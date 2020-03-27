@@ -109,7 +109,6 @@
  nstep  50
  istwfk *1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -128,7 +127,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond. Test the getddb variable that cancels the divergence in el-ph for small q-points
 #%%  Such divergence is induced by a residual electric field.

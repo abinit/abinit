@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eprenorms
 !! NAME
 !! m_eprenorms
@@ -12,7 +11,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (YG)
+!! Copyright (C) 2001-2020 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +27,7 @@
 module m_eprenorms
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
+ use m_abicore
  use m_errors
  use m_xmpi
 #ifdef HAVE_NETCDF
@@ -37,8 +35,9 @@ module m_eprenorms
 #endif
  use m_nctk
 
- use m_crystal,  only : crystal_t
- use m_kpts,     only : listkk
+ use defs_datatypes, only : ebands_t
+ use m_crystal,      only : crystal_t
+ use m_kpts,         only : listkk
 
  implicit none
 
@@ -90,9 +89,9 @@ module m_eprenorms
   ! renorms(2,mband,nkpt,nsppol,ntemp)
   ! Renormalization of the eigenvalues for each temperature
 
-  real(dp), allocatable :: lifetimes(:,:,:,:,:)
-  ! lifetime(2,mband,nkpt,nsppol,ntemp)
-  ! Electron-phonon induced lifetime of the eigens
+  real(dp), allocatable :: linewidth(:,:,:,:,:)
+  ! linewidth(2,mband,nkpt,nsppol,ntemp)
+  ! Electron-phonon induced linewidth of the eigens
 
  end type eprenorms_t
 
@@ -129,23 +128,10 @@ CONTAINS  !=====================================================================
 
 subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_init'
-!End of the abilint section
-
- implicit none
-
 !Arugments -----------------------------------
 !scalars
  integer,intent(in) :: nkpt, nsppol, mband, ntemp
  type(eprenorms_t) :: Epren
-!arrays
-
-!Local variables------------------------------
-!scalars
 !arrays
 
 !*************************************************************************
@@ -162,7 +148,7 @@ subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
  ABI_MALLOC(Epren%eigens,(Epren%mband,Epren%nkpt,Epren%nsppol))
  ABI_MALLOC(Epren%occs,(Epren%mband,Epren%nkpt,Epren%nsppol))
  ABI_MALLOC(Epren%renorms,(2,Epren%mband,Epren%nkpt,Epren%nsppol,Epren%ntemp))
- ABI_MALLOC(Epren%lifetimes,(2,Epren%mband,Epren%nkpt,Epren%nsppol,Epren%ntemp))
+ ABI_MALLOC(Epren%linewidth,(2,Epren%mband,Epren%nkpt,Epren%nsppol,Epren%ntemp))
 
  DBG_EXIT("COLL")
 
@@ -191,39 +177,18 @@ end subroutine eprenorms_init
 
 subroutine eprenorms_free(Epren)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  type(eprenorms_t),intent(inout) :: Epren
 
 !*********************************************************************
 
- if (allocated(Epren%temps)) then
-   ABI_FREE(Epren%temps)
- end if
- if (allocated(Epren%kpts)) then
-   ABI_FREE(Epren%kpts)
- end if
- if (allocated(Epren%eigens)) then
-   ABI_FREE(Epren%eigens)
- end if
- if (allocated(Epren%occs)) then
-   ABI_FREE(Epren%occs)
- end if
- if (allocated(Epren%renorms)) then
-   ABI_FREE(Epren%renorms)
- end if
- if (allocated(Epren%lifetimes)) then
-   ABI_FREE(Epren%lifetimes)
- end if
+ ABI_SFREE(Epren%temps)
+ ABI_SFREE(Epren%kpts)
+ ABI_SFREE(Epren%eigens)
+ ABI_SFREE(Epren%occs)
+ ABI_SFREE(Epren%renorms)
+ ABI_SFREE(Epren%linewidth)
 
 end subroutine eprenorms_free
 !!***
@@ -252,15 +217,6 @@ end subroutine eprenorms_free
 !! SOURCE
 
 subroutine eprenorms_from_epnc(Epren,filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_from_epnc'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -291,7 +247,9 @@ subroutine eprenorms_from_epnc(Epren,filename)
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"eigenvalues"), Epren%eigens))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"occupations"), Epren%occs))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"zero_point_motion"), Epren%renorms))
- NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"lifetime"), Epren%lifetimes))
+ ! TODO: This should be changed. What is stored is a linewidth, not a lifetime,
+ ! we postone the change so as to not break compatibility
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"lifetime"), Epren%linewidth))
 
 #endif
 
@@ -324,15 +282,6 @@ end subroutine eprenorms_from_epnc
 
 subroutine eprenorms_bcast(Epren,master,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_bcast'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: master, comm
@@ -360,7 +309,7 @@ subroutine eprenorms_bcast(Epren,master,comm)
  call xmpi_bcast(Epren%eigens, master, comm, ierr)
  call xmpi_bcast(Epren%occs, master, comm, ierr)
  call xmpi_bcast(Epren%renorms, master, comm, ierr)
- call xmpi_bcast(Epren%lifetimes, master, comm, ierr)
+ call xmpi_bcast(Epren%linewidth, master, comm, ierr)
 
 end subroutine eprenorms_bcast
 !!***
@@ -381,7 +330,7 @@ end subroutine eprenorms_bcast
 !!
 !! SIDE EFFECTS
 !!  Bst<bands_t> : eigens are changed according to epren
-!!                 lifetime is allocated and filled with data if do_lifetime
+!!                 linewidth is allocated and filled with data if do_linewidth
 !!
 !! PARENTS
 !!      m_exc_spectra,m_haydock,optic
@@ -392,15 +341,6 @@ end subroutine eprenorms_bcast
 !! SOURCE
 
 subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'renorm_bst'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -413,7 +353,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 
 !Local variables------------------------------
 !scalars
- integer :: isppol,ikpt
+ integer :: isppol,ikpt,comm
  integer :: nband1, nband_tmp
  integer :: timrev, sppoldbl
  integer :: ik_eph
@@ -426,8 +366,10 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 
  ABI_CHECK(Bst%nsppol == Epren%nsppol, "Nsppol should be the same")
 
+ comm = xmpi_comm_self
+
  if(do_lifetime) then
-   ABI_MALLOC(Bst%lifetime,(Bst%mband,Bst%nkpt,Bst%nsppol))
+   ABI_MALLOC(Bst%linewidth,(1,Bst%mband,Bst%nkpt,Bst%nsppol))
  end if
 
  check = .TRUE.
@@ -439,7 +381,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
  ABI_MALLOC(bs2eph, (BSt%nkpt*sppoldbl, 6))
  timrev = 1
  call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, BSt%kptns, Epren%nkpt, Bst%nkpt, Cryst%nsym, &
-&   sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
+&   sppoldbl, Cryst%symafm, Cryst%symrel, timrev, comm, use_symrec=.False.)
 
  do isppol=1,Bst%nsppol
    do ikpt=1,Bst%nkpt
@@ -464,7 +406,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
      Bst%eig(1:nband_tmp,ikpt,isppol) = BSt%eig(1:nband_tmp,ikpt,isppol) + Epren%renorms(1,1:nband_tmp,ik_eph,isppol,itemp)
 
      if (do_lifetime) then
-       Bst%lifetime(1:nband_tmp,ikpt,isppol) = Epren%lifetimes(1,1:nband_tmp,ik_eph,isppol,itemp)
+       Bst%linewidth(1,1:nband_tmp,ikpt,isppol) = Epren%linewidth(1,1:nband_tmp,ik_eph,isppol,itemp)
      end if
    end do
  end do

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_upf2abinit
 !! NAME
 !!  m_upf2abinit
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MJV)
+!!  Copyright (C) 2009-2020 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,13 +97,6 @@ contains
 
 subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 &  psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upf2abinit'
-!End of the abilint section
 
   implicit none
 
@@ -335,13 +327,6 @@ end subroutine upf2abinit
 subroutine psp11nl(ffspl,indlmn,mmax,lnmax,lmnmax,mqgrid,n_proj,&
 &                  proj, proj_l, proj_np, qgrid, r, drdi, useylm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp11nl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -472,13 +457,6 @@ end subroutine psp11nl
 !! SOURCE
 
 subroutine psp11lo(drdi,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp11lo'
-!End of the abilint section
 
  implicit none
 

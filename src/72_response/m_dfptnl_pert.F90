@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfptnl_pert
 !! NAME
 !!  m_dfptnl_pert
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +24,45 @@
 #include "abi_common.h"
 
 module m_dfptnl_pert
+
+ use defs_basis
+ use m_abicore
+ use m_wffile
+ use m_wfk
+ use m_xmpi
+ use m_hamiltonian
+ use m_errors
+ use m_rf2
+ use m_kg
+ use m_dtset
+ use m_dtfil
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
+ use m_pawang,     only : pawang_type
+ use m_pawfgrtab,  only : pawfgrtab_type
+ use m_pawrad,     only : pawrad_type
+ use m_pawtab,     only : pawtab_type
+ use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free
+ use m_paw_ij,     only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,paw_ij_reset_flags
+ use m_pawdij,     only : pawdijfr
+ use m_pawfgr,     only : pawfgr_type
+ use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
+&                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
+ use m_paw_an,     only : paw_an_type
+ use m_paw_mkrho,  only : pawmkrho
+ use m_paw_nhat,   only : pawnhatfr
+ use m_paw_dfpt,   only : pawdfptenergy
+ use m_paw_dfptnl, only : paw_dfptnl_accrhoij,paw_dfptnl_energy
+ use m_initylmg,   only : initylmg
+ use m_mkffnl,     only : mkffnl
+ use m_getghc,     only : getgsc
+ use m_getgh1c,    only : rf_transgrid_and_pack
+ use m_mpinfo,     only : proc_distrb_cycle
+ use m_nonlop,     only : nonlop
+ use m_fourier_interpol, only : transgrid
+ use m_cgprj,     only : getcprj
 
  implicit none
 
@@ -49,7 +87,7 @@ contains
 !!   - 1st-order WFs DDK,DDE and 2nd-order WF DKDE (ddk_f)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (LB)
+!! Copyright (C) 2018-2020 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -148,7 +186,7 @@ contains
 !!
 !! CHILDREN
 !!      destroy_hamiltonian,dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      load_k_hamiltonian,mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
 !!
 !! SOURCE
 
@@ -159,52 +197,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 & paw_an0,paw_an1_i2pert,paw_ij1_i2pert,ph1d,psps,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
 & ucvol,vtrial,vhartr1_i2pert,vtrial1_i2pert,vxc1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred,&
 & d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_wffile
- use m_wfk
- use m_xmpi
- use m_hamiltonian
- use m_errors
- use m_rf2
- use m_kg
-
- use m_dtfil,      only : status
- use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
- use m_pawang,     only : pawang_type
- use m_pawfgrtab,  only : pawfgrtab_type
- use m_pawrad,     only : pawrad_type
- use m_pawtab,     only : pawtab_type
- use m_pawcprj,    only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_paw_ij,     only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,paw_ij_reset_flags
- use m_pawdij,     only : pawdijfr
- use m_pawfgr,     only : pawfgr_type
- use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
-&                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked
- use m_paw_an,     only : paw_an_type
- use m_paw_mkrho,  only : pawmkrho
- use m_paw_nhat,   only : pawnhatfr
- use m_paw_dfpt,   only : pawdfptenergy
- use m_paw_dfptnl, only : paw_dfptnl_accrhoij,paw_dfptnl_energy
- use m_initylmg,   only : initylmg
- use m_mkffnl,     only : mkffnl
- use m_getghc,     only : getgsc
- use m_getgh1c,    only : rf_transgrid_and_pack
- use m_mpinfo,     only : proc_distrb_cycle
- use m_nonlop,     only : nonlop
- use m_fourier_interpol, only : transgrid
- use m_cgprj,     only : getcprj
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_pert'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -261,11 +253,11 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !scalars
  logical :: has_cprj_jband,compute_conjugate,compute_rho21
  integer,parameter :: level=52,tim_nonlop=0
- integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,iband,icg0,ider,ierr,iexit
+ integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,iband,icg0,ider,ierr
  integer :: idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,ipert_elfd
  integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ifft,ifft_re,ifft_im,ilm,isppol,istwf_k,jband
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
- integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,debug_mode
+ integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,qphase_rhoij,debug_mode
  integer :: signs,size_wf,size_cprj,spaceComm,typat_ipert_phon,usepaw,useylmgr1
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,e3tot,lagi,lagi_paw,lagr,lagr_paw
  real(dp) :: rho2ur,rho2ui,rho2dr,rho2di,rho3ur,rho3ui,rho3dr,rho3di
@@ -301,10 +293,11 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
  DBG_ENTER("COLL")
 
+ ABI_UNUSED(dtfil%ireadwf)
+
+
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
-
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  npert_phon = 0
  if(i1pert<=natom) npert_phon = npert_phon + 1
@@ -339,20 +332,22 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
      idir_elfd  = i1dir
      pawrhoij11 => pawrhoij1_i1pert
    end if
-   cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
    ABI_DATATYPE_ALLOCATE(pawrhoij21,(natom))
    call pawrhoij_nullify(pawrhoij21)
-   call pawrhoij_alloc(pawrhoij21,cplex_rhoij,nspden_rhoij,nspinor,dtset%nsppol,&
-&   dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+   call pawrhoij_alloc(pawrhoij21,cplex_rhoij,nspden_rhoij,nspinor,dtset%nsppol,dtset%typat,&
+&       qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_DATATYPE_ALLOCATE(cwaveprj0,(natom,size_cprj))
    ABI_DATATYPE_ALLOCATE(cwaveprj1,(natom,size_cprj))
    call pawcprj_alloc(cwaveprj0,1,gs_hamkq%dimcprj)
    call pawcprj_alloc(cwaveprj1,1,gs_hamkq%dimcprj)
 !   if (paral_atom) then
 !     ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
-!     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
+!     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+!&                              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
 !     call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-!&     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+!&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
 !   else
    pawrhoij21_unsym => pawrhoij21
    call pawrhoij_init_unpacked(pawrhoij21_unsym)
@@ -370,8 +365,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    call paw_ij_init(paw_ij_tmp,cplex_loc,dtset%nspinor,nsp,nsp,dtset%pawspnorb,natom,psps%ntypat,&
 &   dtset%typat,pawtab,has_dijfr=1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-   call pawdijfr(cplex_loc,gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
-&   1,paw_ij_tmp,pawang,pawfgrtab,pawrad,pawtab,&
+   call pawdijfr(gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
+&   1,paw_ij_tmp,pawang,pawfgrtab,pawrad,pawtab,cplex_loc,&
 &   (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2,cplex_loc))
@@ -407,7 +402,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
  ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
  if (psps%useylm==1) then
-   call status(0,dtfil%filstat,iexit,level,'call initylmg ')
    option=2
    call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,&
    dtset%nkpt,npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
@@ -459,8 +453,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1_i2pert,vlocal,vlocal1_i2pert)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq_i2pert,isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call rf_hamkq_i2pert%load_spin(isppol,vlocal1=vlocal1_i2pert,with_nonlocal=.true.)
 
 !  Loop over k-points
 
@@ -588,18 +582,18 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
 !  Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
-     call load_k_hamiltonian(gs_hamkq,kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+     call gs_hamkq%load_k(kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &     ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
-     call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1,kpt_k=kpt,npw_k=npw1_k,istwf_k=istwf_k,&
+     call gs_hamkq%load_k(ffnl_k=ffnl1,kpt_k=kpt,npw_k=npw1_k,istwf_k=istwf_k,&
 &     kinpw_k=kinpw1,kg_k=kg1_k,kpg_k=kpg1_k,compute_gbound=.true.)
 !   end if
 
 !    Load k-dependent part in the 1st-order Hamiltonian datastructure
-     call load_k_rf_hamiltonian(rf_hamkq_i2pert,npw_k=npw_k,dkinpw_k=dkinpw)
+     call rf_hamkq_i2pert%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 
-     ABI_STAT_ALLOCATE(dudk,  (2,nband_k*size_wf), ierr)
-     ABI_STAT_ALLOCATE(dudkde,(2,nband_k*size_wf), ierr)
-     ABI_STAT_ALLOCATE(eig1_k_i2pert,(2*nband_k), ierr)
+     ABI_MALLOC_OR_DIE(dudk,  (2,nband_k*size_wf), ierr)
+     ABI_MALLOC_OR_DIE(dudkde,(2,nband_k*size_wf), ierr)
+     ABI_MALLOC_OR_DIE(eig1_k_i2pert,(2*nband_k), ierr)
      ABI_ALLOCATE(eig1_k_stored,(2*nband_k**2))
      ABI_ALLOCATE(cgi,(2,size_wf))
      ABI_ALLOCATE(cwave_right,(2,size_wf))
@@ -613,20 +607,20 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
        if (occ_k(iband)>tol10) then
 
 !        Read dude file
-         call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+         call ddk_f(1)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
 !        Copy eig1_k_i2pert in "eig1_k_stored"
          eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_i2pert(:)
 
          if (i2pert==natom+2) then
 !          Read dudk file
-           call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           call ddk_f(2)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
            offset_cgi = (iband-1)*size_wf+icg0
            cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
 !          Copy cwave_right in "dudk"
            dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
 
 !          Read dudkde file
-           call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
+           call ddk_f(3)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_i2pert)
            offset_cgi = (iband-1)*size_wf+icg0
            cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
 !          Copy cwave_right in "dudkde"
@@ -642,8 +636,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
      offset_eig0 = mband*(ikpt-1+nkpt*(isppol-1))
      eig0_k(:) = eigen0(1+offset_eig0:mband+offset_eig0)
 
-     ABI_STAT_ALLOCATE(h_cwave,(2,size_wf), ierr)
-     ABI_STAT_ALLOCATE(s_cwave,(2,size_wf), ierr)
+     ABI_MALLOC_OR_DIE(h_cwave,(2,size_wf), ierr)
+     ABI_MALLOC_OR_DIE(s_cwave,(2,size_wf), ierr)
 
 !    Allocate work spaces when debug_mode is activated
      has_cprj_jband=.false.
@@ -820,18 +814,18 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !          Read dkk file (for tests only)
            if (debug_mode/=0) then
              if(idir_elfd==i2dir) then
-               call wfk_read_bks(ddk_f(2), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+               call ddk_f(2)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
              else
-               call wfk_read_bks(ddk_f(4), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+               call ddk_f(4)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
              end if
              cg_jband(1,1+size_wf*(jband-1):size_wf*jband,2) = -iddk(2,1:size_wf)
              cg_jband(2,1+size_wf*(jband-1):size_wf*jband,2) =  iddk(1,1:size_wf)
            end if
 !          Read dkde file
            if(idir_elfd==i2dir) then
-             call wfk_read_bks(ddk_f(3), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(3)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            else
-             call wfk_read_bks(ddk_f(5), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(5)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            end if
            s_cwave = iddk
            iddk(1,:) = -s_cwave(2,:)
@@ -847,9 +841,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
 !          Read ddk file
            if(idir_elfd==i2dir) then
-             call wfk_read_bks(ddk_f(2), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(2)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            else
-             call wfk_read_bks(ddk_f(4), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+             call ddk_f(4)%read_bks(jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
            end if
            s_cwave = iddk
            iddk(1,:) = -s_cwave(2,:)
@@ -917,7 +911,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
  end do   ! end loop over spins
 
- call destroy_rf_hamiltonian(rf_hamkq_i2pert)
+ call rf_hamkq_i2pert%free()
 
 ! **************************************************************************************************
 !    GATHER BAND-BY-BAND AND XC CONTRIBUTIONS
@@ -1229,8 +1223,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  ABI_DEALLOCATE(vlocal)
  ABI_DEALLOCATE(vlocal1_i2pert)
  ABI_DEALLOCATE(wfraug)
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
  DBG_EXIT("COLL")
 

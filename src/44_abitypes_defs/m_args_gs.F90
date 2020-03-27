@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_args_gs
 !! NAME
 !!  m_args_gs
@@ -9,7 +8,7 @@
 !!  especially those depending on the image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2018 ABINIT group (MT)
+!! Copyright (C) 2015-2020 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,15 +117,6 @@ CONTAINS
 
 subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_gs_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in),target :: amu(:),dmatpawu(:,:,:,:),jpawu(:),mixalch(:,:),upawu(:)
@@ -172,15 +162,6 @@ end subroutine args_gs_init
 !! SOURCE
 
 subroutine args_gs_free(args_gs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_gs_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

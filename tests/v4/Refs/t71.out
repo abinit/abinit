@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h58 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h27 )
   
 
 ================================================================================
@@ -183,7 +183,7 @@
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.007535E-04 -2.007535E-04  0.000000E+00  0.000000E+00  0.000000E+00
@@ -375,6 +375,8 @@
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
         degenerate with vibration mode #   2
   2.0 -0.0 -2.0  0.0  0.0 -0.0 -0.0  0.0
@@ -403,7 +405,7 @@
 
  Treat the second list of vectors 
 
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -592,7 +594,7 @@
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 ;  5 -5.16744682E-03  0.00000000E+00  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
@@ -781,7 +783,7 @@
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 ;  5  0.00000000E+00 -5.75602923E-04  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -977,12 +979,12 @@
       7.67193160     -0.00000000     -0.00000000
      -0.00000000      7.67193160     -0.00000000
      -0.00000000     -0.00000000      7.37276417
- 
+
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.037  and wall time      0.038 sec
++Total cpu time      0.030  and wall time      0.031 sec
 
  anaddb : the run completed succesfully.

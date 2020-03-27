@@ -1,12 +1,14 @@
-ecut 6
+ecut 12
 ngkpt 2 2 2
 
 prt1dm 1
 prtpot 1
+prtvol 2
 
-ndtset 6
+ndtset 7
 
 magcon_lambda 0.05
+ratsm 0.05
 
 nspinor 2 nspden 4
 so_psp 0
@@ -17,40 +19,60 @@ getwfk -1
 magconon1 0
 spinat1 0 0 3
 
-# DS 2 constrain direction, non collinear spin
+# DS 2 constrained direction, non collinear spin
 magconon2 1
 spinat2 0 0 3
 
-# DS 3 constrain direction y, start from different spin wf (DS 2 along z), non collinear spin
+# DS 3 constrained direction y, start from different spin wf (DS 2 along z), non collinear spin
 magconon3 1
 spinat3 0 3 0
+toldfe3 1.e-14
+prtvol3 1   # Turn off printing of minimum magnetization location, because not portable
+nstep3 52
 
-# DS 4 constrain direction and amplitude, non collinear spin
+# DS 4 constrained direction and amplitude, non collinear spin
 magconon4 2
 magcon_lambda4 0.01
 spinat4 0 1.5 0 
+toldfe4 1.e-12
+prtvol4 1   # Turn off printing of minimum magnetization location, because not portable
+nstep4 10
 
-# DS 5 constrain direction, collinear spin
-magconon5 1
+# DS 5 : no constraint, collinear spin
+magconon5 0
 spinat5 0 0 3
-nspinor5 1 
-nspden5 2 
-nsppol5 2 
+nspinor5 1
+nspden5 2
+nsppol5 2
 getwfk5 0
+nband5 6
 
-# DS 6 constrain direction and amplitude, collinear spin
-magconon6 2
+# DS 6 constrained direction, collinear spin
+magconon6 1
 spinat6 0 0 3
 nspinor6 1 
 nspden6 2 
 nsppol6 2 
 getwfk6 0
+nband6 6
+nstep6 24
 
-nband 10
+# DS 7 constrained direction and amplitude, collinear spin
+magconon7 2
+spinat7 0 0 3
+nspinor7 1 
+nspden7 2 
+nsppol7 2 
+getwfk7 0
+nband7 6
+nstep7 18
+
+nband 14
 occopt 7
-tsmear 0.0001
+tsmear 0.01
 
 toldfe 1.e-10
+nstep 40
 
 acell 3*5.328
 
@@ -66,13 +88,12 @@ rprim
  0.5 -0.5  0.5
  0.5  0.5 -0.5
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out,      tolnlines = 4, tolabs = 2.0e-4, tolrel = 3.0e-3, fld_options = -easy
+#%%   t05.out,      tolnlines = 46, tolabs = 1.1e+1, tolrel = 1.1e+0, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -81,6 +102,10 @@ rprim
 #%% keywords = magnetic_constraint
 #%% description = Test magnetic constraint code. Variables magconon and magcon_lambda. BCC iron with low cutoff
 #%%   and kpts, non collinear spin case with nspden=4 imposed. First normal case then constrain direction only
-#%%   (DS2) and full value of vector (DS3)
+#%%   along z (DS2), along y (DS3) and impose value of vector (DS4). Then work in the collinear case, unconstrained (DS5),
+#%%   with constrained direction (DS6), and constrained direction and value (DS7).
+#%%   Total energy in DS1, DS2, DS3 and DS5 are identical (good). Should be also identical in DS6 , but not the case at present.
+#%%   Also, the results for DS3 are NOT really portable, hence the very large tolerances.
+#%%   Revised by XG
 #%% topics = spinpolarisation, MagMom
 #%%<END TEST_INFO>

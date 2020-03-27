@@ -2,9 +2,9 @@
 authors: MG, MS
 ---
 
-# Tutorial on Bethe-Salpeter calculations  
+# Tutorial on Bethe-Salpeter calculations
 
-## Absorption spectra including excitonic effects.  
+## Absorption spectra including excitonic effects.
 
 This tutorial discusses how to calculate the macroscopic dielectric function
 including excitonic effects within the Bethe-Salpeter (BS) approach.
@@ -13,30 +13,30 @@ can be found in the [[theory:bse|Bether-Salpeter notes]].
 
 The user should be familiarized with the four basic tutorials of ABINIT and the [first GW tutorial](gw1).
 
-[TUTORIAL_README]
-
-This tutorial should take about one hour to be completed.
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
+This tutorial should take about one hour to be completed.
+
+[TUTORIAL_README]
+
 ## Preparatory steps (WFK and the SCR file)
-  
+
 *Before starting, you might consider to work in a different subdirectory as
 for the other tutorials. Why not Work_bs?*
 
-Copy the files file *\$ABI_TUTORIAL/Input/tbs_1.files* 
+Copy the files file *\$ABI_TESTS/tutorial/Input/tbs_1.files*
 in the working directory *Work_bs*.
 Now run immediately the calculation with the command:
-    
+
     abinit < tbs_1.files > tbs_1.log 2> err &
 
 so that we can analyze the input file while the code is running.
 
-The input file is located in *\$ABI_TUTORIAL/Input/tbs_1.in*. 
-The header reports a brief description of the calculation so read it carefully. 
+The input file is located in *\$ABI_TESTS/tutorial/Input/tbs_1.in*.
+The header reports a brief description of the calculation so read it carefully.
 Don't worry if some parts are not clear to you as we are going to discuss the
 calculation in step by step fashion.
 
@@ -45,14 +45,14 @@ calculation in step by step fashion.
 This input file generates the two WFK files and the SCR file needed for
 the subsequent Bethe-Salpeter computations. The first dataset performs a
 rather standard ground-state calculation on an $\Gamma$-centered 4x4x4 grid (64 k
-points in the full Brillouin Zone, folding to 8 k points in the irreducible wedge). 
+points in the full Brillouin Zone, folding to 8 k points in the irreducible wedge).
 Then the ground-state density is used in dataset 2 and 3 to generate
 two WFK files with a standard NSCF run and the conjugate-gradient method.
 
 Note that the WFK file computed in dataset 2 contains **100 bands** on the 4x4x4
-**gamma-centered** k-mesh whereas the WFK file produced in dataset 3 has only 
+**gamma-centered** k-mesh whereas the WFK file produced in dataset 3 has only
 **10 bands** on a 4x4x4 k-mesh **shifted** along the direction
-    
+
     shiftk3    0.11 0.21 0.31  # This shift breaks the symmetry of the k-mesh.
 
 The $\Gamma$-centered k-mesh contains 8 points in the IBZ while the
@@ -62,7 +62,7 @@ mesh is clearly inefficient, so you might wonder why we are using such a
 bizarre sampling and, besides, why we need to generate two different WFK files!
 
 Indeed this approach strongly differs from the one we followed in the GW
-tutorials, but there is a good reason for doing so. 
+tutorials, but there is a good reason for doing so.
 It is anticipated that optical spectra **converge slowly** with the BZ sampling, and that
 **symmetry-breaking k-meshes** lead to faster convergence in [[nkpt]] than the
 standard symmetric k-meshes commonly used for ground-state or GW calculations.
@@ -89,14 +89,14 @@ After this lengthy discussion needed to clarify this rather technical point,
 we can finally proceed to analyze the screening computation performed in the
 last dataset of *tbs_1.in*.
 
-The SCR file is calculated in dataset 4 using [[nband]] = 100 and [[ecuteps]] = 6.0 Ha. 
+The SCR file is calculated in dataset 4 using [[nband]] = 100 and [[ecuteps]] = 6.0 Ha.
 In the [first GW tutorial](gw1), these
 values were found to give QP energies converged within 0.01 eV, so we are
 confident that our SCR file is well converged and it can be safely used for
 performing convergence tests in the Bethe-Salpeter part.
 
 Note that, for efficiency reasons, only the static limit of W is computed:
-    
+
     nfreqre4  1   # Only the static limit of W is needed for standard BSE calculations.
     nfreqim4  0
 
@@ -113,29 +113,29 @@ thing that we have to do before moving to the next paragraph.
 As we said, we will need the WFK file on the shifted k-mesh and the SCR file
 for our BS calculations so do not delete them! It is also a good idea to
 rename these precious files using more meaningful names *e.g.*:
-    
+
     mv tbs_1o_DS2_WFK 444_gamma_WFK
     mv tbs_1o_DS3_WFK 444_shifted_WFK
     mv tbs_1o_DS4_SCR 444_SCR
 
 !!! important
-    
+
     The list of k-points specified in the BS input files **must equal** the one used
     to generate the WFK file. Two new WFK files and a new SCR file must be
     generated from scratch if we want to change the k-point sampling used to
     construct the transition space.
 
 ## Computing the absorption spectrum within the Tamm-Dancoff approximation
-  
+
 This section is intended to show how to perform a standard excitonic
-calculation within the Tamm-Dancoff approximation (TDA) using the Haydock iterative technique. 
-The input file is *\$ABI_TUTORIAL/tutorial/Input/tbs_2.in*.
+calculation within the Tamm-Dancoff approximation (TDA) using the Haydock iterative technique.
+The input file is *\$ABI_TESTS/tutorial/tutorial/Input/tbs_2.in*.
 
 Before running the job, we have to connect this calculation with the output
 results produced in *tbs_1.in*.
 
 Use the Unix commands:
-    
+
     ln -s 444_shifted_WFK tbs_2i_WFK
     ln -s 444_SCR tbs_2i_SCR
 
@@ -145,14 +145,14 @@ for doing so will be clear afterwards once we discuss the input file.
 This job lasts 1-2 minutes on a modern machine so it is worth running it
 before inspecting the input file.
 
-Copy the files file *\$ABI_TUTORIAL/Input/tbs_2.files* in the working
+Copy the files file *\$ABI_TESTS/tutorial/Input/tbs_2.files* in the working
 directory and issue:
-    
+
     abinit < tbs_2.files > tbs_2.log 2> err &
 
 to put the job in background so that we can examine *tbs_2.in*.
 
-Now open *\$ABI_TUTORIAL/Input/tbs_2.in* in your preferred editor and go
+Now open *\$ABI_TESTS/tutorial/Input/tbs_2.in* in your preferred editor and go
 to the next section where we discuss the most important variables governing a
 typical BS computation.
 
@@ -161,22 +161,22 @@ typical BS computation.
 ### The structure of the input file
 
 First we need to set [[optdriver]] = 99 to call the BSE routines
-    
+
     optdriver  99   # BS calculation
-    
+
 The variables [[irdwfk]] and [[irdscr]] are similar to other "ird" variables
 of ABINIT and are used to read the files produced in the previous paragraph
-    
-    irdwfk  1  # Read the WFK file produced in tbs_1 
-    irdscr  1  # Read the SCR file produced in tbs_1 
+
+    irdwfk  1  # Read the WFK file produced in tbs_1
+    irdscr  1  # Read the SCR file produced in tbs_1
 
 The code expects to find an input WFK file and an input SCR file whose name is
-constructed according to prefix specified in the files file *tbs_2.files* 
-(see [[help:abinit#files-file|this section]] of the abinit_help file). 
+constructed according to prefix specified in the files file *tbs_2.files*
+(see [[help:abinit#files-file|this section]] of the abinit_help file).
 This is the reason why we had to create the two symbolic links before running the code.
 
 Then we have a list of five variables specifying how to construct the excitonic Hamiltonian.
-    
+
     bs_calctype       1    # L0 constructed with KS orbitals and energies.
     mbpt_sciss   0.8 eV    # Scissors operator used to correct the KS band structure.
     bs_exchange_term  1    # Exchange term included.
@@ -186,37 +186,37 @@ Then we have a list of five variables specifying how to construct the excitonic 
 The value [[bs_calctype]] = 1 specifies that the independent-particle
 polarizability should be constructed with the Kohn-Sham orbitals and energies
 read from the WFK file. To simulate the self-energy correction, the KS
-energies are corrected with a scissors operator of energy [[mbpt_sciss]] = 0.8 eV. 
+energies are corrected with a scissors operator of energy [[mbpt_sciss]] = 0.8 eV.
 This permits us to avoid a cumbersome GW calculation for each state
 included in our transition space. The use of the scissors operator is a
 reasonable approximation for silicon but it might fail in more complicated
 systems in which the GW corrections cannot be simulated in terms of a simple
 rigid shift of the initial KS bands structure.
 
-The remaining three variables specify how to construct the excitonic Hamiltonian. 
+The remaining three variables specify how to construct the excitonic Hamiltonian.
 [[bs_exchange_term]] = 1 tells the code to calculate the exchange
-part of the kernel, hence this calculation includes local-field effects. 
+part of the kernel, hence this calculation includes local-field effects.
 The variable [[bs_coulomb_term]] is used to select among different options that
 are available for the Coulomb term (please take some time to read the
-description of the variable and the relevant equations in the [[theory:bse|Bethe-Salpeter notes]]. 
-Finally [[bs_coupling]] = 0 specifies that the off-diagonal coupling blocks 
+description of the variable and the relevant equations in the [[theory:bse|Bethe-Salpeter notes]].
+Finally [[bs_coupling]] = 0 specifies that the off-diagonal coupling blocks
 should be neglected (Tamm-Dancoff approximation).
 This particular combination of parameters thus corresponds to a Bethe-Salpeter
 calculation within the Tamm-Dancoff approximation with local field effects included.
 
 Then we have the specification of the bands used to construct the transition space:
-    
-    bs_loband   2 
+
+    bs_loband   2
     nband       8
 
 In this case all the bands around the gap whose index is between 2 and 8 are
 included in the basis set.
 
 The frequency mesh for the macroscopic dielectric function is specified by [[bs_freq_mesh]]
-    
+
     bs_freq_mesh 0 6 0.02 eV  # Frequency mesh.
 
-This triplet of real values defines a linear mesh that covers the range [0, 6] eV with a step of 0.02 eV. 
+This triplet of real values defines a linear mesh that covers the range [0, 6] eV with a step of 0.02 eV.
 The number of frequency points in the mesh does not
 have any significant effect on the CPU time, but it is important to stress
 that the number of bands included in the transition space defines, in
@@ -226,26 +226,26 @@ an accurate converge study.
 
 Then we have the parameters that define and control the algorithm employed to
 calculate the macroscopic dielectric function
-    
+
     bs_algorithm        2      # Haydock method (this is the default value).
     bs_haydock_niter   100     # Max number of iterations for the Haydock method.
     bs_haydock_tol     0.05    # Tolerance for the iterative method.
     zcut               0.15 eV # Complex shift to avoid divergences in the continued fraction.
 
-[[bs_algorithm]] specifies the algorithm used to calculate the macroscopic dielectric function. 
+[[bs_algorithm]] specifies the algorithm used to calculate the macroscopic dielectric function.
 In this case we use the iterative Haydock technique whose
-maximum number of iterations is given by [[bs_haydock_niter]]. 
+maximum number of iterations is given by [[bs_haydock_niter]].
 The iterative algorithm stops when the difference between two consecutive evaluations of the
-optical spectra is less than [[bs_haydock_tol]]. 
-The input variable [[zcut]] gives the complex shift to avoid divergences in the continued fraction. 
+optical spectra is less than [[bs_haydock_tol]].
+The input variable [[zcut]] gives the complex shift to avoid divergences in the continued fraction.
 From a physical point of view, this parameters mimics the experimental broadening of
 the absorption peaks. In this test, due to the coarseness of the k-mesh, we
 have to use a value slightly larger than the default one (0.1 eV) in order to
-facilitate the convergence of the Haydock algorithm. 
+facilitate the convergence of the Haydock algorithm.
 Ideally, one should perform a convergence study by decreasing the value of [[zcut]] for increasing number of k-points.
 
 The k-point sampling is specified by the set of variables.
-    
+
     kptopt 1                # Option for the automatic generation of k points,
     ngkpt  4 4 4            # This mesh is too coarse for optical properties.
     nshiftk 1
@@ -254,36 +254,36 @@ The k-point sampling is specified by the set of variables.
 
 
 !!! important
-    
+
     The values of [[kptopt]], [[ngkpt]], [[nshiftk]], and [[shiftk]] **must equal**
-    the ones used to specify the grid for the WFK file. 
+    the ones used to specify the grid for the WFK file.
     [[chksymbreak]] = 0 is used to bypass the check on symmetry breaking that, otherwise, would make the code stop.
 
 
 The last section of the input file
-    
+
     ecutwfn 8.0   # Cutoff for the wavefunction.
     ecuteps 2.0   # Cutoff for W and /bare v used to calculate the BS matrix elements.
     inclvkb 2     # The Commutator for the optical limit is correctly evaluated.
 
 specifies the parameters used to calculate the kernel matrix elements and the
-matrix elements of the dipole operator. 
-We have already encountered these variables in the [first GW tutorial](gw1) of the GW tutorial 
-so their meaning is (hopefully) familiar to you. 
-A more detailed discussion of the role played by these variables in the BS code 
+matrix elements of the dipole operator.
+We have already encountered these variables in the [first GW tutorial](gw1) of the GW tutorial
+so their meaning is (hopefully) familiar to you.
+A more detailed discussion of the role played by these variables in the BS code
 can be found in the [[theory:bse|Bether-Salpeter notes]].
 
 ### Output files
 
 The output file, *tbs_2.out*, reports the basic parameters of the calculation
-and eventual WARNINGs that are issued if the iterative method does not converge. 
+and eventual WARNINGs that are issued if the iterative method does not converge.
 Please take some time to understand its structure.
 
 Could you answer the following questions?
 
-  1. How many transitions are included in the basis set? 
-  2. How many directions are used to evaluate the optical limit? 
-  3. What is the value of the Lorentzian broadening used in the continued fraction? 
+  1. How many transitions are included in the basis set?
+  2. How many directions are used to evaluate the optical limit?
+  3. What is the value of the Lorentzian broadening used in the continued fraction?
 
 After this digression on the main output file, we can finally proceed to
 analyse the output data of the computation.
@@ -292,14 +292,14 @@ The most important results are stored in five different files:
 
   * *tbs_2o_BSR*
   * *tbs_2o_HAYDR_SAVE*
-  * *tbs_2o_RPA_NLF_MDF* 
+  * *tbs_2o_RPA_NLF_MDF*
   * *tbs_2o_GW_NLF_MDF*
   * *tbs_2o_EXC_MDF*
 
 In what follows, we provide a brief description of the format and of the
 content of each output file.
 
-tbs_2o_BSR: 
+tbs_2o_BSR:
 
 :   This binary file stores the upper triangle of the resonant block (the matrix
     is Hermitian hence only the non-redundant part is computed and saved on file).
@@ -312,14 +312,14 @@ tbs_2o_BSR:
     store the resonant and the coupling block (BSC is the prefix used for the
     files storing the coupling term).
 
-tbs_2o_HAYDR_SAVE: 
+tbs_2o_HAYDR_SAVE:
 
 :   It is a binary file containing the results of the Haydock method: the
     coefficient of the tridiagonal matrix and the three vectors employed in the
     iterative algorithm. It is usually used to restart the algorithm if
     convergence has not been achieved (see the related input variables [[gethaydock]] and [[irdhaydock]]).
 
-tbs_2o_RPA_NLF_MDF and tbs_2o_GW_NLF_MDF 
+tbs_2o_RPA_NLF_MDF and tbs_2o_GW_NLF_MDF
 
 :   The RPA spectrum without local field effects obtained with KS energies and the
     GW energies, respectively (mnemonics: NLF stands for No Local Field, while MDF
@@ -327,13 +327,13 @@ tbs_2o_RPA_NLF_MDF and tbs_2o_GW_NLF_MDF
 
 tbs_2o_EXC_MDF
 
-:   Formatted file reporting the macroscopic dielectric function with excitonic effects. 
-    
+:   Formatted file reporting the macroscopic dielectric function with excitonic effects.
+
 The *EXC_MDF* file contains the most important results of our
 calculation so it is worth spending some time to discuss its format.
 
 First we have a header reporting the basic parameters of the calculation:
-    
+
 ```sh
 # Macroscopic dielectric function obtained with the BS equation.
 #  RPA L0 with KS energies and KS wavefunctions     LOCAL FIELD EFFECTS INCLUDED
@@ -349,17 +349,17 @@ First we have a header reporting the basic parameters of the calculation:
 # nkbz    = 64
 # Lorentzian broadening =  0.1500 [eV]
 ```
-    
+
 then the list of q-points giving the direction of the incident photon:
-    
+
 ```sh
 #  List of q-points for the optical limit:
-# q =  0.938821, 0.000000, 0.000000, [Reduced coords] 
-# q =  0.000000, 0.938821, 0.000000, [Reduced coords] 
-# q =  0.000000, 0.000000, 0.938821, [Reduced coords] 
-# q =  0.000000, 0.813043, 0.813043, [Reduced coords] 
-# q =  0.813043, 0.000000, 0.813043, [Reduced coords] 
-# q =  0.813043, 0.813043, 0.000000, [Reduced coords] 
+# q =  0.938821, 0.000000, 0.000000, [Reduced coords]
+# q =  0.000000, 0.938821, 0.000000, [Reduced coords]
+# q =  0.000000, 0.000000, 0.938821, [Reduced coords]
+# q =  0.000000, 0.813043, 0.813043, [Reduced coords]
+# q =  0.813043, 0.000000, 0.813043, [Reduced coords]
+# q =  0.813043, 0.813043, 0.000000, [Reduced coords]
 ```
 
 By default the code calculates the macroscopic dielectric function considering
@@ -371,13 +371,13 @@ Then comes the section with the real and the imaginary part of the macroscopic
 dielectric as a function of frequency for the different directions:
 
 ```sh
-# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... 
+# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ...
 0.000  1.8026E+01  0.0000E+00  1.7992E+01  0.0000E+00  1.4292E+01  0.0000E+00  1.3993E+01 0.0000E+00  1.7117E+01  0.0000E+00  1.7080E+01  0.0000E+00
 .... .... ...
 ```
 
 You can visualize the data using your preferred software. For instance, with |gnuplot|
-    
+
 ```gnuplot
 p "tbs_2o_EXC_MDF" u 1:3 w l
 ```
@@ -405,7 +405,7 @@ p   "tbs_2o_EXC_MDF"     u 1:3 w l
 rep "tbs_2o_RPA_NLF_MDF" u 1:3 w l
 rep "tbs_2o_GW_NLF_MDF"  u 1:3 w l
 ```
-    
+
 to plot the absorption spectrum obtained with the three different approaches.
 The final result is reported in the figure below.
 
@@ -445,31 +445,31 @@ is already able to capture the most important physics.
 
 ### Optional Exercises
 
-* Change the value of the Lorentzian broadening [[zcut]] used to avoid divergences in the continued fraction. 
-  Then restart the Haydock algorithm from the *_BSR* and *_HAYDR_SAVE* files using the appropriate variables. 
-  What is the main effect of the broadening on the final spectrum. 
-  Does the number of iterations needed to converge depend on the broadening? 
+* Change the value of the Lorentzian broadening [[zcut]] used to avoid divergences in the continued fraction.
+  Then restart the Haydock algorithm from the *_BSR* and *_HAYDR_SAVE* files using the appropriate variables.
+  What is the main effect of the broadening on the final spectrum.
+  Does the number of iterations needed to converge depend on the broadening?
 
-* Use the appropriate values for [[bs_exchange_term]] and [[bs_coulomb_term]] to calculate the BS spectrum 
-  without local field effects. Compare the results obtained with and without local field effects. 
+* Use the appropriate values for [[bs_exchange_term]] and [[bs_coulomb_term]] to calculate the BS spectrum
+  without local field effects. Compare the results obtained with and without local field effects.
 
-* Modify the input file tbs_2.in so that the code reads in the resonant block produced in the previous run 
-  and calculates the spectrum employing the method based on the direct diagonalization (use [[irdbsreso]] 
-  to restart the run but remember to rename the file with the resonant block). 
-  Compare the CPU time needed by the two algorithms as a function of the number of transitions in the transition space. 
-  Which one has the best scaling? 
+* Modify the input file tbs_2.in so that the code reads in the resonant block produced in the previous run
+  and calculates the spectrum employing the method based on the direct diagonalization (use [[irdbsreso]]
+  to restart the run but remember to rename the file with the resonant block).
+  Compare the CPU time needed by the two algorithms as a function of the number of transitions in the transition space.
+  Which one has the best scaling?
 
 ### Preliminary discussion about convergence studies
 
 Converging the excitonic spectrum requires a careful analysis of many different parameters:
 
-  * [[bs_loband]] 
-  * [[nband]] 
-  * [[ecutwfn]] 
-  * [[ecuteps]] 
-  * [[ngkpt]] 
-  * [[nshiftk]] 
-  * [[shiftk]] 
+  * [[bs_loband]]
+  * [[nband]]
+  * [[ecutwfn]]
+  * [[ecuteps]]
+  * [[ngkpt]]
+  * [[nshiftk]]
+  * [[shiftk]]
 
 Since the memory requirements scale quadratically with the number of k-points
 in the **full** Brillouin zone **times** the number of valence bands
@@ -503,25 +503,25 @@ important and tedious part of our convergence study. For this reason, this
 study should be done once converged values for the other parameters have been already found.
 
 ## Convergence with respect to the number of bands in the transition space
-  
+
 In this section we take advantage of the multi-dataset capabilities of ABINIT
 to perform calculations with different values for [[bs_loband]] and [[nband]]
 
-Before running the test take some time to read the input file *\$ABI_TUTORIAL/Input/tbs_3.in*.
+Before running the test take some time to read the input file *\$ABI_TESTS/tutorial/Input/tbs_3.in*.
 
 {% dialog tests/tutorial/Input/tbs_3.in %}
 
 The convergence in the number of transitions is performed by defining two
 datasets with different values for [[nband]] and [[bs_loband]]
-    
+
     ndtset     2
     bs_loband1  3 nband1  6
     bs_loband2  2 nband2  7
 
-    
+
 The parameters defining how to build the excitonic Hamiltonian are similar to
 the ones used in *tbs_2.in*. The only difference is in the value used for [[bs_coulomb_term]], *i.e.*
-    
+
     bs_coulomb_term  10  # Coulomb term evaluated within the diagonal approximation.
 
 that allows us to save some CPU time during the computation of the Coulomb term.
@@ -530,16 +530,16 @@ Also in this case, before running the test, we have to connect *tbs_3.in* to the
 WFK and the SCR file produced in the first step. Note that *tbs_3.in* uses
 [[irdwfk]] and [[irdscr]] to read the external files, hence we have to create
 symbolic links for each dataset:
-    
+
 ```sh
 ln -s 444_SCR tbs_3i_DS1_SCR
 ln -s 444_SCR tbs_3i_DS2_SCR
 ln -s 444_shifted_WFK tbs_3i_DS1_WFK
 ln -s 444_shifted_WFK tbs_3i_DS2_WFK
 ```
-    
+
 Now we can finally run the test with
-    
+
     abinit < tbs_3.files > tbs3.log 2> err &
 
 This job should last 3-4 minutes so be patient!
@@ -548,18 +548,18 @@ Let us hope that your calculation has been completed, and that we can examine
 the output results.
 
 Use the following sequence of |gnuplot| commands:
-    
+
 ```gnuplot
 p   "tbs_3o_DS1_EXC_MDF" u 1:3 w l
 rep "tbs_3o_DS2_EXC_MDF" u 1:3 w l
 ```
 
 to plot on the same graphic the absorption spectrum obtained with different
-transition spaces. You should obtain a graphic similar (but not equal) to this one 
+transition spaces. You should obtain a graphic similar (but not equal) to this one
 
 ![](bse_assets/tbs3.png)
 
-Note indeed that the above figure has been produced with more datasets in order 
+Note indeed that the above figure has been produced with more datasets in order
 to highlight the convergence behaviour.
 
 The results obtained with ([[bs_loband]] = 4, [[nband]] = 5) are clearly
@@ -577,14 +577,14 @@ the transition space in the frequency range [0, 8] eV. For completeness, we
 also report the results obtained in a separate calculation done with
 [[bs_loband]] = 2 [[nband]] = 9 to show that four empty states are enough to converge the spectrum.
 
-We therefore fix the number of bands for the transition space using 
+We therefore fix the number of bands for the transition space using
 [[bs_loband]] = 2, [[nband]] = 7 and we proceed to analyse the
 convergence of the spectrum with respect to the number of planewaves in the screening.
 
 !!! tip
 
     If |AbiPy| is installed on your machine, you can use the |abicomp| script
-    with the `mdf` command and the `--expose` option to compare 
+    with the `mdf` command and the `--expose` option to compare
     multiple dielectric functions:
 
         abicomp.py mdf tbs_3o_DS*_MDF.nc --expose --seaborn
@@ -601,29 +601,29 @@ one can introduce a fictitious dataset (say dataset 99), and let the code use
 the output of this nonexistent dataset as the input of the real datasets. An
 example will help clarify: Instead of using the lengthy list of links as done
 before, we might use the much simpler sequence of commands
-    
+
     ln -s 444_shifted_WFK tbs_3o_DS99_WFK
     ln -s 444_SCR         tbs_3o_DS99_SCR
 
 provided that, in the input file, we replace [[irdwfk]] and [[irdscr]] with
-    
+
     getwfk  99   # Trick to read the same file tbs_o3_DS99_WFK in each dataset
     getscr  99   # Same trick for the SCR file
 
 ## Convergence with respect to the number of planewaves in the screening
-  
+
 First of all, before running the calculation, take some time to understand
-what is done in *\$ABI_TUTORIAL/Input/tbs_4.in*.
+what is done in *\$ABI_TESTS/tutorial/Input/tbs_4.in*.
 
 The structure of the input file is very similar to the one of *tbs_3.in*, the
 main difference is in the first section:
-    
+
     ndtset    2
     ecuteps: 2 ecuteps+ 1
     bs_coulomb_term 11
-    
+
 that instructs the code to execute two calculations where the direct term is
-constructed using different value of [[ecuteps]]. We also relax the diagonal-only 
+constructed using different value of [[ecuteps]]. We also relax the diagonal-only
 approximation for the screening by setting [[bs_coulomb_term]] = 11 so that
 the non-locality of $W(\rr, \rr')$ is correctly taken into account.
 
@@ -637,16 +637,16 @@ block of the initial matrix. A WARNING message is issued if the value
 specified in the input file is larger than the one available in the SCR file.
 
 Now we can finally run the calculation. As usual, we have to copy
-*\$ABI_TUTORIAL/Input/tbs_4.files* in the working directory *Work_bs*,
+*\$ABI_TESTS/tutorial/Input/tbs_4.files* in the working directory *Work_bs*,
 then we have to create a bunch of symbolic links for the input WFK and SCR files:
-    
+
     ln -s 444_SCR tbs_4i_DS1_SCR
     ln -s 444_SCR tbs_4i_DS2_SCR
     ln -s 444_shifted_WFK tbs_4i_DS1_WFK
     ln -s 444_shifted_WFK tbs_4i_DS2_WFK
-    
+
 Now issue
-    
+
     abinit < tbs_4.files > tbs4.log 2> err &
 
 to execute the test (it should take around 2 minutes).
@@ -654,7 +654,7 @@ to execute the test (it should take around 2 minutes).
 {% dialog tests/tutorial/Input/tbs_4.in %}
 
 Once the calculation is completed, plot the spectra obtained with different [[ecuteps]] using |gnuplot|:
-    
+
 ```gnuplot
 p "tbs_4o_DS1_EXC_MDF" u 1:3 w l
 rep "tbs_4o_DS2_EXC_MDF" u 1:3 w l
@@ -682,14 +682,14 @@ Note also how the two peaks are affected in a different way by the change of
 consistent with our affirmation that the first peak of silicon has a strong excitonic character.
 
 ## Convergence with respect to the number of k-points
-  
+
 The last parameter that should be checked for convergence is the number of
 k-points. This convergence study represents the most tedious and difficult
 part since it requires the generation of new WFK files and of the new SCR file
 for each k-mesh (the list of k-points for the wavefunctions and the set of
 q-points in the screening must be consistent with each other).
 
-The file *\$ABI_TUTORIAL/Input/tbs_5.in* gathers the different steps of
+The file *\$ABI_TESTS/tutorial/Input/tbs_5.in* gathers the different steps of
 a standard BS calculation (generation of two WFK file, screening calculation,
 BS run) into a single input. The calculation is done with the converged
 parameters found in the previous studies, only [[ngkpt]] has been intentionally left undefined.
@@ -704,7 +704,7 @@ calculations in different directories so that we can keep the output results sep
 Be aware that both the CPU time as well as the memory requirements increase
 quickly with the number of divisions in the mesh. These are, for example, the
 CPU times required by different k-meshes on Intel Xeon X5570:
-    
+
     4x4x4:    +Overall time at end (sec) : cpu=        112.4  wall=        112.4
     5x5x5:    +Overall time at end (sec) : cpu=        362.8  wall=        362.8
     6x6x6:    +Overall time at end (sec) : cpu=        914.8  wall=        914.8
@@ -738,20 +738,20 @@ treat [[zcut]] as an _a posteriori_ parameter chosen to produce the best
 agreement with the experiment.
 
 ## Additional exercises
-  
-* Use [[bs_coupling]] = 1 to perform an excitonic calculation for silicon including the coupling term. 
-  Compare the imaginary part of the macroscopic dielectric function obtained with and without coupling. 
-  Do you find significant differences? (Caveat: calculations with coupling cannot use the Haydock method 
-  and are much more CPU demanding. You might have to decrease some input parameters to have results in reasonable time.) 
+
+* Use [[bs_coupling]] = 1 to perform an excitonic calculation for silicon including the coupling term.
+  Compare the imaginary part of the macroscopic dielectric function obtained with and without coupling.
+  Do you find significant differences? (Caveat: calculations with coupling cannot use the Haydock method
+  and are much more CPU demanding. You might have to decrease some input parameters to have results in reasonable time.)
 
 * Calculate the one-shot GW corrections for silicon following the [first GW tutorial](gw1).
-  Then use the `_GW` file produced by the code to calculate the absorption spectrum. 
+  Then use the `_GW` file produced by the code to calculate the absorption spectrum.
 
 * Learn how to use AbiPy to automate BS calculations as described in this
   [jupyter notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/bse/lesson_bse.ipynb).
 
 ## Notes on the MPI implementation
-  
+
 In this section, we discuss the approach used to parallelize the two steps of
 the BS run, *i.e.* the construction of the H matrix and the evaluation of the
 macroscopic dielectric function.

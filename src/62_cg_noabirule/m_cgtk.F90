@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgtk
 !! NAME
 !!  m_cgtk
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +28,7 @@ module m_cgtk
  use defs_basis
  use m_errors
  use m_abicore
+ use m_time
 
  use m_symtk,     only : mati3inv
  use m_geometry,  only : getspinrot
@@ -42,6 +42,7 @@ module m_cgtk
 !!***
 
  public :: cgtk_rotate
+ public :: cgtk_change_gsphere
 !!***
 
 contains
@@ -82,17 +83,8 @@ contains
 !!
 !! SOURCE
 
-subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
-  npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgtk_rotate'
-!End of the abilint section
-
- implicit none
+subroutine cgtk_rotate(cryst, kpt1, isym, itimrev, shiftg, nspinor, ndat, &
+  npw1, kg1, npw2, kg2, istwf1, istwf2, cg1, cg2, work_ngfft, work)
 
 !Arguments ------------------------------------
 !scalars
@@ -115,10 +107,13 @@ subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
 !arrays
  integer,parameter :: no_shift(3)=0,atindx(1)=1
  integer :: symm(3,3),symrel_conv(3,3)
- real(dp) :: phktnons(2,1),tnons_conv(3),spinrot(4)
+ real(dp) :: phktnons(2,1),tnons_conv(3),spinrot(4),tsec(2)
  real(dp),allocatable :: phase1d(:,:),phase3d(:,:),wavef1(:,:)
 
 !************************************************************************
+
+ ! Keep track of total time spent.
+ call timab(1780, 1, tsec)
 
  n1=work_ngfft(1); n2=work_ngfft(2); n3=work_ngfft(3)
  n4=work_ngfft(4); n5=work_ngfft(5); n6=work_ngfft(6)
@@ -149,7 +144,6 @@ subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
  ABI_MALLOC(wavef1, (2,npw1))
 
  do idat=1,ndat
-
    do isp=1,nspinor
      wavef1 = cg1(:,:,isp,idat)
 
@@ -216,7 +210,69 @@ subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
    ABI_FREE(phase1d)
  end if
 
+ call timab(1780, 2, tsec)
+
 end subroutine cgtk_rotate
+!!***
+
+!!****f* ABINIT/cgtk_change_gsphere
+!! NAME
+!!  cgtk_change_gsphere
+!!
+!! FUNCTION
+!!  Transfer the G components of the wavefunctions from one sphere to another one.
+!!  Can be used to change the value of istwfk e.g. 2 --> 1
+!!
+!! INPUTS
+!!  ndat = Number of wavefunctions to transform.
+!!  npw1, npw2 = Number of plane-waves in (input, output) G-sphere
+!!  istwf1, istwf2 = Storage mode of (input, output) wavefunctions.
+!!  kg1(3,npw1), kg2(3,npw2) = Input/Output G-sphere
+!!  cg1(2,npw1,ndat) = Input wavefunctions on kg1 sphere with istwf1 mode.
+!!  work_ngfft(18)=Specify work dimensions. Must be large enough to accomodate kg1 and kg2
+!!
+!! OUTPUT
+!!  cg2(2,npw2,ndat) = Output wavefunctions on kg2 sphere with istwf2 mode.
+!!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) = Workspace array
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, cg2, work_ngfft, work)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndat,npw1,npw2,istwf1,istwf2
+!arrays
+ integer,intent(in) :: kg1(3,npw1),kg2(3,npw2)
+ integer,intent(in) :: work_ngfft(18)
+ real(dp),intent(inout) :: cg1(2,npw1,ndat)  ! TODO: Should be intent(in) but need to change sphere
+ real(dp),intent(out) :: cg2(2,npw2,ndat)
+ real(dp),intent(out) :: work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6))
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: tobox=1,tosph=-1,me_g0=1
+ integer :: n1,n2,n3,n4,n5,n6,idat
+!arrays
+ integer,parameter :: no_shift(3)=0
+
+!************************************************************************
+
+ n1 = work_ngfft(1); n2 = work_ngfft(2); n3 = work_ngfft(3)
+ n4 = work_ngfft(4); n5 = work_ngfft(5); n6 = work_ngfft(6)
+
+ do idat=1,ndat
+   ! Insert cg1 in work array taking into account istwf1 (intent in)
+   call sphere(cg1(:,:,idat),1,npw1,work,n1,n2,n3,n4,n5,n6,kg1,istwf1,tobox,me_g0,no_shift,identity_3d,one)
+   ! Extract cg2 from work array taking into account istwf2
+   call sphere(cg2(:,:,idat),1,npw2,work,n1,n2,n3,n4,n5,n6,kg2,istwf2,tosph,me_g0,no_shift,identity_3d,one)
+ end do
+
+end subroutine cgtk_change_gsphere
 !!***
 
 end module m_cgtk

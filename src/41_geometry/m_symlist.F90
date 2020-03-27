@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_symlist
 !! NAME
 !!  m_symlist
@@ -7,7 +6,7 @@
 !! Determine the space group from the number and type of symmetry operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (RC)
+!!  Copyright (C) 2008-2020 ABINIT group (RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,15 +73,6 @@ contains
 !! SOURCE
 
 subroutine symlist_prim(additional_info,nsym,n_axes,spgroup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_prim'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -521,15 +511,6 @@ end subroutine symlist_prim
 
 subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_bcc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: additional_info,nsym
@@ -715,15 +696,6 @@ end subroutine symlist_bcc
 
 subroutine symlist_fcc(nsym,n_axes,spgroup)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_fcc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -836,15 +808,6 @@ end subroutine symlist_fcc
 !! SOURCE
 
 subroutine symlist_others(brvltt,nsym,n_axes,spgroup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_others'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

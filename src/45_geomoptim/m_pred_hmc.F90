@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_hmc
 !! NAME
 !!  m_pred_hmc
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2018 ABINIT group (SPr)
+!!  Copyright (C) 2017-2020 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,13 +84,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  use m_geometry,  only : xred2xcart
  use m_numeric_tools,  only : uniformrandom
  use m_pred_velverlet,     only : pred_velverlet
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_hmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -107,21 +99,21 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !Local variables-------------------------------
 
  integer,save  :: seed                                   ! seed for rnd generator
- integer       :: ii,jj,iacc                             ! dummy integers for loop indexes and acceptance decision flag
+ integer       :: iacc !ii,jj                             ! dummy integers for loop indexes and acceptance decision flag
  real(dp)      :: etotal,epot,ekin,de                    ! total, potential (electronic), kinetic (ionic) energies and energy difference
- real(dp)      :: mv2tot,factor                          ! dummies used for rescaling of velocities
- real(dp)      :: rnd
+ !real(dp)      :: mv2tot,factor                          ! dummies used for rescaling of velocities
+ !real(dp)      :: rnd
  real(dp)      :: xred(3,ab_mover%natom)                 ! reduced coordinates of all ions
  real(dp)      :: vel(3,ab_mover%natom)                  ! ionic velocities in Cartesian coordinates
- real(dp)      :: mvtot(3)                               ! total momentum of the cell used to rescale velocities
- real(dp)      :: mtot,kbtemp                            ! total ionic mass and target temperature in energy units
+ !real(dp)      :: mvtot(3)                               ! total momentum of the cell used to rescale velocities
+ real(dp)      :: kbtemp  !mtot,                          ! total ionic mass and target temperature in energy units
  real(dp)      :: acell(3)                               ! lattice parameters
  real(dp)      :: rprimd(3,3)                            ! lattice vectors
 
  real(dp),save :: etotal_hmc_prev,epot_hmc_prev          ! total energy of the initial state
- real(dp),save :: acell_hmc_prev(3)                      !
- real(dp),save :: rprimd_hmc_prev(3,3)                   !
- real(dp),save :: strain_hmc_prev(3,3)                   !
+ !real(dp),save :: acell_hmc_prev(3)                      !
+ !real(dp),save :: rprimd_hmc_prev(3,3)                   !
+ !real(dp),save :: strain_hmc_prev(3,3)                   !
  real(dp),save :: strain(3,3),dstrain                    ! strain tensor
  real(dp),save :: rprimd_original(3,3)                   ! initial lattice vectors <= itime=1,icycle=1
  real(dp),allocatable,save :: xred_hmc_prev(:,:)         ! reduced coordinates of the ions corresponding to the initial state

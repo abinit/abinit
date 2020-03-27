@@ -1,60 +1,60 @@
 # Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 45
+ndtset 43
 
 # (S)LDAs X + different correlations
-ixc1  -1002
-ixc2  -1003
-ixc3  -1004
-ixc4  -1005
-ixc5  -1006
-ixc6  -1007
-ixc7  -1008
-ixc8  -1009
-ixc9  -1010
-ixc10 -1011
-ixc11 -1012
-ixc12 -1013
-ixc13 -1014
-ixc14 -1017
+#ixc  -1002 ! Not portable from libxc v3 to v4
+ixc1  -1003
+ixc2  -1004
+ixc3  -1005
+ixc4  -1006
+ixc5  -1007
+ixc6  -1008
+ixc7  -1009
+ixc8  -1010
+ixc9 -1011
+ixc10 -1012
+ixc11 -1013
+ixc12 -1014
+ixc13 -1017
 #Teter XC functional form
-ixc15 -0020
+ixc14 -0020
 
 # GGAs : Becke 88 exchange + different correlations
-ixc16 -106130
-ixc17 -106131
-ixc18 -106132
-ixc19 -106133
-ixc20 -106134
-ixc21 -106135
-ixc22 -106136
-ixc23 -106137
+ixc15 -106130
+ixc16 -106131
+ixc17 -106132
+ixc18 -106133
+ixc19 -106134
+ixc20 -106135
+ixc21 -106136
+#ixc -106137 ! Not portable from libxc v3 to v4
 
 # GGAs : different exchanges + LYP correlation
-ixc24 -101131
-ixc25 -102131
-ixc26 -103131
-ixc27 -104131
-ixc28 -105131
+ixc22 -101131
+ixc23 -102131
+ixc24 -103131
+ixc25 -104131
+ixc26 -105131
 #ixc  -106131 already treated, see dataset 17
-ixc29 -107131
-ixc30 -108131
-ixc31 -109131
-ixc32 -110131
-ixc33 -111131
-ixc34 -112131
-ixc35 -113131
-ixc36 -114131
-ixc37 -115131
-ixc38 -116131
-ixc39 -117131
-ixc40 -118131
-ixc41 -119131
-ixc42 -120131
-ixc43 -121131
-ixc44 -122131
-ixc45 -123131
+ixc27 -107131
+ixc28 -108131
+ixc29 -109131
+ixc30 -110131
+ixc31 -111131
+ixc32 -112131
+ixc33 -113131
+ixc34 -114131
+ixc35 -115131
+ixc36 -116131
+ixc37 -117131
+ixc38 -118131
+ixc39 -119131
+ixc40 -120131
+ixc41 -121131
+ixc42 -122131
+ixc43 -123131
 
 #Common data
 acell 3*10
@@ -87,13 +87,12 @@ prtden 0
 prtwf  0
 prteig 0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t05.out, tolnlines = 20, tolabs = 4.5e-5, tolrel = 6.5e-6
 #%% psp_files = 83bi.psphgh
 #%% [paral_info]
 #%% max_nprocs = 2

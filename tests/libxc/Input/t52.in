@@ -55,12 +55,11 @@ getwfk -1        # Start from previous wavefunctions to ease convergence
 nkpthf  27          # number of k-point in the full-BZ 
 nbandhf  4         # number of occupied states
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t52.out, tolnlines=9, tolabs=3.000e-08, tolrel=5.000e-03
+#%% files_to_test = t52.out, tolnlines=15, tolabs=3.000e-08, tolrel=5.000e-03
 #%% psp_files= 14si.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/contistr12
 !! NAME
 !! contistr12
@@ -12,7 +11,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DRH)
+!! Copyright (C) 1998-2020 ABINIT group (DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,13 +59,6 @@ subroutine contistr12(istr,rank,gm,gprimd,eisnl,aa,bb)
 
  use defs_basis
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'contistr12'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_efield
 !! NAME
 !!  m_efield
@@ -6,10 +5,9 @@
 !! FUNCTION
 !!  This module contains the declaration of data types and methods
 !!  used to handle electric fields
-!!  Imported object from defs_datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MJV)
+!! Copyright (C) 2011-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +44,7 @@ module m_efield
 !!***
 
 
-!!****t* defs_datatypes/efield_type
+!!****t* m_efield/efield_type
 !! NAME
 !! efield_type
 !!
@@ -250,15 +248,6 @@ contains
 !! SOURCE
 
 subroutine destroy_efield(dtefield)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_efield'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !array

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_hr
 !! NAME
 !!  m_paw_hr
@@ -13,7 +12,7 @@
 !!  matrix elements of [H.r].
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,13 +108,6 @@ CONTAINS  !=====================================================================
 
 subroutine pawhur_free(Hur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawhur_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -177,13 +169,6 @@ end subroutine pawhur_free
 !! SOURCE
 
 function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj_kb1,Cprj_kb2,HUr) result(ihr_comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ihr'
-!End of the abilint section
 
  implicit none
 
@@ -264,7 +249,7 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
        ons_cart(2,2)=ons_cart(2,2) - re_p*nabla_ij(2,ilmn,jlmn)
        ons_cart(2,3)=ons_cart(2,3) - re_p*nabla_ij(3,ilmn,jlmn)
        !
-       if (Pawtab(itypat)%usepawu==1) then ! Add i[V_u, r] 
+       if (Pawtab(itypat)%usepawu/=0) then ! Add i[V_u, r] 
          isel=Hur(iatom)%ij_select(ilmn,jlmn,isppol)
          if (isel>0) then
            hurc_ij(:)=Hur(iatom)%commutator(:,isel,isppol)
@@ -272,7 +257,7 @@ function paw_ihr(isppol,nspinor,npw,istwfk,kpoint,Cryst,Pawtab,ug1,ug2,gvec,Cprj
            ons_cart(1,1)=ons_cart(1,1) - im_p*hurc_ij(1)
            ons_cart(1,2)=ons_cart(1,2) - im_p*hurc_ij(2)
            ons_cart(1,3)=ons_cart(1,3) - im_p*hurc_ij(3)
-                                                                
+
            ons_cart(2,1)=ons_cart(2,1) + re_p*hurc_ij(1)
            ons_cart(2,2)=ons_cart(2,2) + re_p*hurc_ij(2)
            ons_cart(2,3)=ons_cart(2,3) + re_p*hurc_ij(3)
@@ -350,13 +335,6 @@ end function paw_ihr
 
 subroutine paw_cross_ihr_comm(ihr_comm,nspinor,nr,Cryst,Pawfgrtab,Paw_onsite,&
 & ur_ae1,ur_ae2,ur_ae_onsite1,ur_ae_onsite2,Cprj_kb1,Cprj_kb2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_cross_ihr_comm'
-!End of the abilint section
 
  implicit none
 
@@ -448,13 +426,6 @@ end subroutine paw_cross_ihr_comm
 !! SOURCE
 
 subroutine pawhur_init(hur,nsppol,pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawhur_init'
-!End of the abilint section
 
  implicit none
 
@@ -639,13 +610,6 @@ end subroutine pawhur_init
 !! SOURCE
 
 subroutine pawr(Pawtab,Pawrad,Pawang,natom,ntypat,typat,xcart,lmn2_size_max,rcart_onsite)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawr'
-!End of the abilint section
 
  implicit none
 

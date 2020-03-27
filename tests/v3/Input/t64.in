@@ -7,7 +7,6 @@ t62o_DS2_WFK  # WF file
 t64        # Root for the output name
 0          # This is to leave
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d

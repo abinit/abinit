@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_berryphase_new
 !! NAME
 !!  m_berryphase_new
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2018 ABINIT  group (MVeithen)
+!!  Copyright (C) 2003-2020 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,26 +24,29 @@
 
 module m_berryphase_new
 
- use defs_abitypes
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_efield
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_berrytk,      only : smatrix, polcart
- use m_cgprj,            only : ctocprj
- use m_fftcore, only : kpgsph
+ use m_cgprj,        only : ctocprj
+ use m_fftcore,      only : kpgsph
  use m_geometry,     only : xred2xcart, metric
  use m_io_tools,     only : open_file
  use m_iowf,         only : outwf
- use m_kg,       only : getph
- use m_kpts,    only : listkk, smpbz
- use m_mpinfo, only : proc_distrb_cycle
+ use m_kg,           only : getph
+ use m_kpts,         only : listkk, smpbz
+ use m_mpinfo,       only : proc_distrb_cycle
  use m_numeric_tools,only : rhophi
- use m_pawang, only : pawang_type
+ use m_pawang,       only : pawang_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_allgather, &
                             pawcprj_put, pawcprj_copy, pawcprj_mpi_recv,  &
                             pawcprj_mpi_send, pawcprj_free, pawcprj_getdim, pawcprj_symkn
@@ -174,15 +176,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'berryphase_new'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: lmnmax,mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt
@@ -425,7 +418,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          call pawcprj_get(atindx1,cprj_k,cprj,natom,1,(ikpt_loc-1)*nband_k*my_nspinor,ikpt1,0,isppol,mband,&
 &         mkmem,natom,nband_k,nband_k,my_nspinor,nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
+         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,1,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
          do iproc = 1, nproc
            icp2=nband_k*(iproc-1)*my_nspinor
            call pawcprj_get(atindx1,cprj_k,cprj_gat,natom,1,icp2,ikpt1,0,isppol,mband,&
@@ -1003,10 +996,19 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
            if ((det_inv_smat == 10).or.(det_inv_smat == 11)) then
 
              if (sqrt(dtm_k(1)*dtm_k(1) + dtm_k(2)*dtm_k(2)) < tol12) then
+               ! EB: the MSG_BUG has been replaced here by what is done in 67_common/m_cgwf.F90
+               ! This avoid the code to stop for phonons under E-field too.
+               ! TODO: Since the same is done in m_cgwf.F90 and in m_berryphase_new.F90,
+               ! rationalization should be done with one single module.
                write(message,'(a,i5,a,a,a)')&
 &               '  For k-point #',ikpt1,',',ch10,&
-&               '  the determinant of the overlap matrix is found to be 0.'
-               MSG_BUG(message)
+&               '  the determinant of the overlap matrix is found to be 0. Fixing...'
+                ! Try this:
+                write(std_out,*)message,dtm_k(1:2)
+                if(abs(dtm_k(1))<=1d-12)dtm_k(1)=1d-12
+                if(abs(dtm_k(2))<=1d-12)dtm_k(2)=1d-12
+                write(std_out,*)' Changing to:',dtm_k(1:2)
+!               MSG_BUG(message)
              end if
 
              dtm_mult(1,ikpt1+(isppol-1)*dtefield%fnkpt,istep) = dtm_k(1)
@@ -1708,7 +1710,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 end subroutine berryphase_new
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/update_e_field_vars
 !! NAME
 !! update_e_field_vars
@@ -1717,7 +1718,7 @@ end subroutine berryphase_new
 !! This routine updates E field variables
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1803,15 +1804,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &  pwind_alloc,pwnsfac,red_efield2,red_efield2_old,red_ptot,rmet,rprimd,&
 &  scfcv_level,scfcv_quit,scfcv_step,ucvol,unit_out,&
 &  usepaw,xred,ylm,ylmgr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'update_e_field_vars'
-!End of the abilint section
-
-  implicit none
 
   !Arguments ------------------------------------
   integer, intent(in) :: idir,mcg,mkmem,mpw,my_natom,natom,nkpt,ntypat
@@ -2281,7 +2273,7 @@ end subroutine update_e_field_vars
 !! Print components of electric field, displacement field and polarization in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2313,15 +2305,6 @@ end subroutine update_e_field_vars
 !! SOURCE
 
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtefield'
-!End of the abilint section
-
-  implicit none
 
   !Arguments ------------------------------------
   integer :: iunit
@@ -2668,7 +2651,6 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 end subroutine prtefield
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/init_e_field_vars
 !! NAME
 !! init_e_field_vars
@@ -2678,7 +2660,7 @@ end subroutine prtefield
 !! calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group
+!! Copyright (C) 2004-2020 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2725,15 +2707,6 @@ end subroutine prtefield
 subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
      &              mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_e_field_vars'
-!End of the abilint section
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -2794,7 +2767,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
 end subroutine init_e_field_vars
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/initberry
 !! NAME
 !! initberry
@@ -2804,7 +2776,7 @@ end subroutine init_e_field_vars
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2020 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2881,15 +2853,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      &              pwind,pwind_alloc,pwnsfac,&
      &              rprimd,symrec,typat,usepaw,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initberry'
-!End of the abilint section
-
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mband,mkmem,mpw,natom,nkpt,nsppol,nsym,ntypat,usepaw
@@ -2927,7 +2890,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   ! rmetlcl(3,3)=real-space metric (same as rmet in metric.F90)
   ! gmetlcl(3,3)= same as gmet in metric.F90
   ! ucvol = volume of the unit cell in Bohr**3
-
   character(len=500) :: message
   logical :: calc_epaw3_force,calc_epaw3_stress,fieldflag
   !arrays
@@ -2945,6 +2907,10 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
 
   call timab(1001,1,tsec)
   call timab(1002,1,tsec)
+
+  spaceComm=mpi_enreg%comm_cell
+  nproc=xmpi_comm_size(spaceComm)
+  me=xmpi_comm_rank(spaceComm)
 
   !save the current value of berryopt
   dtefield%berryopt = dtset%berryopt
@@ -3000,13 +2966,13 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   !Here is original call
   !
   !call listkk(rdum,gmet,dtefield%indkk_f2ibz,dtset%kptns,dtefield%fkptns,nkpt,&
-  !& dtefield%fnkpt,dtset%nsym,1,dtset%symafm,dtset%symrel,1)
+  !& dtefield%fnkpt,dtset%nsym,1,dtset%symafm,dtset%symrel,1, spaceComm)
 
   call timab(1002,2,tsec)
   call timab(1003,1,tsec)
 
   call listkk(rdum,gmet,dtefield%indkk_f2ibz,dtset%kptns,dtefield%fkptns,nkpt,&
-       & dtefield%fnkpt,dtset%nsym,1,dtset%symafm,symrec,1,use_symrec=.True.)
+       & dtefield%fnkpt,dtset%nsym,1,dtset%symafm,symrec,1, spaceComm, use_symrec=.True.)
 
   call timab(1003,2,tsec)
   call timab(1004,1,tsec)
@@ -3023,8 +2989,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      end if
   end do
   if (idum/=nkpt)then
-     message = ' Found wrong number of k-points in IBZ'
-     MSG_ERROR(message)
+     MSG_ERROR('Found wrong number of k-points in IBZ')
   end if
 
   !set flags for fields, forces, stresses
@@ -3116,9 +3081,9 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
   !------------------------------------------------------------------------------
   !------------------- Compute variables related to MPI // ----------------------
   !------------------------------------------------------------------------------
-  spaceComm=mpi_enreg%comm_cell
-  nproc=xmpi_comm_size(spaceComm)
-  me=xmpi_comm_rank(spaceComm)
+
+
+
 
   if (nproc==1) then
      dtefield%fmkmem = dtefield%fnkpt
@@ -3451,8 +3416,8 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
               kpt_shifted1=dtefield%fkptns(1,ikpt)- isign*dk(1)
               kpt_shifted2=dtefield%fkptns(2,ikpt)- isign*dk(2)
               kpt_shifted3=dtefield%fkptns(3,ikpt)- isign*dk(3)
-              !        Note that this is still a order fnkpt**2 algorithm.
-              !        It is possible to implement a order fnkpt algorithm, see listkk.F90.
+              ! Note that this is still a order fnkpt**2 algorithm.
+              ! It is possible to implement a order fnkpt algorithm, see listkk.F90.
               do ikpt1 = 1, dtefield%fnkpt
                  diffk1=dtefield%fkptns(1,ikpt1) - kpt_shifted1
                  if(abs(diffk1-nint(diffk1))>tol8)cycle

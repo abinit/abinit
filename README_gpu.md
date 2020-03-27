@@ -53,7 +53,7 @@ The permitted Cuda-related preprocessing options are :
 
 All high-level routines directly accessing Cuda features have to be put
 in ~abinit/src/52_manage_cuda/, and low-level ones in
-~abinit/src/15_gpu_toolbox/. All exceptions have to be approved by
+~abinit/shared/common/src/17_gpu_toolbox/. All exceptions have to be approved by
 Xavier Gonze prior to any implementation.
 
 All files belonging to nVidia must *not* be distributed with Abinit.

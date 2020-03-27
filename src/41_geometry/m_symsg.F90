@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_symsg
 !! NAME
 !!  m_symsg
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (RC,XG)
+!!  Copyright (C) 1999-2020 ABINIT group (RC,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,13 +78,6 @@ contains
 !! SOURCE
 
 subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symsgcube'
-!End of the abilint section
 
  implicit none
 
@@ -575,13 +567,6 @@ end subroutine symsgcube
 
 subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symsghexa'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -922,13 +907,6 @@ end subroutine symsghexa
 !! SOURCE
 
 subroutine symsgmono(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symsgmono'
-!End of the abilint section
 
  implicit none
 
@@ -1476,13 +1454,6 @@ end subroutine symsgmono
 subroutine symsgortho(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
 &   spgroupma,symafm,symrel,tnons)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symsgortho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1977,13 +1948,6 @@ end subroutine symsgortho
 
 subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symsgtetra'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2434,13 +2398,6 @@ end subroutine symsgtetra
 !! SOURCE
 
 subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bldgrp'
-!End of the abilint section
 
  implicit none
 

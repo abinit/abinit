@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_correlations/m_paw_correlations
 !! NAME
 !!  m_paw_correlations
@@ -8,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2020 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,15 +23,14 @@
 MODULE m_paw_correlations
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
-
+ use m_dtset
  use m_linalg_interfaces
  use m_special_funcs
- use m_io_tools, only : open_file
 
+ use m_io_tools,    only : open_file
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
  use m_pawrad,      only : pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
  use m_pawtab,      only : pawtab_type
@@ -75,6 +73,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  dmatpuopt= select expression for the density matrix
 !!  exchmix= mixing factor for local exact-exchange
+!!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
 !!  llexexch(ntypat)= value of l on which local exact-exchange applies
 !!  llpawu(ntypat)= value of l on which LDA+U applies
@@ -89,23 +88,23 @@ CONTAINS  !=====================================================================
 !!  upawu(ntypat)= value of U
 !!  use_dmft = 0 no PAW+DMFT, =1 PAW+DMFT
 !!  useexexch= 0 if no local exact-exchange; 1 if local exact-exchange
-!!  usepawu= 0 if no LDA+U; 1 if LDA+U
+!!  usepawu= 0 if no LDA+U; /=0 if LDA+U
 !!
 !! OUTPUT
 !!  pawtab <type(pawtab_type)>=paw tabulated data read at start:
-!!     %euijkl=(2,2,lmn2_size,lmn2_size) array for computing LDA+U terms without occupancies
-!!     %ij_proj=nproj*(nproju+1)/2
-!!     %klmntomn(4,lmn2_size) = Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
+!!     %euijkl=(2,2,lmn2_size,lmn2_size)= array for computing LDA+U terms without occupancies
+!!     %ij_proj= nproj*(nproju+1)/2
+!!     %klmntomn(4,lmn2_size)= Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
 !!     %lnproju(nproj)= value of ln for projectors on which paw+u/local exact-exchange acts.
 !!     %nproju=number of projectors for orbitals on which paw+u/local exact-exchange acts.
 !!     %phiphjint(pawtabitypat%ij_proj)=Integral of Phi(:,i)*Phi(:,j) for correlated orbitals.
-!!     %usepawu=0 if no LDA+U; 1 if LDA+U
+!!     %usepawu=0 if no LDA+U; /=0 if LDA+U
 !!     %useexexch=0 if no local exact-exchange; 1 if local exact-exchange
-!!     === if usepawu>0
+!!     === if usepawu/=0
 !!     %jpawu= value of J
 !!     %upawu= value of U
 !!     %vee(2*lpawu+1,:,:,:)=matrix of the screened interaction for correlated orbitals
-!!     === if useexexch>0
+!!     === if useexexch/=0
 !!     %fk
 !!     %vex(2*lpawu+1,:,:,:)=matrix of the screened interaction for correlated orbitals
 !!
@@ -117,22 +116,14 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,jpawu,llexexch,llpawu,&
+ subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
 &           ucrpa) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpuxinit'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: dmatpuopt,ntypat,pawprtvol,use_dmft,useexexch,usepawu
+ logical :: is_dfpt
  real(dp),intent(in) :: exchmix
  type(pawang_type), intent(in) :: pawang
  integer,optional, intent(in) :: ucrpa
@@ -145,13 +136,13 @@ CONTAINS  !=====================================================================
 
 !Local variables ---------------------------------------
 !scalars
- integer :: icount,icountp,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
- integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,klmn0,klmn0p,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
+ integer :: icount,il,ilmn,ilmnp,isela,iselb,itemp,itypat,iu,iup,j0lmn,jl,jlmn,jlmnp,ju,jup
+ integer :: klm0u,klm0x,klma,klmb,klmn,klmna,klmnb,kln,kln1,kln2,kyc,lcur,lexexch,lkyc,ll,ll1
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lmpawu,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
  integer :: mesh_size,int_meshsz,mkyc,sig,sigp,sz1
  logical :: compute_euijkl,compute_euij_fll
- real(dp) :: ak,fact,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
+ real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
  character(len=500) :: message
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
@@ -162,14 +153,20 @@ CONTAINS  !=====================================================================
 
  DBG_ENTER("COLL")
 
- if(useexexch==0.and.usepawu==0.and.use_dmft==0) return
+!No correlations= nothing to do
+ if(useexexch==0.and.usepawu==0.and.use_dmft==0) then
+   do itypat=1,ntypat
+     pawtab(itypat)%usepawu=0;pawtab(itypat)%useexexch=0;pawtab(itypat)%exchmix=zero
+   end do
+   return
+ end if
 
 !PAW+U and local exact-exchange restriction
- if(useexexch>0.and.usepawu>0)then
+ if(useexexch/=0.and.usepawu/=0)then
    do itypat=1,ntypat
      if (llpawu(itypat)/=llexexch(itypat).and.llpawu(itypat)/=-1.and.llexexch(itypat)/=-1) then
        write(message, '(5a,i2,3a)' )&
-&       '  When PAW+U (usepawu>0) and local exact-exchange (exexch>0)',ch10,&
+&       '  When PAW+U (usepawu/=0) and local exact-exchange (exexch/=0)',ch10,&
 &       '  are selected together, they must apply on the same',ch10,&
 &       '  angular momentum (lpawu/=lexexch forbidden, here for typat=',itypat,') !',ch10,&
 &       '  Action: correct your input file.'
@@ -179,7 +176,8 @@ CONTAINS  !=====================================================================
  end if
 
 !Print title
- if((usepawu>=1.and.usepawu<=6).or.useexexch>0) write(message, '(3a)' ) ch10,ch10," ******************************************"
+ if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
+&  write(message, '(3a)' ) ch10,ch10," ******************************************"
  if(usepawu==1) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL"
  else if(usepawu==2) then
@@ -188,15 +186,15 @@ CONTAINS  !=====================================================================
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (alternative)"
  else if(usepawu==4) then
    write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL with no spin polarization in the xc functional"
- else if(usepawu==5) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL (no use of occupation matrix)"
- else if(usepawu==6) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (no use of occupation matrix)"
+ else if(usepawu==-1) then
+   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL (no use of occupation matrix) - experimental"
+ else if(usepawu==-2) then
+   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (no use of occupation matrix) - experimental"
  end if
- if(useexexch>0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
- if((usepawu>=1.and.usepawu<=6).or.useexexch>0) &
- write(message, '(3a)' ) trim(message),ch10," ******************************************"
- if(use_dmft==0) then
+ if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
+ if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
+&  write(message, '(3a)' ) trim(message),ch10," ******************************************"
+ if(use_dmft==0 .and. abs(usepawu)<=4) then
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
@@ -215,7 +213,7 @@ CONTAINS  !=====================================================================
    lcur=-1
 
 !  PAW+U data
-   if (usepawu>0.or.use_dmft>0) then
+   if (usepawu/=0.or.use_dmft>0) then
      lcur=llpawu(itypat)
      pawtab(itypat)%lpawu=lcur
      if(lcur/=-1) then
@@ -234,7 +232,7 @@ CONTAINS  !=====================================================================
    end if
 
 !  Local exact-echange data
-   if (useexexch>0) then
+   if (useexexch/=0) then
      lcur=llexexch(itypat)
      pawtab(itypat)%lexexch=lcur
      pawtab(itypat)%exchmix=exchmix
@@ -248,7 +246,7 @@ CONTAINS  !=====================================================================
 !    Compute number of projectors for LDA+U/local exact-exchange/LDA+DMFT
      icount=count(indlmn(1,1:lmn_size)==lcur)
      pawtab(itypat)%nproju=icount/(2*lcur+1)
-     if(useexexch>0.and.pawtab(itypat)%nproju>2)  then
+     if(useexexch/=0.and.pawtab(itypat)%nproju>2)  then
        write(message, '(a,a,a)' )&
 &       '  Error on the number of projectors ',ch10,&
 &       '  more than 2 projectors is not allowed for local exact-exchange'
@@ -303,7 +301,6 @@ CONTAINS  !=====================================================================
 !    ==================================================
 !    B-PAW+U: overlap between atomic wavefunctions
 !    --------------------------------------------------
-!    if (usepawu>0) then
      if(dmatpuopt==1) then
        write(message, '(4a)' ) ch10,&
 &       ' pawpuxinit : dmatpuopt=1 ',ch10,&
@@ -394,7 +391,7 @@ CONTAINS  !=====================================================================
          if ((dmatpuopt==1).and.(useexexch==0)) then
            pawtab(itypat)%phiphjint(icount)=pawtab(itypat)%ph0phiint(iu)*&
 &           pawtab(itypat)%ph0phiint(ju)
-         else if((dmatpuopt==2).or.(useexexch>0)) then
+         else if((dmatpuopt==2).or.(useexexch/=0)) then
            ff(1:mesh_size)=pawtab(itypat)%phi(1:mesh_size,pawtab(itypat)%lnproju(iu))&
 &           *pawtab(itypat)%phi(1:mesh_size,pawtab(itypat)%lnproju(ju))
            call simp_gen(int1,ff,pawrad(itypat))
@@ -428,7 +425,7 @@ CONTAINS  !=====================================================================
 !    C-PAW+U: Matrix elements of coulomb interaction (see PRB vol.52 5467) [[cite:Liechenstein1995]]
 !    1. angular part computed from Gaunt coefficients
 !    --------------------------------------------------------------------
-     if (usepawu>0) then
+     if (usepawu/=0) then
        lpawu=lcur
 
 !      a. compute F(k)
@@ -559,9 +556,9 @@ CONTAINS  !=====================================================================
      !  write(std_out,'(a,f12.6)')  " J=", testu-testumj
      !  write(std_out,*) "------------------------"
 
-!      c. For usepawu == 5 or 6, compute euijkl
+!      c. For DFT (or with exp. values usepawu=-1 or -2), compute euijkl
 !      ---------------------------------------------
-       compute_euijkl=(usepawu==5.or.usepawu==6)
+       compute_euijkl=(is_dfpt.or.usepawu<0)
        if (compute_euijkl) then
          if (allocated(pawtab(itypat)%euijkl)) then
            ABI_DEALLOCATE(pawtab(itypat)%euijkl)
@@ -570,7 +567,7 @@ CONTAINS  !=====================================================================
          pawtab(itypat)%euijkl = zero
          compute_euij_fll = .false.
          euijkl_temp2=zero
-         if (usepawu==5) then ! Only for FLL
+         if (abs(usepawu)==1.or.abs(usepawu)==4) then ! Only for FLL
            if (allocated(pawtab(itypat)%euij_fll)) then ! allocate euij_fll for FLL
              ABI_DEALLOCATE(pawtab(itypat)%euij_fll)
            end if
@@ -616,7 +613,7 @@ CONTAINS  !=====================================================================
                      do sig=1,2
                        do sigp=1,2
 
-                         if (usepawu==1.or.usepawu==5) then ! FLL
+                         if (abs(usepawu)==1.or.abs(usepawu)==4) then ! FLL
 
                            if (sig==sigp) then
                              euijkl_dc(sig,sigp) = &
@@ -626,7 +623,7 @@ CONTAINS  !=====================================================================
 &                             phiint_ij * phiint_ipjp * pawtab(itypat)%upawu
                            end if
 
-                         else if (usepawu==2.or.usepawu==6) then ! AMF
+                         else if (abs(usepawu)==2) then ! AMF
 
                            if (sig==sigp) then
                              euijkl_dc(sig,sigp) = &
@@ -697,7 +694,7 @@ CONTAINS  !=====================================================================
 !    ======================================================================
 !    D-Local ex-exchange: Matrix elements of coulomb interaction and Fk
 !    ----------------------------------------------------------------------
-     if (useexexch>0) then
+     if (useexexch/=0) then
        lexexch=lcur
 
 !      a. compute F(k)
@@ -836,7 +833,7 @@ CONTAINS  !=====================================================================
          end do
        end do
 
-     end if !useexexch>0
+     end if !useexexch/=0
 
      if (present(ucrpa)) then
        if (ucrpa>=1) then
@@ -886,15 +883,6 @@ CONTAINS  !=====================================================================
  subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
  &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuenergy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: iatom,pawprtvol
@@ -931,6 +919,10 @@ CONTAINS  !=====================================================================
    message='size of nocctot and noccmmp are inconsistent!'
    MSG_BUG(message)
  end if
+ if (pawtab%usepawu<0) then
+   message='not allowed for usepawu<0!'
+   MSG_BUG(message)
+ end if
  if(present(dmft_dc))  then
    dmftdc=dmft_dc
    if(pawtab%usepawu<10) then
@@ -955,40 +947,38 @@ CONTAINS  !=====================================================================
  edcdc_opt3=zero
  eks_opt3=zero
 
- if (pawtab%usepawu/=5.and.pawtab%usepawu/=6) then
+ ABI_ALLOCATE(n12_sig,(cplex_occ))
+ ABI_ALLOCATE(n34_msig,(cplex_occ))
+ ABI_ALLOCATE(n34_sig,(cplex_occ))
+ do ispden=1,min(nspden,2)
+   jspden=min(nspden,2)-ispden+1
 
-   ABI_ALLOCATE(n12_sig,(cplex_occ))
-   ABI_ALLOCATE(n34_msig,(cplex_occ))
-   ABI_ALLOCATE(n34_sig,(cplex_occ))
-   do ispden=1,min(nspden,2)
-     jspden=min(nspden,2)-ispden+1
-
-!    Compute n_sigs and n_msigs for pawtab%usepawu=3
-     if (nspden<=2) then
-       n_sig =nocctot(ispden)
-       n_msig=nocctot(jspden)
-       n_tot=n_sig+n_msig
+!  Compute n_sigs and n_msigs for pawtab%usepawu=3
+   if (nspden<=2) then
+     n_sig =nocctot(ispden)
+     n_msig=nocctot(jspden)
+     n_tot=n_sig+n_msig
+   else
+     n_tot=nocctot(1)
+     mx=nocctot(2)
+     my=nocctot(3)
+     mz=nocctot(4)
+     mnorm=sqrt(mx*mx+my*my+mz*mz)
+     if (ispden==1) then
+!      n_sig =half*(n_tot+mnorm)
+!      n_msig=half*(n_tot-mnorm)
+       n_sig =half*(n_tot+sign(mnorm,mz))
+       n_msig=half*(n_tot-sign(mnorm,mz))
      else
-       n_tot=nocctot(1)
-       mx=nocctot(2)
-       my=nocctot(3)
-       mz=nocctot(4)
-       mnorm=sqrt(mx*mx+my*my+mz*mz)
-       if (ispden==1) then
-!        n_sig =half*(n_tot+mnorm)
-!        n_msig=half*(n_tot-mnorm)
-         n_sig =half*(n_tot+sign(mnorm,mz))
-         n_msig=half*(n_tot-sign(mnorm,mz))
-       else
-!        n_sig =half*(n_tot-mnorm)
-!        n_msig=half*(n_tot+mnorm)
-         n_sig =half*(n_tot-sign(mnorm,mz))
-         n_msig=half*(n_tot+sign(mnorm,mz))
-       end if
+!      n_sig =half*(n_tot-mnorm)
+!      n_msig=half*(n_tot+mnorm)
+       n_sig =half*(n_tot-sign(mnorm,mz))
+       n_msig=half*(n_tot+sign(mnorm,mz))
      end if
-     n_sigs =n_sig/(float(2*lpawu+1))
-     n_msigs =n_msig/(float(2*lpawu+1))
-!    if(pawtab%usepawu==3) then
+   end if
+   n_sigs =n_sig/(float(2*lpawu+1))
+   n_msigs =n_msig/(float(2*lpawu+1))
+!  if(pawtab%usepawu==3) then
 !    write(message,fmt=12) "noccmmp11 ",ispden,noccmmp(1,1,1,ispden)
 !    call wrtout(std_out,message,'COLL')
 !    write(message,fmt=12) "noccmmp11 ",jspden,noccmmp(1,1,1,jspden)
@@ -1001,59 +991,57 @@ CONTAINS  !=====================================================================
 !    call wrtout(std_out,message,'COLL')
 !    write(message,fmt=12) "n_msigs    ",jspden,n_msigs
 !    call wrtout(std_out,message,'COLL')
-!    endif
-!    12 format(a,i4,e20.10)
+!  endif
+!  12 format(a,i4,e20.10)
 
-!    Compute interaction energy E_{ee}
-     do m1=-lpawu,lpawu
-       m11=m1+lpawu+1
-       do m2=-lpawu,lpawu
-         m21=m2+lpawu+1
-         n12_sig(:)=noccmmp(:,m11,m21,ispden)
-         if(m21==m11.and.(pawtab%usepawu==3.or.dmftdc==3)) n12_sig(1)=n12_sig(1)-n_sigs
-         do m3=-lpawu,lpawu
-           m31=m3+lpawu+1
-           do m4=-lpawu,lpawu
-             m41=m4+lpawu+1
-             n34_sig(:) =noccmmp(:,m31,m41,ispden)
-             n34_msig(:)=noccmmp(:,m31,m41,jspden)
-             if(m31==m41.and.(pawtab%usepawu==3.or.dmftdc==3)) then
-               n34_sig(1)= n34_sig(1) - n_sigs
-               n34_msig(1)= n34_msig(1) - n_msigs
-             end if
+!  Compute interaction energy E_{ee}
+   do m1=-lpawu,lpawu
+     m11=m1+lpawu+1
+     do m2=-lpawu,lpawu
+       m21=m2+lpawu+1
+       n12_sig(:)=noccmmp(:,m11,m21,ispden)
+       if(m21==m11.and.(pawtab%usepawu==3.or.dmftdc==3)) n12_sig(1)=n12_sig(1)-n_sigs
+       do m3=-lpawu,lpawu
+         m31=m3+lpawu+1
+         do m4=-lpawu,lpawu
+           m41=m4+lpawu+1
+           n34_sig(:) =noccmmp(:,m31,m41,ispden)
+           n34_msig(:)=noccmmp(:,m31,m41,jspden)
+           if(m31==m41.and.(pawtab%usepawu==3.or.dmftdc==3)) then
+             n34_sig(1)= n34_sig(1) - n_sigs
+             n34_msig(1)= n34_msig(1) - n_msigs
+           end if
+           eldautemp=eldautemp &
+&           + n12_sig(1)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
+&           + n12_sig(1)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+           if(cplex_occ==2) then
              eldautemp=eldautemp &
-&             + n12_sig(1)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
-&             + n12_sig(1)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+&             - n12_sig(2)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
+&             - n12_sig(2)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+           end if
+           if (pawtab%usepawu==3.or.dmftdc==3) then
+             edcdc_opt3=edcdc_opt3 &
+&             + n_sigs*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
+&             + n_sigs*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
+             eks_opt3=eks_opt3 &
+&             + noccmmp(1,m11,m21,ispden)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
+&             + noccmmp(1,m11,m21,ispden)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
              if(cplex_occ==2) then
-               eldautemp=eldautemp &
-&               - n12_sig(2)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
-&               - n12_sig(2)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-             end if
-             if (pawtab%usepawu==3.or.dmftdc==3) then
-               edcdc_opt3=edcdc_opt3 &
-&               + n_sigs*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
-&               + n_sigs*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
                eks_opt3=eks_opt3 &
-&               + noccmmp(1,m11,m21,ispden)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
-&               + noccmmp(1,m11,m21,ispden)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-               if(cplex_occ==2) then
-                 eks_opt3=eks_opt3 &
-&                 - noccmmp(2,m11,m21,ispden)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
-&                 - noccmmp(2,m11,m21,ispden)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
-               end if
+&               - noccmmp(2,m11,m21,ispden)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
+&               - noccmmp(2,m11,m21,ispden)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
              end if
-           end do ! m4
-         end do ! m3
-       end do ! m2
-     end do ! m1
+           end if
+         end do ! m4
+       end do ! m3
+     end do ! m2
+   end do ! m1
 
-   end do ! ispden
-   if (nspden==1) eldautemp=two*eldautemp ! Non-magn. system: sum up and dn energies
-   ABI_DEALLOCATE(n12_sig)
-   ABI_DEALLOCATE(n34_msig)
-   ABI_DEALLOCATE(n34_sig)
-
- end if ! usepawu/=5 or 6
+ end do ! ispden
+ if (nspden==1) eldautemp=two*eldautemp ! Non-magn. system: sum up and dn energies
+ ABI_DEALLOCATE(n12_sig)
+ ABI_DEALLOCATE(n34_msig)
+ ABI_DEALLOCATE(n34_sig)
 
 !Non-collinear magnetism: add non-diagonal term; see (Eq 3) in PRB 72, 024458 (2005) [[cite:Shurikov2005]]
  if (nspden==4) then
@@ -1163,7 +1151,6 @@ CONTAINS  !=====================================================================
    end if
  end if
 
-
  eldaumdc  =eldaumdc  +eldautemp-edctemp
  eldaumdcdc=eldaumdcdc-eldautemp-edcdctemp
 
@@ -1246,15 +1233,6 @@ CONTAINS  !=====================================================================
 
  subroutine pawxenergy(eexex,pawprtvol,pawrhoij,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxenergy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: pawprtvol
@@ -1275,6 +1253,11 @@ CONTAINS  !=====================================================================
 ! *****************************************************
 
  DBG_ENTER("COLL")
+
+ if (pawrhoij%qphase==2) then
+   message='pawxenergy: local exact-exchange not compatible with qphase=2!'
+   MSG_ERROR(message)
+ end if
 
  lexexch=pawtab%lexexch
  if (pawtab%nproju==1) nk=1
@@ -1306,16 +1289,14 @@ CONTAINS  !=====================================================================
            n3=pawtab%klmntomn(3,klmn1);n4=pawtab%klmntomn(4,klmn1)
            nn2=(n3*n4)/2+1
            do ll=1,lexexch+1
-!            eexextemp=eexextemp-pawtab%vex(m11,m31,m41,m21,ll)*factnk(indn(nn1,nn2))*pawtab%fk(indn(nn1,nn2),ll)&
-!            &        *pawrhoij%rhoijp(jrhoij,ispden)*pawrhoij%rhoijp(jrhoij1,ispden)
              eexextemp=eexextemp-pawtab%vex(m11,m31,m41,m21,ll)*pawtab%dltij(klmn)*pawtab%fk(indn(nn1,nn2),ll)&
 &             *pawtab%dltij(klmn1)*pawrhoij%rhoijp(jrhoij,ispden)*pawrhoij%rhoijp(jrhoij1,ispden)
            end do
          end if
-         jrhoij1=jrhoij1+pawrhoij%cplex
+         jrhoij1=jrhoij1+pawrhoij%cplex_rhoij
        end do !irhoij1
      end if
-     jrhoij=jrhoij+pawrhoij%cplex
+     jrhoij=jrhoij+pawrhoij%cplex_rhoij
    end do !irhoij
  end do ! ispden
  eexextemp=eexextemp/two
@@ -1374,7 +1355,7 @@ CONTAINS  !=====================================================================
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!  typat(natom)=type for each atom
 !!  useexexch=1 if local-exact-exchange is activated
-!!  usepawu=1 if PAW+U is activated
+!!  usepawu= /=0 if PAW+U is activated
 !!
 !! OUTPUT
 !!   paw_ij(natom)%noccmmp(cplex_dij,2*lpawu+1,2*lpawu+1,nsppol or ndij)=density matrix
@@ -1412,15 +1393,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setnoccmmp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: compute_dmat,dimdmat,dmatudiag,impose_dmat,my_natom,natom,natpawu
@@ -1441,7 +1413,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: limp=0 ! could become an input variable
- integer :: at_indx,cplex_dij,dmatudiag_loc,iafm,iatom,iatom_tot,iatpawu,icount
+ integer :: at_indx,cplex_dij,cplex_rhoij,dmatudiag_loc,iafm,iatom,iatom_tot,iatpawu,icount
  integer :: ilm,im1,im2,in1,in2,info,iplex,irot,ispden, irhoij,itypat,jlm,jrhoij
  integer :: jspden,klmn,kspden,lcur,ldim,lmax,lmin,lpawu,lwork,my_comm_atom,ndij,nmat,nspden,nsploop
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
@@ -1453,9 +1425,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !arrays
  integer :: nsym_used(2)
  integer,pointer :: my_atmtab(:)
- real(dp) :: sumocc(2)
+ real(dp) :: ro(2),sumocc(2)
  real(dp),allocatable :: eig(:),hdp(:,:,:),hdp2(:,:),noccmmptemp(:,:,:,:),noccmmp_tmp(:,:,:,:)
- real(dp),allocatable :: rwork(:),ro(:),noccmmp2(:,:,:,:),nocctot2(:)
+ real(dp),allocatable :: rwork(:),noccmmp2(:,:,:,:),nocctot2(:)
  complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
  complex(dpc),allocatable :: zhdp(:,:),zhdp2(:,:),znoccmmp_tmp(:,:),zwork(:)
  character(len=9),parameter :: dspin(6)=  (/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
@@ -1471,27 +1443,31 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !Tests
  if (my_natom>0) then
    if (nsppol/=paw_ij(1)%nsppol) then
-     message=' inconsistent values for nsppol !'
+     message='inconsistent values for nsppol!'
      MSG_BUG(message)
    end if
    if (compute_dmat>0) then
      if (pawrhoij(1)%nspden/=paw_ij(1)%nspden.and.&
-&     pawrhoij(1)%nspden/=4.and.paw_ij(1)%nspden/=1) then
-       message=' inconsistent values for nspden !'
+&        pawrhoij(1)%nspden/=4.and.paw_ij(1)%nspden/=1) then
+       message=' inconsistent values for nspden!'
        MSG_BUG(message)
      end if
    end if
+   if (pawrhoij(1)%qphase==2) then
+     message='setnoccmmp not compatible with qphase=2!'
+     MSG_BUG(message)
+   end if
  end if
- if (usepawu>0.and.useexexch>0) then
-   message=' usepawu>0 and useexexch>0 not allowed !'
+ if (usepawu/=0.and.useexexch/=0) then
+   message='usepawu/=0 and useexexch>0 not allowed!'
    MSG_BUG(message)
  end if
  if (impose_dmat/=0.and.dimdmat==0) then
-   message=' dmatpawu must be allocated when impose_dmat/=0 !'
+   message='dmatpawu must be allocated when impose_dmat/=0!'
    MSG_BUG(message)
  end if
  if (usepawu>0.and.compute_dmat/=0.and.impose_dmat/=0.and.pawang%nsym==0) then
-   message=' pawang%zarot must be allocated !'
+   message='pawang%zarot must be allocated!'
    MSG_BUG(message)
  end if
 
@@ -1516,7 +1492,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
 
 !If needed, store dmatpu in suitable format in tmp_noccmmp
- if (usepawu>0.and.impose_dmat/=0) then
+ if (usepawu/=0.and.impose_dmat/=0) then
    iatpawu=0
    ABI_DATATYPE_ALLOCATE(tmp_noccmmp,(natom))
    do iatom_tot=1,natom
@@ -1612,7 +1588,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  end if  ! impose_dmat/=0
 
 !Print message
- if (usepawu>0.and.impose_dmat/=0) then
+ if (usepawu/=0.and.impose_dmat/=0) then
    if (dmatudiag_loc/=2) then
      write(message,'(6a)') ch10,'Occupation matrix for correlated orbitals is kept constant',ch10,&
 &     'and equal to dmatpawu from input file !',ch10,&
@@ -1625,7 +1601,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
    call wrtout(std_out,message,'COLL')
  end if
 
- if (usepawu>0.and.dmatudiag_loc/=0.and.my_natom>0) then
+ if (usepawu/=0.and.dmatudiag_loc/=0.and.my_natom>0) then
    write(message,'(4a)') ch10,'Diagonalized occupation matrix "noccmmp" is printed !',ch10,&
 &   '-------------------------------------------------------------'
    call wrtout(std_out,message,wrt_mode)
@@ -1635,10 +1611,11 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  do iatom=1,my_natom
    iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
    itypat=pawrhoij(iatom)%itypat
+   cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
 
-   if (useexexch>0) then
+   if (useexexch/=0) then
      lcur=pawtab(itypat)%lexexch
-   else if (usepawu>0) then
+   else if (usepawu/=0) then
      lcur=pawtab(itypat)%lpawu
    end if
    if (lcur/=-1) then
@@ -1646,7 +1623,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !    ########################################################################################
 !    # Compute nocc_mmp
 !    ########################################################################################
-     if ((usepawu>0.and.compute_dmat/=0).or.useexexch>0) then
+     if ((usepawu/=0.and.compute_dmat/=0).or.useexexch/=0) then
 
 
        paw_ij(iatom)%noccmmp(:,:,:,:)=zero
@@ -1658,6 +1635,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_ALLOCATE(noccmmp2,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
        end if
        if(ndij==4)  then
+         if(allocated(nocctot2)) then
+           ABI_DEALLOCATE(nocctot2)
+         end if
          ABI_ALLOCATE(nocctot2,(ndij))
        end if
        do ispden=1,ndij
@@ -1670,36 +1650,31 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            in2=pawtab(itypat)%klmntomn(4,klmn)
            lmin=pawtab(itypat)%indklmn(3,klmn)
            lmax=pawtab(itypat)%indklmn(4,klmn)
-           ABI_ALLOCATE(ro,(cplex_dij))
-           if (ndij==1) then
-             ro(1)=half*pawrhoij(iatom)%rhoijp(jrhoij,1)
-           else if (ndij==2) then
-             ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
-           else  ! ndij==4
-!            Non-collinear magnetism: transfer rhoij to ro_c (keep n, m storage because
+
+           ro(1:2)=zero
+           ro(1:cplex_rhoij)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,ispden)
+           if (ndij==1) ro(1:2)=half*ro(1:2)
+!          Non-collinear magnetism: keep n, m storage because
 !            it is easier for the computation of noccmmp from rhoij)
-!            cplex_dij has to be used here, because it is the dimension of rhoijp
-             ro(1:cplex_dij)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij-1+cplex_dij,ispden)
-           end if
+
            if(lmin==0.and.lmax==2*lcur) then
              icount=in1+(in2*(in2-1))/2
              if(pawtab(itypat)%ij_proj<icount)  then
-               message=' PAW+U: Problem in the loop for calculating noccmmp !'
+               message='PAW+U: Problem in the loop calculating noccmmp!'
                MSG_BUG(message)
              end if
              if(in1/=in2) then
                if(im2<=im1) then
-                 noccmmptemp(:,im1,im2,ispden)=noccmmptemp(:,im1,im2,ispden)+ro(:)*pawtab(itypat)%phiphjint(icount)
+                 noccmmptemp(1:cplex_dij,im1,im2,ispden)=noccmmptemp(1:cplex_dij,im1,im2,ispden) &
+&                           +ro(1:cplex_dij)*pawtab(itypat)%phiphjint(icount)
                end if
              end if
              if(im2>=im1) then
-
-               paw_ij(iatom)%noccmmp(:,im1,im2,ispden)=paw_ij(iatom)%noccmmp(:,im1,im2,ispden) &
-&               +ro(:)*pawtab(itypat)%phiphjint(icount)
+               paw_ij(iatom)%noccmmp(1:cplex_dij,im1,im2,ispden)=paw_ij(iatom)%noccmmp(1:cplex_dij,im1,im2,ispden) &
+&                           +ro(1:cplex_dij)*pawtab(itypat)%phiphjint(icount)
              end if
            end if
-           jrhoij=jrhoij+pawrhoij(iatom)%cplex
-           ABI_DEALLOCATE(ro)
+           jrhoij=jrhoij+cplex_rhoij
          end do ! irhoij
          do im2=1,2*lcur+1
            do im1=1,im2
@@ -1779,17 +1754,24 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_DEALLOCATE(noccmmp2)
        end if
 !      Printing of new nocc_mmp
-       if ((usepawu>0.and.usepawu<10).or.(usepawu>=10.and.pawprtvol>=3)) &
-       write(message, '(2a)' )  ch10,'========== LDA+U DATA =================================================== '
-       if (useexexch>0) write(message, '(2a)' )ch10,'======= Local ex-exchange (PBE0) DATA =================================== '
-       if(((usepawu>0.and.usepawu<10).or.(usepawu>=10.and.pawprtvol>=3)).or.useexexch>0) call wrtout(std_out,message,wrt_mode)
+       if ((usepawu/=0.and.abs(usepawu)<10).or.(usepawu>=10.and.pawprtvol>=3)) then
+         write(message, '(2a)' )  ch10, &
+&         '========== LDA+U DATA =================================================== '
+       end if
+       if (useexexch/=0) then
+         write(message, '(2a)' ) ch10, &
+&         '======= Local ex-exchange (PBE0) DATA =================================== '
+       end if
+       if (((usepawu/=0.and.abs(usepawu)<10).or.(usepawu>=10.and.pawprtvol>=3)).or.useexexch/=0) then
+         call wrtout(std_out,message,wrt_mode)
+       end if
        if (usepawu>=10.and.pawprtvol>=3) then
          write(message, '(6a)' )  ch10,'    ( A DFT+DMFT calculation is carried out                              ',&
          ch10,'      Thus, the following LDA+U occupation matrices are not physical     ',&
          ch10,'      and just informative )'
          call wrtout(std_out,message,wrt_mode)
        end if
-       if(usepawu<10.or.pawprtvol>=3) then ! Always write except if DMFT and pawprtvol low
+       if(abs(usepawu)<10.or.pawprtvol>=3) then ! Always write except if DMFT and pawprtvol low
          write(message,'(2a,i5,a,i4,a)') ch10,"====== For Atom", iatom_tot,&
 &         ", occupations for correlated orbitals. l =",lcur,ch10
          call wrtout(std_out,message,wrt_mode)
@@ -1884,7 +1866,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !    ########################################################################################
 !    # Diagonalize nocc_mmp
 !    ########################################################################################
-     if(usepawu>0.and.dmatudiag_loc>0) then
+     if(usepawu/=0.and.dmatudiag_loc>0) then
 
        lpawu=lcur;ldim=2*lpawu+1
        ABI_ALLOCATE(noccmmp_tmp,(1,ldim,ldim,ndij))
@@ -2032,7 +2014,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !    ########################################################################################
 !    # Impose value of nocc_mmp from dmatpu; symetrize it
 !    ########################################################################################
-     if (usepawu>0.and.impose_dmat/=0) then
+     if (usepawu/=0.and.impose_dmat/=0) then
 
        lpawu=lcur
        nsploop=nsppol;if (ndij==4) nsploop=4
@@ -2161,7 +2143,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !    ########################################################################################
 !    # Rotate imposed occupation matrix in the non-diagonal basis
 !    ########################################################################################
-     if (usepawu>0.and.impose_dmat/=0.and.dmatudiag_loc==2) then
+     if (usepawu/=0.and.impose_dmat/=0.and.dmatudiag_loc==2) then
 
        lpawu=lcur;ldim=2*lpawu+1
 
@@ -2219,7 +2201,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 
      end if ! dmatudiag_loc==2
 
-     if (usepawu>0.and.dmatudiag_loc>0) then
+     if (usepawu/=0.and.dmatudiag_loc>0) then
        ABI_DEALLOCATE(noccmmp_tmp)
        if (ndij==4)  then
          ABI_DEALLOCATE(znoccmmp_tmp)
@@ -2232,7 +2214,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  end do ! iatom
 
 !Memory deallocation
- if (usepawu>0.and.impose_dmat/=0) then
+ if (usepawu/=0.and.impose_dmat/=0) then
    do iatom_tot=1,natom
      lpawu=pawtab(typat(iatom_tot))%lpawu
      if (lpawu/=-1)  then
@@ -2295,15 +2277,6 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &                       mpi_comm_read,my_natom,natom,ntypat,pawrhoij,pawtab,typat,&
 &                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setrhoijpbe0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: initialized,istep,mpi_comm_read,my_natom,natom,ntypat
@@ -2319,8 +2292,8 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: ll=3
- integer :: iatom,iatom_tot,ierr,ii,ios,iread,irhoij,ispden,itypat,jj,klmn,my_comm_atom,my_rank,nselect
- integer :: nstep1,nstep1_abs,rhoijshft,rhoijsz
+ integer :: cplex_rhoij,iatom,iatom_tot,ierr,ii,ios,iread,irhoij,ispden,itypat,jj
+ integer :: klmn,my_comm_atom,my_rank,nselect,nstep1,nstep1_abs,rhoijshft,rhoijsz
  logical :: my_atmtab_allocated,paral_atom,test0
  character(len=9),parameter :: filnam='rhoijpbe0'
  character(len=9),parameter :: dspin(6)=(/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
@@ -2334,6 +2307,14 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 
  DBG_ENTER("COLL")
 
+!Some limitation
+ if (my_natom>0) then
+   if (pawrhoij(1)%qphase==2) then
+     message='setrhoijpbe0 not compatible with qphase=2!'
+     MSG_BUG(message)
+   end if
+ end if
+
 !Test existence of file and open it
  inquire(file=filnam,iostat=ios,exist=test0)
  if(.not.test0) return
@@ -2344,7 +2325,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 !Test if exact-exch. is on f electrons
  test0=.false.
  do itypat=1,ntypat
-   if (pawtab(itypat)%useexexch>0.and.pawtab(itypat)%lexexch/=ll) test0=.true.
+   if (pawtab(itypat)%useexexch/=0.and.pawtab(itypat)%lexexch/=ll) test0=.true.
  end do
  if (test0) then
    write(message, '(3a,i1,a)' ) &
@@ -2381,7 +2362,9 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 !  Loop on atoms
    do iatom=1,natom
      itypat=typat(iatom)
-     if (pawtab(itypat)%useexexch>0) then
+     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
+
+     if (pawtab(itypat)%useexexch/=0) then
 
 !      Set sizes depending on ll
        rhoijsz=4*ll+2
@@ -2419,12 +2402,13 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
        ABI_DEALLOCATE(rhoijtmp1)
 
 !      Compress rhoij
-       nselect=0
+       nselect=0 ; pawrhoij(iatom)%rhoijselect=0
+       pawrhoij(iatom)%rhoijp=zero
        do klmn=1,pawrhoij(iatom)%lmn2_size
          if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
+           nselect=nselect+1 ; ii=cplex_rhoij*(nselect-1)+1
            do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
+             pawrhoij(iatom)%rhoijp(ii,ispden)=rhoijtmp(klmn,ispden)
            end do
            pawrhoij(iatom)%rhoijselect(nselect)=klmn
          end if
@@ -2442,7 +2426,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &         trim(dspin(ispden+2*(pawrhoij(iatom)%nspden/4)))," =="
          call wrtout(std_out,message,'COLL')
          call pawio_print_ij(std_out,pawrhoij(iatom)%rhoijp(:,ispden),pawrhoij(iatom)%nrhoijsel,&
-&         pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,ll,&
+&         pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%lmn_size,ll,&
 &         pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size),&
 &         1,-1,pawrhoij(iatom)%rhoijselect(:),-1.d0,1,mode_paral='COLL')
        end do
@@ -2507,7 +2491,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
    if (my_rank==0) then
      do iatom=1,natom
        itypat=typat(iatom)
-       if (pawtab(itypat)%useexexch>0) then
+       if (pawtab(itypat)%useexexch/=0) then
          rhoijsz=4*ll+2
          do ispden=1,nspden_tmp(iatom)
            do ii=1,rhoijsz
@@ -2528,8 +2512,9 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
    do iatom=1,my_natom
      iatom_tot=my_atmtab(iatom)
      itypat=pawrhoij(iatom)%itypat
+     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
 
-     if (pawtab(itypat)%useexexch>0) then
+     if (pawtab(itypat)%useexexch/=0) then
 
 !      Set sizes depending on ll
        rhoijsz=4*ll+2
@@ -2554,12 +2539,13 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
        end do
 
 !      Compress rhoij
-       nselect=0
+       nselect=0 ; pawrhoij(iatom)%rhoijselect=0
+       pawrhoij(iatom)%rhoijp=zero
        do klmn=1,pawrhoij(iatom)%lmn2_size
          if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
+           nselect=nselect+1 ; ii=cplex_rhoij*(nselect-1)+1
            do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
+             pawrhoij(iatom)%rhoijp(ii,ispden)=rhoijtmp(klmn,ispden)
            end do
            pawrhoij(iatom)%rhoijselect(nselect)=klmn
          end if
@@ -2567,7 +2553,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
        pawrhoij(iatom)%nrhoijsel=nselect
        ABI_DEALLOCATE(rhoijtmp)
 
-     end if ! useexexch>0
+     end if ! useexexch/=0
 
 !    Print new rhoij
      do ispden=1,pawrhoij(iatom)%nspden
@@ -2578,7 +2564,7 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &       trim(dspin(ispden+2*(pawrhoij(iatom)%nspden/4)))," =="
        call wrtout(std_out,message,'PERS')
        call pawio_print_ij(std_out,pawrhoij(iatom)%rhoijp(:,ispden),pawrhoij(iatom)%nrhoijsel,&
-&       pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,ll,&
+&       pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%lmn_size,ll,&
 &       pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size),&
 &       1,-1,pawrhoij(iatom)%rhoijselect(:),-1.d0,1,mode_paral='PERS')
      end do
@@ -2636,14 +2622,6 @@ end subroutine setrhoijpbe0
 
  subroutine calc_ubare(itypatcor,lpawu,pawang,pawrad,pawtab,rmax)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ubare'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
  integer, intent(in)   :: itypatcor,lpawu
  type(pawang_type),intent(in) :: pawang

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/ioprof
 !! NAME
 !! ioprof
@@ -7,7 +6,7 @@
 !! Tool for frofiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MG)
+!! Copyright (C) 2004-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,16 +45,9 @@ program ioprof
  use netcdf
 #endif
 
- use defs_abitypes,    only : hdr_type
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioprof'
-!End of the abilint section
 
  implicit none
 
@@ -136,8 +128,8 @@ program ioprof
    if (my_rank == master) then
      formeig = 0
      call wfk_open_read(wfk, wfk_path, formeig, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
-     call wfk_print(wfk)
-     call wfk_close(wfk)
+     call wfk%print()
+     call wfk%close()
    end if
 
  case ("nc2fort")
@@ -173,7 +165,7 @@ program ioprof
      call hdr_read_from_fname(hdr,hdr_fnames(ii),fform,comm)
      ABI_CHECK(fform/=0,"fform==0")
 
-     call hdr_echo(hdr,fform,4,unit=std_out)
+     call hdr%echo(fform,4,unit=std_out)
 
      do feg=1,size(formeigs)
        formeig = formeigs(feg)
@@ -243,7 +235,7 @@ program ioprof
        end do ! iomode
      end do ! formeig
 
-     call hdr_free(hdr)
+     call hdr%free()
    end do
 
  case default

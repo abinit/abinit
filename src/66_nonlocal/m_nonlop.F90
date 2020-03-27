@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nonlop
 !! NAME
 !!  m_nonlop
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (MT)
+!!  Copyright (C) 1998-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,18 +25,22 @@
 module m_nonlop
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_cgtools
  use m_gemm_nonlop
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_nonlop_pl,   only : nonlop_pl
  use m_nonlop_ylm,  only : nonlop_ylm
+
+#if defined HAVE_GPU_CUDA
+ use m_manage_cuda
+#endif
 
  implicit none
 
@@ -74,11 +77,14 @@ contains
 !!          =1 => non-local energy contribution
 !!          =2 => 1st derivative(s) with respect to atomic position(s)
 !!          =3 => 1st derivative(s) with respect to strain(s)
+!!          =22=> mixed 2nd derivative(s) with respect to atomic pos. and q vector (at q=0)
+!!          =25=> mixed 3rd derivative(s) with respect to atomic pos. and two q vectors (at q=0)
 !!          =23=> 1st derivative(s) with respect to atomic pos. and
 !!                1st derivative(s) with respect to atomic pos. and strains
 !!          =4 => 2nd derivative(s) with respect to 2 atomic pos.
 !!          =24=> 1st derivative(s) with respect to atm. pos. and
 !!                2nd derivative(s) with respect to 2 atomic pos.
+!!          =33=> mixed 2nd derivative(s) with respect to strain and q vector (at q=0)
 !!          =5 => 1st derivative(s) with respect to k wavevector, typically
 !!                sum_ij [ |p_i> D_ij <dp_j/dk| + |dp_i/dk> D_ij < p_j| ]
 !!          =6 => 2nd derivative(s) with respect to 2 strains and
@@ -100,7 +106,7 @@ contains
 !!                (derivative with respect to k of choice 51), typically
 !!                sum_ij [ |dp_i/dk1> D_ij <dp_j/dk2| + |p_i> D_ij < d2p_j/dk1dk2| ]
 !!    Only choices 1,2,3,23,4,5,6 are compatible with useylm=0.
-!!    Only choices 1,2,3,5,51,52,53,7,8,81 are compatible with signs=2
+!!    Only choices 1,2,22,25,3,5,33,51,52,53,7,8,81 are compatible with signs=2
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  [enl]=optional (if not present, use hamk%ekb); non-local coeffs connecting projectors
 !!        see hamk%ekb description
@@ -153,10 +159,13 @@ contains
 !!     | useylm=how the NL operator is to be applied: 1=using Ylm, 0=using Legendre polynomials
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
 !!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
-!!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
+!!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2) 
 !!                        - k point direction in the case (choice=5,51,or 52)
 !!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
+!!                        - (1:9) components to specify the atom to be moved and the second q-gradient 
+!!                          direction in the case (choice=25,signs=2)
 !!  lambda=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
 !!         Typically lambda is the eigenvalue (or its guess)
 !!  mpi_enreg=informations about MPI parallelization
@@ -193,6 +202,7 @@ contains
 !!           paw_opt=2 : PAW: (Vnl-lambda.Sij) (Sij=overlap matrix)
 !!           paw_opt=3 : PAW overlap matrix (Sij)
 !!           paw_opt=4 : both PAW nonlocal part of H (Dij) and overlap matrix (Sij)
+!!  [qdir]= optional, direction of the q-gradient (only for choice=22, choice=25 and choice=33)
 !!  [select_k]=optional, option governing the choice of k points to be used.
 !!             hamk datastructure contains quantities needed to apply NL operator
 !!             in reciprocal space between 2 kpoints, k and k^prime (equal in most cases);
@@ -240,6 +250,12 @@ contains
 !! --If (paw_opt==4)
 !!      not available
 !! ==== if (signs==2) ====
+!! --if (paw_opt=0)
+!!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
+!!                or one of its derivatives to the input vect.  
+!!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
+!!      if (choice=25) <G|d3V_nonlocal/d(atm. pos)dqdq|vect_in> (at q=0)
+!!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
 !! --if (paw_opt=0, 1 or 4)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.:
@@ -308,8 +324,8 @@ contains
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nsteltwf,dfptnl_resp,energy,fock_getghc,forstrnps,getgh1c
-!!      getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,nonlop_test
-!!      prep_nonlop,vtowfk,wfd_vnlpsi
+!!      getgh1dq,getgh2c,getghc,getgsc,m_invovl,m_lobpcgwf,make_grad_berry,
+!!      nonlop_test,prep_nonlop,vtowfk,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      gemm_nonlop,nonlop_gpu,nonlop_pl,nonlop_ylm,pawcprj_alloc,pawcprj_copy
@@ -319,21 +335,12 @@ contains
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
-&                 enl,iatom_only,only_SO,select_k) !optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop'
-!End of the abilint section
-
- implicit none
+&                 enl,iatom_only,only_SO,qdir,select_k) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cpopt,idir,ndat,nnlout,paw_opt,signs,tim_nonlop
- integer,intent(in),optional :: iatom_only,only_SO,select_k
+ integer,intent(in),optional :: iatom_only,only_SO,qdir,select_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
@@ -548,7 +555,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !and if <g|dVnl/dR|c> is required (signs=2), we only need to compute the
 !derivatives of the projectors associated with the displaced atom.
  iatom_only_=-1;if (present(iatom_only)) iatom_only_=iatom_only
- atom_pert=((signs==2).and.(choice==2.or.choice==4.or.choice==24.or.choice==54))
+ atom_pert=((signs==2).and.(choice==2.or.choice==4.or.choice==22.or.choice==24.or.choice==25.or.choice==54))
 
  if (iatom_only_>0.and.atom_pert) then
 !   We consider only atom with index iatom_only
@@ -651,10 +658,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
+
+! use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
+!& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+!& cpopt < 3 .and. hamk%useylm /= 0 .and. &
+!& (choice < 2 .or. choice == 7) )
+
  use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+& signs == 2 .and. paw_opt /= 2 .and. &
 & cpopt < 3 .and. hamk%useylm /= 0 .and. &
 & (choice < 2 .or. choice == 7) )
+
  if(use_gemm_nonlop) then
    call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
 &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
@@ -729,7 +743,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
-&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1))
+&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir)
 !    GPU version
      else
        call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b3:e3),dimenl1,dimenl2_,&
@@ -791,7 +805,7 @@ end subroutine nonlop
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2020 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -936,15 +950,6 @@ end subroutine nonlop
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop_gpu'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

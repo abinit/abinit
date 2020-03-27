@@ -258,13 +258,18 @@ if (istwf_k==1) then
    CASE (0)
      ! Copy the transformed function at the right place and we are done!
      xyplane = 1 + (iz-1)*ldx*ldy
-     if (MYKIND==dpc) then
-       call ZCOPY(ldxy,slice_a,1,fofr(1,xyplane),1)
-     else if (MYKIND==spc) then
-       call CCOPY(ldxy,slice_a,1,fofr(1,xyplane),1)
-     else
-       MSG_ERROR("Wrong FFT precision")
-     end if
+#if FFT_PRECISION == FFT_DOUBLE
+     call ZCOPY(ldxy,slice_a,1,fofr(1,xyplane),1)
+#elif FFT_PRECISION == FFT_SINGLE
+     call CCOPY(ldxy,slice_a,1,fofr(1,xyplane),1)
+#elif FFT_PRECISION == FFT_MIXPREC
+     do ix=0,ldxy-1
+       fofr(1, xyplane + ix) = real(slice_a(ix+1), kind=dp)
+       fofr(2, xyplane + ix) = aimag(slice_a(ix+1))
+     end do
+#else
+#error "Wrong FFT precision"
+#endif
 
    CASE (1)
      ! Accumulate density
@@ -307,13 +312,17 @@ end if
    CASE (3)
      ! Copy the function to be tranformed at the right place
      xyplane = 1 + (iz-1)*ldx*ldy
-     if (MYKIND==dpc) then
-       call ZCOPY(ldxy,fofr(1,xyplane),1,slice_a,1)
-     else if (MYKIND==spc) then
-       call CCOPY(ldxy,fofr(1,xyplane),1,slice_a,1)
-     else
-       MSG_ERROR("Wrong FFT precision")
-     end if
+#if FFT_PRECISION == FFT_DOUBLE
+     call ZCOPY(ldxy,fofr(1,xyplane),1,slice_a,1)
+#elif FFT_PRECISION == FFT_SINGLE
+     call CCOPY(ldxy,fofr(1,xyplane),1,slice_a,1)
+#elif FFT_PRECISION == FFT_MIXPREC
+     do ix=1,ldxy
+       slice_a(ix) = cmplx(fofr(1, xyplane + ix -1), fofr(2, xyplane + ix -1), kind=MYKIND)
+     end do
+#else
+#error "Wrong FFT precision"
+#endif
    END SELECT
 
    if (option==2 .or. option==3)then  

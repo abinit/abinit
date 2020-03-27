@@ -1,54 +1,53 @@
-!Input file for the anaddb code. Analysis of the Si DDB
+#Input file for the anaddb code. Analysis of the Si DDB
 
-!Flags
+#Flags
  ifcflag   1     ! Interatomic force constant flag
  thmflag   1     ! Thermal flag. Gives Internal energy, entropy,
                  !   heat capacity, phonon DOS, Debye-Waller factor)
 
-!Effective charges
+#Effective charges
   chneut   1     ! Charge neutrality requirement for effective charges.
                  !        1=> equal portion of the missing charge
 
-!Interatomic force constant info
+#Interatomic force constant info
   dipdip  0      ! No explicit dipole-dipole treatment
   ifcana  1      ! Analysis of the IFCs
   ifcout 20      ! Number of IFC's written in the output, per atom
   natifc  1      ! Number of atoms in the cell for which ifc's are analysed
    atifc  1      ! List of atoms
 
-!Thermal information
+#Thermal information
   nchan   800    ! # of channels for the DOS with channel width 1 cm-1
   nwchan  10     ! # of different channel widths from this integer down to 1 cm-1
   thmtol  0.2    ! Tolerance on thermodynamical function fluctuations
-! Use standard set of temperatures (default for ntemper, tempermin, temperinc)
+# Use standard set of temperatures (default for ntemper, tempermin, temperinc)
 
-!Wavevector grid number 1 (coarse grid, from DDB)
+#Wavevector grid number 1 (coarse grid, from DDB)
   brav    2      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
   ngqpt   8  8  8   ! Monkhorst-Pack indices
   nqshft  1         ! number of q-points in repeated basic q-cell
   q1shft  0.5  0.5  0.5
 
-!Wavevector grid number 2 (series of fine grids, extrapolated from intrat forces)
+#Wavevector grid number 2 (series of fine grids, extrapolated from intrat forces)
   ng2qpt   24 24 24  ! sample the BZ up to ngqpt2
   ngrids   6         ! number of grids of increasing size
   q2shft   0.5  0.5  0.5
 
-!Wavevector list number 1 (Reduced coordinates and normalization factor)
+#Wavevector list number 1 (Reduced coordinates and normalization factor)
   nph1l    4       ! number of phonons in list 1
   qph1l     0.0  0.0  0.0    1.0   ! (G point)
             0.5  0.0  0.0    1.0   ! (L point)
             0.5  0.5  0.0    1.0   ! (X point)
             0.5  0.5  0.5    1.0   ! (L point again)
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
 #%% test_chain = t16.in, t17.in
 #%% [files]
 #%% files_to_test = 
-#%%  t16.out,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%%  extra_inputs = t16.ddb.in.gz
+#%%  t16.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% extra_inputs = t16.ddb.in.gz
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

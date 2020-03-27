@@ -5,7 +5,7 @@ ntimimage 15
 nimage 6
 imgmov 2
 chksymbreak 0
-fxcartfactor 10.0
+fxcartfactor 5.0
 tolimg 1.d-5
 istatimg 0
 
@@ -40,7 +40,6 @@ ngkpt 4 4 4
  mep_mxstep 100.
  string_algo 1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

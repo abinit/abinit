@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2014-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -25,12 +25,12 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Bindings],[8.10.1],
+AC_INIT([ABINIT-Bindings],[9.1.1],
   [https://bugs.launchpad.net/abinit/],[abinit-bindings])
 AC_REVISION([Autotools support for the ABINIT Bindings])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
-AC_CONFIG_SRCDIR([parser/README])
+AC_CONFIG_SRCDIR([libpaw/README])
 _AC_SRCDIRS(["."])
 
 # Initial setup
@@ -249,25 +249,6 @@ AC_PROG_FC
 if test "${PYTHON}" = ""; then
   AC_CHECK_PROGS(PYTHON,[python python2.7 python2.6 python2.5 python2.4])
 fi
-
-# Get Python preprocessing options
-AC_MSG_CHECKING([for Python CPPFLAGS])
-if test "${PYTHON}" != "" -a "${PYTHON_CPPFLAGS}" = ""; then
-  PYTHON_CPPFLAGS=`${PYTHON} -c "\
-try:
-    import distutils.sysconfig
-    print '-I' + distutils.sysconfig.get_python_inc(),
-except:
-    pass
-try:
-    import numpy
-    print '-I' + numpy.get_include(),
-except:
-    pass"`
-fi
-AC_MSG_RESULT([${PYTHON_CPPFLAGS}])
-
-ABIBND_CHECK_PYTHON
 
 # ---------------------------------------------------------------------------- #
 

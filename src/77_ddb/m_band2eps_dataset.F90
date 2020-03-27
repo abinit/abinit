@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_band2eps_dataset
 !! NAME
 !!  m_band2eps_dataset
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,39 +114,18 @@ contains
 
 subroutine band2eps_dtset_free(band2eps_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'band2eps_dtset_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(band2eps_dataset_type), intent(inout) :: band2eps_dtset
 
 ! *************************************************************************
 
- if (allocated(band2eps_dtset%nqline))  then
-   ABI_DEALLOCATE(band2eps_dtset%nqline)
- end if
- if (allocated(band2eps_dtset%scale))  then
-   ABI_DEALLOCATE(band2eps_dtset%scale)
- end if
- if (allocated(band2eps_dtset%red))  then
-   ABI_DEALLOCATE(band2eps_dtset%red)
- end if
- if (allocated(band2eps_dtset%blue))  then
-   ABI_DEALLOCATE(band2eps_dtset%blue)
- end if
- if (allocated(band2eps_dtset%green))  then
-   ABI_DEALLOCATE(band2eps_dtset%green)
- end if
- if (allocated(band2eps_dtset%qpoint_name))  then
-   ABI_DEALLOCATE(band2eps_dtset%qpoint_name)
- end if
+ ABI_SFREE(band2eps_dtset%nqline)
+ ABI_SFREE(band2eps_dtset%scale)
+ ABI_SFREE(band2eps_dtset%red)
+ ABI_SFREE(band2eps_dtset%blue)
+ ABI_SFREE(band2eps_dtset%green)
+ ABI_SFREE(band2eps_dtset%qpoint_name)
 
 end subroutine band2eps_dtset_free
 !!***
@@ -182,15 +160,6 @@ end subroutine band2eps_dtset_free
 !! SOURCE
 
 subroutine invars11 (band2eps_dtset,lenstr,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars11'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -367,15 +336,6 @@ end subroutine invars11
 !! SOURCE
 
 subroutine outvars_band2eps (band2eps_dtset,nunit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvars_band2eps'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

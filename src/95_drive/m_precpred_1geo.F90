@@ -3,11 +3,11 @@
 !!  m_precpred_1geo
 !!
 !! FUNCTION
-!! Single geometry : apply force and stress preconditioner followed by geometry predictor. 
+!! Single geometry: apply force and stress preconditioner followed by geometry predictor.
 !! Choose among the whole set of geometry predictors defined by iomov.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 2018-2020 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +27,8 @@
 module m_precpred_1geo
 
  use defs_basis
- use defs_abitypes
  use m_errors
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xmpi
@@ -43,8 +43,7 @@ module m_precpred_1geo
 
  use m_fstrings,           only : strcat
  use m_geometry,           only : chkdilatmx
- use m_crystal,            only : crystal_init, crystal_free, crystal_t
- use m_crystal_io,         only : crystal_ncwrite_path
+ use m_crystal,            only : crystal_init, crystal_t
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  use m_pred_delocint,      only : pred_delocint
  use m_pred_fire,          only : pred_fire
@@ -108,9 +107,9 @@ contains
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!
 !! NOTES
-!! This subroutine uses the arguments natom, xred, 
+!! This subroutine uses the arguments natom, xred,
 !! vis, and dtion (the last two contained in dtset) to make
-!! molecular dynamics updates.  
+!! molecular dynamics updates.
 !!
 !! PARENTS
 !!
@@ -120,15 +119,6 @@ contains
 
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
 & icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd_orig,skipcycle,usewvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precpred_1geo'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -252,16 +242,16 @@ real(dp), allocatable :: xred(:,:)
          hist%ihist = abihist_findIndex(hist,-1)
          call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
          call crystal_init(amu_curr,crystal,0,ab_mover%natom,&
-&         npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
-&         [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
-&         symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
+           npsp,ab_mover%ntypat,ab_mover%nsym,rprimd,ab_mover%typat,xred,&
+           [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
+           symrel=ab_mover%symrel,tnons=ab_mover%tnons,symafm=ab_mover%symafm)
 
 #ifdef HAVE_NETCDF
          ! Write netcdf file
          filename = strcat(filnam_ds4, "_DILATMX_STRUCT.nc")
-         NCF_CHECK(crystal_ncwrite_path(crystal, filename))
+         NCF_CHECK(crystal%ncwrite_path(filename))
 #endif
-         call crystal_free(crystal)
+         call crystal%free()
        end if
        call xmpi_barrier(comm_cell)
        write (dilatmx_errmsg, '(a,i0,3a)') &

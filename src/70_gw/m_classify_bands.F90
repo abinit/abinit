@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_classify_bands
 !! NAME
 !!  m_classify_bands
@@ -8,7 +7,7 @@
 !!  a set of degenerate bands at a given k-point and spin.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,11 +27,11 @@
 module m_classify_bands
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_esymm
  use m_errors
 
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
  use m_numeric_tools,  only : get_trace
  use m_symtk,          only : mati3inv
  use m_hide_blas,      only : xdotc, xdotu, xcopy
@@ -46,7 +45,7 @@ module m_classify_bands
  use m_paw_pwaves_lmn, only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_paw_sphharm,    only : setsym_ylm
  use m_paw_nhat,       only : nhatgrid
- use m_wfd,            only : wfd_get_ur, wfd_t, wfd_ug2cprj, wfd_change_ngfft, wfd_paw_get_aeur
+ use m_wfd,            only : wfd_t
 
  implicit none
 
@@ -152,15 +151,6 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 & Cryst,BSt,Pawtab,Pawrad,Pawang,Psps,tolsym,BSym,&
 & EDIFF_TOL) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'classify_bands'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,first_band,last_band
@@ -218,7 +208,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
  EDIFF_TOL_=0.005/Ha_eV; if (PRESENT(EDIFF_TOL)) EDIFF_TOL_=ABS(EDIFF_TOL)
 
- call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
+ call wfd%change_ngfft(Cryst,Psps,ngfftf)
  !
  ! === Get index of the rotated FFT points ===
  ! * FFT mesh in real space _must_ be compatible with symmetries.
@@ -369,11 +359,11 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
      ! debugging: use AE wave on dense FFT mesh.
      if (Wfd%usepaw==1..and.use_paw_aeur) then
-       call wfd_paw_get_aeur(Wfd,ib1,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur1)
+       call wfd%paw_get_aeur(ib1,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur1)
      else
-       call wfd_get_ur(Wfd,ib1,ik_ibz,spin,ur1)
+       call wfd%get_ur(ib1,ik_ibz,spin,ur1)
        if (Wfd%usepaw==1) then
-         call wfd_ug2cprj(Wfd,ib1,ik_ibz,spin,1,0,Cryst%natom,Cryst,Cprj_b1,sorted=.FALSE.)
+         call wfd%ug2cprj(ib1,ik_ibz,spin,1,0,Cryst%natom,Cryst,Cprj_b1,sorted=.FALSE.)
        end if
      end if
 
@@ -390,11 +380,11 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
          !
          ! debugging: use AE wave on dense FFT mesh.
          if (Wfd%usepaw==1.and.use_paw_aeur) then
-           call wfd_paw_get_aeur(Wfd,ib2,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur2)
+           call wfd%paw_get_aeur(ib2,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur2)
          else
-           call wfd_get_ur(Wfd,ib2,ik_ibz,spin,ur2)
+           call wfd%get_ur(ib2,ik_ibz,spin,ur2)
            if (Wfd%usepaw==1) then
-             call wfd_ug2cprj(Wfd,ib2,ik_ibz,spin,1,0,Cryst%natom,Cryst,Cprj_b2,sorted=.FALSE.)
+             call wfd%ug2cprj(ib2,ik_ibz,spin,1,0,Cryst%natom,Cryst,Cprj_b2,sorted=.FALSE.)
            end if
          end if
        end if
@@ -585,15 +575,6 @@ end subroutine classify_bands
 
 subroutine rotate_cprj(kpoint,isym,nspinor,nbnds,natom,nsym,typat,indsym,Cprj_in,Cprj_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_cprj'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbnds,nspinor,natom,isym,nsym
@@ -675,15 +656,6 @@ end subroutine rotate_cprj
 !! SOURCE
 
 function paw_phirotphj(nspinor,natom,typat,zarot_isym,Pawtab,Psps,Cprj_b1,Cprj_b2,conjg_left) result(omat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_phirotphj'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

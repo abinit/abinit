@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gstateimg
 !! NAME
 !!  m_gstateimg
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,8 +25,6 @@
 module m_gstateimg
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
  use m_abicore
@@ -45,7 +42,11 @@ module m_gstateimg
  use m_io_redirect
  use m_m1geo
  use m_abimover
+ use m_yaml
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
  use m_specialmsg,   only : specialmsg_mpisum
@@ -53,7 +54,7 @@ module m_gstateimg
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type
- use m_dtfil,        only : dtfil_init, status
+ use m_dtfil,        only : dtfil_init
  use m_gstate,       only : gstate
  use m_predtk,       only : prtxvf
  use m_precpred_1geo, only : precpred_1geo
@@ -96,6 +97,7 @@ contains
 !!  etotal_img=total energy, for each image
 !!  fcart_img(3,natom,nimage)=forces, in cartesian coordinates, for each image
 !!  fred_img(3,natom,nimage)=forces, in reduced coordinates, for each image
+!!  intgres_img(nspden,natom,nimage)=gradient wrt constraints, for each image
 !!  npwtot(nkpt) = total number of plane waves at each k point
 !!  strten_img(6,nimage)=stress tensor, for each image
 !!
@@ -187,19 +189,10 @@ contains
 !! SOURCE
 
 subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&                    fred_img,iexit,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
+&                    fred_img,iexit,intgres_img,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
 &                    pawang,pawrad,pawtab,psps,&
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gstateimg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -207,7 +200,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,optional,intent(in) :: idtset,ndtset
  integer,intent(inout) :: iexit
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),optional,intent(in) :: filstat
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),target,intent(inout) :: dtfil
@@ -220,7 +213,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,intent(out) :: npwtot(dtset%nkpt)
  character(len=fnlen),optional,intent(in) :: filnam(:)
  real(dp), intent(out) :: etotal_img(nimage),fcart_img(3,dtset%natom,nimage)
- real(dp), intent(out) :: fred_img(3,dtset%natom,nimage),strten_img(6,nimage)
+ real(dp), intent(out) :: fred_img(3,dtset%natom,nimage)
+ real(dp), intent(out) :: intgres_img(dtset%nspden,dtset%natom,nimage)
+ real(dp), intent(out) :: strten_img(6,nimage)
  real(dp),intent(inout) :: acell_img(3,nimage),amu_img(dtset%ntypat,nimage)
  real(dp),intent(inout) :: mixalch_img(dtset%npspalch,dtset%ntypalch,nimage)
  real(dp),intent(inout) :: occ_img(dtset%mband*dtset%nkpt*dtset%nsppol,nimage)
@@ -268,12 +263,26 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   '                                                            ',& ! 11
 &   '                                                            ',& ! 12
 &   'PATH-INTEGRAL MOLECULAR DYNAMICS (CHAIN OF THERMOSTATS)     '/) ! 13
+ character(len=24),parameter :: stgalgo_str(0:2)=(/ &
+&   'ORIGINAL ALGO.          ',& ! 0
+&   'SIMPLIFIED + EQUAL ARC  ',& ! 1
+&   'SIMPLIFIED + ENERGY-WGTH'/) ! 2
+ character(len=20),parameter :: nebalgo_str(0:2)=(/ &
+&   'ORIGINAL ALGO.      ',& ! 0
+&   'IMPROVED TANGENT    ',& ! 1
+&   'CLIMBING IMAGE      '/) ! 2
+ character(len=20),parameter :: mepsolver_str(0:4)=(/ &
+&   'STEEPEST-DESCENT    ',& ! 0
+&   'QUICK-MIN OPT.      ',& ! 1
+&   'L-BFGS              ',& ! 2
+&   'GL-BFGS             ',& ! 3
+&   'ORDER 4 RUNGE-KUTTA '/) ! 4
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2),vel_cell(3,3)
  real(dp),allocatable :: amass(:,:),occ(:),vel(:,:),xred(:,:)
  type(abihist),allocatable :: hist(:),hist_prev(:)
  type(results_img_type),pointer :: results_img(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
- type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
+ !type(abiforstr) :: preconforstr ! Preconditioned forces and stress ... Only needed to deallocate an internal matrix in prec_simple
 
 ! ***********************************************************************
 
@@ -281,8 +290,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
  call timab(700,1,tsec)
  call timab(703,3,tsec)
-
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
 !Arguments check
  if (dtset%nimage>1) then
@@ -351,7 +358,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_ALLOCATE(list_dynimage,(dtset%ndynimage))
  do itimimage=1,ntimimage_stored
    res_img => results_img(:,itimimage)
-   call init_results_img(dtset%natom,dtset%npspalch,dtset%nsppol,dtset%ntypalch,&
+   call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch,&
 &   dtset%ntypat,res_img)
    do iimage=1,nimage
      res_img(iimage)%acell(:)     =acell_img(:,iimage)
@@ -379,7 +386,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  history_size=-1
  if (dtset%ntimimage<=1) then
    if (dtset%usewvl==0.and.dtset%ionmov>0.and. &
-&   (abs(dtset%densfor_pred)==5.or.abs(dtset%densfor_pred)==6)) history_size=2
+&   (abs(dtset%densfor_pred)==5.or.abs(dtset%densfor_pred)==6)) then
+      history_size=2
+      if(dtset%extrapwf==2) history_size=3
+    end if
  else
    if (abs(dtset%densfor_pred)==2.or.abs(dtset%densfor_pred)==3) history_size=0
    if (dtset%imgwfstor==1) history_size=1
@@ -395,8 +405,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ABI_ALLOCATE(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
-       msg='HIST file is not compatible with variable masses!'
-       MSG_ERROR(msg)
+       MSG_ERROR('HIST file is not compatible with variable masses!')
      end if
      amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
    end do
@@ -477,6 +486,15 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &       '--------------------------------------------------------------------------------',&
 &       ch10,' ',trim(imagealgo_str(dtset%imgmov))
      end if
+     if (dtset%imgmov==2) then
+       write(msg,'(6a)') trim(msg),' (',trim(stgalgo_str(mep_param%string_algo)),' + ',&
+&                        trim(mepsolver_str(mep_param%mep_solver)),')'
+     end if
+     if (dtset%imgmov==5) then
+       ii=merge(mep_param%neb_algo,1,mep_param%neb_algo/=2.or.itimimage>=mep_param%cineb_start)
+       write(msg,'(6a)') trim(msg),' (',trim(nebalgo_str(ii)),' + ',&
+&                        trim(mepsolver_str(mep_param%mep_solver)),')'
+     end if
      if (dtset%ntimimage==1) write(msg,'(2a)')    trim(msg),' FOR 1 TIME STEP'
      if (dtset%ntimimage >1) write(msg,'(2a,i5)') trim(msg),' - TIME STEP ',itimimage
      if (dtset%prtvolimg<2) then
@@ -485,7 +503,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
+
+     call yaml_iterstart('timimage', itimimage, dev_null, dtset%use_yaml)
    end if
+
+   if (dtset%use_yaml == 1) call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
    call timab(704,2,tsec)
 
@@ -508,7 +530,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (itimimage>1) then
            dtfil%ireadwf=0;dtfil%ireadden=0;dtfil%ireadkden=0
          end if
+         call yaml_iterstart('image', iimage, dev_null, 0)
        end if
+
+       if (dtset%use_yaml == 1) call yaml_iterstart('image', iimage, ab_out, dtset%use_yaml)
 
 !      Redefine output units
        call localwrfile(mpi_enreg%comm_cell,ii,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
@@ -518,15 +543,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (ii==1) write(msg,'(a)' ) ch10
          if (ii >1) write(msg,'(2a)') ch10,ch10
          write(msg,'(6a,i4,a,i4,3a)') trim(msg),&
-&         '--------------------------------------------------------------------------------',ch10,&
-&         ' ',trim(imagealgo_str(dtset%imgmov)),' - CELL # ',ii,'/',dtset%nimage,ch10,&
-&         '--------------------------------------------------------------------------------',ch10
-         if (dtset%prtvolimg==0) then
-           call wrtout(ab_out ,msg,'COLL')
-         end if
-         if (do_write_log) then
-           call wrtout(std_out,msg,'PERS')
-         end if
+           '--------------------------------------------------------------------------------',ch10,&
+           ' ',trim(imagealgo_str(dtset%imgmov)),' - CELL # ',ii,'/',dtset%nimage,ch10,&
+           '--------------------------------------------------------------------------------',ch10
+         if (dtset%prtvolimg==0) call wrtout(ab_out ,msg,'COLL')
+         if (do_write_log) call wrtout(std_out,msg,'PERS')
        end if
 
        acell(:)     =res_img(iimage)%acell(:)
@@ -543,7 +564,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
        call timab(705,2,tsec)
 
-       call status(idynimage+100*itimimage,dtfil%filstat,iexit,level,'call gstate   ')
        call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),&
 &       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
 &       res_img(iimage)%results_gs,&
@@ -636,6 +656,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
    if (check_conv) then
      do idynimage=1,ndynimage
+       _IBM6("hello world")
        iimage=list_dynimage(idynimage)
        delta_energy=delta_energy &
 &       +abs(results_img(iimage,itimimage)%results_gs%etotal &
@@ -660,8 +681,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &         ' ',trim(imagealgo_str(dtset%imgmov)),' has reached energy convergence',ch10,&
 &         ' with Average[Abs(Etotal(t)-Etotal(t-dt))]=',delta_energy,'<tolimg=',dtset%tolimg
        end if
-       call wrtout(ab_out ,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
+       call wrtout([std_out, ab_out] ,msg,'COLL')
        call timab(707,2,tsec)
        exit   ! exit itimimage
      end if
@@ -710,11 +730,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      etotal_img(iimage)      =results_img(iimage,itimimage_eff)%results_gs%etotal
      fcart_img(:,:,iimage)   =results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%fred(:,:)
+     intgres_img(:,:,iimage) =results_img(iimage,itimimage_eff)%results_gs%intgres(:,:)
      strten_img(:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%strten(:)
    else if (compute_static_images) then
      etotal_img(iimage)    =results_img(iimage,1)%results_gs%etotal
      fcart_img(:,:,iimage) =results_img(iimage,1)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)  =results_img(iimage,1)%results_gs%fred(:,:)
+     intgres_img(:,:,iimage)=results_img(iimage,1)%results_gs%intgres(:,:)
      strten_img(:,iimage)  =results_img(iimage,1)%results_gs%strten(:)
    end if
  end do
@@ -769,8 +791,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call m1geo_destroy(m1geo_param)
  call pimd_destroy(pimd_param)
 
- call status(0,dtfil%filstat,iexit,level,'exit          ')
-
  call timab(708,2,tsec)
  call timab(700,2,tsec)
 
@@ -818,15 +838,6 @@ end subroutine gstateimg
 
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
 &                 prt_all_images,prtvolimg,resimg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtimg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -879,9 +890,9 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 
 !      Title
        write(msg,'(6a,i4,a,i4,2a)') ch10,&
-&       '----------------------------------------------------------------------',ch10,&
-&       ' ',trim(imagealgo_str),' - CELL # ',ii,'/',nimage_tot,ch10,&
-&       '----------------------------------------------------------------------'
+         '----------------------------------------------------------------------',ch10,&
+         ' ',trim(imagealgo_str),' - CELL # ',ii,'/',nimage_tot,ch10,&
+         '----------------------------------------------------------------------'
        call wrtout(iout,msg,'COLL')
 
 !      Total energy
@@ -890,11 +901,11 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 
 !      Residuals of the SCF cycle
        write(msg,'(3a,4(a,es16.8,a))') ch10,&
-&       ' Residuals from SCF cycle: ',ch10,&
-&       '    Total energy difference        =',resimg_all(ii)%results_gs%deltae,ch10,&
-&       '    Maximal forces difference      =',resimg_all(ii)%results_gs%diffor,ch10,&
-&       '    Max. residual of wave-functions=',resimg_all(ii)%results_gs%residm,ch10,&
-&       '    Density/potential residual (^2)=',resimg_all(ii)%results_gs%res2,ch10
+         ' Residuals from SCF cycle: ',ch10,&
+         '    Total energy difference        =',resimg_all(ii)%results_gs%deltae,ch10,&
+         '    Maximal forces difference      =',resimg_all(ii)%results_gs%diffor,ch10,&
+         '    Max. residual of wave-functions=',resimg_all(ii)%results_gs%residm,ch10,&
+         '    Density/potential residual (^2)=',resimg_all(ii)%results_gs%res2,ch10
        call wrtout(iout,msg,'COLL')
 
 !      Cell parameters
@@ -939,8 +950,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
 
 !===== 2nd option for the printing volume ===
  if (prtvolimg==2.and.mpi_enreg%me==0) then
-   write(msg,'(a,1x,a)') ch10,&
-&   'Cell   Total_energy[Ha]     deltae       diffor       residm         res2'
+   write(msg,'(a,1x,a)') ch10,'Cell   Total_energy[Ha]     deltae       diffor       residm         res2'
    call wrtout(iout,msg,'COLL')
    do ii=1,nimage_tot
      if (dynimage(ii)==1.or.prt_all_images) then
@@ -1033,14 +1043,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  use m_predict_pimd,    only : predict_pimd
  use m_predict_string, only : predict_string
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predictimg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: imgmov,itimimage,itimimage_eff,natom,ndynimage
@@ -1061,7 +1063,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  integer,save :: idum=5
  logical :: is_pimd
  character(len=500) :: msg
-!arrays
 
 ! *************************************************************************
 
@@ -1075,7 +1076,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 !Specific case of 4th-order RK algorithm
  if (mep_param%mep_solver==4) then
    if (mod(itimimage,4)==0) then
-     write(msg,'(2a,i1,2a)') trim(msg),&
+     write(msg,'(4a)') trim(msg),&
 &     ' Fourth-order Runge-Kutta algorithm - final step',ch10
      if (itimimage>4) write(msg,'(2a,es11.3,2a)') trim(msg),&
 &     ' Average[Abs(Etotal(t)-Etotal(t-dt))]=',deltae,' Hartree',ch10
@@ -1099,10 +1100,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  end if
 
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
- if(imgmov/=6 .or. m1geo_param%iexit==0)then
-   call wrtout(ab_out ,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
- endif
+ if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
  select case(imgmov)
 
@@ -1189,15 +1187,6 @@ end subroutine predictimg
 subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &                       ntimimage_stored,results_img)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_copy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage_eff,ndynimage,nimage,ntimimage_stored
@@ -1234,7 +1223,7 @@ end subroutine predict_copy
 !! move_1geo
 !!
 !! FUNCTION
-!! This subroutine uses the forces, stresses and other results obtained for several images with one, common, geometry, 
+!! This subroutine uses the forces, stresses and other results obtained for several images with one, common, geometry,
 !! weight them to deliver averaged forces, stresses, etc, and uses these to predict the next common geometry.
 !! All images must be dynamical.
 !! WARNING : at present, only forces are used, to change atomic positions. No change of cell geometry.
@@ -1278,15 +1267,6 @@ end subroutine predict_copy
 
 subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'move_1geo'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage_eff,nimage,ntimimage_stored
@@ -1310,7 +1290,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  ABI_ALLOCATE(fcart,(3,natom))
  ABI_ALLOCATE(vel,(3,natom))
  ABI_ALLOCATE(xred,(3,natom))
- 
+
 !Of course, assume that the geometry parameters are the same for all images, so take them from the first one.
  xred(:,:)    =results_img(1,itimimage_eff)%xred(:,:)
  acell(:)     =results_img(1,itimimage_eff)%acell(:)
@@ -1331,11 +1311,11 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
  fcart(:,:)=zero
  strten(:)=zero
  do iimage=1,nimage
-   fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage) 
-   strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage) 
+   fcart(:,:)=fcart(:,:)+results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)*m1geo_param%mixesimgf(iimage)
+   strten(:) =strten(:) +results_img(iimage,itimimage_eff)%results_gs%strten(:)*m1geo_param%mixesimgf(iimage)
  enddo
 
-!Store them in hist_1geo 
+!Store them in hist_1geo
  m1geo_param%hist_1geo%fcart(:,:,ihist)=fcart(:,:)
  m1geo_param%hist_1geo%strten(:,ihist) =strten(:)
 
@@ -1356,7 +1336,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
 & m1geo_param%icycle,&
 & m1geo_param%iexit,&
 !& m1geo_param%itime,&
-  itimimage_eff,&       ! m1geo_param%itime should be eliminated, no need for it 
+  itimimage_eff,&       ! m1geo_param%itime should be eliminated, no need for it
 & m1geo_param%mttk_vars,&
 & m1geo_param%nctime,&
 & m1geo_param%ncycle,&
@@ -1380,7 +1360,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored
    results_img(iimage,next_itimimage)%xred(:,:)    =xred(:,:)
    results_img(iimage,next_itimimage)%acell(:)     =acell(:)
    results_img(iimage,next_itimimage)%rprim(:,:)   =rprim(:,:)
-!  WARNING : Should also store vel and vel_cell of course ... 
+!  WARNING : Should also store vel and vel_cell of course ...
 !  results_img(iimage,next_itimimage)%vel(:,:)     =vel(:,:)
 !  results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
  end do

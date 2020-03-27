@@ -54,7 +54,6 @@ diemac 12.0       # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
 nsppol 2
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -74,5 +73,5 @@ nsppol 2
 #%%   the first column is sometimes filled by "meaningful" characters,
 #%%   instead of the symbols or blanks needed to process it
 #%%   and compare it with the reference, thanks to the fldiff.pl script.
-#%% WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
 #%%<END TEST_INFO>

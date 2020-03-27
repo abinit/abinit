@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_epweights
 !! NAME
 !!  m_epweights
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (BXU, MVer)
+!!  Copyright (C) 2012-2020 ABINIT group (BXU, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +30,7 @@ module m_epweights
  use m_abicore
  use m_errors
  use m_tetrahedron
+ !use m_htetra
  use m_xmpi
 
  use m_symtk,           only : matr3inv
@@ -79,15 +79,6 @@ contains
 !! SOURCE
 
 subroutine d2c_weights(elph_ds,elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2c_weights'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(elph_type),intent(inout) :: elph_ds
@@ -930,15 +921,6 @@ end subroutine d2c_weights
 
 subroutine d2c_wtq(elph_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2c_wtq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(elph_type),intent(inout) :: elph_ds
 
@@ -1391,15 +1373,6 @@ end subroutine d2c_wtq
 subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax, nene, gprimd, &
 &    irredtoGS, kptrlatt, max_occ, minFSband, nband, nFSband, nsppol, telphint, k_obj, tmp_wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_el_weights'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_kgrid_type), intent(in) :: k_obj
@@ -1435,6 +1408,7 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
  character (len=500) :: message
  character (len=80) :: errstr
  type(t_tetrahedron) :: tetrahedra
+ !type(htetra_t) :: tetrahedra
 
 ! *************************************************************************
 
@@ -1457,7 +1431,10 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
    call matr3inv(rlatt,klatt)
 
    call init_tetra(k_obj%full2full(1,1,:), gprimd,klatt,k_obj%kpt, k_obj%nkpt,&
-&   tetrahedra, ierr, errstr)
+     tetrahedra, ierr, errstr, xmpi_comm_self)
+   !call htetra_init(tetra, k_obj%full2full(1,1,:), gprimd, klatt, k_obj%kpt, k_obj%nkpt, &
+   !                 k_obk%nkptirr, nkpt_ibz, ierr, errstr, xmpi_comm_self)
+
    ABI_CHECK(ierr==0,errstr)
 
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
@@ -1480,7 +1457,7 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
          ikptgs = irredtoGS(k_obj%full2irr(1,ikpt))
          tmp_eigen(ikpt) = eigenGS(minFSband+iband-1,ikptgs,isppol)
        end do
-!      calculate general integration weights at each irred kpoint 
+!      calculate general integration weights at each irred kpoint
 !      as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call get_tetra_weight(tmp_eigen,enemin,enemax,&
 &       max_occ,nene,k_obj%nkpt,tetrahedra,bcorr0,&
@@ -1494,6 +1471,7 @@ subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax,
    ABI_DEALLOCATE(dtweightde)
 
    call destroy_tetra(tetrahedra)
+   !call tetrahedra%free()
 
  else if (telphint == 1) then
 
@@ -1640,15 +1618,6 @@ end subroutine ep_el_weights
 subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd, &
 &    irredtoGS, kptrlatt, max_occ, minFSband, nband, nFSband, nsppol, telphint, k_obj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_fs_weights'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_kgrid_type), intent(inout) :: k_obj
@@ -1708,7 +1677,7 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
    call matr3inv(rlatt,klatt)
 
    call init_tetra(k_obj%full2full(1,1,:), gprimd,klatt,k_obj%kpt, k_obj%nkpt,&
-&   tetrahedra, ierr, errstr)
+&   tetrahedra, ierr, errstr, xmpi_comm_self)
    ABI_CHECK(ierr==0,errstr)
 
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
@@ -1737,7 +1706,7 @@ subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd,
          ikptgs = irredtoGS(k_obj%full2irr(1,ikpt))
          tmp_eigen(ikpt) = eigenGS(minFSband+iband-1,ikptgs,isppol)
        end do
-!      calculate general integration weights at each irred kpoint 
+!      calculate general integration weights at each irred kpoint
 !      as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call get_tetra_weight(tmp_eigen,enemin,enemax,&
 &       max_occ,nene,k_obj%nkpt,tetrahedra,bcorr0,&
@@ -1876,15 +1845,6 @@ end subroutine ep_fs_weights
 
 subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrlatt,nbranch,telphint,k_obj,tmp_wtq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_ph_weights'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_kgrid_type), intent(inout) :: k_obj
@@ -1935,7 +1895,7 @@ subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrl
    call matr3inv(rlatt,klatt)
 
    call init_tetra(k_obj%full2full(1,1,:), gprimd,klatt,k_obj%kpt, k_obj%nkpt,&
-&   tetrahedra, ierr, errstr)
+&   tetrahedra, ierr, errstr, xmpi_comm_self)
    ABI_CHECK(ierr==0,errstr)
 
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &

@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h33 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h42 )
   
-- input  file    -> t81.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t81/t81.in
 - output file    -> t81.out
 - root for input  files -> t81i
 - root for output files -> t81o
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.157 Mbytes of memory.
+P This job should need less than                       1.149 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.157 Mbytes of memory.
+P This job should need less than                       1.149 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.157 Mbytes of memory.
+P This job should need less than                       1.149 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.157 Mbytes of memory.
+P This job should need less than                       1.149 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.157 Mbytes of memory.
+P This job should need less than                       1.149 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -398,7 +398,7 @@ _ WF disk file :      0.086 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -1193,7 +1193,16 @@ P          mk1mem37        16
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 11, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Zunger-Ceperley-Alder - ixc=2
@@ -1211,14 +1220,14 @@ P          mk1mem37        16
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1231,6 +1240,12 @@ P          mk1mem37        16
 _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 11, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.821844140516    -1.082E+01 8.551E-04 9.598E-01
@@ -1247,6 +1262,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  8.908E-04 exceeds tolvrs=  1.000E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 11, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1100000,   5.1100000, ]
+- [  5.1100000,   0.0000000,   5.1100000, ]
+- [  5.1100000,   5.1100000,   0.0000000, ]
+lattice_lengths: [   7.22663,    7.22663,    7.22663, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6686566E+02
+convergence: {deltae: -8.945E-05, res2:  8.908E-04, residm:  8.571E-07, diffor: null, }
+etotal    :  -1.08254694E+01
+entropy   :   0.00000000E+00
+fermie    :   1.35287164E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.32825881E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.32825881E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.32825881E-04, ]
+pressure_GPa:  -1.5676E+01
+xred      :
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1256,7 +1300,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6076E-07; max=  8.5712E-07
+ Mean square residual over all n,k,spin=   36.076E-08; max=  85.712E-08
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
@@ -1293,21 +1337,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 11, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.94861718896809E+00
+hartree             :  5.29283492434846E-01
+xc                  : -5.61196983300401E+00
+Ewald energy        : -8.43334331763888E+00
+psp_core            :  5.45974994332637E-01
+local_psp           : -2.46259440288338E+00
+non_local_psp       :  1.65856251203448E+00
+total_energy        : -1.08254693657562E+01
+total_energy_eV     : -2.94576002376263E+02
+band_energy         : -1.53070948962174E-01
+...
 
-    Kinetic energy  =  2.94861718896806E+00
-    Hartree energy  =  5.29283492434833E-01
-    XC energy       = -5.61196983300398E+00
-    Ewald energy    = -8.43334331763888E+00
-    PspCore energy  =  5.45974994332637E-01
-    Loc. psp. energy= -2.46259440288329E+00
-    NL   psp  energy=  1.65856251203445E+00
-    >>>>>>>>> Etotal= -1.08254693657562E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.94576002376262E+02 ; Band energy (Ha)=  -1.5307094896E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.32825881E-04  sigma(3 2)=  0.00000000E+00
@@ -1321,7 +1365,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 12, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1100000  5.1100000  G(1)= -0.0978474  0.0978474  0.0978474
@@ -1334,14 +1387,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1353,6 +1406,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 12, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.821844140516    -1.082E+01 8.551E-04 9.598E-01
@@ -1369,6 +1428,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  8.908E-04 exceeds tolvrs=  1.000E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 12, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1100000,   5.1100000, ]
+- [  5.1100000,   0.0000000,   5.1100000, ]
+- [  5.1100000,   5.1100000,   0.0000000, ]
+lattice_lengths: [   7.22663,    7.22663,    7.22663, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6686566E+02
+convergence: {deltae: -8.945E-05, res2:  8.908E-04, residm:  8.571E-07, diffor: null, }
+etotal    :  -1.08254694E+01
+entropy   :   0.00000000E+00
+fermie    :   1.35287164E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.32825881E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.32825881E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.32825881E-04, ]
+pressure_GPa:  -1.5676E+01
+xred      :
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1378,7 +1466,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6076E-07; max=  8.5712E-07
+ Mean square residual over all n,k,spin=   36.076E-08; max=  85.712E-08
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
@@ -1415,21 +1503,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 12, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.94861718896806E+00
+hartree             :  5.29283492434834E-01
+xc                  : -5.61196983300395E+00
+Ewald energy        : -8.43334331763888E+00
+psp_core            :  5.45974994332637E-01
+local_psp           : -2.46259440288330E+00
+non_local_psp       :  1.65856251203445E+00
+total_energy        : -1.08254693657561E+01
+total_energy_eV     : -2.94576002376261E+02
+band_energy         : -1.53070948962151E-01
+...
 
-    Kinetic energy  =  2.94861718896809E+00
-    Hartree energy  =  5.29283492434848E-01
-    XC energy       = -5.61196983300399E+00
-    Ewald energy    = -8.43334331763888E+00
-    PspCore energy  =  5.45974994332637E-01
-    Loc. psp. energy= -2.46259440288339E+00
-    NL   psp  energy=  1.65856251203448E+00
-    >>>>>>>>> Etotal= -1.08254693657562E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.94576002376263E+02 ; Band energy (Ha)=  -1.5307094896E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.32825881E-04  sigma(3 2)=  0.00000000E+00
@@ -1443,7 +1531,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 13 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 13, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -1461,14 +1558,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1480,6 +1577,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 13, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.933890152383    -1.093E+01 8.271E-04 5.720E-01
@@ -1496,6 +1599,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  7.415E-04 exceeds tolvrs=  1.000E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 13, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1100000,   5.1100000, ]
+- [  5.1100000,   0.0000000,   5.1100000, ]
+- [  5.1100000,   5.1100000,   0.0000000, ]
+lattice_lengths: [   7.22663,    7.22663,    7.22663, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6686566E+02
+convergence: {deltae: -3.607E-05, res2:  7.415E-04, residm:  1.995E-07, diffor: null, }
+etotal    :  -1.09356820E+01
+entropy   :   0.00000000E+00
+fermie    :   1.43551451E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.80902099E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.80902099E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.80902099E-04, ]
+pressure_GPa:  -1.1207E+01
+xred      :
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -9.90138970E-20,   9.90138970E-20,  -4.24345273E-20, ]
+- [  9.90138970E-20,  -9.90138970E-20,   4.24345273E-20, ]
+force_length_stats: {min:   1.46315388E-19, max:   1.46315388E-19, mean:   1.46315388E-19, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1505,27 +1637,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.9057E-08; max=  1.9951E-07
+ Mean square residual over all n,k,spin=   79.057E-09; max=  19.951E-08
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  4.8666E-19; max dE/dt=  1.0119E-18; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.67602388397372     0.67602388397372     0.67602388397372
     2      4.73216718781608     4.73216718781608     4.73216718781608
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 8.4475229E-20 9.9013897E-20   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000    -0.00000000000000
+    2      0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 4.3438905E-18 5.0914989E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.220000000000 10.220000000000 10.220000000000 bohr
               =  5.408191071790  5.408191071790  5.408191071790 angstroms
  prteigrs : about to open file t81o_DS13_EIG
@@ -1542,21 +1674,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 13, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.95539440781811E+00
+hartree             :  5.36576033154845E-01
+xc                  : -5.72471778818317E+00
+Ewald energy        : -8.43334331763888E+00
+psp_core            :  5.45974994332637E-01
+local_psp           : -2.46783879277762E+00
+non_local_psp       :  1.65227246967458E+00
+total_energy        : -1.09356819936195E+01
+total_energy_eV     : -2.97575040499270E+02
+band_energy         : -8.81422333383395E-02
+...
 
-    Kinetic energy  =  2.95539440781811E+00
-    Hartree energy  =  5.36576033154845E-01
-    XC energy       = -5.72471778818317E+00
-    Ewald energy    = -8.43334331763888E+00
-    PspCore energy  =  5.45974994332637E-01
-    Loc. psp. energy= -2.46783879277762E+00
-    NL   psp  energy=  1.65227246967458E+00
-    >>>>>>>>> Etotal= -1.09356819936195E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.97575040499270E+02 ; Band energy (Ha)=  -8.8142233338E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.80902099E-04  sigma(3 2)=  0.00000000E+00
@@ -1570,7 +1702,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 14 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 14, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1100000  5.1100000  G(1)= -0.0978474  0.0978474  0.0978474
@@ -1583,14 +1724,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1602,6 +1743,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 14, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.933889240746    -1.093E+01 8.271E-04 5.720E-01
@@ -1618,6 +1765,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  7.415E-04 exceeds tolvrs=  1.000E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 14, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1100000,   5.1100000, ]
+- [  5.1100000,   0.0000000,   5.1100000, ]
+- [  5.1100000,   5.1100000,   0.0000000, ]
+lattice_lengths: [   7.22663,    7.22663,    7.22663, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6686566E+02
+convergence: {deltae: -3.607E-05, res2:  7.415E-04, residm:  1.995E-07, diffor: null, }
+etotal    :  -1.09356811E+01
+entropy   :   0.00000000E+00
+fermie    :   1.43551563E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.80900979E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.80900979E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.80900979E-04, ]
+pressure_GPa:  -1.1206E+01
+xred      :
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [  2.82896849E-20,  -2.82896849E-20,   2.82896849E-20, ]
+- [ -2.82896849E-20,   2.82896849E-20,  -2.82896849E-20, ]
+force_length_stats: {min:   4.89991715E-20, max:   4.89991715E-20, mean:   4.89991715E-20, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1627,27 +1803,27 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.9058E-08; max=  1.9951E-07
+ Mean square residual over all n,k,spin=   79.058E-09; max=  19.951E-08
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
- rms dE/dt=  3.4412E-19; max dE/dt=  5.7824E-19; dE/dt below (all hartree)
-    1       0.000000000000     -0.000000000000     -0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  2.8912E-19; max dE/dt=  5.7824E-19; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2      -0.000000000000      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.67602388397372     0.67602388397372     0.67602388397372
     2      4.73216718781608     4.73216718781608     4.73216718781608
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 4.8313835E-20 7.0724212E-20   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 2.8289685E-20 2.8289685E-20   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000     0.00000000000000     0.00000000000000
- frms,max,avg= 2.4843971E-18 3.6367849E-18   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000    -0.00000000000000     0.00000000000000
+    2     -0.00000000000000     0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.4547140E-18 1.4547140E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.220000000000 10.220000000000 10.220000000000 bohr
               =  5.408191071790  5.408191071790  5.408191071790 angstroms
  prteigrs : about to open file t81o_DS14_EIG
@@ -1664,21 +1840,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 14, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.95539445431455E+00
+hartree             :  5.36576068556620E-01
+xc                  : -5.72471689302634E+00
+Ewald energy        : -8.43334331763888E+00
+psp_core            :  5.45974994332637E-01
+local_psp           : -2.46783885993589E+00
+non_local_psp       :  1.65227246971915E+00
+total_energy        : -1.09356810836781E+01
+total_energy_eV     : -2.97575015738507E+02
+band_energy         : -8.81413268406928E-02
+...
 
-    Kinetic energy  =  2.95539445431454E+00
-    Hartree energy  =  5.36576068556620E-01
-    XC energy       = -5.72471689302634E+00
-    Ewald energy    = -8.43334331763888E+00
-    PspCore energy  =  5.45974994332637E-01
-    Loc. psp. energy= -2.46783885993590E+00
-    NL   psp  energy=  1.65227246971915E+00
-    >>>>>>>>> Etotal= -1.09356810836782E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.97575015738507E+02 ; Band energy (Ha)=  -8.8141326841E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.80900979E-04  sigma(3 2)=  0.00000000E+00
@@ -1692,7 +1868,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 15 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 15, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -1710,14 +1895,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1729,6 +1914,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 15, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.821454129265    -1.082E+01 8.550E-04 9.608E-01
@@ -1745,6 +1936,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  8.896E-04 exceeds tolvrs=  1.000E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 15, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1100000,   5.1100000, ]
+- [  5.1100000,   0.0000000,   5.1100000, ]
+- [  5.1100000,   5.1100000,   0.0000000, ]
+lattice_lengths: [   7.22663,    7.22663,    7.22663, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6686566E+02
+convergence: {deltae: -9.010E-05, res2:  8.896E-04, residm:  8.679E-07, diffor: null, }
+etotal    :  -1.08250774E+01
+entropy   :   0.00000000E+00
+fermie    :   1.35491447E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.35287370E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.35287370E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.35287370E-04, ]
+pressure_GPa:  -1.5749E+01
+xred      :
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1754,7 +1974,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6517E-07; max=  8.6786E-07
+ Mean square residual over all n,k,spin=   36.517E-08; max=  86.786E-08
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
@@ -1791,21 +2011,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 15, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.94896188586315E+00
+hartree             :  5.29649129877232E-01
+xc                  : -5.61182218401005E+00
+Ewald energy        : -8.43334331763888E+00
+psp_core            :  5.45974994332637E-01
+local_psp           : -2.46383113592157E+00
+non_local_psp       :  1.65933320576201E+00
+total_energy        : -1.08250774217355E+01
+total_energy_eV     : -2.94565337037063E+02
+band_energy         : -1.51398155762807E-01
+...
 
-    Kinetic energy  =  2.94896188586315E+00
-    Hartree energy  =  5.29649129877231E-01
-    XC energy       = -5.61182218401005E+00
-    Ewald energy    = -8.43334331763888E+00
-    PspCore energy  =  5.45974994332637E-01
-    Loc. psp. energy= -2.46383113592157E+00
-    NL   psp  energy=  1.65933320576201E+00
-    >>>>>>>>> Etotal= -1.08250774217355E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.94565337037063E+02 ; Band energy (Ha)=  -1.5139815576E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.35287370E-04  sigma(3 2)=  0.00000000E+00
@@ -1819,7 +2039,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 16 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 16, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1100000  5.1100000  G(1)= -0.0978474  0.0978474  0.0978474
@@ -1832,14 +2061,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1851,6 +2080,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 16, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.821454129265    -1.082E+01 8.550E-04 9.608E-01
@@ -1867,6 +2102,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  8.896E-04 exceeds tolvrs=  1.000E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 16, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1100000,   5.1100000, ]
+- [  5.1100000,   0.0000000,   5.1100000, ]
+- [  5.1100000,   5.1100000,   0.0000000, ]
+lattice_lengths: [   7.22663,    7.22663,    7.22663, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6686566E+02
+convergence: {deltae: -9.010E-05, res2:  8.896E-04, residm:  8.679E-07, diffor: null, }
+etotal    :  -1.08250774E+01
+entropy   :   0.00000000E+00
+fermie    :   1.35491447E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.35287370E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.35287370E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.35287370E-04, ]
+pressure_GPa:  -1.5749E+01
+xred      :
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1876,7 +2140,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6517E-07; max=  8.6786E-07
+ Mean square residual over all n,k,spin=   36.517E-08; max=  86.786E-08
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
@@ -1913,21 +2177,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 16, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.94896188586315E+00
+hartree             :  5.29649129877228E-01
+xc                  : -5.61182218401014E+00
+Ewald energy        : -8.43334331763888E+00
+psp_core            :  5.45974994332637E-01
+local_psp           : -2.46383113592156E+00
+non_local_psp       :  1.65933320576201E+00
+total_energy        : -1.08250774217355E+01
+total_energy_eV     : -2.94565337037065E+02
+band_energy         : -1.51398155762842E-01
+...
 
-    Kinetic energy  =  2.94896188586315E+00
-    Hartree energy  =  5.29649129877228E-01
-    XC energy       = -5.61182218401014E+00
-    Ewald energy    = -8.43334331763888E+00
-    PspCore energy  =  5.45974994332637E-01
-    Loc. psp. energy= -2.46383113592156E+00
-    NL   psp  energy=  1.65933320576200E+00
-    >>>>>>>>> Etotal= -1.08250774217355E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.94565337037065E+02 ; Band energy (Ha)=  -1.5139815576E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.35287370E-04  sigma(3 2)=  0.00000000E+00
@@ -1941,7 +2205,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 17 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 17, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1100000  5.1100000  G(1)= -0.0978474  0.0978474  0.0978474
@@ -1954,14 +2227,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -1973,6 +2246,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 17, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.821452243049    -1.082E+01 8.550E-04 9.608E-01
@@ -1989,6 +2268,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   nstep=    3 was not enough SCF cycles to converge;
   potential residual=  8.896E-04 exceeds tolvrs=  1.000E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 17, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1100000,   5.1100000, ]
+- [  5.1100000,   0.0000000,   5.1100000, ]
+- [  5.1100000,   5.1100000,   0.0000000, ]
+lattice_lengths: [   7.22663,    7.22663,    7.22663, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6686566E+02
+convergence: {deltae: -9.010E-05, res2:  8.896E-04, residm:  8.679E-07, diffor: null, }
+etotal    :  -1.08250755E+01
+entropy   :   0.00000000E+00
+fermie    :   1.35491586E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.35286451E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.35286451E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.35286451E-04, ]
+pressure_GPa:  -1.5749E+01
+xred      :
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1998,7 +2306,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6517E-07; max=  8.6786E-07
+ Mean square residual over all n,k,spin=   36.517E-08; max=  86.786E-08
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
@@ -2035,21 +2343,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 17, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.94896179711167E+00
+hartree             :  5.29649046737724E-01
+xc                  : -5.61182025028938E+00
+Ewald energy        : -8.43334331763888E+00
+psp_core            :  5.45974994332637E-01
+local_psp           : -2.46383089143433E+00
+non_local_psp       :  1.65933308454254E+00
+total_energy        : -1.08250755366380E+01
+total_energy_eV     : -2.94565285740952E+02
+band_energy         : -1.51397065560969E-01
+...
 
-    Kinetic energy  =  2.94896179711168E+00
-    Hartree energy  =  5.29649046737729E-01
-    XC energy       = -5.61182025028938E+00
-    Ewald energy    = -8.43334331763888E+00
-    PspCore energy  =  5.45974994332637E-01
-    Loc. psp. energy= -2.46383089143434E+00
-    NL   psp  energy=  1.65933308454254E+00
-    >>>>>>>>> Etotal= -1.08250755366380E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.94565285740952E+02 ; Band energy (Ha)=  -1.5139706556E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.35286451E-04  sigma(3 2)=  0.00000000E+00
@@ -2063,7 +2371,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 21, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -2084,14 +2401,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2120,14 +2437,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 21, }
+solver: {iscf: -3, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.329219303222     -1.033E+01 3.936E-03 0.000E+00
+-ETOT  1  -10.329219303215     -1.033E+01 3.936E-03 0.000E+00
  ETOT  2  -10.329783323002     -5.640E-04 6.402E-06 0.000E+00
- ETOT  3  -10.329783506155     -1.832E-07 2.401E-07 0.000E+00
+ ETOT  3  -10.329783506156     -1.832E-07 2.401E-07 0.000E+00
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -2137,10 +2459,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.0556E-09; max=  2.4015E-07
+ Mean square residual over all n,k,spin=   90.556E-10; max=  24.015E-08
  dfpt_looppert : ek2=    1.8142585669E+01
           f-sum rule ratio=    1.2307385107E+00
- prteigrs : about to open file t81_1WF1_EIG
+ prteigrs : about to open file t81t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -2192,7 +2514,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 22, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -2208,14 +2539,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2244,14 +2575,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 22, }
+solver: {iscf: -3, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.329219303222     -1.033E+01 3.936E-03 0.000E+00
+-ETOT  1  -10.329219303215     -1.033E+01 3.936E-03 0.000E+00
  ETOT  2  -10.329783323002     -5.640E-04 6.402E-06 0.000E+00
- ETOT  3  -10.329783506155     -1.832E-07 2.401E-07 0.000E+00
+ ETOT  3  -10.329783506156     -1.832E-07 2.401E-07 0.000E+00
 
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
@@ -2261,10 +2597,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.0556E-09; max=  2.4015E-07
+ Mean square residual over all n,k,spin=   90.556E-10; max=  24.015E-08
  dfpt_looppert : ek2=    1.8142585669E+01
           f-sum rule ratio=    1.2307385107E+00
- prteigrs : about to open file t81_1WF1_EIG
+ prteigrs : about to open file t81t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -2316,7 +2652,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 23 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 23, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  13.
 
@@ -2337,14 +2682,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2373,9 +2718,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 23, }
+solver: {iscf: -3, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.238714408361     -1.024E+01 4.402E-03 0.000E+00
@@ -2390,10 +2740,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.2867E-08; max=  3.7381E-07
+ Mean square residual over all n,k,spin=   12.867E-09; max=  37.381E-08
  dfpt_looppert : ek2=    1.8142585669E+01
           f-sum rule ratio=    1.2200706266E+00
- prteigrs : about to open file t81_1WF1_EIG
+ prteigrs : about to open file t81t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -2445,7 +2795,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 24 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 24, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  13.
 
@@ -2461,14 +2820,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2497,9 +2856,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 24, }
+solver: {iscf: -3, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.238712612951     -1.024E+01 4.402E-03 0.000E+00
@@ -2514,10 +2878,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.2867E-08; max=  3.7380E-07
+ Mean square residual over all n,k,spin=   12.867E-09; max=  37.380E-08
  dfpt_looppert : ek2=    1.8142585669E+01
           f-sum rule ratio=    1.2200704094E+00
- prteigrs : about to open file t81_1WF1_EIG
+ prteigrs : about to open file t81t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -2569,7 +2933,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 25 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 25, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  15.
 
@@ -2590,14 +2963,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2626,12 +2999,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 25, }
+solver: {iscf: -3, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.328210679391     -1.033E+01 3.941E-03 0.000E+00
+-ETOT  1  -10.328210679399     -1.033E+01 3.941E-03 0.000E+00
  ETOT  2  -10.328775766728     -5.651E-04 6.312E-06 0.000E+00
  ETOT  3  -10.328775950375     -1.836E-07 2.372E-07 0.000E+00
 
@@ -2643,10 +3021,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.9447E-09; max=  2.3716E-07
+ Mean square residual over all n,k,spin=   89.447E-10; max=  23.716E-08
  dfpt_looppert : ek2=    1.8142585669E+01
           f-sum rule ratio=    1.2306540431E+00
- prteigrs : about to open file t81_1WF1_EIG
+ prteigrs : about to open file t81t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -2698,7 +3076,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 26 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 26, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  15.
 
@@ -2714,14 +3101,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2750,13 +3137,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 26, }
+solver: {iscf: -3, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.328210679391     -1.033E+01 3.941E-03 0.000E+00
- ETOT  2  -10.328775766728     -5.651E-04 6.312E-06 0.000E+00
+-ETOT  1  -10.328210679399     -1.033E+01 3.941E-03 0.000E+00
+ ETOT  2  -10.328775766729     -5.651E-04 6.312E-06 0.000E+00
  ETOT  3  -10.328775950375     -1.836E-07 2.372E-07 0.000E+00
 
  scprqt:  WARNING -
@@ -2767,10 +3159,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.9447E-09; max=  2.3716E-07
+ Mean square residual over all n,k,spin=   89.447E-10; max=  23.716E-08
  dfpt_looppert : ek2=    1.8142585669E+01
           f-sum rule ratio=    1.2306540431E+00
- prteigrs : about to open file t81_1WF1_EIG
+ prteigrs : about to open file t81t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -2822,7 +3214,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 27 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 27, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  15.
 
@@ -2838,14 +3239,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -2874,12 +3275,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 27, }
+solver: {iscf: -3, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.328208645574     -1.033E+01 3.941E-03 0.000E+00
+-ETOT  1  -10.328208645582     -1.033E+01 3.941E-03 0.000E+00
  ETOT  2  -10.328773731634     -5.651E-04 6.312E-06 0.000E+00
  ETOT  3  -10.328773915280     -1.836E-07 2.372E-07 0.000E+00
 
@@ -2891,10 +3297,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.9445E-09; max=  2.3716E-07
+ Mean square residual over all n,k,spin=   89.445E-10; max=  23.716E-08
  dfpt_looppert : ek2=    1.8142585669E+01
           f-sum rule ratio=    1.2306537967E+00
- prteigrs : about to open file t81_1WF1_EIG
+ prteigrs : about to open file t81t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  16  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  0.06250, kpt= -0.2500  0.5000  0.0000 (reduced coord)
@@ -2946,7 +3352,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 31 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 31, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -2969,14 +3384,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -3006,14 +3421,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 31, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.722988410528     -3.273E+01 3.215E-02 9.955E+02
- ETOT  2   16.457065419820     -8.266E+00 1.406E-02 4.191E+00
- ETOT  3   16.434737927075     -2.233E-02 3.170E-04 3.038E-01
+-ETOT  1   24.722988455030     -3.273E+01 3.215E-02 9.955E+02
+ ETOT  2   16.457065419204     -8.266E+00 1.406E-02 4.191E+00
+ ETOT  3   16.434737926999     -2.233E-02 3.170E-04 3.038E-01
 -open ddk wf file :t81o_DS21_1WF7
 
  scprqt:  WARNING -
@@ -3024,13 +3444,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.8356E-05; max=  3.1701E-04
+ Mean square residual over all n,k,spin=   18.356E-06; max=  31.701E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.94028866E+01 eigvalue=  -1.97222997E+00  local=  -2.73982824E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -6.84269484E+01  Hartree=   1.37687064E+01     xc=  -5.17296833E+00
+ loc psp =  -6.84269483E+01  Hartree=   1.37687064E+01     xc=  -5.17296833E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   2.18341009E+00     enl0=   1.04848125E+01   enl1=  -1.38918499E+01
@@ -3041,9 +3461,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.79346829E+01  frxc 2 =   9.50360604E+01
  Resulting in :
- 2DEtotal=    0.1643473793E+02 Ha. Also 2DEtotal=    0.447211962372E+03 eV
+ 2DEtotal=    0.1643473793E+02 Ha. Also 2DEtotal=    0.447211962370E+03 eV
     (2DErelax=   -4.1022463372E+01 Ha. 2DEnonrelax=    5.7457201299E+01 Ha)
-    (  non-var. 2DEtotal :    1.6297802166E+01 Ha)
+    (  non-var. 2DEtotal :    1.6297802167E+01 Ha)
 
 ================================================================================
 
@@ -3057,86 +3477,86 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.2978255312         0.0000000000
-   1    1   2    1         8.1489127656         0.0000000000
-   1    1   3    1         8.1489127656         0.0000000000
-   1    1   1    2        -6.4514925994         0.0000000000
-   1    1   2    2        -3.2257462997         0.0000000000
-   1    1   3    2        -3.2257462997         0.0000000000
-   1    1   1    4       -31.2145206071         0.0000000000
+   1    1   1    1        16.2978255260         0.0000000000
+   1    1   2    1         8.1489127630         0.0000000000
+   1    1   3    1         8.1489127630         0.0000000000
+   1    1   1    2        -6.4514925599         0.0000000000
+   1    1   2    2        -3.2257462799         0.0000000000
+   1    1   3    2        -3.2257462799         0.0000000000
+   1    1   1    4       -31.2145205949         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1489127656         0.0000000000
-   2    1   2    1        16.2978255312         0.0000000000
-   2    1   3    1         8.1489127656         0.0000000000
-   2    1   1    2        -3.2257462997         0.0000000000
-   2    1   2    2        -6.4514925994         0.0000000000
-   2    1   3    2        -3.2257462997         0.0000000000
+   2    1   1    1         8.1489127630         0.0000000000
+   2    1   2    1        16.2978255260         0.0000000000
+   2    1   3    1         8.1489127630         0.0000000000
+   2    1   1    2        -3.2257462799         0.0000000000
+   2    1   2    2        -6.4514925599         0.0000000000
+   2    1   3    2        -3.2257462799         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2145206071         0.0000000000
+   2    1   2    4       -31.2145205949         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1489127656         0.0000000000
-   3    1   2    1         8.1489127656         0.0000000000
-   3    1   3    1        16.2978255312         0.0000000000
-   3    1   1    2        -3.2257462997         0.0000000000
-   3    1   2    2        -3.2257462997         0.0000000000
-   3    1   3    2        -6.4514925994         0.0000000000
+   3    1   1    1         8.1489127630         0.0000000000
+   3    1   2    1         8.1489127630         0.0000000000
+   3    1   3    1        16.2978255260         0.0000000000
+   3    1   1    2        -3.2257462799         0.0000000000
+   3    1   2    2        -3.2257462799         0.0000000000
+   3    1   3    2        -6.4514925599         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2145206071         0.0000000000
+   3    1   3    4       -31.2145205949         0.0000000000
   
-   1    2   1    1        -6.4514925994        -0.0000000000
-   1    2   2    1        -3.2257462997        -0.0000000000
-   1    2   3    1        -3.2257462997        -0.0000000000
-   1    2   1    2        16.2978255312         0.0000000000
-   1    2   2    2         8.1489127656         0.0000000000
-   1    2   3    2         8.1489127656         0.0000000000
-   1    2   1    4       -31.2145206071         0.0000000000
+   1    2   1    1        -6.4514925599        -0.0000000000
+   1    2   2    1        -3.2257462799        -0.0000000000
+   1    2   3    1        -3.2257462799        -0.0000000000
+   1    2   1    2        16.2978255260         0.0000000000
+   1    2   2    2         8.1489127630         0.0000000000
+   1    2   3    2         8.1489127630         0.0000000000
+   1    2   1    4       -31.2145205949         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2257462997        -0.0000000000
-   2    2   2    1        -6.4514925994        -0.0000000000
-   2    2   3    1        -3.2257462997        -0.0000000000
-   2    2   1    2         8.1489127656         0.0000000000
-   2    2   2    2        16.2978255312         0.0000000000
-   2    2   3    2         8.1489127656         0.0000000000
+   2    2   1    1        -3.2257462799        -0.0000000000
+   2    2   2    1        -6.4514925599        -0.0000000000
+   2    2   3    1        -3.2257462799        -0.0000000000
+   2    2   1    2         8.1489127630         0.0000000000
+   2    2   2    2        16.2978255260         0.0000000000
+   2    2   3    2         8.1489127630         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2145206071         0.0000000000
+   2    2   2    4       -31.2145205949         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2257462997        -0.0000000000
-   3    2   2    1        -3.2257462997        -0.0000000000
-   3    2   3    1        -6.4514925994        -0.0000000000
-   3    2   1    2         8.1489127656         0.0000000000
-   3    2   2    2         8.1489127656         0.0000000000
-   3    2   3    2        16.2978255312         0.0000000000
+   3    2   1    1        -3.2257462799        -0.0000000000
+   3    2   2    1        -3.2257462799        -0.0000000000
+   3    2   3    1        -6.4514925599        -0.0000000000
+   3    2   1    2         8.1489127630         0.0000000000
+   3    2   2    2         8.1489127630         0.0000000000
+   3    2   3    2        16.2978255260         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2145206071         0.0000000000
+   3    2   3    4       -31.2145205949         0.0000000000
   
-   1    4   1    1       -31.2145206071         0.0000000000
+   1    4   1    1       -31.2145205949         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2145206071         0.0000000000
+   1    4   1    2       -31.2145205949         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2145206071         0.0000000000
+   2    4   2    1       -31.2145205949         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2145206071         0.0000000000
+   2    4   2    2       -31.2145205949         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2145206071         0.0000000000
+   3    4   3    1       -31.2145205949         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2145206071         0.0000000000
+   3    4   3    2       -31.2145205949         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -3144,47 +3564,47 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3120742018         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
-   1    1   1    2        -0.1235345414         0.0000000000
+   1    1   1    1         0.3120742017         0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   1    2        -0.1235345407         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.3120742018         0.0000000000
+   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   2    1         0.3120742017         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1235345414         0.0000000000
+   2    1   2    2        -0.1235345407         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3120742018         0.0000000000
+   3    1   3    1         0.3120742017         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1235345414         0.0000000000
+   3    1   3    2        -0.1235345407         0.0000000000
   
-   1    2   1    1        -0.1235345414        -0.0000000000
+   1    2   1    1        -0.1235345407        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3120742018         0.0000000000
+   1    2   1    2         0.3120742017         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1235345414        -0.0000000000
+   2    2   2    1        -0.1235345407        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.3120742018         0.0000000000
+   2    2   2    2         0.3120742017         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1235345414        -0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.3120742018         0.0000000000
+   3    2   3    1        -0.1235345407        -0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   2    2         0.0000000000         0.0000000000
+   3    2   3    2         0.3120742017         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
@@ -3192,33 +3612,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9679452509         0.0000000000
+   1    4   1    1        -0.9679452489         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9679452509         0.0000000000
+   2    4   2    1        -0.9679452489         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9679452509         0.0000000000
+   3    4   3    1        -0.9679452489         0.0000000000
   
-   1    4   1    2        -0.9679452509         0.0000000000
+   1    4   1    2        -0.9679452489         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9679452509         0.0000000000
+   2    4   2    2        -0.9679452489         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9679452509         0.0000000000
+   3    4   3    2        -0.9679452489         0.0000000000
   
   
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    1.919023E-03  1.919023E-03  1.919023E-03  2.916938E-03  2.916938E-03
@@ -3238,7 +3658,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 32 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 32, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -3256,14 +3685,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -3293,14 +3722,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 32, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.722988410528     -3.273E+01 3.215E-02 9.955E+02
- ETOT  2   16.457065419820     -8.266E+00 1.406E-02 4.191E+00
- ETOT  3   16.434737927075     -2.233E-02 3.170E-04 3.038E-01
+-ETOT  1   24.722988455029     -3.273E+01 3.215E-02 9.955E+02
+ ETOT  2   16.457065419204     -8.266E+00 1.406E-02 4.191E+00
+ ETOT  3   16.434737926999     -2.233E-02 3.170E-04 3.038E-01
 -open ddk wf file :t81o_DS21_1WF7
 
  scprqt:  WARNING -
@@ -3311,13 +3745,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.8356E-05; max=  3.1701E-04
+ Mean square residual over all n,k,spin=   18.356E-06; max=  31.701E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.94028866E+01 eigvalue=  -1.97222997E+00  local=  -2.73982824E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -6.84269484E+01  Hartree=   1.37687064E+01     xc=  -5.17296833E+00
+ loc psp =  -6.84269483E+01  Hartree=   1.37687064E+01     xc=  -5.17296833E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   2.18341009E+00     enl0=   1.04848125E+01   enl1=  -1.38918499E+01
@@ -3328,9 +3762,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.79346829E+01  frxc 2 =   9.50360604E+01
  Resulting in :
- 2DEtotal=    0.1643473793E+02 Ha. Also 2DEtotal=    0.447211962372E+03 eV
+ 2DEtotal=    0.1643473793E+02 Ha. Also 2DEtotal=    0.447211962370E+03 eV
     (2DErelax=   -4.1022463372E+01 Ha. 2DEnonrelax=    5.7457201299E+01 Ha)
-    (  non-var. 2DEtotal :    1.6297802166E+01 Ha)
+    (  non-var. 2DEtotal :    1.6297802167E+01 Ha)
 
 ================================================================================
 
@@ -3344,86 +3778,86 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.2978255312         0.0000000000
-   1    1   2    1         8.1489127656         0.0000000000
-   1    1   3    1         8.1489127656         0.0000000000
-   1    1   1    2        -6.4514925994         0.0000000000
-   1    1   2    2        -3.2257462997         0.0000000000
-   1    1   3    2        -3.2257462997         0.0000000000
-   1    1   1    4       -31.2145206071         0.0000000000
+   1    1   1    1        16.2978255260         0.0000000000
+   1    1   2    1         8.1489127630         0.0000000000
+   1    1   3    1         8.1489127630         0.0000000000
+   1    1   1    2        -6.4514925599         0.0000000000
+   1    1   2    2        -3.2257462799         0.0000000000
+   1    1   3    2        -3.2257462799         0.0000000000
+   1    1   1    4       -31.2145205949         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1489127656         0.0000000000
-   2    1   2    1        16.2978255312         0.0000000000
-   2    1   3    1         8.1489127656         0.0000000000
-   2    1   1    2        -3.2257462997         0.0000000000
-   2    1   2    2        -6.4514925994         0.0000000000
-   2    1   3    2        -3.2257462997         0.0000000000
+   2    1   1    1         8.1489127630         0.0000000000
+   2    1   2    1        16.2978255260         0.0000000000
+   2    1   3    1         8.1489127630         0.0000000000
+   2    1   1    2        -3.2257462799         0.0000000000
+   2    1   2    2        -6.4514925599         0.0000000000
+   2    1   3    2        -3.2257462799         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2145206071         0.0000000000
+   2    1   2    4       -31.2145205949         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1489127656         0.0000000000
-   3    1   2    1         8.1489127656         0.0000000000
-   3    1   3    1        16.2978255312         0.0000000000
-   3    1   1    2        -3.2257462997         0.0000000000
-   3    1   2    2        -3.2257462997         0.0000000000
-   3    1   3    2        -6.4514925994         0.0000000000
+   3    1   1    1         8.1489127630         0.0000000000
+   3    1   2    1         8.1489127630         0.0000000000
+   3    1   3    1        16.2978255260         0.0000000000
+   3    1   1    2        -3.2257462799         0.0000000000
+   3    1   2    2        -3.2257462799         0.0000000000
+   3    1   3    2        -6.4514925599         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2145206071         0.0000000000
+   3    1   3    4       -31.2145205949         0.0000000000
   
-   1    2   1    1        -6.4514925994        -0.0000000000
-   1    2   2    1        -3.2257462997        -0.0000000000
-   1    2   3    1        -3.2257462997        -0.0000000000
-   1    2   1    2        16.2978255312         0.0000000000
-   1    2   2    2         8.1489127656         0.0000000000
-   1    2   3    2         8.1489127656         0.0000000000
-   1    2   1    4       -31.2145206071         0.0000000000
+   1    2   1    1        -6.4514925599        -0.0000000000
+   1    2   2    1        -3.2257462799        -0.0000000000
+   1    2   3    1        -3.2257462799        -0.0000000000
+   1    2   1    2        16.2978255260         0.0000000000
+   1    2   2    2         8.1489127630         0.0000000000
+   1    2   3    2         8.1489127630         0.0000000000
+   1    2   1    4       -31.2145205949         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2257462997        -0.0000000000
-   2    2   2    1        -6.4514925994        -0.0000000000
-   2    2   3    1        -3.2257462997        -0.0000000000
-   2    2   1    2         8.1489127656         0.0000000000
-   2    2   2    2        16.2978255312         0.0000000000
-   2    2   3    2         8.1489127656         0.0000000000
+   2    2   1    1        -3.2257462799        -0.0000000000
+   2    2   2    1        -6.4514925599        -0.0000000000
+   2    2   3    1        -3.2257462799        -0.0000000000
+   2    2   1    2         8.1489127630         0.0000000000
+   2    2   2    2        16.2978255260         0.0000000000
+   2    2   3    2         8.1489127630         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2145206071         0.0000000000
+   2    2   2    4       -31.2145205949         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2257462997        -0.0000000000
-   3    2   2    1        -3.2257462997        -0.0000000000
-   3    2   3    1        -6.4514925994        -0.0000000000
-   3    2   1    2         8.1489127656         0.0000000000
-   3    2   2    2         8.1489127656         0.0000000000
-   3    2   3    2        16.2978255312         0.0000000000
+   3    2   1    1        -3.2257462799        -0.0000000000
+   3    2   2    1        -3.2257462799        -0.0000000000
+   3    2   3    1        -6.4514925599        -0.0000000000
+   3    2   1    2         8.1489127630         0.0000000000
+   3    2   2    2         8.1489127630         0.0000000000
+   3    2   3    2        16.2978255260         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2145206071         0.0000000000
+   3    2   3    4       -31.2145205949         0.0000000000
   
-   1    4   1    1       -31.2145206071         0.0000000000
+   1    4   1    1       -31.2145205949         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2145206071         0.0000000000
+   1    4   1    2       -31.2145205949         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2145206071         0.0000000000
+   2    4   2    1       -31.2145205949         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2145206071         0.0000000000
+   2    4   2    2       -31.2145205949         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2145206071         0.0000000000
+   3    4   3    1       -31.2145205949         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2145206071         0.0000000000
+   3    4   3    2       -31.2145205949         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -3431,47 +3865,47 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3120742018         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   1    1         0.3120742017         0.0000000000
+   1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1235345414         0.0000000000
+   1    1   1    2        -0.1235345407         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.3120742018         0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
+   2    1   2    1         0.3120742017         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1235345414         0.0000000000
+   2    1   2    2        -0.1235345407         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3120742018         0.0000000000
+   3    1   3    1         0.3120742017         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1235345414         0.0000000000
+   3    1   3    2        -0.1235345407         0.0000000000
   
-   1    2   1    1        -0.1235345414        -0.0000000000
+   1    2   1    1        -0.1235345407        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3120742018         0.0000000000
-   1    2   2    2        -0.0000000000         0.0000000000
+   1    2   1    2         0.3120742017         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1235345414        -0.0000000000
+   2    2   2    1        -0.1235345407        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2        -0.0000000000         0.0000000000
-   2    2   2    2         0.3120742018         0.0000000000
-   2    2   3    2        -0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   2    2         0.3120742017         0.0000000000
+   2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1235345414        -0.0000000000
+   3    2   3    1        -0.1235345407        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.3120742018         0.0000000000
+   3    2   3    2         0.3120742017         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
@@ -3479,33 +3913,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9679452509         0.0000000000
+   1    4   1    1        -0.9679452489         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9679452509         0.0000000000
+   2    4   2    1        -0.9679452489         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9679452509         0.0000000000
+   3    4   3    1        -0.9679452489         0.0000000000
   
-   1    4   1    2        -0.9679452509         0.0000000000
+   1    4   1    2        -0.9679452489         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9679452509         0.0000000000
+   2    4   2    2        -0.9679452489         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9679452509         0.0000000000
+   3    4   3    2        -0.9679452489         0.0000000000
   
   
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    1.919023E-03  1.919023E-03  1.919023E-03  2.916938E-03  2.916938E-03
@@ -3525,7 +3959,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 33 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 33, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  13.
 
@@ -3548,14 +3991,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -3585,9 +4028,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 33, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.550018072864     -3.130E+01 2.635E-02 8.532E+02
@@ -3603,7 +4051,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.0762E-05; max=  3.9254E-04
+ Mean square residual over all n,k,spin=   20.762E-06; max=  39.254E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3797,7 +4245,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   
   
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.359406E-03 -2.359406E-03 -2.359406E-03 -5.615664E-04 -5.615664E-04
@@ -3817,7 +4265,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 34 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 34, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  13.
 
@@ -3835,14 +4292,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -3872,9 +4329,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 34, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.550054189387     -3.130E+01 2.635E-02 8.532E+02
@@ -3890,7 +4352,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.0762E-05; max=  3.9254E-04
+ Mean square residual over all n,k,spin=   20.762E-06; max=  39.254E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -4011,7 +4473,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1        -0.1505736200         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        -0.1344282796         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
@@ -4035,21 +4497,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2        -0.1505736200         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
+   1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1344282796        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
+   2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2        -0.1505736200         0.0000000000
-   2    2   3    2        -0.0000000000         0.0000000000
+   2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1344282796        -0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2        -0.0000000000         0.0000000000
+   3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2        -0.1505736200         0.0000000000
   
   Effective charges, in cartesian coordinates,
@@ -4084,7 +4546,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   
   
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.359406E-03 -2.359406E-03 -2.359406E-03 -5.615682E-04 -5.615682E-04
@@ -4104,7 +4566,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 35 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 35, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  15.
 
@@ -4127,14 +4598,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -4164,14 +4635,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 35, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.790536894273     -3.276E+01 3.209E-02 9.939E+02
- ETOT  2   16.538034932587     -8.253E+00 1.401E-02 4.203E+00
- ETOT  3   16.515666156510     -2.237E-02 3.161E-04 3.030E-01
+-ETOT  1   24.790536882567     -3.276E+01 3.209E-02 9.939E+02
+ ETOT  2   16.538034932750     -8.253E+00 1.401E-02 4.203E+00
+ ETOT  3   16.515666156531     -2.237E-02 3.161E-04 3.030E-01
 -open ddk wf file :t81o_DS25_1WF7
 
  scprqt:  WARNING -
@@ -4182,7 +4658,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.8339E-05; max=  3.1607E-04
+ Mean square residual over all n,k,spin=   18.339E-06; max=  31.607E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -4199,9 +4675,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.79655924E+01  frxc 2 =   9.51544201E+01
  Resulting in :
- 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131488E+03 eV
+ 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131489E+03 eV
     (2DErelax=   -4.1034253308E+01 Ha. 2DEnonrelax=    5.7549919464E+01 Ha)
-    (  non-var. 2DEtotal :    1.6378956034E+01 Ha)
+    (  non-var. 2DEtotal :    1.6378956033E+01 Ha)
 
 ================================================================================
 
@@ -4215,86 +4691,86 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.3789794555         0.0000000000
-   1    1   2    1         8.1894897278         0.0000000000
-   1    1   3    1         8.1894897278         0.0000000000
-   1    1   1    2        -6.4481361904         0.0000000000
-   1    1   2    2        -3.2240680952         0.0000000000
-   1    1   3    2        -3.2240680952         0.0000000000
-   1    1   1    4       -31.2193471147         0.0000000000
+   1    1   1    1        16.3789794568         0.0000000000
+   1    1   2    1         8.1894897284         0.0000000000
+   1    1   3    1         8.1894897284         0.0000000000
+   1    1   1    2        -6.4481362009         0.0000000000
+   1    1   2    2        -3.2240681004         0.0000000000
+   1    1   3    2        -3.2240681004         0.0000000000
+   1    1   1    4       -31.2193471173         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1894897278         0.0000000000
-   2    1   2    1        16.3789794555         0.0000000000
-   2    1   3    1         8.1894897278         0.0000000000
-   2    1   1    2        -3.2240680952         0.0000000000
-   2    1   2    2        -6.4481361904         0.0000000000
-   2    1   3    2        -3.2240680952         0.0000000000
+   2    1   1    1         8.1894897284         0.0000000000
+   2    1   2    1        16.3789794568         0.0000000000
+   2    1   3    1         8.1894897284         0.0000000000
+   2    1   1    2        -3.2240681004         0.0000000000
+   2    1   2    2        -6.4481362009         0.0000000000
+   2    1   3    2        -3.2240681004         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2193471147         0.0000000000
+   2    1   2    4       -31.2193471173         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1894897278         0.0000000000
-   3    1   2    1         8.1894897278         0.0000000000
-   3    1   3    1        16.3789794555         0.0000000000
-   3    1   1    2        -3.2240680952         0.0000000000
-   3    1   2    2        -3.2240680952         0.0000000000
-   3    1   3    2        -6.4481361904         0.0000000000
+   3    1   1    1         8.1894897284         0.0000000000
+   3    1   2    1         8.1894897284         0.0000000000
+   3    1   3    1        16.3789794568         0.0000000000
+   3    1   1    2        -3.2240681004         0.0000000000
+   3    1   2    2        -3.2240681004         0.0000000000
+   3    1   3    2        -6.4481362009         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2193471147         0.0000000000
+   3    1   3    4       -31.2193471173         0.0000000000
   
-   1    2   1    1        -6.4481361904        -0.0000000000
-   1    2   2    1        -3.2240680952        -0.0000000000
-   1    2   3    1        -3.2240680952        -0.0000000000
-   1    2   1    2        16.3789794555         0.0000000000
-   1    2   2    2         8.1894897278         0.0000000000
-   1    2   3    2         8.1894897278         0.0000000000
-   1    2   1    4       -31.2193471147         0.0000000000
+   1    2   1    1        -6.4481362009        -0.0000000000
+   1    2   2    1        -3.2240681004        -0.0000000000
+   1    2   3    1        -3.2240681004        -0.0000000000
+   1    2   1    2        16.3789794568         0.0000000000
+   1    2   2    2         8.1894897284         0.0000000000
+   1    2   3    2         8.1894897284         0.0000000000
+   1    2   1    4       -31.2193471173         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2240680952        -0.0000000000
-   2    2   2    1        -6.4481361904        -0.0000000000
-   2    2   3    1        -3.2240680952        -0.0000000000
-   2    2   1    2         8.1894897278         0.0000000000
-   2    2   2    2        16.3789794555         0.0000000000
-   2    2   3    2         8.1894897278         0.0000000000
+   2    2   1    1        -3.2240681004        -0.0000000000
+   2    2   2    1        -6.4481362009        -0.0000000000
+   2    2   3    1        -3.2240681004        -0.0000000000
+   2    2   1    2         8.1894897284         0.0000000000
+   2    2   2    2        16.3789794568         0.0000000000
+   2    2   3    2         8.1894897284         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2193471147         0.0000000000
+   2    2   2    4       -31.2193471173         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2240680952        -0.0000000000
-   3    2   2    1        -3.2240680952        -0.0000000000
-   3    2   3    1        -6.4481361904        -0.0000000000
-   3    2   1    2         8.1894897278         0.0000000000
-   3    2   2    2         8.1894897278         0.0000000000
-   3    2   3    2        16.3789794555         0.0000000000
+   3    2   1    1        -3.2240681004        -0.0000000000
+   3    2   2    1        -3.2240681004        -0.0000000000
+   3    2   3    1        -6.4481362009        -0.0000000000
+   3    2   1    2         8.1894897284         0.0000000000
+   3    2   2    2         8.1894897284         0.0000000000
+   3    2   3    2        16.3789794568         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2193471147         0.0000000000
+   3    2   3    4       -31.2193471173         0.0000000000
   
-   1    4   1    1       -31.2193471147         0.0000000000
+   1    4   1    1       -31.2193471173         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2193471147         0.0000000000
+   1    4   1    2       -31.2193471173         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2193471147         0.0000000000
+   2    4   2    1       -31.2193471173         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2193471147         0.0000000000
+   2    4   2    2       -31.2193471173         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2193471147         0.0000000000
+   3    4   3    1       -31.2193471173         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2193471147         0.0000000000
+   3    4   3    2       -31.2193471173         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -4305,25 +4781,25 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    1    1   1    1         0.3136281543         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1234702722         0.0000000000
+   1    1   1    2        -0.1234702724         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.3136281543         0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1234702722         0.0000000000
+   2    1   2    2        -0.1234702724         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.3136281543         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1234702722         0.0000000000
+   3    1   3    2        -0.1234702724         0.0000000000
   
-   1    2   1    1        -0.1234702722        -0.0000000000
+   1    2   1    1        -0.1234702724        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.3136281543         0.0000000000
@@ -4331,7 +4807,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1234702722        -0.0000000000
+   2    2   2    1        -0.1234702724        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.3136281543         0.0000000000
@@ -4339,7 +4815,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1234702722        -0.0000000000
+   3    2   3    1        -0.1234702724        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2         0.3136281543         0.0000000000
@@ -4350,33 +4826,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9687134134         0.0000000000
+   1    4   1    1        -0.9687134138         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9687134134         0.0000000000
+   2    4   2    1        -0.9687134138         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9687134134         0.0000000000
+   3    4   3    1        -0.9687134138         0.0000000000
   
-   1    4   1    2        -0.9687134134         0.0000000000
+   1    4   1    2        -0.9687134138         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9687134134         0.0000000000
+   2    4   2    2        -0.9687134138         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9687134134         0.0000000000
+   3    4   3    2        -0.9687134138         0.0000000000
   
   
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    1.927241E-03  1.927241E-03  1.927241E-03  2.921921E-03  2.921921E-03
@@ -4396,7 +4872,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 36 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 36, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  15.
 
@@ -4414,14 +4899,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -4451,14 +4936,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 36, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.790536894272     -3.276E+01 3.209E-02 9.939E+02
- ETOT  2   16.538034932586     -8.253E+00 1.401E-02 4.203E+00
- ETOT  3   16.515666156509     -2.237E-02 3.161E-04 3.030E-01
+-ETOT  1   24.790536882566     -3.276E+01 3.209E-02 9.939E+02
+ ETOT  2   16.538034932749     -8.253E+00 1.401E-02 4.203E+00
+ ETOT  3   16.515666156530     -2.237E-02 3.161E-04 3.030E-01
 -open ddk wf file :t81o_DS25_1WF7
 
  scprqt:  WARNING -
@@ -4469,7 +4959,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.8339E-05; max=  3.1607E-04
+ Mean square residual over all n,k,spin=   18.339E-06; max=  31.607E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -4486,9 +4976,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -8.79655924E+01  frxc 2 =   9.51544201E+01
  Resulting in :
- 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131488E+03 eV
+ 2DEtotal=    0.1651566616E+02 Ha. Also 2DEtotal=    0.449414131489E+03 eV
     (2DErelax=   -4.1034253308E+01 Ha. 2DEnonrelax=    5.7549919464E+01 Ha)
-    (  non-var. 2DEtotal :    1.6378956034E+01 Ha)
+    (  non-var. 2DEtotal :    1.6378956033E+01 Ha)
 
 ================================================================================
 
@@ -4502,86 +4992,86 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.3789794555         0.0000000000
-   1    1   2    1         8.1894897278         0.0000000000
-   1    1   3    1         8.1894897278         0.0000000000
-   1    1   1    2        -6.4481361904         0.0000000000
-   1    1   2    2        -3.2240680952         0.0000000000
-   1    1   3    2        -3.2240680952         0.0000000000
-   1    1   1    4       -31.2193471147         0.0000000000
+   1    1   1    1        16.3789794568         0.0000000000
+   1    1   2    1         8.1894897284         0.0000000000
+   1    1   3    1         8.1894897284         0.0000000000
+   1    1   1    2        -6.4481362009         0.0000000000
+   1    1   2    2        -3.2240681004         0.0000000000
+   1    1   3    2        -3.2240681004         0.0000000000
+   1    1   1    4       -31.2193471173         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1894897278         0.0000000000
-   2    1   2    1        16.3789794555         0.0000000000
-   2    1   3    1         8.1894897278         0.0000000000
-   2    1   1    2        -3.2240680952         0.0000000000
-   2    1   2    2        -6.4481361904         0.0000000000
-   2    1   3    2        -3.2240680952         0.0000000000
+   2    1   1    1         8.1894897284         0.0000000000
+   2    1   2    1        16.3789794568         0.0000000000
+   2    1   3    1         8.1894897284         0.0000000000
+   2    1   1    2        -3.2240681004         0.0000000000
+   2    1   2    2        -6.4481362009         0.0000000000
+   2    1   3    2        -3.2240681004         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2193471147         0.0000000000
+   2    1   2    4       -31.2193471173         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1894897278         0.0000000000
-   3    1   2    1         8.1894897278         0.0000000000
-   3    1   3    1        16.3789794555         0.0000000000
-   3    1   1    2        -3.2240680952         0.0000000000
-   3    1   2    2        -3.2240680952         0.0000000000
-   3    1   3    2        -6.4481361904         0.0000000000
+   3    1   1    1         8.1894897284         0.0000000000
+   3    1   2    1         8.1894897284         0.0000000000
+   3    1   3    1        16.3789794568         0.0000000000
+   3    1   1    2        -3.2240681004         0.0000000000
+   3    1   2    2        -3.2240681004         0.0000000000
+   3    1   3    2        -6.4481362009         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2193471147         0.0000000000
+   3    1   3    4       -31.2193471173         0.0000000000
   
-   1    2   1    1        -6.4481361904        -0.0000000000
-   1    2   2    1        -3.2240680952        -0.0000000000
-   1    2   3    1        -3.2240680952        -0.0000000000
-   1    2   1    2        16.3789794555         0.0000000000
-   1    2   2    2         8.1894897278         0.0000000000
-   1    2   3    2         8.1894897278         0.0000000000
-   1    2   1    4       -31.2193471147         0.0000000000
+   1    2   1    1        -6.4481362009        -0.0000000000
+   1    2   2    1        -3.2240681004        -0.0000000000
+   1    2   3    1        -3.2240681004        -0.0000000000
+   1    2   1    2        16.3789794568         0.0000000000
+   1    2   2    2         8.1894897284         0.0000000000
+   1    2   3    2         8.1894897284         0.0000000000
+   1    2   1    4       -31.2193471173         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2240680952        -0.0000000000
-   2    2   2    1        -6.4481361904        -0.0000000000
-   2    2   3    1        -3.2240680952        -0.0000000000
-   2    2   1    2         8.1894897278         0.0000000000
-   2    2   2    2        16.3789794555         0.0000000000
-   2    2   3    2         8.1894897278         0.0000000000
+   2    2   1    1        -3.2240681004        -0.0000000000
+   2    2   2    1        -6.4481362009        -0.0000000000
+   2    2   3    1        -3.2240681004        -0.0000000000
+   2    2   1    2         8.1894897284         0.0000000000
+   2    2   2    2        16.3789794568         0.0000000000
+   2    2   3    2         8.1894897284         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2193471147         0.0000000000
+   2    2   2    4       -31.2193471173         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2240680952        -0.0000000000
-   3    2   2    1        -3.2240680952        -0.0000000000
-   3    2   3    1        -6.4481361904        -0.0000000000
-   3    2   1    2         8.1894897278         0.0000000000
-   3    2   2    2         8.1894897278         0.0000000000
-   3    2   3    2        16.3789794555         0.0000000000
+   3    2   1    1        -3.2240681004        -0.0000000000
+   3    2   2    1        -3.2240681004        -0.0000000000
+   3    2   3    1        -6.4481362009        -0.0000000000
+   3    2   1    2         8.1894897284         0.0000000000
+   3    2   2    2         8.1894897284         0.0000000000
+   3    2   3    2        16.3789794568         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2193471147         0.0000000000
+   3    2   3    4       -31.2193471173         0.0000000000
   
-   1    4   1    1       -31.2193471147         0.0000000000
+   1    4   1    1       -31.2193471173         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2193471147         0.0000000000
+   1    4   1    2       -31.2193471173         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2193471147         0.0000000000
+   2    4   2    1       -31.2193471173         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2193471147         0.0000000000
+   2    4   2    2       -31.2193471173         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2193471147         0.0000000000
+   3    4   3    1       -31.2193471173         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2193471147         0.0000000000
+   3    4   3    2       -31.2193471173         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -4592,7 +5082,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    1    1   1    1         0.3136281543         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1234702722         0.0000000000
+   1    1   1    2        -0.1234702724         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
@@ -4600,7 +5090,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    2    1   2    1         0.3136281543         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1234702722         0.0000000000
+   2    1   2    2        -0.1234702724         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
@@ -4608,9 +5098,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    3    1   3    1         0.3136281543         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1234702722         0.0000000000
+   3    1   3    2        -0.1234702724         0.0000000000
   
-   1    2   1    1        -0.1234702722        -0.0000000000
+   1    2   1    1        -0.1234702724        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.3136281543         0.0000000000
@@ -4618,7 +5108,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1234702722        -0.0000000000
+   2    2   2    1        -0.1234702724        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2         0.3136281543         0.0000000000
@@ -4626,7 +5116,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1234702722        -0.0000000000
+   3    2   3    1        -0.1234702724        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2         0.3136281543         0.0000000000
@@ -4637,33 +5127,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9687134134         0.0000000000
+   1    4   1    1        -0.9687134138         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9687134134         0.0000000000
+   2    4   2    1        -0.9687134138         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9687134134         0.0000000000
+   3    4   3    1        -0.9687134138         0.0000000000
   
-   1    4   1    2        -0.9687134134         0.0000000000
+   1    4   1    2        -0.9687134138         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9687134134         0.0000000000
+   2    4   2    2        -0.9687134138         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9687134134         0.0000000000
+   3    4   3    2        -0.9687134138         0.0000000000
   
   
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    1.927241E-03  1.927241E-03  1.927241E-03  2.921921E-03  2.921921E-03
@@ -4683,7 +5173,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
 ================================================================================
 == DATASET 37 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 37, }
+dimensions: {natom: 2, nkpt: 16, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  15.
 
@@ -4701,14 +5200,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
     3.04000000000000    1.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
   1.025211          amesh (Hamman grid)
- pspatm : epsatm=    9.10637364
+  pspatm : epsatm=    9.10637364
          --- l  ekb(1:nproj) -->
              0    1.487262
              1    0.696903
@@ -4738,14 +5237,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 -inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 37, }
+solver: {iscf: 7, nstep: 3, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   24.790536407331     -3.276E+01 3.209E-02 9.939E+02
- ETOT  2   16.538038719256     -8.252E+00 1.401E-02 4.203E+00
- ETOT  3   16.515669941961     -2.237E-02 3.161E-04 3.030E-01
+-ETOT  1   24.790536395625     -3.276E+01 3.209E-02 9.939E+02
+ ETOT  2   16.538038719419     -8.252E+00 1.401E-02 4.203E+00
+ ETOT  3   16.515669941982     -2.237E-02 3.161E-04 3.030E-01
 -open ddk wf file :t81o_DS25_1WF7
 
  scprqt:  WARNING -
@@ -4756,7 +5260,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.8339E-05; max=  3.1606E-04
+ Mean square residual over all n,k,spin=   18.339E-06; max=  31.606E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -4765,7 +5269,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
  loc psp =  -6.84494693E+01  Hartree=   1.37761958E+01     xc=  -5.18469884E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   2.18430139E+00     enl0=   1.04899755E+01   enl1=  -1.38924425E+01
+    edocc=   2.18430139E+00     enl0=   1.04899755E+01   enl1=  -1.38924424E+01
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -4.10342458E+01
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -4789,86 +5293,86 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        16.3789832890         0.0000000000
-   1    1   2    1         8.1894916445         0.0000000000
-   1    1   3    1         8.1894916445         0.0000000000
-   1    1   1    2        -6.4481376707         0.0000000000
-   1    1   2    2        -3.2240688353         0.0000000000
-   1    1   3    2        -3.2240688353         0.0000000000
-   1    1   1    4       -31.2193417988         0.0000000000
+   1    1   1    1        16.3789832903         0.0000000000
+   1    1   2    1         8.1894916451         0.0000000000
+   1    1   3    1         8.1894916451         0.0000000000
+   1    1   1    2        -6.4481376811         0.0000000000
+   1    1   2    2        -3.2240688405         0.0000000000
+   1    1   3    2        -3.2240688405         0.0000000000
+   1    1   1    4       -31.2193418014         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         8.1894916445         0.0000000000
-   2    1   2    1        16.3789832890         0.0000000000
-   2    1   3    1         8.1894916445         0.0000000000
-   2    1   1    2        -3.2240688353         0.0000000000
-   2    1   2    2        -6.4481376707         0.0000000000
-   2    1   3    2        -3.2240688353         0.0000000000
+   2    1   1    1         8.1894916451         0.0000000000
+   2    1   2    1        16.3789832903         0.0000000000
+   2    1   3    1         8.1894916451         0.0000000000
+   2    1   1    2        -3.2240688405         0.0000000000
+   2    1   2    2        -6.4481376811         0.0000000000
+   2    1   3    2        -3.2240688405         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   2    1   2    4       -31.2193417988         0.0000000000
+   2    1   2    4       -31.2193418014         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         8.1894916445         0.0000000000
-   3    1   2    1         8.1894916445         0.0000000000
-   3    1   3    1        16.3789832890         0.0000000000
-   3    1   1    2        -3.2240688353         0.0000000000
-   3    1   2    2        -3.2240688353         0.0000000000
-   3    1   3    2        -6.4481376707         0.0000000000
+   3    1   1    1         8.1894916451         0.0000000000
+   3    1   2    1         8.1894916451         0.0000000000
+   3    1   3    1        16.3789832903         0.0000000000
+   3    1   1    2        -3.2240688405         0.0000000000
+   3    1   2    2        -3.2240688405         0.0000000000
+   3    1   3    2        -6.4481376811         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
-   3    1   3    4       -31.2193417988         0.0000000000
+   3    1   3    4       -31.2193418014         0.0000000000
   
-   1    2   1    1        -6.4481376707        -0.0000000000
-   1    2   2    1        -3.2240688353        -0.0000000000
-   1    2   3    1        -3.2240688353        -0.0000000000
-   1    2   1    2        16.3789832890         0.0000000000
-   1    2   2    2         8.1894916445         0.0000000000
-   1    2   3    2         8.1894916445         0.0000000000
-   1    2   1    4       -31.2193417988         0.0000000000
+   1    2   1    1        -6.4481376811        -0.0000000000
+   1    2   2    1        -3.2240688405        -0.0000000000
+   1    2   3    1        -3.2240688405        -0.0000000000
+   1    2   1    2        16.3789832903         0.0000000000
+   1    2   2    2         8.1894916451         0.0000000000
+   1    2   3    2         8.1894916451         0.0000000000
+   1    2   1    4       -31.2193418014         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1        -3.2240688353        -0.0000000000
-   2    2   2    1        -6.4481376707        -0.0000000000
-   2    2   3    1        -3.2240688353        -0.0000000000
-   2    2   1    2         8.1894916445         0.0000000000
-   2    2   2    2        16.3789832890         0.0000000000
-   2    2   3    2         8.1894916445         0.0000000000
+   2    2   1    1        -3.2240688405        -0.0000000000
+   2    2   2    1        -6.4481376811        -0.0000000000
+   2    2   3    1        -3.2240688405        -0.0000000000
+   2    2   1    2         8.1894916451         0.0000000000
+   2    2   2    2        16.3789832903         0.0000000000
+   2    2   3    2         8.1894916451         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -31.2193417988         0.0000000000
+   2    2   2    4       -31.2193418014         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
   
-   3    2   1    1        -3.2240688353        -0.0000000000
-   3    2   2    1        -3.2240688353        -0.0000000000
-   3    2   3    1        -6.4481376707        -0.0000000000
-   3    2   1    2         8.1894916445         0.0000000000
-   3    2   2    2         8.1894916445         0.0000000000
-   3    2   3    2        16.3789832890         0.0000000000
+   3    2   1    1        -3.2240688405        -0.0000000000
+   3    2   2    1        -3.2240688405        -0.0000000000
+   3    2   3    1        -6.4481376811        -0.0000000000
+   3    2   1    2         8.1894916451         0.0000000000
+   3    2   2    2         8.1894916451         0.0000000000
+   3    2   3    2        16.3789832903         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -31.2193417988         0.0000000000
+   3    2   3    4       -31.2193418014         0.0000000000
   
-   1    4   1    1       -31.2193417988         0.0000000000
+   1    4   1    1       -31.2193418014         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
    1    4   3    1         0.0000000000         0.0000000000
-   1    4   1    2       -31.2193417988         0.0000000000
+   1    4   1    2       -31.2193418014         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
   
    2    4   1    1         0.0000000000         0.0000000000
-   2    4   2    1       -31.2193417988         0.0000000000
+   2    4   2    1       -31.2193418014         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
-   2    4   2    2       -31.2193417988         0.0000000000
+   2    4   2    2       -31.2193418014         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
-   3    4   3    1       -31.2193417988         0.0000000000
+   3    4   3    1       -31.2193418014         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
-   3    4   3    2       -31.2193417988         0.0000000000
+   3    4   3    2       -31.2193418014         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -4879,25 +5383,25 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    1    1   1    1         0.3136282277         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.1234703006         0.0000000000
+   1    1   1    2        -0.1234703008         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.3136282277         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
-   2    1   2    2        -0.1234703006         0.0000000000
+   2    1   2    2        -0.1234703008         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.3136282277         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
-   3    1   3    2        -0.1234703006         0.0000000000
+   3    1   3    2        -0.1234703008         0.0000000000
   
-   1    2   1    1        -0.1234703006        -0.0000000000
+   1    2   1    1        -0.1234703008        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.3136282277         0.0000000000
@@ -4905,7 +5409,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
-   2    2   2    1        -0.1234703006        -0.0000000000
+   2    2   2    1        -0.1234703008        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   2    2         0.3136282277         0.0000000000
@@ -4913,7 +5417,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
-   3    2   3    1        -0.1234703006        -0.0000000000
+   3    2   3    1        -0.1234703008        -0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.3136282277         0.0000000000
@@ -4924,33 +5428,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -0.9687125674         0.0000000000
+   1    4   1    1        -0.9687125678         0.0000000000
    2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1        -0.9687125674         0.0000000000
+   2    4   2    1        -0.9687125678         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1        -0.9687125674         0.0000000000
+   3    4   3    1        -0.9687125678         0.0000000000
   
-   1    4   1    2        -0.9687125674         0.0000000000
+   1    4   1    2        -0.9687125678         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9687125674         0.0000000000
+   2    4   2    2        -0.9687125678         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -0.9687125674         0.0000000000
+   3    4   3    2        -0.9687125678         0.0000000000
   
   
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    1.927241E-03  1.927241E-03  1.927241E-03  2.921921E-03  2.921921E-03
@@ -5001,10 +5505,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      68.000      67.977
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart12   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart13   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart14    7.0724212165E-20 -4.2434527299E-20 -1.4144842433E-20
-                      -7.0724212165E-20  4.2434527299E-20  1.4144842433E-20
+            fcart13   -9.9013897031E-20  9.9013897031E-20 -4.2434527299E-20
+                       9.9013897031E-20 -9.9013897031E-20  4.2434527299E-20
+            fcart14    2.8289684866E-20 -2.8289684866E-20  2.8289684866E-20
+                      -2.8289684866E-20  2.8289684866E-20 -2.8289684866E-20
             fcart15   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart16   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -5816,51 +6320,79 @@ P          mk1mem37        16
 -
 - [1] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
-- Comment : to be cited when LibXC is used (negative value of ixc)
+- Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
-- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
-- Comment : Some pseudopotential generated using the FHI code were used.
+- Comment: Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- [6] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [7] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [6] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
--
-- Proc.   0 individual time (sec): cpu=         23.8  wall=         16.7
+- Proc.   0 individual time (sec): cpu=         16.7  wall=         25.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered 165 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.8  wall=         16.7
+.Delivered  73 WARNINGs and 105 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.7  wall=         25.2

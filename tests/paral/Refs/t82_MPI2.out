@@ -1,8 +1,8 @@
 
-.Version 8.5.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+.Version 8.11.12 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,36 +14,38 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 29 Jun 2017.
-- ( at 10h44 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 16h37 )
   
 -  nproc =    2
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml
+-t82_sys.xml
  to initialize the multibinit input
 
 ================================================================================
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags :
+ Flags : 
      ifcflag         1
    prt_model         1
      strcpli        -1
  Fit the coefficients :
          fit_coeff  1
  fit_generateCoeff  1
-        fit_cutoff  7.00000000E+00
+        fit_cutoff  3.80000000E+00
         fit_option  0
+         fit_iatom  -1
         fit_ncoeff  2
           fit_grid  1  1  1
          ts_option  0
-    fit_rangePower  3  4
+    fit_rangePower  3  3
     fit_anhaStrain  0
     fit_SPCoupling  1
+      fit_SPC_maxS  1
      fit_nfixcoeff  2
       fit_fixcoeff          1      2
  Miscellaneous information :
@@ -69,17 +71,21 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_sys.xml with LibXML library
+-Opening the file t82_sys.xml
+-Reading the file t82_sys.xml with LibXML library
+
+ Bound for ifc SR:
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
 
 ================================================================================
  Generation of new ifc
 
  dipdip is set to one, the dipole-dipole interation is recompute.
 
- New bound for ifc (long+short):
+ Bound for ifc (LR):
 
- x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+ x=[  0  0], y=[  0  0] and z=[  0  0]
 
  Computation of new dipole-dipole interaction.
 
@@ -153,13 +159,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t14_coeffs.xml with LibXML library
+-Opening the file t82_coeffs.xml
+-Reading the file t82_coeffs.xml with LibXML library
 
 ================================================================================
 
--Reading the file the HIST file :
--/home/alex/dev/abinit_git/tests/paral/Input/t101_HIST
+-Reading the training-set file :
+-t81_HIST
 
 
 ================================================================================
@@ -170,15 +176,16 @@ dipdip_range         1         1         1
 
  The coefficients present in the effective potential will be used for the fit
 
- The coefficients for the fit will be generated
- 825 coefficients generated 
+ The coefficients for the fit will be generated with all cross terms
+
+ 60 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/atm):
-   Energy          :   7.4104176514268272E-01
+   Energy          :   7.4104176514268294E-01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460718152E-03
-   Forces          :   7.3678367059221732E-03
-   Stresses        :   1.3882954014964190E-04
+   Forces+Stresses :   7.5066662460719020E-03
+   Forces          :   7.3678367059221766E-03
+   Stresses        :   1.3882954014972623E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
@@ -191,12 +198,12 @@ dipdip_range         1         1         1
  3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
  4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
- Mean Standard Deviation values at the end of the fit process (meV/atm):
-   Energy          :   4.0062562511725264E-01
+ Mean Standard Deviation values at the end of the fit process (meV/atm): 
+   Energy          :   4.0062562511725547E-01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836314273E-03
-   Forces          :   3.6336164702180729E-03
-   Stresses        :   1.5400161341335444E-04
+   Forces+Stresses :   3.7876180836315327E-03
+   Forces          :   3.6336164702180768E-03
+   Stresses        :   1.5400161341345538E-04
 
 
 ================================================================================
@@ -206,10 +213,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.2
 
 ================================================================================
 
-+Total cpu time      0.045  and wall time      0.045 sec
++Total cpu time     20.348  and wall time     20.353 sec
 
  multibinit : the run completed succesfully.

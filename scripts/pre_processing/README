@@ -3,16 +3,3 @@ pre-processing tools
 
 - Cell2Abinit.py
     MaterialsStudio Cell file to Abinit Converter.
-
-- abchk.pl
-    Check that all input variables exist.
-
-- chkinabi.pl
-    Check that all input variables exist.
-
-- tokenize_file.py
-    Make a file into a list of tokens.
-
-- var-file-index.py
-    Build an index for all input variables.
-

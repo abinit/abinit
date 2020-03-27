@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_electronpositron
 !! NAME
 !!  m_electronpositron
@@ -9,7 +8,7 @@
 !!  as methods to operate on it.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MT, GJ)
+!! Copyright (C) 2008-2020 ABINIT group (MT, GJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,13 +27,14 @@
 MODULE m_electronpositron
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_energies
  use m_xmpi
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_pawtab,   only : pawtab_type
  use m_paw_an,   only : paw_an_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy
@@ -215,15 +215,6 @@ CONTAINS
 
 subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,pawrhoij,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_electronpositron'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ireadwf,nfft
@@ -288,11 +279,12 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
   if (dtset%usepaw==1) then
    electronpositron%has_pawrhoij_ep=1
    if (mpi_enreg%my_natom>0) then
-    call pawrhoij_alloc(electronpositron%pawrhoij_ep,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+    call pawrhoij_alloc(electronpositron%pawrhoij_ep,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &                    pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
 &                    mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
 &                    pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                    use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                    qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
+&                    use_rhoijres=pawrhoij(1)%use_rhoijres)
    end if
    electronpositron%lmmax=0
    do ii=1,dtset%ntypat
@@ -379,15 +371,6 @@ end subroutine init_electronpositron
 !! SOURCE
 
 subroutine destroy_electronpositron(electronpositron)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_electronpositron'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -513,15 +496,6 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 &                                    mpi_enreg,my_natom,nfft,ngfft,nhat,npwarr,occ,paw_an,pawrhoij,&
 &                                    rhog,rhor,stress,usecprj,vhartr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exchange_electronpositron'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,mcprj,my_natom,nfft,usecprj
@@ -592,7 +566,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
        end do
      end if
    end do
-   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
    if (dtset%usepaw==1.and.my_natom>0) then
     if (electronpositron%has_pawrhoij_ep==1) then
       ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
@@ -603,10 +577,11 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
         nlmn(iatom)=pawrhoij(iatom)%lmn_size
       end do
 !     Be careful: parallelism over atoms is ignored...
-      call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+      call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &                      pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,typ, &
 &                      lmnsize=nlmn,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                      use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                      qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
+&                      use_rhoijres=pawrhoij(1)%use_rhoijres)
       ABI_DEALLOCATE(typ)
       ABI_DEALLOCATE(nlmn)
       call pawrhoij_copy(pawrhoij,pawrhoij_tmp)
@@ -615,7 +590,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       if (pawrhoij_tmp(1)%ngrhoij>0.and.pawrhoij(1)%ngrhoij==0) then
         do iatom=1,my_natom
           sz1=pawrhoij_tmp(iatom)%ngrhoij
-          sz2=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz2=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz3=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%grhoij,(sz1,sz2,sz3))
           pawrhoij(iatom)%grhoij(:,:,:)=pawrhoij_tmp(iatom)%grhoij(:,:,:)
@@ -623,7 +598,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       end if
       if (pawrhoij_tmp(1)%use_rhoijres>0.and.pawrhoij(1)%use_rhoijres==0) then
         do iatom=1,my_natom
-          sz1=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%rhoijres,(sz1,sz2))
           pawrhoij(iatom)%rhoijres(:,:)=pawrhoij_tmp(iatom)%rhoijres(:,:)
@@ -631,7 +606,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       end if
       if (pawrhoij_tmp(1)%use_rhoij_>0.and.pawrhoij(1)%use_rhoij_==0) then
         do iatom=1,my_natom
-          sz1=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(sz1,sz2))
           pawrhoij(iatom)%rhoij_(:,:)=pawrhoij_tmp(iatom)%rhoij_(:,:)
@@ -783,15 +758,6 @@ end subroutine exchange_electronpositron
 
 integer function electronpositron_calctype(electronpositron)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'electronpositron_calctype'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(electronpositron_type),pointer :: electronpositron
@@ -857,15 +823,6 @@ end function electronpositron_calctype
 subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nhat,nkxc,nspden,n3xccc,&
 &                         paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxcapn,vxcavg,xccc3d,xc_denpos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rhohxcpositron'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nkxc,nspden,n3xccc,paral_kgb,usexcnhat,usepaw
@@ -921,7 +878,7 @@ subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nh
 !Extra total electron/positron densities; compute gradients for GGA
  ABI_ALLOCATE(rhoe,(nfft,nspden_ep,ngrad**2))
  ABI_ALLOCATE(rhop,(nfft,nspden_ep))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,paral_kgb,qphon,rhotote,rhoe)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,qphon,rhotote,rhoe)
  if (ngrad==2) grho2apn(:)=rhoe(:,1,2)**2+rhoe(:,1,3)**2+rhoe(:,1,4)**2
  rhop(:,1)=rhor(:,1);if (usepaw==1.and.usexcnhat==0) rhop(:,1)=rhop(:,1)-nhat(:,1)
  ABI_DEALLOCATE(rhotote)

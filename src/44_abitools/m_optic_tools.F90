@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optic_tools
 !! NAME
 !! m_optic_tools
@@ -7,7 +6,7 @@
 !!  Helper functions used in the optic code
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (SSharma,MVer,VRecoules,TD,YG)
+!! Copyright (C) 2002-2020 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +56,7 @@ MODULE m_optic_tools
  public :: linopt           ! Compute dielectric function for semiconductors
  public :: nlinopt          ! Second harmonic generation susceptibility for semiconductors
  public :: linelop          ! Linear electro-optic susceptibility for semiconductors
- public :: nonlinopt
+ public :: nonlinopt        ! nonlinear electro-optic susceptibility for semiconductors
 
 CONTAINS  !===========================================================
 !!***
@@ -90,18 +89,7 @@ CONTAINS  !===========================================================
 
 subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sym2cart'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------------------
-! in
-! out
 !scalars
  integer,intent(in) :: nsym
 !arrays
@@ -161,18 +149,7 @@ end subroutine sym2cart
 
 subroutine getwtk(kpt,nkpt,nsym,symrel,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getwtk'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------------------
-! in
-! out
 !scalars
  integer,intent(in) :: nkpt,nsym
 !arrays
@@ -251,7 +228,8 @@ end subroutine getwtk
 !! pmat2cart
 !!
 !! FUNCTION
-!!  turn momentum matrix elements to cartesian axes. To be used in optic calculation of linear and non-linear RPA dielectric matrices
+!!  turn momentum matrix elements to cartesian axes. To be used in optic calculation of linear
+!!  and non-linear RPA dielectric matrices
 !!
 !! INPUTS
 !!  eigen11,eigen12,eigen13 = first order ddk eigen values = d eig_i,k / dk for 3 reduced directions
@@ -272,15 +250,6 @@ end subroutine getwtk
 !! SOURCE
 
 subroutine pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pmat2cart'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------------------
 !scalars
@@ -348,15 +317,6 @@ end subroutine pmat2cart
 !! SOURCE
 
 subroutine pmat_renorm(efermi, evalv, mband, nkpt, nsppol, pmat, sc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pmat_renorm'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------------------
 !scalars
@@ -450,17 +410,7 @@ end subroutine pmat_renorm
 subroutine linopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
   v1,v2,nmesh,de,sc,brod,fnam,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linopt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin,ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -480,8 +430,6 @@ real(dp), intent(in) :: brod
 character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
 
-
-
 !Local variables -------------------------
 !no_abirules
 integer :: isp
@@ -496,7 +444,7 @@ integer :: ncerr
 #endif
 integer :: ierr
 integer :: fout1
-logical :: do_lifetime
+logical :: do_linewidth
 complex(dpc) :: e1,e2,e12
 complex(dpc) :: e1_ep,e2_ep,e12_ep
 real(dp) :: deltav1v2
@@ -571,7 +519,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
      write(std_out,*) '    scissors shift is incorrect              '
-     write(std_out,*) '    number has to real greater than 0.0      '
+     write(std_out,*) '    number has to be greater than 0.0      '
      write(std_out,*) '---------------------------------------------'
      MSG_ERROR("Aborting now")
    end if
@@ -580,11 +528,11 @@ complex(dpc), allocatable :: eps(:)
 
  ABI_CHECK(KSBSt%mband==nstval, "The number of bands in the BSt should be equal to nstval !")
 
- do_lifetime = allocated(EPBSt%lifetime)
-! TODO: activate this, and remove do_lifetime - always add it in even if 0.
-! if (.not. allocated(EPBSt%lifetime)) then
-!   ABI_ALLOCATE(EPBSt%lifetime, (nstval, my_k2-my_k1+1, nspin))
-!   EPBSt%lifetime = zero
+ do_linewidth = allocated(EPBSt%linewidth)
+! TODO: activate this, and remove do_linewidth - always add it in even if 0.
+! if (.not. allocated(EPBSt%linewidth)) then
+!   ABI_ALLOCATE(EPBSt%linewidth, (1, nstval, my_k2-my_k1+1, nspin))
+!   EPBSt%linewidth = zero
 ! end if
 
 !allocate local arrays
@@ -619,7 +567,7 @@ complex(dpc), allocatable :: eps(:)
  end do
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 !start calculating linear optical response
  chi(:)=0._dp
@@ -633,16 +581,16 @@ complex(dpc), allocatable :: eps(:)
        e1_ep=EPBSt%eig(ist1,ik,isp)
 ! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
 ! instead of putting an if statement in a loop! See above
-       if(do_lifetime) then
-         e1_ep = e1_ep + EPBSt%lifetime(ist1,ik,isp)*(0.0_dp,1.0_dp)
+       if(do_linewidth) then
+         e1_ep = e1_ep + EPBSt%linewidth(1,ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
 !      if (e1.lt.efermi) then
 !      do ist2=ist1,nstval
        do ist2=1,nstval
          e2=KSBSt%eig(ist2,ik,isp)
          e2_ep=EPBSt%eig(ist2,ik,isp)
-         if(do_lifetime) then
-           e2_ep = e2_ep - EPBSt%lifetime(ist2,ik,isp)*(0.0_dp,1.0_dp)
+         if(do_linewidth) then
+           e2_ep = e2_ep - EPBSt%linewidth(1,ist2,ik,isp)*(0.0_dp,1.0_dp)
          end if
 !        if (e2.gt.efermi) then
          if (ist1.ne.ist2) then
@@ -837,17 +785,7 @@ end subroutine linopt
 subroutine nlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nlinopt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -1040,7 +978,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
  !ENDDBYG
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 !initialise
  inter2w(:)=0._dp
@@ -1626,17 +1564,7 @@ end subroutine nlinopt
 subroutine linelop(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linelop'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -1779,7 +1707,7 @@ integer :: start4(4),count4(4)
 !step in energy
  if (de.le.0._dp) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in nlinopt:                        '
+   write(std_out,*) '    Error in linelop:                        '
    write(std_out,*) '    energy step is incorrect                 '
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
@@ -1850,7 +1778,7 @@ integer :: start4(4),count4(4)
  my_emax=-HUGE(0._dp)
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 ! loop over kpts
  do ik=my_k1,my_k2
@@ -2153,7 +2081,7 @@ end subroutine linelop
 !! nonlinopt
 !!
 !! FUNCTION
-!! Compute optical frequency dependent linear electro-optic susceptibility for semiconductors
+!! Compute the frequency dependent nonlinear electro-optic susceptibility for semiconductors
 !!
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
@@ -2183,7 +2111,7 @@ end subroutine linelop
 !!   fnam5=trim(fnam)//'-ChiAbs.out'
 !!
 !! OUTPUT
-!!  Calculates the second harmonic generation susceptibility on a desired energy mesh and
+!!  Calculates the nonlinear electro-optical susceptibility on a desired energy mesh and
 !!  for desired direction of polarisation. The output is in files named
 !!  ChiEOTot.out : Im\chi_{v1v2v3}(\omega,\omega,0) and Re\chi_{v1v2v3}(\omega,\omega,0)
 !!  ChiEOIm.out  : contributions to the Im\chi_{v1v2v3}(\omega,\omega,0) from various terms
@@ -2208,17 +2136,7 @@ end subroutine linelop
 subroutine nonlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlinopt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -2333,7 +2251,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
      abs(symcrys(3,1,isym)).lt.tst.and.abs(symcrys(3,2,isym)).lt.tst) then
        write(std_out,*) '-----------------------------------------'
        write(std_out,*) '    the crystal has inversion symmetry   '
-       write(std_out,*) '    the SHG susceptibility is zero       '
+       write(std_out,*) '    the nl electro-optical susceptibility'
+       write(std_out,*) '    is zero                              '
        write(std_out,*) '-----------------------------------------'
        MSG_ERROR("Aborting now")
      end if
@@ -2343,7 +2262,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 !check polarisation
  if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in linelop:                        '
+   write(std_out,*) '    Error in nonlinopt:                        '
    write(std_out,*) '    the polarisation directions incorrect    '
    write(std_out,*) '    1=x,  2=y  and 3=z                       '
    write(std_out,*) '---------------------------------------------'
@@ -2353,7 +2272,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 !number of energy mesh points
  if (nmesh.le.0) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in linelop:                        '
+   write(std_out,*) '    Error in nonlinopt:                        '
    write(std_out,*) '    number of energy mesh points incorrect   '
    write(std_out,*) '    number has to be integer greater than 0  '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
@@ -2364,7 +2283,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 !step in energy
  if (de.le.0._dp) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in nlinopt:                        '
+   write(std_out,*) '    Error in nonlinopt:                        '
    write(std_out,*) '    energy step is incorrect                 '
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
@@ -2435,7 +2354,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
  my_emax=-HUGE(0._dp)
 
  ! Split work
- call xmpi_split_work(nkpt,comm,my_k1,my_k2,msg,ierr)
+ call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 ! loop over kpts
  do ik=my_k1,my_k2
@@ -2762,7 +2681,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) ' '
    write(std_out,*) 'information about calculation just performed:'
    write(std_out,*) ' '
-   write(std_out,*) 'calculated the component:',v1,v2,v3 ,'of second order susceptibility'
+   write(std_out,*) 'calculated the component:',v1,v2,v3 ,'of the nonlinear electro-optical susceptibility'
    write(std_out,*) 'tolerance:',tol
    if (tol.gt.0.008) write(std_out,*) 'ATTENTION: tolerance is too high'
    write(std_out,*) 'broadening:',brod,'Hartree'

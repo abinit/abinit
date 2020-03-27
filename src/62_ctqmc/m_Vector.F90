@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_Vector
 !! NAME
 !!  m_Vector
@@ -10,7 +10,7 @@
 !!  Manage a double precision vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -101,13 +101,6 @@ CONTAINS
 SUBROUTINE Vector_init(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Vector_init'
-!End of the abilint section
-
   TYPE(Vector)     , INTENT(INOUT) :: this
   INTEGER, OPTIONAL, INTENT(IN   ) :: size
 !Local variables ------------------------------
@@ -131,7 +124,7 @@ END SUBROUTINE Vector_init
 !!  impose size
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -157,13 +150,6 @@ END SUBROUTINE Vector_init
 SUBROUTINE Vector_setSize(this,new_tail)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Vector_setSize'
-!End of the abilint section
-
   TYPE(Vector), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: new_tail
 !Local variables ------------------------------
@@ -189,7 +175,7 @@ END SUBROUTINE Vector_setSize
 !!  enlarge memory size
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -215,13 +201,6 @@ END SUBROUTINE Vector_setSize
 SUBROUTINE Vector_enlarge(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Vector_enlarge'
-!End of the abilint section
-
   TYPE(Vector)     , INTENT(INOUT)        :: this
   INTEGER          , INTENT(IN   )        :: size
 !Local variables ------------------------------
@@ -256,7 +235,7 @@ END SUBROUTINE Vector_enlarge
 !!  push an element at the end
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -282,13 +261,6 @@ END SUBROUTINE Vector_enlarge
 SUBROUTINE Vector_pushBack(this, value)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Vector_pushBack'
-!End of the abilint section
-
   TYPE(Vector)    , INTENT(INOUT) :: this
   DOUBLE PRECISION, INTENT(IN   ) :: value
 !Local variables ------------------------------
@@ -315,7 +287,7 @@ END SUBROUTINE Vector_pushBack
 !!  Clear vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -340,13 +312,6 @@ END SUBROUTINE Vector_pushBack
 SUBROUTINE Vector_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Vector_clear'
-!End of the abilint section
-
   TYPE(Vector), INTENT(INOUT) :: this
   this%tail = 0 
 END SUBROUTINE Vector_clear
@@ -360,7 +325,7 @@ END SUBROUTINE Vector_clear
 !!  print vector
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -386,13 +351,6 @@ END SUBROUTINE Vector_clear
 SUBROUTINE Vector_print(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Vector_print'
-!End of the abilint section
-
   TYPE(Vector), INTENT(IN) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -421,7 +379,7 @@ END SUBROUTINE Vector_print
 !!  Destroy vector 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -446,13 +404,6 @@ END SUBROUTINE Vector_print
 SUBROUTINE Vector_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Vector_destroy'
-!End of the abilint section
-
   TYPE(Vector), INTENT(INOUT) :: this
 
   FREEIF(this%vec)

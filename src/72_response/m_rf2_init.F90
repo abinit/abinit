@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rf2_init
 !! NAME
 !!  m_rf2_init
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2015-2020 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,8 +29,20 @@
 module m_rf2_init
 
  use defs_basis
+ use m_xmpi
  use m_errors
+ use m_wfk
+ use m_hamiltonian
+ use m_cgtools
+ use m_rf2
  use m_abicore
+ use m_dtset
+ use m_dtfil
+
+ use m_time   , only : timab
+ use defs_abitypes, only : MPI_type
+ use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
+ use m_cgprj,   only : getcprj
 
  implicit none
 
@@ -52,13 +63,6 @@ contains
 !! FUNCTION
 !! Compute terms needed for the 2nd order Sternheimer equation.
 !! All terms are stored in a rf2_t object.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2015-2018 ABINIT group (LB,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cg(2,mpw*nspinor*mband*nsppol)=planewave coefficients of wavefunctions at k
@@ -110,31 +114,9 @@ contains
 subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
                      mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_wfk
- use m_hamiltonian
- use m_cgtools
- use m_rf2
- use m_time   , only : timab
- use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
- use m_cgprj,   only : getcprj
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rf2_init'
-!End of the abilint section
-
- implicit none
-
 ! *************************************************************************
 !Arguments -------------------------------
 !scalars
-
  integer,intent(in) :: ibg,icg,idir,ipert,isppol,ikpt
  integer,intent(in) :: mkmem,mpw,nband_k,nsppol
  type(datafiles_type),intent(in) :: dtfil
@@ -168,7 +150,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  integer :: file_index(2)
  real(dp) :: lambda_ij(2),tsec(2)
  real(dp),allocatable :: cg_jband(:,:,:),ddk_read(:,:),dudkdk(:,:),dudk_dir2(:,:)
- real(dp),allocatable :: eig1_read(:),gvnl1(:,:),h_cwave(:,:),s_cwave(:,:),dsusdu_loc(:,:),dsusdu_gather(:,:)
+ real(dp),allocatable :: eig1_read(:),gvnlx1(:,:),h_cwave(:,:),s_cwave(:,:),dsusdu_loc(:,:),dsusdu_gather(:,:)
  real(dp),allocatable,target :: dsusdu(:,:),dudk(:,:),eig1_k_stored(:)
  real(dp), ABI_CONTIGUOUS pointer :: cwave_dudk(:,:),cwave_i(:,:),cwave_j(:,:),eig1_k_jband(:)
  real(dp),pointer :: rhs_j(:,:)
@@ -233,8 +215,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  eig1_k_stored=zero
 
 ! "dudk" contains du/dpert1 for every bands and ndir (=1 or 2) directions
- ABI_STAT_ALLOCATE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : dudk")
+ ABI_MALLOC_OR_DIE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
  dudk=zero
  has_dudkprj=.false.
  if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
@@ -264,7 +245,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    idir1=rf2%idirs(kdir1)
    ipert1=rf2%iperts(kdir1)
    do iband=1,nband_k
-     call wfk_read_bks(ddk_f(file_index(kdir1)),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+     call ddk_f(file_index(kdir1))%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
 !    Copy ddk_read in "dudk"
      shift_band1=(iband-1)*size_wf
      shift_dir1=(kdir1-1)*nband_k*size_wf
@@ -301,7 +282,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      ABI_ALLOCATE(dudk_dir2,(2,nband_k*size_wf))
    end if
    do iband=1,nband_k
-     call wfk_read_bks(ddk_f(1),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+     call ddk_f(1)%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
      shift_band1=(iband-1)*size_wf
      dudkdk(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
 !    Check that < u^(0) | u^(2) > = - Re[< u^(1) | u^(1) >]
@@ -330,7 +311,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      end if ! debug_mode
 !    Read ddk for idir2
      if (idir>3) then
-       call wfk_read_bks(ddk_f(4),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
+       call ddk_f(4)%read_bks(iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
        dudk_dir2(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
      end if
    end do !iband
@@ -346,14 +327,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !Allocate work spaces for one band
  ABI_ALLOCATE(h_cwave,(2,size_wf))
  ABI_ALLOCATE(s_cwave,(2,size_wf))
- ABI_ALLOCATE(gvnl1,(2,size_wf))
+ ABI_ALLOCATE(gvnlx1,(2,size_wf))
  h_cwave(:,:) = zero
  s_cwave(:,:) = zero
- gvnl1(:,:) = zero
+ gvnlx1(:,:) = zero
 
 ! "dsusdu" contains dS/dpert_dir |u_band> + S|du_band/dpert1> for every bands and ndir (=1 or 2) directions
- ABI_STAT_ALLOCATE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in rf2_init : dsusdu")
+ ABI_MALLOC_OR_DIE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
  dsusdu=zero
 
  ABI_ALLOCATE(rf2%amn,(2,nband_k**2))
@@ -446,7 +426,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 !      Compute H^(0) | du/dpert1 > (in h_cwave) and S^(0) | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,mkmem,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,0,0,ikpt,isppol,mkmem,&
 &       mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 
        if (gs_hamkq%usepaw==0) s_cwave(:,:)=cwave_dudk(:,:) ! Store | du/dpert1 > in s_cwave
@@ -479,17 +459,17 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        if (ipert1==natom+2) then
 !        Extract ddk and multiply by i :
          if(idir<=3) then ! in this case : idir1=idir2
-           gvnl1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
          else
-           gvnl1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
          end if
        end if
 
 !      Compute dH/dpert1 | u^(0) > (in h_cwave) and dS/dpert1 | u^(0) > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,idir1,ipert1,ikpt,isppol,&
 &       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 
 !      Copy infos in dsusdu
@@ -572,8 +552,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 ! COMPUTATION OF "RHS_Stern", THE LAST PART OF "A_mn" AND A PART OF "Lambda_mn"
 ! **************************************************************************************************
 
- ABI_STAT_ALLOCATE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : RHS_Stern")
+ ABI_MALLOC_OR_DIE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
  rf2%RHS_Stern(:,:)=zero
 
 !Computation of terms containing H^(2)
@@ -617,18 +596,18 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        if (ipert==natom+11) then
 !        Extract ddk and multiply by i :
          if(idir<=3) then ! in this case : idir1=idir2
-           gvnl1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
          else
-           gvnl1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
          end if
        end if
 
 !      Compute  : d^2H/(dpert1 dpert2)|u^(0)>  (in h_cwave)
 !      and      : d^2S/(dpert1 dpert2)|u^(0)>  (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,idir,ipert,ikpt,isppol,&
 &       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &       ffnl1=ffnl1,ffnl1_test=ffnl1_test)
 
@@ -723,13 +702,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
        if (ipert2==natom+2) then
 !        Extract dkdk and multiply by i :
-         gvnl1(1,:) = -dudkdk(2,1+shift_band1:size_wf+shift_band1)
-         gvnl1(2,:) =  dudkdk(1,1+shift_band1:size_wf+shift_band1)
+         gvnlx1(1,:) = -dudkdk(2,1+shift_band1:size_wf+shift_band1)
+         gvnlx1(2,:) =  dudkdk(1,1+shift_band1:size_wf+shift_band1)
        end if
 
 !      Compute dH/dpert2 | du/dpert1 > (in h_cwave) and dS/dpert2 | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,idir2,ipert2,ikpt,isppol,&
 &       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 
        if (debug_mode/=0) then
@@ -778,7 +757,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
  end do ! kdir1
 
- ABI_DEALLOCATE(gvnl1)
+ ABI_DEALLOCATE(gvnlx1)
  ABI_DEALLOCATE(h_cwave)
  ABI_DEALLOCATE(s_cwave)
  ABI_DEALLOCATE(cg_jband)
@@ -853,8 +832,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !  COMPUTATION OF "dcwavef" AND "Lambda_mn" FROM "A_mn"
 ! **************************************************************************************************
 
- ABI_STAT_ALLOCATE(rf2%dcwavef,(2,nband_k*size_wf), ierr)
- ABI_CHECK(ierr==0, "out of memory in m_rf2 : dcwavef")
+ ABI_MALLOC_OR_DIE(rf2%dcwavef,(2,nband_k*size_wf), ierr)
  rf2%dcwavef=zero
 
  do jband=1,nband_k

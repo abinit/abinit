@@ -1,7 +1,7 @@
 # He atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 45
+ndtset 44
 
 # (S)LDAs X + different correlations
 ixc1  -1002
@@ -29,32 +29,32 @@ ixc19 -106133
 ixc20 -106134
 ixc21 -106135
 ixc22 -106136
-ixc23 -106137
+#ixc -106137 change in libxc v4
 
 # GGAs : different exchanges + LYP correlation
-ixc24 -101131
-ixc25 -102131
-ixc26 -103131
-ixc27 -104131
-ixc28 -105131
+ixc23 -101131
+ixc24 -102131
+ixc25 -103131
+ixc26 -104131
+ixc27 -105131
 #ixc  -106131 already treated, see dataset 17
-ixc29 -107131
-ixc30 -108131
-ixc31 -109131
-ixc32 -110131
-ixc33 -111131
-ixc34 -112131
-ixc35 -113131
-ixc36 -114131
-ixc37 -115131
-ixc38 -116131
-ixc39 -117131
-ixc40 -118131
-ixc41 -119131
-ixc42 -120131
-ixc43 -121131
-ixc44 -122131
-ixc45 -123131
+ixc28 -107131
+ixc29 -108131
+ixc30 -109131
+ixc31 -110131
+ixc32 -111131
+ixc33 -112131
+ixc34 -113131
+ixc35 -114131
+ixc36 -115131
+ixc37 -116131
+ixc38 -117131
+ixc39 -118131
+ixc40 -119131
+ixc41 -120131
+ixc42 -121131
+ixc43 -122131
+ixc44 -123131
 
 #Common data
 acell 3*5
@@ -75,13 +75,12 @@ typat 1
 znucl 2
 xred 3*0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines = 28, tolabs = 1.1e-2, tolrel = 3.0e-6, fld_options = -medium
+#%%   t04.out, tolnlines = 38, tolabs = 1.1e-2, tolrel = 3.0e-6, fld_options = -medium
 #%% psp_files = 02he.bare
 #%% [paral_info]
 #%% max_nprocs = 1

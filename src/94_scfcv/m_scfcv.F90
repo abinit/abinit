@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_scfcv
 !! NAME
 !!  m_scfcv
@@ -7,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (JB)
+!!  Copyright (C) 2014-2020 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,17 +28,19 @@
 module m_scfcv
 
  use defs_basis
- use m_abicore
- use m_errors
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use defs_rectypes
+ use m_abicore
+ use m_errors
  use m_wffile
  use m_rec
  use m_efield
  use m_entropyDMFT
+ use m_hdr
+ use m_dtfil
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_scf_history,      only : scf_history_type
  use m_results_gs ,      only : results_gs_type
  use m_electronpositron, only : electronpositron_type
@@ -50,6 +51,7 @@ module m_scfcv
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
+ use m_paw_uj,           only : macro_uj_type
  use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_scfcv_core,       only : scfcv_core
@@ -73,7 +75,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (JB)
+!!  Copyright (C) 2014-2020 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,13 +190,6 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_init'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  integer,intent(in),target :: mcg,mcprj,my_natom,ndtpawuj,pwind_alloc
  integer,intent(in),target :: initialized,nfftf
@@ -385,13 +380,6 @@ end subroutine scfcv_init
 subroutine scfcv_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_destroy'
-!End of the abilint section
-
 type(scfcv_t), intent(inout) :: this
 
 !Local variables-------------------------------
@@ -471,7 +459,6 @@ type(scfcv_t), intent(inout) :: this
 end subroutine scfcv_destroy
 !!***
 
-
 !!****f* ABINIT/m_scfcv/scfcv_run
 !! NAME
 !!  scfcv_run
@@ -501,13 +488,6 @@ end subroutine scfcv_destroy
 subroutine scfcv_run(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_run'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer:: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -630,13 +610,6 @@ subroutine scfcv_runWEntropyDMFT(this,electronpositron,rhog,rhor,rprimd,xred,xre
 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_runWEntropyDMFT'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -719,13 +692,6 @@ end subroutine scfcv_runWEntropyDMFT
 
 subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_scfcv'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -746,15 +712,6 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
 &    conv_retcode)
 
 end subroutine scfcv_scfcv
-
-!keep the same name
-!#include "afterscfloop.finc"
-
-!keep the same name
-!#include "outscfcv.finc"
-
-!keep the same name
-!#include "elpolariz.finc"
 
 end module m_scfcv
 !!***

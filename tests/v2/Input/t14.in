@@ -5,7 +5,6 @@ t14.ddb.gamma.in
 t14.ddb.0.0.25.in
 t14.ddb.5.0.25.in
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb

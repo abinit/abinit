@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_intagm_img
 !!
 !! NAME
@@ -14,7 +13,7 @@
 !! with intermediate points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (XG, MT)
+!! Copyright (C) 2012-2020 ABINIT group (XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,15 +93,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intagm_img_1D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -236,15 +226,6 @@ end subroutine intagm_img_1D
 !! SOURCE
 
 subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intagm_img_2D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

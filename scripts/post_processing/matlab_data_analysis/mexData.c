@@ -2,7 +2,7 @@
 //   can efficiently extract data from a file which contains ASCII data and text.
 //   written by Mike.Zhang, 5-5/28/2002, Copyright reserved.
 //   run under MatLab enviroment and compiled by MatLab embeded Lcc C compiler.
-//   Copyright (C) 2002-2018 ABINIT group (Mike Zhang)
+//   Copyright (C) 2002-2020 ABINIT group (Mike Zhang)
 //   This file is distributed under the terms of the
 //   GNU General Public License, see ~abinit/COPYING
 //   or http://www.gnu.org/copyleft/gpl.txt .

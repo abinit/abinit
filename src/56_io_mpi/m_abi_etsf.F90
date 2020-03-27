@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abi_etsf
 !! NAME
 !! m_abi_etsf
@@ -6,10 +5,13 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (DCA,YP,MJV,MG)
+!! Copyright (C) 2006-2020 ABINIT group (DCA,YP,MJV,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! TODO
+!!  Remove this module. At present it's used only in m_iowf.F90
 !!
 !! SOURCE
 
@@ -22,10 +24,9 @@
 module m_abi_etsf
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
+ use m_dtset
  use m_xmpi
  use m_errors
  use m_atomdata
@@ -35,7 +36,8 @@ module m_abi_etsf
  use etsf_io
 #endif
 
- use m_fstrings,   only : endswith
+ use m_fstrings,     only : endswith
+ use defs_datatypes, only : pseudopotential_type
 
  implicit none
 
@@ -70,13 +72,6 @@ CONTAINS  !===========================================================
 #ifdef HAVE_ETSF_IO
 
 subroutine etsf_dims_nullify(Dims,dimlen)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'etsf_dims_nullify'
-!End of the abilint section
 
  implicit none
 
@@ -173,13 +168,6 @@ end subroutine etsf_dims_nullify
 #ifdef HAVE_ETSF_IO
 
 subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_etsf_dims_init'
-!End of the abilint section
 
  implicit none
 
@@ -310,13 +298,6 @@ end subroutine abi_etsf_dims_init
 
 subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_etsf_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -347,7 +328,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 #ifdef HAVE_ETSF_IO
 !Initialize the filename
  filetsf = nctk_ncify(filapp)
- call wrtout(std_out,ABI_FUNC//': about to create file '//TRIM(filetsf),'COLL')
+ call wrtout(std_out,"about to create file "//TRIM(filetsf),'COLL')
 
  usewvl = dtset%usewvl
 
@@ -462,13 +443,6 @@ end subroutine abi_etsf_init
 
 subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ini_wf_etsf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -486,7 +460,7 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 
 #ifdef HAVE_ETSF_IO
 !Define dimensions.
- ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 6),nctkdim_t("psptitlen", 132)])
+ ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 8),nctkdim_t("psptitlen", 132)])
  NCF_CHECK(ncerr)
 
  if (usewvl==1) then ! Add the BigDFT private dimensions.

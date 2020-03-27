@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 #
-#    Copyright (C) 2003-2018 ABINIT group
+#    Copyright (C) 2003-2020 ABINIT group
 #
 #    Written by Matthieu Verstraete in python (compatible v1.9).
 #    This is free software, and you are welcome to redistribute it

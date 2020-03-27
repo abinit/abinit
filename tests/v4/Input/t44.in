@@ -7,7 +7,6 @@ t44_VHXC          # Name of the file where the input data is stored
 0                 # Total charge  (not needed)
 spline            # Type of interpolation
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = macroave

@@ -65,7 +65,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t61.in, t62.in, t63.in, t64.in, t65.in
 #%% [files]
 #%% files_to_test = 

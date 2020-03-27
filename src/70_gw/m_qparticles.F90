@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_qparticles
 !! NAME
 !!  m_qparticles
@@ -9,7 +8,7 @@
 !!  of KS states.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (FB, MG)
+!! Copyright (C) 2008-2020 ABINIT group (FB, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,24 +28,25 @@
 MODULE m_qparticles
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_hdr
  use m_errors
  use m_nctk
+ use m_distribfft
 
+
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, isncfile
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d, rhophi
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : kmesh_t
  use m_ebands,         only : get_valence_idx
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
- use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io
+ use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io, pawrhoij_inquire_dim
  use m_fourier_interpol,only : fourier_interpol
 
  implicit none
@@ -117,15 +117,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,ngfftf,Sr,Bst,m_lda_to_qp,rho_qp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrqps'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -281,20 +272,11 @@ end subroutine wrqps
 !! SOURCE
 
 subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
-& nfftot,ngfftf,ucvol,paral_kgb,Cryst,Pawtab,MPI_enreg,nbsc,m_lda_to_qp,rhor_out,Pawrhoij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdqps'
-!End of the abilint section
-
- implicit none
+& nfftot,ngfftf,ucvol,Cryst,Pawtab,MPI_enreg,nbsc,m_lda_to_qp,rhor_out,Pawrhoij)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfftot,nspden,usepaw,paral_kgb,dimrho
+ integer,intent(in) :: nfftot,nspden,usepaw,dimrho
  integer,intent(out) :: nbsc,nscf
  real(dp),intent(in) :: ucvol
  character(len=*),intent(in) :: fname
@@ -340,15 +322,13 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
  ! Check whether file exists or not.
  write(msg,'(5a)')ch10,&
-&  ' rdqps: reading QP wavefunctions of the previous step ',ch10,&
-&  '        looking for file ',TRIM(fname)
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+  ' rdqps: reading QP wavefunctions of the previous step ',ch10,&
+  '        looking for file ',TRIM(fname)
+ call wrtout([std_out, ab_out], msg)
 
  if (.not.file_exists(fname)) then
    write(msg,'(2a)')' file not found, 1st iteration initialized with KS eigenelements ',ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out, msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    nscf=0; RETURN
  end if
 
@@ -360,8 +340,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    ! TODO the _QPS file should contain additional information
    read(unqps,*)nscf
    write(msg,'(a,i4,a)')' Number of iteration(s) already performed: ',nscf,ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
 
    read(unqps,*)nkibzR
    if (nkibzR/=BSt%nkpt) then
@@ -374,15 +353,15 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
    if (nbsc/=BSt%mband) then
      write(msg,'(3a,i4,a,i4)')&
-&      'QPS file contains less bands than that used in the present calculation ',ch10,&
-&      'Required: ',BSt%mband,', Found: ',nbandR
+      'QPS file contains less bands than that used in the present calculation ',ch10,&
+      'Required: ',BSt%mband,', Found: ',nbandR
      MSG_WARNING(msg)
    end if
 
    if (nbsc/=nbandR) then
      write(msg,'(3a,i4,a)')&
-&      'The QPS file contains more bands than that used in the present calculation ',ch10,&
-&      'only the first ',nbandR,' bands will be read'
+      'The QPS file contains more bands than that used in the present calculation ',ch10,&
+      'only the first ',nbandR,' bands will be read'
      MSG_COMMENT(msg)
    end if
 
@@ -439,8 +418,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        read(unqps,*)rhor_out(:,:)
      else
        write(msg,'(2a,a,5(i3,a),i3)')&
-&        'FFT meshes differ. Performing Fourier interpolation. ',ch10,&
-&        'Found: ',n1,' x',n2,' x',n3,'; Expected: ',ngfftf(1),' x',ngfftf(2),' x',ngfftf(3)
+        'FFT meshes differ. Performing Fourier interpolation. ',ch10,&
+        'Found: ',n1,' x',n2,' x',n3,'; Expected: ',ngfftf(1),' x',ngfftf(2),' x',ngfftf(3)
        MSG_COMMENT(msg)
 
        ABI_MALLOC(rhor_tmp,(n1*n2*n3,nspden))
@@ -462,7 +441,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          call init_distribfft(MPI_enreg%distribfft,'f',MPI_enreg%nproc_fft,ngfft_found(2),ngfft_found(3))
 
          call fourier_interpol(cplex_fft,nspden,optin,optout,nfft_found,ngfft_found,nfftot,ngfftf,&
-&          paral_kgb,MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)
+           MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)
 
        else
          ! Linear interpolation.
@@ -490,8 +469,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
      if (usepaw==0) then
        nelect_qps=SUM(rhor_out(:,1))*ucvol/nfftot; ratio=BSt%nelect/nelect_qps
        write(msg,'(3(a,f9.4))')&
-&        ' Number of electrons calculated using the QPS density = ',nelect_qps,' Expected = ',BSt%nelect,' ratio = ',ratio
-       call wrtout(std_out,msg,'COLL')
+         ' Number of electrons calculated using the QPS density = ',nelect_qps,' Expected = ',BSt%nelect,' ratio = ',ratio
+       call wrtout(std_out, msg)
        !!rhor_out(:,:)=ratio*rhor_out(:,:)
      end if
 
@@ -503,7 +482,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          MSG_WARNING(msg)
          call wrtout(ab_out,msg,"COLL")
          ! Init dummy rhoij just to avoid problems in sigma when rhoij is freed.
-         call pawrhoij_alloc(Pawrhoij,1,nspden,BSt%nspinor,BSt%nsppol,Cryst%typat,pawtab=Pawtab)
+         call pawrhoij_inquire_dim(nspden_rhoij=nspdenR, nspden=nspden)
+         call pawrhoij_alloc(Pawrhoij,1,nspdenR,BSt%nspinor,BSt%nsppol,Cryst%typat,pawtab=Pawtab)
          close(unqps)
          RETURN
        end if
@@ -528,7 +508,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        ABI_CHECK(nspdenR==nspden    ,"mismatch in nspden")
 
        call pawrhoij_io(pawrhoij,unqps,BSt%nsppol,BSt%nspinor,nspden,nlmn_type,Cryst%typat,&
-&                    HDR_LATEST_HEADFORM,"Read",form="formatted")
+                        HDR_LATEST_HEADFORM,"Read",form="formatted")
        !% call pawrhoij_io(pawrhoij,std_out,BSt%nsppol,BSt%nspinor,nspden,nlmn_type,Cryst%typat,HDR_LATEST_HEADFORM,"Echo")
 
        ABI_FREE(nlmn_type)
@@ -586,15 +566,6 @@ end subroutine rdqps
 !! SOURCE
 
 subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_QP'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -735,15 +706,6 @@ end subroutine show_QP
 !! SOURCE
 
 subroutine rdgw(Bst,fname,igwene,extrapolate)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdgw'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -953,15 +915,6 @@ end subroutine rdgw
 !! SOURCE
 
 subroutine updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'updt_m_lda_to_qp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1,0 +1,347 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/xmpi_scatterv
+!! NAME
+!!  xmpi_scatterv
+!!
+!! FUNCTION
+!!  This module contains functions that calls MPI routine,
+!!  if we compile the code using the MPI CPP flags.
+!!  xmpi_scatterv is the generic function.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2001-2020 ABINIT group (MT)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~ABINIT/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! SOURCE
+
+!!***
+
+!!****f* ABINIT/xmpi_scatterv_int
+!! NAME
+!!  xmpi_scatterv_int
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: one-dimensional integer arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcount= number of received elements
+!!  displs= relative offsets for incoming data (array)
+!!  sendcounts= number of sent elements (array)
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!!
+!! SOURCE
+subroutine xmpi_scatterv_int(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(in) :: xval(:)
+ integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
+ integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
+ integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: dd
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_SCATTERV(xval,sendcounts,displs,MPI_INTEGER,recvbuf,recvcount,&
+&   MPI_INTEGER,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   dd=0;if (size(displs)>0) dd=displs(1)
+   recvbuf(1:recvcount)=xval(dd+1:dd+recvcount)
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_scatterv_int
+!!***
+
+!!****f* ABINIT/xmpi_scatterv_int2d
+!! NAME
+!!  xmpi_scatterv_int2d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: two-dimensional integer arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcount= number of received elements
+!!  displs= relative offsets for incoming data (array)
+!!  sendcounts= number of sent elements (array)
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_scatterv_int2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+
+!Arguments-------------------------
+ integer, DEV_CONTARRD intent(in) :: xval(:,:)
+ integer, DEV_CONTARRD intent(inout) :: recvbuf(:,:)
+ integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
+ integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: cc,dd,sz1
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_SCATTERV(xval,sendcounts,displs,MPI_INTEGER,recvbuf,recvcount,&
+&   MPI_INTEGER,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   sz1=size(recvbuf,1);cc=recvcount/sz1
+   dd=0;if (size(displs)>0) dd=displs(1)/sz1
+   recvbuf(:,1:cc)=xval(:,dd+1:dd+cc)
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_scatterv_int2d
+!!***
+
+!!****f* ABINIT/xmpi_scatterv_dp
+!! NAME
+!!  xmpi_scatterv_dp
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: one-dimensional real arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcount= number of received elements
+!!  displs= relative offsets for incoming data (array)
+!!  sendcounts= number of sent elements (array)
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_scatterv_dp(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:)
+ real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:)
+ integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
+ integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: dd
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
+&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   dd=0;if (size(displs)>0) dd=displs(1)
+   recvbuf(1:recvcount)=xval(dd+1:dd+recvcount)
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_scatterv_dp
+!!***
+
+!!****f* ABINIT/xmpi_scatterv_dp2d
+!! NAME
+!!  xmpi_scatterv_dp2d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: two-dimensional real arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcount= number of received elements
+!!  displs= relative offsets for incoming data (array)
+!!  sendcounts= number of sent elements (array)
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
+ real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:)
+ integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
+ integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: cc,dd,sz1 
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
+&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   sz1=size(recvbuf,1);cc=recvcount/sz1
+   dd=0;if (size(displs)>0) dd=displs(1)/sz1
+   recvbuf(:,1:cc)=xval(:,dd+1:dd+cc)
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_scatterv_dp2d
+!!***
+
+!!****f* ABINIT/xmpi_scatterv_dp3d
+!! NAME
+!!  xmpi_scatterv_dp3d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: three-dimensional real arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcount= number of received elements
+!!  displs= relative offsets for incoming data (array)
+!!  sendcounts= number of sent elements (array)
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_scatterv_dp3d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
+ real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:)
+ integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
+ integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: cc,dd,sz12
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
+&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   sz12=size(recvbuf,1)*size(recvbuf,2);cc=recvcount/sz12
+   dd=0;if (size(displs)>0) dd=displs(1)/sz12
+   recvbuf(:,:,1:cc)=xval(:,:,dd+1:dd+cc)
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_scatterv_dp3d
+!!***
+
+!!****f* ABINIT/xmpi_scatterv_dp4d
+!! NAME
+!!  xmpi_scatterv_dp4d
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and delivers it to all.
+!!  Target: four-dimensional real arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  recvcount= number of received elements
+!!  displs= relative offsets for incoming data (array)
+!!  sendcounts= number of sent elements (array)
+!!  root= rank of receiving process
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received buffer
+!!
+!! SOURCE
+
+subroutine xmpi_scatterv_dp4d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
+
+!Arguments-------------------------
+ real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)
+ real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:,:,:,:)
+ integer, DEV_CONTARRD intent(in) :: sendcounts(:),displs(:)
+ integer,intent(in) :: recvcount,root,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+ integer :: cc,dd,sz123
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+   call MPI_SCATTERV(xval,sendcounts,displs,MPI_DOUBLE_PRECISION,recvbuf,recvcount,&
+&   MPI_DOUBLE_PRECISION,root,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+#endif
+   sz123=size(recvbuf,1)*size(recvbuf,2)*size(recvbuf,2);cc=recvcount/sz123
+   dd=0;if (size(displs)>0) dd=displs(1)/sz123
+   recvbuf(:,:,:,1:cc)=xval(:,:,:,dd+1:dd+cc)
+#if defined HAVE_MPI
+ end if
+#endif
+
+end subroutine xmpi_scatterv_dp4d
+!!***

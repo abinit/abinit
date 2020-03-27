@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fourier_interpol
 !! NAME
 !!  m_fourier_interpol
@@ -8,7 +7,7 @@
 !!  Mainly used in PAW to interpol data from/to the coarse FFT grid from/to the fine FFT grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (FJ, MT, MG)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,10 +23,10 @@
 MODULE m_fourier_interpol
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_fft,    only : zerosym, indirect_parallel_Fourier, fourdp
  use m_pawfgr, only : pawfgr_type,pawfgr_destroy,indgrid
 
@@ -102,15 +101,6 @@ CONTAINS  !=====================================================================
 
 subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfgr,rhog,rhogf,rhor,rhorf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'transgrid'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden,optgrid,optin,optout,paral_kgb
@@ -150,7 +140,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      if (optout==1.and.optin/=1) then
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
-       call fourdp(cplex,rhogf,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,rhogf,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
      end if
    end if
@@ -160,7 +150,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      if (optout==1.and.optin/=1) then
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhorf(:,1)
-       call fourdp(cplex,rhog,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,rhog,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
      end if
    end if
@@ -196,7 +186,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
@@ -212,7 +202,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !    call zerosym(vectg,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !    &        comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftf))
-     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
      rhorf(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
      ABI_DEALLOCATE(vectg)
@@ -233,7 +223,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
@@ -249,7 +239,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !    call zerosym(rhogf,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !    &        comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftf))
-     call fourdp(cplex,rhogf,workfft,1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+     call fourdp(cplex,rhogf,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
      rhorf(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
    end if
@@ -262,7 +252,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        vectg(:,:)=zero
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,ispden)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
@@ -277,7 +267,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !      call zerosym(vectg,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !      &          comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(workfft,(cplex*nfftf))
-       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
        rhorf(:,ispden)=workfft(:)
        ABI_DEALLOCATE(workfft)
      end do
@@ -309,7 +299,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
        ABI_DEALLOCATE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
@@ -323,7 +313,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      call zerosym(vectg,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftc))
-     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
      rhor(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
      ABI_DEALLOCATE(vectg)
@@ -337,7 +327,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
        ABI_DEALLOCATE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
@@ -351,7 +341,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      call zerosym(rhog,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftc))
-     call fourdp(cplex,rhog,workfft,1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+     call fourdp(cplex,rhog,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
      rhor(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
    end if
@@ -364,7 +354,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        vectg(:,:)=zero
        ABI_ALLOCATE(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,ispden)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
        ABI_DEALLOCATE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
@@ -377,7 +367,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        call zerosym(vectg,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(workfft,(cplex*nfftc))
-       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
        rhor(:,ispden)=workfft(:)
        ABI_DEALLOCATE(workfft)
      end do
@@ -400,9 +390,9 @@ end subroutine transgrid
 !! fourier_interpol
 !!
 !! FUNCTION
-!!  Perform a Fourier interpolation. Just a wrapper for transgrid, the table giving the correspondence 
-!!  between the coarse and the mesh FFT grids are constructed inside the routine. This allows to specify an 
-!!  arbitrary FFT mesh to be used for the interpolation. Besides the routine works also in 
+!!  Perform a Fourier interpolation. Just a wrapper for transgrid, the table giving the correspondence
+!!  between the coarse and the mesh FFT grids are constructed inside the routine. This allows to specify an
+!!  arbitrary FFT mesh to be used for the interpolation. Besides the routine works also in
 !!  case of NC calculations since it does not require Pawfgr.
 !!
 !! INPUTS
@@ -420,8 +410,7 @@ end subroutine transgrid
 !!         1: output density/potential is given in r space in rhor_out(:,nspden)
 !!                                          and in g space in rhog_out(:)
 !! ngfft_asked(18)=All info on the required FFT mesh.
-!! paral_kgb=Flag related to the kpoint-band-fft parallelism (TODO not implemented)
-!!  
+!!
 !! OUTPUT
 !!  rhor_out(cplex*nfft_out,nspden)=output density/potential in r space on the required FFT mesh.
 !!  if optout=1:
@@ -436,21 +425,12 @@ end subroutine transgrid
 !! SOURCE
 
 subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,ngfft_out,&
-& paral_kgb,MPI_enreg,rhor_in,rhor_out,rhog_in,rhog_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourier_interpol'
-!End of the abilint section
-
- implicit none
+                           MPI_enreg,rhor_in,rhor_out,rhog_in,rhog_out)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden,optin,optout
- integer,intent(in) :: nfft_in,nfft_out,paral_kgb
+ integer,intent(in) :: nfft_in,nfft_out
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft_in(18),ngfft_out(18)
@@ -469,39 +449,36 @@ subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,
 
 ! *************************************************************************
 
-!=== FFT parallelism not implemented ===
- ABI_CHECK(paral_kgb==0,'paral_kgb/=0 not implemented')
-
- ltest= ALL( ngfft_in(7:) == ngfft_out(7:) )
+ ltest= ALL(ngfft_in(7:) == ngfft_out(7:) )
  ABI_CHECK(ltest,'ngfftf_in(7:18)/=ngfftf_out(7:18)')
 
-!================================
-!=== Which one is the coarse? ===
-!================================
- if (nfft_out>=nfft_in) then 
+ !================================
+ !=== Which one is the coarse? ===
+ !================================
+ if (nfft_out>=nfft_in) then
    ! From coarse to fine grid. If meshes are equivalent, call transgrid anyway because of optout, optin.
-   nfftf    =nfft_out 
+   nfftf    =nfft_out
    ngfftf(:)=ngfft_out(:)
    nfftf_tot =PRODUCT(ngfft_out(1:3))
 
-   nfftc    =nfft_in 
+   nfftc    =nfft_in
    ngfftc(:)=ngfft_in(:)
    nfftc_tot =PRODUCT(ngfft_in (1:3))
 
-   Pawfgr%usefinegrid=1 
-   if (ALL(ngfft_in(1:3)==ngfft_out(1:3))) Pawfgr%usefinegrid=0 
+   Pawfgr%usefinegrid=1
+   if (ALL(ngfft_in(1:3)==ngfft_out(1:3))) Pawfgr%usefinegrid=0
    optgrid=1
 
- else 
+ else
    ! From fine towards coarse.
-   nfftf    =nfft_in 
+   nfftf    =nfft_in
    ngfftf(:)=ngfft_in(:)
    nfftf_tot =PRODUCT(ngfft_in(1:3))
 
-   nfftc    =nfft_out 
+   nfftc    =nfft_out
    ngfftc(:)=ngfft_out(:)
    nfftc_tot =PRODUCT(ngfft_out (1:3))
-   Pawfgr%usefinegrid=1 
+   Pawfgr%usefinegrid=1
    optgrid=-1
  end if
 
@@ -518,14 +495,14 @@ subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,
  Pawfgr%nfftc  =PRODUCT(ngfftc(1:3)) ! no FFT parallelism!
  Pawfgr%ngfftc =ngfftc
 
- if (optgrid==1) then 
-   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,paral_kgb,Pawfgr,rhog_in ,rhog_out,rhor_in ,rhor_out)
+ if (optgrid==1) then
+   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,MPI_enreg%paral_kgb,Pawfgr,rhog_in ,rhog_out,rhor_in ,rhor_out)
  else
-   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,paral_kgb,Pawfgr,rhog_out,rhog_in ,rhor_out,rhor_in)
+   call transgrid(cplex,MPI_enreg,nspden,optgrid,optin,optout,MPI_enreg%paral_kgb,Pawfgr,rhog_out,rhog_in ,rhor_out,rhor_in)
  end if
 
  call pawfgr_destroy(Pawfgr)
- 
+
 end subroutine fourier_interpol
 !!***
 

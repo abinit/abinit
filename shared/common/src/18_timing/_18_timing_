@@ -1,0 +1,20 @@
+!!****d* ABINIT/18_timing
+!! NAME
+!! 18_timing
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2020 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_18_timing.F90
+!! m_time.F90
+!! m_xpapi.F90
+!!
+!!***

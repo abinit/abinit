@@ -537,7 +537,7 @@ class PointGroup(list):
         fh.write("!! FUNCTION\n") 
         fh.write("!!\n") 
         fh.write("!! COPYRIGHT\n") 
-        fh.write("!! Copyright (C) 2010-2018 ABINIT group (MG)\n")
+        fh.write("!! Copyright (C) 2010-2020 ABINIT group (MG)\n")
         fh.write("!! This file is distributed under the terms of the\n")
         fh.write("!! GNU General Public License, see ~abinit/COPYING\n")
         fh.write("!! or http://www.gnu.org/copyleft/gpl.txt .\n")

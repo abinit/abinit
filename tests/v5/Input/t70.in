@@ -89,7 +89,6 @@ icutcoul5   3            # old deprecated value of icutcoul, only used for legac
  istwfk    2*1
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

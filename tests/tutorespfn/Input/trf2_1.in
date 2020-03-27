@@ -107,7 +107,6 @@
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screening_driver
 !! NAME
 !!  m_screening_driver
@@ -7,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,10 +26,9 @@
 module m_screening_driver
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
+ use m_dtset
  use m_xmpi
  use m_xomp
  use m_errors
@@ -42,7 +40,13 @@ module m_screening_driver
 #endif
  use libxc_functionals
  use m_hdr
+ use m_dtfil
+ use m_distribfft
+ use m_crystal
 
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
@@ -51,8 +55,6 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_crystal,       only : crystal_free, crystal_t, crystal_print
- use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
                              ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
@@ -63,12 +65,11 @@ module m_screening_driver
  use m_qparticles,    only : rdqps, rdgw, show_QP
  use m_screening,     only : make_epsm1_driver, lwl_write, chi_t, chi_free, chi_new
  use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_free, hscr_t
- use m_spectra,       only : spectra_t, spectra_write, spectra_repr, spectra_free, W_EM_LF, W_EM_NLF, W_EELF
+ use m_spectra,       only : spectra_t, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
  use m_fft,           only : fourdp
- use m_wfd,           only : wfd_init, wfd_free,  wfd_nullify, wfd_print, wfd_t, wfd_rotate, wfd_test_ortho,&
-                             wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft, wfd_mkrho, test_charge
+ use m_wfd,           only : wfd_init, wfd_t, wfd_copy, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
  use m_chi0tk,        only : output_chi0sumrule
@@ -79,7 +80,7 @@ module m_screening_driver
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                            pawrhoij_free, symrhoij, pawrhoij_get_nspden
+&                            pawrhoij_free, pawrhoij_symrhoij, pawrhoij_inquire_dim
  use m_pawdij,        only : pawdij, symdij_all
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
@@ -94,8 +95,9 @@ module m_screening_driver
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
-
  use m_paw_correlations, only : pawpuxinit
+ use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier,&
+                             &fullbz_plowannier,destroy_plowannier 
 
  implicit none
 
@@ -158,7 +160,7 @@ contains
 !!
 !! CHILDREN
 !!      apply_scissor,calc_rpa_functional,cchi0,cchi0q0,chi0_bksmask
-!!      chi0q0_intraband,chi_free,chkpawovlp,coeffs_gausslegint,crystal_free
+!!      chi0q0_intraband,chi_free,chkpawovlp,coeffs_gausslegint
 !!      destroy_mpi_enreg,ebands_copy,ebands_free,ebands_update_occ
 !!      em1params_free,energies_init,fourdp,get_gftt,getph,gsph_free,hdr_free
 !!      hscr_free,hscr_io,init_distribfft_seq,initmpi_seq,kmesh_free,kxc_ada
@@ -180,18 +182,9 @@ contains
 
 subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screening'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
  type(Pawang_type),intent(inout) :: Pawang
@@ -206,7 +199,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !scalars
  integer,parameter :: tim_fourdp4=4,NOMEGA_PRINTED=15,master=0
  integer :: spin,ik_ibz,my_nbks
- integer :: choice,cplex,dim_kxcg,dim_wing,ount,omp_ncpus
+ integer :: choice,cplex,cplex_rhoij,dim_kxcg,dim_wing,ount,omp_ncpus
  integer :: fform_chi0,fform_em1,gnt_option,iat,ider,idir,ierr,band
  integer :: ifft,ii,ikbz,ikxc,initialized,iomega,ios,ipert
  integer :: iqibz,iqcalc,is_qeq0,isym,izero,ifirst,ilast
@@ -221,9 +214,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
- real(dp) :: alpha,rhoav,opt_ecut,factor
+ real(dp) :: alpha,rhoav,factor
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- logical :: found,iscompatibleFFT,use_tr,is_first_qcalc
+ logical :: found,iscompatibleFFT,is_dfpt=.false.,use_tr,is_first_qcalc
  logical :: add_chi0_intraband,update_energies,call_pawinit
  character(len=10) :: string
  character(len=500) :: msg
@@ -251,7 +244,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: gmet(3,3),gprimd(3,3),k0(3),qtmp(3),rmet(3,3),rprimd(3,3),tsec(2),strsxc(6)
  real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),rspower(:)
  real(dp),allocatable :: nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:)
- real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taug(:,:),taur(:,:)
+ real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taur(:,:)
  real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
@@ -270,6 +263,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:),prev_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
+ type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
 !************************************************************************
 
@@ -372,9 +366,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,Cryst%xred)
 
    ABI_DT_MALLOC(Pawrhoij,(Cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-   call pawrhoij_alloc(Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
-&   Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
+&                      Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays stored in Pawinit
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -384,9 +379,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    if (psp_gencond==1.or.call_pawinit) then
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
 &     Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
-&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,Dtset%usepotzero)
+&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%ixc,Dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
@@ -411,21 +406,19 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 !  * Initialize and compute data for LDA+U.
 !  paw_dmft%use_dmft=dtset%usedmft
-   if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-&     Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
+&     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
-   end if
 
    if (my_rank == master) call pawtab_print(Pawtab)
 
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
 
-   ! Re-symmetrize symrhoij.
+   ! Re-symmetrize rhoij.
 !  this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1; ipert=0; idir=0
-!  call symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
+!  call pawrhoij_symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
 !  &             Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
 !  &             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 !
@@ -545,10 +538,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nbvw=MAXVAL(ibocc)
    nbcw=Ep%nbnds-nbvw
    write(msg,'(4a,i0,2a,i0,2a,i0,a)')ch10,&
-&   '- screening: taking advantage of time-reversal symmetry ',ch10,&
-&   '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
-&   '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
-&   '- Number of bands treated by each node ~',nbcw/nprocs,ch10
+    '- screening: taking advantage of time-reversal symmetry ',ch10,&
+    '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
+    '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
+    '- Number of bands treated by each node ~',nbcw/nprocs,ch10
    call wrtout(ab_out,msg,'COLL')
    if (Cryst%timrev/=2) then
      MSG_ERROR('Time-reversal cannot be used since cryst%timrev/=2')
@@ -639,26 +632,22 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end if
 
 ! Initialize the Wf_info object (allocate %ug and %ur if required).
- opt_ecut=Dtset%ecutwfn
-!opt_ecut=zero
 
-!call gsph_init(Gsph_wfn,Cryst,Ep%npwvec,gvec=gvec_kss)
-
- call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,Ep%npwwfn,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
-& Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_gw,&
-& Gsph_wfn%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+ call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
+  Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_gw,&
+  Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
  if (Dtset%pawcross==1) then
-   call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,Ep%npwwfn,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
-&   Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_gw,&
-&   Gsph_wfn%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+   call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,mband,nband,Ep%nkibz,Dtset%nsppol,bks_mask,&
+    Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,ngfft_gw,&
+    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
  end if
 
  ABI_FREE(bks_mask)
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
 
- call wfd_print(Wfd,mode_paral='PERS')
+ call wfd%print(mode_paral='PERS')
 !FIXME: Rewrite the treatment of use_tr branches in cchi0 ...
 !Use a different nbvw for each spin.
 !Now use_tr means that one can use time-reversal symmetry.
@@ -666,21 +655,21 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !==================================================
 !==== Read KS band structure from the KSS file ====
 !==================================================
- call wfd_read_wfk(Wfd,wfk_fname,iomode_from_fname(wfk_fname))
+ call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
 
  if (Dtset%pawcross==1) then
    call wfd_copy(Wfd,Wfdf)
-   call wfd_change_ngfft(Wfdf,Cryst,Psps,ngfftf)
+   call wfdf%change_ngfft(Cryst,Psps,ngfftf)
  end if
 
  ! This test has been disabled (too expensive!)
- if (.False.) call wfd_test_ortho(Wfd,Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
+ if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
  call timab(316,2,tsec) ! screening(wfs
  call timab(319,1,tsec) ! screening(1)
 
  if (Cryst%nsym/=Dtset%nsym .and. Dtset%usepaw==1) then
-   MSG_ERROR('Cryst%nsym/=Dtset%nsym, check pawinit and symrhoij')
+   MSG_ERROR('Cryst%nsym/=Dtset%nsym, check pawinit and pawrhoij_symrhoij')
  end if
 
 ! Get the FFT index of $ (R^{-1}(r-\tau)) $
@@ -759,10 +748,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-&   nfftf,ngfftf,Cryst%ucvol,Dtset%paral_kgb,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
+   nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
 
    ABI_FREE(rhor_p)
-   ABI_DT_FREE(prev_Pawrhoij)
+   ABI_FREE(prev_Pawrhoij)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
@@ -774,7 +763,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! === Update only the wfg treated with GW ===
    ! For PAW update and re-symmetrize cprj in the full BZ, TODO add rotation in spinor space
-   if (nscf/=0) call wfd_rotate(Wfd,Cryst,m_lda_to_qp)
+   if (nscf/=0) call wfd%rotate(Cryst,m_lda_to_qp)
 
    ABI_FREE(m_lda_to_qp)
    call timab(304,2,tsec)
@@ -818,9 +807,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(rhor,(nfftf,Dtset%nspden))
  ABI_MALLOC(taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
- call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,rhor)
+ call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,rhor)
  if (Dtset%usekden==1) then
-   call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,taur,optcalc=1)
+   call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,taur,optcalc=1)
  end if
 
  call timab(305,2,tsec) ! screening(densit
@@ -891,11 +880,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end if
 
  ABI_MALLOC(rhog,(2,nfftf))
- ABI_MALLOC(taug,(2,nfftf*Dtset%usekden))
- call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp4)
- if(Dtset%usekden==1)then
-   call fourdp(1,taug,taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp4)
- end if
+ call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp4)
 
 !The following steps have been gathered in the setvtr routine:
 !- get Ewald energy and Ewald forces
@@ -932,7 +917,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 & moved_atm_inside,moved_rhor,MPI_enreg_seq, &
 & Cryst%nattyp,nfftf,ngfftf,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,Cryst%ntypat,&
 & Psps%n1xccc,n3xccc,optene,pawrad,Pawtab,ph1df,Psps,rhog,rhor,Cryst%rmet,Cryst%rprimd,strsxc,Cryst%ucvol,usexcnhat,&
-& ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl_dummy,xccc3d,Cryst%xred,taug=taug,taur=taur)
+& ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl_dummy,xccc3d,Cryst%xred,taur=taur)
 
  if (nkxc/=0)  then
    ABI_FREE(kxc)
@@ -1080,8 +1065,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  write(msg,'(a,f12.1,a)')' Memory required for chi0 matrix= ',two*gwpc*Ep%npwe**2*Ep%nI*Ep%nJ*Ep%nomega*b2Mb," [Mb]."
  call wrtout(std_out,msg,'COLL')
- ABI_STAT_MALLOC(chi0,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
- ABI_CHECK(ierr==0, "Out of memory in chi0")
+ ABI_MALLOC_OR_DIE(chi0,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 !
 !============================== END OF THE INITIALIZATION PART ===========================
 !
@@ -1091,6 +1075,14 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(321,2,tsec) ! screening(2)
 
  iqcalc = 0
+ if(Dtset%plowan_compute >= 10) then
+   call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
+&Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
+&Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
+&Dtset%kptns,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz_in)
+   call get_plowannier(wanibz_in,wanibz,Dtset)
+   call fullbz_plowannier(Dtset,Kmesh,Cryst,Pawang,wanibz,wanbz)
+ endif
  do iqibz=1,Qmesh%nibz
    call timab(306,1,tsec)
    is_first_qcalc=(iqibz==1)
@@ -1130,7 +1122,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &     Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
-&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
 
      chihw = chi_new(ep%npwe, ep%nomega)
      chihw%head = chi0_head
@@ -1141,8 +1133,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      add_chi0_intraband=.FALSE. !add_chi0_intraband=.TRUE.
      if (add_chi0_intraband .and. ebands_has_metal_scheme(QP_BSt)) then
 
-       ABI_STAT_MALLOC(chi0intra,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
-       ABI_CHECK(ierr==0, "Out of memory in chi0intra")
+       ABI_MALLOC_OR_DIE(chi0intra,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 
        ABI_MALLOC(chi0intra_lwing,(Ep%npwe*Ep%nI,Ep%nomega,3))
        ABI_MALLOC(chi0intra_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
@@ -1181,7 +1172,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0(use_tr,Dtset,Cryst,Qmesh%ibz(:,iqibz),Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftgw,ngfftf,nfftf_tot,chi0,ktabr,ktabrf,&
-&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
+
 
      call timab(308,2,tsec)
    end if
@@ -1232,7 +1224,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
-         NCF_CHECK(crystal_ncwrite(cryst, unt_susc))
+         NCF_CHECK(cryst%ncwrite(unt_susc))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_susc))
 #endif
        else
@@ -1334,7 +1326,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      dim_kxcg=0
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-!  @WC: bootstrap --
+!  bootstrap --
    case (-3, -4, -5, -6, -7, -8)
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      if (Dtset%gwgamma>-5) then
@@ -1344,7 +1336,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (head-only) is being added to screening')
        approx_type=5
      else
-       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (RPA-type, head-only) is being added to screening')
+       MSG_WARNING('EXPERIMENTAL: RPA Bootstrap kernel is being added to screening')
        approx_type=6
      end if
      dim_kxcg=0
@@ -1352,7 +1344,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-!--@WC
+!
 
    case default
      MSG_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
@@ -1379,20 +1371,20 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(chi0_head)
 
    if (my_rank==master .and. is_qeq0==1) then
-     call spectra_repr(spectra,msg)
+     call spectra%repr(msg)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
 
      if (Ep%nomegaer>2) then
-       call spectra_write(spectra,W_EELF  ,Dtfil%fnameabo_eelf)
-       call spectra_write(spectra,W_EM_LF ,Dtfil%fnameabo_em1_lf)
-       call spectra_write(spectra,W_EM_NLF,Dtfil%fnameabo_em1_nlf)
+       call spectra%write(W_EELF  ,Dtfil%fnameabo_eelf)
+       call spectra%write(W_EM_LF ,Dtfil%fnameabo_em1_lf)
+       call spectra%write(W_EM_NLF,Dtfil%fnameabo_em1_nlf)
      end if
    end if ! master and is_qeq0==1
 
    if (is_qeq0==1) call chi_free(chihw)
 
-   call spectra_free(spectra)
+   call spectra%free()
    if (allocated(kxcg)) then
      ABI_FREE(kxcg)
    end if
@@ -1455,7 +1447,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
-         NCF_CHECK(crystal_ncwrite(cryst, unt_em1))
+         NCF_CHECK(cryst%ncwrite(unt_em1))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_em1))
 #endif
        else
@@ -1473,8 +1465,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call timab(310,2,tsec)
  end do ! Loop over q-points
-
- !----------------------------- END OF THE CALCULATION ------------------------
+ if (Dtset%plowan_compute >=10)then
+   call destroy_plowannier(wanbz)
+ endif
+!----------------------------- END OF THE CALCULATION ------------------------
 
  ! Close Files.
  if (my_rank==master) then
@@ -1506,7 +1500,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(qp_vbik)
  ABI_FREE(ktabr)
  ABI_FREE(taur)
- ABI_FREE(taug)
  ABI_FREE(ks_vhartr)
  ABI_FREE(ks_vtrial)
  ABI_FREE(vpsp)
@@ -1526,33 +1519,33 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if (Dtset%pawcross==1) then
      call paw_pwaves_lmn_free(Paw_onsite)
      Wfdf%bks_comm = xmpi_comm_null
-     call wfd_free(Wfdf)
+     call wfdf%free()
    end if
  end if
 
- ABI_DT_FREE(Pawfgrtab)
- ABI_DT_FREE(Paw_pwff)
- ABI_DT_FREE(Pawrhoij)
- ABI_DT_FREE(Paw_ij)
- ABI_DT_FREE(Paw_an)
+ ABI_FREE(Pawfgrtab)
+ ABI_FREE(Paw_pwff)
+ ABI_FREE(Pawrhoij)
+ ABI_FREE(Paw_ij)
+ ABI_FREE(Paw_an)
  ABI_FREE(ktabrf)
- ABI_DT_FREE(Paw_onsite)
+ ABI_FREE(Paw_onsite)
 
- call wfd_free(Wfd)
+ call wfd%free()
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
- call crystal_free(Cryst)
+ call cryst%free()
  call gsph_free(Gsph_epsG0)
  call gsph_free(Gsph_wfn)
  call vcoul_free(Vcp)
  call em1params_free(Ep)
- call hdr_free(Hdr_wfk)
- call hdr_free(Hdr_local)
+ call Hdr_wfk%free()
+ call Hdr_local%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call littlegroup_free(Ltg_q)
  call destroy_mpi_enreg(MPI_enreg_seq)
- ABI_DT_FREE(Ltg_q)
+ ABI_FREE(Ltg_q)
 
  call timab(301,2,tsec)
 
@@ -1609,19 +1602,10 @@ end subroutine screening
 subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&
 & ngfft_gw,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_screening'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: wfk_fname
  type(Dataset_type),intent(inout) :: Dtset !INOUT is due to setshells
  type(datafiles_type),intent(in) :: dtfil
@@ -1694,8 +1678,8 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  Ep%zcut   =Dtset%zcut
 
  write(msg,'(2a,i4,2a,f10.6,a)')ch10,&
-&  ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
-&  ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
+   ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
+   ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
  call wrtout(std_out,msg,'COLL')
 
  Ep%awtr  =Dtset%awtr
@@ -1715,7 +1699,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! Read parameters from WFK and verifify them.
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
- call hdr_vs_dtset(Hdr_wfk,Dtset)
+ call hdr_wfk%vs_dtset(dtset)
  remove_inv=.FALSE.
 
  test_npwkss = 0
@@ -1759,13 +1743,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    Ep%nbnds=mband
    Dtset%nband(:)=mband
    write(msg,'(4a,i4,a)')ch10,&
-&    ' Number of bands found less then required. ',ch10,&
-&    ' Calculation will proceed with nbnds = ',mband,ch10
+     ' Number of bands found less then required. ',ch10,&
+     ' Calculation will proceed with nbnds = ',mband,ch10
    MSG_WARNING(msg)
  end if
 
- call crystal_from_hdr(Cryst,Hdr_wfk,timrev,remove_inv)
- call crystal_print(Cryst,mode_paral='COLL')
+ cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ call cryst%print(mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===
  ! * Kmesh defines the k-point sampling for the wavefunctions.
@@ -2097,7 +2081,6 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! To write the SCR header correctly, with heads and wings, we have
  ! to make sure that q==0, if present, is the first q-point in the list.
- !has_q0=(ANY(normv(Ep%qcalc(:,:),gmet,'G')<GW_TOLQ0)) !commented to avoid problems with sunstudio12
  has_q0=.FALSE.
  do iq=1,Ep%nqcalc
    if (normv(Ep%qcalc(:,iq),gmet,'G')<GW_TOLQ0) then
@@ -2173,11 +2156,11 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
- call hdr_update(Hdr_out,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call Hdr_out%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)
- ABI_DT_FREE(Pawrhoij)
+ ABI_FREE(Pawrhoij)
 
  ! ==== Setup of extrapolar technique ====
  Ep%gwcomp = Dtset%gwcomp; Ep%gwencomp = Dtset%gwencomp
@@ -2236,15 +2219,6 @@ end subroutine setup_screening
 
 subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi0_bksmask'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_rank,nprocs,nbvw,nbcw
@@ -2258,7 +2232,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
 
 !Local variables-------------------------------
 !scalars
- integer :: my_nspins,my_maxb,my_minb,isp,spin,distr_err,nsppol,band,rank_spin,ib
+ integer :: my_nspins,my_maxb,my_minb,isp,spin,nsppol,band,rank_spin,ib
  character(len=500) :: msg
  logical :: store_ur
 !arrays
@@ -2314,13 +2288,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
        ABI_MALLOC(istart,(nprocs_spin(spin)))
        ABI_MALLOC(istop,(nprocs_spin(spin)))
 
-       call xmpi_split_work2_i4b(nbcw,nprocs_spin(spin),istart,istop,msg,distr_err)
-
-       if (distr_err==2) then
-         ! Too many processors.
-         !MSG_WARNING(msg)
-         ierr=1
-       end if
+       call xmpi_split_work2_i4b(nbcw,nprocs_spin(spin),istart,istop)
 
        my_minb = nbvw + istart(rank_spin+1)
        my_maxb = nbvw + istop (rank_spin+1)
@@ -2328,11 +2296,11 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
        ABI_FREE(istart)
        ABI_FREE(istop)
 
-       if (my_maxb-my_minb+1<=0) then
+       if (my_maxb - my_minb + 1 <= 0) then
          write(msg,'(3a,2(i0,a),2a)')&
-&         'One or more processors has zero number of bands ',ch10,&
-&         'my_minb= ',my_minb,' my_maxb= ',my_maxb,ch10,&
-&         'This is a waste, decrease the number of processors.'
+          'One or more processors has zero number of bands ',ch10,&
+          'my_minb= ',my_minb,' my_maxb= ',my_maxb,ch10,&
+          'This is a waste, decrease the number of processors.'
          MSG_ERROR(msg)
        end if
 
@@ -2388,14 +2356,6 @@ end subroutine chi0_bksmask
 subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cryst,Dtfil,epsm1,rspower)
 
  use m_splines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'random_stopping_power'
-!End of the abilint section
-
- implicit  none
 
 !Arguments ------------------------------------
 !scalars
@@ -2616,14 +2576,6 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
  use m_hide_lapack, only : xginv, xheev
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_rpa_functional'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqcalc,iq,gwrpacorr,spaceComm
@@ -2674,8 +2626,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
 
  ABI_ALLOCATE(chi0_diag,(Ep%npwe))
- ABI_STAT_ALLOCATE(chitmp,(Ep%npwe,Ep%npwe), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in chitmp")
+ ABI_MALLOC_OR_DIE(chitmp,(Ep%npwe,Ep%npwe), ierr)
 
  do io=2,Ep%nomega
 

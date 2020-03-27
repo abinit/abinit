@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_prcref
 !! NAME
 !!  m_prcref
@@ -7,7 +6,7 @@
 !!  Routines to precondition residual potential (or density) and forces.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT, PMA)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT, PMA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,18 +26,18 @@
 module m_prcref
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_errors
  use m_abicore
  use m_xmpi
  use m_xcdata
-
  use m_frskerker1
  use m_frskerker2
  use mod_prc_memory
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_numeric_tools, only : dotproduct
  use m_geometry, only : xcart2xred, metric
@@ -49,7 +48,6 @@ module m_prcref
  use m_fftcore,  only : kgindex
  use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
- use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian
  use m_distribfft, only : init_distribfft_seq
  use m_forces,     only : fresid
@@ -57,7 +55,6 @@ module m_prcref
  use m_rhotoxc,    only : rhotoxc
  use m_mklocl,     only : mklocl
  use m_mkcore,     only : mkcore
-
 
  implicit none
 
@@ -200,15 +197,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcref'
-!End of the abilint section
-
- implicit none
-
 !Arguments-------------------------------
 !scalars
  integer,intent(in) :: dielstrt,istep,my_natom,mgfft,moved_atm_inside,n1xccc
@@ -239,13 +227,12 @@ subroutine prcref(atindx,dielar,dielinv,&
 !Local variables-------------------------------
 !scalars
  integer :: coredens_method,cplex,dielop,iatom,ier,ifft,ii,index,ipw1
- integer :: ipw2,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
+ integer :: ipw2,iq,iq0,ispden,klmn,kmix,n1,n2,n3,n3xccc,nfftot,nk3xc,optatm
  integer :: optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
- logical :: computediel
- logical :: non_magnetic_xc
+ logical :: computediel,non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -266,9 +253,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -311,7 +295,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
-       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work)
      if (dtset%iprcel<=78) then
@@ -329,7 +313,7 @@ subroutine prcref(atindx,dielar,dielinv,&
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(work,(nfftprc))
-       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
        ABI_DEALLOCATE(work)
@@ -338,7 +322,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
      end if
      do ispden=1,dtset%nspden
-       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work3)
@@ -350,7 +334,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      cplex=optreal
      qphon(:)=zero
 !    Simple scalar multiplication, or model dielectric function
-     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,dtset%paral_kgb,qphon,rprimd,vresid,vrespc)
+     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
    else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
@@ -359,7 +343,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
      dielop=1
      if(modulo(dtset%iprcel,100)>=41)dielop=2
-     call testsusmat(computediel,dielop,dielstrt,dtset,istep) !test if the matrix is to be computed
+     computediel = dtset%testsusmat(dielop, dielstrt, istep) !test if the matrix is to be computed
      if(computediel) then
 !      Compute the inverse dielectric matrix from the susceptibility matrix
 !      There are two routines for the RPA matrix, while for the electronic
@@ -371,7 +355,7 @@ subroutine prcref(atindx,dielar,dielinv,&
          option=1
          if(modulo(dtset%iprcel,100)>=61)option=2
          call dieltcel(dielinv,gmet,kg_diel,kxc,&
-&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%paral_kgb,dtset%prtvol,susmat)
+&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%prtvol,susmat)
        end if
      end if
 
@@ -386,7 +370,7 @@ subroutine prcref(atindx,dielar,dielinv,&
        work2(:)=vresid(:,1)
 !      Must average over spins in the case of a potential residual
        if(dtset%nspden/=1.and.optres==0)work2(:)=(work2(:)+vresid(:,2))*half
-       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work1(:,:)=reshape(vresid(:,1),(/2,nfftprc/))
        if(dtset%nspden/=1.and.optres==0)work1(:,:)=(work1(:,:)+reshape(vresid(:,2),(/2,nfftprc/)))*half
@@ -447,7 +431,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_DEALLOCATE(mask)
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work2(:)=reshape(work1(:,:),(/nfftprc*2/))
      end if
@@ -490,25 +474,31 @@ subroutine prcref(atindx,dielar,dielinv,&
    else
      mixfac=dielar(4);mixfacmag=abs(dielar(7))
    end if
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
-       do ispden=1,pawrhoij(iatom)%nspden
-         mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
-         do kmix=1,pawrhoij(iatom)%lmnmix_sz
-           index=index+1;klmn=pawrhoij(iatom)%kpawmix(kmix)
-           rhoijrespc(index)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn,ispden)
+       do iq=1,pawrhoij(iatom)%qphase
+         iq0=merge(0,pawrhoij(iatom)%lmn2_size,iq==1)
+         do ispden=1,pawrhoij(iatom)%nspden
+           mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
+           do kmix=1,pawrhoij(iatom)%lmnmix_sz
+             index=index+1;klmn=iq0+pawrhoij(iatom)%kpawmix(kmix)
+             rhoijrespc(index)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn,ispden)
+           end do
          end do
        end do
      end do
    else
      index=-1
      do iatom=1,my_natom
-       do ispden=1,pawrhoij(iatom)%nspden
-         mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
-         do kmix=1,pawrhoij(iatom)%lmnmix_sz
-           index=index+2;klmn=2*pawrhoij(iatom)%kpawmix(kmix)-1
-           rhoijrespc(index:index+1)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn:klmn+1,ispden)
+       do iq=1,pawrhoij(iatom)%qphase
+         iq0=merge(0,2*pawrhoij(iatom)%lmn2_size,iq==1)
+         do ispden=1,pawrhoij(iatom)%nspden
+           mixfac_eff=mixfac;if (ispden>1) mixfac_eff=mixfacmag
+           do kmix=1,pawrhoij(iatom)%lmnmix_sz
+             index=index+2;klmn=iq0+2*pawrhoij(iatom)%kpawmix(kmix)-1
+             rhoijrespc(index:index+1)=mixfac_eff*pawrhoij(iatom)%rhoijres(klmn:klmn+1,ispden)
+           end do
          end do
        end do
      end do
@@ -568,7 +558,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(work,(nfft))
      ABI_ALLOCATE(rhog_wk,(2,nfft))
      work(:)=rhor_wk(:,1)
-     call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
      ABI_DEALLOCATE(work)
 
 !    Compute structure factor phases for new atomic pos:
@@ -641,13 +631,13 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(vhartr_wk,(nfft))
      option=1
 
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
+     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
 
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
-     nk3xc=1
+     nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
      call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&     work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &     vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
      ABI_DEALLOCATE(xccc3d)
 
@@ -850,15 +840,6 @@ end subroutine prcref
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
 &  etotal,pawtab,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcref_PMA'
-!End of the abilint section
-
- implicit none
-
 !Arguments-------------------------------
 !variables used for tfvw
 !scalars
@@ -896,8 +877,7 @@ end subroutine prcref
  real(dp) :: ai,ar,diemix,diemixmag,eei,enxc
  real(dp) :: mixfac
  real(dp) :: mixfac_eff,mixfacmag,ucvol,vxcavg
- logical :: computediel
- logical :: non_magnetic_xc
+ logical :: computediel,non_magnetic_xc
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -923,9 +903,6 @@ end subroutine prcref
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
 !1) Eventually take care of the forces
 
@@ -968,7 +945,7 @@ end subroutine prcref
      ABI_ALLOCATE(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
-       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work)
      if (dtset%iprcel<=78) then
@@ -986,7 +963,7 @@ end subroutine prcref
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(work,(nfftprc))
-       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
        ABI_DEALLOCATE(work)
@@ -995,7 +972,7 @@ end subroutine prcref
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
      end if
      do ispden=1,dtset%nspden
-       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work3)
@@ -1007,7 +984,7 @@ end subroutine prcref
      cplex=optreal
      qphon(:)=zero
 !    Simple scalar multiplication, or model dielectric function
-     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,dtset%paral_kgb,qphon,rprimd,vresid,vrespc)
+     call moddiel(cplex,dielar,mpi_enreg,nfftprc,ngfftprc,dtset%nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !    Use the inverse dielectric matrix in a small G sphere
    else if( (istep>=dielstrt .and. dtset%iprcel>=21) .or. modulo(dtset%iprcel,100)>=41 )then
@@ -1016,7 +993,7 @@ end subroutine prcref
 !    With dielop=2, the matrices will be computed when istep=dielstrt and 1
      dielop=1
      if(modulo(dtset%iprcel,100)>=41)dielop=2
-     call testsusmat(computediel,dielop,dielstrt,dtset,istep) !test if the matrix is to be computed
+     computediel = dtset%testsusmat(dielop, dielstrt, istep) !test if the matrix is to be computed
      if(computediel) then
 !      Compute the inverse dielectric matrix from the susceptibility matrix
 !      There are two routines for the RPA matrix, while for the electronic
@@ -1028,7 +1005,7 @@ end subroutine prcref
          option=1
          if(modulo(dtset%iprcel,100)>=61)option=2
          call dieltcel(dielinv,gmet,kg_diel,kxc,&
-&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%paral_kgb,dtset%prtvol,susmat)
+&         nfft,ngfft,nkxc,npwdiel,dtset%nspden,dtset%occopt,option,dtset%prtvol,susmat)
        end if
      end if
 
@@ -1043,7 +1020,7 @@ end subroutine prcref
        work2(:)=vresid(:,1)
 !      Must average over spins if needed.
        if(dtset%nspden/=1)work2(:)=(work2(:)+vresid(:,2))*half
-       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work1(:,:)=reshape(vresid(:,1),(/2,nfftprc/))
        if (dtset%nspden/=1) work1(:,:)=(work1(:,:)+reshape(vresid(:,2),(/2,nfftprc/)))*half
@@ -1093,7 +1070,7 @@ end subroutine prcref
 
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work2(:)=reshape(work1(:,:),(/nfftprc*2/))
      end if
@@ -1134,7 +1111,7 @@ end subroutine prcref
    else
      mixfac=dielar(4);mixfacmag=abs(dielar(7))
    end if
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
        do ispden=1,pawrhoij(iatom)%nspden
@@ -1210,7 +1187,7 @@ end subroutine prcref
    ABI_ALLOCATE(work,(nfft))
    ABI_ALLOCATE(rhog_wk,(2,nfft))
    work(:)=rhor_wk(:,1)
-   call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
    ABI_DEALLOCATE(work)
 
 !  Compute structure factor phases for new atomic pos:
@@ -1284,14 +1261,14 @@ end subroutine prcref
    ABI_ALLOCATE(vhartr_wk,(nfft))
    option=1
 
-   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_wk,rprimd,vhartr_wk)
+   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
 
 !  Prepare the call to rhotoxc
    call xcdata_init(xcdata,dtset=dtset)
-   nk3xc=1
+   nk3xc=1 ; non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
    ABI_ALLOCATE(work,(0))
    call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor_wk,rprimd,strsxc,1,&
+&   work,0,work,0,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor_wk,rprimd,strsxc,1,&
 &   vxc_wk,vxcavg,xccc3d,xcdata,vhartr=vhartr_wk)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(xccc3d)
@@ -1376,20 +1353,11 @@ end subroutine prcref_PMA
 !!
 !! SOURCE
 
-subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral_kgb,qphon,rprimd,vresid,vrespc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'moddiel'
-!End of the abilint section
-
- implicit none
+subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
 
 !Arguments-------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nspden,optreal,optres,paral_kgb
+ integer,intent(in) :: cplex,nfft,nspden,optreal,optres
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -1452,9 +1420,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
  magn_precon=(diemixmag>=zero) ! Set to true if magnetization has to be preconditionned
  diemixmag=abs(diemixmag)
 
-!DEBUG
 !write(std_out,*)' moddiel : diemac, diemix, diemixmag =',diemac,diemix,diemixmag
-!ENDDEBUG
 
  if(abs(diemac-1.0_dp)<1.0d-6)then
 
@@ -1497,7 +1463,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 !    Do fft from real space (work2) to G space (work1)
      if (optreal==1) then
        work2(:)=vresid(:,ispden)
-       call fourdp(cplex,work1,work2,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,work1,work2,-1,mpi_enreg,nfft,1,ngfft,0)
      else
 !      work1(:,:)=reshape(vresid(:,ispden),(/2,nfft/))
 !      Reshape function does not work with big arrays for some compilers
@@ -1559,7 +1525,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(cplex,work1,work2,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
        vrespc(:,ispden)=work2(:)
      else
 !      vrespc(:,ispden)=reshape(work1(:,:),(/nfft*2/))
@@ -1624,15 +1590,6 @@ end subroutine moddiel
 !! SOURCE
 
 subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dielmt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1994,21 +1951,11 @@ end subroutine dielmt
 !!
 !! SOURCE
 
-subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
-&  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dieltcel'
-!End of the abilint section
-
- implicit none
+subroutine dieltcel(dielinv,gmet,kg_diel,kxc,nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,prtvol,susmat)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb
+ integer,intent(in) :: nfft,nkxc,npwdiel,nspden,occopt,option
  integer,intent(in) :: prtvol
 !arrays
  integer,intent(in) :: kg_diel(3,npwdiel),ngfft(18)
@@ -2219,7 +2166,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 !  ENDDEBUG
    call initmpi_seq(mpi_enreg_seq)
    call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
-   call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,ngfft,paral_kgb,0) ! trsfrm R to G
+   call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,1,ngfft,0) ! trsfrm R to G
    call destroy_mpi_enreg(mpi_enreg_seq)
 
 !  Compute difference in G vectors
@@ -2324,8 +2271,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
    call wrtout(ab_out,message,'COLL')
  end if
 
- write(message, '(a,a)' )ch10,&
-& ' dieltcel : 15 largest eigenvalues of the symmetrized dielectric matrix'
+ write(message,'(2a)')ch10,' dieltcel : 15 largest eigenvalues of the symmetrized dielectric matrix'
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(npwdiel:npwdiel-4:-1)
  call wrtout(std_out,message,'COLL')
@@ -2333,8 +2279,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  11-15:',eig_sym(npwdiel-10:npwdiel-14:-1)
  call wrtout(std_out,message,'COLL')
- write(message, '(a,a)' )ch10,&
-& ' dieltcel : 5 smallest eigenvalues of the symmetrized dielectric matrix'
+ write(message, '(2a)' )ch10,' dieltcel : 5 smallest eigenvalues of the symmetrized dielectric matrix'
  call wrtout(std_out,message,'COLL')
  write(message, '(a,5es12.5)' )'  1-5  :',eig_sym(1:5)
  call wrtout(std_out,message,'COLL')
@@ -2479,15 +2424,6 @@ end subroutine dieltcel
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcrskerker1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nspden
@@ -2566,7 +2502,9 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !compute deltaW                                                 **
 !******************************************************************
  vrespc=vresid !starting point
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,dtset%paral_kgb,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart) ! put the laplacian of the residuals into deltaW
+ ! put the laplacian of the residuals into deltaW
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=vrespc,laplacerdfuncr=deltaW,g2cart_out=g2cart)
+
 !call laplacian(vrespc,buffer,ngfft,gprimd) ! put the laplacian of the residuals into deltaW
 !do ifft=1,nfft
 !if (buffer(ifft,1)/=deltaW(ifft,1)) then
@@ -2703,15 +2641,6 @@ end subroutine prcrskerker1
 !! SOURCE
 
 subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vrespc,natom,xred,mpi_enreg,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcrskerker2'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2902,7 +2831,7 @@ subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vres
 !compute V1
 !******************************************************************
  V1=vresid
- call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,dtset%paral_kgb,rdfuncr=V1,laplacerdfuncr=deltaW)
+ call laplacian(gprimd,mpi_enreg,nfft,nspden,ngfft,rdfuncr=V1,laplacerdfuncr=deltaW)
  deltaW(:,1)= (((one/rdiemac(:))*V1(:,1))-(((rdielng(:))**2)*deltaW(:,1)))
 !deltaW(:,1)= -diemix*(((rdielng(:))**2)*deltaW(:,ispden))
  if (nspden>1) then
@@ -3020,15 +2949,6 @@ end subroutine prcrskerker2
 
 subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgpr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 include "dummy_functions.inc"
 !scalars
@@ -3092,7 +3012,7 @@ end subroutine cgpr
 !! first bracket the minimum then perform the minimization
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3118,15 +3038,6 @@ end subroutine cgpr
 !! SOURCE
 
 subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linmin'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 include "dummy_functions.inc"
@@ -3184,15 +3095,6 @@ end subroutine linmin
 !! SOURCE
 
 subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bracketing'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 include "dummy_functions.inc"
@@ -3302,15 +3204,6 @@ end subroutine bracketing
 !! SOURCE
 
 function brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,itmax,v,grad,ax,xx,bx,tol,xmin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'brent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 include "dummy_functions.inc"

@@ -1,0 +1,117 @@
+# ---------------------------------------------------------------------------------------------------------
+# fcc Gd 
+# DFT+DMFT with Hubbard I solver with Self-consistency over Green function and density
+# and Spin Orbit Coupling.
+# ---------------------------------------------------------------------------------------------------------
+# -- DATASETS AND OPTIONS
+ndtset 2
+jdtset 1 2 # DFT+U and DFT+DMFT
+prtvol 4
+pawprtvol 3
+getwfk -1  # RESTART DFT+DMFT from DFT+U
+fftalg 112 # Needed to preserve the old behaviour
+
+
+#CONVERGENCE PARAMETERS.
+nstep1 30
+nstep2  1
+tolvrs 1.0d-12
+ecut   12   # Low cutoff: test
+pawecutdg  40
+#occopt  3 tsmear 0.003675  # occopt=3 : fermi dirac
+occopt  3 tsmear 0.007000  # occopt=3 : fermi dirac
+nband  44 # number of bands nband/= dmftbandf for testing purpose.
+nbdbuf 2
+
+#MAGNETISM
+nsppol 1  
+nspden 4   # Non Colinear Magnetism
+nspinor 2  # Non Colinear Magnetism
+pawspnorb 1
+spinat 0 0 0  # Impose magnetism
+
+#ATOMS and CELL
+natom 1 ntypat  1 typat  1
+znucl  64.0
+xred  0   0   0
+acell 3*7.4
+rprim 0.0 1/2 1/2
+      1/2 0.0 1/2
+      1/2 1/2 0.0
+
+## K-POINTS
+kptopt 4    # do not use time reversal symetry.
+nshiftk 4
+kptrlatt 2 0 0 0 2 0 0 0 2  # At least 2 k points
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+istwfk *1 
+
+## == DFT+DMFT
+usedmft1 0
+usedmft2 1
+dmftbandi 9
+dmftbandf 40
+dmft_solv2 2   # Hubbard I
+dmft_iter 2    # 2 DMFT iterations
+dmft_nwli 200000   # low: test
+dmft_nwlo 100      # low: test
+dmftcheck 0
+dmft_rslf 1       # do not read self
+dmft_mxsf 0.7
+dmft_charge_prec 1e-10
+
+# Hubbard Correction
+usepawu    1
+lpawu   3    # HUbbard correction ON f-ORBITALS
+upawu1  0.00
+upawu2  0.22
+jpawu  0.0000
+f4of2_sla  0.0
+f6of2_sla  0.0
+dmatpuopt 1  # CHOOSE EXPRESSION OF THE DENSITY MATRIX.
+usedmatpu1 0 # IMPOSE DENSITY MATRIX IN THE FIRST STEP
+dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 1.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 1.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 1.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 1.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 1.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 1.0
+
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+          0.0 0.0 0.0 0.0 0.0 0.0 0.0
+
+paral_kgb1 0
+paral_kgb2 1
+npkpt2 1
+npband2 4
+npfft2 1
+bandpp2 11
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t85.out, tolnlines = 30, tolabs = 2.0e-2, tolrel = 2.0e-2, fld_options = -easy
+#%% psp_files = 64gd.paw 
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test =
+#%%   t85_MPI4.out, tolnlines = 30, tolabs = 2.0e-2, tolrel = 2.0e-2, fld_options = -easy;
+#%% [extra_info]
+#%% authors = B. Amadon, T. Cavignac
+#%% keywords = DMFT, CTQMC, FAILS_IFMPI
+#%% description = DFT+DMFT for Gadolinium using Hubbard 1 code with KGB parallelism
+#%% topics = DMFT, SPINOR, KGB
+#%%<END TEST_INFO>

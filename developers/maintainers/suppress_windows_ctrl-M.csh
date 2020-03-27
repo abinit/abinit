@@ -1,6 +1,6 @@
 #!/bin/csh
 #
-# Copyright (C) 2001-2018 ABINIT group (Lsi,XG)
+# Copyright (C) 2001-2020 ABINIT group (Lsi,XG)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

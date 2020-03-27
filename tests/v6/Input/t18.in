@@ -51,7 +51,6 @@ xcart         4.4575393774E+00  1.9054055331E+00  1.1215044142E+01
 ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

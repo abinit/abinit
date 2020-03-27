@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_overlap
 !! NAME
 !!  m_paw_overlap
@@ -9,7 +8,7 @@
 !!  Mainly used in Berry phase formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
+!! Copyright (C) 2018-2020 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,14 +24,13 @@
 MODULE m_paw_overlap
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_special_funcs, only : sbf8
  use m_efield, only : efield_type
-
  use m_pawang, only : pawang_type
  use m_pawcprj, only : pawcprj_type
  use m_pawrad, only : pawrad_type,simp_gen
@@ -102,15 +100,6 @@ CONTAINS  !=====================================================================
 
  subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,mband,&
 &                           natom,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'overlap_k1k2_paw'
-!End of the abilint section
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -233,15 +222,6 @@ CONTAINS  !=====================================================================
 & g1,gprimd,kpt,mband,mbandw,mkmem,mpi_enreg,&
 & natom,nband,nkpt,nspinor,nsppol,ntypat,pawang,pawrad,pawtab,rprimd,&
 & seed_name,typat,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smatrix_pawinit'
-!End of the abilint section
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -652,15 +632,6 @@ CONTAINS  !=====================================================================
 
  subroutine smatrix_k_paw(cprj_k,cprj_kb,dtefield,kdir,kfor,mband,natom,smat_k_paw,typat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smatrix_k_paw'
-!End of the abilint section
-
- implicit none
-
 !Arguments---------------------------
 !scalars
  integer,intent(in) :: kdir,kfor,mband,natom
@@ -758,15 +729,6 @@ CONTAINS  !=====================================================================
 
  subroutine qijb_kk(calc_qijb,dkvecs,expibi,gprimd,lmn2max,natom,ntypat,&
 &                   pawang,pawrad,pawtab,typat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'qijb_kk'
-!End of the abilint section
-
- implicit none
 
 !Arguments---------------------------
 !scalars
@@ -907,15 +869,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine expibi(calc_expibi,dkvecs,natom,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'expibi'
-!End of the abilint section
-
- implicit none
 
 !Arguments---------------------------
 !scalars

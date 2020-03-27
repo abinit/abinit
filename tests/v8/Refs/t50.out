@@ -1,8 +1,8 @@
 
-.Version 8.5.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 29 May 2017.
-- ( at 14h36 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h32 )
   
 
 ================================================================================
@@ -56,11 +56,11 @@
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.812043E+00    2.409142E-18    2.359603E-18
-         1         2    2.409142E-18    1.812043E+00   -2.458682E-18
+         1         1    1.812043E+00    2.409142E-18    2.260338E-18
+         1         2    2.409142E-18    1.812043E+00   -2.557947E-18
          1         3   -2.409142E-18   -2.409142E-18    1.812043E+00
-         2         1   -3.241280E+00   -1.644472E-16   -1.645701E-16
-         2         2   -1.644472E-16   -3.241280E+00    1.643242E-16
+         2         1   -3.241280E+00   -1.644472E-16   -1.630871E-16
+         2         2   -1.644472E-16   -3.241280E+00    1.658072E-16
          2         3    1.644472E-16    1.644472E-16   -3.241280E+00
  Now, the imaginary part of the dynamical matrix is zeroed
  
@@ -71,15 +71,15 @@
     0.000000    0.000000    0.000000    0.000000    0.000000   32.723426
 
  Electronic dielectric tensor
-     14.90775987      0.00000000     -0.00000000
-      0.00000000     14.90775987     -0.00000000
-     -0.00000000     -0.00000000     14.90775987
+     14.90775987      0.00000000      0.00000000
+      0.00000000     14.90775987      0.00000000
+      0.00000000      0.00000000     14.90775987
 
 -
 - Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.134  and wall time      0.135 sec
++Total cpu time      0.117  and wall time      0.121 sec
 
  anaddb : the run completed succesfully.

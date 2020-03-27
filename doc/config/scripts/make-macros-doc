@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2013-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2013-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -35,7 +35,7 @@ def macro_template(name,stamp):
   return """\
 # -*- M4 -*-
 #
-# Copyright (C) 2013-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2013-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -86,7 +86,7 @@ my_output  = "config/m4/auto-output.m4"
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
-     not os.path.exists("build/config-template.ac") ):
+     not os.path.exists("build/config-template.ac9") ):
   print("%s: You must be in the top of an ABINIT documentation source tree." % my_name)
   print("%s: Aborting now." % my_name)
   sys.exit(1)

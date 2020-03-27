@@ -9,7 +9,7 @@
  ecut    8
  ecutwfn 8
  ecuteps 3.8 
- #symmorphi 0
+ symsigma 0
 
  ndtset 3
 # wavefunction calculation
@@ -54,7 +54,6 @@
            0.0 0.0 0.5
  istwfk    *1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

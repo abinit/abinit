@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw2wvl
 !! NAME
 !!  paw2wvl
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2018 ABINIT group (T. Rangel, MT)
+!!  Copyright (C) 2011-2020 ABINIT group (T. Rangel, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,13 +72,6 @@ contains
 !! SOURCE
 
 subroutine paw2wvl(pawtab,proj,wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw2wvl'
-!End of the abilint section
 
  implicit none
 
@@ -366,13 +358,6 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : nullify_paw_ij_objects
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw2wvl_ij'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -397,7 +382,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
    ABI_DATATYPE_ALLOCATE(wvl%paw%paw_ij,(my_natom))
    do iatom=1,my_natom
      call nullify_paw_ij_objects(wvl%paw%paw_ij(iatom))
-     wvl%paw%paw_ij(iatom)%cplex          =paw_ij(iatom)%cplex_rf
+     wvl%paw%paw_ij(iatom)%cplex          =paw_ij(iatom)%qphase
      wvl%paw%paw_ij(iatom)%cplex_dij      =paw_ij(iatom)%cplex_dij
      wvl%paw%paw_ij(iatom)%has_dij        =paw_ij(iatom)%has_dij
      wvl%paw%paw_ij(iatom)%has_dijfr      =0
@@ -434,7 +419,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
 !  Option==3: only copy
  elseif(option==3) then
    do iatom=1,my_natom
-     wvl%paw%paw_ij(iatom)%cplex     =paw_ij(iatom)%cplex_rf
+     wvl%paw%paw_ij(iatom)%cplex     =paw_ij(iatom)%qphase
      wvl%paw%paw_ij(iatom)%cplex_dij =paw_ij(iatom)%cplex_dij
      wvl%paw%paw_ij(iatom)%lmn_size  =paw_ij(iatom)%lmn_size
      wvl%paw%paw_ij(iatom)%lmn2_size =paw_ij(iatom)%lmn2_size
@@ -485,13 +470,6 @@ end subroutine paw2wvl_ij
 
 
 subroutine wvl_paw_free(wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_paw_free'
-!End of the abilint section
 
  implicit none
 
@@ -572,13 +550,6 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  use BigDFT_API,only : cprj_objects,cprj_paw_alloc,cprj_clean
  use dynamic_memory
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_cprjreorder'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

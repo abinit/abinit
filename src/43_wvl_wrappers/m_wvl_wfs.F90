@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_wfs
 !! NAME
 !! m_wvl_wfs
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DC)
+!!  Copyright (C) 1998-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,6 +27,8 @@ module m_wvl_wfs
  use defs_basis
  use m_errors
  use m_abicore
+
+ use defs_datatypes, only : pseudopotential_type
 
  implicit none
 
@@ -79,7 +80,6 @@ contains
 subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, nproc, nspinor, &
 &  nsppol, nwfshist, occ, psps, rprimd, wfs, wtk, wvl, wvl_crmult, wvl_frmult, xred)
 
- use defs_datatypes
  use defs_wvltypes
 
  use m_geometry, only : xred2xcart
@@ -89,13 +89,6 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
        & input_variables, check_linear_and_create_Lzd, check_communications, &
        & INPUT_IG_OFF, nullify_locreg_descriptors
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_wfs_set'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -271,13 +264,6 @@ end subroutine wvl_wfs_set
 subroutine derfcf(derfc_yy,yy)
 
  use m_special_funcs,  only : abi_derfc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'derfcf'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -315,13 +301,6 @@ end subroutine derfcf
 subroutine derf_ab(derf_yy,yy)
 
  use m_special_funcs,  only : abi_derf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'derf_ab'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -372,13 +351,6 @@ subroutine wvl_wfs_free(wfs)
       & deallocate_orbs, deallocate_comms
  use dynamic_memory
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_wfs_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -442,13 +414,6 @@ end subroutine wvl_wfs_free
 subroutine wvl_wfs_lr_copy(wfs, wvl)
 
  use defs_wvltypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_wfs_lr_copy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

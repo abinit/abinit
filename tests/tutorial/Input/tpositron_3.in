@@ -63,13 +63,12 @@
     prtwf 0 prteig 0           ! To save disk space
     optforces 0 optstress 0    ! Not relevant here
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tpositron_3.out, tolnlines= 30, tolabs= 9.0e-4, tolrel= 3.0e-1, fld_options= -easy
+#%%   tpositron_3.out, tolnlines= 30, tolabs= 9.0e-4, tolrel= 4.0e-1, fld_options= -easy
 #%% psp_files = Si.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 10

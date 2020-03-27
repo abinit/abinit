@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rec
 !! NAME
 !!  m_rec
@@ -10,7 +9,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (MMancini)
+!! Copyright (C) 2002-2020 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,14 +40,15 @@
 module m_rec
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_rectypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_sort
+ use m_dtset
 
+ use defs_datatypes,    only : pseudopotential_type
+ use defs_abitypes,     only : mpi_type
  use m_exp_mat,         only : exp_mat
  use m_numeric_tools,   only : set2unit
  use m_special_funcs,   only : gamma_function
@@ -108,13 +108,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine H_D_distrib(rset,nfft,gratio,proc_pt_dev,beta_coeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'H_D_distrib'
-!End of the abilint section
 
  implicit none
 
@@ -240,13 +233,6 @@ end subroutine H_D_distrib
 
 subroutine find_maxmin_proc(recpar,nproc,me,gratio,ngfft,proc_pt_dev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_maxmin_proc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -312,13 +298,6 @@ end subroutine find_maxmin_proc
 !! SOURCE
 
  subroutine cpu_distribution(gratio,rset,ngfft,beta_coeff,calc_type)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cpu_distribution'
-!End of the abilint section
 
  implicit none
 
@@ -453,13 +432,6 @@ subroutine InitRec(dtset,mpi_ab,rset,rmet,mproj)
  use m_hidecudarec,only   :InitRecGPU_0
 #include "cuda_common.h"
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'InitRec'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -631,13 +603,6 @@ end subroutine InitRec
 
 subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,natom,debug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Init_MetricRec'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -710,13 +675,6 @@ end subroutine Init_MetricRec
 !! SOURCE
 
 subroutine Init_nlpspRec(tempe,psps,nlrec,metrec,ngfftrec,debug)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Init_nlpspRec'
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------
@@ -820,13 +778,6 @@ end subroutine Init_nlpspRec
 
 subroutine CleanRec(rset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CleanRec'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -907,13 +858,6 @@ end subroutine CleanRec
 
 subroutine Calcnrec(rset,b2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Calcnrec'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -984,13 +928,6 @@ end subroutine Calcnrec
 !! SOURCE
 
 subroutine getngrec(ngfft,rmet,ngfftrec,nfftrec,recrcut,delta,tronc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getngrec'
-!End of the abilint section
 
 implicit none
 
@@ -1253,13 +1190,6 @@ real(dp) :: inf_rmet(3,3)
 
    function dsq_rec(ii,jj,kk,inf_rmet)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dsq_rec'
-!End of the abilint section
-
    real(dp) :: dsq_rec
    integer,intent(in) :: ii,jj,kk
    real(dp),intent(in) :: inf_rmet(3,3)
@@ -1317,13 +1247,6 @@ end subroutine getngrec
 
 
 subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspnl_operat_rec'
-!End of the abilint section
 
  implicit none
 
@@ -1495,13 +1418,6 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
    function project_prec(raggio,iproj,iangol,rloc)
 !--Analytical expression of the projectors in hgh-pspeudopotential
 !--The gamma function at denominator is missing
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'project_prec'
-!End of the abilint section
-
    real(dp) :: project_prec
    integer,intent(in) :: iproj,iangol
    real(dp),intent(in) :: raggio,rloc
@@ -1557,13 +1473,6 @@ end subroutine pspnl_operat_rec
 subroutine pspnl_hgh_rec(psps,temperature,nlrec,debug)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspnl_hgh_rec'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------

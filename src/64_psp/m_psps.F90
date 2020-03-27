@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psps
 !! NAME
 !!  m_psps
@@ -8,7 +7,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +32,7 @@ module m_psps
  use m_xmpi
  use m_nctk
  use m_copy
+ use m_dtset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -41,7 +41,6 @@ module m_psps
  use m_io_tools,      only : open_file
  use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
- use defs_abitypes,   only : dataset_type
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_pawpsp,        only : pawpsp_cg
@@ -96,15 +95,6 @@ contains
 !! SOURCE
 
 subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_xml_xmlpaw_upf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -182,15 +172,6 @@ end subroutine test_xml_xmlpaw_upf
 !! SOURCE
 
 subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_global'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -278,15 +259,6 @@ end subroutine psps_init_global
 !! SOURCE
 
 subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_from_dtset'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -553,15 +525,6 @@ end subroutine psps_init_from_dtset
 
 subroutine psps_free(psps)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pseudopotential_type),intent(inout) :: psps
@@ -573,72 +536,28 @@ subroutine psps_free(psps)
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
- if (allocated(psps%filpsp))  then
-   ABI_DEALLOCATE(psps%filpsp)
- end if
- if (allocated(psps%pspcod))  then
-   ABI_DEALLOCATE(psps%pspcod)
- end if
- if (allocated(psps%pspdat))  then
-   ABI_DEALLOCATE(psps%pspdat)
- end if
- if (allocated(psps%pspso))  then
-   ABI_DEALLOCATE(psps%pspso)
- end if
- if (allocated(psps%pspxc))  then
-   ABI_DEALLOCATE(psps%pspxc)
- end if
- if (allocated(psps%title))  then
-   ABI_DEALLOCATE(psps%title)
- end if
- if (allocated(psps%zionpsp))  then
-   ABI_DEALLOCATE(psps%zionpsp)
- end if
- if (allocated(psps%znuclpsp))  then
-   ABI_DEALLOCATE(psps%znuclpsp)
- end if
- if (allocated(psps%algalch))  then
-   ABI_DEALLOCATE(psps%algalch)
- end if
- if (allocated(psps%mixalch))  then
-   ABI_DEALLOCATE(psps%mixalch)
- end if
- if (allocated(psps%ekb))  then
-   ABI_DEALLOCATE(psps%ekb)
- end if
- if (allocated(psps%indlmn))  then
-   ABI_DEALLOCATE(psps%indlmn)
- end if
- if (allocated(psps%ffspl))  then
-   ABI_DEALLOCATE(psps%ffspl)
- end if
- if (allocated(psps%qgrid_ff))  then
-   ABI_DEALLOCATE(psps%qgrid_ff)
- end if
- if (allocated(psps%qgrid_vl))  then
-   ABI_DEALLOCATE(psps%qgrid_vl)
- end if
- if (allocated(psps%vlspl))  then
-   ABI_DEALLOCATE(psps%vlspl)
- end if
- if (allocated(psps%dvlspl))  then
-   ABI_DEALLOCATE(psps%dvlspl)
- end if
- if (allocated(psps%xccc1d))  then
-   ABI_DEALLOCATE(psps%xccc1d)
- end if
- if (allocated(psps%xcccrc))  then
-   ABI_DEALLOCATE(psps%xcccrc)
- end if
- if (allocated(psps%ziontypat))  then
-   ABI_DEALLOCATE(psps%ziontypat)
- end if
- if (allocated(psps%znucltypat))  then
-   ABI_DEALLOCATE(psps%znucltypat)
- end if
- if (allocated(psps%md5_pseudos))  then
-   ABI_DEALLOCATE(psps%md5_pseudos)
- end if
+ ABI_SFREE(psps%filpsp)
+ ABI_SFREE(psps%pspcod)
+ ABI_SFREE(psps%pspdat)
+ ABI_SFREE(psps%pspso)
+ ABI_SFREE(psps%pspxc)
+ ABI_SFREE(psps%title)
+ ABI_SFREE(psps%zionpsp)
+ ABI_SFREE(psps%znuclpsp)
+ ABI_SFREE(psps%algalch)
+ ABI_SFREE(psps%mixalch)
+ ABI_SFREE(psps%ekb)
+ ABI_SFREE(psps%indlmn)
+ ABI_SFREE(psps%ffspl)
+ ABI_SFREE(psps%qgrid_ff)
+ ABI_SFREE(psps%qgrid_vl)
+ ABI_SFREE(psps%vlspl)
+ ABI_SFREE(psps%dvlspl)
+ ABI_SFREE(psps%xccc1d)
+ ABI_SFREE(psps%xcccrc)
+ ABI_SFREE(psps%ziontypat)
+ ABI_SFREE(psps%znucltypat)
+ ABI_SFREE(psps%md5_pseudos)
 
  ! Free types.
  call psp2params_free(psps%gth_params)
@@ -675,15 +594,6 @@ end subroutine psps_free
 !! SOURCE
 
 subroutine psps_copy(pspsin, pspsout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -725,22 +635,22 @@ subroutine psps_copy(pspsin, pspsout)
 
  ! integer allocatable
  if (allocated(pspsin%algalch)) then
-   call alloc_copy( pspsin%algalch, pspsout%algalch)
+   call alloc_copy(pspsin%algalch, pspsout%algalch)
  end if
  if (allocated(pspsin%indlmn)) then
-   call alloc_copy( pspsin%indlmn, pspsout%indlmn)
+   call alloc_copy(pspsin%indlmn, pspsout%indlmn)
  end if
  if (allocated(pspsin%pspdat)) then
-   call alloc_copy( pspsin%pspdat, pspsout%pspdat)
+   call alloc_copy(pspsin%pspdat, pspsout%pspdat)
  end if
  if (allocated(pspsin%pspcod)) then
-   call alloc_copy( pspsin%pspcod, pspsout%pspcod)
+   call alloc_copy(pspsin%pspcod, pspsout%pspcod)
  end if
  if (allocated(pspsin%pspso)) then
-   call alloc_copy( pspsin%pspso, pspsout%pspso)
+   call alloc_copy(pspsin%pspso, pspsout%pspso)
  end if
  if (allocated(pspsin%pspxc)) then
-   call alloc_copy( pspsin%pspxc, pspsout%pspxc)
+   call alloc_copy(pspsin%pspxc, pspsout%pspxc)
  end if
 
  ! real allocatable
@@ -751,37 +661,37 @@ subroutine psps_copy(pspsin, pspsout)
    call alloc_copy( pspsin%ffspl, pspsout%ffspl)
  end if
  if (allocated(pspsin%mixalch)) then
-   call alloc_copy( pspsin%mixalch, pspsout%mixalch)
+   call alloc_copy(pspsin%mixalch, pspsout%mixalch)
  end if
  if (allocated(pspsin%qgrid_ff)) then
-   call alloc_copy( pspsin%qgrid_ff, pspsout%qgrid_ff)
+   call alloc_copy(pspsin%qgrid_ff, pspsout%qgrid_ff)
  end if
  if (allocated(pspsin%qgrid_vl)) then
-   call alloc_copy( pspsin%qgrid_vl, pspsout%qgrid_vl)
+   call alloc_copy(pspsin%qgrid_vl, pspsout%qgrid_vl)
  end if
  if (allocated(pspsin%vlspl)) then
-   call alloc_copy( pspsin%vlspl, pspsout%vlspl)
+   call alloc_copy(pspsin%vlspl, pspsout%vlspl)
  end if
  if (allocated(pspsin%dvlspl)) then
-   call alloc_copy( pspsin%dvlspl, pspsout%dvlspl)
+   call alloc_copy(pspsin%dvlspl, pspsout%dvlspl)
  end if
  if (allocated(pspsin%xcccrc)) then
-   call alloc_copy( pspsin%xcccrc, pspsout%xcccrc)
+   call alloc_copy(pspsin%xcccrc, pspsout%xcccrc)
  end if
  if (allocated(pspsin%xccc1d)) then
-   call alloc_copy( pspsin%xccc1d, pspsout%xccc1d)
+   call alloc_copy(pspsin%xccc1d, pspsout%xccc1d)
  end if
  if (allocated(pspsin%zionpsp)) then
-   call alloc_copy( pspsin%zionpsp, pspsout%zionpsp)
+   call alloc_copy(pspsin%zionpsp, pspsout%zionpsp)
  end if
  if (allocated(pspsin%ziontypat)) then
-   call alloc_copy( pspsin%ziontypat, pspsout%ziontypat)
+   call alloc_copy(pspsin%ziontypat, pspsout%ziontypat)
  end if
  if (allocated(pspsin%znuclpsp)) then
-   call alloc_copy( pspsin%znuclpsp, pspsout%znuclpsp)
+   call alloc_copy(pspsin%znuclpsp, pspsout%znuclpsp)
  end if
  if (allocated(pspsin%znucltypat)) then
-   call alloc_copy( pspsin%znucltypat, pspsout%znucltypat)
+   call alloc_copy(pspsin%znucltypat, pspsout%znucltypat)
  end if
 
  ! allocate and copy character strings
@@ -835,15 +745,6 @@ end subroutine psps_copy
 
 subroutine psps_print(psps,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: prtvol,unit
@@ -896,8 +797,8 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  !END SELECT
 
  write(msg,'(a,i4,2a,i4)')&
-&  '  Number of pseudopotentials .. ',psps%npsp,ch10,&
-&  '  Number of types of atoms   .. ',psps%ntypat
+  '  Number of pseudopotentials .. ',psps%npsp,ch10,&
+  '  Number of types of atoms   .. ',psps%ntypat
  call wrtout(unt,msg,mode)
 
  if (psps%usepaw==0) then
@@ -906,13 +807,13 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
      call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
    CASE (2)
      write(msg,'(3a,i3)')&
-&      '  Calculation with spin-orbit coupling ',ch10,&
-&      '  Max number of channels (spin-orbit included) ',psps%mpssoang
+      '  Calculation with spin-orbit coupling ',ch10,&
+      '  Max number of channels (spin-orbit included) ',psps%mpssoang
      call wrtout(unt,msg,mode)
      do itypat=1,psps%ntypat
        if (psps%pspso(itypat) /= 1) then
          write(msg,'(a,i4,a,i2,a)')&
-&          '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
+          '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
          call wrtout(unt,msg,mode)
        end if
      end do
@@ -944,19 +845,19 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  call wrtout(unt,msg,mode)
 
  write(msg,'(a,i3,2a,i3,2a,i3)')&
-& '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&
-& '  Max number of (l,n)   components .. ',psps%lnmax, ch10,&
-& '  Max number of (l,m,n) components .. ',psps%lmnmax
+ '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&
+ '  Max number of (l,n)   components .. ',psps%lnmax, ch10,&
+ '  Max number of (l,m,n) components .. ',psps%lmnmax
  call wrtout(unt,msg,mode)
 
  !FIXME for paw n1xccc==1
  ! Non-linear Core correction
  if (psps%n1xccc/=0) then
    write(msg,'(3a,2(a,i4,a),2a)')ch10,&
-&    ' Pseudo-Core Charge Info: ',ch10,&
-&    '   Number of radial points for pseudo-core charge .. ',psps%n1xccc,ch10,&
-&    '   XC core-correction treatment (optnlxccc) ........ ',psps%optnlxccc,ch10,&
-&    '   Radius for pseudo-core charge for each type ..... ',ch10
+    ' Pseudo-Core Charge Info: ',ch10,&
+    '   Number of radial points for pseudo-core charge .. ',psps%n1xccc,ch10,&
+    '   XC core-correction treatment (optnlxccc) ........ ',psps%optnlxccc,ch10,&
+    '   Radius for pseudo-core charge for each type ..... ',ch10
    call wrtout(unt,msg,mode)
    do itypat=1,psps%ntypat
      write(msg,'(a,i4,a,f7.4)')'  - Atom type ',itypat,' has pseudo-core radius .. ',psps%xcccrc(itypat)
@@ -967,10 +868,10 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  ! Alchemical mixing
  if (psps%mtypalch/=0) then
    write(msg,'(3a,3(a,i4,a))')ch10,&
-&    ' Calculation with alchemical mixing:',ch10,&
-&    '   Number of pure pseudoatoms .... ',psps%ntyppure,ch10,&
-&    '   Number of pseudos for mixing .. ',psps%npspalch,ch10,&
-&    '   Alchemical pseudoatoms ........ ',psps%ntypalch,ch10
+    ' Calculation with alchemical mixing:',ch10,&
+    '   Number of pure pseudoatoms .... ',psps%ntyppure,ch10,&
+    '   Number of pseudos for mixing .. ',psps%npspalch,ch10,&
+    '   Alchemical pseudoatoms ........ ',psps%ntypalch,ch10
    call wrtout(unt,msg,mode)
    do ipsp_alch=1,psps%npspalch
      do ityp_alch=1,psps%ntypalch
@@ -985,9 +886,9 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
 
  ! Info in Q-grid for spline of form factors
  write(msg,'(3a,a,i6,a,a,i6)')ch10,&
-&  ' Info on the Q-grid used for form factors in spline form: ',ch10,&
-&  '   Number of q-points for radial functions ffspl .. ',psps%mqgrid_ff,ch10,&
-&  '   Number of q-points for vlspl ................... ',psps%mqgrid_vl
+  ' Info on the Q-grid used for form factors in spline form: ',ch10,&
+  '   Number of q-points for radial functions ffspl .. ',psps%mqgrid_ff,ch10,&
+  '   Number of q-points for vlspl ................... ',psps%mqgrid_vl
  call wrtout(unt,msg,mode)
 
  if (psps%vlspl_recipSpace) then
@@ -1050,15 +951,6 @@ end subroutine psps_print
 !! SOURCE
 
 subroutine psps_ncwrite(psps, path)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_ncwrite'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1171,14 +1063,6 @@ subroutine psps_ncwrite(psps, path)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1215,15 +1099,6 @@ end subroutine psps_ncwrite
 !! SOURCE
 
 subroutine psp2params_init(gth_params, npsp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1276,15 +1151,6 @@ end subroutine psp2params_init
 
 subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_copy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pseudopotential_gth_type),intent(in) :: gth_paramsin
@@ -1335,43 +1201,23 @@ end subroutine psp2params_copy
 
 subroutine psp2params_free(gth_params)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pseudopotential_gth_type),intent(inout) :: gth_params
 
 ! *********************************************************************
 
-!Check arrays.
- if (allocated(gth_params%set))  then
-   ABI_DEALLOCATE(gth_params%set)
- end if
- if (allocated(gth_params%hasGeometry))  then
-   ABI_DEALLOCATE(gth_params%hasGeometry)
- end if
+ ABI_SFREE(gth_params%set)
+ ABI_SFREE(gth_params%hasGeometry)
 
 !Coefficients for local part and projectors
- if (allocated(gth_params%psppar))  then
-   ABI_DEALLOCATE(gth_params%psppar)
- end if
+ ABI_SFREE(gth_params%psppar)
 
 !Coefficients for spin orbit part
- if (allocated(gth_params%psp_k_par))  then
-   ABI_DEALLOCATE(gth_params%psp_k_par)
- end if
+ ABI_SFREE(gth_params%psp_k_par)
 
 !Different radii
- if (allocated(gth_params%radii_cf))  then
-   ABI_DEALLOCATE(gth_params%radii_cf)
- end if
+ ABI_SFREE(gth_params%radii_cf)
 
 end subroutine psp2params_free
 !!***
@@ -1398,15 +1244,6 @@ end subroutine psp2params_free
 
 subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mqgrid_vl
@@ -1423,12 +1260,14 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  nctab%has_tcore = has_tcore
  nctab%dncdq0 = zero; nctab%d2ncdq0 = zero
  ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
-
+ nctab%tcorespl = zero
+ 
  ! tvalespl is allocated only if available.
  nctab%has_tvale = has_tvale
  nctab%dnvdq0 = zero
  if (has_tvale) then
    ABI_MALLOC(nctab%tvalespl, (mqgrid_vl, 2))
+   nctab%tvalespl = zero
  end if
 
 end subroutine nctab_init
@@ -1451,15 +1290,6 @@ end subroutine nctab_init
 
 subroutine nctab_free(nctab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(nctab_t),intent(inout) :: nctab
@@ -1467,16 +1297,10 @@ subroutine nctab_free(nctab)
 ! *************************************************************************
 
  nctab%mqgrid_vl = 0
-
  nctab%has_tvale = .False.
- if (allocated(nctab%tvalespl)) then
-   ABI_FREE(nctab%tvalespl)
- end if
-
+ ABI_SFREE(nctab%tvalespl)
  nctab%has_tcore = .False.
- if (allocated(nctab%tcorespl)) then
-   ABI_FREE(nctab%tcorespl)
- end if
+ ABI_SFREE(nctab%tcorespl)
 
 end subroutine nctab_free
 !!***
@@ -1497,15 +1321,6 @@ end subroutine nctab_free
 
 subroutine nctab_copy(nctabin, nctabout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_copy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(nctab_t),intent(in) :: nctabin
@@ -1521,10 +1336,10 @@ subroutine nctab_copy(nctabin, nctabout)
  nctabout%dnvdq0     = nctabin%dnvdq0
 
  if (allocated(nctabin%tvalespl)) then
-   call alloc_copy( nctabin%tvalespl, nctabout%tvalespl)
+   call alloc_copy(nctabin%tvalespl, nctabout%tvalespl)
  end if
  if (allocated(nctabin%tcorespl)) then
-   call alloc_copy( nctabin%tcorespl, nctabout%tcorespl)
+   call alloc_copy(nctabin%tcorespl, nctabout%tcorespl)
  end if
 
 end subroutine nctab_copy
@@ -1558,15 +1373,6 @@ end subroutine nctab_copy
 
 subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tvalespl'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mqgrid_vl
@@ -1590,7 +1396,7 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
  end if
 
  call pawpsp_cg(nctab%dnvdq0,d2nvdq0,mqgrid_vl,qgrid_vl,nctab%tvalespl(:,1),mesh,valr,yp1,ypn)
- call simp_gen(yp1,mesh%rad**2 * valr, mesh); write(std_out,*)"valence charge integrates to: ",four_pi*yp1
+ call simp_gen(yp1,mesh%rad**2 * valr, mesh); write(std_out,*)" valence charge integrates to: ",four_pi*yp1
 
  ! Rescale the integral to have the correct number of valence electrons.
  ! In some cases, indeed, the radial mesh is not large enough and some valence charge is missing
@@ -1638,15 +1444,6 @@ end subroutine nctab_eval_tvalespl
 
 subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_vl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tcorespl'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1xccc,mqgrid_vl
@@ -1684,7 +1481,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
  ! Compute 4\pi\int[(\frac{\sin(2\pi q r)}{2\pi q r})(r^2 n(r))dr].
  !write(std_out,*)"xccc1d: amesh, min, max, minloc ",amesh,maxval(xccc1d(:,1)),minval(xccc1d(:,1)),minloc(xccc1d(:,1))
  call pawpsp_cg(nctab%dncdq0, nctab%d2ncdq0, mqgrid_vl, qgrid_vl, nctab%tcorespl(:,1), &
-&               core_mesh, xccc1d(:,1), yp1, ypn)
+                core_mesh, xccc1d(:,1), yp1, ypn)
 
  ! Compute second derivative of tcorespl(q)
  call paw_spline(qgrid_vl, nctab%tcorespl(:,1), mqgrid_vl, yp1, ypn, nctab%tcorespl(:,2))
@@ -1719,15 +1516,6 @@ end subroutine nctab_eval_tcorespl
 !! SOURCE
 
 subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_mixalch'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

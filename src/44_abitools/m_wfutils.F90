@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wfutils
 !! NAME
 !!  m_wfutils
@@ -7,7 +6,7 @@
 !!  parameters and function for wave functions copy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (CS,GZ,FB)
+!!  Copyright (C) 2001-2020 ABINIT group (CS,GZ,FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,13 +73,6 @@ contains
 !!
 subroutine setWFParameter(cplx,me_g0,npw_k,nspinor,icg,igsc,blocksize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setWFParameter'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -105,13 +97,6 @@ end subroutine setWFParameter
 ! this is the index of a given band in cg array
 integer function x_cgindex(iblocksize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'x_cgindex'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: iblocksize
@@ -124,13 +109,6 @@ end function x_cgindex
 ! this is the index of a given band in gsc array
 integer function x_gscindex(iblocksize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'x_gscindex'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: iblocksize
@@ -141,13 +119,6 @@ end function x_gscindex
 
 integer function x_windex(iblocksize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'x_windex'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: iblocksize
@@ -157,13 +128,6 @@ integer function x_windex(iblocksize)
 end function x_windex
 
 integer function wfindex(iblocksize,indtype)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfindex'
-!End of the abilint section
 
  implicit none
 
@@ -219,13 +183,6 @@ end function wfindex
 !!
 subroutine wfcopy(direction,size,tsrc,incsrc,tdest,incdest,blockiter,iblock,indtype,&
 &                withbbloc,timopt,tim_wfcopy) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfcopy'
-!End of the abilint section
 
  implicit none
 

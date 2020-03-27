@@ -1,15 +1,14 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_primcell_ddb_info
 !!
 !! NAME
 !! m_primcell_ddb_info
 !!
 !! FUNCTION
-!! Module for container object passing cell information to SC phonon calculation in abinit 
+!! Module for container object passing cell information to SC phonon calculation in abinit
 !! Container type is defined, and destruction
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +76,7 @@ contains
 !!  init and fill primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,16 +97,8 @@ contains
 subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,ntypat,ucvol,&
 &    indsym,symrec,symrel,typat,&
 &    acell,amu,dielt,dyewq0,gmet,gprim,rcan,rmet,rprim,rpt,trans,wghatm,xred,zeff)
- 
+
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_primcell_ddb_info'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(primcell_ddb_info), intent(inout) :: pcell
@@ -195,7 +186,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
   pcell%wghatm = wghatm
   pcell%xred = xred
   pcell%zeff = zeff
-  
+
  end subroutine init_primcell_ddb_info
 !!***
 
@@ -208,7 +199,7 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!  read in and fill primcell_ddb_info from the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -228,16 +219,8 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 !!
 !! SOURCE
 subroutine read_primcell_ddb_info (filename,pcell)
- 
+
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_primcell_ddb_info'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*), intent(in) :: filename
@@ -247,7 +230,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
  integer :: unit
  character(len=500) :: msg
  character(len=13):: buffer
- 
+
 ! *************************************************************************
 
   if (open_file(filename,msg,newunit=unit) /= 0) then
@@ -330,7 +313,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
   read(unit,'(3E20.10)') pcell%zeff
 
   close(unit)
-  
+
  end subroutine read_primcell_ddb_info
 !!***
 
@@ -344,7 +327,7 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!  write out primcell_ddb_info to the file name given in input
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -365,16 +348,8 @@ subroutine read_primcell_ddb_info (filename,pcell)
 !!
 !! SOURCE
 subroutine write_primcell_ddb_info (filename,pcell)
- 
+
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_primcell_ddb_info'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 
@@ -445,7 +420,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
   write(unit,'(3E20.10)') pcell%zeff
 
   close(unit)
-  
+
  end subroutine write_primcell_ddb_info
 !!***
 
@@ -458,7 +433,7 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !!  deallocate stuoff in primcell_ddb_info
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MJV)
+!! Copyright (C) 1999-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -476,16 +451,8 @@ subroutine write_primcell_ddb_info (filename,pcell)
 !!
 !! SOURCE
 subroutine destroy_primcell_ddb_info (pcell)
- 
+
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_primcell_ddb_info'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(primcell_ddb_info), intent(inout) :: pcell

@@ -18,6 +18,7 @@
  ecuteps  1.50304505
  prtgsr  0
  gwpara  1
+ symsigma 0
 
 # wavefunction calculation
  nband1       15
@@ -95,7 +96,6 @@ icutcoul3   3            # old deprecated value of icutcoul, only used for legac
  istwfk    2*1
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

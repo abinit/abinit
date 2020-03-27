@@ -58,6 +58,8 @@ dmft_nwlo 32
 dmftcheck 0
 dmft_rslf 1
 dmft_mxsf 0.3
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
 
 ##### LDA+U
 usepawu1    1   # LDA+U is not used.
@@ -68,7 +70,6 @@ jpawu1  0.0000 0.0  # values in Hartree
 upawu2  0.30  0.0   # values in Hartree
 jpawu2  0.0000 0.0  # values in Hartree
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -80,7 +81,7 @@ jpawu2  0.0000 0.0  # values in Hartree
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = DMFT
+#%% keywords = DMFT, PAW
 #%% description = 
 #%%   DMFT tests on Antiferromagnetic NiO (4 atoms), check DMFT loop with Hubbard I, DMFT
 #%%   self-consistency and density self-consistency : computes occupations and energy.

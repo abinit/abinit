@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_CtqmcoffdiagInterface
 !! NAME
 !!  m_CtqmcoffdiagInterface
@@ -11,7 +11,7 @@
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ IMPLICIT NONE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,7 +73,7 @@ CONTAINS
 !!  Initialize with permanent parameters
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,13 +109,6 @@ SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
 &measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcoffdiagInterface_init'
-!End of the abilint section
-
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   INTEGER, OPTIONAL, INTENT(IN) :: MPI_COMM
   INTEGER, INTENT(IN) :: iseed
@@ -172,7 +165,7 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 !!  Set and save options for many runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -209,13 +202,6 @@ END SUBROUTINE CtqmcoffdiagInterface_init
 SUBROUTINE CtqmcoffdiagInterface_setOpts(op,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcoffdiagInterface_setOpts'
-!End of the abilint section
-
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
@@ -254,7 +240,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !!  run a ctqmc simu and get results
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -288,13 +274,6 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcoffdiagInterface_run'
-!End of the abilint section
-
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   COMPLEX(KIND=8)      , DIMENSION(:,:,:), INTENT(IN ) :: G0omega
   DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(OUT) :: Gtau
@@ -383,7 +362,7 @@ END SUBROUTINE CtqmcoffdiagInterface_run
 !!  change sweeps on the fly
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -409,13 +388,6 @@ END SUBROUTINE CtqmcoffdiagInterface_run
 SUBROUTINE CtqmcoffdiagInterface_setSweeps(op, sweeps)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcoffdiagInterface_setSweeps'
-!End of the abilint section
-
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
   DOUBLE PRECISION, INTENT(IN) :: sweeps
 
@@ -431,7 +403,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setSweeps
 !!  Destroy simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -456,13 +428,6 @@ END SUBROUTINE CtqmcoffdiagInterface_setSweeps
 SUBROUTINE CtqmcoffdiagInterface_finalize(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcoffdiagInterface_finalize'
-!End of the abilint section
-
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
 
   !IF ( op%Hybrid%init .EQV. .TRUE. ) THEN

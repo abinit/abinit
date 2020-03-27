@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb
 !! NAME
 !!  m_ddb
@@ -10,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP)
+!! Copyright (C) 2011-2020 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,14 +27,14 @@
 MODULE m_ddb
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_ddb_hdr
  use m_dtset
 
+ use m_io_tools,       only : file_exists
+ use defs_datatypes,   only : pseudopotential_type
  use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
  use m_symtk,          only : mati3inv, matr3inv, littlegroup_q, symatm
@@ -43,8 +42,7 @@ MODULE m_ddb
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
-&                             dfpt_phfrq, sytens
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
  use m_psps,           only : psps_copy, psps_free
 
@@ -52,15 +50,19 @@ MODULE m_ddb
 
  private
 
- public :: ddb_write_blok   ! Writes blocks of data in the DDBs.
  public :: dfptnl_doutput   ! Write the matrix of third-order derivatives to the output file and the DDB
- public :: gtblk9           ! Finds the block containing the derivatives of the total energy.
- public :: read_blok8       ! This routine reads blocks of data in the DDBs.
+
  public :: rdddb9           ! This routine reads the derivative database entirely,
  public :: nlopt            ! Output of all quantities related to third-order derivatives of the energy.
  public :: chkin9
  public :: carttransf       ! Transform a second-derivative matrix (EIG2D) from reduced
                             ! coordinates to cartesian coordinates.
+ public :: dfpt_lw_doutput  ! Write the matrix of third-order derivatives to the output file and the DDB
+ public :: lwcart           ! Transform a 3rd order derivative tensor (long-wave) from reduced (actually
+                            ! mixed since strain derivatives are already in cartesian) to cartesian
+                            ! coordinates
+ public :: ddb_lw_copy      ! Copy the ddb object after reading the long wave 3rd order derivatives
+                            ! into a new ddb_lw and resizes ddb as for 2nd order derivatives 
 
  integer,public,parameter :: DDB_VERSION=100401
  ! DDB Version number.
@@ -132,22 +134,56 @@ MODULE m_ddb
   ! val(2,msize,nblok)
   ! values of the second energy derivatives in each block
 
+  contains
+
+    procedure :: free => ddb_free
+     ! Free dynamic memory.
+
+    procedure :: malloc => ddb_malloc
+     ! Allocate dynamic memory
+
+    procedure :: bcast => ddb_bcast
+     ! Broadcast the object.
+
+    procedure :: get_etotal => ddb_get_etotal
+     ! Read the GS total energy.
+
+    procedure :: get_dielt_zeff => ddb_get_dielt_zeff
+     ! Reads the Dielectric Tensor and the Effective Charges
+
+    procedure :: get_dielt => ddb_get_dielt
+     ! Reads the Dielectric Tensor
+
+    procedure :: get_quadrupoles => ddb_get_quadrupoles
+     ! Reads the Quadrupoles
+
+    procedure :: get_dchidet => ddb_get_dchidet
+     ! Reads the non-linear optical susceptibility tensor and the
+     ! first-order change in the linear dielectric susceptibility
+
+    procedure :: diagoq => ddb_diagoq
+     ! Compute the phonon frequencies at the specified q-point by performing
+     ! a direct diagonalizatin of the dynamical matrix.
+
+    procedure :: get_asrq0 => ddb_get_asrq0
+     ! Return object used to enforce the acoustic sum rule
+
+    procedure :: write_block => ddb_write_block
+    !procedure :: write_blok => ddb_write_blok
+     ! Writes blocks of data in the DDBs.
+
+    !procedure :: read_blok => ddb_read_block
+    procedure :: read_block => ddb_read_block
+     ! This routine reads blocks of data in the DDBs.
+
+    procedure :: get_block => ddb_get_block
+    !procedure :: gtblk9 => ddb_get_block
+     ! Finds the block containing the derivatives of the total energy.
+
  end type ddb_type
 
  public :: ddb_from_file            ! Construct the object from the DDB file.
- public :: ddb_free                 ! Free dynamic memory.
- public :: ddb_malloc               ! Allocate dynamic memory
- public :: ddb_bcast                ! Broadcast the object.
  public :: ddb_copy                 ! Copy the object.
- public :: ddb_get_etotal           ! Read the GS total energy.
- public :: ddb_get_dielt_zeff       ! Reads the Dielectric Tensor and the Effective Charges
- public :: ddb_get_dielt            ! Reads the Dielectric Tensor
- public :: ddb_get_dchidet          ! Reads the non-linear optical susceptibility tensor and the
-                                    ! first-order change in the linear dielectric susceptibility
- public :: ddb_diagoq               ! Compute the phonon frequencies at the specified q-point by performing
-                                    ! a direct diagonalizatin of the dynamical matrix.
- public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
-                                    ! from the Dynamical matrix at Gamma. Used in ddb_diagoq.
  public :: ddb_to_dtset             ! Transfer ddb_hdr to dtset datatype
 
  public :: mblktyp1                 ! This routine merges the derivative databases of type 0-4:
@@ -199,10 +235,15 @@ MODULE m_ddb
    real(dp),allocatable :: vtinvers(:,:)
    ! vtinvers,(1:dims,1:dims))
 
- end type asrq0_t
+ contains
 
- public :: asrq0_apply      ! Impose the acoustic sum rule based on the q=0 block found in the DDB file.
- public :: asrq0_free       ! Free memory
+   procedure :: apply => asrq0_apply
+    ! Impose the acoustic sum rule based on the q=0 block found in the DDB file.
+
+   procedure :: free => asrq0_free
+    ! Free memory
+
+ end type asrq0_t
 !!***
 
  ! TODO: We should use this constants instead of magic numbers!
@@ -210,12 +251,12 @@ MODULE m_ddb
  ! They both are 2-th order derivatives of the total energy!
 
  ! Flags used to indentify the block type.
- !integer,private,parameter :: BLKTYPE_ETOT = 0         ! Total energy
- !integer,private,parameter :: BLKTYPE_2DE_NOSTAT = 1   ! Second order derivative of the energy (non-stationary expression)
- !integer,private,parameter :: BLKTYPE_2DE_STAT = 2     ! Second order derivative of the energy (stationary expression)
- !integer,private,parameter :: BLKTYPE_3DE = 3          ! Third order derivative of the energy
- !integer,private,parameter :: BLKTYPE_1DE = 4          ! First order derivative of the energy
- !integer,private,parameter :: BLKTYPE_2DEIG = 5        ! Second order derivative of the eigenvalues
+ !integer,private,parameter :: DDB_BLKTYPE_ETOT = 0         ! Total energy
+ !integer,private,parameter :: DDB_BLKTYPE_2DE_NOSTAT = 1   ! Second order derivative of the energy (non-stationary expression)
+ !integer,private,parameter :: DDB_BLKTYPE_2DE_STAT = 2     ! Second order derivative of the energy (stationary expression)
+ !integer,private,parameter :: DDB_BLKTYPE_3DE = 3          ! Third order derivative of the energy
+ !integer,private,parameter :: DDB_BLKTYPE_1DE = 4          ! First order derivative of the energy
+ !integer,private,parameter :: DDB_BLKTYPE_2DEIG = 5        ! Second order derivative of the eigenvalues
 
 CONTAINS  !===========================================================
 !!***
@@ -240,41 +281,20 @@ CONTAINS  !===========================================================
 
 subroutine ddb_free(ddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
- type(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(inout) :: ddb
 
 ! ************************************************************************
 
  !integer
- if (allocated(ddb%flg))  then
-   ABI_FREE(ddb%flg)
- end if
- if (allocated(ddb%typ))  then
-   ABI_FREE(ddb%typ)
- end if
+ ABI_SFREE(ddb%flg)
+ ABI_SFREE(ddb%typ)
 
  ! real
- if (allocated(ddb%amu))  then
-   ABI_FREE(ddb%amu)
- end if
- if (allocated(ddb%nrm))  then
-   ABI_FREE(ddb%nrm)
- end if
- if (allocated(ddb%qpt))  then
-   ABI_FREE(ddb%qpt)
- end if
- if (allocated(ddb%val))  then
-   ABI_FREE(ddb%val)
- end if
+ ABI_SFREE(ddb%amu)
+ ABI_SFREE(ddb%nrm)
+ ABI_SFREE(ddb%qpt)
+ ABI_SFREE(ddb%val)
 
 end subroutine ddb_free
 !!***
@@ -297,15 +317,6 @@ end subroutine ddb_free
 
 subroutine ddb_copy(iddb, oddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_copy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !array
  type(ddb_type),intent(in) :: iddb
@@ -327,12 +338,12 @@ subroutine ddb_copy(iddb, oddb)
  oddb%acell = iddb%acell
 
  ! Allocate and copy the allocatable arrays.
- call alloc_copy(iddb%flg,oddb%flg)
- call alloc_copy(iddb%typ,oddb%typ)
- call alloc_copy(iddb%amu,oddb%amu)
- call alloc_copy(iddb%nrm,oddb%nrm)
- call alloc_copy(iddb%qpt,oddb%qpt)
- call alloc_copy(iddb%val,oddb%val)
+ call alloc_copy(iddb%flg, oddb%flg)
+ call alloc_copy(iddb%typ, oddb%typ)
+ call alloc_copy(iddb%amu, oddb%amu)
+ call alloc_copy(iddb%nrm, oddb%nrm)
+ call alloc_copy(iddb%qpt, oddb%qpt)
+ call alloc_copy(iddb%val, oddb%val)
 
 end subroutine ddb_copy
 !!***
@@ -344,6 +355,7 @@ end subroutine ddb_copy
 !! ddb_malloc
 !!
 !! FUNCTION
+!!  Allocate dynamic memory
 !!
 !! INPUTS
 !!
@@ -357,21 +369,12 @@ end subroutine ddb_copy
 !!
 !! SOURCE
 
-subroutine ddb_malloc(ddb,msize,nblok,natom,ntypat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_malloc'
-!End of the abilint section
-
- implicit none
+subroutine ddb_malloc(ddb, msize, nblok, natom, ntypat)
 
 !Arguments ------------------------------------
 !array
  integer,intent(in) :: msize,nblok,natom,ntypat
- type(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(inout) :: ddb
 
 ! ************************************************************************
 
@@ -381,7 +384,7 @@ subroutine ddb_malloc(ddb,msize,nblok,natom,ntypat)
  ddb%msize = msize
  ddb%nblok = nblok
  ddb%natom = natom
- ddb%mpert = natom+6
+ ddb%mpert = natom+MPERT_MAX
  ddb%ntypat = ntypat
 
  ! integer
@@ -422,20 +425,11 @@ end subroutine ddb_malloc
 !!
 !! SOURCE
 
-subroutine ddb_bcast(Ddb, master, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_bcast'
-!End of the abilint section
-
- implicit none
+subroutine ddb_bcast(ddb, master, comm)
 
 !Arguments ------------------------------------
 !array
- type(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(inout) :: ddb
  integer, intent(in) :: master,comm
 
 !Local variables-------------------------------
@@ -463,7 +457,7 @@ subroutine ddb_bcast(Ddb, master, comm)
 
  ! Allocate arrays on the other nodes.
  if (xmpi_comm_rank(comm) /= master) then
-   call ddb_malloc(ddb,ddb%msize,ddb%nblok,ddb%natom,ddb%ntypat)
+   call ddb%malloc(ddb%msize, ddb%nblok, ddb%natom, ddb%ntypat)
  end if
 
  call xmpi_bcast(ddb%flg, master, comm, ierr)
@@ -480,10 +474,10 @@ end subroutine ddb_bcast
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/gtblk9
+!!****f* m_ddb/ddb_get_block
 !!
 !! NAME
-!! gtblk9
+!! ddb_get_block
 !!
 !! FUNCTION
 !! This routine (get block) finds the block that contains the
@@ -507,7 +501,8 @@ end subroutine ddb_bcast
 !!  (note : only one should be used in case of second derivative of total energy,
 !!  because we know that the second is the opposite of this value)
 !! qphnrm(3) =normalisation factors for the three possible phonons
-!! rfphon(4) = 1=> response to phonons (for the four possible derivatives. Two should be used for a second derivative of total energy)
+!! rfphon(4) = 1=> response to phonons (for the four possible derivatives.
+!!             Two should be used for a second derivative of total energy)
 !! rfelfd(4) = 1=> d/dk, 2=> electric field only, 3=> both (see comment on rfphon)
 !! rfstrs(4) = 1=> uniaxial stresses, 2=> shear stresses, 3=> both (see comment on rfphon)
 !! rftyp =
@@ -516,6 +511,8 @@ end subroutine ddb_bcast
 !!   2 => stationary formulation of the 2nd derivative
 !!   3 => third derivative of total energy
 !!   4 => first-order derivatives of total energy
+!!  33 => long wave third order derivatives of total energy
+!! [rfqvec(4)] = 1=> d/dq (optional)
 !!
 !! OUTPUT
 !! iblok= number of the block that corresponds to the specifications
@@ -529,26 +526,17 @@ end subroutine ddb_bcast
 !!
 !! SOURCE
 
-
-subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gtblk9'
-!End of the abilint section
-
- implicit none
+subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: rftyp
  integer,intent(out) :: iblok
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
 !arrays
  integer,intent(in) :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
+ integer,optional,intent(in) :: rfqvec(4)
 
 !Local variables -------------------------
 !scalars
@@ -559,16 +547,17 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  integer :: gamma(3)
  integer,allocatable :: worki(:,:)
  real(dp) :: qpt(3)
+ integer :: rfqvec_(4)
 
 ! *********************************************************************
-
+ 
  mpert = ddb%mpert
  natom = ddb%natom
 
 !Get the number of derivative
  if(rftyp==1.or.rftyp==2)then
    nder=2
- else if(rftyp==3)then
+ else if(rftyp==3.or.rftyp==33)then
    nder=3
  else if(rftyp==0)then
    nder=0
@@ -578,6 +567,8 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    write(message, '(a,i0,a)')' rftyp is equal to ',rftyp,'. The only allowed values are 0, 1, 2, 3 or 4.'
    MSG_BUG(message)
  end if
+
+ rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
 
 !In case of a second-derivative, a second phonon wavevector is provided.
  if(nder==2)then
@@ -605,7 +596,7 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    call gamma9(gamma(ider),qphon(1:3,ider),qphnrm(ider),DDB_QTOL)
 
    if(gamma(ider)==0)then
-     if(rfstrs(ider)/=0.or.rfelfd(ider)/=0)then
+     if(rfstrs(ider)/=0.or.rfelfd(ider)/=0.or.rfqvec_(ider)/=0)then
        write(message, '(a,a)' )&
 &       'Not yet able to handle stresses or electric fields',ch10,&
 &       'with non-zero wavevector.'
@@ -633,6 +624,10 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !  Then the electric field
    if(rfelfd(ider)==2.or.rfelfd(ider)==3)then
      worki(natom+2,ider)=1
+   end if
+!  Then the ddq
+   if(rfqvec_(ider)==1)then
+     worki(natom+8,ider)=1
    end if
 !  Then the uniaxial stress
    if(rfstrs(ider)==1.or.rfstrs(ider)==3)then
@@ -748,11 +743,11 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i3)' )' Type (rfmeth) =',rftyp
      call wrtout(std_out,message,'COLL')
-     write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs'
+     write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs rfqvec'
      call wrtout(std_out,message,'COLL')
      do ider=1,nder
-       write(message, '(i4,4f6.2,3i7)' )&
-       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider)
+       write(message, '(i4,4f6.2,4i7)' )&
+       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider),rfqvec_(ider)
        call wrtout(std_out,message,'COLL')
      end do
    end if
@@ -765,7 +760,7 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  ABI_FREE(worki)
 
-end subroutine gtblk9
+end subroutine ddb_get_block
 !!***
 
 !----------------------------------------------------------------------
@@ -798,15 +793,6 @@ end subroutine gtblk9
 
 subroutine gamma9(gamma,qphon,qphnrm,qtol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gamma9'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(out) :: gamma
@@ -827,10 +813,10 @@ end subroutine gamma9
 
 !----------------------------------------------------------------------
 
-!!****f* m_db_blk/read_blok8
+!!****f* m_db_blk/ddb_read_block
 !!
 !! NAME
-!! read_blok8
+!! ddb_read_block
 !!
 !! FUNCTION
 !! This routine reads blocks of data in the DDBs.
@@ -874,23 +860,14 @@ end subroutine gamma9
 !!
 !! SOURCE
 
-subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
+subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_blok8'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mband,mpert,msize,nkpt,nunit
  integer, intent(in) :: iblok
- type(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(inout) :: ddb
 !arrays
  real(dp),intent(out),optional :: kpt(3,nkpt)
  real(dp),intent(out),optional :: blkval2(2,msize,mband,nkpt)
@@ -925,6 +902,8 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    ddb%typ(iblok)=4
  else if(name==' 2nd eigenvalue derivatives   - ' .or. name==' 2rd eigenvalue derivatives   - ')then
    ddb%typ(iblok)=5
+ else if(name==' 3rd derivatives (long wave)  - ')then
+   ddb%typ(iblok)=33
  else
    write(message,'(6a)')&
    'The following string appears in the DDB in place of',&
@@ -957,7 +936,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    end do
 
 !  Read the 3rd derivative block
- else if(ddb%typ(iblok)==3)then
+ else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
 
 !  First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert*3*mpert))then
@@ -1057,13 +1036,12 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    end if
  end if
 
-end subroutine read_blok8
+end subroutine ddb_read_block
 !!***
 
 !----------------------------------------------------------------------
 
 !!****f* m_ddb/rdddb9
-!!
 !! NAME
 !! rdddb9
 !!
@@ -1134,15 +1112,6 @@ end subroutine read_blok8
 subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 & mband,mpert,msize,msym,natifc,natom,nkpt,nsym,ntypat,&
 & rmet,rprim,symrec,symrel,symafm,tnons,typat,ucvol,xcart,xred,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdddb9'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 ! NOTE: these are used for dimensioning and then re-assigned in ioddb8.
@@ -1240,7 +1209,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
  call wrtout(std_out,message,'COLL')
 
  do iblok=1,ddb%nblok
-   call read_blok8(ddb,iblok,mband,mpert,msize,nkpt,ddbun)
+   call ddb%read_block(iblok,mband,mpert,msize,nkpt,ddbun)
 
    !  Here complete the matrix by symmetrisation of the existing elements
    if(ddb%typ(iblok)==1 .or. ddb%typ(iblok)==2) then
@@ -1331,6 +1300,30 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      ABI_FREE(tmpflg)
      ABI_FREE(tmpval)
      ABI_FREE(rfpert)
+
+   else if (ddb%typ(iblok) == 33) then
+
+     nsize=3*mpert*3*mpert*3*mpert
+     ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
+
+     tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+     tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+     tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+
+     ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
+
+     call lwcart(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd)
+     
+     ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
+     ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
+
+     ABI_FREE(d3cart)
+     ABI_FREE(car3flg)
+     ABI_FREE(tmpflg)
+     ABI_FREE(tmpval)
    end if
  end do ! iblok
 
@@ -1348,7 +1341,6 @@ end subroutine rdddb9
 !----------------------------------------------------------------------
 
 !!****f* m_ddb/chkin9
-!!
 !! NAME
 !! chkin9
 !!
@@ -1378,15 +1370,6 @@ end subroutine rdddb9
 !! SOURCE
 
 subroutine chkin9(atifc,natifc,natom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkin9'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1471,15 +1454,6 @@ end subroutine chkin9
 !! SOURCE
 
 subroutine nlopt(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nlopt'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1630,16 +1604,7 @@ end subroutine nlopt
 !!
 !! SOURCE
 
-subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_from_file'
-!End of the abilint section
-
- implicit none
+subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, comm, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -1672,7 +1637,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 
 ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  ddbun = get_unit()
- call ddb_hdr_open_read(ddb_hdr,filename,ddbun,DDB_VERSION, comm=comm, dimonly=1)
+ call ddb_hdr_open_read(ddb_hdr, filename, ddbun, DDB_VERSION, comm=comm, dimonly=1)
 
  nblok = ddb_hdr%nblok
  mtyp = ddb_hdr%mblktyp
@@ -1693,14 +1658,13 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    MSG_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
  end if
 
- mpert=natom+6
- msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
+ mpert = natom+MPERT_MAX
+ msize=3*mpert*3*mpert; if (mtyp==3.or.mtyp==33) msize=msize*3*mpert
 
  ! Allocate arrays depending on msym (which is actually fixed to nsym inside inprep8)
  ABI_MALLOC(symrel,(3,3,msym))
  ABI_MALLOC(symafm,(msym))
  ABI_MALLOC(tnons,(3,msym))
-
  ABI_MALLOC(typat,(natom))
  ABI_MALLOC(xred,(3,natom))
  ABI_MALLOC(zion,(ntypat))
@@ -1716,14 +1680,14 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
 
    ddbun = get_unit() ! FIXME: The treatment of the unit number in rdddb9 is ugly!
 
-   call ddb_malloc(ddb,msize,nblok,natom,ntypat)
+   call ddb%malloc(msize, nblok, natom, ntypat)
 
    call rdddb9(acell,atifc,amu,ddb,&
-&   ddbun,filename,gmet,gprim,indsym,ab_out,&
-&   mband,mpert,msize,msym,&
-&   natifc,ddb_natom,nkpt,nsym,ntypat,&
-&   rmet,rprim,symrec,symrel,symafm,&
-&   tnons,typat,ucvol,xcart,xred,zion,znucl)
+    ddbun,filename,gmet,gprim,indsym,ab_out,&
+    mband,mpert,msize,msym,&
+    natifc,ddb_natom,nkpt,nsym,ntypat,&
+    rmet,rprim,symrec,symrel,symafm,&
+    tnons,typat,ucvol,xcart,xred,zion,znucl)
 
    close(ddbun)
 
@@ -1736,10 +1700,10 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    if (abs(brav)/=1 .and. abs(abs(rprim(1,2))-half)>tol10) then
      if(abs(rprim(1,2))<tol6)then
        write(message, '(a,i0,7a)' )&
-&       'The input DDB value of brav is ',brav,',',ch10,&
-&       'and the one of rprim(1,2) is zero.',ch10,&
-&       'These are incompatible',ch10,&
-&       'Action: check the value of brav and rprim(1,2) in your DDB.'
+        'The input DDB value of brav is ',brav,',',ch10,&
+        'and the one of rprim(1,2) is zero.',ch10,&
+        'These are incompatible',ch10,&
+        'Action: check the value of brav and rprim(1,2) in your DDB.'
        MSG_ERROR(message)
      end if
      factor=abs(rprim(1,2))*two
@@ -1769,7 +1733,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
  end if
 
  if (xmpi_comm_size(comm) > 1) then
-   call ddb_bcast (ddb, master, comm)
+   call ddb%bcast(master, comm)
    call xmpi_bcast(atifc, master, comm, ierr)
    call xmpi_bcast(nsym, master, comm, ierr)
    call xmpi_bcast(symrel, master, comm, ierr)
@@ -1785,7 +1749,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    call xmpi_bcast(znucl, master, comm, ierr)
  end if
 
-!Initialize crystal_t object.
+ ! Initialize crystal_t object.
  call mkrdim(acell,rprim,rprimd)
 
 !FIXME: These variables are hardcoded
@@ -1797,10 +1761,10 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvo
    write(title(ii),'(a,i0)')"No title for typat ",ii
  end do
 
-!Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
+ ! Warning znucl is dimensioned with ntypat = nspsp hence alchemy is not supported here
  call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-&  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
-&  symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
+   zion,znucl,timrev,use_antiferro,.FALSE.,title,&
+   symrel=symrel(:,:,1:nsym),tnons=tnons(:,1:nsym),symafm=symafm(1:nsym))
 
  ABI_FREE(title)
  ABI_FREE(symrel)
@@ -1858,15 +1822,6 @@ end subroutine ddb_from_file
 
 subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
 & mpert,msize,natom,nblok,nkpt,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'carttransf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1979,15 +1934,6 @@ end subroutine carttransf
 subroutine carteig2d(blkflg,blkval,carflg,d2cart,&
 & gprimd,iblok,mpert,natom,nblok,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'carteig2d'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok
@@ -2073,11 +2019,12 @@ end subroutine carteig2d
 !! nblok= number of blocks in the DDB
 !! blkval(2,3*mpert*3*mpert,nblok)=  dynamical matrices
 !!  In our case, the nblok is restricted to iblok
+!! [unit]=Output unit number
 !!
 !! OUTPUT
 !! zeff(3,3,natom)=effective charge on each atom, versus electric
 !!  field and atomic displacement. Note the following convention:
-!!  zeff(electric field direction, atomic direction, atom number)
+!!  zeff(electric field direction, atomic direction, atom index)
 !! dielt(3,3)=dielectric tensor
 !!
 !! PARENTS
@@ -2088,65 +2035,56 @@ end subroutine carteig2d
 !!
 !! SOURCE
 
-subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtech9'
-!End of the abilint section
-
- implicit none
+subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff,unit)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok
+ integer,intent(in),optional :: unit
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  real(dp),intent(out) :: dielt(3,3),zeff(3,3,natom)
 
 !Local variables -------------------------
 !scalars
- integer :: depl,elec,elec1,elec2,iatom
- character(len=1000) :: message
+ integer :: depl,elec,elec1,elec2,iatom, unt
+ character(len=1000) :: msg
 
 ! *********************************************************************
 
-!Extration of effectives charges
+ unt = std_out; if (present(unit)) unt = unit
+
+ ! Extraction of effectives charges
  do iatom=1,natom
    do elec=1,3
      do depl=1,3
        zeff(elec,depl,iatom)=0.5*&
-&       (blkval(1,depl,iatom,elec,natom+2,iblok)+&
-&       blkval(1,elec,natom+2,depl,iatom,iblok))
+        (blkval(1,depl,iatom,elec,natom+2,iblok)+&
+         blkval(1,elec,natom+2,depl,iatom,iblok))
      end do
    end do
  end do
 
-!Extration of dielectric tensor
+ ! Extraction of dielectric tensor
  do elec1=1,3
    do elec2=1,3
      dielt(elec1,elec2)=blkval(1,elec1,natom+2,elec2,natom+2,iblok)
    end do
  end do
 
- write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
-& ' Dielectric Tensor ',&
-& dielt(1,1),dielt(1,2),dielt(1,3),&
-& dielt(2,1),dielt(2,2),dielt(2,3),&
-& dielt(3,1),dielt(3,2),dielt(3,3)
+ write(msg,'(a,3es16.6,3es16.6,3es16.6)' )' Dielectric Tensor ',&
+   dielt(1,1),dielt(1,2),dielt(1,3),&
+   dielt(2,1),dielt(2,2),dielt(2,3),&
+   dielt(3,1),dielt(3,2),dielt(3,3)
+ call wrtout(unt, msg)
 
- call wrtout(std_out,message,'COLL')
-
- write(message,'(a)' ) ' Effectives Charges '
- call wrtout(std_out,message,'COLL')
+ call wrtout(unt, ' Effectives Charges ')
  do iatom=1,natom
-   write(message,'(a,i4,3es16.6,3es16.6,3es16.6)' )' atom ',iatom,&
-&   zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
-&   zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
-&   zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
-    call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i4,3es16.6,3es16.6,3es16.6)' )' atom ',iatom,&
+     zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
+     zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
+     zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
+    call wrtout(unt, msg)
  end do
 
 end subroutine dtech9
@@ -2155,7 +2093,6 @@ end subroutine dtech9
 !----------------------------------------------------------------------
 
 !!****f* m_ddb/dtchi
-!!
 !! NAME
 !! dtchi
 !!
@@ -2188,15 +2125,6 @@ end subroutine dtech9
 !! SOURCE
 
 subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtchi'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2371,21 +2299,12 @@ end subroutine dtchi
 !!
 !! SOURCE
 
-integer function ddb_get_etotal(ddb,etotal) result(iblok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_etotal'
-!End of the abilint section
-
- implicit none
+integer function ddb_get_etotal(ddb, etotal) result(iblok)
 
 !Arguments -------------------------------
 !scalars
  real(dp),intent(out) :: etotal
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
 
 !Local variables -------------------------
 !scalars
@@ -2404,7 +2323,7 @@ integer function ddb_get_etotal(ddb,etotal) result(iblok)
  rfstrs(:) = 0
  rftyp = 0
 
- call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  if (iblok /= 0) then
    etotal = ddb%val(1,1,iblok)
@@ -2433,16 +2352,17 @@ end function ddb_get_etotal
 !!           3 if third order derivatives
 !!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
 !!  selectz=selection of some parts of the effective charge tensor attached to one atom.
-!!    (0=> no selection, 1=> trace only, 2=> symmetric part only)                       !!
+!!    (0=> no selection, 1=> trace only, 2=> symmetric part only)
 !!
 !! SIDE EFFECTS
 !!  ddb<type(ddb_type)>=
 !!    The block with the effective charges is modified if charge neutrality is imposed.
 !!
 !! OUTPUT
+!!  iblok=Index of the block containing the data. 0 if block is not found.
 !!  dielt(3,3) = Macroscopic dielectric tensor
 !!  zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
-!!  iblok=Index of the block containing the data. 0 if block is not found.
+!!  [zeff_raw(3,3,natom)]=effective charge on each atom before enforcing charge-neutrality.
 !!
 !! NOTES
 !!  dielt and zeff are initialized to one_3D and zero if the derivatives are not available in the DDB file.
@@ -2453,32 +2373,24 @@ end function ddb_get_etotal
 !!
 !! SOURCE
 
-integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff) result(iblok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dielt_zeff'
-!End of the abilint section
-
- implicit none
+integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt, zeff, zeff_raw) result(iblok)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: rftyp,chneut,selectz
- type(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(inout) :: ddb
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(out) :: dielt(3,3),zeff(3,3,crystal%natom)
+ real(dp),optional,intent(out) :: zeff_raw(3,3,crystal%natom)
 
 !Local variables -------------------------
 !scalars
  integer :: ii
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
- real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
 
 ! *********************************************************************
 
@@ -2490,32 +2402,35 @@ integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
  rfstrs(1:2)=0
 
  !write(std_out,*)"ddb%mpert",ddb%mpert
-
- call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
 
  ! Compute effective charges and dielectric tensor only if the Gamma-blok was found in the DDB
  ! In case it was not found, iblok = 0
  zeff=zero; dielt=zero; dielt(1,1)=one; dielt(2,2)=one; dielt(3,3)=one
+ my_zeff_raw = zero
 
- if (iblok/=0) then
-   write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Dielectric Tensor and Effective Charges ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+ if (iblok /= 0) then
+   write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+   ' Dielectric Tensor and Effective Charges ',ch10
+   call wrtout([std_out, ab_out], msg)
 
    ! Make the imaginary part of the Gamma block vanish
-   write(message, '(a,a,a,a,a)'  ) ch10,&
-&   ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
-&   '   and impose the ASR on the effective charges ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(5a)'  ) ch10,&
+   ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
+   '   and impose the ASR on the effective charges ',ch10
+   call wrtout([std_out, ab_out], msg)
+
+   ! Extrac Zeff before enforcing sum rule.
+   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
 
    ! Impose the charge neutrality on the effective charges and eventually select some parts of the effective charges
    call chneu9(chneut,ddb%val(:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
 
    ! Extraction of the dielectric tensor and the effective charges
-   call dtech9(ddb%val,dielt,iblok,ddb%mpert,ddb%natom,ddb%nblok,zeff)
+   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
  end if ! iblok not found
+
+ if (present(zeff_raw)) zeff_raw = my_zeff_raw
 
 end function ddb_get_dielt_zeff
 !!***
@@ -2549,21 +2464,12 @@ end function ddb_get_dielt_zeff
 !!
 !! SOURCE
 
-integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dielt'
-!End of the abilint section
-
- implicit none
+integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: rftyp
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(out) :: dielt(3,3)
 
@@ -2585,7 +2491,7 @@ integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
  rfelfd(1:2)=2
  rfstrs(1:2)=0
 
- call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  ! Read the dielectric tensor only if the Gamma-block was found in the DDB
  ! In case it was not found, iblok = 0
@@ -2611,6 +2517,95 @@ integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
  end if ! iblok not found
 
 end function ddb_get_dielt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/ddb_get_quadrupoles
+!!
+!! NAME
+!!  ddb_get_quadrupoles
+!!
+!! FUNCTION
+!! Reads the Dynamic Quadrupoles or the P^(1) tensor from the DDB file
+!!
+!! INPUTS
+!!  ddb<type(ddb_type)>=Derivative database.
+!!  lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> 1st gradient of polarization response to atomic displacement
+!!         = 1 symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> dynamic quadrupoles
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
+!!          33 if long wave third order derivatives
+!!
+!! OUTPUT
+!!  quadrupoles(3,3,3,natom) = Dynamic Quadrupole tensor
+!!  iblok=Index of the block containing the data. 0 if block is not found.
+!!
+!! NOTES
+!!  quadrupoles is initialized to zero if the derivatives are not available in the DDB file.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: lwsym,rftyp
+ class(ddb_type),intent(in) :: ddb
+!arrays
+ real(dp),intent(out) :: quadrupoles(3,3,3,ddb%natom)
+
+!Local variables -------------------------
+!scalars
+ character(len=500) :: msg
+!arrays
+ integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ integer :: rfqvec(4)
+ real(dp) :: qphnrm(3),qphon(3,3)
+
+! *********************************************************************
+
+ ! Look for the Gamma Block in the DDB
+ qphon(:,:)=zero
+ qphnrm(:)=one
+ rfphon(:)=0
+ rfelfd(:)=0
+ rfqvec(:)=0
+ rfphon(3)=1
+ rfelfd(3)=1
+ rfstrs(:)=0
+ rfqvec(3)=1
+
+ call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec=rfqvec)
+
+ ! Compute the quadrupole tensor only if the Gamma-block was found in the DDB
+ ! In case it was not found, iblok = 0
+ quadrupoles=zero
+
+ if (iblok /= 0) then
+   write(msg,'(2a)') ch10, ' Extract quadrupoles or P^(1) coefficients from 3DTE'
+   call wrtout(std_out, msg,'COLL')
+
+   if (lwsym==1) then
+     write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor (units: e Bohr)',ch10
+   else if (lwsym==0) then
+     write(msg, '(3a)' ) ch10, &
+   & ' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) ',ch10
+   endif
+   call wrtout([std_out, ab_out], msg,'COLL')
+
+   call dtqdrp(ddb%val(:,:,iblok),lwsym,ddb%mpert,ddb%natom,quadrupoles)
+
+ end if
+
+end function ddb_get_quadrupoles
 !!***
 
 !----------------------------------------------------------------------
@@ -2644,21 +2639,12 @@ end function ddb_get_dielt
 !!
 !! SOURCE
 
-integer function ddb_get_dchidet(ddb,ramansr,nlflag,dchide,dchidt) result(iblok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dchidet'
-!End of the abilint section
-
- implicit none
+integer function ddb_get_dchidet(ddb, ramansr, nlflag, dchide, dchidt) result(iblok)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ramansr, nlflag
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(out) :: dchide(3,3,3),dchidt(ddb%natom,3,3,3)
 
@@ -2684,7 +2670,7 @@ integer function ddb_get_dchidet(ddb,ramansr,nlflag,dchide,dchidt) result(iblok)
    rfphon(1)  = 0 ; rfphon(2:3) = 0
  end if
 
- call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  if (iblok /= 0) then
    call dtchi(ddb%val(:,:,iblok),dchide,dchidt,ddb%mpert,ddb%natom,ramansr,nlflag)
@@ -2731,19 +2717,10 @@ end function ddb_get_dchidet
 
 type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_asrq0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: asr,rftyp
- type(ddb_type),intent(inout) :: ddb
+ class(ddb_type),intent(inout) :: ddb
 !arrays
  real(dp),intent(in) :: xcart(3,ddb%natom)
 
@@ -2767,7 +2744,7 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  rfelfd(:)=0
  rfstrs(:)=0
 
- call gtblk9(ddb,asrq0%iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(asrq0%iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  ! this is to maintain the old behaviour in which the arrays where allocated and set to zero in anaddb.
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
  asrq0%d2asr = zero
@@ -2856,19 +2833,10 @@ end function ddb_get_asrq0
 subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
                       out_eigvec,out_displ_red)   ! Optional [out]
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_diagoq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: rftyp,symdynmat
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
  type(asrq0_t),intent(inout) :: asrq0
  type(crystal_t),intent(in) :: crystal
 !arrays
@@ -2899,7 +2867,7 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  qphon_padded(:,1) = qpt
  natom = crystal%natom
 
- call gtblk9(ddb,iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  if (iblok == 0) then
    MSG_ERROR(sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
  end if
@@ -2908,7 +2876,7 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  d2cart(:,1:ddb%msize) = ddb%val(:,:,iblok)
 
  ! Eventually impose the acoustic sum rule based on previously calculated d2asr
- call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+ call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
 
  ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
@@ -2956,19 +2924,10 @@ end subroutine ddb_diagoq
 
 subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrq0_apply'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom, msize, mpert
- type(asrq0_t),intent(inout) :: asrq0
+ class(asrq0_t),intent(inout) :: asrq0
 !arrays
  real(dp),intent(in) :: xcart(3,natom)
  real(dp),intent(inout) :: d2cart(2,msize)
@@ -3014,46 +2973,26 @@ end subroutine asrq0_apply
 
 subroutine asrq0_free(asrq0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrq0_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
- type(asrq0_t),intent(inout) :: asrq0
+ class(asrq0_t),intent(inout) :: asrq0
 
 ! ************************************************************************
 
  ! real
- if (allocated(asrq0%d2asr)) then
-   ABI_FREE(asrq0%d2asr)
- end if
-
- if (allocated(asrq0%singular)) then
-   ABI_FREE(asrq0%singular)
- end if
-
- if (allocated(asrq0%uinvers)) then
-   ABI_FREE(asrq0%uinvers)
- end if
-
- if (allocated(asrq0%vtinvers)) then
-   ABI_FREE(asrq0%vtinvers)
- end if
+ ABI_SFREE(asrq0%d2asr)
+ ABI_SFREE(asrq0%singular)
+ ABI_SFREE(asrq0%uinvers)
+ ABI_SFREE(asrq0%vtinvers)
 
 end subroutine asrq0_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/ddb_write_blok
+!!****f* m_ddb/ddb_write_block
 !!
 !! NAME
-!! ddb_write_blok
+!! ddb_write_block
 !!
 !! FUNCTION
 !! This routine writes blocks of data in the DDBs.
@@ -3101,23 +3040,14 @@ end subroutine asrq0_free
 !!
 !! SOURCE
 
-subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
+subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_write_blok'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,mband,mpert,msize,nkpt,nunit
  integer,intent(in) :: iblok
- type(ddb_type),intent(in) :: ddb
+ class(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(in),optional :: kpt(3,nkpt)
  real(dp),intent(in),optional :: blkval2(2,msize,mband,nkpt)
@@ -3150,6 +3080,8 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,i8)' )' 1st derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == 5) then
    write(nunit, '(a,i8)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
+ else if(ddb%typ(iblok)==33) then
+   write(nunit, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
  end if
 
 !Write the 2nd derivative block
@@ -3176,7 +3108,7 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    end if
 
 !  Write the 3rd derivative block
- else if(ddb%typ(iblok)==3)then
+ else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
 
 !  Write the phonon wavevectors
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
@@ -3255,7 +3187,7 @@ subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    end if !choice
  end if !ddb%typ(iblok)
 
-end subroutine ddb_write_blok
+end subroutine ddb_write_block
 !!***
 
 !!****f* m_ddb/dfptnl_doutput
@@ -3282,20 +3214,11 @@ end subroutine ddb_write_blok
 !!      nonlinear
 !!
 !! CHILDREN
-!!      ddb_free,ddb_malloc,ddb_write_blok,wrtout
+!!      ddb_free,ddb_malloc,ddb_write_block,wrtout
 !!
 !! SOURCE
 
 subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_doutput'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3313,7 +3236,7 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 !*************************************************************************
 
  msize = 27*mpert*mpert*mpert
- call ddb_malloc(ddb,msize,1,natom,ntypat)
+ call ddb%malloc(msize, 1, natom, ntypat)
 
  choice = 2
 
@@ -3362,7 +3285,7 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
  end do
 
 !Write blok of third-order derivatives to DDB
- call ddb_write_blok(ddb,1,choice,mband,mpert,msize,nkpt,unddb)
+ call ddb%write_block(1,choice,mband,mpert,msize,nkpt,unddb)
 
  call ddb_free(ddb)
 
@@ -3391,15 +3314,6 @@ end subroutine dfptnl_doutput
 
 
 subroutine ddb_to_dtset(comm,dtset,filename,psps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_to_dtset'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -3606,20 +3520,11 @@ end subroutine ddb_to_dtset
 !!
 !! CHILDREN
 !!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
-!!      ddb_hdr_open_write,ddb_malloc,ddb_write_blok,read_blok8,wrtout
+!!      ddb_hdr_open_write,ddb_malloc,ddb_write_block,read_block,wrtout
 !!
 !! SOURCE
 
 subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mblktyp1'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3678,11 +3583,12 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    call ddb_hdr_free(ddb_hdr)
  end do
 
- mpert=matom+6
+ mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
- if(mblktyp==3)msize=msize*3*mpert
 
- call ddb_malloc(ddb,msize,mblok,matom,mtypat)
+ if(mblktyp==3.or.mblktyp==33)msize=msize*3*mpert
+
+ call ddb%malloc(msize, mblok, matom, mtypat)
 
 !Allocate arrays
  ABI_ALLOCATE(mgblok,(mblok))
@@ -3701,7 +3607,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    write(message, '(a,i5,a)' ) ' read ',ddb_hdr%nblok, ' blocks from the input DDB '
    call wrtout(std_out,message,'COLL')
    do iblok=1,ddb_hdr%nblok
-     call read_blok8(ddb,iblok,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
+     call ddb%read_block(iblok,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
 !    Setup merged indicator
      mgblok(iblok)=0
    end do
@@ -3762,7 +3668,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !  Read the bloks from the temporary database, and close it.
 !  Also setup the merging indicator
    do iblok=nblok+1,nblokt
-     call read_blok8(ddb,iblok,ddb_hdr8%nband(1),mpert,msize,ddb_hdr8%nkpt,ddbun)
+     call ddb%read_block(iblok,ddb_hdr8%nband(1),mpert,msize,ddb_hdr8%nkpt,ddbun)
      mgblok(iblok)=0
    end do
    close(ddbun)
@@ -3801,7 +3707,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
          tmerge=1
          if(ddb%typ(iblok1)==1.or.ddb%typ(iblok1)==2)then
            nq=1
-         else if(ddb%typ(iblok1)==3)then
+         else if(ddb%typ(iblok1)==3.or.ddb%typ(iblok1)==33)then
 !          Note : do not merge permutation related elements ....
            nq=3
          else if(ddb%typ(iblok1)==4 .or. ddb%typ(iblok1)==0)then
@@ -3867,7 +3773,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    do iblok=1,nblok+tmerge
      if(mgblok(iblok)==0)then
        write(std_out,'(a,i4)' ) ' Write bloc number',iblok
-       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
+       call ddb%write_block(iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
      else
        write(message, '(a,i4,a)' )&
 &       ' Bloc number',iblok,' was merged, so do not write it'
@@ -3880,7 +3786,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    choice=3
    do iblok=1,nblok+tmerge
      if(mgblok(iblok)==0)then
-       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
+       call ddb%write_block(iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
      end if
    end do
 
@@ -3937,20 +3843,11 @@ end subroutine mblktyp1
 !!
 !! CHILDREN
 !!      ddb_free,ddb_hdr_compare,ddb_hdr_free,ddb_hdr_open_read
-!!      ddb_hdr_open_write,ddb_malloc,ddb_write_blok,read_blok8,wrtout
+!!      ddb_hdr_open_write,ddb_malloc,ddb_write_block,read_block,wrtout
 !!
 !! SOURCE
 
 subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mblktyp5'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -4013,12 +3910,12 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  end do
 
- mpert=matom+6
+ mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
- if(mblktyp==3)msize=msize*3*mpert
+ if(mblktyp==3.or.mblktyp==33)msize=msize*3*mpert
 
 !write(std_out,*),'msize',msize,'mpert',mpert,'mblktyp',mblktyp
- call ddb_malloc(ddb,msize,mblok,matom,mtypat)
+ call ddb%malloc(msize, mblok, matom, mtypat)
 
 !Allocate arrays
  ABI_ALLOCATE(mgblok,(mblok))
@@ -4044,7 +3941,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    call wrtout(std_out,message,'COLL')
    choice=1
    do iblok=1,nblok
-     call read_blok8(ddb,iblok,ddb_hdr%nband(1),mpert,&
+     call ddb%read_block(iblok,ddb_hdr%nband(1),mpert,&
 &     msize,ddb_hdr%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
 !    Setup merged indicator
      mgblok(iblok)=1
@@ -4109,7 +4006,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !  Also setup the merging indicator
    choice=1
    do iblok=nblok+1,nblokt
-     call read_blok8(ddb,iblok,ddb_hdr8%nband(1),mpert,&
+     call ddb%read_block(iblok,ddb_hdr8%nband(1),mpert,&
 &     msize,ddb_hdr8%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
      mgblok(iblok)=1
    end do
@@ -4188,10 +4085,10 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
      do iblok=1,ddb_hdr8%nblok
        if(mgblok(ii)==1) then
-         call read_blok8(ddb,ii,ddb_hdr8%nband(1),mpert,&
+         call ddb%read_block(ii,ddb_hdr8%nband(1),mpert,&
 &         msize,ddb_hdr8%nkpt,ddbuntmp,blkval2(:,:,:,:),kpnt(:,:,ii))
          choice=2
-         call ddb_write_blok(ddb,ii,choice,ddb_hdr%nband(1),mpert,&
+         call ddb%write_block(ii,choice,ddb_hdr%nband(1),mpert,&
 &         msize,ddb_hdr8%nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,ii))
        else
          write(message, '(a,i4,a,i4,a)' )&
@@ -4210,7 +4107,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    choice=3
    do iblok=1,nblokt
      if(mgblok(iblok)==1)then
-       call ddb_write_blok(ddb,iblok,choice,ddb_hdr%nband(1),mpert,&
+       call ddb%write_block(iblok,choice,ddb_hdr%nband(1),mpert,&
 &       msize,ddb_hdr%nkpt,ddbun)
      end if
    end do
@@ -4231,6 +4128,405 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  call ddb_free(ddb)
 
 end subroutine mblktyp5
+!!***
+
+!!****f* m_ddb/dfpt_lw_doutput
+!! NAME
+!! dfpt_lw_doutput
+!!
+!! FUNCTION
+!! Write the matrix of third-order derivatives from the long wave calculation 
+!! to the to the DDB
+!!
+!! INPUTS
+!!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!   has been calculated ; 0 otherwise )
+!!  d3(2,3,mpert,6,mpert,3,mpert)= matrix of the 3DTE
+!!  mpert =maximum number of ipert
+!!  natom=Number of atoms
+!!  ntypat=Number of type of atoms
+!!  unddb = unit number for DDB output
+!!
+!! NOTES
+!! - d3 holds the third-order derivatives before computing
+!!   the permutations of the perturbations.
+!!
+!! PARENTS
+!!      longwave
+!!
+!! CHILDREN
+!!      ddb_free,ddb_malloc,ddb_write_blok,wrtout
+!!
+!! SOURCE
+
+subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,unddb,natom,ntypat
+!arrays
+ integer,intent(in) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3(2,3,mpert,3,mpert,3,mpert)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2,idir3,ii,index,ipert1,ipert2,ipert3,msize,nelmts
+ type(ddb_type) :: ddb
+
+!*************************************************************************
+
+ msize = 27*mpert*mpert*mpert
+ call ddb%malloc(msize,1,natom,ntypat)
+
+ ddb%nrm = one
+ ddb%qpt = zero  
+
+ index=0
+ do ipert3=1,mpert
+   do idir3=1,3
+     do ipert2=1,mpert
+       do idir2=1,3
+         do ipert1=1,mpert
+           do idir1=1,3
+             index=index + 1
+             ddb%flg(index,1) = blkflg(idir1,ipert1,idir2,ipert2,idir3,ipert3)
+             ddb%val(:,index,1)= d3(:,idir1,ipert1,idir2,ipert2,idir3,ipert3)
+
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!########  Write blok of third-order derivatives to DDB
+
+!Count the number of elements
+ nelmts=0
+ do ii=1,msize
+   if(ddb%flg(ii,1)==1)nelmts=nelmts+1
+ end do
+
+!Write the block type and number of elements
+ write(unddb,*)' '
+ write(unddb, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
+
+!Write the phonon wavevectors
+ write(unddb, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,1),ii=1,3),ddb%nrm(1,1)
+ write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=4,6),ddb%nrm(2,1)
+ write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=7,9),ddb%nrm(3,1)
+
+!Write the matrix elements 
+ index=0
+ do ipert3=1,mpert
+   do idir3=1,3
+     do ipert2=1,mpert
+       do idir2=1,3
+         do ipert1=1,mpert
+           do idir1=1,3
+             index=index+1
+             if (ddb%flg(index,1)==1)then
+               write(unddb, '(6i4,2d22.14)' )&
+&              idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,index,1),ddb%val(2,index,1)
+             end if
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+ call ddb_free(ddb)
+
+end subroutine dfpt_lw_doutput
+!!***
+
+!!****f* m_ddb/lwcart
+!! NAME
+!! lwcart
+!!
+!! FUNCTION
+!! Transform the 3rd-order energy derivative read from the ddb file generated by a long wave
+!! calculation into cartesian coordinates, and also...
+!!
+!! INPUTS
+!!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!   has been calculated ; 0 otherwise )
+!!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
+!!  mpert =maximum number of ipert
+!!  natom= number of atoms
+!!  rprimd(3,3)=dimensional primitive translations (bohr)
+!!
+!! OUTPUT
+!! carflg(3,mpert,3,mpert,3,mpert)=1 if the element of d3cart has been calculated, 0 otherwise
+!! d3cart(2,3,mpert,3,mpert,3,mpert)=matrix of third-order energy derivatives in cartesian coordinates
+!!
+!! PARENTS
+!!      m_ddb
+!!
+!! CHILDREN
+!!      cart39
+!!
+!! SOURCE
+
+subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom
+!arrays
+ integer,intent(in) :: blkflg(3,mpert,3,mpert,3,mpert)
+ integer,intent(out) :: carflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3(2,3,mpert,3,mpert,3,mpert),gprimd(3,3),rprimd(3,3)
+ real(dp),intent(out) :: d3cart(2,3,mpert,3,mpert,3,mpert)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer :: ii
+!arrays
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
+
+! *******************************************************************
+
+!Transform to cartesian coordinates
+ d3cart(:,:,:,:,:,:,:) = d3(:,:,:,:,:,:,:)
+ carflg(:,:,:,:,:,:) = 0
+
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+
+       do i2dir = 1, 3
+         do i3dir = 1, 3
+           do ii= 1, 2
+
+             vec1(:) = d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert)
+             flg1(:) = blkflg(:,i1pert,i2dir,i2pert,i3dir,i3pert)
+             call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
+             d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert) = vec2(:)
+             carflg(:,i1pert,i2dir,i2pert,i3dir,i3pert) = flg2(:)
+
+           end do
+         end do
+       end do
+
+       do i1dir = 1, 3
+         do i3dir = 1, 3
+           do ii= 1, 2
+             vec1(:) = d3cart(ii,i1dir,i1pert,:,i2pert,i3dir,i3pert)
+             flg1(:) = blkflg(i1dir,i1pert,:,i2pert,i3dir,i3pert)
+             call cart39(flg1,flg2,gprimd,i2pert,natom,rprimd,vec1,vec2)
+             d3cart(ii,i1dir,i1pert,:,i2pert,i3dir,i3pert) = vec2(:)
+             carflg(i1dir,i1pert,:,i2pert,i3dir,i3pert) = flg2(:)
+           end do
+         end do
+       end do
+
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do ii= 1, 2
+             vec1(:) = d3cart(ii,i1dir,i1pert,i2dir,i2pert,:,i3pert)
+             flg1(:) = blkflg(i1dir,i1pert,i2dir,i2pert,:,i3pert)
+             call cart39(flg1,flg2,gprimd,i3pert,natom,rprimd,vec1,vec2)
+             d3cart(ii,i1dir,i1pert,i2dir,i2pert,:,i3pert) = vec2(:)
+             carflg(i1dir,i1pert,i2dir,i2pert,:,i3pert) = flg2(:)
+           end do
+         end do
+       end do
+
+     end do
+   end do
+ end do
+
+end subroutine lwcart
+!!***
+
+!!****f* m_ddb/dtqdrp
+!! NAME
+!! dtqdrp
+!!
+!! FUNCTION
+!! Reads the Dynamical Quadrupole or the P^(1) Tensor
+!! in the Gamma Block coming from the Derivative Data Base
+!! (long wave third-order derivatives).
+!!
+!! INPUTS
+!! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
+!! lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> 1st gradient of polarization response to atomic displacement
+!!        = 1 symmetrize the tensor wrt efield and qvec derivative 
+!!             |-> dynamic quadrupoles
+!! natom= number of atoms in unit cell
+!! mpert =maximum number of ipert
+!!
+!! OUTPUT
+!! lwtens(3,3,3,natom) = Dynamical Quadrupoles or P^(1) tensor
+!!
+!! PARENTS
+!!      m_ddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: lwsym,mpert,natom
+!arrays
+ real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
+ real(dp),intent(out) :: lwtens(3,3,3,natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: elfd,iatd,iatom,qvecd
+ logical :: iwrite
+ character(len=500) :: msg
+!arrays
+ real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
+
+! *********************************************************************
+
+ d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
+ d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
+
+!Extraction of quadrupoles (need symmetrization wrt qvecd and elfd) 
+ do iatom = 1,natom
+   do iatd = 1,3
+     do elfd = 1,3
+       do qvecd = 1,elfd-1
+         if (lwsym==1) then
+           lwtens(qvecd,elfd,iatd,iatom) = -two* &
+         (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
+           lwtens(elfd,qvecd,iatd,iatom) = lwtens(qvecd,elfd,iatd,iatom) 
+         else if (lwsym==0) then
+           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
+           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
+         end if
+       end do
+       lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+     end do
+   end do
+ end do
+
+ iwrite = ab_out > 0
+
+ if (iwrite) then
+   if (lwsym==1) then
+     write(msg,*)' atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     do iatom= 1, natom
+       write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
+     & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
+     & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
+     & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+     end do
+   else if (lwsym==0) then
+     write(msg,*) &
+   & ' atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     do iatom= 1, natom
+       write(msg,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &
+     & lwtens(2,3,1,iatom),lwtens(1,3,1,iatom),lwtens(1,2,1,iatom), &
+     & lwtens(3,2,1,iatom),lwtens(3,1,1,iatom),lwtens(2,1,1,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'y',lwtens(1,1,2,iatom),lwtens(2,2,2,iatom),lwtens(3,3,2,iatom), &
+     & lwtens(2,3,2,iatom),lwtens(1,3,2,iatom),lwtens(1,2,2,iatom), &
+     & lwtens(3,2,2,iatom),lwtens(3,1,2,iatom),lwtens(2,1,2,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'z',lwtens(1,1,3,iatom),lwtens(2,2,3,iatom),lwtens(3,3,3,iatom), &
+     & lwtens(2,3,3,iatom),lwtens(1,3,3,iatom),lwtens(1,2,3,iatom), &
+     & lwtens(3,2,3,iatom),lwtens(3,1,3,iatom),lwtens(2,1,3,iatom)
+       call wrtout([ab_out,std_out],msg,'COLL')
+     end do
+   endif
+ end if
+
+ end subroutine dtqdrp
+!!***
+
+
+!!****f* m_ddb/ddb_lw_copy
+!! NAME
+!! ddb_lw_copy
+!!
+!! FUNCTION
+!! Copy the ddb object after reading the long wave 3rd order derivatives  
+!! into a new ddb_lw and resizes ddb as for 2nd order derivatives
+!!
+!! INPUTS
+!! ddb (INOUT) = ddb block datastructure
+!! mpert =maximum number of ipert
+!! natom= number of atoms in unit cell
+!! ntypat= number of atom types
+!!
+!! OUTPUT
+!! ddb_lw= ddb block datastructure 
+!!
+!! PARENTS
+!!     anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,ntypat
+!arrays
+ type(ddb_type),intent(inout) :: ddb
+ type(ddb_type),intent(out) :: ddb_lw
+
+!Local variables -------------------------
+!scalars
+ integer :: ii,nblok,nsize
+!arrays
+
+! *********************************************************************
+
+   call ddb_copy(ddb, ddb_lw)
+   call ddb%free()
+   nsize=3*mpert*3*mpert
+   nblok=ddb_lw%nblok-count(ddb_lw%typ(:)==33)
+   call ddb%malloc(nsize, nblok, natom, ntypat)
+   
+ ! Copy dimensions and static variables.
+   ddb%msize = nsize
+   ddb%mpert = ddb_lw%mpert
+   ddb%nblok = nblok
+   ddb%natom = ddb_lw%natom
+   ddb%ntypat = ddb_lw%ntypat
+   ddb%occopt = ddb_lw%occopt
+   ddb%prtvol = ddb_lw%prtvol
+  
+   ddb%rprim = ddb_lw%rprim
+   ddb%gprim = ddb_lw%gprim
+   ddb%acell = ddb_lw%acell
+
+ ! Copy the allocatable arrays.
+   ddb%amu(:) = ddb_lw%amu(:)
+   do ii=1,ddb_lw%nblok
+     if (ddb_lw%typ(ii)/=33) then
+       ddb%flg(:,ii)   = ddb_lw%flg(1:nsize,ii)
+       ddb%val(:,:,ii) = ddb_lw%val(:,1:nsize,ii)
+       ddb%typ(ii)     = ddb_lw%typ(ii)
+       ddb%nrm(:,ii)   = ddb_lw%nrm(:,ii)
+       ddb%qpt(:,ii)   = ddb_lw%qpt(:,ii)
+     end if
+   end do
+
+ end subroutine ddb_lw_copy
 !!***
 
 end module m_ddb

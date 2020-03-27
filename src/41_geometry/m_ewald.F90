@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ewald
 !! NAME
 !!  m_ewald
@@ -7,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2020 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,6 +29,7 @@ module m_ewald
  use m_abicore
  use m_errors
  use m_splines
+ use m_time
 
  use m_special_funcs,  only : abi_derfc
  use m_symtk,          only : matr3inv
@@ -79,15 +79,6 @@ contains
 
 subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -106,7 +97,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
  real(dp) :: t1,term
- character(len=500) :: message
+ !character(len=500) :: message
 
 ! *************************************************************************
 
@@ -144,7 +135,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  do
    ng=ng+1
    newg=0
-!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations), 
+!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations),
 !   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
 !   if (ng > 20 .and. mod(ng,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
@@ -272,7 +263,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              drdta3=0.0_dp
 
              do ib=1,natom
-!              fraca and fracb should be precomputedi and become arrays with natom dimension. 
+!              fraca and fracb should be precomputedi and become arrays with natom dimension.
 !              Also the combination with dble(ir1), dble(ir2), dble(ir3) or fraca should be done outside of the ib loop.
                fracb1=xred(1,ib)-aint(xred(1,ib))+0.5_dp-sign(0.5_dp,xred(1,ib))
                fracb2=xred(2,ib)-aint(xred(2,ib))+0.5_dp-sign(0.5_dp,xred(2,ib))
@@ -383,15 +374,6 @@ end subroutine ewald
 !! SOURCE
 
 subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald2'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -626,6 +608,12 @@ end subroutine ewald2
 !! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
 !! zeff(3,3,natom)=effective charge on each atom, versus electric
 !!  field and atomic displacement
+!! qdrp_cart(3,3,3,natom)=Quadrupole tensor on each atom in cartesian cordinates
+!! option= 0: use old implementation;
+!!         1: reduce the smalest argument of the exponentials to be evaluated,
+!!            set eta to 1 and skip real space sum, leads to a significant speedup
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
@@ -653,34 +641,33 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald9'
-!End of the abilint section
-
- implicit none
+subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
+      qdrp_cart,option,dipquad,quadquad)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,sumg0
+ integer,optional,intent(in) :: option
  real(dp),intent(in) :: ucvol
+ integer,optional,intent(in) :: dipquad, quadquad
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),xred(3,natom),zeff(3,3,natom)
+ real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(out) :: dyew(2,3,natom,3,natom)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: mr=10000,ny2_spline=1024*10
- integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ integer :: ewald_option
+ integer :: dipquad_,quadquad_
+ logical :: do_quadrupole
  real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
  real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
  real(dp),parameter :: y2max=64.0_dp, y2min=1.0d-24
- real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,detdlt,inv_detdlt
+ real(dp) :: cddi,cddr,cqdi,cqdr,cqqi,cqqr,g3,g4
+ real(dp) :: arg1,arg2,arg3,arga,c123r,c123i,c23i,c23r,detdlt,inv_detdlt
  real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
  real(dp) :: minexparg
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
@@ -690,60 +677,36 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
- real(dp) :: gprimbyacell(3,3)
- real(dp),allocatable :: dyewt(:,:,:,:,:)
+ real(dp) :: gprimbyacell(3,3),tsec(2)
+ real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
  complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
-
-!#define DEV_USESPLINE
-#ifdef DEV_USESPLINE
- integer :: jspl
- real(dp) :: aa,bb,cc,dd,step,stepm1,step2div6
- logical,save :: first_call=.True.
- real(dp),save :: t4spl(ny2_spline,2),t5spl(ny2_spline,2),y2vals(ny2_spline)
-#endif
 
 ! *********************************************************************
 
  ! This routine is expensive so skip the calculation and return zeros if zeff == zero.
  ! Typically this happens when the DDB file does not contains zeff but dipdip = 1 is used (default).
- if (all(zeff == zero)) then
+ if (all(zeff == zero).and.all(qdrp_cart == zero)) then
    dyew = zero; return
  end if
+ do_quadrupole = any(qdrp_cart /= zero)
+ ewald_option = 0; if (present(option)) ewald_option = option
+ if (do_quadrupole) ewald_option = 1
+
+ ! Keep track of total time spent.
+ call timab(1749, 1, tsec)
+
+ ! Initialize dipquad and quadquad options
+ dipquad_=1; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=1; if(present(quadquad)) quadquad_=quadquad
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
+ if (ewald_option == 1) minexparg=-20.0_dp
 
-#ifdef DEV_USESPLINE
- step = (0.1_dp + y2max - y2min) / (ny2_spline - 1)
- stepm1 = one / step; step2div6 = step**2/six
- if (first_call) then
-   first_call = .False.
-   do ii=1,ny2_spline
-     y2 = y2min + (ii-1) * step
-     y2vals(ii) = y2
-     yy=sqrt(y2)
-     invy=1.0_dp/yy
-     invy2=invy**2
-     derfc_yy = abi_derfc(yy)
-     term2=derfc_yy*invy*invy2
-     term3=fact2*exp(-y2)*invy2
-     term4=-(term2+term3)
-     term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
-     t4spl(ii,1) = term4
-     t5spl(ii,1) = term5
-   end do
-
-   call spline(y2vals, t4spl(:,1), ny2_spline, zero, zero, t4spl(:,2))
-   call spline(y2vals, t5spl(:,1), ny2_spline, zero, zero, t5spl(:,2))
-   !do ii=1,ny2_spline
-   !  write(345,*)y2vals(ii),t4spl(ii,:),t5spl(ii,:)
-   !end do
-   !write(std_out,*)"spline tables created"; stop
- end if
-#endif
-
- ABI_ALLOCATE(dyewt,(2,3,natom,3,natom))
+ ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
+ ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
+ ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
 
 ! initialize complex phase factors
  do ia = 1, natom
@@ -775,10 +738,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+ if (ewald_option == 1) eta = one
  inv4eta = one / four / eta
 
- dyew = zero
- dyewt = zero
+ dyddt = zero
+ dydqt = zero
+ dyqqt = zero
 
 !Sum terms over g space:
  ng=0
@@ -855,7 +820,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 ! MJV: replaced old calls to cos and sin. Checked for 10 tests in v2 that max error is about 6.e-15, usually < 2.e-15
                do ia=1,natom
-                 cosqxred(ia)=real(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
+                 cosqxred(ia)= real(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
                  sinqxred(ia)=aimag(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
                end do
 
@@ -863,7 +828,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                do nu=1,3
                  do ia=1,natom
                    do mu=nu,3
-                     dyewt(1,mu,ia,nu,ia)=dyewt(1,mu,ia,nu,ia)+gpqfac(mu,nu)
+                     dyddt(1,mu,ia,nu,ia)=dyddt(1,mu,ia,nu,ia)+gpqfac(mu,nu)
                    end do
                  end do
                end do
@@ -871,17 +836,58 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !              Then, the non-diagonal ones
                do ib=2,natom
                  do ia=1,ib-1
-                   c123r=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
-                   c123i=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
-!                  The most inner loop
+                   ! phase factor dipole-dipole
+                   cddr=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
+                   cddi=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
+
+                   ! Dipole-dipole contribution
                    do nu=1,3
                      do mu=nu,3
-                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+gpqfac(mu,nu)*c123r
-                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+gpqfac(mu,nu)*c123i
+                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+gpqfac(mu,nu)*cddr
+                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+gpqfac(mu,nu)*cddi
                      end do
                    end do
                  end do
                end do
+
+               if (do_quadrupole) then
+                 do ib=1,natom
+                   do ia=1,natom
+
+                     ! phase factor for dipole-quadrupole
+                     cqdr=cosqxred(ia)*sinqxred(ib)-sinqxred(ia)*cosqxred(ib)
+                     cqdi=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
+
+                     ! phase factor quadrupole-quadrupole
+                     cqqr=cosqxred(ia)*cosqxred(ib)+sinqxred(ia)*sinqxred(ib)
+                     cqqi=sinqxred(ia)*cosqxred(ib)-cosqxred(ia)*sinqxred(ib)
+
+                     ! Dipole-quadrupole contribution
+                     do ii=1,3
+                       do jj=1,3
+                         do kk=1,3
+                           g3=gpq(ii)*gpq(jj)*gpq(kk)
+                           dydqt(1,ii,ia,jj,ib,kk)=dydqt(1,ii,ia,jj,ib,kk)+g3*term1*cqdr
+                           dydqt(2,ii,ia,jj,ib,kk)=dydqt(2,ii,ia,jj,ib,kk)+g3*term1*cqdi
+                         end do ! kk
+                       end do ! jj
+                     end do ! ii
+
+                     ! Quadrupole-quadrupole contribution
+                     do ii=1,3
+                       do jj=1,3
+                         do kk=1,3
+                           do ll=1,3
+                             g4 = gpq(ii)*gpq(jj)*gpq(kk)*gpq(ll)
+                             dyqqt(1,ii,ia,jj,ib,kk,ll)=dyqqt(1,ii,ia,jj,ib,kk,ll)+g4*term1*cqqr
+                             dyqqt(2,ii,ia,jj,ib,kk,ll)=dyqqt(2,ii,ia,jj,ib,kk,ll)+g4*term1*cqqi
+                           end do
+                         end do ! kk
+                       end do ! jj
+                     end do ! ii
+                   end do ! ia
+                 end do ! ib
+               end if
 
              end if ! endif exp() argument is smaller than -minexparg
            end if ! Endif g/=0 :
@@ -900,12 +906,16 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    do ia=1,ib
      do nu=1,3
        do mu=nu,3
-         dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)*fact1
-         dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)*fact1
+         dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)*fact1
+         dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)*fact1
        end do
      end do
    end do
  end do
+ if (do_quadrupole) then
+   dydqt=dydqt*fact1/two  * two_pi
+   dyqqt=dyqqt*fact1/four * two_pi ** 2
+ end if
 
  reta=sqrt(eta)
  reta3=-eta*reta
@@ -932,23 +942,24 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  inv_detdlt = one / sqrt(detdlt)
  fact3=reta3 * inv_detdlt
 
-!Preparing the loop on real space
+ if (ewald_option /= 1) then
+ ! Preparing the loop on real space
  do ia=1,natom
    do ii=1,3
      xredcar(ii,ia)=(xred(1,ia)*acell(1)*rprim(ii,1)+&
-&     xred(2,ia)*acell(2)*rprim(ii,2)+&
-&     xred(3,ia)*acell(3)*rprim(ii,3) )*reta
+                     xred(2,ia)*acell(2)*rprim(ii,2)+&
+                     xred(3,ia)*acell(3)*rprim(ii,3) )*reta
    end do
  end do
  do ia=1,natom
    do ii=1,3
      xredcax(ii,ia)= invdlt(1,ii)*xredcar(ii,ia)+&
-&     invdlt(2,ii)*xredcar(ii,ia)+&
-&     invdlt(3,ii)*xredcar(ii,ia)
+                     invdlt(2,ii)*xredcar(ii,ia)+&
+                     invdlt(3,ii)*xredcar(ii,ia)
    end do
  end do
 
-!Prepare the evaluation of exp(iq*R)
+ ! Prepare the evaluation of exp(iq*R)
  do ir=-mr,mr
    arg1=-two_pi*qphon(1)*ir
    arg2=-two_pi*qphon(2)*ir
@@ -964,37 +975,37 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  do nr=1,mr
    newr=0
 
-!  Begin big loop on real space vectors
+   ! Begin big loop on real space vectors
    do ir3=-nr,nr
      do ir2=-nr,nr
 
-!      Here, construct the cosine and sine of q*R for components 2 and 3
+       ! Here, construct the cosine and sine of q*R for components 2 and 3
        c23r = c2r(ir2+mr+1) * c3r(ir3+mr+1) - c2i(ir2+mr+1) * c3i(ir3+mr+1)
        c23i = c2i(ir2+mr+1) * c3r(ir3+mr+1) + c2r(ir2+mr+1) * c3i(ir3+mr+1)
 
-!      Also multiplies by fact3, because it is a rather economical place to do so
+       ! Also multiplies by fact3, because it is a rather economical place to do so
        c23r=c23r * fact3
        c23i=c23i * fact3
 
        do ir1=-nr,nr
          if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
 
-!          This is the real part and imaginary part of the phase factor exp(iq*R)
+           ! This is the real part and imaginary part of the phase factor exp(iq*R)
            c123r = c1r(ir1+mr+1) * c23r - c1i(ir1+mr+1) * c23i
            c123i = c1i(ir1+mr+1) * c23r + c1r(ir1+mr+1) * c23i
 
            do ii=1,3
              ircar(ii)= ( ir1*acell(1)*rprim(ii,1)+&
-&             ir2*acell(2)*rprim(ii,2)+&
-&             ir3*acell(3)*rprim(ii,3) ) * reta
+                          ir2*acell(2)*rprim(ii,2)+&
+                          ir3*acell(3)*rprim(ii,3) ) * reta
            end do
            do ii=1,3
-             ircax(ii)=   invdlt(1,ii)*ircar(ii)+&
-&             invdlt(2,ii)*ircar(ii)+&
-&             invdlt(3,ii)*ircar(ii)
+             ircax(ii)= invdlt(1,ii)*ircar(ii)+&
+                        invdlt(2,ii)*ircar(ii)+&
+                        invdlt(3,ii)*ircar(ii)
            end do
 
-!          Here loops on atoms
+           ! Here loops on atoms
            do ib=1,natom
              do ii=1,3
                xredicar(ii)=ircar(ii)-xredcar(ii,ib)
@@ -1008,44 +1019,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
                y2=rr(1)*xx(1)+rr(2)*xx(2)+rr(3)*xx(3)
 
-!              The atoms should not be too far of each other
+               ! The atoms should not be too far of each other
                if (y2 < y2max) then
-!                Note: erfc(8) is about 1.1e-29, so dont bother with larger y.
-!                Also: exp(-64) is about 1.6e-28, do dont bother with larger y**2 in exp.
+               ! Note: erfc(8) is about 1.1e-29, so dont bother with larger y.
+               ! Also: exp(-64) is about 1.6e-28, do dont bother with larger y**2 in exp.
 
-!                Avoid zero denominators in term:
+                 ! Avoid zero denominators in term:
                  if (y2 >= y2min) then
                    newr=1
-! TODO : find a workaround here - the sqrt, erf and exp functions are slow
-!        and for dense q meshes this takes forever
-!        could tabulate and spline the full function of yy on a very fine grid
-!        and look it up there...
-
-#ifdef DEV_USESPLINE
-                   if (y2 > 1.0_dp) then
-                     ! Spline function
-                     jspl = 1 + int((y2 - y2min) * stepm1); dd = y2 - y2vals(jspl)
-                     bb = dd * stepm1
-                     aa = one - bb
-                     cc = aa*(aa**2-one) * step2div6
-                     dd = bb*(bb**2-one) * step2div6
-
-                     term4 = aa*t4spl(jspl,1) + bb*t4spl(jspl+1,1) + cc*t4spl(jspl,2) + dd*t4spl(jspl+1,2)
-                     term5 = aa*t5spl(jspl,1) + bb*t5spl(jspl+1,1) + cc*t5spl(jspl,2) + dd*t5spl(jspl+1,2)
-                   else
-                     ! Evaluate values (the function increases quickly for x --> 0, the spline
-                     ! is unstable and this leads to SIGFPE.
-                     yy=sqrt(y2)
-                     invy=1.0_dp/yy
-                     invy2=invy**2
-                     derfc_yy = abi_derfc(yy)
-                     term2=derfc_yy*invy*invy2
-                     term3=fact2*exp(-y2)*invy2
-                     term4=-(term2+term3)
-                     term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
-                   end if
-
-#else
                    yy=sqrt(y2)
                    invy=1.0_dp/yy
                    invy2=invy**2
@@ -1054,29 +1035,26 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    term3=fact2*exp(-y2)*invy2
                    term4=-(term2+term3)
                    term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
-#endif
                    do nu=1,3
                      do mu=nu,3
-                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+&
-&                       c123r*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
-                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+&
-&                       c123i*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
+                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+c123r*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
+                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+c123i*(xx(nu)*xx(mu)*term5+term4*invdlt(nu,mu))
                      end do
                    end do
                  else
-!                  If zero denominator, the atoms should be identical
+                   ! If zero denominator, the atoms should be identical
                    if (ia/=ib)then
                      write(message, '(5a,i0,a,i0,a)' )&
-&                     'The distance between two atoms seem to vanish.',ch10,&
-&                     'This is not allowed.',ch10,&
-&                     'Action: check the input for the atoms number',ia,' and',ib,'.'
+                       'The distance between two atoms seem to vanish.',ch10,&
+                       'This is not allowed.',ch10,&
+                       'Action: check the input for the atoms number',ia,' and',ib,'.'
                      MSG_ERROR(message)
                    else
-!                    This is the correction when the atoms are identical
+                     ! This is the correction when the atoms are identical
                      do nu=1,3
                        do mu=1,3
-                         dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+&
-&                         fac*reta3*invdlt(nu,mu) * inv_detdlt
+                         dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+&
+                                  fac*reta3*invdlt(nu,mu) * inv_detdlt
                        end do
                      end do
                    end if
@@ -1089,18 +1067,19 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      end do ! ir2
    end do ! ir3
 
-!  Check if new shell must be calculated
+   ! Check if new shell must be calculated
    if(newr==0)exit
    if(newr==1 .and. nr==mr) MSG_BUG('mr is too small')
  end do
+ end if ! check if should compute real part
 
 !Now, symmetrizes
  do ib=1,natom-1
    do nu=1,3
      do ia=ib+1,natom
        do mu=nu,3
-         dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ib,nu,ia)
-         dyewt(2,mu,ia,nu,ib)=-dyewt(2,mu,ib,nu,ia)
+         dyddt(1,mu,ia,nu,ib)= dyddt(1,mu,ib,nu,ia)
+         dyddt(2,mu,ia,nu,ib)=-dyddt(2,mu,ib,nu,ia)
        end do
      end do
    end do
@@ -1110,8 +1089,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    do nu=2,3
      do ia=1,natom
        do mu=1,nu-1
-         dyewt(1,mu,ia,nu,ib)=dyewt(1,nu,ia,mu,ib)
-         dyewt(2,mu,ia,nu,ib)=dyewt(2,nu,ia,mu,ib)
+         dyddt(1,mu,ia,nu,ib)=dyddt(1,nu,ia,mu,ib)
+         dyddt(2,mu,ia,nu,ib)=dyddt(2,nu,ia,mu,ib)
        end do
      end do
    end do
@@ -1119,17 +1098,42 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Tests
 !write(std_out,*)' ewald9 : take into account the effective charges '
+ dyew = zero
  do ib=1,natom
    do nu=1,3
      do ia=1,natom
        do mu=1,3
-         do i2=1,2
-           dyew(i2,mu,ia,nu,ib)=zero
+         do ii=1,3
            do jj=1,3
-             do ii=1,3
-               dyew(i2,mu,ia,nu,ib)=dyew(i2,mu,ia,nu,ib) + &
-                zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyewt(i2,ii,ia,jj,ib)
-             end do
+             ! dipole-dipole correction
+             dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
+              zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyddt(1,ii,ia,jj,ib)
+             dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
+              zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyddt(2,ii,ia,jj,ib)
+             if (do_quadrupole) then
+               do kk=1,3
+                 if (dipquad_==1) then
+                   ! dipole-quadrupole correction
+                   dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
+                     (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
+                      zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(1,ii,ia,jj,ib,kk)
+                   dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
+                     (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
+                      zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(2,ii,ia,jj,ib,kk)
+                 end if
+
+                 ! quadrupole-quadrupole correction
+                 if (quadquad_==1) then
+                   do ll=1,3
+                     dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
+                     (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(1,ii,ia,jj,ib,kk,ll)
+                     dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
+                     (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(2,ii,ia,jj,ib,kk,ll)
+                   end do
+                 end if
+               end do
+             end if
+
            end do
          end do
        end do
@@ -1140,7 +1144,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ABI_DEALLOCATE(expx1)
  ABI_DEALLOCATE(expx2)
  ABI_DEALLOCATE(expx3)
- ABI_DEALLOCATE(dyewt)
+ ABI_DEALLOCATE(dyddt)
+ ABI_DEALLOCATE(dydqt)
+ ABI_DEALLOCATE(dyqqt)
+
+ call timab(1749, 2, tsec)
 
 end subroutine ewald9
 !!***

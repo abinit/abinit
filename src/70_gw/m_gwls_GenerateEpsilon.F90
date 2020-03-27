@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_GenerateEpsilon
 !! NAME
 !! m_gwls_GenerateEpsilon
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,8 +42,7 @@ use m_gwls_GWlanczos
 ! Abinit modules
 use m_abicore
 use defs_basis
-use defs_datatypes
-use defs_abitypes
+use m_dtset
 
 use m_io_tools,    only : get_unit
 
@@ -101,14 +99,6 @@ epsilon_eigenvalues,Lbasis,debug)
 ! implicit dielectic operator and then diagonalizes the banded
 ! Lanczos matrix.
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'driver_generate_dielectric_matrix'
-!End of the abilint section
-
-implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)
   use defs_basis
@@ -198,14 +188,6 @@ subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,kmax,outpu
 ! implicit dielectic operator and then diagonalizes the banded
 ! Lanczos matrix.
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GeneratePrintDielectricEigenvalues'
-!End of the abilint section
-
-implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)
   use defs_basis
@@ -222,7 +204,7 @@ integer,       intent(in) :: kmax
 character(*),  intent(in) :: output_filename
 
 
-complex(dpc), intent(out) :: Lbasis(npw_k,nseeds*kmax)  
+complex(dpc), intent(out) :: Lbasis(npw_k,nseeds*kmax)
 complex(dpc), intent(out) :: alpha(nseeds,nseeds,kmax)
 complex(dpc), intent(out) :: beta (nseeds,nseeds,kmax)
 
@@ -232,7 +214,7 @@ complex(dpc), intent(out) :: beta (nseeds,nseeds,kmax)
 
 complex(dpc),allocatable :: seeds(:,:)
 
-complex(dpc),allocatable :: Lbasis_diag(:,:)  
+complex(dpc),allocatable :: Lbasis_diag(:,:)
 
 
 real(dp),    allocatable :: psik(:,:)
@@ -246,7 +228,7 @@ integer :: io_unit
 integer :: lmax
 integer :: l
 integer :: ir1, ir2, ir3
-integer :: n1, n2, n3 
+integer :: n1, n2, n3
 
 real(dp) :: R, G
 real(dp) :: sigma_R, sigma_G
@@ -427,13 +409,6 @@ subroutine Driver_GeneratePrintDielectricEigenvalues(dtset)
 !----------------------------------------------------------------------
 ! Compute the eigenvalues of the various dielectric operators
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Driver_GeneratePrintDielectricEigenvalues'
-!End of the abilint section
-
 type(dataset_type),intent(in) :: dtset
 
 integer  ::  kmax_exact, kmax_model, kmax
@@ -578,7 +553,7 @@ call write_timing_log(timing_string,time)
 
 
 
-! Compare the traces 
+! Compare the traces
 
 
 io_unit = get_unit()
@@ -707,7 +682,7 @@ ABI_ALLOCATE(rwork,(lrwork))
 ABI_ALLOCATE(iwork,(liwork))
 
 call zheevd('N', 'U',k*nseeds, dummy2, k*nseeds, eig_exact, work, lwork, rwork, lrwork, iwork, liwork, info)
-if ( info /= 0) then        
+if ( info /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 

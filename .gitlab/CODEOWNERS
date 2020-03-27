@@ -1,0 +1,19 @@
+#
+# This file specifies who watches which files of the source tree
+#
+
+# Files required by the GNU Autotools
+/AUTHORS @pouillon
+/COPYING @pouillon
+/ChangeLog @pouillon
+/INSTALL @pouillon
+/NEWS @pouillon
+/README @pouillon
+
+# Build system
+/autogen.sh @pouillon
+/config/ @pouillon
+/config.pc.in @pouillon
+/config.sh.in @pouillon
+/configure.ac @pouillon
+/wipeout.sh @pouillon

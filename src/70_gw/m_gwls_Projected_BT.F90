@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_Projected_BT
 !! NAME
 !! m_gwls_Projected_BT
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,13 +110,6 @@ kmax_numeric, npt_gauss, dielectric_array, array_integrand )
 ! already contains the properly modified basis vectors.
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_projected_BT_shift_Lanczos'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in) :: nfreq
@@ -506,13 +498,6 @@ modified_Lbasis, kmax_numeric, npt_gauss, dielectric_array, array_integrand )
 ! takes into account that the MODEL dielectric array is distributed over the processors.
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_projected_BT_shift_Lanczos_DISTRIBUTED'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in) :: nfreq

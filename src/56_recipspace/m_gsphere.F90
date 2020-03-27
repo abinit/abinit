@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gsphere
 !! NAME
 !!  m_gsphere
@@ -12,7 +11,7 @@
 !!   one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
+!! Copyright (C) 1999-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -172,7 +171,7 @@ MODULE m_gsphere
  public :: gsph_extend        ! Construct a new gsphere_t with a larger cutoff energy
 !!***
 
-CONTAINS  !=========================================================================================================================
+CONTAINS  !=================================================================================
 !!***
 
 !!****f* m_gsphere/setup_G_rotation
@@ -209,15 +208,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,grottbm1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_G_rotation'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -306,15 +296,6 @@ end subroutine setup_G_rotation
 !! SOURCE
 
 subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -514,15 +495,6 @@ end subroutine gsph_init
 
 subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_fft_tabs'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft
@@ -570,20 +542,18 @@ subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
  ! Evaluate the tables needed for the padded FFT performed in rhotwg. Note that we have
  ! to pass G-G0 to sphereboundary instead of G as we need FFT results on the shifted G-sphere,
  ! If Gamma is not inside G-G0 one has to disable FFT padding as sphereboundary will give wrong tables.
- if (use_padfft==1) then
-   call sphereboundary(gmg0_gbound,1,gmg0,mgfft,ng)
- end if
+ if (use_padfft == 1) call sphereboundary(gmg0_gbound,1,gmg0,mgfft,ng)
 
  call initmpi_seq(MPI_enreg_seq) ! No FFT parallelism.
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
- ABI_MALLOC(kg_mask,(ng))
- call kgindex(gmg0_ifft,gmg0,kg_mask,MPI_enreg_seq,ngfft,ng)
+ ABI_MALLOC(kg_mask, (ng))
+ call kgindex(gmg0_ifft, gmg0, kg_mask, MPI_enreg_seq, ngfft, ng)
 
  ABI_CHECK(ALL(kg_mask),"FFT para not yet implemented")
  ABI_FREE(kg_mask)
 
- ABI_DEALLOCATE(gmg0)
+ ABI_FREE(gmg0)
  call destroy_mpi_enreg(MPI_enreg_seq)
 
 end subroutine gsph_fft_tabs
@@ -615,15 +585,6 @@ end subroutine gsph_fft_tabs
 !! SOURCE
 
 subroutine gsph_in_fftbox(Gsph,Cryst,ngfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_in_fftbox'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -726,15 +687,6 @@ end subroutine gsph_in_fftbox
 
 subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_gsphere'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: prtvol,unit
@@ -808,15 +760,6 @@ end subroutine print_gsphere
 
 subroutine gsph_free(Gsph)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(gsphere_t),intent(inout) :: Gsph
@@ -828,36 +771,18 @@ subroutine gsph_free(Gsph)
  !@gsphere_t
 
 ! integer arrays.
- if (allocated(Gsph%g2sh)) then
-   ABI_FREE(Gsph%g2sh)
- end if
- if (allocated(Gsph%gvec)) then
-   ABI_FREE(Gsph%gvec)
- end if
- if (allocated(Gsph%g2mg)) then
-   ABI_FREE(Gsph%g2mg)
- end if
- if (allocated(Gsph%rottb)) then
-   ABI_FREE(Gsph%rottb)
- end if
- if (allocated(Gsph%rottbm1)) then
-   ABI_FREE(Gsph%rottbm1)
- end if
- if (allocated(Gsph%shlim)) then
-   ABI_FREE(Gsph%shlim)
- end if
+ ABI_SFREE(Gsph%g2sh)
+ ABI_SFREE(Gsph%gvec)
+ ABI_SFREE(Gsph%g2mg)
+ ABI_SFREE(Gsph%rottb)
+ ABI_SFREE(Gsph%rottbm1)
+ ABI_SFREE(Gsph%shlim)
 
- if (allocated(Gsph%shlen)) then
-   ABI_FREE(Gsph%shlen)
- end if
+ ABI_SFREE(Gsph%shlen)
 
 ! complex arrays
- if (allocated(Gsph%phmGt)) then
-   ABI_FREE(Gsph%phmGt)
- end if
- if (allocated(Gsph%phmSGt)) then
-   ABI_FREE(Gsph%phmSGt)
- end if
+ ABI_SFREE(Gsph%phmGt)
+ ABI_SFREE(Gsph%phmSGt)
 
  DBG_EXIT("COLL")
 
@@ -885,15 +810,6 @@ end subroutine gsph_free
 !! SOURCE
 
 pure function gsph_g_idx(Gsph,gg) result(g_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_g_idx'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -952,15 +868,6 @@ end function gsph_g_idx
 !! SOURCE
 
 pure function gsph_gmg_idx(Gsph,ig1,ig2) result(ig1mg2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_gmg_idx'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1021,15 +928,6 @@ end function gsph_gmg_idx
 !! SOURCE
 
 pure function gsph_gmg_fftidx(Gsph,ig1,ig2,ngfft) result(fft_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_gmg_fftidx'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1092,15 +990,6 @@ end function gsph_gmg_fftidx
 !! SOURCE
 
 subroutine prune_g1mg2(npw,gvec,ngdiff,g1mg2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prune_g1mg2'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1196,15 +1085,6 @@ end subroutine prune_g1mg2
 !! SOURCE
 
 subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtvol,shlim_p)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'merge_and_sort_kg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1480,15 +1360,6 @@ end subroutine merge_and_sort_kg
 
 subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getfullg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbase,nsym,pinv,sizepw
@@ -1633,15 +1504,6 @@ end subroutine getfullg
 
 subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_irredg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nsym,pinv
@@ -1738,15 +1600,6 @@ end subroutine get_irredg
 !! SOURCE
 
 subroutine merge_kgirr(nsym,pinv,nkpt,mpw,sizepw,symrec,nbasek,cnormk,gbasek,nbase,gbase,cnorm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'merge_kgirr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1852,15 +1705,6 @@ end subroutine merge_kgirr
 
 subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setshells'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -1888,53 +1732,51 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 
 !******************************************************************
 
- DBG_ENTER("COLL")
-!
-!=== Check coherence of input variables ecut, npw, and nsh ===
-!1-> one at least should be non-null
+ ! Check coherence of input variables ecut, npw, and nsh.
+ ! 1-> one at least should be non-null
  if (npw==0.and.nsh==0.and.ecut<=tol6) then
    write(msg,'(8a)')&
-&   'One of the three variables ecut',TRIM(tag),', npw',TRIM(tag),', or nsh',TRIM(tag),ch10,&
-&   'must be non-null. Returning.'
+    'One of the three variables ecut',TRIM(tag),', npw',TRIM(tag),', or nsh',TRIM(tag),ch10,&
+    'must be non-null. Returning.'
    MSG_COMMENT(msg)
    RETURN
  end if
-!2-> one and only one should be non-null
+ ! 2-> one and only one should be non-null
  if (npw/=0.and.nsh/=0) then
    write(msg,'(6a)')&
-&   'Only one of the two variables npw',TRIM(tag),' and nsh',TRIM(tag),ch10,&
-&   'can be non-null. Modify the value of one of these in input file.'
+    'Only one of the two variables npw',TRIM(tag),' and nsh',TRIM(tag),ch10,&
+    'can be non-null. Modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
  if (ecut>tol6.and.npw/=0) then
    write(msg,'(6a)')&
-&   'Only one of the two variables ecut',TRIM(tag),' and npw',TRIM(tag),ch10,&
-&   'can be non-null. Modify the value of one of these in input file.'
+    'Only one of the two variables ecut',TRIM(tag),' and npw',TRIM(tag),ch10,&
+    'can be non-null. Modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
  if (ecut>tol6.and.nsh/=0) then
    write(msg,'(6a)')&
-&   'Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
-&   'can be non-null Action : modify the value of one of these in input file.'
+    'Only one of the two variables ecut',TRIM(tag),' and nsh',TRIM(tag),ch10,&
+    'can be non-null Action : modify the value of one of these in input file.'
    MSG_ERROR(msg)
  end if
-!
-!=== Calculates an upper bound for npw ===
-!* gctr is center of the g-vector sphere
+
+ ! Calculate an upper bound for npw.
+ ! gctr is center of the g-vector sphere
  gctr(:)= [zero,zero,zero]
  if (ecut>tol6) then
-!  The average number of plane-waves in the cutoff sphere is given by:
-!  npwave = (2*ecut)**(3/2)*ucvol/(6*pi**2)
-!  The upper bound is calculated as npwwrk=int(scale * npwave) + pad
+   ! The average number of plane-waves in the cutoff sphere is given by:
+   ! npwave = (2*ecut)**(3/2)*ucvol/(6*pi**2)
+   ! The upper bound is calculated as npwwrk=int(scale * npwave) + pad
    npwave=NINT(ucvol*(two*ecut)**1.5_dp/(six*pi**2))
    npwwrk=NINT(DBLE(npwave)*scale)+pad
    ecut_trial=ecut
  else if (npw/=0) then
-!  npw is given in the input
+   ! npw is given in the input
    npwwrk=NINT(DBLE(npw)*scale)+pad
    ecut_trial=(six*pi**2*npw/ucvol)**two_thirds/two
  else
-!  If nsh is given in the input
+   ! If nsh is given in the input
    npwwrk=nsh*18+2*pad
    ecut_trial=(six*pi**2*nsh*18/ucvol)**two_thirds/two
  end if
@@ -1943,7 +1785,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 
  ABI_MALLOC(gvec,(3,npwwrk))
  ifound=0
- do while(ifound==0)
+ do while (ifound==0)
    !write(msg,'(a,f8.2)')' setshells : ecut_trial = ',ecut_trial
    !call wrtout(std_out,msg,'COLL')
    exchn2n3d=0 ! For the time being, no exchange of n2 and n3
@@ -1958,19 +1800,20 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      gnorm(ig)=zero
      do ii=1,3
        gnorm(ig)=gnorm(ig)+(gvec(1,ig)*gprimd(ii,1)+&
-&       gvec(2,ig)*gprimd(ii,2)+&
-&       gvec(3,ig)*gprimd(ii,3))**2
+                            gvec(2,ig)*gprimd(ii,2)+&
+                            gvec(3,ig)*gprimd(ii,3))**2
      end do
    end do
    call sort_dp(npw_found,gnorm,insort,tol14)
+
    ABI_MALLOC(npw_sh,(npw_found))
    ABI_MALLOC(gnorm_sh,(npw_found))
    ABI_MALLOC(gvec_sh,(3,npw_found))
    npw_sh(:)=0
    gnorm_sh(:)=zero
    gvec_sh(:,:)=0
-!  Count the number of shells:
-!  (search for the G-vectors generating the others by symmetry)
+   ! Count the number of shells:
+   ! (search for the G-vectors generating the others by symmetry)
    nsh_found=0
 
    do ig=1,npw_found
@@ -1982,12 +1825,12 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
          isym=1
          do while ((.not.found).and.(isym<=nsym))
            geq(:)=(symrel(1,:,isym)*gvec(1,insort(ig))+&
-&           symrel(2,:,isym)*gvec(2,insort(ig))+&
-&           symrel(3,:,isym)*gvec(3,insort(ig)))
+                  symrel(2,:,isym)*gvec(2,insort(ig))+&
+                  symrel(3,:,isym)*gvec(3,insort(ig)))
 
            found=((geq(1)==gvec_sh(1,ish)).and.&
-&           (geq(2)==gvec_sh(2,ish)).and.&
-&           (geq(3)==gvec_sh(3,ish)))
+                  (geq(2)==gvec_sh(2,ish)).and.&
+                  (geq(3)==gvec_sh(3,ish)))
            isym=isym+1
          end do
        end if
@@ -2007,17 +1850,17 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
    ecut_found=two*pi**2*gnorm(npw_found)
 
    if(ecut>tol6) then
-!    ecut is given in the input
+     ! ecut is given in the input
      if (ecut_found<ecut-0.1) then
        write(msg,'(3a,e14.6,9a,e14.6,3a)')&
-&       'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
-&       'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
-&       'This value will be adopted for the calculation.',ch10
+        'The value ecut',TRIM(tag),'=',ecut,' given in the input file leads to',ch10,&
+        'the same values for nsh',TRIM(tag),' and npw',TRIM(tag),' as ecut',TRIM(tag),'=',ecut_found,ch10,&
+        'This value will be adopted for the calculation.',ch10
        MSG_WARNING(msg)
      end if
      ifound=1
    else if (npw/=0) then
-!    If npw is given in the input
+     ! If npw is given in the input
      if (npw_found==npw) then
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
@@ -2028,9 +1871,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
          nsh_found=nsh_found+1
          npw_found=npw_found+npw_sh(nsh_found)
        end do
-!      check that the shell is closed
+       ! check that the shell is closed
        if(npw_found>npw) then
-!        shell not closed
+         ! shell not closed
          npw_found=npw_found-npw_sh(nsh_found)
          nsh_found=nsh_found-1
          do while (ABS(gnorm_sh(nsh_found)-gnorm_sh(nsh_found+1))<0.000001)
@@ -2038,16 +1881,16 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
            nsh_found=nsh_found-1
          end do
          write(msg,'(3a,i6,5a,i6,3a)')&
-&         'The value npw',TRIM(tag),'=',npw,' given in the input file does not close the shell',ch10,&
-&         'The lower closed-shell is obtained for a value npw',TRIM(tag),'=',npw_found,ch10,&
-&         'This value will be adopted for the calculation.',ch10
+          'The value npw',TRIM(tag),'=',npw,' given in the input file does not close the shell',ch10,&
+          'The lower closed-shell is obtained for a value npw',TRIM(tag),'=',npw_found,ch10,&
+          'This value will be adopted for the calculation.',ch10
          MSG_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
      end if
    else if (nsh/=0) then
-!    If nsh is given in the input
+     ! If nsh is given in the input
      if (nsh_found==nsh) then
        ecut_found=two*pi**2*gnorm(npw_found)
        ifound=1
@@ -2064,9 +1907,9 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
            npw_found=npw_found+npw_sh(nsh_found)
          end do
          write(msg,'(3a,i6,5a,i6,3a)')&
-&         'The value nsh',TRIM(tag),'=',nsh,' given in the input file corresponds to the same',ch10,&
-&         'cut-off energy as for closed-shell upto nsh',TRIM(tag),'=',nsh_found,ch10,&
-&         'This value will be adopted for the calculation.',ch10
+          'The value nsh',TRIM(tag),'=',nsh,' given in the input file corresponds to the same',ch10,&
+          'cut-off energy as for closed-shell upto nsh',TRIM(tag),'=',nsh_found,ch10,&
+          'This value will be adopted for the calculation.',ch10
          MSG_WARNING(msg)
        end if
        ecut_found=two*pi**2*gnorm(npw_found)
@@ -2087,7 +1930,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      nsh=nsh_found
    end if
 
- end do !while(ifound==0)
+ end do ! while(ifound==0)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
 
@@ -2097,8 +1940,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
  ABI_FREE(gvec_sh)
  ABI_FREE(insort)
  ABI_FREE(npw_sh)
-
- DBG_EXIT("COLL")
 
 end subroutine setshells
 !!***
@@ -2130,15 +1971,6 @@ end subroutine setshells
 !! SOURCE
 
 subroutine kg_map(npw1,kg1,npw2,kg2,g2g1,nmiss)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kg_map'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2217,15 +2049,6 @@ end subroutine kg_map
 !! SOURCE
 
 subroutine make_istwfk_table(istwf_k,ng1,ng2,ng3,ig1_inver,ig2_inver,ig3_inver)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_istwfk_table'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2331,15 +2154,6 @@ end subroutine make_istwfk_table
 
 pure subroutine table_gbig2kg(npw_k,kg_k,maxpw,gbig,gamma2k,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'table_gbig2kg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,maxpw
@@ -2401,15 +2215,6 @@ end subroutine table_gbig2kg
 !! SOURCE
 
 subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_extend'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2504,15 +2309,6 @@ end subroutine gsph_extend
 
 subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getkpgnorm'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k
@@ -2594,15 +2390,6 @@ end subroutine getkpgnorm
 
 subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwdiel,nsym
@@ -2616,7 +2403,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 !scalars
  integer :: g1,g2,g3,ipw,isym,j1,j2,j3,m1m,m1p,m2m,m2p,m3m,m3p,symmg,trevg
  real(dp) :: arg,tau1,tau2,tau3
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: grid(:,:,:)
 
@@ -2635,7 +2422,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
 
 !Set up grid, that associate to each point the index of the
 !corresponding planewave, if there is one
- ABI_ALLOCATE(grid,(m1m:m1p,m2m:m2p,m3m:m3p))
+ ABI_MALLOC(grid, (m1m:m1p,m2m:m2p,m3m:m3p))
  grid(:,:,:)=0
  do ipw=1,npwdiel
    g1=kg_diel(1,ipw)
@@ -2693,7 +2480,7 @@ subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
    end do
  end do
 
- ABI_DEALLOCATE(grid)
+ ABI_FREE(grid)
 
 end subroutine symg
 !!***

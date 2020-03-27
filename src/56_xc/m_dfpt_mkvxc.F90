@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkvxc
 !! NAME
 !!  m_dfpt_mkvxc
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2020 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +26,11 @@
 module m_dfpt_mkvxc
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xc_noncoll
 
+ use defs_abitypes,     only : MPI_type
  use m_time,     only : timab
  use m_symtk,    only : matr3inv
  use m_xctk,     only : xcden, xcpot
@@ -72,6 +71,7 @@ contains
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
 !!  nhat1grdim= -PAW only- 1 if nhat1gr array is used ; 0 otherwise
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used, otherwise, nfft
 !!  option=if 0, work only with the XC core-correction,
@@ -135,21 +135,13 @@ contains
 !! SOURCE
 
 subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
-&          nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxc'
-!End of the abilint section
-
- implicit none
+&          nkxc,non_magnetic_xc,nspden,n3xccc,option,qphon,rhor1,rprimd,usexcnhat,vxc1,xccc3d1)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhat1dim,nhat1grdim
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
+ integer,intent(in) :: nkxc,nspden,option,usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -191,9 +183,17 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 
 !  PAW: eventually substract compensation density
    if (option/=0) then
-     if (usexcnhat==0.and.nhat1dim==1) then
+     if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
        ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+       if (usexcnhat==0.and.nhat1dim==1) then
+         rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+       else
+         rhor1_(:,:)=rhor1(:,:)
+       end if
+       if (non_magnetic_xc) then
+         if(nspden==2) rhor1_(:,2)=rhor1_(:,1)*half
+         if(nspden==4) rhor1_(:,2:4)=zero
+       end if
      else
        rhor1_ => rhor1
      end if
@@ -314,16 +314,16 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 
    end if ! n3xccc==0
 
-   if (option/=0.and.usexcnhat==0.and.nhat1dim==1) then
+   if (option/=0.and.((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc))) then
      ABI_DEALLOCATE(rhor1_)
    end if
 
 !  Treat GGA
  else if (nkxc==7.or.nkxc==19) then
 
-! Transfer the data to spin-polarized storage
+!  Transfer the data to spin-polarized storage
 
-! Treat the density change
+!  Treat the density change
    ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
    if (option==1 .or. option==2) then
      if (nspden==1) then
@@ -331,11 +331,19 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
          rhor1_(ir,1)=rhor1(ir,1)
        end do
      else
-       do ir=1,cplex*nfft
-         rho1_dn=rhor1(ir,1)-rhor1(ir,2)
-         rhor1_(ir,1)=rhor1(ir,2)
-         rhor1_(ir,2)=rho1_dn
-       end do
+       if(non_magnetic_xc) then
+         do ir=1,cplex*nfft
+           rho1_dn=rhor1(ir,1)*half
+           rhor1_(ir,1)=rho1_dn
+           rhor1_(ir,2)=rho1_dn
+         end do
+       else
+         do ir=1,cplex*nfft
+           rho1_dn=rhor1(ir,1)-rhor1(ir,2)
+           rhor1_(ir,1)=rhor1(ir,2)
+           rhor1_(ir,2)=rho1_dn
+         end do
+       end if
      end if
    else
      do ispden=1,nspden
@@ -344,6 +352,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
        end do
      end do
    end if
+
    if( (option==0 .or. option==1) .and. n3xccc/=0)then
      spin_scale=one;if (nspden==2) spin_scale=half
      do ispden=1,nspden
@@ -357,11 +366,18 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    nhat1dim_=nhat1dim ; nhat1rgdim_=nhat1grdim
    if (option/=0.and.nhat1dim==1.and.nspden==2) then
      ABI_ALLOCATE(nhat1_,(cplex*nfft,nspden))
-     do ir=1,cplex*nfft
-       rho1_dn=nhat1(ir,1)-nhat1(ir,2)
-       nhat1_(ir,1)=nhat1(ir,2)
-       nhat1_(ir,2)=rho1_dn
-     end do
+     if (non_magnetic_xc) then
+       do ir=1,cplex*nfft
+         rho1_dn=nhat1(ir,1)*half
+         nhat1_(ir,1:2)=rho1_dn
+       end do
+     else
+       do ir=1,cplex*nfft
+         rho1_dn=nhat1(ir,1)-nhat1(ir,2)
+         nhat1_(ir,1)=nhat1(ir,2)
+         nhat1_(ir,2)=rho1_dn
+       end do
+     end if
    else if (option==0) then
      ABI_ALLOCATE(nhat1_,(0,0))
      nhat1dim_=0
@@ -370,13 +386,22 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    end if
    if (option/=0.and.nhat1grdim==1.and.nspden==2) then
      ABI_ALLOCATE(nhat1gr_,(cplex*nfft,nspden,3))
-     do ii=1,3
-       do ir=1,cplex*nfft
-         rho1_dn=nhat1gr(ir,1,ii)-nhat1gr(ir,2,ii)
-         nhat1gr_(ir,1,ii)=nhat1gr(ir,2,ii)
-         nhat1gr_(ir,2,ii)=rho1_dn
+     if (non_magnetic_xc) then
+       do ii=1,3
+         do ir=1,cplex*nfft
+           rho1_dn=nhat1(ir,1)*half
+           nhat1gr_(ir,1:2,ii)=rho1_dn
+         end do
        end do
-     end do
+     else
+       do ii=1,3
+         do ir=1,cplex*nfft
+           rho1_dn=nhat1gr(ir,1,ii)-nhat1gr(ir,2,ii)
+           nhat1gr_(ir,1,ii)=nhat1gr(ir,2,ii)
+           nhat1gr_(ir,2,ii)=rho1_dn
+         end do
+       end do
+     end if
    else if (option==0) then
      ABI_ALLOCATE(nhat1gr_,(0,0,0))
      nhat1rgdim_=0
@@ -387,7 +412,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
    call matr3inv(rprimd,gprimd)
 
    call dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,nhat1_,nhat1dim_,&
-&   nhat1gr_,nhat1rgdim_,nkxc,nspden,paral_kgb,qphon,rhor1_,usexcnhat,vxc1)
+&   nhat1gr_,nhat1rgdim_,nkxc,nspden,qphon,rhor1_,usexcnhat,vxc1)
 
    ABI_DEALLOCATE(rhor1_)
    if ((option==0).or.(nhat1dim==1.and.nspden==2)) then
@@ -485,20 +510,11 @@ end subroutine dfpt_mkvxc
 
 subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 &                    nhat1,nhat1dim,nhat1gr,nhat1grdim,nkxc,&
-&                    nspden,paral_kgb,qphon,rhor1,usexcnhat,vxc1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxcgga'
-!End of the abilint section
-
- implicit none
+&                    nspden,qphon,rhor1,usexcnhat,vxc1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,paral_kgb,usexcnhat
+ integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,usexcnhat
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -512,7 +528,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,ir,ishift,mgga,ngrad,nspgrad
+ integer :: ii,ir,ishift,ngrad,nspgrad,use_laplacian
  logical :: test_nhat
  real(dp) :: coeff_grho,coeff_grho_corr,coeff_grho_dn,coeff_grho_up
  real(dp) :: coeffim_grho,coeffim_grho_corr,coeffim_grho_dn,coeffim_grho_up
@@ -535,7 +551,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
 !metaGGA contributions are not taken into account here
- mgga=0
+ use_laplacian=0
 
 !PAW: substract 1st-order compensation density from 1st-order density
  test_nhat=((nhat1dim==1).and.(usexcnhat==0.or.nhat1grdim==1))
@@ -553,7 +569,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !rho1now(:,:,2:4) contains the gradients of the first-order density
  ishift=0 ; ngrad=2
  ABI_ALLOCATE(rho1now,(cplex*nfft,nspden,ngrad*ngrad))
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor1_ptr,rho1now)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,qphon,rhor1_ptr,rho1now)
 
 !PAW: add "exact" gradients of compensation density
  if (test_nhat.and.usexcnhat==1) then
@@ -702,8 +718,8 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
  vxc1(:,:)=zero
- call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,paral_kgb,qphon,rho1now,vxc1)
+ call xcpot(cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+& nspgrad,qphon,depsxc=dnexcdn,rhonow=rho1now,vxc=vxc1)
 
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 
@@ -741,6 +757,7 @@ end subroutine dfpt_mkvxcgga
 !!  nhat1gr(cplex*nfft,nspden,3*nhat1grdim)= -PAW only- gradients of 1st-order compensation density
 !!  nhat1grdim= -PAW only- 1 if nhat1gr array is used ; 0 otherwise
 !!  nkxc=second dimension of the kxc array
+!!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used, otherwise, nfft
 !!  optnc=option for non-collinear magnetism (nspden=4):
@@ -770,22 +787,14 @@ end subroutine dfpt_mkvxcgga
 !! SOURCE
 
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
-&          nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,&
-&          rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxc_noncoll'
-!End of the abilint section
-
- implicit none
+&          nhat1gr,nhat1grdim,nkxc,non_magnetic_xc,nspden,n3xccc,optnc,option,qphon,&
+&          rhor,rhor1,rprimd,usexcnhat,vxc,vxc1,xccc3d1,ixcrot)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhatdim,nhat1dim,nhat1grdim,optnc
- integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
+ integer,intent(in) :: nkxc,nspden,option,usexcnhat
+ logical,intent(in) :: non_magnetic_xc
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -837,15 +846,31 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    vxc1(:,:)=zero
 
 !  PAW: possibly substract compensation density
-   if (usexcnhat==0.and.nhatdim==1) then
+   if ((usexcnhat==0.and.nhatdim==1).or.(non_magnetic_xc)) then
      ABI_ALLOCATE(rhor_,(nfft,nspden))
-     rhor_(:,:) =rhor(:,:)-nhat(:,:)
+     if (usexcnhat==0.and.nhatdim==1) then
+       rhor_(:,:) =rhor(:,:)-nhat(:,:)
+     else
+       rhor_(:,:) =rhor(:,:)
+     end if
+     if (non_magnetic_xc) then
+       if(nspden==2) rhor_(:,2)=rhor_(:,1)*half
+       if(nspden==4) rhor_(:,2:4)=zero
+     end if
    else
      rhor_ => rhor
    end if
-   if (usexcnhat==0.and.nhat1dim==1) then
+   if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
      ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-     rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+     if (usexcnhat==0.and.nhatdim==1) then
+       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+     else
+       rhor1_(:,:)=rhor1(:,:)
+     end if
+     if (non_magnetic_xc) then
+       if(nspden==2) rhor1_(:,2)=rhor1_(:,1)*half
+       if(nspden==4) rhor1_(:,2:4)=zero
+     end if
    else
      rhor1_ => rhor1
    end if
@@ -867,7 +892,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
 !                 (put all nhat options to zero).
 !  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
    call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1_zero,0,nhat1gr_zero,0,&
-&   nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
+&   nkxc,non_magnetic_xc,2,n3xccc,option,qphon,rhor1_diag,rprimd,0,vxc1_diag,xccc3d1)
 
    !call test_rotations(0,1)
 
@@ -888,10 +913,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nh
    ABI_DEALLOCATE(rhor1_diag)
    ABI_DEALLOCATE(vxc1_diag)
    ABI_DEALLOCATE(m_norm)
-   if (usexcnhat==0.and.nhatdim==1) then
+   if ((usexcnhat==0.and.nhatdim==1).or.(non_magnetic_xc)) then
      ABI_DEALLOCATE(rhor_)
    end if
-   if (usexcnhat==0.and.nhat1dim==1) then
+   if ((usexcnhat==0.and.nhat1dim==1).or.(non_magnetic_xc)) then
      ABI_DEALLOCATE(rhor1_)
    end if
 

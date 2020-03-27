@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/fold2Bloch
 !! NAME
 !! fold2Bloch
@@ -7,7 +6,7 @@
 !! Main routine for the unfolding of the wavefuntion.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2018 ABINIT group (AB)
+!! Copyright (C) 2014-2020 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +46,6 @@ program fold2Bloch
  use m_nctk
  use m_hdr
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_fold2block
 #ifdef HAVE_NETCDF
@@ -57,13 +55,6 @@ program fold2Bloch
  use m_fstrings,       only : strcat
  use m_io_tools,       only : get_unit, iomode_from_fname, open_file, prompt
  use defs_datatypes,   only : ebands_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fold2Bloch'
-!End of the abilint section
-
 implicit none
 
 !Arguments --------------------------------------------------------------
@@ -151,12 +142,12 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 
 #ifdef HAVE_NETCDF
  timrev = 2; if (any(wfk%hdr%kptopt == [3, 4])) timrev = 1
- call crystal_from_hdr(cryst, wfk%hdr, timrev)
+ cryst = wfk%hdr%get_crystal(timrev)
 
  NCF_CHECK(nctk_open_create(ncid, strcat(seedname, "_FOLD2BLOCH.nc"), xmpi_comm_self))
  fform = fform_from_ext("FOLD2BLOCH.nc")
- NCF_CHECK(hdr_ncwrite(wfk%hdr, ncid, fform, nc_define=.True.))
- NCF_CHECK(crystal_ncwrite(cryst, ncid))
+ NCF_CHECK(wfk%hdr%ncwrite(ncid, fform, nc_define=.True.))
+ NCF_CHECK(cryst%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
  ncerr = nctk_def_dims(ncid, [ &
@@ -175,7 +166,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  NCF_CHECK(nf90_inq_varid(ncid, "spectral_weights", weights_varid))
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fold_matrix"), fold_matrix))
- call crystal_free(cryst)
+ call cryst%free()
 #endif
 
  call ebands_free(ebands)
@@ -218,7 +209,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
      call progress(ikpt,nkpt,kpts(:,ikpt)) !Write progress information
 
      !Read a block of data
-     call wfk_read_band_block(wfk, [1, nband(ikpt)], ikpt, csppol, xmpio_single, kg_k=kg, cg_k=cg, eig_k=eig)
+     call wfk%read_band_block([1, nband(ikpt)], ikpt, csppol, xmpio_single, kg_k=kg, cg_k=cg, eig_k=eig)
 
      !Determine unfolded K point states
      call newk(kpts(1,ikpt),kpts(2,ikpt),kpts(3,ikpt),folds(1),folds(2),folds(3),nkval)
@@ -279,7 +270,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
      close(outfile1)
    end if
  end do
- call wfk_close(wfk)
+ call wfk%close()
 
  ABI_FREE(kpts)
  ABI_FREE(nband)

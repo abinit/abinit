@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_isothermal
 !! NAME
 !!  m_pred_isothermal
@@ -11,7 +10,7 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,13 +93,6 @@ contains
 !! SOURCE
 
 subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_isothermal'
-!End of the abilint section
 
  implicit none
 
@@ -477,7 +469,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !  !      If metric has changed since the initialization, update the Ylm's
 !  if (ab_mover%optcell/=0.and.psps%useylm==1.and.itime>1)then
-!  call status(0,dtfil%filstat,iexit,level,'call initylmg ')
 !  option=0;if (ab_mover%iscf>0) option=1
 !  call initylmg(gprimd,kg,ab_mover%kptns,ab_mover%mkmem,mpi_enreg,psps%mpsang,ab_mover%mpw,ab_mover%nband,ab_mover%nkpt,&
 !  &         npwarr,ab_mover%nsppol,option,rprimd_next,ylm,ylmgr)
@@ -541,7 +532,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !  !      If metric has changed since the initialization, update the Ylm's
 !  if (ab_mover%optcell/=0.and.psps%useylm==1.and.itime>1)then
-!  call status(0,dtfil%filstat,iexit,level,'call initylmg ')
 !  option=0;if (ab_mover%iscf>0) option=1
 !  call initylmg(gprimd,kg,ab_mover%kptns,ab_mover%mkmem,mpi_enreg,psps%mpsang,ab_mover%mpw,ab_mover%nband,ab_mover%nkpt,&
 !  &         npwarr,ab_mover%nsppol,option,rprimd_next,ylm,ylmgr)
@@ -651,13 +641,6 @@ end subroutine pred_isothermal
 !! SOURCE
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isotemp'
-!End of the abilint section
 
  implicit none
 
@@ -798,13 +781,6 @@ end subroutine isotemp
 
  subroutine isopress(amass,bmass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,&
    & strten,strtarget,ucvol,vel,vlogv)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isopress'
-!End of the abilint section
 
  implicit none
 
@@ -981,13 +957,6 @@ end subroutine isopress
    & qmass,strten,strtarget,ucvol,vel)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isostress'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1129,9 +1098,9 @@ end subroutine isopress
  expdiag(1)=exp(-veig(1)*dtion/two)
  expdiag(2)=exp(-veig(2)*dtion/two)
  expdiag(3)=exp(-veig(3)*dtion/two)
- if(DEBUG) then
-   write(std_out,*)' isostress : expdiag(:)=',expdiag(:)  ! Do not remove this line : seems to be needed for g95 compilo
- end if
+ !if(DEBUG) then
+ !  write(std_out,*)' isostress : expdiag(:)=',expdiag(:)  ! Do not remove this line : seems to be needed for g95 compilo
+ !end if
  do iatom=1,natom
    uv(:)=matmul(tvtemp,vel(:,iatom))
    uv(:)=uv(:)*expdiag(:)

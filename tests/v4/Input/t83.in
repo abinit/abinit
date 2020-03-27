@@ -3,14 +3,13 @@
 elaflag 5
 instrflag 1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
 #%% input_ddb = t82.ddb.out
 #%% test_chain = t81.in, t82.in, t83.in
 #%% [files]
-#%%  files_to_test =
+#%% files_to_test =
 #%%   t83.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 4

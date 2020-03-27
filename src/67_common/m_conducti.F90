@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_conducti
 !! NAME
 !!  m_conducti
@@ -9,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2018 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko)
+!!  Copyright (C) 2002-2020 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,13 +30,13 @@ module m_conducti
  use defs_basis
  use m_errors
  use m_abicore
- use defs_abitypes
  use m_xmpi
  use m_wffile
  use m_wfk
  use m_hdr
  use m_nctk
 
+ use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, get_unit
  use m_fstrings,     only : sjoin
  use m_symtk,        only : matr3inv
@@ -127,15 +126,6 @@ contains
 
  subroutine conducti_paw(filnam,filnam_out,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conducti_paw'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
@@ -189,7 +179,7 @@ contains
 
 ! Read the header of the optic files
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
  if (fform1 /= 610) then
    MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
@@ -516,7 +506,7 @@ contains
  ABI_DEALLOCATE(doccde)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw
 !!***
@@ -570,15 +560,6 @@ end subroutine conducti_paw
 !! SOURCE
 
  subroutine conducti_paw_core(filnam,filnam_out,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conducti_paw_core'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -639,7 +620,7 @@ end subroutine conducti_paw
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -803,8 +784,11 @@ end subroutine conducti_paw
  if (open_file(trim(filnam_out)//'_sigX', msg, newunit=sigx_unt, form='formatted', action="write") /= 0) then
    MSG_ERROR(msg)
  end if
+ write(sigx_unt,*) '# conducti: Xray core level conductivity, all in atomic units by default '
+ write(sigx_unt,*) '# One block of 3 columns per core wavefunction'
+ write(sigx_unt,*) '# energy, sigx_av, sigx, etc... '
  do iom=1,mom
-   write(sigx_unt,'(9(1x,e14.8))') &
+   write(sigx_unt,'( 3(3(1x,e14.8),2x) )') &
 &   ((-energy_cor(icor)+oml1(iom)+omin),sigx_av(iom,icor),sigx(atnbr,iom,icor),icor=1,nphicor)
  end do
  close(sigx_unt)
@@ -822,7 +806,7 @@ end subroutine conducti_paw
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw_core
 !!***
@@ -893,21 +877,12 @@ end subroutine conducti_paw_core
 !!
 !! CHILDREN
 !!      getnel,hdr_free,jacobi,matr3inv,metric,msig,nctk_fort_or_ncfile
-!!      wfk_close,wfk_open_read,wfk_read_eigk
+!!      wfk_open_read,wfk_read_eigk
 !!
 !! SOURCE
 
 
 subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conducti_nc'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -982,10 +957,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  if (len_trim(msg) /= 0) MSG_ERROR(msg)
  call wfk_open_read(ddk3,filnam3, formeig1, iomode, get_unit(), comm)
 
- if (wfk_compare(ddk1, ddk2) /= 0) then
+ if (ddk1%compare(ddk2) /= 0) then
    MSG_ERROR("ddk1 and ddk2 are not consistent. see above messages")
  end if
- if (wfk_compare(ddk1, ddk3) /= 0) then
+ if (ddk1%compare(ddk3) /= 0) then
    MSG_ERROR("ddk1 and ddk3 are not consistent. see above messages")
  end if
 
@@ -1033,16 +1008,16 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  do isppol=1,nsppol
    do ikpt=1,nkpt
      nband1=nband(ikpt+(isppol-1)*nkpt)
-     call wfk_read_eigk(gswfk,ikpt,isppol,xmpio_single,eig0tmp)
+     call gswfk%read_eigk(ikpt,isppol,xmpio_single,eig0tmp)
      eigen0(1+bdtot0_index:nband1+bdtot0_index)=eig0tmp(1:nband1)
 
-     call wfk_read_eigk(ddk1,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk1%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen11(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
-     call wfk_read_eigk(ddk2,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk2%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen12(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
-     call wfk_read_eigk(ddk3,ikpt,isppol,xmpio_single,eigtmp)
+     call ddk3%read_eigk(ikpt,isppol,xmpio_single,eigtmp)
      eigen13(1+bdtot_index:2*nband1**2+bdtot_index)=eigtmp(1:2*nband1**2)
 
      bdtot0_index=bdtot0_index+nband1
@@ -1051,10 +1026,10 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  end do
 
  ! Close files
- call wfk_close(gswfk)
- call wfk_close(ddk1)
- call wfk_close(ddk2)
- call wfk_close(ddk3)
+ call gswfk%close()
+ call ddk1%close()
+ call ddk2%close()
+ call ddk3%close()
 
  ABI_DEALLOCATE(eigtmp)
  ABI_DEALLOCATE(eig0tmp)
@@ -1102,7 +1077,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !size of the frequency range
  read(iunt,*)dom,wind
  close(iunt)
- mom=dint(wind/dom)
+ mom=int(wind/dom)
  ABI_ALLOCATE(oml1,(mom))
  do iom=1,mom
    oml1(iom)=tol10*1000.0d0+dble(iom)*dom
@@ -1196,6 +1171,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
      do iband=1,nband_k
        do jband=1,nband_k
 !
+! TODO : replace with BLAS calls
          do l1=1,3
            do l2=1,3
              do ii=1,3
@@ -1216,12 +1192,13 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
            end do
          end do
 !
+! TODO: replace with BLAS calls
          do l1=1,3
            do l2=1,3
              dhdk2_g(iband,jband)=dhdk2_g(iband,jband)+gmet_inv(l1,l2)*( &
 &             eig1_k(2*iband-1+(jband-1)*2*nband_k,l1)*&
 &             eig1_k(2*iband-1+(jband-1)*2*nband_k,l2) &
-&             +eig1_k(2*iband  +(jband-1)*2*nband_k,l1)*&
+&            +eig1_k(2*iband  +(jband-1)*2*nband_k,l1)*&
 &             eig1_k(2*iband  +(jband-1)*2*nband_k,l2))
            end do
          end do
@@ -1490,7 +1467,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  ABI_DEALLOCATE(Stp)
  ABI_DEALLOCATE(Kth)
 
- call hdr_free(hdr)
+ call hdr%free()
 
  end subroutine conducti_nc
 !!***
@@ -1533,15 +1510,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
 subroutine msig(fcti,npti,xi,filnam_out_sig)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'msig'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: npti
@@ -1551,7 +1519,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: npt=10000
+ integer :: npt = 10000
  integer :: ii,ip,npt1,npt2,eps_unt,abs_unt
  real(dp),parameter :: del=0.001_dp,ohmtosec=9.d11
  real(dp) :: dx,dx1,dx2,eps1,eps2,idel,komega,pole,refl,sigma2,xsum
@@ -1563,6 +1531,12 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 
 ! *********************************************************************************
 !BEGIN EXECUTABLE SECTION
+
+ if (npti > 12000) then
+   msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points." // &
+&        ch10 // " Reduce the conducti input npti, or implement a better interpolator!"
+   MSG_ERROR(msg)
+ end if
 
  write(std_out,'(2a)')ch10,'Calculate the principal value and related optical properties'
  write(std_out,'(a)')'following W.J. Thomson computer in physics vol 12 p94 1998 for '
@@ -1596,11 +1570,6 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  ABI_ALLOCATE(fctii,(npt))
  ABI_ALLOCATE(abso,(npt))
  ABI_ALLOCATE(nomega,(npt))
-
- if (npti > npt) then
-   write (std_out,*) 'msig: input npti is too large for hard coded npt array size = ', npt
-   MSG_ERROR("Aborting now")
- end if
 
 !loop on the initial energy grid
  do ip=1,npti
@@ -1641,6 +1610,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 !    MJV 6/12/2008:
 !    for each use of fctii should ensure that npt1 npt2 etc... are less than
 !    npt=len(fctii)
+! TODO: move to spline/splint routines with no memory limitation
      call intrpl(npti,xi,fctii,npt1,x1,fct4,fct1,fct5,1)
      call intrpl(npti,xi,fctii,npt2,x2,fct3,fct2,fct5,1)
 
@@ -1662,6 +1632,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
      xsum=xsum+half*(fct1(1)+fct1(npt1))*dx1+half*(fct2(1)+fct2(npt2))*dx2
 
 !    calculate the first and third derivative at the pole and add the taylor expansion
+! TODO: move to spline/splint routines with no memory limitation
      call intrpl(npti,xi,fctii,npti,xi,fct3,fct4,fct5,1)
      call intrpl(npti,xi,fct4,1,(/pole/),fp,fpp,fppp,1)
 
@@ -1770,15 +1741,6 @@ end subroutine msig
 
  subroutine emispec_paw(filnam,filnam_out,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'emispec_paw'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
@@ -1839,7 +1801,7 @@ end subroutine msig
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -2013,8 +1975,11 @@ end subroutine msig
  if (open_file(trim(filnam_out)//'_emisX',msg,newunit=ems_unt,form='formatted', action="write") /= 0) then
    MSG_ERROR(msg)
  end if
+ write(ems_unt,*) '# conducti: Xray emission spectrum, all in atomic units by default '
+ write(ems_unt,*) '# One block of 3 columns per core wavefunction'
+ write(ems_unt,*) '# energy, sigx_av, sigx, etc... '
  do iom=1,mom
-   write(ems_unt,'(9(1x,e15.8))') &
+   write(ems_unt,'( 3(3(1x,e15.8),2x) )') &
 &   ((-energy_cor(icor)+oml1(iom)),sigx_av(iom,icor),sigx(atnbr,iom,icor),icor=1,nphicor)
  end do
  close(ems_unt)
@@ -2032,7 +1997,7 @@ end subroutine msig
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine emispec_paw
 !!***

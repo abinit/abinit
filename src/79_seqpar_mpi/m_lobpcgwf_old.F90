@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lobpcgwf_old
 !! NAME
 !!   m_lobpcgwf_old
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +48,7 @@ contains
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! Copyright (C) 1998-2020 ABINIT group (FBottin,GZ,AR,MT,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,13 +67,14 @@ contains
 !!  nbdblock : number of blocks
 !!  npw_k=number of plane waves at this k point
 !!  prtvol=control print volume and debugging output
+!!  use_totvnlx=1 if one has to compute totvnlx
 !!
 !! OUTPUT
 !!  resid_k(nband_k)=residuals for each states
 !!  subham(nband_k*(nband_k+1))=the matrix elements of h
 !!  If gs_hamk%usepaw==0:
 !!    gsc(2,mgsc)=<g|s|c> matrix elements (s=overlap)
-!!    totvnl(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl
+!!    totvnlx(nband_k*use_totvnlx,nband_k*use_totvnlx)=the matrix elements of vnl+vfockACE
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions
@@ -91,10 +91,9 @@ contains
 !! SOURCE
 
 subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnl)
+&                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
 
 
- use defs_abitypes
  use defs_basis
  use m_abicore
  use m_lobpcg
@@ -103,23 +102,19 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_xmpi
  use m_errors
  use iso_c_binding
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_getghc,      only : getghc
  use m_prep_kgb,    only : prep_getghc
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcgwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: icg,igsc,mcg,mgsc,nband_k,nbdblock,npw_k,prtvol
+ integer,intent(in) :: icg,igsc,mcg,mgsc,nband_k,nbdblock,npw_k,prtvol,use_totvnlx
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(inout) :: mpi_enreg
@@ -127,7 +122,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  real(dp),intent(in) :: kinpw(npw_k)
  real(dp),intent(out) :: resid_k(nband_k)
  real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
- real(dp),intent(inout) :: totvnl((3-gs_hamk%istwf_k)*nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))
+ real(dp),intent(inout) :: totvnlx((3-gs_hamk%istwf_k)*nband_k*use_totvnlx,nband_k*use_totvnlx)
 
 !Local variables-------------------------------
  integer, parameter :: tim_getghc=5
@@ -146,7 +141,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  real(dp) :: zvar(2)
  logical :: havetoprecon
  real(dp) :: tsec(2)
- real(dp), allocatable :: gwavef(:,:),cwavef(:,:),gvnlc(:,:)
+ real(dp), allocatable :: gwavef(:,:),cwavef(:,:),gvnlxc(:,:)
  real(dp), allocatable :: swavef(:,:)
  real(dp), allocatable :: residualnorms(:),eigen(:)
  real(dp), allocatable :: tmpeigen(:)
@@ -234,7 +229,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use_lapack_gpu=use_linalg_gpu
 #endif
  if(use_linalg_gpu==1) then
-!  call gpu_linalg_init()
    call alloc_on_gpu(A_gpu,cplx*dp*vectsize*blocksize)
    call alloc_on_gpu(C_gpu,cplx*dp*vectsize*blocksize)
    call alloc_on_gpu(blockvectorr_gpu,cplx*dp*vectsize*blocksize)
@@ -352,7 +346,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
    ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
    ABI_ALLOCATE(gwavef,(2,npw_k*my_nspinor*blocksize))
-   ABI_ALLOCATE(gvnlc,(2,npw_k*my_nspinor*blocksize))
+   ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor*blocksize))
    ABI_ALLOCATE(swavef,(2,npw_k*my_nspinor*blocksize))
 
    call wfcopy('I',vectsize*blocksize,blockvectorx,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
@@ -368,10 +362,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    cpopt=-1;sij_opt=0;if (gen_eigenpb) sij_opt=1
 
    if (mpi_enreg%paral_kgb==0) then
-     call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlc,dum,&
+     call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlxc,dum,&
 &     mpi_enreg,blocksize,prtvol,sij_opt,tim_getghc,0)
    else
-     call prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,dum,blocksize,mpi_enreg,&
+     call prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,dum,blocksize,mpi_enreg,&
 &     prtvol,sij_opt,cpopt,cprj_dum,already_transposed=.false.)
    end if
    if(abs(dtset%timopt)==4) then
@@ -385,7 +379,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      call wfcopy('D',vectsize*blocksize,swavef,1,blockvectorbx,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
    else
-     call wfcopy('D',vectsize*blocksize,gvnlc,1,blockvectorvx,1,blocksize,iblock,'W',withbbloc=.false.,&
+     call wfcopy('D',vectsize*blocksize,gvnlxc,1,blockvectorvx,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
      call abi_xcopy(vectsize*blocksize,blockvectorx,1,blockvectorbx,1,x_cplx=x_cplx)
    end if
@@ -395,7 +389,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
    ABI_DEALLOCATE(cwavef)
    ABI_DEALLOCATE(gwavef)
-   ABI_DEALLOCATE(gvnlc)
+   ABI_DEALLOCATE(gvnlxc)
    ABI_DEALLOCATE(swavef)
 
    call abi_xorthonormalize(blockvectorx,blockvectorbx,blocksize,mpi_enreg%comm_bandspinorfft,gramxbx,vectsize,&
@@ -422,7 +416,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end if
    ABI_ALLOCATE(eigen,(blocksize))
 
-   call abi_xheev('v','u',blocksize,gramxax,eigen,x_cplx=cplx,istwf_k=istwf_k, &
+   call abi_xheev('v','u',blocksize,gramxax,blocksize,eigen,x_cplx=cplx,istwf_k=istwf_k, &
    timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
 
 !  blockvectorx=matmul(blockvectorx,gramxax)
@@ -568,7 +562,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
      ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
      ABI_ALLOCATE(gwavef,(2,npw_k*my_nspinor*blocksize))
-     ABI_ALLOCATE(gvnlc,(2,npw_k*my_nspinor*blocksize))
+     ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor*blocksize))
      ABI_ALLOCATE(swavef,(2,npw_k*my_nspinor*blocksize))
 
      call wfcopy('I',vectsize*blocksize,blockvectorr,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
@@ -584,10 +578,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      end if
 
      if (mpi_enreg%paral_kgb==0) then
-       call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlc,dum,&
+       call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlxc,dum,&
 &       mpi_enreg,blocksize,prtvol,sij_opt,tim_getghc,0)
      else
-       call prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,dum,blocksize,mpi_enreg,&
+       call prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,dum,blocksize,mpi_enreg,&
 &       prtvol,sij_opt,cpopt,cprj_dum,already_transposed=.false.)
      end if
 
@@ -603,7 +597,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &       timopt=timopt,tim_wfcopy=tim_wfcopy)
      else
        call abi_xcopy(vectsize*blocksize,blockvectorr,1,blockvectorbr,1,x_cplx=x_cplx)
-       call wfcopy('D',vectsize*blocksize,gvnlc,1,blockvectorvr,1,blocksize,iblock,'W',withbbloc=.false.,&
+       call wfcopy('D',vectsize*blocksize,gvnlxc,1,blockvectorvr,1,blocksize,iblock,'W',withbbloc=.false.,&
 &       timopt=timopt,tim_wfcopy=tim_wfcopy)
      end if
 
@@ -612,7 +606,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
      ABI_DEALLOCATE(cwavef)
      ABI_DEALLOCATE(gwavef)
-     ABI_DEALLOCATE(gvnlc)
+     ABI_DEALLOCATE(gvnlxc)
      ABI_DEALLOCATE(swavef)
 
      if(use_linalg_gpu==1) then
@@ -849,7 +843,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        ABI_ALLOCATE(tmpeigen,(bigorder))
        tmpgramb=gramb
 
-       call abi_xheev('v','u',bigorder,tmpgramb,tmpeigen,x_cplx=cplx,istwf_k=istwf_k, &
+       call abi_xheev('v','u',bigorder,tmpgramb,bigorder,tmpeigen,x_cplx=cplx,istwf_k=istwf_k, &
 &       timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
 
        condestgramb=tmpeigen(bigorder)/tmpeigen(1)
@@ -888,7 +882,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !    ################ END LOOP ON COND #########################################
 !    ###########################################################################
 
-     call abi_xhegv(1,'v','u',bigorder,grama,gramb,eigen,x_cplx=cplx,istwf_k=istwf_k, &
+     call abi_xhegv(1,'v','u',bigorder,grama,bigorder,gramb,bigorder,eigen,x_cplx=cplx,istwf_k=istwf_k, &
      timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
 
      deltae=-one
@@ -1169,8 +1163,8 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
    end if
 
-!  The Vnl part of the Hamiltonian is no more stored in the packed form such as it was the case for subvnl(:).
-!  Now, the full matrix is stored in totvnl(:,:). This trick permits:
+!  The Vnl+VFockACE part of the Hamiltonian is no more stored in the packed form such as it was the case for subvnlx(:).
+!  Now, the full matrix is stored in totvnlx(:,:). This trick permits:
 !  1) to avoid the reconstruction of the total matrix in vtowfk.F90 (double loop over bands)
 !  2) to use two optimized matrix-matrix blas routine for general (in lobpcgccwf.F90) or hermitian (in vtowfk.F90)
 !  operators, zgemm.f and zhemm.f respectively, rather than a triple loop in both cases.
@@ -1191,7 +1185,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    if (gs_hamk%usepaw==0) then
      ! MG FIXME: Here gfortran4.9 allocates temporary array for C in abi_d2zgemm.
      call abi_xgemm(cparam(cplx),'n',blocksize,iwavef,vectsize,cone,blockvectorvx,vectsize,&
-&     blockvectorz,vectsize,czero,totvnl(cplx*bblocksize+1:cplx*iwavef,1:iwavef),blocksize,x_cplx=x_cplx)
+&     blockvectorz,vectsize,czero,totvnlx(cplx*bblocksize+1:cplx*iwavef,1:iwavef),blocksize,x_cplx=x_cplx)
    end if
 
    do iblocksize=1,blocksize
@@ -1208,7 +1202,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end do
    ABI_DEALLOCATE(tsubham)
    ABI_DEALLOCATE(blockvectorz)
-!  comm for subham and subvnl are made in vtowfk
+!  comm for subham and subvnlx are made in vtowfk
 
    ABI_DEALLOCATE(pcon)
    ABI_DEALLOCATE(blockvectory)
@@ -1273,13 +1267,6 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  contains
 
    function gramindex(iblocksize)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gramindex'
-!End of the abilint section
 
    integer :: gramindex,iblocksize
    gramindex=(iblocksize-1)*cplx+1

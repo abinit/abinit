@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_tools
 !! NAME
 !!  m_paw_tools
@@ -7,7 +6,7 @@
 !!  This module contains miscelaneous routines used in the PAW context.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (FJ,MT)
+!! Copyright (C) 2018-2020 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,10 +22,10 @@
 MODULE m_paw_tools
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,EP_POSITRON
@@ -34,7 +33,8 @@ MODULE m_paw_tools
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_free, paw_ij_nullify, paw_ij_gather
  use m_pawdij,           only : pawdij_print_dij
- use m_pawrhoij,         only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify
+ use m_pawrhoij,         only : pawrhoij_type, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, &
+&                               pawrhoij_print_rhoij
  use m_paw_io,           only : pawio_print_ij
  use m_paw_sphharm,      only : mat_mlms2jmj, mat_slm2ylm
  use m_paw_correlations, only : setnoccmmp
@@ -83,15 +83,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkpawovlp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -247,13 +238,6 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
    function sqnrm_pawovlp(u1,u2,u3)
 !squared norm of a vector
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqnrm_pawovlp'
-!End of the abilint section
-
    real(dp) :: sqnrm_pawovlp
    real(dp),intent(in) :: u1,u2,u3
 
@@ -278,7 +262,7 @@ end subroutine chkpawovlp
 !! To be called at the end of the SCF cycle
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ,MT,BA)
+!! Copyright (C) 1998-2020 ABINIT group (FJ,MT,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -319,15 +303,6 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &                 electronpositron,& ! optional argument
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawprt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom
@@ -343,24 +318,21 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: natmax=2
- integer :: cplex_dij,group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,irhoij,ispden
- integer :: i_unitfi,itypat,jrhoij,ll,llp,me_atom,my_comm_atom,natprt,ndij,nspden,nsppol
- integer :: optsym,sz1,sz2,unitfi,unt
+ integer :: cplex_dij,group1,group2,iat,iatom,ierr,ii,im1,im2,ipositron,ispden
+ integer :: i_unitfi,itypat,ll,llp,me_atom,my_comm_atom,natprt,ndij,nspden,nsppol
+ integer :: unitfi,unt
  real(dp) :: mnorm,mx,my,mz,ntot,valmx,localm
- logical,parameter :: debug=.false.
  logical :: my_atmtab_allocated,paral_atom,useexexch,usepawu
  type(pawang_type):: pawang_dum
  character(len=7),parameter :: dspin1(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
  character(len=8),parameter :: dspin2(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
- character(len=9),parameter :: dspin3(6)=(/"up       ","down     ","up-up    ","down-down","Re[up-dn]","Im[up-dn]"/)
- character(len=500) :: msg0,msg
+ character(len=500) :: msg
 !arrays
  integer :: idum(1)
  integer :: idum1(0),idum3(0,0,0)
- integer,allocatable :: jatom(:),opt_l_index(:)
+ integer,allocatable :: jatom(:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
- real(dp),allocatable :: rhoijs(:,:)
  complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
  type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
  type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
@@ -404,8 +376,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  else
    MSG_BUG("invalid value of natprt!")
  end if
- usepawu=(count(pawtab(:)%usepawu>0)>0)
- useexexch=(count(pawtab(:)%useexexch>0)>0)
+ usepawu=(count(pawtab(:)%usepawu/=0)>0)
+ useexexch=(count(pawtab(:)%useexexch/=0)>0)
  ipositron=0
  if (present(electronpositron)) then
    if (associated(electronpositron)) ipositron=electronpositron%calctype
@@ -459,9 +431,8 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
          do iat=1,natprt
            iatom=jatom(iat)
            call pawdij_print_dij(paw_ij_all(iatom)%dij,paw_ij_all(iatom)%cplex_dij,&
-&                  paw_ij_all(iatom)%cplex_rf,iatom,dtset%natom,paw_ij_all(iatom)%nspden,&
-&                  paw_ij_all(iatom)%nsppol,test_value=valmx,unit=unitfi,&
-&                  Ha_or_eV=unt,opt_prtvol=dtset%pawprtvol)
+&                  paw_ij_all(iatom)%qphase,iatom,dtset%natom,paw_ij_all(iatom)%nspden,&
+&                  test_value=valmx,unit=unitfi,Ha_or_eV=unt,opt_prtvol=dtset%pawprtvol)
          end do
        end if
        msg=' '
@@ -504,29 +475,19 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        end if
        call wrtout(unitfi,msg,'COLL')
      end if
-     if (dtset%pawspnorb>0.and.pawrhoij_all(1)%cplex==1.and.dtset%kptopt/=1.and.dtset%kptopt/=2) then
+     if (dtset%pawspnorb>0.and.pawrhoij_all(1)%cplex_rhoij==1.and.dtset%kptopt/=1.and.dtset%kptopt/=2) then
        write(msg,'(6a)') ' pawprt: - WARNING:',ch10,&
 &       '       Spin-orbit coupling is activated but only real part of Rhoij occupancies',ch10,&
 &       '       has been computed; they could have an imaginary part (not printed here).'
        call wrtout(unitfi,msg,'COLL')
      end if
+     valmx=25._dp;if (ipositron>0) valmx=-1._dp
      do iat=1,natprt
        iatom=jatom(iat);nspden=pawrhoij_all(iatom)%nspden
-       optsym=2;if (pawrhoij_all(iatom)%cplex==2.and.dtset%nspinor==1) optsym=1
-       do ispden=1,nspden
-         valmx=-1._dp;if (ispden==1) valmx=25._dp
-         msg='' ; msg0=''
-         if (dtset%natom>1.or.nspden>1) write(msg0, '(a,i3)' ) ' Atom #',iatom
-         if (nspden==1) write(msg,'(a)')     trim(msg0)
-         if (nspden==2) write(msg,'(2a,i1)') trim(msg0),' - Spin component ',ispden
-         if (nspden==4) write(msg,'(3a)')    trim(msg0),' - Component ',dspin2(ispden+2*(nspden/4))
-         if (dtset%natom>1.or.nspden>1) then
-           call wrtout(unitfi,msg,'COLL')
-         end if
-         call pawio_print_ij(unitfi,pawrhoij_all(iatom)%rhoijp(:,ispden),pawrhoij_all(iatom)%nrhoijsel,&
-&         pawrhoij_all(iatom)%cplex,pawrhoij_all(iatom)%lmn_size,-1,idum,1,dtset%pawprtvol,&
-&         pawrhoij_all(iatom)%rhoijselect(:),valmx,1,opt_sym=optsym)
-       end do
+       call pawrhoij_print_rhoij(pawrhoij_all(iatom)%rhoijp,pawrhoij_all(iatom)%cplex_rhoij,&
+&                    pawrhoij_all(iatom)%qphase,iatom,dtset%natom,&
+&                    rhoijselect=pawrhoij_all(iatom)%rhoijselect,&
+&                    test_value=valmx,unit=unitfi,opt_prtvol=dtset%pawprtvol)
      end do
      msg=' '
      call wrtout(unitfi,msg,'COLL')
@@ -534,7 +495,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  end if
 
 !PAW+U or local exact-exchange: print out +U components of occupancies
-!-------------------------------------------------------------------------------
+!---------------------------------------------------------------------
  if ((usepawu.or.useexexch).and.ipositron/=1.and.me_atom==0) then
    do i_unitfi=1,2
      unitfi=ab_out;if (i_unitfi==2) unitfi=std_out
@@ -543,67 +504,25 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      if(usepawu) write(msg,'(a)') &
 &     ' "PAW+U" part of augmentation waves occupancies Rhoij:'
      call wrtout(unitfi,msg,'COLL')
-     valmx=-1._dp
      do iatom=1,dtset%natom
-       nspden=pawrhoij_all(iatom)%nspden;itypat=dtset%typat(iatom)
-       cplex_dij=paw_ij_all(iatom)%cplex_dij
-       ll=-1;llp=-1
-       if (pawtab(itypat)%usepawu>0) ll=pawtab(itypat)%lpawu
-       if (pawtab(itypat)%useexexch>0) llp=pawtab(itypat)%lexexch
+       itypat=pawrhoij_all(iatom)%itypat
+       nspden=pawrhoij_all(iatom)%nspden
+       ll=-1;if (pawtab(itypat)%usepawu/=0) ll=pawtab(itypat)%lpawu
+       llp=-1;if (pawtab(itypat)%useexexch/=0) llp=pawtab(itypat)%lexexch
        if (ll/=llp.and.ll/=-1.and.llp/=-1) then
-         MSG_BUG(" lpawu/=lexexch forbidden!")
+         MSG_BUG("lpawu/=lexexch forbidden!")
        end if
-       ABI_ALLOCATE(opt_l_index, (pawtab(itypat)%lmn_size))
        ll=max(ll,llp)
        if (ll>=0) then
-         optsym=2;if (pawrhoij_all(iatom)%cplex==2.and.dtset%nspinor==1) optsym=1
-         do ispden=1,nspden
-           msg='' ; msg0=''
-           write(msg0,'(a,i3,a,i1,a)') ' Atom #',iatom,' - L=',ll,' ONLY'
-           if (nspden==1) write(msg,'(a)')     trim(msg0)
-           if (nspden==2) write(msg,'(2a,i1)') trim(msg0),' - Spin component ',ispden
-           if (nspden==4) write(msg,'(3a)')    trim(msg0),' - Component ',dspin2(ispden+2*(nspden/4))
-           call wrtout(unitfi,msg,'COLL')
-
-           opt_l_index = pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size)
-           call pawio_print_ij(unitfi,pawrhoij_all(iatom)%rhoijp(:,ispden),pawrhoij_all(iatom)%nrhoijsel,&
-&           pawrhoij_all(iatom)%cplex,pawrhoij_all(iatom)%lmn_size,ll,&
-&           opt_l_index,1,dtset%pawprtvol,&
-&           pawrhoij_all(iatom)%rhoijselect(:),valmx,1,opt_sym=optsym)
-
-         end do
-         if (debug.and.nspden==4) then
-           sz1=paw_ij_all(iatom)%lmn2_size*cplex_dij
-           sz2=paw_ij_all(iatom)%ndij
-           ABI_ALLOCATE(rhoijs,(sz1,sz2))
-           do irhoij=1,pawrhoij_all(iatom)%nrhoijsel
-             jrhoij=cplex_dij*(irhoij-1)+1
-             rhoijs(jrhoij,1)=pawrhoij_all(iatom)%rhoijp(jrhoij,1)+pawrhoij_all(iatom)%rhoijp(jrhoij,4)
-             rhoijs(jrhoij+1,1)=pawrhoij_all(iatom)%rhoijp(jrhoij+1,1)+pawrhoij_all(iatom)%rhoijp(jrhoij+1,4)
-             rhoijs(jrhoij,2)=pawrhoij_all(iatom)%rhoijp(jrhoij,1)-pawrhoij_all(iatom)%rhoijp(jrhoij,4)
-             rhoijs(jrhoij+1,2)=pawrhoij_all(iatom)%rhoijp(jrhoij+1,1)-pawrhoij_all(iatom)%rhoijp(jrhoij+1,4)
-             rhoijs(jrhoij,3)=pawrhoij_all(iatom)%rhoijp(jrhoij,2)+pawrhoij_all(iatom)%rhoijp(jrhoij+1,3)
-             rhoijs(jrhoij+1,3)=pawrhoij_all(iatom)%rhoijp(jrhoij+1,2)-pawrhoij_all(iatom)%rhoijp(jrhoij,3)
-             rhoijs(jrhoij,4)=pawrhoij_all(iatom)%rhoijp(jrhoij ,2)-pawrhoij_all(iatom)%rhoijp(jrhoij+1,3)
-             rhoijs(jrhoij+1,4)=pawrhoij_all(iatom)%rhoijp(jrhoij+1,2)+pawrhoij_all(iatom)%rhoijp(jrhoij,3)
-           end do
-           do ispden=1,nspden
-             write(msg,'(3a)') trim(msg0),' - Component ',dspin1(ispden+2*(nspden/4))
-             opt_l_index = pawtab(itypat)%indlmn(1,1:pawtab(itypat)%lmn_size)
-
-             call pawio_print_ij(unitfi,rhoijs(:,ispden),pawrhoij_all(iatom)%nrhoijsel,&
-&             pawrhoij_all(iatom)%cplex,pawrhoij_all(iatom)%lmn_size,ll,&
-&             opt_l_index,1,dtset%pawprtvol,&
-&             pawrhoij_all(iatom)%rhoijselect(:),valmx,1,opt_sym=optsym)
-
-             call wrtout(unitfi,"WARNING: half of the array is not correct",'COLL')
-           end do
-           ABI_DEALLOCATE(rhoijs)
-         end if
+         call pawrhoij_print_rhoij(pawrhoij_all(iatom)%rhoijp,pawrhoij_all(iatom)%cplex_rhoij,&
+&                      pawrhoij_all(iatom)%qphase,iatom,dtset%natom,&
+&                      rhoijselect=pawrhoij_all(iatom)%rhoijselect,&
+&                      l_only=ll,indlmn=pawtab(itypat)%indlmn,&
+&                      unit=unitfi,opt_prtvol=dtset%pawprtvol)
        end if
-       ABI_DEALLOCATE(opt_l_index)
      end do ! iatom
-     call wrtout(unitfi,' ','COLL')
+     msg=' '
+     call wrtout(unitfi,msg,'COLL')
    end do
  end if
 
@@ -619,7 +538,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lpawu
        nspden=paw_ij_all(iatom)%nspden;ndij=paw_ij_all(iatom)%ndij
        cplex_dij=paw_ij_all(iatom)%cplex_dij
-       if ((ll>=0).and.(pawtab(itypat)%usepawu>0)) then
+       if ((ll>=0).and.(pawtab(itypat)%usepawu/=0)) then
          write(msg,fmt='(a,i5,a,i4,a)') " ====== For Atom ", iatom,&
 &         ", occupations for correlated orbitals. lpawu =",ll,ch10
          call wrtout(unitfi,msg,'COLL')
@@ -724,7 +643,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
            ABI_DEALLOCATE(noccmmp_ylm)
            ABI_DEALLOCATE(noccmmp_slm)
          end if ! ndij==4
-       end if ! ((ll>=0).and.(pawtab(itypat)%usepawu>0))
+       end if ! ((ll>=0).and.(pawtab(itypat)%usepawu/=0))
      end do
    end do
  end if
@@ -736,7 +655,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    do iatom=1,dtset%natom
      itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
      cplex_dij=paw_ij_all(iatom)%cplex_dij
-     if (ll>=0.and.pawtab(itypat)%useexexch>0) then
+     if (ll>=0.and.pawtab(itypat)%useexexch/=0) then
        ABI_ALLOCATE(paw_ij_all(iatom)%noccmmp,(cplex_dij,2*ll+1,2*ll+1,ndij))
        ABI_ALLOCATE(paw_ij_all(iatom)%nocctot,(nspden))
      end if
@@ -751,7 +670,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      do iatom=1,dtset%natom
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lexexch
        cplex_dij=paw_ij_all(iatom)%cplex_dij
-       if ((ll>=0).and.(pawtab(itypat)%useexexch>0)) then
+       if ((ll>=0).and.(pawtab(itypat)%useexexch/=0)) then
          write(msg,fmt='(a,i5,a,i4,a)') " ====== For Atom",iatom,&
 &         ", occupations for correlated orbitals. l =",ll,ch10
          call wrtout(unitfi,msg,'COLL')

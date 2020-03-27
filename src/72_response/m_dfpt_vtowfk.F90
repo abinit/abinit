@@ -1,13 +1,11 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_vtowfk
 !! NAME
 !!  m_dfpt_vtowfk
 !!
 !! FUNCTION
 !!
-!!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,17 +25,19 @@
 module m_dfpt_vtowfk
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_cgtools
  use m_wfk
  use m_rf2
- use m_rf2_init,         only : rf2_init
+ use m_dtset
+ use m_dtfil
 
- use m_dtfil,        only : status
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
+ use m_rf2_init,     only : rf2_init
  use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby
@@ -58,16 +58,6 @@ module m_dfpt_vtowfk
 contains
 !!***
 
-
-
-
-
-
-
-
-
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/dfpt_vtowfk
 !! NAME
 !! dfpt_vtowfk
@@ -99,7 +89,7 @@ contains
 !!  icgq=shift to be applied on the location of data in the array cgq
 !!  icg1=shift to be applied on the location of data in the array cg1
 !!  idir=direction of the current perturbation
-!!  ikpt=number of the k-point
+!!  ikpt=k-point index number
 !!  ipert=type of the perturbation
 !!  isppol=1 index of current spin component
 !!  mband=maximum number of bands
@@ -189,15 +179,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
 & ddk_f,wtk_k,nlines_done,cg1_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_vtowfk'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,dim_eig2rf,ibg
@@ -241,9 +222,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !scalars
  integer,parameter :: level=14,tim_fourwf=5
  integer,save :: nskip=0
- integer :: counter,iband,idir0,ierr,iexit,igs,igscq,ii,dim_dcwf,inonsc
+ integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
- integer :: option,opt_gvnl1,quit,test_ddk
+ integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
  character(len=500) :: message
@@ -252,7 +233,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:)
- real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnl1(:,:),gvnlc(:,:)
+ real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnlx1(:,:),gvnlxc(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
 
@@ -280,8 +261,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  kinpw1 => gs_hamkq%kinpw_kp
  ABI_ALLOCATE(gh0c1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlc,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw1_k*nspinor))
+ ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
  ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
  ABI_ALLOCATE(cwave1,(2,npw1_k*nspinor))
@@ -293,7 +274,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  end if
 
 !Read the npw and kg records of wf files
- call status(0,dtfil%filstat,iexit,level,'before WffRead')
  test_ddk=0
  if ((ipert==natom+2.and.sum((dtset%qptn(1:3))**2)<1.0d-7.and.&
 & (dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
@@ -309,8 +289,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !  1-Compute all <g|S|Cnk+q>
    igscq=0
    mgscq=mpw1*nspinor*mband
-   ABI_STAT_ALLOCATE(gscq,(2,mgscq), ierr)
-   ABI_CHECK(ierr==0, "out of memory in gscq")
+   ABI_MALLOC_OR_DIE(gscq,(2,mgscq), ierr)
 
    call getgsc(cgq,cprjq,gs_hamkq,gscq,ibgq,icgq,igscq,ikpt,isppol,mcgq,mcprjq,&
 &   mgscq,mpi_enreg,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
@@ -396,9 +375,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
    if(test_ddk==1) then
-     ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
-     ABI_CHECK(ii == ikpt, "ii != ikpt")
-     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=gvnl1)
+     ii = ddk_f(1)%findk(gs_hamkq%kpt_k)
+     ABI_CHECK(ii == ikpt, "ii != ikpt, something is wrong with k-point, check kptopt/ngkpt, etc")
+     call ddk_f(1)%read_bks(iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,
@@ -409,12 +388,12 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !    This change will affect the computation of the 2dtes from non
 !    stationary expressions, see dfpt_nstdy.f and dfpt_nstwf.f
      do ipw=1,npw1_k*nspinor
-!      aa=gvnl1(1,ipw)
-!      gvnl1(1,ipw)=gvnl1(2,ipw)
-!      gvnl1(2,ipw)=-aa
-       aa=gvnl1(1,ipw)
-       gvnl1(1,ipw)=-gvnl1(2,ipw)
-       gvnl1(2,ipw)=aa
+!      aa=gvnlx1(1,ipw)
+!      gvnlx1(1,ipw)=gvnlx1(2,ipw)
+!      gvnlx1(2,ipw)=-aa
+       aa=gvnlx1(1,ipw)
+       gvnlx1(1,ipw)=-gvnlx1(2,ipw)
+       gvnlx1(2,ipw)=aa
      end do
    end if
 
@@ -423,21 +402,19 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !  (often 1 for SCF calculation, =nstep for non-SCF calculations)
    do inonsc=1,nnsclo_now
 
-     counter=100*iband+inonsc
-
 !    Note that the following translation occurs in the called routine :
 !    iband->band, nband_k->nband, npw_k->npw, npw1_k->npw1
      eig0nk=eig0_k(iband)
      usedcwavef=gs_hamkq%usepaw;if (dim_dcwf==0) usedcwavef=0
      if (inonsc==1) usedcwavef=2*usedcwavef
-     opt_gvnl1=0;if (ipert==natom+2) opt_gvnl1=1
-     if (ipert==natom+2.and.gs_hamkq%usepaw==1.and.inonsc==1) opt_gvnl1=2
+     opt_gvnlx1=0;if (ipert==natom+2) opt_gvnlx1=1
+     if (ipert==natom+2.and.gs_hamkq%usepaw==1.and.inonsc==1) opt_gvnlx1=2
 
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        call dfpt_cgwf(iband,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwavef,&
-&       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlc,gvnl1,icgq,&
+&       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
 &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,dtset%nbdbuf,dtset%nline,&
-&       npw_k,npw1_k,nspinor,opt_gvnl1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+&       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
 &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
        resid_k(iband)=resid
      else
@@ -502,14 +479,14 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        eeig0_k(iband)=-energy_factor*(eig0_k(iband)- (dtset%dfpt_sciss) )*scprod
 
 !      Compute nonlocal psp contributions to nonlocal energy:
-!      <G|Vnl|C1nk(perp)> is contained in gvnlc (with cwavef)
-       call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gvnlc,mpi_enreg%me_g0,&
+!      <G|Vnl+VFockACE|C1nk(perp)> is contained in gvnlxc (with cwavef)
+       call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gvnlxc,mpi_enreg%me_g0,&
 &       mpi_enreg%comm_spinorfft)
        enl0_k(iband)=energy_factor*scprod
 
        if(ipert/=natom+10.and.ipert/=natom+11) then
-!        <G|Vnl1|Cnk> is contained in gvnl1 (with cwave1)
-         call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnl1,mpi_enreg%me_g0,&
+!        <G|Vnl1|Cnk> is contained in gvnlx1 (with cwave1)
+         call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnlx1,mpi_enreg%me_g0,&
 &         mpi_enreg%comm_spinorfft)
          enl1_k(iband)=two*energy_factor*scprod
        end if
@@ -524,9 +501,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !   BUGFIX from Max Stengel: need to initialize eloc at each inonsc iteration, in case nnonsc > 1
        eloc0_k(iband) = zero
        option=2;if (iscf_mod>0.and.inonsc==nnsclo_now) option=3
-       call dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,eloc0_k(iband),&
-&       dtfil%filstat,gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,natom,nband_k,ncpgr,&
-&       npw_k,npw1_k,nspinor,occ_k,option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,tocceig,wtk_k)
+       call dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,eloc0_k(iband),&
+&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,natom,nband_k,ncpgr,&
+&       npw_k,npw1_k,nspinor,occ_k,option,pawrhoij1,rhoaug1,tim_fourwf,tocceig,wtk_k)
        if(ipert==natom+10.or.ipert==natom+11) eloc0_k(iband)=energy_factor*eloc0_k(iband)/two
 
        if(ipert==natom+10.or.ipert==natom+11) then
@@ -588,8 +565,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(cwave1)
  ABI_DEALLOCATE(gh0c1)
- ABI_DEALLOCATE(gvnlc)
- ABI_DEALLOCATE(gvnl1)
+ ABI_DEALLOCATE(gvnlxc)
+ ABI_DEALLOCATE(gvnlx1)
  ABI_DEALLOCATE(gh1c_n)
 
  if (gs_hamkq%usepaw==1) then
@@ -608,20 +585,19 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !###################################################################
 
-!Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
- if(iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max))then
+ ! Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers)
+ if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
    write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
    call wrtout(std_out,message,'PERS')
  end if
 
- if(prtvol<=2 .and. ikpt==nkpt_max+1)then
+ if (prtvol<=2 .and. ikpt==nkpt_max+1) then
    write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
    call wrtout(std_out,message,'PERS')
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
-   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,&
-&   ikpt,' max resid=',residk
+   write(message,'(a,2i0,a,es13.5)')'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
    MSG_WARNING(message)
  end if
 
@@ -688,15 +664,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 &               iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,&
 &               nspinor,timcount,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'full_active_wf1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband,ibgq,icgq,mcgq,mcprjq,natom,nband,npw1,nspinor,timcount,usepaw
@@ -714,14 +681,14 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 !Local variables-------------------------------
 !scalars
  integer :: ibandkq,index_cgq,index_cprjq,index_eig1,ii
- real(dp) :: facti,factr,invocc,eta,delta_E,inv_delta_E,gkkr
+ real(dp) :: facti,factr,eta,delta_E,inv_delta_E,gkkr
 !arrays
  real(dp) :: tsec(2)
- real(dp),allocatable :: cwcorr(:,:)
 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+ ABI_UNUSED(mpi_enreg%comm_cell)
 
  call timab(214+timcount,1,tsec)
 
@@ -834,15 +801,6 @@ end subroutine full_active_wf1
 subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fermie1,ghc,iband, &
 &          ibgq,icgq,istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,nspinor,occ,rocceig,timcount,&
 &          usepaw,wf_corrected)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'corrmetalwf1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -53,13 +53,12 @@ w90iniprj2 1
  vdw_typfrag2 1 
  vdw_supercell2 3 3 3 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t12.out, tolnlines = 6, tolabs = 6.0e-5, tolrel = 1.1, fld_options = -medium
+#%%   t12.out, tolnlines = 6, tolabs = 9.0e-5, tolrel = 1.1, fld_options = -medium
 #%% psp_files = 18ar.revpbe 
 #%% [shell]
 #%% pre_commands = iw_cp t12_w90.win w90.win

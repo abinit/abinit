@@ -1,8 +1,8 @@
 
-.Version 8.1.5 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  7 Dec 2016.
-- ( at 20h15 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h14 )
   
-- input  file    -> t48.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t48/t48.in
 - output file    -> t48.out
 - root for input  files -> t48i
 - root for output files -> t48o
@@ -43,8 +43,8 @@ P              Additional     real(dp)  numbers, for      0.319 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 3.206 Mbytes.
-P Main chain + nonlop.f + opernl.f      2.890 Mbytes.
+P Main chain + fourwf.f                 3.165 Mbytes.
+P Main chain + nonlop.f + opernl.f      2.849 Mbytes.
 P XC chain                              3.358 Mbytes.
 P mkrho chain                           2.555 Mbytes.
 P fourdp chain                          2.351 Mbytes.
@@ -113,7 +113,16 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 1, mband: 5, nsppol: 2, nspinor: 1, nspden: 2, mpw: 338, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   2.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 4, optcell: 0, iscf: 2, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -131,8 +140,8 @@ P           mkmem           1
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -143,7 +152,7 @@ P           mkmem           1
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -165,6 +174,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
+tolerances: {toldff: 1.00E-05, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
@@ -491,9 +506,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.10417578E-04  sigma(3 1)= -1.89394417E-08
   sigma(3 3)=  1.10411942E-04  sigma(2 1)= -1.24359081E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -6.863E-08, res2:  1.638E-04, residm:  5.848E-10, diffor:  4.464E-06, }
+etotal    :  -8.67163154E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.72123034E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.36871894E-04,  -1.24359081E-08,  -1.89394417E-08, ]
+- [ -1.24359081E-08,   1.10417578E-04,  -1.91452067E-09, ]
+- [ -1.89394417E-08,  -1.91452067E-09,   1.10411942E-04, ]
+pressure_GPa:  -3.5080E+00
+xred      :
+- [ -1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
+- [  1.7683E-01,   0.0000E+00,   0.0000E+00, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.77488666E-02,  -2.31900114E-06,  -3.53916270E-06, ]
+- [  1.77488666E-02,   2.31900114E-06,   3.53916270E-06, ]
+force_length_stats: {min:   1.77488671E-02, max:   1.77488671E-02, mean:   1.77488671E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.951584     0.610110      1.561693     0.341474
     2   2.00000     0.951533     0.610161      1.561693     0.341372
@@ -522,6 +566,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
+tolerances: {toldff: 1.00E-05, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
@@ -943,9 +993,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   nstep=   17 was not enough SCF cycles to converge;
   maximum force difference=  1.115E-05 exceeds toldff=  1.000E-05
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -9.166E-09, res2:  1.663E-05, residm:  2.061E-10, diffor:  1.115E-05, }
+etotal    :  -8.67317545E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.85141796E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.53665561E-04,   3.68690299E-10,   5.31829472E-10, ]
+- [  3.68690299E-10,   1.11207632E-04,   8.49329141E-14, ]
+- [  5.31829472E-10,   8.49329141E-14,   1.11207610E-04, ]
+pressure_GPa:  -4.6689E+00
+xred      :
+- [ -1.8468E-01,  -2.2704E-07,  -3.2717E-07, Si]
+- [  1.8468E-01,   2.2704E-07,   3.2717E-07, Si]
+cartesian_forces: # hartree/bohr
+- [ -3.14188832E-05,   6.70232727E-08,   9.66457844E-08, ]
+- [  3.14188832E-05,  -6.70232727E-08,  -9.66457844E-08, ]
+force_length_stats: {min:   3.14191033E-05, max:   3.14191033E-05, mean:   3.14191033E-05, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941832     0.605257      1.547089     0.336575
     2   2.00000     0.941832     0.605257      1.547089     0.336575
@@ -978,6 +1057,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
+tolerances: {toldff: 1.00E-05, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
@@ -1052,9 +1137,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11131745E-04  sigma(3 1)=  3.35809422E-10
   sigma(3 3)=  1.11131746E-04  sigma(2 1)=  2.32981891E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -2.677E-10, res2:  1.443E-07, residm:  7.489E-12, diffor:  6.074E-07, }
+etotal    :  -8.67317545E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.85028302E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.53815100E-04,   2.32981891E-10,   3.35809422E-10, ]
+- [  2.32981891E-10,   1.11131745E-04,  -5.65165543E-15, ]
+- [  3.35809422E-10,  -5.65165543E-15,   1.11131746E-04, ]
+pressure_GPa:  -4.6689E+00
+xred      :
+- [ -1.8468E-01,  -2.2704E-07,  -3.2717E-07, Si]
+- [  1.8468E-01,   2.2704E-07,   3.2717E-07, Si]
+cartesian_forces: # hartree/bohr
+- [ -2.63520431E-05,   7.21605405E-08,   1.03999882E-07, ]
+- [  2.63520431E-05,  -7.21605405E-08,  -1.03999882E-07, ]
+force_length_stats: {min:   2.63523471E-05, max:   2.63523471E-05, mean:   2.63523471E-05, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941827     0.605256      1.547083     0.336570
     2   2.00000     0.941827     0.605256      1.547083     0.336570
@@ -1087,6 +1201,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
+tolerances: {toldff: 1.00E-05, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
@@ -1170,9 +1290,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11146841E-04  sigma(3 1)=  2.90784323E-10
   sigma(3 3)=  1.11146828E-04  sigma(2 1)=  2.01782186E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.262E-09, res2:  1.251E-07, residm:  4.745E-11, diffor:  5.661E-06, }
+etotal    :  -8.67317546E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.84955829E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.53884639E-04,   2.01782186E-10,   2.90784323E-10, ]
+- [  2.01782186E-10,   1.11146841E-04,   0.00000000E+00, ]
+- [  2.90784323E-10,   0.00000000E+00,   1.11146828E-04, ]
+pressure_GPa:  -4.6699E+00
+xred      :
+- [ -1.8468E-01,  -1.9242E-07,  -2.7727E-07, Si]
+- [  1.8468E-01,   1.9242E-07,   2.7727E-07, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.39939874E-05,   5.96654506E-08,   8.59806257E-08, ]
+- [  1.39939874E-05,  -5.96654506E-08,  -8.59806257E-08, ]
+force_length_stats: {min:   1.39943787E-05, max:   1.39943787E-05, mean:   1.39943787E-05, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941823     0.605249      1.547072     0.336573
     2   2.00000     0.941823     0.605249      1.547072     0.336573
@@ -1205,6 +1354,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 5, icycle: 1, }
+solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
+tolerances: {toldff: 1.00E-05, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
@@ -1279,9 +1434,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11135379E-04  sigma(3 1)=  2.98381981E-10
   sigma(3 3)=  1.11135380E-04  sigma(2 1)=  2.07064451E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.659E-12, res2:  4.066E-10, residm:  3.706E-14, diffor:  1.666E-07, }
+etotal    :  -8.67317546E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.84952873E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.53903839E-04,   2.07064451E-10,   2.98381981E-10, ]
+- [  2.07064451E-10,   1.11135379E-04,   0.00000000E+00, ]
+- [  2.98381981E-10,   0.00000000E+00,   1.11135380E-04, ]
+pressure_GPa:  -4.6698E+00
+xred      :
+- [ -1.8468E-01,  -1.9242E-07,  -2.7727E-07, Si]
+- [  1.8468E-01,   1.9242E-07,   2.7727E-07, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.32400171E-05,   6.21249585E-08,   8.95224213E-08, ]
+- [  1.32400171E-05,  -6.21249585E-08,  -8.95224213E-08, ]
+force_length_stats: {min:   1.32404654E-05, max:   1.32404654E-05, mean:   1.32404654E-05, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941823     0.605250      1.547073     0.336573
     2   2.00000     0.941823     0.605250      1.547073     0.336573
@@ -1314,6 +1498,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 6, icycle: 1, }
+solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
+tolerances: {toldff: 1.00E-05, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
@@ -1397,9 +1587,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11141930E-04  sigma(3 1)=  2.46949354E-10
   sigma(3 3)=  1.11141920E-04  sigma(2 1)=  1.71373617E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 6, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -3.100E-10, res2:  3.096E-08, residm:  1.094E-11, diffor:  2.842E-06, }
+etotal    :  -8.67317546E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.84914167E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.53943212E-04,   1.71373617E-10,   2.46949354E-10, ]
+- [  1.71373617E-10,   1.11141930E-04,   0.00000000E+00, ]
+- [  2.46949354E-10,   0.00000000E+00,   1.11141920E-04, ]
+pressure_GPa:  -4.6704E+00
+xred      :
+- [ -1.8469E-01,  -1.6292E-07,  -2.3477E-07, Si]
+- [  1.8469E-01,   1.6292E-07,   2.3477E-07, Si]
+cartesian_forces: # hartree/bohr
+- [ -6.89709269E-06,   5.06622274E-08,   7.30043276E-08, ]
+- [  6.89709269E-06,  -5.06622274E-08,  -7.30043276E-08, ]
+force_length_stats: {min:   6.89766510E-06, max:   6.89766510E-06, mean:   6.89766510E-06, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941822     0.605247      1.547068     0.336575
     2   2.00000     0.941822     0.605247      1.547068     0.336575
@@ -1432,6 +1651,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 7, icycle: 1, }
+solver: {iscf: 2, nstep: 17, nline: 3, wfoptalg: 0, }
+tolerances: {toldff: 1.00E-05, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
@@ -1506,9 +1731,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11136401E-04  sigma(3 1)=  2.52966715E-10
   sigma(3 3)=  1.11136402E-04  sigma(2 1)=  1.75549692E-10
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 7, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -4.921E-13, res2:  9.335E-11, residm:  1.009E-14, diffor:  8.451E-08, }
+etotal    :  -8.67317546E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.84912949E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.53952393E-04,   1.75549692E-10,   2.52966715E-10, ]
+- [  1.75549692E-10,   1.11136401E-04,   0.00000000E+00, ]
+- [  2.52966715E-10,   0.00000000E+00,   1.11136402E-04, ]
+pressure_GPa:  -4.6703E+00
+xred      :
+- [ -1.8469E-01,  -1.6292E-07,  -2.3477E-07, Si]
+- [  1.8469E-01,   1.6292E-07,   2.3477E-07, Si]
+cartesian_forces: # hartree/bohr
+- [ -6.52290392E-06,   5.26302485E-08,   7.58400618E-08, ]
+- [  6.52290392E-06,  -5.26302485E-08,  -7.58400618E-08, ]
+force_length_stats: {min:   6.52355710E-06, max:   6.52355710E-06, mean:   6.52355710E-06, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941822     0.605247      1.547069     0.336575
     2   2.00000     0.941822     0.605247      1.547069     0.336575
@@ -1544,7 +1798,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.0899E-15; max=  1.0088E-14
+ Mean square residual over all n,k,spin=   50.899E-16; max=  10.088E-15
    0.0000  0.0000  0.0000    1  1.00881E-14 kpt; spin; max resid(k); each band:
   1.01E-14 2.77E-16 1.01E-14 5.30E-16 5.30E-16
    0.0000  0.0000  0.0000    2  9.52137E-15 kpt; spin; max resid(k); each band:
@@ -1616,21 +1870,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
       Minimum=   -6.8137E-02  at reduced coord.    0.0000    0.5000    0.5000
  Next minimum=   -6.7220E-02  at reduced coord.    0.5000    0.5000    0.5000
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, itime: 7, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.53917295910779E+00
+hartree             :  1.45930961799800E+00
+xc                  : -3.21819313748285E+00
+Ewald energy        : -5.59010278084875E+00
+psp_core            :  2.98722879456821E-02
+local_psp           : -5.84102917056583E+00
+non_local_psp       :  1.94779476724118E+00
+total_energy        : -8.67317545660478E+00
+total_energy_eV     : -2.36009106634803E+02
+band_energy         : -1.35344908770407E+00
+...
 
-    Kinetic energy  =  2.53917295910779E+00
-    Hartree energy  =  1.45930961799800E+00
-    XC energy       = -3.21819313748285E+00
-    Ewald energy    = -5.59010278084875E+00
-    PspCore energy  =  2.98722879456821E-02
-    Loc. psp. energy= -5.84102917056583E+00
-    NL   psp  energy=  1.94779476724118E+00
-    >>>>>>>>> Etotal= -8.67317545660478E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.36009106634803E+02 ; Band energy (Ha)=  -1.3534490877E+00
---------------------------------------------------------------------------------
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -1735,7 +1989,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1746,48 +2017,45 @@ P           mkmem           1
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.7
+- Proc.   0 individual time (sec): cpu=          7.8  wall=         11.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.7
+.Delivered  11 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.8  wall=         11.0

@@ -4,47 +4,32 @@
 ##############################################################################
 prt_model = 0
 
-#---------------------------------------------------------------
-#Generation of the IFC
-#---------------------------------------------------------------
-#dipdip = 0
-#dipdip_prt = 1
-
-#---------------------------------------------------------------
-#Inputs for the fitted coefficients
-#---------------------------------------------------------------
-#ncoeff = 4
-#coefficients =  4.57647e-02 -2.02737e-03 -4.88691e-02 2.09467e-03
-
-#--------------------------------------------------------------
-#Monte carlo / molecular dynamics
-#--------------------------------------------------------------
 dynamics =  0
 ncell =   6 6 6
 temperature = 600
-#ntime  = 50
-#optcell = 2
 
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
+spin_init_state = 2
 spin_mag_field= 0.0 0.0 0.0
 spin_dynamics=1
 spin_temperature = 600
 spin_ntime =1000
 spin_nctime=100
-spin_dt=1e-16
+spin_dt=1e-16 s
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_LIBXML
+#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% exclude_hosts = nag@abiref
 #%% system_xml = t16.xml
 #%% [files]
 #%% files_to_test = 
-#%%   t16.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t16.out, tolnlines = 1, tolabs = 1e1, tolrel = 0.1, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -52,4 +37,7 @@ spin_dt=1e-16
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read xml and run spin dynamics
+#%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
+#%%   is detected, which is needed by the random number generator.
+#%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
 #%%<END TEST_INFO>

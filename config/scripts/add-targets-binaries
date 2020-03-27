@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -105,7 +105,13 @@ for bin in main_bins:
     # Set directory for library
     lib_opt = "yes"
     if ( lib in abinit_corelibs ):
-      lib_dir = "src/%s" % (lib)
+      parent = lib_cnf.get(lib, "parent")
+      if ( parent == "common" ):
+        lib_dir = "shared/common/src/%s" % (lib)
+      elif ( parent == "libpaw" ):
+        lib_dir = "shared/libpaw/src"
+      else:
+        lib_dir = "src/%s" % (lib)
       lib_tgt = "lib%s.a" % (lib)
       lib_opt = lib_cnf.get(lib,"optional")
     else:
@@ -118,10 +124,6 @@ for bin in main_bins:
       (lib_dir,lib_tgt) + bin_make
     if ( lib_opt == "yes" ):
       bin_make = "\nif DO_BUILD_%s" % (lib.upper()) + bin_make
-
-  # Delegate the build of external dependencies
-  if ( bin_deps == "yes" ):
-    bin_make = "\n\tcd fallbacks && $(MAKE) @SET_MAKE@"  + bin_make
 
   # Check for optional binaries
   if ( bin_opt == "yes" ):

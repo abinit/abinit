@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ListCdagC
 !! NAME
 !!  m_ListCdagC
@@ -10,7 +10,7 @@
 !!  Manage a 2D vector to store couple of c+c
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,7 +106,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -132,13 +132,6 @@ CONTAINS
 SUBROUTINE ListCdagC_init(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_init'
-!End of the abilint section
-
   TYPE(ListCdagC)  , INTENT(INOUT) :: this
   !DOUBLE PRECISION , INTENT(IN   ) :: inv_dt
   INTEGER, OPTIONAL, INTENT(IN   ) :: size
@@ -165,7 +158,7 @@ END SUBROUTINE ListCdagC_init
 !!  Impose size of the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -191,13 +184,6 @@ END SUBROUTINE ListCdagC_init
 SUBROUTINE ListCdagC_setSize(this,new_tail)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_setSize'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   INTEGER        , INTENT(IN   ) :: new_tail
 !Local variables ------------------------------
@@ -225,7 +211,7 @@ END SUBROUTINE ListCdagC_setSize
 !!  Enlarge memory space of the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -251,13 +237,6 @@ END SUBROUTINE ListCdagC_setSize
 SUBROUTINE ListCdagC_enlarge(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_enlarge'
-!End of the abilint section
-
   TYPE(ListCdagC),   INTENT(INOUT)       :: this
   INTEGER, OPTIONAL, INTENT(IN   )       :: size
 !Local variables ------------------------------
@@ -301,7 +280,7 @@ END SUBROUTINE ListCdagC_enlarge
 !!  assign routine
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -327,13 +306,6 @@ END SUBROUTINE ListCdagC_enlarge
 SUBROUTINE listCdagC_assign(this, list_2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'listCdagC_assign'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   TYPE(ListCdagC), INTENT(IN   ) :: list_2
 !Local variables ------------------------------
@@ -355,7 +327,7 @@ END SUBROUTINE ListCdagC_assign
 !!  Swap two lists
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -381,13 +353,6 @@ END SUBROUTINE ListCdagC_assign
 SUBROUTINE ListCdagC_swap(this,list_2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_swap'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   TYPE(ListCdagC), INTENT(INOUT) :: list_2
 !Local variables ------------------------------
@@ -430,7 +395,7 @@ END SUBROUTINE ListCdagC_swap
 !!  push at the end of the list a couple
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -456,13 +421,6 @@ END SUBROUTINE ListCdagC_swap
 SUBROUTINE ListCdagC_pushBack(this, CdagC_1)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_pushBack'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT)       :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
 !Local variables ------------------------------
@@ -494,7 +452,7 @@ END SUBROUTINE ListCdagC_pushBack
 !!  insert somewhere a couple
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -521,13 +479,6 @@ END SUBROUTINE ListCdagC_pushBack
 SUBROUTINE ListCdagC_insert(this, CdagC_1, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_insert'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1 
   INTEGER        , INTENT(IN   ) :: position
@@ -564,7 +515,7 @@ END SUBROUTINE ListCdagC_insert
 !!  Remove the last element
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -589,13 +540,6 @@ END SUBROUTINE ListCdagC_insert
 SUBROUTINE ListCdagC_popBack(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_popBack'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                        :: tail
@@ -614,7 +558,7 @@ END SUBROUTINE ListCdagC_popBack
 !!  Erase a couple at a given position
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -640,13 +584,6 @@ END SUBROUTINE ListCdagC_popBack
 SUBROUTINE ListCdagC_erase(this,position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_erase'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   INTEGER,         INTENT(IN   ) :: position
 !Local variables ------------------------------
@@ -673,7 +610,7 @@ END SUBROUTINE ListCdagC_erase
 !!  assume the list is already sorted
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -699,13 +636,6 @@ END SUBROUTINE ListCdagC_erase
 INTEGER FUNCTION ListCdagC_firstHigherThanReal(this, time)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_firstHigherThanReal'
-!End of the abilint section
-
   TYPE(ListCdagC),  INTENT(IN) :: this
   DOUBLE PRECISION, INTENT(IN) :: time
 #include "ListCdagC_firstHigher.h"
@@ -732,7 +662,7 @@ END FUNCTION ListCdagC_firstHigherThanReal
 !!  sort the list by c+ increasing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -757,13 +687,6 @@ END FUNCTION ListCdagC_firstHigherThanReal
 SUBROUTINE ListCdagC_sort(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_sort'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
  
   IF ( this%tail .EQ. 1 ) RETURN
@@ -779,7 +702,7 @@ END SUBROUTINE ListCdagC_sort
 !!  sort the list by c+ increasing with the quick sort algo
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -806,13 +729,6 @@ END SUBROUTINE ListCdagC_sort
 RECURSIVE SUBROUTINE ListCdagC_quickSort(this, begin, end)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_quickSort'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   INTEGER,         INTENT(IN   ) :: begin
   INTEGER,         INTENT(IN   ) :: end
@@ -863,7 +779,7 @@ END SUBROUTINE ListCdagC_quickSort
 !!  print the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -889,13 +805,6 @@ END SUBROUTINE ListCdagC_quickSort
 SUBROUTINE ListCdagC_print(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_print'
-!End of the abilint section
-
   TYPE(ListCdagC)  , INTENT(IN) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -919,7 +828,7 @@ END SUBROUTINE ListCdagC_print
 !!  Clear the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -944,13 +853,6 @@ END SUBROUTINE ListCdagC_print
 SUBROUTINE ListCdagC_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_clear'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   this%tail = 0 
 END SUBROUTINE ListCdagC_clear
@@ -964,7 +866,7 @@ END SUBROUTINE ListCdagC_clear
 !!  destroy the list
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -989,13 +891,6 @@ END SUBROUTINE ListCdagC_clear
 SUBROUTINE ListCdagC_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_destroy'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
 
   FREEIF(this%list)

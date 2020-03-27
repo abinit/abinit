@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fft_mesh
 !! NAME
 !!  m_fft_mesh
@@ -9,7 +8,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2020 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +33,7 @@ MODULE m_fft_mesh
  use m_hide_blas
 
  use defs_fftdata,     only : size_goed_fft
+ use m_fstrings,       only : sjoin, itoa
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
  use m_symtk,          only : mati3inv
  use m_geometry,       only : xred2xcart
@@ -128,15 +128,6 @@ CONTAINS  !=====================================================================
 
 subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zpad_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,mgfft
@@ -221,15 +212,6 @@ end subroutine zpad_init
 
 subroutine zpad_free(zpad)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zpad_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(zpad_t),intent(inout) :: zpad
@@ -301,15 +283,6 @@ end subroutine zpad_free
 
 subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst,enforce_sym,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setmesh'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: enforce_sym,method,npwsigx,npwvec,npwwfn
@@ -327,7 +300,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  integer :: is,m1,m2,m3,mm1,mm2,mm3,n1,n2,n3,nsym,nt,ount
  real(dp) :: ecuteff,ecutsigx,ecutwfn,g1,g2,g3,gsq,gsqmax,reff,rsigx,rwfn
  logical :: fft_ok
- character(len=500) :: msg
+ character(len=500) :: msg, tnons_warn
 !arrays
  integer :: fftnons(3),fftsym(3),mdum(3)
  !integer,allocatable :: pfactors(:),powers(:)
@@ -342,6 +315,11 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    write(msg,'(a,3(i0,1x))')' called with wrong value of mG0 = ',mG0
    MSG_BUG(msg)
  end if
+
+ tnons_warn = "Check your fractional translations tnons. "//ch10//&
+   "Components should be a rational fraction in 1/8th nor in 1/12th."//ch10//&
+   "You may need to polish the structure by running AbiPy `abistruct.py abisanitize` on the input file."//ch10//&
+   "to get rid of spurious tnons"
 
  ount = std_out; if (present(unit)) ount = unit
 
@@ -375,9 +353,9 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  !if (iseven(mm3)) mm3=mm3+1
 
  write(msg,'(2(2a,i8,a,3i6),2a,3i3)')ch10,&
-&  ' setmesh: npwwfn        = ',npwwfn, '; Max (m1,m2,m3)   = ',m1,m2,m3,ch10,&
-&  '          npweps/npwsigx= ',npwsigx,'; Max (mm1,mm2,mm3)= ',mm1,mm2,mm3,ch10,&
-&  '          mG0 added     = ',mG0(:)
+  ' setmesh: npwwfn        = ',npwwfn, '; Max (m1,m2,m3)   = ',m1,m2,m3,ch10,&
+  '          npweps/npwsigx= ',npwsigx,'; Max (mm1,mm2,mm3)= ',mm1,mm2,mm3,ch10,&
+  '          mG0 added     = ',mG0(:)
  call wrtout(ount,msg,'COLL')
  !
  ! === Different FFT grids according to method ==
@@ -417,7 +395,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
      g2=REAL(gvec(2,ig))
      g3=REAL(gvec(3,ig))
      gsq=       gmet(1,1)*g1**2+gmet(2,2)*g2**2+gmet(3,3)*g3**2+ &
-&          two*(gmet(1,2)*g1*g2+gmet(1,3)*g1*g3+gmet(2,3)*g2*g3)
+          two*(gmet(1,2)*g1*g2+gmet(1,3)*g1*g3+gmet(2,3)*g2*g3)
      ecutwfn=MAX(ecutwfn,gsq)
    end do
    rwfn=SQRT(ecutwfn); ecutwfn=two*ecutwfn*pi**2
@@ -429,14 +407,14 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
      g2=REAL(gvec(2,ig))
      g3=REAL(gvec(3,ig))
      gsq=      gmet(1,1)*g1**2+gmet(2,2)*g2**2+gmet(3,3)*g3**2+ &
-&         two*(gmet(1,2)*g1*g2+gmet(1,3)*g1*g3+gmet(2,3)*g2*g3)
+         two*(gmet(1,2)*g1*g2+gmet(1,3)*g1*g3+gmet(2,3)*g2*g3)
      ecutsigx=MAX(ecutsigx,gsq)
    end do
    rsigx=SQRT(ecutsigx); ecutsigx=two*ecutsigx*pi**2
 
    write(msg,'(a,f7.3,3a,f7.3,a)')&
-&    ' calculated ecutwfn          = ',ecutwfn, ' [Ha] ',ch10,&
-&    ' calculated ecutsigx/ecuteps = ',ecutsigx,' [Ha]'
+    ' calculated ecutwfn          = ',ecutwfn, ' [Ha] ',ch10,&
+    ' calculated ecutsigx/ecuteps = ',ecutsigx,' [Ha]'
    call wrtout(ount,msg,'COLL')
    !
    ! In the calculation of the GW self-energy or of the RPA dielectric matrix,
@@ -469,8 +447,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
      ig2max=MAX(2*m2+1,2*mm2+1,mm2+m2+1)
      ig3max=MAX(2*m3+1,2*mm3+1,mm3+m3+1)
    else
-     write(msg,'(a,i0)')"Wrong method : ",method
-     MSG_BUG(msg)
+     MSG_BUG(sjoin("Wrong method:", itoa(method)))
    end if
 
    m1=-1; m2=-1; m3=-1
@@ -481,7 +458,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
          g2=REAL(ig2)
          g3=REAL(ig3)
          gsq=     gmet(1,1)*g1**2+gmet(2,2)*g2**2+gmet(3,3)*g3**2+ &
-&            two*(gmet(1,2)*g1*g2+gmet(1,3)*g1*g3+gmet(2,3)*g2*g3)
+             two*(gmet(1,2)*g1*g2+gmet(1,3)*g1*g3+gmet(2,3)*g2*g3)
          if (gsq>gsqmax+tol6) CYCLE ! tol6 to improve portability
          m1=MAX(m1,ig1)
          m2=MAX(m2,ig2)
@@ -491,16 +468,15 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    end do
 
  case default
-   write(msg,'(a,i0)')' Method > 3 or < 0 not allowed in setmesh while method= ',method
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('Method > 3 or < 0 not allowed in setmesh while method:', itoa(method)))
  end select
  !
  ! * Warning if low npwwfn.
  if (m1<mm1 .or. m2<mm2 .or. m3<mm3) then
    write(msg,'(5a)')&
-&    'Note that npwwfn is small with respect to npweps or with respect to npwsigx. ',ch10,&
-&    'Such a small npwwfn is a waste: ',ch10,&
-&    'You could raise npwwfn without loss in cpu time. '
+    'Note that npwwfn is small with respect to npweps or with respect to npwsigx. ',ch10,&
+    'Such a small npwwfn is a waste: ',ch10,&
+    'You could raise npwwfn without loss in cpu time. '
    MSG_COMMENT(msg)
  end if
  !
@@ -516,7 +492,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    call size_goed_fft(m1,n1,ierr)
    call size_goed_fft(m2,n2,ierr)
    call size_goed_fft(m3,n3,ierr)
-   ABI_CHECK(ierr==0,"size_goed_fft failed")
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    nfftot=n1*n2*n3
 
    ! * Check if the FFT is compatible, write ONLY a warning if it breaks the symmetry
@@ -563,7 +539,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    call size_goed_fft(m1,fftsym(1),ierr)
    call size_goed_fft(m2,fftsym(2),ierr)
    call size_goed_fft(m3,fftsym(3),ierr)
-   ABI_CHECK(ierr==0,"size_goed_fft failed")
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    mdum(1)=m1
    mdum(2)=m2
    mdum(3)=m3
@@ -571,14 +547,14 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    idx=0
    do ! If a FFT division gets too large the code stops in size_goed_fft.
      if ( check_rot_fft(nsym,symrel,fftsym(1),fftsym(2),fftsym(3)) .and. &
-&         (MOD(fftsym(1),fftnons(1))==0) .and.                           &
-&         (MOD(fftsym(2),fftnons(2))==0) .and.                           &
-&         (MOD(fftsym(3),fftnons(3))==0)                                 &
-&       ) EXIT
+         (MOD(fftsym(1),fftnons(1))==0) .and.                           &
+         (MOD(fftsym(2),fftnons(2))==0) .and.                           &
+         (MOD(fftsym(3),fftnons(3))==0)                                 &
+     ) EXIT
      ii=MOD(idx,3)+1
      mdum(ii)=mdum(ii)+1
      call size_goed_fft(mdum(ii),fftsym(ii),ierr)
-     ABI_CHECK(ierr==0,"size_goed_fft failed")
+     ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
      idx=idx+1
    end do
    !
@@ -588,21 +564,19 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    n3=fftsym(3); nfftot=n1*n2*n3
 
    if (.not.( check_rot_fft(nsym,symrel,n1,n2,n3)) &
-&       .or.( MOD(fftsym(1),fftnons(1))/=0) .and.  &
-&           ( MOD(fftsym(2),fftnons(2))/=0) .and.  &
-&           ( MOD(fftsym(3),fftnons(3))/=0)        &
-&     ) then
+       .or.( MOD(fftsym(1),fftnons(1))/=0) .and.  &
+           ( MOD(fftsym(2),fftnons(2))/=0) .and.  &
+           ( MOD(fftsym(3),fftnons(3))/=0)        &
+     ) then
      MSG_BUG('Not able to generate a symmetric FFT')
    end if
  end if ! enforce_sym
 
  write(msg,'(3(a,i3),2a,i8,a)')&
-&  ' setmesh: FFT mesh size selected  = ',n1,'x',n2,'x',n3,ch10,&
-&  '          total number of points  = ',nfftot,ch10
+  ' setmesh: FFT mesh size selected  = ',n1,'x',n2,'x',n3,ch10,&
+  '          total number of points  = ',nfftot,ch10
  call wrtout(ount,msg,'COLL')
- if (ount /= dev_null) then
-   call wrtout(ab_out,msg,'COLL')
- end if
+ if (ount /= dev_null) call wrtout(ab_out,msg,'COLL')
 
  ngfft(1)=n1
  ngfft(2)=n2
@@ -618,9 +592,9 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 
  if ( ALL(fftalga /= (/FFT_SG,FFT_FFTW3, FFT_DFTI/)) ) then
    write(msg,'(6a)')ch10,&
-&    "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
-&    "Action : check the value of fftalg in your input file, ",ch10,&
-&    "or modify setmesh.F90 to make sure the FFT mesh is compatible with the FFT library. "
+    "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
+    "Action : check the value of fftalg in your input file, ",ch10,&
+    "or modify setmesh.F90 to make sure the FFT mesh is compatible with the FFT library. "
    MSG_ERROR(msg)
  end if
 
@@ -664,15 +638,6 @@ end subroutine setmesh
 !! SOURCE
 
 pure function check_rot_fft(nsym,symrel,nr1,nr2,nr3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_rot_fft'
-!End of the abilint section
-
- implicit none
 
 !Arguments
 !Scalar
@@ -732,15 +697,6 @@ end function check_rot_fft
 !! SOURCE
 
 function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_check_rotrans'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -846,15 +802,6 @@ end function fft_check_rotrans
 
 subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_fft_mesh'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -959,15 +906,6 @@ end subroutine rotate_fft_mesh
 
 subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cigfft'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwvec
@@ -1020,9 +958,9 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
  end do !ig
 
  if (ierr/=0) then
-   write(msg,'(a,i4,3a)')&
-&    'Found ',ierr,' G-G0 vectors falling outside the FFT box. ',ch10,&
-&    'igfft will be set to zero for these particular G-G0 '
+   write(msg,'(a,i0,3a)')&
+    'Found ',ierr,' G-G0 vectors falling outside the FFT box. ',ch10,&
+    'igfft will be set to zero for these particular G-G0 '
    MSG_WARNING(msg)
  end if
 
@@ -1049,27 +987,11 @@ end subroutine cigfft
 !!
 !! SOURCE
 
-elemental function ig2gfft(ig,ng) result (gc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ig2gfft'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ig2gfft'
-!End of the abilint section
+elemental integer function ig2gfft(ig,ng) result (gc)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ig,ng
- integer :: gc
 
 !************************************************************************
 
@@ -1112,24 +1034,7 @@ end function ig2gfft
 
 pure integer function g2ifft(gg,ngfft) result (gidx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g2ifft'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g2ifft'
-!End of the abilint section
-
 !Arguments ------------------------------------
-!scalars
-!arrays
  integer,intent(in) :: gg(3),ngfft(3)
 
 !Local variables-------------------------------
@@ -1188,15 +1093,6 @@ end function g2ifft
 
 pure subroutine get_gftt(ngfft,kpt,gmet,gsq_max,gfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_gftt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: gsq_max
@@ -1213,19 +1109,22 @@ pure subroutine get_gftt(ngfft,kpt,gmet,gsq_max,gfft)
 !************************************************************************
 
  ifft=0; gsq_max=smallest_real
- do i3=1,ngfft(3)    ; g3 = ig2gfft(i3,ngfft(3))
-   do i2=1,ngfft(2)  ; g2 = ig2gfft(i2,ngfft(2))
-     do i1=1,ngfft(1); g1 = ig2gfft(i1,ngfft(1))
-       ifft=ifft+1
+ do i3=1,ngfft(3)
+   g3 = ig2gfft(i3,ngfft(3))
+   do i2=1,ngfft(2)
+     g2 = ig2gfft(i2,ngfft(2))
+     do i1=1,ngfft(1)
+       g1 = ig2gfft(i1,ngfft(1))
+       ifft = ifft+1
        gfft(1,ifft) = g1
        gfft(2,ifft) = g2
        gfft(3,ifft) = g3
-       dsq=gmet(1,1)*(kpt(1)+dble(i1))**2&
-&        +gmet(2,2)*(kpt(2)+dble(i2))**2&
-&        +gmet(3,3)*(kpt(3)+dble(i3))**2&
-&        +2._dp*(gmet(1,2)*(kpt(1)+dble(i1))*(kpt(2)+dble(i2))&
-&        +gmet(2,3)*(kpt(2)+dble(i2))*(kpt(3)+dble(i3))&
-&        +gmet(3,1)*(kpt(3)+dble(i3))*(kpt(1)+dble(i1)))
+       dsq=gmet(1,1)*(kpt(1)+dble(i1))**2 &
+        +gmet(2,2)*(kpt(2)+dble(i2))**2 &
+        +gmet(3,3)*(kpt(3)+dble(i3))**2 &
+        +2._dp*(gmet(1,2)*(kpt(1)+dble(i1))*(kpt(2)+dble(i2)) &
+        +gmet(2,3)*(kpt(2)+dble(i2))*(kpt(3)+dble(i3)) &
+        +gmet(3,1)*(kpt(3)+dble(i3))*(kpt(1)+dble(i1)))
        gsq_max = MAX(dsq,gsq_max)
      end do
    end do
@@ -1260,15 +1159,6 @@ end subroutine get_gftt
 !! SOURCE
 
 subroutine calc_ceigr_spc(gg,nfft,nspinor,ngfft,ceigr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ceigr_spc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1340,15 +1230,6 @@ end subroutine calc_ceigr_spc
 
 subroutine calc_ceigr_dpc(gg,nfft,nspinor,ngfft,ceigr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ceigr_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nspinor
@@ -1417,15 +1298,6 @@ end subroutine calc_ceigr_dpc
 
 pure subroutine calc_eigr(gg,nfft,ngfft,eigr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_eigr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -1490,15 +1362,6 @@ end subroutine calc_eigr
 
 pure subroutine calc_ceikr(kk,nfft,ngfft,ceikr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ceikr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -1559,15 +1422,6 @@ end subroutine calc_ceikr
 !! SOURCE
 
 pure subroutine times_eigr(gg,ngfft,nfft,ndat,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'times_eigr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1636,15 +1490,6 @@ end subroutine times_eigr
 !! SOURCE
 
 pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'times_eikr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1715,15 +1560,6 @@ end subroutine times_eikr
 
 subroutine phase(ngfft,ph)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phase'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ngfft
@@ -1772,15 +1608,6 @@ end subroutine phase
 !! SOURCE
 
 subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkgrid_fft'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: nfft

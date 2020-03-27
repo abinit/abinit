@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_matlu
 !! NAME
 !!  m_matlu
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -147,13 +146,6 @@ subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -209,30 +201,45 @@ end subroutine init_matlu
 !!
 !! SOURCE
 
-subroutine zero_matlu(matlu,natom)
+subroutine zero_matlu(matlu,natom,onlynondiag)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zero_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom
  type(matlu_type),intent(inout) :: matlu(natom)
+ integer, optional, intent(in) :: onlynondiag
 !Local variables-------------------------------
- integer :: iatom
+ integer :: iatom,im,im1,ispinor,ispinor1,isppol,ndim
 
 !*********************************************************************
 
- do iatom=1,natom
-  matlu(iatom)%mat=czero
- enddo
+ if(present(onlynondiag)) then
+   do iatom=1,natom
+     if(matlu(iatom)%lpawu.ne.-1) then
+       do ispinor=1,matlu(iatom)%nspinor
+         ndim=(2*matlu(iatom)%lpawu+1)
+         do im=1,ndim
+           do im1=1,ndim
+             do ispinor1=1,matlu(iatom)%nspinor
+               if(im/=im1.or.ispinor/=ispinor1) then
+                 do isppol=1,matlu(iatom)%nsppol
+                   matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)=czero
+                 enddo
+               end if
+             end do
+           end do
+         end do
+       end do
+     endif
+   enddo
+ else
+   do iatom=1,natom
+    matlu(iatom)%mat=czero
+   enddo
+ endif
 
 
 end subroutine zero_matlu
@@ -262,13 +269,6 @@ subroutine destroy_matlu(matlu,natom)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -315,13 +315,6 @@ end subroutine destroy_matlu
 subroutine copy_matlu(nmat1,nmat2,natom,opt_diag,opt_non_diag,opt_re)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -402,13 +395,6 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -550,7 +536,6 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 end subroutine print_matlu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* m_matlu/sym_matlu
 !! NAME
 !! sym_matlu
@@ -559,7 +544,7 @@ end subroutine print_matlu
 !! Symetrise local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -568,6 +553,7 @@ end subroutine print_matlu
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  gloc(natom) <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!  pawang <type(pawang)>=paw angular mesh and related data
+!!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!
 !! OUTPUT
 !!  gloc(natom) <type(matlu_type)>= density matrix symetrized in the local orbital basis and related variables
@@ -583,18 +569,13 @@ end subroutine print_matlu
 !! CHILDREN
 !!
 !! SOURCE
- subroutine sym_matlu(cryst_struc,gloc,pawang)
+ subroutine sym_matlu(cryst_struc,gloc,pawang,paw_dmft)
 
  use defs_basis
 ! use defs_wvltypes
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sym_matlu'
-!End of the abilint section
+ use m_paw_dmft, only: paw_dmft_type
 
  implicit none
 
@@ -602,12 +583,14 @@ end subroutine print_matlu
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
  type(pawang_type),intent(in) :: pawang
+ type(paw_dmft_type), intent(in) :: paw_dmft
 !arrays
  type(matlu_type),intent(inout) :: gloc(cryst_struc%natom)
+!scalars
 !Local variables-------------------------------
 !scalars
  integer :: at_indx,iatom,irot,ispinor,ispinor1,isppol,lpawu,m1,m2,m3,m4,mu
- integer :: natom,ndim,nsppol,nspinor,nu
+ integer :: natom,ndim,nsppol,nspinor,nu,t2g,m1s,m2s,m3s,m4s,lpawu_zarot,x2my2d
  complex(dpc) :: sumrho,summag(3),rotmag(3),ci
  real(dp) :: zarot2
 !arrays
@@ -617,6 +600,13 @@ end subroutine print_matlu
  type(matlu_type),allocatable :: glocnms(:)
  type(matlu_type),allocatable :: glocsym(:)
  real(dp),allocatable :: symrec_cart(:,:,:)
+ integer :: mt2g(3),mx2my2d
+ mt2g(1)=1
+ mt2g(2)=2
+ mt2g(3)=4
+ mx2my2d=5
+ t2g=paw_dmft%dmftqmc_t2g
+ x2my2d=paw_dmft%dmftqmc_x2my2d
 
 ! DBG_ENTER("COLL")
 
@@ -648,7 +638,26 @@ end subroutine print_matlu
         at_indx=cryst_struc%indsym(4,irot,iatom)
         do m3=1, 2*lpawu+1
          do m4=1, 2*lpawu+1
-          zarot2=pawang%zarot(m3,m1,lpawu+1,irot)*pawang%zarot(m4,m2,lpawu+1,irot)
+          if(t2g==1) then
+           m1s=mt2g(m1)
+           m2s=mt2g(m2)
+           m3s=mt2g(m3)
+           m4s=mt2g(m4)
+           lpawu_zarot=2
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
+           lpawu_zarot=2
+          else
+           m1s=m1
+           m2s=m2
+           m3s=m3
+           m4s=m4
+           lpawu_zarot=lpawu
+          endif
+          zarot2=pawang%zarot(m3s,m1s,lpawu_zarot+1,irot)*pawang%zarot(m4s,m2s,lpawu_zarot+1,irot)
           glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)=&
 &          glocsym(iatom)%mat(m1,m2,isppol,ispinor,ispinor1)&
 &          +gloc(at_indx)%mat(m3,m4,isppol,ispinor,ispinor1)*zarot2
@@ -715,7 +724,26 @@ end subroutine print_matlu
        at_indx=cryst_struc%indsym(4,irot,iatom)
        do m3=1, 2*lpawu+1
         do m4=1, 2*lpawu+1
-         zarot2=pawang%zarot(m3,m2,lpawu+1,irot)*pawang%zarot(m4,m1,lpawu+1,irot)
+          if(t2g==1) then
+           m1s=mt2g(m1)
+           m2s=mt2g(m2)
+           m3s=mt2g(m3)
+           m4s=mt2g(m4)
+           lpawu_zarot=2
+          else if (x2my2d==1) then
+           m1s=mx2my2d
+           m2s=mx2my2d
+           m3s=mx2my2d
+           m4s=mx2my2d
+           lpawu_zarot=2
+          else
+           m1s=m1
+           m2s=m2
+           m3s=m3
+           m4s=m4
+           lpawu_zarot=lpawu
+          endif
+         zarot2=pawang%zarot(m3s,m2s,lpawu_zarot+1,irot)*pawang%zarot(m4s,m1s,lpawu_zarot+1,irot)
          sumrho=sumrho +  glocnm(at_indx)%mat(m4,m3,isppol,1,1)  * zarot2
          do mu=1,3
           summag(mu)=summag(mu) + glocnm(at_indx)%mat(m4,m3,isppol,mu+1,1) * zarot2
@@ -786,7 +814,7 @@ end subroutine print_matlu
 !! Inverse local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -813,13 +841,6 @@ end subroutine print_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inverse_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -893,19 +914,12 @@ end subroutine print_matlu
 !! CHILDREN
 !!
 !! SOURCE
-subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
+subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_or_one)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_crystal, only : crystal_t
  use m_io_tools,           only : flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diff_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -915,6 +929,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
  character(len=*), intent(in) :: char1,char2
  real(dp),intent(in) :: toldiff
  integer,intent(out), optional :: ierr
+ integer,intent(in), optional :: zero_or_one
 
 !local variables-------------------------------
  integer :: iatom,idiff,ispinor,ispinor1,isppol,m1,m,lpawu,nspinor,nsppol
@@ -948,7 +963,8 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
    enddo ! isppol
   endif ! lpawu/=1
  enddo ! natom
- matludiff=matludiff/float(idiff)
+ if(.not.present(zero_or_one)) matludiff=matludiff/float(idiff)
+
  if(option==1.or.option==0) then
   if( matludiff < toldiff ) then
    write(message,'(5a,6x,3a,4x,e12.4,a,e12.4)') ch10,&
@@ -956,7 +972,7 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
 &   ch10,matludiff,' is lower than',toldiff
    call wrtout(std_out,message,'COLL')
    if(present(ierr)) ierr=0
-  else
+  else 
    write(message,'(5a,3x,3a,3x,e12.4,a,e12.4)') ch10,&
 &   'Differences between ',trim(char1),' and ',ch10,trim(char2),' is too large:',&
 &   ch10,matludiff,' is larger than',toldiff
@@ -968,9 +984,19 @@ subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr)
    write(message,'(a,3x,a)') ch10,trim(char2)
    call wrtout(std_out,message,'COLL')
    call print_matlu(matlu2,natom,prtopt=1,opt_diag=-1)
-   if(option==1) then
-     call flush_unit(std_out)
-     MSG_ERROR("option==1, aborting now!")
+   if (present(zero_or_one).and.(mod(matludiff,1.d0)< toldiff)) then
+     write(message,'(a,3x,a)') ch10," The norm is not identity for this k-point but&
+    & is compatible with a high symmetry point"
+     call wrtout(std_out,message,'COLL')
+   else if(present(zero_or_one)) then
+     write(message,'(a,3x,a)') ch10," The norm is not identity for this k-point but&
+    & might be compatible with a high symmetry point: it should be checked"
+     call wrtout(std_out,message,'COLL')
+   else 
+     if(option==1) then
+       call flush_unit(std_out)
+       MSG_ERROR("option==1, aborting now!")
+     end if
    end if
    if(present(ierr)) ierr=-1
   endif
@@ -1007,13 +1033,6 @@ subroutine add_matlu(matlu1,matlu2,matlu3,natom,sign_matlu2)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'add_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1041,7 +1060,7 @@ end subroutine add_matlu
 !! Change representation of density matrix (useful for nspinor=2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1072,13 +1091,6 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chg_repr_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1201,13 +1213,6 @@ end subroutine add_matlu
  subroutine trace_matlu(matlu,natom,trace_loc,itau)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trace_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1292,7 +1297,7 @@ end subroutine add_matlu
 !! Create new array from matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1321,13 +1326,6 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gather_matlu'
-!End of the abilint section
-
  implicit none
 
 ! type  matlus_type
@@ -1417,7 +1415,7 @@ end subroutine add_matlu
 !! Diagonalize matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1449,13 +1447,6 @@ end subroutine add_matlu
  use defs_wvltypes
  use m_crystal, only : crystal_t
  use m_matrix,         only : blockdiago_fordsyev,blockdiago_forzheev
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diag_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1700,7 +1691,7 @@ end subroutine add_matlu
 !           end do
 !           call dgemm('n','n',tndim,tndim,tndim,cone,valuer2,tndim,&
 !&            valuer4,tndim,czero,valuer                ,tndim)
-           write(6,*) "INFO",info
+           !write(6,*) "INFO",info
            gathermatlu(iatom)%value=cmplx(valuer,0.d0,kind=dp)
 !           write(message,'(a,i4,a,i4)')  "AFTER valuer for atom",iatom,"  and isppol",isppol
 !           call wrtout(std_out,message,'COLL')
@@ -1913,7 +1904,7 @@ end subroutine add_matlu
 !! Rotate matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1941,13 +1932,6 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2141,7 +2125,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2168,13 +2152,6 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'shift_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2220,7 +2197,7 @@ end subroutine add_matlu
 !! Check that matlu is real in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2244,13 +2221,6 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checkreal_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2313,7 +2283,7 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
 &   ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10&
 &    , "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10&
-&    , "(Except if dmft_solv=8 where these elements are taken into accounts)",ch10&
+&    , "(Except if dmft_solv=8,9 where these elements are taken into accounts)",ch10&
 &    , "This is an approximation"
    MSG_WARNING(message)
  else
@@ -2333,7 +2303,7 @@ end subroutine add_matlu
 !! Check that matlu is diagonal in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2357,13 +2327,6 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checkdiag_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2431,7 +2394,7 @@ end subroutine add_matlu
 !! Do the matrix product of two matlus
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2457,13 +2420,6 @@ end subroutine add_matlu
  use defs_basis
  use defs_wvltypes
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prod_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2514,7 +2470,7 @@ end subroutine add_matlu
 !! conjugate of input matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2534,13 +2490,6 @@ end subroutine add_matlu
  subroutine conjg_matlu(matlu1,natom)
  use defs_basis
  use defs_wvltypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conjg_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2583,7 +2532,7 @@ end subroutine add_matlu
 !! Compute the logarithm of matlu (only if diagonal for the moment)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2603,13 +2552,6 @@ end subroutine add_matlu
  subroutine ln_matlu(matlu1,natom)
  use defs_basis
  use defs_wvltypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ln_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2655,7 +2597,7 @@ end subroutine add_matlu
 !! Transform mat from Slm to Ylm basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2678,13 +2620,6 @@ end subroutine add_matlu
  subroutine slm2ylm_matlu(matlu,natom,option,optprt)
  use defs_basis
  use defs_wvltypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slm2ylm_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2745,7 +2680,8 @@ end subroutine add_matlu
            mat_out_c=czero
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"SLM input matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,& 
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -2771,7 +2707,8 @@ end subroutine add_matlu
            end do
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"YLM output matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -2786,10 +2723,10 @@ end subroutine add_matlu
          enddo ! im
        enddo ! ispinor
      enddo ! isppol
+     ABI_DEALLOCATE(slm2ylm)
    endif ! lpawu
  enddo ! iatom
 
- ABI_DEALLOCATE(slm2ylm)
 
  end subroutine slm2ylm_matlu
 !!***
@@ -2802,7 +2739,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2827,13 +2764,6 @@ end subroutine add_matlu
 !! SOURCE
  subroutine fac_matlu(matlu,natom,fac)
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fac_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2878,7 +2808,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2904,13 +2834,6 @@ end subroutine add_matlu
  subroutine printplot_matlu(matlu,natom,freq,char1,units,imre)
  use defs_basis
  use m_fstrings,       only : int2char4
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printplot_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2964,7 +2887,7 @@ end subroutine add_matlu
 !! Make the matlu the identity
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2987,13 +2910,6 @@ end subroutine add_matlu
 !! SOURCE
  subroutine identity_matlu(matlu,natom)
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'identity_matlu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mkffnl
 !! NAME
 !!  m_mkffnl
@@ -8,7 +7,7 @@
 !! and for each angular momentum.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MT, DRH)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MT, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -186,15 +185,6 @@ contains
 subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 &                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
 &                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkffnl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -649,30 +639,15 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
  end do  ! End do - loop over atom types
 
- if (allocated(kpgc))  then
-   ABI_DEALLOCATE(kpgc)
- end if
- if (allocated(kpgn))  then
-   ABI_DEALLOCATE(kpgn)
- end if
- if (allocated(dffnl_red))  then
-   ABI_DEALLOCATE(dffnl_red)
- end if
- if (allocated(d2ffnl_red))  then
-   ABI_DEALLOCATE(d2ffnl_red)
- end if
- if (allocated(dffnl_cart))  then
-   ABI_DEALLOCATE(dffnl_cart)
- end if
- if (allocated(d2ffnl_cart))  then
-   ABI_DEALLOCATE(d2ffnl_cart)
- end if
- if (allocated(dffnl_tmp))  then
-   ABI_DEALLOCATE(dffnl_tmp)
- end if
- if (allocated(d2ffnl_tmp))  then
-   ABI_DEALLOCATE(d2ffnl_tmp)
- end if
+ ! Optional deallocations.
+ ABI_SFREE(kpgc)
+ ABI_SFREE(kpgn)
+ ABI_SFREE(dffnl_red)
+ ABI_SFREE(d2ffnl_red)
+ ABI_SFREE(dffnl_cart)
+ ABI_SFREE(d2ffnl_cart)
+ ABI_SFREE(dffnl_tmp)
+ ABI_SFREE(d2ffnl_tmp)
 
  ABI_DEALLOCATE(kpgnorm_inv)
  ABI_DEALLOCATE(kpgnorm)

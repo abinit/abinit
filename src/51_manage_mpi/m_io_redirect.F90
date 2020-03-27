@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_redirect
 !! NAME
 !!  m_io_redirect
@@ -7,7 +6,7 @@
 !!  management of output and log files when parallelisation on cells is activated
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2018 ABINIT group (FJ,MT)
+!!  Copyright (C) 2001-2020 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,15 +69,6 @@ contains
 !!
  subroutine localfilnam(commspace,commspace1,commworld,filnam,nam,nfil)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localfilnam'
-!End of the abilint section
-
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: commspace,commspace1,commworld,nfil
@@ -145,15 +135,6 @@ contains
 !! SOURCE
 !!
  subroutine localwrfile(commspace,ii,nfil,paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localwrfile'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: commspace,ii,nfil,paral,prtvol
@@ -227,15 +208,6 @@ contains
 !!
  subroutine localrdfile(commspace,commworld,compute_all,nfil,paral,prtvol,dyn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localrdfile'
-!End of the abilint section
-
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: commspace,commworld,nfil,paral,prtvol
@@ -340,15 +312,6 @@ contains
 !!
  subroutine localredirect(commspace,commworld,nfil,paral,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localredirect'
-!End of the abilint section
-
- implicit none
- 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: commspace,commworld,nfil,paral,prtvol

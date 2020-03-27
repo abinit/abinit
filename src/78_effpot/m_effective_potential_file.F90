@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_effective_potential_file
 !! NAME
 !! m_effective_potential_file
@@ -9,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (AM)
+!! Copyright (C) 2000-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,9 +39,9 @@ module m_effective_potential_file
 #endif
 
  use m_io_tools,   only : open_file
- use m_geometry,   only : xcart2xred, metric
+ use m_geometry,   only : xcart2xred, xred2xcart, metric
  use m_symfind,    only : symfind, symlatt
- use m_crystal,    only : crystal_t, crystal_init, crystal_free
+ use m_crystal,    only : crystal_t, crystal_init
  use m_dynmat,     only : dfpt_prtph
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
  use m_ddb_internalstr, only : ddb_internalstr
@@ -63,14 +62,14 @@ module m_effective_potential_file
  private :: system_xml2effpot
  private :: system_ddb2effpot
 
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  private :: rdfromline
  private :: rmtabfromline
  private :: rdfromline_value
  private :: elementfromline
 #endif
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
  public :: effpot_xml_checkXML
  public :: effpot_xml_getDimCoeff
  public :: effpot_xml_readSystem
@@ -240,18 +239,10 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
   use m_effective_potential
   use m_multibinit_dataset
-  use m_ddb, only : ddb_from_file,ddb_free
+  use m_ddb, only : ddb_from_file
   use m_strain
-  use m_crystal, only : crystal_t, crystal_free
+  use m_crystal, only : crystal_t
   use m_dynmat, only : bigbx9
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_read'
-!End of the abilint section
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -428,8 +419,8 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
  end if
 
 ! Deallocation of array
-  call crystal_free(Crystal)
-  call ddb_free(ddb)
+  call crystal%free()
+  call ddb%free()
 
 end subroutine effective_potential_file_read
 !!***
@@ -462,15 +453,6 @@ end subroutine effective_potential_file_read
 !! SOURCE
 
 subroutine effective_potential_file_getType(filename,filetype)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getType'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -599,14 +581,6 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
  use m_ddb
  use m_ddb_hdr
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimSystem'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
@@ -723,15 +697,6 @@ end subroutine effective_potential_file_getDimSystem
 
 subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimCoeff'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
@@ -739,13 +704,13 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
 !Local variables-------------------------------
  !scalar
  integer ::  filetype
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer ::  count,count2
  integer :: funit = 1,ios=0
  logical :: found,found2
 #endif
 !arrays
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  character (len=XML_RECL) :: line,readline
 #endif
  character(len=500) :: message
@@ -763,7 +728,7 @@ subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_
    nterm_max = 0
    ndisp_max = 0
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 !  Read with libxml the number of coefficient
    call effpot_xml_getDimCoeff(char_f2c(trim(filename)),ncoeff,nterm_max,ndisp_max)
 #else
@@ -871,15 +836,6 @@ end subroutine effective_potential_file_getDimCoeff
 
 subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimStrainCoupling'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
@@ -887,13 +843,13 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
  integer,intent(out) :: nrpt
 !Local variables-------------------------------
  !scalar
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer :: irpt,ivoigt
  integer :: funit = 1,ios=0
  logical :: found
 #endif
 !arrays
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  character (len=XML_RECL) :: line,readline,strg,strg1
  character(len=500) :: message
 #endif
@@ -902,7 +858,7 @@ subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
    nrpt = 0
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 !  Read with libxml the number of coefficient
    call effpot_xml_getDimStrainCoupling(char_f2c(trim(filename)),nrpt,voigt)
 #else
@@ -979,15 +935,6 @@ end subroutine effective_potential_file_getDimStrainCoupling
 !! SOURCE
 
 subroutine effective_potential_file_getDimMD(filename,natom,nstep)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimMD'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1145,15 +1092,6 @@ end subroutine effective_potential_file_getDimMD
 
 subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'system_getDimFromXML'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  !scalars
   character(len=fnlen),intent(in) :: filename
@@ -1164,7 +1102,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
   integer :: nrpt1,nrpt2
   real :: itypat
   character(len=500) :: message
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
   integer :: funit = 1,ios = 0
   integer :: iatom
   logical :: found
@@ -1172,7 +1110,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
   character (len=XML_RECL) :: strg,strg1
 #endif
   !arrays
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
   integer,allocatable :: typat(:)
 #endif
 
@@ -1195,7 +1133,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
 !Open the atomicdata XML file for reading
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 !Read with libxml
  call effpot_xml_getDimSystem(char_f2c(trim(filename)),natom,ntypat,nph1l,nrpt1,nrpt2)
 #else
@@ -1340,14 +1278,6 @@ end subroutine system_getDimFromXML
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'system_xml2effpot'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  character(len=*),intent(in) :: filename
@@ -1365,7 +1295,7 @@ end subroutine system_getDimFromXML
  integer,parameter :: master=0
  logical :: has_anharmonics = .FALSE.
  logical :: iam_master
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer :: funit = 1,ios=0
  integer :: iatom,iamu,iph1l,irpt,irpt1,irpt2,irpt3,jj,mu,nu
  real(dp):: amu
@@ -1390,11 +1320,11 @@ end subroutine system_getDimFromXML
  type(ifc_type),dimension(:),allocatable :: phonon_strain
  type(crystal_t)  :: crystal
  type(atomdata_t) :: atom
-#ifdef HAVE_LIBXML
+#ifdef HAVE_XML
  real(dp),allocatable :: phonon_strain_atmfrc(:,:,:,:,:)
  integer,allocatable  :: phonon_straincell(:,:)
 #endif
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  real(dp),allocatable :: work2(:,:)
 #endif
 
@@ -1467,7 +1397,7 @@ end subroutine system_getDimFromXML
 
  if(iam_master)then
 !Open the atomicdata XML file for reading
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
    write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
 &   ' with LibXML library'
@@ -2165,7 +2095,7 @@ end subroutine system_getDimFromXML
 
 !Re-generate symmetry operations from the lattice and atomic coordinates
  tolsym=tol8
- msym = 192
+ msym = 384
  ABI_ALLOCATE(spinat,(3,natom))
  ABI_ALLOCATE(ptsymrel,(3,3,msym))
  ABI_ALLOCATE(symafm,(msym))
@@ -2251,8 +2181,8 @@ end subroutine system_getDimFromXML
  ABI_DEALLOCATE(elastic_displacement)
 
 !DEALLOCATION OF TYPES
- call ifc_free(ifcs)
- call crystal_free(crystal)
+ call ifcs%free()
+ call crystal%free()
 
 end subroutine system_xml2effpot
 !!***
@@ -2293,17 +2223,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_ddb
  use m_ifc
  use m_copy,            only : alloc_copy
- use m_crystal,         only : crystal_t,crystal_print
+ use m_crystal,         only : crystal_t
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'system_ddb2effpot'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2324,7 +2246,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
  integer :: nptsym,nsym
- integer :: msym = 192,  use_inversion = 1, space_group
+ integer :: msym = 384,  use_inversion = 1, space_group
  real(dp):: max_phfq,tolsym = tol8
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
@@ -2333,7 +2255,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
- real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
+ real(dp),allocatable :: instrain(:,:),zeff(:,:,:),qdrp_cart(:,:,:,:)
  real(dp),pointer :: atmfrc_red(:,:,:,:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(asrq0_t) :: asrq0
@@ -2355,7 +2277,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Initialisation of usefull values
   natom = ddb%natom
   nblok = ddb%nblok
-  mpert=natom+6
+  mpert=natom+MPERT_MAX
   msize=3*mpert*3*mpert;
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
@@ -2385,7 +2307,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &          ' ---'
       call wrtout(std_out,message,'COLL')
   end if
-
   call crystal_init(ddb%amu,effective_potential%crystal,&
 &                   space_group,crystal%natom,crystal%npsp,&
 &                   crystal%ntypat,nsym,crystal%rprimd,&
@@ -2408,7 +2329,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &     ' Extraction of the energy of the structure (unit: Hartree)',ch10
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
-  if (ddb_get_etotal(ddb,effective_potential%energy) == 0) then
+  if (ddb%get_etotal(effective_potential%energy) == 0) then
     if(abs(inp%energy_reference) < tol16)then
       write(message,'(5a)')&
 &      ' Warning : Energy of the reference structure is not specify in',&
@@ -2437,12 +2358,14 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! Dielectric Tensor and Effective Charges
 !**********************************************************************
   ABI_ALLOCATE(zeff,(3,3,natom))
+  ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
   ABI_ALLOCATE(effective_potential%harmonics_terms%zeff,(3,3,natom))
 
   rftyp   = 1 ! Blocks obtained by a non-stationary formulation.
   chneut  = 1 ! The ASR for effective charges is imposed
   selectz = 0 ! No selection of some parts of the effective charge tensor
-  iblok = ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
+  iblok = ddb%get_dielt_zeff(crystal,rftyp,chneut,selectz,dielt,zeff)
+  qdrp_cart = zero
   if (iblok /=0 .and. maxval(abs(dielt)) < 10000) then
     effective_potential%harmonics_terms%epsilon_inf = dielt
     effective_potential%harmonics_terms%zeff = zeff
@@ -2472,7 +2395,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfstrs(1:2)=0
   rftyp=4
 
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   if (iblok /=0) then
    if(any(abs(inp%strten_reference)>tol16))then
@@ -2566,7 +2489,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfstrs(1:2)=3 ! Need uniaxial  both stresses and  shear stresses
   rftyp=1 ! Blocks obtained by a non-stationary formulation.
 ! for both diagonal and shear parts
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   if (iblok /=0) then
 !   extraction of the elastic constants from the blkvals (GPa)
@@ -2637,7 +2560,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfstrs(:)=0
   rftyp=inp%rfmeth
 
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   d2asr = zero
   if (iblok /=0) then
@@ -2647,7 +2570,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ! Acoustic Sum Rule
   ! In case the interatomic forces are not calculated, the
   ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
+  asrq0 = ddb%get_asrq0(inp%asr, inp%rfmeth, crystal%xcart)
 
 !**********************************************************************
 ! Interatomic Forces Calculation
@@ -2659,7 +2582,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(ab_out,message,'COLL')
 
   call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
-&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,&
+&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,qdrp_cart,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
 !***************************************************************************
@@ -2698,7 +2621,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff)
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,xmpi_comm_self)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
@@ -2832,8 +2755,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! !!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
 ! rcan,ifc%rpt,wghatm and other quantities
 ! are not needed for effective potential!!!
-  call ifc_free(ifc)
-  call ifc_free(effective_potential%harmonics_terms%ifcs)
+  call ifc%free()
+  call effective_potential%harmonics_terms%ifcs%free()
 
 ! Only conserve the necessary points in rpt
   nrpt_new2 = 0
@@ -2910,7 +2833,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rfelfd(1:2)=0
   rfstrs(1:2)=3
   rftyp=1
-  call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
   ABI_ALLOCATE(effective_potential%harmonics_terms%strain_coupling,(6,3,natom))
   effective_potential%harmonics_terms%strain_coupling = zero
@@ -2941,9 +2864,10 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! DEALLOCATION OF ARRAYS
   ABI_DEALLOCATE(blkval)
   ABI_DEALLOCATE(zeff)
+  ABI_DEALLOCATE(qdrp_cart)
   ABI_DEALLOCATE(instrain)
   ABI_DEALLOCATE(d2asr)
-  call asrq0_free(asrq0)
+  call asrq0%free()
 
   write(message,'(a)')ch10
   call wrtout(std_out,message,'COLL')
@@ -2981,17 +2905,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  use m_polynomial_coeff
  use m_polynomial_term
  use m_crystal, only : symbols_crystal
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
  use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'coeffs_xml2effpot'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -3005,11 +2921,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  integer :: ii,jj,my_rank,ndisp,ncoeff,nterm_max,nstrain,ndisp_max,nproc,nterm
 ! character(len=200),allocatable :: name(:)
  character(len=200) :: name
-#ifdef HAVE_LIBXML
+#ifdef HAVE_XML
  integer :: icoeff,iterm
 #endif
 
-#ifndef HAVE_LIBXML
+#ifndef HAVE_XML
  integer :: funit = 1,ios = 0
  integer :: icoeff,idisp,istrain,iterm,mu
  logical :: found,found2,displacement
@@ -3065,7 +2981,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  if(iam_master)then
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
    write(message,'(3a)')'-Reading the file ',trim(filename),&
 &   ' with LibXML library'
 #else
@@ -3083,7 +2999,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 
  !Read with libxml librarie
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
    ABI_DATATYPE_ALLOCATE(terms,(ncoeff,nterm_max))
    ABI_ALLOCATE(atindx,(ncoeff,nterm_max,2,ndisp_max))
@@ -3351,7 +3267,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  if(debug)then
    do ii=1,ncoeff
      do jj=1,coeffs(ii)%nterm
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
        write(200+my_rank,*)"ii,jj,ndisp,nterm",ii,jj,coeffs(ii)%nterm,coeffs(ii)%terms(jj)%ndisp
        write(200+my_rank,*)"atindx",coeffs(ii)%terms(jj)%atindx
        write(200+my_rank,*)"cell1",coeffs(ii)%terms(jj)%cell(:,1,:)
@@ -3370,7 +3286,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 #endif
      end do
    end do
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
    close(200+my_rank)
 #else
    close(300+my_rank)
@@ -3415,15 +3331,6 @@ end subroutine coeffs_xml2effpot
 
 subroutine effective_potential_file_readMDfile(filename,hist,option)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_readMDfile'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional :: option
@@ -3447,7 +3354,6 @@ subroutine effective_potential_file_readMDfile(filename,hist,option)
  if(present(option))then
    option_in = option
  end if
-
  if(type==40)then
 !  Netcdf type
    call read_md_hist(filename,hist,.FALSE.,.FALSE.,.FALSE.)
@@ -3538,15 +3444,6 @@ end subroutine effective_potential_file_readMDfile
 
 subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_mapHistToRef'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -3560,10 +3457,12 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  real(dp):: factor
  logical :: revelant_factor,need_map,need_verbose
 !arrays
- real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
- integer :: ncell(3)
- integer,allocatable  :: blkval(:),list(:)
- real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
+ real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
+ integer :: ncell(3),scale_cell(3)
+ integer,allocatable  :: shift(:,:)
+ integer,allocatable  :: list_map(:) !blkval(:),
+ real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
+ real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
  character(len=500) :: msg
  type(abihist) :: hist_tmp
 ! *************************************************************************
@@ -3575,15 +3474,15 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
 
-!Try to set the supercell according to the hist file
+! Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
  do ia=1,3
-   scale_cell(:) = zero
+   scale_cell(:) = 0
    do ii=1,3
      if(abs(rprimd_ref(ii,ia)) > tol10)then
-       scale_cell(ii) = rprimd_hist(ii,ia) / rprimd_ref(ii,ia)
+       scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
      end if
    end do
 !  Check if the factor for the supercell is revelant
@@ -3602,7 +3501,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     ncell(ia) = nint(factor)
+     ncell(ia) = int(factor)
    end if
  end do
 
@@ -3632,68 +3531,101 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  call effective_potential_setSupercell(eff_pot,comm,ncell)
 
 !allocation
- ABI_ALLOCATE(blkval,(natom_hist))
- ABI_ALLOCATE(list,(natom_hist))
- ABI_ALLOCATE(xred_hist,(3,natom_hist))
+ ABI_ALLOCATE(shift,(3,natom_hist))
+ ABI_ALLOCATE(list_map,(natom_hist))
+ ABI_ALLOCATE(list_reddist,(3,natom_hist))
+ ABI_ALLOCATE(list_absdist,(3,natom_hist))
+ ABI_ALLOCATE(list_dist,(natom_hist))
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
- blkval = 1
- list   = 0
- call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
-&                eff_pot%supercell%xcart,xred_ref)
 
- xred_hist = hist%xred(:,:,1)
+ !Putting maping list to zero
+ list_map = 0
+
+ !Fill xcart_ref/hist and xred_ref/hist
+
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred_ref)                   ! Get xred_ref
+
+
+do ia=1,natom_hist !Loop over all reference atoms
+   ! Put temporary lists to zero
+   list_reddist = 0
+   list_absdist = 0
+   list_dist = 0
+   shift = 0
+   do ib=1,natom_hist !Loop over all atoms of distorted structure
+      !Calculate list of reduced distance between reference atom ia and all others
+      list_reddist(:,ib) = hist%xred(:,ib,1) - xred_ref(:,ia)
+      !If the distorted atom is further away than half the unit cell shift it.
+      if(list_reddist(1,ib) > 0.5)then
+         list_reddist(1,ib) = 1 -  list_reddist(1,ib)
+         shift(1,ib) = -1
+      end if
+      if(list_reddist(2,ib) > 0.5)then
+         list_reddist(2,ib) = 1 -  list_reddist(2,ib)
+         shift(2,ib) = -1
+      end if
+      if(list_reddist(3,ib) > 0.5)then
+         list_reddist(3,ib) = 1 -  list_reddist(3,ib)
+         shift(3,ib) = -1
+      end if
+      if(list_reddist(1,ib) < -0.5)then
+         list_reddist(1,ib) = -1 -  list_reddist(1,ib)
+         shift(1,ib) = 1
+      end if
+      if(list_reddist(2,ib) < -0.5)then
+         list_reddist(2,ib) = -1 -  list_reddist(2,ib)
+         shift(2,ib) = 1
+      end if
+      if(list_reddist(3,ib) < -0.5)then
+         list_reddist(3,ib) = -1 -  list_reddist(3,ib)
+         shift(3,ib) = 1
+      end if
+      list_absdist(1,ib) = (rprimd_hist(1,1)+rprimd_hist(2,1)+rprimd_hist(3,1))*list_reddist(1,ib)
+      list_absdist(2,ib) = (rprimd_hist(1,2)+rprimd_hist(2,2)+rprimd_hist(3,2))*list_reddist(2,ib)
+      list_absdist(3,ib) = (rprimd_hist(1,3)+rprimd_hist(2,3)+rprimd_hist(3,3))*list_reddist(3,ib)
+      list_dist(ib) = sqrt(abs(list_absdist(1,ib))**2 + abs(list_absdist(2,ib))**2 + abs(list_absdist(3,ib))**2 )
+   end do !ib
+   !find the closest atom ib
+   list_map(ia) = minloc(list_dist,DIM=1)
+   !If the closest atom ib was shifted, apply and store the shift
+   if(any(shift(:,list_map(ia)) /= 0))then
+      hist%xred(1,list_map(ia),:)= hist%xred(1,list_map(ia),:) + 1*shift(1,list_map(ia))
+      hist%xred(2,list_map(ia),:)= hist%xred(2,list_map(ia),:) + 1*shift(2,list_map(ia))
+      hist%xred(3,list_map(ia),:)= hist%xred(3,list_map(ia),:) + 1*shift(3,list_map(ia))
+   end if
+   !TEST MS
+   !write(*,*) 'Atom', ia,' of reference is matche with', list_map(ia)
+   !write(*,*) 'xred_ref(',xred_ref(:,ia),'), xred_hist(',hist%(:,list_map(ia)),')'
+end do  ! ia
 
  if(need_verbose) then
-   write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
+   write(msg,'(2a,I3,a,I3,a,I3)') ch10,&
 &       ' The size of the supercell for the fit is ',ncell(1),' ',ncell(2),' ',ncell(3)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
 
-!try to map
- do ia=1,natom_hist
-   do ib=1,natom_hist
-     if(blkval(ib)==1)then
-       if(abs((xred_ref(1,ia)-xred_hist(1,ib))) < 0.1 .and.&
-&         abs((xred_ref(2,ia)-xred_hist(2,ib))) < 0.1 .and.&
-&         abs((xred_ref(3,ia)-xred_hist(3,ib))) < 0.1) then
-         blkval(ib) = 0
-         list(ib) = ia
-       end if
-     end if
-   end do
- end do
 
-!Check before transfert
- if(.not.all(blkval==0))then
-   write(msg, '(5a)' )&
-&         'Unable to map the molecular dynamic file ',ch10,&
-&         'on the reference supercell structure',ch10,&
-&         'Action: change the MD file'
-     MSG_ERROR(msg)
- end if
-
- do ia=1,natom_hist
-   if(.not.any(list(:)==ia))then
-     write(msg, '(5a)' )&
+   if(any(list_map(:)==0))then
+       write(msg, '(5a)' )&
 &         'Unable to map the molecular dynamic file  ',ch10,&
 &         'on the reference supercell structure',ch10,&
 &         'Action: change the MD file'
-     MSG_ERROR(msg)
+       MSG_ERROR(msg)
    end if
- end do
 
  need_map = .FALSE.
  do ia=1,natom_hist
-   if(list(ia) /= ia) need_map = .TRUE.
+   if(list_map(ia) /= ia) need_map = .TRUE.
  end do
  if(need_map)then
    if(need_verbose) then
      write(msg, '(11a)' )ch10,&
 &      ' --- !WARNING',ch10,&
-&      '     The ordering of the atoms in the hist file is different,',ch10,&
-&      '     of the one built by multibinit. The hist file will be map,',ch10,&
-&      '     on the ordering of multibinit.',ch10,&
+&      '     The ordering of the atoms in the _HIST.nc file is different,',ch10,&
+&      '     of the one built by multibinit. The _HIST.nc file will be mapped,',ch10,&
+&      '     to the ordering of multibinit.',ch10,&
 &      ' ---',ch10
      call wrtout(ab_out,msg,'COLL')
      call wrtout(std_out,msg,'COLL')
@@ -3711,9 +3643,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 ! reoder array
    do ia=1,natom_hist
-     hist_tmp%xred(:,list(ia),:)=hist%xred(:,ia,:)
-     hist_tmp%fcart(:,list(ia),:)=hist%fcart(:,ia,:)
-     hist_tmp%vel(:,list(ia),:)=hist%vel(:,ia,:)
+     hist_tmp%xred(:,ia,:)  = hist%xred(: ,list_map(ia),:)
+     hist_tmp%fcart(:,ia,:) = hist%fcart(:,list_map(ia),:)
+     hist_tmp%vel(:,ia,:)   = hist%vel(:,list_map(ia),:)
    end do
 
 ! free the old hist and reinit
@@ -3726,16 +3658,16 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
      call abihist_copy(hist_tmp,hist)
    end do
    hist_tmp%mxhist = nstep_hist
-
    call abihist_free(hist_tmp)
- end if
+ end if !need map
 
 !deallocation
- ABI_DEALLOCATE(blkval)
- ABI_DEALLOCATE(list)
- ABI_DEALLOCATE(xred_hist)
+ ABI_DEALLOCATE(shift)
+ ABI_DEALLOCATE(list_map)
+ ABI_DEALLOCATE(list_dist)
+ ABI_DEALLOCATE(list_reddist)
+ ABI_DEALLOCATE(list_absdist)
  ABI_DEALLOCATE(xred_ref)
-
 end subroutine effective_potential_file_mapHistToRef
 !!***
 
@@ -3763,15 +3695,6 @@ end subroutine effective_potential_file_mapHistToRef
 !! SOURCE
 
 subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_readDisplacement'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3835,15 +3758,6 @@ end subroutine effective_potential_file_readDisplacement
 
 subroutine elementfromline(line,nelement)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elementfromline'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
  character(len=*), intent(in) :: line
  integer, intent(out) :: nelement
@@ -3895,15 +3809,6 @@ subroutine elementfromline(line,nelement)
 
  subroutine rdfromline(keyword,line,output)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdfromline'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
   character(len=*), intent(in) :: keyword,line
   character(len=*), intent(out) :: output
@@ -3953,15 +3858,6 @@ subroutine elementfromline(line,nelement)
 
 recursive subroutine rmtabfromline(line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rmtabfromline'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
   character(len=*), intent(inout) :: line
 !Local variables ---------------------------------------
@@ -4003,15 +3899,6 @@ recursive subroutine rmtabfromline(line)
 !! SOURCE
 
  subroutine rdfromline_value(keyword,line,output)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdfromline_value'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
   character(len=*), intent(in) :: keyword,line
@@ -4059,19 +3946,12 @@ end subroutine rdfromline_value
 !!
 !! SOURCE
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
 function char_f2c(f_string) result(c_string)
 
  use iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'char_f2c'
-!End of the abilint section
-
  character(len=*),intent(in) :: f_string
  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
 !Local variables -------------------------------
@@ -4112,13 +3992,6 @@ subroutine char_c2f(c_string,f_string)
 
  use iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'char_c2f'
-!End of the abilint section
-
  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
  character(len=*),intent(out) :: f_string
 !Local variables -------------------------------

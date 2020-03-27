@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multipoles
 !! NAME
 !!  m_multipoles
@@ -7,7 +6,7 @@
 !!  Compute spatial multipole moments of input array on FFT grid
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2018 ABINIT group (MJV, MT, XG)
+!!  Copyright (C) 2003-2020 ABINIT group (MJV, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,13 +26,13 @@
 module m_multipoles
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_distribfft
  use m_xmpi
  use m_atomdata
 
+ use defs_abitypes,    only : mpi_type
  use m_io_tools, only : open_file
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp
@@ -81,16 +80,7 @@ contains
 !! SOURCE
 
 subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
-&                          distribfft,mpi_comm_grid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multipoles_fftr'
-!End of the abilint section
-
- implicit none
+                           distribfft,mpi_comm_grid)
 
 !Arguments ------------------------------------
 !scalars
@@ -242,16 +232,7 @@ end subroutine multipoles_fftr
 !! SOURCE
 
 subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
-&                         ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multipoles_out'
-!End of the abilint section
-
- implicit none
+                          ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
 
 !Arguments ------------------------------------
 !scalars
@@ -378,16 +359,7 @@ end subroutine multipoles_out
 !! SOURCE
 
 subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
-&  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out1dm'
-!End of the abilint section
-
- implicit none
+                  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
 
 !Arguments ------------------------------------
 !scalars
@@ -417,7 +389,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 ! *************************************************************************
 
 !Initialize the file
- write(message, '(a,a)' ) ' io1dm : about to open file ',fnameabo_app_1dm
+ write(message, '(a,a)' ) ' io1dm : about to open file ',trim(fnameabo_app_1dm)
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_common
 !! NAME
 !!  m_common
@@ -8,7 +7,7 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,19 +27,42 @@
 module m_common
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_exit
+ use m_fftcore
  use m_fock
  use m_io_tools
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
+ use m_crystal
+ use m_wfk
+ use m_ebands
+ use m_hdr
+ use m_xmpi
+ use m_dtset
+ use m_xpapi
+ use m_yaml
+ use m_invars2
+ use m_dtset
 
- use m_fstrings,         only : indent
- use m_electronpositron, only : electronpositron_type
-use m_energies,          only : energies_type, energies_eval_eint
+ use m_fstrings,          only : indent, endswith, sjoin, itoa
+ use m_electronpositron,  only : electronpositron_type
+ use m_energies,          only : energies_type, energies_eval_eint
+ use m_pair_list,         only : pair_list
+ use m_geometry,          only : mkrdim, metric
+ use m_kg,                only : getcut
+ use m_parser,            only : parsefile, ab_dimensions
+ use m_invars1,           only : invars0, invars1m, indefo
+ use m_time,              only : timab, time_set_papiopt
+ use defs_abitypes,       only : MPI_type
+ use defs_datatypes,      only : pspheader_type, ebands_t
+ use m_pspheads,          only : inpspheads, pspheads_comm
 
  implicit none
 
@@ -51,6 +73,11 @@ use m_energies,          only : energies_type, energies_eval_eint
  public :: setup1
  public :: prteigrs
  public :: prtene
+ public :: get_dtsets_pspheads     ! Parse input file, get list of pseudos for files file and build list of datasets
+                                   ! pseudopotential headers, maxval of dimensions needed in outvars
+ public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files
+ public :: crystal_from_file       ! Build a crystal_t object from netcdf or Fortran file with Header
+
 !!***
 
 contains
@@ -71,8 +98,7 @@ contains
 !!          if 3 => called at the end of scfcv.f
 !!  cpus=cpu time limit in seconds
 !!  deltae=change in energy between the previous and present SCF cycle
-!!  diffor=maximum absolute change in component of fcart between present
-!!          and previous SCF cycle.
+!!  diffor=maximum absolute change in component of fcart between present and previous SCF cycle.
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | chkexit= if non-zero, check whether the user wishes to exit
 !!   | enunit=parameter determining units of output energies
@@ -89,7 +115,8 @@ contains
 !!   | prtstm=print STM input variable
 !!   | prtvol= control print volume
 !!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
-!!   | usepawu=0 if no LDA+U; 1 if LDA+U
+!!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
+!!   | usepawu=0 if no LDA+U; /=0 if LDA+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  etotal=total energy (hartree)
@@ -108,6 +135,8 @@ contains
 !!   iscf =6 => SCF cycle, CG based on true minimization of the energy
 !!   iscf =-3, although non-SCF, the energy is computed, so print it here.
 !!  istep=number of the SCF iteration (needed if choice=2)
+!!  istep_fock_outer=number of outer SCF iteration in the double loop approach
+!!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
@@ -135,7 +164,7 @@ contains
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  quit= 0 if the SCF cycle is not finished ; 1 otherwise.
+!!  quit= 0 if the SCF cycle is not finished; 1 otherwise.
 !!  conv_retcode=Only if choice==3, != 0 if convergence is not achieved.
 !!
 !! PARENTS
@@ -148,24 +177,16 @@ contains
 
 subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fname_eig,filnam1,initGS,&
-&  iscf,istep,kpt,maxfor,moved_atm_inside,mpi_enreg,&
+&  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
 &  electronpositron, fock) ! optional arguments)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scprqt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: choice,initGS,iscf,istep,moved_atm_inside,nkpt,nstep
+ integer,intent(in) :: choice,initGS,iscf,istep,istep_fock_outer,istep_mix
+ integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
  real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,maxfor,res2,residm
@@ -186,24 +207,24 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs
- integer,save :: ttolwfr
- integer :: iatom,iband,iexit,ikpt,isppol,nband_index,nband_k,openexit,option, ishift
- integer :: tmagnet, my_rank
+ integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank
+ integer :: nband_index,nband_k,nnsclohf
+ integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
  integer :: ivdw
 #endif
  real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
  real(dp) :: diff_e,diff_f,magnet,rhodn,rhoup
- real(dp) :: residm_band(dtset%mband,dtset%nsppol)
- logical :: noquit
+ logical :: noquit,use_dpfft
  character(len=500) :: message, message2, message3
  character(len=2) :: format_istep
  character(len=5) :: format_magnet
  character(len=8) :: colname
  character(len=1) :: firstchar
+ type(yamldoc_t) :: ydoc
 !arrays
- real(dp) :: f_tmp(3)
+ real(dp) :: residm_band(dtset%mband,dtset%nsppol), f_tmp(3)
 
 ! *********************************************************************
 
@@ -212,6 +233,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  my_rank = mpi_enreg%me_cell
 
  quit=0; conv_retcode=0
+ usefock=dtset%usefock
+ nnsclohf=dtset%nnsclohf
+ use_dpfft = .False.
 
  tmagnet=0
  if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2)tmagnet=1
@@ -228,11 +252,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  end do
 
  select case (choice)
-
  case (1)
-!  Examine tolerance criteria
-! NB: The tests on tolwfr and the presence of tolerances in the SCF case are
-! also done at the level of the parser in chkinp.
+   ! choice= if 1 => called at the initialisation of scfcv.f
+   ! Examine tolerance criteria
+   ! NB: The tests on tolwfr and the presence of tolerances in the SCF case are
+   ! also done at the level of the parser in chkinp.
    tolwfr=tollist(2)
    toldff=tollist(3)
    toldfe=tollist(4)
@@ -245,20 +269,20 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if(abs(tolrff)>tiny(zero))ttolrff=1
    if(abs(toldfe)>tiny(zero))ttoldfe=1
    if(abs(tolvrs)>tiny(zero))ttolvrs=1
-!  If non-scf calculations, tolwfr must be defined
+   !  If non-scf calculations, tolwfr must be defined
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
-&     'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
-&     'positive, while it is ',tolwfr,ch10,&
-&     'Action: change tolwfr in your input file and resubmit the job.'
+      'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
+      'positive, while it is ',tolwfr,ch10,&
+      'Action: change tolwfr in your input file and resubmit the job.'
      MSG_ERROR(message)
    end if
-!  toldff only allowed when prtfor==1
-!  FIXME: this test should be done on input, not during calculation
+   ! toldff only allowed when prtfor==1
+   ! FIXME: this test should be done on input, not during calculation
    if((ttoldff == 1 .or. ttolrff == 1) .and. prtfor==0 )then
      MSG_ERROR('toldff only allowed when prtfor=1!')
    end if
-!  If SCF calculations, one and only one of these can differ from zero
+   ! If SCF calculations, one and only one of these can differ from zero
    if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
@@ -298,37 +322,50 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          if (prtfor==0) then
            if (optres==0) then
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ', colname, '   vres2'
+               '     iter   Etot(hartree)      deltaE(h)  ', colname, '   vres2'
            else
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ', colname, '   nres2'
+               '     iter   Etot(hartree)      deltaE(h)  ', colname, '   nres2'
            end if
          else
            if (optres==0) then
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ',colname,'   vres2    diffor    maxfor '
+              '     iter   Etot(hartree)      deltaE(h)  ',colname,'   vres2    diffor    maxfor '
            else
              write(message, '(4a)' ) ch10,&
-&             '     iter   Etot(hartree)      deltaE(h)  ',colname,'   nres2    diffor    maxfor '
+              '     iter   Etot(hartree)      deltaE(h)  ',colname,'   nres2    diffor    maxfor '
            end if
          end if
        else
          if (optres==0) then
            write(message, '(4a)' ) ch10,&
-&           '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2'
+            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  vres2'
          else
            write(message, '(4a)' ) ch10,&
-&           '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2'
+            '     iter   2DEtotal(Ha)        deltaE(Ha) ', colname, '  nres2'
          end if
        end if
      end if
+
+     ydoc = yamldoc_open('BeginCycle')
+     call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
+                        [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
+     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
+                        [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
+                        real_fmt="(es8.2)", dict_key="tolerances", ignore=zero)
+
+     !if (dtset%use_yaml == 1) then
+     call ydoc%write_and_free(ab_out, newline=.False.)
+     !else
+     !call ydoc%write_and_free(std_out, newline=.False.)
+     !end if
+
      call wrtout(ab_out,message,'COLL')
    end if
 
  case (2)
 
-
-!  Examine tolerance criteria
+   ! Examine tolerance criteria
    tolwfr=tollist(2)
    toldff=tollist(3)
    toldfe=tollist(4)
@@ -341,14 +378,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
    if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
-!  Conduct printing. If extra output follows, then put a blank line into the output here
-   if (dtset%prtvol>=10) then
-     message = ' '
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-   end if
 
-!  Calculate up and down charge and magnetization
+   ! Conduct printing. If extra output follows, then put a blank line into the output here
+   if (dtset%prtvol>=10) call wrtout([std_out, ab_out], ' ')
+
+   ! Calculate up and down charge and magnetization
    if(tmagnet==1) then
      rhoup = zero
      rhodn = zero
@@ -393,7 +427,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      write(ab_xml_out, "(A)") " />"
    end if
 
-!  Print total (free) energy (hartree) and other convergence measures
+   ! Print total (free) energy (hartree) and other convergence measures
    if(dtset%prtstm==0)then
      format_istep='i3'
      if(istep>99)format_istep='i5'
@@ -429,6 +463,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
+     !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
      call wrtout(ab_out,message,'COLL')
 
      if(mpi_enreg%paral_pert==1) then
@@ -439,53 +474,47 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    end if ! dtset%prtstm==0
 
-!  Print positions/forces every step if dtset%prtvol>=10 and iscf>0 or -3 and GS case
+   ! Print positions/forces every step if dtset%prtvol>=10 and iscf>0 or -3 and GS case
    if (dtset%prtvol>=10.and.(iscf>=0.or.iscf==-3).and.response==0.and.dtset%prtstm==0) then
      call wrtout(ab_out," ",'COLL')
 
-!    Print up and down charge and magnetization
+     ! Print up and down charge and magnetization
      if(tmagnet==1) then
        write(message,'(a,f11.6,a,f11.6,a,f10.6)')&
 &       ' #electrons spin up=',rhoup,', spin down=',rhodn,', magnetization=',magnet
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,  message,'COLL')
+       call wrtout([std_out, ab_out], message)
      end if
 
-!    Moreover, print atomic positions if dtset%ionmov==4, and moved_atm_inside==1
+     ! Moreover, print atomic positions if dtset%ionmov==4, and moved_atm_inside==1
      if (dtset%ionmov==4 .and. moved_atm_inside==1)then
-       message = ' reduced coordinates :'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], ' reduced coordinates :')
        do iatom=1,dtset%natom
          write(message, '(i5,1x,3es21.11)' ) iatom,xred(:,iatom)
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
        end do
      end if
 
-!    Slightly change favg for printing reasons
+     ! Slightly change favg for printing reasons
      if (prtfor>0) then
        f_tmp(:)=favg(:)
        if(abs(favg(1))<1.0d-13)f_tmp(1)=zero
        if(abs(favg(2))<1.0d-13)f_tmp(2)=zero
        if(abs(favg(3))<1.0d-13)f_tmp(3)=zero
        write(message, '(a,3es10.2)' )' cartesian forces (ha/bohr); non-corrected avg=',f_tmp(:)
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
        do iatom=1,dtset%natom
          f_tmp(:)=fcart(:,iatom)
          if(abs(fcart(1,iatom))<1.0d-13)f_tmp(1)=zero
          if(abs(fcart(2,iatom))<1.0d-13)f_tmp(2)=zero
          if(abs(fcart(3,iatom))<1.0d-13)f_tmp(3)=zero
          write(message, '(i5,1x,3es21.11)' ) iatom,f_tmp(:)
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
        end do
      end if
 
    end if
 
-!  Print eigenvalues every step if dtset%prtvol>=10 and GS case
+   ! Print eigenvalues every step if dtset%prtvol>=10 and GS case
    if (my_rank == master .and. (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0)) then
      option=1
      call prteigrs(eigen,dtset%enunit,fermie,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
@@ -500,17 +529,17 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      call wrtout(std_out,message,'COLL')
    end if
 
-!  Check whether exiting was required by the user.
+   ! Check whether exiting was required by the user.
    openexit=1 ; if(dtset%chkexit==0) openexit=0
    call exit_check(cpus,filnam1,iexit,ab_out,mpi_enreg%comm_cell,openexit)
    if (iexit/=0) quit=1
 
-!  In special cases, do not quit even if convergence is reached
-   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu>0).and.&
+   ! In special cases, do not quit even if convergence is reached
+   noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu/=0).and.&
 &   (dtset%usedmatpu/=0).and.(istep<=abs(dtset%usedmatpu)).and.&
 &   (dtset%usedmatpu<0.or.initGS==0))
 
-!  Additional stuff for electron/positron
+   ! Additional stuff for electron/positron
    if (present(electronpositron)) then
      if (associated(electronpositron)) then
        if (electronpositron%istep_scf==1) then
@@ -519,40 +548,44 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
    end if
 
-!  Stopping criteria in the SCF case
+   ! Stopping criteria in the SCF case
    if(iscf>1 .or. iscf==-3 .or. iscf == 0) then
-!    Here treat the vdw_df_threshold criterion : if the change of energy is less than
-!    input vdw_df_threshold, trigger the calculation of vdW interactions
-!    write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
-!    &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
-!    &      (abs(deltae)<vdw_df_threshold),ch10
-!    call wrtout(std_out,message,'COLL')
+     ! Here treat the vdw_df_threshold criterion : if the change of energy is less than
+     ! input vdw_df_threshold, trigger the calculation of vdW interactions
+     ! write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
+     ! &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
+     ! &      (abs(deltae)<vdw_df_threshold),ch10
+     ! call wrtout(std_out,message,'COLL')
 #if defined DEV_YP_VDWXC
      call xc_vdw_trigger( (abs(deltae)<vdw_df_threshold) )
 #endif
-!    Here treat the tolwfr criterion : if maximum residual is less than
-!    input tolwfr, stop steps (exit loop here)
-     if( ttolwfr==1 .and. residm<tolwfr .and. (.not.noquit)) then
-       if (dtset%usewvl == 0) then
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
-&         ' At SCF step',istep,'   max residual=',residm,' < tolwfr=',tolwfr,' =>converged.'
+     ! Here treat the tolwfr criterion: if maximum residual is less than
+     ! input tolwfr, stop steps (exit loop here)
+     if (ttolwfr == 1 .and. .not. noquit) then
+       if (residm < tolwfr) then
+         if (dtset%usewvl == 0) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
+           ' At SCF step',istep,'   max residual=',residm,' < tolwfr=',tolwfr,' =>converged.'
+         else
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
+           ' At SCF step',istep,'   max grdnorm=',residm,' < tolwfr=',tolwfr,' =>converged.'
+         end if
+         call wrtout([std_out, ab_out], message)
+         quit=1
        else
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
-&         ' At SCF step',istep,'   max grdnorm=',residm,' < tolwfr=',tolwfr,' =>converged.'
+         use_dpfft = residm < tol7
        end if
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-       quit=1
      end if
-!    Here treat the toldff criterion : if maximum change of fcart is less than
-!    input toldff twice consecutively, stop steps (exit loop here)
-     if( ttoldff==1 ) then
-       if( istep==1 )then
+
+     ! Here treat the toldff criterion: if maximum change of fcart is less than
+     ! input toldff twice consecutively, stop steps (exit loop here)
+     if (ttoldff==1) then
+       if (istep==1) then
          toldff_ok=0
-       else if (diffor<toldff) then
+       else if (diffor < toldff) then
          toldff_ok=toldff_ok+1
-! add warning for forces which are 0 by symmetry. Also added Matteo check below that the wave
-!  functions are relatively converged as well
+         ! add warning for forces which are 0 by symmetry. Also added Matteo check below that the wave
+         ! functions are relatively converged as well
          if (diffor < tol12) then
            write (message,'(3a)') ' toldff criterion is satisfied, but your forces are suspiciously low.', ch10,&
 &           ' Check if the forces are 0 by symmetry: in that case you can not use the toldff convergence criterion!'
@@ -561,66 +594,95 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          end if
        else
          toldff_ok=0
+         use_dpfft = diffor < tol6
        end if
-       if(toldff_ok==2 .and. (.not.noquit))then
+
+       if(toldff_ok==2 .and. .not.noquit)then
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
 &         ' At SCF step',istep,', forces are converged : ',ch10,&
 &         '  for the second time, max diff in force=',diffor,' < toldff=',toldff
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
      end if
-!    Here treat the tolrff criterion : if maximum change of fcart is less than
-!    input tolrff times fcart itself twice consecutively, stop steps (exit loop here)
-     if( ttolrff==1 ) then
-       if( istep==1 )then
+
+     ! Here treat the tolrff criterion: if maximum change of fcart is less than
+     ! input tolrff times fcart itself twice consecutively, stop steps (exit loop here)
+     if (ttolrff==1) then
+       if (istep==1) then
          tolrff_ok=0
-!        27/7/2009: added test for absolute value of maxfor, otherwise if it is 0 this never exits the scf loop.
-       else if (diffor<tolrff*maxfor .or. (maxfor < tol16 .and. diffor < tol16)) then
+         ! 27/7/2009: added test for absolute value of maxfor, otherwise if it is 0 this never exits the scf loop.
+       else if (diffor < tolrff*maxfor .or. (maxfor < tol16 .and. diffor < tol16)) then
          tolrff_ok=tolrff_ok+1
            ! Thu Mar 12 19:01:40 MG: added additional check on res2 to make sure the SCF cycle is close to convergence.
            ! Needed for structural relaxations otherwise the stress tensor is wrong and the relax algo makes wrong moves.
          if (maxfor < tol16 .and. res2 > tol9) tolrff_ok=0
        else
          tolrff_ok=0
+         use_dpfft = diffor < tolrff * maxfor * five
        end if
        if(tolrff_ok==2 .and. (.not.noquit))then
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
-&         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
-&         '  for the second time, max diff in force=',diffor,&
-&         ' is less than < tolrff=',tolrff, ' times max force'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
+         '  for the second time, max diff in force=',diffor,&
+         ' is less than < tolrff=',tolrff, ' times max force'
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
      end if
-!    Here treat the toldfe criterion : if the change of energy is less than
-!    input toldfe twice consecutively, stop steps (exit loop here)
-     if( ttoldfe==1 ) then
-       if( istep==1 )then
+
+     ! Here treat the toldfe criterion: if the change of energy is less than
+     ! input toldfe twice consecutively, stop steps (exit loop here)
+     if (ttoldfe==1) then
+       if (istep==1) then
          toldfe_ok=0
        else if (abs(deltae)<toldfe) then
          toldfe_ok=toldfe_ok+1
        else
          toldfe_ok=0
+         use_dpfft = abs(deltae) < tol8
        end if
        if(toldfe_ok==2 .and. (.not.noquit))then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&         ' At SCF step',istep,', etot is converged : ',ch10,&
-&         '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
+         if(usefock==0 .or. nnsclohf<2)then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+         else
+           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+            ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+         endif
+         call wrtout([std_out, ab_out], message)
          quit=1
        end if
-!    Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
-!    calculations: If input vdw_df_threshold is lesss than toldfe
-!    then the vdW-DF is triggered once selfconsistency criteria is
-!    reached for the first time.
-!    write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
-!    &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
-!    &      (abs(deltae)<toldfe),ch10
-!    call wrtout(std_out,message,'COLL')
+       if(usefock==1 .and. nnsclohf>1)then
+         if(istep_mix==1 .and. (.not.noquit))then
+!          The change due to the update of the Fock operator is sufficiently small. No need to meet it a second times.
+           if (abs(deltae)<toldfe) then
+             write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
+             '  update of Fock operator yields diff in etot=',abs(deltae),' < toldfe=',toldfe
+             call wrtout([std_out, ab_out], message)
+             fock%fock_common%fock_converged=.true.
+             quit=1
+           endif
+         endif
+         if(istep_mix==nnsclohf .and. quit==0)then
+           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
+           '  diff in etot=',abs(deltae),' > toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
+         endif
+       endif
+
+!      Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
+!      calculations: If input vdw_df_threshold is lesss than toldfe
+!      then the vdW-DF is triggered once selfconsistency criteria is
+!      reached for the first time.
+!      write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
+!      &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
+!      &      (abs(deltae)<toldfe),ch10
+!      call wrtout(std_out,message,'COLL')
 #if defined DEV_YP_VDWXC
        ivdw = 0
        if ( toldfe > vdw_df_threshold ) then
@@ -632,33 +694,41 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
 #endif
      end if
-!    Here treat the tolvrs criterion : if density/potential residual (squared)
-!    is less than input tolvrs, stop steps (exit loop here)
-     if( ttolvrs==1 .and. res2<tolvrs .and. (.not.noquit)) then
-       if (optres==0) then
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-&         ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+
+     ! Here treat the tolvrs criterion: if density/potential residual (squared)
+     ! is less than input tolvrs, stop steps (exit loop here)
+     if (ttolvrs==1 .and. .not. noquit) then
+       if (res2 < tolvrs) then
+         if (optres==0) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+            ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+         else
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+            ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+         end if
+         call wrtout([std_out, ab_out], message)
+         quit=1
        else
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-&         ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+         use_dpfft = res2 < tol5
        end if
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-       quit=1
      end if
 
      if (quit==1.and.noquit) then
        write(message, '(a,a,a)' ) ch10, &
-&       ' SCF cycle will continue as it is in an initialization stage',' (occ. matrix was kept constant)...'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+        ' SCF cycle will continue as it is in an initialization stage',' (occ. matrix was kept constant)...'
+       call wrtout([std_out, ab_out], message)
      end if
 
    end if
 
- case (3)
+   ! Activate FFT in double-precision.
+   if (use_dpfft) then
+     if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching convergence. Activating FFT in double-precision")
+     ii = fftcore_set_mixprec(0)
+   end if
 
-!  If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
+ case (3)
+   ! If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
    conv_retcode = 0
    if(nstep>0) then
      if (.not. converged()) then
@@ -666,38 +736,36 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
        if(iscf>=1 .or. iscf==-3 .or. iscf == 0)then
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
-&         ' scprqt:  WARNING -',ch10,&
-&         '  nstep=',nstep,' was not enough SCF cycles to converge;'
+         ' scprqt:  WARNING -',ch10,&
+         '  nstep=',nstep,' was not enough SCF cycles to converge;'
 
          write(std_out,'(6a,i0,3a)')ch10,&
-&         "--- !ScfConvergenceWarning",ch10,&
-&         "message: |",ch10,&
-&         '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
-&         "..."
+         "--- !ScfConvergenceWarning",ch10,&
+         "message: |",ch10,&
+         '    nstep ',nstep,' was not enough SCF cycles to converge.',ch10,&
+         "..."
            !MSG_WARNING_CLASS(message, "ScfConvergenceWarning")
        else
          write(message, '(a,a,a,a,i5,a)' ) ch10,&
-&         ' scprqt:  WARNING -',ch10,&
-&         '  nstep=',nstep,' was not enough non-SCF iterations to converge;'
+         ' scprqt:  WARNING -',ch10,&
+         '  nstep=',nstep,' was not enough non-SCF iterations to converge;'
 
          write(std_out,'(8a)')ch10,&
-&         "--- !NscfConvergenceWarning",ch10,&
-&         "message: |",ch10,TRIM(indent(message)),ch10,&
-&         "..."
+         "--- !NscfConvergenceWarning",ch10,&
+         "message: |",ch10,TRIM(indent(message)),ch10,&
+         "..."
            !MSG_WARNING_CLASS(message, "NScfConvergenceWarning")
        end if
-
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
 
        if (ttolwfr==1) then
          if (dtset%usewvl == 0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
+           '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
 
            write(message2, '(a,es11.3,2a)' ) &
-&           '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
-&           '  iband, isppol, individual band residuals (max over all k-points):'
+           '  maximum residual each band. tolwfr= ',tolwfr,ch10,&
+           '  iband, isppol, individual band residuals (max over all k-points):'
            call wrtout(std_out, message2,'COLL')
            do isppol = 1, dtset%nsppol
              do iband = 1, dtset%mband
@@ -708,39 +776,38 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
          else
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  maximum grdnorm=',residm,' exceeds tolwfr=',tolwfr,ch10
+           '  maximum grdnorm=',residm,' exceeds tolwfr=',tolwfr,ch10
          end if
 
        else if (ttoldff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
+         '  maximum force difference=',diffor,' exceeds toldff=',toldff,ch10
 
        else if (ttolrff==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
+         '  maximum force difference=',diffor,' exceeds tolrff*maxfor=',tolrff*maxfor,ch10
 
        else if (ttoldfe==1) then
          write(message, '(a,es11.3,a,es11.3,a)' ) &
-&         '  maximum energy difference=',abs(deltae),' exceeds toldfe=',toldfe,ch10
+         '  maximum energy difference=',abs(deltae),' exceeds toldfe=',toldfe,ch10
 
        else if(ttolvrs==1)then
          if (optres==0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  potential residual=',res2,' exceeds tolvrs=',tolvrs,ch10
+           '  potential residual=',res2,' exceeds tolvrs=',tolvrs,ch10
          else
            write(message, '(a,es11.3,a,es11.3,a)' ) &
-&           '  density residual=',res2,' exceeds tolvrs=',tolvrs,ch10
+           '  density residual=',res2,' exceeds tolvrs=',tolvrs,ch10
          end if
        end if
-
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message, 'COLL')
+       call wrtout([std_out, ab_out], message)
 
        if (prtxml == 1) then
          write(ab_xml_out, "(A)", advance = "NO") '      <status cvState="Failed"'
        end if
 
-     else    ! Convergence is OK
+     else
+       ! Convergence is OK
        if (prtxml == 1) then
          write(ab_xml_out, "(A)", advance = "NO") '      <status cvState="Ok"'
        end if
@@ -762,6 +829,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
 
+     ! If enabled, output a YAML document with the ETOT iterations
+     !if (etot_yaml_doc%stream%length > 0) call etot_yaml_doc%write_and_free(ab_out)
    end if ! nstep == 0 : no output
 
  case default
@@ -769,7 +838,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    MSG_BUG(message)
  end select
 
-!Additional stuff for the Fock+SCF cycle
+ ! Additional stuff for the Fock+SCF cycle
  if (present(fock)) then
    if (associated(fock)) then
      fock%fock_common%scf_converged=(quit==1)
@@ -778,7 +847,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
  end if
 
-!Additional stuff for the two-component DFT SCF cycle (electrons+positron)
+ ! Additional stuff for the two-component DFT SCF cycle (electrons+positron)
  if (present(electronpositron)) then
    if (associated(electronpositron)) then
      electronpositron%scf_converged=(quit==1)
@@ -791,8 +860,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(abs(dtset%postoldff)>tiny(0.0_dp))ttoldff=1
        if(abs(dtset%postoldfe)>tiny(0.0_dp))ttoldfe=1
        if (dtset%positron<0.and.ttoldff+ttoldfe/=1.and.iscf>0) then
-         message = 'one and only one of toldff or toldfe must differ from zero !'
-         MSG_ERROR(message)
+         MSG_ERROR('one and only one of toldff or toldfe must differ from zero !')
        end if
      end if
      if (choice==2) then
@@ -813,8 +881,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &                 ' max. force from electronic calculation and max. force from positronic calculation',ch10,&
 &                 ' is converged :  diff(maxfor_el-maxfor_pos)=',diff_f,' < postoldff=',electronpositron%postoldff
                end if
-               call wrtout(ab_out,message,'COLL')
-               call wrtout(std_out,message,'COLL')
+               call wrtout([std_out, ab_out], message)
              else
                quit=0
              end if
@@ -830,8 +897,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &           '  posnstep=',dtset%posnstep,' was not enough SCF cycles to converge difference between',ch10,&
 &           '  etotal from electronic calculation and etotal from positronic calculation;',ch10,&
 &           '  diff=',diff_e,' exceeds postoldfe=',electronpositron%postoldfe
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
          end if
          if (diff_f>=electronpositron%postoldff.and.abs(dtset%postoldff)>tiny(0.0_dp)) then
            write(message, '(4a,i5,5a,es11.3,a,es11.3)' ) ch10,&
@@ -839,8 +905,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &           '  posnstep=',dtset%posnstep,' was not enough SCF cycles to converge difference between',ch10,&
 &           '  max. force from electronic calculation and max. force from positronic calculation;',ch10,&
 &           '  diff=',diff_e,' exceeds postoldff=',electronpositron%postoldff
-           call wrtout(ab_out,message,'COLL')
-           call wrtout(std_out,message,'COLL')
+           call wrtout([std_out, ab_out], message)
          end if
        end if
      end if
@@ -855,22 +920,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    logical function converged()
 
-!   converged = .not.(                             &
-!&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
-!&   (ttoldff==1 .and. diffor > toldff) .or.       &
-!&   (ttolrff==1 .and. diffor > tolrff*maxfor .and. maxfor > tol16) .or.&
-!&   (ttoldfe==1 .and. abs(deltae) > toldfe) .or.  &
-!&   (ttolvrs==1 .and. res2  > tolvrs) )
-
-   ! LB-02/01/2017 :
+   ! LB-02/01/2017:
    ! This code avoids evaluation of undefined variables (which could happen in respfn, apparently)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'converged'
-!End of the abilint section
-
    logical :: loc_conv
    loc_conv = .true.
    if (ttolwfr==1) then
@@ -941,24 +992,13 @@ end subroutine scprqt
 !! SOURCE
 
 subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
-&  gprimd,gsqcut_eff,gsqcutc_eff,natom,ngfft,ngfftc,nkpt,nsppol,&
+&  gprimd,gsqcut_eff,gsqcutc_eff,ngfft,ngfftc,nkpt,nsppol,&
 &  response,rmet,rprim,rprimd,ucvol,usepaw)
-
- use m_geometry,   only : mkrdim, metric
- use m_kg,         only : getcut
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
- integer,intent(in) :: natom,nkpt,nsppol
+ integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: response,usepaw
  integer,intent(out) :: bantot
  real(dp),intent(in) :: ecut_eff,ecutc_eff
@@ -971,7 +1011,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
 !Local variables-------------------------------
 !scalars
- integer :: iatom,ikpt,isppol
+ integer :: ikpt,isppol
  real(dp) :: boxcut,boxcutc
  character(len=500) :: message
 !arrays
@@ -989,51 +1029,47 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  if(dtset%nqpt>1.or.dtset%nqpt<0) then
    write(message,'(a,i0,5a)')&
-&   '  nqpt =',dtset%nqpt,' is not allowed',ch10,&
-&   '  (only 0 or 1 are allowed).',ch10,&
-&   '  Action : correct your input file.'
-   call wrtout(ab_out,message,'COLL')
+   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
+   '(only 0 or 1 are allowed).',ch10,&
+   'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
-!Compute dimensional primitive translations rprimd
+ ! Compute dimensional primitive translations rprimd
  call mkrdim(acell,rprim,rprimd)
 
-!Obtain dimensional translations in reciprocal space gprimd,
-!metrics and unit cell volume, from rprimd.
-!Also output rprimd, gprimd and ucvol
+ ! Obtain dimensional translations in reciprocal space gprimd,
+ ! metrics and unit cell volume, from rprimd.
+ ! Also output rprimd, gprimd and ucvol
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
 
-!Get boxcut for given acell, gmet, ngfft, and ecut_eff
-!(center at 000 for groundstate, center at q for respfn):
-!boxcut=ratio of basis sphere diameter to fft box side
+ ! Get boxcut for given acell, gmet, ngfft, and ecut_eff
+ ! (center at 000 for groundstate, center at q for respfn):
+ ! boxcut=ratio of basis sphere diameter to fft box side
  k0(:)=0.0_dp
  if(response==1 .and. dtset%nqpt==1)then
    k0(:)=dtset%qptn(:)
    write(message, '(a)' )' setup1 : take into account q-point for computing boxcut.'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
  end if
  if (usepaw==1) then
    write(message,'(2a)') ch10,' Coarse grid specifications (used for wave-functions):'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call getcut(boxcutc,ecutc_eff,gmet,gsqcutc_eff,dtset%iboxcut,ab_out,k0,ngfftc)
    write(message,'(2a)') ch10,' Fine grid specifications (used for densities):'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
  else
    call getcut(boxcut,ecut_eff,gmet,gsqcut_eff,dtset%iboxcut,ab_out,k0,ngfft)
    gsqcutc_eff=gsqcut_eff
  end if
 
-!Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
+ ! Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
  if (boxcut<2.0_dp.and.dtset%intxc==1) then
    write(message, '(a,es12.4,a,a,a,a,a)' )&
-&   '  boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
-&   '  Need larger ngfft to use intxc=1.',ch10,&
-&   '  Action : you could increase ngfft, or decrease ecut, or put intxcn=0.'
+   'boxcut= ',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
+   'Need larger ngfft to use intxc=1.',ch10,&
+   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
    MSG_ERROR(message)
  end if
 
@@ -1041,7 +1077,6 @@ end subroutine setup1
 !!***
 
 !!****f* ABINIT/prteigrs
-!!
 !! NAME
 !! prteigrs
 !!
@@ -1104,14 +1139,6 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 
  use m_io_tools,  only : open_file
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prteigrs'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nkpt,nnsclo_now,nsppol
@@ -1137,13 +1164,11 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 ! *************************************************************************
 
  if (enunit<0.or.enunit>2) then
-   write(msg, '(a,i0)' )' enunit must be 0, 1 or 2. Argument was ',enunit
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('enunit must be 0, 1 or 2. Argument was:', itoa(enunit)))
  end if
 
  if (prteig > 0) then
-   write(msg, '(a,a)' ) ' prteigrs : about to open file ',TRIM(fname_eig)
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout, sjoin(' prteigrs : about to open file ', fname_eig))
    if (open_file(fname_eig, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if
@@ -1158,8 +1183,8 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 
  nkpt_eff=nkpt
 
-!write(msg,'(a,5i5)')' prtvol,iscf,kptopt,nkpt_eff,nkpt_max ',prtvol,iscf,kptopt,nkpt_eff,nkpt_max
-!call wrtout(iout,msg,'COLL')
+ !write(msg,'(a,5i5)')' prtvol,iscf,kptopt,nkpt_eff,nkpt_max ',prtvol,iscf,kptopt,nkpt_eff,nkpt_max
+ !call wrtout(iout,msg)
 
  if( (prtvol==0.or.prtvol==1) .and. (iscf/=-2 .or. kptopt>0) .and. nkpt_eff>nkpt_max)nkpt_eff=nkpt_max
  if( (prtvol==0.or.prtvol==1) .and. (iscf/=-2 .or. kptopt>0) .and. nkpt_eff>1 .and. iout==ab_out)nkpt_eff=1
@@ -1170,8 +1195,8 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 
      if (enunit==1 .and. ienunit==0)cycle
      if (enunit==0 .and. ienunit==1)cycle
-!  Print eigenvalues in hartree for enunit=0 or 2
-!  The definition of two different strings is quite ridiculous. Historical reasons ...
+     ! Print eigenvalues in hartree for enunit=0 or 2
+     ! The definition of two different strings is quite ridiculous. Historical reasons ...
 
      if (ienunit==0)then
        convrt=one
@@ -1212,23 +1237,22 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
      if(iscf>=0 .and. (ienunit==0 .or. option==1))then
        write(msg, '(3a,f10.5,3a,f10.5)' ) &
         ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
-       call wrtout(iout,msg,'COLL')
-       if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+       call wrtout(iout,msg)
+       if (prteig > 0) call wrtout(temp_unit,msg)
      end if
 
-
-!    if( (iscf>=0 .or. iscf==-3) .and. ienunit==0)then     ! This is the most correct
+     ! if( (iscf>=0 .or. iscf==-3) .and. ienunit==0)then     ! This is the most correct
      if(iscf>=0 .and. ienunit==0)then ! For historical reasons
        if(tmagnet==1)then
          write(msg, '(a,es16.8,a,a,es16.8,a,es16.8)' )&
 &         ' Magnetization (Bohr magneton)=',magnet,ch10,&
 &         ' Total spin up =',rhoup,'   Total spin down =',rhodn
          call wrtout(iout,msg,'COLL')
-         if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+         if (prteig > 0) call wrtout(temp_unit,msg)
        end if
      end if
 
-!    Loop over spins (suppress spin data if nsppol not 2)
+     ! Loop over spins (suppress spin data if nsppol not 2)
      do isppol=1,nsppol
 
        ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
@@ -1242,14 +1266,14 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
          write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
 &         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points:'
        end if
-       call wrtout(iout,msg,'COLL')
-       if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+       call wrtout(iout,msg)
+       if (prteig > 0) call wrtout(temp_unit,msg)
 
        if(ienunit==0)then
          if(option>=4 .and. option<=7)then
            msg = '  (in case of degenerate eigenvalues, averaged derivative)'
-           call wrtout(iout,msg,'COLL')
-           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+           call wrtout(iout,msg)
+           if (prteig > 0) call wrtout(temp_unit,msg)
          end if
        end if
 
@@ -1262,36 +1286,35 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 &           ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
 &           kptns(1:3,ikpt)+tol10,' (reduced coord)'
            call wrtout(iout,msg,'COLL')
-           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+           if (prteig > 0) call wrtout(temp_unit,msg)
            do ii=0,(nband_k-1)/8
 !            write(msg, '(8f15.10)' ) (convrt*eigen(iband+band_index),&
-             write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),&
-&             iband=1+ii*8,min(nband_k,8+ii*8))
+             write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index), iband=1+ii*8,min(nband_k,8+ii*8))
              call wrtout(iout,msg,'COLL')
-             if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+             if (prteig > 0) call wrtout(temp_unit,msg)
            end do
            if(ienunit==0 .and. option==1 .and. occopt>=3 .and. occopt<=8)then
              write(msg, '(5x,a,'//ikpt_fmt//')' )  ' occupation numbers for kpt#',ikpt
-             call wrtout(iout,msg,'COLL')
+             call wrtout(iout,msg)
              do ii=0,(nband_k-1)/8
                write(msg, '(8(f10.5,1x))' ) (occ(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
-               call wrtout(iout,msg,'COLL')
+               call wrtout(iout,msg)
              end do
            end if
 
          else
            if(ikpt==nkpt_eff+1)then
              write(msg, '(a,a)' )' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
-             call wrtout(iout,msg,'COLL')
+             call wrtout(iout,msg)
            end if
            if (prteig > 0) then
              write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
 &             ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
 &             kptns(1:3,ikpt)+tol10,' (reduced coord)'
-             call wrtout(temp_unit,msg,'COLL')
+             call wrtout(temp_unit,msg)
              do ii=0,(nband_k-1)/8
                write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
-               call wrtout(temp_unit,msg,'COLL')
+               call wrtout(temp_unit,msg)
              end do
            end if
          end if
@@ -1309,8 +1332,8 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
      if(nsppol==2)then
        if(isppol==1)write(msg, '(2a)' ) ch10,' SPIN UP channel '
        if(isppol==2)write(msg, '(2a)' ) ch10,' SPIN DOWN channel '
-       call wrtout(iout,msg,'COLL')
-       if(prteig>0) call wrtout(temp_unit,msg,'COLL')
+       call wrtout(iout,msg)
+       if(prteig>0) call wrtout(temp_unit,msg)
      end if
 
      do ikpt=1,nkpt
@@ -1320,32 +1343,32 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
        if(ikpt<=nkpt_eff)then
          write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
 &         'Non-SCF case, kpt',ikpt,' (',(kptns(ii,ikpt),ii=1,3),'), residuals and eigenvalues='
-         call wrtout(iout,msg,'COLL')
+         call wrtout(iout,msg)
          if (prteig > 0) then
            write(msg, '(1x,a,'//ikpt_fmt//',a,f9.5,2f9.5,a)' ) &
 &           'Non-SCF case, kpt',ikpt,' eig(',(kptns(ii,ikpt),ii=1,3),') '
-           call wrtout(temp_unit,msg,'COLL')
+           call wrtout(temp_unit,msg)
          end if
          do ii=0,(nband_k-1)/8
            write(msg, '(1p,8e10.2)' )(resid(iband+band_index),iband=1+8*ii,min(8+8*ii,nband_k))
-           call wrtout(iout,msg,'COLL')
+           call wrtout(iout,msg)
          end do
          do ii=0,(nband_k-1)/6
            write(msg, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
-           call wrtout(iout,msg,'COLL')
-           if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
+           call wrtout(iout,msg)
+           if (prteig > 0) call wrtout(temp_unit,msg)
          end do
        else
          if(ikpt==nkpt_eff+1)then
            write(msg, '(a,a)' )' prteigrs : prtvol=0 or 1, do not print more k-points.',ch10
-           call wrtout(iout,msg,'COLL')
+           call wrtout(iout,msg)
          end if
          if (prteig > 0) then
            write(msg, '(1x,a,i5,a,f9.5,2f9.5,a)' )'Non-SCF kpt',ikpt,' eig(',(kptns(ii,ikpt),ii=1,3),') '
-           call wrtout(temp_unit,msg,'COLL')
+           call wrtout(temp_unit,msg)
            do ii=0,(nband_k-1)/6
              write(msg, '(1p,6e12.4)' )(eigen(iband+band_index),iband=1+6*ii,min(6+6*ii,nband_k))
-             call wrtout(temp_unit,msg,'COLL')
+             call wrtout(temp_unit,msg)
            end do
          end if
        end if
@@ -1356,17 +1379,16 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
        if (residk>tolwfr) then
          write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
 &         ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (incl. the buffer)=',residk
-         call wrtout(iout,msg,'COLL')
+         call wrtout(iout,msg)
        end if
 
        band_index=band_index+nband_k
      end do
    end do
-   call wrtout(iout," ",'COLL')
+   call wrtout(iout," ")
 
  else
-   write(msg, '(a,i0,a)' )' option = ',option,', is not an allowed value.'
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('option:', itoa(option),', is not allowed.'))
  end if
 
  if (prteig > 0) close (temp_unit)
@@ -1407,15 +1429,6 @@ end subroutine prteigrs
 
 subroutine prtene(dtset,energies,iout,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtene'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,usepaw
@@ -1423,15 +1436,16 @@ subroutine prtene(dtset,energies,iout,usepaw)
  type(energies_type),intent(in) :: energies
 
 !Local variables-------------------------------
-! Do not modify the length of this string
 !scalars
- integer :: ipositron,mu,optdc
+ integer :: ipositron,optdc
  logical :: directE_avail,testdmft
- real(dp) :: eent,enevalue,etotal,etotaldc
- character(len=22) :: eneName
+ real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
+ ! Do not modify the length of these strings
+ character(len=14) :: eneName
  character(len=500) :: msg
+ type(yamldoc_t) :: edoc, dc_edoc
 !arrays
- character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
+ !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
 ! *************************************************************************
 
@@ -1463,210 +1477,523 @@ subroutine prtene(dtset,energies,iout,usepaw)
  etotal   = etotal   + eent
  etotaldc = etotaldc + eent
 
- write(msg,'(a,80a)') ch10,('-',mu=1,80)
- call wrtout(iout,msg,'COLL')
-
 !============= Printing of Etotal by direct scheme ===========
 
  if (dtset%icoulomb == 1) then
-   write(eneName, "(A)") "    Ion-ion energy  = "
+   eneName =  "Ion-ion energy"
  else
-   write(eneName, "(A)") "    Ewald energy    = "
+   eneName = "Ewald energy"
  end if
  enevalue = energies%e_ewald
+
 
  if (optdc==0.or.optdc==2) then
 
    if (directE_avail) then
-     write(msg, '(2a)' ) ' Components of total free energy (in Hartree) :',ch10
-     call wrtout(iout,msg,'COLL')
-     write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
-     call wrtout(iout,msg,'COLL')
+     edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
+                         width=20, real_fmt='(es21.14)')
+     call edoc%add_real('kinetic', energies%e_kinetic)
      if (ipositron/=1) then
-       write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
-&       '    Hartree energy  = ',energies%e_hartree,ch10,&
-&       '    XC energy       = ',energies%e_xc+energies%e_fock+&
-&       energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v,ch10,&
-&       eneName            ,enevalue,ch10,&
-&       '    PspCore energy  = ',energies%e_corepsp
-       call wrtout(iout,msg,'COLL')
+       exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
+       ! XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
+       ! At present, there is still a problem with the variational formulation for the Fock term with PAW.
+       ! So, for the time being, keep it inside.
+       if(usepaw==1)exc_semilocal=exc_semilocal+energies%e_fock
+       call edoc%add_real('hartree', energies%e_hartree)
+       call edoc%add_real('xc', exc_semilocal)
+       call edoc%add_real(eneName, enevalue)
+       call edoc%add_real('psp_core', energies%e_corepsp)
 #if defined DEV_YP_VDWXC
        if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) .and. (xc_vdw_status()) ) then
-         write(msg, '(a,es21.14)' )'    vdW-DF energy   = ',energies%e_xc_vdw
-         call wrtout(iout,msg,'COLL')
+         call edoc%add_real('VdWaals_df', energies%e_xc_vdw)
        end if
 #endif
      end if
-     write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
-     call wrtout(iout,msg,'COLL')
+     call edoc%add_real('local_psp', energies%e_localpsp)
      if (usepaw==0) then
-       write(msg, '(a,es21.14)' ) '    NL   psp  energy= ',energies%e_nonlocalpsp
+       if(abs(energies%e_fock0)<tol8)then
+         call edoc%add_real('non_local_psp', energies%e_nlpsp_vfock)
+       else
+         call edoc%add_real('non_local_psp+x', energies%e_nlpsp_vfock-energies%e_fock0)
+       endif
      else
-       write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_paw
+       call edoc%add_real('spherical_terms', energies%e_paw)
+       !!!XG20181025 Does not work (yet)...
+       !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
+       !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
+       !!!  call wrtout(iout,msg,'COLL')
+       !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
+       !!!  call wrtout(iout,msg,'COLL')
+       !!!endif
      end if
-     call wrtout(iout,msg,'COLL')
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
-       write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
-       call wrtout(iout,msg,'COLL')
+       call edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
      end if
      if (dtset%nzchempot>=1) then
-       write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
-       call wrtout(iout,msg,'COLL')
+       call edoc%add_real('chem_potential', energies%e_chempot)
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
+       call edoc%add_real('internal', etotal-eent)
        if(.not.testdmft) then
-         write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
-&         '    >>>>> Internal E= ',etotal-eent,ch10,ch10,&
-&         '    -kT*entropy     = ',eent
-         call wrtout(iout,msg,'COLL')
-       else if (testdmft) then
-         write(msg, '(a,es21.14,a)' ) &
-&         '    >>>>> Internal E= ',etotal-eent,ch10
-         call wrtout(iout,msg,'COLL')
+         call edoc%add_real('-kT*entropy', eent)
        end if
      else if (ipositron/=0) then
        if (dtset%occopt>=3.and.dtset%occopt<=8) then
-         write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
-         call wrtout(iout,msg,'COLL')
+         call edoc%add_real('-kT*entropy', eent)
        end if
-       write(msg, '(3a,es21.14,a)' ) &
-&       '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron &
-&       -energies%e_electronpositron,ch10
-       call wrtout(iout,msg,'COLL')
-       write(msg, '(3a,es21.14,2a,es21.14)' ) &
-&       '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
-&       '    EP interaction E= '             ,energies%e_electronpositron
-       call wrtout(iout,msg,'COLL')
+       !write(msg, '(3a,es21.14,a)' ) &
+       ! '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron -energies%e_electronpositron,ch10
+       !call wrtout(iout,msg,'COLL')
+       !write(msg, '(3a,es21.14,2a,es21.14)' ) &
+       ! '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
+       ! '    EP interaction E= '             ,energies%e_electronpositron
+       !call wrtout(iout,msg,'COLL')
+       if(ipositron == 1) then
+        call edoc%add_real('positronic', etotal - energies%e0_electronpositron-energies%e_electronpositron)
+        call edoc%add_real('electronic', energies%e0_electronpositron)
+       else
+        call edoc%add_real('electronic', etotal- energies%e0_electronpositron-energies%e_electronpositron)
+        call edoc%add_real('positronic', energies%e0_electronpositron)
+       end if
+       call edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
      end if
      if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
-&     dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) .and.ipositron/=1) then
-       write(msg, '(a,es21.14)' ) '    Electric energy = ',energies%e_elecfield
-       call wrtout(iout,msg,'COLL')
-       write(msg, '(a,es21.14)' ) '    Kohn-Sham energy= ',etotal-energies%e_elecfield
-       call wrtout(iout,msg,'COLL')
+          dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) .and.ipositron/=1) then
+       call edoc%add_real('electric', energies%e_elecfield)
+       call edoc%add_real('kohn_sham', etotal-energies%e_elecfield)
      end if
-     write(msg, '(a,es21.14)' ) '    >>>>>>>>> Etotal= ',etotal
-     call wrtout(iout,msg,'COLL')
+     call edoc%add_real('total_energy', etotal)
 
    else
      write(msg, '(9a)' ) &
-&     ' COMMENT: ',ch10,&
-&     '  "Direct" decomposition of total free energy cannot be printed out !!!',ch10,&
-&     '  PAW contribution due to spin-orbit coupling cannot be evaluated',ch10,&
-&     '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
-&     '  (computed only when pawcpxocc=2).'
+     ' COMMENT: ',ch10,&
+     '  "Direct" decomposition of total free energy cannot be printed out !!!',ch10,&
+     '  PAW contribution due to spin-orbit coupling cannot be evaluated',ch10,&
+     '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
+     '  (computed only when pawcpxocc=2).'
      call wrtout(iout,msg,'COLL')
    end if
-
  end if
 !============= Printing of Etotal by double-counting scheme ===========
 
  if (optdc>=1) then
 
-   write(msg, '(4a,es21.14)' ) ch10,&
-&   ' "Double-counting" decomposition of free energy:',ch10,&
-&   '    Band energy     = ',energies%e_eigenvalues
-   call wrtout(iout,msg,'COLL')
+   dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
+                          width=20, real_fmt="(es21.14)")
+   call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
+
    if (ipositron/=1) then
-     write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
-&     eneName            ,enevalue,ch10,&
-&     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
-&     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc+&
-&     energies%e_fock-energies%e_fockdc+&
-&     energies%e_hybcomp_E0-energies%e_hybcomp_v0
-     call wrtout(iout,msg,'COLL')
+     !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
+     !  '    '//eneName//'  =',enevalue,ch10,&
+     !  '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
+     !  '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc -energies%e_fock0 + &
+     !  energies%e_hybcomp_E0-energies%e_hybcomp_v0
+     !call wrtout(iout,msg,'COLL')
+     call dc_edoc%add_real(eneName, enevalue)
+     call dc_edoc%add_real('psp_core', energies%e_corepsp-energies%e_corepspdc)
+     call dc_edoc%add_real('xc_dc', -energies%e_hartree+energies%e_xc-energies%e_xcdc - energies%e_fock0 + &
+                                     energies%e_hybcomp_E0-energies%e_hybcomp_v0)
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
-&   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
-     write(msg, '(a,es21.14)' ) '    Electric field  = ',energies%e_elecfield
-     call wrtout(iout,msg,'COLL')
+        dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
+     call dc_edoc%add_real('electric_field', energies%e_elecfield)
    end if
    if (usepaw==1) then
-     write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_pawdc
-     call wrtout(iout,msg,'COLL')
+     call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
-     write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
-     call wrtout(iout,msg,'COLL')
+     call dc_edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
    end if
    if (dtset%nzchempot>=1) then
-     write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
-     call wrtout(iout,msg,'COLL')
+     call dc_edoc%add_real('chem_potential', energies%e_chempot)
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
      if(.not.testdmft) then
-       write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
-&       '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
-&       '    -kT*entropy     = ',eent
-       call wrtout(iout,msg,'COLL')
-     else if (testdmft) then
-       write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotaldc-eent,ch10
-       call wrtout(iout,msg,'COLL')
+       !write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
+       ! '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
+       ! '    -kT*entropy     = ',eent
+       !call wrtout(iout,msg,'COLL')
+       call dc_edoc%add_real('internal', etotaldc-eent)
+       call dc_edoc%add_real('-kT*entropy', eent)
+     else
+       call dc_edoc%add_real('internal', etotaldc-eent)
      end if
    else if (ipositron/=0) then
      if (dtset%occopt>=3 .and. dtset%occopt<=8) then
-       write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
-       call wrtout(iout,msg,'COLL')
+       call dc_edoc%add_real('-kT*entropy', eent)
      end if
-     write(msg, '(a,es21.14,4a,es21.14,a)' ) &
-&     '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
-&     '    >>> ',EPName(ipositron),' E= ',etotaldc-energies%e0_electronpositron &
-&     -energies%e_electronpositron,ch10
-     call wrtout(iout,msg,'COLL')
-     write(msg, '(3a,es21.14,2a,es21.14)' ) &
-&     '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
-&     '    EP interaction E= '            ,energies%e_electronpositron
-     call wrtout(iout,msg,'COLL')
+     !write(msg, '(a,es21.14,4a,es21.14,a)' ) &
+     !  '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
+     !  '    >>> ',EPName(ipositron),' E= ',etotaldc-energies%e0_electronpositron -energies%e_electronpositron,ch10
+     !call wrtout(iout,msg,'COLL')
+     !write(msg, '(3a,es21.14,2a,es21.14)' ) &
+     ! '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
+     ! '    EP interaction E= '            ,energies%e_electronpositron
+     !call wrtout(iout,msg,'COLL')
+     call dc_edoc%add_real('electron_positron_dc', -energies%edc_electronpositron)
+     if(ipositron == 1) then
+       call dc_edoc%add_real('positronic', etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
+       call dc_edoc%add_real('electronic', energies%e0_electronpositron)
+     else
+       call dc_edoc%add_real('electronic', etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
+       call dc_edoc%add_real('positronic', energies%e0_electronpositron)
+     end if
+     call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
-   call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg,'COLL')
+   call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
 !======= Additional printing for compatibility  ==========
 
  if (usepaw==0.and.optdc==0) then
-   write(msg, '(a,a,a,a,es21.14,a,es18.10)' ) ch10,&
-&   ' Other information on the energy :',ch10,&
-&   '    Total energy(eV)= ',etotal*Ha_eV,' ; Band energy (Ha)= ',energies%e_eigenvalues
-   call wrtout(iout,msg,'COLL')
+   call edoc%add_real('total_energy_eV', etotal*Ha_eV)
+   call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
-   write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
-   call wrtout(iout,msg,'COLL')
+   !write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
+   !call wrtout(iout,msg,'COLL')
+   call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
  if (usepaw==1) then
    if ((optdc==0.or.optdc==2).and.(directE_avail)) then
-     write(msg, '(a,a,es21.14)' ) ch10,'  >Total energy in eV           = ',etotal*Ha_eV
-     call wrtout(iout,msg,'COLL')
+     call edoc%add_real('total_energy_eV', etotal*Ha_eV)
    end if
    if (optdc>=1) then
-     if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,&
-&     '  >Total DC energy in eV        = ',etotaldc*Ha_eV
-     if (optdc==2) write(msg, '(a,es21.14)' ) &
-&     '  >Total DC energy in eV        = ',etotaldc*Ha_eV
-     call wrtout(iout,msg,'COLL')
+     !if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,'  >Total DC energy in eV        = ',etotaldc*Ha_eV
+     !if (optdc==2) write(msg, '(a,es21.14)' ) '  >Total DC energy in eV        = ',etotaldc*Ha_eV
+     !call wrtout(iout,msg,'COLL')
+     call dc_edoc%add_real('total_energy_dc_eV', etotaldc*Ha_eV)
    end if
  end if
 
  if( dtset%icoulomb/=1.and.abs(dtset%charge)>tol8) then
    write(msg, '(6a)' ) &
-&   ch10,' Calculation was performed for a charged system with PBC',&
-&   ch10,' You may consider including the monopole correction to the total energy',&
-&   ch10,' The correction is to be divided by the dielectric constant'
+     ch10,' Calculation was performed for a charged system with PBC',&
+     ch10,' You may consider including the monopole correction to the total energy',&
+     ch10,' The correction is to be divided by the dielectric constant'
    call wrtout(iout,msg,'COLL')
-   write(msg, '(a,es21.14)' ) '    Monopole correction (Ha)=',energies%e_monopole
-   call wrtout(iout,msg,'COLL')
-   write(msg, '(a,es21.14)' ) '    Monopole correction (eV)=',energies%e_monopole*Ha_eV
-   call wrtout(iout,msg,'COLL')
+   call edoc%add_real('monopole_correction', energies%e_monopole)
+   call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
-!=============
- write(msg,'(a,80a)')('-',mu=1,80)
- call wrtout(iout,msg,'COLL')
+ ! Write components of total energies in Yaml format.
+ call edoc%write_and_free(iout)
+ if (optdc >= 1) call dc_edoc%write_and_free(iout)
 
 end subroutine prtene
+!!***
+
+!!****f* ABINIT/get_dtsets_pspheads
+!! NAME
+!! get_dtsets_pspheads
+!!
+!! FUNCTION
+!!  Parse input file, get list of pseudos for files file and build list of datasets
+!!  pseudopotential headers, maxval of dimensions needed in outvars
+!!
+!! INPUTS
+!!  input_path: Input filename specifed on the command line. zero lenght if files file syntax is used.
+!!    Mainly used to check whether pseudos are defined in the input to avoid entering the files file
+!!    branch that prompts for pseudos.
+!!  path: Input Filename
+!!  comm: MPI communicator
+!!
+!! OUTPUT
+!!  lenstr= the length of the resulting string.
+!!  ndtset= the number of declared datasets.
+!!  string= contains on output the content of the file, ready for parsing.
+!!  dtsets(0:ndtset): List of datasets
+!!  dmatpuflag=flag controlling the use of an initial density matrix in PAW+U (max. value over datasets)
+!!  mx<ab_dimensions>=datatype storing the maximal dimensions.
+!!  pspheads(npsp)=<type pspheader_type>=all the important information from the
+!!   pseudopotential file headers, as well as the psp file names
+!!
+!! PARENTS
+!!      abinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(out) :: lenstr, ndtset
+ type(ab_dimensions),intent(out) :: mx
+ character(len=strlen), intent(out) :: string
+ character(len=*),intent(in) :: input_path, path
+ integer,intent(in) :: comm
+ integer,intent(out) :: timopt, dmatpuflag
+!arrays
+ type(dataset_type),allocatable,intent(out)  :: dtsets(:)
+ type(pspheader_type),allocatable,intent(out):: pspheads(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipsp,ios, me, ndtset_alloc, nprocs
+ integer :: istatr,istatshft, papiopt, npsp, ii, idtset, msym, usepaw
+ character(len=fnlen) :: filpsp
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: mband_upper_(:)
+ real(dp) :: ecut_tmp(3,2,10),tsec(2)
+ real(dp),allocatable :: zionpsp(:)
+ character(len=fnlen), allocatable :: pspfilnam_(:), pseudo_paths(:)
+
+!************************************************************************
+
+ me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ ! Read the file, stringify it and return the number of datasets.
+ call parsefile(path, lenstr, ndtset, string, comm)
+
+ ndtset_alloc = ndtset; if (ndtset == 0) ndtset_alloc=1
+ ABI_MALLOC(dtsets, (0:ndtset_alloc))
+
+ timopt = 1; if (xmpi_paral==1) timopt = 0
+
+ ! Continue to analyze the input string, get upper dimensions, and allocate the remaining arrays.
+ call invars0(dtsets, istatr, istatshft, lenstr, msym, mx%natom, mx%nimage, mx%ntypat, &
+              ndtset, ndtset_alloc, npsp, pseudo_paths, papiopt, timopt, string, comm)
+
+ ! Enable PAPI timers
+ call time_set_papiopt(papiopt)
+
+ dtsets(:)%timopt = timopt
+ dtsets(0)%timopt = 1
+ if (xmpi_paral == 1) dtsets(0)%timopt = 0
+
+ call timab(41,2,tsec)
+ call timab(timopt,5,tsec)
+
+ ! Initialize pspheads, that contains the important information
+ ! from the pseudopotential headers, as well as the psp filename
+ call timab(42,1,tsec)
+
+ usepaw = 0
+ ABI_MALLOC(pspheads, (npsp))
+ if (npsp > 10) then
+   MSG_BUG('ecut_tmp is not well defined.')
+ end if
+ ecut_tmp = -one
+
+ pspheads(:)%usewvl = dtsets(1)%usewvl
+
+ if (me == 0) then
+    ABI_MALLOC(pspfilnam_, (npsp))
+
+    if (len_trim(pseudo_paths(1)) == 0) then
+      ! Enter Legacy `files file` mode --> Read the name of the psp file from files file.
+
+      ! Catch possible mistake done by user (input without pseudos and `abinit t01.in` syntax)
+      ! else the code starts to prompt for pseudos and execution gets stuck
+      if (len_trim(input_path) /= 0) then
+        MSG_ERROR("`pseudos` variable must be specified in input when the code is invoked with the `abinit t01.in` syntax")
+      end if
+
+      ! Finish to read the "file" file completely, as npsp is known,
+      do ipsp=1,npsp
+        write(std_out,'(/,a)' )' Please give name of formatted atomic psp file (and finish with a newline character)'
+        read (std_in, '(a)' , iostat=ios ) filpsp
+        ! It might be that a file name is missing
+        if (ios /= 0) then
+          write(msg, '(5a)' )&
+          'There are not enough names of pseudopotentials provided in the files file.',ch10,&
+          'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
+          'if they are correct, complete your files file.'
+          MSG_ERROR(msg)
+        end if
+        pspfilnam_(ipsp) = trim(filpsp)
+        write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
+      end do ! ipsp
+
+    else
+      ! Get pseudopotential paths from input file.
+      pspfilnam_ = pseudo_paths
+      do ipsp=1,npsp
+        write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(pspfilnam_(ipsp))
+      end do
+    end if
+
+    ! Now read the psp headers
+    call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
+    ABI_FREE(pspfilnam_)
+
+    if (minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
+    if (minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
+ end if
+
+ ABI_FREE(pseudo_paths)
+
+ ! Communicate pspheads to all processors
+ call pspheads_comm(npsp, pspheads, usepaw)
+
+ ! If (all) pspcod are 7 then this is a PAW calculation. Initialize (default) the value of ratsph
+ do idtset=0,ndtset_alloc
+    dtsets(idtset)%usepaw = usepaw
+    if (usepaw == 0) then
+      dtsets(idtset)%ratsph(:)=two
+    else
+      ! Note that the following coding assumes that npsp=ntypat for PAW, which is true as of now (XG20101024).
+      ! dtsets(idtset)%ratsph(1:npsp)=token%pspheads(1:npsp)%pawheader%rpaw
+      do ipsp=1,npsp
+        dtsets(idtset)%ratsph(ipsp) = pspheads(ipsp)%pawheader%rpaw
+      end do
+    endif
+ end do
+
+ ! Take care of other dimensions, and part of the content of dtsets that is or might be needed early.
+ ABI_MALLOC(zionpsp, (npsp))
+ do ii=1,npsp
+   zionpsp(ii) = pspheads(ii)%zionpsp
+ end do
+
+ ABI_MALLOC(mband_upper_, (0:ndtset_alloc))
+
+ ! Get MAX dimension over datasets
+ call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, mx,&
+               msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
+
+ ABI_FREE(zionpsp)
+ call timab(42,2,tsec)
+ call timab(43,3,tsec)
+
+ ! Provide defaults for the variables that have not yet been initialized.
+ call indefo(dtsets, ndtset_alloc, nprocs)
+ call macroin(dtsets, ecut_tmp, lenstr, ndtset_alloc, string)
+
+ ! Perform some global initialization, depending on the value of
+ ! pseudopotentials, parallelism variables, or macro input variables
+
+ ! If all the pseudopotentials have the same pspxc, override the default value for dtsets 1 to ndtset
+ if (minval(abs((pspheads(1:npsp)%pspxc - pspheads(1)%pspxc)))==0) then
+   dtsets(1:ndtset_alloc)%ixc = pspheads(1)%pspxc
+ end if
+
+ ! Call the main input routine.
+ call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string, comm)
+
+ call macroin2(dtsets, ndtset_alloc)
+
+ mx%mband = dtsets(1)%mband
+ do ii=1,ndtset_alloc
+    mx%mband = max(dtsets(ii)%mband, mx%mband)
+ end do
+
+ call timab(43,2,tsec)
+
+ ABI_FREE(mband_upper_)
+
+end subroutine get_dtsets_pspheads
+!!***
+
+!!****f* ABINIT/ebands_from_file
+!! NAME
+!! ebands_from_file
+!!
+!! FUNCTION
+!!  Build and ebands_t object from file. Supports Fortran and netcdf files
+!!  provided they have a Abinit header and obviously GS eigenvalues
+!!
+!! INPUTS
+!!  path: File name.
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+type(ebands_t) function ebands_from_file(path, comm) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform, ncid
+ type(hdr_type) :: hdr
+!arrays
+ real(dp),pointer :: gs_eigen(:,:,:)
+
+! *************************************************************************
+
+ ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
+ if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
+   call hdr_read_from_fname(hdr, path, fform, comm)
+   ABI_CHECK(fform /= 0, "fform == 0")
+   call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
+   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+
+ else if (endswith(path, ".nc")) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nctk_open_read(ncid, path, comm))
+   call hdr_ncread(hdr, ncid, fform)
+   ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
+   new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ else
+   MSG_ERROR(sjoin("Don't know how to construct crystal structure from: ", path, ch10, "Supported extensions: _WFK or .nc"))
+ end if
+
+ ABI_FREE(gs_eigen)
+ call hdr%free()
+
+end function ebands_from_file
+!!***
+
+!!****f* ABINIT/crystal_from_file
+!! NAME
+!! crystal_from_file
+!!
+!! FUNCTION
+!!  Build crystal_t object from netcdf file
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(crystal_t) function crystal_from_file(path, comm) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: fform, timrev
+ type(hdr_type) :: hdr
+
+! *************************************************************************
+
+ ! Assume file with Abinit header
+ call hdr_read_from_fname(hdr, path, fform, comm)
+ ABI_CHECK(fform /= 0, "fform == 0")
+ timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
+ new = hdr%get_crystal(timrev)
+ call hdr%free()
+
+end function crystal_from_file
 !!***
 
 end module m_common

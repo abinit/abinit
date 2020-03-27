@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_suscep_stat
 !! NAME
 !! m_suscep_stat
@@ -7,7 +6,7 @@
 !! Compute the susceptibility matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (XG, AR, MB)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +26,12 @@
 MODULE m_suscep_stat
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
+ use m_distribfft
 
+ use defs_abitypes, only : MPI_type
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type
@@ -167,15 +167,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &  susmat,symafm,symrel,tnons,typat,ucvol,unpaw,usecprj,usepaw,usetimerev,&
 &  wtk,ylmdiel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'suscep_stat'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lmax_diel,mband,mcg,mcprj,mgfftdiel,mkmem,mpw,natom,neglect_pawhat
@@ -213,7 +204,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
  integer :: ispinor,istwf_k,isym,j1,j2,j3,jj,jsp,k1,k2,k3
  integer :: my_nspinor,nband_k,nband_loc,ndiel1,ndiel2,ndiel3,ndiel4,ndiel5,ndiel6
  integer :: nkpg_diel,npw_k,npwsp,nspden_eff,nspden_tmp,nsym1,nsym2
- integer :: paral_kgb_diel,spaceComm,t1,t2,testocc
+ integer :: spaceComm,t1,t2,testocc
  real(dp) :: ai,ai2,ar,ar2,diegap,dielam,emax,invnsym
  real(dp) :: invnsym1,invnsym2,phi1,phi12,phi2,phr1,phr12
  real(dp) :: phr2,sumdocc,weight
@@ -387,8 +378,8 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
            call pawcprj_get(atindx1,cprj_loc,cprj,natom,1,ibg,ikpt,iorder_cprj,isp,&
 &           mband/mpi_enreg%nproc_band,mkmem,natom,nband_loc,nband_loc,my_nspinor,nsppol,unpaw,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,dimcprj,0,&
-&           mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
+           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,mpi_enreg%bandpp,&
+&           dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
            call pawcprj_free(cprj_loc)
            ABI_DATATYPE_DEALLOCATE(cprj_loc)
          end if
@@ -434,7 +425,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &       gbound_diel,gylmg_diel,icg,ikpt,&
 &       isp,istwf_k,kg_diel,kg_k,lmax_diel,mband,mcg,mgfftdiel,mpi_enreg,&
 &       natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat,ngfftdiel,nkpt,&
-&       npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,paral_kgb_diel,&
+&       npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &       pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &       susmat,typat,ucvol,usepaw,wtk)
      end if
@@ -487,7 +478,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !      (note symrhg also make the reverse FFT, to get symmetrized density;
 !      this is useless here, and should be made an option)
        call symrhg(1,gprimd,irrzondiel,mpi_enreg_diel,nfftdiel,nfftdiel,ngfftdiel,&
-&       nspden_tmp,1,nsym,paral_kgb_diel,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel)
+&       nspden_tmp,1,nsym,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel,tnons)
 
        do ipw2=1,npwdiel
          j1=kg_diel(1,ipw2) ; j2=kg_diel(2,ipw2) ; j3=kg_diel(3,ipw2)
@@ -911,15 +902,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'susk'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !This type is defined in defs_mpi
 !scalars
@@ -965,11 +947,12 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  integer,allocatable :: band_loc(:),kg_k_gather(:,:),npw_per_proc(:),rdispls(:)
  integer,allocatable :: rdispls_all(:),rdisplsloc(:),recvcounts(:)
  integer,allocatable :: recvcountsloc(:),sdispls(:),sdisplsloc(:),sendcounts(:)
- integer,allocatable :: sendcountsloc(:),susmat_mpi(:,:,:)
+ integer,allocatable :: sendcountsloc(:)
  integer,allocatable,target :: kg_k_gather_all(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef_alltoall(:,:)
  real(dp),allocatable :: cwavef_alltoall_gather(:,:),dummy(:,:),rhoaug(:,:,:)
+ real(dp),allocatable :: susmat_mpi(:,:,:)
  real(dp),allocatable :: wfprod(:,:),wfraug(:,:,:,:),wfrspa(:,:,:,:,:,:)
  real(dp),allocatable,target :: cg_local(:,:)
  real(dp),pointer :: cg(:,:)
@@ -1149,7 +1132,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
      cwavef(:,1:npw_k)=cg(:,1+iwf:npw_k+iwf)
      call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &     istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&     0,mpi_enreg_diel%paral_kgb,tim_fourwf,weight,weight)
+&     0,tim_fourwf,weight,weight)
 
      wfrspa(:,:,:,:,ispinor,iband)=wfraug(:,:,:,:)
 
@@ -1193,7 +1176,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
        tim_fourwf=9
        call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &       1,kg_diel,kg_diel,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&       ndiel4,ndiel5,ndiel6,3,mpi_enreg_diel%paral_kgb,tim_fourwf,weight,weight)
+&       ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 !      In case of PAW, add compensation charge contribution if not already done
        if (usepaw==1.and.extrap==0.and.neglect_pawhat==0) then
          call pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,ibd1,ibd2,ispinor,ispinor,1,kg_diel,&
@@ -1324,7 +1307,7 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
            tim_fourwf=19
            call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &           1,kg_diel,kg_diel,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&           ndiel4,ndiel5,ndiel6,3,mpi_enreg_diel%paral_kgb,tim_fourwf,weight,weight)
+&           ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 
 !          In case of PAW, add compensation charge contribution
            if (usepaw==1.and.neglect_pawhat==0) then
@@ -1508,25 +1491,16 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 &  gbound_diel,gylmg_diel,icg,ikpt,isp,istwf_k,kg_diel,kg_k,&
 &  lmax_diel,mband,mcg,mgfftdiel,mpi_enreg,&
 &  natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat,ngfftdiel,nkpt,&
-&  npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,paral_kgb,&
+&  npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,&
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'suskmm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bdtot_index,extrap,icg,ikpt,isp,istwf_k,lmax_diel,mband,mcg
  integer,intent(in) :: mgfftdiel,natom,nband_k,ndiel4,ndiel5,ndiel6,neglect_pawhat
  integer,intent(in) :: nkpt,npw_k,npwdiel,nspden,nspden_eff,nspinor
- integer,intent(in) :: nsppol,ntypat,occopt,paral_kgb,usepaw
+ integer,intent(in) :: nsppol,ntypat,occopt,usepaw
  real(dp),intent(in) :: ucvol
  real(dp),intent(inout) :: sumdocc
  type(MPI_type),intent(in) :: mpi_enreg
@@ -1563,11 +1537,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
  real(dp),allocatable :: wfrspa2(:,:,:,:,:,:)
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' suskmm : enter '
-!if(.true.)stop
-!ENDDEBUG
 
  call timab(760,1,tsec)
  call timab(761,1,tsec)
@@ -1651,7 +1620,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
          cwavef(:,1:npw_k)=cg(:,1+iwf:npw_k+iwf)
          call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &         istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&         0,paral_kgb,tim_fourwf,weight,weight)
+&         0,tim_fourwf,weight,weight)
          wfrspa1(:,:,:,:,ispinor,iband)=wfraug(:,:,:,:)
        end do
      end do
@@ -1711,7 +1680,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
          tim_fourwf=31
          call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &         1,kg_diel,kg_diel,&
-&         mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,ndiel4,ndiel5,ndiel6,3,paral_kgb,tim_fourwf,weight,weight)
+&         mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 !        In case of PAW, add compensation charge contribution if not already done
          if (usepaw==1.and.extrap==0.and.neglect_pawhat==0) then
            call pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband,iband,1,1,1,kg_diel,&
@@ -1814,7 +1783,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
              tim_fourwf=32
              call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &             1,kg_diel,kg_diel, mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&             ndiel4,ndiel5,ndiel6,3,paral_kgb,tim_fourwf,weight,weight)
+&             ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 
 !            In case of PAW, add compensation charge contribution
              if (usepaw==1.and.neglect_pawhat==0) then
@@ -1876,7 +1845,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
            cwavef(:,1:npw_k)=cg(:,1+iwf:npw_k+iwf)
            call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &           istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,npw_k,1,&
-&           ndiel4,ndiel5,ndiel6,0,paral_kgb,tim_fourwf,weight,weight)
+&           ndiel4,ndiel5,ndiel6,0,tim_fourwf,weight,weight)
            wfrspa2(:,:,:,:,ispinor,iband)=wfraug(:,:,:,:)
          end do
        end do
@@ -1917,7 +1886,7 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
                tim_fourwf=32
                call fourwf(1,rhoaug,dummy,wfprod,wfraug,gbound_diel,gbound_diel,&
 &               1,kg_diel,kg_diel,mgfftdiel,mpi_enreg_diel,1,ngfftdiel,1,npwdiel,&
-&               ndiel4,ndiel5,ndiel6,3,paral_kgb,tim_fourwf,weight,weight)
+&               ndiel4,ndiel5,ndiel6,3,tim_fourwf,weight,weight)
 
 !              In case of PAW, add compensation charge contribution
                if (usepaw==1.and.neglect_pawhat==0) then

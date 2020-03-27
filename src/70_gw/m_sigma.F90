@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigma
 !! NAME
 !!  m_sigma
@@ -9,7 +8,7 @@
 !!  methods bound to the object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2020 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,23 +26,26 @@
 MODULE m_sigma
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
  use iso_c_binding
  use m_nctk
+ use m_yaml
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_wfd
 
+
+ use defs_datatypes,   only : ebands_t
+ use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
  use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsilonm1_results
+ use m_stream_string,  only : stream_string
 
  implicit none
 
@@ -257,15 +259,6 @@ CONTAINS  !=====================================================================
 
 subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_sigma_header'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -280,9 +273,7 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 
 ! *************************************************************************
 
- msg = ' SIGMA fundamental parameters:'
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], ' SIGMA fundamental parameters:')
 
  gwcalctyp=Sigp%gwcalctyp
  mod10=MOD(Sigp%gwcalctyp,10)
@@ -308,107 +299,76 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    write(msg,'(a,i3)')' Wrong value for Sigp%gwcalctyp = ',Sigp%gwcalctyp
    MSG_BUG(msg)
  END SELECT
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
  write(msg,'(a,i12)')' number of plane-waves for SigmaX         ',Sigp%npwx
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of plane-waves for SigmaC and W   ',Sigp%npwc
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of plane-waves for wavefunctions  ',Sigp%npwwfn
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of bands                          ',Sigp%nbnds
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of independent spin polarizations ',Sigp%nsppol
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of spinorial components           ',Sigp%nspinor
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of k-points in IBZ                ',Kmesh%nibz
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of q-points in IBZ                ',Qmesh%nibz
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of symmetry operations            ',Cryst%nsym
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of k-points in BZ                 ',Kmesh%nbz
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of q-points in BZ                 ',Qmesh%nbz
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of frequencies for dSigma/dE      ',Sigp%nomegasrd
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,f12.2)')' frequency step for dSigma/dE [eV]        ',Sigp%deltae*Ha_eV
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,i12)')' number of omega for Sigma on real axis   ',Sigp%nomegasr
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,f12.2)')' max omega for Sigma on real axis  [eV]   ',Sigp%maxomega_r*Ha_eV
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,f12.2)')' zcut for avoiding poles [eV]             ',Sigp%zcut*Ha_eV
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
  if (Sigp%mbpt_sciss>0.1d-4) then
    write(msg,'(a,f12.2)')' scissor energy [eV]                      ',Sigp%mbpt_sciss*Ha_eV
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
  end if
 
  if (mod10==1) then
    write(msg,'(a,i12)')' number of imaginary frequencies for Sigma',Sigp%nomegasi
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
  end if
 
  if (sigma_needs_w(Sigp)) then
    write(msg,'(2a)')ch10,' EPSILON^-1 parameters (SCR file):'
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   !write(std_out,*) titem1(2)(1:79)
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' dimension of the eps^-1 matrix on file   ',Er%Hscr%npwe
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' dimension of the eps^-1 matrix used      ',Er%npwe
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' number of plane-waves for wavefunctions  ',Er%Hscr%npwwfn_used
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' number of bands                          ',Er%Hscr%nbnds_used
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' number of q-points in IBZ                ',Qmesh%nibz
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' number of frequencies                    ',Er%nomega
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' number of real frequencies               ',Er%nomega_r
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a,i12)')' number of imag frequencies               ',Er%nomega_i
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
  end if
 
  write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
  if (gwcalctyp<10) then
    write(msg,'(a)')' Perturbative Calculation'
@@ -417,8 +377,7 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
  else
    write(msg,'(a)')' Self-Consistent on Energies and Wavefunctions'
  end if
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
 end subroutine write_sigma_header
 !!***
@@ -454,15 +413,6 @@ end subroutine write_sigma_header
 
 subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_sigma_results'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikcalc,ikibz
@@ -475,6 +425,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  integer :: ib,io,is
  integer :: gwcalctyp,mod10
  character(len=500) :: msg
+ type(yamldoc_t) :: ydoc
 !arrays
  character(len=12) :: tag_spin(2)
 
@@ -493,7 +444,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  do is=1,Sr%nsppol
    write(msg,'(2a,3f8.3,a)')ch10,' k = ',Sigp%kptgw(:,ikcalc),tag_spin(is)
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   !call wrtout(ab_out,msg,'COLL')
 
    msg = ' Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
    if (Sr%usepawu/=0) then
@@ -502,11 +453,19 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
    if (gwcalctyp>=10) then
      write(msg,'(2a)')&
-&     ' Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
-&     '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
+     ' Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
+     '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
    end if
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+
+   ydoc = yamldoc_open('SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
+   call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
+   call ydoc%add_int('spin', is, int_fmt="(i1)")
+   call ydoc%add_real('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV)
+   call ydoc%add_real('QP_gap', Sr%egwgap(ikibz,is)*Ha_eV)
+   call ydoc%add_real('Delta_QP_KS', Sr%degwgap(ikibz,is)*Ha_eV)
+   call ydoc%open_tabular('data', tag='SigmaeeData')
+   call ydoc%add_tabular_line(msg)
 
    write(unt_gw,'(3f10.6)')Sigp%kptgw(:,ikcalc)
    write(unt_gw,'(i4)')Sigp%maxbnd(ikcalc,is)-Sigp%minbnd(ikcalc,is)+1
@@ -522,31 +481,31 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp>=10) then
-       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=ab_out)
+       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=dev_null, ydoc=ydoc)
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 
-       write(unt_gwdiag,'(i6,3f9.4)')                                  &
-&        ib,                                                           &
-&        Sr%en_qp_diago(ib,ikibz,is)*Ha_eV,                            &
-&        (Sr%en_qp_diago(ib,ikibz,is) - KS_BSt%eig(ib,ikibz,is))*Ha_eV,&
-&        zero
+       write(unt_gwdiag,'(i6,3f9.4)')                                 &
+        ib,                                                           &
+        Sr%en_qp_diago(ib,ikibz,is)*Ha_eV,                            &
+        (Sr%en_qp_diago(ib,ikibz,is) - KS_BSt%eig(ib,ikibz,is))*Ha_eV,&
+        zero
 
      else
        ! If not ppmodel, write out also the imaginary part in ab_out
        SELECT CASE(mod10)
        CASE(1,2)
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,prtvol=1)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=dev_null,ydoc=ydoc,prtvol=1)
        CASE DEFAULT
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=dev_null,ydoc=ydoc)
        END SELECT
        call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=std_out,prtvol=1)
      end if
 
      write(unt_gw,'(i6,3f9.4)')          &
-&      ib,                               &
-&      REAL (Sr%egw (ib,ikibz,is))*Ha_eV,&
-&      REAL (Sr%degw(ib,ikibz,is))*Ha_eV,&
-&      AIMAG(Sr%egw (ib,ikibz,is))*Ha_eV
+      ib,                               &
+      REAL (Sr%egw (ib,ikibz,is))*Ha_eV,&
+      REAL (Sr%degw(ib,ikibz,is))*Ha_eV,&
+      AIMAG(Sr%egw (ib,ikibz,is))*Ha_eV
    end do !ib
 
    if (Sr%e0gap(ikibz,is)**2+Sr%egwgap(ikibz,is)**2+Sr%degwgap(ikibz,is)**2 > tol10) then
@@ -554,32 +513,31 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      ! If all the gaps are zero, this means that it could not be computed in the calling routine
      write(msg,'(2a,f8.3)')ch10,' E^0_gap       ',Sr%e0gap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3)')      ' E^GW_gap      ',Sr%egwgap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3,a)')    ' DeltaE^GW_gap ',Sr%degwgap(ikibz,is)*Ha_eV,ch10
      call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
    end if
-   !
-   ! === Output of the spectral function ===
+
+   call ydoc%write_and_free(ab_out)
+
+   ! Output of the spectral function
    do io=1,Sr%nomega_r
      write(unt_sig,'(100(e12.5,2x))')&
-&     REAL(Sr%omega_r(io))*Ha_eV,&
-&     (REAL(Sr%sigxcme(ib,ikibz,io,is))*Ha_eV,&
-&     AIMAG(Sr%sigxcme(ib,ikibz,io,is))*Ha_eV,&
-&     gw_spectral_function(Sr,io,ib,ikibz,is),&
-&     ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is))
+      REAL(Sr%omega_r(io))*Ha_eV,&
+      (REAL(Sr%sigxcme(ib,ikibz,io,is))*Ha_eV,&
+      AIMAG(Sr%sigxcme(ib,ikibz,io,is))*Ha_eV,&
+      gw_spectral_function(Sr,io,ib,ikibz,is),&
+      ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is))
    end do
    !
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      write(unt_sgr,'("# ik, ib",2i5)')ikibz,ib
      do io=1,Sr%nomega4sd
        write(unt_sgr,'(100(e12.5,2x))')              &
-&        REAL (Sr%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
-&        REAL (Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV,&
-&        AIMAG(Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV
+         REAL (Sr%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
+         REAL (Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV,&
+         AIMAG(Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV
      end do
    end do
    !
@@ -587,10 +545,10 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
        write(unt_sgm,'("# ik, ib",2i5)')ikibz,ib
        do io=1,Sr%nomega_i
-         write(unt_sgm,'(3(e12.5,2x))')              &
-&          AIMAG(Sr%omega_i(io))              *Ha_eV,&
-&          REAL (Sr%sigxcmesi(ib,ikibz,io,is))*Ha_eV,&
-&          AIMAG(Sr%sigxcmesi(ib,ikibz,io,is))*Ha_eV
+         write(unt_sgm,'(3(e12.5,2x))')             &
+          AIMAG(Sr%omega_i(io))              *Ha_eV,&
+          REAL (Sr%sigxcmesi(ib,ikibz,io,is))*Ha_eV,&
+          AIMAG(Sr%sigxcmesi(ib,ikibz,io,is))*Ha_eV
        end do
      end do
    end if
@@ -621,15 +579,6 @@ end subroutine write_sigma_results
 
 function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gw_spectral_function'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: io,ib,ikibz,is
@@ -639,8 +588,8 @@ function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
 ! *********************************************************************
 
  aw = one/pi*ABS(AIMAG(Sr%sigcme(ib,ikibz,io,is)))&
-&  /( (REAL(Sr%omega_r(io)-Sr%hhartree(ib,ib,ikibz,is)-Sr%sigxcme(ib,ikibz,io,is)))**2&
-&    +(AIMAG(Sr%sigcme(ib,ikibz,io,is)))**2) /Ha_eV
+   /( (REAL(Sr%omega_r(io)-Sr%hhartree(ib,ib,ikibz,is)-Sr%sigxcme(ib,ikibz,io,is)))**2&
+     +(AIMAG(Sr%sigcme(ib,ikibz,io,is)))**2) /Ha_eV
 
 end function gw_spectral_function
 !!***
@@ -666,16 +615,7 @@ end function gw_spectral_function
 !!
 !! SOURCE
 
-subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_Sigma_perturbative'
-!End of the abilint section
-
- implicit none
+subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader,ydoc)
 
 !Arguments ------------------------------------
 !scalars
@@ -684,6 +624,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
  character(len=*),optional,intent(in) :: mode_paral
  logical,optional,intent(in) :: witheader
  type(sigma_t),intent(in) :: Sr
+ type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
 !scalars
@@ -706,92 +647,99 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
  if (Sr%usepawu==0) then
 
    if (Sr%nsig_ab/=1) then
-     write(msg,'(i5,9f8.3)')                        &
-&           iband,                                  &
-&           Sr%e0          (iband,ik_ibz,1)*Ha_eV,  &
-&           SUM(Sr%vxcme   (iband,ik_ibz,:))*Ha_eV, &
-&           SUM(Sr%sigxme  (iband,ik_ibz,:))*Ha_eV, &
-&      REAL(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,&
-&      REAL(Sr%ze0         (iband,ik_ibz,1)),       &
-&      REAL(SUM(Sr%dsigmee0(iband,ik_ibz,:))),      &
-&      REAL(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,&
-&      REAL(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
-&      REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV
-       call wrtout(my_unt,msg,my_mode)
+     write(msg,'(i5,9f8.3)')                       &
+           iband,                                  &
+           Sr%e0          (iband,ik_ibz,1)*Ha_eV,  &
+           SUM(Sr%vxcme   (iband,ik_ibz,:))*Ha_eV, &
+           SUM(Sr%sigxme  (iband,ik_ibz,:))*Ha_eV, &
+      REAL(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,&
+      REAL(Sr%ze0         (iband,ik_ibz,1)),       &
+      REAL(SUM(Sr%dsigmee0(iband,ik_ibz,:))),      &
+      REAL(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,&
+      REAL(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
+      REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV
+     call wrtout(my_unt,msg,my_mode)
+     if (present(ydoc)) call ydoc%add_tabular_line(msg)
      if (verbose/=0) then
-       write(msg,'(i5,9f8.3)')                         &
-&              iband,                                  &
-&              zero,                                   &
-&              zero,                                   &
-&              zero,                                   &
-&        AIMAG(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,&
-&        AIMAG(Sr%ze0         (iband,ik_ibz,1)),       &
-&        AIMAG(SUM(Sr%dsigmee0(iband,ik_ibz,:))),      &
-&        AIMAG(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,&
-&        AIMAG(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
-&        AIMAG(Sr%egw         (iband,ik_ibz,1))*Ha_eV
+       write(msg,'(i5,9f8.3)')                        &
+              iband,                                  &
+              zero,                                   &
+              zero,                                   &
+              zero,                                   &
+        AIMAG(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,&
+        AIMAG(Sr%ze0         (iband,ik_ibz,1)),       &
+        AIMAG(SUM(Sr%dsigmee0(iband,ik_ibz,:))),      &
+        AIMAG(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,&
+        AIMAG(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
+        AIMAG(Sr%egw         (iband,ik_ibz,1))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
+       if(present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
   else
-    write(msg,'(i5,9f8.3)')                     &
-&          iband,                               &
-&          Sr%e0      (iband,ik_ibz,isp)*Ha_eV, &
-&          Sr%vxcme   (iband,ik_ibz,isp)*Ha_eV, &
-&          Sr%sigxme  (iband,ik_ibz,isp)*Ha_eV, &
-&     REAL(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-&     REAL(Sr%ze0     (iband,ik_ibz,isp)),      &
-&     REAL(Sr%dsigmee0(iband,ik_ibz,isp)),      &
-&     REAL(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-&     REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
-&     REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
+    write(msg,'(i5,9f8.3)')                    &
+          iband,                               &
+          Sr%e0      (iband,ik_ibz,isp)*Ha_eV, &
+          Sr%vxcme   (iband,ik_ibz,isp)*Ha_eV, &
+          Sr%sigxme  (iband,ik_ibz,isp)*Ha_eV, &
+     REAL(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
+     REAL(Sr%ze0     (iband,ik_ibz,isp)),      &
+     REAL(Sr%dsigmee0(iband,ik_ibz,isp)),      &
+     REAL(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
+     REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
+     REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
     call wrtout(my_unt,msg,my_mode)
+    if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
     if (verbose/=0) then
-      write(msg,'(i5,9f8.3)')                       &
-&              iband,                               &
-&              zero,                                &
-&              zero,                                &
-&              zero,                                &
-&        AIMAG(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-&        AIMAG(Sr%ze0     (iband,ik_ibz,isp)),      &
-&        AIMAG(Sr%dsigmee0(iband,ik_ibz,isp)),      &
-&        AIMAG(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-&        AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
-&        AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
+      write(msg,'(i5,9f8.3)')                      &
+              iband,                               &
+              zero,                                &
+              zero,                                &
+              zero,                                &
+        AIMAG(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
+        AIMAG(Sr%ze0     (iband,ik_ibz,isp)),      &
+        AIMAG(Sr%dsigmee0(iband,ik_ibz,isp)),      &
+        AIMAG(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
+        AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
+        AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
        call wrtout(my_unt,msg,my_mode)
+       if (present(ydoc)) call ydoc%add_tabular_line(msg)
     end if
   end if
 
- else  ! PAW+U+GW calculation.
+ else
+   ! PAW+U+GW calculation.
    ABI_CHECK(Sr%nsig_ab==1,'LDA+U with spinor not implemented')
-   write(msg,'(i5,10f8.3)')                    &
-&         iband,                               &
-&         Sr%e0      (iband,ik_ibz,isp)*Ha_eV, &
-&         Sr%vxcme   (iband,ik_ibz,isp)*Ha_eV, &
-&         Sr%vUme    (iband,ik_ibz,isp)*Ha_eV, &
-&         Sr%sigxme  (iband,ik_ibz,isp)*Ha_eV, &
-&    REAL(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-&    REAL(Sr%ze0     (iband,ik_ibz,isp)),      &
-&    REAL(Sr%dsigmee0(iband,ik_ibz,isp)),      &
-&    REAL(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-&    REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
-&    REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
+   write(msg,'(i5,10f8.3)')                   &
+         iband,                               &
+         Sr%e0      (iband,ik_ibz,isp)*Ha_eV, &
+         Sr%vxcme   (iband,ik_ibz,isp)*Ha_eV, &
+         Sr%vUme    (iband,ik_ibz,isp)*Ha_eV, &
+         Sr%sigxme  (iband,ik_ibz,isp)*Ha_eV, &
+    REAL(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
+    REAL(Sr%ze0     (iband,ik_ibz,isp)),      &
+    REAL(Sr%dsigmee0(iband,ik_ibz,isp)),      &
+    REAL(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
+    REAL(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
+    REAL(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
    call wrtout(my_unt,msg,my_mode)
+   if(present(ydoc)) call ydoc%add_tabular_line(msg)
 
    if (verbose/=0) then
-     write(msg,'(i5,10f8.3)')                    &
-&           iband,                               &
-&           zero,                                &
-&           zero,                                &
-&           zero,                                &
-&           zero,                                &
-&     AIMAG(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
-&     AIMAG(Sr%ze0     (iband,ik_ibz,isp)),      &
-&     AIMAG(Sr%dsigmee0(iband,ik_ibz,isp)),      &
-&     AIMAG(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
-&     AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
-&     AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
-      call wrtout(my_unt,msg,my_mode)
+     write(msg,'(i5,10f8.3)')                   &
+           iband,                               &
+           zero,                                &
+           zero,                                &
+           zero,                                &
+           zero,                                &
+     AIMAG(Sr%sigcmee0(iband,ik_ibz,isp))*Ha_eV,&
+     AIMAG(Sr%ze0     (iband,ik_ibz,isp)),      &
+     AIMAG(Sr%dsigmee0(iband,ik_ibz,isp)),      &
+     AIMAG(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
+     AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
+     AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
+     call wrtout(my_unt,msg,my_mode)
+     if(present(ydoc)) call ydoc%add_tabular_line(msg)
    end if
  end if
 
@@ -819,16 +767,7 @@ end subroutine print_Sigma_perturbative
 !!
 !! SOURCE
 
-subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_Sigma_QPSC'
-!End of the abilint section
-
- implicit none
+subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,ydoc)
 
 !Arguments ------------------------------------
 !scalars
@@ -837,6 +776,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
  character(len=*),intent(in),optional :: mode_paral
  type(sigma_t),intent(in) :: Sr
  type(ebands_t),intent(in) :: KS_BSt
+ type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
 !scalars
@@ -856,76 +796,81 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 
  if (Sr%usepawu==0 .or. .TRUE.) then
    if (Sr%nsig_ab/=1) then
-     write(msg,'(i5,12(2x,f8.3))')                        &
-&           iband,                                        &
-&           KS_BSt%eig     (iband,ik_ibz,1)*Ha_eV,        &
-&           SUM(Sr%vxcme   (iband,ik_ibz,:))*Ha_eV,       &
-&           Sr%e0          (iband,ik_ibz,1)*Ha_eV,        &
-&      REAL(SUM(Sr%hhartree(iband,iband,ik_ibz,:)))*Ha_eV,&
-&           SUM(Sr%sigxme  (iband,ik_ibz,:))*Ha_eV,       &
-&      REAL(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,      &
-&      REAL(Sr%ze0         (iband,ik_ibz,1)),             &
-&      REAL(SUM(Sr%dsigmee0(iband,ik_ibz,:))),            &
-&      REAL(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,      &
-&      REAL(Sr%degw        (iband,ik_ibz,1))*Ha_eV,       &
-&      REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV,       &
-&           Sr%en_qp_diago (iband,ik_ibz,1)*Ha_eV
+     write(msg,'(i5,12(2x,f8.3))')                       &
+           iband,                                        &
+           KS_BSt%eig     (iband,ik_ibz,1)*Ha_eV,        &
+           SUM(Sr%vxcme   (iband,ik_ibz,:))*Ha_eV,       &
+           Sr%e0          (iband,ik_ibz,1)*Ha_eV,        &
+      REAL(SUM(Sr%hhartree(iband,iband,ik_ibz,:)))*Ha_eV,&
+           SUM(Sr%sigxme  (iband,ik_ibz,:))*Ha_eV,       &
+      REAL(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,      &
+      REAL(Sr%ze0         (iband,ik_ibz,1)),             &
+      REAL(SUM(Sr%dsigmee0(iband,ik_ibz,:))),            &
+      REAL(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,      &
+      REAL(Sr%degw        (iband,ik_ibz,1))*Ha_eV,       &
+      REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV,       &
+           Sr%en_qp_diago (iband,ik_ibz,1)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
+     if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
-     write(msg,'(i5,12(2x,f8.3))')                         &
-&            iband,                                        &
-&            zero,                                         &
-&            zero,                                         &
-&            zero,                                         &
-&      AIMAG(SUM(Sr%hhartree(iband,iband,ik_ibz,:)))*Ha_eV,&
-&            zero,                                         &
-&      AIMAG(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,      &
-&      AIMAG(Sr%ze0         (iband,ik_ibz,1)),             &
-&      AIMAG(SUM(Sr%dsigmee0(iband,ik_ibz,:))),            &
-&      AIMAG(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,      &
-&      AIMAG(Sr%degw        (iband,ik_ibz,1))*Ha_eV,       &
-&      AIMAG(Sr%egw         (iband,ik_ibz,1))*Ha_eV,       &
-&            zero
+     write(msg,'(i5,12(2x,f8.3))')                        &
+            iband,                                        &
+            zero,                                         &
+            zero,                                         &
+            zero,                                         &
+      AIMAG(SUM(Sr%hhartree(iband,iband,ik_ibz,:)))*Ha_eV,&
+            zero,                                         &
+      AIMAG(SUM(Sr%sigcmee0(iband,ik_ibz,:)))*Ha_eV,      &
+      AIMAG(Sr%ze0         (iband,ik_ibz,1)),             &
+      AIMAG(SUM(Sr%dsigmee0(iband,ik_ibz,:))),            &
+      AIMAG(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,      &
+      AIMAG(Sr%degw        (iband,ik_ibz,1))*Ha_eV,       &
+      AIMAG(Sr%egw         (iband,ik_ibz,1))*Ha_eV,       &
+            zero
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
+       if( present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
    else
-     write(msg,'(i5,12(2x,f8.3))')                        &
-&           iband,                                        &
-&           KS_BSt%eig    (iband,ik_ibz,isp)*Ha_eV,       &
-&           Sr%vxcme      (iband,ik_ibz,isp)*Ha_eV,       &
-&           Sr%e0         (iband,ik_ibz,isp)*Ha_eV,       &
-&      REAL(Sr%hhartree   (iband,iband,ik_ibz,isp))*Ha_eV,&
-&           Sr%sigxme     (iband,ik_ibz,isp)*Ha_eV,       &
-&      REAL(Sr%sigcmee0   (iband,ik_ibz,isp))*Ha_eV,      &
-&      REAL(Sr%ze0        (iband,ik_ibz,isp)),            &
-&      REAL(Sr%dsigmee0   (iband,ik_ibz,isp)),            &
-&      REAL(Sr%sigmee     (iband,ik_ibz,isp))*Ha_eV,      &
-&      REAL(Sr%degw       (iband,ik_ibz,isp))*Ha_eV,      &
-&      REAL(Sr%egw        (iband,ik_ibz,isp))*Ha_eV,      &
-&           Sr%en_qp_diago(iband,ik_ibz,isp)*Ha_eV
+     write(msg,'(i5,12(2x,f8.3))')                       &
+           iband,                                        &
+           KS_BSt%eig    (iband,ik_ibz,isp)*Ha_eV,       &
+           Sr%vxcme      (iband,ik_ibz,isp)*Ha_eV,       &
+           Sr%e0         (iband,ik_ibz,isp)*Ha_eV,       &
+      REAL(Sr%hhartree   (iband,iband,ik_ibz,isp))*Ha_eV,&
+           Sr%sigxme     (iband,ik_ibz,isp)*Ha_eV,       &
+      REAL(Sr%sigcmee0   (iband,ik_ibz,isp))*Ha_eV,      &
+      REAL(Sr%ze0        (iband,ik_ibz,isp)),            &
+      REAL(Sr%dsigmee0   (iband,ik_ibz,isp)),            &
+      REAL(Sr%sigmee     (iband,ik_ibz,isp))*Ha_eV,      &
+      REAL(Sr%degw       (iband,ik_ibz,isp))*Ha_eV,      &
+      REAL(Sr%egw        (iband,ik_ibz,isp))*Ha_eV,      &
+           Sr%en_qp_diago(iband,ik_ibz,isp)*Ha_eV
      call wrtout(my_unt,msg,my_mode)
+     if (present(ydoc)) call ydoc%add_tabular_line(msg)
 
-     write(msg,'(i5,12(2x,f8.3))')                        &
-&            iband,                                       &
-&            zero,                                        &
-&            zero,                                        &
-&            zero,                                        &
-&      AIMAG(Sr%hhartree  (iband,iband,ik_ibz,isp))*Ha_eV,&
-&            zero,                                        &
-&      AIMAG(Sr%sigcmee0   (iband,ik_ibz,isp))*Ha_eV,     &
-&      AIMAG(Sr%ze0        (iband,ik_ibz,isp)),           &
-&      AIMAG(Sr%dsigmee0   (iband,ik_ibz,isp)),           &
-&      AIMAG(Sr%sigmee     (iband,ik_ibz,isp))*Ha_eV,     &
-&      AIMAG(Sr%degw       (iband,ik_ibz,isp))*Ha_eV,     &
-&      AIMAG(Sr%egw        (iband,ik_ibz,isp))*Ha_eV,     &
-&            zero
+     write(msg,'(i5,12(2x,f8.3))')                       &
+            iband,                                       &
+            zero,                                        &
+            zero,                                        &
+            zero,                                        &
+      AIMAG(Sr%hhartree  (iband,iband,ik_ibz,isp))*Ha_eV,&
+            zero,                                        &
+      AIMAG(Sr%sigcmee0   (iband,ik_ibz,isp))*Ha_eV,     &
+      AIMAG(Sr%ze0        (iband,ik_ibz,isp)),           &
+      AIMAG(Sr%dsigmee0   (iband,ik_ibz,isp)),           &
+      AIMAG(Sr%sigmee     (iband,ik_ibz,isp))*Ha_eV,     &
+      AIMAG(Sr%degw       (iband,ik_ibz,isp))*Ha_eV,     &
+      AIMAG(Sr%egw        (iband,ik_ibz,isp))*Ha_eV,     &
+            zero
      if (verbose/=0) then
        call wrtout(my_unt,msg,my_mode)
+       if (present(ydoc)) call ydoc%add_tabular_line(msg)
      end if
    end if
 
- else ! PAW+U+GW calculation.
+ else
+   ! PAW+U+GW calculation.
    MSG_ERROR("PAW+U+GW not yet implemented")
  end if
 
@@ -942,7 +887,7 @@ end subroutine print_Sigma_QPSC
 !! Main creation method for the sigma_t data type.
 !!
 !! INPUTS
-!! usepawu=1 if we used LDA+U as starting point (only for PAW)
+!! usepawu= /=0 if we used LDA+U as starting point (only for PAW)
 !!
 !! OUTPUT
 !!
@@ -958,15 +903,6 @@ end subroutine print_Sigma_QPSC
 !! SOURCE
 
 subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nkibz,usepawu
@@ -1031,22 +967,22 @@ subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
  ! Sr%eigvec_qp(ib,ib,:,:)=cone
  !end do
 
- ABI_CALLOC(Sr%vxcme,(b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%vUme,(b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%sigxme,(b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%x_mat,(b1gw:b2gw,b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%sigcme,(b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%sigxcme,(b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%sigcmee0,(b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%ze0,(b1gw:b2gw,Sr%nkibz,Sr%nsppol))
- ABI_CALLOC(Sr%dsigmee0,(b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%sigmee,(b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
- ABI_CALLOC(Sr%degw,(b1gw:b2gw,Sr%nkibz,Sr%nsppol))
- ABI_CALLOC(Sr%e0,(Sr%nbnds,Sr%nkibz,Sr%nsppol))
- ABI_CALLOC(Sr%egw,(Sr%nbnds,Sr%nkibz,Sr%nsppol))
- ABI_CALLOC(Sr%e0gap,(Sr%nkibz,Sr%nsppol))
- ABI_CALLOC(Sr%degwgap,(Sr%nkibz,Sr%nsppol))
- ABI_CALLOC(Sr%egwgap,(Sr%nkibz,Sr%nsppol))
+ ABI_CALLOC(Sr%vxcme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%vUme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%sigxme, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%x_mat, (b1gw:b2gw,b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%sigcme, (b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%sigxcme, (b1gw:b2gw,Sr%nkibz,Sr%nomega_r,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%sigcmee0, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%ze0, (b1gw:b2gw,Sr%nkibz,Sr%nsppol))
+ ABI_CALLOC(Sr%dsigmee0, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%sigmee, (b1gw:b2gw,Sr%nkibz,Sr%nsppol*Sr%nsig_ab))
+ ABI_CALLOC(Sr%degw, (b1gw:b2gw,Sr%nkibz,Sr%nsppol))
+ ABI_CALLOC(Sr%e0, (Sr%nbnds,Sr%nkibz,Sr%nsppol))
+ ABI_CALLOC(Sr%egw, (Sr%nbnds,Sr%nkibz,Sr%nsppol))
+ ABI_CALLOC(Sr%e0gap, (Sr%nkibz,Sr%nsppol))
+ ABI_CALLOC(Sr%degwgap, (Sr%nkibz,Sr%nsppol))
+ ABI_CALLOC(Sr%egwgap, (Sr%nkibz,Sr%nsppol))
 
  ! These quantities are used to evaluate $\Sigma(E)$ around the KS\QP eigenvalue
  ABI_CALLOC(Sr%omega4sd,(b1gw:b2gw,Sr%nkibz,Sr%nomega4sd,Sr%nsppol))
@@ -1096,15 +1032,6 @@ end subroutine sigma_init
 
 subroutine sigma_free(Sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(sigma_t),intent(inout) :: Sr
@@ -1113,100 +1040,40 @@ subroutine sigma_free(Sr)
 
  !@sigma_t
 !integer
- if (allocated(Sr%maxbnd)) then
-   ABI_FREE(Sr%maxbnd)
- end if
- if (allocated(Sr%minbnd)) then
-   ABI_FREE(Sr%minbnd)
- end if
+ ABI_SFREE(Sr%maxbnd)
+ ABI_SFREE(Sr%minbnd)
 
 !real
- if (allocated(Sr%degwgap)) then
-   ABI_FREE(Sr%degwgap)
- end if
- if (allocated(Sr%egwgap)) then
-   ABI_FREE(Sr%egwgap)
- end if
- if (allocated(Sr%en_qp_diago)) then
-   ABI_FREE(Sr%en_qp_diago)
- end if
- if (allocated(Sr%e0)) then
-   ABI_FREE(Sr%e0)
- end if
- if (allocated(Sr%e0gap)) then
-   ABI_FREE(Sr%e0gap)
- end if
- if (allocated(Sr%omega_r)) then
-   ABI_FREE(Sr%omega_r)
- end if
- if (allocated(Sr%kptgw)) then
-   ABI_FREE(Sr%kptgw)
- end if
- if (allocated(Sr%sigxme)) then
-   ABI_FREE(Sr%sigxme)
- end if
- if (allocated(Sr%x_mat)) then
-   ABI_FREE(Sr%x_mat)
- end if
- if (allocated(Sr%vxcme)) then
-   ABI_FREE(Sr%vxcme)
- end if
- if (allocated(Sr%vUme)) then
-   ABI_FREE(Sr%vUme)
- end if
+ ABI_SFREE(Sr%degwgap)
+ ABI_SFREE(Sr%egwgap)
+ ABI_SFREE(Sr%en_qp_diago)
+ ABI_SFREE(Sr%e0)
+ ABI_SFREE(Sr%e0gap)
+ ABI_SFREE(Sr%omega_r)
+ ABI_SFREE(Sr%kptgw)
+ ABI_SFREE(Sr%sigxme)
+ ABI_SFREE(Sr%x_mat)
+ ABI_SFREE(Sr%vxcme)
+ ABI_SFREE(Sr%vUme)
 
 !complex
- if (allocated(Sr%degw)) then
-   ABI_FREE(Sr%degw)
- end if
- if (allocated(Sr%dsigmee0)) then
-   ABI_FREE(Sr%dsigmee0)
- end if
- if (allocated(Sr%egw)) then
-   ABI_FREE(Sr%egw)
- end if
- if (allocated(Sr%eigvec_qp)) then
-   ABI_FREE(Sr%eigvec_qp)
- end if
- if (allocated(Sr%m_lda_to_qp)) then
-   ABI_FREE(Sr%m_lda_to_qp)
- end if
- if (allocated(Sr%hhartree)) then
-   ABI_FREE(Sr%hhartree)
- end if
- if (allocated(Sr%sigcme)) then
-   ABI_FREE(Sr%sigcme)
- end if
- if (allocated(Sr%sigmee)) then
-   ABI_FREE(Sr%sigmee)
- end if
- if (allocated(Sr%sigcmee0)) then
-   ABI_FREE(Sr%sigcmee0)
- end if
- if (allocated(Sr%sigcmesi)) then
-   ABI_FREE(Sr%sigcmesi)
- end if
- if (allocated(Sr%sigcme4sd)) then
-   ABI_FREE(Sr%sigcme4sd)
- end if
- if (allocated(Sr%sigxcme)) then
-   ABI_FREE(Sr%sigxcme)
- end if
- if (allocated(Sr%sigxcmesi)) then
-   ABI_FREE(Sr%sigxcmesi)
- end if
- if (allocated(Sr%sigxcme4sd)) then
-   ABI_FREE(Sr%sigxcme4sd)
- end if
- if (allocated(Sr%ze0)) then
-   ABI_FREE(Sr%ze0)
- end if
- if (allocated(Sr%omega_i)) then
-   ABI_FREE(Sr%omega_i)
- end if
- if (allocated(Sr%omega4sd)) then
-   ABI_FREE(Sr%omega4sd)
- end if
+ ABI_SFREE(Sr%degw)
+ ABI_SFREE(Sr%dsigmee0)
+ ABI_SFREE(Sr%egw)
+ ABI_SFREE(Sr%eigvec_qp)
+ ABI_SFREE(Sr%m_lda_to_qp)
+ ABI_SFREE(Sr%hhartree)
+ ABI_SFREE(Sr%sigcme)
+ ABI_SFREE(Sr%sigmee)
+ ABI_SFREE(Sr%sigcmee0)
+ ABI_SFREE(Sr%sigcmesi)
+ ABI_SFREE(Sr%sigcme4sd)
+ ABI_SFREE(Sr%sigxcme)
+ ABI_SFREE(Sr%sigxcmesi)
+ ABI_SFREE(Sr%sigxcme4sd)
+ ABI_SFREE(Sr%ze0)
+ ABI_SFREE(Sr%omega_i)
+ ABI_SFREE(Sr%omega4sd)
 
 end subroutine sigma_free
 !!***
@@ -1230,15 +1097,6 @@ end subroutine sigma_free
 !! SOURCE
 
 pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_get_exene'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1299,15 +1157,6 @@ end function sigma_get_exene
 !! SOURCE
 
 subroutine find_wpoles_for_cd(Sigp,Sr,Kmesh,BSt,omega_max)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_wpoles_for_cd'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1416,15 +1265,6 @@ end subroutine find_wpoles_for_cd
 !! SOURCE
 
 integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_ncwrite'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1665,14 +1505,6 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1723,15 +1555,6 @@ end function sigma_ncwrite
 
 subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kptgw,mg0,my_nbks,proc_distrb,got,bks_mask,global)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_distribute_bks'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsppol
@@ -1761,7 +1584,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
 
 !************************************************************************
 
- call wfd_update_bkstab(Wfd)
+ call wfd%update_bkstab()
 
  get_more=0; if (PRESENT(got)) get_more=got
 
@@ -1778,7 +1601,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
        if (Ltg_kgw%ibzq(iq_bz)==1) then
          bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
          if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
-         call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+         call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
          if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
        end if
      end do
@@ -1789,7 +1612,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
        ik_ibz = Kmesh%tab(ik_bz)
        bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
        if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
-       call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+       call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
        if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
      end do
    end if

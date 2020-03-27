@@ -56,6 +56,8 @@ dmft_rslf 1
 dmft_mxsf 0.7
 dmft_dc 1
 dmft_t2g 1   # special value for t2g only calculation.
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
 
 # == CTQMC
 dmft_solv 5 # CTQMC
@@ -76,14 +78,13 @@ upawu2  3.1333333333333333  0.0  0.0  eV
 f4of2_sla3  0.0  0.0  0.0 
 jpawu2  0.7583333333333333  0.0  0.0  eV
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t30.in, t31.in
 #%% [files]
 #%% files_to_test =
-#%%                  t30.out,  tolnlines =120, tolabs =2.34e-03, tolrel = 3.5e-01, fld_options=-medium ;
+#%%                  t30.out,  tolnlines =120, tolabs =0.005, tolrel = 3.5e-01, fld_options=-medium ;
 #%% psp_files =  23v.paw, 38sr.paw, 8o.2.paw
 #%% [shell] 
 #%% post_commands = 
@@ -93,6 +94,6 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Amadon, J. Bieder 
-#%% keywords = DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = PAW, DMFT, CTQMC, FAILS_IFMPI
 #%% description = Test entropy calculation for SrVO3 within DMFT
 #%%<END TEST_INFO>

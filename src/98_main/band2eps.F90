@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/band2eps
 !! NAME
 !! band2eps
@@ -9,7 +8,7 @@
 !! of each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (FDortu,MVeithen)
+!! Copyright (C) 1999-2020 ABINIT group (FDortu,MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +38,6 @@
 program band2eps
 
  use defs_basis
- use defs_abitypes
  use m_abimover
  use m_build_info
  use m_xmpi
@@ -55,18 +53,10 @@ program band2eps
  use m_time,          only : asctime
  use m_parser,        only : instrng
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'band2eps'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
-
 !Local variables-------------------------------
-!no_abirules
  integer,parameter :: master=0
  character(len=fnlen) :: filnam(4)
  real(dp) :: E,deltaE
@@ -314,7 +304,6 @@ program band2eps
  write(unt1,'(a)') '%****Vertical graduation****'
  deltaE=(inp%max-inp%min)/inp%ngrad
 
-!Replacing do loop with real variables with standard g95 do loop
  E=inp%min
  do
 !  do E=inp%min,(inp%max-deltaE/2),deltaE

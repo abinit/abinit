@@ -7,7 +7,7 @@
 !! Solve Anderson model with the density/density Hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@ contains
 !! Solve the hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,16 +90,9 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  use m_paw_dmft, only : paw_dmft_type
  use m_oper, only : oper_type,init_oper,destroy_oper,loc_oper,print_oper
  use m_matlu, only : matlu_type,sym_matlu, print_matlu, gather_matlu,&
-& diag_matlu,init_matlu,destroy_matlu,rotate_matlu,copy_matlu
+& diag_matlu,init_matlu,destroy_matlu,rotate_matlu,copy_matlu,slm2ylm_matlu
  use m_hu, only : hu_type,rotatevee_hu
  use m_datafordmft, only : compute_levels
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hubbard_one'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -127,7 +120,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 ! scalars
  character(len=500) :: message
  integer :: iatom,ifreq,im,im1,isppol,ispinor,ispinor1
- integer :: lpawu,mbandc,natom,nkpt,nspinor,nsppol,nsppol_imp,tndim
+ integer :: lpawu,mbandc,natom,nkpt,nspinor,nsppol,nsppol_imp,testblock,tndim,useylm
 ! complex(dpc) :: g,g0,w
 ! arrays
  complex(dp), allocatable :: Id(:,:,:,:)
@@ -259,11 +252,19 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  if(hu(1)%jpawu_zero.and.nsppol==2) nsppol_imp=2
  if(.not.hu(1)%jpawu_zero.or.nsppol/=2) nsppol_imp=1
 !  Diagonalize energy levels
+ useylm=paw_dmft%dmft_blockdiag
+ if(useylm==1) call slm2ylm_matlu(energy_level%matlu,natom,1,pawprtvol)
+ testblock=1
+ if(useylm==1) testblock=8
  call diag_matlu(energy_level%matlu,level_diag,natom,&
-& prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1)
+& prtopt=pawprtvol,eigvectmatlu=eigvectmatlu,nsppol_imp=nsppol_imp,optreal=1,test=testblock)
 
 !  Use rotation matrix to rotate interaction
- call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,1)
+ if(useylm==1) then 
+   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,4)
+ else
+   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,1)
+ endif 
 !write(std_out,*)"udens after rotatevee", udens_atoms(1)%value
  write(message,'(a,2x,a,f13.5)') ch10,&
 & " == Print Diagonalized Energy levels for Fermi Level=",paw_dmft%fermie
@@ -303,6 +304,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
  call print_matlu(green_hubbard%oper(1)%matlu,natom,1)
  do ifreq=1,green_hubbard%nw
    call rotate_matlu(green_hubbard%oper(ifreq)%matlu,eigvectmatlu,natom,3,0)
+   if(useylm==1) call slm2ylm_matlu(green_hubbard%oper(ifreq)%matlu,natom,2,0)
    call copy_matlu(green_hubbard%oper(ifreq)%matlu,green%oper(ifreq)%matlu,natom)
  end do
  write(message,'(2a,f13.5)') ch10," == Green function after rotation"
@@ -372,7 +374,7 @@ contains
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -410,13 +412,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  use m_green, only : green_type,init_green,destroy_green
  use m_hu, only : hu_type
  use m_paw_dmft, only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'green_atomic_hubbard'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -789,7 +784,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -811,13 +806,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  recursive subroutine combin(ielec,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'combin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

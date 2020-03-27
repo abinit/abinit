@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_sternheimer
 !! NAME
 !!   m_gwls_sternheimer
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!!  Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,7 +62,7 @@ contains
 !! SOURCE
 
 subroutine gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&                           fred_img,iexit,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
+&                           fred_img,iexit,intgres_img,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
 &                           pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
 &                           filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
 
@@ -74,34 +73,29 @@ use m_gwls_TimingLog
 use m_gwls_valenceWavefunctions
 use m_gwls_ComputeCorrelationEnergy
 use m_gwls_GenerateEpsilon
+use m_dtset
 
 use defs_basis
-use defs_datatypes
-use defs_abitypes
 use defs_wvltypes
 use m_pawang
 use m_pawrad
 use m_pawtab
 use m_abicore
 use m_errors
+use m_dtfil
 
+use defs_datatypes, only : pseudopotential_type
+use defs_abitypes, only : MPI_type
 use m_time,      only : timab
 use m_gstateimg, only : gstateimg
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gwls_sternheimer'
-!End of the abilint section
-
-implicit none
 !Arguments ------------------------------------
 !scalars
 integer,intent(in) :: nimage
 integer,optional,intent(in) :: idtset,ndtset
 integer,intent(inout) :: iexit
 real(dp),intent(in) :: cpui
-character(len=6),intent(in) :: codvsn
+character(len=8),intent(in) :: codvsn
 character(len=fnlen),optional,intent(in) :: filstat
 type(MPI_type),intent(inout) :: mpi_enreg
 type(datafiles_type),target,intent(inout) :: dtfil
@@ -114,6 +108,7 @@ integer,intent(out) :: npwtot(dtset%nkpt)
 character(len=fnlen),optional,intent(in) :: filnam(:)
 real(dp), intent(out) :: etotal_img(nimage),fcart_img(3,dtset%natom,nimage)
 real(dp), intent(out) :: fred_img(3,dtset%natom,nimage),strten_img(6,nimage)
+real(dp), intent(out) :: intgres_img(dtset%nspden,dtset%natom,nimage)
 real(dp),intent(inout) :: acell_img(3,nimage),amu_img(dtset%ntypat,nimage),occ_img(dtset%mband*dtset%nkpt*dtset%nsppol,nimage)
 real(dp),intent(inout) :: mixalch_img(dtset%npspalch,dtset%ntypalch,nimage)
 real(dp),intent(inout) :: rprim_img(3,3,nimage),vel_cell_img(3,3,nimage),vel_img(3,dtset%natom,nimage)
@@ -164,7 +159,7 @@ integer :: GWLS_TIMAB, OPTION_TIMAB
 
 
  call gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-& fred_img,iexit,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
+& fred_img,iexit,intgres_img,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
 & pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 & filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_elphon
 !!
 !! NAME
@@ -10,7 +9,7 @@
 !!  used, or be written to disk. All combinations should be feasible.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2020 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,9 +38,8 @@ module defs_elphon
  use m_abicore
  use m_errors
  use m_xmpi
-
- use m_kptrank,  only : kptrank_type, destroy_kptrank, copy_kptrank
- use m_crystal,    only : crystal_t
+ use m_krank
+ use m_crystal
 
  implicit none
 
@@ -51,6 +49,7 @@ module defs_elphon
  public :: gam_mult_displ
  public :: complete_gamma
  public :: complete_gamma_tr
+ public :: mkqptequiv
 
 !----------------------------------------------------------------------
 !!****t* defs_elphon/elph_kgrid_type
@@ -73,7 +72,7 @@ module defs_elphon
    integer :: new_nkptirr                     ! number of k-points in irreducible grid
    integer :: my_nkpt                         ! number of k-points on present processor
 
-   type(kptrank_type) :: kptrank_t            ! ranking of all kpoints on phonon calculation grid, and inverse rank
+   type(krank_t) :: krank            ! ranking of all kpoints on phonon calculation grid, and inverse rank
 
    integer, allocatable :: irr2full(:)            ! correspondence of irred kpoints to a full one
    integer, allocatable :: full2irr(:,:)          ! correspondence of full k to one irred kpoints through sym and timrev
@@ -295,7 +294,7 @@ module defs_elphon
 
 !----------------------------------------------------------------------
 
-CONTAINS  !=========================================================================================================================
+CONTAINS
 !!***
 
 !----------------------------------------------------------------------
@@ -322,15 +321,6 @@ CONTAINS  !=====================================================================
 
 subroutine elph_ds_clean(elph_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_ds_clean'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_type), intent(inout) :: elph_ds
@@ -338,50 +328,24 @@ subroutine elph_ds_clean(elph_ds)
 ! *************************************************************************
 
  !@elph_type
- if (allocated(elph_ds%qirredtofull))  then
-   ABI_DEALLOCATE(elph_ds%qirredtofull)
- end if
- if (allocated(elph_ds%wtq))  then
-   ABI_DEALLOCATE(elph_ds%wtq)
- end if
- if (allocated(elph_ds%n0))  then
-   ABI_DEALLOCATE(elph_ds%n0)
- end if
- if (allocated(elph_ds%qpt_full))  then
-   ABI_DEALLOCATE(elph_ds%qpt_full)
- end if
- if (allocated(elph_ds%gkk_intweight))  then
-   ABI_DEALLOCATE(elph_ds%gkk_intweight)
- end if
- if (allocated(elph_ds%gkk_qpt))  then
-   ABI_DEALLOCATE(elph_ds%gkk_qpt)
- end if
- if (allocated(elph_ds%gkk_rpt))  then
-   ABI_DEALLOCATE(elph_ds%gkk_rpt)
- end if
- if (allocated(elph_ds%gkk2))  then
-   ABI_DEALLOCATE(elph_ds%gkk2)
- end if
- if (allocated(elph_ds%gamma_qpt))  then
-   ABI_DEALLOCATE(elph_ds%gamma_qpt)
- end if
- if (allocated(elph_ds%gamma_rpt))  then
-   ABI_DEALLOCATE(elph_ds%gamma_rpt)
- end if
- if (allocated(elph_ds%phfrq))  then
-   ABI_DEALLOCATE(elph_ds%phfrq)
- end if
- if (allocated(elph_ds%a2f))  then
-   ABI_DEALLOCATE(elph_ds%a2f)
- end if
- if (allocated(elph_ds%qgrid_data))  then
-   ABI_DEALLOCATE(elph_ds%qgrid_data)
- end if
+ ABI_SFREE(elph_ds%qirredtofull)
+ ABI_SFREE(elph_ds%wtq)
+ ABI_SFREE(elph_ds%n0)
+ ABI_SFREE(elph_ds%qpt_full)
+ ABI_SFREE(elph_ds%gkk_intweight)
+ ABI_SFREE(elph_ds%gkk_qpt)
+ ABI_SFREE(elph_ds%gkk_rpt)
+ ABI_SFREE(elph_ds%gkk2)
+ ABI_SFREE(elph_ds%gamma_qpt)
+ ABI_SFREE(elph_ds%gamma_rpt)
+ ABI_SFREE(elph_ds%phfrq)
+ ABI_SFREE(elph_ds%a2f)
+ ABI_SFREE(elph_ds%qgrid_data)
 
  call elph_k_destroy (elph_ds%k_phon)
  call elph_k_destroy (elph_ds%k_fine)
 
- call destroy_kptrank (elph_ds%k_fine%kptrank_t)
+ call elph_ds%k_fine%krank%free()
 
 end subroutine elph_ds_clean
 !!***
@@ -410,15 +374,6 @@ end subroutine elph_ds_clean
 
 subroutine elph_tr_ds_clean(elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_tr_ds_clean'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_tr_type), intent(inout) :: elph_tr_ds
@@ -426,84 +381,32 @@ subroutine elph_tr_ds_clean(elph_tr_ds)
 ! *************************************************************************
 
  !@elph_tr_type
- if (allocated(elph_tr_ds%el_veloc))  then
-   ABI_DEALLOCATE(elph_tr_ds%el_veloc)
- end if
- if (allocated(elph_tr_ds%FSelecveloc_sq))  then
-   ABI_DEALLOCATE(elph_tr_ds%FSelecveloc_sq)
- end if
- if (allocated(elph_tr_ds%veloc_sq0))  then
-   ABI_DEALLOCATE(elph_tr_ds%veloc_sq0)
- end if
- if (allocated(elph_tr_ds%veloc_sq))  then
-   ABI_DEALLOCATE(elph_tr_ds%veloc_sq)
- end if
- if (allocated(elph_tr_ds%dos_n0))  then
-   ABI_DEALLOCATE(elph_tr_ds%dos_n0)
- end if
- if (allocated(elph_tr_ds%dos_n))  then
-   ABI_DEALLOCATE(elph_tr_ds%dos_n)
- end if
- if (allocated(elph_tr_ds%en_all))  then
-   ABI_DEALLOCATE(elph_tr_ds%en_all)
- end if
- if (allocated(elph_tr_ds%de_all))  then
-   ABI_DEALLOCATE(elph_tr_ds%de_all)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_tr)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trin)
- end if
- if (allocated(elph_tr_ds%gamma_qpt_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_qpt_trout)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_tr)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trin)
- end if
- if (allocated(elph_tr_ds%gamma_rpt_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%gamma_rpt_trout)
- end if
- if (allocated(elph_tr_ds%a2f_1d_tr))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_tr)
- end if
- if (allocated(elph_tr_ds%a2f_1d_trin))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trin)
- end if
- if (allocated(elph_tr_ds%a2f_1d_trout))  then
-   ABI_DEALLOCATE(elph_tr_ds%a2f_1d_trout)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight1)
- end if
- if (allocated(elph_tr_ds%tmp_gkk_intweight2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_gkk_intweight2)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk1)
- end if
- if (allocated(elph_tr_ds%tmp_velocwtk2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_velocwtk2)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk1))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk1)
- end if
- if (allocated(elph_tr_ds%tmp_vvelocwtk2))  then
-   ABI_DEALLOCATE(elph_tr_ds%tmp_vvelocwtk2)
- end if
+ ABI_SFREE(elph_tr_ds%el_veloc)
+ ABI_SFREE(elph_tr_ds%FSelecveloc_sq)
+ ABI_SFREE(elph_tr_ds%veloc_sq0)
+ ABI_SFREE(elph_tr_ds%veloc_sq)
+ ABI_SFREE(elph_tr_ds%dos_n0)
+ ABI_SFREE(elph_tr_ds%dos_n)
+ ABI_SFREE(elph_tr_ds%en_all)
+ ABI_SFREE(elph_tr_ds%de_all)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_tr)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_trin)
+ ABI_SFREE(elph_tr_ds%gamma_qpt_trout)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_tr)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_trin)
+ ABI_SFREE(elph_tr_ds%gamma_rpt_trout)
+ ABI_SFREE(elph_tr_ds%a2f_1d_tr)
+ ABI_SFREE(elph_tr_ds%a2f_1d_trin)
+ ABI_SFREE(elph_tr_ds%a2f_1d_trout)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight1)
+ ABI_SFREE(elph_tr_ds%tmp_gkk_intweight2)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk1)
+ ABI_SFREE(elph_tr_ds%tmp_velocwtk2)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk1)
+ ABI_SFREE(elph_tr_ds%tmp_vvelocwtk2)
 
 end subroutine elph_tr_ds_clean
 !!***
@@ -530,15 +433,6 @@ end subroutine elph_tr_ds_clean
 !! SOURCE
 
 subroutine elph_k_copy(elph_k_in, elph_k_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_k_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -573,7 +467,7 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
  ABI_ALLOCATE(elph_k_out%kpt,(3,elph_k_out%nkpt))
  elph_k_out%kpt = elph_k_in%kpt
 
- call copy_kptrank(elph_k_in%kptrank_t, elph_k_out%kptrank_t)
+ elph_k_out%krank = elph_k_in%krank%copy()
 
  ABI_ALLOCATE(elph_k_out%irr2full,(elph_k_out%nkptirr))
  elph_k_out%irr2full = elph_k_in%irr2full
@@ -584,7 +478,6 @@ subroutine elph_k_copy(elph_k_in, elph_k_out)
 
  ABI_ALLOCATE(elph_k_out%irredtoGS,(elph_k_out%nkptirr))
  elph_k_out%irredtoGS = elph_k_in%irredtoGS
-
 
 end subroutine elph_k_copy
 !!***
@@ -613,15 +506,6 @@ end subroutine elph_k_copy
 
 subroutine elph_k_destroy(elph_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_k_destroy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_kgrid_type), intent(inout) :: elph_k
@@ -629,56 +513,24 @@ subroutine elph_k_destroy(elph_k)
 ! *************************************************************************
 
  !@elph_kgrid_type
- if(allocated(elph_k%irr2full)) then
-   ABI_DEALLOCATE (elph_k%irr2full)
- end if
- if(allocated(elph_k%full2irr)) then
-   ABI_DEALLOCATE (elph_k%full2irr)
- end if
- if(allocated(elph_k%full2full)) then
-   ABI_DEALLOCATE (elph_k%full2full)
- end if
- if(allocated(elph_k%irredtoGS)) then
-   ABI_DEALLOCATE (elph_k%irredtoGS)
- end if
- if(allocated(elph_k%new_irredtoGS)) then
-   ABI_DEALLOCATE (elph_k%new_irredtoGS)
- end if
- if(allocated(elph_k%kpt)) then
-   ABI_DEALLOCATE (elph_k%kpt)
- end if
- if(allocated(elph_k%kptirr)) then
-   ABI_DEALLOCATE (elph_k%kptirr)
- end if
- if(allocated(elph_k%new_kptirr)) then
-   ABI_DEALLOCATE (elph_k%new_kptirr)
- end if
- if(allocated(elph_k%my_kpt)) then
-   ABI_DEALLOCATE (elph_k%my_kpt)
- end if
- if(allocated(elph_k%my_ikpt)) then
-   ABI_DEALLOCATE (elph_k%my_ikpt)
- end if
- if(allocated(elph_k%wtk)) then
-   ABI_DEALLOCATE (elph_k%wtk)
- end if
- if(allocated(elph_k%wtq)) then
-   ABI_DEALLOCATE (elph_k%wtq)
- end if
- if(allocated(elph_k%wtkirr)) then
-   ABI_DEALLOCATE (elph_k%wtkirr)
- end if
- if(allocated(elph_k%new_wtkirr)) then
-   ABI_DEALLOCATE (elph_k%new_wtkirr)
- end if
- if(allocated(elph_k%velocwtk)) then
-   ABI_DEALLOCATE (elph_k%velocwtk)
- end if
- if(allocated(elph_k%vvelocwtk)) then
-   ABI_DEALLOCATE (elph_k%vvelocwtk)
- end if
+ ABI_SFREE(elph_k%irr2full)
+ ABI_SFREE(elph_k%full2irr)
+ ABI_SFREE(elph_k%full2full)
+ ABI_SFREE(elph_k%irredtoGS)
+ ABI_SFREE(elph_k%new_irredtoGS)
+ ABI_SFREE(elph_k%kpt)
+ ABI_SFREE(elph_k%kptirr)
+ ABI_SFREE(elph_k%new_kptirr)
+ ABI_SFREE(elph_k%my_kpt)
+ ABI_SFREE(elph_k%my_ikpt)
+ ABI_SFREE(elph_k%wtk)
+ ABI_SFREE(elph_k%wtq)
+ ABI_SFREE(elph_k%wtkirr)
+ ABI_SFREE(elph_k%new_wtkirr)
+ ABI_SFREE(elph_k%velocwtk)
+ ABI_SFREE(elph_k%vvelocwtk)
 
- call destroy_kptrank (elph_k%kptrank_t)
+ call elph_k%krank%free()
 
 end subroutine elph_k_destroy
 !!***
@@ -707,15 +559,6 @@ end subroutine elph_k_destroy
 !! SOURCE
 
 subroutine elph_k_procs(nproc, elph_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph_k_procs'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -791,15 +634,6 @@ end subroutine elph_k_procs
 
 subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gam_mult_displ'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  integer, intent(in)  :: nbranch
  real(dp), intent(in)  :: displ_red(2,nbranch,nbranch)
@@ -813,13 +647,9 @@ subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
 
  gam_now = zero
 
- call zgemm('c','n',nbranch,nbranch,nbranch,cone,&
-& displ_red,nbranch,gam_bare,&
-& nbranch,czero,zgemm_tmp_mat,nbranch)
+ call zgemm('c','n',nbranch,nbranch,nbranch,cone,displ_red,nbranch,gam_bare,nbranch,czero,zgemm_tmp_mat,nbranch)
 
- call zgemm('n','n',nbranch,nbranch,nbranch,cone,&
-& zgemm_tmp_mat,nbranch,displ_red,&
-& nbranch,czero,gam_now,nbranch)
+ call zgemm('n','n',nbranch,nbranch,nbranch,cone,zgemm_tmp_mat,nbranch,displ_red,nbranch,czero,gam_now,nbranch)
 
 end subroutine gam_mult_displ
 !!***
@@ -851,15 +681,6 @@ end subroutine gam_mult_displ
 !! SOURCE
 
 subroutine complete_gamma(Cryst,nbranch,nsppol,nqptirred,nqpt_full,ep_scalprod,qirredtofull,qpttoqpt,gamma_qpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'complete_gamma'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1109,14 +930,6 @@ end subroutine complete_gamma
 subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsppol,gamma_qpt_tr,qirredtofull,qpttoqpt)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'complete_gamma_tr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1431,6 +1244,132 @@ subroutine complete_gamma_tr(crystal,ep_scalprod,nbranch,nqptirred,nqpt_full,nsp
  ABI_DEALLOCATE(gkk_qpt_tmp)
 
 end subroutine complete_gamma_tr
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstab/mkqptequiv
+!! NAME
+!! mkqptequiv
+!!
+!! FUNCTION
+!! This routine determines the equivalence between
+!!   1) qpoints and fermi surface kpoints
+!!   2) qpoints under symmetry operations
+!!
+!! INPUTS
+!!   Cryst<crystal_t>=Info on unit cell and symmetries.
+!!   kpt_phon = fermi surface kpoints
+!!   nkpt_phon = number of kpoints in the full FS set
+!!   nqpt = number of qpoints
+!!   qpt_full = qpoint coordinates
+!!
+!! OUTPUT
+!!   FSfullpqtofull = mapping of k + q onto k' for k and k' in full BZ
+!!   qpttoqpt(itim,isym,iqpt) = qpoint index which transforms to iqpt under isym and with time reversal itim.
+!!
+!! NOTES
+!!   REMOVED 3/6/2008: much too large matrix, and not used at present
+!!       FStoqpt = mapping of kpoint pairs (1 irreducible and 1 full) to qpoints
+!!
+!! PARENTS
+!!      elphon,get_tau_k
+!!
+!! CHILDREN
+!!      destroy_kptrank,get_rank,mkkptrank,wrtout
+!!
+!! SOURCE
+
+subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt_phon,nqpt
+ type(crystal_t),intent(in) :: Cryst
+!arrays
+ integer,intent(out) :: FSfullpqtofull(nkpt_phon,nqpt),qpttoqpt(2,Cryst%nsym,nqpt)
+ integer,intent(out),optional :: mqtofull(nqpt)
+ real(dp),intent(in) :: kpt_phon(3,nkpt_phon),qpt_full(3,nqpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
+ !character(len=500) :: message
+ type(krank_t) :: krank
+!arrays
+ real(dp) :: tmpkpt(3),gamma_kpt(3)
+
+! *************************************************************************
+
+ call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
+
+ krank = krank_new(nkpt_phon, kpt_phon)
+
+ FSfullpqtofull = -999
+ gamma_kpt(:) = zero
+
+ do ikpt_phon=1,nkpt_phon
+   do iqpt=1,nqpt
+     ! tmpkpt = jkpt = ikpt + qpt
+     tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
+
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+
+     FSfullpqtofull(ikpt_phon,iqpt) = krank%invrank(symrankkpt_phon)
+     if (FSfullpqtofull(ikpt_phon, iqpt) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to k+q !!!")
+     end if
+
+   end do
+ end do
+
+ if (present(mqtofull)) then
+   do iqpt=1,nqpt
+     tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
+
+     ! which kpt is it among the full FS kpts?
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+
+     mqtofull(iqpt) = krank%invrank(symrankkpt_phon)
+     if (mqtofull(iqpt) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to -q !!!")
+     end if
+   end do
+ end if
+
+ call krank%free()
+
+ ! start over with q grid
+ call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
+
+ krank = krank_new(nqpt, qpt_full)
+
+ qpttoqpt(:,:,:) = -1
+ do iFSqpt=1,nqpt
+   do isym=1,Cryst%nsym
+     tmpkpt(:) =  Cryst%symrec(:,1,isym)*qpt_full(1,iFSqpt) &
+                + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
+                + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
+
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!!!")
+     end if
+     qpttoqpt(1,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
+
+     tmpkpt = -tmpkpt
+     symrankkpt_phon = krank%get_rank(tmpkpt)
+     if (krank%invrank(symrankkpt_phon) == -1) then
+       MSG_ERROR('looks like no kpoint equiv to q by symmetry with time reversal!!!')
+     end if
+     qpttoqpt(2,isym,krank%invrank(symrankkpt_phon)) = iFSqpt
+   end do
+ end do
+
+ call krank%free()
+
+end subroutine mkqptequiv
 !!***
 
 end module defs_elphon

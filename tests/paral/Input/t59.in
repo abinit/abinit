@@ -57,7 +57,6 @@ qpt2   0.0 0.0 0.0
  paral_kgb 0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -67,15 +66,15 @@ qpt2   0.0 0.0 0.0
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%%  files_to_test  = t59_MPI1.out,          tolnlines=    3,   tolabs=  1.1e-6,      tolrel= 3.0e-4
+#%% files_to_test  = t59_MPI1.out,          tolnlines=    3,   tolabs=  1.1e-6,      tolrel= 3.0e-4
 #%% [NCPU_2]
-#%%  files_to_test  = t59_MPI2.out,          tolnlines=    3,   tolabs=  1.1e-6,      tolrel= 3.0e-4
+#%% files_to_test  = t59_MPI2.out,          tolnlines=    3,   tolabs=  1.1e-6,      tolrel= 3.0e-4
 #%% [NCPU_4]
-#%%  files_to_test  = t59_MPI4.out,          tolnlines=    3,   tolabs=  2.0e-6,      tolrel= 3.0e-4
+#%% files_to_test  = t59_MPI4.out,          tolnlines=    3,   tolabs=  2.0e-6,      tolrel= 3.0e-4
 #%% [NCPU_10]
-#%%  files_to_test  = t59_MPI10.out,          tolnlines=    9,   tolabs=  2.0e-6,      tolrel= 3.0e-4
+#%% files_to_test  = t59_MPI10.out,          tolnlines=    9,   tolabs=  2.0e-6,      tolrel= 3.0e-4
 #%% [extra_info]
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% authors = Unknown
 #%% description = 
 #%%   Calculation of the electron-phonon band structure renormalisation for Diamond,

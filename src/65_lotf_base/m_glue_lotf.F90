@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/glue_lotf
 !! NAME
 !! glue_lotf
@@ -7,7 +6,7 @@
 !!  Contains the GLUE procedure and parameters for Lotf
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2020 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -92,13 +91,6 @@ contains !===========================================================
 
   !--Function phi_r
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'glue_init'
-!End of the abilint section
-
   dphi =  (0.2878207442141723d+01 + ddphi) / 0.529177d0
   rcphi = (0.3700000000000000d+01 + ddphi) / 0.529177d0
 
@@ -194,13 +186,6 @@ contains !===========================================================
 
  subroutine glue_pair_devs(alpha_dum,RD,r_au,epot_2,fdum,dfdum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'glue_pair_devs'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -281,13 +266,6 @@ contains !===========================================================
 
  subroutine glue_pair(RD,r_au,epot_2,fdum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'glue_pair'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -349,13 +327,6 @@ contains !===========================================================
 
  subroutine calc_coord(r_au,coordatom_dum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coord'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -403,13 +374,6 @@ contains !===========================================================
 
      subroutine calc_rhop(r_st,rhop_dum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_rhop'
-!End of the abilint section
-
      implicit none
 
 !    Arguments ------------------------
@@ -454,13 +418,6 @@ contains !===========================================================
 !! SOURCE
 
  subroutine calc_coord_new_d(r_au,alpha_d,coordatom_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coord_new_d'
-!End of the abilint section
 
   implicit none
 
@@ -509,13 +466,6 @@ contains !===========================================================
 !! SOURCE
 
      subroutine rho_devs(r_au,alpha_d,rho_neigh_d,rho_neigh_p,rho_neigh_pd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rho_devs'
-!End of the abilint section
 
      real(dp),intent(in) :: r_au,alpha_d
      real(dp),intent(out) :: rho_neigh_d,rho_neigh_p,rho_neigh_pd
@@ -571,13 +521,6 @@ contains !===========================================================
 
  subroutine rhop_value(rst,alpha_d,rhop_dum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rhop_value'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -620,13 +563,6 @@ contains !===========================================================
 !! SOURCE
 
  subroutine eval_U_n(coordatom_i,epot_dum2,up_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_U_n'
-!End of the abilint section
 
   implicit none
 
@@ -698,13 +634,6 @@ contains !===========================================================
 !! SOURCE
 
  subroutine eval_Upp_n(coordatom_i,up_dum,upp_dum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_Upp_n'
-!End of the abilint section
 
   implicit none
 

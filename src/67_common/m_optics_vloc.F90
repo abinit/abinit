@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optics_vloc
 !! NAME
 !!  m_optics_vloc
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2018 ABINIT group (SM,VR,FJ,MT)
+!!  Copyright (C) 2010-2020 ABINIT group (SM,VR,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +24,20 @@
 #include "abi_common.h"
 
 module m_optics_vloc
+
+ use defs_basis
+ use m_abicore
+ use m_errors
+ use m_wffile
+ use m_xmpi
+ use m_hdr
+ use m_dtset
+ use m_dtfil
+
+use defs_abitypes,   only : MPI_type
+ use m_time,         only : timab
+ use m_io_tools,     only : get_unit
+ use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
 
@@ -79,27 +92,6 @@ contains
 
  subroutine optics_vloc(cg,dtfil,dtset,eigen0,gprimd,hdr,kg,mband,mcg,mkmem,mpi_enreg,mpw,&
 &                       nkpt,npwarr,nsppol)
-
- use defs_basis
- use defs_abitypes
- use m_abicore
- use m_errors
- use m_wffile
- use m_xmpi
- use m_hdr
-
- use m_time,         only : timab
- use m_io_tools,     only : get_unit
- use m_mpinfo,       only : proc_distrb_cycle
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optics_vloc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mkmem,mpw,nkpt,nsppol

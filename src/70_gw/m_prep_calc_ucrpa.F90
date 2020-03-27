@@ -6,7 +6,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +31,36 @@
 MODULE m_prep_calc_ucrpa
 
  use defs_basis
+ use m_abicore
+ use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
+ use m_xmpi
+ use m_defs_ptgroups
+ use m_errors
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use m_time,          only : timab
+ use m_hide_blas,     only : xdotc
+ use m_geometry,      only : normv
+ use m_crystal,       only : crystal_t
+ use m_fft_mesh,      only : rotate_FFT_mesh
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
+ use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_io_tools,      only : flush_unit, open_file
+ use m_vcoul,         only : vcoul_t
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
+ use m_pawang,        only : pawang_type
+ use m_pawtab,        only : pawtab_type
+ use m_pawfgrtab,     only : pawfgrtab_type
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_nhat,      only : pawmknhat_psipsi
+ use m_paw_sym,       only : paw_symcprj
+ use m_wfd,           only : wfd_t
+ use m_oscillators,   only : rho_tw_g
+ use m_esymm,         only : esymm_t, esymm_failed
+ use m_read_plowannier, only : read_plowannier
+ use m_plowannier, only : plowannier_type,operwan_realspace_type
+
  implicit none
 
  private
@@ -40,7 +70,6 @@ MODULE m_prep_calc_ucrpa
 
 contains
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/prep_calc_ucrpa
 !! NAME
 !! prep_calc_ucrpa
@@ -49,7 +78,7 @@ contains
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,49 +165,19 @@ contains
 subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Gsph_x,Vcp,Kmesh,Qmesh,lpawu,&
 & M1_q_m,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,&
 & Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross,rhot1_q_m)
+& prtvol,pawcross,plowan_compute,rhot1_q_m,wanbz,rhot1)
 
- use defs_basis
- use defs_datatypes
- use m_abicore
- use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
- use m_xmpi
- use m_defs_ptgroups
- use m_errors
-
- use m_time,          only : timab
- use m_hide_blas,     only : xdotc
- use m_geometry,      only : normv
- use m_crystal,       only : crystal_t
- use m_fft_mesh,      only : rotate_FFT_mesh
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
- use m_io_tools,      only : flush_unit, open_file
- use m_vcoul,         only : vcoul_t
- use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
- use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
- use m_pawang,        only : pawang_type
- use m_pawtab,        only : pawtab_type
- use m_pawfgrtab,     only : pawfgrtab_type
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
- use m_paw_nhat,      only : pawmknhat_psipsi
- use m_paw_sym,       only : paw_symcprj
- use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur
- use m_oscillators,   only : rho_tw_g
- use m_esymm,         only : esymm_t, esymm_failed
- use m_read_plowannier, only : read_plowannier
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_calc_ucrpa'
-!End of the abilint section
-
- implicit none
+#ifndef HAVE_CRPA_OPTIM
+#ifdef FC_INTEL
+#if  __INTEL_COMPILER<=1700
+!DEC$ NOOPTIMIZE
+#endif
+#endif
+#endif
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: sigmak_ibz,ikcalc,itypatcor,prtvol,lpawu,minbnd,maxbnd,pawcross
+ integer,intent(in) :: sigmak_ibz,ikcalc,itypatcor,prtvol,lpawu,minbnd,maxbnd,pawcross,plowan_compute
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -198,6 +197,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  type(esymm_t),target,intent(in) :: allQP_sym(Wfd%nkibz,Wfd%nsppol)
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
+ type(plowannier_type),intent(in) :: wanbz
+ type(operwan_realspace_type),target,intent(inout) :: rhot1(Sigp%npwx,Qmesh%nibz)
 
 !Local variables ------------------------------
 !scalars
@@ -212,8 +213,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  integer :: ispinor1,ispinor3,isym_kgw,isym_ki,gwx_mgfft,use_padfft,use_padfftf,gwx_fftalga,gwx_fftalgb
  integer :: gwx_nfftot,nfftf,mgfftf,ierr
  integer :: nhat12_grdim
+ integer :: iatom1,iatom2,il1,il2,im1,im2,ispinor2,pos1,pos2,wan_jb,wan_ib_sum,pwx
  real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm,weight
- complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
+ complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt,eikr
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
 !arrays
@@ -233,11 +235,13 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  complex(gwpc),pointer :: cg_jb(:),cg_sum(:)
  complex(dpc) :: ovlp(2)
  complex(dpc),allocatable :: coeffW_BZ(:,:,:,:,:,:)
+ complex(dpc),pointer :: ptr_rhot(:,:,:,:,:)
  logical :: can_symmetrize(Wfd%nsppol)
  logical,allocatable :: bks_mask(:,:,:)
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
+ !type(plowannier_type) :: wan
  logical     :: ecriture=.FALSE.
  logical     :: l_ucrpa,luwindow
  integer     :: g0_dump(3),iq_ibz_dump,dumint(2)
@@ -280,12 +284,13 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  dumint=0
  luwindow=.true.
 ! write(6,*) "cc",allocated(coeffW_BZ)
- call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
-& nspinor,nsppol,pawang,prtvol,dumint)
-
- if(lcor/=lpawu) then
+ if (plowan_compute <10)then 
+   call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
+     & nspinor,nsppol,pawang,prtvol,dumint)
+   if(lcor/=lpawu) then
      msg = "lcor and lpawu differ in prep_calc_ucrpa"
      MSG_ERROR(msg)
+   endif
  endif
 
  ! === End of read Wannier function coefficients for Ucrpa
@@ -311,7 +316,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
 
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
+   call wfd%change_ngfft(Cryst,Psps,gwx_ngfft)
  end if
  gwx_mgfft   = MAXVAL(gwx_ngfft(1:3))
  gwx_fftalga = gwx_ngfft(7)/100
@@ -532,7 +537,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
    ABI_STAT_ALLOCATE(wfr_bdgw,(gwx_nfftot*nspinor,ib1:ib2), ierr)
    ABI_CHECK(ierr==0, "out of memory in wfr_bdgw")
    do jb=ib1,ib2
-     call wfd_get_ur(Wfd,jb,jk_ibz,spin,wfr_bdgw(:,jb))
+     call wfd%get_ur(jb,jk_ibz,spin,wfr_bdgw(:,jb))
 !     write(6,'(a,6i4)')"indforwfd" ,jb,jk_ibz,spin
    end do
 
@@ -544,7 +549,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      do jb=ib1,ib2
 !           write(6,*) "has_cprj",Wfd%Wave(jb,jk_ibz,spin)%has_cprj
            Wfd%Wave(jb,jk_ibz,spin)%has_cprj=1
-       call wfd_get_cprj(Wfd,jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+       call wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
        call paw_symcprj(jk_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        call pawcprj_copy(Cprj_ksum,Cprj_kgw(:,ibsp:ibsp+(nspinor-1)))
        ibsp=ibsp+nspinor
@@ -554,7 +559,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        ABI_ALLOCATE(ur_ae_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        ABI_ALLOCATE(ur_ps_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        do jb=ib1,ib2
-         call wfd_paw_get_aeur(Wfdf,jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+         call wfdf%paw_get_aeur(jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &          ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          ur_ae_bdgw(:,jb)=ur_ae_sum
          ur_ae_onsite_bdgw(:,jb)=ur_ae_onsite_sum
@@ -599,8 +604,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !       end do
 !     end if
 
-     write(msg,'(2(a,i4),a,i3)')' prep_calc_ucrpa : ik_bz ',ik_bz,'/',Kmesh%nbz,' done'
-     call wrtout(std_out,msg,'PERS')
+
      !
      ! * Find the corresponding irreducible q-point.
      call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
@@ -616,6 +620,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
       if (.NOT.has_IBZ_item(Qmesh,qbz,iq_ibz_dump,g0_dump)) then
         cycle
       end if
+      
+      write(msg,'(2(a,i4),a,i3)')' prep_calc_ucrpa : ik_bz ',ik_bz,'/',Kmesh%nbz,' done'
+      call wrtout(std_out,msg,'PERS')
 !      write(6,*) "kkk1p",ik_bz,jk_bz,iq_ibz
 
 !     write(std_out,*)'prep_calc_ucrpa:ik_bz ',ik_bz,'/',Kmesh%nbz,' done by processor ',Wfd%my_rank,"iq_BZ",iq_bz,"iQ_iBZ",iq_ibz
@@ -639,7 +646,10 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      call gsph_fft_tabs(Gsph_x,g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
 
      if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-     !use_padfft=0
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
      if (use_padfft==0) then
        ABI_DEALLOCATE(gwx_gbound)
        ABI_ALLOCATE(gwx_gbound,(2*gwx_mgfft+8,2*use_padfft))
@@ -686,7 +696,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        ! * Skip empty states.
        !if (qp_occ(ib_sum,ik_ibz,spin)<tol_empty) CYCLE
 
-       call wfd_get_ur(Wfd,ib_sum,ik_ibz,spin,wfr_sum)
+       call wfd%get_ur(ib_sum,ik_ibz,spin,wfr_sum)
 !       write(6,'(a,3i4)')"indforwfd2" ,ib_sum,ik_ibz,spin
 !       write(6,*) wfd_ihave_ug(Wfd,ib_sum,ik_ibz,spin,"Stored"),Wfd%Wave(ib_sum,ik_ibz,spin)%has_ug
 !       write(6,*) wfd_ihave_ur(Wfd,ib_sum,ik_ibz,spin,"Stored"),Wfd%Wave(ib_sum,ik_ibz,spin)%has_ur
@@ -694,10 +704,10 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        if (Psps%usepaw==1) then ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call wfd_get_cprj(Wfd,ib_sum,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+         call wfd%get_cprj(ib_sum,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
          if (pawcross==1) then
-           call wfd_paw_get_aeur(Wfdf,ib_sum,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+           call wfdf%paw_get_aeur(ib_sum,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &              ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if
@@ -769,19 +779,21 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
          if (ib_sum.GE.ib1.AND.ib_sum.LE.ib2) then
            call flush_unit(std_out)
            call flush_unit(ab_out)
-           do iat=1, cryst%nattyp(itypatcor)
-             do ispinor1=1,nspinor
-               do ispinor3=1,nspinor
-                 do m1=1,2*lcor+1
-                   do m3=1,2*lcor+1
-                      M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
+           if (plowan_compute <10)then
+             do iat=1, cryst%nattyp(itypatcor)
+               do ispinor1=1,nspinor
+                 do ispinor3=1,nspinor
+                   do m1=1,2*lcor+1
+                     do m3=1,2*lcor+1
+                       M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=M1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
 &                      rhotwg_ki(:,jb)*coeffW_BZ(iat,spin,jb,jk_bz,ispinor3,m3)*conjg(coeffW_BZ(iat,spin,ib_sum,ik_bz,ispinor1,m1))
+                     enddo
                    enddo
                  enddo
                enddo
              enddo
-           enddo
-         end if
+           end if
+         endif
 !  ************************************8
 !  ************************************8
          !
@@ -809,7 +821,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
              cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
 
-             ctmp = xdotc(Wfd%npwwfn*Wfd%nspinor,cg_sum,1,cg_jb,1)
+             ctmp = xdotc(Wfd%npwarr(ik_ibz)*Wfd%nspinor,cg_sum,1,cg_jb,1)
              ovlp(1) = REAL(ctmp)
              ovlp(2) = AIMAG(ctmp)
 
@@ -844,22 +856,60 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
          if (ib_sum.GE.ib1.AND.ib_sum.LE.ib2) then
            call flush_unit(std_out)
            call flush_unit(ab_out)
-           do iat=1, cryst%nattyp(itypatcor)
-             do ispinor1=1,nspinor
-               do ispinor3=1,nspinor
-                 do m1=1,2*lcor+1
-                   do m3=1,2*lcor+1
-                     if(m1==2.and.m3==2) then
-                     endif
-                      rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=&
-&                       rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
-&                       rhotwg_ki(:,jb)*coeffW_BZ(iat,spin,jb,jk_bz,ispinor3,m3)&
-&                       *conjg(coeffW_BZ(iat,spin,ib_sum,ik_bz,ispinor1,m1))*weight
+           if (plowan_compute<10)then
+             do iat=1, cryst%nattyp(itypatcor)
+               do ispinor1=1,nspinor
+                 do ispinor3=1,nspinor
+                   do m1=1,2*lcor+1
+                     do m3=1,2*lcor+1
+                       if(m1==2.and.m3==2) then
+                       endif
+                       rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)=&
+                         &rhot1_q_m(iat,ispinor1,ispinor3,m1,m3,:,iq_ibz)+&
+                         &rhotwg_ki(:,jb)*coeffW_BZ(iat,spin,jb,jk_bz,ispinor3,m3)&
+                         &*conjg(coeffW_BZ(iat,spin,ib_sum,ik_bz,ispinor1,m1))*weight
+                     enddo
                    enddo
                  enddo
                enddo
              enddo
-           enddo
+           else
+             wan_jb=jb-wanbz%bandi_wan+1
+             wan_ib_sum=ib_sum-wanbz%bandi_wan+1
+             do pwx=1,sigp%npwx
+               do iatom1=1,wanbz%natom_wan
+               do iatom2=1,wanbz%natom_wan
+                 !Loig Vaugier PhD eq. 5.11
+                 eikr=exp(- cmplx(0.0,1.0) * two_pi * ( &
+   kmesh%bz(1,ik_bz)* ( cryst%xred(1,wanbz%iatom_wan(iatom1)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+&
+   kmesh%bz(2,ik_bz)* ( cryst%xred(2,wanbz%iatom_wan(iatom1)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+&
+   kmesh%bz(3,ik_bz)* ( cryst%xred(3,wanbz%iatom_wan(iatom1)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
+                 do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+                 do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+                   do il1=1,wanbz%nbl_atom_wan(iatom1)
+                   do il2=1,wanbz%nbl_atom_wan(iatom2)
+                     ptr_rhot=>rhot1(pwx,iq_ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl
+                     do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+                     do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+                       do ispinor1=1,wanbz%nspinor
+                       do ispinor2=1,wanbz%nspinor
+      ptr_rhot(im1,im2,spin,ispinor1,ispinor2)=&
+      &ptr_rhot(im1,im2,spin,ispinor1,ispinor2)+&
+      &rhotwg_ki(pwx,jb)*wanbz%psichi(jk_bz,wan_jb,iatom1)%atom(il1)%matl(im1,spin,ispinor1)*&
+      &conjg(wanbz%psichi(ik_bz,wan_ib_sum,iatom2)%atom(il2)%matl(im2,spin,ispinor2))*weight&
+      *eikr
+                                 enddo!im2
+                               enddo!im1
+                             enddo!il2
+                           enddo!il1
+                         enddo!pos2
+                       enddo!pos1
+                     enddo!iatom2
+                   enddo!iatom1
+                 enddo!ispinor2
+               enddo!ispinor1
+             enddo!pwx
+           endif!plowan_compute<10
          end if
 !  ************************************8
 !  ************************************8
@@ -932,7 +982,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  ABI_DEALLOCATE(vc_sqrt_qbz)
  ABI_DEALLOCATE(ktabr)
 ! ABI_DEALLOCATE(proc_distrb)
- ABI_DEALLOCATE(coeffW_BZ)
+ if (plowan_compute<10) then
+   ABI_DEALLOCATE(coeffW_BZ)
+ endif
 
 
  call timab(430,2,tsec) ! csigme (SigX)

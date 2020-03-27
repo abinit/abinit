@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sg2002
 !! NAME
 !!  m_sg2002
@@ -7,7 +6,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2002-2007 Stefan Goedecker, CEA Grenoble
-!!  Copyright (C) 2014-2018 ABINIT group (XG)
+!!  Copyright (C) 2014-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,13 +123,6 @@ contains
 !! SOURCE
 
 subroutine sg2002_back(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zf,zr,comm_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_back'
-!End of the abilint section
 
  implicit none
 
@@ -416,13 +408,6 @@ end subroutine sg2002_back
 
 subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zr,zf,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_forw'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -698,13 +683,6 @@ end subroutine sg2002_forw
 
 subroutine sg2002_mpiback_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_mpiback_wf'
-!End of the abilint section
 
  implicit none
 
@@ -1045,13 +1023,6 @@ end subroutine sg2002_mpiback_wf
 subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &        max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zr,zf,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_mpiforw_wf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1364,13 +1335,6 @@ end subroutine sg2002_mpiforw_wf
 subroutine sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_mpifourdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1489,13 +1453,6 @@ end subroutine sg2002_mpifourdp
 subroutine sg2002_applypot(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_applypot'
-!End of the abilint section
 
  implicit none
 
@@ -1915,13 +1872,6 @@ end subroutine sg2002_applypot
 subroutine sg2002_applypot_many(icplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_applypot_many'
-!End of the abilint section
 
  implicit none
 
@@ -2358,13 +2308,6 @@ end subroutine sg2002_applypot_many
 subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,zf,rho,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg2002_accrho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2618,13 +2561,6 @@ end subroutine sg2002_accrho
 
 subroutine ctrig(n,trig,after,before,now,isign,ic)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ctrig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2731,13 +2667,6 @@ end subroutine ctrig
 !! SOURCE
 
 subroutine fftstp(mm,n1dfft,m,nn,n,zin,zout,trig,after,now,before,isign)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftstp'
-!End of the abilint section
 
  implicit none
 

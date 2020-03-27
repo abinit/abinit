@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_nmr
 !! NAME
 !!  m_paw_nmr
@@ -8,7 +7,7 @@
 !!   observables (PAW approach).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (JWZ, MT)
+!! Copyright (C) 2018-2020 ABINIT group (JWZ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +30,7 @@ MODULE m_paw_nmr
 
  use m_symtk,      only : matpointsym
  use m_pawang,     only : pawang_type
+ use m_paw_sphharm, only : slxyzs
  use m_pawtab,     only : pawtab_type
  use m_pawrad,     only : pawrad_type,pawrad_deducer0,simp_gen
  use m_pawtab,     only : pawtab_type
@@ -46,11 +46,110 @@ MODULE m_paw_nmr
 !public procedures.
  public :: make_efg_onsite ! Compute the electric field gradient due to PAW on-site densities
  public :: make_fc_paw     ! Compute the PAW on-site contribution to the Fermi-contact
+ public :: make_orbl_paw     ! Compute the PAW on-site contribution for orbital magnetism, 1/2<L>
 
 CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_paw_nmr/make_orbl_paw
+!! NAME
+!! make_orbl_paw
+!!
+!! FUNCTION
+!! Compute the onsite contribution to orbital magnetism, 1/2 <L>
+!!
+!! INPUTS
+!!  idir=cartesian direction of interest
+!!  natom=number of atoms in cell.
+!!  ntypat=number of atom types
+!!  pawrad(ntypat) <type(pawrad_type)>=paw radial mesh and related data
+!!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!  typat(ntypat)
+!!
+!! OUTPUT
+!!  orbl=complex(dpc) 1/2<L_dir>
+
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_orbl_paw(idir,natom,ntypat,orbl,pawrad,pawtab,typat)
+
+ implicit none
+
+!Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: idir,natom,ntypat
+ complex(dpc),intent(out) :: orbl
+ !arrays
+ integer,intent(in) :: typat(ntypat)
+ type(pawrad_type),intent(in) :: pawrad(ntypat)
+ type(pawtab_type),target,intent(in) :: pawtab(ntypat)
+
+!Local variables-------------------------------
+ !scalars
+ integer :: iatom,il,im,ilmn,itypat,jl,jm,jlmn,klmn,kln,mesh_size
+ real(dp) :: intg
+ complex(dpc) :: orbl_me
+ !arrays
+ integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
+ real(dp),allocatable :: ff(:)
+
+! ************************************************************************
+
+ DBG_ENTER("COLL")
+
+ !loop over atoms in cell
+ orbl = czero
+ do iatom = 1, natom
+   itypat=typat(iatom)
+   indlmn => pawtab(itypat)%indlmn
+   
+   mesh_size=pawtab(itypat)%mesh_size
+   ABI_ALLOCATE(ff,(mesh_size))
+
+!    loop over basis elements for this atom
+!    ----
+     do jlmn=1,pawtab(itypat)%lmn_size
+       jl=indlmn(1,jlmn)
+       jm=indlmn(2,jlmn)
+       do ilmn=1,pawtab(itypat)%lmn_size
+         il=indlmn(1,ilmn)
+         im=indlmn(2,ilmn)
+
+         klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+         kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+
+         ! compute <L_dir>
+         call slxyzs(jl,jm,idir,il,im,orbl_me)
+
+         ! compute integral of phi_i*phi_j - tphi_i*tphi_j
+         if (abs(orbl_me) > tol8) then
+            ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
+            call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+            call simp_gen(intg,ff,pawrad(itypat))
+            
+            orbl = orbl + half*orbl_me*intg
+
+         end if ! end check that |L_dir| > 0, otherwise ignore term
+
+      end do ! end loop over ilmn
+   end do ! end loop over jlmn
+      
+   ABI_DEALLOCATE(ff)
+
+ end do     ! Loop on atoms
+
+ DBG_EXIT("COLL")
+
+ end subroutine make_orbl_paw
+!!***
 
 !!****f* m_paw_nmr/make_efg_onsite
 !! NAME
@@ -102,13 +201,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 &                          rprimd,symrel,tnons,xred,&
 &                          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_onsite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -142,6 +234,10 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 
  DBG_ENTER("COLL")
 
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'make_efg_onsite: not supposed to be called with qphqse=2!')
+ end if
+
  efg(:,:,:) = zero
 
 !Set up parallelism over atoms
@@ -170,7 +266,7 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
    mesh_size=pawtab(itypat)%mesh_size
    ABI_ALLOCATE(ff,(mesh_size))
 
-   cplex = pawrhoij(iatom)%cplex
+   cplex = pawrhoij(iatom)%qphase
    nspden = pawrhoij(iatom)%nspden
    ABI_ALLOCATE(lmselectin,(lm_size))
    ABI_ALLOCATE(lmselectout,(lm_size))
@@ -318,13 +414,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_fc_paw'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -341,7 +430,7 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
 !Local variables-------------------------------
 !scalars
  integer :: iatom,iatom_tot,ierr,irhoij,islope,ispden,itypat
- integer :: ilmn,il,iln,ilm,im,jl,jlm,jlmn,jln,jm,j0lmn
+ integer :: ilmn,il,iln,ilm,im,jl,jlm,jlmn,jln,jm,j0lmn,jrhoij
  integer :: klmn,kln,mesh_size,my_comm_atom,nslope
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: mi,mj,xi,xxsum,xysumi,xysumj,yi,yj
@@ -352,6 +441,10 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
 ! ************************************************************************
 
  DBG_ENTER("COLL")
+
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'make_fc_paw: not supposed to be called with qphqse=2!')
+ end if
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
@@ -394,6 +487,7 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
          if (jl==0 .and. il==0) then ! select only s-states
 
 !          Loop over non-zero elements of rhoij
+           jrhoij=1
            do irhoij=1,pawrhoij(iatom)%nrhoijsel
              if (klmn==pawrhoij(iatom)%rhoijselect(irhoij)) then ! rho_ij /= 0 for this klmn
                xxsum = 0 ! these three variables will be used to compute the slopes
@@ -426,14 +520,10 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
                mi = xysumi/xxsum
                mj = xysumj/xxsum
 !              accumulate the rho_ij contribution to the fermi contact for this spin density:
-               if (pawrhoij(iatom)%cplex == 1) then
-                 fc(ispden,iatom_tot)=fc(ispden,iatom_tot)+&
-&                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(irhoij,ispden)*mi*mj/four_pi
-               else
-                 fc(ispden,iatom_tot)=fc(ispden,iatom_tot)+&
-&                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(2*irhoij-1,ispden)*mi*mj/four_pi
-               end if
+               fc(ispden,iatom_tot)=fc(ispden,iatom_tot)+&
+&                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(jrhoij,ispden)*mi*mj/four_pi
              end if ! end selection on klmn for nonzero rho_ij
+             jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
            end do ! end loop over nonzero rho_ij
          end if ! end l=l'=0 selection
        end do ! end loop over ilmn

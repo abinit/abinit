@@ -143,7 +143,6 @@
 #  d3e_pert3_elfd7   1
 #   d3e_pert3_dir7   1 1 1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

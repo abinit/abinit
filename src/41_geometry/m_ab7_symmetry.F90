@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ab7_symmetry
 !! NAME
 !! m_ab7_symmetry
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  Copyright (C) 2008-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,13 +118,6 @@ contains
 
   subroutine new_item(token)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'new_item'
-!End of the abilint section
-
     type(symmetry_list), pointer :: token
 
     ! We allocate a new list token and prepend it.
@@ -149,13 +141,6 @@ contains
   end subroutine new_item
 
   subroutine free_item(token)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'free_item'
-!End of the abilint section
 
     type(symmetry_list), pointer :: token
 
@@ -190,13 +175,6 @@ contains
 
   subroutine get_item(token, id)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_item'
-!End of the abilint section
-
     type(symmetry_list), pointer :: token
     integer, intent(in) :: id
 
@@ -220,13 +198,6 @@ contains
 
   subroutine symmetry_get_from_id(sym, id, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_from_id'
-!End of the abilint section
-
     type(symmetry_type), pointer :: sym
     integer, intent(in) :: id
     integer, intent(out) :: errno
@@ -248,13 +219,6 @@ contains
   end subroutine symmetry_get_from_id
 
   subroutine new_symmetry(sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'new_symmetry'
-!End of the abilint section
 
     type(symmetry_type), intent(out) :: sym
 
@@ -280,13 +244,6 @@ contains
   end subroutine new_symmetry
 
   subroutine free_symmetry(sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'free_symmetry'
-!End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
 
@@ -321,13 +278,6 @@ contains
 
   subroutine symmetry_new(id)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_new'
-!End of the abilint section
-
     integer, intent(out) :: id
 
     type(symmetry_list), pointer :: token
@@ -338,13 +288,6 @@ contains
   end subroutine symmetry_new
 
   subroutine symmetry_free(id)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_free'
-!End of the abilint section
 
     integer, intent(in) :: id
 
@@ -359,13 +302,6 @@ contains
   end subroutine symmetry_free
 
   subroutine symmetry_set_tolerance(id, tolsym, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_tolerance'
-!End of the abilint section
 
     integer, intent(in) :: id
     real(dp), intent(in) :: tolsym
@@ -392,13 +328,6 @@ contains
   end subroutine symmetry_set_tolerance
 
   subroutine symmetry_set_lattice(id, rprimd, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_lattice'
-!End of the abilint section
 
     integer, intent(in) :: id
     real(dp), intent(in) :: rprimd(3,3)
@@ -431,13 +360,6 @@ contains
   end subroutine symmetry_set_lattice
 
   subroutine symmetry_set_structure(id, nAtoms, typeAt, xRed, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_structure'
-!End of the abilint section
 
     integer, intent(in) :: id
     integer, intent(in) :: nAtoms
@@ -480,13 +402,6 @@ contains
 
   subroutine symmetry_set_spin(id, nAtoms, spinAt, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_spin'
-!End of the abilint section
-
     integer, intent(in) :: id
     integer, intent(in) :: nAtoms
     real(dp), intent(in) :: spinAt(3,nAtoms)
@@ -524,13 +439,6 @@ contains
   end subroutine symmetry_set_spin
 
   subroutine symmetry_set_collinear_spin(id, nAtoms, spinAt, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_collinear_spin'
-!End of the abilint section
 
     integer, intent(in) :: id
     integer, intent(in) :: nAtoms
@@ -571,13 +479,6 @@ contains
 
   subroutine symmetry_set_spin_orbit(id, withSpinOrbit, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_spin_orbit'
-!End of the abilint section
-
     integer, intent(in) :: id
     logical, intent(in) :: withSpinOrbit
     integer, intent(out) :: errno
@@ -602,13 +503,6 @@ contains
   end subroutine symmetry_set_spin_orbit
 
   subroutine symmetry_set_field(id, field, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_field'
-!End of the abilint section
 
     integer, intent(in) :: id
     real(dp), intent(in) :: field(3)
@@ -637,13 +531,6 @@ contains
 
   subroutine symmetry_set_jellium(id, jellium, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_jellium'
-!End of the abilint section
-
     integer, intent(in) :: id
     logical, intent(in) :: jellium
     integer, intent(out) :: errno
@@ -670,13 +557,6 @@ contains
 
   subroutine symmetry_set_nzchempot(id, nzchempot, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_nzchempot'
-!End of the abilint section
-
     integer, intent(in) :: id
     integer, intent(in) :: nzchempot
     integer, intent(out) :: errno
@@ -701,13 +581,6 @@ contains
   end subroutine symmetry_set_nzchempot
 
   subroutine symmetry_set_periodicity(id, periodic, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_periodicity'
-!End of the abilint section
 
     integer, intent(in) :: id
     logical, intent(in) :: periodic(3)
@@ -737,13 +610,6 @@ contains
 
   subroutine symmetry_get_n_atoms(id, nAtoms, errno)
     !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_n_atoms'
-!End of the abilint section
-
     integer, intent(in) :: id
     integer, intent(out) :: errno
     integer, intent(out) :: nAtoms
@@ -763,13 +629,6 @@ contains
   end subroutine symmetry_get_n_atoms
 
   subroutine compute_bravais(sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_bravais'
-!End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
 
@@ -793,13 +652,6 @@ contains
   subroutine symmetry_get_bravais(id, bravais, holohedry, center, &
        & nBravSym, bravSym, errno)
     !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_bravais'
-!End of the abilint section
-
     integer, intent(in) :: id
     integer, intent(out) :: errno
     integer, intent(out) :: nBravSym, holohedry, center
@@ -830,13 +682,6 @@ contains
   end subroutine symmetry_get_bravais
 
   subroutine compute_matrices(sym, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_matrices'
-!End of the abilint section
 
     type(symmetry_type), intent(inout) :: sym
     integer, intent(out) :: errno
@@ -934,13 +779,6 @@ contains
 
   subroutine symmetry_get_n_sym(id, nSym, errno)
     !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_n_sym'
-!End of the abilint section
-
     integer, intent(in) :: id
     integer, intent(out) :: errno
     integer, intent(out) :: nSym
@@ -966,13 +804,6 @@ contains
 
   subroutine symmetry_set_n_sym(id, nSym, sym, transNon, symAfm, errno)
     !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_set_n_sym'
-!End of the abilint section
-
     integer, intent(in)  :: id
     integer, intent(in)  :: nSym
     integer, intent(in)  :: sym(3, 3, nSym)
@@ -1012,13 +843,6 @@ contains
 
   subroutine symmetry_get_matrices(id, nSym, sym, transNon, symAfm, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_matrices'
-!End of the abilint section
-
     integer, intent(in) :: id
     integer, intent(out) :: errno
     integer, intent(out) :: nSym
@@ -1049,13 +873,6 @@ contains
   end subroutine symmetry_get_matrices
 
   subroutine symmetry_get_matrices_p(id, nSym, sym, transNon, symAfm, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_matrices_p'
-!End of the abilint section
 
     integer, intent(in) :: id
     integer, intent(out) :: errno
@@ -1088,13 +905,6 @@ contains
 
   subroutine symmetry_get_multiplicity(id, multiplicity, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_multiplicity'
-!End of the abilint section
-
     integer, intent(in) :: id
     integer, intent(out) :: multiplicity, errno
 
@@ -1118,13 +928,6 @@ contains
 
   subroutine symmetry_get_group(id, spaceGroup, spaceGroupId, &
        & pointGroupMagn, genAfm, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_group'
-!End of the abilint section
 
     integer, intent(in)            :: id
     integer, intent(out)           :: errno
@@ -1168,13 +971,6 @@ contains
 
   subroutine compute_equivalent_atoms(sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_equivalent_atoms'
-!End of the abilint section
-
     type(symmetry_type), intent(inout) :: sym
 
     integer, allocatable :: symrec(:,:,:)
@@ -1198,13 +994,6 @@ contains
   end subroutine compute_equivalent_atoms
 
   subroutine symmetry_get_equivalent_atom(id, equiv, iAtom, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_equivalent_atom'
-!End of the abilint section
 
     integer, intent(in)  :: id
     integer, intent(in)  :: iAtom
@@ -1236,13 +1025,6 @@ contains
   end subroutine symmetry_get_equivalent_atom
 
   subroutine symmetry_get_type(id, iSym, label, type, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetry_get_type'
-!End of the abilint section
 
     integer, intent(in)  :: id, iSym
     character(len = 128), intent(out) :: label

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_predtk
 !! NAME
 !!  m_predtk
@@ -7,7 +6,7 @@
 !!  Low-level procedures used by 45_geomoptim routines
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,13 +75,6 @@ contains
 !! SOURCE
 
 function fdtion(ab_mover,itime,xcart,fcart,vel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fdtion'
-!End of the abilint section
 
   implicit none
 
@@ -172,13 +164,6 @@ function fdtion(ab_mover,itime,xcart,fcart,vel)
 !! SOURCE
 
 subroutine prtxvf(fcart,fred,iatfix,iout,natom,prtvel,vel,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtxvf'
-!End of the abilint section
 
  implicit none
 

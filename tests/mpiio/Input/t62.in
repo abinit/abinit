@@ -14,7 +14,7 @@
   getwfk1   0            # Cancel default
     nqpt1   0            # Cancel default
   kptopt1   1            # Automatic generation of k points with symmetries
-  tolvrs1   1.0d-15      # SCF stopping criterion (modify default)
+  tolwfr1   1.0d-20      # SCF stopping criterion (modify default)
    prtwf1   1            # Printing of WF
 
 #Set 2 : Response function calculation of d/dk wave function
@@ -110,11 +110,10 @@ nppert 2
 #PAW parameters
 pawecutdg   9.
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% [files]
 #%% psp_files = al_ps.abinit.paw, as_ps.paw
 #%% [paral_info]

@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the Abinit software package. For license information,
 # please see the COPYING file in the top-level directory of the Abinit source
@@ -353,7 +353,7 @@ AC_DEFUN([ABI_INIT_OS_INFO],[
 AC_DEFUN([ABI_INIT_HEADER],[
   dnl Set top of file ...
   AH_TOP([/*
- * Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+ * Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
  *
  * This file is part of the Abinit software package. For license information,
  * please see the COPYING file in the top-level directory of the Abinit source
@@ -379,20 +379,34 @@ AC_DEFUN([ABI_INIT_HEADER],[
 #if defined HAVE_MPI 
 
 /* Check that one MPI level is actually defined */
-#if ! defined HAVE_MPI1 && ! defined HAVE_MPI2
-#error "HAVE_MPI1 and HAVE_MPI2 are both undefined"
+#if ! defined HAVE_MPI1 && ! defined HAVE_MPI2 && ! defined HAVE_MPI3
+#error "HAVE_MPI1, HAVE_MPI2, and HAVE_MPI3, are all undefined"
 #endif
 
 /* Check that only one MPI level has been defined */
-#if defined HAVE_MPI1 && defined HAVE_MPI2
+#if defined HAVE_MPI1
+#  if defined HAVE_MPI2
+#    if defined HAVE_MPI3
+#      error "HAVE_MPI1, Have_MPI2, and HAVE_MPI3, are all defined"
+#    else
 #error "HAVE_MPI1 and HAVE_MPI2 are both defined"
+#    endif
+#  else
+#    if defined HAVE_MPI3
+#      error "HAVE_MPI1 and HAVE_MPI3 are both defined"
+#    endif
+#  endif
+#else
+#  if defined HAVE_MPI2 && defined HAVE_MPI3
+#    error "HAVE_MPI2 and HAVE_MPI3 are both defined"
+#  endif
 #endif
 
 #else /* HAVE_MPI */
 
 /* Check that no MPI level is defined */
-#if defined HAVE_MPI1 || defined HAVE_MPI2
-#error "HAVE_MPI1 and HAVE_MPI2 must be undefined"
+#if defined HAVE_MPI1 || defined HAVE_MPI2 || HAVE_MPI3
+#error "HAVE_MPI1, HAVE_MPI2, and HAVE_MPI3, must be undefined"
 #endif
 
 /* Check that MPI-IO is undefined */
@@ -401,16 +415,6 @@ AC_DEFUN([ABI_INIT_HEADER],[
 #endif
 
 #endif /* HAVE_MPI */
-
-/* ETSF_IO support */
-#if defined HAVE_ETSF_IO
-
-/* Check that NetCDF is defined */
-#if ! defined HAVE_NETCDF
-#error "HAVE_NETCDF must but defined for ETSF_IO to work"
-#endif
-
-#endif /* HAVE_ETSF_IO */
 
 /* *** END sanity checks *** */
 

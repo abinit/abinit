@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_elphon
 !! NAME
 !! m_elphon
@@ -8,7 +7,7 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, BXu, MG, JPC)
+!! Copyright (C) 2004-2020 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,16 +28,15 @@
 module m_elphon
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_elphon
  use m_abicore
- use m_kptrank
+ use m_krank
  use m_errors
  use m_xmpi
  use m_hdr
  use m_ebands
 
+ use defs_datatypes,    only : ebands_t
  use m_fstrings,        only : int2char4
  use m_io_tools,        only : open_file, is_open, get_unit
  use m_time,            only : timein
@@ -48,16 +46,15 @@ module m_elphon
  use m_geometry,        only : phdispl_cart2red
  use m_kpts,            only : getkgrid, smpbz
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type
  use m_nesting,         only : mknesting, bfactor
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_eliashberg_1d,   only : eliashberg_1d
  use m_iogkk,           only : read_el_veloc,  read_gkk
  use m_bz_mesh,         only : make_path
- use m_fstab,           only : mkqptequiv
  use m_epweights,       only : d2c_weights, ep_el_weights, ep_fs_weights
  use m_a2ftr,           only : mka2f_tr, mka2f_tr_lova, get_tau_k
- use m_symkpt,     only : symkpt
+ use m_symkpt,          only : symkpt
 
  implicit none
 
@@ -141,7 +138,7 @@ contains
 !!      ebands_update_occ,eliashberg_1d,elph_ds_clean,elph_k_procs
 !!      elph_tr_ds_clean,ep_fs_weights,ep_setupqpt,ftgam,ftgam_init
 !!      get_all_gkk2,get_all_gkq,get_all_gkr,get_fs_bands,get_nv_fs_en
-!!      get_nv_fs_temp,get_rank_1kpt,get_tau_k,get_veloc_tr,hdr_bcast
+!!      get_nv_fs_temp,get_rank,get_tau_k,get_veloc_tr,hdr_bcast
 !!      hdr_fort_read,hdr_free,integrate_gamma,integrate_gamma_tr
 !!      integrate_gamma_tr_lova,mka2f,mka2f_tr,mka2f_tr_lova,mka2fqgrid
 !!      mkfskgrid,mknesting,mkph_linwid,mkqptequiv,order_fs_kpts,outelph
@@ -151,15 +148,6 @@ contains
 !! SOURCE
 
 subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elphon'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -199,7 +187,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  integer,allocatable :: indkpt1(:)
  integer,allocatable :: FSfullpqtofull(:,:)
  integer,allocatable :: qpttoqpt(:,:,:)
- integer,allocatable :: pair2red(:,:), red2pair(:,:)
+ integer,allocatable :: pair2red(:,:), red2pair(:,:), bz2ibz_smap(:,:)
  !real(dp) :: acell_in(3),rprim_in(3,3),rprim(3,3),acell(3),
  real(dp) :: kpt(3),shiftk(3)
  real(dp),allocatable :: wtk_fullbz(:),wtk_folded(:)
@@ -233,6 +221,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  if (master == me) then
    gkk_fname = filnam(5)
+   ABI_CHECK(len_trim(gkk_fname) > 0, "gkk_fname is not defined")
    if (open_file(gkk_fname,message,newunit=unitgkk,form="unformatted",status="old",action="read") /=0) then
      MSG_ERROR(message)
    end if
@@ -240,6 +229,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  elph_base_name=trim(filnam(2))//"_ep"
  ddkfilename=trim(filnam(7))
+ ABI_CHECK(len_trim(ddkfilename) > 0, "ddkfilename is not defined")
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -361,7 +351,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  end if
 
 !the following is for the non master nodes
- call hdr_bcast(hdr,master,me,comm)
+ call hdr%bcast(master, me, comm)
  call xmpi_bcast(nband, master,comm,ierr)
  elph_ds%nband = nband
 
@@ -451,6 +441,12 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 & elph_ds%minFSband,elph_ds%maxFSband,elph_ds%k_phon%nkptirr)
 
  elph_ds%nFSband = elph_ds%maxFSband - elph_ds%minFSband + 1
+
+ if (anaddb_dtset%ep_prt_yambo==1) then
+   elph_ds%nFSband = nband
+   elph_ds%minFSband = 1
+   elph_ds%maxFSband = nband
+ end if
 
 !Modify the band gap by sissor shift of the CB
  if (abs(anaddb_dtset%band_gap) < 10.0d0) then
@@ -566,10 +562,13 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    ABI_ALLOCATE(indkpt1,(elph_ds%k_phon%nkpt))
    ABI_ALLOCATE(wtk_fullbz,(elph_ds%k_phon%nkpt))
    ABI_ALLOCATE(wtk_folded,(elph_ds%k_phon%nkpt))
+   ABI_ALLOCATE(bz2ibz_smap, (6, elph_ds%k_phon%nkpt))
 
    wtk_fullbz(:) = one/dble(elph_ds%k_phon%nkpt) !weights normalized to unity
    call symkpt(0,cryst%gmet,indkpt1,0,elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,elph_ds%k_phon%new_nkptirr,&
-&   Cryst%nsym,Cryst%symrec,timrev,wtk_fullbz,wtk_folded)
+&   Cryst%nsym,Cryst%symrec,timrev,wtk_fullbz,wtk_folded, bz2ibz_smap, xmpi_comm_self)
+
+   ABI_FREE(bz2ibz_smap)
 
    write (message,'(2a,i0)')ch10,' Number of irreducible k-points = ',elph_ds%k_phon%new_nkptirr
    call wrtout(std_out,message,'COLL')
@@ -630,7 +629,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
      call hdr_fort_read(hdr1, unitfskgrid, fform)
      ABI_CHECK(fform/=0,'denser grid GKK header was mis-read. fform == 0')
    end if
-   call hdr_bcast(hdr1,master,me,comm)
+   call hdr1%bcast(master,me,comm)
 
    ABI_ALLOCATE(eigenGS_fine,(nband,hdr1%nkpt,elph_ds%nsppol))
 
@@ -656,7 +655,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    call order_fs_kpts(hdr1%kptns, hdr1%nkpt, elph_ds%k_fine%kptirr,&
 &   elph_ds%k_fine%nkptirr,elph_ds%k_fine%irredtoGS)
 
-   call hdr_free(hdr1)
+   call hdr1%free()
 
    call mkFSkgrid (elph_ds%k_fine, Cryst%nsym, Cryst%symrec, timrev)
 
@@ -700,7 +699,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
    ABI_ALLOCATE(elph_ds%k_fine%kpt,(3,elph_ds%k_fine%nkpt))
    elph_ds%k_fine%kpt = elph_ds%k_phon%kpt
 
-   call copy_kptrank(elph_ds%k_phon%kptrank_t, elph_ds%k_fine%kptrank_t)
+   elph_ds%k_fine%krank = elph_ds%k_phon%krank%copy()
 
    ABI_ALLOCATE(elph_ds%k_fine%irr2full,(elph_ds%k_fine%nkptirr))
    elph_ds%k_fine%irr2full = elph_ds%k_phon%irr2full
@@ -842,8 +841,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%nqpt_full
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%qpt_full(:,iqpt)
-     call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-     iFSkpq = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
+     iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
          res = res + elph_ds%gkk_intweight(iband,ikpt_fine,1)*elph_ds%gkk_intweight(ibandp,iFSkpq,1)
@@ -858,8 +857,8 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  do ikpt_fine = 1, elph_ds%k_phon%nkpt
    do iqpt = 1, elph_ds%k_phon%nkpt
      kpt = elph_ds%k_phon%kpt(:,ikpt_fine) + elph_ds%k_phon%kpt(:,iqpt)
-     call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-     iFSkpq = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+     symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
+     iFSkpq = elph_ds%k_phon%krank%invrank(symrankkpt)
      do iband = 1, elph_ds%ngkkband
        do ibandp = 1, elph_ds%ngkkband
          res = res + elph_ds%gkk_intweight(iband,ikpt_fine,1)*elph_ds%gkk_intweight(ibandp,iFSkpq,1)
@@ -1389,7 +1388,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
  call ebands_free(Bst)
  call elph_ds_clean(elph_ds)
  call elph_tr_ds_clean(elph_tr_ds)
- call hdr_free(hdr)
+ call hdr%free()
 
  ABI_DEALLOCATE(coskr)
  ABI_DEALLOCATE(sinkr)
@@ -1425,15 +1424,6 @@ end subroutine elphon
 
 subroutine outelph(elph_ds,enunit,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outelph'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: enunit
@@ -1447,7 +1437,7 @@ subroutine outelph(elph_ds,enunit,fname)
  real(dp) :: lambda_q_max,lambda_qbranch_max,lambda_tot,nest_max,nest_min
  real(dp) :: omegalog_q,omegalog_qgrid,tc_macmill
  character(len=500) :: msg
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: qbranch_max(2)
  real(dp),allocatable :: lambda_q(:,:),nestfactor(:),qirred(:,:)
@@ -1626,16 +1616,16 @@ subroutine outelph(elph_ds,enunit,fname)
    qirred(:,iqirr)=elph_ds%qpt_full(:,elph_ds%qirredtofull(iqirr))
  end do
 
- call mkkptrank (elph_ds%k_phon%kpt,elph_ds%k_phon%nkpt,kptrank_t)
+ krank = krank_new(elph_ds%k_phon%nkpt, elph_ds%k_phon%kpt)
 
  ABI_ALLOCATE(nestfactor,(nqptirred))
 
 !NOTE: weights are not normalised, the normalisation factor in reintroduced in bfactor
- call bfactor(elph_ds%k_phon%nkpt,elph_ds%k_phon%kpt,nqptirred,qirred,kptrank_t,&
+ call bfactor(elph_ds%k_phon%nkpt,elph_ds%k_phon%kpt,nqptirred,qirred,krank,&
 & elph_ds%k_phon%nkpt,elph_ds%k_phon%wtk,elph_ds%nFSband,nestfactor)
 
  ABI_DEALLOCATE(qirred)
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 
 !find Max and min of the nesting factor
@@ -1791,15 +1781,6 @@ end subroutine outelph
 
 subroutine rchkGSheader (hdr,natom,nband,unitgkk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rchkGSheader'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,unitgkk
@@ -1833,7 +1814,7 @@ subroutine rchkGSheader (hdr,natom,nband,unitgkk)
    MSG_ERROR(message)
  end if
 
- call hdr_echo(hdr, fform, 4, unit=std_out)
+ call hdr%echo(fform, 4, unit=std_out)
 
  nband=hdr%nband(1)
 
@@ -1870,21 +1851,13 @@ end subroutine rchkGSheader
 !!      elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank,sort_int,wrap2_pmhalf,wrtout
+!!      destroy_kptrank,get_rank,mkkptrank,sort_int,wrap2_pmhalf,wrtout
 !!
 !! SOURCE
 
 subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 
  use m_sort
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkFSkgrid'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1922,12 +1895,12 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  elph_k%wtkirr(:) = zero
 
 !first allocation for irred kpoints - will be destroyed below
- call mkkptrank (elph_k%kptirr,elph_k%nkptirr,elph_k%kptrank_t)
- ABI_ALLOCATE(rankallk,(elph_k%kptrank_t%max_rank))
+ elph_k%krank = krank_new(elph_k%nkptirr, elph_k%kptirr)
+ ABI_ALLOCATE(rankallk,(elph_k%krank%max_rank))
 
-!elph_k%kptrank_t%invrank is used as a placeholder in the following loop
+!elph_k%krank%invrank is used as a placeholder in the following loop
  rankallk = -1
- elph_k%kptrank_t%invrank = -1
+ elph_k%krank%invrank = -1
 
 !replicate all irred kpts by symmetry to get the full k grid.
  elph_k%nkpt=0 !zero k-points found so far
@@ -1940,11 +1913,11 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,2,isym)*elph_k%kptirr(2,ikpt1) + &
 &       symrec(:,3,isym)*elph_k%kptirr(3,ikpt1))
 
-       call get_rank_1kpt (kpt,symrankkpt,elph_k%kptrank_t)
+       symrankkpt = elph_k%krank%get_rank (kpt)
 
 !      is the kpt on the full grid (may have lower symmetry than full spgroup)
 !      is kpt among the full FS kpts found already?
-       if (elph_k%kptrank_t%invrank(symrankkpt) == -1) then
+       if (elph_k%krank%invrank(symrankkpt) == -1) then
          elph_k%wtkirr(ikpt1)=elph_k%wtkirr(ikpt1)+1
          elph_k%nkpt=elph_k%nkpt+1
 
@@ -1957,7 +1930,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
          tmpkphon_full2irr(2,elph_k%nkpt) = isym
          tmpkphon_full2irr(3,elph_k%nkpt) = itim
 
-         elph_k%kptrank_t%invrank(symrankkpt) = elph_k%nkpt
+         elph_k%krank%invrank(symrankkpt) = elph_k%nkpt
          rankallk(elph_k%nkpt) = symrankkpt
        end if
 
@@ -1993,20 +1966,18 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  ABI_DEALLOCATE(rankallk)
  ABI_DEALLOCATE(tmpkphon_full2irr)
  ABI_DEALLOCATE(tmpkpt)
- call destroy_kptrank (elph_k%kptrank_t)
-
+ call elph_k%krank%free()
 
 !make proper full rank arrays
- call mkkptrank (elph_k%kpt,elph_k%nkpt,elph_k%kptrank_t)
-
+ elph_k%krank = krank_new(elph_k%nkpt, elph_k%kpt)
 
 !find correspondence table between irred FS kpoints and a full one
  ABI_ALLOCATE(elph_k%irr2full,(elph_k%nkptirr))
  elph_k%irr2full(:) = 0
 
  do ikpt1=1,elph_k%nkptirr
-   call get_rank_1kpt (elph_k%kptirr(:,ikpt1),symrankkpt,elph_k%kptrank_t)
-   elph_k%irr2full(ikpt1) = elph_k%kptrank_t%invrank(symrankkpt)
+   symrankkpt = elph_k%krank%get_rank (elph_k%kptirr(:,ikpt1))
+   elph_k%irr2full(ikpt1) = elph_k%krank%invrank(symrankkpt)
  end do
 
 !find correspondence table between FS kpoints under symmetry
@@ -2023,8 +1994,8 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 &       symrec(:,3,isym)*elph_k%kpt(3,ikpt1))
 
 !      which kpt is it among the full FS kpts
-       call get_rank_1kpt (kpt,symrankkpt,elph_k%kptrank_t)
-       ikpt2 = elph_k%kptrank_t%invrank(symrankkpt)
+       symrankkpt = elph_k%krank%get_rank (kpt)
+       ikpt2 = elph_k%krank%invrank(symrankkpt)
        new=1
        if (ikpt2 /= -1) then
          elph_k%full2full(itim+1,isym,ikpt2) = ikpt1
@@ -2089,14 +2060,6 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 
  use m_special_funcs,  only : fermi_dirac, bose_einstein
  use m_epweights,      only : d2c_wtq, ep_ph_weights
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2235,7 +2198,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
  ABI_ALLOCATE(pheigvec,(2*nbranch*nbranch,elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,cryst,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(cryst,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = omega_min - domega
@@ -2294,7 +2257,7 @@ subroutine mka2f(Cryst,ifc,a2f_1d,dos_phon,elph_ds,kptrlatt,mustar)
 &       coskr(iFSqpt,:), sinkr(iFSqpt,:))
      end if
 
-     call ifc_fourq(ifc,cryst,kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec)
+     call ifc%fourq(cryst,kpt(:,iFSqpt),phfrq(:,iFSqpt),displ_cart,out_eigvec=pheigvec)
 
 !    Diagonalize gamma matrix at qpoint (complex matrix).
 
@@ -2642,15 +2605,6 @@ end subroutine mka2f
 
 subroutine mka2fQgrid(elph_ds,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2fQgrid'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: fname
@@ -2843,15 +2797,6 @@ end subroutine mka2fQgrid
 
 subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'order_fs_kpts'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkptirr
@@ -2864,24 +2809,25 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
 
 !Local variables-------------------------------
 !scalars
- integer :: ikpt,jkpt,kkpt,new, ik
+ integer :: irank,ikpt,jkpt,kkpt,new, ik
  real(dp) :: res
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer :: kptirrank(nkptirr)
 
 ! *************************************************************************
 
 !rank is used to order kpoints
- call mkkptrank (kptns,nkpt,kptrank_t)
+ krank = krank_new(nkpt, kptns)
 
  ik=1
  do ikpt=1,nkpt
+   irank = krank%get_rank(kptns(:,ikpt))
 !  add kpt to FS kpts, in order, increasing z, then y, then x !
    new = 1
 !  look for position to insert kpt ikpt among irredkpts already found
    do jkpt=1,ik-1
-     if (kptirrank(jkpt) > kptrank_t%rank(ikpt)) then
+     if (kptirrank(jkpt) > irank) then
 !      shift all the others up
        do kkpt=ik-1,jkpt,-1
          kptirr(:,kkpt+1) = kptirr(:,kkpt)
@@ -2893,7 +2839,7 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
        call wrap2_pmhalf(kptns(2,ikpt),kptirr(2,jkpt),res)
        call wrap2_pmhalf(kptns(3,ikpt),kptirr(3,jkpt),res)
 
-       kptirrank(jkpt) = kptrank_t%rank(ikpt)
+       kptirrank(jkpt) = irank
        FSirredtoGS(jkpt) = ikpt
        new=0
        exit
@@ -2904,13 +2850,13 @@ subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
      call wrap2_pmhalf(kptns(1,ikpt),kptirr(1,ikpt),res)
      call wrap2_pmhalf(kptns(2,ikpt),kptirr(2,ikpt),res)
      call wrap2_pmhalf(kptns(3,ikpt),kptirr(3,ikpt),res)
-     kptirrank(ik) = kptrank_t%rank(ikpt)
+     kptirrank(ik) = irank
      FSirredtoGS(ik) = ikpt
    end if
    ik=ik+1
  end do
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 end subroutine order_fs_kpts
 !!***
@@ -2946,15 +2892,6 @@ end subroutine order_fs_kpts
 
 subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_setupqpt'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer, intent(in) :: timrev
@@ -2974,6 +2911,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  integer :: vacuum(3)
  integer,allocatable :: indqpt1(:)
  real(dp) :: kpt(3)
+ integer, allocatable :: bz2ibz_smap(:,:)
  real(dp),allocatable :: wtq_folded(:)
  real(dp), allocatable :: wtq(:),qpt_full(:,:),tmpshifts(:,:)
 
@@ -2999,7 +2937,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
      mqpt = anaddb_dtset%ngqpt(1)*anaddb_dtset%ngqpt(2)*anaddb_dtset%ngqpt(3)*anaddb_dtset%nqshft
      ABI_ALLOCATE(qpt_full,(3,mqpt))
      ABI_ALLOCATE(wtq,(mqpt))
-     ABI_ALLOCATE(tmpshifts,(3,210))
+     ABI_ALLOCATE(tmpshifts,(3,MAX_NSHIFTK))
 
      wtq(:) = one
 
@@ -3082,6 +3020,7 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  ABI_ALLOCATE(indqpt1,(elph_ds%nqpt_full))
  ABI_ALLOCATE(wtq_folded,(elph_ds%nqpt_full))
  ABI_ALLOCATE(wtq,(elph_ds%nqpt_full))
+ ABI_ALLOCATE(bz2ibz_smap, (6, elph_ds%nqpt_full))
 
  wtq(:) = one/dble(elph_ds%nqpt_full) !weights normalized to unity
 
@@ -3092,7 +3031,9 @@ subroutine ep_setupqpt (elph_ds,crystal,anaddb_dtset,qptrlatt,timrev)
  iout=0 !do not write to ab_out
 !should we save indqpt1 for use inside elph_ds?
  call symkpt(0,crystal%gmet,indqpt1,iout,elph_ds%qpt_full,elph_ds%nqpt_full,nqpt1,crystal%nsym,crystal%symrec,&
-& timrev,wtq,wtq_folded)
+& timrev,wtq,wtq_folded, bz2ibz_smap, xmpi_comm_self)
+
+ ABI_FREE(bz2ibz_smap)
 
  write (message,'(2a,i0)')ch10,' Number of irreducible q-points = ',nqpt1
  call wrtout(std_out,message,'COLL')
@@ -3149,15 +3090,6 @@ end subroutine ep_setupqpt
 !! SOURCE
 
 subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkph_linwid'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3334,7 +3266,7 @@ subroutine mkph_linwid(Cryst,ifc,elph_ds,nqpath,qpath_vertices)
 !
 !    get phonon freqs and eigenvectors anyway
 !
-     call ifc_fourq(ifc,cryst,qpt,phfrq_tmp,displ_cart,out_eigvec=pheigvec)
+     call ifc%fourq(cryst,qpt,phfrq_tmp,displ_cart,out_eigvec=pheigvec)
 !
 !    additional frequency factor for some cases
 !
@@ -3501,15 +3433,6 @@ end subroutine mkph_linwid
 
 subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband,nkptirr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_fs_bands'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ep_b_min, ep_b_max
@@ -3649,15 +3572,6 @@ end subroutine get_fs_bands
 
 subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_all_gkk2'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: crystal
@@ -3758,15 +3672,6 @@ end subroutine get_all_gkk2
 !! SOURCE
 
 subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpolate_gkk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3886,7 +3791,7 @@ subroutine interpolate_gkk(crystal,ifc,elph_ds,kpt_phon)
    redkpt(3) = qphon(1)*gprim(3,1)+qphon(2)*gprim(3,2)+qphon(3)*gprim(3,3)
    write (unit_gkkp,*) 'qp= ', redkpt
 
-   call ifc_fourq(ifc,crystal,qphon,phfrq_tmp,displ,out_eigvec=pheigvec)
+   call ifc%fourq(crystal,qphon,phfrq_tmp,displ,out_eigvec=pheigvec)
    write (unit_gkkp,*) phfrq_tmp(:)*Ha_cmm1
 
    ii = ii+1
@@ -4016,15 +3921,6 @@ end subroutine interpolate_gkk
 subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksize,&
 &    qpttoqpt,ep_prt_yambo,unitgkk,ifltransport)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_all_gkq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1wf,nband,onegkksize,unitgkk,ep_prt_yambo,ifltransport
@@ -4082,8 +3978,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
    else
      sz6=elph_ds%nqptirred
    end if
-   ABI_STAT_ALLOCATE(elph_ds%gkk_qpt,(2,sz2,sz3,sz4,sz5,sz6), ierr)
-   ABI_CHECK(ierr==0, 'Trying to allocate array elph_ds%gkk_qpt')
+   ABI_MALLOC_OR_DIE(elph_ds%gkk_qpt,(2,sz2,sz3,sz4,sz5,sz6), ierr)
 
    elph_ds%gkk_qpt = zero
 
@@ -4118,8 +4013,7 @@ subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksi
 
  sz2=elph_ds%nbranch;sz3=elph_ds%k_phon%my_nkpt
  sz4=elph_ds%nsppol;sz5=elph_ds%nqpt_full
- ABI_STAT_ALLOCATE(gkk_flag,(sz2,sz2,sz3,sz4,sz5), ierr)
- ABI_CHECK(ierr==0, "allocating gkk_flag")
+ ABI_MALLOC_OR_DIE(gkk_flag,(sz2,sz2,sz3,sz4,sz5), ierr)
 
  call read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
 
@@ -4185,15 +4079,6 @@ end subroutine get_all_gkq
 !! SOURCE
 
 subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_all_gkr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4316,15 +4201,6 @@ end subroutine get_all_gkr
 !! SOURCE
 
 subroutine complete_gkk(elph_ds,gkk_flag,gprimd,indsym,natom,nsym,qpttoqpt,rprimd,symrec,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'complete_gkk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4662,15 +4538,6 @@ end subroutine complete_gkk
 
 subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_nv_fs_en'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !Scalars
  real(dp), intent(in)  :: max_occ
@@ -4724,7 +4591,7 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  ABI_ALLOCATE(displ,(2, elph_ds%nbranch, elph_ds%nbranch, elph_ds%k_phon%nkpt))
 
  do iFSqpt=1,elph_ds%k_phon%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt))
  end do
 
  omega_max = maxval(phfrq)*1.1_dp
@@ -4901,11 +4768,9 @@ subroutine get_nv_fs_en(crystal,ifc,elph_ds,eigenGS,max_occ,elph_tr_ds,omega_max
  elph_tr_ds%tmp_velocwtk = zero
  elph_tr_ds%tmp_vvelocwtk = zero
 
- ABI_STAT_ALLOCATE(elph_ds%k_phon%velocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'allocating elph_ds%k_phon%velocwtk')
+ ABI_MALLOC_OR_DIE(elph_ds%k_phon%velocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,elph_ds%nsppol), ierr)
 
- ABI_STAT_ALLOCATE(elph_ds%k_phon%vvelocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'allocating elph_ds%k_phon%vvelocwtk')
+ ABI_MALLOC_OR_DIE(elph_ds%k_phon%vvelocwtk,(elph_ds%nFSband,elph_ds%k_phon%nkpt,3,3,elph_ds%nsppol), ierr)
 
  elph_ds%k_phon%velocwtk = zero
  elph_ds%k_phon%vvelocwtk = zero
@@ -5175,18 +5040,7 @@ end subroutine get_nv_fs_en
 
 subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_nv_fs_temp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-
-!data_type
  type(elph_type),intent(inout) :: elph_ds
  type(ebands_t),intent(inout)   :: BSt
  type(elph_tr_type),intent(inout) :: elph_tr_ds
@@ -5311,15 +5165,6 @@ end subroutine get_nv_fs_temp
 
 subroutine get_veloc_tr(elph_ds,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_veloc_tr'
-!End of the abilint section
-
-  implicit none
-
 !Arguments ------------------------------------
 !arrays
   type(elph_type),intent(in) :: elph_ds
@@ -5386,20 +5231,11 @@ end subroutine get_veloc_tr
 !!      elphon
 !!
 !! CHILDREN
-!!      get_rank_1kpt,wrtout,xmpi_sum
+!!      get_rank,wrtout,xmpi_sum
 !!
 !! SOURCE
 
 subroutine integrate_gamma(elph_ds,FSfullpqtofull)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrate_gamma'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5447,7 +5283,7 @@ subroutine integrate_gamma(elph_ds,FSfullpqtofull)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)
-   call get_rank_1kpt (elph_ds%k_phon%kpt(:,iqpt_fullbz),symrankkpt_phon, elph_ds%k_phon%kptrank_t)
+   symrankkpt_phon = elph_ds%k_phon%krank%get_rank (elph_ds%k_phon%kpt(:,iqpt_fullbz))
    write (std_out,*) ' iqpt_fullbz in qpt grid only,  rank ', iqpt_fullbz, symrankkpt_phon
 
    do ik_this_proc =1,elph_ds%k_phon%my_nkpt
@@ -5528,15 +5364,6 @@ end subroutine integrate_gamma
 
 subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrate_gamma_tr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: s1,s2
@@ -5580,8 +5407,7 @@ subroutine integrate_gamma_tr(elph_ds,FSfullpqtofull,s1,s2, veloc_sq1,veloc_sq2,
  end if
 
 !allocate temp variables
- ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+ ABI_MALLOC_OR_DIE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)
@@ -5702,15 +5528,6 @@ end subroutine integrate_gamma_tr
 
 subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrate_gamma_tr_lova'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(elph_tr_type), intent(inout) :: elph_tr_ds
@@ -5735,12 +5552,10 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
  comm = xmpi_world
 
  ib1=elph_ds%nbranch*elph_ds%nbranch ; ib2=elph_ds%nqpt_full
- ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trin,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trin')
+ ABI_MALLOC_OR_DIE(elph_tr_ds%gamma_qpt_trin,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
  elph_tr_ds%gamma_qpt_trin = zero
 
- ABI_STAT_ALLOCATE(elph_tr_ds%gamma_qpt_trout,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array elph_tr_ds%gamma_qpt_trout')
+ ABI_MALLOC_OR_DIE(elph_tr_ds%gamma_qpt_trout,(2,9,ib1,elph_ds%nsppol,ib2), ierr)
  elph_tr_ds%gamma_qpt_trout = zero
 
 !information
@@ -5757,8 +5572,7 @@ subroutine integrate_gamma_tr_lova(elph_ds,FSfullpqtofull,elph_tr_ds)
  end if
 
 !allocate temp variables
- ABI_STAT_ALLOCATE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array tmp_gkkout')
+ ABI_MALLOC_OR_DIE(tmp_gkk,(2,elph_ds%ngkkband**2,elph_ds%nbranch**2,elph_ds%nsppol), ierr)
 
  do iqpt=1,elph_ds%nqptirred
    iqpt_fullbz = elph_ds%qirredtofull(iqpt)
@@ -5933,15 +5747,6 @@ end subroutine integrate_gamma_tr_lova
 subroutine ftgkk (wghatm,gkk_qpt,gkk_rpt,gkqwrite,gkrwrite,gprim,ikpt_phon0,&
 &                  natom,nkpt_phon,ngkkband,nkpt_used,nqpt,nrpt,nsppol,&
 &                  qtor,rpt,qpt_full,unit_gkk_rpt,unitgkq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftgkk'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -6172,15 +5977,6 @@ end subroutine ftgkk
 !! SOURCE
 
 subroutine test_ftgkk(elph_ds,gprim,natom,nrpt,rpt,qpt_full,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_ftgkk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

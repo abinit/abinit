@@ -88,13 +88,12 @@ nshiftk   1              # Use one copy of grid only (default)
  optforces 1
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   telast_5.out, tolnlines=  3, tolabs=  3.000e-09, tolrel=  9.000e-10
+#%%   telast_5.out, tolnlines=  5, tolabs=  3.000e-09, tolrel= 0.0004
 #%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2

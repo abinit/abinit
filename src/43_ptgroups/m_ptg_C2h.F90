@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/ptg_C2h
 !!
 !! NAME
@@ -7,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (MG)
+!! Copyright (C) 2010-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,13 +47,6 @@ contains
  use defs_basis
  use m_abicore
  use m_defs_ptgroups,  only : irrep_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptg_C2h'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
  integer,intent(out) :: nclass,nsym 

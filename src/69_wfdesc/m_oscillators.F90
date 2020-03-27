@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !****m* ABINIT/m_oscillators
 !! NAME
 !!  m_oscillators
@@ -7,7 +6,7 @@
 !!  This module contains procedures to calculate the oscillator matrix elements used in the GW code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +46,6 @@ MODULE m_oscillators
  public :: rho_tw_g           ! Calculate rhotwg(G) = <wfn1| exp(-i(q+G).r) |wfn2>
  public :: calc_wfwfg         ! Calculate the Fourier transform of the product u_{bk}^*(r).u_{b"k}(r) at an arbitrary k in the BZ.
  public :: sym_rhotwgq0       ! Symmetrize the oscillator matrix elements in the BZ in the special case of q=0.
- !public :: get_uug
 !!***
 
 !----------------------------------------------------------------------
@@ -104,15 +102,6 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 & wfn2,i2,ktabr2,ktabp2,spinrot2,&
 & dim_rtwg,rhotwg) !& nhat12)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rho_tw_g'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: i1,i2,npwvec,nr,nspinor,dim_rtwg,map2sphere,use_padfft,ndat
@@ -140,8 +129,8 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
  CASE (1)
    ! Collinear case.
    call ts_usug_kkp_bz(npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-&    wfn1,i1,ktabr1,ktabp1,&
-&    wfn2,i2,ktabr2,ktabp2,rhotwg)
+                       wfn1,i1,ktabr1,ktabp1,&
+                       wfn2,i2,ktabr2,ktabp2,rhotwg)
 
  CASE (2)
    ! Spinorial case.
@@ -180,11 +169,11 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      CASE (1)
        ! Need results on the G-sphere. Call zero-padded FFT routines if required.
        if (use_padfft == 1) then
-         nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
-         ldx=nx; ldy=ny; ldz=nz
-         call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
+         nx = ngfft(1); ny = ngfft(2); nz = ngfft(3); mgfft = maxval(ngfft(1:3))
+         ldx = nx; ldy = ny; ldz = nz
+         call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
        else
-         call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
+         call fftbox_plan3_many(plan, ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
          call fftbox_execute(plan,u12prod)
        end if
 
@@ -217,103 +206,6 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
  END SELECT
 
 end subroutine rho_tw_g
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_oscillators/get_uug
-!! NAME
-!! get_uug
-!!
-!! FUNCTION
-!! Calculate usug(G)= \intl \dr u1(r) exp(-i(q+G).r) u2(r) for ndat pair of wavefunctions
-!!
-!! INPUTS
-!! npw=number of plane waves in the sphere.
-!! nr=number of FFT grid points
-!! ndat=Number of wavefunctions to transform.
-!! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! use_padfft=
-!!             1 if matrix elements are calculated via zero-padded FFT.
-!!             0 R-->G Transform in done on the full FFT box.
-!! igfftg0(npw)=index of G-G_o in the FFT array for each G in the sphere.
-!! u1(nr*ndat),u2(nr*ndat)=the two wavefunctions (periodic part)
-!! [trans1] = "C" if the complex conjugate of u1 should be used. Default is "N"
-!! [trans2] = "C" if the complex conjugate of u2 should be used. Default is "N"
-!!
-!! OUTPUT
-!! usug(npw*ndat)=density of a pair of states, in reciprocal space
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine get_uug(npw,nr,ndat,ngfft,use_padfft,igfftg0,gbound,u1,u2,usug,trans1,trans2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_uug'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: npw,nr,use_padfft,ndat
- character(len=*),optional,intent(in) :: trans1,trans2
-!arrays
- integer,intent(in) :: gbound(:,:) !gbound(2*mgfft+8,2)
- integer,intent(in) :: igfftg0(npw),ngfft(18)
- complex(gwpc),intent(in) :: u1(nr*ndat),u2(nr*ndat)
- complex(gwpc),intent(out) :: usug(npw*ndat)
-
-!Local variables-------------------------------
-!scalars
- integer :: nx,ny,nz,ldx,ldy,ldz,mgfft
- character(len=1) :: my_trans1,my_trans2
- type(fftbox_plan3_t) :: plan
-!arrays
- complex(gwpc),allocatable :: u12prod(:)
-
-! *************************************************************************
-
- ABI_MALLOC(u12prod,(nr*ndat))
-
- my_trans1 = "N"; if (PRESENT(trans1)) my_trans1 = toupper(trans1(1:1))
- my_trans2 = "N"; if (PRESENT(trans2)) my_trans2 = toupper(trans2(1:1))
-
- if (my_trans1=="N" .and. my_trans2=="N") then
-   u12prod = u1 * u2
- else if (my_trans1=="H" .and. my_trans2=="N") then
-   u12prod = GWPC_CONJG(u1) * u2
- else if (my_trans1=="N" .and. my_trans2=="H") then
-   u12prod = u1 * GWPC_CONJG(u2)
- else if (my_trans1=="H" .and. my_trans2=="H") then
-   u12prod = GWPC_CONJG(u1) * GWPC_CONJG(u2)
- else
-   MSG_ERROR("Wrong combination of trans1, trans2")
- end if
-
- ! Call zero-padded FFT routines if required.
- if (use_padfft==1) then
-   nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
-   ldx=nx; ldy=ny; ldz=nz
-   call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
- else
-   call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
-   call fftbox_execute(plan,u12prod)
- end if
-
- ! From the FFT to the G-sphere.
- call gw_box2gsph(nr,ndat,npw,igfftg0,u12prod,usug)
-
- ABI_FREE(u12prod)
-
-end subroutine get_uug
 !!***
 
 !----------------------------------------------------------------------
@@ -357,15 +249,6 @@ end subroutine get_uug
 subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
 & u1,time1,ktabr1,ktabp1,&
 & u2,time2,ktabr2,ktabp2,usug) !& nhat12)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ts_usug_kkp_bz'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -457,15 +340,6 @@ end subroutine ts_usug_kkp_bz
 !! SOURCE
 
 subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12prod)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'usur_kkp_bz'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -632,15 +506,6 @@ end subroutine usur_kkp_bz
 
 subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gw_box2gsph'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nr,ndat,npw
@@ -711,15 +576,6 @@ end subroutine gw_box2gsph
 !! SOURCE
 
 subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_wfwfg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -813,15 +669,6 @@ end subroutine calc_wfwfg
 
 function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sym_rhotwgq0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,dim_rtwg,itim_k,isym_k
@@ -896,15 +743,6 @@ end function sym_rhotwgq0
 !! SOURCE
 
 subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, ndat, ug_ibz, cwork, oug_bz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_spinor'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1,13 +1,14 @@
 # C in diamond structure.  Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
  ndtset 5
 
- istwfk *1
+ #istwfk *1
  ecut 20
  ecutsm 0.5
  #nband 50
  nband 4
  tolvrs 1.0e-10
  diemac 6.0d0
+ prtpot 1
 
 # Kpoints
  ngkpt    4 4 4
@@ -27,7 +28,7 @@
 ##################################################
 # Dataset 2 (NSCF run to get WFK with empty states
 ##################################################
- getden2  1
+ getden_filepath2 "t41o_DS1_DEN"
  getwfk2  0
  iscf2   -2
  nband2   54
@@ -65,11 +66,11 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 
-#%%   t41.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 0.04
+#%%   t41.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 0.06
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
@@ -79,7 +80,6 @@
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   WARNING: This code is still under development. Use at your own risk!
 #%%   Preparatory run for the calculation of the Fan-Migdal + Debye-Waller self-energy 
 #%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
 #%%<END TEST_INFO>

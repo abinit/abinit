@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_inwffil
 !! NAME
 !!  m_inwffil
@@ -7,7 +6,7 @@
 !!  Do initialization of wavefunction files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +26,6 @@
 module m_inwffil
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_wffile
@@ -36,10 +34,12 @@ module m_inwffil
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtset
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_io_tools, only : file_exists, get_unit
  use m_geometry, only : getspinrot
@@ -183,15 +183,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
 &           wffnow,unwff1,wffnm,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inwffil'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ask_accurate,exchn2n3d,formeig,ireadwf,localrdwf,mband,mcg,mkmem,mpw
  integer,intent(in) :: nkpt,nsppol,nsym,optorth,unkg,unwff1
@@ -318,7 +309,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      MSG_ERROR(message)
    end if
 
-   call wrtout(std_out,'inwffil: examining the header of disk file '//TRIM(wff1%fname),'COLL')
+   call wrtout(std_out,' inwffil: examining the header of disk file: '//trim(wff1%fname),'COLL')
 
 !  Check hdr0 versus hdr (and from now on ignore header consistency and write new info to header for each file)
    if (dtset%usewvl == 0) then
@@ -393,7 +384,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !  the pointer is ready to read the first wavefunction block.
 
 !  Compute k points from input file closest to the output file
-   call listkk(dksqmax,gmet0,indkk,kptns0,kptns,nkpt0,nkpt,nsym,sppoldbl,symafm,symrel,1)
+   call listkk(dksqmax,gmet0,indkk,kptns0,kptns,nkpt0,nkpt,nsym,sppoldbl,symafm,symrel,1,spaceComm)
 
  else if (restart==1) then ! direct restart
 
@@ -964,13 +955,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    end if
  end if
 
-!Clean hdr0
- !if (ireadwf==1)then
- !  if( restart==2 .or. localrdwf==1 .or. master==me)then
- !    call hdr_free(hdr0)
- !  end if
- !end if
- call hdr_free(hdr0)
+ !Clean hdr0
+ call hdr0%free()
 
  call timab(716,2,tsec)
  call timab(717,1,tsec)
@@ -1132,15 +1118,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                  ngfft,nkassoc,nkpt,nkpt0,npwarr,npwarr0,nspinor,&
 &                  nspinor0,nsppol,nsppol0,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,squeeze,symrel,tnons,wff1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfsinp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: exchn2n3d,formeig,headform0,localrdwf,mband,mcg,mcg_disk
@@ -1598,7 +1575,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #endif
 
        else if(formeig==1)then
-         call wrtout(std_out,ABI_FUNC//': transfer of first-order eigs not yet coded!',"COLL")
+         call wrtout(std_out,'wfsinp: transfer of first-order eigs not yet coded!',"COLL")
        end if
 
 !      DEBUG
@@ -1863,15 +1840,6 @@ end subroutine wfsinp
 subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 &  spin,mcg,mpi_enreg,nband_k,nkpt,npw,nspinor,occ_k,wff1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initwf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: formeig,headform,icg,ikpt,spin,mcg,nband_k,nkpt,npw,nspinor
@@ -1953,11 +1921,11 @@ subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
  end if
 
 !Check the number of bands on disk file against desired number. These are not required to agree)
- if (nband_disk/=nband_k) then
+ if (nband_disk /= nband_k) then
    write(msg,'(2(a,i0),3a,i0,3a)')&
-&   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
-&   'but input file gave nband= ',nband_k,'.',ch10,&
-&   'This is not fatal. Bands are skipped or filled with random numbers.'
+   'For kpt number ',ikpt,' disk file has ',nband_disk,' bands',ch10,&
+   'but input file gave nband= ',nband_k,'.',ch10,&
+   'This is not fatal. Bands are skipped or filled with random numbers.'
    MSG_COMMENT(msg)
  end if
 
@@ -2108,15 +2076,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &                  ngfft1,ngfft2,nkpt1,nkpt2,npwarr1,npwarr2,nspinor1,nspinor2,&
 &                  nsppol1,nsppol2,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newkpt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2341,7 +2300,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
            call wrtout(iout,message,'PERS')
          end if
        else if(ikpt2==nkpt_eff+1)then
-         call wrtout(std_out, '- newkpt : prtvol=0 or 1, do not print more k-points.', 'PERS')
+         call wrtout(std_out, '- newkpt: prtvol=0 or 1, do not print more k-points.', 'PERS')
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
            call wrtout(iout,message,'PERS')
          end if
@@ -2369,7 +2328,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
        if(debug>0)then
          write(message, '(a,a,a,a,i5,a,i5,a,a,i5,a,i5)' ) ch10,&
-         ' newkpt : about to call randac',ch10,&
+         ' newkpt: about to call randac',ch10,&
          '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
          '  and isppol1=',isppol1,', isppol2=',isppol2
          call wrtout(std_out,message,'PERS')
@@ -2432,7 +2391,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
        if (debug>0 .and. restart==2) then
          write(message,'(a,i5,a,a,i5,a,i5,a)' ) &
-&         ' newkpt : about to call rwwf with ikpt1=',ikpt1,ch10,&
+&         ' newkpt: about to call rwwf with ikpt1=',ikpt1,ch10,&
 &         ' and nband(ikpt1)=',nband1(ikpt1),' nbd2=',nbd2,'.'
          call wrtout(std_out,message,'PERS')
        end if
@@ -2712,15 +2671,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 & mpw1,mpw2,nbd1,nbd2,ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,&
 & nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfconv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ceksp2,debug,exchn2n3d,formeig,icg1,icg2,ikpt1
@@ -2747,7 +2697,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: conv_tnons,convert,fftalg,fold1,fold2,foldim,foldre,i1,i2,iband
  integer :: iband_first,iband_last,icgmod,ierr,index,ipw
  integer :: ispinor,ispinor1,ispinor2,ispinor_first,ispinor_last
- integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev,jsign
+ integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev
  integer :: mgfft1,mgfft2,n1,n2,n3,n4,n5,n6
  integer :: nbremn,npwtot,nspinor_index,nspinor1_this_proc,nspinor2_this_proc
  integer :: order,ortalgo,seed
@@ -2869,9 +2819,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  identity(:,:)=0
  identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
  isym=indkk(ikpt2+(sppoldbl-1)*(isppol2-1)*nkpt2,2)
-!DEBUG
-!write(std_out,*)' wfconv : isym=',isym
-!ENDDEBUG
+ !write(std_out,*)' wfconv : isym=',isym
  itimrev=indkk(ikpt2+(sppoldbl-1)*(isppol2-1)*nkpt2,6)
  if(isym/=0)then
    symrel_conv(:,:)=symrel(:,:,isym)
@@ -3190,8 +3138,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !    and to avoid linear dependencies between wavefunctions
 !    No need for a difference for different k points and/or spin-polarization
 
+     npwtot=npw2
      if (mpi_enreg1%paral_kgb == 1) then
-       npwtot=npw2
        call timab(539,1,tsec)
        call xmpi_sum(npwtot, mpi_enreg1%comm_bandfft, ierr)
        call timab(539,2,tsec)
@@ -3200,7 +3148,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      do iband=(nbd1/nspinor1)*nspinor2+1,nbd2
        do ispinor2=1,nspinor2_this_proc
          ispinor=ispinor2;if (nspinor2_this_proc/=nspinor2) ispinor=mpi_enreg2%me_spinor+1
-         jsign=1;if (ispinor==2) jsign=-1
 
          do ipw=1,npw2
            index=index+1
@@ -3209,10 +3156,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !          if(.false.) then
 !          ENDDEBUG seq==par
 
-           if ( mpi_enreg2%paral_kgb /= 1) then
+           if ( mpi_enreg2%paral_kgb /= 1.or.mpi_enreg2%nproc_cell == 1) then
              seed=(iband-1)*npw2*nspinor2 + (ispinor-1)*npw2 + ipw
            else
-             seed=jsign*(iband*(kg2(1,ipw)*npwtot*npwtot + kg2(2,ipw)*npwtot + kg2(3,ipw)))
+             seed=kg2(1,ipw)*npwtot*npwtot + kg2(2,ipw)*npwtot + kg2(3,ipw)
+             seed=(iband*nspinor2+ispinor-1)*seed
            end if
 
            if(randalg == 0) then
@@ -3288,7 +3236,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      if(ikpt2<=nkpt_max)then
        nbremn=nbd2-nbd1
-       write(message,'(a,i6,a,i7,a,i4)')' wfconv :',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
+       write(message,'(a,i6,a,i7,a,i4)')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
        call wrtout(std_out,message,'PERS')
      end if
 
@@ -3296,8 +3244,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  end if
 
 !Orthogonalize GS wfs
- !if (.False.) then
- if (optorth==1.and.formeig==0.and.mpi_enreg2%paral_kgb/=1) then
+ if (optorth==1.and.formeig==0.and.(mpi_enreg2%paral_kgb/=1.or.mpi_enreg2%nproc_cell==1)) then
    ABI_ALLOCATE(dum,(2,0))
    ortalgo=0 !;ortalgo=3
    call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abi2big
 !! NAME
 !!  m_abi2big
@@ -7,7 +6,7 @@
 !!  Module to copy objects from ABINIT to BigDFT and viceversa.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2018 ABINIT group (TR,DC,MT)
+!!  Copyright (C) 2012-2020 ABINIT group (TR,DC,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,13 +114,6 @@ subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : KS_POTENTIAL
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_vtrial_abi2big'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -209,13 +201,6 @@ subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rho_abi2big'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -297,13 +282,6 @@ subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : HARTREE_POTENTIAL
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_vhartr_abi2big'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -386,13 +364,6 @@ end subroutine wvl_vhartr_abi2big
 
 subroutine wvl_vxc_abi2big(opt,vxc,wvl_den)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_vxc_abi2big'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -453,13 +424,6 @@ end subroutine wvl_vxc_abi2big
 !! SOURCE
 
 subroutine wvl_occ_abi2big(mband,nkpt,nsppol,occ,opt,wvl_wfs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_occ_abi2big'
-!End of the abilint section
 
  implicit none
 
@@ -545,13 +509,6 @@ end subroutine wvl_occ_abi2big
 !! SOURCE
 
 subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_eigen_abi2big'
-!End of the abilint section
 
  implicit none
 
@@ -643,13 +600,6 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
 &  SMEARING_DIST_FERMI, SMEARING_DIST_COLD1, SMEARING_DIST_COLD2,&
 &  SMEARING_DIST_METPX
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_occopt_abi2big'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -740,13 +690,6 @@ end subroutine wvl_occopt_abi2big
 
 subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rhov_abi2big_2D_4D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -806,13 +749,6 @@ end subroutine wvl_rhov_abi2big_2D_4D
 
 subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rhov_abi2big_1D_4D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -870,13 +806,6 @@ end subroutine wvl_rhov_abi2big_1D_4D
 !! SOURCE
 
 subroutine wvl_rhov_abi2big_2D_2D(opt,rhov_abi,rhov_big,shift)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rhov_abi2big_2D_2D'
-!End of the abilint section
 
  implicit none
 
@@ -937,13 +866,6 @@ end subroutine wvl_rhov_abi2big_2D_2D
 
 subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rhov_abi2big_1D_2D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1002,13 +924,6 @@ end subroutine wvl_rhov_abi2big_1D_2D
 
 subroutine wvl_rhov_abi2big_2D_1D(opt,rhov_abi,rhov_big,shift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rhov_abi2big_2D_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1062,13 +977,6 @@ end subroutine wvl_rhov_abi2big_2D_1D
 !! SOURCE
 
 subroutine wvl_rhov_abi2big_1D_1D(opt,rhov_abi,rhov_big,shift)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rhov_abi2big_1D_1D'
-!End of the abilint section
 
  implicit none
 
@@ -1135,13 +1043,6 @@ end subroutine wvl_rhov_abi2big_1D_1D
 !! SOURCE
 
 subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,shift)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_rhov_abi2big_gen'
-!End of the abilint section
 
  implicit none
 
@@ -1293,13 +1194,6 @@ end subroutine wvl_rhov_abi2big_gen
 
 subroutine wvl_setngfft(me_wvl, mgfft, nfft, ngfft, nproc_wvl, n1i, n2i, n3i,n3d)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_setngfft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1406,13 +1300,6 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: system_size,nullify_locreg_descriptors
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_setBoxGeometry'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

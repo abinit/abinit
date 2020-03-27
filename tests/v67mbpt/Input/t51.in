@@ -71,7 +71,8 @@ nfreqim3  0
 # Dataset 4 BSE equation with direct diagonalization (only resonant + W + v)
 optdriver4 99
 getwfk4  2
-getscr4  3
+#getscr4  3
+getscr_filepath4 "t51o_DS3_SCR"
 getbsreso4 4
 #getbseig4 4
 
@@ -91,7 +92,6 @@ bs_haydock_niter4  1000
 zcut 0.0001 eV
 ixc 7
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -49,7 +49,9 @@ all-local: bindings-ready
 
 EXTRA_DIST = @SOURCES@
 
-CLEANFILES = bindings-ready
+CLEANFILES = bindings-ready @PACKAGE@-*.tar.gz
+
+-include ../config.mk
 """ % (name,stamp,name,b_name)
 
 
@@ -167,6 +169,7 @@ for bnd in abinit_bindings:
   makefile = makefile_template(my_name,now,bnd)
   makefile = re.sub("@SOURCES@",sources,makefile)
   makefile = re.sub("@CLEANS@",cleans,makefile)
+  makefile = re.sub("@PACKAGE@",bnd,makefile)
 
   # Add hand-written makefile providing the bindings-ready target
   add = "config/makefiles/%s.am" % bnd

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_entropyDMFT
 !! NAME
 !!  m_entropyDMFT
@@ -7,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,9 +30,11 @@
 module m_entropyDMFT
 
   use defs_basis
-  use defs_abitypes
   use m_errors
+  use m_abicore
   use m_xmpi
+  use m_dtset
+
   use m_energies, only : energies_type, energies_eval_eint
   use m_splines, only : spline_integrate, spline, splint
   use m_pawang, only : pawang_type
@@ -71,7 +72,7 @@ module m_entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,7 +124,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -148,13 +149,6 @@ contains
 subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_init'
-!End of the abilint section
-
     type(entropyDMFT_t) , intent(inout) :: e_t
     type(dataset_type)  , intent(in   ) :: dt
     type(pawtab_type)   , intent(in   ) :: pawtab(:)
@@ -314,7 +308,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -339,13 +333,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_allocateAll(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_allocateAll'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 
     ABI_ALLOCATE(e_t%index_atom, (1:e_t%natom))
@@ -379,7 +366,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -404,13 +391,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_restart(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_restart'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 !Local variables-------------------------------
     logical            :: doBcast
@@ -533,7 +513,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -558,13 +538,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_dump(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_dump'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 !Local variables-------------------------------
     integer            :: ilambda
@@ -660,7 +633,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -686,13 +659,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   function entropyDMFT_nextLambda(e_t,dt,pawtab,pawang,pawrad) result(nextstep)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_nextLambda'
-!End of the abilint section
-
     type(entropyDMFT_t) , intent(inout) :: e_t
     type(dataset_type)  , intent(in) :: dt
     type(pawtab_type)   , intent(inout) :: pawtab(:)
@@ -702,6 +668,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
     logical :: nextstep
     integer :: itypat
     integer :: mylambda
+    logical :: is_dfpt=.false.
     real(dp),allocatable :: upawu(:),jpawu(:)
     character(len=100) :: message
 
@@ -751,7 +718,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
       call wrtout(std_out,message,"COLL")
       call wrtout(ab_out,message,"COLL")
       call pawpuxinit(dt%dmatpuopt,dt%exchmix,dt%f4of2_sla,dt%f6of2_sla,&
-&        jpawu,dt%lexexch,dt%lpawu,dt%ntypat,pawang,dt%pawprtvol,&
+&        is_dfpt,jpawu,dt%lexexch,dt%lpawu,dt%ntypat,pawang,dt%pawprtvol,&
 &        pawrad,pawtab,upawu,dt%usedmft,dt%useexexch,dt%usepawu)
       ABI_DEALLOCATE(upawu)
       ABI_DEALLOCATE(jpawu)
@@ -768,7 +735,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -793,13 +760,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_addIntegrand(e_t,dt,energies,data4etot)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_addIntegrand'
-!End of the abilint section
-
     type(entropyDMFT_t)   , intent(inout) :: e_t
     type(dataset_type) , intent(in   ) :: dt
     type(energies_type), intent(in   ) :: energies
@@ -930,7 +890,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -955,13 +915,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_computeEntropy(e_t,entropy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_computeEntropy'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
     real(dp)        , intent(inout) :: entropy !inout in case we do nothing, avoid to change entropy in NaN
 !Local variables ------------------------------
@@ -1085,7 +1038,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1110,13 +1063,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_integrate(e_t,integrand,integral)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_integrate'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
     real(dp)        , intent(in   ) :: integrand(:,:)
     real(dp)        , intent(  out) :: integral
@@ -1188,7 +1134,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1213,13 +1159,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_destroy(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_destroy'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 
     if ( allocated(e_t%index_atom) ) then

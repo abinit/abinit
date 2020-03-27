@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psolver
 !! NAME
 !!  m_psolver
@@ -7,7 +6,7 @@
 !!  Poisson solver
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR,TRangel).
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR,TRangel).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +26,6 @@
 module m_psolver
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
@@ -35,6 +33,7 @@ module m_psolver
  use m_cgtools
  use m_xmpi
 
+ use defs_abitypes, only : mpi_type
  use m_geometry, only : metric
  use m_drivexc,  only : mkdenpos
 
@@ -103,13 +102,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_rhohxc'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -193,8 +185,8 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !  ngrad=1 is for LDAs or LSDs, ngrad=2 is for GGAs
    ngrad=1;if(xclevel==2)ngrad=2
-!  ixc 31 to 34 are for mgga test purpose only (fake functionals based on LDA but need the gradients too)
-   if(ixc>=31 .and. ixc<=34)ngrad=2
+!  ixc 31 to 35 are for mgga test purpose only (fake functionals based on LDA but need the gradients too)
+   if(ixc>=31 .and. ixc<=35)ngrad=2
 !  Test: has a compensation density to be added/substracted (PAW) ?
 !  test_nhat=((nhatdim==1).and.(usexcnhat==0.or.(ngrad==2.and.nhatgrdim==1)))
    test_nhat=((nhatdim==1).and.(usexcnhat==0))
@@ -566,13 +558,6 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
  use BigDFT_API,     only : coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_hartree'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -706,13 +691,6 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 #else
  use defs_wvltypes,  only : coulomb_operator
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_kernel'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------

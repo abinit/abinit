@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2014-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -138,7 +138,7 @@ mf_data += "\n# Clean-up temporary directories\nclean-local:\n%s" % mf_cln
 
 # Generate EXTRA_DIST information
 mf_extra = "EXTRA_DIST ="
-xd_data = open("config/dist/abichecks.lst", "rt").read().strip().split("\n")
+xd_data = open("config/dist/auto-abichecks.lst", "rt").read().strip().split("\n")
 for src in xd_data:
   mf_extra += " \\\n  %s" % re.sub("^abichecks/","",src)
 mf_data += "\n%s\n" % mf_extra

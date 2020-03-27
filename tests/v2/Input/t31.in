@@ -5,7 +5,6 @@ t30o_DS4_DDB
 t30o_DS6_DDB
 t30o_DS8_DDB
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb

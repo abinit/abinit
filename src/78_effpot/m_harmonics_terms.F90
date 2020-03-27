@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_harmonics_terms
 !!
 !! NAME
@@ -8,7 +7,7 @@
 !! Module with datatype and tools for the harmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +43,7 @@ module m_harmonics_terms
  public :: harmonics_terms_setInternalStrain
 !!***
 
-!!****t* defs_abitypes/harmonics_terms_type
+!!****t* m_harmonics_terms/harmonics_terms_type
 !! NAME
 !! harmonics_terms_type
 !!
@@ -130,13 +129,6 @@ CONTAINS  !=====================================================================
 subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 &                               dynmat,epsilon_inf,elastic_constants,strain_coupling,&
 &                               nqpt,phfrq,qpoints,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_init'
-!End of the abilint section
 
  implicit none
 
@@ -279,13 +271,6 @@ end subroutine harmonics_terms_init
 
 subroutine harmonics_terms_free(harmonics_terms)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_free'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -327,7 +312,7 @@ subroutine harmonics_terms_free(harmonics_terms)
     ABI_DEALLOCATE(harmonics_terms%qpoints)
   end if
 
-  call ifc_free(harmonics_terms%ifcs)
+  call harmonics_terms%ifcs%free()
 
 end subroutine harmonics_terms_free
 !!***
@@ -356,13 +341,6 @@ end subroutine harmonics_terms_free
 !! SOURCE
 
 subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setInternalStrain'
-!End of the abilint section
 
   implicit none
 
@@ -423,13 +401,6 @@ end subroutine harmonics_terms_setInternalStrain
 !! SOURCE
 
 subroutine harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setEffectiveCharges'
-!End of the abilint section
 
   implicit none
 
@@ -492,13 +463,6 @@ end subroutine harmonics_terms_setEffectiveCharges
 !! SOURCE
 
 subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpoints)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setDynmat'
-!End of the abilint section
 
   implicit none
 
@@ -605,15 +569,8 @@ end subroutine harmonics_terms_setDynmat
 !!
 !! SOURCE
 
-subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,ncell,nrpt,&
-&                                      atmrpt_index,index_cells,sc_size,rpt,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_evaluateIFC'
-!End of the abilint section
+subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,&
+&                                      ncell,nrpt,atmrpt_index,index_cells,sc_size,rpt,comm)
 
  implicit none
 
@@ -633,8 +590,11 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
 ! scalar
   integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,irpt_tmp,ii,jj,kk,ll
   integer :: mu,nu
-  real(dp):: disp1,disp2,ifc,tmp,tmp2
-! array
+  real(dp):: disp1,disp2,ifc,tmp_etot1,tmp_etot2
+!Variables for separation of short and dipdip ifc contribution 
+ !real(dp):: short_ifc,ewald_ifc
+ !real(dp):: tmp_ewald1,tmp_ewald2,tmp_short1,tmp_short2
+  ! array
   character(500) :: msg
 
 ! *************************************************************************
@@ -668,13 +628,14 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
+              
 !              if(abs(ifc) > tol10)then
-                tmp = disp2 * ifc
+                tmp_etot1  = disp2 * ifc
 !               accumule energy
-                tmp2 = disp1*tmp
-                energy =  energy + tmp2
+                tmp_etot2  = disp1*tmp_etot1
+                energy =  energy + tmp_etot2
 !               accumule forces
-                fcart(mu,kk) = fcart(mu,kk) + tmp
+                fcart(mu,kk) = fcart(mu,kk) + tmp_etot1
 !              end if
             end do
           end do
@@ -684,7 +645,6 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
   end do
 
   energy = half * energy
-
 ! MPI_SUM
   call xmpi_sum(energy, comm, ierr)
   call xmpi_sum(fcart , comm, ierr)
@@ -723,13 +683,6 @@ end subroutine harmonics_terms_evaluateIFC
 !!
 subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,natom,natom_uc,ncell,&
 &                                          strain_coupling,strten,strain)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_evaluateElastic'
-!End of the abilint section
 
  real(dp),intent(out):: energy
  integer, intent(in) :: natom,natom_uc,ncell
@@ -808,13 +761,6 @@ end subroutine  harmonics_terms_evaluateElastic
 !! SOURCE
 
 subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_applySumRule'
-!End of the abilint section
 
   implicit none
 

@@ -61,7 +61,6 @@
  xcart    3*0.0       3*1.1547006  # dist=2
  znucl  2 1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

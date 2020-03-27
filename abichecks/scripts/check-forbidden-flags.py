@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 "Check forbidden CPP flags"
 #
-# Copyright (C) 2010-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2010-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
 from __future__ import unicode_literals, division, print_function, absolute_import
+
+from abirules_tools import find_abinit_src_directory
 
 try:
     from ConfigParser import ConfigParser
@@ -24,54 +26,27 @@ class MyConfigParser(ConfigParser):
   def optionxform(self,option):
     return str(option)
 
-# ---------------------------------------------------------------------------- #
-
-#
-# Functions
-#
-
 env_ignore = ["CFLAGS","CXXFLAGS","FCFLAGS","NVCC_*","fcflags_opt_*"]
 
 def is_ignored(keyword):
   for env in env_ignore:
-    if ( "*" in env ):
-      if ( re.match(env,keyword) ):
+    if "*" in env:
+      if re.match(env,keyword):
         return True
-    elif ( env == keyword ):
+    elif env == keyword:
         return True
   return False
 
-# ---------------------------------------------------------------------------- #
-def abinit_test_generator():
-  def test_func(abenv):
-     "check forbidden flags"
-     try:
-       return main(abenv.home_dir)
-     except Exception:
-       import sys
-       raise sys.exc_info()[1] # Reraise current exception (py2.4 compliant)
-  return {"test_func" : test_func}
-#
-# Main program
-#
-def main(home_dir):
-  from os.path import join as pj
-                                                                           
-  # Check if we are in the top of the ABINIT source tree
-  my_name = os.path.basename(__file__) + ".main"
-  if ( not os.path.exists( pj(home_dir,"configure.ac") ) or
-       not os.path.exists( pj(home_dir,"src/98_main/abinit.F90")) ):
-    print("%s: You must be in the top of an ABINIT source tree." % my_name)
-    print("%s: Aborting now." % my_name)
-    sys.exit(1)
 
+def main():
+  home_dir = find_abinit_src_directory()
   # Init
   re_dbgflags = re.compile("(^-g|[^0-9A-Za-z]-g)")
   re_optflags = re.compile("(-O[0-9]|-xO[0-9])")
 
   # Extract environment variables from config file
   cnf_env = MyConfigParser()
-  cnf_env.read( pj(home_dir,"config/specs/environment.conf") )
+  cnf_env.read(os.path.join(home_dir,"config/specs/environment.conf"))
   env_config = list()
   for env in cnf_env.sections():
     if cnf_env.get(env,"reset") == "no":
@@ -82,7 +57,7 @@ def main(home_dir):
   # Extract information from build example config file
   bex_ok = True
   cnf_bex = MyConfigParser()
-  cnf_bex.read( pj(home_dir,"config/specs/build-examples.conf") )
+  cnf_bex.read( os.path.join(home_dir,"config/specs/testfarm.conf") )
   env_forbidden = dict()
   for bot in cnf_bex.sections():
     env_forbidden[bot] = list()
@@ -117,10 +92,4 @@ def main(home_dir):
   return my_exitcode
 
 if __name__ == "__main__":
-  if len(sys.argv) == 1: 
-    home_dir = "."
-  else:
-    home_dir = sys.argv[1] 
-
-  exit_status = main(home_dir)
-  sys.exit(exit_status)
+  sys.exit(main())

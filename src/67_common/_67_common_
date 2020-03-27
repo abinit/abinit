@@ -11,7 +11,7 @@
 !! further split)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group
+!! Copyright (C) 1998-2020 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,6 +42,7 @@
 !! m_orbmag.F90
 !! m_positron.F90
 !! m_rhotov.F90
+!! m_rot_cg.F90
 !! m_setvtr.F90
 !! m_spin_current.F90
 !! m_stress.F90

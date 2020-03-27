@@ -1,8 +1,8 @@
 
-.Version 8.7.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 25 Oct 2017.
-- ( at 09h01 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h41 )
   
-- input  file    -> t70.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t70/t70.in
 - output file    -> t70.out
 - root for input  files -> t70i
 - root for output files -> t70o
@@ -64,7 +64,7 @@ _ WF disk file :      0.068 Mbytes ; DEN or POT disk file :      0.160 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      9.4486306644E+00  7.5589045315E+00  6.6140414651E+00 Bohr
@@ -130,7 +130,16 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 1, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1081, }
+cutoff_energies: {ecut:  13.0, pawecutdg:  35.0, }
+electrons: {nelect:   5.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -148,8 +157,8 @@ P           mkmem           1
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -162,8 +171,8 @@ P           mkmem           1
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/H.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -191,6 +200,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 6, nline: 4, wfoptalg: 0, }
+tolerances: {tolrff: 2.00E-02, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -6.3213972351873    -6.321E+00 2.750E-02 2.686E+01 1.091E-02 1.091E-02
  ETOT  2  -6.3303918813148    -8.995E-03 1.767E-06 4.811E+00 1.758E-02 6.667E-03
@@ -201,6 +216,32 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
  At SCF step    6, forces are sufficiently converged : 
   for the second time, max diff in force=  1.788E-05 is less than < tolrff=  2.000E-02 times max force
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  9.4486307,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.5589045,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.6140415, ]
+lattice_lengths: [   9.44863,    7.55890,    6.61404, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   4.7238342E+02
+convergence: {deltae: -3.701E-08, res2:  1.445E-04, residm:  1.634E-09, diffor:  1.788E-05, }
+etotal    :  -6.33096842E+00
+entropy   :   0.00000000E+00
+fermie    :  -1.15814365E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [ -1.1240E-01,   0.0000E+00,   0.0000E+00,  C]
+- [  1.1240E-01,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -9.74573384E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  9.74573384E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   9.74573384E-03, max:   9.74573384E-03, mean:   9.74573384E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -216,27 +257,59 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
  -1.12400000000000E-01  0.00000000000000E+00  0.00000000000000E+00
   1.12400000000000E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.74573E-03 5.62670E-03 (free atoms)
- -9.74573384253055E-03 -0.00000000000000E+00 -0.00000000000000E+00
-  9.74573384253055E-03 -0.00000000000000E+00 -0.00000000000000E+00
+ -9.74573384252796E-03 -0.00000000000000E+00 -0.00000000000000E+00
+  9.74573384252796E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Reduced forces (fred)
-  9.20838396318900E-02  0.00000000000000E+00  0.00000000000000E+00
- -9.20838396318900E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Total energy (etotal) [Ha]= -6.33096842344286E+00
+  9.20838396318655E-02  0.00000000000000E+00  0.00000000000000E+00
+ -9.20838396318655E-02 -0.00000000000000E+00 -0.00000000000000E+00
+ Total energy (etotal) [Ha]= -6.33096842344288E+00
 
 --- Iteration: ( 2/15) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 6, nline: 4, wfoptalg: 0, }
+tolerances: {tolrff: 2.00E-02, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -6.3310927206867    -6.331E+00 3.213E-09 1.589E+00 5.480E-03 4.266E-03
  ETOT  2  -6.3311000939847    -7.373E-06 3.302E-11 3.914E-01 6.665E-04 3.599E-03
- ETOT  3  -6.3311002545501    -1.606E-07 2.773E-08 4.886E-04 2.027E-04 3.802E-03
+ ETOT  3  -6.3311002545500    -1.606E-07 2.773E-08 4.886E-04 2.027E-04 3.802E-03
  ETOT  4  -6.3311002700337    -1.548E-08 1.410E-09 5.830E-05 2.153E-05 3.824E-03
- ETOT  5  -6.3311002709859    -9.522E-10 1.465E-10 1.254E-06 1.704E-05 3.841E-03
+ ETOT  5  -6.3311002709860    -9.522E-10 1.465E-10 1.254E-06 1.704E-05 3.841E-03
 
  At SCF step    5, forces are sufficiently converged : 
   for the second time, max diff in force=  1.704E-05 is less than < tolrff=  2.000E-02 times max force
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  9.4486307,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.5589045,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.6140415, ]
+lattice_lengths: [   9.44863,    7.55890,    6.61404, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   4.7238342E+02
+convergence: {deltae: -9.522E-10, res2:  1.254E-06, residm:  1.465E-10, diffor:  1.704E-05, }
+etotal    :  -6.33110027E+00
+entropy   :   0.00000000E+00
+fermie    :  -1.15596098E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [ -1.1343E-01,   0.0000E+00,   0.0000E+00,  C]
+- [  1.1343E-01,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -3.84067272E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  3.84067272E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   3.84067272E-03, max:   3.84067272E-03, mean:   3.84067272E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -252,12 +325,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
  -1.13431444046090E-01  0.00000000000000E+00  0.00000000000000E+00
   1.13431444046090E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.84067E-03 2.21741E-03 (free atoms)
- -3.84067272347381E-03 -0.00000000000000E+00 -0.00000000000000E+00
-  3.84067272347381E-03 -0.00000000000000E+00 -0.00000000000000E+00
+ -3.84067272350395E-03 -0.00000000000000E+00 -0.00000000000000E+00
+  3.84067272350395E-03 -0.00000000000000E+00 -0.00000000000000E+00
  Reduced forces (fred)
-  3.62890980670477E-02  0.00000000000000E+00  0.00000000000000E+00
- -3.62890980670477E-02 -0.00000000000000E+00 -0.00000000000000E+00
- Total energy (etotal) [Ha]= -6.33110027098595E+00
+  3.62890980673325E-02  0.00000000000000E+00  0.00000000000000E+00
+ -3.62890980673325E-02 -0.00000000000000E+00 -0.00000000000000E+00
+ Total energy (etotal) [Ha]= -6.33110027098598E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.31848E-04
@@ -268,13 +341,45 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 6, nline: 4, wfoptalg: 0, }
+tolerances: {tolrff: 2.00E-02, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -6.3311223563032    -6.331E+00 1.484E-09 8.644E-01 3.411E-03 4.293E-04
- ETOT  2  -6.3311254181019    -3.062E-06 1.385E-11 2.128E-01 4.266E-04 2.680E-06
+ ETOT  2  -6.3311254181018    -3.062E-06 1.385E-11 2.128E-01 4.266E-04 2.680E-06
  ETOT  3  -6.3311254842868    -6.618E-08 1.158E-08 1.646E-04 1.363E-04 1.390E-04
- ETOT  4  -6.3311254909432    -6.656E-09 5.939E-10 1.644E-05 1.092E-05 1.499E-04
+ ETOT  4  -6.3311254909433    -6.656E-09 5.939E-10 1.644E-05 1.092E-05 1.499E-04
  ETOT  5  -6.3311254913710    -4.277E-10 5.940E-11 3.722E-07 1.054E-05 1.604E-04
- ETOT  6  -6.3311254913899    -1.893E-11 2.063E-12 3.902E-09 2.842E-07 1.602E-04
+ ETOT  6  -6.3311254913899    -1.890E-11 2.063E-12 3.902E-09 2.842E-07 1.602E-04
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  9.4486307,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.5589045,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.6140415, ]
+lattice_lengths: [   9.44863,    7.55890,    6.61404, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   4.7238342E+02
+convergence: {deltae: -1.890E-11, res2:  3.902E-09, residm:  2.063E-12, diffor:  2.842E-07, }
+etotal    :  -6.33112549E+00
+entropy   :   0.00000000E+00
+fermie    :  -1.15474403E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [ -1.1410E-01,   0.0000E+00,   0.0000E+00,  C]
+- [  1.1410E-01,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -1.60155079E-04,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  1.60155079E-04,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   1.60155079E-04, max:   1.60155079E-04, mean:   1.60155079E-04, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -284,18 +389,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.07811048042711E+00  0.00000000000000E+00  0.00000000000000E+00
-  1.07811048042711E+00  0.00000000000000E+00  0.00000000000000E+00
+ -1.07811048042719E+00  0.00000000000000E+00  0.00000000000000E+00
+  1.07811048042719E+00  0.00000000000000E+00  0.00000000000000E+00
  Reduced coordinates (xred)
- -1.14102298916809E-01  0.00000000000000E+00  0.00000000000000E+00
-  1.14102298916809E-01  0.00000000000000E+00  0.00000000000000E+00
+ -1.14102298916817E-01  0.00000000000000E+00  0.00000000000000E+00
+  1.14102298916817E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.60155E-04 9.24656E-05 (free atoms)
- -1.60155079200378E-04 -0.00000000000000E+00 -0.00000000000000E+00
-  1.60155079200378E-04 -0.00000000000000E+00 -0.00000000000000E+00
+ -1.60155079165385E-04 -0.00000000000000E+00 -0.00000000000000E+00
+  1.60155079165385E-04 -0.00000000000000E+00 -0.00000000000000E+00
  Reduced forces (fred)
-  1.51324619239662E-03  0.00000000000000E+00  0.00000000000000E+00
- -1.51324619239662E-03 -0.00000000000000E+00 -0.00000000000000E+00
- Total energy (etotal) [Ha]= -6.33112549138989E+00
+  1.51324619206598E-03  0.00000000000000E+00  0.00000000000000E+00
+ -1.51324619206598E-03 -0.00000000000000E+00 -0.00000000000000E+00
+ Total energy (etotal) [Ha]= -6.33112549138988E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.52204E-05
@@ -306,13 +411,45 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 6, nline: 4, wfoptalg: 0, }
+tolerances: {tolrff: 2.00E-02, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -6.3311255306340    -6.331E+00 2.922E-12 2.649E-03 1.455E-04 1.470E-05
- ETOT  2  -6.3311255362070    -5.573E-09 2.523E-14 6.608E-04 1.842E-05 3.726E-06
- ETOT  3  -6.3311255363302    -1.232E-10 2.218E-11 3.485E-07 5.597E-06 1.871E-06
- ETOT  4  -6.3311255363430    -1.279E-11 1.129E-12 5.368E-08 4.122E-07 2.283E-06
- ETOT  5  -6.3311255363438    -7.851E-13 1.396E-13 1.568E-09 4.730E-07 2.756E-06
- ETOT  6  -6.3311255363438    -3.819E-14 7.486E-15 1.010E-11 4.643E-08 2.710E-06
+ ETOT  1  -6.3311255306341    -6.331E+00 2.922E-12 2.649E-03 1.455E-04 1.470E-05
+ ETOT  2  -6.3311255362071    -5.573E-09 2.523E-14 6.608E-04 1.842E-05 3.726E-06
+ ETOT  3  -6.3311255363302    -1.231E-10 2.218E-11 3.485E-07 5.597E-06 1.871E-06
+ ETOT  4  -6.3311255363430    -1.282E-11 1.129E-12 5.368E-08 4.122E-07 2.283E-06
+ ETOT  5  -6.3311255363438    -7.958E-13 1.396E-13 1.568E-09 4.730E-07 2.756E-06
+ ETOT  6  -6.3311255363438    -6.750E-14 7.486E-15 1.010E-11 4.643E-08 2.710E-06
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  9.4486307,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.5589045,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.6140415, ]
+lattice_lengths: [   9.44863,    7.55890,    6.61404, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   4.7238342E+02
+convergence: {deltae: -6.750E-14, res2:  1.010E-11, residm:  7.486E-15, diffor:  4.643E-08, }
+etotal    :  -6.33112554E+00
+entropy   :   0.00000000E+00
+fermie    :  -1.15469074E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [ -1.1413E-01,   0.0000E+00,   0.0000E+00,  C]
+- [  1.1413E-01,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -2.70977496E-06,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  2.70977496E-06,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   2.70977496E-06, max:   2.70977496E-06, mean:   2.70977496E-06, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -322,22 +459,22 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -1.07838630265564E+00  0.00000000000000E+00  0.00000000000000E+00
-  1.07838630265564E+00  0.00000000000000E+00  0.00000000000000E+00
+ -1.07838630265565E+00  0.00000000000000E+00  0.00000000000000E+00
+  1.07838630265565E+00  0.00000000000000E+00  0.00000000000000E+00
  Reduced coordinates (xred)
- -1.14131490684200E-01  0.00000000000000E+00  0.00000000000000E+00
-  1.14131490684200E-01  0.00000000000000E+00  0.00000000000000E+00
+ -1.14131490684202E-01  0.00000000000000E+00  0.00000000000000E+00
+  1.14131490684202E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.70977E-06 1.56449E-06 (free atoms)
- -2.70977498924277E-06 -0.00000000000000E+00 -0.00000000000000E+00
-  2.70977498924277E-06 -0.00000000000000E+00 -0.00000000000000E+00
+ -2.70977496494393E-06 -0.00000000000000E+00 -0.00000000000000E+00
+  2.70977496494393E-06 -0.00000000000000E+00 -0.00000000000000E+00
  Reduced forces (fred)
-  2.56036630570599E-05  0.00000000000000E+00  0.00000000000000E+00
- -2.56036630570599E-05 -0.00000000000000E+00 -0.00000000000000E+00
- Total energy (etotal) [Ha]= -6.33112553634382E+00
+  2.56036628274691E-05  0.00000000000000E+00  0.00000000000000E+00
+ -2.56036628274691E-05 -0.00000000000000E+00 -0.00000000000000E+00
+ Total energy (etotal) [Ha]= -6.33112553634385E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-4.49539E-08
-           Relative     =-7.10046E-09
+           Absolute (Ha)=-4.49540E-08
+           Relative     =-7.10047E-09
 
  At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 2.7098E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
@@ -346,7 +483,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7601E-15; max=  7.4857E-15
+ Mean square residual over all n,k,spin=   37.601E-16; max=  74.857E-16
  reduced coordinates (array xred) for    2 atoms
       -0.114131490684      0.000000000000      0.000000000000
        0.114131490684      0.000000000000      0.000000000000
@@ -355,18 +492,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
     2      -0.000047368575      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.57065745342100     0.00000000000000     0.00000000000000
-    2      0.57065745342100     0.00000000000000     0.00000000000000
+    1     -0.57065745342101     0.00000000000000     0.00000000000000
+    2      0.57065745342101     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000270977499    -0.00000000000000    -0.00000000000000
-    2      0.00000270977499    -0.00000000000000    -0.00000000000000
+    1     -0.00000270977496    -0.00000000000000    -0.00000000000000
+    2      0.00000270977496    -0.00000000000000    -0.00000000000000
  frms,max,avg= 1.5644893E-06 2.7097750E-06   2.303E-06  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00013934222073    -0.00000000000000    -0.00000000000000
-    2      0.00013934222073    -0.00000000000000    -0.00000000000000
- frms,max,avg= 8.0449269E-05 1.3934222E-04   1.185E-04  0.000E+00  0.000E+00 e/A
+    1     -0.00013934221948    -0.00000000000000    -0.00000000000000
+    2      0.00013934221948    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 8.0449268E-05 1.3934222E-04   1.185E-04  0.000E+00  0.000E+00 e/A
  length scales=  9.448630664428  7.558904531543  6.614041465100 bohr
               =  5.000000000000  4.000000000000  3.500000000000 angstroms
  prteigrs : about to open file t70o_DS1_EIG
@@ -377,31 +514,39 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
       occupation numbers for kpt#   1
    2.00000    2.00000    0.92766    0.07234
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.77358307156224E+00
+hartree             :  2.45815185507665E+00
+xc                  : -2.22340249062002E+00
+Ewald energy        : -2.52301281880451E+00
+psp_core            :  7.31453256942226E-02
+local_psp           : -7.54384300258341E+00
+non_local_psp       : -3.39006176558929E-01
+internal            : -6.32438423623375E+00
+'-kT*entropy'       : -6.74130011009912E-03
+total_energy        : -6.33112553634385E+00
+total_energy_eV     : -1.72278687235301E+02
+band_energy         : -1.63565862644296E+00
+...
 
-    Kinetic energy  =  3.77358307156205E+00
-    Hartree energy  =  2.45815185507648E+00
-    XC energy       = -2.22340249061993E+00
-    Ewald energy    = -2.52301281880448E+00
-    PspCore energy  =  7.31453256942225E-02
-    Loc. psp. energy= -7.54384300258318E+00
-    NL   psp  energy= -3.39006176558884E-01
-    >>>>> Internal E= -6.32438423623372E+00
-
-    -kT*entropy     = -6.74130011009879E-03
-    >>>>>>>>> Etotal= -6.33112553634381E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.72278687235300E+02 ; Band energy (Ha)=  -1.6356586264E+00
---------------------------------------------------------------------------------
  rms coord change=  9.9968E-04   atom, delta coord (reduced):
      1       -0.001731490684      0.000000000000      0.000000000000
      2        0.001731490684      0.000000000000      0.000000000000
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 1, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1081, }
+cutoff_energies: {ecut:  13.0, pawecutdg:  35.0, }
+electrons: {nelect:   5.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -421,8 +566,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -435,8 +580,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/GONZE/ace_1/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/H.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -456,67 +601,92 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
 ================================================================================
 
-     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
- ETOT  1  -6.3210735439098    -6.321E+00 8.299E-09 3.800E-01 7.771E-04 7.771E-04
- ETOT  2  -6.3226417423257    -1.568E-03 2.054E-10 7.647E-02 2.263E-03 3.040E-03
- ETOT  3  -6.3223936831087     2.481E-04 9.160E-08 1.254E-02 1.462E-03 4.502E-03
- ETOT  4  -6.3231678844481    -7.742E-04 1.059E-07 2.518E-03 6.291E-04 3.873E-03
- ETOT  5  -6.3229594206170     2.085E-04 9.668E-10 3.745E-04 1.261E-04 3.999E-03
- ETOT  6  -6.3228928464274     6.657E-05 2.395E-08 6.791E-04 3.628E-04 4.362E-03
- ETOT  7  -6.3230320091961    -1.392E-04 2.621E-09 3.003E-05 1.523E-04 4.209E-03
- ETOT  8  -6.3230126251644     1.938E-05 8.099E-10 1.827E-06 5.354E-05 4.156E-03
- ETOT  9  -6.3230020967931     1.053E-05 1.589E-11 5.415E-06 9.722E-06 4.146E-03
- ETOT 10  -6.3229949867128     7.110E-06 9.006E-12 2.957E-06 3.144E-06 4.149E-03
- ETOT 11  -6.3229929591998     2.028E-06 8.641E-12 4.312E-07 7.751E-06 4.157E-03
- ETOT 12  -6.3229927819623     1.772E-07 1.710E-11 2.138E-07 8.050E-06 4.165E-03
- ETOT 13  -6.3229945148650    -1.733E-06 4.853E-13 4.791E-07 1.493E-06 4.167E-03
- ETOT 14  -6.3229948556314    -3.408E-07 7.017E-13 8.496E-07 1.451E-06 4.168E-03
- ETOT 15  -6.3229959640715    -1.108E-06 1.569E-12 3.382E-07 2.527E-06 4.166E-03
- ETOT 16  -6.3229963536840    -3.896E-07 2.733E-12 1.060E-08 3.310E-06 4.162E-03
- ETOT 17  -6.3229959043883     4.493E-07 5.120E-13 1.471E-08 1.436E-06 4.161E-03
- ETOT 18  -6.3229952912908     6.131E-07 1.001E-13 2.347E-09 5.696E-07 4.161E-03
- ETOT 19  -6.3229953104424    -1.915E-08 6.228E-15 8.899E-10 1.433E-07 4.161E-03
- ETOT 20  -6.3229953417272    -3.128E-08 4.407E-16 4.925E-10 3.571E-08 4.162E-03
- ETOT 21  -6.3229953381899     3.537E-09 1.181E-15 1.691E-10 6.296E-08 4.162E-03
- ETOT 22  -6.3229953485899    -1.040E-08 1.828E-16 6.476E-11 2.411E-08 4.162E-03
- ETOT 23  -6.3229953474918     1.098E-09 4.563E-16 2.059E-12 3.679E-08 4.162E-03
- ETOT 24  -6.3229953514699    -3.978E-09 5.946E-17 1.197E-12 1.488E-08 4.162E-03
- ETOT 25  -6.3229953593793    -7.909E-09 3.425E-17 4.646E-14 9.482E-09 4.162E-03
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 25, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-12, }
+...
 
- scprqt:  WARNING -
-  nstep=   25 was not enough SCF cycles to converge;
-  maximum energy difference=  7.909E-09 exceeds toldfe=  1.000E-12
+     iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
+ ETOT  1  -6.3224106327927    -6.322E+00 8.299E-09 3.800E-01 7.771E-04 7.771E-04
+ ETOT  2  -6.3229712767186    -5.606E-04 2.054E-10 7.647E-02 2.263E-03 3.040E-03
+ ETOT  3  -6.3229903142249    -1.904E-05 9.160E-08 1.254E-02 1.462E-03 4.502E-03
+ ETOT  4  -6.3229943892830    -4.075E-06 1.059E-07 2.518E-03 6.291E-04 3.873E-03
+ ETOT  5  -6.3229951253406    -7.361E-07 9.668E-10 3.745E-04 1.261E-04 3.999E-03
+ ETOT  6  -6.3229949730260     1.523E-07 2.395E-08 6.791E-04 3.628E-04 4.362E-03
+ ETOT  7  -6.3229953114233    -3.384E-07 2.621E-09 3.003E-05 1.523E-04 4.209E-03
+ ETOT  8  -6.3229953526331    -4.121E-08 8.099E-10 1.827E-06 5.354E-05 4.156E-03
+ ETOT  9  -6.3229953552701    -2.637E-09 1.589E-11 5.415E-06 9.722E-06 4.146E-03
+ ETOT 10  -6.3229953562569    -9.868E-10 9.006E-12 2.957E-06 3.144E-06 4.149E-03
+ ETOT 11  -6.3229953575008    -1.244E-09 8.641E-12 4.312E-07 7.751E-06 4.157E-03
+ ETOT 12  -6.3229953578151    -3.144E-10 1.710E-11 2.138E-07 8.050E-06 4.165E-03
+ ETOT 13  -6.3229953577508     6.437E-11 4.853E-13 4.791E-07 1.493E-06 4.167E-03
+ ETOT 14  -6.3229953575796     1.712E-10 7.017E-13 8.496E-07 1.451E-06 4.168E-03
+ ETOT 15  -6.3229953577702    -1.906E-10 1.569E-12 3.382E-07 2.527E-06 4.166E-03
+ ETOT 16  -6.3229953579307    -1.605E-10 2.733E-12 1.060E-08 3.310E-06 4.162E-03
+ ETOT 17  -6.3229953579547    -2.402E-11 5.120E-13 1.471E-08 1.436E-06 4.161E-03
+ ETOT 18  -6.3229953579622    -7.524E-12 1.001E-13 2.347E-09 5.696E-07 4.161E-03
+ ETOT 19  -6.3229953579630    -7.931E-13 6.228E-15 8.899E-10 1.433E-07 4.161E-03
+ ETOT 20  -6.3229953579632    -2.132E-13 4.407E-16 4.925E-10 3.571E-08 4.162E-03
+
+ At SCF step   20, etot is converged : 
+  for the second time, diff in etot=  2.132E-13 < toldfe=  1.000E-12
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  9.4486307,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.5589045,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.6140415, ]
+lattice_lengths: [   9.44863,    7.55890,    6.61404, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   4.7238342E+02
+convergence: {deltae: -2.132E-13, res2:  4.925E-10, residm:  4.407E-16, diffor:  3.571E-08, }
+etotal    :  -6.32299536E+00
+entropy   :   0.00000000E+00
+fermie    :  -1.21996722E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [ -1.1413E-01,   0.0000E+00,   0.0000E+00,  C]
+- [  1.1413E-01,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [  4.16151567E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -4.16151567E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   4.16151567E-03, max:   4.16151567E-03, mean:   4.16151567E-03, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          3.18171985
-    2        2.00000          1.82535649
+    1        2.00000          3.18171918
+    2        2.00000          1.82535662
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7014E-17; max=  3.4251E-17
+ Mean square residual over all n,k,spin=   20.892E-17; max=  44.072E-17
  reduced coordinates (array xred) for    2 atoms
       -0.114131490684      0.000000000000      0.000000000000
        0.114131490684      0.000000000000      0.000000000000
- rms dE/dt=  2.2703E-02; max dE/dt=  3.9378E-02; dE/dt below (all hartree)
-    1      -0.039266184053      0.000000000000      0.000000000000
-    2       0.039377507674      0.000000000000      0.000000000000
+ rms dE/dt=  2.2702E-02; max dE/dt=  3.9376E-02; dE/dt below (all hartree)
+    1      -0.039265217282      0.000000000000      0.000000000000
+    2       0.039376031804      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -0.57065745342100     0.00000000000000     0.00000000000000
-    2      0.57065745342100     0.00000000000000     0.00000000000000
+    1     -0.57065745342101     0.00000000000000     0.00000000000000
+    2      0.57065745342101     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00416164492612    -0.00000000000000    -0.00000000000000
-    2     -0.00416164492612    -0.00000000000000    -0.00000000000000
- frms,max,avg= 2.4027268E-03 4.1616449E-03  -5.891E-06  0.000E+00  0.000E+00 h/b
+    1      0.00416151566713    -0.00000000000000    -0.00000000000000
+    2     -0.00416151566713    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 2.4026522E-03 4.1615157E-03  -5.864E-06  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.21400036837446    -0.00000000000000    -0.00000000000000
-    2     -0.21400036837446    -0.00000000000000    -0.00000000000000
- frms,max,avg= 1.2355317E-01 2.1400037E-01  -3.029E-04  0.000E+00  0.000E+00 e/A
+    1      0.21399372161075    -0.00000000000000    -0.00000000000000
+    2     -0.21399372161075    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.2354933E-01 2.1399372E-01  -3.015E-04  0.000E+00  0.000E+00 e/A
  length scales=  9.448630664428  7.558904531543  6.614041465100 bohr
               =  5.000000000000  4.000000000000  3.500000000000 angstroms
  prteigrs : about to open file t70o_DS2_EIG
@@ -527,31 +697,34 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
       occupation numbers for kpt#   1
    2.00000    2.00000    1.00000    0.00000
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 2, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.71010573906761E+00
+hartree             :  2.42760937222325E+00
+xc                  : -1.78968697344734E+00
+Ewald energy        : -2.52301281880451E+00
+psp_core            :  7.31453256942226E-02
+local_psp           : -7.47611241727815E+00
+non_local_psp+x     : -7.39401689582848E-01
+internal            : -6.31735346212777E+00
+'-kT*entropy'       : -5.64189583547795E-03
+total_energy        : -6.32299535796325E+00
+...
 
-    Kinetic energy  =  3.71010670920899E+00
-    Hartree energy  =  2.42761013839271E+00
-    XC energy       = -2.20654890757483E+00
-    Ewald energy    = -2.52301281880448E+00
-    PspCore energy  =  7.31453256942225E-02
-    Loc. psp. energy= -7.47611373746513E+00
-    NL   psp  energy= -3.22540172995328E-01
-    >>>>> Internal E= -6.31735346354384E+00
 
-    -kT*entropy     = -5.64189583547795E-03
-    >>>>>>>>> Etotal= -6.32299535937932E+00
+--- !EnergyTermsDC
+iteration_state     : {dtset: 2, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.95149259744052E+00
+Ewald energy        : -2.52301281880451E+00
+psp_core            :  7.31453256942226E-02
+xc_dc               : -1.91599233560627E+00
+internal            : -6.31735242615707E+00
+'-kT*entropy'       : -5.64189583547795E-03
+total_energy_dc     : -6.32299432199255E+00
+...
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.95149296277096E+00
-    Ewald energy    = -2.52301281880448E+00
-    PspCore energy  =  7.31453256942225E-02
-    Dble-C XC-energy= -1.91599299813152E+00
-    >>>>> Internal E= -6.31735345401273E+00
-
-    -kT*entropy     = -5.64189583547795E-03
-    >>>> Etotal (DC)= -6.32299534984821E+00
---------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -563,11 +736,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
            diemix      5.00000000E-01
              ecut      1.30000000E+01 Hartree
            etotal1    -6.3311255363E+00
-           etotal2    -6.3229953594E+00
-            fcart1    -2.7097749892E-06 -0.0000000000E+00 -0.0000000000E+00
-                       2.7097749892E-06 -0.0000000000E+00 -0.0000000000E+00
-            fcart2     4.1616449261E-03 -0.0000000000E+00 -0.0000000000E+00
-                      -4.1616449261E-03 -0.0000000000E+00 -0.0000000000E+00
+           etotal2    -6.3229953580E+00
+            fcart1    -2.7097749649E-06 -0.0000000000E+00 -0.0000000000E+00
+                       2.7097749649E-06 -0.0000000000E+00 -0.0000000000E+00
+            fcart2     4.1615156671E-03 -0.0000000000E+00 -0.0000000000E+00
+                      -4.1615156671E-03 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
            getwfk1          0
            getwfk2          1
@@ -645,7 +818,29 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
+- Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -656,52 +851,45 @@ P           mkmem           1
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
-- D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
-- Comment: Some pseudopotential generated using the ONCVPSP code were used.
--
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          4.1  wall=          4.2
+- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.1  wall=          4.2
+.Delivered   9 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.9  wall=          5.1

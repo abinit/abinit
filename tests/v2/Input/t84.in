@@ -22,13 +22,12 @@
  znucl 73.0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t84.out, tolnlines = 6, tolabs = 4.0e-09, tolrel = 3.0e-9
+#%%   t84.out, tolnlines = 8, tolabs = 4.0e-09, tolrel = 5.0e-9
 #%% psp_files = 73ta.hgh
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -2,7 +2,7 @@
 .Version 7.7.1 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_intel12.1 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -313,6 +313,8 @@ Phonon band structure files, with atomic projections, will be output
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0  1.0 -1.0  2.0 -2.0  1.0 -1.0  0.0  0.0  1.0 -1.0 -1.0  1.0  1.0 -1.0

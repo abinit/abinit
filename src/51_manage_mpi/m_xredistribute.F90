@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xredistribute
 !! NAME
 !!  m_xredistribute
@@ -8,7 +7,7 @@
 !!  results on different procs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MMANCINI)
+!! Copyright (C) 2008-2020 ABINIT group (MMANCINI)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,8 +58,6 @@ module m_xredistribute
 CONTAINS  !===========================================================
 !!***
 
-
-
 !!****f* ABINIT/xredistribute_mpi_dp
 !! NAME
 !!  xredistribute_mpi_dp
@@ -90,16 +87,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
-  &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xredistribute_mpi_dp'
-!End of the abilint section
-
- implicit none
+                                rec_counts,rec_displs,me,nproc,spaceComm,ier)
 
 !Arguments-------------------------
  integer ,intent(in) :: me,nproc
@@ -172,17 +160,7 @@ end subroutine xredistribute_mpi_dp
 !!
 !! SOURCE
 subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
-  &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xredistribute_mpi_2d_dp'
-!End of the abilint section
-
- implicit none
-
+                                   rec_counts,rec_displs,me,nproc,spaceComm,ier)
 
 !Arguments-------------------------
  integer ,intent(in) :: me,nproc

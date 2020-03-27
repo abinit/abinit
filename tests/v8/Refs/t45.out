@@ -1,8 +1,8 @@
 
-.Version 8.7.6 of ANADDB 
-.(sequential version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  8 Mar 2018.
-- ( at 23h02 )
+.Starting date : Thu  6 Feb 2020.
+- ( at 11h54 )
   
 
 ================================================================================
@@ -29,6 +29,8 @@
       prtvol         1
  Interatomic Force Constants Inputs :
       dipdip         1
+      dipqua         0
+      quadqu         0
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -252,15 +254,15 @@ Computation of Gruneisen parameter with central finite difference:
  The interatomic forces have been obtained
  Average Gruneisen parameter: 1.38585
  Speed of sound:  1.8510E+00  1.8507E+00  9.9863E+00 [km/s] along reduced direction: 1
- Speed of sound:  1.8510E+00  1.8507E+00  9.9863E+00 [km/s] along reduced direction: 2
- Speed of sound:  1.8510E+00  1.8507E+00  9.9863E+00 [km/s] along reduced direction: 3
- Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   2.0000E-01 [km/s], npts: 110
- Spherical average:  5.0913E+00  3.2733E+00  8.2212E+00 [km/s],   5.5286E+00
+ Speed of sound:  1.8509E+00  1.8508E+00  9.9863E+00 [km/s] along reduced direction: 2
+ Speed of sound:  1.8507E+00  1.8510E+00  9.9863E+00 [km/s] along reduced direction: 3
+ Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   2.0000E-01 [km/s], npts: 50
+ Spherical average:  5.0878E+00  3.3311E+00  8.2205E+00 [km/s],   5.5465E+00
 -
-- Proc.   0 individual time (sec): cpu=        157.5  wall=        157.5
+- Proc.   0 individual time (sec): cpu=        143.5  wall=        143.7
 
 ================================================================================
 
-+Total cpu time    157.505  and wall time    157.516 sec
++Total cpu time    143.521  and wall time    143.707 sec
 
  anaddb : the run completed succesfully.

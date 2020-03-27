@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_efield
 !! NAME
 !!  m_paw_efield
@@ -7,7 +6,7 @@
 !!  This module contains routines related to the treatment of electric field in the PAW approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (FJ, PH)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, PH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +50,7 @@ CONTAINS  !=====================================================================
 !! Compute the PAW term for polarization, named expected value term
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ, PH)
+!! Copyright (C) 1998-2020 ABINIT group (FJ, PH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,13 +77,6 @@ CONTAINS  !=====================================================================
 
 subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 &                   comm_atom) ! optional argument (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpolev'
-!End of the abilint section
 
  implicit none
 
@@ -113,6 +105,10 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
 
  call timab(560,1,tsec)
 
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'pawpolev not supposed to be called with qphase/=1!')
+ end if
+
 !Check for parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
 
@@ -137,7 +133,7 @@ subroutine pawpolev(my_natom,natom,ntypat,pawrhoij,pawtab,pelev,&
          klmn=pawrhoij(iatom)%rhoijselect(irhoij)
          ro_dlt=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
          pelev(idir)=pelev(idir)+ro_dlt*c1*pawtab(itypat)%qijl(idirindx(idir),klmn)
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
      end do
    end do

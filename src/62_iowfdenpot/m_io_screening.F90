@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_screening
 !! NAME
 !!  m_io_screening
@@ -8,7 +7,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +25,6 @@
 MODULE m_io_screening
 
  use defs_basis
- use defs_abitypes
  use m_abicore
 #if defined HAVE_MPI2
  use mpi
@@ -35,6 +33,7 @@ MODULE m_io_screening
  use m_mpiotk
  use m_nctk
  use m_errors
+ use m_dtset
  use iso_c_binding
 #ifdef HAVE_NETCDF
  use netcdf
@@ -231,7 +230,8 @@ MODULE m_io_screening
  integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
  ! The list of headforms used for SCR/SUSC so far.
 
- integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size(HSCR_KNOWN_HEADFORMS))
+ integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
+ integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
  ! The latest headform used when writing.
 
  public :: hscr_from_file       ! Read the header from file.
@@ -271,13 +271,6 @@ CONTAINS  !=====================================================================
 
 character(len=nctk_slen) function ncname_from_id(id) result(varname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ncname_from_id'
-!End of the abilint section
-
   integer,intent(in) :: id
 
   varname = "None"
@@ -313,15 +306,6 @@ end function ncname_from_id
 !! SOURCE
 
 subroutine hscr_from_file(hscr,path,fform,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_from_file'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -425,15 +409,6 @@ end subroutine hscr_from_file
 !! SOURCE
 
 subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_io'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -579,7 +554,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
    if (iomode==IO_MODE_FORTRAN .or. iomode==IO_MODE_MPI) then
      ! Write the abinit header.
-     call hdr_fort_write(hscr%hdr, unt, fform, ierr)
+     call hscr%hdr%fort_write(unt, fform, ierr)
      ABI_CHECK(ierr == 0, "hdr_fort_write retured ierr != 0")
 
      write(unt, err=10, iomsg=errmsg)hscr%titles
@@ -609,7 +584,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 #ifdef HAVE_NETCDF
      ncid = unt
      ! Write the abinit header, rewinding of the file (if any) is done here.
-     NCF_CHECK(hdr_ncwrite(hscr%hdr, ncid, fform, nc_define=.True.))
+     NCF_CHECK(hscr%hdr%ncwrite(ncid, fform, nc_define=.True.))
 
      ! Define dimensions
      ! Part 2) of etsf-io specifications
@@ -617,13 +592,13 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
      ! and I'm not gonna allocate extra memory just to have up up, down down
      ! Besides number_of_spins should be replaced by `number_of_spins_dielectric_function`
      ! Should add spin_dependent attribute.
-     ncerr = nctk_def_dims(ncid, [&
-       nctkdim_t("complex", 2), nctkdim_t("number_of_reduced_dimensions", 3),&
+     ncerr = nctk_def_dims(ncid, [ &
+       nctkdim_t("complex", 2), nctkdim_t("number_of_reduced_dimensions", 3), &
        nctkdim_t("number_of_frequencies_dielectric_function", hscr%nomega), &
-       nctkdim_t("number_of_qpoints_dielectric_function", hscr%nqibz),&
-       nctkdim_t("number_of_qpoints_gamma_limit", hscr%nqlwl),&
-       nctkdim_t("number_of_spins", hscr%hdr%nsppol),&
-       nctkdim_t("nI", hscr%nI), nctkdim_t("nJ", hscr%nJ),&
+       nctkdim_t("number_of_qpoints_dielectric_function", hscr%nqibz), &
+       nctkdim_t("number_of_qpoints_gamma_limit", hscr%nqlwl), &
+       nctkdim_t("number_of_spins", hscr%hdr%nsppol), &
+       nctkdim_t("nI", hscr%nI), nctkdim_t("nJ", hscr%nJ), &
        nctkdim_t("number_of_coefficients_dielectric_function", hscr%npwe)], defmode=.True.)
      NCF_CHECK(ncerr)
 
@@ -720,14 +695,6 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -757,15 +724,6 @@ end subroutine hscr_io
 !! SOURCE
 
 subroutine hscr_print(Hscr,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -892,15 +850,6 @@ end subroutine hscr_print
 
 type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_new'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikxc,test_type,tordering,ngvec
@@ -1015,15 +964,6 @@ end function hscr_new
 
 subroutine hscr_bcast(hscr,master,my_rank,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_bcast'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: master,my_rank,comm
  type(hscr_t),intent(inout) :: hscr
@@ -1074,7 +1014,7 @@ subroutine hscr_bcast(hscr,master,my_rank,comm)
  call xmpi_bcast(hscr%omega,master,comm,ierr)
 
  ! Communicate the Abinit header.
- call hdr_bcast(hscr%Hdr,master,my_rank,comm)
+ call hscr%Hdr%bcast(master, my_rank, comm)
 
 ! HSCR_NEW
  call xmpi_bcast(hscr%awtr, master, comm, ierr)
@@ -1109,15 +1049,6 @@ end subroutine hscr_bcast
 !! SOURCE
 
 subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_malloc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1160,15 +1091,6 @@ end subroutine hscr_malloc
 
 subroutine hscr_free(hscr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(hscr_t),intent(inout) :: hscr
@@ -1178,20 +1100,12 @@ subroutine hscr_free(hscr)
  !@hscr_t
  DBG_ENTER("COLL")
 
- if (allocated(hscr%gvec)) then
-   ABI_FREE(hscr%gvec)
- end if
- if (allocated(hscr%qibz)) then
-   ABI_FREE(hscr%qibz)
- end if
- if (allocated(hscr%qlwl)) then
-   ABI_FREE(hscr%qlwl)
- end if
- if (allocated(hscr%omega)) then
-   ABI_FREE(hscr%omega)
- end if
+ ABI_SFREE(hscr%gvec)
+ ABI_SFREE(hscr%qibz)
+ ABI_SFREE(hscr%qlwl)
+ ABI_SFREE(hscr%omega)
 
- call hdr_free(hscr%Hdr)
+ call hscr%Hdr%free()
 
  DBG_EXIT("COLL")
 
@@ -1218,15 +1132,6 @@ end subroutine hscr_free
 !! SOURCE
 
 subroutine hscr_copy(Hscr_in,Hscr_cp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1311,15 +1216,6 @@ end subroutine hscr_copy
 !! SOURCE
 
 subroutine hscr_merge(Hscr_in,Hscr_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_merge'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1479,15 +1375,6 @@ end subroutine hscr_merge
 
 subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_screening'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: varname
@@ -1596,15 +1483,6 @@ end subroutine write_screening
 
 subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 & iqiA) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_screening'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1748,8 +1626,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
      ! Have to allocate workspace for dpc data.
      ! FIXME: Change the file format of the SCR and SUC file so that
      ! they are written in single precision if not HAVE_GW_DPC
-     ABI_STAT_MALLOC(bufdc3d,(npweA,npweA,nomegaA), ierr)
-     ABI_CHECK(ierr==0, "out of memory bufdc3d")
+     ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
 
      call mpiotk_read_fsuba_dpc3D(mpi_fh,offset, [HScr%npwe,HScr%npwe,HScr%nomega], [npweA,npweA,nomegaA], [1,1,1],&
         buf_dim,bufdc3d,xmpio_chunk_bsize,sc_mode,comm,ierr)
@@ -1775,8 +1652,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
      ABI_CHECK(ierr==0,"Fortran record too big")
 #else
      ! Have to allocate workspace for dpc data.
-     ABI_STAT_MALLOC(bufdc3d,(npweA,npweA,nomegaA), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in bufdc3d, change the code to loop over frequencies!')
+     ABI_MALLOC_OR_DIE(bufdc3d,(npweA,npweA,nomegaA), ierr)
      sc_mode = xmpio_collective
 
      do iqibz=1,Hscr%nqibz
@@ -1933,15 +1809,6 @@ end subroutine read_screening
 
 subroutine hscr_mpio_skip(mpio_fh,fform,offset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_mpio_skip'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: mpio_fh
  integer,intent(out) :: fform
@@ -2027,15 +1894,6 @@ end subroutine hscr_mpio_skip
 
 subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_qmerge'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfiles
@@ -2120,8 +1978,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  npwe4m   = ohscr%npwe
  nomega4m = ohscr%nomega
 
- ABI_STAT_MALLOC(epsm1,(npwe4m,npwe4m,nomega4m,1), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1,(npwe4m,npwe4m,nomega4m,1), ierr)
 
  do iqibz=1,ohscr%nqibz
    ifile = merge_table(iqibz,1)
@@ -2174,15 +2031,6 @@ end subroutine ioscr_qmerge
 !! SOURCE
 
 subroutine ioscr_qrecover(ipath, nqrec, fname_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_qrecover'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2258,8 +2106,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 
  nqibzA=1; nomega_asked=hscr%nomega; npwe_asked=hscr%npwe
 
- ABI_STAT_MALLOC(epsm1,(npwe_asked,npwe_asked,nomega_asked,1), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1,(npwe_asked,npwe_asked,nomega_asked,1), ierr)
 
  do iqiA=1,hscr_recov%nqibz
    call read_screening(varname,ipath,npwe_asked,nqibzA,nomega_asked,epsm1,iomode,comm,iqiA=iqiA)
@@ -2310,15 +2157,6 @@ end subroutine ioscr_qrecover
 !! SOURCE
 
 subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohscr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_wmerge'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2527,8 +2365,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  npwe4mI = ohscr%npwe*ohscr%nI
  npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
- ABI_STAT_MALLOC(epsm1,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
 
  do iqibz=1,ohscr%nqibz
 
@@ -2537,8 +2374,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
      npwe4mI = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nI
      npwe4mJ = Hscr_file(ifile)%npwe*Hscr_file(ifile)%nJ
      nomega4m = Hscr_file(ifile)%nomega
-     ABI_STAT_MALLOC(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in epsm1_temp')
+     ABI_MALLOC_OR_DIE(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m,1), ierr)
 
      ! read screening
      call read_screening(varname,filenames(ifile),npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iqibz)
@@ -2615,15 +2451,6 @@ end subroutine ioscr_wmerge
 
 subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_wremove'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfreq_tot
@@ -2697,16 +2524,14 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  npwe4mI = ohscr%npwe*ohscr%nI; npwe4mJ = ohscr%npwe*ohscr%nJ
  nomega4m = ohscr%nomega
 
- ABI_STAT_MALLOC(epsm1, (npwe4mI,npwe4mJ,nomega4m), ierr)
- ABI_CHECK(ierr==0, 'out of memory in epsm1')
+ ABI_MALLOC_OR_DIE(epsm1, (npwe4mI,npwe4mJ,nomega4m), ierr)
 
  do iqibz=1,ohscr%nqibz
    ! allocate temporary array
    npwe4mI = ihscr%npwe * ihscr%nI
    npwe4mJ = ihscr%npwe * ihscr%nJ
    nomega4m = ihscr%nomega
-   ABI_STAT_MALLOC(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m), ierr)
-   ABI_CHECK(ierr==0, 'out of memory in epsm1_temp')
+   ABI_MALLOC_OR_DIE(epsm1_temp,(npwe4mI,npwe4mJ,nomega4m), ierr)
 
    ! read full screening matrix for this q-point
    call read_screening(varname,inpath,npwe4mI,1,nomega4m,epsm1_temp,iomode,comm,iqiA=iqibz)

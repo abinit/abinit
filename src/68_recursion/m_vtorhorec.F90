@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhorec
 !! NAME
 !!  m_vtorhorec
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (SLeroux, MMancini).
+!!  Copyright (C) 2008-2020 ABINIT group (SLeroux, MMancini).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,15 +25,17 @@
 module m_vtorhorec
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use defs_rectypes
+ use m_distribfft
  use m_xmpi
  use m_pretty_rec
  use m_errors
  use m_abicore
  use m_per_cond
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timein, timab
  use m_rec,              only : Calcnrec, init_nlpsprec, cpu_distribution
  use m_rec_tools,        only : reshape_pot, trottersum, get_pt0_pt1
@@ -43,7 +44,7 @@ module m_vtorhorec
  use m_fft,              only : fourdp
 
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,       only : cudap
+ use m_gpu_toolbox
  use m_hidecudarec
  use m_xredistribute
 #endif
@@ -86,7 +87,7 @@ contains
 !!
 !! OUTPUT
 !!  ek=kinetic energy part of total energy.
-!!  enl=nonlocal pseudopotential part of total energy.
+!!  enlx=nonlocal psp + potential Fock ACE part of total energy.
 !!  entropy=entropy due to the occupation number smearing (if metal)
 !!  e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
 !!  fermie=fermi energy (Hartree)
@@ -118,24 +119,15 @@ contains
 !! SOURCE
 
 subroutine vtorhorec(dtset,&
-&  ek,enl,entropy,e_eigenvalues,fermie,&
+&  ek,enlx,entropy,e_eigenvalues,fermie,&
 &  grnl,initialized,irrzon,nfftf,phnons,&
 &  rhog, rhor, vtrial,rset,deltastep,rprimd,gprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vtorhorec'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: initialized
  integer,intent(in) :: nfftf,deltastep
- real(dp),intent(out) :: e_eigenvalues,ek,enl,entropy,fermie
+ real(dp),intent(out) :: e_eigenvalues,ek,enlx,entropy,fermie
  type(dataset_type),intent(in) :: dtset
  type(recursion_type),intent(inout) :: rset
 !arrays
@@ -246,7 +238,7 @@ subroutine vtorhorec(dtset,&
  n_pt_integ_entropy = max(25,dtset%recnpath)
 
 !-- energies non-local: at day not implemented
- enl = zero
+ enlx = zero
  grnl = zero
 !jmb
  ek = zero
@@ -822,7 +814,7 @@ subroutine vtorhorec(dtset,&
 
 
    if(rset%nl%nlpsp) then
-     call nlenergyrec(rset,enl,exppot,dtset%ngfft,dtset%natom,&
+     call nlenergyrec(rset,enlx,exppot,dtset%ngfft,dtset%natom,&
 &     dtset%typat,tsmear,trotter,tolrec)
    end if
  end if noentropie
@@ -868,7 +860,7 @@ subroutine vtorhorec(dtset,&
    intrhov = (inf_ucvol)*sum(rholocal*vtrial(min_pt:max_pt,1))
    call xmpi_sum(intrhov,rset%mpi%comm_bandfft ,ierr)
 
-   ek = e_eigenvalues-intrhov-enl
+   ek = e_eigenvalues-intrhov-enlx
 
 
    if(rset%debug) then
@@ -909,7 +901,7 @@ subroutine vtorhorec(dtset,&
 &   ' -omega/T    =',gran_pot,ch10,&
 &   ' eigenvalues =',e_eigenvalues,ch10,&
 &   ' kinetic     =',ek,ch10,&
-&   ' non-loc ene =',enl
+&   ' non-loc ene =',enlx
    call wrtout(std_out,msg,'COLL')
  end if
  write(msg,'(a,50a)')' ',('-',ii=1,50)
@@ -932,8 +924,7 @@ subroutine vtorhorec(dtset,&
 
  call symrhg(1,gprimd,irrzon,rset%mpi,nfftf,&
 & dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%ngfft,dtset%nspden,&
-& dtset%nsppol,dtset%nsym,dtset%paral_kgb,&
-& phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+& dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
 
 end subroutine vtorhorec
 !!***
@@ -975,15 +966,6 @@ end subroutine vtorhorec
 subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 &                     n_pt_integ,xmax,&
 &                     ent_out1,ent_out2,ent_out3,ent_out4)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyrec'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1250,15 +1232,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 
    function func1_rec(z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'func1_rec'
-!End of the abilint section
-
-   implicit none
-
    complex(dpc) :: func1_rec
    complex(dpc),intent(in) :: z
 
@@ -1315,15 +1288,6 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
   &                      acc, max_it, &
   &                      long_tranche,mpi_enreg,&
   &                      inf_ucvol,gputopo)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fermisolverec'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  !scalars
@@ -1612,15 +1576,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 &                     fermie,tsmear,rtrotter, &
 &                     dim_trott,tol,inf_ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'density_rec'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nrec
@@ -1740,15 +1695,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 &                     debug_rec,n_pt_integ,xmax,&
 &                     ene_out1,ene_out2,ene_out3,ene_out4)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gran_potrec'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1989,15 +1935,6 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 
    function func_rec(z,x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'func_rec'
-!End of the abilint section
-
-   implicit none
-
    complex(dpc) :: func_rec
    complex(dpc),intent(in) :: z
    real(dp),intent(in) :: x
@@ -2029,7 +1966,7 @@ end subroutine gran_potrec
 !!  natom=number of atoms
 !!
 !! OUTPUT
-!!  enl=non-local energy
+!!  enlx=non-local energy
 !!
 !! SIDE EFFECTS
 !!
@@ -2043,23 +1980,14 @@ end subroutine gran_potrec
 !!
 !! SOURCE
 
-subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nlenergyrec'
-!End of the abilint section
-
- implicit none
+subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 
 !Arguments ------------------------------------
 !Scalar
  integer , intent(in)  :: natom,trotter
  real(dp), intent(in)  :: tsmear,tol
  type(recursion_type),intent(in) :: rset
- real(dp), intent(out) :: enl
+ real(dp), intent(out) :: enlx
 !Arrays
  integer , intent(in)  :: typat(natom),ngfft(18)
  real(dp), intent(in)  :: exppot(0:ngfft(1)*ngfft(2)*ngfft(3)-1)
@@ -2095,7 +2023,7 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  call wrtout(std_out,msg,'COLL')
 
 !--Initialisation variables
- enl = zero
+ enlx = zero
  mult = two !--is twice for non-spinned systems
  ngfftrec = rset%ngfftrec(:3)
  gcart_loc = rset%inf%gcart
@@ -2189,14 +2117,14 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 &         natom,projec)
        end if
 
-       enl = enl+mult*rho_nl*rset%nl%eival(in,il,ipsp)*normali
+       enlx = enlx+mult*rho_nl*rset%nl%eival(in,il,ipsp)*normali
      end if
 
    end do projloop
  end do atomloop
 
 !--Sum the contribution to the non-local energy computed by any procs
- call xmpi_sum(enl,mpi_loc%comm_bandfft,ierr)
+ call xmpi_sum(enlx,mpi_loc%comm_bandfft,ierr)
 
  if(associated(projec))  then
    ABI_DEALLOCATE(projec)
@@ -2216,7 +2144,6 @@ end subroutine nlenergyrec
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/first_rec
 !! NAME
 !! first_rec
@@ -2226,7 +2153,7 @@ end subroutine nlenergyrec
 !! compute some quantities which are used in the rest of the calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2020 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2264,15 +2191,6 @@ end subroutine nlenergyrec
 !! SOURCE
 
 subroutine first_rec(dtset,psps,rset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'first_rec'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 ! scalars
@@ -2508,15 +2426,6 @@ end subroutine first_rec
 
 subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'green_kernel'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -2596,7 +2505,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
 
  isign = -1
- call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,ngfft,1,0)
+ call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(T_p)
 
@@ -2608,13 +2517,6 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  contains
 
    function dsq_green(ii,jj,kk,inf_rmet)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dsq_green'
-!End of the abilint section
 
    real(dp) :: dsq_green
    integer,intent(in) :: ii,jj,kk
@@ -2693,14 +2595,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'recursion'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2801,7 +2695,7 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 !  --Convolution with the Green kernel
 !  --FFT of vn
    isign = -1
-   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,ngfft,1,tim_fourdp)
+   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,1,ngfft,tim_fourdp)
 
 !  --F(T)F(vn)
    do ii = 0,nfft-1
@@ -2813,7 +2707,7 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 
 !  --F^-1(F(T)F(vn))
    isign = 1
-   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,ngfft,1,tim_fourdp)
+   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,1,ngfft,tim_fourdp)
 
 !  --Computation of exp(-beta*V/8*p)*un or exp(-beta*V/4*p)*un
 !  depending on if nl part has to be calculated or not.
@@ -2924,14 +2818,6 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 
  use m_linalg_interfaces
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'recursion_nl'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: trotter,natom,dim_trott
@@ -3028,7 +2914,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 !  --Convolution with the Green kernel
 !  --FFT of vn
    isign = -1
-   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,rset%ngfftrec,1,6)
+   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,1,rset%ngfftrec,6)
 
 !  --F(T)F(vn)
    do ii = 0,rset%nfftrec-1
@@ -3040,7 +2926,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 
 !  --F^-1(F(T)F(vn))
    isign = 1
-   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,rset%ngfftrec,1,6)
+   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,1,rset%ngfftrec,6)
 
 !  --Computation of exp(-beta*V/2*p)*vn
    vn = inf_ucvol * exppot * vn
@@ -3131,14 +3017,6 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,inf_ucvol,nlrec,projec)
 
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vn_nl_rec'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

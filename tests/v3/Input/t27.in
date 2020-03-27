@@ -7,18 +7,22 @@ spgroup: 75
 spgroup+ 1
 
 #This is for spgroup 75 to 122
-natom1 4     natom2 4    natom3 4    natom4 4    natom5  4
-natom6 4     natom7 4    natom8 4    natom9 8    natom10 8
-natom11 8    natom12 8   natom13 8   natom14 8   natom15  8
-natom16 8    natom17 8   natom18 8   natom19 8   natom20  8
-natom21 8    natom22 8   natom23 8   natom24 8   natom25  8
-natom26 8    natom27 8   natom28 8   natom29 8   natom30  8
-natom31 8    natom32 8   natom33 8   natom34 8   natom35  8
-natom36 8    natom37 8   natom38 8   natom39 8   natom40  8
-natom41 8    natom42 8   natom43 8   natom44 8   natom45  8
-natom46 8    natom47 8   natom48 8
+# wyckoff multiplicity 4
+natom1 12    natom2 12   natom3 12   natom4 12   natom5  12
+natom6 12    natom7 12   natom8 12
 
-natom   16   # this is for spgroup 123 to 142
+# wyckoff multiplicity 8
+ natom9 24   natom10  24   natom11 24    natom12 24   natom13 24 
+natom14 24   natom15  24   natom16 24    natom17 24   natom18 24 
+natom19 24   natom20  24   natom21 24    natom22 24   natom23 24 
+natom24 24   natom25  24   natom26 24    natom27 24   natom28 24 
+natom29 24   natom30  24   natom31 24    natom32 24   natom33 24 
+natom34 24   natom35  24   natom36 24    natom37 24   natom38 24 
+natom39 24   natom40  24   natom41 24    natom42 24   natom43 24 
+natom44 24   natom45  24   natom46 24    natom47 24   natom48 24
+
+# wyckoff multiplicity 16
+natom   48   # this is for spgroup 123 to 142
 
 # Common data
 prtvol -1          # stop in abinit (main program), before call driver.
@@ -28,17 +32,18 @@ acell 7 7 9
 angdeg  90 90 90
 ntypat 1
 znucl 1
-natrd 1
+natrd 3
 xred 0.17 0.15 0.11
-typat 1
+0.734 0.467 0.66
+0.44  0.824 0.31415
+typat *1
 ecut 1
-  kptopt 0
+kptopt 0
 nkpt 1
 nline 1
 nstep 1
 toldfe 1.0d-6
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

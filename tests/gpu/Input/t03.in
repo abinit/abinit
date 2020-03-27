@@ -105,7 +105,6 @@ dmatpawu2
 # === Other options
 prtden 0  prteig 0  prtwf 0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -119,8 +118,8 @@ prtden 0  prteig 0  prtwf 0
 #%% authors = M. Torrent
 #%% keywords = PAW, LDAU
 #%% description = 
-#%% NiO - LDA+U - fcc structure
-#%% Test the use of GPU within Projector Augmented-Wave formalism.
-#%% Test ferromagnetic and non-collinear magnetism.
-#%% ABINIT v7.0: GPU is not used when nspinor=2
+#%%   NiO - LDA+U - fcc structure
+#%%   Test the use of GPU within Projector Augmented-Wave formalism.
+#%%   Test ferromagnetic and non-collinear magnetism.
+#%%   ABINIT v7.0: GPU is not used when nspinor=2
 #%%<END TEST_INFO>

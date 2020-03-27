@@ -1,0 +1,31 @@
+!!****d* ABINIT/32_util
+!! NAME
+!! 32_util
+!!
+!! DESCRIPTION
+!! This directory contains small utility routines that are
+!! used in different places in the ABINIT package.
+!! These utility can be related to the treatment of characters,
+!! to basic mathematical operations, or to basic chemistry and
+!! physics data.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2020 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_32_util.F90
+!! m_atomdata.F90
+!! m_dummy.F90
+!! m_exp_mat.F90
+!! m_integrals.F90
+!! m_matrix.F90
+!! m_pptools.F90
+!! m_special_funcs.F90
+!! m_symtk.F90
+!! test_radsintr.F90
+!!
+!!***

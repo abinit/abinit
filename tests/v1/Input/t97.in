@@ -31,10 +31,11 @@
                .750000000000       .750000000000       .250000000000
  znucl 14
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+### FIXME
+#%% no_check = yes
 #%% [shell]
 #%% pre_commands = w_touch abinit.exit
 #%% [files]

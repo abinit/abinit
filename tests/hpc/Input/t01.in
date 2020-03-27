@@ -158,7 +158,6 @@ xred
         8.3403087614E-01  8.3403087614E-01  6.6786431989E-01
         6.6697112171E-01  6.6697112171E-01  6.6697112171E-01
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

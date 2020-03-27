@@ -4,9 +4,8 @@
 # for the irreducible qpoints in a 4x4x4 grid.
 # Note that the q-point grid must be a sub-grid of the k-point grid (here 8x8x8)
 
-ndtset 10
+ndtset 9
 prtpot 1
-istwfk *1   # limitation of wfd_t
 nstep  50
 #nsppol 2
 
@@ -41,16 +40,6 @@ qpt7     -2.50000000E-01  2.50000000E-01  0.00000000E+00
 qpt8      5.00000000E-01  5.00000000E-01  0.00000000E+00
 qpt9     -2.50000000E-01  5.00000000E-01  2.50000000E-01
 
-# get DDK files
-rfelfd10   2
-iscf10    -3
-rfphon10   0             # no phonons here
-getden10   1
-tolwfr10   1.0d-14       # Must use tolwfr for non-self-consistent calculations
-tolvrs10   0.0
-qpt10      0.00000000E+00  0.00000000E+00  0.00000000E+00
-prtwf10    1
-
 # general data for all phonon calculations:
 nqpt    1        # 1 qpoint at a time
 getwfk  1        # all other datasets get WFK from DS1
@@ -73,11 +62,10 @@ xred   0.00 0.00 0.00
 ntypat 1
 znucl  13
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in
 #%% [files]
 #%% files_to_test = 
@@ -86,9 +74,6 @@ znucl  13
 #%% [shell]
 #%% post_commands =
 #%%  ww_cp t85o_DS1_WFK t88o_DS20_WFK;
-#%%  ww_cp t85o_DS10_1WF4 t88o_DS20_1WF4;
-#%%  ww_cp t85o_DS10_1WF5 t88o_DS20_1WF5;
-#%%  ww_cp t85o_DS10_1WF6 t88o_DS20_1WF6;
 #%%  ww_cp t85o_DS1_DEN t89o_DS20_DEN;
 #%% [paral_info]
 #%% max_nprocs = 8

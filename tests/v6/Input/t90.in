@@ -141,11 +141,11 @@ znucl 22
 #prtnest 1
 #fermie_nest 0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t90.in, t91.in, t92.in, t93.in, t94.in
+#%% no_check = yes
 #%% [files]
 #%% files_to_test = 
 ####  The comparison of the output file has been disabled: this test

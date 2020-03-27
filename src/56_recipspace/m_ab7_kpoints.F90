@@ -1,11 +1,10 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ab7_kpoints
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  Copyright (C) 2008-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,13 +72,6 @@ contains
   subroutine kpoints_get_irreductible_zone(irrzon, phnons, &
        & n1, n2, n3, nsppol, nspden, symid, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_get_irreductible_zone'
-!End of the abilint section
-
     integer, intent(in)   :: symid
     integer, intent(in)   :: n1, n2, n3, nsppol, nspden
     integer, intent(out)  :: irrzon(n1*n2*n3,2,(nspden/nsppol)-3*(nspden/4))
@@ -130,18 +122,11 @@ contains
   subroutine kpoints_binding_mp_k_1(symid, nkpt, ngkpt, &
        & kptrlatt, kptrlen, nshiftk, shiftk, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_mp_k_1'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(in) :: ngkpt(3)
     integer, intent(inout) :: nshiftk
-    real(dp), intent(inout) :: shiftk(3,210)
+    real(dp), intent(inout) :: shiftk(3,MAX_NSHIFTK)
     real(dp), intent(out) :: kptrlen
     integer, intent(out) :: kptrlatt(3,3)
     integer, intent(out) :: nkpt
@@ -194,17 +179,10 @@ contains
   subroutine kpoints_binding_mp_k_2(symid, nkpt, kpt, wkpt, &
        & kptrlatt, kptrlen, nshiftk, shiftk, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_mp_k_2'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(inout) :: nshiftk
-    real(dp), intent(inout) :: shiftk(3,210)
+    real(dp), intent(inout) :: shiftk(3,MAX_NSHIFTK)
     integer, intent(in) :: nkpt
     real(dp), intent(out) :: kpt(3,nkpt), wkpt(nkpt)
     real(dp), intent(inout) :: kptrlen
@@ -251,13 +229,6 @@ contains
   subroutine kpoints_get_mp_k_grid(symid, nkpt, kpt, wkpt, &
        & ngkpt, nshiftk, shiftk, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_get_mp_k_grid'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(in) :: ngkpt(3)
@@ -269,7 +240,7 @@ contains
     real(dp) :: kptrlen
     integer :: kptrlatt(3,3)
     integer :: nshiftk_
-    real(dp) :: shiftk_(3,210)
+    real(dp) :: shiftk_(3,MAX_NSHIFTK)
 
     if (AB_DBG) write(std_err,*) "AB symmetry: call get k grid."
 
@@ -311,19 +282,12 @@ contains
   subroutine kpoints_binding_auto_k_1(symid, nkpt, kptrlatt, kptrlen, &
        & nshiftk, shiftk, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_auto_k_1'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(out) :: nkpt
     real(dp), intent(inout) :: kptrlen
     integer, intent(out) :: nshiftk
-    real(dp), intent(out) :: shiftk(3,210)
+    real(dp), intent(out) :: shiftk(3,MAX_NSHIFTK)
     integer, intent(out) :: kptrlatt(3,3)
 
     type(symmetry_type), pointer  :: sym
@@ -383,20 +347,13 @@ contains
   subroutine kpoints_binding_auto_k_2(symid, nkpt, kpt, wkpt, kptrlatt, kptrlen, &
        & nshiftk, shiftk, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_auto_k_2'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(in) :: nkpt
     real(dp), intent(out) :: kpt(3,nkpt), wkpt(nkpt)
     real(dp), intent(inout) :: kptrlen
     integer, intent(inout) :: nshiftk
-    real(dp), intent(inout) :: shiftk(3,210)
+    real(dp), intent(inout) :: shiftk(3,MAX_NSHIFTK)
     integer, intent(inout) :: kptrlatt(3,3)
 
     type(symmetry_type), pointer  :: sym
@@ -440,13 +397,6 @@ contains
   subroutine kpoints_get_auto_k_grid(symid, nkpt, kpt, wkpt, &
        & kptrlen, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_get_auto_k_grid'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(out) :: nkpt
@@ -456,7 +406,7 @@ contains
     real(dp) :: kptrlen_
     integer :: kptrlatt(3,3)
     integer :: nshiftk
-    real(dp) :: shiftk(3,210)
+    real(dp) :: shiftk(3,MAX_NSHIFTK)
 
     if (AB_DBG) write(std_err,*) "AB symmetry: call get auto k grid."
 

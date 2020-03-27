@@ -40,7 +40,6 @@
 
    nbdbuf 0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -55,8 +54,8 @@
 #%% authors =  P. Hermet
 #%% keywords = PAW, DFPT
 #%% description = 
-#%% 113. GaAs with 2 atoms per cell.
-#%% Test computation of the Berry phase in PAW, with GGA functional.
-#%% WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%%   113. GaAs with 2 atoms per cell.
+#%%   Test computation of the Berry phase in PAW, with GGA functional.
+#%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
 #%% topics = Berry
 #%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outxml
 !! NAME
 !! m_outxml
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt.
@@ -27,9 +26,9 @@
 module m_outxml
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
+ use m_dtset
 
  use m_io_tools,    only : open_file
  use m_geometry,    only : xcart2xred, xred2xcart
@@ -68,15 +67,6 @@ contains
 !! SOURCE
 
 subroutine outxml_open(filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxml_open'
-!End of the abilint section
-
-  implicit none
 
 !Arguments -------------------------------
   character(len = *), intent(in) :: filename
@@ -125,15 +115,6 @@ end subroutine outxml_open
 !! SOURCE
 
 subroutine outxml_finalise(tsec, values)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxml_finalise'
-!End of the abilint section
-
-  implicit none
 
 !Arguments -------------------------------
   integer, intent(in) :: values(8)
@@ -186,15 +167,6 @@ end subroutine outxml_finalise
 
 subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_resultsgs_XML'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: level,usepaw
@@ -220,7 +192,7 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' kinetic="', trim(value) ,'"'
    write(value, "(es20.8)") results_gs%energies%e_localpsp
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' local="', trim(value) ,'"'
-   write(value, "(es20.8)") results_gs%energies%e_nonlocalpsp
+   write(value, "(es20.8)") results_gs%energies%e_nlpsp_vfock
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' non-local="', trim(value) ,'"'
    if (usepaw == 1) then
      write(value, "(es20.8)") results_gs%energies%e_paw
@@ -308,15 +280,6 @@ end subroutine out_resultsgs_XML
 !! SOURCE
 
 subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_geometry_XML'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

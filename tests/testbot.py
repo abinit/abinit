@@ -1,8 +1,10 @@
 #!/usr/bin/env python
-from __future__ import print_function, division, absolute_import #, unicode_literals
+from __future__ import print_function, division, absolute_import  #, unicode_literals
 
 import sys
 import os
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 
 from os.path import join as pj, abspath as absp, basename
@@ -14,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 try:
     from ConfigParser import SafeConfigParser, NoOptionError
-except ImportError: # The ConfigParser module has been renamed to configparser in Python 3
-    from configparser import SafeConfigParser, NoOptionError
+except ImportError:  # The ConfigParser module has been renamed to configparser in Python 3
+    from configparser import ConfigParser as SafeConfigParser, NoOptionError
 
 # Add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir, x = os.path.split(absp(__file__))
 pack_dir, x = os.path.split(pack_dir)
-sys.path.insert(0,pack_dir)
+sys.path.insert(0, pack_dir)
 import tests
 
 __version__ = "0.3"
@@ -42,12 +44,12 @@ def lazy__str__(func):
     "Lazy decorator for __str__ methods"
     def oncall(*args, **kwargs):
         self = args[0]
-        return "\n".join( [ str(k) + " : " + str(v) for (k,v) in self.__dict__.items()] )
+        return "\n".join(str(k) + " : " + str(v) for (k, v) in self.__dict__.items())
     return oncall
 
 
 def _yesno2bool(string):
-    string = string.lower().strip().replace('"',"").replace("'","")
+    string = string.lower().strip().replace('"', "").replace("'", "")
     if string == "yes":
         return True
     elif string == "no":
@@ -102,21 +104,21 @@ class TestBot(object):
         parser.read(testbot_cfg)
 
         attrs2read = [
-          "slavename",
-          "type",
-          "ncpus",
-          "omp_num_threads",
-          "mpi_prefix",
-          "mpirun_np",
-          "poe",
-          "poe_args",
-          "with_tdirs",
-          "without_tdirs",
-          "timeout_time",
-          "cygwin_dir",
-          "runmode",
-          "keywords",
-          "etsf_check",
+            "slavename",
+            "type",
+            "ncpus",
+            "omp_num_threads",
+            "mpi_prefix",
+            "mpirun_np",
+            "poe",
+            "poe_args",
+            "with_tdirs",
+            "without_tdirs",
+            "timeout_time",
+            "cygwin_dir",
+            "runmode",
+            "keywords",
+            "etsf_check",
         ]
 
         for attr in attrs2read:
@@ -141,18 +143,18 @@ class TestBot(object):
             err_msg = "with_tdirs and without_tdirs attribute are mutually exclusive"
             raise ValueError(err_msg)
 
-        (system, node, release, version, machine, processor) = platform.uname()
+        system, node, release, version, machine, processor = platform.uname()
         print("Running on %s -- slave %s -- system %s -- ncpus %s -- Python %s -- %s" % (
-               gethostname(), self.slavename, system, self.ncpus, platform.python_version(), _my_name))
+            gethostname(), self.slavename, system, self.ncpus, platform.python_version(), _my_name))
 
         # Set the logger level.
         # loglevel is bound to the string value obtained from the command line argument.
         # Convert to upper case to allow the user to specify --loglevel=DEBUG or --loglevel=debug
-        #numeric_level = getattr(logging, options.loglevel.upper(), None)
+        # numeric_level = getattr(logging, options.loglevel.upper(), None)
         numeric_level = getattr(logging, "ERROR", None)
 
         if not isinstance(numeric_level, int):
-            raise ValueError('Invalid log level: %s' % options.loglevel)
+            raise ValueError('Invalid log level: %s' % numeric_level)
         logging.basicConfig(level=numeric_level)
 
         # Read testfarm configuration file.
@@ -167,18 +169,18 @@ class TestBot(object):
 
         # TODO
         # Consistency check
-        #d = self.__dict__
-        #for attr, (default, parse) in TestBot._attrbs.items():
-        #  try:
-        #    d[attr] = parser.get(self.slavename, attr)
-        #  except NoOptionError:
-        #    print "option %s is not declared" % attr
-        #    #raise ValueError(err_msg)
-        #    d[attr] = default
-        #    if default is None:
-        #      err_msg = "option %s is not declared" % attr
-        #      raise ValueError(err_msg)
-        #  d[attr] = parse(d[attr])
+        # d = self.__dict__
+        # for attr, (default, parse) in TestBot._attrbs.items():
+        #   try:
+        #     d[attr] = parser.get(self.slavename, attr)
+        #   except NoOptionError:
+        #     print "option %s is not declared" % attr
+        #     #raise ValueError(err_msg)
+        #     d[attr] = default
+        #     if default is None:
+        #       err_msg = "option %s is not declared" % attr
+        #       raise ValueError(err_msg)
+        #   d[attr] = parse(d[attr])
 
         # 2 )Initialize the jobrunner.
         self.build_env = build_env = BuildEnvironment(os.curdir, cygwin_instdir=self.__dict__["cygwin_dir"])
@@ -203,9 +205,10 @@ class TestBot(object):
 
         if self.omp_num_threads > 0:
             print("Initalizing OMP environment with omp_num_threads %d " % self.omp_num_threads)
-            omp_env = OMPEnvironment(OMP_NUM_THREADS = self.omp_num_threads)
+            omp_env = OMPEnvironment(OMP_NUM_THREADS=self.omp_num_threads)
             self.seq_runner.set_ompenv(omp_env)
-            if self.has_mpi: self.mpi_runner.set_ompenv(omp_env)
+            if self.has_mpi:
+                self.mpi_runner.set_ompenv(omp_env)
 
         self.targz_fnames = []
         print(self)
@@ -217,7 +220,7 @@ class TestBot(object):
         database = abitests.get_database()
         res_table = database.init_result_table()
         self.summary = TestBotSummary(res_table)
-        #print(self.summary)
+        # print(self.summary)
 
     @lazy__str__
     def __str__(self): pass
@@ -238,14 +241,15 @@ class TestBot(object):
         Returns: (nfailed, npassed, nexecuted)
         """
         omp_nthreads = max(self.omp_num_threads, 1)
-        py_nthreads = self.ncpus // (mpi_nprocs * omp_nthreads)
-        assert py_nthreads > 0
+        py_nprocs = self.ncpus // (mpi_nprocs * omp_nthreads)
+        assert py_nprocs > 0
 
         test_suite = abitests.select_tests(suite_args, keys=self.keywords, regenerate=False)
 
         # Create workdir.
         workdir = "TestBot_MPI" + str(mpi_nprocs)
-        if self.has_openmp: workdir += "_OMP" + str(omp_nthreads)
+        if self.has_openmp:
+            workdir += "_OMP" + str(omp_nthreads)
 
         if os.path.exists(workdir):
             raise RuntimeError("%s already exists!" % workdir)
@@ -254,22 +258,23 @@ class TestBot(object):
 
         # Run the tests.
         if self.has_openmp:
-            msg = "Running ntests = %s, MPI_nprocs = %s, OMP_nthreads %s, py_nthreads = %s..." % (
-                  test_suite.full_length, mpi_nprocs, omp_nthreads, py_nthreads)
+            msg = "Running ntests = %s, MPI_nprocs = %s, OMP_nthreads %s, py_nprocs = %s..." % (
+                  test_suite.full_length, mpi_nprocs, omp_nthreads, py_nprocs)
         else:
-            msg = "Running ntests = %s, MPI_nprocs = %s, py_nthreads = %s..." % (
-                  test_suite.full_length, mpi_nprocs, py_nthreads)
+            msg = "Running ntests = %s, MPI_nprocs = %s, py_nprocs = %s..." % (
+                  test_suite.full_length, mpi_nprocs, py_nprocs)
         print(msg)
 
         runner = self.seq_runner
-        if mpi_nprocs > 1: runner = self.mpi_runner
+        if mpi_nprocs > 1:
+            runner = self.mpi_runner
 
         results = test_suite.run_tests(
-            self.build_env, workdir, runner,
-            nprocs=mpi_nprocs, nthreads=py_nthreads, runmode=self.runmode)
-            # Cannot use this option on the test farm because hdf5 is not thread-safe.
-            # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
-            #etsf_check=self.etsf_check)
+            self.build_env, workdir, runner, make_html_diff=1,
+            nprocs=mpi_nprocs, py_nprocs=py_nprocs, runmode=self.runmode)
+        # Cannot use this option on the test farm because hdf5 is not thread-safe.
+        # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
+        # etsf_check=self.etsf_check)
 
         if results is None:
             print("Test suite is empty, returning 0 0 0 ")
@@ -279,7 +284,7 @@ class TestBot(object):
         # taking into account that an input file might be executed multiple times
         # with a different environment (MPI, OMP ...)
         run_info = {}
-        #run_info = [self.build_env, workdir, runner, mpi_nprocs, py_nthreads]
+        # run_info = [self.build_env, workdir, runner, mpi_nprocs, py_nprocs]
         self.summary.merge_results(test_suite, run_info)
 
         # Push the location of the tarball file
@@ -310,9 +315,9 @@ class TestBot(object):
             suite_args = suite_args.split()
 
         # Run tests with 1 processor
-        #print(suite_args)
-        #runmode = "static"
-        #nexecuted = 0
+        # print(suite_args)
+        # runmode = "static"
+        # nexecuted = 0
 
         if self.runmode == "static":
             # Old mode: run all available tests with 1 MPI node here,
@@ -340,7 +345,8 @@ class TestBot(object):
                 suite_args = [s for s in mp_names if s not in self.without_tdirs]
 
             for np in np_list:
-                if np > self.ncpus or not suite_args: continue
+                if np > self.ncpus or not suite_args:
+                    continue
                 print("Running multi-parallel tests with %s MPI processors, suite_args %s" % (np, suite_args))
                 para_nfailed, para_npassed, para_nexec = self.run_tests_with_np(np, runmode="static", suite_args=suite_args)
 
@@ -350,14 +356,14 @@ class TestBot(object):
                 nexecuted += para_nexec
 
         # TODO Collect tarball files.
-        #for fname in self.targz_fnames:
-        #    print("got targz file: ", fname)
+        # for fname in self.targz_fnames:
+        #     print("got targz file: ", fname)
 
         # Dump the table with the final results.
         # The buildbot master will upload it and the info will be used
         # to generate the HTML summary table
-        #for suite_name in self.summary_table:
-        #  print suite_name, self.summary_table.suite_status(suite_name)
+        # for suite_name in self.summary_table:
+        #   print suite_name, self.summary_table.suite_status(suite_name)
         from pymods.tools import pprint_table
         table = self.summary.totable()
         pprint_table(table)
@@ -407,8 +413,7 @@ class TestBotSummary(object):
         """
         def stats2string(stats):
             "helper function that returns (nfail/npass/nsucc/nskipped)"
-            lst = [ str(stats[k]) for k in self._possible_status]
-            return "/".join(lst)
+            return "/".join(str(stats[k]) for k in self._possible_status)
 
         table = [self.suite_names()]
         row = []
@@ -420,7 +425,7 @@ class TestBotSummary(object):
         return table
 
     def merge_results(self, test_suite, run_info):
-        #assert test_suite._executed
+        # assert test_suite._executed
         self.run_info = run_info
 
         for test in test_suite:
@@ -436,7 +441,7 @@ class TestBotSummary(object):
                 # Handle the case where we have executed the same test but with a different setup.
                 # Ordering is: failed < passed < succeeded
                 # hence a test is marked as "failed" if at least one run failed.
-                d["status"] = self._min_status([test.status, d["status"] ])
+                d["status"] = self._min_status([test.status, d["status"]])
                 d["number_of_runs"] += 1
                 d["run_etime"] += test.run_etime
                 d["tot_etime"] += test.tot_etime
@@ -450,7 +455,8 @@ class TestBotSummary(object):
 
     def __iter__(self):
         """Iterate over the suite names in alphabetical order."""
-        for suite_name in self.suite_names(): yield suite_name
+        for suite_name in self.suite_names():
+            yield suite_name
 
     def suite_names(self):
         """List of suite names in alphabetical order."""
@@ -468,7 +474,8 @@ class TestBotSummary(object):
         stats = dict.fromkeys(self._possible_status, 0)
 
         for test_id, d in self.res_table[suite_name].items():
-            if "status" not in d: d["status"] = "skipped"
+            if "status" not in d:
+                d["status"] = "skipped"
             stats[d["status"]] += 1
 
         for status in self._possible_status:
@@ -490,7 +497,7 @@ class TestBotSummary(object):
         The file will be transferred from the slave to the buildbot master.
         """
         def as_ascii(s):
-            #return str(s.encode("ascii", "ignore"))
+            # return str(s.encode("ascii", "ignore"))
             return str(s)
 
         d = {}
@@ -503,7 +510,7 @@ class TestBotSummary(object):
             suite_name = as_ascii(suite_name)
             print("---", suite_name, self.res_table[suite_name])
             if suite_name in d:
-                #raise KeyError("Cannot overwrite key %s" % suite_name)
+                # raise KeyError("Cannot overwrite key %s" % suite_name)
                 print("Warning: About to overwrite key %s" % suite_name)
             d[suite_name] = self.res_table[suite_name]
 

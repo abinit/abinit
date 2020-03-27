@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spin_current
 !! NAME
 !!  m_spin_current
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (Mver)
+!! Copyright (C) 2005-2020 ABINIT group (Mver)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,12 +25,15 @@
 
 module m_spin_current
 
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_splines
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart
@@ -95,15 +97,6 @@ contains
 !! SOURCE
 
 subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_current'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -283,28 +276,28 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 &       dpsidr(:,:,:,:,ispinor,1),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      FT Gpsi_y to real space
        call fourwf(cplex,dummy_denpot,gpsi(:,:,ispinor,2),dummy_fofgout,&
 &       dpsidr(:,:,:,:,ispinor,2),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      FT Gpsi_z to real space
        call fourwf(cplex,dummy_denpot,gpsi(:,:,ispinor,3),dummy_fofgout,&
 &       dpsidr(:,:,:,:,ispinor,3),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      FT psi to real space
        call fourwf(cplex,dummy_denpot,psi(:,:,ispinor),dummy_fofgout,&
 &       psi_r(:,:,:,:,ispinor),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,dtset%paral_kgb,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
 
      end do ! ispinor
 
@@ -621,15 +614,6 @@ end subroutine spin_current
 !! SOURCE
 
 subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vso_realspace_local'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  type(hdr_type),intent(inout) :: hdr

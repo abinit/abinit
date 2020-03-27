@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rwwf
 !! NAME
 !!  m_rwwf
@@ -7,7 +6,7 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +26,6 @@
 module m_rwwf
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_wffile
  use m_abicore
@@ -40,6 +38,7 @@ module m_rwwf
  use netcdf
 #endif
 
+ use defs_abitypes, only : mpi_type
  use m_time,   only : timab
 
  implicit none
@@ -139,15 +138,6 @@ contains
 subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &               nband,nband_disk,npw,nspinor,occ,option,optkg,tim_rwwf,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rwwf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
  integer,intent(inout) :: nband_disk
@@ -235,15 +225,6 @@ end subroutine rwwf
 !! SOURCE
 
 subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadSkipK'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -334,15 +315,6 @@ end subroutine WffReadSkipK
 
 subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                 nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'readwf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,headform,icg,ikpt,isppol,mband,mcg,nband,npw
@@ -635,8 +607,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
          NCF_CHECK_MSG(ncerr, "getting cg_k")
        else
          write(std_out,*)"ETSF Reading distributed cg"
-         ABI_STAT_MALLOC(cg_all, (2, npw1*nspinor, nband1), ierr)
-         ABI_CHECK(ierr==0, "oom cg_all")
+         ABI_MALLOC_OR_DIE(cg_all, (2, npw1*nspinor, nband1), ierr)
          ncerr = nf90_get_var(wff%unwff, cg_varid, cg_all, start=[1,1,1,1,ikpt,isppol], &
          count=[2,npw1,nspinor,nband1,1,1])
          NCF_CHECK_MSG(ncerr, "getting cg_k")
@@ -826,15 +797,6 @@ end subroutine readwf
 
 subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                  nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'writewf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: formeig,icg,ikpt,isppol,mband,mcg,nband,nband_disk,npw,nspinor,option,optkg

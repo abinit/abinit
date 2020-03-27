@@ -46,7 +46,6 @@ ngkpt2     4 4 4              # Number of grid points for k-point generation
 chksymbreak 0                 # should have nshiftk 4  with shiftk 1/2 1/2 1/2  1/2 0 0  0 1/2 0   0 0 1/2
 istwfk2    10*1               # Wavefunction storage mode for each k-point
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

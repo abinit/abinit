@@ -200,6 +200,28 @@ parsing, to remove case sensitivity.
 More than one parameter per line may be given. If a given parameter name is
 given more than once in the input file, an error message is printed, and the code stops.
 
+External input files can be included with the syntax:
+
+    include "geometry.inc"
+
+where geometry.inc gives the crystalline structure in the Abinit format:
+
+    cat geometry.in
+
+    # Si in diamond structure
+    acell 3*10.25
+    rprim   
+      0.0 0.5 0.5  
+      0.5 0.0 0.5  
+      0.5 0.5 0.0
+    natom  2
+    ntypat 1
+    typat  2*1
+    xred   0.00  0.00  0.00
+           0.25  0.25  0.25
+    znucl 14.0
+
+
 <a id="parameters"></a>
 ### 3.2 More about ABINIT input variables
   
@@ -237,20 +259,23 @@ first class of variables have the characteristics **ENERGY**, and can be
 specified in atomic units (Hartree), or electron-volts, or Rydbergs, or even Kelvin. 
 
 The second class of variables have the characteristics **LENGTH**,
-and can be specified in atomic units (Bohr) and angstrom. The third class of
+and can be specified in atomic units (Bohr), nm (nanometer) and angstrom. 
+The third class of
 variables have the characteristics **MAGNETIC FIELD**, and can be
 specified in atomic units and Tesla. The abinit parser recognize a dimension
 if it is specified after the list of numbers following the input variable
 keyword, in the input file. The specification can be upper or lower case, or a
 mix thereof. Here is the list of recognized chains of characters:
 
-  * Ry --> Rydberg (for energies) 
+  * Ry or Rydberg or Rydbergs --> Rydberg (for energies) 
   * eV --> electron-volts (for energies) 
   * K  --> Kelvin (for energies) 
   * Angstr --> Angstrom (for lengths) 
+  * nm --> nanometer (for lengths) 
+  * T or Tesla --> Tesla (for magnetic fields) 
+  * S or Sec or Second --> second (for time) 
 
-Except in the case of 'Angstr', the abbreviation must be used (i.e. 'Rydberg'
-will not be recognized presently). Other character chains, like "au" (for
+Other character chains, like "au" (for
 atomic units) or "Hartree", or "Bohr" are not recognized, but make the parser
 choose (by default) atomic units, which is the correct behaviour. Example:
     

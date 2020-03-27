@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_diago
 !! NAME
 !! m_exc_diago
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2020 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +23,6 @@
 MODULE m_exc_diago
 
  use defs_basis
- use defs_datatypes
  use m_slk
  use m_bs_defs
  use m_abicore
@@ -36,7 +34,7 @@ MODULE m_exc_diago
  use m_hdr
  use m_sort
 
- use defs_abitypes,     only : hdr_type
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
@@ -89,26 +87,11 @@ contains
 !!      bethe_salpeter
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
 &  Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_driver'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -198,7 +181,6 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
    call build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren=Epren)
  end if
 
-
  DBG_EXIT("COLL")
 
 end subroutine exc_diago_driver
@@ -227,25 +209,10 @@ end subroutine exc_diago_driver
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst,elph_lifetime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_resonant'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -350,11 +317,9 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  call wrtout(std_out,msg,"COLL")
  call wrtout(ab_out,msg,"COLL")
 
- ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: excitonic eigenvalues')
+ ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
- ABI_STAT_MALLOC(exc_ene_c,(exc_size), ierr)
- ABI_CHECK(ierr==0,'out of memory: excitonic complex eigenvalues')
+ ABI_MALLOC_OR_DIE(exc_ene_c,(exc_size), ierr)
 
  do_ep_renorm = .FALSE.
  ntemp = 1
@@ -384,12 +349,10 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    write(msg,'(a,f8.1,a)')' Allocating excitonic hamiltonian.  Memory required: ',exc_size**2*dpc*b2Mb,' Mb.'
    call wrtout(std_out,msg,"COLL",do_flush=.True.)
 
-   ABI_STAT_MALLOC(exc_mat,(exc_size,exc_size), ierr)
-   ABI_CHECK(ierr==0, 'out of memory: excitonic hamiltonian')
+   ABI_MALLOC_OR_DIE(exc_mat,(exc_size,exc_size), ierr)
 
    if (do_ep_renorm) then
-     ABI_STAT_MALLOC(exc_vl,(exc_size,exc_size),ierr)
-     ABI_CHECK(ierr==0,'out of memory for left eigenvectors !')
+     ABI_MALLOC_OR_DIE(exc_vl,(exc_size,exc_size),ierr)
    end if
    !exc_mat = HUGE(zero)
    !
@@ -409,14 +372,13 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    close(hreso_unt)
 
-
    if (do_ep_renorm) then
      write(std_out,'(a)') "Mapping kpts from bse to eph"
      sppoldbl = 1 !; if (any(Cryst%symafm == -1) .and. Epren%nsppol == 1) nsppoldbl=2
      ABI_MALLOC(bs2eph, (Kmesh%nbz*sppoldbl, 6))
      timrev = 1
      call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, Kmesh%bz, Epren%nkpt, Kmesh%nbz, Cryst%nsym, &
-&       sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
+        sppoldbl, Cryst%symafm, Cryst%symrel, timrev, xmpi_comm_self, use_symrec=.False.)
    end if
 
    do itemp = 1, ntemp
@@ -469,8 +431,8 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
            ! Add lifetime
            if(do_ep_lifetime) then
-             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) &
-&                + Epren%lifetimes(1,iv,ik,isppol,itemp))
+             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%linewidth(1,ic,ik,isppol,itemp) &
+&                + Epren%linewidth(1,iv,ik,isppol,itemp))
            end if
 
          end do
@@ -493,8 +455,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      else
        call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
        abstol=zero; il=1; iu=nstates
-       ABI_STAT_MALLOC(exc_vec,(exc_size,nstates),ierr)
-       ABI_CHECK(ierr==0,"out of memory in exc_vec")
+       ABI_MALLOC_OR_DIE(exc_vec,(exc_size,nstates),ierr)
        call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
        exc_mat(:,1:nstates) = exc_vec
        exc_ene_c(:) = exc_ene(:)
@@ -724,25 +685,10 @@ end subroutine exc_diago_resonant
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_print_eig'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -888,25 +834,10 @@ end subroutine exc_print_eig
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_coupling'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -968,8 +899,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',bsize_ham*b2Gb,' Gb. '
  call wrtout(std_out,msg,"COLL")
 
- ABI_STAT_MALLOC(exc_ham,(exc_size,exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: full excitonic hamiltonian')
+ ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
 
  write(msg,'(3a,f8.1,3a,f8.1,a)')&
 &  ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
@@ -977,8 +907,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 &  ' Memory-space requested: ',bsize_ham*b2Gb,' Gb. '
  call wrtout(std_out,msg,"COLL")
 
- ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: exc_ene')
+ ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
  if (BS_files%in_hreso /= BSE_NOFILE) then
    hreso_fname = BS_files%in_hreso
@@ -1056,8 +985,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
  ! ======================================================
  ! ==== Calculate right eigenvectors and eigenvalues ====
  ! ======================================================
- ABI_STAT_MALLOC(exc_rvect,(exc_size,exc_size), ierr)
- ABI_CHECK(ierr==0, "out of memory: excitonic eigenvectors")
+ ABI_MALLOC_OR_DIE(exc_rvect,(exc_size,exc_size), ierr)
 
  if (do_full_diago) then
    call wrtout(std_out,"Complete direct diagonalization with xgeev...","COLL")
@@ -1111,8 +1039,7 @@ subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  ABI_FREE(exc_ene)
 
- ABI_STAT_MALLOC(ovlp,(nstates,nstates), ierr)
- ABI_CHECK(ierr==0, 'out of memory in ovlp matrix')
+ ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
  call wrtout(std_out,' Calculating overlap matrix... ',"COLL")
 
@@ -1172,25 +1099,10 @@ end subroutine exc_diago_coupling
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      destruction_matrix_scalapack,end_scalapack,exc_fullh_from_blocks
-!!      exc_read_bshdr,exc_skip_bshdr_mpio,hermitianize,idx_glob
-!!      init_matrix_scalapack,init_scalapack,mpi_file_close,mpi_file_open
-!!      mpi_file_read_all,mpi_file_set_view,mpi_type_free,slk_pzgemm
-!!      slk_pzhegvx,slk_single_fview_read_mask,slk_write,slk_zinvert,wrtout
-!!      xgemm,xhdp_invert,xhegv,xhegvx,xmpi_barrier,xmpio_read_frm
 !!
 !! SOURCE
 
 subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_coupling_hegv'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1282,8 +1194,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
  if (.not.use_scalapack .and. my_rank/=master) GOTO 10
 
- ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
- ABI_CHECK(ierr==0, 'out of memory: exc_ene')
+ ABI_MALLOC_OR_DIE(exc_ene,(exc_size), ierr)
 
  SELECT CASE (use_scalapack)
 
@@ -1296,11 +1207,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    write(msg,'(a,f9.2,a)')' Allocating full excitonic Hamiltonian. Memory requested: ',2*bsize_ham*b2Gb,' Gb. '
    call wrtout(std_out,msg,"COLL")
 
-   ABI_STAT_MALLOC(exc_ham,(exc_size,exc_size), ierr)
-   ABI_CHECK(ierr==0, 'out of memory: full excitonic hamiltonian')
+   ABI_MALLOC_OR_DIE(exc_ham,(exc_size,exc_size), ierr)
 
-   ABI_STAT_MALLOC(fmat,(exc_size,exc_size), ierr)
-   ABI_CHECK(ierr==0, 'out of memory: fmat')
+   ABI_MALLOC_OR_DIE(fmat,(exc_size,exc_size), ierr)
 
    write(msg,'(3a,f8.1,3a,f8.1,a)')&
 &    ' Allocating excitonic eigenvalues and eigenvectors. ',ch10,&
@@ -1365,8 +1274,7 @@ write(666)exc_ham
      call xhegv(itype,"Vectors","Upper",exc_size,fmat,exc_ham,exc_ene)
    else
      call wrtout(std_out," Partial diagonalization with XHEGVX... ","COLL")
-     ABI_STAT_MALLOC(exc_rvect,(exc_size,nstates), ierr)
-     ABI_CHECK(ierr==0, "out of memory: excitonic eigenvectors")
+     ABI_MALLOC_OR_DIE(exc_rvect,(exc_size,nstates), ierr)
      il=1; iu=1; abstol=zero
      call xhegvx(itype,"Vectors","All","Upper",exc_size,fmat,exc_ham,vl,vu,il,iu,abstol,neig_found,exc_ene,exc_rvect,exc_size)
    end if
@@ -1399,8 +1307,7 @@ write(666)exc_ham
    write(888)exc_ene
 #endif
 
-   ABI_STAT_MALLOC(ovlp,(nstates,nstates), ierr)
-   ABI_CHECK(ierr==0, 'out of memory in ovlp matrix')
+   ABI_MALLOC_OR_DIE(ovlp,(nstates,nstates), ierr)
 
    call wrtout(std_out,' Calculating overlap matrix...',"COLL")
 
@@ -1493,8 +1400,7 @@ write(668,*)ovlp
    ABI_CHECK_MPI(mpi_err,"MPI_TYPE_FREE")
    !
    ! Read my portion of the R,-R* sublocks and store the values in a temporary buffer.
-   ABI_STAT_MALLOC(tmp_cbuffer,(my_nel), ierr)
-   ABI_CHECK(ierr==0, " out of memory tmp_cbuffer")
+   ABI_MALLOC_OR_DIE(tmp_cbuffer,(my_nel), ierr)
 
    call xmpi_barrier(comm)
 
@@ -1557,8 +1463,7 @@ write(668,*)ovlp
    ABI_CHECK_MPI(mpi_err,"MPI_TYPE_FREE")
    !
    ! Read my portion of the C-C* blocks and store the values in a temporary buffer.
-   ABI_STAT_MALLOC(tmp_cbuffer,(my_nel), ierr)
-   ABI_CHECK(ierr==0, " out of memory tmp_cbuffer")
+   ABI_MALLOC_OR_DIE(tmp_cbuffer,(my_nel), ierr)
 
    call MPI_FILE_READ_ALL(mpi_fh, tmp_cbuffer, my_nel, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpi_err)
    ABI_CHECK_MPI(mpi_err,"READ_ALL")

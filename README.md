@@ -12,7 +12,7 @@ Please see the file [COPYING](COPYING) for copying conditions.
 
 ## LICENSE
 
-	Copyright (C) 2006-2018 ABINIT Group
+	Copyright (C) 2006-2020 ABINIT Group
 
 	This file is part of ABINIT.
 

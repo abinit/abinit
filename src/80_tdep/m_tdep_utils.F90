@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -16,6 +17,19 @@ module m_tdep_utils
   implicit none
 
   type Coeff_Moore_type
+    integer :: ntotcoeff
+    integer :: ntotconst
+    integer :: ncoeff1st
+    integer :: ncoeff2nd
+    integer :: ncoeff3rd
+    integer :: nconst_1st
+    integer :: nconst_2nd
+    integer :: nconst_3rd
+    integer :: nconst_rot2nd
+    integer :: nconst_huang
+    integer :: nconst_dynmat
+    integer :: nconst_rot3rd
+    integer :: nconst_asr3rd
     double precision, allocatable :: fcoeff(:,:)
   end type Coeff_Moore_type
 
@@ -26,41 +40,37 @@ module m_tdep_utils
 
 contains
 
-!====================================================================================================
-!FB subroutine tdep_calc_MoorePenrose(Forces_MD,fcoeff,InVar,ntotcoeff,Phij_coeff)
- subroutine tdep_calc_MoorePenrose(Forces_MD,CoeffMoore,InVar,ntotcoeff,Phij_coeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_MoorePenrose'
-!End of the abilint section
+!=====================================================================================================
+ subroutine tdep_calc_MoorePenrose(Forces_MD,CoeffMoore,InVar,IFC_coeff)
 
   implicit none 
 
   type(Input_Variables_type),intent(in) :: InVar
-  integer,intent(in) :: ntotcoeff
-!FB  double precision, intent(inout)  :: fcoeff(3*InVar%natom*InVar%nstep,ntotcoeff)
-  double precision, intent(in)  :: Forces_MD(3*InVar%natom*InVar%nstep)
-  double precision, intent(out)  :: Phij_coeff(ntotcoeff,1)
   type(Coeff_Moore_type), intent(inout) :: CoeffMoore
+  double precision, intent(in)  :: Forces_MD(3*InVar%natom*InVar%nstep)
+  double precision, intent(out)  :: IFC_coeff(CoeffMoore%ntotcoeff,1)
   
-  integer :: ii,LWORK,INFO
+  integer :: ii,LWORK,INFO,ntotcoeff,ntotconst,firstdim
   integer, allocatable :: IWORK(:)
   double precision, allocatable :: WORK(:),pseudo_inverse(:,:),sigma(:),matU(:,:)
   double precision, allocatable :: pseudo_sigma(:,:),transmatV(:,:),tmp1(:,:),fcart_tmp(:,:)
 
+  write(InVar%stdout,*) '################### And compute the pseudo-inverse ##########################'
+  write(InVar%stdout,*) '#############################################################################'
+
+  ntotcoeff=CoeffMoore%ntotcoeff
+  ntotconst=CoeffMoore%ntotconst
+  firstdim=3*InVar%natom*InVar%nstep+ntotconst
 
   write(InVar%stdout,*) ' Singular value decomposition...'
   ABI_MALLOC(sigma,(ntotcoeff)) ; sigma(:)=0.d0 
-  ABI_MALLOC(matU,(3*InVar%natom*InVar%nstep,ntotcoeff)) ; matU(:,:)=0.d0
+  ABI_MALLOC(matU,(firstdim,ntotcoeff)) ; matU(:,:)=0.d0
   ABI_MALLOC(transmatV,(ntotcoeff,ntotcoeff)) ; transmatV(:,:)=0.d0
-  LWORK=3*(ntotcoeff)**2+max(3*InVar%natom*InVar%nstep,4*(ntotcoeff)**2+4*(ntotcoeff))
-  ABI_MALLOC(WORK,(LWORK))
-  ABI_MALLOC(IWORK,(8*(ntotcoeff))) ; WORK(:)=0.d0
-  call DGESDD('S',3*InVar%natom*InVar%nstep,ntotcoeff,CoeffMoore%fcoeff,3*InVar%natom*InVar%nstep,&
-&   sigma,matU,3*InVar%natom*InVar%nstep,transmatV,ntotcoeff,WORK,LWORK,IWORK,INFO) 
+  LWORK=3*(ntotcoeff)**2+max(firstdim,4*(ntotcoeff)**2+4*(ntotcoeff))
+  ABI_MALLOC(WORK,(LWORK)) ; WORK(:)=0.d0
+  ABI_MALLOC(IWORK,(8*(ntotcoeff))) ; IWORK(:)=0
+  call DGESDD('S',firstdim,ntotcoeff,CoeffMoore%fcoeff(1:firstdim,:),firstdim,&
+&   sigma,matU,firstdim,transmatV,ntotcoeff,WORK,LWORK,IWORK,INFO) 
   ABI_FREE(CoeffMoore%fcoeff)
   ABI_FREE(WORK)
   ABI_FREE(IWORK)
@@ -78,21 +88,21 @@ contains
   ABI_FREE(sigma)
   
   write(InVar%stdout,*) ' Calculation of the pseudo-inverse...'
-  ABI_MALLOC(tmp1,(ntotcoeff,3*InVar%natom*InVar%nstep)) ; tmp1(:,:)=0.d0
-  call DGEMM('N','T',ntotcoeff,3*InVar%natom*InVar%nstep,ntotcoeff,1.d0,pseudo_sigma,ntotcoeff,matU,&
-&   3*InVar%natom*InVar%nstep,1.d0,tmp1,ntotcoeff)
+  ABI_MALLOC(tmp1,(ntotcoeff,firstdim)) ; tmp1(:,:)=0.d0
+  call DGEMM('N','T',ntotcoeff,firstdim,ntotcoeff,1.d0,pseudo_sigma,ntotcoeff,matU,&
+&   firstdim,1.d0,tmp1,ntotcoeff)
   ABI_FREE(matU)
   ABI_FREE(pseudo_sigma)
-  ABI_MALLOC(pseudo_inverse,(ntotcoeff,3*InVar%natom*InVar%nstep)) ; pseudo_inverse(:,:)=0.d0
-  call DGEMM('T','N',ntotcoeff,3*InVar%natom*InVar%nstep,ntotcoeff,1.d0,transmatV,ntotcoeff,&
+  ABI_MALLOC(pseudo_inverse,(ntotcoeff,firstdim)) ; pseudo_inverse(:,:)=0.d0
+  call DGEMM('T','N',ntotcoeff,firstdim,ntotcoeff,1.d0,transmatV,ntotcoeff,&
 &   tmp1,ntotcoeff,1.d0,pseudo_inverse,ntotcoeff)
   ABI_FREE(tmp1)
   ABI_FREE(transmatV)
-  ABI_MALLOC(fcart_tmp,(3*InVar%natom*InVar%nstep,1)); fcart_tmp(:,:)=zero  
-  fcart_tmp(:,1)=Forces_MD(:)
+  ABI_MALLOC(fcart_tmp,(firstdim,1)); fcart_tmp(:,:)=zero  
+  fcart_tmp(1:3*InVar%natom*InVar%nstep,1)=Forces_MD(:)
 ! NOTE, we have to solve F_ij = -\sum_j \Phi_ij u_j, so we add a minus sign to the pseudo_inverse  
-  call DGEMM('N','N',ntotcoeff,1,3*InVar%natom*InVar%nstep,1.d0,-pseudo_inverse,ntotcoeff,fcart_tmp,&
-&   3*InVar%natom*InVar%nstep,1.d0,Phij_coeff,ntotcoeff)
+  call DGEMM('N','N',ntotcoeff,1,firstdim,1.d0,-pseudo_inverse,ntotcoeff,fcart_tmp,&
+&   firstdim,1.d0,IFC_coeff,ntotcoeff)
   ABI_FREE(fcart_tmp)
   ABI_FREE(pseudo_inverse)
 
@@ -101,13 +111,6 @@ contains
 !====================================================================================================
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,InVar,Lattice,&
 &                              Rlatt_cart,Rlatt4dos,Sym,ucart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_MatchIdeal2Average'
-!End of the abilint section
 
   implicit none 
 
@@ -562,15 +565,8 @@ contains
  end subroutine tdep_MatchIdeal2Average
 
 !====================================================================================================
- subroutine tdep_calc_model(DeltaFree_AH2,distance,Forces_MD,Forces_TDEP,InVar,Phij_NN,ucart,U0,&
-&                 Psij_NN) !optional 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_model'
-!End of the abilint section
+ subroutine tdep_calc_model(Free_Anh,Forces_MD,Forces_TDEP,InVar,Phij_NN,Pij_N,ucart,U0,&
+&                 ftot3) !optional 
 
   implicit none 
 
@@ -578,18 +574,21 @@ contains
   double precision, intent(in)  :: Forces_MD(3*InVar%natom*InVar%nstep)
   double precision, intent(out) :: Forces_TDEP(3*InVar%natom*InVar%nstep)
   double precision, intent(in)  :: Phij_NN(3*InVar%natom,3*InVar%natom)
+  double precision, intent(in)  :: Pij_N(3*InVar%natom)
   double precision, intent(in)  :: ucart(3,InVar%natom,InVar%nstep)
-  double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
-  double precision, intent(out) :: U0,DeltaFree_AH2
-  double precision, intent(in),optional  :: Psij_NN(3*InVar%natom,3*InVar%natom,3*InVar%natom)
+  double precision, intent(out) :: U0,Free_Anh
+  double precision, intent(in),optional  :: ftot3(3*InVar%natom,InVar%nstep)
   
-  integer :: ii,jj,kk,istep,iatom,jatom,katom,islice,nslice,istepmin,istepmax
-  integer :: alpha,beta,gama,nu,delta,iatcell
-  double precision :: force_i,MinDeltaForces,DeltaFree_AH,norm1
-  double precision :: tmp0,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7,sigma,Uharm,Uanh,UMD
-  double precision :: Levi_Civita(3,3,3)
+  integer :: ii,jj,istep,iatom,jatom,islice,nslice,istepmin,istepmax
+  !integer :: nu,delta !alpha,beta,gama,lambda,
+  double precision :: Delta_F2,Delta_U,Delta_U2
+  double precision :: tmp0,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7,tmp8,tmp9,sigma,U_1,U_2,U_3,UMD
   double precision, allocatable :: Fmean(:)
-  double precision, allocatable :: U_MD(:),U_TDEP(:),PhijUiUj(:),PsijUiUjUk(:),residualF(:)
+  double precision, allocatable :: U_MD(:),U_TDEP(:),PijUi(:),PhijUiUj(:),PsijUiUjUk(:),residualF(:)
+  double precision, allocatable :: ftot2(:),ucart_blas(:)
+  integer :: ierr
+
+  ierr = 0;
 
   write(InVar%stdout,*)' '
   write(InVar%stdout,*) '#############################################################################'
@@ -601,95 +600,79 @@ contains
   end do  
   
 ! Compute Forces of the model TDEP
-  ABI_MALLOC(PhijUiUj  ,(InVar%nstep)); PhijUiUj  (:)=0.d0 
-  if (present(Psij_NN)) then 
+  ABI_MALLOC(PijUi     ,(InVar%nstep)); PijUi   (:)=0.d0 
+  ABI_MALLOC(PhijUiUj  ,(InVar%nstep)); PhijUiUj(:)=0.d0 
+  if (present(ftot3)) then 
     ABI_MALLOC(PsijUiUjUk,(InVar%nstep)); PsijUiUjUk(:)=0.d0 
   end if  
+  ABI_MALLOC(ucart_blas,(3*InVar%natom))                      ; ucart_blas(:)=0.d0
+  ABI_MALLOC(ftot2     ,(3*InVar%natom))                      ; ftot2     (:)=0.d0
   do istep=1,InVar%nstep
-    do iatom=1,InVar%natom
-      do ii=1,3
-        force_i=0.d0
-        do jatom=1,InVar%natom
-          do jj=1,3
-            force_i=force_i-Phij_NN(3*(iatom-1)+ii,3*(jatom-1)+jj)*ucart(jj,jatom,istep)
-            PhijUiUj(istep)=PhijUiUj(istep)+Phij_NN((iatom-1)*3+ii,3*(jatom-1)+jj)*ucart(ii,iatom,istep)*ucart(jj,jatom,istep)/2.d0
-          end do !jj 
-        end do !jatom
-        if (present(Psij_NN)) then 
-          do jatom=1,InVar%natom
-            do jj=1,3
-              do katom=1,InVar%natom
-                do kk=1,3
-                  force_i=force_i-&
-&                   Psij_NN(3*(iatom-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)/2.d0
-                  PsijUiUjUk(istep)=PsijUiUjUk(istep)+&
-&                   Psij_NN(3*(iatom-1)+ii,3*(jatom-1)+jj,3*(katom-1)+kk)*&
-&                   ucart(ii,iatom,istep)*ucart(jj,jatom,istep)*ucart(kk,katom,istep)/6.d0
-                end do !kk
-              end do !katom 
-            end do !jj 
-          end do !jatom
-        end if  
-        Forces_TDEP(ii+3*(iatom-1)+3*InVar%natom*(istep-1))=force_i
-      end do !ii
-    end do !iatom
-  end do !istep
+    ftot2(:)=0.d0 ; ucart_blas(:)=0.d0 
+    do jatom=1,InVar%natom
+      do jj=1,3
+        ucart_blas(3*(jatom-1)+jj)=ucart(jj,jatom,istep)
+      end do
+    end do
+    call DGEMM('N','N',3*InVar%natom,1,3*InVar%natom,1.d0,Phij_NN,3*InVar%natom,ucart_blas,3*InVar%natom,0.d0,ftot2,3*InVar%natom)
+    call DGEMM('T','N',1,1,3*InVar%natom,1./2.d0,ftot2,3*InVar%natom,ucart_blas,3*InVar%natom,0.d0,PhijUiUj(istep),3*InVar%natom)
+    PijUi(istep)=sum(Pij_N(:)*ucart_blas(:))
+    Forces_TDEP(3*InVar%natom*(istep-1)+1:3*InVar%natom*istep)=-Pij_N(:)-ftot2(:)
+    if (present(ftot3)) then
+      call DGEMM('T','N',1,1,3*InVar%natom,1./6.d0,ftot3(:,istep),3*InVar%natom,ucart_blas,&
+&       3*InVar%natom,0.d0,PsijUiUjUk(istep),3*InVar%natom)
+      Forces_TDEP(3*InVar%natom*(istep-1)+1:3*InVar%natom*istep)=-Pij_N(:)-ftot2(:)-ftot3(:,istep)/2.d0
+    end if !Psij
+  end do !istep  
+  ABI_FREE(ftot2)
+  ABI_FREE(ucart_blas)
 
-! Compute U0, U_TDEP, DeltaFree_AH and write them in the data.out file
-  ABI_MALLOC(U_TDEP,(InVar%nstep)); U_TDEP(:)=0.d0
-  write(InVar%stdout,'(a)') ' Average quantities highlighting the convergence (in eV/atom for energies) :'
-  if (present(Psij_NN)) then
-    write(InVar%stdout,'(a)') ' <U_TDEP> = U_0 + <Uharm> + <Uanh>'
-    write(InVar%stdout,'(2a)') ' Istep         <U_MD>            U_0            <Uharm>',&
-&     '          <Uanh>        <U_MD-U_TDEP>   <(U_MD-UTDEP)^2> <(F_MD-F_TDEP)^2>     Sigma'
+! Compute U0, U_TDEP, Delta_U and write them in the data.out file
+  write(InVar%stdout,'(a)') ' Thermodynamic quantities and convergence parameters of THE MODEL,' 
+  write(InVar%stdout,'(a)') '      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :'
+  if (present(ftot3)) then
+    write(InVar%stdout,'(a)') ' <U_TDEP> = U_0 + U_1 + U_2 + U_3'
+    write(InVar%stdout,'(a)') '       with U_0 = < U_MD - sum_i Pii ui - 1/2 sum_ij Phij ui uj - 1/6 sum_ij Psijk ui uj uk >'
+    write(InVar%stdout,'(a)') '        and U_1 = < sum_i Pii ui >'
+    write(InVar%stdout,'(a)') '        and U_2 = < 1/2 sum_ij Phij  ui uj >'
+    write(InVar%stdout,'(a)') '        and U_3 = < 1/6 sum_ij Psijk ui uj uk >'
   else  
-    write(InVar%stdout,'(a)') ' <U_TDEP> = U_0 + <Uharm>'
-    write(InVar%stdout,'(2a)') ' Istep         <U_MD>            U_0            <Uharm>',&
-&     '       <U_MD-U_TDEP>   <(U_MD-UTDEP)^2> <(F_MD-F_TDEP)^2>     Sigma'
+    write(InVar%stdout,'(a)') ' <U_TDEP> = U_0 +  U_1 +U_2'
+    write(InVar%stdout,'(a)') '       with U_0 = < U_MD - sum_i Pii ui - 1/2 sum_ij Phij ui uj >'
+    write(InVar%stdout,'(a)') '        and U_1 = < sum_i Pii ui >'
+    write(InVar%stdout,'(a)') '        and U_2 = < 1/2 sum_ij Phij  ui uj >'
   end if  
-  tmp0=zero
-  tmp3=zero
-  tmp4=zero
-  tmp5=zero
-  tmp6=zero
-  tmp7=zero
+  write(InVar%stdout,'(a)') '  Delta_U = < U_MD-F_TDEP > '
+  write(InVar%stdout,'(a)') '  Delta_U2= (< (U_MD-U_TDEP)^2 >)**0.5 '
+  write(InVar%stdout,'(a)') '  Delta_F2= (< (F_MD-F_TDEP)^2 >)**0.5 '
+  write(InVar%stdout,'(a)') '  Sigma   = (< (F_MD-F_TDEP)^2 >/<F_MD**2>)**0.5 '
+  if (present(ftot3)) then
+    write(InVar%stdout,'(2a)') ' Istep         <U_MD>            U_0              U_1              U_2  ',&
+&     '            U_3            Delta_U          Delta_U2          Delta_F2          Sigma'
+  else
+    write(InVar%stdout,'(2a)') ' Istep         <U_MD>            U_0              U_1              U_2  ',&
+&     '          Delta_U          Delta_U2          Delta_F2          Sigma'
+  end if  
+  ABI_MALLOC(U_TDEP,(InVar%nstep)); U_TDEP(:)=0.d0
+  tmp0=zero; tmp1=zero; tmp2=zero; tmp3=zero; tmp4=zero; tmp5=zero; tmp6=zero; tmp7=zero; tmp8=zero; tmp9=zero
   nslice=10
   do islice=1,nslice
     istepmin=int(InVar%nstep*(islice-1)/nslice+1)
     istepmax=int(InVar%nstep*islice/nslice)
-!   Compute U0 = < U_MD - 1/2 \Sum_ij \Phi_ij u_i u_j >   (2nd order)
-!              = < U_MD - 1/2 \Sum_ij \Phi_ij u_i u_j  - 1/6 \Psi_ij u_i u_j u_k >   (3rd order)
     do istep=istepmin,istepmax
-      tmp0=tmp0+(U_MD(istep)-PhijUiUj(istep))
-      if (present(Psij_NN)) tmp0=tmp0-PsijUiUjUk(istep)
-    end do
-!   Compute UMD = < U_MD >   
-    do istep=istepmin,istepmax
+      tmp0=tmp0+(U_MD(istep)-PijUi(istep)-PhijUiUj(istep))
+      if (present(ftot3)) tmp0=tmp0-PsijUiUjUk(istep)
       tmp6=tmp6+U_MD(istep)
-    end do
-!   Compute Uharm = < 1/2 \Sum_ij \Phi_ij u_i u_j >   
-    do istep=istepmin,istepmax
+      tmp9=tmp9+PijUi(istep)
       tmp5=tmp5+PhijUiUj(istep)
-    end do
-!   Compute Uanh = < 1/6 \Sum_ij \Psi_ij u_i u_j u_k >   
-    if (present(Psij_NN)) then
-      do istep=istepmin,istepmax
-        tmp7=tmp7+PsijUiUjUk(istep)
-      end do
-    end if  
-!   Compute U_TDEP = U0 + PhijUiUj  (2nd order)
-!                  = U0 + PhijUiUj + PsijUiUjUk  
-    U_TDEP(:)=tmp0/real(istepmax)+PhijUiUj(:)
-    if (present(Psij_NN)) U_TDEP(:) = U_TDEP(:)+PsijUiUjUk(:)
-!   Compute DeltaFree_AH = < U_MD - U_TDEP >
-    tmp1=zero
+      if (present(ftot3)) tmp7=tmp7+PsijUiUjUk(istep)
+    end do  
+    U_TDEP(:)=tmp0/real(istepmax)+PijUi(:)+PhijUiUj(:)
+    if (present(ftot3)) U_TDEP(:) = U_TDEP(:)+PsijUiUjUk(:)
     do istep=1,istepmax
-      tmp1 =tmp1 +(U_MD(istep)-U_TDEP(istep))
-    end do
-!   Compute DeltaFree_AH2 = - <( (U_MD-U_TDEP) - <U_MD-U_TDEP> )**2> / (2.k_B.T)
-    tmp2=zero
-    do istep=1,istepmax
-      tmp2=tmp2-( (U_MD(istep)-U_TDEP(istep)) - tmp1/real(istepmax))**2
+      tmp1 =tmp1 + (U_MD(istep)-U_TDEP(istep))
+      tmp8 =tmp8 + (U_MD(istep)-U_TDEP(istep))**2
+      tmp2 =tmp2 -((U_MD(istep)-U_TDEP(istep)) - tmp1/real(istepmax))**2
     end do
 !   Compute eucledian distance for forces    
     do istep=istepmin,istepmax
@@ -701,68 +684,73 @@ contains
         end do
       end do  
     end do
-    U0            =tmp0/real(istepmax*InVar%natom)
-    UMD           =tmp6/real(istepmax*InVar%natom)
-    Uharm         =tmp5/real(istepmax*InVar%natom)
-    Uanh          =tmp7/real(istepmax*InVar%natom)
-    DeltaFree_AH  =tmp1/real(istepmax*InVar%natom)
-    DeltaFree_AH2 =tmp2/real(istepmax*InVar%natom)/(2.d0*kb_HaK*InVar%temperature)
-    MinDeltaForces=tmp3/real(istepmax*InVar%natom*3)
-    sigma         =dsqrt(tmp3/tmp4)
-    if (present(Psij_NN)) then
-      write(InVar%stdout,'(i5,8(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,Uharm*Ha_eV,Uanh*Ha_eV,&
-&       DeltaFree_AH*Ha_eV,DeltaFree_AH2*Ha_eV,MinDeltaForces,sigma
+    U0       =tmp0/real(istepmax*InVar%natom)
+    UMD      =tmp6/real(istepmax*InVar%natom)
+    U_1      =tmp9/real(istepmax*InVar%natom)
+    U_2      =tmp5/real(istepmax*InVar%natom)
+    U_3      =tmp7/real(istepmax*InVar%natom)
+    Delta_U  =tmp1/real(istepmax*InVar%natom)
+    Delta_U2 =tmp8/real(istepmax*InVar%natom)
+    Delta_F2 =tmp3/real(istepmax*InVar%natom*3)
+    sigma    =dsqrt(tmp3/tmp4)
+    Free_Anh =tmp2/real(istepmax*InVar%natom)/(2.d0*kb_HaK*InVar%temperature)
+    if (present(ftot3)) then
+      write(InVar%stdout,'(i5,9(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,U_3*Ha_eV,&
+&       Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
     else
-      write(InVar%stdout,'(i5,7(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,Uharm*Ha_eV,&
-&       DeltaFree_AH*Ha_eV,DeltaFree_AH2*Ha_eV,MinDeltaForces,sigma
+      write(InVar%stdout,'(i5,8(5x,f12.5))') istepmax,UMD*Ha_eV,U0*Ha_eV,U_1*Ha_eV,U_2*Ha_eV,&
+&       Delta_U*Ha_eV,Delta_U2**0.5*Ha_eV,Delta_F2**0.5,sigma
     endif 
   end do  
+  write(InVar%stdout,'(a,1x,f12.5)') ' NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=',&
+&   3.d0/2.d0*kb_HaK*Ha_eV*InVar%temperature
 
 ! Write : i) (U_TDEP vs U_MD) in etotMDvsTDEP.dat
 !        ii) (Forces_TDEP vs Forces_MD) in fcartMDvsTDEP.dat
   write(InVar%stdout,'(a)') ' '
-  if (present(Psij_NN)) then
-    write(InVar%stdout,'(a)') ' See the etotMDvsTDEP3.dat file and (if DEBUG) the fcartMDvsTDEP3.dat file'
+  if (present(ftot3)) then
     open(unit=32,file=trim(InVar%output_prefix)//'etotMDvsTDEP3.dat')
+    write(32,'(a)') '#   Istep      U_MD(Ha)         U_TDEP(Ha)       PiiUi(Ha)       PhijUiUj/2(Ha)  PsijUiUjUk/6(Ha)'
     open(unit=33,file=trim(InVar%output_prefix)//'fcartMDvsTDEP3.dat')
+    write(33,'(a)') '# Forces_MD(Ha/bohr) Forces_TDEP(Ha/bohr)'
   else  
-    write(InVar%stdout,'(a)') ' See the etotMDvsTDEP2.dat file and (if DEBUG) the fcartMDvsTDEP2.dat file'
     open(unit=32,file=trim(InVar%output_prefix)//'etotMDvsTDEP2.dat')
+    write(32,'(a)') '#   Istep      U_MD(Ha)         U_TDEP(Ha)       PiiUi(Ha)       PhijUiUj/2(Ha)'
     open(unit=33,file=trim(InVar%output_prefix)//'fcartMDvsTDEP2.dat')
+    write(33,'(a)') '# Forces_MD(Ha/bohr) Forces_TDEP(Ha/bohr)'
   end if  
   do istep=1,InVar%nstep
-    if (present(Psij_NN)) then
-      write(32,'(i6,1x,4(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep),PhijUiUj(istep),PsijUiUjUk(istep)
+    if (present(ftot3)) then
+      write(32,'(i6,1x,5(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep),PijUi(istep),PhijUiUj(istep),PsijUiUjUk(istep)
     else  
-      write(32,'(i6,1x,3(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep),PhijUiUj(istep)
+      write(32,'(i6,1x,4(f17.6,1x))') istep,U_MD(istep),U_TDEP(istep),PijUi(istep),PhijUiUj(istep)
     end if
 
-    if (InVar%debug) then
-      do iatom=1,InVar%natom
-        do ii=1,3
-          write(33,'(2(f17.10,1x))') Forces_MD  (ii+3*(iatom-1)+3*InVar%natom*(istep-1)),&
-&                                   Forces_TDEP(ii+3*(iatom-1)+3*InVar%natom*(istep-1))
-        end do
-      end do  
-    end if  
+    do iatom=1,InVar%natom
+      do ii=1,3
+        write(33,'(2(f17.10,1x))') Forces_MD  (ii+3*(iatom-1)+3*InVar%natom*(istep-1)),&
+&                                  Forces_TDEP(ii+3*(iatom-1)+3*InVar%natom*(istep-1))
+      end do
+    end do  
   end do  
   close(32)
   close(33)
   ABI_FREE(U_MD)
   ABI_FREE(U_TDEP)
+  ABI_FREE(PijUi)
   ABI_FREE(PhijUiUj)
-  if (present(Psij_NN)) then
+  if (present(ftot3)) then
     ABI_FREE(PsijUiUjUk)
-  endif
+  end if
 
 ! Compute average on forces on each atom and each direction
   ABI_MALLOC(residualF,(3*InVar%natom)); residualF(:)=zero
   ABI_MALLOC(Fmean    ,(3*InVar%natom)); Fmean(:)    =zero
-  if (present(Psij_NN)) then
-    write(InVar%stdout,'(a)') ' See the residual on forces : the residualF3.dat file'
+  if (present(ftot3)) then
+    write(InVar%stdout,'(a)') ' See the etotMDvsTDEP3.dat, fcartMDvsTDEP3.dat and residualF3.dat files'
     open(unit=34,file=trim(InVar%output_prefix)//'residualF3.dat')
   else  
-    write(InVar%stdout,'(a)') ' See the order 1 and order 2 residual on forces : the residualF1.dat and residualF2.dat files'
+    write(InVar%stdout,'(a)') ' See the etotMDvsTDEP2.dat, fcartMDvsTDEP2.dat, residualF1.dat and residualF2.dat files'
     open(unit=33,file=trim(InVar%output_prefix)//'residualF1.dat')
     do istep=1,InVar%nstep
       do iatom=1,InVar%natom
@@ -799,83 +787,13 @@ contains
   close(34)
   ABI_FREE(residualF)
   ABI_FREE(Fmean)
-  write(InVar%stdout,'(a)') ' WARNING: Big differences on residual forces can be observed between average and '
-  write(InVar%stdout,'(a)') '          ideal positions (see the Ideal_position input parameter).'
-  write(InVar%stdout,'(a)') '          --> ACTION: check this input parameter.'
-
-! Compute the invariance under an arbitrary rotation of the system
-  Levi_Civita(:,:,:)=zero
-  Levi_Civita(1,2,3)=+1 ; Levi_Civita(2,3,1)=+1 ; Levi_Civita(3,1,2)=+1 
-  Levi_Civita(3,2,1)=-1 ; Levi_Civita(1,3,2)=-1 ; Levi_Civita(2,1,3)=-1 
-
-  if (present(Psij_NN)) then
-!FB    write(6,*)'Invariance under an arbitrary rotation (third order)'
-    do iatcell=1,InVar%natom_unitcell
-      do jatom=1,InVar%natom
-        do alpha=1,3
-          do nu=1,3
-            do beta=1,3
-              norm1=zero
-              do gama=1,3
-                do delta=1,3
-                  do katom=1,InVar%natom
-                    norm1=norm1+Psij_NN(3*(iatcell-1)+alpha,3*(jatom-1)+beta,3*(katom-1)+gama)*&
-&                               distance(iatcell,katom,delta+1)*Levi_Civita(gama,delta,nu)
-                  end do !katom
-                end do !delta  
-                norm1=norm1+Phij_NN(3*(iatcell-1)+gama ,3*(jatom-1)+beta)*Levi_Civita(gama,alpha,nu)+&
-&                           Phij_NN(3*(iatcell-1)+alpha,3*(jatom-1)+gama)*Levi_Civita(gama,beta,nu)
-              end do !gama
-              if (abs(norm1).gt.tol8) then
-                write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 3)'
-                write(std_out,'(5(i3,1x),1(e17.10,1x))') iatcell,jatom,alpha,nu,beta,norm1
-                write(std_out,*) 'iatcell,jatom,alpha,nu,beta,norm1'
-                if (InVar%RotationalInv.eq.0)  then
-                  MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 3)')
-                end if
-              end if  
-            end do !beta
-          end do !nu
-        end do !alpha
-      end do !jatom
-    end do !iatcell  
-  else
-!FB    write(6,*)'Invariance under an arbitrary rotation (second order)'
-    do iatcell=1,InVar%natom_unitcell
-      do alpha=1,3
-        do nu=1,3
-          norm1=zero
-          do beta=1,3
-            do gama=1,3
-              do jatom=1,InVar%natom
-                norm1=norm1+Phij_NN(3*(iatcell-1)+alpha,3*(jatom-1)+beta)*distance(iatcell,jatom,gama+1)*Levi_Civita(beta,gama,nu)
-              end do !jatom
-            end do !gama
-          end do !beta
-          if (abs(norm1).gt.tol8) then
-            write(std_out,*) ' BUG : invariance under arbitrary rotation is not fulfilled (order 2)'
-            write(std_out,*) 'iatcell,alpha,nu,norm1'
-            write(std_out,'(3(i3,1x),1(e17.10,1x))') iatcell,alpha,nu,norm1
-            if (InVar%RotationalInv.eq.0) then
-              MSG_BUG('invariance under arbitrary rotation is not fulfilled (order 2)')
-            end if
-          end if 
-        end do !nu
-      end do !alpha
-    end do !iatcell  
-  end if !Psij_NN
+  write(InVar%stdout,'(a)') ' NOTE: Large differences on residual forces can be observed between average and '
+  write(InVar%stdout,'(a)') '          ideal positions (check with the "Use_Ideal_Positions" input parameter).'
 
  end subroutine tdep_calc_model
 
 !====================================================================================================
 subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,norder,nshell,order,proj,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_nbcoeff'
-!End of the abilint section
 
   implicit none
 
@@ -898,13 +816,25 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   double precision, allocatable :: WORK(:)
   double complex :: eigenvectors(3,3),eigenvalues(3)
   double complex :: pp(3,3),ppp(3,3,3),lambda
-  double complex, allocatable :: tab_vec(:,:),temp(:,:),alphaij(:,:,:)
+  double complex, allocatable :: tab_vec(:,:),temp(:,:),alphaij(:,:,:),constraints(:,:)
   logical, allocatable :: unchanged(:)
 
-  if (jatom==iatcell.and.order==2) return
-  if (katom==iatcell.and.order==3) return
+  if (iatcell==1.and.order==1) then
+    ncoeff=0
+    return
+  end if    
+  if (jatom==iatcell.and.order==2) then
+    ncoeff=0
+    return
+  end if    
+  if (katom==iatcell.and.jatom==iatcell.and.order==3) then
+    ncoeff=0
+    return
+  end if    
 
-  if (order==2) then
+  if (order==1) then
+    facorder=1
+  else if (order==2) then
     facorder=2
   else if (order==3) then
     facorder=6
@@ -932,6 +862,17 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
     isym=(isyminv-1)/facorder+1
     inv=isyminv-(isym-1)*facorder
     if (isym==1) cycle 
+
+!   For the 1st order: Search if the atom is let invariant
+    if (order==1) then
+      if (Sym%indsym(4,isym,iatcell)==iatcell) then
+        write(16,*) ' '
+        write(16,*) 'For shell number=',ishell
+        write(16,*)'===========The atom is let invariant for isym=',isym
+      else
+        cycle
+      end if  
+    end if 
 
 !   For the 2nd order: Search if the bond is kept invariant or reversed    
     if (order==2) then
@@ -1064,7 +1005,23 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
 !   We obtain n vectors with norder coefficients (defined in the R^norder space).
 !   The space of the independent solutions are in the R^(norder-n) space, orthogonal 
 !   to the space spanned by the starting n vectors.
-    if (order==2) then
+    if (order==1) then
+      do ii=1,3
+        lambda=eigenvalues(ii)
+        if ((abs(real(lambda)-1.d0).lt.1.d-6).and.(abs(aimag(lambda)).lt.1.d-6)) cycle
+        unchanged(isyminv)=.true.
+        iconst(isyminv)=iconst(isyminv)+1
+        const_tot=const_tot+1
+        write(16,*)'  The eigenvalue',ii
+        write(16,*)'  is equal to ',lambda  
+        do mu=1,3
+          alphaij(isyminv,mu,iconst(isyminv))=eigenvectors(mu,ii)
+        end do  
+        write(16,*)'  Real & imaginary parts of the eigenvectors product:'
+        write(16,'(9(f16.12,1x))')  real(alphaij(isyminv,:,iconst(isyminv)))
+        write(16,'(9(f16.12,1x))') aimag(alphaij(isyminv,:,iconst(isyminv)))
+      end do !ii
+    else if (order==2) then
       do ii=1,3
         do jj=1,3
           lambda=eigenvalues(ii)*eigenvalues(jj)
@@ -1147,25 +1104,70 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
         end do !jj
       end do !ii
     else
-      MSG_BUG('Only the second and third order is allowed')
+      MSG_BUG('Only the first, second and third order is allowed')
     end if  
 
 !   WARNING: There are some minimum and maximum of constraints
-    if (order==2.and.(iconst(isyminv).gt.8)) then
-      MSG_BUG('There are more than 8 constraints')
+    if (order==1.and.(iconst(isyminv).eq.3)) then
+      ncoeff=0
+      proj(:,:,ishell)=zero   
+      return
+    else if (order==1.and.(iconst(isyminv).gt.3)) then
+      MSG_BUG(' First order : There are more than 3 constraints')
     end if
-    if (order==3.and.(iconst(isyminv).gt.26)) then
-      MSG_BUG('There are more than 26 constraints')
+    if (order==2.and.(iconst(isyminv).gt.8)) then
+      MSG_BUG(' Second order : There are more than 8 constraints')
+    end if
+    if (order==3.and.(iconst(isyminv).gt.27)) then
+      MSG_BUG(' Third order : There are more than 27 constraints')
     end if
   end do !isyminv
 ! ================================================================================================
 ! =========== End big loop over symetries and facorder ===========================================
 ! ================================================================================================
 
+! If the third order IFCs are symmetric with respect to the atoms (iik, iji, ijj), 
+! some constraints have to be added :
+  if (order.eq.3) then
+    if ((iatcell.eq.jatom).or.(iatcell.eq.katom).or.(jatom.eq.katom)) then
+    write(16,*) ' '
+    write(16,*) 'For shell number=',ishell
+    write(16,*)'=========== The IFCs are symmetric'
+      const_tot=const_tot+norder
+      ABI_MALLOC(constraints,(norder,norder)) ; constraints(:,:)=czero
+      ii=0
+      do mu=1,3
+        do nu=1,3
+          do xi=1,3
+            ii=ii+1
+            if (iatcell.eq.jatom) then 
+              if (mu.eq.nu) cycle
+              constraints((mu-1)*9+(nu-1)*3+xi,ii)= cone
+              constraints((nu-1)*9+(mu-1)*3+xi,ii)=-cone
+            end if 
+            if (iatcell.eq.katom) then 
+              if (mu.eq.xi) cycle
+              constraints((mu-1)*9+(nu-1)*3+xi,ii)= cone
+              constraints((xi-1)*9+(nu-1)*3+mu,ii)=-cone
+            end if 
+            if (jatom.eq.katom) then 
+              if (nu.eq.xi) cycle
+              constraints((mu-1)*9+(nu-1)*3+xi,ii)= cone
+              constraints((mu-1)*9+(xi-1)*3+nu,ii)=-cone
+            end if 
+          end do  
+        end do  
+      end do  
+    end if
+  end if
+
 ! In the case where the matrix has norder elements  
   if (const_tot==0) then 
+    write(16,*) ' '
+    write(16,*) 'For shell number=',ishell
     write(16,*)'  WARNING: There is no symetry operation leaving the bond unchanged'
     write(16,*) isym,ishell,jatom,iatcell
+    proj(:,:,ishell)=0.d0
     do ii=1,norder
       proj(ii,ii,ishell)=1.d0
     end do
@@ -1179,6 +1181,7 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   write(16,*) 'There is a total of ',ncount,' non-independant constraints for this shell'
   ii=0
   ABI_MALLOC(tab_vec,(norder,ncount)); tab_vec(:,:)=czero
+  ABI_MALLOC(temp   ,(norder,ncount)); temp(:,:)   =czero
   do isyminv=1,nsyminv
     if (unchanged(isyminv)) then
       do jj=1,iconst(isyminv)
@@ -1187,9 +1190,19 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
       end do  
     end if  
   end do
+! Add the constraints coming from the symmetry of the IFCs (at the 3rd order)  
+  if (order.eq.3) then
+    if ((iatcell.eq.jatom).or.(iatcell.eq.katom).or.(jatom.eq.katom)) then
+      do jj=1,norder
+        ii=ii+1
+        tab_vec(:,ii)=constraints(:,jj)
+      end do
+      ABI_FREE(constraints)
+    end if
+  end if  
   if (ii.ne.ncount) then
-!JB    write(16,*) ii,' non equal to ',ncount
-    MSG_BUG("Count error")
+    write(16,*) ii,' non equal to ',ncount
+    MSG_BUG('Count error')
   end if  
   do ii=1,norder
     do jj=1,ncount
@@ -1215,7 +1228,6 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   end do
 
 ! On stocke les vecteurs non-nuls
-  ABI_MALLOC(temp,(norder,ncount)); temp(:,:)=czero
   ii=0
   do kk=1,ncount
     prod_scal=sum( real(tab_vec(:,kk))* real(tab_vec(:,kk))+aimag(tab_vec(:,kk))*aimag(tab_vec(:,kk)))
@@ -1236,10 +1248,10 @@ subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,no
   end do  
   write(16,*) '  =======Au total, il y a ',ncount,' vecteurs independants'
   if (ncount.gt.8.and.order==2) then
-    MSG_ERROR('There are too many independant vectors')
+    MSG_ERROR(' Order 2 : There are too many independant vectors')
   end if
   if (ncount.gt.26.and.order==3) then
-    MSG_ERROR('There are too many independant vectors')
+    MSG_ERROR(' Order 3 : There are too many independant vectors')
   end if
 
 ! On cherche les (norder-ncount) vecteurs orthogonaux aux vecteurs non-nuls

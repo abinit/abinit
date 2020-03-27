@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_utility
 !! NAME
 !! m_gwls_utility
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,13 +37,13 @@ module m_gwls_utility
 
 ! abinit modules
 use defs_basis
-use defs_datatypes
 use m_abicore
 use m_xmpi
 
 use m_io_tools, only : get_unit
 
 implicit none
+
 private
 
 complex(dpc), public, parameter :: cmplx_i = (0.0_dp,1.0_dp)
@@ -84,13 +83,6 @@ complex(dpc) function complex_vector_product(v1,v2,l)
 !--------------------------------------------------------------------------
 ! This function computes the vector product of two complex vectors.
 !--------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'complex_vector_product'
-!End of the abilint section
-
 implicit none
 
 integer,     intent(in)  :: l
@@ -138,13 +130,6 @@ subroutine orthogonalize(mpi_communicator, Hsize,Qsize,Xsize,Q,X)
 !  Hsize means "dimension of the Hilbert space", so typically the number
 !  of plane waves...
 !--------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'orthogonalize'
-!End of the abilint section
-
 implicit none
 
 integer,     intent(in)  :: mpi_communicator
@@ -227,13 +212,6 @@ subroutine driver_invert_positive_definite_hermitian_matrix(matrix,ldim)
 !
 !        The subroutine overwrites the input.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'driver_invert_positive_definite_hermitian_matrix'
-!End of the abilint section
-
 implicit none
 
 integer     , intent(in)    :: ldim
@@ -320,13 +298,6 @@ subroutine ritz_analysis_general(mpi_communicator,matrix_function,lmax,Hsize,Lba
 !                       eigenvalues      : the computed approximate eigenvalues
 !                                        of the matrix
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ritz_analysis_general'
-!End of the abilint section
-
 implicit none
 
 interface

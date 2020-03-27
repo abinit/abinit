@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wffile
 !! NAME
 !!  m_wffile
@@ -8,7 +7,7 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2020 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +18,7 @@
 !! CHILDREN
 !!
 !! NOTES
-!! wffile_type : a handler for dealing with the IO of a wavefunction file
+!! wffile_type: a handler for dealing with the IO of a wavefunction file
 !!
 !! SOURCE
 
@@ -32,7 +31,6 @@
 MODULE m_wffile
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -44,6 +42,7 @@ MODULE m_wffile
  use netcdf
 #endif
 
+ use defs_abitypes, only : MPI_Type
  use m_io_tools,   only : mvrecord, open_file
  use m_fstrings,   only : toupper, endswith, sjoin
 
@@ -250,15 +249,6 @@ CONTAINS
 
 subroutine getRecordMarkerLength_wffile(wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getRecordMarkerLength_wffile'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(wffile_type),intent(inout) :: wff
@@ -411,15 +401,6 @@ end subroutine getRecordMarkerLength_wffile
 
 subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rwRecordMarker'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: option
@@ -554,15 +535,6 @@ end subroutine rwRecordMarker
 
 subroutine xnullifyOff(wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xnullifyOff'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
 
@@ -608,15 +580,6 @@ end subroutine xnullifyOff
 !! SOURCE
 
 subroutine xmoveOff(wff,n_int,n_dp,n_ch,n_mark)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmoveOff'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: n_int,n_dp,n_ch,n_mark
@@ -671,15 +634,6 @@ end subroutine xmoveOff
 !! SOURCE
 
 subroutine xderiveWRecEnd(wff,ierr,me_proc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWRecEnd'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -754,15 +708,6 @@ end subroutine xderiveWRecEnd
 
 subroutine xderiveWRecInit(wff,ierr,me_proc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWRecInit'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in),optional :: me_proc
@@ -832,13 +777,6 @@ end subroutine xderiveWRecInit
 subroutine xderiveRRecEnd(wff,ierr)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRRecEnd'
-!End of the abilint section
-
  integer,intent(out) ::  ierr
  type(wffile_type),intent(inout) :: wff
 
@@ -886,15 +824,6 @@ end subroutine xderiveRRecEnd
 !! SOURCE
 
 subroutine xderiveRRecInit(wff,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRRecInit'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -949,15 +878,6 @@ end subroutine xderiveRRecInit
 
 subroutine clsopn(wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clsopn'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(wffile_type),intent(inout) :: wff
@@ -991,7 +911,6 @@ subroutine clsopn(wff)
 
 !    od is a logical variable which is set to true if the specified
 !    unit is connected to a file; otherwise it is set to false.
-#if !defined FC_HITACHI
    else if (.not.od) then
      write(message, '(/,a,/,a,i8,/,a,/,a,/,a,/,a)' ) &
 &     ' clsopn : ERROR -',&
@@ -1001,7 +920,6 @@ subroutine clsopn(wff)
 &     '  Action: check whether there might be some external problem,',&
 &     '  then resubmit.'
      MSG_ERROR(message)
-#endif
 
 !    nmd is a logical variable assigned the value true if the file
 !    has a name; otherwise false.  A scratch file is not named.
@@ -1013,17 +931,6 @@ subroutine clsopn(wff)
 
 !    May now close the file and then reopen it
 !    (file is already opened according to above checks)
-
-#if defined FC_HITACHI
-     if (.not.od) then
-       write(message, '(a,i0,/,a,/,a,/,a)' ) &
-&       '  Tried to inquire about unit',unit,&
-&       '  and found it not connected to a file.',&
-&       '  May be due to temporary problem with file, disks or network.',&
-&       '  Action: disregard this error and continue the process anyway.'
-       MSG_WARNING(message)
-     end if
-#endif
      close (unit=unit)
      open (unit=unit,file=filnam,form=fm,status='old') !VALGRIND complains filnam is just a few thousand bytes inside a block of 8300
 
@@ -1057,15 +964,6 @@ end subroutine clsopn
 
 function wff_usef90(wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wff_usef90'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: wff_usef90
@@ -1097,15 +995,6 @@ end function wff_usef90
 !! SOURCE
 
 function wff_ireadf90(wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wff_ireadf90'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1159,15 +1048,6 @@ end function wff_ireadf90
 
 subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
 &                  spaceComm_mpiio) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffOpen'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in)  :: iomode,spaceComm,master,me,unwff
@@ -1321,20 +1201,9 @@ end subroutine WffOpen
 
 subroutine WffClose(wff,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffClose'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type), intent(inout) :: wff
  integer, intent(out) :: ier
-
-!Local ------------------------------------
 
 ! *************************************************************************
 
@@ -1387,20 +1256,9 @@ end subroutine WffClose
 
 subroutine WffDelete(wff,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffDelete'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer, intent(out) :: ier
-
-!Local variables-------------------------------
 
 ! *************************************************************************
 
@@ -1454,15 +1312,6 @@ end subroutine WffDelete
 
 subroutine WffKg(wff,optkg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffKg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: optkg
@@ -1504,15 +1353,6 @@ end subroutine WffKg
 !! SOURCE
 
 subroutine WffOffset(wff,sender,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffOffset'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1573,15 +1413,6 @@ end subroutine WffOffset
 
 subroutine WffReadDataRec_dp1d(dparray,ierr,ndp,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadDataRec_dp1d'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) ::  ndp
@@ -1639,15 +1470,6 @@ end subroutine WffReadDataRec_dp1d
 !! SOURCE
 
 subroutine WffReadDataRec_dp2d(dparray,ierr,n1,n2,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadDataRec_dp2d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1716,15 +1538,6 @@ end subroutine WffReadDataRec_dp2d
 !! SOURCE
 
 subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadNpwRec'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -1811,15 +1624,6 @@ end subroutine WffReadNpwRec
 
 
 subroutine WffReadSkipRec(ierr,nrec,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadSkipRec'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)  :: nrec
@@ -1911,15 +1715,6 @@ end subroutine WffReadSkipRec
 
 subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_mpi_to_seq,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadWrite_mpio'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,mcg,nband_disk,npwso,npwsotot,rdwr
@@ -1992,12 +1787,10 @@ subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_
 !  ----------------------------------------------
 
 !  Build map; for better performance, map must be in increasing order
-   ABI_STAT_ALLOCATE(map,(2*npwso*nband_block), ierr)
-   ABI_CHECK(ierr==0, "out of memory in map")
+   ABI_MALLOC_OR_DIE(map,(2*npwso*nband_block), ierr)
 
    ABI_STAT_ALLOCATE(buf,(2*npwso*nband_block), ierr)
-   msg = "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio"
-   ABI_CHECK(ierr==0, msg)
+   ABI_CHECK(ierr==0, "out of memory in wavefunction buffer. Try to decrease MAXBAND in WffReadWrite_mpio")
 
    if (rdwr==1) then
 !    If reading, only build map
@@ -2237,15 +2030,6 @@ end subroutine WffReadWrite_mpio
 
 subroutine WffWriteDataRec_int2d(intarray,ierr,n1,n2,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffWriteDataRec_int2d'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) ::  n1,n2
@@ -2303,15 +2087,6 @@ end subroutine WffWriteDataRec_int2d
 !! SOURCE
 
 subroutine WffWriteDataRec_dp1d(dparray,ierr,ndp,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffWriteDataRec_dp1d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2371,15 +2146,6 @@ end subroutine WffWriteDataRec_dp1d
 
 
 subroutine WffWriteDataRec_dp2d(dparray,ierr,n1,n2,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffWriteDataRec_dp2d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2444,15 +2210,6 @@ end subroutine WffWriteDataRec_dp2d
 
 subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
 &                         opt_paral) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffWriteNpwRec'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2524,15 +2281,6 @@ end subroutine WffWriteNpwRec
 
 subroutine xderiveRead_int(wff,xval,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(out) :: xval
@@ -2593,15 +2341,6 @@ end subroutine xderiveRead_int
 !! SOURCE
 
 subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_int1d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2690,15 +2429,6 @@ end subroutine xderiveRead_int1d
 
 subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_int2d'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(out) :: xval(:,:)
@@ -2784,15 +2514,6 @@ end subroutine xderiveRead_int2d
 
 subroutine xderiveRead_dp(wff,xval,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(out) :: ierr
@@ -2851,15 +2572,6 @@ end subroutine xderiveRead_dp
 !! SOURCE
 
  subroutine xderiveRead_dp1d(wff,xval,n1,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_dp1d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2948,15 +2660,6 @@ end subroutine xderiveRead_dp1d
 
 subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_dp2d'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n1,n2,spaceComm
@@ -3044,15 +2747,6 @@ end subroutine xderiveRead_dp2d
 !! SOURCE
 
 subroutine xderiveRead_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_int2d_displ'
-!End of the abilint section
-
-  implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -3191,15 +2885,6 @@ end subroutine xderiveRead_int2d_displ
 
 subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveRead_dp2d_displ'
-!End of the abilint section
-
-  implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n1,n2,spaceComm
@@ -3329,15 +3014,6 @@ end subroutine xderiveRead_dp2d_displ
 
 subroutine xderiveReadVal_char(wff,xval,n,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveReadVal_char'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
@@ -3395,15 +3071,6 @@ end subroutine xderiveReadVal_char
 !! SOURCE
 
 subroutine xmpi_read_int2d(wff,xval,spaceComm,sc_mode,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_read_int2d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3493,15 +3160,6 @@ end subroutine xmpi_read_int2d
 
 subroutine xderiveWrite_int(wff,xval,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
  integer,intent(in):: xval
@@ -3554,15 +3212,6 @@ end subroutine xderiveWrite_int
 !! SOURCE
 
 subroutine xderiveWrite_int1d(wff,xval,n1,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_int1d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,spaceComm
@@ -3635,15 +3284,6 @@ end subroutine xderiveWrite_int1d
 
 subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_int2d'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
  integer,intent(out) :: ierr
@@ -3711,15 +3351,6 @@ end subroutine xderiveWrite_int2d
 
 subroutine xderiveWrite_dp(wff,xval,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
  real(dp),intent(in):: xval
@@ -3772,15 +3403,6 @@ end subroutine xderiveWrite_dp
 !! SOURCE
 
 subroutine xderiveWrite_dp1d(wff,xval,n1,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_dp1d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,spaceComm
@@ -3850,15 +3472,6 @@ end subroutine xderiveWrite_dp1d
 
 subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_dp2d'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
  integer,intent(out) :: ierr
@@ -3926,15 +3539,6 @@ end subroutine xderiveWrite_dp2d
 
 subroutine xderiveWrite_dp2d_seq(wff,xval,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_dp2d_seq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
  real(dp),intent(in):: xval(:,:)
@@ -3989,15 +3593,6 @@ end subroutine xderiveWrite_dp2d_seq
 !! SOURCE
 
 subroutine xderiveWrite_int2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_int2d_displ'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
@@ -4118,15 +3713,6 @@ end subroutine xderiveWrite_int2d_displ
 
 subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_dp2d_displ'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,spaceComm
  integer,intent(out) :: ierr
@@ -4245,15 +3831,6 @@ end subroutine xderiveWrite_dp2d_displ
 
 subroutine xderiveWrite_char(wff,xval,n,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xderiveWrite_char'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
@@ -4311,15 +3888,6 @@ end subroutine xderiveWrite_char
 !! SOURCE
 
 subroutine xdefineOff(formeig,wff,mpi_enreg,nband,npwarr,nspinor,nsppol,nkpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xdefineOff'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) ::  nsppol,nkpt,nspinor,formeig

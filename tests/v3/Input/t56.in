@@ -23,7 +23,6 @@
  typat  1 2
  znucl  8 12
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -34,7 +33,7 @@
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [shell]
-#%%  post_commands = ww_mv t56o_DEN t57i_DEN
+#%% post_commands = ww_mv t56o_DEN t57i_DEN
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 

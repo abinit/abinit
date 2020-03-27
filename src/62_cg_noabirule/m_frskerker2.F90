@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_frskerker2
 !! NAME
 !! m_frskerker2
@@ -9,7 +8,7 @@
 !! with some residuals and a real space dielectric function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,9 +33,10 @@
 module m_frskerker2
 
   use defs_basis
-  use defs_abitypes
   use m_abicore
+  use m_dtset
 
+  use defs_abitypes, only : MPI_type
   use m_spacepar, only : laplacian
   use m_numeric_tools, only : dotproduct
 
@@ -77,15 +77,6 @@ contains
 !! SOURCE
 
 subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdielng_in,deltaW_in,gprimd_in,mat_in )
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker2__init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(dataset_type),target,intent(in) :: dtset_in
@@ -140,15 +131,6 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 
   subroutine frskerker2__end()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker2__end'
-!End of the abilint section
-
- implicit none
-
 ! *************************************************************************
   if(ok) then
 !  ! set ok to false which prevent using the pf and dpf
@@ -184,15 +166,6 @@ subroutine frskerker2__init(dtset_in,mpi_enreg_in,nfft_in,ngfft_in,nspden_in,rdi
 
 subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker2__newvres2'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)    :: nv1,nv2
  real(dp),intent(in)   :: x
@@ -225,15 +198,6 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
   function frskerker2__pf(nv1,nv2,vrespc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker2__pf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)    :: nv1,nv2
  real(dp),intent(in) ::vrespc(nv1,nv2)
@@ -246,7 +210,7 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,rdfuncr=buffer1,laplacerdfuncr=buffer2)
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,rdfuncr=buffer1,laplacerdfuncr=buffer2)
    do ispden=1,nspden
     buffer2(:,ispden)=(vrespc(:,ispden)-((rdielng(:))**2)*buffer2(:,ispden))  &
 &    *half  -  deltaW(:,ispden)
@@ -284,15 +248,6 @@ subroutine frskerker2__newvres2(nv1,nv2,x, grad, vrespc)
 
 function frskerker2__dpf(nv1,nv2,vrespc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frskerker2__dpf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nv1,nv2
  real(dp),intent(in)::vrespc(nv1,nv2)
@@ -306,7 +261,7 @@ function frskerker2__dpf(nv1,nv2,vrespc)
 
   if(ok) then
    buffer1=vrespc
-   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,dtset_ptr%paral_kgb,rdfuncr=buffer1,laplacerdfuncr=buffer2)
+   call laplacian(gprimd,mpi_enreg_ptr,nfft,nspden,ngfft,rdfuncr=buffer1,laplacerdfuncr=buffer2)
    do ispden=1,nspden
     frskerker2__dpf(:,ispden)= vrespc(:,ispden)-deltaW(:,ispden)-((rdielng(:))**2)*buffer2(:,ispden)
    end do

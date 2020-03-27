@@ -37,8 +37,9 @@
     getwfk2     1
 
      nband2    16
-      awtr2     0       # Note : the default awtr 1 is better
+      awtr2     0     # Note : the default awtr 1 is better
       symchi    0     # Note : the default symchi 1 is better
+      symsigma  0     # Note : the default symsigma 1 is better
 
 # Calculation of the HF corrections
  optdriver3     4
@@ -84,7 +85,6 @@
   icutcoul5     3   # old deprecated value of icutcoul, only used for legacy
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

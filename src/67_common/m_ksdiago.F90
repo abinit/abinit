@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ksdiago
 !! NAME
 !!  m_ksdiago
@@ -7,7 +6,7 @@
 !!  Direct diagonalization of the KS Hamiltonian H_k(G,G')
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,13 +26,14 @@
 module m_ksdiago
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_hamiltonian
+ use m_distribfft
 
+ use defs_datatypes,      only : pseudopotential_type
+ use defs_abitypes,       only : MPI_type
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
  use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx
@@ -242,7 +242,7 @@ contains
 !!      m_shirley,outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,destroy_mpi_enreg,fftpac,getcprj,getghc
+!!      destroy_mpi_enreg,fftpac,getcprj,getghc
 !!      init_distribfft_seq,init_hamiltonian,initmpi_seq,initylmg,kpgsph
 !!      load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg
 !!      pawcprj_alloc,pawcprj_free,pawcprj_reorder,transgrid,wrtout,xheev
@@ -254,15 +254,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 & typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
 & Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
 & Electronpositron) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ksdiago'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -310,7 +301,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  real(dp),allocatable :: ph3d(:,:,:),pwave(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:),vlocal_tmp(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlc(:,:),gsc(:,:)
+ real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:)
  real(dp),allocatable :: ghg_mat(:,:,:),gtg_mat(:,:,:)
  real(dp),allocatable :: cgrvtrial(:,:)
  real(dp),pointer :: cwavef(:,:)
@@ -455,7 +446,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  end if
 
 !Continue to initialize the Hamiltonian (spin-dependent part)
- call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+ call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
 !
 !* Calculate G-vectors, for this k-point.
 !* Count the number of planewaves as a check.
@@ -509,9 +500,8 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 
 !Load k-dependent part in the Hamiltonian datastructure
  ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
- call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,&
-& kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-& compute_ph3d=.true.,compute_gbound=.true.)
+ call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,&
+& kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
 
 !Prepare the call to getghc.
  ndat=1; lambda=zero; type_calc=0         ! For applying the whole Hamiltonian
@@ -523,7 +513,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  end if
 
  ABI_MALLOC(ghc  ,(2,npw_k*nspinor*ndat))
- ABI_MALLOC(gvnlc,(2,npw_k*nspinor*ndat))
+ ABI_MALLOC(gvnlxc,(2,npw_k*nspinor*ndat))
  ABI_MALLOC(gsc  ,(2,npw_k*nspinor*ndat*(sij_opt+1)/2))
 
  cplex_ghg=2
@@ -556,7 +546,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 
    pwave(1,igsp2)=one      ! Get <:|H|beta,G''> and <:|T_{PAW}|beta,G''>
 
-   call getghc(cpopt,pwave,Cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,MPI_enreg_seq,ndat,&
+   call getghc(cpopt,pwave,Cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,MPI_enreg_seq,ndat,&
 &   prtvol,sij_opt,tim_getghc,type_calc)
 
 !  Fill the upper triangle.
@@ -571,7 +561,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  ABI_FREE(kinpw)
  ABI_FREE(vlocal)
  ABI_FREE(ghc)
- ABI_FREE(gvnlc)
+ ABI_FREE(gvnlxc)
  ABI_FREE(gsc)
 
  if (Psps%usepaw==1.and.cpopt==0) then
@@ -680,7 +670,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  ABI_FREE(ffnl)
 
  call destroy_mpi_enreg(MPI_enreg_seq)
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  call xmpi_barrier(comm)
 
@@ -710,15 +700,6 @@ end subroutine ksdiago
 
 subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 & nband_k,istwf_k,ecutsm,effmass_free,abstol,range,ilu,vlu,use_scalapack,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_ddiago_ctl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

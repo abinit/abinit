@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/tools_lotf
 !! NAME
 !! tools_lotf
@@ -7,7 +6,7 @@
 !!  Contains simple functions for LOTF
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MMancini)
+!! Copyright (C) 2005-2020 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,13 +54,6 @@ contains
   ! interpolator : a0 for n=0
   !                a1 for n=nx
   !                a1 for nx = 0
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pinterp'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -103,13 +95,6 @@ contains
   ! interpolator : a0 for n=0
   !                a1 for n=nx
   !                a1 for nx = 0
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pinterp_nolinear'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -144,13 +129,6 @@ contains
  subroutine dlvsum(local_pe,npes,sum_local_pe,ndimve)
   !------------------------------------------------------------
   ! (ADV) GLOBAL VECTOR SUM, REAL 28/5/94
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dlvsum'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -179,13 +157,6 @@ contains
  !!
  !! SOURCE
  FUNCTION icf(ix,iy,iz,ic1,ic2,ic3) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'icf'
-!End of the abilint section
 
   implicit none
   !Arguments ------------------------

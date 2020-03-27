@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_tddft
 !! NAME
 !!  m_tddft
@@ -7,7 +6,7 @@
 !!  Routines for computing excitation energies within TDDFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
+!! Copyright (C) 1999-2020 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,16 +29,18 @@
 module m_tddft
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_wffile
  use m_sort
+ use m_dtset
+ use m_dtfil
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools, only : get_unit
  use m_symtk,    only : matr3inv
  use m_time,     only : timab
@@ -132,15 +133,6 @@ contains
  subroutine tddft(cg,dtfil,dtset,eigen,etotal,gmet,gprimd,gsqcut,&
 &  kg,kxc,mband,mgfftdiel,mkmem,mpi_enreg,mpw,nfft,ngfftdiel,nkpt,nkxc,&
 &  npwarr,nspinor,nsppol,occ,ucvol,wffnew)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tddft'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: mband,mgfftdiel,mkmem,mpw,nfft,nkpt,nkxc,nsppol
@@ -736,21 +728,17 @@ contains
          cwavef(:,1:npw_k)=cg(:,1+(iband-1)*npw_k+(isppol-1)* (npw_k*nband_k(1)) : iband*npw_k+(isppol-1)*(npw_k*nband_k(1)))
 #endif
 
-!        DEBUG
 !        write(std_out,*)' iband : ',iband, ' isppol', isppol, '  -> index ', &
 !        &            istate,index_state(iband+(isppol-1)*nband_k(1))
-!        ENDDEBUG
 
          tim_fourwf=14
 !        This call should be made by master, and then the results be sent to the other procs
 
          call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &         istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&         0,dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&         0,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
-!        DEBUG
 !        write(std_out,'(a,i5)')' After Fourier proc ',me_loc
-!        ENDDEBUG
 
 !        Fix the phase, and checks that the wavefunction is real
 !        (should be merged with routine fxphas)
@@ -1079,7 +1067,7 @@ contains
 !      call wrtout(std_out,message,'PERS')
 !      ENDDEBUG
 
-       call fourdp(cplex,rhog,work,-1,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,0)
+       call fourdp(cplex,rhog,work,-1,mpi_enreg,nfftdiel,1,ngfftdiel,0)
 
 !      DEBUG
 !      write(message,'(a,i3)')'Before Hartree, on proc ',me_loc
@@ -1092,7 +1080,7 @@ contains
 !      &            '   vhartr(1) :,',vhartr(1)
 !      ENDDEBUG
 
-       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,rhog,rprimd,vhartr)
+       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,rhog,rprimd,vhartr)
 
 !      DEBUG
 !      write(message,'(a,i3)')'After Hartree, on proc ',me_loc

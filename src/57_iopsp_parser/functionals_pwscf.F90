@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/functionals_pwscf.F90
 !! NAME
 !!  functionals_pwscf
@@ -217,13 +216,6 @@ CONTAINS
   !-----------------------------------------------------------------------
 
     use flib_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_dft_from_name'
-!End of the abilint section
-
     implicit none
     ! input
     character(len=*)               :: dft_
@@ -422,13 +414,6 @@ CONTAINS
   !-----------------------------------------------------------------------
 
     use flib_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_auxiliary_flags'
-!End of the abilint section
-
     isgradient =  (igcx > 0) .or. (igcc > 0) 
     ismeta     =  (igcx == 7) .or. (igcx == 6 )
 
@@ -464,13 +449,6 @@ CONTAINS
   subroutine set_dft_value (m, i)
   !-----------------------------------------------------------------------
     use flib_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_dft_value'
-!End of the abilint section
-
     implicit none
     integer :: m, i
     ! local
@@ -508,13 +486,6 @@ CONTAINS
   !
     use defs_basis, only : std_out,std_out_default
     use flib_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'enforce_input_dft'
-!End of the abilint section
-
     implicit none
     ! input
     character(len=*) :: dft_
@@ -555,13 +526,6 @@ CONTAINS
   subroutine start_exx 
 
     use flib_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'start_exx'
-!End of the abilint section
-
      if (.not. ishybrid) &
         call errore('start_exx','dft is not hybrid, wrong call',1)
      exx_started = .true.
@@ -589,13 +553,6 @@ CONTAINS
   subroutine stop_exx 
 
     use flib_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'stop_exx'
-!End of the abilint section
-
      if (.not. ishybrid) &
         call errore('stop_exx','dft is not hybrid, wrong call',1)
      exx_started = .false.
@@ -621,13 +578,6 @@ CONTAINS
 
   function exx_is_active ()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exx_is_active'
-!End of the abilint section
-
      logical exx_is_active
      exx_is_active = exx_started
   end function exx_is_active
@@ -651,13 +601,6 @@ CONTAINS
 !! SOURCE
   !-----------------------------------------------------------------------
   function get_iexch ()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_iexch'
-!End of the abilint section
 
      integer get_iexch
      get_iexch = iexch
@@ -684,13 +627,6 @@ CONTAINS
   !-----------------------------------------------------------------------
   function get_icorr ()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_icorr'
-!End of the abilint section
-
      integer get_icorr
      get_icorr = icorr
      return
@@ -715,13 +651,6 @@ CONTAINS
 !! SOURCE
   !-----------------------------------------------------------------------
   function get_igcx ()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_igcx'
-!End of the abilint section
 
      integer get_igcx
      get_igcx = igcx
@@ -748,13 +677,6 @@ CONTAINS
   !-----------------------------------------------------------------------
   function get_igcc ()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_igcc'
-!End of the abilint section
-
      integer get_igcc
      get_igcc = igcc
      return
@@ -779,13 +701,6 @@ CONTAINS
 !! SOURCE
   !-----------------------------------------------------------------------
   function get_exx_fraction ()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_exx_fraction'
-!End of the abilint section
 
      real(8):: get_exx_fraction
      get_exx_fraction = exx_fraction
@@ -812,13 +727,6 @@ CONTAINS
   !-----------------------------------------------------------------------
   function get_dft_name ()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dft_name'
-!End of the abilint section
-
      character (len=50) :: get_dft_name
      get_dft_name = dft
      return
@@ -843,13 +751,6 @@ CONTAINS
 !! SOURCE
   !-----------------------------------------------------------------------
   function dft_is_gradient ()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dft_is_gradient'
-!End of the abilint section
 
      logical :: dft_is_gradient
      dft_is_gradient = isgradient
@@ -876,13 +777,6 @@ CONTAINS
   !-----------------------------------------------------------------------
   function dft_is_meta ()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dft_is_meta'
-!End of the abilint section
-
      logical :: dft_is_meta
      dft_is_meta = ismeta
      return
@@ -907,13 +801,6 @@ CONTAINS
 !! SOURCE
   !-----------------------------------------------------------------------
   function dft_is_hybrid ()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dft_is_hybrid'
-!End of the abilint section
 
      logical :: dft_is_hybrid
      dft_is_hybrid = ishybrid
@@ -942,13 +829,6 @@ CONTAINS
 
     use defs_basis, only : std_out,std_out_default
     use flib_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_dft_from_indices'
-!End of the abilint section
-
     implicit none
      integer :: iexch_, icorr_, igcx_, igcc_
      if ( discard_input_dft ) return
@@ -1001,13 +881,6 @@ CONTAINS
   !---------------------------------------------------------------------
   subroutine dft_name(iexch_, icorr_, igcx_, igcc_, longname_, shortname_)
   !---------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dft_name'
-!End of the abilint section
-
   implicit none
   integer iexch_, icorr_, igcx_, igcc_
   character (len=4) :: shortname_
@@ -1056,13 +929,6 @@ end subroutine dft_name
 subroutine write_dft_name
 !-----------------------------------------------------------------------
    use defs_basis, only : std_out,std_out_default
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_dft_name'
-!End of the abilint section
-
    implicit none
 
    !write(std_out,'(5X,"Exchange-correlation      = ",A, &

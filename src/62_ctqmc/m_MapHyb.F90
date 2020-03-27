@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_MapHyb
 !! NAME
 !!  m_MapHyb
@@ -10,7 +10,7 @@
 !!  map template integer/double
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,7 +86,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -112,13 +112,6 @@ CONTAINS
 SUBROUTINE MapHyb_init(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_init'
-!End of the abilint section
-
   TYPE(MapHyb)     , INTENT(INOUT) :: this
   INTEGER, OPTIONAL, INTENT(IN   ) :: size
 !Local variables ------------------------------
@@ -143,7 +136,7 @@ END SUBROUTINE MapHyb_init
 !!  impose size of the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -169,13 +162,6 @@ END SUBROUTINE MapHyb_init
 SUBROUTINE MapHyb_setSize(this,new_tail)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_setSize'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: new_tail
 !Local variables ------------------------------
@@ -200,7 +186,7 @@ END SUBROUTINE MapHyb_setSize
 !!  enlarge memory space
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -226,13 +212,6 @@ END SUBROUTINE MapHyb_setSize
 SUBROUTINE MapHyb_enlarge(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_enlarge'
-!End of the abilint section
-
   TYPE(MapHyb)     , INTENT(INOUT)       :: this
   INTEGER, OPTIONAL, INTENT(IN   )       :: size
 !Local variables ------------------------------
@@ -277,7 +256,7 @@ END SUBROUTINE MapHyb_enlarge
 !!  assign this=map
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -303,13 +282,6 @@ END SUBROUTINE MapHyb_enlarge
 SUBROUTINE MapHyb_assign(this, map)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_assign'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   TYPE(MapHyb), INTENT(IN   ) :: map
 !Local variables ------------------------------
@@ -331,7 +303,7 @@ END SUBROUTINE MapHyb_assign
 !!  sort the this with respect to the integer array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -356,13 +328,6 @@ END SUBROUTINE MapHyb_assign
 SUBROUTINE MapHyb_sort(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_sort'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
  
   IF ( this%tail .EQ. 1 ) RETURN
@@ -379,7 +344,7 @@ END SUBROUTINE MapHyb_sort
 !!  with the quickSort algo
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -406,13 +371,6 @@ END SUBROUTINE MapHyb_sort
 RECURSIVE SUBROUTINE MapHyb_quickSort(this, begin, end)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_quickSort'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: begin
   INTEGER     , INTENT(IN   ) :: end
@@ -463,7 +421,7 @@ END SUBROUTINE MapHyb_quickSort
 !!  print the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -489,13 +447,6 @@ END SUBROUTINE MapHyb_quickSort
 SUBROUTINE MapHyb_print(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_print'
-!End of the abilint section
-
   TYPE(MapHyb)     , INTENT(IN) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -519,7 +470,7 @@ END SUBROUTINE MapHyb_print
 !!  Clear the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -544,13 +495,6 @@ END SUBROUTINE MapHyb_print
 SUBROUTINE MapHyb_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_clear'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   this%tail = 0 
 END SUBROUTINE MapHyb_clear
@@ -564,7 +508,7 @@ END SUBROUTINE MapHyb_clear
 !!  destroy and deallocate the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -589,13 +533,6 @@ END SUBROUTINE MapHyb_clear
 SUBROUTINE MapHyb_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_destroy'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
 
   FREEIF(this%listINT)

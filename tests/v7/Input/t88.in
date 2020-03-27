@@ -1,8 +1,8 @@
 # Calculation of phonon linewidths and e-ph coupling parameter lambda
-ndtset 3
+ndtset 4
 optdriver 7
-istwfk *1       # Limitation of wfd_t
 #nsppol  2
+prtvol 1  # This to activate the output of PHDOS in text format (slow!)
 
 # Common data
 ecut    6.0
@@ -11,7 +11,6 @@ tolwfr  1.0d-14
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB and DVDB files from DS20_DDB and _DVDB
-getddk   20      # read DDK files from DS20_DDKxx where xx is natom+1 +2 +3
 ddb_ngqpt 4 4 4  # q-mesh used to produce the DDB file (must be consistent with DDB data)
 
 # These are the default values.
@@ -75,7 +74,14 @@ prtphbands2  2         # Output phonon bands in gnuplot format
 ###############
 ## DATASET 3 ##
 ###############
-eph_ngqpt_fine3  8 8 8 # Activate Fourier interpolation of DFPT potentials.
+eph_task3        5
+eph_ngqpt_fine3  8 8 8 # Interpolate DFPT potentials (used in the dataset 4)
+
+###############
+## DATASET 4 ##
+###############
+getdvdb4 -1
+eph_ngqpt_fine4 8 8 8 
 
 # Geometry
 acell 3*7.5
@@ -90,11 +96,10 @@ xred   0.00 0.00 0.00
 ntypat 1
 znucl  13
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t85.in, t86.in, t87.in, t88.in
 #%% [files]
 #%% files_to_test = 

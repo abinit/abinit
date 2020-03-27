@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_BathOperator
 !! NAME
 !!  m_BathOperator
@@ -11,7 +11,7 @@
 !!  simgle Anderson Impurity Model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,7 +116,7 @@ CONTAINS
 !!  Initialize and allocate data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -146,13 +146,6 @@ CONTAINS
 SUBROUTINE BathOperator_init(this, flavors, samples, beta, iTech)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_init'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
   INTEGER           , INTENT(IN   ) :: flavors
   INTEGER           , INTENT(IN   ) :: samples
@@ -209,7 +202,7 @@ END SUBROUTINE BathOperator_init
 !!  Reset all internal variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -234,13 +227,6 @@ END SUBROUTINE BathOperator_init
 SUBROUTINE BathOperator_reset(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_reset'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                           :: it
@@ -276,7 +262,7 @@ END SUBROUTINE BathOperator_reset
 !!  It is better to use the macro defined in defs.h
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -302,13 +288,6 @@ END SUBROUTINE BathOperator_reset
 SUBROUTINE BathOperator_activateParticle(this,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_activateParticle'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER           , INTENT(IN   ) :: flavor
@@ -334,7 +313,7 @@ END SUBROUTINE BathOperator_activateParticle
 !!  at time time
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -359,13 +338,6 @@ END SUBROUTINE BathOperator_activateParticle
 
 DOUBLE PRECISION FUNCTION BathOperator_hybrid(this,time)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_hybrid'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(IN) :: this
   DOUBLE PRECISION  , INTENT(IN) :: time
 #include "BathOperator_hybrid.h"
@@ -387,7 +359,7 @@ END FUNCTION BathOperator_hybrid
 !!  is trying to be added and store some array for setMadd
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -415,13 +387,6 @@ END FUNCTION BathOperator_hybrid
 DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, particle)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_getDetAdd'
-!End of the abilint section
-
   TYPE(BathOperator)      , INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   INTEGER                 , INTENT(IN   ) :: position  
@@ -560,7 +525,7 @@ END FUNCTION BathOperator_getDetAdd
 !!  is trying to be removed 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -587,13 +552,6 @@ END FUNCTION BathOperator_getDetAdd
 DOUBLE PRECISION FUNCTION BathOperator_getDetRemove(this,position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_getDetRemove'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
 !Local arguments-------------------------------
   INTEGER           , INTENT(IN   ) :: position  
@@ -647,7 +605,7 @@ END FUNCTION BathOperator_getDetRemove
 !!  segments of particle
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -675,13 +633,6 @@ END FUNCTION BathOperator_getDetRemove
 DOUBLE PRECISION FUNCTION BathOperator_getDetF(this,flavor,particle)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_getDetF'
-!End of the abilint section
-
   TYPE(BathOperator)       , INTENT(INOUT)      :: this
   INTEGER                  , INTENT(IN   )  :: flavor
   TYPE(ListCdagC), OPTIONAL, INTENT(IN   )  :: particle
@@ -744,7 +695,7 @@ END FUNCTION BathOperator_getDetF
 !!  Update de M this inserting a row and a column
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -770,13 +721,6 @@ END FUNCTION BathOperator_getDetF
 SUBROUTINE BathOperator_setMAdd(this,particle) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_setMAdd'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
   TYPE(ListCdagC)   , INTENT(IN   ) :: particle
 !Local variables ------------------------------
@@ -1022,7 +966,7 @@ END SUBROUTINE BathOperator_setMAdd
 !!  delete one row and one column of the M this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1048,13 +992,6 @@ END SUBROUTINE BathOperator_setMAdd
 SUBROUTINE BathOperator_setMRemove(this,particle) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_setMRemove'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT)  :: this
   TYPE(ListCdagC)   , INTENT(IN   )  :: particle
 !Local variables ------------------------------
@@ -1208,7 +1145,7 @@ END SUBROUTINE BathOperator_setMRemove
 !!  Recompute 2 M this swaping the segments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1235,13 +1172,6 @@ END SUBROUTINE BathOperator_setMRemove
 SUBROUTINE BathOperator_swap(this, flavor1, flavor2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_swap'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
   INTEGER           , INTENT(IN   ) :: flavor1
   INTEGER           , INTENT(IN   ) :: flavor2
@@ -1264,7 +1194,7 @@ END SUBROUTINE BathOperator_swap
 !!  Copy input hybridization functions from a file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1291,13 +1221,6 @@ END SUBROUTINE BathOperator_swap
 SUBROUTINE BathOperator_initF(this,ifstream)
 
 !Arguments ----------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_initF'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
   INTEGER           , INTENT(IN   ) :: ifstream
 !Local variables ----------------
@@ -1323,7 +1246,7 @@ END SUBROUTINE BathOperator_initF
 !!  Copy F from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1349,13 +1272,6 @@ END SUBROUTINE BathOperator_initF
 SUBROUTINE BathOperator_setF(this,F)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_setF'
-!End of the abilint section
-
   TYPE(BathOperator)               , INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:,:) , INTENT(IN   ) :: F
 !Arguments ------------------------------------
@@ -1386,7 +1302,7 @@ END SUBROUTINE BathOperator_setF
 !!  print F function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1412,13 +1328,6 @@ END SUBROUTINE BathOperator_setF
 SUBROUTINE BathOperator_printF(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_printF'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(INOUT) :: this
   INTEGER,OPTIONAL  , INTENT(IN   ) :: ostream
 !Local variables ------------------------------
@@ -1456,7 +1365,7 @@ END SUBROUTINE BathOperator_printF
 !!  print M =F^{-1} this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1483,13 +1392,6 @@ END SUBROUTINE BathOperator_printF
 SUBROUTINE BathOperator_printM(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_printM'
-!End of the abilint section
-
   TYPE(BathOperator), INTENT(IN) :: this
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -1511,7 +1413,7 @@ END SUBROUTINE BathOperator_printM
 !!  Deallocate and reset every thing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1534,13 +1436,6 @@ END SUBROUTINE BathOperator_printM
 !! SOURCE
 
 SUBROUTINE  BathOperator_destroy(this)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_destroy'
-!End of the abilint section
 
   TYPE(BathOperator), INTENT(INOUT) :: this
   INTEGER  :: it
@@ -1581,7 +1476,7 @@ END SUBROUTINE BathOperator_destroy
 !!  Just store if we perfom check for updates of M
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1607,13 +1502,6 @@ END SUBROUTINE BathOperator_destroy
 SUBROUTINE BathOperator_doCheck(this,opt_check)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_doCheck'
-!End of the abilint section
-
   TYPE(BathOperator) , INTENT(INOUT) :: this
   INTEGER            , INTENT(IN   ) :: opt_check
   
@@ -1631,7 +1519,7 @@ END SUBROUTINE BathOperator_doCheck
 !!  with the already computed M this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1657,13 +1545,6 @@ END SUBROUTINE BathOperator_doCheck
 SUBROUTINE BathOperator_checkM(this,particle)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_checkM'
-!End of the abilint section
-
   TYPE(BathOperator) , INTENT(INOUT) :: this
   TYPE(ListCdagC)    , INTENT(IN   ) :: particle
 !Local variables ------------------------------
@@ -1755,7 +1636,7 @@ END SUBROUTINE BathOperator_checkM
 !!  compute a percentage error / checkM
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1779,13 +1660,6 @@ END SUBROUTINE BathOperator_checkM
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION BathOperator_getError(this)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperator_getError'
-!End of the abilint section
 
   TYPE(BathOperator), INTENT(IN) :: this
 

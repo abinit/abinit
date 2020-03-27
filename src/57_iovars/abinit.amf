@@ -1,2 +1,0 @@
-EXTRA_DIST += \
-	ab7_invars_f90.inc ab7_invars_f90_get.f90

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lbfgs
 !! NAME
 !!  m_lbfgs
@@ -10,7 +9,7 @@
 !!  They have been reshaped and translated into modern fortran here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (FB)
+!! Copyright (C) 2012-2020 ABINIT group (FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +30,8 @@ module m_lbfgs
 
  use defs_basis
  use m_abicore
+
+ implicit none
 
 type,public :: lbfgs_internal
  integer              :: lbfgs_status
@@ -90,15 +91,6 @@ contains
 
 subroutine lbfgs_init(ndim,history_record,diag_guess)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_init'
-!End of the abilint section
-
-implicit none
-
 integer,intent(in)   :: ndim
 integer,intent(in)   :: history_record
 real(dp),intent(in)  :: diag_guess(ndim)
@@ -147,15 +139,6 @@ end subroutine lbfgs_init
 
 subroutine lbfgs_destroy()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_destroy'
-!End of the abilint section
-
-implicit none
-
  if(allocated (lbfgs_plan%work)) then
    ABI_DEALLOCATE(lbfgs_plan%work)
  end if
@@ -192,14 +175,6 @@ end subroutine lbfgs_destroy
 
 function lbfgs_execute(x,f,gradf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_execute'
-!End of the abilint section
-
-implicit none
 real(dp),intent(inout) :: x(lbfgs_plan%ndim)
 real(dp),intent(in)    :: f
 real(dp),intent(in)    :: gradf(lbfgs_plan%ndim)
@@ -252,15 +227,6 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
                  LINE_STY,LINE_FY,LINE_DGY,   &
                  LINE_STMIN,LINE_STMAX,       &
                  LINE_BRACKT,LINE_STAGE1,LINE_INFOC)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -427,15 +393,6 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
                   GTOL,STPMIN,STPMAX,DGINIT,FINIT, &
                   STX,FX,DGX,STY,FY,DGY,STMIN,STMAX, &
                   BRACKT,STAGE1,INFOC)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mcsrch'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -652,15 +609,6 @@ end subroutine mcsrch
 !! SOURCE
 
 subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mcstep'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

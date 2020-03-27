@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_elt
 !! NAME
 !!  m_dfpt_elt
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GM, AR, MB)
+!! Copyright (C) 1998-2020 ABINIT group (DRH, DCA, XG, GM, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,12 +26,13 @@
 module m_dfpt_elt
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_special_funcs,  only : abi_derfc
  use m_geometry,    only : metric
@@ -61,6 +61,8 @@ module m_dfpt_elt
  public :: dfpt_eltfrhar
  public :: elt_ewald
  public :: dfpt_ewald
+ public :: dfpt_ewalddq
+ public :: dfpt_ewalddqdq
 !!***
 
 contains
@@ -139,15 +141,6 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 & nattyp,nfft,ngfft,ngfftf,nhat,nkxc,n3xccc,pawtab,ph1d,psps,rhor,rprimd,&
 & usexcnhat,vxc,xccc3d,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrxc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !type
 !scalars
@@ -174,6 +167,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  integer :: cplex,fgga,ia,idir,ielt,ieltx,ierr,ifft,ii,ipert,is1,is2,ispden,ispden_c,jj,ka,kb
  integer :: kd,kg,n1,n1xccc,n2,n3,n3xccc_loc,optatm,optdyfr,opteltfr,optgr
  integer :: option,optn,optn2,optstr,optv
+ logical :: nmxc
  real(dp) :: d2eacc,d2ecdgs2,d2exdgs2,d2gsds1ds2,d2gstds1ds2,decdgs,dexdgs
  real(dp) :: dgsds10,dgsds20,dgstds10,dgstds20,rstep,spnorm,tmp0,tmp0t
  real(dp) :: ucvol,valuei,yp1,ypn
@@ -226,6 +220,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
  end if
 
  fgga=0 ; if(nkxc==7.or.nkxc==19) fgga=1
+ nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
  ABI_ALLOCATE(eltfrxc_tmp,(6+3*dtset%natom,6))
  ABI_ALLOCATE(eltfrxc_tmp2,(6+3*dtset%natom,6))
@@ -295,7 +290,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(n1xccc/=0) then
      work(:)=work(:)+xccc3d(:)
    end if
-   call redgr (work,workgr,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb)
+   call redgr (work,workgr,mpi_enreg,nfft,ngfft)
    do ifft=1,nfft
      rho0_redgr(:,ifft,1)=workgr(ifft,:)
    end do
@@ -304,7 +299,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
      if(n1xccc/=0) then
        work(:)=work(:)+xccc3d(:)
      end if
-     call redgr(work,workgr,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb)
+     call redgr(work,workgr,mpi_enreg,nfft,ngfft)
      do ifft=1,nfft
        rho0_redgr(:,ifft,2)=workgr(ifft,:)
      end do
@@ -312,7 +307,6 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(workgr)
  end if !GGA
-
 
 !Null the elastic tensor accumulator
  eltfrxc(:,:)=zero;eltfrxc_tmp(:,:)=zero;eltfrxc_tmp2(:,:) = zero
@@ -368,7 +362,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==0 .or. (fgga==1 .and. n1xccc/=0)) then
      option=0
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
@@ -386,7 +380,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
    if(fgga==1) then
      option=2
      call dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,&
-&     dummy_in,nkxc,dtset%nspden,n3xccc_loc,option,mpi_enreg%paral_kgb,qphon,rhor,rhor,&
+&     dummy_in,nkxc,nmxc,dtset%nspden,n3xccc_loc,option,qphon,rhor,rhor,&
 &     rprimd,dtset%usepaw,usexcnhat,vxc10,xccc3d1)
      if(n1xccc/=0)then
        if(dtset%nspden==1) then
@@ -527,9 +521,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
 
 !      Fourier transform of Vxc_core/vxc10_core to use in atm2fft (reciprocal space calculation)
-       call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-       call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-       call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+       call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft,0)
+       call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft, 0)
+       call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,1, ngfft, 0)
 
        call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_tmp2,dummy_in,gmet,gprimd,&
 &       dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
@@ -588,9 +582,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          ABI_ALLOCATE(vxc_coreg,(2,nfft))
          ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
          vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
-         call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-         call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+         call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft, 0)
+         call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft,0)
+         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,1, ngfft, 0)
          optatm=0;optdyfr=0;optgr=0;optstr=0;optv=0;optn=1;optn2=1;opteltfr=1;corstr=zero
          call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_test2,dummy_in,gmet,gprimd,&
 &         dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
@@ -671,7 +665,7 @@ end subroutine dfpt_eltfrxc
 !! over the second strain and over all atomic displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2020 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -720,15 +714,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 & n1,n1xccc,n2,n3,rprimd,typat,ucvol,vxc_core,vxc10_core,vxc1is_core,&
 & xcccrc,xccc1d,xred, &
 & mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eltxccore'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1018,13 +1003,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 
    function cross_elt(xx,yy,zz,aa,bb,cc)
 !Define magnitude of cross product of two vectors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_elt'
-!End of the abilint section
-
    real(dp) :: cross_elt
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_elt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
@@ -1075,15 +1053,6 @@ end subroutine eltxccore
 
 subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,ph1d,qgrid,rhog,vlspl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrloc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1297,38 +1266,17 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 !Real and imaginary parts of phase.
    function phr_elt(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phr_elt'
-!End of the abilint section
-
    real(dp) :: phr_elt,x1,x2,x3,y1,y2,y3
    phr_elt=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_elt
 
    function phi_elt(x1,y1,x2,y2,x3,y3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phi_elt'
-!End of the abilint section
-
    real(dp):: phi_elt,x1,x2,x3,y1,y2,y3
    phi_elt=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
  end function phi_elt
 
    function ph1_elt(nri,ig1,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1_elt'
-!End of the abilint section
 
    real(dp):: ph1_elt
    integer :: nri,ig1,ia
@@ -1337,13 +1285,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
    function ph2_elt(nri,ig2,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph2_elt'
-!End of the abilint section
-
    real(dp):: ph2_elt
    integer :: nri,ig2,ia
    ph2_elt=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1))
@@ -1351,26 +1292,12 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
    function ph3_elt(nri,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph3_elt'
-!End of the abilint section
-
    real(dp):: ph3_elt
    integer :: nri,ig3,ia
    ph3_elt=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_elt
 
    function phre_elt(ig1,ig2,ig3,ia)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phre_elt'
-!End of the abilint section
 
    real(dp):: phre_elt
    integer :: ig1,ig2,ig3,ia
@@ -1380,13 +1307,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
 
    function phimag_elt(ig1,ig2,ig3,ia)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phimag_elt'
-!End of the abilint section
-
    real(dp) :: phimag_elt
    integer :: ig1,ig2,ig3,ia
    phimag_elt=phi_elt(ph1_elt(re,ig1,ia),ph1_elt(im,ig1,ia),&
@@ -1394,13 +1314,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end function phimag_elt
 
    function gsq_elt(i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_elt'
-!End of the abilint section
 
    real(dp) :: gsq_elt
    integer :: i1,i2,i3
@@ -1411,13 +1324,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end function gsq_elt
 
    function dgsqds_elt(i1,i2,i3,is)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dgsqds_elt'
-!End of the abilint section
 
    real(dp) :: dgsqds_elt
    integer :: i1,i2,i3,is
@@ -1430,13 +1336,6 @@ subroutine dfpt_eltfrloc(atindx,eltfrloc,gmet,gprimd,gsqcut,mgfft,&
  end function dgsqds_elt
 
    function d2gsqds_elt(i1,i2,i3,is1,is2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2gsqds_elt'
-!End of the abilint section
 
    real(dp) :: d2gsqds_elt
    integer :: i1,i2,i3,is1,is2
@@ -1500,15 +1399,6 @@ end subroutine dfpt_eltfrloc
 subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 &  istwfk,kg,kptns,mband,mgfft,mkmem,mpi_enreg,&
 &  mpw,nband,nkpt,ngfft,npwarr,nspinor,nsppol,occ,rprimd,wtk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrkin'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1694,15 +1584,6 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 subroutine d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &            istwfk,kg_k,kpt,npw,nspinor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2kindstr2'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,npw,nspinor
@@ -1866,15 +1747,6 @@ end subroutine dfpt_eltfrkin
 !! SOURCE
 
 subroutine dfpt_eltfrhar(eltfrhar,rprimd,gsqcut,mpi_enreg,nfft,ngfft,rhog)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_eltfrhar'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2088,15 +1960,6 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 &                 typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elt_ewald'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,ntypat
@@ -2195,7 +2058,8 @@ subroutine elt_ewald(elteew,gmet,gprimd,my_natom,natom,ntypat,rmet,rprimd,&
 !Here, a bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- eta=pi*200._dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+! eta=pi*200._dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+eta=1.0_dp
 
 !Conduct reciprocal space summations
  fac=pi**2/eta ; gsum=zero
@@ -2516,15 +2380,6 @@ end subroutine elt_ewald
 subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_ewald'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,sumg0
@@ -2645,7 +2500,6 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
      end do
    end do
  end do
-
 
 !Do sums over real space:
  reta=sqrt(eta)
@@ -2773,6 +2627,744 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
 end subroutine dfpt_ewald
+!!***
+
+!!****f* ABINIT/dfpt_ewalddq
+!!
+!! NAME
+!! dfpt_ewalddq
+!!
+!! FUNCTION
+!! Compute the first q-gradient of Ewald contribution to the dynamical matrix, at a given q wavevector.
+!! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2019 ABINIT group (MR, MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! gmet(3,3)=metric tensor in reciprocal space (length units **-2)
+!! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
+!! comm_atom=--optional-- MPI communicator over atoms
+!! my_natom=number of atoms treated by current processor
+!! natom=number of atoms in unit cell
+!! qphon(3)=phonon wavevector (same system of coordinates as the
+!!          reciprocal lattice vectors)
+!! rmet(3,3)=metric tensor in real space (length units squared)
+!! sumg0: if=1, the sum in reciprocal space must include g=0,
+!!   if=0, this contribution must be skipped (q=0 singularity)
+!! typat(natom)=integer label of each type of atom (1,2,...)
+!! ucvol=unit cell volume in (whatever length scale units)**3
+!! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
+!! zion(ntypat)=charge on each type of atom (real number)
+!!
+!! OUTPUT
+!! dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the dynamical matrix,
+!!    second energy derivative wrt xred(3,natom), Hartrees.
+!!
+!! PARENTS
+!!      respfn
+!!
+!! CHILDREN
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
+!!
+!! SOURCE
+
+subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
+&                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: my_natom,natom,sumg0
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: typat(natom)
+ integer,optional,intent(in) :: comm_atom
+ integer,optional,target,intent(in) :: mpi_atmtab(:)
+ real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),xred(3,natom),zion(*)
+ real(dp),intent(out) :: dyewdq(2,3,natom,3,natom,3)
+
+!Local variables -------------------------
+!nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
+!scalars
+ integer,parameter :: im=2,nng=10,nnr=6,re=1
+ integer ::ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
+ logical :: my_atmtab_allocated,paral_atom
+ real(dp) :: arg,arga,argb,c1i,c1r,delag,delbg,derfc_arg
+ real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
+ real(dp) :: eta,fac,fac2,gdot12,gdot13,gdot23,gsq,gpqdq,gterms,norm1
+ real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
+ real(dp) :: reta3m,rmagn,rsq,term,term1,term2,term3
+ character(len=500) :: message
+!arrays
+ real(dp) :: tsec(2)
+ integer,pointer :: my_atmtab(:)
+ real(dp) :: dakk(3),gpq(3),rq(3)
+
+! *************************************************************************
+
+!Set up parallelism over atoms
+ paral_atom=(present(comm_atom).and.(my_natom/=natom))
+ nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
+
+!Compute eta for approximately optimized summations:
+ direct=rmet(1,1)+rmet(1,2)+rmet(1,3)+rmet(2,1)+&
+& rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
+ recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
+& gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+ eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
+
+!Test Ewald s summation
+!eta=1.2_dp*eta
+
+!Sum over G space, done shell after shell until all
+!contributions are too small.
+ fac=pi**2.d0/eta
+ fac2=2.d0*fac
+ dyewdq(:,:,:,:,:,:)=zero
+ ng=0
+ do
+   ng=ng+1
+   newg=0
+
+   do ig3=-ng,ng
+     do ig2=-ng,ng
+       do ig1=-ng,ng
+
+!        Exclude shells previously summed over
+         if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng&
+&         .or. ng==1 ) then
+
+           gpq(1)=dble(ig1)+qphon(1)
+           gpq(2)=dble(ig2)+qphon(2)
+           gpq(3)=dble(ig3)+qphon(3)
+           gdot12=gmet(2,1)*gpq(1)*gpq(2)
+           gdot13=gmet(3,1)*gpq(1)*gpq(3)
+           gdot23=gmet(3,2)*gpq(2)*gpq(3)
+           dot1=gmet(1,1)*gpq(1)**2+gdot12+gdot13
+           dot2=gmet(2,2)*gpq(2)**2+gdot12+gdot23
+           dot3=gmet(3,3)*gpq(3)**2+gdot13+gdot23
+           gsq=dot1+dot2+dot3
+  !        Skip q=0:
+           if (gsq<1.0d-20) then
+             if (sumg0==1) then
+               write(message,'(3a)')&
+  &             'The G=0 term has no contributions at first order in q: ',ch10,&
+  &             'Action : sumg0=0 '
+               MSG_ERROR(message)
+             end if
+           else
+             arg=fac*gsq
+  !          Larger arg gives 0 contribution:
+             if (arg <= 80._dp) then
+!              When any term contributes then include next shell
+               newg=1
+               term=exp(-arg)/gsq
+               do ia0=1,my_natom
+                 ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+                 arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
+                 do ib=1,ia
+                   argb=two_pi*(gpq(1)*xred(1,ib)+gpq(2)*xred(2,ib)+gpq(3)*xred(3,ib))
+                   arg=arga-argb
+                   c1r=cos(arg)*term
+                   c1i=sin(arg)*term
+  
+                   do iq=1,3
+                     gpqdq=gmet(iq,1)*gpq(1)+gmet(iq,2)*gpq(2)+gmet(iq,3)*gpq(3)
+                     do mu=1,3
+                       delag=zero; if(iq==mu) delag=one
+                       do nu=1,mu
+                         delbg=zero; if(iq==nu) delbg=one
+                         term1=delag*gpq(nu)+delbg*gpq(mu)
+                         term2=gpq(mu)*gpq(nu)*gpqdq
+                         term3=fac2*term2
+                         term2=two*term2/gsq
+                         gterms=term1-term2-term3
+                         dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)+gterms*c1r
+                         dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+gterms*c1i
+                       end do
+                     end do
+                   end do
+  
+                 end do
+               end do
+             end if
+  !          Endif g/=0 :
+           end if
+         end if
+  !        End triple loop over G s:
+       end do
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if (newg==0) exit
+ end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+
+!End G summation by accounting for some common factors.
+!(for the charges:see end of routine)
+ norm1=4.0_dp*pi/ucvol
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq=1,3
+       do mu=1,3
+         do nu=1,mu
+           dyewdq(:,mu,ia,nu,ib,iq)=dyewdq(:,mu,ia,nu,ib,iq)*norm1
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Do sums over real space:
+ reta=sqrt(eta)
+ reta3m=-eta*reta
+ fac=4._dp/3.0_dp/sqrt(pi)
+ nr=0
+ do
+   nr=nr+1
+   newr=0
+ 
+   do ir3=-nr,nr
+     do ir2=-nr,nr
+       do ir1=-nr,nr
+         if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
+
+           arg=two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
+           c1r=cos(arg)*reta3m
+           c1i=sin(arg)*reta3m
+           do ia0=1,my_natom
+             ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+             do ib=1,ia
+               r1=dble(ir1)+xred(1,ib)-xred(1,ia)
+               r2=dble(ir2)+xred(2,ib)-xred(2,ia)
+               r3=dble(ir3)+xred(3,ib)-xred(3,ia)
+               dakk(:)=two_pi*(/r1,r2,r3/)
+               rdot12=rmet(2,1)*r1*r2
+               rdot13=rmet(3,1)*r1*r3
+               rdot23=rmet(3,2)*r2*r3
+               dotr1=rmet(1,1)*r1**2+rdot12+rdot13
+               dotr2=rmet(2,2)*r2**2+rdot12+rdot23
+               dotr3=rmet(3,3)*r3**2+rdot13+rdot23
+               rsq=dotr1+dotr2+dotr3
+               rmagn=sqrt(rsq)
+!              Avoid zero denominators in term :
+               if (rmagn>=1.0d-12) then
+                 arg=reta*rmagn
+                 term=zero
+                 if (arg<8.0_dp) then
+!                  Note: erfc(8) is about 1.1e-29,
+!                  so don t bother with larger arg.
+!                  Also: exp(-64) is about 1.6e-28,
+!                  so don t bother with larger arg**2 in exp.
+                   newr=1
+                   derfc_arg = abi_derfc(arg)
+                   term=derfc_arg/arg**3
+                   term1=2.0_dp/sqrt(pi)*exp(-arg**2)/arg**2
+                   term2=-(term+term1)
+                   term3=(3*term+term1*(3.0_dp+2.0_dp*arg**2))/rsq
+                   rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
+                   rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
+                   rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
+                   do iq=1,3               
+                     do mu=1,3
+!                       do nu=1,3
+                       do nu=1,mu
+                         dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)-&
+&                         c1i*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                         dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+&
+&                         c1r*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                       end do
+                     end do
+                   end do
+                 end if
+               else
+                 if (ia/=ib)then
+                   write(message,'(a,a,a,a,a,i5,a,i5,a)')&
+&                   'The distance between two atoms vanishes.',ch10,&
+&                   'This is not allowed.',ch10,&
+&                   'Action: check the input for the atoms number',ia,' and',ib,'.'
+                   MSG_ERROR(message)
+                 end if
+               end if
+
+             end do ! End loop over ib:
+           end do ! End loop over ia:
+         end if
+       end do ! End triple loop over real space points:
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if(newr==0) exit
+ end do !  End loop on nr (new shells). Note that there is an exit within the loop
+
+!Take account of the charges
+!write(std_out,*)' '
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq=1,3               
+       do mu=1,3
+         do nu=1,mu
+           do ii=1,2
+             dyewdq(ii,mu,ia,nu,ib,iq)=dyewdq(ii,mu,ia,nu,ib,iq)*&
+&             zion(typat(ia))*zion(typat(ib))
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Symmetrize with respect to the directions
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq=1,3
+       do mu=1,3
+         do nu=1,mu
+           dyewdq(re,nu,ia,mu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)
+           dyewdq(im,nu,ia,mu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!In case of parallelism over atoms: communicate
+ if (paral_atom) then
+   call timab(48,1,tsec)
+   call xmpi_sum(dyewdq,my_comm_atom,ierr)
+   call timab(48,2,tsec)
+ end if
+
+!Fill the upper part of the matrix, with the hermitian conjugate
+ do ia=1,natom
+   do ib=1,ia
+     do iq=1,3
+       do nu=1,3
+         do mu=1,3
+           dyewdq(re,mu,ib,nu,ia,iq)=dyewdq(re,mu,ia,nu,ib,iq)
+           dyewdq(im,mu,ib,nu,ia,iq)=-dyewdq(im,mu,ia,nu,ib,iq)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
+end subroutine dfpt_ewalddq
+!!***
+
+!!****f* ABINIT/dfpt_ewalddqdq
+!!
+!! NAME
+!! dfpt_ewalddqdq
+!!
+!! FUNCTION
+!! Compute the second q-gradient of Ewald contribution to the dynamical matrix, at a given q wavevector,
+!! sumed over the second atomic sublattice.
+!! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2019 ABINIT group (MR, MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! gmet(3,3)=metric tensor in reciprocal space (length units **-2)
+!! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
+!! comm_atom=--optional-- MPI communicator over atoms
+!! my_natom=number of atoms treated by current processor
+!! natom=number of atoms in unit cell
+!! qphon(3)=phonon wavevector (same system of coordinates as the
+!!          reciprocal lattice vectors)
+!! rmet(3,3)=metric tensor in real space (length units squared)
+!! sumg0: if=1, the sum in reciprocal space must include g=0,
+!!   if=0, this contribution must be skipped (q=0 singularity)
+!! typat(natom)=integer label of each type of atom (1,2,...)
+!! ucvol=unit cell volume in (whatever length scale units)**3
+!! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
+!! zion(ntypat)=charge on each type of atom (real number)
+!!
+!! OUTPUT
+!! dyewdqdq(2,3,natom,3,3,3)= First q-gradient of Ewald part of the dynamical matrix,
+!!    sumed over second atomic sublattice.
+!!
+!! PARENTS
+!!      respfn
+!!
+!! CHILDREN
+!!      free_my_atmtab,get_my_atmtab,timab,xmpi_sum
+!!
+!! SOURCE
+
+subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
+&                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: my_natom,natom,sumg0
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: typat(natom)
+ integer,optional,intent(in) :: comm_atom
+ integer,optional,target,intent(in) :: mpi_atmtab(:)
+ real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),xred(3,natom),zion(*)
+ real(dp),intent(out) :: dyewdqdq(2,3,natom,3,3,3)
+
+!Local variables -------------------------
+!nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
+!scalars
+ integer,parameter :: im=2,nng=10,nnr=6,re=1
+ integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq1,iq2,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
+ logical :: my_atmtab_allocated,paral_atom
+ real(dp) :: arg,arga,argb,c1i,c1r,delad,delag,delbd,delbg,derfc_arg
+ real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
+ real(dp) :: eta,fac,fac2,fac8,fac2sqr,gdot12,gdot13,gdot23,gsq,gsqsq,gpqdq1,gpqdq2,gterms,g0term,norm1
+ real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
+ real(dp) :: reta3m,rmagn,rsq,term,term1,term2,term3
+ character(len=500) :: message
+!arrays
+ integer,pointer :: my_atmtab(:)
+ real(dp) :: dakk(3),gpq(3),rq(3)
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: work(:,:,:,:,:,:,:)
+
+! *************************************************************************
+
+!Set up parallelism over atoms
+ paral_atom=(present(comm_atom).and.(my_natom/=natom))
+ nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
+
+!Compute eta for approximately optimized summations:
+ direct=rmet(1,1)+rmet(1,2)+rmet(1,3)+rmet(2,1)+&
+& rmet(2,2)+rmet(2,3)+rmet(3,1)+rmet(3,2)+rmet(3,3)
+ recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
+& gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
+ eta=pi*(dble(nng)/dble(nnr))*sqrt(1.69_dp*recip/direct)
+! eta=1.0_dp
+
+!Test Ewald s summation
+!eta=1.2_dp*eta
+
+!Sum terms over g space:
+ fac=pi**2.0_dp/eta
+ fac2=2.0_dp*fac
+ fac8=4.0_dp*fac2
+ fac2sqr=fac2*fac2
+ ABI_ALLOCATE(work,(2,3,natom,3,natom,3,3))
+ work(:,:,:,:,:,:,:)=zero
+ ng=0
+ do
+   ng=ng+1
+   newg=0
+
+   do ig3=-ng,ng
+     do ig2=-ng,ng
+       do ig1=-ng,ng
+
+!        Exclude shells previously summed over
+         if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng&
+&         .or. ng==1 ) then
+
+           gpq(1)=dble(ig1)+qphon(1)
+           gpq(2)=dble(ig2)+qphon(2)
+           gpq(3)=dble(ig3)+qphon(3)
+           gdot12=gmet(2,1)*gpq(1)*gpq(2)
+           gdot13=gmet(3,1)*gpq(1)*gpq(3)
+           gdot23=gmet(3,2)*gpq(2)*gpq(3)
+           dot1=gmet(1,1)*gpq(1)**2+gdot12+gdot13
+           dot2=gmet(2,2)*gpq(2)**2+gdot12+gdot23
+           dot3=gmet(3,3)*gpq(3)**2+gdot13+gdot23
+           gsq=dot1+dot2+dot3
+           gsqsq=gsq*gsq
+!          Skip q=0:
+           if (gsq<1.0d-20) then
+
+!            At second order in q there is a nonvanishing G=0 contribution in the longwave limit
+             if (sumg0==1) then
+               do ia0=1,my_natom
+                 ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+                 do ib=1,ia
+                   do iq2=1,3
+                     do iq1=1,3
+                       do mu=1,3
+                         delag=zero; if(iq1==mu) delag=one
+                         delad=zero; if(iq2==mu) delad=one
+                         do nu=1,mu
+                           delbg=zero; if(iq1==nu) delbg=one
+                           delbd=zero; if(iq2==nu) delbd=one
+                           g0term=-fac*(delad*delbg+delbd*delag)
+                           work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+g0term
+                         end do
+                       end do
+                     end do
+                   end do
+                 end do
+               end do
+             end if
+
+           else
+             arg=fac*gsq
+!            Larger arg gives 0 contribution:
+             if (arg <= 80._dp) then
+               newg=1
+               term=exp(-arg)/gsq
+               do ia0=1,my_natom
+                 ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+                 arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
+                 do ib=1,ia
+                   argb=two_pi*(gpq(1)*xred(1,ib)+gpq(2)*xred(2,ib)+gpq(3)*xred(3,ib))
+                   arg=arga-argb
+                   c1r=cos(arg)*term
+                   c1i=sin(arg)*term
+
+                   do iq2=1,3
+                     gpqdq2=gmet(iq2,1)*gpq(1)+gmet(iq2,2)*gpq(2)+gmet(iq2,3)*gpq(3)
+                     do iq1=1,3
+                       gpqdq1=gmet(iq1,1)*gpq(1)+gmet(iq1,2)*gpq(2)+gmet(iq1,3)*gpq(3)
+                       do mu=1,3
+                         delag=zero; if(iq1==mu) delag=one
+                         delad=zero; if(iq2==mu) delad=one
+                         do nu=1,mu
+                           delbg=zero; if(iq1==nu) delbg=one
+                           delbd=zero; if(iq2==nu) delbd=one
+
+                           term1=gpqdq2*(delag*gpq(nu)+delbg*gpq(mu))
+                           term1=term1+gpqdq1*(delad*gpq(nu)+delbd*gpq(mu))
+                           term1=term1+gpq(mu)*gpq(nu)*gmet(iq1,iq2)
+                           term1=-term1*(fac2+2.0_dp/gsq)
+
+                           term2=delag*delbd + delbg*delad 
+
+                           term3=gpqdq1*gpqdq2*gpq(mu)*gpq(nu)
+                           term3=term3*(fac8/gsq + fac2sqr + 8.0_dp/gsqsq)
+   
+                           gterms=term1+term2+term3
+                           work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+gterms*c1r
+                           work(im,mu,ia,nu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)+gterms*c1i
+                         end do
+                       end do
+                     end do
+                   end do
+                 end do
+               end do
+             end if
+!            Endif g/=0 :
+           end if
+         end if
+!        End triple loop over G s:
+       end do
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if (newg==0) exit
+ end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+
+!End G summation by accounting for some common factors.
+!(for the charges:see end of routine)
+ norm1=4.0_dp*pi/ucvol
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq2=1,3
+       do iq1=1,3
+         do mu=1,3
+           do nu=1,mu
+             work(:,mu,ia,nu,ib,iq1,iq2)=work(:,mu,ia,nu,ib,iq1,iq2)*norm1
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Do sums over real space:
+ reta=sqrt(eta)
+ reta3m=eta*reta
+ fac=4._dp/3.0_dp/sqrt(pi)
+ nr=0
+ do
+   nr=nr+1
+   newr=0
+
+   do ir3=-nr,nr
+     do ir2=-nr,nr
+       do ir1=-nr,nr
+         if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
+
+           arg=two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
+           c1r=cos(arg)*reta3m
+           c1i=sin(arg)*reta3m
+           do ia0=1,my_natom
+             ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+             do ib=1,ia
+               r1=dble(ir1)+xred(1,ib)-xred(1,ia)
+               r2=dble(ir2)+xred(2,ib)-xred(2,ia)
+               r3=dble(ir3)+xred(3,ib)-xred(3,ia)
+               dakk(:)=two_pi*(/r1,r2,r3/)
+               rdot12=rmet(2,1)*r1*r2
+               rdot13=rmet(3,1)*r1*r3
+               rdot23=rmet(3,2)*r2*r3
+               dotr1=rmet(1,1)*r1**2+rdot12+rdot13
+               dotr2=rmet(2,2)*r2**2+rdot12+rdot23
+               dotr3=rmet(3,3)*r3**2+rdot13+rdot23
+               rsq=dotr1+dotr2+dotr3
+               rmagn=sqrt(rsq)
+!              Avoid zero denominators in term :
+               if (rmagn>=1.0d-12) then
+                 arg=reta*rmagn
+                 term=zero
+                 if (arg<8.0_dp) then
+!                  Note: erfc(8) is about 1.1e-29,
+!                  so don t bother with larger arg.
+!                  Also: exp(-64) is about 1.6e-28,
+!                  so don t bother with larger arg**2 in exp.
+                   newr=1
+                   derfc_arg = abi_derfc(arg)
+                   term=derfc_arg/arg**3
+                   term1=2.0_dp/sqrt(pi)*exp(-arg**2)/arg**2
+                   term2=-(term+term1)
+                   term3=(3*term+term1*(3.0_dp+2.0_dp*arg**2))/rsq
+                   rq(1)=rmet(1,1)*r1+rmet(1,2)*r2+rmet(1,3)*r3
+                   rq(2)=rmet(2,1)*r1+rmet(2,2)*r2+rmet(2,3)*r3
+                   rq(3)=rmet(3,1)*r1+rmet(3,2)*r2+rmet(3,3)*r3
+                   do iq2=1,3               
+                     do iq1=1,3               
+                       do mu=1,3
+!                         do nu=1,3
+                         do nu=1,mu
+                           work(re,mu,ia,nu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)+&
+&                           c1r*dakk(iq1)*dakk(iq2)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                           work(im,mu,ia,nu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)+&
+&                           c1i*dakk(iq1)*dakk(iq2)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+                         end do
+                       end do
+                     end do
+                   end do
+                 end if
+               else
+                 if (ia/=ib)then
+                   write(message,'(a,a,a,a,a,i5,a,i5,a)')&
+&                   'The distance between two atoms vanishes.',ch10,&
+&                   'This is not allowed.',ch10,&
+&                   'Action: check the input for the atoms number',ia,' and',ib,'.'
+                   MSG_ERROR(message)
+                 end if
+               end if
+
+             end do ! End loop over ib:
+           end do ! End loop over ia:
+         end if
+       end do ! End triple loop over real space points:
+     end do
+   end do
+
+!  Check if new shell must be calculated
+   if(newr==0) exit
+ end do !  End loop on nr (new shells). Note that there is an exit within the loop
+
+!Take account of the charges
+!write(std_out,*)' '
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq2=1,3               
+       do iq1=1,3               
+         do mu=1,3
+           do nu=1,mu
+             do ii=1,2
+               work(ii,mu,ia,nu,ib,iq1,iq2)=work(ii,mu,ia,nu,ib,iq1,iq2)*&
+&               zion(typat(ia))*zion(typat(ib))
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Symmetrize with respect to the directions
+ do ia0=1,my_natom
+   ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
+   do ib=1,ia
+     do iq2=1,3
+       do iq1=1,3
+         do mu=1,3
+           do nu=1,mu
+             work(re,nu,ia,mu,ib,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)
+             work(im,nu,ia,mu,ib,iq1,iq2)=work(im,mu,ia,nu,ib,iq1,iq2)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!In case of parallelism over atoms: communicate
+ if (paral_atom) then
+   call timab(48,1,tsec)
+   call xmpi_sum(work,my_comm_atom,ierr)
+   call timab(48,2,tsec)
+ end if
+
+!Fill the upper part of the matrix, with the hermitian conjugate
+ do ia=1,natom
+   do ib=1,ia
+     do iq2=1,3
+       do iq1=1,3
+         do nu=1,3
+           do mu=1,3
+             work(re,mu,ib,nu,ia,iq1,iq2)=work(re,mu,ia,nu,ib,iq1,iq2)
+             work(im,mu,ib,nu,ia,iq1,iq2)=-work(im,mu,ia,nu,ib,iq1,iq2)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Perform the summation over the second atomic sublattice
+ dyewdqdq(:,:,:,:,:,:)=zero
+ do ia=1,natom
+   do iq2=1,3
+     do iq1=1,3
+       do nu=1,3
+         do mu=1,3
+           do ib=1,natom
+             dyewdqdq(re,mu,ia,nu,iq1,iq2)=dyewdqdq(re,mu,ia,nu,iq1,iq2) + &
+           & work(re,mu,ia,nu,ib,iq1,iq2)
+             dyewdqdq(im,mu,ia,nu,iq1,iq2)=dyewdqdq(im,mu,ia,nu,iq1,iq2) + &
+           & work(im,mu,ia,nu,ib,iq1,iq2)
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+ ABI_DEALLOCATE(work)
+ 
+!Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
+end subroutine dfpt_ewalddqdq
 !!***
 
 end module m_dfpt_elt

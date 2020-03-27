@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_driver
 !! NAME
 !!  m_driver
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,6 +23,57 @@
 #include "abi_common.h"
 
 module m_driver
+
+ use defs_basis
+ use defs_wvltypes
+ use m_errors
+ use m_dtset
+ use m_results_out
+ use m_results_respfn
+ use m_yaml
+ use m_xmpi
+ use m_xomp
+ use m_abi_linalg
+ use m_abicore
+ use m_exit
+ use m_dtfil
+ use m_fftcore
+ use libxc_functionals
+#if defined DEV_YP_VDWXC
+ use m_xc_vdw
+#endif
+ use m_xgScalapack
+
+ use defs_datatypes, only : pseudopotential_type, pspheader_type
+ use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
+ use m_time,         only : timab
+ use m_xg,           only : xg_finalize
+ use m_libpaw_tools, only : libpaw_write_comm_set
+ use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
+ use m_pawang,       only : pawang_type, pawang_free
+ use m_pawrad,       only : pawrad_type, pawrad_free
+ use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
+ use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
+ use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
+ use m_mpinfo,       only : mpi_distrib_is_ok
+ use m_respfn_driver,    only : respfn
+ use m_screening_driver, only : screening
+ use m_sigma_driver,     only : sigma
+ use m_bethe_salpeter,   only : bethe_salpeter
+ use m_eph_driver,       only : eph
+ use m_wfk_analyze,      only : wfk_analyze
+ use m_gstateimg,        only : gstateimg
+ use m_gwls_sternheimer, only : gwls_sternheimer
+ use m_nonlinear,        only : nonlinear
+ use m_drivexc,          only : echo_xc_name
+
+#if defined HAVE_BIGDFT
+ use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
+&                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
+#endif
+
+ use m_longwave
 
  implicit none
 
@@ -50,7 +100,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2020 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,65 +161,11 @@ contains
 subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_errors
- use m_results_out
- use m_results_respfn
- use m_xmpi
- use m_xomp
- use m_abi_linalg
- use m_abicore
- use m_exit
- use libxc_functionals
-#if defined DEV_YP_VDWXC
- use m_xc_vdw
-#endif
- use m_xgScalapack
-
- use m_time,         only : timab
- use m_xg,           only : xg_finalize
- use m_libpaw_tools, only : libpaw_write_comm_set
- use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
- use m_pawang,       only : pawang_type, pawang_free
- use m_pawrad,       only : pawrad_type, pawrad_free
- use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
- use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
- use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
- use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
- use m_mpinfo,       only : mpi_distrib_is_ok
- use m_dtfil,        only : dtfil_init, dtfil_init_img, status
- use m_respfn_driver,    only : respfn
- use m_screening_driver, only : screening
- use m_sigma_driver,     only : sigma
- use m_bethe_salpeter,   only : bethe_salpeter
- use m_eph_driver,       only : eph
- use m_wfk_analyze,      only : wfk_analyze
- use m_gstateimg,        only : gstateimg
- use m_gwls_sternheimer, only : gwls_sternheimer
- use m_nonlinear,        only : nonlinear
- use m_drivexc,          only : echo_xc_name
-
-#if defined HAVE_BIGDFT
- use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
-&                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
-#endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'driver'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: ndtset,ndtset_alloc,npsp
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: filstat
  type(MPI_type),intent(inout) :: mpi_enregs(0:ndtset_alloc)
  !arrays
@@ -186,11 +182,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer,parameter :: level=2,mdtset=9999
  integer,save :: paw_size_old=-1
  integer :: idtset,ierr,iexit,iget_cell,iget_occ,iget_vel,iget_xcart,iget_xred
- integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk
- integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol
+ integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk,linalg_max_size
+ integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol, omp_nthreads
  real(dp) :: etotal
- character(len=500) :: message
- character(len=500) :: dilatmx_errmsg
+ character(len=500) :: msg, dilatmx_errmsg
  logical :: converged,results_gathered,test_img,use_results_all
  type(dataset_type) :: dtset
  type(datafiles_type) :: dtfil
@@ -198,6 +193,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  type(pseudopotential_type) :: psps
  type(results_respfn_type) :: results_respfn
  type(wvl_data) :: wvl
+ type(yamldoc_t) :: ydoc
 #if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_params
 #endif
@@ -206,7 +202,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer,allocatable :: jdtset_(:),npwtot(:)
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: acell_img(:,:),amu_img(:,:),rprim_img(:,:,:)
- real(dp),allocatable :: fcart_img(:,:,:),fred_img(:,:,:)
+ real(dp),allocatable :: fcart_img(:,:,:),fred_img(:,:,:),intgres_img(:,:,:)
  real(dp),allocatable :: etotal_img(:),mixalch_img(:,:,:),strten_img(:,:),miximage(:,:)
  real(dp),allocatable :: occ(:),xcart(:,:),xred(:,:),xredget(:,:)
  real(dp),allocatable :: occ_img(:,:),vel_cell_img(:,:,:),vel_img(:,:,:),xred_img(:,:,:)
@@ -220,18 +216,17 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  call timab(640,1,tsec)
  call timab(641,3,tsec)
- call status(0,filstat,iexit,level,'enter         ')
 
 !Structured debugging if prtvol==-level
  prtvol=dtsets(1)%prtvol
  if(prtvol==-level)then
-   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' driver : enter , debug mode '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(80a,a,a)')  ('=',ii=1,80),ch10,' driver : enter , debug mode '
+   call wrtout(std_out, msg)
  end if
 
  if(ndtset>mdtset)then
-   write(message,'(a,i2,a,i5,a)')'  The maximal allowed ndtset is ',mdtset,' while the input value is ',ndtset,'.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a,i0,a)')'  The maximal allowed ndtset is ',mdtset,' while the input value is ',ndtset,'.'
+   MSG_BUG(msg)
  end if
 
  mtypalch=dtsets(1)%ntypalch
@@ -273,31 +268,111 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      jdtset_status=0
    end if
 
-   call status(jdtset_status,filstat,iexit,level,'loop jdtset   ')
-
 !  Copy input variables into a local dtset.
-   call dtset_copy(dtset, dtsets(idtset))
+   dtset = dtsets(idtset)%copy()
 
 !  Set other values
    dtset%jdtset = jdtset
    dtset%ndtset = ndtset
 
 !  Print DATASET number
-   write(message,'(83a)') ch10,('=',mu=1,80),ch10,'== DATASET'
+   write(msg,'(83a)') ch10,('=',mu=1,80),ch10,'== DATASET'
    if (jdtset>=100) then
-     write(message,'(2a,i4,65a)') trim(message),' ',jdtset,' ',('=',mu=1,64)
+     write(msg,'(2a,i4,65a)') trim(msg),' ',jdtset,' ',('=',mu=1,64)
    else
-     write(message,'(2a,i2,67a)') trim(message),' ',jdtset,' ',('=',mu=1,66)
+     write(msg,'(2a,i2,67a)') trim(msg),' ',jdtset,' ',('=',mu=1,66)
    end if
-   write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
-   if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,&
-&   dtset%mkmem,dtset%nsppol)) then
-     write(message,'(2a)') trim(message),&
-&     '   -> not optimal: autoparal keyword recommended in input file'
+
+#ifdef HAVE_OPENMP
+   omp_nthreads = xomp_get_num_threads(open_parallel=.True.)
+#else
+   omp_nthreads = -1
+#endif
+   write(msg,'(2a,2(a, i0), a)') trim(msg),ch10,&
+     '-   mpi_nproc: ',mpi_enregs(idtset)%nproc, ", omp_nthreads: ", omp_nthreads, " (-1 if OMP is not activated)"
+
+   if (dtset%optdriver == RUNL_GSTATE) then
+     if (.not. mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
+       write(msg,'(3a)') trim(msg),ch10,'-    --> not optimal distribution: autoparal keyword recommended in input file <--'
+     end if
    end if
-   write(message,'(3a)') trim(message),ch10,' '
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
+
+   write(msg,'(3a)') trim(msg),ch10,' '
+   call wrtout(ab_out, msg)
+   call wrtout(std_out, msg, 'PERS')     ! PERS is choosen to make debugging easier
+
+   call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
+
+   if (mpi_enregs(idtset)%me_cell == 0) then
+     ydoc = yamldoc_open('DatasetInfo')
+
+     ! Write basic dimensions.
+     call ydoc%add_ints( &
+       "natom, nkpt, mband, nsppol, nspinor, nspden, mpw", &
+       [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden, dtset%mpw], &
+       dict_key="dimensions")
+
+     ! Write cutoff energies.
+     call ydoc%add_reals("ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], &
+       real_fmt="(f5.1)", dict_key="cutoff_energies")
+
+     ! Write info on electrons.
+     call ydoc%add_reals("nelect, charge, occopt, tsmear", &
+       [dtset%nelect, dtset%charge, one * dtset%occopt, dtset%tsmear], &
+       dict_key="electrons")
+
+     ! This part depends on optdriver.
+     ! Third-party Yaml parsers may use optdriver to specialize the logic used to interpret the next data.
+     select case (dtset%optdriver)
+     case (RUNL_GSTATE)
+       call ydoc%add_ints("optdriver, ionmov, optcell, iscf, paral_kgb", &
+         [dtset%optdriver, dtset%ionmov, dtset%optcell, dtset%iscf, dtset%paral_kgb], &
+         dict_key="meta")
+
+     case(RUNL_RESPFN)
+       call ydoc%add_ints("optdriver, rfddk, rfelfd, rfmagn, rfphon, rfstrs", &
+         [dtset%optdriver, dtset%rfddk, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
+         ignore=0, dict_key="meta")
+         ! dtset%rfdir ??
+
+     case(RUNL_NONLINEAR)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
+     case(RUNL_GWLS)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
+     case(RUNL_WFK)
+       call ydoc%add_ints("optdriver, wfk_task", &
+         [dtset%optdriver, dtset%wfk_task] , dict_key="meta")
+
+     case (RUNL_SCREENING, RUNL_SIGMA)
+       call ydoc%add_ints("optdriver, gwcalctyp", &
+         [dtset%optdriver, dtset%gwcalctyp] , dict_key="meta")
+
+     case (RUNL_BSE)
+       call ydoc%add_ints("optdriver, bs_calctype, bs_algorithm", &
+         [dtset%optdriver, dtset%bs_calctype, dtset%bs_algorithm] , dict_key="meta")
+
+     case (RUNL_EPH)
+       call ydoc%add_ints("optdriver, eph_task", &
+         [dtset%optdriver, dtset%eph_task] , dict_key="meta")
+
+     case(RUNL_LONGWAVE)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
+     case default
+       MSG_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
+     end select
+
+     !if (dtset%use_yaml == 1) then
+     call ydoc%write_and_free(ab_out)
+     !else
+     !  call ydoc%write_and_free(std_out)
+     !end if
+   end if
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)
@@ -361,7 +436,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      use_results_all=.false.
      if (test_img.and.mpi_enregs(idtset)%me_cell==0) then
        use_results_all=.true.
-       ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
+       ABI_MALLOC(results_out_all,(0:ndtset_alloc))
      else
        results_out_all => results_out
      end if
@@ -372,7 +447,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !      Gather contributions to results_out from images, if needed
        if (test_img.and.mpi_enregs(idtset)%me_cell==0.and.(.not.results_gathered)) then
          call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all, &
-&         allgather=.true.,only_one_per_img=.true.)
+           allgather=.true.,only_one_per_img=.true.)
          results_gathered=.true.
        end if
        if ((.not.test_img).or.mpi_enregs(idtset)%me_cell==0) then
@@ -491,8 +566,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
              end do
            end do
          end do
-         ABI_DEALLOCATE(xcart)
-         ABI_DEALLOCATE(xredget)
+         ABI_FREE(xcart)
+         ABI_FREE(xredget)
        end if
      end if
 
@@ -542,12 +617,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      end if
 
 !    Clean memory
-     ABI_DEALLOCATE(miximage)
+     ABI_FREE(miximage)
      if (test_img.and.mpi_enregs(idtset)%me_cell==0) then
        if (results_gathered) then
          call destroy_results_out(results_out_all)
        end if
-       ABI_DATATYPE_DEALLOCATE(results_out_all)
+       ABI_FREE(results_out_all)
      else
        nullify(results_out_all)
      end if
@@ -555,9 +630,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
 
 !  ****************************************************************************
-!  Treat the pseudopotentials : initialize the psps/PAW variable
+!  Treat the pseudopotentials: initialize the psps/PAW variable
 
-   call status(jdtset_status,filstat,iexit,level,'init psps     ')
    call psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
 !  The correct dimension of pawrad/tab is ntypat. In case of alchemical psps
@@ -568,11 +642,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      if (paw_size_old/=-1) then
        call pawrad_free(pawrad)
        call pawtab_free(pawtab)
-       ABI_DATATYPE_DEALLOCATE(pawrad)
-       ABI_DATATYPE_DEALLOCATE(pawtab)
+       ABI_FREE(pawrad)
+       ABI_FREE(pawtab)
      end if
-     ABI_DATATYPE_ALLOCATE(pawrad,(paw_size))
-     ABI_DATATYPE_ALLOCATE(pawtab,(paw_size))
+     ABI_MALLOC(pawrad,(paw_size))
+     ABI_MALLOC(pawtab,(paw_size))
      call pawtab_nullify(pawtab)
      paw_size_old=paw_size
    end if
@@ -615,10 +689,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  ****************************************************************************
 !  Exchange-correlation
 
-   call echo_xc_name (dtset%ixc)
+   call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
-     call libxc_functionals_init(dtset%ixc,dtset%nspden)
+     call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
 
 #if defined DEV_YP_VDWXC
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
@@ -644,8 +718,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        vdw_params%tolerance = dtset%vdw_df_tolerance
        vdw_params%tweaks = dtset%vdw_df_tweaks
        vdw_params%zab = dtset%vdw_df_zab
-       write(message,'(a,1x,a)') ch10,'[vdW-DF] *** Before init ***'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,1x,a)') ch10,'[vdW-DF] *** Before init ***'
+       call wrtout(std_out,msg)
        call xc_vdw_show(std_out,vdw_params)
        if ( dtset%irdvdw == 1 ) then
          write(vdw_filnam,'(a,a)') trim(filnam(3)),'_VDW.nc'
@@ -654,35 +728,38 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          call xc_vdw_init(vdw_params)
        end if
        call xc_vdw_libxc_init(vdw_params%functional)
-       write(message,'(a,1x,a)') ch10,'[vdW-DF] *** After init ***'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,1x,a)') ch10,'[vdW-DF] *** After init ***'
+       call wrtout(std_out,msg)
 !      call xc_vdw_get_params(vdw_params)
        call xc_vdw_memcheck(std_out)
        call xc_vdw_show(std_out)
        call xc_vdw_show(ab_out)
 
-       write (message,'(a,1x,a,e10.3,a)')ch10,&
+       write (msg,'(a,1x,a,e10.3,a)')ch10,&
 &       '[vdW-DF] activation threshold: vdw_df_threshold=',dtset%vdw_df_threshold,ch10
        call xc_vdw_trigger(.false.)
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,msg)
      end if
 #else
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
-       write(message,'(3a)')&
+       write(msg,'(3a)')&
 &       'vdW-DF functionals are not fully operational yet.',ch10,&
-&       'Action : modify vdw_xc'
-       MSG_ERROR(message)
+&       'Action: modify vdw_xc'
+       MSG_ERROR(msg)
      end if
 #endif
    end if
 
-!  FFTW3 threads initialization
-   if (dtset%ngfft(7)/100==FFT_FFTW3)then
-     call fftw3_init_threads()
-   end if
+   ! FFTW3 threads initialization
+   if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_init_threads()
 
-!  linalg initialisation:
-   call abi_linalg_init(mpi_enregs(idtset)%comm_bandspinorfft,dtset%np_slk,3*maxval(dtset%nband(:)), mpi_enregs(idtset)%me)
+   ! Set precision for FFT libs.
+   ii = fftcore_set_mixprec(dtset%mixprec)
+
+!  linalg initialisation
+   linalg_max_size=maxval(dtset%nband(:))
+   call abi_linalg_init(linalg_max_size,dtset%optdriver,dtset%wfoptalg,dtset%paral_kgb,&
+        dtset%use_gpu_cuda,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
 
    call timab(642,2,tsec)
 
@@ -695,90 +772,79 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
+     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
-     call status(jdtset_status,filstat,iexit,level,'call gstateimg')
      call gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
-&     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
-&     filnam,filstat,idtset,jdtset_,ndtset)
+       fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+       pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
+       filnam,filstat,idtset,jdtset_,ndtset)
 
    case(RUNL_RESPFN)
 
-     call status(jdtset_status,filstat,iexit,level,'call respfn')
      call respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,mkmems,mpi_enregs(idtset),&
-&     npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
+       npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
    case(RUNL_SCREENING)
-
-     call status(jdtset_status,filstat,iexit,level,'call screening')
      call screening(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
    case(RUNL_SIGMA)
-
-     call status(jdtset_status,filstat,iexit,level,'call sigma')
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
 
    case(RUNL_NONLINEAR)
-
-     call status(jdtset_status,filstat,iexit,level,'call nonlinear')
-     call nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enregs(idtset),npwtot,occ,&
-&     pawang,pawrad,pawtab,psps,xred)
-
-   case(6)
-
-     write(message,'(3a)')&
-&     'The optdriver value 6 has been disabled since ABINITv6.0.',ch10,&
-&     'Action : modify optdriver in the input file.'
-     MSG_ERROR(message)
+     call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
    case (RUNL_BSE)
-
-     call status(jdtset_status,filstat,iexit,level,'call bethe_salpeter')
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case(RUNL_GWLS) ! For running G0W0 calculations with Lanczos basis for dielectric operator and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
-
+   case(RUNL_GWLS)
+     ! For running G0W0 calculations with Lanczos basis for dielectric operator
+     ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
+     ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(etotal_img,(nimage))
+     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
-     call status(jdtset_status,filstat,iexit,level,'call gwls_sternheimer')
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
-&     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
-&     filnam,filstat,idtset,jdtset_,ndtset)
+       fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+       pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
+       filnam,filstat,idtset,jdtset_,ndtset)
 
-     ABI_DEALLOCATE(etotal_img)
-     ABI_DEALLOCATE(fcart_img)
-     ABI_DEALLOCATE(fred_img)
-     ABI_DEALLOCATE(strten_img)
+     ABI_FREE(etotal_img)
+     ABI_FREE(fcart_img)
+     ABI_FREE(fred_img)
+     ABI_FREE(intgres_img)
+     ABI_FREE(strten_img)
 
    case (RUNL_WFK)
-     call status(jdtset_status,filstat,iexit,level,'call wfk_analyze')
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
-     call status(jdtset_status,filstat,iexit,level,'call eph      ')
+     call dtsets(0)%free_nkpt_arrays()
+     call dtsets(idtset)%free_nkpt_arrays()
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case default ! Bad value for optdriver
-     write(message,'(a,i0,4a)')&
-&     'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
-&     'This is not allowed. ',ch10,&
-&     'Action: modify optdriver in the input file.'
-     MSG_ERROR(message)
+   case(RUNL_LONGWAVE)
+
+     call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
+&     pawrad,pawtab,psps,xred)
+
+   case default
+     ! Bad value for optdriver
+     write(msg,'(a,i0,4a)')&
+      'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
+      'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
+     MSG_ERROR(msg)
    end select
 
    call timab(643,1,tsec)
 !  ****************************************************************************
 
-!  Transfer of multi dataset outputs from temporaries :
-!  acell, xred, occ rprim, and vel might be modified from their
-!  input values
-!  etotal, fcart, fred, and strten have been computed
+!  Transfer of multi dataset outputs from temporaries:
+!  acell, xred, occ rprim, and vel might be modified from their input values
+!  etotal, fcart, fred, intgres, and strten have been computed
 !  npwtot was already computed before, but is stored only now
 
    if(dtset%optdriver==RUNL_GSTATE)then
@@ -790,6 +856,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        results_out(idtset)%strten(:,iimage)                =strten_img(:,iimage)
        results_out(idtset)%fcart(1:3,1:dtset%natom,iimage)=fcart_img(:,:,iimage)
        results_out(idtset)%fred(1:3,1:dtset%natom,iimage) =fred_img(:,:,iimage)
+       if(dtset%nspden/=2)then
+         results_out(idtset)%intgres(1:dtset%nspden,1:dtset%natom,iimage) =intgres_img(:,:,iimage)
+       else
+         results_out(idtset)%intgres(1,1:dtset%natom,iimage) =intgres_img(1,:,iimage)
+         results_out(idtset)%intgres(4,1:dtset%natom,iimage) =intgres_img(2,:,iimage)
+       endif
        results_out(idtset)%mixalch(1:dtset%npspalch,1:dtset%ntypalch,iimage) &
 &       =mixalch_img(1:dtset%npspalch,1:dtset%ntypalch,iimage)
        results_out(idtset)%npwtot(1:dtset%nkpt,iimage)    =npwtot(1:dtset%nkpt)
@@ -799,10 +871,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        results_out(idtset)%vel_cell(:,:,iimage)           =vel_cell_img(:,:,iimage)
        results_out(idtset)%xred(:,1:dtset%natom,iimage)   =xred_img(:,:,iimage)
      end do
-     ABI_DEALLOCATE(etotal_img)
-     ABI_DEALLOCATE(fcart_img)
-     ABI_DEALLOCATE(fred_img)
-     ABI_DEALLOCATE(strten_img)
+     ABI_FREE(etotal_img)
+     ABI_FREE(fcart_img)
+     ABI_FREE(fred_img)
+     ABI_FREE(intgres_img)
+     ABI_FREE(strten_img)
    else
      results_out(idtset)%acell(:,1)                =acell(:)
      results_out(idtset)%etotal(1)                 =etotal
@@ -812,18 +885,16 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &     occ(1:dtset%mband*dtset%nkpt*dtset%nsppol)
      results_out(idtset)%xred(:,1:dtset%natom,1)   =xred(:,:)
    end if
-   ABI_DEALLOCATE(acell_img)
-   ABI_DEALLOCATE(amu_img)
-   ABI_DEALLOCATE(mixalch_img)
-   ABI_DEALLOCATE(occ_img)
-   ABI_DEALLOCATE(rprim_img)
-   ABI_DEALLOCATE(vel_img)
-   ABI_DEALLOCATE(vel_cell_img)
-   ABI_DEALLOCATE(xred_img)
+   ABI_FREE(acell_img)
+   ABI_FREE(amu_img)
+   ABI_FREE(mixalch_img)
+   ABI_FREE(occ_img)
+   ABI_FREE(rprim_img)
+   ABI_FREE(vel_img)
+   ABI_FREE(vel_cell_img)
+   ABI_FREE(xred_img)
 
-   if (dtset%ngfft(7)/100==FFT_FFTW3) then
-     call fftw3_cleanup()
-   end if
+   if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_cleanup()
 
    if (dtset%ixc<0) then
      call libxc_functionals_end()
@@ -840,23 +911,21 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #endif
    end if
 
-!  MG: There are routines such as GW and Berry phase that can change/compute
-!  entries in the datatype at run-time. These changes won't be visibile
-!  in the main output file since we are passing a copy of dtsets.
-!  I tried to update the results with the call below but this creates
-!  several problems in outvars since one should take into account
-!  the new dimensions (e.g. nkptgw) and their maximum value.
-!  For the time being, we continue to pass a copy of dtsets(idtset).
-#if 0
-   call dtset_free(dtsets(idtset))
-   call dtset_copy(dtsets(idtset),dtset)
-#endif
+   ! MG: There are routines such as GW and Berry phase that can change/compute
+   ! entries in the datatype at run-time. These changes won't be visibile
+   ! in the main output file since we are passing a copy of dtsets.
+   ! I tried to update the results with the call below but this creates
+   ! several problems in outvars since one should take into account
+   ! the new dimensions (e.g. nkptgw) and their maximum value.
+   ! For the time being, we continue to pass a copy of dtsets(idtset).
+   !call dtsets(idtset)%free()
+   !call dtsets(idtset) = dtset%copy()
 
-   call dtset_free(dtset)
+   call dtset%free()
 
-   ABI_DEALLOCATE(occ)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(npwtot)
+   ABI_FREE(occ)
+   ABI_FREE(xred)
+   ABI_FREE(npwtot)
 
    call abi_linalg_finalize()
    call xg_finalize()
@@ -869,30 +938,29 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call timab(643,2,tsec)
 
    if (iexit/=0) exit
-
  end do ! idtset (allocate statements are present - an exit statement is present)
 
 !*********************************************************************
 
  call timab(644,1,tsec)
 
-!PSP deallocation
+ !PSP deallocation
  call psps_free(psps)
 
-!XG 121126 : One should not use dtset or idtset in this section, as these might not be defined for all processors.
+ !XG 121126 : One should not use dtset or idtset in this section, as these might not be defined for all processors.
 
-!PAW deallocation
+ !PAW deallocation
  if (allocated(pawrad)) then
    call pawrad_free(pawrad)
-   ABI_DATATYPE_DEALLOCATE(pawrad)
+   ABI_FREE(pawrad)
  end if
  if (allocated(pawtab)) then
    call pawtab_free(pawtab)
-   ABI_DATATYPE_DEALLOCATE(pawtab)
+   ABI_FREE(pawtab)
  end if
  call pawang_free(pawang)
 
- ABI_DEALLOCATE(jdtset_)
+ ABI_FREE(jdtset_)
 
 !Results_respfn deallocation
  call destroy_results_respfn(results_respfn)
@@ -910,8 +978,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !call wvl_timing(mpi_enregs(1)%me_wvl,'              ','RE')
 !end if
 #endif
-
- call status(0,filstat,iexit,level,'exit')
 
  call timab(644,2,tsec)
  call timab(640,2,tsec)

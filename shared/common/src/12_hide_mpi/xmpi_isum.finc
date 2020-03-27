@@ -1,0 +1,70 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/xmpi_isum
+!! NAME
+!!  xmpi_isum
+!!
+!! FUNCTION
+!!  This module contains functions that calls MPI routine,
+!!  if we compile the code using the MPI CPP flags.
+!!  xmpi_isum is the generic function.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2001-2020 ABINIT group (MG)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~ABINIT/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!    MPI_IALLREDUCE(SENDBUF, RECVBUF, COUNT, DATATYPE, OP, COMM, REQUEST, IERROR)
+!!                   <type>    SENDBUF(*), RECVBUF(*)
+!!                   INTEGER    COUNT, DATATYPE, OP, COMM, REQUEST, IERROR
+!!
+!! SOURCE
+
+!!***
+
+!!****f* ABINIT/xmpi_isum_int0d
+!! NAME
+!!  xmpi_isum_int0d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: scalar integers. Non-blocking version.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine xmpi_isum_int0d(xval, xsum, comm, request, ierr)
+
+!Arguments-------------------------
+ integer, intent(in) :: xval
+ integer ABI_ASYNC, intent(out) :: xsum
+ integer,intent(in) :: comm
+ integer,intent(out) :: ierr, request
+
+!Local variables-------------------
+ integer :: itmp
+
+! *************************************************************************
+
+#ifdef HAVE_MPI_IALLREDUCE
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_IALLREDUCE(xval, xsum, 1, MPI_INTEGER, MPI_SUM, comm, request,ierr)
+   xmpi_count_requests = xmpi_count_requests + 1
+   return
+ end if
+ xsum = xval; request = xmpi_request_null
+ return
+#endif
+
+ ! Call the blocking version and return null request.
+ !write(std_out,*)"will block here and return fake request"
+ itmp = xval
+ call xmpi_sum(itmp, comm, ierr)
+ xsum = itmp; request = xmpi_request_null
+
+end subroutine xmpi_isum_int0d
+!!***

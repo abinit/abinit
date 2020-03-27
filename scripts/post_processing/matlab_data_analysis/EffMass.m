@@ -15,7 +15,7 @@
 %
 %    Written by Mike Zhang, 8/11/2002, copyright reserved.
 %    Used by your own warranty, Mike Zhang(mz24cn@hotmail.com)
-%    Copyright (C) 2002-2018 ABINIT group (Mike Zhang)
+%    Copyright (C) 2002-2020 ABINIT group (Mike Zhang)
 %    This file is distributed under the terms of the
 %    GNU General Public License, see ~abinit/COPYING
 %    or http://www.gnu.org/copyleft/gpl.txt .

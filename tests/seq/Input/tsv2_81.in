@@ -55,7 +55,6 @@ tolwfr3   1.0d-9
  typat  1 
  
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -67,6 +66,6 @@ tolwfr3   1.0d-9
 #%% [extra_info]
 #%% keywords = NC
 #%% description = 
-#%% 81. Nitrogen atom in a big box, spin-polarized.
-#%% Compute Berry phase for atom at different positions.
+#%%   81. Nitrogen atom in a big box, spin-polarized.
+#%%   Compute Berry phase for atom at different positions.
 #%%<END TEST_INFO>

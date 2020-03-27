@@ -72,7 +72,6 @@
  1.028E+00  2.270E-02  1.568E-02 # H (proton)
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

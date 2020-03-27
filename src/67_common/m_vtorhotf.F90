@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhotf
 !! NAME
 !!  m_vtorhotf
@@ -7,7 +6,7 @@
 !! Computes the new density from a fixed potential (vtrial) using the Thomas-Fermi functional
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, MF, AR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MF, AR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,13 +26,13 @@
 module m_vtorhotf
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
- use m_dtfil,    only : status
  use m_spacepar,  only : symrhg
 
  implicit none
@@ -56,7 +55,6 @@ contains
 !! using the Thomas-Fermi functional
 !!
 !! INPUTS
-!!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
@@ -73,7 +71,7 @@ contains
 !!
 !! OUTPUT
 !!  ek=kinetic energy part of total energy.
-!!  enl=nonlocal pseudopotential part of total energy.
+!!  enlx=nonlocal psp + potential Fock ACE part of total energy.
 !!  entropy=entropy due to the occupation number smearing (if metal)
 !!  fermie=fermi energy (Hartree)
 !!  grnl(3*natom)=stores grads of nonlocal energy wrt length scales
@@ -90,25 +88,15 @@ contains
 !!
 !! SOURCE
 
-subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
+subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 &  irrzon,mpi_enreg,natom,nfft,nspden,nsppol,nsym,phnons,rhog,rhor,rprimd,ucvol,vtrial)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vtorhotf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nfft,nspden,nsppol,nsym
  real(dp),intent(in) :: ucvol
- real(dp),intent(out) :: ek,enl,entropy,fermie
+ real(dp),intent(out) :: ek,enlx,entropy,fermie
  type(MPI_type),intent(in) :: mpi_enreg
- type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: irrzon((dtset%ngfft(1)*dtset%ngfft(1)*dtset%ngfft(1))**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))
@@ -121,7 +109,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: jdichomax=20,level=111
- integer :: i1,i2,i3,ierr,iexit,ifft,ii,ir,iscf,jdicho
+ integer :: i1,i2,i3,ierr,ifft,ii,ir,iscf,jdicho
  integer :: me_fft,n1,n2,n3,nfftot,nproc_fft,prtvol
  real(dp),save :: cktf,fermie_tol,nelect_mid
  real(dp) :: dnelect_mid_dx,dxrtnewt,eektemp,eektf,feektemp,feektf
@@ -132,15 +120,11 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !arrays
  real(dp) :: tsec(2)
  real(dp),allocatable :: betamumoinsV(:),rhor_mid(:),rhor_middx(:)
-!no_abirules
 
 ! *************************************************************************
 
 !Keep track of total time spent in vtorho
  call timab(21,1,tsec)
-
-
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
 !Structured debugging if prtvol==-level
  prtvol=dtset%prtvol
@@ -172,7 +156,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  end if
 
  ek=zero
- enl=zero
+ enlx=zero
  grnl(:)=zero
 
 !Initialize rhor if needed
@@ -182,8 +166,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  call tf
 !Compute energy terms
  call tfek
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
  call timab(21,2,tsec)
 !End thomas fermi
@@ -208,15 +190,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !!
 !! SOURCE
   subroutine tf()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tf'
-!End of the abilint section
-
-  implicit none
 
 ! *************************************************************************
 
@@ -270,10 +243,9 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !  Compute rhog
    call timab(70,1,tsec)
 
-   call status(0,dtfil%filstat,iexit,level,'compute rhog  ')
    nfftot=dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3)
-   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,dtset%paral_kgb,phnons,&
-&   rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+   call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,phnons,&
+&   rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
 
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !  we also have the spin-up density, symmetrized, in rhor(:,2).
@@ -303,15 +275,6 @@ end subroutine tf
 !! SOURCE
 
   subroutine tfek()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tfek'
-!End of the abilint section
-
-  implicit none
 
 ! *************************************************************************
 
@@ -383,15 +346,6 @@ end subroutine tf
 !! SOURCE
 
  function zfermim12(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermim12'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -476,14 +430,6 @@ end function zfermim12
 !..reference: antia apjs 84,101 1993
 !..
 !..declare
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi12'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -570,14 +516,6 @@ end function zfermi12
 !..
 !..declare
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi1'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
  real(dp):: zfermi1
@@ -653,15 +591,6 @@ end function zfermi1
 !! SOURCE
 
  function zfermi32(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi32'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -745,15 +674,6 @@ end function zfermi32
 
  function zfermi2(xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi2'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
  real(dp) :: zfermi2
@@ -829,15 +749,6 @@ end function zfermi2
 !! SOURCE
 
  function zfermi52(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi52'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
@@ -920,15 +831,6 @@ end function zfermi52
 
  function zfermi3(xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi3'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: xx
  real(dp):: zfermi3
@@ -1006,15 +908,6 @@ end function zfermi3
 
  function ifermim12(ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermim12'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
  real(dp) :: ifermim12
@@ -1090,15 +983,6 @@ end function ifermim12
 
  function ifermi12(ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermi12'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
  real(dp) :: ifermi12
@@ -1170,15 +1054,6 @@ end function ifermi12
 !! SOURCE
 
  function ifermi32(ff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermi32'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
@@ -1252,15 +1127,6 @@ end function ifermi32
 
  function ifermi52(ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermi52'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  real(dp), intent(in) :: ff
  real(dp) :: ifermi52
@@ -1331,15 +1197,6 @@ end function ifermi52
 
  function fp12a1 (x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fp12a1'
-!End of the abilint section
-
- implicit none
-
 ! Arguments -------------------------------
  real(dp),intent(in) :: x
  real(dp) :: fp12a1
@@ -1388,15 +1245,6 @@ end function ifermi52
 !! SOURCE
 
  function fp32a1 (x)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fp32a1'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  real(dp),intent(in) :: x
@@ -1447,15 +1295,6 @@ end function ifermi52
 !! SOURCE
 
  function xp12a1 (y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xp12a1'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
  real(dp) :: xp12a1
@@ -1508,15 +1347,6 @@ end function ifermi52
 
  function fm12a1 (x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fm12a1'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  real(dp),intent(in) :: x
  real(dp) :: fm12a1
@@ -1566,15 +1396,6 @@ end function ifermi52
 !! SOURCE
 
  subroutine fm12a1t (cktf,rtnewt,tphysel,vtrial,rhor_middx,rhor_mid,nfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fm12a1t'
-!End of the abilint section
-
- implicit none
 
  integer,intent(in) :: nfft
  real(dp),intent(in) :: tphysel,rtnewt,cktf

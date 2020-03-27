@@ -1,0 +1,232 @@
+#
+# Default configuration parameters obtained from Abinit's Autoconf
+#
+
+# ---------------------------------------------------------------------------- #
+
+#
+# System information
+#
+
+# Architecture
+abi_cpu_model   = @abi_cpu_model@
+abi_cpu_64bits  = @abi_cpu_64bits@
+abi_cpu_spec    = @abi_cpu_spec@
+abi_sys_spec    = @abi_sys_spec@
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Libraries and linking
+#
+
+AR             = @AR@
+ARFLAGS        = @ARFLAGS@
+ARFLAGS_64BITS = @ARFLAGS_64BITS@
+ARFLAGS_DEBUG  = @ARFLAGS_DEBUG@
+ARFLAGS_OPTIM  = @ARFLAGS_OPTIM@
+ARFLAGS_EXTRA  = @ARFLAGS_EXTRA@
+ARFLAGS_CMD    = @ARFLAGS_CMD@
+RANLIB         = @RANLIB@
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Preprocessing
+#
+
+CPP               = @CPP@
+CPPFLAGS          = @CPPFLAGS@
+CPPFLAGS_DEBUG    = @CPPFLAGS_DEBUG@
+CPPFLAGS_EXTRA    = @CPPFLAGS_EXTRA@
+CPPFLAGS_HINTS    = @CPPFLAGS_HINTS@
+CPPFLAGS_OPTIM    = @CPPFLAGS_OPTIM@
+
+FPP               = @FPP@
+FPPFLAGS          = @FPPFLAGS@
+FPPFLAGS_DEBUG    = @FPPFLAGS_DEBUG@
+FPPFLAGS_EXTRA    = @FPPFLAGS_EXTRA@
+FPPFLAGS_HINTS    = @FPPFLAGS_HINTS@
+FPPFLAGS_OPTIM    = @FPPFLAGS_OPTIM@
+
+INCLUDES          = @fc_mod_incs@
+
+TRUE_CPP          = @TRUE_CPP@ @CPPFLAGS_HINTS_EXT@
+
+# ---------------------------------------------------------------------------- #
+
+#
+# C compilation
+#
+
+cc_info_string    = @cc_info_string@
+
+abi_cc_vendor     = @abi_cc_vendor@
+abi_cc_version    = @abi_cc_version@
+
+CC                = @CC@
+CFLAGS            = @CFLAGS@
+CFLAGS_64BITS     = @CFLAGS_64BITS@
+CFLAGS_DEBUG      = @CFLAGS_DEBUG@
+CFLAGS_EXTRA      = @CFLAGS_EXTRA@
+CFLAGS_HINTS      = @CFLAGS_HINTS@
+CFLAGS_OPTIM      = @CFLAGS_OPTIM@
+
+CC_LDFLAGS_64BITS = @CC_LDFLAGS_64BITS@
+CC_LDFLAGS_DEBUG  = @CC_LDFLAGS_DEBUG@
+CC_LDFLAGS_EXTRA  = @CC_LDFLAGS_EXTRA@
+CC_LDFLAGS_HINTS  = @CC_LDFLAGS_HINTS@
+CC_LDFLAGS_OPTIM  = @CC_LDFLAGS_OPTIM@
+CC_LDFLAGS        = @CC_LDFLAGS@
+
+CC_LIBS_DEBUG     = @CC_LIBS_DEBUG@
+CC_LIBS_EXTRA     = @CC_LIBS_EXTRA@
+CC_LIBS_HINTS     = @CC_LIBS_HINTS@
+CC_LIBS_OPTIM     = @CC_LIBS_OPTIM@
+CC_LIBS           = @CC_LIBS@
+
+# ---------------------------------------------------------------------------- #
+
+#
+# C++ compilation
+#
+
+cxx_info_string    = @cxx_info_string@
+
+abi_cxx_vendor     = @abi_cxx_vendor@
+abi_cxx_version    = @abi_cxx_version@
+
+CXX                = @CXX@
+CXXFLAGS           = @CXXFLAGS@
+CXXFLAGS_64BITS    = @CXXFLAGS_64BITS@
+CXXFLAGS_DEBUG     = @CXXFLAGS_DEBUG@
+CXXFLAGS_EXTRA     = @CXXFLAGS_EXTRA@
+CXXFLAGS_HINTS     = @CXXFLAGS_HINTS@
+CXXFLAGS_OPTIM     = @CXXFLAGS_OPTIM@
+
+CXX_LDFLAGS_64BITS = @CXX_LDFLAGS_64BITS@
+CXX_LDFLAGS_DEBUG  = @CXX_LDFLAGS_DEBUG@
+CXX_LDFLAGS_EXTRA  = @CXX_LDFLAGS_EXTRA@
+CXX_LDFLAGS_HINTS  = @CXX_LDFLAGS_HINTS@
+CXX_LDFLAGS_OPTIM  = @CXX_LDFLAGS_OPTIM@
+CXX_LDFLAGS        = @CXX_LDFLAGS@
+
+CXX_LIBS_DEBUG     = @CXX_LIBS_DEBUG@
+CXX_LIBS_EXTRA     = @CXX_LIBS_EXTRA@
+CXX_LIBS_HINTS     = @CXX_LIBS_HINTS@
+CXX_LIBS_OPTIM     = @CXX_LIBS_OPTIM@
+CXX_LIBS           = @CXX_LIBS@
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Fortran compilation
+#
+
+fc_info_string    = @fc_info_string@
+
+fc_vendor         = @abi_fc_vendor@
+fc_version        = @abi_fc_version@
+
+FC                = @FC@
+FCFLAGS           = @FCFLAGS@
+FCFLAGS_64BITS    = @FCFLAGS_64BITS@
+FCFLAGS_DEBUG     = @FCFLAGS_DEBUG@
+FCFLAGS_EXTRA     = @FCFLAGS_EXTRA@
+FCFLAGS_HINTS     = @FCFLAGS_HINTS@
+FCFLAGS_OPTIM     = @FCFLAGS_OPTIM@
+
+FCFLAGS_FIXEDFORM = @FCFLAGS_FIXEDFORM@
+FCFLAGS_FREEFORM  = @FCFLAGS_FREEFORM@
+
+FC_LDFLAGS_64BITS = @FC_LDFLAGS_64BITS@
+FC_LDFLAGS_DEBUG  = @FC_LDFLAGS_DEBUG@
+FC_LDFLAGS_EXTRA  = @FC_LDFLAGS_EXTRA@
+FC_LDFLAGS_HINTS  = @FC_LDFLAGS_HINTS@
+FC_LDFLAGS_OPTIM  = @FC_LDFLAGS_OPTIM@
+FC_LDFLAGS        = @FC_LDFLAGS@
+
+FC_LIBS_DEBUG     = @FC_LIBS_DEBUG@
+FC_LIBS_EXTRA     = @FC_LIBS_EXTRA@
+FC_LIBS_HINTS     = @FC_LIBS_HINTS@
+FC_LIBS_OPTIM     = @FC_LIBS_OPTIM@
+FC_LIBS           = @FC_LIBS@
+
+MODEXT            = @MODEXT@
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Exports
+#
+
+# Algorithmic use flags
+lib_algo_incs      = @lib_algo_incs@
+lib_algo_libs      = @lib_algo_libs@
+
+                    ########################################
+
+# FFT use flags
+lib_fft_incs       = @lib_fft_incs@
+lib_fft_libs       = @lib_fft_libs@
+
+                    ########################################
+
+# Linear algebra use flags
+lib_linalg_fcflags = @lib_linalg_fcflags@
+lib_linalg_ldflags = @lib_linalg_ldflags@
+lib_linalg_incs    = @lib_linalg_incs@
+lib_linalg_libs    = @lib_linalg_libs@
+
+                    ########################################
+
+# Mathematical use flags
+lib_math_incs      = @lib_math_incs@
+lib_math_libs      = @lib_math_libs@
+
+                    ########################################
+
+# Timer use flags
+lib_timer_incs     = @lib_timer_incs@
+lib_timer_libs     = @lib_timer_libs@
+
+                    ########################################
+
+# ETSF_IO use flags
+lib_etsf_io_incs   = @lib_etsf_io_incs@
+lib_etsf_io_libs   = @lib_etsf_io_libs@
+
+# NetCDF use flags
+lib_netcdf_incs    = @lib_netcdf_incs@
+lib_netcdf_libs    = @lib_netcdf_libs@
+
+# YAML use flags
+lib_yaml_incs    = @lib_yaml_incs@
+lib_yaml_libs    = @lib_yaml_libs@
+
+                    ########################################
+
+# LibXC use flags
+lib_libxc_incs     = @lib_libxc_incs@
+lib_libxc_libs     = @lib_libxc_libs@
+
+                    ########################################
+# cthyb
+lib_cthyb_incs = @lib_cthyb_incs@
+lib_cthyb_libs = @lib_cthyb_libs@
+
+                    ########################################
+# triqs
+lib_triqs_incs = @lib_triqs_incs@
+lib_triqs_libs = @lib_triqs_libs@
+
+                    ########################################
+
+# Fortran flags
+FCFLAGS_ATOMPAW_EXT   = @FCFLAGS@ @fcflags_opt_atompaw@
+FCFLAGS_BIGDFT_EXT    = @FCFLAGS@ @fcflags_opt_bigdft@
+FCFLAGS_ETSF_IO_EXT   = @FCFLAGS@ @fcflags_opt_etsf_io@
+FCFLAGS_LIBXC_EXT     = @FCFLAGS@ @fcflags_opt_libxc@
+FCFLAGS_LINALG_EXT    = @FCFLAGS@ @fcflags_opt_linalg@
+FCFLAGS_NETCDF_EXT    = @FCFLAGS@ @fcflags_opt_netcdf@
+FCFLAGS_WANNIER90_EXT = @FCFLAGS@ @fcflags_opt_wannier90@

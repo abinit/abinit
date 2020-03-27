@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vdw_dftd3
 !! NAME
 !!  m_vdw_dftd3
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2018 ABINIT group (BVT)
+!!  Copyright (C) 2015-2020 ABINIT group (BVT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,13 +117,6 @@ subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 &          vdw_tol,vdw_tol_3bt,xred,znucl,dyn_vdw_dftd3,elt_vdw_dftd3,&
 &          fred_vdw_dftd3,str_vdw_dftd3,qphon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_dftd3'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -147,7 +139,7 @@ implicit none
  integer,parameter :: vdw_nspecies=94
  integer:: alpha,beta,ia,ii,indi,indj,index_ia,index_ja,index_ka
  integer :: is1,is2,is3,itypat,ja,jj,js1,js2,js3
- integer :: jtypat,ka,kk,ktypat,la,ll
+ integer :: jtypat,ka,kk,ktypat,la,ll,ierr
  integer :: nline,npairs,nshell
  integer :: refi,refj,refmax
  logical :: bol_3bt,found
@@ -492,7 +484,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_ALLOCATE(dcn,(3,natom,natom))
  ABI_ALLOCATE(dcn_cart,(3,natom,natom))
  ABI_ALLOCATE(str_dcn,(6,natom))
- ABI_ALLOCATE(d2cn,(2,3,natom,3,natom,natom))
+ ABI_MALLOC_OR_DIE(d2cn, (2,3,natom,3,natom,natom), ierr)
  ABI_ALLOCATE(fdcn,(2,3,natom,natom))
  ABI_ALLOCATE(cfdcn,(2,3,natom,natom))
  ABI_ALLOCATE(elt_cn,(6+3*natom,6,natom))
@@ -1574,13 +1566,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 
    subroutine comp_prod(a,b,c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'comp_prod'
-!End of the abilint section
-
    implicit none
  !Arguments ----------------------
    real(dp),intent(in) :: a(2),b(2)
@@ -1610,13 +1595,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !! SOURCE
 
 subroutine d3_cart2red(grad)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd3_cart2red'
-!End of the abilint section
 
 implicit none
 

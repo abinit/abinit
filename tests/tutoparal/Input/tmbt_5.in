@@ -4,7 +4,7 @@ optdriver   99
 irdwfk      1
 irdscr      1
 
-bs_calctype       1       # L0 is contstructed with KS orbitals and energies.
+bs_calctype       1       # L0 is constructed with KS orbitals and energies.
 mbpt_sciss        3.1 eV
 bs_exchange_term  1       # Exchange term included.
 #bs_coulomb_term   10      # Coulomb term included using the diagonal approximation W_GG
@@ -72,7 +72,6 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

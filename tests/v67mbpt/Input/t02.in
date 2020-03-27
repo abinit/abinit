@@ -8,6 +8,8 @@ ndtset      5
 gwpara      2
 fftgw       11  # Use the coarsest FFT mesh for oscillator (compatible with symmetries)
 
+symsigma    0
+
 # Parameters for the calculation of the WFK file
 nband1      30         # Number of (occ and empty) bands to be computed in the GS part.
 nbdbuf1     5
@@ -145,22 +147,23 @@ bdgw
 #    1  8
 #    1  8
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t02.out, tolnlines = 12, tolabs = 6.0e-3, tolrel = 6.0e-2, fld_options =  -medium
+#%% files_to_test =
+#%%   t02.out, use_yaml = no, tolnlines = 12, tolabs = 6.0e-3, tolrel = 6.0e-2, fld_options =  -medium
 #%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 16
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, GW
-#%% description = 
+#%% description =
 #%%   GW calculation in Si: Hilbert transform method for the irreducible polarizability (gaussian approximant)
 #%%   and analytic continuation of sigma from imaginary- to real-axis. The spectral function is also
 #%%   obtained via Pade extrapolation. The following variables are tested spmeth=2, spbroad,
 #%%   nomegasi, and omegasimax
+#%% [yaml_test]
+#%% file = ./t02.yaml
 #%%<END TEST_INFO>

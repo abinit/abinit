@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_distribfft
 !! NAME
 !!  m_distribfft
@@ -8,7 +7,7 @@
 !!  used for FFT parallelization with MPI and n2 plane sharing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (FD,MT)
+!! Copyright (C) 2011-2020 ABINIT group (FD,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,15 +137,6 @@ CONTAINS !===========================================================
 
 subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_distribfft'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nproc_fft,n2,n3
@@ -273,16 +263,6 @@ end subroutine init_distribfft
 
 subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_distribfft_seq'
-!End of the abilint section
-
- implicit none
-
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: n2,n3
@@ -408,15 +388,6 @@ end subroutine init_distribfft_seq
 
 subroutine destroy_distribfft(distribfft_arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_distribfft'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(distribfft_type), intent(inout) :: distribfft_arg
 
@@ -493,15 +464,6 @@ end subroutine destroy_distribfft
 !! SOURCE
 
 subroutine copy_distribfft(distribfft_src, distribfft_dst)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_distribfft'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(distribfft_type),intent(in)   :: distribfft_src

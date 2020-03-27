@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 "check test farm build examples"
 #
-# Copyright (C) 2010-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2010-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -9,6 +9,8 @@
 #
 # FIXME: detect duplicate definitions
 from __future__ import unicode_literals, division, print_function, absolute_import
+
+from abirules_tools import find_abinit_toplevel_directory
 
 try:
     from ConfigParser import ConfigParser
@@ -24,12 +26,6 @@ class MyConfigParser(ConfigParser):
 
   def optionxform(self,option):
     return str(option)
-
-# ---------------------------------------------------------------------------- #
-
-#
-# Functions
-#
 
 env_ignore = list()
 opt_ignore = ["fcflags_opt_*","status"]
@@ -56,37 +52,17 @@ def key_is_ok(mode,key):
   else:
     return True
 
-# ---------------------------------------------------------------------------- #
-def abinit_test_generator():
-  def test_func(abenv):
-     "check test farm build examples"
-     try:
-       return main(abenv.home_dir)
-     except Exception:
-       import sys
-       raise sys.exc_info()[1] # Reraise current exception (py2.4 compliant)
-  return {"test_func" : test_func}
-#
-# Main program
-#
-def main(home_dir=""):
-  from os.path import join as pj
-                                                                           
-  # Check if we are in the top of the ABINIT source tree
-  my_name = os.path.basename(__file__) + ".main"
-  if ( not os.path.exists( pj(home_dir,"configure.ac") ) or
-       not os.path.exists( pj(home_dir,"src/98_main/abinit.F90")) ):
-    print("%s: You must be in the top of an ABINIT source tree." % my_name)
-    print("%s: Aborting now." % my_name)
-    sys.exit(1)
-
+def main():
+  home_dir = find_abinit_toplevel_directory()
   # Init
   re_env = re.compile("^[A-Z][0-9A-Z_]*")
   re_opt = re.compile("^[a-z][0-9a-z_]*")
 
   # Extract environment variables from config file
+  env_path = os.path.join(home_dir,"config/specs/environment.conf")
+  assert os.path.exists(env_path)
   cnf_env = MyConfigParser()
-  cnf_env.read( pj(home_dir,"config/specs/environment.conf") )
+  cnf_env.read(env_path)
   env_config = list()
   for env in cnf_env.sections():
     if cnf_env.get(env,"reset") == "no":
@@ -96,7 +72,7 @@ def main(home_dir=""):
 
   # Extract options from config file
   cnf_opt = MyConfigParser()
-  cnf_opt.read( pj(home_dir,"config/specs/options.conf") )
+  cnf_opt.read( os.path.join(home_dir,"config/specs/options.conf") )
   opt_config = list()
   opt_removed = list()
   for opt in cnf_opt.sections():
@@ -115,7 +91,7 @@ def main(home_dir=""):
 
   # Extract information from build example config file
   cnf_bex = MyConfigParser()
-  cnf_bex.read( pj(home_dir, "config/specs/testfarm.conf") )
+  cnf_bex.read( os.path.join(home_dir, "config/specs/testfarm.conf") )
   env_examples = list()
   opt_examples = list()
   env_dict = dict()
@@ -124,23 +100,23 @@ def main(home_dir=""):
     for var in cnf_bex.options(bot):
       if not is_ignored(var):
         if re_env.match(var):
-          if not var in env_examples:
+          if var not in env_examples:
             env_examples.append(var)
-          if not var in env_dict:
+          if var not in env_dict:
             env_dict[var] = list()
           env_dict[var].append(bot)
         elif re_opt.match(var):
-          if not var in opt_examples:
+          if var not in opt_examples:
             opt_examples.append(var)
-          if not var in opt_dict:
+          if var not in opt_dict:
             opt_dict[var] = list()
           opt_dict[var].append(bot)
   env_examples.sort()
   opt_examples.sort()
 
   # Compare environment and options
-  denv_examples = [env for env in env_examples if not env in env_config]
-  dopt_examples = [opt for opt in opt_examples if not opt in opt_config + opt_removed]
+  denv_examples = [env for env in env_examples if env not in env_config]
+  dopt_examples = [opt for opt in opt_examples if opt not in opt_config + opt_removed]
   dopt_removed = [opt for opt in opt_examples if opt in opt_removed]
 
   nerr = len(denv_examples) + len(dopt_examples) + len(dopt_removed)
@@ -148,11 +124,11 @@ def main(home_dir=""):
   # Compare build examples and generated files
   bex_data = dict()
   dbex_files = list()
-  for acf in os.listdir( pj(home_dir, "doc/build/config-examples") ):
+  for acf in os.listdir( os.path.join(home_dir, "doc/build/config-examples") ):
     if ( re.match("bb_",acf) ):
       acf_section = re.sub("\.ac","",acf)
       if ( cnf_bex.has_section(acf_section) ):
-        with open(pj(home_dir, "doc/build/config-examples/"+acf), "r") as fh:
+        with open(os.path.join(home_dir, "doc/build/config-examples/"+acf), "r") as fh:
           acf_data = fh.readlines()
 
         acf_dict = dict()
@@ -169,7 +145,7 @@ def main(home_dir=""):
         dbex_files.append(acf_section)
 
   dbex_sections = [bot for bot in cnf_bex.sections() \
-    if ( re.match("bb_",bot) and not bot in bex_data.keys() )]
+    if ( re.match("bb_",bot) and bot not in bex_data.keys() )]
 
   dbex_keys = dict()
   dbex_vals = dict()
@@ -231,10 +207,4 @@ def main(home_dir=""):
   return nerr
 
 if __name__ == "__main__":
-  if len(sys.argv) == 1: 
-    home_dir = "."
-  else:
-    home_dir = sys.argv[1] 
-
-  exit_status = main(home_dir)
-  sys.exit(exit_status)
+  sys.exit(main())

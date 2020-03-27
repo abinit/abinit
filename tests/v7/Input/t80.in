@@ -120,11 +120,10 @@ nband  11
 #Definition of the SCF procedure
 nstep 100              # Maximal number of SCF cycles
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = nag@abiref
+##%% exclude_hosts = nag@abiref
 #%% [shell] 
 #%% post_commands = 
 #%% [files]

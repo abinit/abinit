@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_metstr
 !! NAME
 !!  m_metstr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,7 +53,7 @@ contains
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2020 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -126,15 +125,6 @@ contains
 !! SOURCE
 
 subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metstr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

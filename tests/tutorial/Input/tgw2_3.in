@@ -8,6 +8,7 @@ ecutsigx    6.5
 ecutwfn     6.5
 
 gwcalctyp   12
+symsigma     0
 
 nkptgw       8
 kptgw
@@ -66,7 +67,6 @@ toldfe 1.0d-8
 prtvol     5
 enunit     1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

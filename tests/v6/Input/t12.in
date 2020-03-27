@@ -39,7 +39,6 @@ usekden 1 # Test the kinetic energy density.
 prtgden 1 # Test the gradient of electronic density.
 prtlden 1 # Test the Laplacian of electronic density.
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

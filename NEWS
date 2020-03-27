@@ -106,7 +106,7 @@ The build system is now much less tolerant about obsolete options to the
 configure script. Outdated config files will thus likely cause errors.
 
 Build examples (found in ~abinit/doc/build/config-examples), as well as
-their template (~abinit/doc/build/config-template.ac), have been
+their template (~abinit/doc/build/config-template.ac9), have been
 substantially modified, to match the changes in the build system. All
 personal config files (usually found in ~/.abinit/build/) should be
 updated using this material as reference.
@@ -286,6 +286,6 @@ conflict marker checker (util/source/check-conflict-markers.py).
 Other news
 ----------
 
-More news can be found in the ~abinit/doc/release_notes/ directory,
+More news can be found in the [release-notes directory](https://docs.abinit.org/about/release-notes),
 more specifically in the latest of the release_notes_v*.*. files.
 

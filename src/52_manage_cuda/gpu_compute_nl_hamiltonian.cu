@@ -8,7 +8,7 @@
 //  the application of non-local hamiltonian
 //
 // COPYRIGHT
-// Copyright (C) 1998-2018 ABINIT group (FDahm)
+// Copyright (C) 1998-2020 ABINIT group (FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .
@@ -523,6 +523,8 @@ __global__ void kernel_stress_convert(double *gprimd,double *d_enlk,double *enlo
     sh_stress[threadIdx.x] = d_enlk[threadIdx.x+1];
 
   sh_enl[threadIdx.x] = sh_stress[imunu[threadIdx.x]] * sh_gprim[ialpha[blockIdx.x] + 3*imu[threadIdx.x]] * sh_gprim[ibeta[blockIdx.x] + 3*inu[threadIdx.x]];
+
+  __syncthreads();
 
   if(threadIdx.x < 3 )
     sh_enl[threadIdx.x] += sh_enl[threadIdx.x + 3] + sh_enl[threadIdx.x + 6];

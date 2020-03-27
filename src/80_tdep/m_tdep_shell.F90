@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -35,23 +36,130 @@ module m_tdep_shell
     type(List_of_neighbours),allocatable :: neighbours(:,:)
   end type Shell_Variables_type
 
+  public :: tdep_init_shell1at
   public :: tdep_init_shell2at
   public :: tdep_init_shell3at
   public :: tdep_destroy_shell
 
 contains
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!====================================================================================================
+ subroutine tdep_init_shell1at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell1at,Sym)
+
+  type(Input_Variables_type),intent(in) :: InVar
+  type(Shell_Variables_type),intent(out) :: Shell1at
+  type(Symetries_Variables_type),intent(inout) :: Sym
+  integer,intent(in) :: norder,order,nshell_max
+  integer,intent(out) :: ntotcoeff
+  double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
+  double precision, intent(out) :: proj(norder,norder,nshell_max)
+  integer :: ishell,iatcell,iatom,eatom,iatref
+  integer :: natom,natom_unitcell,counter,ncoeff,ncoeff_prev,isym
+  integer, allocatable :: ref1at(:,:),Isym1at(:,:)
+
+  natom         =InVar%natom
+  natom_unitcell=InVar%natom_unitcell
+
+  write(InVar%stdout,*) ' '
+  write(InVar%stdout,*) '#############################################################################'
+  write(InVar%stdout,*) '####### FIRST ORDER : find the number of coefficients #######################'
+  write(InVar%stdout,*) '#############################################################################'
+
+! - Identify the shells
+! - Store the index of the atoms included in each shell
+! - Store the reference atoms for each shell
+! - Compute the symetry operation between the reference atom and another one
+  write(InVar%stdout,*) ' Build the ref1at and Isym1at tables...'
+  ABI_MALLOC(ref1at ,(natom,2)) ; ref1at (:,:)=zero
+  ABI_MALLOC(Isym1at,(natom,1)) ; Isym1at(:,:)=zero
+  ishell=0
+  do iatcell=1,natom_unitcell
+    if (ref1at(iatcell,1).ne.0) cycle
+    ishell=ishell+1
+    do eatom=1,natom
+      if (ref1at(eatom,1).eq.0) then
+        do isym=1,Sym%nsym
+!FB          write(6,'(4(i5,x))') Sym%indsym(4,isym,eatom),eatom,iatcell,isym
+          if (Sym%indsym(4,isym,eatom).eq.iatcell) then
+            Isym1at(eatom,1)=isym
+            ref1at(eatom,1)=iatcell
+            ref1at(eatom,2)=ishell
+            if (InVar%debug) write(InVar%stdout,'(a,1x,2(i4,1x),a,i4)') &
+&             'For:',iatcell,eatom,' direct transformation with isym=',Isym1at(eatom,1)
+            exit
+          end if  
+        end do !isym  
+      end if !already treated
+    end do !eatom
+  end do !iatcell 
+  Shell1at%nshell=ishell
+  if (Shell1at%nshell.gt.nshell_max) then
+    write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
+    write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell1at%nshell
+    write(InVar%stdout,*) '         Action: increase nshell_max'
+    MSG_ERROR('The maximum number of shells allowed by the code is reached')
+  end if  
+
+
+! Store all the previous quantities in a better way than in ref1at (without using too memory).
+  write(InVar%stdout,*) ' Build the Shell1at datatype...'
+  ABI_MALLOC(Shell1at%neighbours,(1,Shell1at%nshell))
+  ABI_MALLOC(Shell1at%iatref       ,(Shell1at%nshell)); Shell1at%iatref(:)=zero
+  do ishell=1,Shell1at%nshell
+    counter=0
+    do iatom=1,natom
+      if (ref1at(iatom,2).eq.ishell) counter=counter+1 
+    end do
+    Shell1at%neighbours(1,ishell)%n_interactions=counter
+    if (counter.eq.0) cycle
+    ABI_MALLOC(Shell1at%neighbours(1,ishell)%atomj_in_shell,(counter))
+    ABI_MALLOC(Shell1at%neighbours(1,ishell)%sym_in_shell,(counter))
+    Shell1at%neighbours(1,ishell)%atomj_in_shell(:)=zero
+    Shell1at%neighbours(1,ishell)%sym_in_shell(:)=zero
+    counter=0
+    do iatom=1,natom
+      if (ref1at(iatom,2).eq.ishell) then
+        counter=counter+1
+        Shell1at%neighbours(1,ishell)%atomj_in_shell(counter)=iatom
+        Shell1at%iatref(ishell)=ref1at(iatom,1)
+        Shell1at%neighbours(1,ishell)%sym_in_shell(counter)=Isym1at(iatom,1)
+      end if  
+    end do
+  end do
+  ABI_FREE(ref1at)
+  ABI_FREE(Isym1at)
+
+! Find the number of coefficients of the (3x3) Phij for a given shell
+  ABI_MALLOC(Shell1at%ncoeff     ,(Shell1at%nshell)); Shell1at%ncoeff(:)=zero
+  ABI_MALLOC(Shell1at%ncoeff_prev,(Shell1at%nshell)); Shell1at%ncoeff_prev(:)=zero
+  write(InVar%stdout,*) ' Number of shells=',Shell1at%nshell
+  write(InVar%stdout,*) '============================================================================'
+  open(unit=16,file=trim(InVar%output_prefix)//'nbcoeff-pij.dat')
+  ncoeff_prev=0
+  do ishell=1,Shell1at%nshell
+    ncoeff=0
+    iatref=Shell1at%iatref(ishell)
+    write(InVar%stdout,*) 'Shell number:',ishell 
+    write(InVar%stdout,'(a,i5,a)') '  For atom',iatref,':'
+    call tdep_calc_nbcoeff(distance,iatref,InVar,ishell,1,1,ncoeff,norder,Shell1at%nshell,order,proj,Sym)
+    if (ncoeff.eq.0) then 
+      Shell1at%neighbours(1,ishell)%n_interactions=0
+    end if
+    Shell1at%ncoeff     (ishell)=ncoeff
+    Shell1at%ncoeff_prev(ishell)=ncoeff_prev
+    ncoeff_prev=ncoeff_prev+ncoeff
+    write(InVar%stdout,*)'  Number of independant coefficients in this shell=',ncoeff
+    write(InVar%stdout,*) '============================================================================'
+  end do  
+  write(InVar%stdout,*)'  >>>>>> Total number of coefficients at the first order=',ncoeff_prev
+  close(16)
+  ntotcoeff=ncoeff_prev
+
+ end subroutine tdep_init_shell1at
+
+!====================================================================================================
  subroutine tdep_init_shell2at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell2at,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_shell2at'
-!End of the abilint section
-
-  implicit none
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(out) :: Shell2at
   type(Symetries_Variables_type),intent(inout) :: Sym
@@ -60,12 +168,17 @@ contains
   double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
   double precision, intent(out) :: proj(norder,norder,nshell_max)
 
-  integer :: ishell,iatcell,iatom,jatom,eatom,fatom,iatref,jatref
+  integer :: ishell,iatcell,iatom,jatom,eatom,fatom,iatref,jatref !,ii
   integer :: natom,natom_unitcell,counter,ncoeff,ncoeff_prev
   integer, allocatable :: ref2at(:,:,:),Isym2at(:,:,:)
 
   natom         =InVar%natom
   natom_unitcell=InVar%natom_unitcell
+
+  write(InVar%stdout,*) ' '
+  write(InVar%stdout,*) '#############################################################################'
+  write(InVar%stdout,*) '###### SECOND ORDER : find the number of coefficients #######################'
+  write(InVar%stdout,*) '#############################################################################'
 
 ! - Identify the shells
 ! - Store the index of the atoms included in each shell
@@ -85,7 +198,8 @@ contains
       do eatom=1,natom
         do fatom=1,natom
           if ((ref2at(eatom,fatom,1).eq.0).and.&
-&         (abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.1.d-3)) then
+!FB&         (abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.1.d-3)) then
+&         (abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.1.d-6)) then
             call tdep_SearchS_2at(InVar,iatcell,jatom,eatom,fatom,Isym2at,Sym,InVar%xred_ideal)
             if (Isym2at(eatom,fatom,2)==1) then
               if (InVar%debug) write(InVar%stdout,'(a,1x,4(i4,1x),a,i4)') &
@@ -176,24 +290,35 @@ contains
     ncoeff_prev=ncoeff_prev+ncoeff
     write(InVar%stdout,*)'  Number of independant coefficients in this shell=',ncoeff
     write(InVar%stdout,*) '============================================================================'
-  end do
-  write(InVar%stdout,*)'  >>>>>> Total number of coefficients in these shells=',ncoeff_prev
+  end do  
+  write(InVar%stdout,*)'  >>>>>> Total number of coefficients at the second order=',ncoeff_prev
   close(16)
   ntotcoeff=ncoeff_prev
+!BeginFB 
+!FB  open(unit=91,file='Shell2at.dat')
+!FB  write(91,*) Shell2at%nshell
+!FB  do ishell=1,Shell2at%nshell
+!FB    write(91,*) Shell2at%ncoeff(ishell) 
+!FB    write(91,*) Shell2at%ncoeff_prev(ishell) 
+!FB    write(91,*) Shell2at%iatref(ishell) 
+!FB    write(91,*) Shell2at%jatref(ishell) 
+!FB    do iatom=1,InVar%natom
+!FB      write(91,*) Shell2at%neighbours(iatom,ishell)%n_interactions
+!FB      do ii=1,Shell2at%neighbours(iatom,ishell)%n_interactions
+!FB        write(91,*) Shell2at%neighbours(iatom,ishell)%sym_in_shell(ii)
+!FB        write(91,*) Shell2at%neighbours(iatom,ishell)%transpose_in_shell(ii)
+!FB        write(91,*) Shell2at%neighbours(iatom,ishell)%atomj_in_shell(ii)
+!FB      end do
+!FB    end do
+!FB  end do
+!FB  close(91)
+!EndFB
 
  end subroutine tdep_init_shell2at
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!====================================================================================================
  subroutine tdep_init_shell3at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell3at,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_shell3at'
-!End of the abilint section
-
-  implicit none
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(out) :: Shell3at
   type(Symetries_Variables_type),intent(inout) :: Sym
@@ -202,149 +327,308 @@ contains
   double precision, intent(in) :: distance(InVar%natom,InVar%natom,4)
   double precision, intent(out) :: proj(norder,norder,nshell_max)
 
-  integer :: ii,ishell,iatcell,iatom,jatom,katom,eatom,fatom,gatom,iatref,jatref,katref
-  integer :: natom,natom_unitcell,watom,xatom,yatom,counter,ncoeff,ncoeff_prev
-  double precision :: norm1,norm2
-  integer, allocatable :: ref3at(:,:,:,:),Isym3at(:,:,:,:)
+  integer :: ii,ishell,iatom,jatom,katom,eatom,fatom,gatom,iatref,jatref,katref
+  integer :: natom,natom_unitcell,watom,xatom,yatom,ninteractions,ncoeff,ncoeff_prev,nshell_tmp
+  integer :: find_equivalent,ninter,iat_ref,jat_ref,kat_ref,tmpinter !jj, ok,
+  double precision :: norm1,norm2,norm3
+  integer :: Isym3at(2)
+  integer, allocatable :: atref(:,:),interactions(:,:)
 
   natom         =InVar%natom
   natom_unitcell=InVar%natom_unitcell
 
-! - Identify the shells
-! - Store the index of the (couple of) atoms included in each shell
-! - Store the reference (couple of) atoms for each shell
-! - Compute the symetry operation between the reference (couple of) atoms and another one
-  ABI_MALLOC(ref3at ,(natom,natom,natom,4)) ; ref3at(:,:,:,:)=zero
-  ABI_MALLOC(Isym3at,(natom,natom,natom,2)) ; Isym3at(:,:,:,:)=zero
-  ishell=0
-  do iatcell=1,natom_unitcell
+  write(InVar%stdout,*) ' '
+  write(InVar%stdout,*) '#############################################################################'
+  write(InVar%stdout,*) '###### THIRD ORDER : find the number of coefficients ########################'
+  write(InVar%stdout,*) '#############################################################################'
+
+! 1/ Identify the shells
+  ABI_MALLOC(interactions,(natom_unitcell,nshell_max)) ; interactions(:,:)=0
+  ABI_MALLOC(atref,(nshell_max,3)) ; atref(:,:)=0
+  nshell_tmp=0
+  do iatom=1,natom_unitcell
     do jatom=1,natom
       do katom=1,natom
-!FB        if((iatcell.ne.jatom).and.(iatcell.ne.katom).and.(jatom.ne.katom)) cycle
-!       WARNING: distance(j,k).ne.|djk| due to the inbox procedure when computing distance(j,k).
-!                So, compute |djk| using vec(ij) and vec(ik).
-        norm1=dsqrt((distance(iatcell,katom,2)-distance(iatcell,jatom,2))**2+&
-&                   (distance(iatcell,katom,3)-distance(iatcell,jatom,3))**2+&
-&                   (distance(iatcell,katom,4)-distance(iatcell,jatom,4))**2)
+!FB        write(6,*) 'NEW COORD1 : iatom,jatom,katom=',iatom,jatom,katom
+!       WARNING: distance(j,k).ne.|djk| due to the inbox procedure when computing distance(j,k). 
+!                So, compute |djk| using vec(ij) and vec(ik).      
+        norm1=dsqrt((distance(iatom,katom,2)-distance(iatom,jatom,2))**2+&
+&                   (distance(iatom,katom,3)-distance(iatom,jatom,3))**2+&
+&                   (distance(iatom,katom,4)-distance(iatom,jatom,4))**2)
 !       Interactions are only computed until Rcut3<acell/2 in order to have complete shell of neighbours.
 !       Otherwise the symetries are broken.
-        if ((ref3at(iatcell,jatom,katom,1).ne.0).or.&
-&          (distance(iatcell,jatom,1).gt.(InVar%Rcut3*0.99)).or.&
-&          (norm1                    .gt.(InVar%Rcut3*0.99)).or.&
-&          (distance(iatcell,katom,1).gt.(InVar%Rcut3*0.99))) cycle
-        ishell=ishell+1
-        if (InVar%debug) write(InVar%stdout,'(a)') &
-&          'NEW SHELL'
-        do eatom=1,natom
-          do fatom=1,natom
-            do gatom=1,natom
-!             WARNING: distance(f,g).ne.|dfg| due to the inbox procedure when computing distance(f,g).
-!                      So, compute |dfg| using vec(ef) and vec(eg).
-              norm2=dsqrt((distance(eatom,gatom,2)-distance(eatom,fatom,2))**2+&
+        if ((distance(iatom,jatom,1).gt.(InVar%Rcut3*0.99)).or.&
+&           (norm1                  .gt.(InVar%Rcut3*0.99)).or.&
+&           (distance(iatom,katom,1).gt.(InVar%Rcut3*0.99))) cycle
+        if (nshell_tmp.eq.0) then
+          atref(1,:)=1
+          nshell_tmp=nshell_tmp+1
+          interactions(iatom,nshell_tmp)=interactions(iatom,nshell_tmp)+1
+          cycle
+        else   
+          find_equivalent=0
+          do ishell=1,nshell_tmp
+            iat_ref=atref(ishell,1) ; jat_ref=atref(ishell,2) ; kat_ref=atref(ishell,3)
+            norm2=dsqrt((distance(iat_ref,kat_ref,2)-distance(iat_ref,jat_ref,2))**2+&
+&                       (distance(iat_ref,kat_ref,3)-distance(iat_ref,jat_ref,3))**2+&
+&                       (distance(iat_ref,kat_ref,4)-distance(iat_ref,jat_ref,4))**2)
+            do ii=1,6
+              if (ii.eq.1) then ; eatom=iatom ; fatom=jatom ; gatom=katom ; end if
+              if (ii.eq.2) then ; eatom=iatom ; fatom=katom ; gatom=jatom ; end if
+              if (ii.eq.3) then ; eatom=jatom ; fatom=iatom ; gatom=katom ; end if
+              if (ii.eq.4) then ; eatom=jatom ; fatom=katom ; gatom=iatom ; end if
+              if (ii.eq.5) then ; eatom=katom ; fatom=iatom ; gatom=jatom ; end if
+              if (ii.eq.6) then ; eatom=katom ; fatom=jatom ; gatom=iatom ; end if
+              norm3=dsqrt((distance(eatom,gatom,2)-distance(eatom,fatom,2))**2+&
 &                         (distance(eatom,gatom,3)-distance(eatom,fatom,3))**2+&
 &                         (distance(eatom,gatom,4)-distance(eatom,fatom,4))**2)
-              if ((ref3at(eatom,fatom,gatom,1).eq.0).and.&
-&                ((abs(distance(iatcell,jatom,1)-distance(eatom,fatom,1)).lt.1.d-3).and.&
-&                 (abs(norm1                    -norm2                  ).lt.1.d-3).and.&
-&                 (abs(distance(iatcell,katom,1)-distance(eatom,gatom,1)).lt.1.d-3))) then
-                call tdep_SearchS_3at(InVar,iatcell,jatom,katom,eatom,fatom,gatom,Isym3at,Sym,InVar%xred_ideal)
-                if (Isym3at(eatom,fatom,gatom,2)==1) then
-                  do ii=1,6
-!                   The Phij_NN has to be symetric (transposition symetries)
-                    if (ii==1) then ; watom=eatom ; xatom=fatom ; yatom=gatom ; endif !\Psi_efg
-                    if (ii==2) then ; watom=eatom ; xatom=gatom ; yatom=fatom ; endif !\Psi_egf
-                    if (ii==3) then ; watom=fatom ; xatom=eatom ; yatom=gatom ; endif !\Psi_feg
-                    if (ii==4) then ; watom=fatom ; xatom=gatom ; yatom=eatom ; endif !\Psi_fge
-                    if (ii==5) then ; watom=gatom ; xatom=eatom ; yatom=fatom ; endif !\Psi_gef
-                    if (ii==6) then ; watom=gatom ; xatom=fatom ; yatom=eatom ; endif !\Psi_gfe
-                    ref3at(watom,xatom,yatom,1)=iatcell
-                    ref3at(watom,xatom,yatom,2)=jatom
-                    ref3at(watom,xatom,yatom,3)=katom
-                    ref3at(watom,xatom,yatom,4)=ishell
-                    Isym3at(watom,xatom,yatom,1)=Isym3at(eatom,fatom,gatom,1)
-                    Isym3at(watom,xatom,yatom,2)=ii
-                    if (InVar%debug.and.ii==1) write(InVar%stdout,'(a,1x,6(i4,1x),a,i4)') &
-&                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' direct transformation with isym=', &
-&                       Isym3at(watom,xatom,yatom,1)
-                    if (InVar%debug.and.ii.gt.1) write(InVar%stdout,'(a,1x,6(i4,1x),a,i4)') &
-&                      'For:',iatcell,jatom,katom,watom,xatom,yatom,' transformation+permutation with isym=',&
-&                       Isym3at(watom,xatom,yatom,1)
-                  end do !ii
-                else
-                  if (InVar%debug) then
-                    write(InVar%stdout,'(a,4(1x,i4))') &
-&                     'NO SYMETRY OPERATION BETWEEN (iatom,jatom,katom) and (eatom,fatom,gatom)=',&
-&                    iatcell,jatom,katom,eatom,fatom,gatom
-                  end if
-                end if
+!FB              if ((abs(distance(iatom,jatom,1)-distance(eatom,fatom,1)).lt.1.d-3).and.&
+!FB&                 (abs(norm1                  -norm2                  ).lt.1.d-3).and.&
+!FB&                 (abs(distance(iatom,katom,1)-distance(eatom,gatom,1)).lt.1.d-3)) then
+              if ((abs(distance(iat_ref,jat_ref,1)-distance(eatom,fatom,1)).lt.1.d-6).and.&
+&                 (abs(norm2                      -norm3                  ).lt.1.d-6).and.&
+&                 (abs(distance(iat_ref,kat_ref,1)-distance(eatom,gatom,1)).lt.1.d-6)) then
+                Isym3at(:)=0
+                call tdep_SearchS_3at(InVar,iat_ref,jat_ref,kat_ref,eatom,fatom,gatom,Isym3at,Sym,InVar%xred_ideal)
+                if (Isym3at(2).eq.1) find_equivalent=1
+                if (find_equivalent.eq.1) then 
+                  interactions(iatom,ishell)=interactions(iatom,ishell)+1
+!FB                  write(6,*) 'The number of interactions in this shell is=',ishell,interactions(iatom,ishell)
+                  exit
+                end if  
               end if
-            end do !gatom
-          end do !fatom
-        end do !eatom
+            end do !ii
+            if (find_equivalent.eq.1) exit
+          end do !ishell
+          if (find_equivalent.eq.0) then
+            nshell_tmp=nshell_tmp+1
+            interactions(iatom,nshell_tmp)=interactions(iatom,nshell_tmp)+1
+            atref(nshell_tmp,1)=iatom
+            atref(nshell_tmp,2)=jatom
+            atref(nshell_tmp,3)=katom
+!FB            write(6,'(a,1x,4(i5,1x))') 'NEW SHELL1 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
+          end if  
+        end if  
       end do !katom
     end do !jatom
-  end do !iatcell
-  Shell3at%nshell=ishell
-  if (Shell3at%nshell.gt.nshell_max) then
-    write(InVar%stdout,*) '  STOP : The maximum number of shells allowed by the code is:',nshell_max
-    write(InVar%stdout,*) '         In the present calculation, the number of shells is:',Shell3at%nshell
-    write(InVar%stdout,*) '         Action: increase nshell_max'
-    MSG_ERROR('The maximum number of shells allowed by the code is reached')
-  end if
+  end do !iatom
+  ABI_FREE(atref)
 
-
-! Store all the previous quantities in a better way than in ref2at (without using too memory).
+! 2/ Allocate the datatype Shell3at%...
+  Shell3at%nshell=nshell_tmp
   ABI_MALLOC(Shell3at%neighbours,(natom,Shell3at%nshell))
-  ABI_MALLOC(Shell3at%iatref         ,(Shell3at%nshell)); Shell3at%iatref(:)=zero
-  ABI_MALLOC(Shell3at%jatref         ,(Shell3at%nshell)); Shell3at%jatref(:)=zero
-  ABI_MALLOC(Shell3at%katref         ,(Shell3at%nshell)); Shell3at%katref(:)=zero
+  ABI_MALLOC(Shell3at%iatref,(Shell3at%nshell)); Shell3at%iatref(:)=zero
+  ABI_MALLOC(Shell3at%jatref,(Shell3at%nshell)); Shell3at%jatref(:)=zero
+  ABI_MALLOC(Shell3at%katref,(Shell3at%nshell)); Shell3at%katref(:)=zero
   do ishell=1,Shell3at%nshell
     do iatom=1,natom
-      counter=0
-      do jatom=1,natom
-        do katom=1,natom
-          if (ref3at(iatom,jatom,katom,4).eq.ishell) counter=counter+1
-        end do
-      end do
-      Shell3at%neighbours(iatom,ishell)%n_interactions=counter
-      if (counter.eq.0) cycle
-      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%atomj_in_shell,(counter))
-      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%atomk_in_shell,(counter))
-      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%sym_in_shell,(counter))
-      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%transpose_in_shell,(counter))
+      ninteractions=interactions(mod(iatom-1,natom_unitcell)+1,ishell)
+      Shell3at%neighbours(iatom,ishell)%n_interactions=ninteractions
+      if (ninteractions.eq.0) cycle
+      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%atomj_in_shell,(ninteractions))
+      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%atomk_in_shell,(ninteractions))
+      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%sym_in_shell,(ninteractions))
+      ABI_MALLOC(Shell3at%neighbours(iatom,ishell)%transpose_in_shell,(ninteractions))
       Shell3at%neighbours(iatom,ishell)%atomj_in_shell(:)=zero
       Shell3at%neighbours(iatom,ishell)%atomk_in_shell(:)=zero
       Shell3at%neighbours(iatom,ishell)%sym_in_shell(:)=zero
       Shell3at%neighbours(iatom,ishell)%transpose_in_shell(:)=zero
-      counter=0
-      do jatom=1,natom
-        do katom=1,natom
-          if (ref3at(iatom,jatom,katom,4).eq.ishell) then
-            counter=counter+1
-            Shell3at%neighbours(iatom,ishell)%atomj_in_shell(counter)=jatom
-            Shell3at%neighbours(iatom,ishell)%atomk_in_shell(counter)=katom
-            Shell3at%neighbours(iatom,ishell)%sym_in_shell(counter)=Isym3at(iatom,jatom,katom,1)
-            Shell3at%neighbours(iatom,ishell)%transpose_in_shell(counter)=Isym3at(iatom,jatom,katom,2)
-            Shell3at%iatref         (ishell)=ref3at(iatom,jatom,katom,1)
-            Shell3at%jatref         (ishell)=ref3at(iatom,jatom,katom,2)
-            Shell3at%katref         (ishell)=ref3at(iatom,jatom,katom,3)
+    end do
+  end do
+  ABI_FREE(interactions)
+
+! 3/ Store the index of the (couple of) atoms included in each shell
+! 4/ Store the reference (couple of) atoms for each shell
+! 5/ Compute the symetry operation between the reference (couple of) atoms and another one
+  ABI_MALLOC(interactions,(natom,Shell3at%nshell)) ; interactions(:,:)=0
+  nshell_tmp=0
+  do iatom=1,natom
+    do jatom=1,natom
+      do katom=1,natom
+!FB        write(6,*) 'NEW COORD2 : iatom,jatom,katom=',iatom,jatom,katom
+        if (nshell_tmp.eq.0) then
+          nshell_tmp=nshell_tmp+1
+          interactions(iatom,nshell_tmp)=1
+          Shell3at%iatref(nshell_tmp)=iatom
+          Shell3at%jatref(nshell_tmp)=jatom
+          Shell3at%katref(nshell_tmp)=katom
+          Shell3at%neighbours(iatom,nshell_tmp)%atomj_in_shell(interactions(iatom,nshell_tmp))=jatom
+          Shell3at%neighbours(iatom,nshell_tmp)%atomk_in_shell(interactions(iatom,nshell_tmp))=katom
+          Shell3at%neighbours(iatom,nshell_tmp)%sym_in_shell(interactions(iatom,nshell_tmp))=1
+          Shell3at%neighbours(iatom,nshell_tmp)%transpose_in_shell(interactions(iatom,nshell_tmp))=1
+          cycle
+        end if   
+!       WARNING: distance(j,k).ne.|djk| due to the inbox procedure when computing distance(j,k). 
+!                So, compute |djk| using vec(ij) and vec(ik).      
+        norm1=dsqrt((distance(iatom,katom,2)-distance(iatom,jatom,2))**2+&
+&                   (distance(iatom,katom,3)-distance(iatom,jatom,3))**2+&
+&                   (distance(iatom,katom,4)-distance(iatom,jatom,4))**2)
+!       Interactions are only computed until Rcut3<acell/2 in order to have complete shell of neighbours.
+!       Otherwise the symetries are broken.
+        if ((distance(iatom,jatom,1).gt.(InVar%Rcut3*0.99)).or.&
+&           (norm1                  .gt.(InVar%Rcut3*0.99)).or.&
+&           (distance(iatom,katom,1).gt.(InVar%Rcut3*0.99))) cycle
+!       Search if the triplet has already been classified        
+        find_equivalent=0
+        do ishell=1,nshell_tmp
+          do ninter=1,interactions(iatom,ishell)
+            if ((Shell3at%neighbours(iatom,ishell)%atomj_in_shell(ninter).eq.jatom).and.&
+&               (Shell3at%neighbours(iatom,ishell)%atomk_in_shell(ninter).eq.katom)) find_equivalent=1
+          end do
+        end do
+        if (find_equivalent.eq.1) cycle
+!       Search if the triplet belongs to a shell already found
+        do ishell=1,nshell_tmp
+          iat_ref=Shell3at%iatref(ishell) ; jat_ref=Shell3at%jatref(ishell) ; kat_ref=Shell3at%katref(ishell)
+          norm2=dsqrt((distance(iat_ref,kat_ref,2)-distance(iat_ref,jat_ref,2))**2+&
+&                     (distance(iat_ref,kat_ref,3)-distance(iat_ref,jat_ref,3))**2+&
+&                     (distance(iat_ref,kat_ref,4)-distance(iat_ref,jat_ref,4))**2)
+          do ii=1,6
+            if (ii.eq.1) then ; eatom=iatom ; fatom=jatom ; gatom=katom ; end if
+            if (ii.eq.2) then ; eatom=iatom ; fatom=katom ; gatom=jatom ; end if
+            if (ii.eq.3) then ; eatom=jatom ; fatom=iatom ; gatom=katom ; end if
+            if (ii.eq.4) then ; eatom=jatom ; fatom=katom ; gatom=iatom ; end if
+            if (ii.eq.5) then ; eatom=katom ; fatom=iatom ; gatom=jatom ; end if
+            if (ii.eq.6) then ; eatom=katom ; fatom=jatom ; gatom=iatom ; end if
+            norm3=dsqrt((distance(eatom,gatom,2)-distance(eatom,fatom,2))**2+&
+&                       (distance(eatom,gatom,3)-distance(eatom,fatom,3))**2+&
+&                       (distance(eatom,gatom,4)-distance(eatom,fatom,4))**2)
+!FB            if ((abs(distance(iatom,jatom,1)-distance(eatom,fatom,1)).lt.1.d-3).and.&
+!FB&               (abs(norm1                  -norm2                  ).lt.1.d-3).and.&
+!FB&               (abs(distance(iatom,katom,1)-distance(eatom,gatom,1)).lt.1.d-3)) then
+            if ((abs(distance(iat_ref,jat_ref,1)-distance(eatom,fatom,1)).lt.1.d-6).and.&
+&               (abs(norm2                      -norm3                  ).lt.1.d-6).and.&
+&               (abs(distance(iat_ref,kat_ref,1)-distance(eatom,gatom,1)).lt.1.d-6)) then
+              Isym3at(:)=0
+              call tdep_SearchS_3at(InVar,iat_ref,jat_ref,kat_ref,eatom,fatom,gatom,Isym3at,Sym,InVar%xred_ideal)
+              if (Isym3at(2).eq.1) then
+                find_equivalent=1
+                exit
+              end if  
+            end if
+          end do !ii
+          if (find_equivalent.eq.1) exit
+        end do !ishell
+!       The triplet belongs to a new shell 
+        if (find_equivalent.eq.0) then
+          nshell_tmp=nshell_tmp+1
+!         Check that the new shell is allowed
+          if (nshell_tmp.gt.Shell3at%nshell) then
+            MSG_ERROR('The shell number index is greater than the shell number max computed previously')
+          end if  
+          Shell3at%iatref(nshell_tmp)=iatom
+          Shell3at%jatref(nshell_tmp)=jatom
+          Shell3at%katref(nshell_tmp)=katom
+          eatom=iatom ; fatom=jatom ; gatom=katom
+          Isym3at(:)=1
+          ishell=nshell_tmp
+!FB          write(6,'(a,1x,4(i5,1x))') 'NEW SHELL2 : nshell_tmp,iatom,jatom,katom=',nshell_tmp,iatom,jatom,katom
+        end if  
+!       Classify the informations of the triplet in Shell3at
+        do ii=1,6
+!         The Phij_NN has to be symetric (transposition symetries)
+          if (ii==1) then ; watom=eatom ; xatom=fatom ; yatom=gatom ; endif !\Psi_ijk
+          if (ii==2) then ; watom=eatom ; xatom=gatom ; yatom=fatom ; endif !\Psi_ikj
+          if (ii==3) then ; watom=fatom ; xatom=eatom ; yatom=gatom ; endif !\Psi_jik
+          if (ii==4) then ; watom=fatom ; xatom=gatom ; yatom=eatom ; endif !\Psi_jki
+          if (ii==5) then ; watom=gatom ; xatom=eatom ; yatom=fatom ; endif !\Psi_kij
+          if (ii==6) then ; watom=gatom ; xatom=fatom ; yatom=eatom ; endif !\Psi_kji
+!         Do not overwrite the Psi_iik, Psi_iji, Psi_ijj or Psi_iii IFCs
+!         and avoid double counting of triplet interactions
+          if ((eatom.eq.fatom).and.((ii.eq.3).or.(ii.eq.4).or.(ii.eq.6))) cycle
+          if ((eatom.eq.gatom).and.((ii.gt.3))) cycle
+          if ((fatom.eq.gatom).and.((ii.eq.2).or.(ii.eq.5).or.(ii.eq.6))) cycle
+          if ((eatom.eq.fatom).and.(fatom.eq.gatom).and.(ii.gt.1)) cycle
+          interactions(watom,ishell)=interactions(watom,ishell)+1
+!FB          write(6,*) 'For ishell and eatom=',ishell,watom
+!FB          write(6,*) '  --> the number of interactions in the shell is=',interactions(watom,ishell)
+          if (interactions(watom,ishell).gt.Shell3at%neighbours(watom,ishell)%n_interactions) then
+            MSG_ERROR('The interaction number index is greater than the interaction number max computed previously')
+          end if
+          Shell3at%neighbours(watom,ishell)%atomj_in_shell(interactions(watom,ishell))=xatom
+          Shell3at%neighbours(watom,ishell)%atomk_in_shell(interactions(watom,ishell))=yatom
+          Shell3at%neighbours(watom,ishell)%sym_in_shell(interactions(watom,ishell))=Isym3at(1)
+          Shell3at%neighbours(watom,ishell)%transpose_in_shell(interactions(watom,ishell))=ii
+!DEBUG          write(6,'(a,9(i5,x))') 'ishell,iatref,jatref,katref,iatom,atomj_in_shell,atomk_in_shell,isym,trans=',&
+!DEBUG&         ishell,Shell3at%iatref(ishell),Shell3at%jatref(ishell),Shell3at%katref(ishell),watom,xatom,yatom,Isym3at(1),ii
+        end do !ii
+      end do !katom
+    end do !jatom
+  end do !iatom
+! Check that each interaction has different symmetry per shell
+  do ishell=1,Shell3at%nshell 
+    do iatom=1,natom
+      if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
+      do ninter=1,Shell3at%neighbours(iatom,ishell)%n_interactions-1
+        do tmpinter=ninter+1,Shell3at%neighbours(iatom,ishell)%n_interactions
+            if (Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter).eq.&
+&             Shell3at%neighbours(iatom,ishell)%sym_in_shell(tmpinter)) then
+            if (Shell3at%neighbours(iatom,ishell)%transpose_in_shell(  ninter).ne.&
+&               Shell3at%neighbours(iatom,ishell)%transpose_in_shell(tmpinter)) cycle
+            write(std_out,'(a,2(1x,i5))') 'For ishell and iatom =',ishell,iatom
+            write(std_out,'(a,i5,a,i5,a,i5)') '  the interactions ',ninter,&
+&             ' and ',tmpinter,' have both the same symmetry isym=',Shell3at%neighbours(iatom,ishell)%sym_in_shell(  ninter)
+            MSG_ERROR('Some interactions are equals due to the symmetry')
           end if
         end do
       end do
     end do
+  end do  
+! Check that each equivalent shell has the same set of interactions
+  do ishell=1,Shell3at%nshell 
+    do iatom=1,natom
+      if (Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%n_interactions.ne.&
+&         Shell3at%neighbours(                        iatom,ishell)%n_interactions) then
+        MSG_ERROR('The interaction number index is not equal to the interaction number max computed previously')
+      end if
+!FB      do ninter=1,Shell3at%neighbours(iatom,ishell)%n_interactions
+!FB        jatom=Shell3at%neighbours(iatom,ishell)%atomj_in_shell(ninter)
+!FB	katom=Shell3at%neighbours(iatom,ishell)%atomk_in_shell(ninter)
+!FB	isym =Shell3at%neighbours(iatom,ishell)%sym_in_shell(ninter)
+!FB	trans=Shell3at%neighbours(iatom,ishell)%transpose_in_shell(ninter)
+!FB        do ii=1,3
+!FB          do jj=1,3
+!FB            vectj(ii)=vectj(ii)+Sym%S_ref(ii,jj,isym,1)*distance(iatom,jatom,jj+1)
+!FB            vectk(ii)=vectk(ii)+Sym%S_ref(ii,jj,isym,1)*distance(iatom,katom,jj+1)
+!FB          end do  
+!FB        end do
+!FB        if (trans==1) then ; watom=iatcell ; xatom=jatom   ; yatom=katom   ; endif !\Psi_ijk
+!FB        if (trans==2) then ; watom=iatcell ; xatom=katom   ; yatom=jatom   ; endif !\Psi_ikj
+!FB        if (trans==3) then ; watom=jatom   ; xatom=iatcell ; yatom=katom   ; endif !\Psi_jik
+!FB        if (trans==4) then ; watom=jatom   ; xatom=katom   ; yatom=iatcell ; endif !\Psi_jki
+!FB        if (trans==5) then ; watom=katom   ; xatom=iatcell ; yatom=jatom   ; endif !\Psi_kij
+!FB        if (trans==6) then ; watom=katom   ; xatom=jatom   ; yatom=iatcell ; endif !\Psi_kji
+!FB	if 
+!FB      end do
+!FB
+!FB      if (Shell3at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
+!FB      do ninter=1,Shell3at%neighbours(iatom,ishell)%n_interactions
+!FB        ok=0
+!FB        do tmpinter=1,Shell3at%neighbours(iatom,ishell)%n_interactions
+!FB          if ((Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%sym_in_shell(  ninter)).eq.&
+!FB&             (Shell3at%neighbours(                      iatom,ishell)%sym_in_shell(tmpinter))) ok=1
+!FB	end do  
+!FB	if (ok.eq.0) then
+!FB          write(std_out,'(a,2(x,i5))') 'For ishell and iatom =',ishell,iatom
+!FB          write(std_out,'(a,i5,a)') '  the symmetry ',&
+!FB&	    Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%sym_in_shell(  ninter),' is not found'
+!FB          do tmpinter=1,Shell3at%neighbours(iatom,ishell)%n_interactions
+!FB	    write(6,*) 'INTER=',tmpinter
+!FB            write(6,*) Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%sym_in_shell(tmpinter),Shell3at%neighbours(iatom,ishell)%sym_in_shell(tmpinter)
+!FB            write(6,*) Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%transpose_in_shell(tmpinter),Shell3at%neighbours(iatom,ishell)%transpose_in_shell(tmpinter)
+!FB            write(6,*) Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%atomj_in_shell(tmpinter),Shell3at%neighbours(iatom,ishell)%atomj_in_shell(tmpinter)
+!FB            write(6,*) Shell3at%neighbours(mod(iatom-1,natom_unitcell)+1,ishell)%atomk_in_shell(tmpinter),Shell3at%neighbours(iatom,ishell)%atomk_in_shell(tmpinter)
+!FB	  end do
+!FB          MSG_ERROR('Some symmetries are not found')
+!FB	end if
+!FB      end do
+    end do
   end do
-  ABI_FREE(ref3at)
-  ABI_FREE(Isym3at)
+  ABI_FREE(interactions)
 
 ! Find the number of coefficients of the (3x3x3) Psij for a given shell
   ABI_MALLOC(Shell3at%ncoeff     ,(Shell3at%nshell)); Shell3at%ncoeff(:)=zero
   ABI_MALLOC(Shell3at%ncoeff_prev,(Shell3at%nshell)); Shell3at%ncoeff_prev(:)=zero
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '############################ THIRD ORDER  ###################################'
-  write(InVar%stdout,*) '################ Now, find the number of coefficients for ###################'
-  write(InVar%stdout,*) '########################## a reference interaction ##########################'
-  write(InVar%stdout,*) '#############################################################################'
   write(InVar%stdout,*) 'Number of shells=',Shell3at%nshell
   write(InVar%stdout,*) '============================================================================'
   open(unit=16,file=trim(InVar%output_prefix)//'nbcoeff-psij.dat')
@@ -364,24 +648,37 @@ contains
     ncoeff_prev=ncoeff_prev+ncoeff
     write(InVar%stdout,*)'  Number of independant coefficients in this shell=',ncoeff
     write(InVar%stdout,*) '============================================================================'
-  end do
-  write(InVar%stdout,*)'  >>>>>> Total number of coefficients in these shells=',ncoeff_prev
+  end do  
+  write(InVar%stdout,*)'  >>>>>> Total number of coefficients at the third order=',ncoeff_prev
   close(16)
   ntotcoeff=ncoeff_prev
-
+!BeginFB 
+!FB  open(unit=91,file='Shell3at.dat')
+!FB  write(91,*) Shell3at%nshell
+!FB  do ishell=1,Shell3at%nshell
+!FB    write(91,*) Shell3at%ncoeff(ishell) 
+!FB    write(91,*) Shell3at%ncoeff_prev(ishell) 
+!FB    write(91,*) Shell3at%iatref(ishell) 
+!FB    write(91,*) Shell3at%jatref(ishell) 
+!FB    write(91,*) Shell3at%katref(ishell) 
+!FB    do iatom=1,InVar%natom
+!FB      write(91,*) Shell3at%neighbours(iatom,ishell)%n_interactions
+!FB      do ii=1,Shell3at%neighbours(iatom,ishell)%n_interactions
+!FB        write(91,*) Shell3at%neighbours(iatom,ishell)%sym_in_shell(ii)
+!FB        write(91,*) Shell3at%neighbours(iatom,ishell)%transpose_in_shell(ii)
+!FB        write(91,*) Shell3at%neighbours(iatom,ishell)%atomj_in_shell(ii)
+!FB        write(91,*) Shell3at%neighbours(iatom,ishell)%atomk_in_shell(ii)
+!FB      end do
+!FB    end do
+!FB  end do
+!FB  close(91)
+!EndFB
+  
  end subroutine tdep_init_shell3at
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!====================================================================================================
  subroutine tdep_destroy_shell(natom,order,Shell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_destroy_shell'
-!End of the abilint section
-
-  implicit none
   integer, intent(in) :: natom,order
   type(Shell_Variables_type),intent(inout) :: Shell
 
@@ -410,5 +707,5 @@ contains
 
  end subroutine tdep_destroy_shell
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!====================================================================================================
 end module m_tdep_shell

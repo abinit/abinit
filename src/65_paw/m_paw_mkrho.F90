@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_mkrho
 !! NAME
 !!  m_paw_mkrho
@@ -7,7 +6,7 @@
 !!  This module contains routines used to compute PAW density on the real space fine grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (MT, JWZ)
+!! Copyright (C) 2018-2020 ABINIT group (MT, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,19 +22,19 @@
 MODULE m_paw_mkrho
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_time, only : timab
+ use defs_abitypes,      only : MPI_type
+ use m_time,             only : timab
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type,pawrad_deducer0
  use m_pawtab,           only : pawtab_type,pawtab_get_lsize
  use m_paw_sphharm,      only : initylmr
  use m_pawfgrtab,        only : pawfgrtab_type,pawfgrtab_init,pawfgrtab_free
  use m_pawrhoij,         only : pawrhoij_type,pawrhoij_copy,pawrhoij_free_unpacked, &
-&                               pawrhoij_nullify,pawrhoij_free,symrhoij
+&                               pawrhoij_nullify,pawrhoij_free,pawrhoij_symrhoij
  use m_pawfgr,           only : pawfgr_type
  use m_paw_nhat,         only : pawmknhat,nhatgrid
  use m_paral_atom,       only : get_my_atmtab,free_my_atmtab
@@ -53,8 +52,8 @@ MODULE m_paw_mkrho
  private
 
 !public procedures.
- public :: pawmkrho ! Build PAW electron density on fine grid, including compensation charge density
- public :: denfgr   ! Build complete PAW electron density on fine grid, including on-site contributions
+ public :: pawmkrho ! Build PAW electronic density on fine grid, including compensation charge density
+ public :: denfgr   ! Build complete PAW electronic density on fine grid, including on-site contributions
 
 CONTAINS  !========================================================================================
 !!***
@@ -133,7 +132,7 @@ CONTAINS  !=====================================================================
 !!
 !! CHILDREN
 !!      fourdp,pawmknhat,pawrhoij_copy,pawrhoij_free,pawrhoij_free_unpacked
-!!      pawrhoij_nullify,symrhoij,timab,transgrid
+!!      pawrhoij_nullify,pawrhoij_symrhoij,timab,transgrid
 !!
 !! SOURCE
 
@@ -142,15 +141,6 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
 &          pawang_sym,pawnhat,pawrhoij0,rhog) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmkrho'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -203,20 +193,20 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    msg='  pawrhoij0 must be present when ipert>0 !'
    MSG_BUG(msg)
  end if
- 
+
 !Symetrize PAW occupation matrix and store it in packed storage
  call timab(557,1,tsec)
  option=1;choice=1
  if (present(pawang_sym)) then
-   call symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,ntypat,&
-&   option,pawang_sym,pawprtvol,pawtab,rprimd,symafm,symrec,typat,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&   qphon=qphon)
+   call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,&
+&       natom,nsym,ntypat,option,pawang_sym,pawprtvol,pawtab,rprimd,symafm,&
+&       symrec,typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&       qphon=qphon)
  else
-   call symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,ntypat,&
-&   option,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&   qphon=qphon)
+   call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,&
+&       natom,nsym,ntypat,option,pawang,pawprtvol,pawtab,rprimd,symafm,&
+&       symrec,typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&       qphon=qphon)
  end if
  call pawrhoij_free_unpacked(pawrhoij_unsym)
  call timab(557,2,tsec)
@@ -227,7 +217,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    call pawrhoij_nullify(pawrhoij_ptr)
    call pawrhoij_copy(pawrhoij,pawrhoij_ptr,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom, &
-&   keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)       
+&   keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
  else
    pawrhoij_ptr=>pawrhoij
  end if
@@ -250,7 +240,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 & rhodum,pawnhat_ptr,pawrhoij_ptr,pawrhoij0_ptr,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & comm_fft=mpi_enreg%comm_fft,paral_kgb=paral_kgb,me_g0=mpi_enreg%me_g0,&
-& distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl) 
+& distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl)
 
  if (compute_rhor_rhog/=0) then
 !  Transfer pseudo density from coarse grid to fine grid
@@ -263,7 +253,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !  Compute compensated pseudo density in reciprocal space
    if (present(rhog)) then
-     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,1,pawfgr%ngfft,0)
    end if
  end if
 
@@ -350,15 +340,6 @@ end subroutine pawmkrho
 & pawfgr,pawrad,pawrhoij,pawtab,prtvol,rhor,rhor_paw,rhor_n_one,rhor_nt_one,rprimd,typat,ucvol,xred,&
 & abs_n_tilde_nt_diff,znucl,mpi_atmtab,comm_atom) ! Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'denfgr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_natom,natom,nspden,ntypat,prtvol,nsppol,nspinor
@@ -409,6 +390,10 @@ end subroutine pawmkrho
 
  DBG_ENTER("COLL")
 
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'denfgr not supposed to be called with qphase/=1!')
+ end if
+
 !Set up parallelism over atoms (compatible only with band-FFT parallelism)
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
@@ -424,11 +409,11 @@ end subroutine pawmkrho
  if (my_natom>0) then
    if (paral_atom) then
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat,mpi_atmtab=my_atmtab)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex,l_size_atm,nspden,typat,&
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%qphase,l_size_atm,nspden,typat,&
 &     mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
    else
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex,l_size_atm,nspden,typat)
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%qphase,l_size_atm,nspden,typat)
    end if
    ABI_DEALLOCATE(l_size_atm)
  end if
@@ -647,7 +632,7 @@ end subroutine pawmkrho
              end if ! check if |r-R| = 0
 
              do ispden=1,nspden
-               if (pawrhoij(iatom)%cplex == 1) then
+               if (pawrhoij(iatom)%cplex_rhoij == 1) then
                  rhor_paw(ifftsph,ispden) = rhor_paw(ifftsph,ispden) + &
 &                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(irhoij,ispden)*(phj*phi - tphj*tphi)
 

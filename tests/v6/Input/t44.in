@@ -41,7 +41,6 @@ prtden 0
 prtwf 0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -53,7 +52,7 @@ prtwf 0
 #%% max_nprocs = 18
 #%% [extra_info]
 #%% authors = J. Zwanziger
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Electric field gradient of indium metal, body-centered tetragonal, included to
 #%%   check EFG symmetry in this case.

@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -45,6 +46,6 @@ MODULE TRIQS_CTQMC
     end subroutine Ctqmc_triqs_run
    
   end interface
- 
+
 
 END MODULE TRIQS_CTQMC

@@ -4,9 +4,9 @@ Created: Nov 12, 2016
 Author : Nicholas Pike
 Email  : Nicholas.pike@ulg.ac.be
 
-Purpose: To calculate the Raman spectrum, at a user defined orientation and angle, 
+Purpose: To calculate the Raman spectra, both polarization and powder average, 
          by reading in data from an abinit calculation.  This program will read
-         the anaddb output file "anaddb.out" or from a user specified file, 
+         the anaddb output file and a user created input file, 
          extract the needed data, and output the result for plotting with your 
          favorite program. 
          
@@ -17,6 +17,7 @@ Version: 0.0 - Initial building of program
          0.1 - Additional for angle dependent calculation
          0.2 - Additional user input required and number of output files reduced
          0.3 - Moved all user prompted input to an input file
+         0.4 - Added help menu and better input file example and a small bug fix
 
 Output: Program will output a text file containing the raman spectrum vs frequency
         and an outfile which outlines what happens in the calculation.
@@ -33,6 +34,14 @@ Start of definations and other useful information
 """
 
 def GET_UNIT(string):
+    """
+    Author: Lucas Baguet
+    
+    Purpose: Determine the unit of the corresponding input string.
+    
+    Return: integer depending on what unit is used in the input file.
+    
+    """
     if string == 'Ha':
         return 0
     if string == 'Hz':
@@ -57,10 +66,7 @@ def READ_INPUT(user_filein):
     if check == False:
         print('')
         print('The input file was not found in the directory. \n Please correct this.')
-        print('\n Remember the input file should be formated as follows:\n\n '\
-                 'filename "name of file"\n outname "name of outfile"\n temp "temperature in Kelvin"\n'
-                 ' frequency "frequency in cm^-1"\n spread "spread of lorentz in cm^-1"\n '\
-                 'calctype "type of calculation 0- abort, 1- powder, 2-ij polarization, 3- angle"\n')
+        print('\n Remember the input file should be formated.  See help menu.')
         sys.exit()
     else:
         for line in open(user_filein):
@@ -71,38 +77,49 @@ def READ_INPUT(user_filein):
                 if len(l)>0:
                   if l[0] == 'filename':          # name of the anaddb output file
                       vararray[0] = str(l[1])
+                      
                   elif l[0] == 'temp':            # temperature
+                      
                       vararray[1] = float(l[1])
                   elif l[0] == 'laser_freq':       # laser frequency
+                      
                       vararray[2][0] = float(l[1])
                       if len(l)>2:
                           vararray[2][1] = GET_UNIT(l[2])
+                          
                   elif l[0] == 'spread':          # spread of lorentz
                       vararray[3][0] = float(l[1])
                       if len(l)>2:
                           vararray[3][1] = GET_UNIT(l[2])
-                  elif l[0] == '':                # passes over spaces
-                      fill = 0
+                          
                   elif l[0] == 'calctype':        # calculation type
                       vararray[4] = int(l[1])
+                      
                   elif l[0] == 'outname':         # output file name
                       vararray[5] = str(l[1])
-                  elif l[0] == 'relative_intensity':        # relative intensities or not
+                      
+                  elif l[0] == 'relative_intensity':        # relative intensities or not                      
                       vararray[6] = True
-                  elif l[0] == 'freq_unit':       # unit for output frequencies
+                      
+                  elif l[0] == 'freq_unit':       # unit for output frequencies                      
                       vararray[7] = GET_UNIT(l[1])
-                  elif l[0] == 'keep_file':
+                      
+                  elif l[0] == 'keep_file':    # should we keep the output file or rewrite it
                       vararray[8] = True
-                  elif l[0] == 'n_freq':
+                      
+                  elif l[0] == 'n_freq':   # number of frequency output to the file
                       vararray[9] = int(l[1])
-                  elif l[0] == 'min_freq':
+                      
+                  elif l[0] == 'min_freq':# minimum frequency
                       vararray[10][0] = float(l[1])
                       if len(l)>2:
                           vararray[10][1] = GET_UNIT(l[2])
-                  elif l[0] == 'max_freq':
+                          
+                  elif l[0] == 'max_freq':    #  maximum frequency
                       vararray[11][0] = float(l[1])
                       if len(l)>2:
                           vararray[11][1] = GET_UNIT(l[2])
+                          
         #set output file name
         global outname
         #check for output file
@@ -153,7 +170,7 @@ def PRINT_HEADER():
     printout('')
     printout('++++++++++++++++++++++++ Version %s ++++++++++++++++++++++++\n'%__version__)
     printout('')
-    printout('This program generates a Raman Spectrum after an anaddb '\
+    printout('This program generates a Raman Spectra after an anaddb '\
              'calculation.\n')
     printout('In this version, the program reads an the output file of an '\
              'anaddb\n calculation, finds the information it needs, and outputs '\
@@ -171,7 +188,7 @@ def printout(to_output):
     Email: Nicholas.pike@ulg.ac.be
         
     Purpose: This defintion should print to an output file, known as the output,
-    in which all comments, warnings, and results are printed too. 
+    in which all comments, warnings, and results are to be printed. 
     """
     #print to file
     f1= open(outname,'a')
@@ -219,6 +236,12 @@ def CHECK_REPEAT(filename,delete):
     return newfilename
 
 def UNIT_TO_HA(val,unit):
+    """
+    Author: Lucas Baguet
+    
+    Purpose: Determines how the unit, read in as a string, should be converted.
+    
+    """
     if not (unit in [0,1,2]):
         return -1
     if unit==0:# val in Ha
@@ -229,6 +252,11 @@ def UNIT_TO_HA(val,unit):
         return val*cm1_to_hartree
 
 def HA_TO_UNIT(val,unit):
+    """
+    Author: Lucas Baguet
+    
+    Purpose: Does the opposite of the previous function.
+    """
     if not (unit in [0,1,2]):
         return -1
     if unit==0:# val in Ha
@@ -378,7 +406,6 @@ def CALL_RAMAN_MENU(output,keywords,vararray):
 
                 # if width <=0 : write information to the output file with a simple format
                 if not with_spreading:
-#                    printout('Printing results to an output file named %s' %outfile)
                     if relative:
                         printoutfile(' %11.2f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f %11.5f' %(menergy[j][freq_unit],
                     l_I_rel[0],l_I_rel[1],l_I_rel[2],l_I_rel[3],l_I_rel[4],l_I_rel[5],l_I_rel[6]),outfile)
@@ -434,7 +461,7 @@ def LOAD_ANADDB(infile):
         
     Loads abinit data by reading the output file and storing necessary information
     in the correct arrays.  This is done by reading the file twice. First to 
-    find keywords, and the second time to extract dat
+    find keywords, and the second time to extract data
     
     """
     keywords =['', #Abinit version
@@ -484,7 +511,6 @@ def LOAD_ANADDB(infile):
     diedata = []
     
     if keywords[1]: #dielectric tensor as a function of frequency
-        #Do something
         printout('Starting extraction of the dielectric Tensor as a function of frequency.')
         diedata=np.zeros(shape=(keywords[2],7))
         with open(infile,'r') as f:
@@ -579,13 +605,24 @@ def GET_RAMANMATRIX(modedata):
     return modedata
 
 def GET_NORM(m):
-  norm = 0
-  for ii in range(3):
-    for jj in range(3):
-      norm += m[ii][jj]**2
-  return norm
+    """
+    Author: Lucas Baguet
+    
+    Purpose: Calculates the norm of a matrix
+    """
+    
+    norm = 0
+    for ii in range(3):
+        for jj in range(3):
+            norm += m[ii][jj]**2
+    return norm
 
 def GET_G012(m):
+    """
+    Author: Nicholas Pike and Lucas Baguet
+    
+    Purpose: Calculates the G components for the powder average spectra
+    """
     m_I = np.zeros([3,3],dtype=np.float64)
     m_A = np.zeros([3,3],dtype=np.float64)
     m_S = np.zeros([3,3],dtype=np.float64)
@@ -603,10 +640,6 @@ def GET_G012(m):
     G0 = GET_NORM(m_I)
     G1 = GET_NORM(m_A)
     G2 = GET_NORM(m_S)
-#    G0 = 1.0/3.0*(m[0][0]+m[1][1]+m[2][2])**2
-#    G1 = 1.0/2.0*((m[0][1]-m[1][0])**2+(m[0][2]-m[2][0])**2+(m[1][2]-m[2][1])**2)
-#    G2 = 1.0/2.0*((m[0][1]+m[1][0])**2+(m[0][2]+m[2][0])**2+(m[1][2]+m[2][1])**2)
-#    G2+= 1.0/3.0*((m[0][0]-m[1][1])**2+(m[1][1]-m[2][2])**2+(m[2][2]-m[0][0])**2)
     return G0,G1,G2
 
 def RAMAN_INTENSITIES(menergy,rarray,laser,T,option):
@@ -619,18 +652,12 @@ def RAMAN_INTENSITIES(menergy,rarray,laser,T,option):
     nmode = len(menergy)
     Intensities     = np.zeros(nmode)
     Intensities_rel = np.zeros(nmode)
-#    if option == 'POWDER':
-#      printout(" hbar/kT = {:12.5e}".format(hplank/(kb*T)))
     for j in range(nmode):
         if menergy[j][2] > 1: # in cm1
             mbose = 1.0/(np.exp(hplank*menergy[j][1]/(kb*T))-1.0)
             pref = 1.0/(2.0*menergy[j][0])*(menergy[j][0] - laser)**4/clight**4*(mbose+1.0)
             if option == 'POWDER':
-#                printout("mode {:d} : {:12.5e} mbose = {:8.5f}".format(j+1,menergy[j][1],mbose+1.0))
-#                for ii in range(3):
-#                  printout(" {:12.5e} {:12.5e} {:12.5e} ".format(rarray[j][ii][0],rarray[j][ii][1],rarray[j][ii][2]))
                 G0,G1,G2 = GET_G012(rarray[j])
-#                printout("G1 = {:12.5e} G1 = {:12.5e} G2 = {:12.5e}".format(G0,G1,G2))
                 pref  = (2*np.pi)*pref
                 Ipar  = pref*(10.0*G0+4.0*G2)
                 Iperp = pref*( 5.0*G1+3.0*G2)
@@ -692,6 +719,7 @@ def DETER_MENU(var_array):
         for j in range(int(keywords[2])):
             o3j=output[3][j]
             printoutfile('%e %e %e %e %e %e %e' %(o3j[0],o3j[1],o3j[2],o3j[3],o3j[4],o3j[5],o3j[6]),outfile)
+            
     if keywords[3]:
         #Choose to identify the modes characteristics or make a Raman Spectrum  
         printout('Entering Raman Spectrum Calculation.')
@@ -714,7 +742,7 @@ if __name__ == '__main__':
     __copyright__  = 'none'
     __credits__    = 'none'
     __license__    = 'none'
-    __version__    = '0.3'
+    __version__    = '0.4'
     __maintainer__ = 'Nicholas Pike'
     __email__      = 'Nicholas.pike@ulg.ac.be'
     __status__     = 'production'
@@ -750,18 +778,65 @@ if __name__ == '__main__':
     if any('SPYDER' in name for name in os.environ):
         user_inputfile = 'input_raman'
     else:
-        #Determines what the program is to do if it is run from command line
-        user_inputfile = sys.argv[1] #input should be python program_name tfile 
+        if len(sys.argv) == 1:
+            print('ERROR: Please see help menu for details about this program. ')
+            sys.exit()
+        elif sys.argv[1] == '--help':
+            print('--help\t\t  +Prints this help menu.')
+            print('--input\t\t  +Prints an example input file.')
+            print('--usage\t\t  +Prints an example of how to use this program.')
+            print('--author\t  +Prints the authors name.')
+            print('--email\t\t  +Prints the authors email address.')
+            print('--version\t  +Prints the version number of this program.')   
+            print('--citations\t  +Prints suggested citations.')
+            sys.exit()
+        elif sys.argv[1] == '--input':
+            print('The input file should be formated as follows:\n '\
+                  '\tNOTE! Do not use the quotation marks!\n'\
+                  'filename "name of file"\n'\
+                  'outname "name of outfile"\n'\
+                  'temp "temperature in Kelvin"\n'\
+                  'freq_unit cm1 # or Ha, Hz, cm1 (default: cm1)\n'\
+                  'laser_freq "frequency"\n'\
+                  'spread "spread of lorentz in Ha" \n\n'\
+                  '#additional input variables\n'\
+                  'freqstep "number of frequency steps (default 1000)"\n'\
+                  '#n_freq      1000 # (default value:1000)	\n'\
+                  '#min_freq    0    cm1 # minimum value (default:0.95 of the smallest active mode)\n'\
+                  '#max_freq    2000 cm1 # maximum value (default:1.05 of the greatest active mode)\n'\
+                  'relative_intensity # if present: compute relative intensities (greatest value is 1)\n'\
+                  'keep_file          # if present: keep the same output file (existing one will be deleted)\n')
+            sys.exit()
+        elif sys.argv[1] == '--usage':
+            print('Usage: python %s input_file or %s input_file'%(sys.argv[0],sys.argv[0]))
+            sys.exit()
+        elif sys.argv[1] == '--author':
+            print('Author: %s'%__author__)
+            sys.exit()            
+        elif sys.argv[1] == '--email':
+            print('Email bugs to: %s'%__email__)
+            sys.exit()    
+        elif sys.argv[1] == '--version':
+            print('Version %s'%__version__)
+            sys.exit()  
+        elif sys.argv[1] == '--citations':
+            print('While not required, please cite the following references\n if you use this program:')
+            print('Romero et al. "ABINIT: Overview and focus on selected\n capabilities" J. Comp. Phys. XXXX ')
+            
+        else:
+            #Determines what the program is to do if it is run from command line
+            user_inputfile = sys.argv[1] #input should be python program_name tfile 
           
-    #Name of default input file
-    vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file
+            #Name of default input file 
+            vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file
     
        
-    #Print header file and start the calculation
-    PRINT_HEADER()
+            #Print header file and start the calculation
+            PRINT_HEADER()
     
-    #Read anaddb.out file and determine what type of calculation to run
-    DETER_MENU(vararray)
+            #Read anaddb.out file and determine what type of calculation to run
+            DETER_MENU(vararray)
+   
     
     
 #Ends program

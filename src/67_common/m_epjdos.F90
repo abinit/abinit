@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_epjdos
 !! NAME
 !!  m_epjdos
@@ -7,7 +6,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
+!!  Copyright (C) 2008-2020 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,16 +24,14 @@
 module m_epjdos
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
- use m_tetrahedron
+ use m_htetra
  use m_splines
  use m_cgtools
  use m_atomdata
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -43,7 +40,9 @@ module m_epjdos
  use m_hdr
  use m_mpinfo
  use m_sort
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_occ,            only : dos_hdr_write
  use m_time,           only : cwtime, timab
@@ -139,10 +138,15 @@ module m_epjdos
    real(dp),allocatable :: fractions_pawt1(:,:,:,:)
    ! fractions_pawt1(nkpt,mband,nsppol,ndosfraction))
 
+   contains
+
+   procedure :: free => epjdos_free
+   ! Free dynamic memory
+
  end type epjdos_t
 
  public :: epjdos_new         ! Create new object
- public :: epjdos_free        ! Free dynamic memory
+
 
  public :: prtfatbands        ! Print PJDOS contributions in xmgrace format.
  public :: fatbands_ncwrite   ! Write PJDOS contributions to netcdf file.
@@ -169,15 +173,6 @@ contains  !============================================================
 !! SOURCE
 
 type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'epjdos_new'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
@@ -252,21 +247,17 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
  end if
 
  ! Check allocations status as these arrays are not distributed and the wavefunctions are still in memory.
- ABI_STAT_MALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
- ABI_CHECK(ierr==0, "out of memory in new%fractions")
+ ABI_MALLOC_OR_DIE(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
  new%fractions = zero
 
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
-   ABI_STAT_MALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fractions_m")
+   ABI_MALLOC_OR_DIE(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
    new%fractions_m = zero
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
-   ABI_STAT_MALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fraction_paw1")
-   ABI_STAT_MALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fraction_pawt1")
+   ABI_MALLOC_OR_DIE(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
+   ABI_MALLOC_OR_DIE(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
    new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
@@ -290,38 +281,19 @@ end function epjdos_new
 
 subroutine epjdos_free(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'epjdos_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
- type(epjdos_t),intent(inout) :: self
+ class(epjdos_t),intent(inout) :: self
 
 ! *********************************************************************
 
  ! integer
- if (allocated(self%mlang_type)) then
-   ABI_FREE(self%mlang_type)
- end if
+ ABI_SFREE(self%mlang_type)
 
  ! real
- if (allocated(self%fractions)) then
-   ABI_FREE(self%fractions)
- end if
- if (allocated(self%fractions_m)) then
-   ABI_FREE(self%fractions_m)
- end if
- if (allocated(self%fractions_paw1)) then
-   ABI_FREE(self%fractions_paw1)
- end if
- if (allocated(self%fractions_pawt1)) then
-   ABI_FREE(self%fractions_pawt1)
- end if
+ ABI_SFREE(self%fractions)
+ ABI_SFREE(self%fractions_m)
+ ABI_SFREE(self%fractions_paw1)
+ ABI_SFREE(self%fractions_pawt1)
 
 end subroutine epjdos_free
 !!***
@@ -369,15 +341,6 @@ end subroutine epjdos_free
 
 subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dos_calcnwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -399,7 +362,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  logical :: bigDOS,iam_master
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,msg
- type(t_tetrahedron) :: tetra
+ type(htetra_t) :: tetra
 !arrays
  integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
@@ -439,9 +402,9 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  call cwtime(cpu, wall, gflops, "start")
 
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-   dtset%shiftk, dtset%nkpt, dtset%kpt, msg, ierr)
+   dtset%shiftk, dtset%nkpt, dtset%kpt, comm, msg, ierr)
  if (ierr /= 0) then
-   call destroy_tetra(tetra)
+   call tetra%free()
    MSG_WARNING(msg)
    return
  end if
@@ -461,7 +424,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
      ! Open file for total DOS as well.
      if (open_file(strcat(fildata, '_TOTAL'), msg, newunit=unt_atsph(0), &
-         status='unknown', form='formatted', action="write") /= 0) then
+                   status='unknown', form='formatted', action="write") /= 0) then
        MSG_ERROR(msg)
      end if
 
@@ -469,7 +432,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        call int2char4(dtset%iatsph(iat),tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        if (open_file(strcat(fildata, '_AT', tag), msg, newunit=unt_atsph(iat), &
-           status='unknown', form='formatted', action="write") /= 0) then
+                     status='unknown', form='formatted', action="write") /= 0) then
          MSG_ERROR(msg)
        end if
      end do
@@ -478,7 +441,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        call int2char4(iat,tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        if (open_file(strcat(fildata, '_ATEXTRA', tag), msg, newunit=unt_atsph(natsph+iat), &
-           status='unknown', form='formatted', action="write") /= 0) then
+                     status='unknown', form='formatted', action="write") /= 0) then
          MSG_ERROR(msg)
        end if
      end do
@@ -568,7 +531,8 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
         ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
         tmp_eigen(:) = ebands%eig(iband, :, isppol)
-        call tetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        call tetra%get_onewk(ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        wdt = wdt*ebands%wtk(ikpt)
         eig_dos = eig_dos + wdt
 
         ! Accumulate L-DOS.
@@ -647,14 +611,14 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          if (prtdosm==0) then
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&              min(total_dos(iene, i1:i2, 1), dos_max), total_dos(iene, i1:i2,2)
+               min(total_dos(iene, i1:i2, 1), dos_max), total_dos(iene, i1:i2,2)
            end do
          else
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&              min(total_dos(iene, i1:i2, 1), dos_max),&
-&              total_dos(iene, i1:i2, 2),&
-&              min(dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2,1), dos_max)
+               min(total_dos(iene, i1:i2, 1), dos_max),&
+               total_dos(iene, i1:i2, 2),&
+               min(dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2,1), dos_max)
            end do
          end if
        end do
@@ -665,15 +629,15 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          if (prtdosm==0) then
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
-&             total_dos(iene, i1:i2, 1), &
-&             total_dos(iene, i1:i2, 2)
+              total_dos(iene, i1:i2, 1), &
+              total_dos(iene, i1:i2, 2)
            end do
          else
            do iene=1,nene
              write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
-&             total_dos(iene, i1:i2, 1),&
-&             total_dos(iene, i1:i2, 2),&
-&             dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2, 1)
+              total_dos(iene, i1:i2, 1),&
+              total_dos(iene, i1:i2, 2),&
+              dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2, 1)
            end do
          end if
        end do
@@ -688,10 +652,10 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          i1 = iat*5-4; i2 = iat*5
          do iene=1,nene
            write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&           min(total_dos(iene,i1:i2,1), dos_max),&
-&           min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
-&           min(dos_paw1(iene,i1:i2,1), dos_max),&
-&           min(dos_pawt1(iene,i1:i2,1), dos_max)
+            min(total_dos(iene,i1:i2,1), dos_max),&
+            min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
+            min(dos_paw1(iene,i1:i2,1), dos_max),&
+            min(dos_pawt1(iene,i1:i2,1), dos_max)
          end do
        end do
 
@@ -700,10 +664,10 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          i1 = iat*5-4; i2 = iat*5
          do iene=1,nene
            write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
-&            min(total_dos(iene,i1:i2,1), dos_max),&
-&            min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
-&            min(dos_paw1(iene,i1:i2,1), dos_max),&
-&            min(dos_pawt1(iene,i1:i2,1), dos_max)
+             min(total_dos(iene,i1:i2,1), dos_max),&
+             min(total_dos(iene,i1:i2,1) - dos_paw1(iene,i1:i2,1) + dos_pawt1(iene,i1:i2,1), dos_max),&
+             min(dos_paw1(iene,i1:i2,1), dos_max),&
+             min(dos_pawt1(iene,i1:i2,1), dos_max)
          end do
        end do
      end if
@@ -749,7 +713,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
    ABI_FREE(dos_pawt1)
  end if
 
- call destroy_tetra(tetra)
+ call tetra%free()
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
@@ -758,13 +722,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 contains
 
 subroutine write_extra_headers()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_extra_headers'
-!End of the abilint section
 
  if (nsppol==2) then
    if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
@@ -792,86 +749,86 @@ subroutine write_extra_headers()
    if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      do iat=1,natsph
        write(unt_atsph(iat), '(3a,i5,a,i5,a,a,es16.6,3a)' ) &
-&       '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
-&       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
-&       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
+        '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
+        '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
+        '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
 
        if (dtset%usepaw==1.and.dtset%pawprtdos==2) then
          write(unt_atsph(iat), '(3a)' ) &
-&         '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
+          '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
        end if
        if (bigDOS) then
          write(msg, '(a,a)' ) &
-&         '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
-&         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+          '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
+          '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        else
          write(msg, '(a,a)' ) &
-&         '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
-&         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+          '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
+          '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        end if
        if (prtdosm>=1) then
          write(msg, '(7a)' ) trim(msg),'          ',&
-&         '  lm=0 0',&
-&         '  lm=1-1  lm=1 0  lm=1 1',&
-&         '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
-&         '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
-&         '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
+          '  lm=0 0',&
+          '  lm=1-1  lm=1 0  lm=1 1',&
+          '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
+          '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
+          '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
        end if
        write(unt_atsph(iat), "(a)")trim(msg)
      end do
    else
      do iat=1,natsph
        write(unt_atsph(iat), '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
-&       '# Local DOS (columns 2-6),',ch10,&
-&       '#  plane-waves contrib. to DOS (columns 7-11),',ch10,&
-&       '#  AE on-site  contrib. to DOS (columns 12-16),',ch10,&
-&       '# -PS on-site  contrib. to DOS (columns 17-21),',ch10,&
-&       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
-&       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
+        '# Local DOS (columns 2-6),',ch10,&
+        '#  plane-waves contrib. to DOS (columns 7-11),',ch10,&
+        '#  AE on-site  contrib. to DOS (columns 12-16),',ch10,&
+        '# -PS on-site  contrib. to DOS (columns 17-21),',ch10,&
+        '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
+        '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
        if (bigDOS) then
          write(msg, '(4a)' ) &
-&         '#energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
-&         '       (PW)  l=0       l=1       l=2       l=3       l=4',&
-&         '      (Phi)  l=0       l=1       l=2       l=3       l=4',&
-&         '     (tPhi)  l=0       l=1       l=2       l=3       l=4'
+          '#energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
+          '       (PW)  l=0       l=1       l=2       l=3       l=4',&
+          '      (Phi)  l=0       l=1       l=2       l=3       l=4',&
+          '     (tPhi)  l=0       l=1       l=2       l=3       l=4'
        else
          write(msg, '(4a)' ) &
-&         '#energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
-&         '       (PW) l=0      l=1      l=2      l=3      l=4',&
-&         '      (Phi) l=0      l=1      l=2      l=3      l=4',&
-&         '     (tPhi) l=0      l=1      l=2      l=3      l=4'
+          '#energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
+          '       (PW) l=0      l=1      l=2      l=3      l=4',&
+          '      (Phi) l=0      l=1      l=2      l=3      l=4',&
+          '     (tPhi) l=0      l=1      l=2      l=3      l=4'
        end if
        write(unt_atsph(iat), "(a)")trim(msg)
      end do
    end if
    do iat=1,natsph_extra
      write(unt_atsph(natsph+iat), '(3a,i5,2a,es16.6,3a)' ) &
-&     '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
-&     '# for non-atomic sphere number iat=',iat,ch10,&
-&     '# of radius ratsph=',dtset%ratsph_extra,' Bohr.',ch10,"#"
+      '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
+      '# for non-atomic sphere number iat=',iat,ch10,&
+      '# of radius ratsph=',dtset%ratsph_extra,' Bohr.',ch10,"#"
      if (bigDOS) then
        write(msg, '(a,a)' ) &
-&       '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
-&       '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+        '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
+        '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
      else
        write(msg, '(a,a)' ) &
-&       '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
-&       '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
+        '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
+        '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
      end if
      if (prtdosm>=1) then
        write(msg, '(7a)' ) trim(msg),'          ',&
-&       '  lm=0 0',&
-&       '  lm=1-1  lm=1 0  lm=1 1',&
-&       '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
-&       '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
-&       '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
+        '  lm=0 0',&
+        '  lm=1-1  lm=1 0  lm=1 1',&
+        '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
+        '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
+        '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
      end if
      write(unt_atsph(natsph+iat), "(a)")trim(msg)
    end do
 
  else if (prtdos==5) then
    write(unitdos, '(a)' )&
-&    '# energy(Ha)     DOS up,up  up,dn  dn,up  dn,dn  sigma_x sigma_y sigma_z  and integrated DOS components'
+     '# energy(Ha)     DOS up,up  up,dn  dn,up  dn,dn  sigma_x sigma_y sigma_z  and integrated DOS components'
  end if ! prtdos value
 
 end subroutine write_extra_headers
@@ -915,6 +872,7 @@ end subroutine dos_calcnwrite
 !! OUTPUT
 !!  sum_1ll_1atom(mlang,natsph)= projected scalars for each atom and ang. mom.
 !!  sum_1lm_1atom(mlang*mlang,natsph)= projected scalars for each atom and LM component.
+!!  cplx_1lm_1atom(2,dtset%nspinor**2,dos%mbesslang**2,natsph_tot) = complex projection of wave function on atomic like orbital
 !!
 !! NOTES
 !!  * ph3d atoms are ordered with natsph and must be provided by the caller in the correct order!
@@ -933,16 +891,7 @@ end subroutine dos_calcnwrite
 
 subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax, mlang,&
 &  mpw, natsph, typat_extra, mlang_type, npw_k, nspinor, ph3d, prtsphere, rint, rmax,&
-&  rc_ylm, sum_1ll_1atom, sum_1lm_1atom, ucvol, ylm_k, znucl_sph)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'recip_ylm'
-!End of the abilint section
-
- implicit none
+&  rc_ylm, sum_1ll_1atom, sum_1lm_1atom, cplx_1lm_1atom, ucvol, ylm_k, znucl_sph)
 
 !Arguments ------------------------------------
 !scalars
@@ -959,6 +908,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(out) :: sum_1ll_1atom(nspinor**2, mlang, natsph)
  real(dp),intent(out) :: sum_1lm_1atom(nspinor**2, mlang*mlang,natsph)
+ real(dp),intent(out) :: cplx_1lm_1atom(2,nspinor, mlang*mlang,natsph)
 
 !Local variables-------------------------------
 !scalars
@@ -975,6 +925,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
  real(dp) :: func(nradintmax)
+ real(dp) :: func_cplx(nradintmax,2)
  complex(dpc) :: vect(npw_k)
  complex(dpc),allocatable :: tmppsia(:,:),tmppsim(:,:),dotc(:)
  integer, allocatable :: ispinors(:)
@@ -984,8 +935,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
 
  ! Workspace array (used to reduce the number of MPI communications)
  ! One could reduce a bit the memory requirement by using non-blocking operations ...
- ABI_STAT_MALLOC(values, (nradintmax, nspinor, mlang**2, natsph), ierr)
- ABI_CHECK(ierr==0, "oom in values")
+ ABI_MALLOC_OR_DIE(values, (nradintmax, nspinor, mlang**2, natsph), ierr)
  values = czero
 
  my_nspinor = max(1,nspinor/mpi_enreg%nproc_spinor)
@@ -1001,6 +951,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
  end if
 
  sum_1lm_1atom = zero
+ cplx_1lm_1atom = zero
 
  do ll=0,mlang-1
    do mm=-ll,ll
@@ -1073,7 +1024,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
           c1 = sy(ll, mm, mm)
           c2 = sy(ll,-mm, mm)
           vect(:) = dcmplx(c1(1) * ylm_k(1:npw_k,ilm) + c2(1) * ylm_k(1:npw_k,jlm), &
-&                         c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
+                          c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
 
        else if (mm < 0) then
           !vect(1,:) =  invsqrt2 * ylm_k(1:npw_k,jlm) !* (-1)**mm
@@ -1081,7 +1032,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
           c1 = sy(ll, mm,  mm)
           c2 = sy(ll,-mm,  mm)
           vect(:) = dcmplx(c1(1) * ylm_k(1:npw_k,ilm) + c2(1) * ylm_k(1:npw_k,jlm),&
-&                         c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
+                          c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm))
        end if
        vect(:) = dcmplx(real(vect(:)), -aimag(vect(:)))
        !vect(:)%im = -vect(:)%im
@@ -1155,12 +1106,13 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
    itypat = typat_extra(iat)
    lm_size = mlang_type(itypat) ** 2
    do ilm=1,lm_size
+
      do ipauli=0,nspinor**2-1
        do ixint=1,nradint(iat)
          func(ixint) = zero
          do is=1,nspinor
            do isp=1,nspinor
-             func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat))*pauli_mat(is,isp,ipauli)*&
+             func(ixint) =  func(ixint) + real(conjg(values(ixint, is, ilm, iat)) * pauli_mat(is,isp,ipauli)*&
 &                                                    values(ixint, isp, ilm, iat))
            end do
          end do
@@ -1168,14 +1120,28 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
        end do
        ! Here I should treat the case in which the last point /= rcut
        ! NB: indexing is from 1 not 0 for spin matrix components
-       sum_1lm_1atom(ipauli+1, ilm, iat) = simpson(dr, func(1:nradint(iat)))
+       sum_1lm_1atom   (ipauli+1, ilm, iat) = simpson(dr, func(1:nradint(iat)))
+     end do ! ipauli
+
+     do is = 1, nspinor
+       func_cplx(:,1) = real(values(:, is, ilm, iat))
+       func_cplx(:,2) = aimag(values(:, is, ilm, iat))
+       do ixint=1,nradint(iat)
+         func_cplx(ixint,:) = rint(ixint)**2 * func_cplx(ixint,:)
+       end do
+       cplx_1lm_1atom(1, is, ilm, iat) = simpson(dr, func_cplx(1:nradint(iat),1))
+       cplx_1lm_1atom(2, is, ilm, iat) = simpson(dr, func_cplx(1:nradint(iat),2))
      end do
-   end do
- end do
+
+   end do ! ilm
+ end do ! iat
 
  ! Normalize with unit cell volume and include 4pi term coming from Rayleigh expansion.
  fact = four_pi**2 / ucvol
  sum_1lm_1atom = fact * sum_1lm_1atom
+ cplx_1lm_1atom = fact * cplx_1lm_1atom
+
+ ! sum up the m-independent fractions
  sum_1ll_1atom = zero
  do iat=1,natsph
    itypat = typat_extra(iat)
@@ -1210,8 +1176,8 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
      call wrtout(std_out, msg)
      do ll=0,mlang-1
        write(msg,'(a,i1,a,f9.6,a,9f6.3)' )&
-&       ' l=',ll,', charge=',sum_1ll_1atom(1,ll+1,iat),&
-&       ', m=-l,l splitting:',sum_1lm_1atom(1,1+ll**2:(ll+1)**2,iat)
+        ' l=',ll,', charge=',sum_1ll_1atom(1,ll+1,iat),&
+        ', m=-l,l splitting:',sum_1lm_1atom(1,1+ll**2:(ll+1)**2,iat)
        call wrtout(std_out, msg)
      end do ! ll
    end do ! iat
@@ -1219,7 +1185,7 @@ subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax
    call wrtout(std_out, msg)
    do ll=0,mlang-1
      write(msg,'(a,i1,a,f9.6,a,f9.6)' )&
-&     ' l=',ll,', charge =',sum_1ll(ll+1),' proportion =',sum_1ll(ll+1)/sum_all
+      ' l=',ll,', charge =',sum_1ll(ll+1),' proportion =',sum_1ll(ll+1)/sum_all
      call wrtout(std_out, msg)
    end do
    write(msg,'(a,a,f10.6)' ) ch10,' Total over all atoms and l=0 to 4 :',sum_all
@@ -1232,13 +1198,6 @@ contains
  function sy(ll, mm, mp)
    use  m_paw_sphharm, only : ys
    ! Computes the matrix element <Slm|Ylm'>
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sy'
-!End of the abilint section
-
    integer,intent(in) :: ll,mm, mp
 
    real(dp) :: sy(2)
@@ -1289,20 +1248,11 @@ end subroutine recip_ylm
 !! SOURCE
 
 subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
-&                       paral_kgb,ph1d,rmax,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dens_in_sph'
-!End of the abilint section
-
- implicit none
+&                       ph1d,rmax,ucvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwfk,natom,npw_k,paral_kgb
+ integer,intent(in) :: istwfk,natom,npw_k
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1361,7 +1311,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  ABI_ALLOCATE(fofr,(2,n4,n5,n6))
  call fourwf(cplex,denpot,cg,fofgout,fofr,gbound,gbound, &
 & istwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft_here,npw_k,&
-& npw_k,n4,n5,n6,1,paral_kgb,tim_fourwf,weight,weight)
+& npw_k,n4,n5,n6,1,tim_fourwf,weight,weight)
  ABI_DEALLOCATE(fofgout)
  ABI_DEALLOCATE(fofr)
  ABI_DEALLOCATE(gbound)
@@ -1380,7 +1330,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  call fftpac(1,mpi_enreg,1,n1,n2,n3,n4,n5,n6,ngfft,rhor,denpot,1)
 
  ABI_ALLOCATE(rhog,(2,nfft))
- call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(rhor)
  ABI_DEALLOCATE(denpot)
@@ -1437,8 +1387,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !  Compute the phases for the whole set of fft vectors
 !  -----------------------------------------------------------------
 
-   call ph1d3d(iatom,iatom,garr,natom,natom,nfft,ngfft(1),ngfft(2),ngfft(3),&
-&   phkxred,ph1d,ph3d)
+   call ph1d3d(iatom,iatom,garr,natom,natom,nfft,ngfft(1),ngfft(2),ngfft(3),phkxred,ph1d,ph3d)
 
 !  For the phase factors, take the compex conjugate, before evaluating the scalar product
    do ifft=1,nfft
@@ -1493,15 +1442,6 @@ end subroutine dens_in_sph
 !! SOURCE
 
 subroutine sphericaldens(fofg,gnorm,nfft,rmax,sphfofg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sphericaldens'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1571,15 +1511,6 @@ end subroutine sphericaldens
 
 subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtfatbands'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: pawfatbnd
@@ -1598,7 +1529,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  character(len=1) :: tag_l,tag_1m,tag_is
  character(len=2) :: tag_2m
  character(len=10) :: tag_il,tag_at,tag_grace
- character(len=1500) :: message
+ character(len=1500) :: msg
  character(len=fnlen) :: tmpfil
  type(atomdata_t) :: atom
 !arrays
@@ -1613,10 +1544,10 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  ndosfraction = dos%ndosfraction; mbesslang = dos%mbesslang
 
  if(dos%prtdosm.ne.0) then
-   write(message,'(3a)')&
-&   'm decomposed dos is activated',ch10, &
-&   'Action: deactivate it with prtdosm=0 !'
-   MSG_ERROR(message)
+   write(msg,'(3a)')&
+    'm decomposed dos is activated',ch10, &
+    'Action: deactivate it with prtdosm=0 !'
+   MSG_ERROR(msg)
  end if
 
  if(dtset%nspinor==2) then
@@ -1630,33 +1561,33 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  mband=dtset%mband
 
  if(natsph>1000) then
-   write(message,'(3a)')&
-&   'Too big number of fat bands!',ch10, &
-&   'Action: decrease natsph in input file !'
-   MSG_ERROR(message)
+   write(msg,'(3a)')&
+    'Too big number of fat bands!',ch10, &
+    'Action: decrease natsph in input file !'
+   MSG_ERROR(msg)
  end if
 
 !--------------  PRINTING IN LOG
  call cwtime(cpu, wall, gflops, "start")
- write(message,'(a,a,a,a,i5,a,a,1000i5)') ch10," ***** Print of fatbands activated ****** ",ch10,&
-& "  Number of atom: natsph = ",natsph,ch10, &
-& "  atoms  are             = ",(dtset%iatsph(iat),iat=1,natsph)
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ write(msg,'(a,a,a,a,i5,a,a,1000i5)') ch10," ***** Print of fatbands activated ****** ",ch10,&
+  "  Number of atom: natsph = ",natsph,ch10, &
+  "  atoms  are             = ",(dtset%iatsph(iat),iat=1,natsph)
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
  iall=0;inbfatbands=0
 
  if(pawfatbnd==1) then
    inbfatbands=mbesslang-1
-   write(message,'(3a)')"  (fatbands are in eV and are given for each value of L)",ch10
+   write(msg,'(3a)')"  (fatbands are in eV and are given for each value of L)",ch10
  else if(pawfatbnd==2) then
-   write(message,'(3a)')"  (fatbands are in eV and are given for each value of L and M)",ch10
+   write(msg,'(3a)')"  (fatbands are in eV and are given for each value of L and M)",ch10
    inbfatbands=(mbesslang-1)**2
  end if
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
 
- write(message,'(a,e12.5,a,e12.5,a)') "  Fermi energy is ",ebands%fermie*Ha_eV," eV = ",ebands%fermie," Ha"
- call wrtout(std_out,message,'COLL')
+ write(msg,'(a,e12.5,a,e12.5,a)') "  Fermi energy is ",ebands%fermie*Ha_eV," eV = ",ebands%fermie," Ha"
+ call wrtout(std_out,msg,'COLL')
 
 !--------------  OPEN AND NAME FILES FOR FATBANDS
  ABI_ALLOCATE(unitfatbands_arr,(natsph*inbfatbands,dtset%nsppol))
@@ -1677,8 +1608,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
          if(pawfatbnd==1) then
            call int2char4(il-1,tag_il)
            ABI_CHECK((tag_il(1:1)/='#'),'Bug: string length too short!')
-           tmpfil = trim(fildata)// &
-&           '_at'//trim(tag_at)//'_'//trim(adjustl(symbol))//'_is'//tag_is//'_l'//trim(tag_il)
+           tmpfil = trim(fildata)//'_at'//trim(tag_at)//'_'//trim(adjustl(symbol))//'_is'//tag_is//'_l'//trim(tag_il)
          else if (pawfatbnd==2) then
            write(tag_l,'(i1)') ll
            mm=il-(ll**2+ll+1)      ! compute m
@@ -1691,24 +1621,24 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
          end if
          !unitfatbands_arr(iall,isppol)=tmp_unit+100+iall-1+(natsph*inbfatbands)*(isppol-1)
          !open (unit=unitfatbands_arr(iall,isppol),file=trim(tmpfil),status='unknown',form='formatted')
-         if (open_file(tmpfil, message, newunit=unitfatbands_arr(iall,isppol), status='unknown',form='formatted') /= 0) then
-           MSG_ERROR(message)
+         if (open_file(tmpfil, msg, newunit=unitfatbands_arr(iall,isppol), status='unknown',form='formatted') /= 0) then
+           MSG_ERROR(msg)
          end if
 
-         write(message,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitfatbands_arr(iall,isppol)
-         call wrtout(std_out,message,'COLL')
-         write(message,'(9a)') "# ",ch10,"# ABINIT package : FATBAND file ", ch10,&
-&         "# It contains, for each band: the eigenvalues in eV (and the character of the band) as a function of the k-point",&
-&         ch10,"# This file can be read with xmgrace (http://plasma-gate.weizmann.ac.il/Grace/)  ",ch10,"#  "
-         write(unitfatbands_arr(iall,isppol), "(a)")trim(message)
+         write(msg,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitfatbands_arr(iall,isppol)
+         call wrtout(std_out,msg,'COLL')
+         write(msg,'(9a)') "# ",ch10,"# ABINIT package : FATBAND file ", ch10,&
+           "# It contains, for each band: the eigenvalues in eV (and the character of the band) as a function of the k-point",&
+           ch10,"# This file can be read with xmgrace (http://plasma-gate.weizmann.ac.il/Grace/)  ",ch10,"#  "
+         write(unitfatbands_arr(iall,isppol), "(a)")trim(msg)
          do iband=1,mband
            call int2char4(iband-1,tag_grace)
            ABI_CHECK((tag_grace(1:1)/='#'),'Bug: string length too short!')
-           write(message,'(16a)') ch10,"@    s",trim(tag_grace)," line color 1",&
-&           ch10,"@    s",trim(tag_grace)," errorbar color 2",&
-&           ch10,"@    s",trim(tag_grace)," errorbar riser linewidth 5.0", &
-&           ch10,"@    s",trim(tag_grace)," errorbar linestyle 0"
-           write(unitfatbands_arr(iall,isppol), "(a)")trim(message)
+           write(msg,'(16a)') ch10,"@    s",trim(tag_grace)," line color 1",&
+            ch10,"@    s",trim(tag_grace)," errorbar color 2",&
+            ch10,"@    s",trim(tag_grace)," errorbar riser linewidth 5.0", &
+            ch10,"@    s",trim(tag_grace)," errorbar linestyle 0"
+           write(unitfatbands_arr(iall,isppol), "(a)")trim(msg)
          end do  !iband
          write(unitfatbands_arr(iall,isppol), '(a,a)') ch10,'@type xydy'
        end do   ! isppol
@@ -1775,8 +1705,8 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  ABI_DEALLOCATE(unitfatbands_arr)
 
  call cwtime(cpu,wall,gflops,"stop")
- write(message,'(2(a,f8.2),a)')" prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
- call wrtout(std_out,message,"PERS")
+ write(msg,'(2(a,f8.2),a)')" prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,msg,"PERS")
 
  DBG_EXIT("COLL")
 
@@ -1814,15 +1744,6 @@ end subroutine prtfatbands
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fatbands_ncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1853,8 +1774,8 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  ABI_CHECK(fform /= 0, "Cannot find fform associated to FATBANDS.nc")
 
  ! Write header, crystal structure and band energies.
- NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
- NCF_CHECK(crystal_ncwrite(crystal, ncid))
+ NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
+ NCF_CHECK(crystal%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
  ! Add fatband-specific quantities
@@ -1951,13 +1872,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -2022,15 +1936,6 @@ end subroutine fatbands_ncwrite
 
 subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'partial_dos_fractions'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,collect
@@ -2046,7 +1951,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
 !Local variables-------------------------------
 !scalars
- logical,parameter :: write_procar = .False.
  integer,parameter :: prtsphere0=0 ! do not output all the band by band details for projections.
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
@@ -2070,8 +1974,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
  real(dp),allocatable :: ylm_k(:,:)
  real(dp),allocatable :: bess_fit(:,:,:)
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
- real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1atom_1ll(:,:,:)
- real(dp),allocatable :: sum_1atom_1lm(:,:,:)
+ real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1ll_1atom(:,:,:)
+ real(dp),allocatable :: sum_1lm_1atom(:,:,:)
+ real(dp),allocatable :: cplx_1lm_1atom(:,:,:,:)
  real(dp),allocatable :: xred_sph(:,:),znucl_sph(:),phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
 
@@ -2108,7 +2013,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
  call cwtime(cpu, wall, gflops, "start")
 
- if (write_procar) then
+ if (dtset%prtprocar /= 0) then
    ! open file for each proc, and print header for master node
    call int2char4(me_kpt, ikproc_str)
    filename = 'PROCAR_'//ikproc_str
@@ -2116,7 +2021,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
       MSG_ERROR(msg)
    end if
    if(mpi_enreg%me==0) then
-     write (unit_procar,'(a)') 'PROCAR lm decomposed - need to concatenate files in parallel case'
+     write (unit_procar,'(a)') 'PROCAR lm decomposed - need to merge files yourself in parallel case!!! Or use pyprocar package'
+     if (dtset%prtprocar == 2) then
+       write (unit_procar,'(a)') ' Requested complex output of PROCAR file (prtprocar 2)' 
+     end if
      write (unit_procar,'(a,I10,a,I10,a,I10,a)') '# of k-points: ', dtset%nkpt, &
        ' # of bands:', dtset%mband, ' # of ions:', dtset%natom, ch10
    end if
@@ -2161,8 +2069,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    end do
 
    ! init bessel function integral for recip_ylm max ang mom + 1
-   ABI_ALLOCATE(sum_1atom_1ll,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
-   ABI_ALLOCATE(sum_1atom_1lm,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
+   ABI_ALLOCATE(sum_1ll_1atom,(dtset%nspinor**2,dos%mbesslang,natsph_tot))
+   ABI_ALLOCATE(sum_1lm_1atom,(dtset%nspinor**2,dos%mbesslang**2,natsph_tot))
+   ABI_ALLOCATE(cplx_1lm_1atom,(2,dtset%nspinor,dos%mbesslang**2,natsph_tot))
 
    ! Note ecuteff instead of ecut.
    kpgmax = sqrt(dtset%ecut * dtset%dilatmx**2)
@@ -2214,7 +2123,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
        npw_k = npwarr(ikpt)
        kpoint(:) = dtset%kpt(:,ikpt)
 
-       if (write_procar) then
+       if (dtset%prtprocar /= 0) then
          write (unit_procar,'(a,I7,a,3F12.6,a,F12.6,a)') &
            ' k-point ', ikpt, ' : ', kpoint(:), ' weight = ', dtset%wtk(ikpt), ch10
        end if
@@ -2274,7 +2183,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
          !write(std_out,*)"in band:",iband
          ! TODO: eventually import eig and occ down to here - a pain, but printing outside would imply saving a huge array in memory
-         if (write_procar) then
+         if (dtset%prtprocar /= 0) then
            write (unit_procar,'(a,I7,a,F12.6,a,F12.6,a)') 'band ', iband, ' # energy ', &
              eigen(abs_shift_b), ' # occ. ', occ(abs_shift_b), ch10
          end if
@@ -2284,7 +2193,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
 
          call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+my_nspinor*npw_k), dtset%istwfk(ikpt),&
 &          mpi_enreg, nradint, nradintmax, dos%mbesslang , dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
-&          npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
+&          npw_k, dtset%nspinor, ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1ll_1atom, sum_1lm_1atom, cplx_1lm_1atom,&
 &          crystal%ucvol, ylm_k, znucl_sph)
          ! on exit the sum_1atom_* have both spinors counted
 
@@ -2293,7 +2202,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
            do ilang=1,dos%mbesslang
              dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
 &             = dos%fractions(ikpt,iband,isppol,dos%mbesslang*(iatom-1) + ilang) &
-&             + sum_1atom_1ll(1,ilang,iatom)
+&             + sum_1ll_1atom(1,ilang,iatom)
            end do
          end do
 
@@ -2302,7 +2211,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
              do ilang=1,dos%mbesslang**2
                dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
 &               = dos%fractions_m(ikpt,iband,isppol,dos%mbesslang**2*(iatom-1) + ilang) &
-&               + sum_1atom_1lm(1,ilang,iatom)
+&               + sum_1lm_1atom(1,ilang,iatom)
              end do
            end do
          end if
@@ -2311,21 +2220,51 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
          !shift_b = shift_b + npw_k
          shift_b = shift_b + my_nspinor*npw_k
 
-         ! now we have both spinor components.
-         if (write_procar) then
-           write (unit_procar,'(a)') 'ion      s     py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
+         ! now we have both spinor components. The first option is for real values projections, eventually decomposed by Pauli spinor components
+         if (dtset%prtprocar /= 0) then
+           write (unit_procar,'(a)') 'ion       s      py     pz     px    dxy    dyz    dz2    dxz    dx2    tot'
            do ipauli= 1,dtset%nspinor**2
              ! Contract with Pauli matrices to get projections for this k and band, all atoms and ilang
              do iatom = 1, natsph_tot
-               write (unit_procar, '(I3)', advance='no') iatom
+               write (unit_procar, '(1x,I5)', advance='no') iatom
                do ilang=1,min(dos%mbesslang**2,9)
-                 write (unit_procar, '(F7.3)',advance='no') sum_1atom_1lm(ipauli,ilang,iatom)
+                 write (unit_procar, '(F7.3)',advance='no') sum_1lm_1atom(ipauli,ilang,iatom)
                end do
-               write (unit_procar, '(F7.3)',advance='yes') sum(sum_1atom_1lm(ipauli,:,iatom))
+               write (unit_procar, '(F7.3)',advance='yes') sum(sum_1lm_1atom(ipauli,:,iatom))
              end do
+             ! final line with sum over atoms
+             write (unit_procar, '(a)', advance='no') 'tot   '
+             do ilang=1,min(dos%mbesslang**2,9)
+               write (unit_procar, '(F7.3)',advance='no') sum(sum_1lm_1atom(ipauli,ilang,:))
+             end do
+             write (unit_procar, '(F7.3)',advance='yes') sum(sum_1lm_1atom(ipauli,:,:))
            end do
-           write (unit_procar,*)
-        end if
+
+           ! second option is to also print the complex projection on the atomic like orbital: <psi_nk | Y_lm> in a sphere
+           !  Two blocks are printed, first real then imaginary part
+           if (dtset%prtprocar == 2) then
+             write (unit_procar,'(2a)') 'ion            s              py              pz              px',&
+&              '             dxy             dyz             dz2             dxz             dx2             tot'
+             do is1= 1,dtset%nspinor
+               ! Contracted with Pauli matrices to get projections for this k and band, all atoms and ilang
+               do iatom = 1, natsph_tot
+                 write (unit_procar, '(1x,I5)', advance='no') iatom
+                 do ilang=1,min(dos%mbesslang**2,9)
+                   write (unit_procar, '(2(F7.3,1x))',advance='no') cplx_1lm_1atom(:,is1,ilang,iatom)
+                 end do
+                 write (unit_procar, '(2(F7.3,1x))',advance='yes') sum(cplx_1lm_1atom(1,is1,:,iatom)), &
+&                   sum(cplx_1lm_1atom(2,is1,:,iatom))
+               end do
+               ! final line with sum over atoms
+               write (unit_procar, '(a)', advance='no') 'charge'
+               do ilang=1,min(dos%mbesslang**2,9)
+                 write (unit_procar, '(F7.3,9x)',advance='no') sum(cplx_1lm_1atom(:,is1,ilang,:)**2)
+               end do
+               write (unit_procar, '(F7.3,9x)',advance='yes') sum(cplx_1lm_1atom(:,is1,:,:)**2)
+             end do
+             write (unit_procar,*)
+           end if
+         end if
 
        end do ! band
 
@@ -2361,8 +2300,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    ABI_DEALLOCATE(phkxred)
    ABI_DEALLOCATE(ratsph)
    ABI_DEALLOCATE(rint)
-   ABI_DEALLOCATE(sum_1atom_1ll)
-   ABI_DEALLOCATE(sum_1atom_1lm)
+   ABI_DEALLOCATE(sum_1ll_1atom)
+   ABI_DEALLOCATE(sum_1lm_1atom)
+   ABI_DEALLOCATE(cplx_1lm_1atom)
    ABI_DEALLOCATE(xred_sph)
    ABI_DEALLOCATE(znucl_sph)
 
@@ -2442,7 +2382,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,co
    MSG_WARNING('only partial_dos==1 or 2 is coded')
  end if
 
- if (write_procar) close(unit_procar)
+ if (dtset%prtprocar /= 0) close(unit_procar)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" partial_dos_fractions: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
@@ -2507,15 +2447,6 @@ end subroutine partial_dos_fractions
 
 subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'partial_dos_fractions_paw'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcprj,mkmem
@@ -2535,7 +2466,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  integer :: jl,jlmn,jln,jm,klmn,kln,lmn_size,mbesslang,me_band,me_kpt,my_nspinor
  integer :: nband_cprj_k,nband_k,ndosfraction,nprocband,nproc_spkptband,paw_dos_flag,prtdosm
  real(dp) :: cpij,one_over_nproc
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  integer ,allocatable :: dimcprj_atsph(:)
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)

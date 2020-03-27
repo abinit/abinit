@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgtools
 !! NAME
 !!  m_cgtools
@@ -8,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2018 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2020 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,15 +148,6 @@ CONTAINS  !=====================================================================
 
 subroutine cg_setval(n,cg,alpha)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_setval'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -209,15 +199,6 @@ end subroutine cg_setval
 
 subroutine cg_tocplx(n, cg, ocplx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_tocplx'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -264,15 +245,6 @@ end subroutine cg_tocplx
 
 subroutine cg_fromcplx(n,icplx,ocg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_fromcplx'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -318,15 +290,6 @@ end subroutine cg_fromcplx
 
 pure subroutine cg_filter(n, x, mask)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_filter'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -366,15 +329,6 @@ end subroutine cg_filter
 !! SOURCE
 
 pure subroutine cg_setaug_zero(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_setaug_zero'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -431,15 +385,6 @@ end subroutine cg_setaug_zero
 
 subroutine cg_to_reim(npw,ndat,cg,factor,reim)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_to_reim'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,ndat
@@ -478,15 +423,6 @@ end subroutine cg_to_reim
 !! SOURCE
 
 subroutine cg_from_reim(npw,ndat,reim,factor,cg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_from_reim'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -533,15 +469,6 @@ end subroutine cg_from_reim
 
 subroutine cg_zcopy(n, x, y)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zcopy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -580,15 +507,6 @@ end subroutine cg_zcopy
 !! SOURCE
 
 subroutine cg_zscal(n, a, x)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zscal'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -630,15 +548,6 @@ end subroutine cg_zscal
 
 function cg_dznrm2(n, x) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_dznrm2'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -673,16 +582,7 @@ end function cg_dznrm2
 !!
 !! SOURCE
 
-function cg_zdotc(n,x,y) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zdotc'
-!End of the abilint section
-
- implicit none
+function cg_zdotc(n, x, y) result(res)
 
 !Arguments ------------------------------------
 !scalars
@@ -695,9 +595,10 @@ function cg_zdotc(n,x,y) result(res)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTC_BUG
  integer :: ii
-#endif
+#else
  complex(dpc) :: cres
  complex(dpc),external :: zdotc
+#endif
 
 ! *************************************************************************
 
@@ -741,15 +642,6 @@ end function cg_zdotc
 
 function cg_real_zdotc(n,x,y) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_real_zdotc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -791,15 +683,6 @@ end function cg_real_zdotc
 
 function cg_zdotu(n, x, y) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zdotu'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -811,9 +694,10 @@ function cg_zdotu(n, x, y) result(res)
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ZDOTU_BUG
  integer :: ii
-#endif
+#else
  complex(dpc) :: cres
  complex(dpc),external :: zdotu
+#endif
 
 ! *************************************************************************
 
@@ -860,15 +744,6 @@ end function cg_zdotu
 
 subroutine cg_zaxpy(n,alpha,x,y)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zaxpy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -877,8 +752,6 @@ subroutine cg_zaxpy(n,alpha,x,y)
  real(dp),intent(in) :: x(2*n)
  real(dp),intent(inout) :: y(2*n)
 
-!local variables
-! integer :: ii
 
 ! *************************************************************************
 
@@ -918,15 +791,6 @@ end subroutine cg_zaxpy
 !! SOURCE
 
 subroutine cg_zaxpby(n,a,x,b,y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zaxpby'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -977,15 +841,6 @@ end subroutine cg_zaxpby
 !! SOURCE
 
 subroutine cg_zgemv(trans,nrows,ncols,cgmat,vec,matvec,alpha,beta)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zgemv'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1058,16 +913,7 @@ end subroutine cg_zgemv
 !!
 !! SOURCE
 
-subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zgemm'
-!End of the abilint section
-
- implicit none
+subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars
@@ -1109,7 +955,6 @@ subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
 end subroutine cg_zgemm
 !!***
 
-
 !!****f* m_cgtools/set_istwfk
 !! NAME
 !!  set_istwfk
@@ -1147,15 +992,6 @@ end subroutine cg_zgemm
 !! SOURCE
 
 integer pure function set_istwfk(kpoint) result(istwfk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_istwfk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: kpoint(3)
@@ -1215,15 +1051,6 @@ end function set_istwfk
 !! SOURCE
 
 subroutine sqnorm_g(dotr,istwf_k,npwsp,vect,me_g0,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqnorm_g'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1306,15 +1133,6 @@ end subroutine sqnorm_g
 !! SOURCE
 
 subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotprod_g'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1403,15 +1221,6 @@ end subroutine dotprod_g
 !! SOURCE
 
 subroutine matrixelmt_g(ai,ar,diag,istwf_k,needimag,npw,nspinor,vect1,vect2,me_g0,comm_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrixelmt_g'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1570,15 +1379,6 @@ end subroutine matrixelmt_g
 
 subroutine dotprod_v(cplex,dotr,nfft,nspden,opt_storage,pot1,pot2,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotprod_v'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,opt_storage,comm
@@ -1683,15 +1483,6 @@ end subroutine dotprod_v
 
 subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,ucvol, &
     mpi_comm_sphgrid)  ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotprod_vn'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1935,15 +1726,6 @@ end subroutine dotprod_vn
 
 subroutine sqnorm_v(cplex,nfft,norm2,nspden,opt_storage,pot,mpi_comm_sphgrid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqnorm_v'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,opt_storage
@@ -2031,15 +1813,6 @@ end subroutine sqnorm_v
 
 subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mean_fftr'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nfftot,nspden
@@ -2101,15 +1874,6 @@ end subroutine mean_fftr
 !! SOURCE
 
 subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_getspin'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2181,15 +1945,6 @@ end subroutine cg_getspin
 !! SOURCE
 
 subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarrbox)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_gsph2box'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2351,15 +2106,6 @@ end subroutine cg_gsph2box
 
 subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_box2gsph'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2465,15 +2211,6 @@ end subroutine cg_box2gsph
 
 subroutine cg_addtorho(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,weight_i,ur,rho)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_addtorho'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2551,15 +2288,6 @@ end subroutine cg_addtorho
 !! SOURCE
 
 subroutine cg_vlocpsi(nx,ny,nz,ldx,ldy,ldz,ndat,cplex,vloc,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_vlocpsi'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2673,15 +2401,6 @@ end subroutine cg_vlocpsi
 !! SOURCE
 
 subroutine cgnc_cholesky(npws,nband,cgblock,istwfk,me_g0,comm_pw,use_gemm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgnc_cholesky'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2834,15 +2553,6 @@ end subroutine cgnc_cholesky
 
 subroutine cgpaw_cholesky(npws,nband,cgblock,gsc,istwfk,me_g0,comm_pw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgpaw_cholesky'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npws,nband,istwfk
@@ -2949,15 +2659,6 @@ end subroutine cgpaw_cholesky
 
 subroutine cgnc_normalize(npws,nband,cg,istwfk,me_g0,comm_pw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgnc_normalize'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npws,nband,istwfk,me_g0,comm_pw
@@ -3049,15 +2750,6 @@ end subroutine cgnc_normalize
 
 subroutine cgnc_gsortho(npws,nband1,icg1,nband2,iocg2,istwfk,normalize,me_g0,comm_pw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgnc_gsortho'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npws,nband1,nband2,istwfk,me_g0
@@ -3146,15 +2838,6 @@ end subroutine cgnc_gsortho
 
 subroutine cgnc_gramschmidt(npws,nband,cgblock,istwfk,me_g0,comm_pw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgnc_gramschmidt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npws,nband,istwfk
@@ -3216,15 +2899,6 @@ end subroutine cgnc_gramschmidt
 !! SOURCE
 
 subroutine cgpaw_normalize(npws,nband,cg,gsc,istwfk,me_g0,comm_pw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgpaw_normalize'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3323,15 +2997,6 @@ end subroutine cgpaw_normalize
 
 subroutine cgpaw_gsortho(npws,nband1,icg1,igsc1,nband2,iocg2,iogsc2,istwfk,normalize,me_g0,comm_pw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgpaw_gsortho'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npws,nband1,nband2,istwfk,me_g0
@@ -3421,15 +3086,6 @@ end subroutine cgpaw_gsortho
 !! SOURCE
 
 subroutine cgpaw_gramschmidt(npws,nband,cg,gsc,istwfk,me_g0,comm_pw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgpaw_gramschmidt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3526,15 +3182,6 @@ end subroutine cgpaw_gramschmidt
 
 subroutine projbd(cg,direc,iband0,icg,iscg,istwf_k,mcg,mscg,nband,&
 &                 npw,nspinor,scg,scprod,scprod_io,tim_projbd,useoverlap,me_g0,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'projbd'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3674,15 +3321,6 @@ end subroutine projbd
 
 subroutine cg_envlop(cg,ecut,gmet,icgmod,kg,kpoint,mcg,nband,npw,nspinor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_envlop'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icgmod,mcg,nband,npw,nspinor
@@ -3772,15 +3410,6 @@ end subroutine cg_envlop
 !! SOURCE
 
 subroutine cg_normev(cg,npw,nband)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_normev'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3875,15 +3504,6 @@ end subroutine cg_normev
 
 subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_precon'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwf_k,npw,nspinor,optekin,me_g0,comm
@@ -3941,7 +3561,7 @@ subroutine cg_precon(cg,eval,istwf_k,kinpw,npw,nspinor,me_g0,optekin,pcon,vect,c
  if(ek0<1.0d-10)then
    write(message,'(3a)')&
 &   'The mean kinetic energy of a wavefunction vanishes.',ch10,&
-&   'It is reset to 0.1Ha.'
+&   'It is reset to 0.1 Ha.'
    MSG_WARNING(message)
    ek0=0.1_dp
  end if
@@ -4022,15 +3642,6 @@ end subroutine cg_precon
 
 subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 & npw,nspinor,me_g0,optekin,optpcon,pcon,ghc,vect,vectsize,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_precon_block'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4323,15 +3934,6 @@ end subroutine cg_precon_block
 subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
 &  npw,nspinor,optekin,optpcon,pcon,ghc,vect,vectsize,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_zprecon_block'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: blocksize,iterationnumber,npw,nspinor,optekin
@@ -4498,15 +4100,6 @@ end subroutine cg_zprecon_block
 !! SOURCE
 
 subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fxphas_seq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4739,15 +4332,6 @@ end subroutine fxphas_seq
 
 subroutine overlap_g(doti,dotr,mpw,npw_k1,npw_k2,nspinor,pwind_k,vect1,vect2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'overlap_g'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpw,npw_k1,npw_k2,nspinor
@@ -4829,14 +4413,6 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
  use m_linalg_interfaces
  use m_abi_linalg
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'subdiago'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: icg,igsc,istwf_k,mcg,mgsc,nband_k,npw_k,me_g0
  integer,intent(in) :: nspinor,paral_kgb,use_subovl,usepaw
@@ -4881,19 +4457,19 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
      ABI_ALLOCATE(subovl_tmp,(nband_k*(nband_k+1)/2))
      subovl_tmp=subovl(1:nband_k*(nband_k+1):2)
 !    TO DO: Not sure this one has been fully tested
-     call abi_xhpgv(1,'V','U',nband_k, subham_tmp,subovl_tmp, eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpgv(1,'V','U',nband_k,subham_tmp,subovl_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
      ABI_DEALLOCATE(subovl_tmp)
    else
-     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
    evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
    ABI_DEALLOCATE(evec_tmp)
    ABI_DEALLOCATE(subham_tmp)
  else
    if (use_subovl==1) then
-     call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpgv(1,'V','U',nband_k,subham,subovl,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    else
-     call abi_xhpev('V','U',nband_k,subham,eig_k,evec,istwf_k=istwf_k,use_slk=use_slk)
+     call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
    end if
  end if
 
@@ -4922,12 +4498,9 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 !=====================================================
  if (istwf_k==2) then
 
-   ABI_STAT_ALLOCATE(blockvectora,(vectsize,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectora")
-   ABI_STAT_ALLOCATE(blockvectorb,(nband_k,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectorb")
-   ABI_STAT_ALLOCATE(blockvectorc,(vectsize,nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in blockvectorc")
+   ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorb,(nband_k,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorc,(vectsize,nband_k), ierr)
 
    do iband=1,nband_k
      if (me_g0 == 1) then
@@ -4955,7 +4528,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
      end if
    end do
 
-!  If paw, musb also rotate S.C(G,n):
+!  If paw, must also rotate S.C(G,n):
    if (usepaw==1) then
 
      do iband=1,nband_k
@@ -4992,8 +4565,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
  else
 
-   ABI_STAT_ALLOCATE(work,(2,npw_k*nspinor*nband_k), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in work")
+   ABI_MALLOC_OR_DIE(work,(2,npw_k*nspinor*nband_k), ierr)
 
 !  MG: Do not remove this initialization.
 !  telast_06 stops in fxphase on inca_debug and little_buda (very very strange, due to atlas?)
@@ -5020,24 +4592,10 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 
    function cgindex_subd(iband)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgindex_subd'
-!End of the abilint section
-
    integer :: iband,cgindex_subd
    cgindex_subd=npw_k*nspinor*(iband-1)+icg+1
  end function cgindex_subd
    function gscindex_subd(iband)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gscindex_subd'
-!End of the abilint section
 
    integer :: iband,gscindex_subd
    gscindex_subd=npw_k*nspinor*(iband-1)+igsc+1
@@ -5102,14 +4660,6 @@ end subroutine subdiago
 subroutine pw_orthon(icg,igsc,istwf_k,mcg,mgsc,nelem,nvec,ortalgo,ovl_vecnm,useoverlap,vecnm,me_g0,comm)
 
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pw_orthon'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_projectors
 !! NAME
 !!  m_wvl_projectors
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  Copyright (C) 2008-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,12 +26,12 @@
 module m_wvl_projectors
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_errors
  use m_abicore
  use m_atomdata
 
+ use defs_datatypes, only : pseudopotential_type
  use m_geometry,     only : xred2xcart
 
  implicit none
@@ -85,13 +84,6 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: createProjectorsArrays, wvl_timing => timing
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_projectors_set'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -195,13 +187,6 @@ subroutine wvl_projectors_free(proj)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : free_DFT_PSP_projectors,deallocate_gwf
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_projectors_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

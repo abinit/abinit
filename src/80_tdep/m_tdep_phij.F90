@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -14,6 +15,7 @@ module m_tdep_phij
   use m_tdep_shell,       only : Shell_Variables_type
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_qpt,         only : Qpoints_type
+  use m_tdep_utils,       only : Coeff_Moore_type
 
   implicit none
 
@@ -24,6 +26,8 @@ module m_tdep_phij
 
   end type Eigen_Variables_type
 
+  public :: tdep_calc_pijfcoeff
+  public :: tdep_build_pijN
   public :: tdep_calc_phijfcoeff
   public :: tdep_build_phijNN
   public :: tdep_build_phij33
@@ -36,24 +40,65 @@ module m_tdep_phij
 contains
 
 !====================================================================================================
-subroutine tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,fcoeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_phijfcoeff'
-!End of the abilint section
+subroutine tdep_calc_pijfcoeff(CoeffMoore,InVar,proj,Shell1at,Sym)
 
   implicit none
 
-  integer, intent(in) :: ntotcoeff
+  type(Input_Variables_type),intent(in) :: InVar
+  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Shell_Variables_type),intent(in) :: Shell1at
+  type(Coeff_Moore_type), intent(inout) :: CoeffMoore
+  double precision, intent(in) :: proj(3,3,Shell1at%nshell)
+
+  integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,iatshell,iat_mod
+  integer :: icoeff,isym,mu,iatref
+  double precision :: terme
+
+  write(InVar%stdout,*) ' '
+  write(InVar%stdout,*) '#############################################################################'
+  write(InVar%stdout,*) '############## Fill the matrices used in the pseudo-inverse #################'
+  write(InVar%stdout,*) '#############################################################################'
+
+  write(InVar%stdout,*) ' Compute the coefficients (at the 1st order) used in the Moore-Penrose...'
+  do ishell=1,Shell1at%nshell
+    if (Shell1at%neighbours(1,ishell)%n_interactions.eq.0) cycle
+    do iatshell=1,Shell1at%neighbours(1,ishell)%n_interactions
+      iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell) 
+      iat_mod=mod(iatom+InVar%natom_unitcell-1,InVar%natom_unitcell)+1
+      if (iat_mod==1) cycle
+      iatref=Shell1at%iatref(ishell)
+      isym=Shell1at%neighbours(1,ishell)%sym_in_shell(iatshell)
+      ncoeff     =Shell1at%ncoeff(ishell)
+      ncoeff_prev=Shell1at%ncoeff_prev(ishell)
+      do mu=1,3
+        do icoeff=1,ncoeff
+          terme=sum(Sym%S_ref(mu,:,isym,1)*proj(:,icoeff,ishell))
+          do istep=1,InVar%nstep
+            CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&           CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
+!           Add all the other contributions, when iat_mod==1 (due to ASR)
+            CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&           CoeffMoore%fcoeff(mu+3*(iatom-iat_mod+1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)-terme
+          end do !istep
+        end do    
+      end do  
+    end do !iatshell
+  end do !ishell
+  write(InVar%stdout,*) ' ------- achieved'
+
+end subroutine tdep_calc_pijfcoeff
+
+!====================================================================================================
+subroutine tdep_calc_phijfcoeff(CoeffMoore,InVar,proj,Shell2at,Sym,ucart)
+
+  implicit none
+
   type(Input_Variables_type),intent(in) :: InVar
   type(Symetries_Variables_type),intent(in) :: Sym
   type(Shell_Variables_type),intent(in) :: Shell2at
+  type(Coeff_Moore_type), intent(inout) :: CoeffMoore
   double precision, intent(in) :: ucart(3,InVar%natom,InVar%nstep)
   double precision, intent(in) :: proj(9,9,Shell2at%nshell)
-  double precision, intent(out) :: fcoeff(3*InVar%natom*InVar%nstep,ntotcoeff)
 
   integer :: ishell,ncoeff,ncoeff_prev,istep,iatom,jatom,iatshell
   integer :: icoeff,isym
@@ -61,11 +106,6 @@ subroutine tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,fcoeff)
   double precision :: terme,temp
   double precision :: udiff(3),SSu(3,9)
   double precision, allocatable :: SS_ref(:,:,:,:,:)
-
-  write(InVar%stdout,*) ' '
-  write(InVar%stdout,*) '#############################################################################'
-  write(InVar%stdout,*) '########################## Compute the pseudo-inverse #######################'
-  write(InVar%stdout,*) '#############################################################################'
 
 ! For each couple of atoms, transform the Phij (3x3) ifc matrix using the symetry operation (S)
 ! Note: iatom=1 is excluded in order to take into account the atomic sum rule (see below)
@@ -84,7 +124,7 @@ subroutine tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,fcoeff)
     end do
   end do  
         
-  write(InVar%stdout,*) ' Compute the coefficients used in the Moore-Penrose...'
+  write(InVar%stdout,*) ' Compute the coefficients (at the 2nd order) used in the Moore-Penrose...'
   do ishell=1,Shell2at%nshell
     do iatom=1,InVar%natom
       if (Shell2at%neighbours(iatom,ishell)%n_interactions.eq.0) cycle
@@ -94,7 +134,7 @@ subroutine tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,fcoeff)
         isym=Shell2at%neighbours(iatom,ishell)%sym_in_shell(iatshell)
         trans=Shell2at%neighbours(iatom,ishell)%transpose_in_shell(iatshell)
         ncoeff     =Shell2at%ncoeff(ishell)
-        ncoeff_prev=Shell2at%ncoeff_prev(ishell)
+        ncoeff_prev=Shell2at%ncoeff_prev(ishell)+CoeffMoore%ncoeff1st
 
         do istep=1,InVar%nstep
 
@@ -111,8 +151,8 @@ subroutine tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,fcoeff)
           do mu=1,3
             do icoeff=1,ncoeff
               terme=sum(SSu(mu,:)*proj(:,icoeff,ishell))
-              fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
-&             fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
+              CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)= &
+&             CoeffMoore%fcoeff(mu+3*(iatom-1)+3*InVar%natom*(istep-1),icoeff+ncoeff_prev)+terme
             end do    
           end do  
         
@@ -126,14 +166,93 @@ subroutine tdep_calc_phijfcoeff(InVar,ntotcoeff,proj,Shell2at,Sym,ucart,fcoeff)
 end subroutine tdep_calc_phijfcoeff
 
 !=====================================================================================================
+subroutine tdep_build_pijN(InVar,ntotcoeff,proj,Pij_coeff,Pij_N,Shell1at,Sym)
+
+  implicit none
+
+  type(Input_Variables_type),intent(in) :: InVar
+  type(Symetries_Variables_type),intent(in) :: Sym
+  type(Shell_Variables_type),intent(in) :: Shell1at
+  integer,intent(in) :: ntotcoeff
+  double precision,intent(in) :: proj(3,3,Shell1at%nshell)
+  double precision,intent(in) :: Pij_coeff(ntotcoeff,1)
+  double precision,intent(out) :: Pij_N(3*InVar%natom)
+
+  integer :: iatcell,ishell,isym,iatom,ncoeff,ncoeff_prev
+  integer :: nshell,ii,iatshell,iat_mod
+  double precision :: sum1
+  double precision,allocatable :: Pij_3(:),Pij_ref(:,:)
+
+  write(InVar%stdout,*) ' '
+  write(InVar%stdout,*) '#############################################################################'
+  write(InVar%stdout,*) '#### For each shell, list of coefficients (IFC), number of neighbours... ####'
+  write(InVar%stdout,*) '#############################################################################'
+
+  nshell=Shell1at%nshell
+!==========================================================================================
+!======== 1/ Build the Pij_N ============================================================
+!==========================================================================================
+  ABI_MALLOC(Pij_ref,(3,nshell)); Pij_ref(:,:)=zero
+  ABI_MALLOC(Pij_3,(3)) ; Pij_3(:)=0.d0
+  do ishell=1,nshell
+!   Build the 3x3 IFC per shell    
+    ncoeff     =Shell1at%ncoeff(ishell)
+    ncoeff_prev=Shell1at%ncoeff_prev(ishell)
+    do ii=1,3
+      Pij_ref(ii,ishell)=sum(proj(ii,1:ncoeff,ishell)*Pij_coeff(ncoeff_prev+1:ncoeff_prev+ncoeff,1))
+    end do  
+!   Build the vector-IFC of an atom in this shell    
+    if (Shell1at%neighbours(1,ishell)%n_interactions.eq.0) cycle
+    do iatshell=1,Shell1at%neighbours(1,ishell)%n_interactions
+      iatom=Shell1at%neighbours(1,ishell)%atomj_in_shell(iatshell)
+      isym =Shell1at%neighbours(1,ishell)%sym_in_shell(iatshell)
+      do ii=1,3
+        Pij_3(ii)=sum(Sym%S_ref(ii,:,isym,1)*Pij_ref(:,ishell))
+      end do  
+      Pij_N((iatom-1)*3+1:(iatom-1)*3+3)=Pij_3(:)
+    end do !iatshell
+  end do !ishell
+! Acoustic sum rule
+  do ii=1,3
+    do iatom=1,InVar%natom
+      iat_mod=mod(iatom+InVar%natom_unitcell-1,InVar%natom_unitcell)+1
+      if (iat_mod==1) cycle
+      Pij_N((iatom-iat_mod+1)*3+ii)=Pij_N((iatom-iat_mod+1)*3+ii)-Pij_N((iatom-1)*3+ii)
+    end do
+  end do  
+  
+  do ii=1,3
+    sum1=zero
+    do iatom=1,InVar%natom_unitcell
+      sum1=sum1+Pij_N((iatom-1)*3+ii)
+    enddo
+    if (sum1.gt.tol8) then
+      MSG_WARNING('The acoustic sum rule is not fulfilled at the 1st order')
+    end if
+  enddo
+  ABI_FREE(Pij_3)
+  ABI_FREE(Pij_ref)
+
+!==========================================================================================
+!======== 2/ Write the Pij_N in output ==================================================
+!==========================================================================================
+! Remove the rounding errors before writing (for non regression testing purposes)
+  do ii=1,3*InVar%natom
+    if (abs(Pij_N(ii)).lt.tol8) Pij_N(ii)=zero
+  end do  
+
+! Write the IFCs in the data.out file (with others specifications: 
+! number of atoms in a shell, distance, Trace...)
+  do iatcell=1,InVar%natom_unitcell
+    write(InVar%stdout,'(a,i4)') ' ############# List of (first order) IFC for the reference atom=',iatcell
+    write(InVar%stdout,'(2x,3(f9.6,1x))') (Pij_N((iatcell-1)*3+ii),ii=1,3)
+    write(InVar%stdout,*) ' '
+  end do !iatcell  
+
+end subroutine tdep_build_pijN 
+
+!=====================================================================================================
 subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_build_phijNN'
-!End of the abilint section
 
   implicit none
 
@@ -223,7 +342,8 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
         if (Shell2at%neighbours(iatref,ishell)%n_interactions.eq.0) cycle
         do iatshell=1,Shell2at%neighbours(iatref,ishell)%n_interactions
           jatom=Shell2at%neighbours(iatref,ishell)%atomj_in_shell(iatshell)
-          if (iatom==jatom) cycle
+!FB20171213          if (iatom==jatom) cycle
+          if (iatref==jatom) cycle 
           do ll=1,3
             Phij_shell(kk,ll,ishell)=Phij_shell(kk,ll,ishell)+Phij_NN((iatref-1)*3+kk,(jatom-1)*3+ll)
           end do !ll
@@ -310,7 +430,7 @@ subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Sh
   ABI_MALLOC(tab_shell,(nshell)); tab_shell(:)=0
   do iatcell=1,InVar%natom_unitcell
     tab_shell(:)=0
-    write(InVar%stdout,'(a,i4)') ' ############# List of IFC for the reference atom=',iatcell
+    write(InVar%stdout,'(a,i4)') ' ############# List of (second order) IFC for the reference atom=',iatcell
 !   Sort the IFC with distance in increasing order
     min_bound=-1.d0
     do ishell=1,nshell
@@ -373,13 +493,6 @@ end subroutine tdep_build_phijNN
 
 !=====================================================================================================
 subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rlatt_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_dij'
-!End of the abilint section
 
   implicit none
 
@@ -471,8 +584,8 @@ subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rl
 
 ! Diagonalization of dynamical matrix
   LWORK=2*3*InVar%natom_unitcell-1
-  ABI_MALLOC(WORKC,(LWORK))
-  ABI_MALLOC(RWORK,(3*3*InVar%natom_unitcell-2)); WORKC(:)=czero; RWORK(:)=zero
+  ABI_MALLOC(WORKC,(LWORK)); WORKC(:)=czero
+  ABI_MALLOC(RWORK,(3*3*InVar%natom_unitcell-2)); RWORK(:)=zero
 !FB  ABI_MALLOC(mass_mat,(3*InVar%natom_unitcell,3*InVar%natom_unitcell)); mass_mat(:,:)=dcmplx(0.d0,0.d0)
 !FB  do iatom=1,InVar%natom_unitcell
 !FB    itypat=InVar%typat_unitcell(iatom)
@@ -525,13 +638,6 @@ end subroutine tdep_calc_dij
 !=====================================================================================================
 subroutine tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_write_dij'
-!End of the abilint section
-
   implicit none
 
   type(Input_Variables_type),intent(in) :: InVar
@@ -581,13 +687,6 @@ end subroutine tdep_write_dij
 !=====================================================================================================
 subroutine tdep_build_phij33(isym,Phij_ref,Phij_33,Sym,trans) 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_build_phij33'
-!End of the abilint section
-
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -622,13 +721,6 @@ end subroutine tdep_build_phij33
 !=====================================================================================================
 subroutine tdep_init_eigen2nd(Eigen2nd,natom_unitcell,nqpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_eigen2nd'
-!End of the abilint section
-
   implicit none
 
   integer, intent(in) :: natom_unitcell,nqpt
@@ -642,13 +734,6 @@ end subroutine tdep_init_eigen2nd
 !=====================================================================================================
 subroutine tdep_destroy_eigen2nd(Eigen2nd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_destroy_eigen2nd'
-!End of the abilint section
-
   implicit none
 
   type(Eigen_Variables_type),intent(inout) :: Eigen2nd
@@ -661,13 +746,6 @@ end subroutine tdep_destroy_eigen2nd
 !=====================================================================================================
 subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_write_yaml'
-!End of the abilint section
-
   implicit none
 
   type(Eigen_Variables_type),intent(in) :: Eigen2nd
@@ -675,7 +753,7 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
   character(len=*) :: Prefix
 ! type(Lattice_Variables_type),intent(in) :: Lattice
 
-  integer :: ii,iqpt,imode,nmode
+  integer :: ii,iqpt,imode,nmode,idir,iatom
   double precision :: distance
   
   nmode=size(Eigen2nd%eigenval,dim=1)
@@ -703,6 +781,14 @@ subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
     do imode=1,nmode
       write(52,'(a,i4)')    '  - #',imode
       write(52,'(a,f15.6)') '    frequency:',Eigen2nd%eigenval(imode,iqpt)*Ha_THz
+      write(52,'(a)') '    eigenvector:'
+      do iatom=1,nmode/3
+        write(52,'(a,i4)') "    - # atom ", iatom
+        do idir=1,3
+          write(52,'(a,f18.9,a,f18.9,a)') "      - [",real(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),','&
+&           ,aimag(Eigen2nd%eigenvec((iatom-1)*3+idir,imode,iqpt)),']'
+        end do
+      end do
     end do !nmode  
     write(52,'(a)') ''
   end do

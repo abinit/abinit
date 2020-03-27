@@ -33,44 +33,43 @@
 
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t51.in, t52.in, t53.in
 #%% [files]
-#%% psp_files = 13al.pspgth, 33as.SGS_mod
+#%% psp_files = 13al.pspgth
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
-#%%   files_to_test = t51_MPI1.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
-#%%   post_commands = 
-#%%     ww_cp t51_MPI1o_DEN t52_MPI1i_DS1_DEN;
-#%%     ww_mv t51_MPI1o_DEN t52_MPI1i_DS2_DEN;
-#%%     ww_cp t51_MPI1o_WFK t53_MPI1i_WFK;
-#%%     ww_mv t51_MPI1o_WFK t53_MPI1i_WFQ;
+#%% files_to_test = t51_MPI1.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI1o_DEN t52_MPI1i_DS1_DEN;
+#%%   ww_mv t51_MPI1o_DEN t52_MPI1i_DS2_DEN;
+#%%   ww_cp t51_MPI1o_WFK t53_MPI1i_WFK;
+#%%   ww_mv t51_MPI1o_WFK t53_MPI1i_WFQ;
 #%% [NCPU_2]
-#%%   files_to_test = t51_MPI2.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
-#%%   post_commands = 
-#%%     ww_cp t51_MPI2o_DEN t52_MPI2i_DS1_DEN;
-#%%     ww_mv t51_MPI2o_DEN t52_MPI2i_DS2_DEN;
-#%%     ww_cp t51_MPI2o_WFK t53_MPI2i_WFK;
-#%%     ww_mv t51_MPI2o_WFK t53_MPI2i_WFQ;
+#%% files_to_test = t51_MPI2.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI2o_DEN t52_MPI2i_DS1_DEN;
+#%%   ww_mv t51_MPI2o_DEN t52_MPI2i_DS2_DEN;
+#%%   ww_cp t51_MPI2o_WFK t53_MPI2i_WFK;
+#%%   ww_mv t51_MPI2o_WFK t53_MPI2i_WFQ;
 #%% [NCPU_4]
-#%%   files_to_test = t51_MPI4.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
-#%%   post_commands = 
-#%%     ww_cp t51_MPI4o_DEN t52_MPI4i_DS1_DEN;
-#%%     ww_mv t51_MPI4o_DEN t52_MPI4i_DS2_DEN;
-#%%     ww_cp t51_MPI4o_WFK t53_MPI4i_WFK;
-#%%     ww_mv t51_MPI4o_WFK t53_MPI4i_WFQ;
+#%% files_to_test = t51_MPI4.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI4o_DEN t52_MPI4i_DS1_DEN;
+#%%   ww_mv t51_MPI4o_DEN t52_MPI4i_DS2_DEN;
+#%%   ww_cp t51_MPI4o_WFK t53_MPI4i_WFK;
+#%%   ww_mv t51_MPI4o_WFK t53_MPI4i_WFQ;
 #%% [NCPU_10]
-#%%   files_to_test = t51_MPI10.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
-#%%   post_commands = 
-#%%     ww_cp t51_MPI10o_DEN t52_MPI10i_DS1_DEN;
-#%%     ww_mv t51_MPI10o_DEN t52_MPI10i_DS2_DEN;
-#%%     ww_cp t51_MPI10o_WFK t53_MPI10i_WFK;
-#%%     ww_mv t51_MPI10o_WFK t53_MPI10i_WFQ;
+#%% files_to_test = t51_MPI10.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% post_commands = 
+#%%   ww_cp t51_MPI10o_DEN t52_MPI10i_DS1_DEN;
+#%%   ww_mv t51_MPI10o_DEN t52_MPI10i_DS2_DEN;
+#%%   ww_cp t51_MPI10o_WFK t53_MPI10i_WFK;
+#%%   ww_mv t51_MPI10o_WFK t53_MPI10i_WFQ;
 #%% [extra_info]
 #%% keywords = NC
 #%% authors = Unknown

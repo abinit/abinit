@@ -87,7 +87,6 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
           0.0 0.0 0.0 0.0 0.0 0.0 0.0
           0.0 0.0 0.0 0.0 0.0 0.0 0.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -99,7 +98,7 @@ dmatpawu1 1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors =  B. Amadon
-#%% keywords =  DMFT
+#%% keywords =  DMFT, PAW
 #%% description = (Apparently the documentation section of this test has been lost)
 #%% topics = DFT+U, DMFT
 #%%<END TEST_INFO>

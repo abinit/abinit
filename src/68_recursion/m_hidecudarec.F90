@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hidecudarec
 !! NAME
 !! m_hidecudarec
@@ -7,7 +6,7 @@
 !!  Call the C-cu program to make recursion on GPU
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2020 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,11 +34,11 @@ module m_hidecudarec
  use defs_basis
  use defs_rectypes
  use m_abicore
-#if defined HAVE_GPU_CUDA
- use m_initcuda
-#endif
-
  use m_fft,        only : fourdp
+
+#if defined HAVE_GPU_CUDA
+ use m_gpu_toolbox
+#endif
 
  implicit none
 
@@ -80,13 +79,6 @@ CONTAINS !===========================================================
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 subroutine prt_mem_usage(nptrec,nfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_mem_usage'
-!End of the abilint section
 
   implicit none
 !Arguments ------------------------------------
@@ -152,13 +144,6 @@ end subroutine prt_mem_usage
 
 subroutine InitRecGPU_0(recgpu,mpi_ab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'InitRecGPU_0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -203,13 +188,6 @@ end subroutine InitRecGPU_0
 #if defined HAVE_GPU_CUDA
 
 subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'InitRecGPU'
-!End of the abilint section
 
  implicit none
 
@@ -310,13 +288,6 @@ end subroutine InitRecGPU
 
 subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cudarec'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -339,7 +310,7 @@ subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 ! write (std_out,*) ' m_hidecudarec/cudarec : enter'
 !ENDDEBUG
 
- call fourdp(1,rset%ZT_p,T_p,1,rset%mpi,rset%nfftrec,rset%ngfftrec,1,0)
+ call fourdp(1,rset%ZT_p,T_p,1,rset%mpi,rset%nfftrec,1,rset%ngfftrec,0)
  T_p = (one/rset%nfftrec)*T_p
 
  if(.not.(rset%tronc)) then
@@ -414,13 +385,6 @@ end subroutine cudarec
 !! SOURCE
 
 subroutine CleanRecGPU(recgpu,load)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CleanRecGPU'
-!End of the abilint section
 
  implicit none
 

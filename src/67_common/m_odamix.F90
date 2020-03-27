@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_odamix
 !! NAME
 !!  m_odamix
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,13 +26,15 @@
 module m_odamix
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_xcdata
+ use m_dtset
 
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_time,       only : timab
  use m_geometry,   only : metric
  use m_cgtools,    only : dotprod_vn
@@ -43,7 +44,7 @@ module m_odamix
  use m_paw_an,     only : paw_an_type
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
- use m_pawrhoij,   only : pawrhoij_type
+ use m_pawrhoij,   only : pawrhoij_type,pawrhoij_filter
  use m_paw_nhat,   only : pawmknhat
  use m_paw_denpot, only : pawdenpot
  use m_energies,   only : energies_type
@@ -118,7 +119,6 @@ contains
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (Bohr**3)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
@@ -146,7 +146,7 @@ contains
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
-!!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
+!!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
 !!   | e_paw(IN)=PAW spherical part energy
@@ -188,16 +188,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          paw_an,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &          red_ptot,psps,rhog,rhor,rprimd,strsxc,ucvol,usepaw,&
 &          usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,xccc3d,xred,&
-&          taug,taur,vxctau,add_tfw) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'odamix'
-!End of the abilint section
-
- implicit none
+&          taur,vxctau,add_tfw) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -217,7 +208,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  logical :: add_tfw_
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: red_ptot(3),rprimd(3,3),vpsp(nfft),xred(3,dtset%natom)
- real(dp),intent(in),optional :: taug(2,nfft*dtset%usekden),taur(nfft,dtset%nspden*dtset%usekden)
+ real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout) :: kxc(nfft,nkxc),nhat(nfft,dtset%nspden*usepaw)
  real(dp),intent(inout) :: nvresid(nfft,dtset%nspden),rhog(2,nfft)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft)
@@ -235,9 +226,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Local variables-------------------------------
 !scalars
  integer :: cplex,iatom,ider,idir,ierr,ifft,ipert,irhoij,ispden,itypat,izero,iir,jjr,kkr
- integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nselect,nzlmopt,nk3xc,option,optxc
- logical :: with_vxctau
- logical :: non_magnetic_xc
+ integer :: jrhoij,klmn,klmn1,kmix,nfftot,nhatgrdim,nzlmopt,nk3xc,option,optxc
+ logical :: nmxc,with_vxctau
  real(dp) :: alphaopt,compch_fft,compch_sph,doti,e1t10,e_ksnm1,e_xcdc_vxctau
  real(dp) :: eenth,fp0,gammp1,ro_dlt,ucvol_local
  character(len=500) :: message
@@ -255,15 +245,12 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call timab(80,1,tsec)
 
-! Initialise non_magnetic_xc for rhohxc
- non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
-
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
 
 !To be adjusted for the call to rhotoxc
  add_tfw_=.false.;if (present(add_tfw)) add_tfw_=add_tfw
- nk3xc=1
+ nk3xc=1;nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
 !faire un test sur optres=1, usewvl=0, nspden=1,nhatgrdim
  if(optres/=1)then
@@ -286,7 +273,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      message = ' dijhat variable must be allocated in odamix ! '
      MSG_ERROR(message)
    end if
-   if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%cplex_rf==2)then
+   if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%qphase==2)then
      message = ' complex dij not allowed in odamix! '
      MSG_ERROR(message)
    end if
@@ -299,6 +286,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  fp0=energies%e_eigenvalues-energies%h0-two*energies%e_hartree-energies%e_xcdc
  if (usepaw==1) then
    do iatom=1,my_natom
+     ABI_CHECK(pawrhoij(iatom)%qphase==1,'ODA mixing not allowed with a Q phase in PAW objects!')
      itypat=pawrhoij(iatom)%itypat
      do ispden=1,pawrhoij(iatom)%nspden
        jrhoij=1
@@ -306,13 +294,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
          klmn=pawrhoij(iatom)%rhoijselect(irhoij)
          ro_dlt=pawrhoij(iatom)%rhoijp(jrhoij,ispden)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,ispden)-paw_ij(iatom)%dijhat(klmn,ispden))
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
        klmn1=1
        do klmn=1,pawrhoij(iatom)%lmn2_size
          ro_dlt=-pawrhoij(iatom)%rhoijres(klmn1,ispden)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,ispden)-paw_ij(iatom)%dijhat(klmn,ispden))
-         klmn1=klmn1+pawrhoij(iatom)%cplex
+         klmn1=klmn1+pawrhoij(iatom)%cplex_rhoij
        end do
      end do
      if (paw_ij(iatom)%ndij>=2.and.pawrhoij(iatom)%nspden==1) then
@@ -321,13 +309,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
          klmn=pawrhoij(iatom)%rhoijselect(irhoij)
          ro_dlt=pawrhoij(iatom)%rhoijp(jrhoij,1)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,2)-paw_ij(iatom)%dijhat(klmn,2))
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
        klmn1=1
        do klmn=1,pawrhoij(iatom)%lmn2_size
          ro_dlt=-pawrhoij(iatom)%rhoijres(klmn1,1)*pawtab(itypat)%dltij(klmn)
          e1t10=e1t10+ro_dlt*(paw_ij(iatom)%dij(klmn,2)-paw_ij(iatom)%dijhat(klmn,2))
-         klmn1=klmn1+pawrhoij(iatom)%cplex
+         klmn1=klmn1+pawrhoij(iatom)%cplex_rhoij
        end do
        e1t10=half*e1t10
      end if
@@ -365,15 +353,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !------Compute Hartree and xc potentials----------------------------------
  nfftot=PRODUCT(ngfft(1:3))
 
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
 
  call xcdata_init(xcdata,dtset=dtset)
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
 !------Compute parts of total energy depending on potentials--------
 
@@ -415,7 +403,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    end do
  end if
 
-
 !When the finite-temperature VG broadening scheme is used,
 !the total entropy contribution "tsmear*entropy" has a meaning,
 !and gather the two last terms of Eq.8 of the VG paper
@@ -450,7 +437,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !energies%e_magfield = emag
 !end if
 
-!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]], 
+!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]],
 !but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
  if (dtset%berryopt == 6 .or. dtset%berryopt == 16 )  then
    energies%e_elecfield=zero
@@ -510,20 +497,14 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  end if   ! berryopt==17
 
-
-
-
-
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
-& energies%e_localpsp + energies%e_corepsp + &
+& energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
 !& energies%e_entropy + energies%e_elecfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
- if (usepaw==0) then
-   etotal = etotal + energies%e_nonlocalpsp
- else
+ if (usepaw==1) then
    etotal = etotal + energies%e_paw
  end if
 
@@ -543,16 +524,18 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  write(std_out,*) " alphaopt",alphaopt
 
  energies%h0=(one-alphaopt)*energies%h0 + alphaopt*(energies%e_kinetic+energies%e_localpsp)
- if (usepaw==0) energies%h0=energies%h0 + alphaopt*energies%e_nonlocalpsp
+ energies%h0=energies%h0 + alphaopt*energies%e_nlpsp_vfock
 
  rhor= rhor+(alphaopt-one)*nvresid
- call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+ call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,0)
 
  if (usepaw==1) then
+   if (my_natom>0) then
+     ABI_ALLOCATE(rhoijtmp,(pawrhoij(1)%cplex_rhoij*pawrhoij(1)%lmn2_size,pawrhoij(1)%nspden))
+   end if
    do iatom=1,my_natom
-     ABI_ALLOCATE(rhoijtmp,(pawrhoij(iatom)%cplex*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
      rhoijtmp=zero
-     if (pawrhoij(iatom)%cplex==1) then
+     if (pawrhoij(iatom)%cplex_rhoij==1) then
        if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
          do ispden=1,pawrhoij(iatom)%nspden
            do irhoij=1,pawrhoij(iatom)%nrhoijsel
@@ -567,18 +550,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
            rhoijtmp(klmn,ispden)=rhoijtmp(klmn,ispden)+(alphaopt-one)*pawrhoij(iatom)%rhoijres(klmn,ispden)
          end do
        end do
-       nselect=0
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
-           end do
-         end if
-       end do
-       pawrhoij(iatom)%nrhoijsel=nselect
-       ABI_DEALLOCATE(rhoijtmp)
      else
        if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
          jrhoij=1
@@ -597,23 +568,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &           +(alphaopt-one)*pawrhoij(iatom)%rhoijres(klmn:klmn+1,ispden)
          end do
        end do
-       nselect=0
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(2*klmn-1:2*klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(2*nselect-1:2*nselect,ispden)=rhoijtmp(2*klmn-1:2*klmn,ispden)
-           end do
-         end if
-       end do
-       pawrhoij(iatom)%nrhoijsel=nselect
-       ABI_DEALLOCATE(rhoijtmp)
      end if
-
-   end do
- end if
-
+     call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,pawrhoij(iatom)%nrhoijsel,&
+&                         pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,pawrhoij(iatom)%lmn2_size,&
+&                         pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
+   end do ! iatom
+   if (allocated(rhoijtmp)) then
+     ABI_DEALLOCATE(rhoijtmp)
+   end if
+ end if ! usepaw
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!! Calcul des quantites qui dependent de rho_tilde_n+1 (rho apres mixing)
@@ -632,13 +595,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !------Compute Hartree and xc potentials----------------------------------
 
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
-& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,dtset%paral_kgb,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then
    ABI_DEALLOCATE(nhatgr)

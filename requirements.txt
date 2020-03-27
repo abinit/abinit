@@ -2,8 +2,12 @@ html2text
 # Pinned versions
 #-mkdocs==0.16.3
 #-mkdocs-material==1.12.2
-mkdocs==0.17.2
+#mkdocs==0.17.2 
+mkdocs==0.17.5 # required by py3.7 
 mkdocs-material==2.6.6
+# This to move to new mkdocs version (requires core refactoring)
+#mkdocs==1.0.4
+#mkdocs-material==3.3.0
 pymdown-extensions
 python-markdown-math
 pyyaml

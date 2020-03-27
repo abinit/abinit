@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outwant
 !! NAME
 !! m_outwant
@@ -7,7 +6,7 @@
 !! Interface with want code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (CMorari)
+!! Copyright (C) 2005-2020 ABINIT group (CMorari)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,10 +27,10 @@
 module m_outwant
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_hdr
+ use m_dtset
 
  use m_io_tools,   only : open_file
  use m_symtk,      only : matr3inv
@@ -99,15 +98,6 @@ contains
 !! SOURCE
 
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outwant'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/predict_ga
 !! NAME
 !! predict_ga
@@ -9,7 +8,7 @@
 !! to the next generation. Those are chosen from ga_opt_percent% best fit and (1-ga_opt_percent)% from Genetic rules
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (XG, AHR)
+!! Copyright (C) 2009-2020 ABINIT group (XG, AHR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,13 +84,6 @@ CONTAINS
 
 subroutine predict_ga(itimimage_eff,idum,ga_param,natom,nimage,&
 &                     ntimimage_stored,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_ga'
-!End of the abilint section
 
  implicit none
 
@@ -485,13 +477,6 @@ end subroutine predict_ga
 
 INTEGER FUNCTION choosefather(fitf,n,idum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'choosefather'
-!End of the abilint section
-
  implicit none
 
  integer,intent(in) :: n
@@ -515,13 +500,6 @@ end FUNCTION choosefather
 
 SUBROUTINE swap(a,b)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'swap'
-!End of the abilint section
-
  integer, intent(inout) :: a,b
  integer :: dum
    dum=a; a=b;  b=dum
@@ -536,13 +514,6 @@ INTEGER FUNCTION comp_indiv(distances,indiv,natom,nimage)
 !! We assume, all distances for a given individual are ordered and
 !! we define a metric from the total difference distances between individuals.
 !! if comp_indiv is 0, means that two individuals are two close.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'comp_indiv'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: indiv,natom,nimage
@@ -568,13 +539,6 @@ end FUNCTION comp_indiv
 SUBROUTINE randomize_parent(parent,natom,idum)
 
 ! take a parent and randomize the positions of the atoms
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'randomize_parent'
-!End of the abilint section
-
 implicit none
 
 integer,intent(in)     :: natom
@@ -631,13 +595,6 @@ end SUBROUTINE randomize_parent
 SUBROUTINE convert_gentocoor(parent,coor,natom)
 
 ! convert gene (single vector) to coordinates (3,natom)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'convert_gentocoor'
-!End of the abilint section
-
 implicit none
 
 integer,intent(in) :: natom
@@ -659,13 +616,6 @@ end SUBROUTINE convert_gentocoor
 SUBROUTINE convert_coortogen(parent,coor,natom)
 
 ! convert coordinates in gene notation (single vector with all coordinates)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'convert_coortogen'
-!End of the abilint section
-
 implicit none
 
 integer,intent(in) :: natom
@@ -686,13 +636,6 @@ end SUBROUTINE convert_coortogen
 SUBROUTINE initialize_perm(iperm,nimage)
 
 !! initialize the vector iperm with corresponding indices.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initialize_perm'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: nimage
@@ -714,13 +657,6 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
 
 !! check if two atoms are two close.
 !! if they are, checkatomicdist=0
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checkatomicdist'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: natom
@@ -744,13 +680,6 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
 END FUNCTION checkatomicdist
 
 SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checksymmetrygroup'
-!End of the abilint section
 
   implicit none
 
@@ -786,13 +715,6 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 END SUBROUTINE checksymmetrygroup
 
 DOUBLE PRECISION FUNCTION gaussian_random(idum,sigma)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussian_random'
-!End of the abilint section
 
   implicit none
 

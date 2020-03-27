@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_init10
 !! NAME
 !!  m_init10
@@ -7,7 +6,7 @@
 !!   It should be "contained" in multibinit but abilint does not accept "contains" in programs.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +51,7 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!! character(len=fnlen) filnam(4)=character strings giving file names
+!! character(len=fnlen) filnam(6)=character strings giving file names
 !!
 !! NOTES
 !! 1. Should be executed by one processor only.
@@ -61,8 +60,9 @@ contains
 !!     (2) Formatted output file
 !!     (3) Input for reference structure and harmonic part (DDB file or XML)
 !!     (4) Input for XML with polynomial coefficients (DDB file)
-!!     (5) Input for HIST file
-!!     (6-14) Input Derivative Database (XML format)
+!!     (5) Input for HIST Training-Set file (netcdf .nc format)
+!!     (6) Input for HIST Test-Set file (netcdf .nc format)
+!!     (7-18) Input Derivative Database (XML format)
 !!
 !! PARENTS
 !!      multibinit
@@ -77,16 +77,9 @@ subroutine init10(filnam,comm)
  use defs_basis
  use m_xmpi
  use m_errors
- use m_ab7_invars
 
  use m_fstrings,     only : int2char4
  use m_io_tools,     only : open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init10'
-!End of the abilint section
 
  implicit none
 
@@ -94,14 +87,13 @@ subroutine init10(filnam,comm)
 !scalars
  integer,intent(in) :: comm
 !arrays
- character(len=*),intent(out) :: filnam(17)
+ character(len=fnlen),intent(out) :: filnam(18)
 
 !Local variables--------------------------
 !scalars
  integer,parameter :: master=0
  integer :: me,nproc,ierr
  integer :: ii,io
-!arrays
 ! *********************************************************************
 
 !Determine who I am in comm
@@ -126,14 +118,18 @@ subroutine init10(filnam,comm)
 &                  ' (XML file or enter no): '
    read(std_in, '(a)',IOSTAT=io) filnam(4)
    write(std_out,'(a,a)' )'-   ',trim(filnam(4))
-   write(std_out,*)' Give name for molecular dynamics',&
+   write(std_out,*)' Give name for training-set file',&
 &                  ' (netcdf file or enter no): '
    read(std_in, '(a)',IOSTAT=io) filnam(5)
-   write(std_out,'(a,a)' )'-   ',trim(filnam(5))
+   write(std_out,'(a,a)' )'-   ',trim(filnam(5)) 
+   write(std_out,*)' Give name for test-set file',&
+&                  ' (netcdf file or enter no): '
+   read(std_in, '(a)',IOSTAT=io) filnam(6)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(6)) 
 ! TODO hexu: shift ii, add possible file format for spin when needed
-   ii = 6
+   ii = 7
    !TODO hexu: shift ii
-   do while (io>=0 .and. ii<18)
+   do while (io>=0 .and. ii<19)
      write(std_out,*)' Give name for input derivative database (DDB or XML file): '
      read(std_in, '(a)',IOSTAT=io) filnam(ii)
      write(std_out,'(a,a)' )'-   ',trim(filnam(ii))

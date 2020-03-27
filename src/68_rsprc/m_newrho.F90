@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_newrho
 !! NAME
 !!  m_newrho
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2018 ABINIT group (MT).
+!!  Copyright (C) 2005-2020 ABINIT group (MT).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,9 +26,20 @@
 module m_newrho
 
  use defs_basis
+ use defs_wvltypes
  use m_errors
  use m_abicore
+ use m_ab7_mixing
+ use m_abi2big
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,     only : MPI_type
+ use m_time,     only : timab
+ use m_geometry, only : metric
+ use m_pawtab,   only : pawtab_type
+ use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
+ use m_prcref,   only : prcref
  use m_wvl_rho, only : wvl_prcref
  use m_fft,     only : fourdp
 
@@ -128,14 +138,18 @@ contains
 !! SIDE EFFECTS
 !!  dtn_pc(3,natom)=preconditioned change of atomic position,
 !!                                          in reduced coordinates
+!!  mix<type(ab7_mixing_object)>=all data defining the mixing algorithm for the density
 !!  rhor(nfft,nspden)= at input, it is the "out" trial density that gave nresid=(rho_out-rho_in)
 !!                     at output, it is an updated "mixed" trial density
 !!  rhog(2,nfft)= Fourier transform of the new trial density
+!!  ===== if usekden==1 =====
+!!  [mix_mgga<type(ab7_mixing_object)>]=all data defining the mixing algorithm
+!!     for the kinetic energy density
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!  ==== if usepaw==1
 !!    pawrhoij(natom)%nrhoijsel=number of non-zero values of rhoij
-!!    pawrhoij(natom)%rhoijp(cplex*lmn2_size,nspden)= new (mixed) value of rhoij quantities in PACKED STORAGE
+!!    pawrhoij(natom)%rhoijp(cplex_rhoij*lmn2_size,nspden)= new (mixed) value of rhoij quantities in PACKED STORAGE
 !!    pawrhoij(natom)%rhoijselect(lmn2_size)=select the non-zero values of rhoij
 !!  taug(2,nfft*dtset%usekden)=array for Fourier transform of kinetic
 !!     energy density
@@ -166,30 +180,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 &  nfftmix,nfftmix_per_nfft,ngfft,ngfftmix,nkxc,npawmix,npwdiel,&
 &  nresid,ntypat,n1xccc,pawrhoij,pawtab,&
 &  ph1d,psps,rhog,rhor,rprimd,susmat,usepaw,vtrial,wvl,wvl_den,xred,&
-&  taug,taur,tauresid)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_errors
- use m_abicore
- use m_ab7_mixing
- use m_abi2big
-
- use m_time,     only : timab
- use m_geometry, only : metric
- use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type
- use m_prcref,   only : prcref
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newrho'
-!End of the abilint section
-
- implicit none
+&  mix_mgga,taug,taur,tauresid)
 
 !Arguments-------------------------------
 !scalars
@@ -201,6 +192,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp),intent(in) :: etotal,gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
  type(ab7_mixing_object), intent(inout) :: mix
+ type(ab7_mixing_object), intent(inout),optional :: mix_mgga
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl
@@ -223,7 +215,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  real(dp),intent(inout) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden)
  real(dp),intent(inout), target :: xred(3,dtset%natom)
- real(dp),intent(inout) :: rhog(2,nfft) !vz_i
+ real(dp),intent(inout) :: rhog(2,nfft)
  real(dp),intent(inout), optional :: taug(2,nfft*dtset%usekden)
  real(dp),intent(inout), optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout), optional :: tauresid(nfft,dtset%nspden*dtset%usekden)
@@ -234,21 +226,21 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp9=9
- integer :: cplex,dplex,errid,i_vresid1,i_vrespc1,iatom,ifft,indx,irhoij,ispden,jfft
- integer :: jrhoij,klmn,kmix,mpicomm,nfftot,nselect
+ integer :: cplex,dplex,errid,i_vresid1,i_vrespc1,iatom,ifft,indx,iq,iq0,irhoij,ispden,jfft
+ integer :: jrhoij,klmn,kklmn,kmix,mpicomm,nfftot,qphase
  logical :: mpi_summarize,reset
  real(dp) :: fact,ucvol,ucvol_local
  character(len=500) :: message
 !arrays
  real(dp) :: gprimd(3,3),rmet(3,3),ro(2),tsec(2),vhartr_dum(1),vpsp_dum(1)
  real(dp) :: vxc_dum(1,1)
- real(dp),allocatable :: magng(:,:,:)
+ real(dp),allocatable :: magng(:,:,:),magntaug(:,:,:)
  real(dp),allocatable :: nresid0(:,:),nrespc(:,:),nreswk(:,:,:)
  real(dp),allocatable :: rhoijrespc(:),rhoijtmp(:,:)
 ! TODO : these should be allocatables not pointers: is there some reason to
 !  keep them this way, eg an interface somewhere?
  real(dp), pointer :: rhomag(:,:), npaw(:)
- real(dp),allocatable :: tauresid0(:,:)
+ real(dp),allocatable :: tauresid0(:,:),taurespc(:,:)
  real(dp),allocatable :: taumag(:,:)
 
 ! *************************************************************************
@@ -260,32 +252,44 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Compatibility tests
  if(nfftmix>nfft) then
-   MSG_BUG('nfftmix>nfft not allowed !')
+   message='nfftmix>nfft not allowed!'
+   MSG_BUG(message)
  end if
 
  if(dtset%usewvl==1) then
    if( (ispmix/=1 .or. nfftmix/=nfft)) then
-     MSG_BUG('nfftmix/=nfft, ispmix/=1 not allowed for wavelets')
+     message='nfftmix/=nfft, ispmix/=1 not allowed for wavelets!'
+     MSG_BUG(message)
    end if
    if(dtset%wvl_bigdft_comp==1) then
-     MSG_BUG('usewvl == 1 and wvl_bigdft_comp==1 not allowed!')
+     message='usewvl == 1 and wvl_bigdft_comp==1 not allowed!'
+     MSG_BUG(message)
    end if
- end if
-
- if (usepaw==1 .and. dtset%usekden>0) then
-   write (message, "(2a)") 'PAW mixing not coded yet for kinetic energy density.',&
-&     ' No mixing will be done on PAW bits, something may explode'
-   MSG_WARNING(message)
  end if
 
  if(ispmix/=2.and.nfftmix/=nfft) then
-   MSG_BUG('nfftmix/=nfft allowed only when ispmix=2 !')
+   message='nfftmix/=nfft allowed only when ispmix=2!'
+   MSG_BUG(message)
+ end if
+
+ if (dtset%usekden==1) then
+   if ((.not.present(tauresid)).or.(.not.present(taug)).or. &
+&      (.not.present(taur)).or.(.not.present(mix_mgga))) then
+     message='Several arrays are missing!'
+     MSG_BUG(message)
+   end if
+   if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
+&      mix_mgga%iscf==AB7_MIXING_EIG) then
+     message='kinetic energy density cannot be mixed with the selected mixing algorithm!'
+     MSG_ERROR(message)
+   end if
  end if
 
  if (usepaw==1.and.my_natom>0) then
-   cplex=pawrhoij(1)%cplex;dplex=cplex-1
+   cplex=pawrhoij(1)%cplex_rhoij;dplex=cplex-1
+   qphase=pawrhoij(1)%qphase
  else
-   cplex = 0;dplex = 0
+   cplex = 0;dplex = 0 ; qphase=0
  end if
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
@@ -308,43 +312,38 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (ispmix==1.and.nfft==nfftmix) then
    rhomag(:,1:dtset%nspden)=rhor(:,1:dtset%nspden)
    nresid0(:,1:dtset%nspden)=nresid(:,1:dtset%nspden)
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      taumag(:,1:dtset%nspden)=taur(:,1:dtset%nspden)
      tauresid0(:,1:dtset%nspden)=tauresid(:,1:dtset%nspden)
    end if
  ! recip space and all fft points are here
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(1,nresid0(:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     call fourdp(1,nresid0(:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
    rhomag(:,1)=reshape(rhog,(/2*nfft/))
    if (dtset%nspden>1) then
      do ispden=2,dtset%nspden
-       call fourdp(1,rhomag(:,ispden),rhor(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,rhomag(:,ispden),rhor(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
    end if
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      do ispden=1,dtset%nspden
-       call fourdp(1,tauresid0(:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,tauresid0(:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
      taumag(:,1)=reshape(taug,(/2*nfft/))
      if (dtset%nspden>1) then
        do ispden=2,dtset%nspden
-         call fourdp(1,taumag(:,ispden),taur(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+         call fourdp(1,taumag(:,ispden),taur(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
        end do
      end if
    end if
  ! not all fft points are here - presumes recip space
  else
-   if (dtset%usekden>0) then
-     write (message, "(2a)") 'ffttomix not coded yet for kinetic energy density.',&
-&       ' No mixing will be done or something will explode'
-     MSG_WARNING(message)
-   end if
    fact=dielar(4)-1._dp
    ABI_ALLOCATE(nreswk,(2,nfft,dtset%nspden))
    do ispden=1,dtset%nspden
-     call fourdp(1,nreswk(:,:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     call fourdp(1,nreswk(:,:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
    do ifft=1,nfft
      if (ffttomix(ifft)>0) then
@@ -358,7 +357,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    if (dtset%nspden>1) then
      ABI_ALLOCATE(magng,(2,nfft,dtset%nspden-1))
      do ispden=2,dtset%nspden
-       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
        do ifft=1,nfft
          if (ffttomix(ifft)>0) then
            jfft=2*ffttomix(ifft)
@@ -371,12 +370,42 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
        end do
      end do
    end if
+   if (dtset%usekden==1) then
+     do ispden=1,dtset%nspden
+       call fourdp(1,nreswk(:,:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
+     end do
+     do ifft=1,nfft
+       if (ffttomix(ifft)>0) then
+         jfft=2*ffttomix(ifft)
+         taumag (jfft-1:jfft,1)=taug(1:2,ifft)
+         tauresid0(jfft-1:jfft,1)=nreswk(1:2,ifft,1)
+       else
+         taug(:,ifft)=taug(:,ifft)+fact*nreswk(:,ifft,1)
+       end if
+     end do
+     if (dtset%nspden>1) then
+       ABI_ALLOCATE(magntaug,(2,nfft,dtset%nspden-1))
+       do ispden=2,dtset%nspden
+         call fourdp(1,magntaug(:,:,ispden-1),taur(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
+         do ifft=1,nfft
+           if (ffttomix(ifft)>0) then
+             jfft=2*ffttomix(ifft)
+             taumag (jfft-1:jfft,ispden)=magntaug(1:2,ifft,ispden-1)
+             tauresid0(jfft-1:jfft,ispden)=nreswk(1:2,ifft,ispden)
+           else
+             magntaug(:,ifft,ispden-1)=magntaug(:,ifft,ispden-1)+fact*nreswk(:,ifft,ispden)
+             if (dtset%nspden==2) magntaug(:,ifft,1)=two*magntaug(:,ifft,1)-taug(:,ifft)
+           end if
+         end do
+       end do
+     end if
+   end if
    ABI_DEALLOCATE(nreswk)
  end if
 
 !Retrieve "input" density from "output" density and density residual
  rhomag(:,1:dtset%nspden)=rhomag(:,1:dtset%nspden)-nresid0(:,1:dtset%nspden)
- if (dtset%usekden>0) then
+ if (dtset%usekden==1) then
    taumag(:,1:dtset%nspden)=taumag(:,1:dtset%nspden)-tauresid0(:,1:dtset%nspden)
  end if
 
@@ -384,26 +413,31 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (dtset%nspden==2) then
    rhomag (:,2)=two*rhomag (:,2)-rhomag (:,1)
    nresid0(:,2)=two*nresid0(:,2)-nresid0(:,1)
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      taumag (:,2)=two*taumag (:,2)-taumag (:,1)
      tauresid0(:,2)=two*tauresid0(:,2)-tauresid0(:,1)
    end if
  end if
+
+!If PAW, handle occupancy matrix
  if (usepaw==1.and.my_natom>0) then
    if (pawrhoij(1)%nspden==2) then
      do iatom=1,my_natom
-       jrhoij=1
-       do irhoij=1,pawrhoij(iatom)%nrhoijsel
-         ro(1:1+dplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
-         pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
-         pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
-         jrhoij=jrhoij+cplex
-       end do
-       do kmix=1,pawrhoij(iatom)%lmnmix_sz
-         klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-         ro(1:1+dplex)=pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)
-         pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
-         pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
+       do iq=1,qphase
+         iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+         jrhoij=1+iq0
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           ro(1:1+dplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
+           pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
+           pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
+           jrhoij=jrhoij+cplex
+         end do
+         do kmix=1,pawrhoij(iatom)%lmnmix_sz
+           klmn=iq0+cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
+           ro(1:1+dplex)=pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)
+           pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,1)=ro(1:1+dplex)+pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
+           pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)=ro(1:1+dplex)-pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,2)
+         end do
        end do
      end do
    end if
@@ -411,6 +445,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
 !Choice of preconditioner governed by iprcel, densfor_pred and iprcfc
  ABI_ALLOCATE(nrespc,(ispmix*nfftmix,dtset%nspden))
+ ABI_ALLOCATE(taurespc,(ispmix*nfftmix,dtset%nspden*dtset%usekden))
  ABI_ALLOCATE(npaw,(npawmix*usepaw))
  if (usepaw==1)  then
    ABI_ALLOCATE(rhoijrespc,(npawmix))
@@ -429,17 +464,28 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    call wvl_prcref(dielar,dtset%iprcel,my_natom,nfftmix,npawmix,dtset%nspden,pawrhoij,&
 &   rhoijrespc,psps%usepaw,nresid0,nrespc)
  end if
+!At present, only a simple precoditionning for the kinetic energy density
+! (is Kerker mixing valid for tau?)
+ if (dtset%usekden==1) then
+   do ispden=1,dtset%nspden
+     fact=dielar(4);if (ispden>1) fact=abs(dielar(7))
+     taurespc(1:ispmix*nfftmix,ispden)=fact*tauresid0(1:ispmix*nfftmix,ispden)
+   end do
+ end if
 
 !------Compute new trial density and eventual new atomic positions
 
- i_vresid1=mix%i_vresid(1)
- i_vrespc1=mix%i_vrespc(1)
+ if (mix%n_fftgr>0) then
+   i_vresid1=mix%i_vresid(1)
+   i_vrespc1=mix%i_vrespc(1)
+ end if
 
 !Initialise working arrays for the mixing object.
  if (moved_atm_inside == 1) then
    call ab7_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
  end if
  call ab7_mixing_eval_allocate(mix, istep)
+
 !Copy current step arrays.
  if (moved_atm_inside == 1) then
    call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc, arr_atm = grhf)
@@ -449,31 +495,44 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (errid /= AB7_NO_ERROR) then
    MSG_ERROR(message)
  end if
+
+!Same treatment for the kinetic energy density
+ if (dtset%usekden==1) then
+   call ab7_mixing_eval_allocate(mix_mgga, istep)
+   call ab7_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
+   if (errid /= AB7_NO_ERROR) then
+     MSG_ERROR(message)
+   end if
+ end if
+
  ABI_DEALLOCATE(nresid0)
  ABI_DEALLOCATE(nrespc)
  ABI_DEALLOCATE(tauresid0)
+ ABI_DEALLOCATE(taurespc)
 
 !PAW: either use the array f_paw or the array f_paw_disk
  if (usepaw==1) then
    indx=-dplex
    do iatom=1,my_natom
-     do ispden=1,pawrhoij(iatom)%nspden
-       ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,1))
-       rhoijtmp=zero
-       jrhoij=1
-       do irhoij=1,pawrhoij(iatom)%nrhoijsel
-         klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-         rhoijtmp(klmn:klmn+dplex,1)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-         jrhoij=jrhoij+cplex
+     ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,1))
+     do iq=1,qphase
+       iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+       do ispden=1,pawrhoij(iatom)%nspden
+         rhoijtmp=zero ; jrhoij=1+iq0
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+           rhoijtmp(klmn:klmn+dplex,1)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+           jrhoij=jrhoij+cplex
+         end do
+         do kmix=1,pawrhoij(iatom)%lmnmix_sz
+           indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex ; kklmn=klmn+iq0
+           npaw(indx:indx+dplex)=rhoijtmp(klmn:klmn+dplex,1)-pawrhoij(iatom)%rhoijres(kklmn:kklmn+dplex,ispden)
+           mix%f_paw(indx:indx+dplex,i_vresid1)=pawrhoij(iatom)%rhoijres(kklmn:kklmn+dplex,ispden)
+           mix%f_paw(indx:indx+dplex,i_vrespc1)=rhoijrespc(indx:indx+dplex)
+         end do
        end do
-       do kmix=1,pawrhoij(iatom)%lmnmix_sz
-         indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-         npaw(indx:indx+dplex)=rhoijtmp(klmn:klmn+dplex,1)-pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
-         mix%f_paw(indx:indx+dplex,i_vresid1)=pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
-         mix%f_paw(indx:indx+dplex,i_vrespc1)=rhoijrespc(indx:indx+dplex)
-       end do
-       ABI_DEALLOCATE(rhoijtmp)
      end do
+     ABI_DEALLOCATE(rhoijtmp)
    end do
  end if
 
@@ -494,17 +553,26 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 
  reset = .false.
  if (initialized == 0) reset = .true.
+
+!Electronic density mixing
  call ab7_mixing_eval(mix, rhomag, istep, nfftot, ucvol_local, &
 & mpicomm, mpi_summarize, errid, message, &
 & reset = reset, isecur = dtset%isecur,&
 & pawopt = dtset%pawoptmix, pawarr = npaw, &
 & etotal = etotal, potden = vtrial, &
 & comm_atom=mpi_enreg%comm_atom)
-
  if (errid == AB7_ERROR_MIXING_INC_NNSLOOP) then
    dbl_nnsclo = 1
  else if (errid /= AB7_NO_ERROR) then
    MSG_ERROR(message)
+ end if
+!Kinetic energy density mixing (if any)
+ if (dtset%usekden==1) then
+   call ab7_mixing_eval(mix_mgga, taumag, istep, nfftot, ucvol_local, &
+&   mpicomm, mpi_summarize, errid, message, reset = reset)
+   if (errid /= AB7_NO_ERROR) then
+     MSG_ERROR(message)
+   end if
  end if
 
 !PAW: apply a simple mixing to rhoij (this is temporary)
@@ -512,51 +580,45 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    if (usepaw==1) then
      indx=-dplex
      do iatom=1,my_natom
-       ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+       ABI_ALLOCATE(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
        rhoijtmp=zero
-       if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
-         do ispden=1,pawrhoij(iatom)%nspden
-           do kmix=1,pawrhoij(iatom)%lmnmix_sz
-             indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-             rhoijtmp(klmn:klmn+dplex,ispden)=rhoijrespc(indx:indx+dplex) &
-&             -pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
-           end do
-         end do
-       end if
-       if (pawrhoij(iatom)%nspden/=2) then
-         do ispden=1,pawrhoij(iatom)%nspden
-           jrhoij=1
-           do irhoij=1,pawrhoij(iatom)%nrhoijsel
-             klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-             rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&             +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-             jrhoij=jrhoij+cplex
-           end do
-         end do
-       else
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-           ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
-           rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2)) &
-&           +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
-           rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2)) &
-&           +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
-           jrhoij=jrhoij+cplex
-         end do
-       end if
-       nselect=0
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(cplex*klmn-dplex:cplex*klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
+       do iq=1,qphase
+         iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+         if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
            do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(cplex*nselect-dplex:cplex*nselect,ispden)=&
-&             rhoijtmp(cplex*klmn-dplex:cplex*klmn,ispden)
+             do kmix=1,pawrhoij(iatom)%lmnmix_sz
+               indx=indx+cplex;klmn=iq0+cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijrespc(indx:indx+dplex) &
+&               -pawrhoij(iatom)%rhoijres(klmn:klmn+dplex,ispden)
+             end do
+           end do
+         end if
+         if (pawrhoij(iatom)%nspden/=2) then
+           do ispden=1,pawrhoij(iatom)%nspden
+             jrhoij=iq0+1
+             do irhoij=1,pawrhoij(iatom)%nrhoijsel
+               klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
+&               +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+               jrhoij=jrhoij+cplex
+             end do
+           end do
+         else
+           jrhoij=iq0+1
+           do irhoij=1,pawrhoij(iatom)%nrhoijsel
+             klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+             ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
+             rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2)) &
+&             +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
+             rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2)) &
+&             +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
+             jrhoij=jrhoij+cplex
            end do
          end if
        end do
-       pawrhoij(iatom)%nrhoijsel=nselect
+       call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,&
+&           pawrhoij(iatom)%nrhoijsel,pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,&
+&           pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
        ABI_DEALLOCATE(rhoijtmp)
      end do
    end if
@@ -570,120 +632,117 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (usepaw==1.and.dtset%iscf/=15.and.dtset%iscf/=16) then
    indx=-dplex
    do iatom=1,my_natom
-     ABI_ALLOCATE(rhoijtmp,(cplex*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
+     ABI_ALLOCATE(rhoijtmp,(cplex*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
      rhoijtmp=zero
-     if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
+     do iq=1,qphase
+       iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+       if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
+         do ispden=1,pawrhoij(iatom)%nspden
+           jrhoij=iq0+1
+           do irhoij=1,pawrhoij(iatom)%nrhoijsel
+             klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+             rhoijtmp(klmn:klmn+dplex,ispden)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+             jrhoij=jrhoij+cplex
+           end do
+         end do
+       end if
        do ispden=1,pawrhoij(iatom)%nspden
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-           rhoijtmp(klmn:klmn+dplex,ispden)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-           jrhoij=jrhoij+cplex
+         do kmix=1,pawrhoij(iatom)%lmnmix_sz
+           indx=indx+cplex;klmn=iq0+cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
+           rhoijtmp(klmn:klmn+dplex,ispden)=npaw(indx:indx+dplex)
          end do
        end do
-     end if
-     do ispden=1,pawrhoij(iatom)%nspden
-       do kmix=1,pawrhoij(iatom)%lmnmix_sz
-         indx=indx+cplex;klmn=cplex*pawrhoij(iatom)%kpawmix(kmix)-dplex
-         rhoijtmp(klmn:klmn+dplex,ispden)=npaw(indx:indx+dplex)
-       end do
+       if (pawrhoij(iatom)%nspden==2) then
+         jrhoij=iq0+1
+         do irhoij=1,pawrhoij(iatom)%nrhoijsel
+           klmn=iq0+cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
+           ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
+           rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2))
+           rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2))
+           jrhoij=jrhoij+cplex
+         end do
+       end if
      end do
-     if (pawrhoij(iatom)%nspden==2) then
-       jrhoij=1
-       do irhoij=1,pawrhoij(iatom)%nrhoijsel
-         klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-         ro(1:1+dplex)=rhoijtmp(klmn:klmn+dplex,1)
-         rhoijtmp(klmn:klmn+dplex,1)=half*(ro(1:1+dplex)+rhoijtmp(klmn:klmn+dplex,2))
-         rhoijtmp(klmn:klmn+dplex,2)=half*(ro(1:1+dplex)-rhoijtmp(klmn:klmn+dplex,2))
-         jrhoij=jrhoij+cplex
-       end do
-     end if
-     nselect=0
-     if (cplex==1) then
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
-           end do
-         end if
-       end do
-     else
-       do klmn=1,pawrhoij(iatom)%lmn2_size
-         if (any(abs(rhoijtmp(2*klmn-1:2*klmn,:))>tol10)) then
-           nselect=nselect+1
-           pawrhoij(iatom)%rhoijselect(nselect)=klmn
-           do ispden=1,pawrhoij(iatom)%nspden
-             pawrhoij(iatom)%rhoijp(2*nselect-1:2*nselect,ispden)=rhoijtmp(2*klmn-1:2*klmn,ispden)
-           end do
-         end if
-       end do
-     end if
-     pawrhoij(iatom)%nrhoijsel=nselect
+     call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,&
+&         pawrhoij(iatom)%nrhoijsel,pawrhoij(iatom)%cplex_rhoij,pawrhoij(iatom)%qphase,&
+&         pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden,rhoij_input=rhoijtmp)
      ABI_DEALLOCATE(rhoijtmp)
    end do
  end if   ! usepaw==1.and.dtset%iscf/=15.and.dtset%iscf/=16
  ABI_DEALLOCATE(npaw)
 
-!MGGA: apply a simple mixing to taur
- if (dtset%usekden > 0)then
-
- end if
-
 !Eventually write the data on disk and deallocate f_fftgr_disk
  call ab7_mixing_eval_deallocate(mix)
+ if (dtset%usekden==1) call ab7_mixing_eval_deallocate(mix_mgga)
 
 !Fourier transform the density
  if (ispmix==1.and.nfft==nfftmix) then
+   !Real space mixing, no need to transform rhomag
    rhor(:,1:dtset%nspden)=rhomag(:,1:dtset%nspden)
    if(dtset%usewvl==0) then
-     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     !Get rhog from rhor(:,1)
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end if
-   if (dtset%usekden>0) then
-     taur(:,1:dtset%nspden*dtset%usekden)=taumag(:,1:dtset%nspden*dtset%usekden)
+   if (dtset%usekden==1) then
+     taur(:,1:dtset%nspden)=taumag(:,1:dtset%nspden)
      if(dtset%usewvl==0) then
-       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end if
    end if
  else if (nfft==nfftmix) then
+   !Reciprocal mixing space mixing, need to generate rhor in real space from rhomag in reciprocal space
    do ispden=1,dtset%nspden
-     call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
    rhog(:,:)=reshape(rhomag(:,1),(/2,nfft/))
-   if (dtset%usekden>0) then
+   if (dtset%usekden==1) then
      do ispden=1,dtset%nspden
-       call fourdp(1,taumag(:,ispden),taur(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,taumag(:,ispden),taur(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
      taug(:,:)=reshape(taumag(:,1),(/2,nfft/))
    end if
  else
-   if (dtset%usekden>0) then
-     write (message, "(2a)") 'ffttomix not coded yet for kinetic energy density.',&
-&       ' No mixing will be done or something will explode'
-     MSG_WARNING(message)
-   end if
    do ifft=1,nfftmix
      jfft=mixtofft(ifft)
      rhog(1:2,jfft)=rhomag(2*ifft-1:2*ifft,1)
    end do
-   call fourdp(1,rhog,rhor(:,1),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+   call fourdp(1,rhog,rhor(:,1),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    if (dtset%nspden>1) then
      do ispden=2,dtset%nspden
        do ifft=1,nfftmix
          jfft=mixtofft(ifft)
          magng(1:2,jfft,ispden-1)=rhomag(2*ifft-1:2*ifft,ispden)
        end do
-       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
      ABI_DEALLOCATE(magng)
+   end if
+   if (dtset%usekden==1) then
+     do ifft=1,nfftmix
+       jfft=mixtofft(ifft)
+       taug(1:2,jfft)=taumag(2*ifft-1:2*ifft,1)
+     end do
+     call fourdp(1,taug,taur(:,1),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
+     if (dtset%nspden>1) then
+       do ispden=2,dtset%nspden
+         do ifft=1,nfftmix
+           jfft=mixtofft(ifft)
+           magntaug(1:2,jfft,ispden-1)=taumag(2*ifft-1:2*ifft,ispden)
+         end do
+         call fourdp(1,magntaug(:,:,ispden-1),taur(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
+       end do
+       ABI_DEALLOCATE(magntaug)
+     end if
    end if
  end if
  ABI_DEALLOCATE(rhomag)
  ABI_DEALLOCATE(taumag)
 
 !Set back rho in (up+dn,up) form if nspden=2
- if (dtset%nspden==2) rhor(:,2)=half*(rhor(:,1)+rhor(:,2))
+ if (dtset%nspden==2) then
+   rhor(:,2)=half*(rhor(:,1)+rhor(:,2))
+   if (dtset%usekden==1) taur(:,2)=half*(taur(:,1)+taur(:,2))
+ end if
 
 !In WVL: copy density to BigDFT object:
  if(dtset%usewvl==1) then

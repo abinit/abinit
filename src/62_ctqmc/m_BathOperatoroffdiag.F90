@@ -1,7 +1,8 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
+
 !!****m* ABINIT/m_BathOperatoroffdiag
 !! NAME
 !!  m_BathOperatoroffdiag
@@ -11,7 +12,7 @@
 !!  simgle Anderson Impurity Model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder, J. Denier, B. Amadon)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder, J. Denier, B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,8 +57,6 @@ IMPLICIT NONE
  public :: BathOperatoroffdiag_getDetRemove
  public :: BathOperatoroffdiag_getDetF
  public :: BathOperatoroffdiag_getError
-
-      
 !!***
 
 !!****t* m_BathOperatoroffdiag/BathOperatoroffdiag
@@ -68,7 +67,7 @@ IMPLICIT NONE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -209,7 +208,7 @@ CONTAINS
 !!  Initialize and allocate data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -239,13 +238,6 @@ CONTAINS
 SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondiag)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_init'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER           , INTENT(IN   ) :: flavors
   INTEGER           , INTENT(IN   ) :: samples
@@ -253,7 +245,7 @@ SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondia
   DOUBLE PRECISION  , INTENT(IN   ) :: beta
 !Local variables ------------------------------
   INTEGER           , INTENT(IN   ) :: iTech
-  INTEGER                           :: it
+  !INTEGER                           :: it
 
   op%MAddFlag     = .FALSE.
   op%MRemoveFlag  = .FALSE.
@@ -304,7 +296,7 @@ END SUBROUTINE BathOperatoroffdiag_init
 !!  Reset all internal variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -329,13 +321,6 @@ END SUBROUTINE BathOperatoroffdiag_init
 SUBROUTINE BathOperatoroffdiag_reset(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_reset'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                           :: iflavor
@@ -374,7 +359,7 @@ END SUBROUTINE BathOperatoroffdiag_reset
 !!  It is better to use the macro defined in defs.h
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -400,13 +385,6 @@ END SUBROUTINE BathOperatoroffdiag_reset
 SUBROUTINE BathOperatoroffdiag_activateParticle(op,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_activateParticle'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER           , INTENT(IN   ) :: flavor
@@ -432,7 +410,7 @@ END SUBROUTINE BathOperatoroffdiag_activateParticle
 !!  is trying to be added and store some array for setMAdd
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -460,13 +438,6 @@ END SUBROUTINE BathOperatoroffdiag_activateParticle
 DOUBLE PRECISION  FUNCTION BathOperatoroffdiag_getDetAdd(op,CdagC_1, position, particle)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getDetAdd'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag)      , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   INTEGER                 , INTENT(IN   ) :: position  
@@ -701,7 +672,7 @@ END FUNCTION BathOperatoroffdiag_getDetAdd
 !!  is trying to be removed 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -728,18 +699,11 @@ END FUNCTION BathOperatoroffdiag_getDetAdd
 DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetRemove(op,position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getDetRemove'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 !Local arguments-------------------------------
   INTEGER           , INTENT(IN   ) :: position  
   INTEGER                           :: ABSposition  
-  INTEGER                           :: tail,it,it1
+  INTEGER                           :: tail !,it,it1
 
   IF ( op%activeFlavor .LE. 0 ) &
     CALL ERROR("BathOperatoroffdiag_getDetRemove : no active hybrid fun  ")
@@ -797,7 +761,7 @@ END FUNCTION BathOperatoroffdiag_getDetRemove
 !!  used for Gloval moves only
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -825,13 +789,6 @@ END FUNCTION BathOperatoroffdiag_getDetRemove
 DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetF(op,particle,option)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getDetF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag)       , INTENT(INOUT)      :: op
   TYPE(ListCdagC), OPTIONAL, INTENT(IN   )  :: particle(:)
   INTEGER , optional :: option
@@ -911,7 +868,7 @@ END FUNCTION BathOperatoroffdiag_getDetF
 !!  Update de M matrix inserting a row and a column
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -937,13 +894,6 @@ END FUNCTION BathOperatoroffdiag_getDetF
 SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_setMAdd'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   TYPE(ListCdagC)   , INTENT(IN   ) :: particle(:)
 !Local variables ------------------------------
@@ -967,7 +917,7 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
   INTEGER :: count
   INTEGER :: i
   INTEGER :: j
-  INTEGER :: p,it,it1
+  INTEGER :: p,it !,it1
 
 
 
@@ -1332,7 +1282,7 @@ END SUBROUTINE BathOperatoroffdiag_setMAdd
 !!  delete one row and one column of the M matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1358,13 +1308,6 @@ END SUBROUTINE BathOperatoroffdiag_setMAdd
 SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_setMRemove'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT)  :: op
   TYPE(ListCdagC)   , INTENT(IN   )  :: particle(:)
 !Local variables ------------------------------
@@ -1380,7 +1323,7 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
   INTEGER                              :: m
   INTEGER                              :: count
   INTEGER                              :: i
-  INTEGER                              :: j,it,it1
+  INTEGER                              :: j,it !,it1
   INTEGER                              :: p
   DOUBLE PRECISION                   :: invStilde
   DOUBLE PRECISION                   :: invStilde2
@@ -1548,7 +1491,7 @@ END SUBROUTINE BathOperatoroffdiag_setMRemove
 !!  Recompute 2 M matrix swaping the segments (used for Global moves)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1575,13 +1518,6 @@ END SUBROUTINE BathOperatoroffdiag_setMRemove
 SUBROUTINE BathOperatoroffdiag_swap(op, flavor1, flavor2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_swap'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER           , INTENT(IN   ) :: flavor1
   INTEGER           , INTENT(IN   ) :: flavor2
@@ -1680,7 +1616,7 @@ END SUBROUTINE BathOperatoroffdiag_swap
 !!  Copy input hybridization functions from a file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1707,13 +1643,6 @@ END SUBROUTINE BathOperatoroffdiag_swap
 SUBROUTINE BathOperatoroffdiag_initF(op,ifstream)
 
 !Arguments ----------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_initF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER           , INTENT(IN   ) :: ifstream
 !Local variables ----------------
@@ -1742,7 +1671,7 @@ END SUBROUTINE BathOperatoroffdiag_initF
 !!  Copy F from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1768,13 +1697,6 @@ END SUBROUTINE BathOperatoroffdiag_initF
 SUBROUTINE BathOperatoroffdiag_setF(op,F)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_setF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag)               , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:,:) , INTENT(IN   ) :: F
 !Arguments ------------------------------------
@@ -1808,7 +1730,7 @@ END SUBROUTINE BathOperatoroffdiag_setF
 !!  print F function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1834,13 +1756,6 @@ END SUBROUTINE BathOperatoroffdiag_setF
 SUBROUTINE BathOperatoroffdiag_printF(op,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_printF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER,OPTIONAL  , INTENT(IN   ) :: ostream
 !Local variables ------------------------------
@@ -1880,7 +1795,7 @@ END SUBROUTINE BathOperatoroffdiag_printF
 !!  print M =F^{-1} matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1907,13 +1822,6 @@ END SUBROUTINE BathOperatoroffdiag_printF
 SUBROUTINE BathOperatoroffdiag_printM(op,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_printM'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(IN) :: op
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -1935,7 +1843,7 @@ END SUBROUTINE BathOperatoroffdiag_printM
 !!  print M =F^{-1} matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1962,22 +1870,16 @@ END SUBROUTINE BathOperatoroffdiag_printM
 SUBROUTINE BathOperatoroffdiag_printM_matrix(op,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_printM_matrix'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(IN) :: op
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
-  INTEGER                        :: ostream_val
   INTEGER                        :: iflavor1
   INTEGER                        :: i1,it1,it2
   CHARACTER(LEN=22)              :: string
   CHARACTER(LEN=22)              :: string2
   CHARACTER(LEN=4 )              :: size
+
+  ABI_UNUSED(ostream)
 
   WRITE(size,'(I4)') op%sumtails
   string ='(i2,x,i3,a,'//TRIM(ADJUSTL(size))//'(E5.2,1x))'
@@ -2005,7 +1907,7 @@ END SUBROUTINE BathOperatoroffdiag_printM_matrix
 !!  Deallocate and reset every thing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2028,13 +1930,6 @@ END SUBROUTINE BathOperatoroffdiag_printM_matrix
 !! SOURCE
 
 SUBROUTINE  BathOperatoroffdiag_destroy(op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_destroy'
-!End of the abilint section
 
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 
@@ -2072,7 +1967,7 @@ END SUBROUTINE BathOperatoroffdiag_destroy
 !!  Just store if we perfom check for updates of M
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2098,13 +1993,6 @@ END SUBROUTINE BathOperatoroffdiag_destroy
 SUBROUTINE BathOperatoroffdiag_doCheck(op,opt_check)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_doCheck'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
   INTEGER            , INTENT(IN   ) :: opt_check
   
@@ -2122,7 +2010,7 @@ END SUBROUTINE BathOperatoroffdiag_doCheck
 !!  with the already computed M matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2148,13 +2036,6 @@ END SUBROUTINE BathOperatoroffdiag_doCheck
 SUBROUTINE BathOperatoroffdiag_checkM(op,particle)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_checkM'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
   TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
 !Local variables ------------------------------
@@ -2165,7 +2046,7 @@ SUBROUTINE BathOperatoroffdiag_checkM(op,particle)
   INTEGER :: iCdag
   INTEGER :: aF
   INTEGER :: iflavora
-  INTEGER :: iflavorb,it,it1
+  INTEGER :: iflavorb,it !,it1
   CHARACTER(LEN=6) :: a
   DOUBLE PRECISION :: time
   DOUBLE PRECISION :: beta
@@ -2289,7 +2170,7 @@ END SUBROUTINE BathOperatoroffdiag_checkM
 !!  compute from scratch the M matrix 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2020 ABINIT group (B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2315,39 +2196,27 @@ END SUBROUTINE BathOperatoroffdiag_checkM
 SUBROUTINE BathOperatoroffdiag_recomputeM(op,particle,flav_i,flav_j)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_recomputeM'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
   TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
   INTEGER :: flav_i,flav_j
 !Local variables ------------------------------
 !  TYPE(MatrixHyb)                    :: checkMatrix
-  LOGICAL :: checkTau
   INTEGER :: tail
   INTEGER :: iC
   INTEGER :: iCdag
   INTEGER :: aF
   INTEGER :: iflavora
-  INTEGER :: iflavorb,it,it1
+  INTEGER :: iflavorb,it !,it1
   INTEGER :: iflavora_imp
   INTEGER :: iflavorb_imp
-  CHARACTER(LEN=6) :: a
+  !CHARACTER(LEN=6) :: a
   DOUBLE PRECISION :: time
   DOUBLE PRECISION :: beta
   DOUBLE PRECISION :: mbeta_two
-  DOUBLE PRECISION :: errorabs
-  DOUBLE PRECISION :: errormax
-  DOUBLE PRECISION :: error1
-  DOUBLE PRECISION :: errorrel
   DOUBLE PRECISION :: tc
   DOUBLE PRECISION :: tCdag
-  DOUBLE PRECISION :: sumMmat
-  DOUBLE PRECISION :: sumCheck
+  !DOUBLE PRECISION :: sumMmat
+  !DOUBLE PRECISION :: sumCheck
 #include "BathOperatoroffdiag_hybrid.h"
 
   aF = op%activeFlavor
@@ -2428,7 +2297,7 @@ END SUBROUTINE BathOperatoroffdiag_recomputeM
 !!  compute a percentage error / checkM
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2452,13 +2321,6 @@ END SUBROUTINE BathOperatoroffdiag_recomputeM
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getError(op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getError'
-!End of the abilint section
 
   TYPE(BathOperatoroffdiag), INTENT(IN) :: op
 

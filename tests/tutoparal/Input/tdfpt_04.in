@@ -1,4 +1,4 @@
-#SLAB ending TiO2 double layer
+#BaTiO3 SLAB ending TiO2 double layer
 # N=9
 # paralelectric configuration
 #Supercell and atoms
@@ -43,7 +43,7 @@ nband 120
 
 #electronic structure
 ecut 15.0
-nstep 18
+nstep 30
 ngkpt 4 4 1
 kptopt 3
 tolwfr 1.0d-22
@@ -61,7 +61,6 @@ qpt 0.0 0.25  0.0
 
 timopt -2
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -72,7 +71,7 @@ timopt -2
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%%     files_to_test = tdfpt_04_MPI24.out, tolnlines=500, tolabs=0.0, tolrel=0.0, fld_options= -medium
+#%% files_to_test = tdfpt_04_MPI24.out, tolnlines=500, tolabs=0.0, tolrel=0.0, fld_options= -medium
 #%% [extra_info]
 #%% keywords = NC
 #%% description = BaTiO3 linear response calculation

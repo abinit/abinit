@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_invovl
 !! NAME
 !!  m_invovl
@@ -11,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (AL)
+!! Copyright (C) 2013-2020 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,11 +30,11 @@
 MODULE m_invovl
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_abicore
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
@@ -110,13 +109,6 @@ CONTAINS
 
  subroutine init_invovl(nkpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_invovl'
-!End of the abilint section
-
   integer, intent(in) :: nkpt
   integer :: ikpt
 
@@ -149,13 +141,6 @@ CONTAINS
 !!
 !! SOURCE
  subroutine destroy_invovl(nkpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_invovl'
-!End of the abilint section
 
   integer, intent(in) :: nkpt
   integer :: ikpt
@@ -200,13 +185,6 @@ CONTAINS
 subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_invovl'
-!End of the abilint section
-
  implicit none
 
  type(gs_hamiltonian_type),intent(in) :: ham
@@ -464,13 +442,6 @@ end subroutine make_invovl
 
  subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'apply_invovl'
-!End of the abilint section
-
  implicit none
 
  ! args
@@ -493,7 +464,7 @@ end subroutine make_invovl
  integer :: ikpt_this_proc
  integer, parameter :: tim_nonlop = 13
  ! dummies
- real(dp) :: enlout(ndat), lambda_block(1), gvnlc(1,1)
+ real(dp) :: enlout(ndat), lambda_block(1), gvnlxc(1,1)
  integer, parameter :: nnlout = 0, idir = 0, signs = 2
 
  type(invovl_kpt_type), pointer :: invovl
@@ -530,10 +501,10 @@ end subroutine make_invovl
  paw_opt = 3 ! S nonlocal operator
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc,already_transposed=.true.)
+&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
  else
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
-&              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
+&              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
 
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
@@ -572,10 +543,10 @@ end subroutine make_invovl
  paw_opt = 3
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
-&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc,already_transposed=.true.)
+&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
  else
    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
-&              signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
+&              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
 
  call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
@@ -620,13 +591,6 @@ end subroutine apply_invovl
 subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj)
 
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_inner'
-!End of the abilint section
-
  implicit none
 
  integer,intent(in) :: ndat,cplx
@@ -739,13 +703,6 @@ end subroutine solve_inner
 subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y)
 
   use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'apply_block'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx

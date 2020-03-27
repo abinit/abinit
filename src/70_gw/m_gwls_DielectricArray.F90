@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_DielectricArray
 !! NAME
 !! m_gwls_DielectricArray
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -133,13 +132,6 @@ subroutine generate_frequencies_and_weights(npt_gauss)
 ! quadrature, and stores the results in module arrays.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'generate_frequencies_and_weights'
-!End of the abilint section
-
 implicit none
 
 integer, intent(in)  :: npt_gauss
@@ -212,13 +204,6 @@ subroutine compute_eps_m1_minus_eps_model_m1(lmax, npt_gauss)
 !
 ! for all relevant frequencies in the Lanczos basis.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_eps_m1_minus_eps_model_m1'
-!End of the abilint section
-
 implicit none
 
 integer ,     intent(in)  :: lmax, npt_gauss
@@ -332,13 +317,6 @@ subroutine compute_eps_m1_minus_one(lmax, npt_gauss)
 !
 ! for all relevant frequencies in the Lanczos basis.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_eps_m1_minus_one'
-!End of the abilint section
-
 implicit none
 
 integer ,     intent(in)  :: lmax, npt_gauss
@@ -466,13 +444,6 @@ subroutine compute_eps_model_m1_minus_one(lmax_model, npt_gauss, second_model_pa
 !
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_eps_model_m1_minus_one'
-!End of the abilint section
-
 implicit none
 
 integer,  intent(in) :: lmax_model, npt_gauss
@@ -1035,13 +1006,6 @@ end subroutine compute_eps_model_m1_minus_one
 
 subroutine cleanup_projected_Sternheimer_epsilon
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cleanup_projected_Sternheimer_epsilon'
-!End of the abilint section
-
 implicit none
 
 ! *************************************************************************
@@ -1131,13 +1095,6 @@ epsilon_eigenvalues_0,debug,use_model)
 ! The subroutine also computes the matrix elements on epsilon_model(iw) in the Lanczos basis;
 ! this is done here to avoid preforming direct products with the valence states again later.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ProjectedSternheimerEpsilon'
-!End of the abilint section
-
 implicit none
 
 real(dp), parameter     :: svd_tolerance = 1.0e-16_dp

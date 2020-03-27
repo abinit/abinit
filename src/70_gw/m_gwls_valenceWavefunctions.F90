@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_valenceWavefunctions
 !! NAME
 !! m_gwls_valenceWavefunctions
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,13 +82,6 @@ subroutine prepareValenceWavefunctions()
 !      Valence wavefunctions will be stored in Fourier space instead.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prepareValenceWavefunctions'
-!End of the abilint section
-
 implicit none
 
 !integer  :: v, kmin, kmax
@@ -157,13 +149,6 @@ subroutine cleanupValenceWavefunctions()
 ! This subroutine deallocates the array valence_wfr once it is no longer needed.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cleanupValenceWavefunctions'
-!End of the abilint section
-
 implicit none
 
 ! *************************************************************************
@@ -199,13 +184,6 @@ subroutine compute_Exchange_and_Correlation_energies(e_index, exchange_energy, V
 ! This subroutine computes the exchange and correlation energies.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_Exchange_and_Correlation_energies'
-!End of the abilint section
-
 implicit none
 
 integer, intent(in)    :: e_index

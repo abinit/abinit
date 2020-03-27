@@ -5,7 +5,10 @@ ngfft 24 24 24
 ngfftdg 36 36 36
 getwfk -1
 paral_kgb 1
-pw_unbal_thresh 10  # Activate load balancing procedure
+
+#pw_unbal_thresh 10  # Activate load balancing procedure
+                     # This test has been deactivated because it's not portable
+                     # and prevent us from testing the MPI-IO part
 
 # Test the prt* variables used in outscf.
 prtden 1
@@ -90,18 +93,18 @@ ntypat 1
 typat  1 1  
 natom 2
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = ubu_intel_13.1_openmpi, atlas_intel_18.0_openmpi, buda2_gnu_8.1_openmpi
+#%%###### This was required for making the test pass with pw_unbal_thresh
+#%%###### exclude_builders = .*_intel_1[89].0_.*, buda2_gnu_8.2_mpich3, graphene_gnu_8.3_macports, .*_gnu_9.[12]_.*
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%%   files_to_test=t26_MPI4.out, tolnlines=11, tolabs=2.0e-7, tolrel=1.0;
+#%% files_to_test=t26_MPI4.out, tolnlines=11, tolabs=2.0e-7, tolrel=1.0;
 #%%    t26_MPI4o_DS1_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%    t26_MPI4o_DS2_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%    t26_MPI4o_DS5_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;

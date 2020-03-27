@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bs_defs
 !! NAME
 !!  m_bs_defs
@@ -7,7 +6,7 @@
 !!  This module defines basic structures used for Bethe-Salpeter calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2018 EXC and ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
+!! Copyright (C) 1992-2020 EXC and ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -296,15 +295,6 @@ CONTAINS  !=====================================================================
 
 subroutine bs_parameters_free(BSp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bs_parameters_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(excparam),intent(inout) :: BSp
@@ -312,54 +302,20 @@ subroutine bs_parameters_free(BSp)
 !************************************************************************
  
  !@excparam
- if (allocated(BSp%q)) then
-   ABI_FREE(BSp%q)
- end if
-
- if (allocated(Bsp%nreh)) then
-   ABI_FREE(Bsp%nreh)
- end if
- if (allocated(Bsp%vcks2t)) then
-   ABI_FREE(Bsp%vcks2t)
- end if
- if (allocated(Bsp%omega)) then
-   ABI_FREE(Bsp%omega)
- end if
-
- if (allocated(Bsp%lomo_spin)) then 
-   ABI_FREE(Bsp%lomo_spin)
- end if
- if (allocated(Bsp%homo_spin)) then 
-   ABI_FREE(Bsp%homo_spin)
- end if
- if (allocated(Bsp%lumo_spin)) then 
-   ABI_FREE(Bsp%lumo_spin)
- end if
- if (allocated(Bsp%humo_spin)) then 
-   ABI_FREE(Bsp%humo_spin)
- end if
- if (allocated(Bsp%nbndv_spin)) then 
-   ABI_FREE(Bsp%nbndv_spin)
- end if
- if (allocated(Bsp%nbndc_spin)) then 
-   ABI_FREE(Bsp%nbndc_spin)
- end if
-
- if (allocated(Bsp%Trans)) then
-   ABI_DT_FREE(Bsp%Trans)
- end if
-
- if (allocated(Bsp%nreh_interp)) then
-   ABI_FREE(Bsp%nreh_interp)
- end if
-
- if (allocated(Bsp%vcks2t_interp)) then
-   ABI_FREE(Bsp%vcks2t_interp)
- end if
-
- if (allocated(Bsp%Trans_interp)) then
-   ABI_DT_FREE(Bsp%Trans_interp)
- end if
+ ABI_SFREE(BSp%q)
+ ABI_FREE(Bsp%nreh)
+ ABI_SFREE(Bsp%vcks2t)
+ ABI_SFREE(Bsp%omega)
+ ABI_SFREE(Bsp%lomo_spin)
+ ABI_SFREE(Bsp%homo_spin)
+ ABI_SFREE(Bsp%lumo_spin)
+ ABI_SFREE(Bsp%humo_spin)
+ ABI_SFREE(Bsp%nbndv_spin)
+ ABI_SFREE(Bsp%nbndc_spin)
+ ABI_SFREE(Bsp%Trans)
+ ABI_SFREE(Bsp%nreh_interp)
+ ABI_SFREE(Bsp%vcks2t_interp)
+ ABI_SFREE(Bsp%Trans_interp)
 
 end subroutine bs_parameters_free
 !!***
@@ -388,15 +344,6 @@ end subroutine bs_parameters_free
 !! SOURCE
 
 subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_bs_parameters'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -436,40 +383,39 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
 
  write(msg,'(4(a,i0,a))')&
-&  ' Dimension of the v, W matrices,  npweps  = ',BSp%npweps,ch10,&
-&  ' Cutoff for the wavefunctions,    npwwfn  = ',BSp%npwwfn,ch10,&
-&  ' Number of k-points in the IBZ,   nkibz   = ',BSp%nkibz,ch10,&
-&  ' Highest empty band included,     nband   = ',BSp%nbnds,""
+  ' Dimension of the v, W matrices,  npweps  = ',BSp%npweps,ch10,&
+  ' Cutoff for the wavefunctions,    npwwfn  = ',BSp%npwwfn,ch10,&
+  ' Number of k-points in the IBZ,   nkibz   = ',BSp%nkibz,ch10,&
+  ' Highest empty band included,     nband   = ',BSp%nbnds,""
  call wrtout(my_unt,msg,my_mode)
 
  do spin=1,Bsp%nsppol
    msg = " === Spin UP ==="; if (spin == 2) msg = " === Spin DOWN ==="
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(5(a,i0,a))')&
-&    ' Number of resonant transitions          ',BSp%nreh(spin),ch10,&
-&    ' Lowest occupied state                   ',BSp%lomo_spin(spin),ch10,&
-&    ' Highest occupied state                  ',BSp%homo_spin(spin),ch10,&
-&    ' Lowest unoccupied state                 ',BSp%lumo_spin(spin),ch10,&
-&    ' Highest unoccupied state                ',BSp%nbnds,""
-!&    ' Number of valence bands                 ',BSp%nbndv,ch10,&
-!&    ' Number of conduction bands              ',BSp%nbndc,""
+    ' Number of resonant transitions          ',BSp%nreh(spin),ch10,&
+    ' Lowest occupied state                   ',BSp%lomo_spin(spin),ch10,&
+    ' Highest occupied state                  ',BSp%homo_spin(spin),ch10,&
+    ' Lowest unoccupied state                 ',BSp%lumo_spin(spin),ch10,&
+    ' Highest unoccupied state                ',BSp%nbnds,""
+!    ' Number of valence bands                 ',BSp%nbndv,ch10,&
+!    ' Number of conduction bands              ',BSp%nbndc,""
    call wrtout(my_unt,msg,my_mode)
  end do
 
  write(msg,'(3(a,f6.2,a),a,f6.2)')&
-&  ' Minimum frequency [eV]           Emin    = ',BSp%omegai*Ha_eV,ch10,&
-&  ' Maximum frequency [eV]           Emax    = ',BSp%omegae*Ha_eV,ch10,&
-&  ' Frequency step [eV]              dE      = ',BSp%domega*Ha_eV,ch10,&
-&  ' Lorentzian broadening [eV]       eta     = ',BSp%broad*Ha_eV
+  ' Minimum frequency [eV]           Emin    = ',BSp%omegai*Ha_eV,ch10,&
+  ' Maximum frequency [eV]           Emax    = ',BSp%omegae*Ha_eV,ch10,&
+  ' Frequency step [eV]              dE      = ',BSp%domega*Ha_eV,ch10,&
+  ' Lorentzian broadening [eV]       eta     = ',BSp%broad*Ha_eV
  call wrtout(my_unt,msg,my_mode)
- !
+
  ! Calculation type
  call bsp_calctype2str(Bsp,msg)
  call wrtout(my_unt,msg,my_mode)
 
  if (ABS(Bsp%mbpt_sciss)>tol6) then
-   write(msg,'(a,f5.2)')&
-&   " Scissors operator energy [eV] =         ",Bsp%mbpt_sciss*Ha_eV
+   write(msg,'(a,f5.2)')" Scissors operator energy [eV] =         ",Bsp%mbpt_sciss*Ha_eV
    call wrtout(my_unt,msg,my_mode)
  end if
 
@@ -553,7 +499,6 @@ end subroutine print_bs_parameters
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_bs_defs/bsp_calctype2str
 !! NAME
 !!  bsp_calctype2str
@@ -570,15 +515,6 @@ end subroutine print_bs_parameters
 !! SOURCE
 
 subroutine bsp_calctype2str(BSp,str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bsp_calctype2str'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -642,15 +578,6 @@ end subroutine bsp_calctype2str
 
 subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,nkibz,nsppol,nspinor,gw_energy,occ,ktab,&
 &  minmax_tene,nreh) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_transitions'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -757,15 +684,6 @@ end subroutine init_transitions
 
 pure function repr_1trans(Trans,prtvol) result(str)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'repr_1trans'
-!End of the abilint section
-
- implicit none 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol
@@ -810,15 +728,6 @@ end function repr_1trans
 !! SOURCE
 
 pure function repr_2trans(Trans1,Trans2,prtvol) result(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'repr_2trans'
-!End of the abilint section
-
- implicit none 
 
 !Arguments ------------------------------------
 !scalars
@@ -866,15 +775,6 @@ end function repr_2trans
 !! SOURCE
 
 subroutine print_bs_files(BS_files,header,unit,mode_paral,prtvol)                                   
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_bs_files'
-!End of the abilint section
-
- implicit none 
 
 !Arguments ------------------------------------
 !scalars

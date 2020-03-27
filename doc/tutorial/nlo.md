@@ -1,44 +1,43 @@
 ---
-authors: PhG,  MVeithen,  XG
+authors: PhG,  MVeithen,  XG, NAP
 ---
 
-# Tutorial on static non-linear properties  
+# Tutorial on static non-linear properties
 
-## Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.  
+## Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.
 
 This tutorial aims at showing how to get the following non-linear physical properties, for an insulator:
 
-  * The non-linear optical susceptibilities 
-  * The Raman tensor of TO and LO modes 
-  * The electro-optic coefficients 
+  * The non-linear optical susceptibilities
+  * The Raman tensor of TO and LO modes
+  * The electro-optic coefficients
 
-We will work on AlAs. During the preliminary steps needed to compute 
+We will work on AlAs. During the preliminary steps needed to compute
 non-linear properties, one will also obtain several linear response properties:
 
-  * The Born effective charges 
-  * The dielectric constant 
-  * The proper piezoelectric tensor (clamped and relaxed ions) 
+  * The Born effective charges
+  * The dielectric constant
+  * The proper piezoelectric tensor (clamped and relaxed ions)
 
 Finally, we will also compute the derivative of the susceptibility tensor with
 respect to atomic positions (Raman tensor) thanks to finite differences.
 
 The user should have already passed through several advanced tutorials of the
-tutorial: the [tutorial Response-Function 1](rf1), the [tutorial Response-Function 2](rf2), 
-the [tutorial on Polarization and finite electric field](ffield), and the 
-[tutorial on Elastic properties](elastic)
-
-[TUTORIAL_README]
+tutorial: the [tutorial Response-Function 1](rf1), the [tutorial Response-Function 2](rf2),
+the [tutorial on Polarization and finite electric field](ffield), and the
+[tutorial on Elastic properties](elastic).
 
 This tutorial should take about 1 hour and 30 minutes.
 
+[TUTORIAL_README]
 
 ## 1 Ground-state properties of AlAs and general parameters
-  
-*Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
-Why not create Work-NLO in \$ABI_TUTORESPFN/Input?*
+
+*Before beginning, you might consider to work in a different subdirectory as for the other tutorials.
+Why not create Work-NLO in \$ABI_TESTS/tutorespfn/Input?*
 
 In order to save some time, you might immediately start running a calculation.
-Copy the file *tnlo_2.in* from *\$ABI_TUTORESPFN/Input* to *Work-NLO*. Copy also
+Copy the file *tnlo_2.in* from *\$ABI_TESTS/tutorespfn/Input* to *Work-NLO*. Copy also
 *tnlo_x.files* in *Work-NLO*, and modify it so that
 all occurrences of tnlo_x are replaced by tnlo_2, then run abinit with these
 data. This calculation might be one or two minutes on a PC 3GHz.
@@ -56,7 +55,7 @@ properties)
 
 We will adopt the following set of generic parameters (the same than in the
 [tutorial on Polarization and finite electric field](ffield)):
-    
+
        acell               10.53
        ixc                 3
        ecut                2.8     (results with ecut = 5 are also reported
@@ -71,10 +70,10 @@ We will adopt the following set of generic parameters (the same than in the
                 0.5 0.0 0.0
                 0.0 0.5 0.0
                 0.0 0.0 0.5
-    
+
        pseudopotentials    13al.pspnc
                            33as.pspnc
-    
+
 
 In principle, the [[acell]] to be used should be the one corresponding to the
 optimized structure at the [[ecut]], and [[ngkpt]] combined with [[nshiftk]]
@@ -86,12 +85,12 @@ In what follows, the lattice constant has been arbitrarily fixed to 10.53
 Bohr. For comparison, results with [[ecut]] = 5 are also reported and, in that
 case, were obtained at the optimized lattice constant of 10.64 Bohr. For those
 who would like to try later, convergence tests and structural optimizations
-can be done using the file *\$ABI_TUTORESPFN/Input/tnlo_1.in*. Before
+can be done using the file *\$ABI_TESTS/tutorespfn/Input/tnlo_1.in*. Before
 going further, you might refresh your mind concerning the other variables:
 [[ixc]], [[ecutsm]], [[dilatmx]], [[nbdbuf]].
 
 ## 2 Linear and non-linear responses from density functional perturbation theory (DFPT)
-  
+
 As a theoretical support to this section of the tutorial, you might consider
 reading [[cite:Veithen2005]]:
 
@@ -99,7 +98,7 @@ In the first part of this tutorial, we will describe how to compute various
 linear and non-linear responses directly connected to second-order and third-
 order derivatives of the energy, using DFPT. From the (2n+1) theorem,
 computation of energy derivatives up to third order only requires the
-knowledge of the ground-state and first-order wavefunctions, see 
+knowledge of the ground-state and first-order wavefunctions, see
 [[cite:Gonze1989]] and [[cite:Gonze1995]].
 Our study will therefore include the following steps : (i) resolution
 of the ground-state problem, (ii) determination of the first-order
@@ -113,13 +112,13 @@ derivatives will now be set up during the run. Only selected third-order
 derivatives are implemented at this stage and concern responses to electric
 field and atomic displacements:
 
-  * non-linear optical susceptibilities 
+  * non-linear optical susceptibilities
     (related to a third-order derivative of the energy with respect to electric fields at clamped nuclei positions)
 
-  * Raman susceptibilities (mixed third-order derivative of the energy, twice with respect 
+  * Raman susceptibilities (mixed third-order derivative of the energy, twice with respect
     to electric fields at clamped nuclei positions, and once with respect to atomic displacement)
 
-  * Electro-optic coefficients (related to a third-order derivative of the energy with respect to electric fields, 
+  * Electro-optic coefficients (related to a third-order derivative of the energy with respect to electric fields,
     two of them being optical fields -clamped nuclei positions- and one of them being a static field -the ions are allowed to move-)
 
 Many different steps can be combined in one input file. For the sake of
@@ -136,12 +135,12 @@ to get the wave-functions over the full BZ; (3) ddk calculation, (4)
 derivatives with respect to electric field and atomic displacements. Some
 specific features must however be explicitly specified in order to prepare the
 non-linear response step (dataset 5). First, from dataset 2 it is mandatory to specify:
-    
+
             nbdbuf  0
             nband   4 (= number of valence bands)
-    
+
 Also, in dataset 4, it is required to impose [[prtden]], and [[prepanl]]
-    
+
             prtden4    1
             prepanl4   1
 
@@ -162,14 +161,14 @@ used later for a global and convenient analysis of the results using ANADDB.
 **Responses to strain.** We combine the above-mentioned computation of the
 response to electric field and atomic displacements with the response to
 strain. This is not at all mandatory for the computation of the presently
-accessible non-linear response coefficients. However, this was used in 
+accessible non-linear response coefficients. However, this was used in
 [[cite:Veithen2005]], already mentioned,
 to add corrections corresponding to
 free boundary conditions, thanks to a further finite difference calculation on
 top of linear response calculations. The DFPT implementation of the
 computation of this correction is not available at present.
 
-You can now copy the file *\$ABI_TUTORESPFN/Input/tnlo_3.in* in *Work-NLO*,
+You can now copy the file *\$ABI_TESTS/tutorespfn/Input/tnlo_3.in* in *Work-NLO*,
 and modify the *tnlo_x.files* accordingly (or create a file *tnlo_3.files* -
 in any case, this new file should contain tnlo_3 instead of tnlo_x or tnlo_2).
 You can launch the calculation, it might last about 1 minute on a PC 3 GHz.
@@ -193,27 +192,27 @@ utility in order to get a unique database *tnlo_4.ddb.out*. Explicitely, you
 should merge the files *tnlo_2o_DS4_DDB*, *tnlo_3o_DS4_DDB*, and *tnlo_2o_DS5_DDB*.
 You might have a look at the input file for MRGDDB named *tnlo_4.in*, and use
 it to perform the merge. You already used MRGDDB previously. It might be
-located in *\$ABI_HOME/src/98_main* or another (build) directory. 
+located in *\$ABI_HOME/src/98_main* or another (build) directory.
 You might copy it, or make an alias.
 
 **Analysis of the DDB.**
 
 We are now ready for the analysis of the results using ANADDB. You can copy
-the files *\$ABI_TUTORESPFN/Input/tnlo_5.in* and
-*\$ABI_TUTORESPFN/Input/tnlo_5.files* in *Work-NLO*. You already used
+the files *\$ABI_TESTS/tutorespfn/Input/tnlo_5.in* and
+*\$ABI_TESTS/tutorespfn/Input/tnlo_5.files* in *Work-NLO*. You already used
 ANADDB previously. It is located in the same directory as *abinit*.
 You might copy it, or make an alias. The present input is in
 principle very similar to the one you have used for the analysis of dynamical
 and dielectric responses except that some new flags need to be activated.
 
 For the strain perturbation you need to specify [[anaddb:elaflag]], [[anaddb:piezoflag]], and [[anaddb:instrflag]]:
-    
+
             elaflag 3
             piezoflag  3
             instrflag  1
 
 For the non-linear responses you need
-    
+
             nlflag  1
             ramansr 1
             alphon  1
@@ -239,12 +238,12 @@ Finally, the second list of phonon, specified with [[anaddb:nph2l]] and
 [[anaddb:qph2l]], must also be explicitely considered to obtain the Raman
 efficiencies of longitudinal modes (in a way similar to the computation of
 frequencies of longitudinal mode frequencies at Gamma):
-    
+
             # Wave vector list no. 2
             #***********************
                    nph2l  1
                    qph2l  1.0 0.0 0.0 0.0
-    
+
 
 You can now run the code ANADDB. The results are in the file tnlo_5.out.
 Various interesting physical properties are now directly accessible in this
@@ -258,84 +257,84 @@ For comparison, we report in parenthesis (...) the values obtained with ecut =
 reported in [[cite:Veithen2005]].
 
   * Born effective charge of Al:
-    
+
         Z*_Al = 2.043399E+00 (2.105999E+00)
 
   * Optical phonon frequencies at Gamma :
-    
+
         w_TO (cm^-1) = 3.694366E+02 (3.602635E+02)
-    w_LO (cm^-1) = 4.031189E+02 (3.931598E+02) 
+    w_LO (cm^-1) = 4.031189E+02 (3.931598E+02)
 
   * Linear optical dielectric constant :
-    
-        Electronic dielectric tensor = 9.20199931 (9.94846084) 
+
+        Electronic dielectric tensor = 9.20199931 (9.94846084)
 
   * Static dielectric constant :
-    
-        relaxed ion dielectric tensor = 10.95642097 (11.84823634) 
+
+        relaxed ion dielectric tensor = 10.95642097 (11.84823634)
 
 Some other quantities, as the piezoelectric coefficients, are related to the
 strain response as it is more extensively discussed in the tutorial on the strain perturbation.
 
   * Proper piezoelectric coefficients :
-    
+
         clamped ion (Unit:c/m^2) = -0.65029623 (-0.69401363)
-    relaxed ion (Unit:c/m^2) =  0.03754602 (-0.04228777) 
+    relaxed ion (Unit:c/m^2) =  0.03754602 (-0.04228777)
 
 Finally, different quantities are related to non-linear responses.
 
-  * Nonlinear optical susceptibility :   
+  * Nonlinear optical susceptibility :
 They are directly provided in the output in pm/V. As you can see the value
-computed here is far from the well converged result as reported in 
+computed here is far from the well converged result as reported in
 [[cite:Veithen2005]].
 
-    
-        d_36 (pm/V)  = 21.175523 (32.772254) [fully converged :35] 
 
-  * Electro-optic coefficients:   
+        d_36 (pm/V)  = 21.175523 (32.772254) [fully converged :35]
+
+  * Electro-optic coefficients:
 As we asked for mode by mode decomposition the output provides individual
 contributions. We report below a summary of the results. It concern the
 clamped r_63 coefficient.
 
-    
+
                 Electronic EO constant (pm/V): -1.000298285 (-1.324507791) [-1.69]
             Full Ionic EO constant (pm/V):  0.543837671 (0.533097548)  [0.64]
-            Total EO constant (pm/V):      -0.456460614 (-0.791410242) [-1.05] 
+            Total EO constant (pm/V):      -0.456460614 (-0.791410242) [-1.05]
 
-  * Raman properties   
+  * Raman properties
 The code directly report the Raman susceptibilities for both transverse (TO)
 and longitudinal (LO) optic modes at Gamma:
 
-    
+
                 alpha(TO) = -0.008489212 (-0.009114814)
-            alpha(LO) = -0.011466211 (-0.013439375) 
-  
+            alpha(LO) = -0.011466211 (-0.013439375)
+
 The basic quantity to get the Raman susceptibilities are the $\frac{d \chi}{d \tau}$ that
 are also reported separately:
-    
-        dchi_23/dtau_1 (Bohr^-1) of Al = -0.094488281 (-0.099889084) 
-  
+
+        dchi_23/dtau_1 (Bohr^-1) of Al = -0.094488281 (-0.099889084)
+
 In cubic semiconductors, it is usual to report the Raman polarizability of
 optical phonon modes at Gamma which is defined as
-    
-        a = Omega_0 * dchi/dtau = Sqrt[mu * Omega_0] alpha 
-  
+
+        a = Omega_0 * dchi/dtau = Sqrt[mu * Omega_0] alpha
+
 where Omega_0 is the primitive unit cell volume (i.e. one quarter of the cubic
 unit cell volume, to be expressed here in Ang) and mu is the reduced mass of
 the system (1/mu = 1/m_Al + 1/m_As). From the previous data, we get :
-    
+
                 a(TO) (Unit: Ang^2)= -7.7233 (-8.4222112)  [-8.48]
-            a(LO) (Unit: Ang^2)= -10.4317 (-12.418168) [-12.48] 
+            a(LO) (Unit: Ang^2)= -10.4317 (-12.418168) [-12.48]
 
 ## 3 Finite difference calculation of the Raman tensor
-  
+
 For comparison with the DPFT calculation, we can compute $\frac{d \chi}{d \tau}$ for the Al
 nucleus from finite differences. In practice, this is achieved by computing
 the linear optical susceptibility for 3 different positions of the Al nucleus.
-This is done with the file *\$ABI_TUTORESPFN/Input/tnlo_6.in*, however
+This is done with the file *\$ABI_TESTS/tutorespfn/Input/tnlo_6.in*, however
 with the unrealistic cutoff of 2.8 Ha. The calculation is about 2 or 3 minutes
 on a PC 3 GHz). For those who want to do it you anyway, you can copy
-*\$ABI_TUTORESPFN/Input/tnlo_6.in* in your working directory. If you
+*\$ABI_TESTS/tutorespfn/Input/tnlo_6.in* in your working directory. If you
 have time, you should modify the cutoff to [[ecut]] = 5 Ha, in order to obtain
 realistic results. So, you might as well start the run after this modification
 (the run is about two times more time-consuming than with 2.8 Ha).
@@ -355,68 +354,68 @@ Supposing you are running the calculation, you have now time for a Belgian
 Beer, why not a Gouyasse ?! ... Or you can look at the results as summarized below.
 
 For tau = 0:
-    
+
     Dielectric tensor, in cartesian coordinates,
          j1       j2             matrix element
       dir pert dir pert     real part    imaginary part
-    
+
        1    4   1    4         9.2020015668        -0.0000000000
        1    4   2    4         0.0000000000        -0.0000000000
        1    4   3    4         0.0000000000        -0.0000000000
-      
+
        2    4   1    4         0.0000000000        -0.0000000000
        2    4   2    4         9.2020015668        -0.0000000000
        2    4   3    4         0.0000000000        -0.0000000000
-      
+
        3    4   1    4         0.0000000000        -0.0000000000
        3    4   2    4         0.0000000000        -0.0000000000
        3    4   3    4         9.2020015668        -0.0000000000
-  
+
 For tau = +0.01 :
-    
+
     Dielectric tensor, in cartesian coordinates,
          j1       j2             matrix element
       dir pert dir pert     real part    imaginary part
-    
+
        1    4   1    4         9.2023220436        -0.0000000000
        1    4   2    4        -0.0000000000        -0.0000000000
        1    4   3    4        -0.0000000000        -0.0000000000
-      
+
        2    4   1    4        -0.0000000000        -0.0000000000
        2    4   2    4         9.2021443491        -0.0000000000
        2    4   3    4        -0.0123700617        -0.0000000000
-      
+
        3    4   1    4        -0.0000000000        -0.0000000000
        3    4   2    4        -0.0123700617        -0.0000000000
        3    4   3    4         9.2021443491        -0.0000000000
-  
+
 Note that the following results would have been obtained for tau = -0.01 (with
 obvious even / odd behaviour with respect to tau of the different components,
 and some very small numerical noise):
-    
+
     Dielectric tensor, in cartesian coordinates,
          j1       j2             matrix element
       dir pert dir pert     real part    imaginary part
-    
+
        1    4   1    4         9.2023220610        -0.0000000000
        1    4   2    4        -0.0000000000        -0.0000000000
        1    4   3    4         0.0000000000        -0.0000000000
-      
+
        2    4   1    4         0.0000000000        -0.0000000000
        2    4   2    4         9.2021443663        -0.0000000000
        2    4   3    4         0.0123700529        -0.0000000000
-      
+
        3    4   1    4         0.0000000000        -0.0000000000
        3    4   2    4         0.0123700529        -0.0000000000
        3    4   3    4         9.2021443663        -0.0000000000
-  
+
 You can extract the value of dchi_23/dtau_1 for Al from the dielectric tensor
 (hereafter called eps) above using the following finite-difference formula [unit of bohr^-1] :
-    
+
      dchi_23/dtau_1= (1/4 pi) (eps_23[tau=+0.01] +eps_23[tau=0.00])/tau
                    = (1/4 pi) (-0.0123700 -0.0)/(0.01)
                    = -0.098437
-    
+
 This value is close to that obtained at [[ecut]]=5 from DFPT (-0.099889084).
 When convergence is reached (beware, the k point convergence is extremely
 slow, much slower than for other properties), both approaches allow to get the
@@ -433,3 +432,38 @@ The DFPT approach is the most convenient and avoid a lot of human work.
 Everything is reported together (not only $\frac{d \chi}{d \tau}$ but also the full Raman
 polarizability tensors) and in appropriate units. It should therefore be
 considered as the best choice (when available, as in ABINIT).
+
+## Calculation of the Raman Spectra
+AFter an ANADDB calculation, one can visualize the Raman spectra using the post-processing script Raman_spec.py (The script can be found in the post-processing scripts repository ( ~/scripts/post_processing/)). Take a moment to explore the help menu (try Raman_spec.py --help) and maybe look at a typical input file (Raman_spec.py --input).  When you are done with that, execute the calculation:
+
+   python Raman_spec.py "input file name"
+
+On a normal computer, this calculation may take several minutes.
+
+This python script reads the output file generated by your ANADDB calculation, extracts the Raman tensor and phonon frequencies, and calculates the polarization dependent and powder-averaged Raman spectra.  All the calculated intensities (the 6 polarization dependent spectra and the powder-average spectra) are printed to a file.
+
+We can view the Raman spectra with
+
+    xmgrace *_spec.out
+
+The resulting powder-average spectra, plotted here with Gnuplot, is shown below. For the cubic structure calculated here, the resulting spectra contains a single Raman mode corresponding to an XY polarization.
+
+!!! tip
+
+    ![](nlo_assets/ramanspec_tnlo5_spec.pdf)
+
+A typical input file for the Raman_spec script contains the following variables
+  * filename   - name of the ANADDB output file
+  * outname    - uses specified output file name
+  * temp       - temperature
+  * laser_freq - laser frequency
+  * freq_unit  - output frequency (default cm$^{-1}$
+  * spread     - spread of the Lorentzian (same for all modes)
+  * n_freq     - number of output frequencies (default: 1000)
+  * min_freq   - minimum frequency (default: 0.95 times the lowest active mode)
+  * max_freq   - maximum frequency (default) 1.05 times the highest active mode)
+  * relative_intensity - plots the relative intensity (if present)
+  * keep_file  - keep the output file, any existing file is removed (if present)
+
+Finally, if one includes a calculation of the frequency dependent dielectric tensor during the ANADDB calculation, then this program extracts that dielectric tensor and prints it to its own file.
+

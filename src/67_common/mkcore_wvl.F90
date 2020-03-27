@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mkcore_wvl
 !! NAME
 !!  m_mkcore_wvl
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2018 ABINIT group (MT,TRangel)
+!!  Copyright (C) 2016-2020 ABINIT group (MT,TRangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,8 +39,6 @@ module m_mkcore_wvl
  use m_pawrad,      only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab,      only : pawtab_type
  use m_drivexc,     only : mkdenpos
-
- implicit none
 
  private
 !!***
@@ -120,14 +117,6 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_wvl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -568,14 +557,6 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
   use BigDFT_API, only: ext_buffers,ind_positions
 #endif
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_wvl_old'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat,nfft,nspden
@@ -943,15 +924,6 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 &          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rr,strdia,vxc,xccc3d,&
 &          rred) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_inner'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer ,intent(in) :: msz,natom,ncmax,nfft,nfgd,nfgd_r0,nspden,n3xccc,option
@@ -1092,7 +1064,7 @@ end module m_mkcore_wvl
 !%% !!  FIXME: add description.
 !%% !!
 !%% !! COPYRIGHT
-!%% !!  Copyright (C) 2012-2018 ABINIT group (TRangel)
+!%% !!  Copyright (C) 2012-2020 ABINIT group (TRangel)
 !%% !!  This file is distributed under the terms of the
 !%% !!  GNU General Public License, see ~abinit/COPYING
 !%% !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1132,14 +1104,6 @@ end module m_mkcore_wvl
 !%%  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
 !%%  use m_pawtab,   only : pawtab_type
 !%%  use m_mpinfo,   only : ptabs_fourdp
-!%%
-!%% !This section has been created automatically by the script Abilint (TD).
-!%% !Do not modify the following lines by hand.
-!%% #undef ABI_FUNC
-!%% #define ABI_FUNC 'mkcore_paw'
-!%% !End of the abilint section
-!%%
-!%%  implicit none
 !%%
 !%% !Arguments ------------------------------------
 !%% !scalars

@@ -38,12 +38,11 @@
   nshiftk  1
   shiftk   0.0  0.0  0.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = nag@abiref
-#%% exclude_builders  = buda2_gnu_8.1_openmpi, buda2_gnu_8.1_mpich3
+##%% exclude_hosts = nag@abiref
+##%% exclude_builders  = buda2_gnu_8.2_mpich3
 #%% [files]
 #%% files_to_test = 
 #%%   t34.out, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy

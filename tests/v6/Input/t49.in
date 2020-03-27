@@ -46,7 +46,6 @@ prtden 0
 
 diemac 2.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -58,7 +57,7 @@ diemac 2.0
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Electric field gradients in ICl molecule, with and without spin orbit coupling.
 #%% topics = EFG

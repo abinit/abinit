@@ -1,3 +1,4 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -54,13 +55,6 @@ contains
 subroutine tdep_make_inbox(tab,natom,tol,&
 &                temp) !Optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_inbox'
-!End of the abilint section
-
   implicit none
   integer :: natom,ii,jj,iatom
   double precision :: tol
@@ -87,13 +81,6 @@ end subroutine tdep_make_inbox
 !=====================================================================================================
  subroutine tdep_make_latt(InVar,Lattice)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_latt'
-!End of the abilint section
-
   implicit none
 
   integer :: brav,ii,jj,kk,INFO,iout,line
@@ -101,6 +88,7 @@ end subroutine tdep_make_inbox
   double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3),temp2(3,3)
   double precision :: rprimd(3,3),rprimdt(3,3),rprimd_MD(3,3),rprim_tmp(3,3),rprimdm1(3,3)
   double precision :: rprim(3,3),temp(3,3),rprimm1(3,3),rprimt(3,3),rprimdtm1(3,3)
+  double precision :: xi,hh
   double precision, allocatable :: WORK(:)
   type(Input_Variables_type) :: InVar
   type(Lattice_Variables_type),intent(out) :: Lattice
@@ -139,8 +127,8 @@ end subroutine tdep_make_inbox
   write(InVar%stdout,*) '#############################################################################'
 
 ! Define inverse of the multiplicity tab
-  ABI_MALLOC(IPIV,(3))
-  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
+  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
   multiplicitym1(:,:)=InVar%multiplicity(:,:)
   call DGETRF(3,3,multiplicitym1,3,IPIV,INFO)
   call DGETRI(3,multiplicitym1,3,IPIV,WORK,3,INFO)
@@ -200,6 +188,16 @@ end subroutine tdep_make_inbox
     rprim(1,1)=-0.5d0 ; rprim(1,2)= 0.5d0 ; rprim(1,3)= 0.5d0
     rprim(2,1)= 0.5d0 ; rprim(2,2)=-0.5d0 ; rprim(2,3)= 0.5d0
     rprim(3,1)= 0.5d0 ; rprim(3,2)= 0.5d0 ; rprim(3,3)=-0.5d0
+! For trigonal: bravais(1)=5
+  else if (InVar%bravais(1).eq.5.and.InVar%bravais(2).eq.0) then !rhombo
+    brav=1
+    line=0
+    xi=dsin(InVar%angle_alpha*pi/180.d0/2d0)
+    hh=dsqrt(1d0-4d0/3d0*xi**2)
+    rprim(1,1)=xi    ; rprim(1,2)=-xi/dsqrt(3d0)    ; rprim(1,3)= hh
+    rprim(2,1)= 0.d0 ; rprim(2,2)=2d0*xi/dsqrt(3d0) ; rprim(2,3)= hh
+    rprim(3,1)=-xi   ; rprim(3,2)=-xi/dsqrt(3d0)    ; rprim(3,3)= hh
+
 ! For hexagonal: bravais(1)=6
   else if (InVar%bravais(1).eq.6.and.InVar%bravais(2).eq.0) then !hexagonal
     brav=4
@@ -248,8 +246,8 @@ end subroutine tdep_make_inbox
       rprimt(ii,jj)=rprim(jj,ii)
     end do
   end do
-  ABI_MALLOC(IPIV,(3))
-  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
+  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
   rprimm1(:,:)=rprim(:,:)
   call DGETRF(3,3,rprimm1,3,IPIV,INFO)
   call DGETRI(3,rprimm1,3,IPIV,WORK,3,INFO)
@@ -334,16 +332,16 @@ end subroutine tdep_make_inbox
     end do
   end do
   call metric(Lattice%gmet,Lattice%gprimd,iout,Lattice%rmet,rprimdt,Lattice%ucvol)
-  ABI_MALLOC(IPIV,(3))
-  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
+  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
   rprimdtm1(:,:)=rprimdt(:,:)
   call DGETRF(3,3,rprimdtm1,3,IPIV,INFO)
   call DGETRI(3,rprimdtm1,3,IPIV,WORK,3,INFO)
   ABI_FREE(IPIV)
   ABI_FREE(WORK)
 
-  ABI_MALLOC(IPIV,(3))
-  ABI_MALLOC(WORK,(3)) ; IPIV(:)=0 ; WORK(:)=0.d0
+  ABI_MALLOC(IPIV,(3)); IPIV(:)=0
+  ABI_MALLOC(WORK,(3)); WORK(:)=0.d0
   rprimdm1(:,:)=rprimd(:,:)
   call DGETRF(3,3,rprimdm1,3,IPIV,INFO)
   call DGETRI(3,rprimdm1,3,IPIV,WORK,3,INFO)

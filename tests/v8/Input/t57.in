@@ -100,7 +100,9 @@
     kpt6      0.00 0.00 0.00   # Gamma
               0.00 0.50 0.50   # X
 
-    ddb_ngqpt 1 1 1
+    ddb_ngqpt6 1 1 1
+    prtphdos6 0
+    chneut6   0  # Don't enforce ASR on BECS (not a good idea, just for testing purposes)
 
 #######################################################################   
 acell 3*9.136
@@ -121,7 +123,7 @@ diemac 6
  ecut 30               # Underconverged ecut. 
 #ecut 15
 nstep 100
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -131,13 +133,13 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t57.out, tolnlines = 2, tolabs = 1.1e-6, tolrel = 9.0e-5, fld_options=-medium ;
+#%%   t57.out, tolnlines = 4, tolabs = 1.1e-6, tolrel = 9.0e-5, fld_options=-medium;
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = DFPT
+#%% keywords = DFPT, EPH
 #%% description =
 #%%  CaO effective mass tensor at \Gamma and X. Also compute the Frohlich average of the effective mass 
 #%%  and also the Frohlich ZPR from the general formula.

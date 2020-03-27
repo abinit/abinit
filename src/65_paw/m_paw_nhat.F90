@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_nhat
 !! NAME
 !!  m_paw_nhat
@@ -8,7 +7,7 @@
 !!    charge density (i.e. n^hat(r)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (FJ, MT, MG, TRangel)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,10 +24,10 @@ MODULE m_paw_nhat
 
  use defs_basis
  use m_abicore
- use defs_abitypes
  use m_errors
  use m_xmpi
 
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
@@ -126,13 +125,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &          pawgrnhat,pawnhat,pawrhoij,pawrhoij0,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmknhat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -142,7 +134,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  integer,intent(in) :: nhatgrdim,nspden,ntypat
  integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb
  real(dp),intent(in) :: ucvol
- real(dp),intent(out) :: compch_fft
+ real(dp),intent(inout) :: compch_fft
  type(distribfft_type),optional,intent(in),target :: distribfft
  type(pawang_type),intent(in) :: pawang
 !arrays
@@ -157,7 +149,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 
 !Local variables ---------------------------------------
 !scalars
- integer :: dplex,iatom,iatom_tot,ic,ierr,ii,ils,ilslm,irhoij,ispden,itypat
+ integer :: cplex_rhoij,iatom,iatom_tot,ic,ierr,ii,ils,ilslm,iq0,irhoij,ispden,itypat
  integer :: jc,jrhoij,kc,klm,klmn,lmax,lmin,lm_size,mfgd,mm,mpi_comm_sphgrid
  integer :: my_comm_atom,my_comm_fft,nfgd,nfftot,option,optgr0,optgr1,optgr2,paral_kgb_fft
  logical :: compute_grad,compute_nhat,my_atmtab_allocated,need_frozen,paral_atom,qeq0
@@ -185,24 +177,24 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
    end if
  end if
  if(ider>0.and.nhatgrdim==0) then
-   MSG_BUG(' Gradients of nhat required but not allocated !')
+   MSG_BUG('Gradients of nhat required but not allocated!')
  end if
  if (my_natom>0) then
    if(nspden>1.and.nspden/=pawrhoij(1)%nspden) then
-     MSG_BUG(' Wrong values for nspden and pawrhoij%nspden !')
+     MSG_BUG('Wrong values for nspden and pawrhoij%nspden!')
    end if
    if(nspden>1.and.nspden/=pawfgrtab(1)%nspden) then
-     MSG_BUG(' Wrong values for nspden and pawfgrtab%nspden !')
+     MSG_BUG('Wrong values for nspden and pawfgrtab%nspden!')
    end if
-   if(pawrhoij(1)%cplex<cplex) then
-     MSG_BUG('  Must have pawrhoij()%cplex >= cplex !')
+   if(pawrhoij(1)%qphase<cplex) then
+     MSG_BUG('Must have pawrhoij()%qphase >= cplex!')
    end if
    if (compute_phonons.and.(.not.qeq0)) then
      if (pawfgrtab(1)%rfgd_allocated==0) then
-       MSG_BUG(' pawfgrtab()%rfgd array must be allocated  !')
+       MSG_BUG('pawfgrtab()%rfgd array must be allocated!')
      end if
      if (compute_grad.and.(.not.compute_nhat)) then
-       MSG_BUG(' When q<>0, nhat gradients need nhat !')
+       MSG_BUG('When q<>0, nhat gradients need nhat!')
      end if
    end if
  end if
@@ -220,7 +212,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !Initialisations
  if ((.not.compute_nhat).and.(.not.compute_grad)) return
  mfgd=zero;if (my_natom>0) mfgd=maxval(pawfgrtab(1:my_natom)%nfgd)
- dplex=cplex-1
  if (compute_nhat) then
    ABI_ALLOCATE(pawnhat_atm,(cplex*mfgd))
    pawnhat=zero
@@ -246,6 +237,9 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
    lm_size=pawfgrtab(iatom)%l_size**2
    need_frozen=((compute_nhat).and.(ipert==iatom_tot.or.ipert==natom+3.or.ipert==natom+4))
    nfgd=pawfgrtab(iatom)%nfgd
+   cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
+   iq0=cplex_rhoij*pawrhoij(iatom)%lmn2_size
+
 !  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
    if (((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)).or.&
 &   ((compute_grad).and.(pawfgrtab(iatom)%gylmgr_allocated==0)).or.&
@@ -308,7 +302,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
        pawfgrtab(iatom)%nhatfrgr_allocated=2
      end if
      call pawnhatfr(option,idir,ipert,1,natom,nspden,ntypat,pawang,pawfgrtab(iatom),&
-&     pawrhoij0(iatom),pawtab,rprimd)
+&                   pawrhoij0(iatom),pawtab,rprimd)
    end if
 
 !  ------------------------------------------------------------------------
@@ -331,17 +325,20 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
        lmax=pawtab(itypat)%indklmn(4,klmn)
 
 !      Retrieve rhoij
-       if (nspden/=2) then
-         ro(1:cplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+       if (pawrhoij(iatom)%nspden/=2) then
+         ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
+         if (cplex==2) ro(2)=pawrhoij(iatom)%rhoijp(iq0+jrhoij,ispden)
        else
          if (ispden==1) then
-           ro(1:cplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)&
-&           +pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
+           ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,1)+pawrhoij(iatom)%rhoijp(jrhoij,2)
+           if (cplex==2) ro(2)=pawrhoij(iatom)%rhoijp(iq0+jrhoij,1)+pawrhoij(iatom)%rhoijp(iq0+jrhoij,2)
          else if (ispden==2) then
-           ro(1:cplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
+           ro(1)=pawrhoij(iatom)%rhoijp(jrhoij,1)
+           if (cplex==2) ro(2)=pawrhoij(iatom)%rhoijp(iq0+jrhoij,1)
          end if
        end if
        ro(1:cplex)=pawtab(itypat)%dltij(klmn)*ro(1:cplex)
+
        if (compute_nhat) then
          if (cplex==1) then
            do ils=lmin,lmax,2
@@ -410,7 +407,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !      ------------------------------------------------------------------------
 !      ----- End loop over ij channels
 !      ------------------------------------------------------------------------
-       jrhoij=jrhoij+pawrhoij(iatom)%cplex
+       jrhoij=jrhoij+cplex_rhoij
      end do
 
 !    If RF calculation, add frozen part of 1st-order compensation density
@@ -597,9 +594,9 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  do FFT
    ABI_ALLOCATE(work,(2,nfft))
    do ispden=1,min(2,nspden)
-     call fourdp(cplex,work,pawnhat(:,ispden),-1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,pawnhat(:,ispden),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,2,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,pawnhat(:,ispden),+1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,pawnhat(:,ispden),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(work)
 !  Destroy fake mpi_enreg
@@ -685,13 +682,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 &          nspinor,ntypat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmknhat_psipsi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -735,7 +725,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !Compatibility tests
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
-     MSG_BUG('Need paral_kgb and me_g0 with comm_fft !')
+     MSG_BUG('Need paral_kgb and me_g0 with comm_fft!')
    end if
    if (present(paral_kgb)) then
      if (paral_kgb/=0) then
@@ -789,6 +779,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    qijl=zero
    qijl=pawtab(itypat)%qijl
    if (compute_nhat) nhat12_atm=zero
+
 !  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
    if (((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)).or.&
 &   (((compute_grad).or.(compute_grad1)).and.(pawfgrtab(iatom)%gylmgr_allocated==0))) then
@@ -800,7 +791,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
        ABI_ALLOCATE(pawfgrtab(iatom)%gylm,(pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
        pawfgrtab(iatom)%gylm_allocated=2;optgr0=1
      end if
-
      if (((compute_grad).or.(compute_grad1)).and.(pawfgrtab(iatom)%gylmgr_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylmgr))  then
          ABI_DEALLOCATE(pawfgrtab(iatom)%gylmgr)
@@ -808,7 +798,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
        ABI_ALLOCATE(pawfgrtab(iatom)%gylmgr,(3,pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
        pawfgrtab(iatom)%gylmgr_allocated=2;optgr1=1
      end if
-
      if (optgr0+optgr1>0) then
        call pawgylm(pawfgrtab(iatom)%gylm,pawfgrtab(iatom)%gylmgr,rdum,&
 &       lm_size,pawfgrtab(iatom)%nfgd,optgr0,optgr1,0,pawtab(itypat),&
@@ -837,7 +826,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
        lmax=pawtab(itypat)%indklmn(4,klmn)  ! il+jl
        ilmn=pawtab(itypat)%indklmn(7,klmn)
        jlmn=pawtab(itypat)%indklmn(8,klmn)
-!       call klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)  ! This mapping should be stored in pawtab_type
+!      call klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)  ! This mapping should be stored in pawtab_type
 
 !      Retrieve the factor due to the PAW projections.
        re_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2)%cp(1,jlmn) &
@@ -1032,9 +1021,9 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    ABI_ALLOCATE(work,(2,nfft))
    cplex=2
    do isp1=1,MIN(2,nspinor**2)
-     call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,cplex,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(work)
 !  Destroy fake mpi_enreg
@@ -1103,13 +1092,6 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 &                    pawang,pawfgrtab,pawrhoij,pawtab,rprimd, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawnhatfr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1153,7 +1135,10 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
  if (my_natom>0) then
    if ((pawfgrtab(1)%gylm_allocated==0.or.pawfgrtab(1)%gylmgr_allocated==0).and. &
 &   pawfgrtab(1)%rfgd_allocated==0) then
-     MSG_BUG('  pawfgrtab()%rfgd array must be allocated  !')
+     MSG_BUG('pawnhatfr: pawfgrtab()%rfgd array must be allocated!')
+   end if
+   if (pawrhoij(1)%qphase/=1) then
+     MSG_BUG('pawnhatfr: not supposed to be called with qphase=2!')
    end if
  end if
 
@@ -1247,6 +1232,7 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
          klm =pawtab(itypat)%indklmn(1,klmn)
          lmin=pawtab(itypat)%indklmn(3,klmn)
          lmax=pawtab(itypat)%indklmn(4,klmn)
+
          if (nspden/=2) then
            ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
          else
@@ -1257,6 +1243,7 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
            end if
          end if
          ro=pawtab(itypat)%dltij(klmn)*ro
+
          do ils=lmin,lmax,2
            lm0=ils**2+ils+1
            do mm=-ils,ils
@@ -1283,7 +1270,7 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
              end if
            end do
          end do
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
 
 !      Convert from cartesian to reduced coordinates
@@ -1367,7 +1354,7 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
              end if
            end do
          end do
-         jrhoij=jrhoij+pawrhoij(iatom)%cplex
+         jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
        end do
      end do ! ispden
    end if
@@ -1386,7 +1373,6 @@ subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 
 !  End loop on atoms
  end do
-
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -1465,13 +1451,6 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 &                    pawang,pawtab,ph3d_diel,typat,wfprod,wfraug, &
 &                    mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawsushat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1496,7 +1475,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex,iatm,iatom,iatom_tot,ibsp1,ibsp2,ierr,il,ilmn,ils,ilslm,ipw
- integer :: itypat,j0lmn,jlmn,klm,klmn,lmax,lmin,mm,my_comm_atom,my_comm_fft,my_natom,paral_kgb_fft,tim_fourwf
+ integer :: itypat,j0lmn,jlmn,klm,klmn,lmax,lmin,mm,my_comm_atom,my_comm_fft,my_natom,tim_fourwf
  real(dp) :: phil1,phil2,sgn,weight_dum,wf1,wf2
  logical :: my_atmtab_allocated,parity,paral_atom
  type(distribfft_type),pointer :: my_distribfft
@@ -1647,16 +1626,18 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
    ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
    if (present(comm_fft)) then
      call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
-     my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
+     my_comm_fft=comm_fft
+     mpi_enreg_fft%paral_kgb = paral_kgb
    else
-     my_comm_fft=xmpi_comm_self;paral_kgb_fft=0;
+     my_comm_fft=xmpi_comm_self
+     mpi_enreg_fft%paral_kgb = 0
      mpi_enreg_fft%distribfft => my_distribfft
    end if
 !  do FFT
    ABI_ALLOCATE(wfraug_paw,(2,ndiel4,ndiel5,ndiel6))
    call fourwf(1,dummy,wfprod_paw,dummy,wfraug_paw,gbound_diel,gbound_diel,&
 &   istwf_k,kg_diel,kg_diel,mgfftdiel,mpi_enreg_fft,1,ngfftdiel,1,npwdiel,&
-&   ndiel4,ndiel5,ndiel6,0,paral_kgb_fft,tim_fourwf,weight_dum,weight_dum)
+&   ndiel4,ndiel5,ndiel6,0,tim_fourwf,weight_dum,weight_dum)
    wfraug(:,:,:,:)=wfraug(:,:,:,:)+wfraug_paw(:,:,:,:)
    ABI_DEALLOCATE(wfraug_paw)
    call unset_mpi_enreg_fft(mpi_enreg_fft)
@@ -1740,13 +1721,6 @@ end subroutine pawsushat
 subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 & optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,typat,ucvol,xred, &
 & mpi_atmtab,comm_atom,comm_fft,distribfft,typord) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nhatgrid'
-!End of the abilint section
 
  implicit none
 
@@ -1987,13 +1961,6 @@ end subroutine nhatgrid
 subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 & nattyp,ntypat,n1,n1i,n2,n2i,n3,n3pi,optcut,optgr0,optgr1,optgr2,optrad,&
 & pawfgrtab,pawtab,psppar,rprimd,shift,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nhatgrid'
-!End of the abilint section
 
  implicit none
 

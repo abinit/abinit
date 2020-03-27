@@ -70,7 +70,6 @@ prtden 0
 prtwf 0
 prteig 0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -87,6 +86,6 @@ prteig 0
 #%% authors = T. Rangel, M. Torrent
 #%% keywords =  NC, WVL
 #%% description = O2 in a box (NC). ABINIT routines are used (wvl_bigdft_comp=0)
-#%% Test: DIIS, potential/density mixing and parallelism
+#%%   Test: DIIS, potential/density mixing and parallelism
 #%% topics = Wavelets
 #%%<END TEST_INFO>

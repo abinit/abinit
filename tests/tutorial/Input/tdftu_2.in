@@ -42,7 +42,6 @@ upawu  8.0 0.0 eV
 jpawu  0.8 0.0 eV
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -54,6 +53,6 @@ jpawu  0.8 0.0 eV
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = LDAU
+#%% keywords = LDAU, PAW
 #%% description = second run of the DFT+U tutorial
 #%%<END TEST_INFO>

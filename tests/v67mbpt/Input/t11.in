@@ -146,7 +146,6 @@ gwmem7            01      # Compute the model-dielectric function on-the-fly.
 
 
 # Dataset 8 BSE with coupling
-# Not executed as this part is numerically unstable.
 optdriver8 99
 getbseig8  0         # just to pass the abi_rules tests
 getwfk8  2
@@ -165,7 +164,6 @@ bs_loband8         2
 nband8   8
 bs_freq_mesh8      0 10.0 0.1 eV
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -196,6 +194,5 @@ bs_freq_mesh8      0 10.0 0.1 eV
 #%%   the Haydock iterative method is employed to calculate the macroscopic dielectric function.
 #%%   The last dataset solves the BSE problem including the coupling between resonant and
 #%%   anti-resonant transition via brute force diagonalization. 
-#%%   Shiva is disabled because the coupling part is unstable on this machine
 #%% topics = BSE
 #%%<END TEST_INFO>

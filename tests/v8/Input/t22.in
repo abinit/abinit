@@ -110,13 +110,12 @@ vel
  0.000690071545191  -0.00190327033267   -0.00198257245164
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t22.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t22.out, tolnlines = 3, tolabs = 1e-08, tolrel = 0.002
 #%% psp_files = 05b.soft_tm
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -126,6 +125,6 @@ vel
 #%% description = 
 #%%   Test of molecular dynamics of B atoms, in the isokinetic
 #%%   ensemble, based on the Thomas-Fermi functional (very fast, even with 32 atoms).
-#%%   Fox the position of one atom along one direction.
+#%%   Fix the position of one atom along one direction.
 #%% topics = Recursion
 #%%<END TEST_INFO>

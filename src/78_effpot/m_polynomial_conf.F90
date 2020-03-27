@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_polynomial_conf
 !!
 !! NAME
@@ -9,7 +8,7 @@
 !! Container type is defined, and destruction
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,13 +114,6 @@ CONTAINS  !=====================================================================
 subroutine polynomial_conf_init(cutoff_disp,cutoff_strain,factor_disp,factor_strain,ndisp,&
 &                               polynomial_conf,power_disp,power_strain,need_confinement)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_conf_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -189,13 +181,6 @@ end subroutine polynomial_conf_init
 
 subroutine polynomial_conf_free(polynomial_conf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_conf_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -261,13 +246,6 @@ end subroutine polynomial_conf_free
 subroutine polynomial_conf_evaluate(disp,disp_ref,energy,factor_disp,factor_strain,fcart,&
 &                                   strain,strain_ref,strten,power_disp,power_strain,cells,&
 &                                   natom_sc,natom_uc,ncell,index_cells,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_conf_evaluate'
-!End of the abilint section
 
  implicit none
 

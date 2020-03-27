@@ -47,7 +47,8 @@ rfdir4  1 1 1
 nqpt4   1
 qpt4   0.0 0.0 0.5
 getwfk4   1
-getwfq4   3
+#getwfq4   3
+getwfq_filepath4 "t98o_DS3_WFQ"
 kptopt4   3
 tolvrs4   1d-16
 
@@ -67,7 +68,8 @@ rfdir6  1 1 1
 nqpt6   1
 qpt6   0.0 0.0 1/3
 getwfk6   1
-getwfq6   5
+#getwfq6   5
+getwfq_filepath6 "t98o_DS5_WFQ"
 kptopt6   3
 tolvrs6   1d-16
 
@@ -98,7 +100,6 @@ diemac 3
 vdw_xc 7  # Activate DFT-D3(BJ)
 vdw_tol 1d-10 # Tolerance on the pair-wise term
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

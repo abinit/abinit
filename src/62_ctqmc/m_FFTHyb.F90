@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_FFTHyb
 !! NAME
 !!  m_FFTHyb
@@ -11,7 +11,7 @@
 !!  of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,7 +82,7 @@ CONTAINS
 !!  Initialize ...
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,13 +109,6 @@ CONTAINS
 SUBROUTINE FFTHyb_init(this,n,samples_sec)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'FFTHyb_init'
-!End of the abilint section
-
   TYPE(FFTHyb), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: n
   DOUBLE PRECISION, INTENT(IN   ) :: samples_sec
@@ -165,7 +158,7 @@ END SUBROUTINE FFTHyb_init
 !!  mirror bits of an integer
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -191,13 +184,6 @@ END SUBROUTINE FFTHyb_init
 INTEGER FUNCTION FFTHyb_mirror(i,n)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'FFTHyb_mirror'
-!End of the abilint section
-
   INTEGER, INTENT(IN ) :: i
   INTEGER, INTENT(IN ) :: n
 !Local variable -------------------------------
@@ -226,7 +212,7 @@ END FUNCTION FFTHyb_mirror
 !!  set input data (in time)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -251,13 +237,6 @@ END FUNCTION FFTHyb_mirror
 
 SUBROUTINE FFTHyb_setData(this, array_in)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'FFTHyb_setData'
-!End of the abilint section
-
   TYPE(FFTHyb), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: array_in
   INTEGER :: size_in
@@ -283,7 +262,7 @@ END SUBROUTINE FFTHyb_setData
 !!  perform FFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -309,13 +288,6 @@ END SUBROUTINE FFTHyb_setData
 SUBROUTINE FFTHyb_run(this, dir)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'FFTHyb_run'
-!End of the abilint section
-
   TYPE(FFTHyb), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: dir
 !Local variables ------------------------------
@@ -376,7 +348,7 @@ END SUBROUTINE FFTHyb_run
 !!  get result
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -404,13 +376,6 @@ END SUBROUTINE FFTHyb_run
 SUBROUTINE FFTHyb_getData(this, bound, array_out, freqs)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'FFTHyb_getData'
-!End of the abilint section
-
   TYPE(FFTHyb), INTENT(IN) :: this
   INTEGER         ,               INTENT(OUT) :: bound
   DOUBLE PRECISION, DIMENSION(:), INTENT(OUT) :: array_out
@@ -450,7 +415,7 @@ END SUBROUTINE FFTHyb_getData
 !!  destroy every thing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -475,13 +440,6 @@ END SUBROUTINE FFTHyb_getData
 SUBROUTINE FFTHyb_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'FFTHyb_destroy'
-!End of the abilint section
-
   TYPE(FFTHyb), INTENT(INOUT) :: this
 
   FREEIF(this%bit_rev)

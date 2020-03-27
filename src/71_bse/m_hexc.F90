@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hexc
 !! NAME
 !! m_hexc
@@ -7,7 +6,7 @@
 !! module for excitonic hamiltonian for Haydock
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2020 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,12 +46,12 @@ MODULE m_hexc
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
- use m_wfd,               only : wfd_t,wfd_sym_ur,wfd_get_ur, wfd_change_ngfft
+ use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
- use m_bseinterp,            only : interpolator_t, interpolator_init, interpolator_normalize, &
-&                    interpolator_free, int_alloc_work, int_free_work
+ use m_bseinterp,         only : interpolator_t, interpolator_init, interpolator_normalize, &
+&                                interpolator_free, int_alloc_work, int_free_work
 
  implicit none
 
@@ -247,15 +246,6 @@ CONTAINS  !=====================================================================
 
 subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BSt, QP_BSt, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
 !scalars
  integer,intent(in) :: comm
@@ -276,7 +266,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  integer :: spin, spad, itt ! For diagonal !
  logical :: is_resonant, diago_is_real, use_mpio=.FALSE.
  character(len=fnlen) :: hreso_fname, hcoup_fname
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  complex(dpc),allocatable :: test(:,:)
 
@@ -303,16 +293,12 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  hexc%nbnd_coarse = BSp%maxnbndv*BSp%maxnbndc
 
  ! Divide the columns of the Hamiltonian among the nodes.
- call xmpi_split_work(hsize,comm,hexc%my_t1,hexc%my_t2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(hsize,comm,hexc%my_t1,hexc%my_t2)
 
  hexc%my_nt = hexc%my_t2 - hexc%my_t1 + 1
  ABI_CHECK(hexc%my_nt>0,"found processor with 0 rows")
 
- ABI_STAT_MALLOC(hexc%hreso,(hsize,hexc%my_t1:hexc%my_t2), ierr)
- ABI_CHECK(ierr==0, "out of memory in hreso")
+ ABI_MALLOC_OR_DIE(hexc%hreso,(hsize,hexc%my_t1:hexc%my_t2), ierr)
 
  ! Read the resonant block from file.
  if (BS_files%in_hreso /= BSE_NOFILE) then
@@ -328,8 +314,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
  !BEGIN DEBUG
  if (use_mpio) then
    MSG_WARNING("Testing MPI-IO routines")
-   ABI_STAT_MALLOC(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
-   ABI_CHECK(ierr==0, "out of memory in hreso")
+   ABI_MALLOC_OR_DIE(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
    diago_is_real=(.not.BSp%have_complex_ene)
    call exc_read_rcblock(hreso_fname,Bsp,is_resonant,diago_is_real,Bsp%nsppol,Bsp%nreh,hsize,&
 &     hexc%my_t1,hexc%my_t2,test,.FALSE.,comm)
@@ -360,8 +345,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
      hcoup_fname = BS_files%out_hcoup
    end if
 
-   ABI_STAT_MALLOC(hexc%hcoup,(hsize,hexc%my_t1:hexc%my_t2), ierr)
-   ABI_CHECK(ierr==0, "out of memory in hcoup")
+   ABI_MALLOC_OR_DIE(hexc%hcoup,(hsize,hexc%my_t1:hexc%my_t2), ierr)
    is_resonant=.FALSE.; diago_is_real=.FALSE.
    call exc_read_rcblock(hcoup_fname,Bsp,is_resonant,diago_is_real,BSp%nsppol,BSp%nreh,hsize,&
 &     hexc%my_t1,hexc%my_t2,hexc%hcoup,use_mpio,comm)
@@ -369,8 +353,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
 
    if (use_mpio) then
      MSG_WARNING("Testing MPI-IO routines")
-     ABI_STAT_MALLOC(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
-     ABI_CHECK(ierr==0, "out of memory in text")
+     ABI_MALLOC_OR_DIE(test,(hsize,hexc%my_t1:hexc%my_t2), ierr)
      diago_is_real=.FALSE.
      call exc_read_rcblock(hcoup_fname,Bsp,is_resonant,diago_is_real,BSp%nsppol,Bsp%nreh,hsize,&
 &       hexc%my_t1,hexc%my_t2,test,.FALSE.,comm)
@@ -460,15 +443,6 @@ end subroutine hexc_init
 subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_dense, &
 &    double_grid, Wfd_dense, KS_BSt_dense, QP_BSt_dense, Psps, Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
 !scalars
  integer,intent(in) :: method
@@ -552,27 +526,23 @@ subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_den
 
    ! TODO: Write new IO routines to read MPI-distributed data in a format suitable for the interpolation
    tmpfname(ii-2:ii+1) = 'ABSR'
-   ABI_STAT_MALLOC(hexc_i%all_acoeffs,(hsize,hsize), ierr)
-   ABI_CHECK(ierr==0, "out of memory in all_acoeffs")
+   ABI_MALLOC_OR_DIE(hexc_i%all_acoeffs,(hsize,hsize), ierr)
    call exc_read_rcblock(tmpfname,Bsp,is_resonant,diago_is_real,nsppol,BSp%nreh,hsize,1,hsize,&
 &     hexc_i%all_acoeffs,use_mpio,hexc%comm)
 
    tmpfname(ii-2:ii+1) = 'BBSR'
-   ABI_STAT_MALLOC(hexc_i%all_bcoeffs,(hsize,hsize), ierr)
-   ABI_CHECK(ierr==0, "out of memory in all_bcoeffs")
+   ABI_MALLOC_OR_DIE(hexc_i%all_bcoeffs,(hsize,hsize), ierr)
    call exc_read_rcblock(tmpfname,Bsp,is_resonant,diago_is_real,nsppol,BSp%nreh,hsize,1,hsize,&
 &     hexc_i%all_bcoeffs,use_mpio,hexc%comm)
 
    tmpfname(ii-2:ii+1) = 'CBSR'
-   ABI_STAT_MALLOC(hexc_i%all_ccoeffs,(hsize,hsize), ierr)
-   ABI_CHECK(ierr==0, "out of memory in all_ccoeffs")
+   ABI_MALLOC_OR_DIE(hexc_i%all_ccoeffs,(hsize,hsize), ierr)
    call exc_read_rcblock(tmpfname,Bsp,is_resonant,diago_is_real,nsppol,BSp%nreh,hsize,1,hsize,&
 &     hexc_i%all_ccoeffs,use_mpio,hexc%comm)
  end if
 
  ! Compute overlaps & compute all hmat
- ABI_STAT_MALLOC(hexc_i%all_hmat,(hsize,hsize), ierr)
- ABI_CHECK(ierr==0, "out of memory in all_hmat")
+ ABI_MALLOC_OR_DIE(hexc_i%all_hmat,(hsize,hsize), ierr)
 
  hexc_i%all_hmat(:,:) = hexc%hreso(:,:)
 
@@ -622,15 +592,6 @@ end subroutine hexc_interp_init
 
 subroutine hexc_build_hinterp(hexc,hexc_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_build_hinterp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(inout) :: hexc
  type(hexc_interp_t),intent(inout) :: hexc_i
@@ -644,8 +605,7 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
  write(msg,"(a,f8.1,a)")"Memory needed for hinterp = ",one*(hexc_i%hsize_dense**2)*2*dpc*b2Mb," Mb"
  call wrtout(std_out,msg,"COLL")
 
- ABI_STAT_MALLOC(hexc_i%hinterp,(hexc_i%hsize_dense,hexc_i%hsize_dense), ierr)
- ABI_CHECK(ierr==0, 'Out of memory in hinterp')
+ ABI_MALLOC_OR_DIE(hexc_i%hinterp,(hexc_i%hsize_dense,hexc_i%hsize_dense), ierr)
 
  call hexc_compute_hinterp(hexc%BSp, hexc%hsize_coarse, hexc_i%hsize_dense, hexc_i%all_hmat, &
 &  hexc_i%interpolator%double_grid,hexc%nbnd_coarse, hexc_i%interpolator, &
@@ -711,15 +671,6 @@ end subroutine hexc_build_hinterp
 
 subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
 &  interpolator,kdense2div,work_coeffs,Cmat,ikp_dense,overlaps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_compute_subhinterp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -850,15 +801,6 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 &  interpolator,kdense2div,acoeffs,bcoeffs,ccoeffs,Kmesh_dense,Vcp_dense,gmet,hinterp,&
 &  m3_width)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_compute_hinterp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: hsize_coarse,hsize_dense,nbnd_coarse !,ntrans
@@ -916,8 +858,7 @@ subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coar
 
  hinterp = czero; term = czero
 
- ABI_STAT_MALLOC(Cmat,(nbnd_coarse,nbnd_coarse,interpolator%nvert), ierr)
- ABI_CHECK(ierr==0, "out of memory in Cmat")
+ ABI_MALLOC_OR_DIE(Cmat,(nbnd_coarse,nbnd_coarse,interpolator%nvert), ierr)
  Cmat = czero
 
  ABI_MALLOC(band2it,(nbnd_coarse))
@@ -1251,19 +1192,8 @@ end subroutine hexc_compute_hinterp
 
 subroutine hexc_free(hexc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(inout) :: hexc
-
-!Local variables ---------------------
 
 !*****************************************************************************
 
@@ -1313,19 +1243,8 @@ end subroutine hexc_free
 
 subroutine hexc_interp_free(hexc_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_interp_t),intent(inout) :: hexc_i
-
-!Local variables ---------------------
 
 !*****************************************************************************
 
@@ -1408,15 +1327,6 @@ end subroutine hexc_interp_free
 
 subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 &   nbnd_coarse,interpolator,div2kdense,kdense2div)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_matmul'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1729,15 +1639,6 @@ end subroutine hexc_interp_matmul
 
 subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_tda'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(in) :: hexc
  type(hexc_interp_t),intent(in) :: hexc_i
@@ -1805,15 +1706,6 @@ end subroutine hexc_matmul_tda
 
 subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_elphon'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------
  type(hexc_t),intent(in) :: hexc
  character,intent(in) :: op
@@ -1876,15 +1768,6 @@ end subroutine hexc_matmul_elphon
 !! SOURCE
 
 subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_full'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------
  integer,intent(in) :: parity

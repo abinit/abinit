@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_srkhna14
 !! NAME
 !!  m_pred_srkna14
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,13 +83,6 @@ contains
 !! SOURCE
 
 subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_srkna14'
-!End of the abilint section
 
  implicit none
 

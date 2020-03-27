@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_fftdata
 !! NAME
 !! defs_fftdata
@@ -8,7 +7,7 @@
 !! used to define fft grids within Abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (LG, PMA)
+!! Copyright (C) 2000-2020 ABINIT group (LG, PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -164,13 +163,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine size_goed_fft(m_in,n_out,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'size_goed_fft'
-!End of the abilint section
 
  implicit none
 

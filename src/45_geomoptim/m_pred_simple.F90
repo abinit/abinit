@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_simple
 !! NAME
 !!  m_pred_simple
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,13 +78,6 @@ contains
 !! SOURCE
 
 subroutine pred_simple(ab_mover,hist,iexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_simple'
-!End of the abilint section
 
  implicit none
 
@@ -166,13 +158,6 @@ end subroutine pred_simple
 subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prec_simple'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -408,6 +393,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    end if
 
    ABI_ALLOCATE(matrix_tmp,(3*ab_mover%natom,3*ab_mover%natom))
+   
    matrix_tmp(:,:)=matrix(:,:)
    !write(*,*)"matrix_tmp",matrix_tmp
 
@@ -421,6 +407,7 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
    call DSYEV('V', 'U', 3*ab_mover%natom, matrix_tmp, 3*ab_mover%natom, w , work, lwork, info )
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(matrix_tmp)
+
    write(std_out,*) 'DSYEV info=',info
    write(std_out,*) 'Eigenvalues:'
    write(std_out,fmt) w(:)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_dfptnl
 !! NAME
 !!  m_paw_dfptnl
@@ -8,7 +7,7 @@
 !!   or 2nd-order PAW occupancies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (LB)
+!! Copyright (C) 2018-2020 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,10 +23,9 @@
 MODULE m_paw_dfptnl
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
- use m_xmpi, only : xmpi_comm_self,xmpi_sum
+ use m_xmpi
 
  use m_pawang,     only : pawang_type
  use m_pawrad,     only : pawrad_type,simp_gen
@@ -103,15 +101,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
 &                    pawtab,pawxcdev,&
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_dfptnl_energy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ixc,my_natom,natom,ntypat
@@ -123,9 +112,9 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  real(dp),intent(out) :: d3exc(2)
  type(paw_an_type),intent(in) :: paw_an0(my_natom)
  type(pawrad_type),intent(in) :: pawrad(ntypat)
- type(pawrhoij_type),intent(in) :: pawrhoij_1(natom)
- type(pawrhoij_type),intent(in) :: pawrhoij_2(natom)
- type(pawrhoij_type),intent(in) :: pawrhoij_3(natom)
+ type(pawrhoij_type),intent(in) :: pawrhoij_1(my_natom)
+ type(pawrhoij_type),intent(in) :: pawrhoij_2(my_natom)
+ type(pawrhoij_type),intent(in) :: pawrhoij_3(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
 
 !Local variables ---------------------------------------
@@ -135,7 +124,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  integer :: opt_compch,usecore,usetcore,usexcnhat
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: compch,d3exc1_iat(2)
-! character(len=500) :: msg
+ character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect_1(:),lmselect_2(:),lmselect_3(:),lmselect_tmp(:)
@@ -150,7 +139,14 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
  nzlmopt = 0 ! compute all LM-moments of the density and use all LM-moments
 
  if (pawxcdev/=0) then
-   MSG_BUG("paw_dfptnl_energy is not implemented for pawxcdev /=0")
+   msg="paw_dfptnl_energy is not implemented for pawxcdev/=0"
+   MSG_BUG(msg)
+ end if
+ if (my_natom>0) then
+   if (pawrhoij_1(1)%qphase/=1.or.pawrhoij_2(1)%qphase/=1.or.pawrhoij_3(1)%qphase/=1) then
+     msg="paw_dfptnl_energy not supposed to be called with q/=0!"
+     MSG_BUG(msg)
+   end if
  end if
 
 !Set up parallelism over atoms
@@ -175,9 +171,9 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    itypat=pawrhoij_1(iatom)%itypat
    mesh_size=pawtab(itypat)%mesh_size
    nspden=pawrhoij_1(iatom)%nspden
-   cplex_1=pawrhoij_1(iatom)%cplex
-   cplex_2=pawrhoij_2(iatom)%cplex
-   cplex_3=pawrhoij_3(iatom)%cplex
+   cplex_1=pawrhoij_1(iatom)%cplex_rhoij
+   cplex_2=pawrhoij_2(iatom)%cplex_rhoij
+   cplex_3=pawrhoij_3(iatom)%cplex_rhoij
    lm_size_all=paw_an0(iatom)%lm_size
 
    ABI_ALLOCATE(lmselect_tmp,(lm_size_all))
@@ -306,15 +302,6 @@ end subroutine paw_dfptnl_energy
 
 subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmselect1,lmselect2,lmselect3,&
 &                 nhat1,nhat2,nhat3,nkxc,nrad,nspden,pawang,pawrad,rhor1,rhor2,rhor3,usexcnhat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_dfptnl_xc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -538,15 +525,6 @@ end subroutine paw_dfptnl_xc
 &                       nspinor,occ_k,pawrhoij,wtk_k,&
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_dfptnl_accrhoij'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,ipert1,ipert2,isppol,my_natom,natom,nspinor
@@ -584,7 +562,11 @@ end subroutine paw_dfptnl_xc
 
  ncpgr=1
  if (ipert1<0.or.ipert1>natom+2.or.ipert2<0.or.ipert2>natom+2) then
-   message = 'Wrong inputs. Necessary conditions on ipert1 or ipert2 : 0 <= ipert <= natom+2'
+   message = 'paw_dfptnl_accrhoij: Necessary conditions on ipert1 or ipert2: 0<=ipert<=natom+2'
+   MSG_BUG(message)
+ end if
+ if (pawrhoij(1)%qphase/=1) then
+   message="paw_dfptnl_accrhoij not supposed to be called with q/=0!"
    MSG_BUG(message)
  end if
 
@@ -602,8 +584,8 @@ end subroutine paw_dfptnl_xc
 !!  === Accumulate (n,k) contribution to partial 2nd-order rhoij   ===
 !!  ==================================================================
 
- compute_impart=(pawrhoij(1)%cplex==2)
- compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
+ compute_impart=(pawrhoij(1)%cplex_rhoij==2)
+ compute_impart_cplex=((pawrhoij(1)%cplex_rhoij==2).and.(cplex==2))
 
 ! NOT USED FOR PAWRHO21! => only for PAWRHO2 (full second derivative)
 !!Accumulate :   < Psi^(pert1) | p_i^(0) > < p_j^(0) | Psi^(pert2) >
@@ -612,7 +594,7 @@ end subroutine paw_dfptnl_xc
 !   do iatom=1,my_natom
 !     iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
 !     iatm=atindx(iatom1)
-!     cplex_rhoij=pawrhoij(iatom)%cplex
+!     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
 !     do jlmn=1,pawrhoij(iatom)%lmn_size
 !       j0lmn=jlmn*(jlmn-1)/2
 !       cpj1(1:2,1)=cwaveprj1_pert12(iatm,1)%cp(1:2,jlmn)   ! < p_j^(0) | Psi^(pert1) >
@@ -650,7 +632,7 @@ end subroutine paw_dfptnl_xc
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
        if (iatom/=ipert2) cycle ! To move atom "ipert2" does not change projectors of other atoms
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          cpj0(1:2,1)  =cwaveprj0_pert2 (iatm,1)% cp(1:2,  jlmn)   ! < p_j^(0)     | Psi^(0)     >
@@ -697,7 +679,7 @@ end subroutine paw_dfptnl_xc
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        if (iatom/=ipert1) cycle ! To move atom "ipert1" does not change projectors of other atoms
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
@@ -732,7 +714,8 @@ end subroutine paw_dfptnl_xc
        end do
      end do
    else ! nspinor=2
-     MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
+     message="paw_dfptnl_accrhoij is not implemented for nspinor=2!"
+     MSG_BUG(message)
    end if
  end if
 !  End
@@ -745,7 +728,7 @@ end subroutine paw_dfptnl_xc
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
        if (iatom/=ipert1.or.iatom/=ipert2) cycle ! To move atom "ipert" does not change projectors of other atoms
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          d1cpj0(1:2,1)=cwaveprj0_pert1(iatm,1)%dcp(1:2,1,jlmn)   ! < p_j^(pert1) | Psi^(0) >
@@ -770,7 +753,8 @@ end subroutine paw_dfptnl_xc
        end do
      end do
    else ! nspinor=2
-     MSG_BUG("paw_dfptnl_accrhoij is not implemented for nspinor=2")
+     message="paw_dfptnl_accrhoij is not implemented for nspinor=2!"
+     MSG_BUG(message)
    end if
  end if
 

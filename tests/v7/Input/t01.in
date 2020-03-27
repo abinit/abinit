@@ -4,7 +4,7 @@
 
 prtposcar 1
 # Fix order in typat: the POSCAR files impose ordering of atomic types!
-#  with different order the resulting files will be re-ordered to the following
+#  with different input order for abinit, the resulting files will be re-ordered to the following anyway
 typat 1 1 1 2 2 2 2 2 2
 
 # number of self-consistent field steps
@@ -51,7 +51,6 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

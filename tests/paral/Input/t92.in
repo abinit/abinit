@@ -48,6 +48,8 @@ dmft_nwlo 100
 dmft_nwli 10000
 dmft_iter 1
 dmftcheck 0
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
 
 # == CTQMC
 dmft_solv 5 # CTQMC
@@ -80,7 +82,6 @@ upawu2  6 eV     # values in Hartree
 jpawu  0.0000  # values in Hartree
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -91,10 +92,10 @@ jpawu  0.0000  # values in Hartree
 #%% max_nprocs = 10
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%   t92_MPI4.out,   tolnlines=  178, tolabs=  0.005, tolrel= 3.0e-2, fld_options = -medium
+#%%   t92_MPI4.out,   tolnlines=  178, tolabs=  0.017, tolrel= 3.0e-2, fld_options = -medium
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   t92_MPI10.out, tolnlines=   178, tolabs=  0.005, tolrel= 3.0e-2, fld_options = -medium
+#%%   t92_MPI10.out, tolnlines=   178, tolabs=  0.017, tolrel= 3.0e-2, fld_options = -medium
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon
 #%% keywords = DMFT, CTQMC

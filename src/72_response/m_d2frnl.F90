@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_d2frnl
 !! NAME
 !!  m_d2frnl
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +24,42 @@
 #include "abi_common.h"
 
 module m_d2frnl
+
+ use defs_basis
+ use m_abicore
+ use m_xmpi
+ use m_errors
+ use m_cgtools
+ use m_nctk
+ use m_hamiltonian
+ use m_efmas_defs
+ use m_wfk
+ use m_dtset
+ use m_dtfil
+
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_time,     only : timab
+ use m_geometry, only : metric, strconv
+ use m_efmas,    only : check_degeneracies
+ use m_io_tools, only : file_exists
+ use m_hdr,      only : hdr_skip
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type,pawtab_get_lsize
+ use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
+                        pawrhoij_nullify, pawrhoij_symrhoij
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
+ use m_pawdij,   only : pawdijfr
+ use m_paw_dfpt, only : pawgrnl
+ use m_kg,       only : mkkin, mkkpg
+ use m_mkffnl,   only : mkffnl
+ use m_mpinfo,   only : proc_distrb_cycle
+ use m_nonlop,   only : nonlop
+ use m_paw_occupancies, only : pawaccrhoij
 
  implicit none
 
@@ -113,12 +148,12 @@ contains
 !!      respfn
 !!
 !! CHILDREN
-!!      appdig,check_degeneracies,destroy_hamiltonian,dotprod_g
-!!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl
+!!      appdig,check_degeneracies,dotprod_g
+!!      init_hamiltonian,metric,mkffnl
 !!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
 !!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,symrhoij
+!!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,pawrhoij_symrhoij
 !!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
 !!
 !! SOURCE
@@ -127,46 +162,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
 &          rprimd,rfphon,rfstrs,symrec,vtrial,vxc,xred,ylm,ylmgr)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_xmpi
- use m_errors
- use m_cgtools
- use m_nctk
- use m_hamiltonian
- use m_efmas_defs
- use m_wfk
-
- use m_time,     only : timab
- use m_geometry, only : metric, strconv
- use m_efmas,    only : check_degeneracies
- use m_io_tools, only : file_exists
- use m_hdr,      only : hdr_skip
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type
- use m_pawtab,   only : pawtab_type,pawtab_get_lsize
- use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
- use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, pawrhoij_nullify, symrhoij
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
- use m_pawdij,   only : pawdijfr
- use m_paw_dfpt, only : pawgrnl
- use m_kg,       only : mkkin, mkkpg
- use m_mkffnl,   only : mkffnl
- use m_mpinfo,   only : proc_distrb_cycle
- use m_nonlop,   only : nonlop
- use m_paw_occupancies, only : pawaccrhoij
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2frnl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -210,7 +205,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer :: choice_bec2,choice_bec54,choice_efmas,choice_phon,choice_strs,choice_piez3,choice_piez55
  integer :: cplex,cplx,cpopt,cpopt_bec,ddkcase,deg_dim
  integer :: dimffnl,dimffnl_str,dimnhat,ia,iatom,iashift,iband,jband,ibg,icg,icplx,ideg,ider,idir
- integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw
+ integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw,iq,iq0
  integer :: ispinor,isppol,istwf_k,isub,itypat,jj,jsub,klmn,master,me,mu
  integer :: my_comm_atom,n1,n2,n3,nband_k,ncpgr,nfftot,ngrhoij,nkpg,nnlout_bec1,nnlout_bec2,nnlout_efmas
  integer :: nnlout_piez1,nnlout_piez2,nnlout_phon,nnlout_strs,npw_,npw_k,nsp,nsploop,nu
@@ -423,8 +418,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DEALLOCATE(l_size_atm)
      do ii=1,3 ! Loop over direction of electric field
        call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-       call pawdijfr(cplex,gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
-&       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,&
+       call pawdijfr(gprimd,ii,natom+2,my_natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
+&       0,paw_ij_tmp,pawang,pawfgrtab_tmp,pawrad,pawtab,cplex,&
 &       (/zero,zero,zero/),rprimd,ucvol,vtrial,vtrial,vxc,xred,&
 &       comm_atom=my_comm_atom, mpi_atmtab=my_atmtab ) ! vtrial not used here
        do isppol=1,dtset%nspinor**2
@@ -450,7 +445,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,dtset%nspinor))
    call pawcprj_alloc(cwaveprj,ncpgr,gs_ham%dimcprj)
    do iatom=1,natom
-     sz2=pawrhoij_tot(iatom)%cplex*pawrhoij_tot(iatom)%lmn2_size
+     sz2=pawrhoij_tot(iatom)%cplex_rhoij*pawrhoij_tot(iatom)%qphase*pawrhoij_tot(iatom)%lmn2_size
      sz3=pawrhoij_tot(iatom)%nspden
      ABI_ALLOCATE(pawrhoij_tot(iatom)%grhoij,(ngrhoij,sz2,sz3))
      pawrhoij_tot(iatom)%ngrhoij=ngrhoij
@@ -479,7 +474,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  do isppol=1,dtset%nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_ham,isppol,with_nonlocal=.true.)
+   call gs_ham%load_spin(isppol,with_nonlocal=.true.)
 
 !  Rewind (k+G) data if needed
    ikg=0
@@ -503,7 +498,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        do ii=1,3 ! Loop over elect. field directions
          if (ddkfil(ii)/=0)then
 !        Number of k points to skip in the full set of k pointsp
-           ik_ddk(ii) = wfk_findk(ddkfiles(ii), kpoint)
+           ik_ddk(ii) = ddkfiles(ii)%findk(kpoint)
            ABI_CHECK(ik_ddk(ii) /= -1, "Cannot find k-point in DDK")
            npw_ = ddkfiles(ii)%hdr%npwarr(ik_ddk(ii))
            if (npw_/=npw_k) then
@@ -612,7 +607,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
 !    Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_ham%matblk))
-     call load_k_hamiltonian(gs_ham,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
+     call gs_ham%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
 
 !    Initialize contributions from current k point
@@ -700,7 +695,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !            Read ddk wave function
            ABI_ALLOCATE(ddk,(2,npw_k*dtset%nspinor))
            if (ddkfil(ii)/=0) then
-             call wfk_read_bks(ddkfiles(ii), iband, ik_ddk(ii), isppol, xmpio_single, cg_bks=ddk)
+             call ddkfiles(ii)%read_bks(iband, ik_ddk(ii), isppol, xmpio_single, cg_bks=ddk)
 !            Multiply ddk by +i
              do jj=1,npw_k*dtset%nspinor
                arg=ddk(1,jj)
@@ -726,14 +721,14 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
            if(need_piezofr)then
              do mu=1,6 !loop over strain
-               call load_k_hamiltonian(gs_ham,ffnl_k=ffnl_str(:,:,:,:,mu))
+               call gs_ham%load_k(ffnl_k=ffnl_str(:,:,:,:,mu))
                call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,mu,(/zero/),mpi_enreg,1,&
 &               nnlout_piez1,paw_opt_3,signs_field,svectout,tim_nonlop,cwavef,svectout)
                call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,svectout,ddk,&
 &               mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
                piezofrnlk(mu,ii)=piezofrnlk(mu,ii)+occ_k*dotprod(1)
              end do
-             call load_k_hamiltonian(gs_ham,ffnl_k=ffnl)
+             call gs_ham%load_k(ffnl_k=ffnl)
            end if
 
            ABI_DEALLOCATE(ddk)
@@ -929,7 +924,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  PAW: accumulate gradients of rhoij
    if (psps%usepaw==1) then
      ABI_ALLOCATE(dimlmn,(natom))
-     dimlmn(1:natom)=pawrhoij_tot(1:natom)%cplex*pawrhoij_tot(1:natom)%lmn2_size
+     dimlmn(1:natom)=pawrhoij_tot(1:natom)%cplex_rhoij*pawrhoij_tot(1:natom)%qphase*pawrhoij_tot(1:natom)%lmn2_size
      bufdim=ncpgr*sum(dimlmn)*nsploop
      ABI_ALLOCATE(mpibuf,(bufdim))
      ii=0;mpibuf=zero
@@ -964,33 +959,37 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  This symetrization is necessary in the antiferromagnetic case...
    if (rfphon==1.and.rfstrs==0) then
      option_rhoij=2;option=0
-     call symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
+     call pawrhoij_symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
 &     psps%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &     comm_atom=my_comm_atom, mpi_atmtab=my_atmtab)
    else if (rfphon==1.and.rfstrs==1) then
      option_rhoij=23;option=0
-     call symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
+     call pawrhoij_symrhoij(pawrhoij_tot,pawrhoij_tot,option_rhoij,gprimd,indsym,0,natom,dtset%nsym,&
 &     psps%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &     comm_atom=my_comm_atom, mpi_atmtab=my_atmtab)
    end if
 
 !  Translate coordinates
+   ABI_CHECK(nsploop/=4,'d2frnl: should we mix mx/my/mz when translating coordinates?')
    do iatom=1,natom
-     cplx=pawrhoij_tot(iatom)%cplex
-     do isppol=1,nsploop
-       do klmn=1,pawrhoij_tot(iatom)%lmn2_size
-         do ii=1,cplx
-           if(rfphon==1.or.rfstrs/=0)then
-             grhoij(1:3)=pawrhoij_tot(iatom)%grhoij(shift_rhoij+1:shift_rhoij+3,cplx*(klmn-1)+ii,isppol)
-             do mu=1,3
-               pawrhoij_tot(iatom)%grhoij(shift_rhoij+mu,cplx*(klmn-1)+ii,isppol)=gprimd(mu,1)*grhoij(1)&
-&               +gprimd(mu,2)*grhoij(2)+gprimd(mu,3)*grhoij(3)
-             end do
-           end if
-           if(rfstrs/=0)then
-             call strconv(pawrhoij_tot(iatom)%grhoij(1:6,cplx*(klmn-1)+ii,isppol),gprimd,&
-&             pawrhoij_tot(iatom)%grhoij(1:6,cplx*(klmn-1)+ii,isppol))
-           end if
+     cplx=pawrhoij_tot(iatom)%cplex_rhoij
+     do iq=1,pawrhoij_tot(iatom)%qphase
+       iq0=0;if (iq==2) iq0=cplx*pawrhoij_tot(iatom)%lmn2_size
+       do isppol=1,nsploop
+         do klmn=1,pawrhoij_tot(iatom)%lmn2_size
+           do ii=1,cplx
+             if(rfphon==1.or.rfstrs/=0)then
+               grhoij(1:3)=pawrhoij_tot(iatom)%grhoij(shift_rhoij+1:shift_rhoij+3,iq0+cplx*(klmn-1)+ii,isppol)
+               do mu=1,3
+                 pawrhoij_tot(iatom)%grhoij(shift_rhoij+mu,iq0+cplx*(klmn-1)+ii,isppol)=gprimd(mu,1)*grhoij(1)&
+&                  +gprimd(mu,2)*grhoij(2)+gprimd(mu,3)*grhoij(3)
+               end do
+             end if
+             if(rfstrs/=0)then
+               call strconv(pawrhoij_tot(iatom)%grhoij(1:6,iq0+cplx*(klmn-1)+ii,isppol),gprimd,&
+&                           pawrhoij_tot(iatom)%grhoij(1:6,iq0+cplx*(klmn-1)+ii,isppol))
+             end if
+           end do
          end do
        end do
      end do
@@ -1000,14 +999,17 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !     -delta_{alphabeta} rhoi_{ij} to drhoij/d_eps
    if(rfstrs/=0)then
      do iatom=1,natom
-       cplx=pawrhoij_tot(iatom)%cplex
-       do isppol=1,nsploop
-         do nu=1,pawrhoij_tot(iatom)%nrhoijsel
-           klmn=pawrhoij_tot(iatom)%rhoijselect(nu)
-           do ii=1,cplx
-             pawrhoij_tot(iatom)%grhoij(1:3,cplx*(klmn-1)+ii,isppol)= &
-&             pawrhoij_tot(iatom)%grhoij(1:3,cplx*(klmn-1)+ii,isppol)&
-&             -pawrhoij_tot(iatom)%rhoijp(cplx*(nu-1)+ii,isppol)
+       cplx=pawrhoij_tot(iatom)%cplex_rhoij
+       do iq=1,pawrhoij_tot(iatom)%qphase
+         iq0=0;if (iq==2) iq0=cplx*pawrhoij_tot(iatom)%lmn2_size
+         do isppol=1,nsploop
+           do nu=1,pawrhoij_tot(iatom)%nrhoijsel
+             klmn=pawrhoij_tot(iatom)%rhoijselect(nu)
+             do ii=1,cplx
+               pawrhoij_tot(iatom)%grhoij(1:3,iq0+cplx*(klmn-1)+ii,isppol)= &
+&               pawrhoij_tot(iatom)%grhoij(1:3,iq0+cplx*(klmn-1)+ii,isppol)&
+&               -pawrhoij_tot(iatom)%rhoijp(iq0+cplx*(nu-1)+ii,isppol)
+             end do
            end do
          end do
        end do
@@ -1067,7 +1069,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
 !Close the ddk files
  do ii=1,3
-   call wfk_close(ddkfiles(ii))
+   call ddkfiles(ii)%close()
  end do
 
 !Release now useless memory
@@ -1081,7 +1083,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DATATYPE_DEALLOCATE(pawrhoij_tot)
    end if
  end if
- call destroy_hamiltonian(gs_ham)
+ call gs_ham%free()
  call timab(159,2,tsec)
 
  write(msg,'(3a)')ch10,' ==> Calculation of the frozen part of the second order derivative done',ch10

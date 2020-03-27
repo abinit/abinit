@@ -1,11 +1,10 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sorth_ph
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MVer, FDortu, MVeithen)
+!!  Copyright (C) 2008-2020 ABINIT group (MVer, FDortu, MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,13 +64,6 @@ contains
 !! SOURCE
 subroutine end_sortph()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'end_sortph'
-!End of the abilint section
-
  if (allocated(eigvecLast))  then
    ABI_DEALLOCATE(eigvecLast)
  end if
@@ -124,15 +116,6 @@ end subroutine end_sortph
 !! SOURCE
 
 subroutine sortph(eigvec,displ,filnam, natom,phfrq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sortph'
-!End of the abilint section
-
-implicit none
 
 !Arguments -----------------------------------
 !scalars

@@ -6,6 +6,7 @@
 
 optdriver    4
 gwcalctyp    2
+symsigma     0
 nband       30
 ecutsigx    4.0
 ecutwfn     4.0
@@ -54,7 +55,6 @@ prtvol     5
 enunit     1
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

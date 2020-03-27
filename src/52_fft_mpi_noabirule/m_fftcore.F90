@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fftcore
 !! NAME
 !!  m_fftcore
@@ -9,7 +8,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2020 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,6 +40,7 @@ module m_fftcore
  use m_sort
 
  use m_time,         only : timab
+ use m_fstrings,     only : itoa, sjoin
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
@@ -98,9 +98,12 @@ module m_fftcore
  public :: mpifft_collect_datar           ! Collect a real-space MPI-FFT distributed array on each proc.
 
  public :: indfftrisc
-
  public :: addrho
  public :: multpot
+
+ ! 0 for double precision version (default), 1 for mixed precision FFTs
+ integer, public, protected :: fftcore_mixprec = 0
+ public :: fftcore_set_mixprec
 
 ! *************************************************************************
 
@@ -131,6 +134,46 @@ contains
 
 !----------------------------------------------------------------------
 
+!!****f* m_fftcore/fftcore_set_mixprec
+!! NAME
+!! fftalg_set_precision
+!!
+!! FUNCTION
+!!  Set the precision to be used in the FFT routines: 0 for standard double precision,
+!!  1 for mixed precision (dp input, sp for intermediate arrays passed to FFT libs)
+!!  Return old value.
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+integer function fftcore_set_mixprec(wp) result(old_wp)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: wp
+
+! *************************************************************************
+
+ old_wp = fftcore_mixprec
+ fftcore_mixprec = abs(wp)
+
+ select case (fftcore_mixprec)
+ case (0)
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in double-precision.")
+ case (1)
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in mixed precision.")
+ case default
+   MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
+ end select
+
+end function fftcore_set_mixprec
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_fftcore/fftalg_isavailable
 !! NAME
 !! fftalg_isavailable
@@ -146,15 +189,6 @@ contains
 !! SOURCE
 
 pure function fftalg_isavailable(fftalg) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftalg_isavailable'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -173,11 +207,11 @@ pure function fftalg_isavailable(fftalg) result(ans)
  fftalgc = mod(fftalg,10)
 
  ! Optional FFT libraries.
-#ifndef HAVE_FFT_FFTW3
+#ifndef HAVE_FFTW3
  if (fftalga == FFT_FFTW3) ans = .FALSE.
 #endif
 
-#ifndef HAVE_FFT_DFTI
+#ifndef HAVE_DFTI
  if (fftalga == FFT_DFTI) ans = .FALSE.
 #endif
 
@@ -201,15 +235,6 @@ end function fftalg_isavailable
 !! SOURCE
 
 pure function fftalg_has_mpi(fftalg) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftalg_has_mpi'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -254,15 +279,6 @@ end function fftalg_has_mpi
 
 pure function fftalg_for_npfft(nproc_fft) result(fftalg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftalg_for_npfft'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nproc_fft
@@ -277,9 +293,9 @@ pure function fftalg_for_npfft(nproc_fft) result(fftalg)
  if (nproc_fft > 1) fftalg = 401
  !if (nproc_fft > 1) fftalg = 402
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  fftalg = 312
-#elif defined HAVE_FFT_DFTI
+#elif defined HAVE_DFTI
  fftalg = 512
  if (nproc_fft > 1) fftalg = 401  ! MPI-FFT with DFTI is not implemented yet
 #endif
@@ -315,15 +331,6 @@ end function fftalg_for_npfft
 !! SOURCE
 
 subroutine fftalg_info(fftalg,library,cplex_mode,padding_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftalg_info'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -370,15 +377,6 @@ end subroutine fftalg_info
 
 pure function get_cache_kb()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_cache_kb'
-!End of the abilint section
-
- implicit none
-
 !Local variables-------------------------------
 !scalars
  integer :: get_cache_kb
@@ -419,15 +417,6 @@ end function get_cache_kb
 
 pure subroutine ngfft_seq(ngfft, n123)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ngfft_seq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -442,9 +431,9 @@ pure subroutine ngfft_seq(ngfft, n123)
 
  ! Default  for the sequential case.
  fftalg = 112
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  fftalg = 312
-#elif defined HAVE_FFT_DFTI
+#elif defined HAVE_DFTI
  fftalg = 512
 #endif
 
@@ -492,15 +481,6 @@ end subroutine ngfft_seq
 !! SOURCE
 
 subroutine print_ngfft(ngfft,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_ngfft'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -580,15 +560,6 @@ end subroutine print_ngfft
 !! SOURCE
 
 subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bound'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -710,13 +681,6 @@ subroutine bound(dsqmax,dsqmin,gbound,gmet,kpt,ngfft,plane)
 
    function dsq(i1,i2,i3,gmet,kpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dsq'
-!End of the abilint section
-
      integer :: i1,i2,i3
      real(dp) :: dsq
      real(dp) :: kpt(3),gmet(3,3)
@@ -793,14 +757,6 @@ subroutine getng(boxcutmin,ecut,gmet,kpt,me_fft,mgfft,nfft,ngfft,nproc_fft,nsym,
 &                ngfftc,use_gpu_cuda,unit) ! optional
 
  use defs_fftdata,  only : mg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getng'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1241,16 +1197,7 @@ end subroutine getng
 !!
 !! SOURCE
 
-subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sphereboundary'
-!End of the abilint section
-
- implicit none
+subroutine sphereboundary(gbound, istwf_k, kg_k, mgfft, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -1525,7 +1472,7 @@ end subroutine sphereboundary
 !!
 !! TODO
 !! 1) Order arguments
-!! 2) Split the two cases: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
+!! 2) Split the two cases to avoid breaking intent: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
 !!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
 !!
@@ -1539,14 +1486,6 @@ end subroutine sphereboundary
 
 subroutine sphere(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,istwf_k,iflag,me_g0,shiftg,symm,xnorm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sphere'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1943,14 +1882,6 @@ end subroutine sphere
 subroutine sphere_fft(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,kg_k,tab_fftwf2_local,nd2proc)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sphere_fft'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,n4,n5,nd2proc,ndat,npw
@@ -2051,14 +1982,6 @@ end subroutine sphere_fft
 subroutine sphere_fft1(cg,ndat,npw,cfft,n1,n2,n3,n4,n5,n6,kg_k,tab_fftwf2_local)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sphere_fft1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,n4,n5,n6,ndat,npw
@@ -2127,14 +2050,6 @@ end subroutine sphere_fft1
 subroutine change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'change_istwfk'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: from_npw,from_istwfk,to_npw,to_istwfk,n1,n2,n3,ndat
@@ -2190,14 +2105,6 @@ end subroutine change_istwfk
 pure subroutine switch(n1dfft,n2,lot,n1,lzt,zt,zw)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'switch'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
  real(dp),intent(in) :: zt(2,lzt,n1)
@@ -2250,14 +2157,6 @@ end subroutine switch
 
 pure subroutine switch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zt,zw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'switch_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -2332,14 +2231,6 @@ end subroutine switch_cent
 
 pure subroutine switchreal(includelast,n1dfft,n2,n2eff,lot,n1zt,lzt,zt,zw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'switchreal'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,n2,n2eff,lot,n1zt,lzt
@@ -2427,14 +2318,6 @@ end subroutine switchreal
 
 pure subroutine switchreal_cent(includelast,n1dfft,max2,n2,lot,n1zt,lzt,zt,zw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'switchreal_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: includelast,n1dfft,max2,n2,lot,n1zt,lzt
@@ -2537,14 +2420,6 @@ end subroutine switchreal_cent
 pure subroutine scramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zw,zmpi2)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scramble'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3
  real(dp),intent(in) :: zw(2,lot,n3)
@@ -2592,14 +2467,6 @@ end subroutine scramble
 
 pure subroutine fill(nd1,nd3,lot,n1dfft,n3,zf,zw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fill'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
@@ -2651,14 +2518,6 @@ end subroutine fill
 
 pure subroutine fill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zf,zw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fill_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
@@ -2724,14 +2583,6 @@ end subroutine fill_cent
 pure subroutine unfill(nd1,nd3,lot,n1dfft,n3,zw,zf)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unfill'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nd1,nd3,lot,n1dfft,n3
  real(dp),intent(in) :: zw(2,lot,n3)
@@ -2779,14 +2630,6 @@ end subroutine unfill
 
 pure subroutine unfill_cent(md1,md3,lot,n1dfft,max3,m3,n3,zw,zf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unfill_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: md1,md3,lot,n1dfft,max3,m3,n3
@@ -2838,14 +2681,6 @@ end subroutine unfill_cent
 
 pure subroutine unmpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zw,zmpi1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unmpiswitch'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -2925,14 +2760,6 @@ end subroutine unmpiswitch
 
 pure subroutine unmpiswitch_cent(j3,n1dfft,Jp2stf,J2stf,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption,zw,zmpi1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unmpiswitch_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -3034,14 +2861,6 @@ end subroutine unmpiswitch_cent
 pure subroutine unscramble(i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3,zmpi2,zw)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unscramble'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: i1,j2,lot,n1dfft,md1,n3,md2proc,nnd3
  real(dp),intent(in) :: zmpi2(2,md1,md2proc,nnd3)
@@ -3089,14 +2908,6 @@ end subroutine unscramble
 pure subroutine unswitch(n1dfft,n2,lot,n1,lzt,zw,zt)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unswitch'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,lot,n1,lzt
  real(dp),intent(in) :: zw(2,lot,n2)
@@ -3143,14 +2954,6 @@ end subroutine unswitch
 
 pure subroutine unswitch_cent(n1dfft,max2,m2,n2,lot,n1,lzt,zw,zt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unswitch_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,m2,n2,lot,n1,lzt
@@ -3209,14 +3012,6 @@ end subroutine unswitch_cent
 pure subroutine unswitchreal(n1dfft,n2,n2eff,lot,n1zt,lzt,zw,zt)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unswitchreal'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,n2,n2eff,lot,n1zt,lzt
  real(dp),intent(in) :: zw(2,lot,n2)
@@ -3272,14 +3067,6 @@ end subroutine unswitchreal
 
 pure subroutine unswitchreal_cent(n1dfft,max2,n2,lot,n1zt,lzt,zw,zt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unswitchreal_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: n1dfft,max2,n2,lot,n1zt,lzt
@@ -3347,14 +3134,6 @@ end subroutine unswitchreal_cent
 
 pure subroutine mpiswitch(j3,n1dfft,Jp2st,J2st,lot,n1,nd2proc,nd3proc,nproc,ioption,zmpi1,zw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpiswitch'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,n1,nd2proc,nd3proc,nproc,ioption
@@ -3447,14 +3226,6 @@ end subroutine mpiswitch
 pure subroutine mpiswitch_cent(j3,n1dfft,Jp2stb,J2stb,lot,max1,md1,m1,n1,md2proc,&
 &  nd3proc,nproc,ioption,zmpi1,zw,max2,m2,n2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpiswitch_cent'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: j3,n1dfft,lot,max1,md1,m1,n1,md2proc,nd3proc,nproc,ioption
@@ -3573,14 +3344,6 @@ end subroutine mpiswitch_cent
 pure subroutine mpifft_fg2dbox(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_fg2dbox'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ndat,n1,n2,n3,n4,nd2proc,n6,me_fft
@@ -3632,14 +3395,6 @@ end subroutine mpifft_fg2dbox
 pure subroutine mpifft_fg2dbox_dpc(nfft,ndat,fofg,n1,n2,n3,n4,nd2proc,n6,fftn2_distrib,ffti2_local,me_fft,workf)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_fg2dbox_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,ndat,n1,n2,n3,n4,nd2proc,n6,me_fft
@@ -3689,14 +3444,6 @@ end subroutine mpifft_fg2dbox_dpc
 
 pure subroutine mpifft_dbox2fg(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_dbox2fg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3753,14 +3500,6 @@ end subroutine mpifft_dbox2fg
 pure subroutine mpifft_dbox2fg_dpc(n1,n2,n3,n4,nd2proc,n6,ndat,fftn2_distrib,ffti2_local,me_fft,workf,nfft,fofg)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_dbox2fg_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,n4,nd2proc,n6,ndat,me_fft,nfft
@@ -3815,14 +3554,6 @@ end subroutine mpifft_dbox2fg_dpc
 
 pure subroutine mpifft_dbox2fr(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_dbox2fr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3904,14 +3635,6 @@ end subroutine mpifft_dbox2fr
 pure subroutine mpifft_dbox2fr_dpc(n1,n2,n3,n4,n5,nd3proc,ndat,fftn3_distrib,ffti3_local,me_fft,workr,cplex,nfft,fofr)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_dbox2fr_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,n4,n5,nd3proc,ndat,me_fft,nfft,cplex
@@ -3987,14 +3710,6 @@ end subroutine mpifft_dbox2fr_dpc
 
 pure subroutine mpifft_fr2dbox(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_fr2dbox'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4072,14 +3787,6 @@ end subroutine mpifft_fr2dbox
 
 pure subroutine mpifft_fr2dbox_dpc(cplex,nfft,ndat,fofr,n1,n2,n3,n4,n5,nd3proc,fftn3_distrib,ffti3_local,me_fft,workr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_fr2dbox_dpc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4170,14 +3877,6 @@ end subroutine mpifft_fr2dbox_dpc
 
 subroutine indfftrisc(gbound,indpw_k,kg_k,mgfft,ngb,ngfft,npw_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indfftrisc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4311,15 +4010,6 @@ end subroutine indfftrisc
 
 
 subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mpw,npw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpgsph'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4714,14 +4404,6 @@ end subroutine kpgsph
 subroutine kpgcount(ecut,exchn2n3d,gmet,istwfk,kpt,ngmax,ngmin,nkpt)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpgcount'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,nkpt
@@ -4825,16 +4507,7 @@ end subroutine kpgcount
 !!
 !! SOURCE
 
-subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_kg'
-!End of the abilint section
-
- implicit none
+subroutine get_kg(kpoint, istwf_k, ecut, gmet, npw_k, kg_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -4856,11 +4529,11 @@ subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
- !
- ! * Calculate the number of G-vectors for this k-point.
+
+ ! Calculate the number of G-vectors for this k-point.
  call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
- !
- ! * Allocate and calculate the set of G-vectors.
+
+ ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
  call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem_,MPI_enreg_seq,npw_k,npw_k_test)
 
@@ -4897,16 +4570,8 @@ end subroutine get_kg
 !!
 !! SOURCE
 
-subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
+subroutine kgindex(indpw_k, kg_k, mask, mpi_enreg, ngfft, npw_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kgindex'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4928,9 +4593,9 @@ subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
 
-!Use the following indexing (N means ngfft of the adequate direction)
-!0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= kg
-!1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index
+ ! Use the following indexing (N means ngfft of the adequate direction)
+ ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= kg
+ ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index
 
  me_fft=mpi_enreg%me_fft
  nd2=(n2-1)/mpi_enreg%nproc_fft+1
@@ -4959,8 +4624,8 @@ subroutine kgindex(indpw_k,kg_k,mask,mpi_enreg,ngfft,npw_k)
      indpw_k(ig)=0
      mask(ig)=.false.
    end if
-   if ( ANY(kg_k(:,ig)>ngfft(1:3)/2) .or. ANY(kg_k(:,ig)<-(ngfft(1:3)-1)/2) ) then
-     write(msg,'(a,i0,a)')" The G-vector with ig: ",ig," falls outside the FFT box."
+   if (any(kg_k(:,ig) > ngfft(1:3)/2) .or. any(kg_k(:,ig) < -(ngfft(1:3)-1)/2) ) then
+     write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ig)," falls outside the FFT box. Increase boxcutmin (?)"
      MSG_ERROR(msg)
    end if
  end do
@@ -4996,14 +4661,6 @@ end subroutine kgindex
 
 pure subroutine addrho(icplexwf,includelast,nd1,nd2,n2,lot,n1dfft,zw,rhopart,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addrho'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,includelast,nd1,nd2,n2,lot,n1dfft
@@ -5083,14 +4740,6 @@ end subroutine addrho
 
 subroutine multpot(icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft,pot,zw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multpot'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: icplexwf,icplex,includelast,nd1,nd2,n2,lot,n1dfft
@@ -5209,14 +4858,6 @@ end subroutine multpot
 
 subroutine mpifft_collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpifft_collect_datar'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

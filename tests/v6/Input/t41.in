@@ -34,7 +34,6 @@
   pawprtvol      3
   pawujopt 1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = ujdet
@@ -49,7 +48,7 @@
 #%% keywords = FAILS_IFMPI
 #%% authors = D.J. Adams
 #%% description = Compute U in cells containing 2, 16 and 128 atoms.
-#%% Cannot be executed in parallel, random errors
-#%%   At line 111 of file ujdet.F90 (unit = 7, file = ...)
-#%%   Fortran runtime error: File 'ujdet.out' already exists
+#%%   Cannot be executed in parallel, random errors
+#%%     At line 111 of file ujdet.F90 (unit = 7, file = ...)
+#%%     Fortran runtime error: File 'ujdet.out' already exists
 #%%<END TEST_INFO>

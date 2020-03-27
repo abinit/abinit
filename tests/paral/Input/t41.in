@@ -94,7 +94,6 @@ dtion 100
 ntime 2
 mdtemp 3600 3600
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

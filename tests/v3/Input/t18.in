@@ -209,13 +209,12 @@
  tnons  24*0.0d0
  znucl 13.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t18.out, tolnlines = 3, tolabs = 5.0e-07, tolrel = 1.0e-08
+#%%   t18.out, tolnlines = 3, tolabs = 5.0e-07, tolrel = 2.0e-08
 #%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 1

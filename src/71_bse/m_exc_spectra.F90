@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_spectra
 !! NAME
 !! m_exc_spectra
@@ -7,7 +6,7 @@
 !!  Routines to compute the macroscopic dielectric function in the Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
+!! Copyright (C) 2009-2020 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +24,6 @@
 MODULE m_exc_spectra
 
  use defs_basis
- use defs_datatypes
  use m_bs_defs
  use m_abicore
  use iso_c_binding
@@ -36,16 +34,15 @@ MODULE m_exc_spectra
  use netcdf
 #endif
  use m_ebands
- !use m_hdr,          only : hdr_free
+ use m_hdr
 
- use defs_abitypes,     only : hdr_type
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx
  use m_hide_blas,       only : xdotu,xdotc
- use m_special_funcs,   only : dirac_delta
+ use m_special_funcs,   only : gaussian
  use m_crystal,         only : crystal_t
- use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : kmesh_t
  use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
@@ -105,15 +102,6 @@ contains
 !! SOURCE
 
 subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_spectra'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -286,9 +274,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 #ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
-     ! Write structure
-     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
-     ! Write QP energies
+     NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(QP_BSt, ncid))
      ! Write dielectric functions.
      call mdfs_ncwrite(ncid, Bsp, eps_exc,eps_rpanlf,eps_gwnlf)
@@ -349,15 +335,6 @@ end subroutine build_spectra
 !! SOURCE
 
 subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_data'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -531,15 +508,6 @@ end subroutine exc_write_data
 
 subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,opt_cvk,ucvol,broad,nomega,omega,eps_rpa,dos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_rpa'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbnds,lomo_min,nsppol,nomega,nq
@@ -557,9 +525,9 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 !scalars
  integer :: iw,ib_v,ib_c,ik_bz,ik_ibz,spin,iq
  real(dp) :: fact,arg,ediff
- real(dp) :: lifetime
+ real(dp) :: linewidth
  complex(dpc) :: ctemp
- logical :: do_lifetime
+ logical :: do_linewidth
 
 !************************************************************************
 
@@ -570,8 +538,8 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
  eps_rpa=czero; dos=zero
 
- do_lifetime = .FALSE.
- do_lifetime = allocated(BSt%lifetime)
+ do_linewidth = .FALSE.
+ do_linewidth = allocated(BSt%linewidth)
 
  !write(std_out,*)nsppol,Kmesh%nbz,lomo_min,homo,nbnds
  !
@@ -586,13 +554,13 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
          ediff = BSt%eig(ib_c,ik_ibz,spin) - BSt%eig(ib_v,ik_ibz,spin)
 
          !
-         if(do_lifetime) then
-           lifetime = BSt%lifetime(ib_c,ik_ibz,spin) + BSt%lifetime(ib_v,ik_ibz,spin)
+         if(do_linewidth) then
+           linewidth = BSt%linewidth(1,ib_c,ik_ibz,spin) + BSt%linewidth(1,ib_v,ik_ibz,spin)
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
                eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
-&             (one/(ediff-j_dpc*lifetime-omega(iw)) + one/(ediff+j_dpc*lifetime+omega(iw)))
+&             (one/(ediff-j_dpc*linewidth-omega(iw)) + one/(ediff+j_dpc*linewidth+omega(iw)))
              end do
            end do
            !
@@ -603,14 +571,14 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,lifetime)
+             dos(iw) = dos(iw) + gaussian(arg, linewidth)
            end do
          else
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
                eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
-&             (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
+               (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
              end do
            end do
            !
@@ -621,7 +589,7 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,broad)
+             dos(iw) = dos(iw) + gaussian(arg, broad)
            end do
          end if
          !
@@ -667,18 +635,8 @@ end subroutine exc_eps_rpa
 !!
 !! SOURCE
 
-
 subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
 &    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_resonant'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -851,9 +809,9 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
    do iw=1,nomega
      arg = ( DBLE(omega(iw)) - exc_ene(ll))
      if(do_ep_lifetime) then
-       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,AIMAG(exc_ene_cplx(ll)))
+       dos_exc(iw) = dos_exc(iw) + gaussian(arg, AIMAG(exc_ene_cplx(ll)))
      else
-       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
+       dos_exc(iw) = dos_exc(iw) + gaussian(arg, Bsp%broad)
      end if
    end do
  end do
@@ -927,17 +885,7 @@ end subroutine exc_eps_resonant
 !!
 !! SOURCE
 
-
 subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_coupling'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1008,8 +956,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
  ABI_MALLOC(fa,(nstates,BSp%nq))
  ABI_MALLOC(fap,(nstates,BSp%nq))
- ABI_STAT_MALLOC(Ami,(exc_size), ierr)
- ABI_CHECK(ierr==0, " out-of-memory Ami")
+ ABI_MALLOC_OR_DIE(Ami,(exc_size), ierr)
 
  do mi=1,nstates ! Loop on excitonic eigenvalues mi
    read(eig_unt, err=10, iomsg=errmsg) Ami(:)
@@ -1083,7 +1030,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  do ll=1,nstates ! Sum over the calculate excitonic eigenstates.
    do iw=1,nomega
      arg = DBLE(omega(iw) - exc_ene(ll))
-     dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
+     dos_exc(iw) = dos_exc(iw) + gaussian(arg, Bsp%broad)
    end do
  end do
 
@@ -1127,15 +1074,6 @@ end subroutine exc_eps_coupling
 !! SOURCE
 
 subroutine exc_write_tensor(BSp,BS_files,what,tensor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_tensor'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1283,15 +1221,6 @@ end subroutine exc_write_tensor
 
 subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mdfs_ncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1367,14 +1296,6 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1408,15 +1329,6 @@ end subroutine mdfs_ncwrite
 !! SOURCE
 
 subroutine check_kramerskronig(n,o,eps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_kramerskronig'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1549,15 +1461,6 @@ end subroutine check_kramerskronig
 !! SOURCE
 
 subroutine check_fsumrule(n,o,e2,omegaplasma)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fsumrule'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

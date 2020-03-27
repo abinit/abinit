@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_iogkk
 !! NAME
 !!  m_iogkk
@@ -7,7 +6,7 @@
 !!  IO routines for GKK files
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MVer)
+!!  Copyright (C) 2008-2020 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,21 +26,21 @@
 module m_iogkk
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_elphon
  use m_errors
  use m_abicore
  use m_xmpi
- use m_kptrank
+ use m_krank
  use m_hdr
 
+ use defs_datatypes,    only : ebands_t
+ use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
  use m_symtk,           only : mati3inv, littlegroup_q
  use m_geometry,        only : phdispl_cart2red, littlegroup_pert
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type
  use m_dynmat,          only : d2sym3
 
  implicit none
@@ -90,22 +89,13 @@ contains
 !!      get_all_gkq
 !!
 !! CHILDREN
-!!      completeperts,get_rank_1kpt,hdr_bcast,hdr_fort_read,hdr_free,ifc_fourq
+!!      completeperts,get_rank,hdr_bcast,hdr_fort_read,hdr_free,ifc_fourq
 !!      littlegroup_pert,littlegroup_q,mati3inv,normsq_gkq,phdispl_cart2red
 !!      prt_gkk_yambo,wrap2_pmhalf,wrtout,xmpi_bcast
 !!
 !! SOURCE
 
 subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_gkk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -154,25 +144,18 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  use_sym   = 1
  nsppol    = elph_ds%nsppol
  nbranch   = elph_ds%nbranch
- if (ep_prt_yambo==1) then
-   nFSband = nband
-   minFSband = 1
- else
-   nFSband   = elph_ds%nFSband
-   minFSband = elph_ds%minFSband
- end if
+ nFSband   = elph_ds%nFSband
+ minFSband = elph_ds%minFSband
 
 !init values for parallelization
  comm = xmpi_world
  me = xmpi_comm_rank(comm)
  master = 0
 
- ABI_STAT_ALLOCATE(h1_mat_el,(2, nFSband**2, nbranch, elph_ds%k_phon%my_nkpt, nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array h1_mat_el')
+ ABI_MALLOC_OR_DIE(h1_mat_el,(2, nFSband**2, nbranch, elph_ds%k_phon%my_nkpt, nsppol), ierr)
  h1_mat_el= zero
 
- ABI_STAT_ALLOCATE(h1_mat_el_sq,(2, nFSband**2, nbranch**2,elph_ds%k_phon%my_nkpt, nsppol), ierr)
- ABI_CHECK(ierr==0, 'trying to allocate array h1_mat_el_sq')
+ ABI_MALLOC_OR_DIE(h1_mat_el_sq,(2, nFSband**2, nbranch**2,elph_ds%k_phon%my_nkpt, nsppol), ierr)
  h1_mat_el_sq = zero
 
  ABI_ALLOCATE(elph_ds%qirredtofull,(elph_ds%nqptirred))
@@ -190,8 +173,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
    elph_ds%gkk_qpt = zero
 
  else if (elph_ds%gkqwrite == 1) then
-   ABI_STAT_ALLOCATE(gkk_qpt_tmp,(2,elph_ds%ngkkband**2,nbranch**2,nsppol), ierr)
-   ABI_CHECK(ierr==0, 'trying to allocate array gkk_qpt_tmp')
+   ABI_MALLOC_OR_DIE(gkk_qpt_tmp,(2,elph_ds%ngkkband**2,nbranch**2,nsppol), ierr)
    gkk_qpt_tmp = zero
    do iqptirred=1,elph_ds%nqptirred*elph_ds%k_phon%nkpt
      write (elph_ds%unitgkq,REC=iqptirred) gkk_qpt_tmp
@@ -235,8 +217,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
    end if
 
-!  broadcast data to all nodes:
-   call hdr_bcast(hdr1, master, me, comm)
+   ! broadcast data to all nodes:
+   call hdr1%bcast(master, me, comm)
 
 !  Find qpoint in full grid
    new=1
@@ -344,7 +326,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
    ! Determine dynamical matrix, phonon frequencies and displacement vector for qpoint
    !call wrtout(std_out,' read_gkk: calling inpphon to calculate the dynamical matrix','COLL')
 
-   call ifc_fourq(ifc,cryst,qptirred_local(:,iqptirred),phfrq_tmp,displ_cart,out_eigvec=eigvec)
+   call ifc%fourq(cryst,qptirred_local(:,iqptirred),phfrq_tmp,displ_cart,out_eigvec=eigvec)
 
 !  Get displacement vectors for all branches in reduced coordinates
 !  used in scalar product with H(1)_atom,idir  matrix elements
@@ -404,12 +386,10 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
 !      find place of irred k in k_phon
 !      the kpoints in the file (kptns) could be ordered arbitrarily
-       call get_rank_1kpt (hdr1%kptns(:,ikpt1)-qptirred_local(:,iqptirred), &
-&       symrankkpt, elph_ds%k_phon%kptrank_t)
-       ikpt1_phon = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+       symrankkpt = elph_ds%k_phon%krank%get_rank (hdr1%kptns(:,ikpt1)-qptirred_local(:,iqptirred))
+       ikpt1_phon = elph_ds%k_phon%krank%invrank(symrankkpt)
        if (ikpt1_phon < 0) then
-         write (msg,'(a,3es16.6,a)')&
-&         ' irred k ',hdr1%kptns(:,ikpt1),' was not found in full grid'
+         write (msg,'(a,3es16.6,a)')' irred k ',hdr1%kptns(:,ikpt1),' was not found in full grid'
          MSG_ERROR(msg)
        end if
 !      find correspondence between this kpt_phon and the others
@@ -420,8 +400,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
            timsign=one-two*itim1
            kpt(:) = timsign*matmul(symrc1(:,:,isym1), elph_ds%k_phon%kpt(:,ikpt1_phon))
 
-           call get_rank_1kpt (kpt,symrankkpt,elph_ds%k_phon%kptrank_t)
-           jkpt_phon = elph_ds%k_phon%kptrank_t%invrank(symrankkpt)
+           symrankkpt = elph_ds%k_phon%krank%get_rank (kpt)
+           jkpt_phon = elph_ds%k_phon%krank%invrank(symrankkpt)
 
            if (jkpt_phon > 0) then
              FSirrtok(1,jkpt_phon) = ikpt1_phon
@@ -661,7 +641,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      ABI_DEALLOCATE(qdata)
    end if
 
-   call hdr_free(hdr1)
+   call hdr1%free()
 
  end do !of i1wf
 
@@ -737,15 +717,6 @@ end subroutine read_gkk
 
 subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phasecg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outgkk'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot0,bantot1
@@ -782,7 +753,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
  end if
 
 !output GS header
- call hdr_fort_write(hdr0, unitout, fform, ierr)
+ call hdr0%fort_write(unitout, fform, ierr)
  ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
 
 !output GS eigenvalues
@@ -798,7 +769,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
  write (unitout) ntot
 
 !output RF header
- call hdr_fort_write(hdr1, unitout, fform, ierr)
+ call hdr1%fort_write(unitout, fform, ierr)
  ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
 
 !output RF eigenvalues
@@ -860,15 +831,6 @@ end subroutine outgkk
 
 subroutine prt_gkk_yambo(displ_cart,displ_red,kpt_phon,h1_mat_el,iqpt,&
 &       natom,nFSband,nkpt_phon,phfrq,qptn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_gkk_yambo'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1037,7 +999,7 @@ end subroutine prt_gkk_yambo
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2020 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1055,20 +1017,11 @@ end subroutine prt_gkk_yambo
 !!      elphon
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,hdr_free,inpgkk,mkkptrank
+!!      destroy_kptrank,get_rank,hdr_free,inpgkk,mkkptrank
 !!
 !! SOURCE
 
 subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_el_veloc'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1087,8 +1040,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  character(len=fnlen) :: filnam1,filnam2,filnam3
  character(len=500) :: msg
  type(hdr_type) :: hdr1
- type(kptrank_type) :: kptrank_t
-
+ type(krank_t) :: krank
 !arrays
  real(dp) :: im_el_veloc(3)
  real(dp),allocatable :: eig1_k(:,:)
@@ -1117,10 +1069,10 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  bantot1 = 2*nband_in**2*nkpt_in*nsppol_in
 
  call inpgkk(eigen11,filnam1,hdr1)
- call hdr_free(hdr1)
+ call hdr1%free()
 
  call inpgkk(eigen12,filnam2,hdr1)
- call hdr_free(hdr1)
+ call hdr1%free()
 
 !we use the hdr1 from the last call - should add some consistency
 !testing here, we are trusting users not to mix different ddk files...
@@ -1149,13 +1101,13 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  elph_tr_ds%el_veloc=zero
 
 !need correspondence between the DDK kpoints and the kpt_phon
- call mkkptrank (hdr1%kptns,hdr1%nkpt,kptrank_t)
+ krank = krank_new(hdr1%nkpt, hdr1%kptns)
 
  do isppol=1,nsppol_in
    im_el_veloc(:)=zero
    do ikpt=1,nkpt_in
-     call get_rank_1kpt (kpt_in(:,ikpt),symrankkpt, kptrank_t)
-     ikpt_ddk = kptrank_t%invrank(symrankkpt)
+    symrankkpt = krank%get_rank (kpt_in(:,ikpt))
+     ikpt_ddk = krank%invrank(symrankkpt)
      if (ikpt_ddk == -1) then
        write(std_out,*)'read_el_veloc ******** error in correspondence between ddk and gkk kpoint sets'
        write(std_out,*)' kpt sets in gkk and ddk files must agree.'
@@ -1182,13 +1134,13 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
    end do
  end do ! end isppol
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
  ABI_DEALLOCATE(eig1_k)
  ABI_DEALLOCATE(eigen11)
  ABI_DEALLOCATE(eigen12)
  ABI_DEALLOCATE(eigen13)
 
- call hdr_free(hdr1)
+ call hdr1%free()
 
  write(std_out,*)'out of read_el_veloc '
 
@@ -1220,15 +1172,6 @@ end subroutine read_el_veloc
 !! SOURCE
 
 subroutine inpgkk(eigen1,filegkk,hdr1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inpgkk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1272,7 +1215,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
  ABI_CHECK(ierr==0,"reading n1wf from gkk file")
 
  ABI_DEALLOCATE(eigen)
- call hdr_free(hdr0)
+ call hdr0%free()
 
  if (n1wf > 1) then
    write(message,'(3a)')&
@@ -1348,15 +1291,6 @@ end subroutine inpgkk
 
 subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1_mat_el_sq,&
 &   qpt,symq,qtimrev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'completeperts'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1506,15 +1440,6 @@ end subroutine completeperts
 
 subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &    h1_mat_el_sq,iqptirred,phfrq_tmp,qpt_irred,qdata)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normsq_gkq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1725,15 +1650,6 @@ end subroutine normsq_gkq
 subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &  h1_mat_el_sq,iqptirred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_gam'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqptirred
@@ -1885,15 +1801,6 @@ end subroutine nmsq_gam
 subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_gam_sumFS'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqptirred
@@ -1954,7 +1861,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
          sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)
          ibeff=ib2+(ib1-1)*elph_ds%nFSband
 
-         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,isppol,ik_this_proc),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,elph_ds%nbranch,elph_ds%nbranch/))
 
          call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
 
@@ -2018,7 +1925,6 @@ end subroutine nmsq_gam_sumFS
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/nmsq_pure_gkk
 !!
 !! NAME
@@ -2052,15 +1958,6 @@ end subroutine nmsq_gam_sumFS
 
 subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_pure_gkk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2191,15 +2088,6 @@ end subroutine nmsq_pure_gkk
 !! SOURCE
 
 subroutine nmsq_pure_gkk_sumfs(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,h1_mat_el_sq,iqptirred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_pure_gkk_sumfs'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

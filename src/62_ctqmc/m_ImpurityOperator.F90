@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ImpurityOperator
 !! NAME
 !!  m_ImpurityOperator
@@ -10,7 +10,7 @@
 !!  manage all related to Impurity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -127,7 +127,7 @@ CONTAINS
 !!  Initialize and allocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -154,13 +154,6 @@ CONTAINS
 SUBROUTINE ImpurityOperator_init(this, flavors, beta)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_init'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: flavors
   !DOUBLE PRECISION      , INTENT(IN   ) :: U
@@ -219,7 +212,7 @@ END SUBROUTINE ImpurityOperator_init
 !!  reset operator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -244,13 +237,6 @@ END SUBROUTINE ImpurityOperator_init
 SUBROUTINE ImpurityOperator_reset(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_reset'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                               :: IT
@@ -283,7 +269,7 @@ END SUBROUTINE ImpurityOperator_reset
 !!  Compute an interaction this for t2g like interaction
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -310,13 +296,6 @@ END SUBROUTINE ImpurityOperator_reset
 SUBROUTINE ImpurityOperator_computeU(this, U, J)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_computeU'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION      , INTENT(IN   ) :: U
   DOUBLE PRECISION      , INTENT(IN   ) :: J
@@ -364,7 +343,7 @@ END SUBROUTINE ImpurityOperator_computeU
 !!  Set directly the U interaction this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -390,13 +369,6 @@ END SUBROUTINE ImpurityOperator_computeU
 SUBROUTINE ImpurityOperator_setUmat(this, matU)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_setUmat'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: matU
   INTEGER :: iflavor1
@@ -422,7 +394,7 @@ END SUBROUTINE ImpurityOperator_setUmat
 !!  Set directly the chemical potential
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -448,13 +420,6 @@ END SUBROUTINE ImpurityOperator_setUmat
 SUBROUTINE ImpurityOperator_setMu(this, mu)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_setMu'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ) :: mu
   INTEGER :: iflavor
@@ -476,7 +441,7 @@ END SUBROUTINE ImpurityOperator_setMu
 !!  active a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -502,13 +467,6 @@ END SUBROUTINE ImpurityOperator_setMu
 SUBROUTINE ImpurityOperator_activateParticle(this,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_activateParticle'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: flavor
 
@@ -532,7 +490,7 @@ END SUBROUTINE ImpurityOperator_activateParticle
 !!  positive if outside a segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -560,13 +518,6 @@ END SUBROUTINE ImpurityOperator_activateParticle
 DOUBLE PRECISION FUNCTION ImpurityOperator_getAvailableTime(this, time, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getAvailableTime'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN   ) :: this
   DOUBLE PRECISION      , INTENT(IN   ) :: time
   INTEGER               , INTENT(OUT  ) :: position
@@ -620,7 +571,7 @@ END FUNCTION ImpurityOperator_getAvailableTime
 !!  get the time available without the segment "position"
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -647,13 +598,6 @@ END FUNCTION ImpurityOperator_getAvailableTime
 DOUBLE PRECISION FUNCTION ImpurityOperator_getAvailedTime(this, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getAvailedTime'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN   ) :: this
   INTEGER               , INTENT(IN   ) :: position
   DOUBLE PRECISION                      :: T_avail
@@ -689,7 +633,7 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !!  add a segment to the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -718,13 +662,6 @@ END FUNCTION ImpurityOperator_getAvailedTime
 SUBROUTINE ImpurityOperator_add(this, CdagC_1, position_val)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_add'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   INTEGER               , INTENT(IN   ) :: position_val
@@ -814,7 +751,7 @@ END SUBROUTINE ImpurityOperator_add
 !!  Return the segment at position_val
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -841,13 +778,6 @@ END SUBROUTINE ImpurityOperator_add
 FUNCTION ImpurityOperator_getSegment(this,position_val)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getSegment'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: position_val
 !Local variables ------------------------------
@@ -892,7 +822,7 @@ END FUNCTION ImpurityOperator_getSegment
 !!  Remove a segment for the active flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -918,13 +848,6 @@ END FUNCTION ImpurityOperator_getSegment
 SUBROUTINE ImpurityOperator_remove(this,ieme)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_remove'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: ieme
 !Local variables ------------------------------
@@ -982,7 +905,7 @@ END SUBROUTINE ImpurityOperator_remove
 !!  Get the overlap induced by CdagC_1 in the current configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1009,13 +932,6 @@ END SUBROUTINE ImpurityOperator_remove
 DOUBLE PRECISION FUNCTION ImpurityOperator_getNewOverlap(this, CdagC_1)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getNewOverlap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN) :: CdagC_1
 !Local variables ------------------------------
@@ -1062,7 +978,7 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !!  Get the sign of the ratio of impurity traces
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2014 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2020 ABINIT group (B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1091,13 +1007,6 @@ END FUNCTION ImpurityOperator_getNewOverlap
 DOUBLE PRECISION FUNCTION ImpurityOperator_getsign(this, time2, i, action, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getsign'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   DOUBLE PRECISION, INTENT(IN) :: time2, action
   INTEGER ,  INTENT(IN) :: i,position
@@ -1191,7 +1100,7 @@ END FUNCTION ImpurityOperator_getsign
 !!  new (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1216,13 +1125,6 @@ END FUNCTION ImpurityOperator_getsign
 !! SOURCE
 
 FUNCTION ImpurityOperator_getTraceAdd(this, CdagC_1) RESULT(trace)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getTraceAdd'
-!End of the abilint section
 
   TYPE(ImpurityOperator)          , INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
@@ -1267,7 +1169,7 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !!  (anti-)segment.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1292,13 +1194,6 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !! SOURCE
 
 FUNCTION ImpurityOperator_getTraceRemove(this, position) RESULT(trace)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getTraceRemove'
-!End of the abilint section
 
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: position
@@ -1344,7 +1239,7 @@ END FUNCTION ImpurityOperator_getTraceRemove
 !!  Compute the overlap of a segment with a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1372,13 +1267,6 @@ END FUNCTION ImpurityOperator_getTraceRemove
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSegFlav(this,CdagC_1,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapSegFlav'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !  TYPE(CdagC)           , INTENT(IN) :: CdagC_1
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN) :: CdagC_1
@@ -1525,7 +1413,7 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 !!  Returns the overlap of flavor with the others
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1552,13 +1440,6 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapFlavor(this,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapFlavor'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER,      OPTIONAL, INTENT(IN) :: flavor
 !Local variables ------------------------------
@@ -1587,7 +1468,7 @@ END FUNCTION ImpurityOperator_overlapflavor
 !!  compute the overlap of flavor1 with the configuration of flavor2
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1615,13 +1496,6 @@ END FUNCTION ImpurityOperator_overlapflavor
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSwap(this,flavor1,flavor2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapSwap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER               , INTENT(IN) :: flavor1
   INTEGER               , INTENT(IN) :: flavor2
@@ -1659,7 +1533,7 @@ END FUNCTION ImpurityOperator_overlapSwap
 !!  Swap to flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1686,13 +1560,6 @@ END FUNCTION ImpurityOperator_overlapSwap
 SUBROUTINE ImpurityOperator_swap(this,flavor1, flavor2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_swap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: flavor1
   INTEGER               , INTENT(IN   ) :: flavor2
@@ -1730,7 +1597,7 @@ END SUBROUTINE ImpurityOperator_swap
 !!  Compute overlap between two flavors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1758,13 +1625,6 @@ END SUBROUTINE ImpurityOperator_swap
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapIJ(this,i,j)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapIJ'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN) :: i
   INTEGER               , INTENT(IN) :: j
@@ -1806,7 +1666,7 @@ END FUNCTION ImpurityOperator_overlapIJ
 !!  measure double occupancy and interaction energy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1832,13 +1692,6 @@ END FUNCTION ImpurityOperator_overlapIJ
 SUBROUTINE ImpurityOperator_measDE(this,DE)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_measDE'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(INOUT) :: DE
 !Local variables ------------------------------
@@ -1875,7 +1728,7 @@ END SUBROUTINE ImpurityOperator_measDE
 !!  Compute from scratch all overlaps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1900,13 +1753,6 @@ END SUBROUTINE ImpurityOperator_measDE
 SUBROUTINE ImpurityOperator_cleanOverlaps(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_cleanOverlaps'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                                       :: iflavor1
@@ -1934,7 +1780,7 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 !!  measure the number of electrons on flavor flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1961,13 +1807,6 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 DOUBLE PRECISION FUNCTION ImpurityOperator_measN(this,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_measN'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER,      OPTIONAL, INTENT(IN) :: flavor
 !Local variables ------------------------------
@@ -2006,7 +1845,7 @@ END FUNCTION ImpurityOperator_measN
 !!  destroy and deallocate
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2031,13 +1870,6 @@ END FUNCTION ImpurityOperator_measN
 SUBROUTINE ImpurityOperator_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_destroy'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                               :: IT
@@ -2066,7 +1898,7 @@ END SUBROUTINE ImpurityOperator_destroy
 !!  compute error on the overlap (numerical accumulation)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2092,13 +1924,6 @@ END SUBROUTINE ImpurityOperator_destroy
 SUBROUTINE ImpurityOperator_getErrorOverlap(this,DE)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getErrorOverlap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(INOUT) :: DE
 !Local variables ------------------------------
@@ -2138,7 +1963,7 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 !!  set the check mechanism
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2164,13 +1989,6 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 SUBROUTINE ImpurityOperator_doCheck(this,opt_check)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_doCheck'
-!End of the abilint section
-
   TYPE(ImpurityOperator) , INTENT(INOUT) :: this
   INTEGER                , INTENT(IN   ) :: opt_check
 
@@ -2188,7 +2006,7 @@ END SUBROUTINE ImpurityOperator_doCheck
 !!  between Tmin and Tmax (c+ and c)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2217,13 +2035,6 @@ END SUBROUTINE ImpurityOperator_doCheck
 SUBROUTINE ImpurityOperator_checkOverlap(this, Tmin, Tmax, iOverlap, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_checkOverlap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT)  :: this
   DOUBLE PRECISION      , INTENT(IN   )  :: Tmin
   DOUBLE PRECISION      , INTENT(IN   )  :: Tmax
@@ -2318,7 +2129,7 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 !!  get error on computing the overlap
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2344,13 +2155,6 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 DOUBLE PRECISION FUNCTION ImpurityOperator_getError(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getError'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
 !Local variables ------------------------------
 !  DOUBLE PRECISION :: tolerance
@@ -2375,7 +2179,7 @@ END FUNCTION ImpurityOperator_getError
 !!  print in a latex format all the configuration
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2402,13 +2206,6 @@ END FUNCTION ImpurityOperator_getError
 SUBROUTINE ImpurityOperator_printLatex(this, ostream, isweep)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_printLatex'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER               , INTENT(IN) :: ostream
   INTEGER               , INTENT(IN) :: isweep

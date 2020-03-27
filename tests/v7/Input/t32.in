@@ -3,10 +3,30 @@
 ndtset 2
 
 # first data set: normal ground state
-nucdipmom1 6*0.0
+nucdipmom1
+0.0 0.0 0.0
+0.0 0.0 0.0
 
 # second data set: add nuclear dipole moment in z direction to Al site
-nucdipmom2 10.0 10.0 10.0 0.0 0.0 0.000
+# nuclear dipoles are input in cartesian coords, atomic units
+# note that in atomic units, 1 unit of mag dipole = 2 bohr magnetons
+nucdipmom2
+0.0 0.0  10.0
+0.0 0.0  0.0
+
+# nuclear dipole moments break time reversal symmetry so do not use kptopt 1 or 2
+# symmetry will be lower in data set 2 case due to dipole in z direction on one site
+
+# turn off all symmetries
+kptopt 3
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
+symmorphi 0
+
+kptrlatt
+4 4 -4
+-4 4 -4
+-4 4 4
 
 # nuclear dipoles always generate complex occupancies
 pawcpxocc 2
@@ -38,16 +58,6 @@ pawecutdg 10
 
 nband 4
 
-# nuclear dipole moments break time reversal symmetry so do not use kptopt 1 or 2
-# symmetry will be lower in data set 2 case due to dipole in z direction on one site
-kptopt 3
-nsym 1
-symmorphi 0
-symrel 1 0 0 0 1 0 0 0 1
-kptrlatt
-2   0   0   
-0   2   0   
-0  -2   2   
 
 acell 3*10.699
 rprim
@@ -65,7 +75,6 @@ typat 1 2
 natom 2
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

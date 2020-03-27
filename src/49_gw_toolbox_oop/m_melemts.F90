@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_melemts
 !! NAME
 !!  m_melemts
@@ -10,7 +9,7 @@
 !!  using the perturbative approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -215,15 +214,6 @@ CONTAINS  !=====================================================================
 
 subroutine melflags_reset(Mflags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melflags_reset'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(melflags_t),intent(inout) :: Mflags
 
@@ -267,15 +257,6 @@ end subroutine melflags_reset
 !! SOURCE
 
 subroutine melflags_copy(Mflags_in, Mflags_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melflags_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(melflags_t),intent(in)    :: Mflags_in
@@ -324,15 +305,6 @@ end subroutine melflags_copy
 
 subroutine melements_free(Mels)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(melements_t),intent(inout) :: Mels
 
@@ -343,45 +315,23 @@ subroutine melements_free(Mels)
  ! @melements_t
 
 !integer arrays
- if (allocated(Mels%bands_idx)) then
-   ABI_FREE(Mels%bands_idx)
- end if
- if (allocated(Mels%iscalc))   then
-   ABI_FREE(Mels%iscalc)
- end if
+ ABI_SFREE(Mels%bands_idx)
+ ABI_SFREE(Mels%iscalc)
 
 !real arrays
- if (allocated(Mels%kibz)) then
-   ABI_FREE(Mels%kibz)
- end if
+ ABI_SFREE(Mels%kibz)
 
 !complex arrays
- if (allocated(Mels%hbare))   then
-   ABI_FREE(Mels%hbare)
- end if
- if (allocated(Mels%sxcore)) then
-   ABI_FREE(Mels%sxcore)
- end if
- if (allocated(Mels%vhartree))   then
-   ABI_FREE(Mels%vhartree)
- end if
- if (allocated(Mels%vlexx)) then
-   ABI_FREE(Mels%vlexx)
- end if
- if (allocated(Mels%vu)) then
-   ABI_FREE(Mels%vu)
- end if
- if (allocated(Mels%vxc)) then
-   ABI_FREE(Mels%vxc)
- end if
- if (allocated(Mels%vxcval)) then
-   ABI_FREE(Mels%vxcval)
- end if
- if (allocated(Mels%vxcval_hybrid)) then
-   ABI_FREE(Mels%vxcval_hybrid)
- end if
+ ABI_SFREE(Mels%hbare)
+ ABI_SFREE(Mels%sxcore)
+ ABI_SFREE(Mels%vhartree)
+ ABI_SFREE(Mels%vlexx)
+ ABI_SFREE(Mels%vu)
+ ABI_SFREE(Mels%vxc)
+ ABI_SFREE(Mels%vxcval)
+ ABI_SFREE(Mels%vxcval_hybrid)
 
- ! * Reset all has_* flags.
+ ! Reset all has_* flags.
  call melflags_reset(Mels%flags)
 
  DBG_EXIT("COLL")
@@ -415,15 +365,6 @@ end subroutine melements_free
 !! SOURCE
 
 subroutine my_select_melements(Mels,aname,flag_p,arr_p)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_select_melements'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -495,15 +436,6 @@ end subroutine my_select_melements
 !! SOURCE
 
 subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -632,15 +564,6 @@ end subroutine melements_init
 
 subroutine melements_herm(Mels,aname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_herm'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),optional,intent(in) :: aname
@@ -730,15 +653,6 @@ end subroutine melements_herm
 
 subroutine melements_mpisum(Mels,comm,aname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_mpisum'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -805,15 +719,6 @@ end subroutine melements_mpisum
 !! SOURCE
 
 subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -978,15 +883,6 @@ end subroutine melements_print
 
 subroutine melements_zero(Mels,irrep_tab,aname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_zero'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),optional,intent(in) :: aname
@@ -1061,14 +957,6 @@ end subroutine melements_zero
 !! SOURCE
 
 !pure function mels_get_exene_core(mels,kmesh,bands) result(ex_energy)
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'mels_get_exene_core'
-!!End of the abilint section
-!
-! implicit none
 !
 !!Arguments ------------------------------------
 !!scalars

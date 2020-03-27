@@ -35,13 +35,12 @@
   nkpt 1  kptnrm 1  istwfk 1
   kpt 0 0 0  wtk 1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t03.out, tolnlines = 32, tolabs = 1.1e-1, tolrel = 6.0e-4, fld_options =  -medium
+#%%   t03.out, tolnlines = 32, tolabs = 1.1e-1, tolrel = 7.0e-4, fld_options =  -medium
 #%% psp_files = 08o.6.blyp.hgh, 08o.6.bp.hgh, 08o.6.olyp.hgh
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_lobpcgwf
 !! NAME
 !! m_lobpcgwf
@@ -11,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (JB)
+!! Copyright (C) 1998-2020 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +31,6 @@
 
 module m_lobpcgwf
 
- use defs_abitypes
  use defs_basis
  use m_abicore
  use m_lobpcg
@@ -43,7 +41,9 @@ module m_lobpcgwf
  use m_fstrings
  use m_xg
  use m_lobpcg2
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop
@@ -63,7 +63,7 @@ module m_lobpcgwf
  logical,save  :: l_paw
  integer,save  :: l_prtvol
  integer,save  :: l_sij_opt
- real(dp), allocatable,save :: l_gvnlc(:,:)
+ real(dp), allocatable,save :: l_gvnlxc(:,:)
  real(dp), allocatable,save ::  l_pcon(:)
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
@@ -78,13 +78,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  use m_cgtools, only : dotprod_g
  use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcgwf2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -121,7 +114,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp), pointer :: eig_ptr(:,:) => NULL()
  real(dp), pointer :: resid_ptr(:,:) => NULL()
 
- ! Stupid things for NC
+ ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
  integer :: iband, shift
@@ -217,7 +210,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
 
- ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*blockdim))
+ ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
  call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
 
@@ -238,21 +231,21 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
  ! Compute enlout (nonlocal energy for each band if necessary) This is the best
- ! quick and dirty trick to compute this part in NC. gvnlc cannot be part of
+ ! quick and dirty trick to compute this part in NC. gvnlxc cannot be part of
  ! lobpcg algorithm
  if ( .not. l_paw ) then
-   !Check l_gvnlc size
-   !if ( size(l_gvnlc) < 2*nband*l_npw*l_nspinor ) then
-   if ( size(l_gvnlc) /= 0 ) then
-     ABI_FREE(l_gvnlc)
-     !ABI_MALLOC(l_gvnlc,(2,nband*l_npw*l_nspinor))
-     ABI_MALLOC(l_gvnlc,(0,0))
+   !Check l_gvnlxc size
+   !if ( size(l_gvnlxc) < 2*nband*l_npw*l_nspinor ) then
+   if ( size(l_gvnlxc) /= 0 ) then
+     ABI_FREE(l_gvnlxc)
+     !ABI_MALLOC(l_gvnlxc,(2,nband*l_npw*l_nspinor))
+     ABI_MALLOC(l_gvnlxc,(0,0))
    end if
    !Call nonlop
    if (mpi_enreg%paral_kgb==0) then
 
      call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-&                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
+&                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
 
    else
      do iband=1,nband/blockdim
@@ -262,8 +255,8 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
 &       gsc_dummy,l_tim_getghc, &
 &       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-!&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-&       l_gvnlc(:,:),&
+!&       l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&       l_gvnlxc(:,:),&
 &       already_transposed=.false.)
      end do
    end if
@@ -271,11 +264,11 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !   do iband=1,nband
 !     shift = npw*nspinor*(iband-1)
 !       call dotprod_g(enl_out(iband),dprod_i,l_gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
-!  &     l_gvnlc(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+!  &     l_gvnlxc(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 !   end do
  end if
 
- ABI_FREE(l_gvnlc)
+ ABI_FREE(l_gvnlxc)
 
  ! Free lobpcg
  call lobpcg_free(lobpcg)
@@ -309,13 +302,6 @@ end subroutine lobpcgwf2
 #ifdef HAVE_OPENMP
    use omp_lib
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghc_gsc'
-!End of the abilint section
-
   type(xgBlock_t), intent(inout) :: X
   type(xgBlock_t), intent(inout) :: AX
   type(xgBlock_t), intent(inout) :: BX
@@ -344,18 +330,18 @@ end subroutine lobpcgwf2
    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
  end if
 
- if ( size(l_gvnlc) < 2*blockdim*spacedim ) then
-   ABI_FREE(l_gvnlc)
-   ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
+ if ( size(l_gvnlxc) < 2*blockdim*spacedim ) then
+   ABI_FREE(l_gvnlxc)
+   ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
  end if
 
   if (l_mpi_enreg%paral_kgb==0) then
 
     call multithreaded_getghc(l_cpopt,cg(:,1:blockdim*spacedim),cprj_dum,ghc,gsc(:,1:blockdim*spacedim),&
-      l_gs_hamk,l_gvnlc,dum, l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
+      l_gs_hamk,l_gvnlxc,dum, l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
 
   else
-    call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),dum,blockdim,l_mpi_enreg,&
+    call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlxc,ghc,gsc(:,1:blockdim*spacedim),dum,blockdim,l_mpi_enreg,&
 &                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)
   end if
 
@@ -384,13 +370,6 @@ end subroutine lobpcgwf2
 
  subroutine precond(W)
    use m_xg, only : xg_t, xgBlock_colwiseMul
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precond'
-!End of the abilint section
-
    type(xgBlock_t), intent(inout) :: W
    integer :: ispinor
    !integer :: cplx

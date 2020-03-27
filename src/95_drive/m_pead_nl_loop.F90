@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pead_nl_loop
 !! NAME
 !!  m_pead_nl_loop
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2016 ABINIT group (MVeithen,MB)
+!!  Copyright (C) 2002-2020 ABINIT group (MVeithen,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,18 +26,19 @@
 module m_pead_nl_loop
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_wffile
  use m_abicore
  use m_xmpi
  use m_hdr
+ use m_dtset
+ use m_dtfil
 #if defined HAVE_MPI2
  use mpi
 #endif
 
- use m_dtfil,    only : status
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_kg,       only : getph, mkkpg
  use m_cgtools,  only : dotprod_vn, dotprod_g
@@ -53,8 +53,7 @@ module m_pead_nl_loop
  use m_dfpt_mkvxc, only : dfpt_mkvxc
  use m_mkcore,     only : dfpt_mkcore
  use m_mklocl,     only : dfpt_vlocal
- use m_hamiltonian,only : init_hamiltonian, destroy_hamiltonian, &
-                          load_k_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,only : init_hamiltonian, gs_hamiltonian_type
  use m_mkffnl,     only : mkffnl
  use m_mpinfo,     only : proc_distrb_cycle
  use m_nonlop,     only : nonlop
@@ -158,15 +157,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 & npwarr,occ,psps,pwind,&
 & rfpert,rprimd,ucvol,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pead_nl_loop'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mgfft,mk1mem,mkmem,mkmem_max,mpert,mpw,natom,nfft
@@ -194,9 +184,10 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !scalars
  integer,parameter :: level=51
  integer :: ask_accurate,counter,cplex,formeig,i1dir
- integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,iexit,ifft,index,ir
+ integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,ifft,index,ir
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftot,nspden,option,optorth
  integer :: pert1case,pert2case,pert3case,rdwrpaw,timrev,comm_cell
+ logical :: nmxc
  real(dp) :: ecut_eff,exc3,valuei
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i
@@ -215,7 +206,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 ! ***********************************************************************
 
  call timab(502,1,tsec)
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  comm_cell = mpi_enreg%comm_cell
 
@@ -289,8 +279,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
        counter = pert1case
        call appdig(pert1case,dtfil%fnamewff1,fiwf1i)
 
-       call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
-
        mcg=mpw*nspinor*mband*mkmem*nsppol
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
 &       formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
@@ -308,16 +296,14 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
          rdwrpaw=0
          call appdig(pert1case,dtfil%fildens1in,fiden1i)
-         call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
        xccc3d1(:) = 0._dp
        if ((psps%n1xccc/=0).and.(i1pert <= natom)) then
-         call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
          call dfpt_mkcore(cplex,i1dir,i1pert,natom,psps%ntypat,n1,psps%n1xccc,&
 &         n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
 &         psps%xcccrc,psps%xccc1d,xccc3d1,xred)
@@ -332,7 +318,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
              counter = 100*pert3case + pert1case
              call appdig(pert3case,dtfil%fnamewff1,fiwf3i)
 
-             call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
              mcg=mpw*nspinor*mband*mkmem*nsppol
              call inwffil(ask_accurate,cg3,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
 &             formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
@@ -350,16 +335,14 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
              if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
                rdwrpaw=0
                call appdig(pert3case,dtfil%fildens1in,fiden1i)
-               call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-               call hdr_free(hdr_den)
+               call hdr_den%free()
              end if
 
              xccc3d3(:) = 0._dp
              if ((psps%n1xccc/=0).and.(i3pert <= natom)) then
-               call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
                call dfpt_mkcore(cplex,i3dir,i3pert,natom,psps%ntypat,n1,psps%n1xccc,&
 &               n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
 &               psps%xcccrc,psps%xccc1d,xccc3d3,xred)
@@ -377,7 +360,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 &               (maxval(rfpert(i1dir,i1pert,:,i2pert,i3dir,i3pert)) == 1)) then
 
                  call timab(511,1,tsec)
-                 call status(counter,dtfil%filstat,iexit,level,'call pead_nl_mv  ')
                  call pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 &                 i1pert,i3pert,i1dir,i3dir,&
 &                 kneigh,kg_neigh,kptindex,kpt3,mband,mkmem,mkmem_max,mk1mem,&
@@ -428,17 +410,15 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
                      rdwrpaw=0
                      call appdig(pert2case,dtfil%fildens1in,fiden1i)
-                     call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-                     call hdr_free(hdr_den)
+                     call hdr_den%free()
 
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfft))
                      work(:)=rho2r1(:,1)
-                     call status(counter,dtfil%filstat,iexit,level,'call fourdp   ')
-                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,0)
+                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfft,1,dtset%ngfft,0)
                      ABI_DEALLOCATE(work)
 
                    end if
@@ -451,13 +431,11 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                    if (i2pert <= natom) then
 
-                     call status(counter,dtfil%filstat,iexit,level,'call dfpt_vlocal   ')
                      call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
-&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
 &                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
                      if (psps%n1xccc/=0) then
-                       call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
                        call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
 &                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
 &                       psps%xcccrc,psps%xccc1d,xccc3d2,xred)
@@ -465,13 +443,11 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                    end if  ! i2pert <= natom
 
-                   call status(counter,dtfil%filstat,iexit,level,'call hartre   ')
-                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,rho2g1,rprimd,vhartr1)
-                   option=1
-                   call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkvxc   ')
+                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,rho2g1,rprimd,vhartr1)
+                   option=1 ; nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&
-&                   rho_dum,0,rho_dum,0,nkxc,dtset%nspden,n3xccc,option,&
-&                   dtset%paral_kgb,dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
+&                   rho_dum,0,rho_dum,0,nkxc,nmxc,dtset%nspden,n3xccc,option,&
+&                   dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
 
                    if(dtset%nsppol==1)then
                      if(cplex==1)then
@@ -625,13 +601,11 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !                  Perform DFPT part of the 3dte calculation
 
                    call timab(512,1,tsec)
-                   call status(counter,dtfil%filstat,iexit,level,'call pead_nl_resp ')
                    call pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
 &                   kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nfft,nkpt,nspden,&
 &                   nspinor,nsppol,npwarr,occ,ph1d,psps,rprimd,vtrial1,xred,ylm)
                    call timab(512,2,tsec)
 
-                   call status(counter,dtfil%filstat,iexit,level,'after pead_nl_resp')
 
 !                  Describe the perturbation and write out the result
                    if (mpi_enreg%me == 0) then
@@ -684,7 +658,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
    end do    ! i1dir
  end do     ! i1pert
 
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
  ABI_DEALLOCATE(cg1)
  ABI_DEALLOCATE(cg3)
@@ -762,8 +735,8 @@ end subroutine pead_nl_loop
 !!      pead_nl_loop
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      load_k_hamiltonian,mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      dotprod_g,fftpac,fourwf,init_hamiltonian
+!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
 !!
 !! SOURCE
 
@@ -772,15 +745,6 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 & kg,mband,mgfft,mkmem,mk1mem,&
 & mpert,mpi_enreg,mpsang,mpw,natom,nfft,nkpt,nspden,nspinor,nsppol,&
 & npwarr,occ,ph1d,psps,rprimd,vtrial1,xred,ylm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pead_nl_resp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -804,7 +768,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=52
- integer :: bantot,choice,counter,cpopt,dimffnl,iband,icg0,ider,ierr,iexit
+ integer :: bantot,choice,counter,cpopt,dimffnl,iband,icg0,ider,ierr
  integer :: ii,ikg,ikpt,ilm,ipw,isppol,istwf_k,jband,jj
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nnlout,npw_k
  integer :: option,paw_opt,signs,spaceComm,tim_fourwf,tim_nonlop
@@ -822,10 +786,10 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 
 !***********************************************************************
 
+ ABI_UNUSED(dtfil%ireadwf)
+
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
-
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  bantot = 0
  icg0 = 0
@@ -849,7 +813,6 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 
  do isppol = 1, nsppol
 
-   call status(0,dtfil%filstat,iexit,level,'call fftpac   ')
    call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,vtrial1,vlocal1,option)
 
 !  Loop over k-points
@@ -895,7 +858,6 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
      ABI_ALLOCATE(ffnlk,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
      if (i2pert<natom+1) then
        ider=0
-       call status(counter,dtfil%filstat,iexit,level,'call mkffnl  ')
        call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnlk,psps%ffspl,gs_hamk%gmet,gs_hamk%gprimd,&
 &       ider,ider,psps%indlmn,kg_k,kpg_k,kpt,psps%lmnmax,psps%lnmax,psps%mpsang,&
 &       psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
@@ -903,7 +865,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
      end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
-     call load_k_hamiltonian(gs_hamk,kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
+     call gs_hamk%load_k(kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnlk,compute_gbound=.true.)
 !    Load k+q-dependent part in the Hamiltonian datastructure
 !    call load_kprime_hamiltonian...  !! To be activated when q/=0
@@ -919,17 +881,15 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 
 !      Compute vtrial1 | cwafef3 >
        tim_fourwf = 0 ; weight = one
-       call status(counter,dtfil%filstat,iexit,level,'call fourwf  ')
        call fourwf(cplex,vlocal1,cwavef3,gh1,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
-&       dtset%paral_kgb,tim_fourwf,weight,weight,&
+&       tim_fourwf,weight,weight,&
 &       use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      In case i2pert = phonon-type perturbation
 !      add first-order change in the nonlocal potential
        if (i2pert<natom+1) then
          signs=2 ; choice=2 ; nnlout=3 ; tim_nonlop = 0 ; paw_opt=0 ; cpopt=-1
-         call status(counter,dtfil%filstat,iexit,level,'call nonlop  ')
          call nonlop(choice,cpopt,cprj_dum,enlout,gs_hamk,i2dir,dum,mpi_enreg,1,nnlout,paw_opt,&
 &         signs,dum_svectout,tim_nonlop,cwavef3,gvnl,iatom_only=i2pert)
          gh1(:,:) = gh1(:,:) + gvnl(:,:)
@@ -940,16 +900,14 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 
 !      Compute vtrial1 | cwave0 >
        tim_fourwf = 0 ; weight = one
-       call status(counter,dtfil%filstat,iexit,level,'call fourwf  ')
        call fourwf(cplex,vlocal1,cwave0,gh0,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
-&       dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&       tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      In case i2pert = phonon-type perturbation
 !      add first-order change in the nonlocal potential
        if (i2pert<natom+1) then
          signs=2 ; choice=2 ; nnlout=3 ; tim_nonlop = 0 ; paw_opt=0 ; cpopt=-1
-         call status(counter,dtfil%filstat,iexit,level,'call nonlop  ')
          call nonlop(choice,cpopt,cprj_dum,enlout,gs_hamk,i2dir,dum,mpi_enreg,1,nnlout,paw_opt,&
 &         signs,dum_svectout,tim_nonlop,cwave0,gvnl,iatom_only=i2pert)
          gh0(:,:) = gh0(:,:) + gvnl(:,:)
@@ -1026,12 +984,10 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !use of time reversal symmetry
  d3lo(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  ABI_DEALLOCATE(vlocal1)
  ABI_DEALLOCATE(wfraug)
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
 end subroutine pead_nl_resp
 !!***
@@ -1109,14 +1065,6 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 
  use m_hide_lapack, only : dzgedi, dzgefa
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pead_nl_mv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !
 !---  Arguments : integer scalars
@@ -1148,7 +1096,7 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !
 !---- Local variables : integer scalars
  integer :: count,counter,count1,iband,icg
- integer :: ierr,iexit,ii,ikpt,ikpt_loc,ikpt2
+ integer :: ierr,ii,ikpt,ikpt_loc,ikpt2
  integer :: ikpt_rbz,ineigh,info,ipw,isppol,jband,jcg,jj,jkpt,job,jpw, jkpt2, jkpt_rbz
  integer :: lband,lpband,nband_occ,npw_k,npw_k1,my_source,his_source,dest,tag
  integer :: spaceComm
@@ -1175,15 +1123,15 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !
 !---- Local variables : structured datatypes
 
+
 #if defined HAVE_MPI
 integer :: status1(MPI_STATUS_SIZE)
 spaceComm=mpi_enreg%comm_cell
 #endif
 
+ ABI_UNUSED(dtfil%ireadwf)
 
 ! ***********************************************************************
-
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  write(message,'(8a)') ch10,&
 & ' pead_nl_mv : finite difference expression of the k-point derivative',ch10,&
@@ -1250,7 +1198,6 @@ spaceComm=mpi_enreg%comm_cell
      ikpt_loc = ikpt_loc + 1
      npw_k = npwarr(ikpt)
      counter = 100*ikpt
-     call status(counter,dtfil%filstat,iexit,level,'loop over k   ')
 
      ii = cgindex(ikpt,isppol)
 
@@ -1715,8 +1662,6 @@ spaceComm=mpi_enreg%comm_cell
 !write(100,*)'imaginary part'
 !write(100,'(3(2x,f20.9))')d3_berry(2,:)
 !ENDDEBUG
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
 end subroutine pead_nl_mv
 !!***

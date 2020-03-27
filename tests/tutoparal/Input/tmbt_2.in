@@ -60,7 +60,6 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -71,7 +70,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% max_nprocs = 20
 #%% nprocs_to_test = 20
 #%% [NCPU_20]
-#%%   files_to_test = tmbt_2_MPI20.out, tolnlines = 10, tolabs = 1.100e-03, tolrel = 3.000e-03
+#%% files_to_test = tmbt_2_MPI20.out, tolnlines = 10, tolabs = 1.100e-03, tolrel = 3.000e-03
 #%% [shell]
 #%% post_commands = 
 #%%  ww_cp tmbt_2_MPI20o_SCR tmbt_4_MPI20i_SCR;

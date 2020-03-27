@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigc
 !! NAME
 !!  m_sigc
@@ -21,8 +20,6 @@
 module m_sigc
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_gwdefs
  use m_abicore
  use m_xmpi
@@ -31,9 +28,10 @@ module m_sigc
  use m_errors
  use m_time
  use m_splines
+ use m_dtset
 
- !use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
- !                     Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
@@ -43,8 +41,7 @@ module m_sigc
  use m_gsphere,       only : gsphere_t, gsph_fft_tabs
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
- use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_barrier, wfd_change_ngfft, wfd_paw_get_aeur, &
-&                            wfd_get_many_ur,wfd_sym_ur
+ use m_wfd,           only : wfd_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
  use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
@@ -180,15 +177,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 & PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
 & gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sigc_me'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,rho_nfftot,nomega_sigc,minbnd,maxbnd
@@ -309,7 +297,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
  w_maxval = zero
 
- if ( ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,gwc_ngfft)
+ if ( ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
  gwc_mgfft   = MAXVAL(gwc_ngfft(1:3))
  gwc_fftalga = gwc_ngfft(7)/100 !; gwc_fftalgc=MOD(gwc_ngfft(7),10)
 
@@ -560,8 +548,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
  if ( ANY(mod10== [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
    if (.not.(mod10==SIG_GW_CD.and.Er%mqmem==0)) then
-     ABI_STAT_MALLOC(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
-     ABI_CHECK(ierr==0, "out-of-memory in epsm1_qbz")
+     ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
    end if
  end if
 
@@ -569,8 +556,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ! the Hermitian and the anti-Hermitian part have to be symmetrized in a different way.
  !if (mod10==SIG_QPGW_CD) then
  if (mod10==SIG_QPGW_CD) then
-   ABI_STAT_MALLOC(epsm1_trcc_qbz, (npwc, npwc, Er%nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in epsm1_trcc_qbz")
+   ABI_MALLOC_OR_DIE(epsm1_trcc_qbz, (npwc, npwc, Er%nomega), ierr)
    ABI_MALLOC(epsm1_tmp, (npwc, npwc))
  end if
 
@@ -596,7 +582,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ! Load wavefunctions for GW corrections
    ! TODO: Rotate the functions here instead of calling rho_tw_g
    ABI_MALLOC(wfr_bdgw,(gwc_nfftot*nspinor,ib1:ib2))
-   call wfd_get_many_ur(Wfd, [(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
+   call wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
 
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
@@ -605,7 +591,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
-       call wfd_get_cprj(Wfd,jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+       call wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
        call paw_symcprj(jk_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        call pawcprj_copy(Cprj_ksum,Cprj_kgw(:,ibsp:ibsp+(nspinor-1)))
        ibsp=ibsp+nspinor
@@ -615,7 +601,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_MALLOC(ur_ae_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        ABI_MALLOC(ur_ps_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        do jb=ib1,ib2
-         call wfd_paw_get_aeur(Wfdf,jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+         call wfdf%paw_get_aeur(jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &          ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          ur_ae_bdgw(:,jb)=ur_ae_sum
          ur_ae_onsite_bdgw(:,jb)=ur_ae_onsite_sum
@@ -775,16 +761,16 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ! This processor has this k-point but what about spin?
        if (proc_distrb(ib,ik_bz,spin)/=Wfd%my_rank) CYCLE
 
-       call wfd_get_ur(Wfd,ib,ik_ibz,spin,ur_ibz)
+       call wfd%get_ur(ib,ik_ibz,spin,ur_ibz)
 
        if (Psps%usepaw==1) then
          ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call wfd_get_cprj(Wfd,ib,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+         call wfd%get_cprj(ib,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
          if (Dtset%pawcross==1) then
-           call wfd_paw_get_aeur(Wfdf,ib,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+           call wfdf%paw_get_aeur(ib,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &              ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if
@@ -1390,15 +1376,6 @@ end subroutine calc_sigc_me
 subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
 &  ngfft,nfftot,wfg2_jk,vc_sqrt,botsq,otq,sigcohme)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coh_comp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,npwc,nsig_ab,nspinor,nfftot
@@ -1517,15 +1494,6 @@ end subroutine calc_coh_comp
 
 subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotwgp,&
 & omega,epsm1q,omegame0i,theta_mu_minus_e0i,ket,plasmafreq,npoles_missing,calc_poles,method)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sigc_cd'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1947,15 +1915,6 @@ end subroutine calc_sigc_cd
 !! SOURCE
 
 subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,theta_mu_minus_e0i,ket,ppmodel,npwx,npwc1,npwc2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sig_ppm_comp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

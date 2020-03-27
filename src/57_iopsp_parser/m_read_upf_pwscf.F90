@@ -52,13 +52,6 @@ subroutine read_pseudo (is, iunps)
   use defs_basis, only : std_out,std_out_default
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps
@@ -111,13 +104,6 @@ subroutine scan_begin (iunps, string, rew)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scan_begin'
-!End of the abilint section
-
   implicit none
   ! Unit of the input file
   integer :: iunps
@@ -144,13 +130,6 @@ subroutine scan_end (iunps, string)
   !---------------------------------------------------------------------
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scan_end'
-!End of the abilint section
-
   implicit none
   ! Unit of the input file
   integer :: iunps
@@ -173,13 +152,6 @@ subroutine read_pseudo_header (is, iunps)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo_header'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps
@@ -213,13 +185,6 @@ subroutine read_pseudo_local (is, iunps)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo_local'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps
@@ -240,13 +205,6 @@ subroutine read_pseudo_mesh (is, iunps)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo_mesh'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps
@@ -272,13 +230,6 @@ subroutine read_pseudo_nl (is, iunps)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo_nl'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps
@@ -364,13 +315,6 @@ subroutine read_pseudo_nlcc (is, iunps)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo_nlcc'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps
@@ -389,13 +333,6 @@ subroutine read_pseudo_pswfc (is, iunps)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo_pswfc'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps
@@ -418,13 +355,6 @@ subroutine read_pseudo_rhoatom (is, iunps)
   !
   use flib_pwscf
   use pseudo_pwscf
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_pseudo_rhoatom'
-!End of the abilint section
-
   implicit none
   !
   integer :: is, iunps

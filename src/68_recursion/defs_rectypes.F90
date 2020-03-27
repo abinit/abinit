@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_rectypes
 !! NAME
 !! defs_rectypes
@@ -7,7 +6,7 @@
 !! This module contains definitions of all structured datatype for recursion
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (MM)
+!! Copyright (C) 2001-2020 ABINIT group (MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_esymm
 !! NAME
 !! m_esymm
@@ -8,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +36,7 @@ MODULE m_esymm
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
  use m_hide_lapack,    only : xgeev, xginv
- use m_crystal,        only : crystal_t, idx_spatial_inversion
+ use m_crystal,        only : crystal_t
  use m_defs_ptgroups,  only : point_group_t, irrep_t
  use m_ptgroups,       only : get_classes, point_group_init, irrep_free,&
 &                             copy_irrep, init_irrep, mult_table, sum_irreps
@@ -256,15 +255,6 @@ CONTAINS  !=====================================================================
 
 subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF_TOL,ene_k,tolsym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbnds,nspinor,first_ib
@@ -321,7 +311,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  esymm%nbnds          = nbnds
  esymm%only_trace     = only_trace
  esymm%tol_deg        = EDIFF_TOL
- esymm%has_spatial_inv= (idx_spatial_inversion(Cryst) /= 0)
+ esymm%has_spatial_inv= (cryst%idx_spatial_inversion() /= 0)
  esymm%can_use_tr     = .TRUE. !TODO this should be input
  esymm%has_chtabs     = .FALSE.
  esymm%kpt            = kpt_in(:)
@@ -854,15 +844,6 @@ end subroutine esymm_init
 
 subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol,unit
@@ -977,15 +958,6 @@ end subroutine esymm_print
 
 subroutine esymm_free_0D(esymm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_free_0D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(esymm_t),intent(inout) :: esymm
@@ -996,33 +968,15 @@ subroutine esymm_free_0D(esymm)
 ! *************************************************************************
 
  !@esymm_t
- if (allocated(esymm%g0)) then
-   ABI_FREE(esymm%g0)
- end if
- if (allocated(esymm%tr_g0))  then
-   ABI_FREE(esymm%tr_g0)
- end if
- if (allocated(esymm%nelements))  then
-   ABI_FREE(esymm%nelements)
- end if
- if (allocated(esymm%sgk2symrec))  then
-   ABI_FREE(esymm%sgk2symrec)
- end if
- if (allocated(esymm%tr_sgk2symrec)) then
-   ABI_FREE(esymm%tr_sgk2symrec)
- end if
- if (allocated(esymm%herring_test)) then
-   ABI_FREE(esymm%herring_test)
- end if
- if (allocated(esymm%b2irrep)) then
-   ABI_FREE(esymm%b2irrep)
- end if
- if (allocated(esymm%degs_bounds))  then
-   ABI_FREE(esymm%degs_bounds)
- end if
- if (allocated(esymm%degs_dim)) then
-   ABI_FREE(esymm%degs_dim)
- end if
+ ABI_SFREE(esymm%g0)
+ ABI_SFREE(esymm%tr_g0)
+ ABI_SFREE(esymm%nelements)
+ ABI_SFREE(esymm%sgk2symrec)
+ ABI_SFREE(esymm%tr_sgk2symrec)
+ ABI_SFREE(esymm%herring_test)
+ ABI_SFREE(esymm%b2irrep)
+ ABI_SFREE(esymm%degs_bounds)
+ ABI_SFREE(esymm%degs_dim)
 
  if (allocated(esymm%irrep2b)) then
    do ii=LBOUND(esymm%irrep2b,DIM=1),UBOUND(esymm%irrep2b,DIM=1)
@@ -1031,17 +985,9 @@ subroutine esymm_free_0D(esymm)
    ABI_DT_FREE(esymm%irrep2b)
  end if
 
- if (allocated(esymm%Calc_irreps)) then
-   call irrep_free(esymm%Calc_irreps)
- end if
-
- if (allocated(esymm%trCalc_irreps)) then
-   call irrep_free(esymm%trCalc_irreps)
- end if
-
- if (allocated(esymm%Ref_irreps)) then
-   call irrep_free(esymm%Ref_irreps)
- end if
+ if (allocated(esymm%Calc_irreps)) call irrep_free(esymm%Calc_irreps)
+ if (allocated(esymm%trCalc_irreps)) call irrep_free(esymm%trCalc_irreps)
+ if (allocated(esymm%Ref_irreps)) call irrep_free(esymm%Ref_irreps)
 
 end subroutine esymm_free_0D
 !!***
@@ -1063,15 +1009,6 @@ end subroutine esymm_free_0D
 !! SOURCE
 
 subroutine esymm_free_2D(esymm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_free_2D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1111,15 +1048,6 @@ end subroutine esymm_free_2D
 !! SOURCE
 
 subroutine esymm_finalize(esymm,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_finalize'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1375,15 +1303,6 @@ end subroutine esymm_finalize
 
 function which_irrep(esymm,trace,tolerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'which_irrep'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: which_irrep
@@ -1431,15 +1350,6 @@ end function which_irrep
 !! SOURCE
 
 subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_symmetrize_mels'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1536,15 +1446,6 @@ end subroutine esymm_symmetrize_mels
 
 function esymm_failed(esymm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_failed'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical :: esymm_failed
@@ -1576,15 +1477,6 @@ end function esymm_failed
 !! SOURCE
 
 subroutine polish_irreps(Irreps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polish_irreps'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

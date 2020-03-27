@@ -1,0 +1,17 @@
+tol_abs: 1.0e-10
+tol_rel: 1.0e-10
+tol_vec: 1.0e-5
+
+EnergyTerms:
+    tol_abs: 1.0e-7
+
+ResultsGS:
+    tol_rel: 1.0e-12
+    convergence:
+        ceil: 1.0e-6
+
+EtotSteps:
+    data:
+        callback:  # callback takes a mapping as its value
+            method: last_iter
+            tol_iter: 3

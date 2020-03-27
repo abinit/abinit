@@ -7,22 +7,27 @@ spgroup: 143
 spgroup+ 1
 
 #This is for spgroup 143 to 146
-natom1 3     natom2 3     natom3 3     natom4 3
+#wyckoff multiplicity 3
+natom1 9     natom2 9     natom3 9     natom4 9
 
-natom   6    # this is for spgroup 147 to 161  and 168 to 174
+#wyckoff multiplicity 6
+natom   18    # this is for spgroup 147 to 161  and 168 to 174
 
 #This is for spgroup 162 to 167
-natom20 12    natom21 12   natom22 12   natom23 12
-natom24 12    natom25 12
+#wyckoff multiplicity 12
+natom20 36    natom21 36   natom22 36   natom23 36
+natom24 36    natom25 36
 
 #This is for spgroup 175 to 190
-natom33 12    natom34 12   natom35 12   natom36 12
-natom37 12    natom38 12   natom39 12   natom40 12
-natom41 12    natom42 12   natom43 12   natom44 12
-natom45 12    natom46 12   natom47 12   natom48 12
+#wyckoff multiplicity 12
+natom33 36    natom34 36   natom35 36   natom36 36
+natom37 36    natom38 36   natom39 36   natom40 36
+natom41 36    natom42 36   natom43 36   natom44 36
+natom45 36    natom46 36   natom47 36   natom48 36
 
 #This is for spgroup 191 to 194
-natom49 24    natom50 24   natom51 24   natom52 24
+#wyckoff multiplicity 24
+natom49 72    natom50 72   natom51 72   natom52 72
 
 
 
@@ -46,17 +51,18 @@ brvltt -1          # important to reduce the conventional cell to primitive,
                    # and allow the recognition of space group
 ntypat 1
 znucl 1
-natrd 1
+natrd 3
 xred 0.17 0.15 0.11
-typat 1
+0.734 0.467 0.66
+0.44  0.824 0.31415
+typat *1
 ecut 1
-  kptopt 0
+kptopt 0
 nkpt 1
 nline 1
 nstep 1
 toldfe 1.0d-6
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

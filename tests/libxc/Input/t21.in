@@ -1,10 +1,10 @@
 # Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 38
+ndtset 34
 jdtset  1  2  3  4  5  6  7
-    10 11 12 13 14 15 16 17 18 19
-    20 21 22 23 24 25 26    28 29
+    10 11 12 13 14 15 16 17 
+          22 23 24 25 26    28 29
     30 31 32 33 34 35 36 37 38
                 44 45 46
 
@@ -30,10 +30,10 @@ ixc15 -192131
 ixc16 -193131
 ixc17 -524131
 ixc18 -525131
-ixc19 -526131
-ixc20 -527131
-ixc21 -528131
-ixc22 -529131
+# ixc19 -526131 ! Not portable from libxc v3 to v4
+# ixc20 -527131 ! Not portable from libxc v3 to v4
+# ixc21 -528131 ! Not portable from libxc v3 to v4
+# ixc22 -529131 ! Not portable from libxc v3 to v4
 
 # GGAs : Becke 88 exchange + different correlations
 ixc23 -106084
@@ -97,13 +97,12 @@ prtden 0
 prtwf  0
 prteig 0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t21.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t21.out, tolnlines = 20, tolabs = 1.5e-5, tolrel = 1.5e-6
 #%% psp_files = 83bi.psphgh
 #%% [paral_info]
 #%% max_nprocs = 2

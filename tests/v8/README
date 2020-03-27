@@ -11,6 +11,8 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 41-89 concern response functions including Nonlinear(+PAW) and 2nd order Sternheimer equation
 
-* Tests 90-99 concern GW/BSE
+* Tests 90-95 concern GW/BSE
+
+* Tests 95-99 concern again ground state (constrained DFT and checking of symmetries)
 
 ------------------------------------------------------------------

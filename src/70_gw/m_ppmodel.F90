@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ppmodel
 !! NAME
 !! m_ppmodel
@@ -8,7 +7,7 @@
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,19 +27,21 @@
 MODULE m_ppmodel
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_array
  use m_linalg_interfaces
+ use m_distribfft
 
+ use defs_abitypes,    only : MPI_type
  use m_fstrings,       only : sjoin, itoa
  use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul,          only : vcoul_t, cmod_qpg
+ use m_vcoul,          only : vcoul_t
+ use m_qplusg,         only : cmod_qpg
  use m_fft_mesh,       only : g2ifft
  use m_fft,            only : fourdp
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
@@ -57,8 +58,8 @@ MODULE m_ppmodel
  integer,public,parameter :: PPM_ENGEL_FARID     = 4
 
  ! Flags giving the status of the pointers defined in ppmodel_t
- integer,private,parameter :: PPM_ISPOINTER  =1 ! The pointer is used to store the address in memory.
- integer,private,parameter :: PPM_ISALLOCATED=2 ! The pointer is used as an allocable array.
+ integer,private,parameter :: PPM_ISPOINTER   = 1 ! The pointer is used to store the address in memory.
+ integer,private,parameter :: PPM_ISALLOCATED = 2 ! The pointer is used as an allocable array.
 
  ! Flags giving the status of the plasmon-pole tables
  integer,private,parameter :: PPM_NOTAB         = 0
@@ -160,7 +161,6 @@ MODULE m_ppmodel
 
  end type ppmodel_t
 
-
  public :: ppm_get_qbz              ! Symmetrize the PPm parameters in the BZ.
  public :: ppm_nullify              ! Nullify all pointers
  public :: ppm_init                 ! Initialize dimensions and pointers
@@ -226,15 +226,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_get_qbz'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -353,15 +344,6 @@ end subroutine ppm_get_qbz
 
 subroutine ppm_nullify(PPm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_nullify'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(ppmodel_t),intent(inout) :: PPm
 ! *********************************************************************
@@ -395,15 +377,6 @@ end subroutine ppm_nullify
 !! SOURCE
 
 subroutine ppm_free(PPm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(ppmodel_t),intent(inout) :: PPm
@@ -478,12 +451,8 @@ subroutine ppm_free(PPm)
 #endif
 
  ! logical flags must be deallocated here.
- if (allocated(PPm%keep_q)) then
-   ABI_FREE(PPm%keep_q)
- end if
- if (allocated(PPm%has_q)) then
-   ABI_FREE(PPm%has_q)
- end if
+ ABI_SFREE(PPm%keep_q)
+ ABI_SFREE(PPm%has_q)
 
 end subroutine ppm_free
 !!***
@@ -511,15 +480,6 @@ end subroutine ppm_free
 !! SOURCE
 
 subroutine ppm_mallocq(PPm,iq_ibz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_mallocq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: iq_ibz
@@ -563,15 +523,6 @@ end subroutine ppm_mallocq
 
 subroutine ppm_table_free(PPm,iq_ibz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_table_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: iq_ibz
  type(ppmodel_t),intent(inout) :: PPm
@@ -579,17 +530,9 @@ subroutine ppm_table_free(PPm,iq_ibz)
 ! *********************************************************************
 
  !@ppmodel_t
- if (allocated(PPm%bigomegatwsq)) then
-   call array_free(PPm%bigomegatwsq(iq_ibz))
- end if
-
- if (allocated(PPm%omegatw)) then
-   call array_free(PPm%omegatw(iq_ibz))
- end if
-
- if (allocated(PPm%eigpot)) then
-   call array_free(PPm%eigpot(iq_ibz))
- end if
+ if (allocated(PPm%bigomegatwsq)) call array_free(PPm%bigomegatwsq(iq_ibz))
+ if (allocated(PPm%omegatw)) call array_free(PPm%omegatw(iq_ibz))
+ if (allocated(PPm%eigpot)) call array_free(PPm%eigpot(iq_ibz))
 
  PPm%has_q(iq_ibz) = PPM_NOTAB
 
@@ -621,15 +564,6 @@ end subroutine ppm_table_free
 !! SOURCE
 
 subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mqmem,nqibz,npwe,ppmodel,invalid_freq
@@ -707,14 +641,9 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
  do iq_ibz=1,dim_q
    !%if (keep_q(iq_ibz)) then
 #if 1
-   ABI_STAT_MALLOC(PPm%bigomegatwsq(iq_ibz)%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
-   ABI_CHECK(ierr==0, "out of memory bigomegatwsq")
-   !
-   ABI_STAT_MALLOC(PPm%omegatw(iq_ibz)%vals, (PPm%npwc,PPm%dm2_otq), ierr)
-   ABI_CHECK(ierr==0, "out of memory omegatw")
-   !
-   ABI_STAT_MALLOC(PPm%eigpot(iq_ibz)%vals, (PPm%dm_eig,PPm%dm_eig), ierr)
-   ABI_CHECK(ierr==0, "out of memory eigpot")
+   ABI_MALLOC_OR_DIE(PPm%bigomegatwsq(iq_ibz)%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
+   ABI_MALLOC_OR_DIE(PPm%omegatw(iq_ibz)%vals, (PPm%npwc,PPm%dm2_otq), ierr)
+   ABI_MALLOC_OR_DIE(PPm%eigpot(iq_ibz)%vals, (PPm%dm_eig,PPm%dm_eig), ierr)
    !%endif
 #else
    call ppm_mallocq(PPm,iq_ibz)
@@ -778,15 +707,6 @@ end subroutine ppm_init
 
 subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngfftf,rhor_tot,&
 & iqiA) !Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_ppmodel'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -908,15 +828,6 @@ end subroutine setup_ppmodel
 !! SOURCE
 
 subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,only_ig2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getem1_from_ppm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1061,15 +972,6 @@ end subroutine getem1_from_ppm
 
 subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getem1_from_ppm_one_ggp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nomega
@@ -1185,15 +1087,6 @@ end subroutine getem1_from_ppm_one_ggp
 
 subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_ppm_eigenvalues'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nomega
@@ -1262,9 +1155,7 @@ subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
      ABI_MALLOC(rwork,(3*PPm%npwc-2))
      ABI_MALLOC(eigvec,(PPm%npwc,PPm%npwc))
 
-     ABI_STAT_MALLOC(Adpp,(PPm%npwc*(PPm%npwc+1)/2), ierr)
-     ABI_CHECK(ierr==0, "out of memory in Adpp")
-
+     ABI_MALLOC_OR_DIE(Adpp,(PPm%npwc*(PPm%npwc+1)/2), ierr)
      write(std_out,*) 'in hermitian'
 
      idx=0
@@ -1337,15 +1228,6 @@ end subroutine get_ppm_eigenvalues
 !! SOURCE
 
 subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm1par'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1478,15 +1360,6 @@ end subroutine cppm1par
 
 subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatwsq,omegatw,invalid_freq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm2par'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwc,nfftf,invalid_freq
@@ -1518,8 +1391,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfftf(2),ngfftf(3),'all')
  !
  ! === Calculate qratio(npwec,npvec) = (q+G).(q+Gp)/|q+G|^2 ===
- ABI_STAT_MALLOC(qratio,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in qratio")
+ ABI_MALLOC_OR_DIE(qratio,(npwc,npwc), ierr)
 
  call cqratio(npwc,gvec,qpt,gmet,gprimd,qratio)
  !
@@ -1532,15 +1404,14 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
  !
  ! Calculate the FFT index of each (G-Gp) vector and assign
  ! the value of the correspondent density simultaneously
- ABI_STAT_MALLOC(rhogg,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "out of memory rhogg")
+ ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
 
  ierr=0
  do ig=1,npwc
@@ -1570,8 +1441,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
  ! unsymmetrized epsm1 -> epsm1=|q+Gp|/|q+G|*epsm1
  ABI_MALLOC(qplusg,(npwc))
  ABI_MALLOC(temp,(npwc,npwc))
- ABI_STAT_MALLOC(omegatwsq,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'out of memory in omegatwsq')
+ ABI_MALLOC_OR_DIE(omegatwsq,(npwc,npwc), ierr)
 
  temp = -epsm1(:,:)
  !
@@ -1609,21 +1479,21 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
        nimwp=nimwp+1
 
        if ( invalid_freq == 1 ) then
-       ! set omegatwsq to 1 hartree
+        ! set omegatwsq to 1 hartree
          omegatwsq(ig,igp)=cone
          AA = epsm1(ig,igp)
          if ( ig == igp ) AA = AA - one
          omegatw(ig,igp)=SQRT(REAL(omegatwsq(ig,igp)))
          bigomegatwsq(ig,igp)=-AA*omegatw(ig,igp)**2
        elseif ( invalid_freq == 2 ) then
-       ! set omegatwsq to infinity
+         ! set omegatwsq to infinity
          omegatwsq(ig,igp)=cone/tol6
          AA = epsm1(ig,igp)
          if ( ig == igp ) AA = AA - one
          omegatw(ig,igp)=SQRT(REAL(omegatwsq(ig,igp)))
          bigomegatwsq(ig,igp)=-AA*omegatw(ig,igp)**2
        else
-       ! simply ignore all cases of omegatw with imaginary values
+         ! simply ignore all cases of omegatw with imaginary values
          bigomegatwsq(ig,igp)=(0.,0.)
          omegatw(ig,igp)=(ten,0.)
        end if
@@ -1702,15 +1572,6 @@ end subroutine cppm2par
 
 subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw,eigtot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm3par'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwc
@@ -1756,15 +1617,14 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_MALLOC(rhog_dp,(2,nfftf))
  ABI_MALLOC(rhog,(nfftf))
 
- ABI_STAT_MALLOC(rhogg,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "out of memory in rhogg")
+ ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
  !
  ! === Compute the density in G space rhog(r)--> rho(G) ===
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
 
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
@@ -1792,8 +1652,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  end if
  !
  ! mm(G,Gp) = (q+G) \cdot (q+Gp) n(G-Gp)
- ABI_STAT_MALLOC(mm,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'out of memory in mm')
+ ABI_MALLOC_OR_DIE(mm,(npwc,npwc), ierr)
 
  do ig=1,npwc
    if (qiszero) then
@@ -1827,8 +1686,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! Use only the static epsm1 i.e., only the w=0 part (eps(:,:,1,:))
  ABI_MALLOC(eigval,(npwc))
 
- ABI_STAT_MALLOC(eigvec,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'eigvec out of memory')
+ ABI_MALLOC_OR_DIE(eigvec,(npwc,npwc), ierr)
 
  ABI_MALLOC(zz,(npwc))
  zz=czero
@@ -1836,8 +1694,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_MALLOC(qplusg,(npwc))
 
  ! Store the susceptibility matrix in upper mode before calling zhpev.
- ABI_STAT_MALLOC(matr,(npwc*(npwc+1)/2), ierr)
- ABI_CHECK(ierr==0, 'matr of memory')
+ ABI_MALLOC_OR_DIE(matr,(npwc*(npwc+1)/2), ierr)
 
  idx=1
  do ii=1,npwc
@@ -1975,15 +1832,6 @@ end subroutine cppm3par
 
 subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm4par'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwc
@@ -2025,14 +1873,13 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_MALLOC(rhog_dp,(2,nfftf))
  ABI_MALLOC(rhog,(nfftf))
 
- ABI_STAT_MALLOC(rhogg,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'rhogg out of memory')
+ ABI_MALLOC_OR_DIE(rhogg,(npwc,npwc), ierr)
  !
  ! Conduct FFT tho(r)-->rhog(G)
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
@@ -2067,8 +1914,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ABI_FREE(rhog)
  !
  ! Now we have rhogg, calculate the M matrix (q+G1).(q+G2) n(G1-G2)
- ABI_STAT_MALLOC(mm,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'mm out of memory')
+ ABI_MALLOC_OR_DIE(mm,(npwc,npwc), ierr)
 
  do ig=1,npwc
    gpq(:)=gvec(:,ig)+qpt
@@ -2085,11 +1931,9 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  end do !ig
 
  !MG TODO too much memory in chi, we can do all this stuff inside a loop
- ABI_STAT_MALLOC(chitmp,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'chitmp out of memory')
+ ABI_MALLOC_OR_DIE(chitmp,(npwc,npwc), ierr)
 
- ABI_STAT_MALLOC(chi,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, 'chi out of memory')
+ ABI_MALLOC_OR_DIE(chi,(npwc,npwc), ierr)
 
  ABI_MALLOC(qplusg,(npwc))
  !
@@ -2113,14 +1957,9 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! === Solve chi*X = Lambda M*X where Lambda=-1/em(q)**2 ===
  ABI_MALLOC(eigval,(npwc))
 
- ABI_STAT_MALLOC(eigvec,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "eigvec out-of-memory")
-
- ABI_STAT_MALLOC(mtemp,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "mtemp out-of-memory")
-
- ABI_STAT_MALLOC(chitmps,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "chitmps out-of-memory")
+ ABI_MALLOC_OR_DIE(eigvec,(npwc,npwc), ierr)
+ ABI_MALLOC_OR_DIE(mtemp,(npwc,npwc), ierr)
+ ABI_MALLOC_OR_DIE(chitmps,(npwc,npwc), ierr)
  !
  ! Copy chi and mm into working arrays
  chitmps(:,:)=chi(:,:)
@@ -2136,8 +1975,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! === Calculate the plasmon pole parameters ===
  ABI_MALLOC(tmp1,(npwc))
 
- ABI_STAT_MALLOC(zz2,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, "zz2 out-of-memory")
+ ABI_MALLOC_OR_DIE(zz2,(npwc,npwc), ierr)
  !
  ! good check:
  ! the lowest plasmon energy on gamma should be
@@ -2243,15 +2081,6 @@ end subroutine cppm4par
 !! SOURCE
 
 subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cqratio'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2360,15 +2189,6 @@ end subroutine cqratio
 
 subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 & omegame0i,zcut,theta_mu_minus_e0i,eig,npwx,ket,sigcme)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sig_ppm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2553,15 +2373,6 @@ end subroutine calc_sig_ppm
 
 subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_ggw,nfftf,ngfftf,rhor_tot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_symmetrizer'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwe,nomega,iq_bz
@@ -2636,22 +2447,19 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
    ! Allocate memory if not done yet.
    if (PPm%bigomegatwsq_qbz_stat==PPM_ISPOINTER) then
       nullify(PPm%bigomegatwsq_qbz)
-      ABI_STAT_MALLOC(PPm%bigomegatwsq_qbz%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
-      ABI_CHECK(ierr==0, "out of memory bigomegatwsq")
+      ABI_MALLOC_OR_DIE(PPm%bigomegatwsq_qbz%vals, (PPm%npwc,PPm%dm2_botsq), ierr)
       PPm%bigomegatwsq_qbz_stat=PPM_ISALLOCATED
    end if
 
    if (PPm%omegatw_qbz_stat==PPM_ISPOINTER) then
       nullify(PPm%omegatw_qbz)
-      ABI_STAT_MALLOC(PPm%omegatw_qbz%vals,(PPm%npwc,PPm%dm2_otq), ierr)
-      ABI_CHECK(ierr==0, "out of memory omegatw")
+      ABI_MALLOC_OR_DIE(PPm%omegatw_qbz%vals,(PPm%npwc,PPm%dm2_otq), ierr)
       PPm%omegatw_qbz_stat=PPM_ISALLOCATED
    end if
 
    if (PPm%eigpot_qbz_stat==PPM_ISPOINTER) then
      nullify(PPm%eigpot_qbz)
-     ABI_STAT_MALLOC(PPm%eigpot_qbz%vals,(PPm%dm_eig,PPm%dm_eig), ierr)
-     ABI_CHECK(ierr==0, "out of memory eigpot")
+     ABI_MALLOC_OR_DIE(PPm%eigpot_qbz%vals,(PPm%dm_eig,PPm%dm_eig), ierr)
      PPm%eigpot_qbz_stat=PPM_ISALLOCATED
    end if
    !
@@ -2717,15 +2525,6 @@ end subroutine ppm_symmetrizer
 !! SOURCE
 
 subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,gvec,ngfftf,rhor_tot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'new_setup_ppmodel'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2853,15 +2652,6 @@ end subroutine new_setup_ppmodel
 !! SOURCE
 
 subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu_minus_e0i,npwx,ket,sigcme)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_times_ket'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

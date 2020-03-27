@@ -44,13 +44,12 @@ xred
 0 0 0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t77.out, tolnlines = 1, tolabs = 1.210e-04, tolrel = 1.100e-03, fld_options = -medium
+#%%   t77.out, tolnlines = 5, tolabs = 1.210e-04, tolrel = 1.100e-03, fld_options = -medium
 #%% psp_files = 50sn.paw
 #%% [paral_info]
 #%% max_nprocs = 8

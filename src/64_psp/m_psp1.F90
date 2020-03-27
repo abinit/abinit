@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp1
 !! NAME
 !!  m_psp1
@@ -7,7 +6,7 @@
 !!  Initialize pspcod=1 or 4 pseudopotential (Teter format)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FrD, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FrD, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,15 +118,6 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &                  mmax,mpsang,mqgrid,nproj,n1xccc,pspcod,&
 &                  qchrg,qgrid,rcpsp,rms,useylm,vlspl,xcccrc,xccc1d,&
 &                  zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp1in'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -457,15 +447,6 @@ end subroutine psp1in
 subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 &  vloc,wksincos,yp1,ypn,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp1lo'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mmax,mqgrid
@@ -630,15 +611,6 @@ end subroutine psp1lo
 
 subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
 &                  qgrid,rad,vloc,vpspll,wfll,wksincos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp1nl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -907,15 +879,6 @@ end subroutine psp1nl
 
 subroutine der_int(ff,df,rr,dr,nlast,smf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'der_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !nmax sets standard number of grid points ! SHOULD BE REMOVED
 !scalars
@@ -1021,15 +984,6 @@ end subroutine der_int
 
 subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sincos'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq,irmax,mmax
@@ -1043,16 +997,9 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
  integer :: ir,nstep
  real(dp) :: prevcos,prevsin
  logical :: testmipspro
-#if defined HAVE_LINALG_MLIB
- real(dp) :: halfpi
-#endif
 
 
 ! *************************************************************************
-
-#if defined HAVE_LINALG_MLIB
- halfpi=asin(1.0d0)
-#endif
 
  if(iq==2)then
 
@@ -1075,20 +1022,12 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
 !  fortunately, on the SGI - R10000 the normal computation is fast enough.
 
    testmipspro=.false.
-#ifdef FC_MIPSPRO
-   testmipspro=.true.
-#endif
    nstep=40
    if(iq-(iq/nstep)*nstep == 0 .or. testmipspro)then
 
 !    Every nstep steps, uses the hard way
      do ir=2,irmax
-#if defined HAVE_LINALG_MLIB
-!      There is a bug in the hp library !! Sine is slightly inaccurate !
-       pspwk(ir,1,2)=cos(tpiq*rad(ir)-halfpi)
-#else
        pspwk(ir,1,2)=sin(tpiq*rad(ir))
-#endif
        pspwk(ir,2,2)=cos(tpiq*rad(ir))
      end do
 
@@ -1144,15 +1083,6 @@ end subroutine sincos
 !! SOURCE
 
 subroutine psp4cc(fchrg,n1xccc,xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp4cc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1268,13 +1198,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gg_psp4(x)
 !Expression of 7 May 1992
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gg_psp4'
-!End of the abilint section
-
    real(dp) :: gg_psp4
    real(dp),intent(in) :: x
    gg_psp4=(1.d0+x**2*(a2 +x**2*(a4 +x**2*(a6 +x**2*(a8 + &
@@ -1284,13 +1207,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gp_psp4(x)
 !gp(x) is the derivative of gg(x) wrt x
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gp_psp4'
-!End of the abilint section
-
    real(dp) :: gp_psp4
    real(dp),intent(in) :: x
    gp_psp4=2.d0*x*((a2+x**2*(2.d0*a4+x**2*(3.d0*a6+x**2*(              &
@@ -1304,13 +1220,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gpp_1_psp4(x)
 !gpp(x) is the second derivative of gg(x) wrt x
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpp_1_psp4'
-!End of the abilint section
-
    real(dp) :: gpp_1_psp4
    real(dp),intent(in) :: x
    gpp_1_psp4= ( 2.d0*a4+ x**2*(3.d0*2.d0*a6 +x**2*(               &
@@ -1323,13 +1232,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gpp_2_psp4(x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpp_2_psp4'
-!End of the abilint section
-
    real(dp) :: gpp_2_psp4
    real(dp),intent(in) :: x
    gpp_2_psp4=(a2+x**2*(2.d0*a4+x**2*(3.d0*a6+x**2*(                 &
@@ -1340,13 +1242,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
  end function gpp_2_psp4
 
    function gpp_3_psp4(x)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpp_3_psp4'
-!End of the abilint section
 
    real(dp) :: gpp_3_psp4
    real(dp),intent(in) :: x

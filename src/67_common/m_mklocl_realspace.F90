@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mklocl_realspace
 !! NAME
 !!  m_mklocl_realspace
@@ -8,7 +7,7 @@
 !!   Computation is done in real space (useful for isolated systems).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (TRangel, MT, DC)
+!!  Copyright (C) 2013-2020 ABINIT group (TRangel, MT, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,13 +30,13 @@
 module m_mklocl_realspace
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_xmpi
  use m_abicore
  use m_errors
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_geometry,    only : xred2xcart
  use m_fft_mesh,    only : mkgrid_fft
@@ -48,7 +47,6 @@ module m_mklocl_realspace
  use m_abi2big,     only : wvl_rhov_abi2big
  use m_wvl_wfs,     only : derf_ab
  use m_fft,         only : fourdp
-
 
  implicit none
 
@@ -117,14 +115,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 #else
  use defs_wvltypes, only : coulomb_operator
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mklocl_realspace'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -309,7 +299,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
          rhor_testing(ii) = exp(-r/4._dp)
        end do
 !      Testing only, compute rhog_testing from rhor_testing
-       call fourdp(1,rhog_testing,rhor_testing,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+       call fourdp(1,rhog_testing,rhor_testing,-1,mpi_enreg,nfft,1,ngfft,0)
      end if
 
 !    Compute the interpolation of rho, using a fourier transform
@@ -348,7 +338,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
      ngfft_interpol(:) = ngfft(:)
      ngfft_interpol(1:3) = (/ n1 * nStep, n2 * nStep, n3 * nStep /)
      ngfft_interpol(4:6) = (/ n1 * nStep + 1, n2 * nStep + 1, n3 * nStep /)
-     call fourdp(1,rhog_interpol,rhor_work,1,mpi_enreg,nfft*n_interpol,ngfft_interpol,mpi_enreg%paral_kgb,0)
+     call fourdp(1,rhog_interpol,rhor_work,1,mpi_enreg,nfft*n_interpol,1,ngfft_interpol,0)
 
 !    Reorder rhor_interpol to be able to read it linearly
      jj = 0
@@ -635,14 +625,6 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 
  use defs_wvltypes, only : coulomb_operator
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'createIonicPotential_new'
-!End of the abilint section
-
-implicit none
-
 !Arguments -------------------------------
 !scalars
  integer, intent(in) :: iproc,nproc,ntypes,nat,n1i,n2i,n3i,n3d,spaceworld,usepaw
@@ -913,14 +895,6 @@ implicit none
 
 subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcVloc_mklocl'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -958,14 +932,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
 function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vloc_zero_mklocl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1040,14 +1006,6 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
      geocode,iproc,ntypes,nat,iatype,rxyz,gridcart,psppar,nelpsp,hxh,hyh,hzh,&
      n1,n2,n3,n3d,rho,pot,floc,pawtab,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'local_forces_new'
-!End of the abilint section
-
-  implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1247,14 +1205,6 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcdVloc_mklocl'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -1292,14 +1242,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
 function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvloc_zero_mklocl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1375,14 +1317,6 @@ end subroutine local_forces_new
 subroutine ind_positions_mklocl(periodic,i,n,j,go)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ind_positions_mklocl'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  logical, intent(in) :: periodic
  integer, intent(in) :: i,n
@@ -1452,14 +1386,6 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  use BigDFT_API, only : ELECTRONIC_DENSITY,createIonicPotential,local_forces
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mklocl_wavelets'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1681,14 +1607,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'local_forces_wvl'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: i3s,iproc,n1,n1i,n2,n2i,n3,n3pi,natom
@@ -1899,14 +1817,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 
 subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcdVloc_wvl'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in)  :: xx,rloc,Z
@@ -1944,14 +1854,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
 function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvloc_zero_wvl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

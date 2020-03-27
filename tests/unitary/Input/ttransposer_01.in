@@ -1,0 +1,20 @@
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = testtransposer
+#%% need_cpp_vars = HAVE_MPI
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 32
+#%% [NCPU_1]
+#%% files_to_test = ttransposer_01_MPI1.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [NCPU_2]
+#%% files_to_test = ttransposer_01_MPI2.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [NCPU_4]
+#%% files_to_test = ttransposer_01_MPI4.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [NCPU_10]
+#%% files_to_test = ttransposer_01_MPI10.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [extra_info]
+#%% authors = J. Bieder
+#%% description = Test the transposer for linear algebra to KGB parallelisation.
+#%%<END TEST_INFO>

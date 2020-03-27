@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bse_io
 !! NAME
 !! m_bse_io
@@ -7,7 +6,7 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,12 +39,11 @@ MODULE m_bse_io
  use iso_c_binding
  use m_hdr
 
- use defs_abitypes,    only : Hdr_type
  use m_time,           only : cwtime
  use m_fstrings,       only : toupper
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : arth
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_bs_defs,        only : excparam
  use m_bz_mesh,        only : kmesh_t
 
@@ -103,15 +101,6 @@ CONTAINS  !====================================================================
 
 subroutine exc_write_bshdr(funt,Bsp,Hdr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_bshdr'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  integer,intent(in) :: funt
  type(excparam),intent(in) :: BSp
@@ -124,7 +113,7 @@ subroutine exc_write_bshdr(funt,Bsp,Hdr)
  character(len=500) :: errmsg
  ! *************************************************************************
 
- call hdr_fort_write(Hdr, funt, fform_1002, ierr)
+ call hdr%fort_write(funt, fform_1002, ierr)
  ABI_CHECK(ierr == 0, "hdr_fort_write returned ierr != 0")
  write(funt, err=10, iomsg=errmsg) BSp%nreh,BSp%nkbz
 
@@ -166,15 +155,6 @@ end subroutine exc_write_bshdr
 
 subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_bshdr'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  integer,intent(in) :: funt
  integer,intent(out) :: fform,ierr
@@ -198,7 +178,7 @@ subroutine exc_read_bshdr(funt,Bsp,fform,ierr)
 
  read(funt, err=10, iomsg=errmsg) nreh_read, nkbz_read
 
- call hdr_free(Hdr)
+ call Hdr%free()
 
  if (ANY(nreh_read/=BSp%nreh)) then
    call wrtout(std_out,"Wrong number of e-h transitions","COLL")
@@ -240,15 +220,6 @@ end subroutine exc_read_bshdr
 !! SOURCE
 
 subroutine exc_skip_bshdr(funt,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_skip_bshdr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: funt
@@ -297,15 +268,6 @@ end subroutine exc_skip_bshdr
 !! SOURCE
 
 subroutine exc_skip_bshdr_mpio(mpifh,at_option,ehdr_offset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_skip_bshdr_mpio'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: mpifh,at_option
@@ -363,15 +325,6 @@ end subroutine exc_skip_bshdr_mpio
 !! SOURCE
 
 subroutine exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_eigen'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -481,15 +434,6 @@ end subroutine exc_read_eigen
 !! SOURCE
 
 subroutine exc_read_rcblock(fname,Bsp,is_resonant,diago_is_real,nsppol,nreh,hsize,my_t1,my_t2,hmat,use_mpio,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_rcblock'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -828,15 +772,6 @@ end subroutine exc_read_rcblock
 
 subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,nreh,exc_size,exc_ham)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_fullh_from_blocks'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: funt,exc_size,nsppol,row_sign
@@ -867,8 +802,7 @@ subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,n
    MSG_ERROR(" different nreh are not supported")
  end if
 
- ABI_STAT_MALLOC(cbuff_dpc,(exc_size), ierr)
- ABI_CHECK(ierr==0, "out of memory in cbuff_dpc")
+ ABI_MALLOC_OR_DIE(cbuff_dpc,(exc_size), ierr)
  !
  ! The two cases nsppol==1,2 can be merged but we keep them
  ! separated to keep to code readable.
@@ -1088,15 +1022,6 @@ end subroutine exc_fullh_from_blocks
 
 pure function rrs_of_glob(row_glob,col_glob,size_glob)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rrs_of_glob'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer :: rrs_of_glob
  integer,intent(in) :: row_glob,col_glob
@@ -1140,15 +1065,6 @@ end function rrs_of_glob
 !! SOURCE
 
 pure function ccs_of_glob(row_glob,col_glob,size_glob)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ccs_of_glob'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer :: ccs_of_glob
@@ -1196,15 +1112,6 @@ end function ccs_of_glob
 !! SOURCE
 
 function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm,bsize_frm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'offset_in_file'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  integer(XMPI_OFFSET_KIND) :: offset_in_file
@@ -1269,15 +1176,6 @@ end function offset_in_file
 !! SOURCE
 
 subroutine exc_read_rblock_fio(funt,diago_is_real,nsppol,nreh,exc_size,exc_mat,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_read_rblock_fio'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1400,15 +1298,6 @@ end subroutine exc_read_rblock_fio
 
 subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_amplitude'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nvec
@@ -1458,8 +1347,7 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
  hsize = SUM(Bsp%nreh); if (Bsp%use_coupling>0) hsize=2*hsize
 
  ABI_MALLOC(ene_list,(nvec))
- ABI_STAT_MALLOC(vec_list,(hsize,nvec), ierr)
- ABI_CHECK(ierr==0, "out of memory in vec_list")
+ ABI_MALLOC_OR_DIE(vec_list,(hsize,nvec), ierr)
 
  call exc_read_eigen(eig_fname,hsize,nvec,vec_idx,vec_list,ene_list,Bsp=Bsp)
 
@@ -1491,10 +1379,10 @@ subroutine exc_amplitude(Bsp,eig_fname,nvec,vec_idx,out_fname)
       !
       do iw=1,nw ! Accumulate
         xx = wmesh(iw) - ene_rt
-        amplitude(iw) = amplitude(iw) + ampl_eh * dirac_delta(xx,stdev)
+        amplitude(iw) = amplitude(iw) + ampl_eh * gaussian(xx, stdev)
         if (Bsp%use_coupling>0) then
           xx = wmesh(iw) + ene_rt
-          amplitude(iw) = amplitude(iw) + ampl_he * dirac_delta(xx,stdev)
+          amplitude(iw) = amplitude(iw) + ampl_he * gaussian(xx, stdev)
         end if
       end do
       !
@@ -1551,15 +1439,6 @@ end subroutine exc_amplitude
 
 subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_optme'
-!End of the abilint section
-
- implicit none
-
  !Arguments ------------------------------------
  integer,intent(in) :: minb,maxb,nkbz,nsppol,nq
  character(len=fnlen),intent(in) :: filname
@@ -1568,7 +1447,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 
 !Local variables ------------------------------
 !scalars
- integer :: ncid,ncerr,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
+ integer :: ncid,cmplx_id,nband_id,nkbz_id,nsppol_id,nq_id,xyz_id
  integer :: minb_id,maxb_id,ome_id,iq,is,ik,ib,jb
  integer :: dimOME(6),dimKPT(2),dimQPT(2),dimSCA(0),start6(6),count6(6)
  real(dp) :: complex2(2)
@@ -1578,9 +1457,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  ierr = 1
 
 !1. Create netCDF file
- ncerr = nctk_open_create(ncid, filname, xmpi_comm_self)
- !MT aug 2013: keep the following on THREE lines in order to help abilint script
- NCF_CHECK_MSG(ncerr," create netcdf OME file")
+ NCF_CHECK_MSG(nctk_open_create(ncid, filname, xmpi_comm_self), " create netcdf OME file")
 
 !2. Define dimensions
  NCF_CHECK(nf90_def_dim(ncid,"xyz",3,xyz_id))
@@ -1600,13 +1477,13 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
 !3. Define variables
 
  call ab_define_var(ncid, dimOME, ome_id, NF90_DOUBLE,&
-& "OME", "Values of optical matrix elements","Tobedone")
+ "OME", "Values of optical matrix elements","Tobedone")
 
  call ab_define_var(ncid, dimSCA, minb_id, NF90_INT,"minb",&
-& "Minimum band index for the optical matrix elements", "Dimensionless")
+ "Minimum band index for the optical matrix elements", "Dimensionless")
 
  call ab_define_var(ncid, dimSCA, maxb_id, NF90_INT,"maxb",&
-& "Maximum band index for the optical matrix elements", "Dimensionless")
+ "Maximum band index for the optical matrix elements", "Dimensionless")
 
 !4. End define mode
  NCF_CHECK(nf90_enddef(ncid))
@@ -1626,8 +1503,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
            start6 = (/ 1, ib-minb+1, jb-minb+1, ik, is, iq /)
            count6 = (/ 2, 1, 1, 1, 1, 1 /)
            complex2 = (/ REAL(opt_cvk(ib,jb,ik,is,iq)),AIMAG(opt_cvk(ib,jb,ik,is,iq)) /)
-           ncerr = nf90_put_var(ncid, ome_id, complex2, start = start6, count = count6)
-           NCF_CHECK_MSG(ncerr," write variable OME")
+           NCF_CHECK(nf90_put_var(ncid, ome_id, complex2, start = start6, count = count6))
        end do
        end do
      end do
@@ -1671,14 +1547,6 @@ end subroutine exc_write_optme
 
 subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_ham_ncwrite'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1748,13 +1616,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

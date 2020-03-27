@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wfd_optic
 !! NAME
 !!  m_wfd_optic
@@ -7,7 +6,7 @@
 !!  Functions to compute optical matrix elements using the wavefunction descriptor.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +35,7 @@ module m_wfd_optic
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
  use m_crystal,           only : crystal_t
  use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
- use m_wfd,               only : wfd_t, wfd_get_cprj, wfd_distribute_bbp
+ use m_wfd,               only : wfd_t
  use m_pawtab,            only : pawtab_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_hr,            only : pawhur_t, paw_ihr
@@ -88,15 +87,6 @@ contains
 
 subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 &  inclvkb,lomo_spin,lomo_min,max_band,nkbz,qpoint,opt_cvk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_optical_mels'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -164,7 +154,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
     !
     ! Distribute the (b,b') entries.
     bbp_mask=.FALSE.; bbp_mask(lomo_spin(spin):max_band,lomo_spin(spin):max_band)=.TRUE.
-    call wfd_distribute_bbp(Wfd,ik_ibz,spin,"All",my_nbbp,bbp_distrb,bbp_mask=bbp_mask)
+    call wfd%distribute_bbp(ik_ibz,spin,"All",my_nbbp,bbp_distrb,bbp_mask=bbp_mask)
     if (ALL(bbp_distrb/=my_rank)) CYCLE
 
     istwf_k = Wfd%istwfk(ik_ibz)
@@ -183,7 +173,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
       if ( ALL(bbp_distrb(ib_v,:)/=my_rank) ) CYCLE
       ug_v => Wfd%Wave(ib_v,ik_ibz,spin)%ug
       if (usepaw==1) then
-        call wfd_get_cprj(Wfd,ib_v,ik_ibz,spin,Cryst,Cp_v,sorted=.FALSE.)
+        call wfd%get_cprj(ib_v,ik_ibz,spin,Cryst,Cp_v,sorted=.FALSE.)
       end if
 
       do ib_c=lomo_spin(spin),max_band
@@ -196,7 +186,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 
        else
          ! Matrix elements of i[H,r] for PAW.
-         call wfd_get_cprj(Wfd,ib_c,ik_ibz,spin,Cryst,Cp_c,sorted=.FALSE.)
+         call wfd%get_cprj(ib_c,ik_ibz,spin,Cryst,Cp_c,sorted=.FALSE.)
 
          ihrc = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug_c,ug_v,kg_k,Cp_c,Cp_v,HUr)
        end if
@@ -287,15 +277,6 @@ contains
 !! SOURCE
 
 pure function pdtqrc(R,C,b1,b2,b3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pdtqrc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

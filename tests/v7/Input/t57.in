@@ -5,6 +5,7 @@
  elph2_imagden 0.1 eV
  ngkpt 3*2
 
+
 #This should not change with convergence studies
  nshiftk 1
  shiftk 0.0 0.0 0.0
@@ -60,7 +61,6 @@
  tolwfr 1.0d-8
  istwfk *1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -75,7 +75,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond. The wtq variable is introduced to be able to reproduce the q-point 
 #%%  weight obtained with ngqpt and qptopt.

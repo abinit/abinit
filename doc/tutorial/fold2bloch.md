@@ -2,16 +2,16 @@
 authors: SS, XG
 ---
 
-# Tutorial on fold2bloch  
+# Tutorial on fold2bloch
 
-## Unfolding the electronic structure of a lattice of Hydrogen atoms.  
+## Unfolding the electronic structure of a lattice of Hydrogen atoms.
 
 Supercells are often used in electronic structure calculations in order to
 model compound alloys, defects, etc. The band structure obtained directly from
 these calculations is hard to interpret due to the Brillouin zone folding as a
 result of its reduced size for the supercell, compared to that for the
-unperturbed host unit cell. 
-The unfolding technique used in Abinit is the one presented in [[cite:Rubel2014]]. 
+unperturbed host unit cell.
+The unfolding technique used in Abinit is the one presented in [[cite:Rubel2014]].
 
 This tutorial aims at demonstrating how to unfold the band structure of a
 supercell and present it in the basis of conventional Bloch wave vectors
@@ -20,12 +20,12 @@ hydrogen atoms, perform self-consistent cycle and plot the corresponding band
 structure. At the end, we will recover the familiar dispersion relation using
 the *fold2Bloch* utility. See also the [[help:fold2bloch]].
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour.
 
+[TUTORIAL_README]
+
 ## Creating a Hydrogen supercell structure
-  
+
 Let's begin with the simplest structure: a lattice of hydrogen atoms. It is a
 convenient starting point since the hybridization between $s$-orbitals results
 in a well known dispersion relation for the energy eigenvalues as a function
@@ -37,7 +37,7 @@ Here $b$ is the lattice spacing and $A$ reflects the strength of
 hybridization between adjacent $s$-orbitals. For more details please refer to
 the Feynman's Lectures on Physics (vol 3, chapter 13).
 
-Our model structure will be a cubic lattice of hydrogen atoms spaced 3 Bohr apart. 
+Our model structure will be a cubic lattice of hydrogen atoms spaced 3 Bohr apart.
 The primitive cell contains only one atom. Here we chose to represent
 the same structure with a 6 atom supercell. Such a large cell is redundant in
 this case, since there is nothing that disturbs the original symmetry.
@@ -62,10 +62,10 @@ for the other tutorials. Why not Work_fold2Bloch?*
 In order to use the *fold2Bloch*, you need to first generate a wave function file (*WFK* file).
 
 In the directory ~abinit/tests/tutorial/Input/Work_fold2Bloch, copy the files
-tests/tutorial/Input/tfold2bloch_1.files and tests/tutorial/Input/tfold2bloch_1.in. 
+tests/tutorial/Input/tfold2bloch_1.files and tests/tutorial/Input/tfold2bloch_1.in.
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work_fold2Bloch
 cd Work_fold2Bloch
 cp ../tfold2bloch_1.files .   # You will need to edit this file.
@@ -78,24 +78,24 @@ The input file has two datasets,
 the first to generate the *WFK* file, and the second to draw the band structure.
 Now you are ready to run Abinit. Issue the following:
 
-    abinit tfold2bloch_1.files > & tfold1bloch_1.log &
+    abinit < tfold2bloch_1.files > & tfold1bloch_1.log &
 
 This will generate a self consistent charge density for the 6 Hydrogen atom
 supercell structure, and the wave function file, *tfold2bloch_1o_WFK*, which is
 needed for unfolding with *fold2Bloch*.
 
 ## Folded band structure
-  
+
 Before we proceed with the unfolding, let's plot the "standard" band structure
 of a supercell. We will be looking for signatures of the zone folding. In
 order to do this you will need the following scripts:
-    
+
 1.  energy_eig-abinit.sh
 2.  plot_band.m
-    
-which are located at /abinit/doc/tutorial/fold2Bloch_assets/
 
-Execute the *energy_eig-avinit.sh* script
+which are located at $ABI_HOME/doc/tutorial/fold2Bloch_assets/
+
+Execute the *energy_eig-abinit.sh* script
 
     ./energy_eig-abinit.sh tfold2bloch_1o_DS2_EIG_
 
@@ -107,7 +107,7 @@ Edit *plot_band.m* file and point to the newly created *tfold2bloch_1o_DS2_EIG.d
 
 Then, run the *plot_band.m* script in MatLab
 
-    >&gtplot;_band
+    plot_band.m
 
 This will plot the band structure of the 6 atom Hydrogen supercell created.
 
@@ -131,7 +131,7 @@ to the multiplicity along those directions used when constructing the supercell 
 
 
 ## Bloch spectral weights with fold2Bloch
-  
+
 Next step is to execute *fold2Bloch* using the wave function file from the 2nd
 dataset, and multiplicity in the corresponding directions, used when
 constructing the super-cell (x:y:z), included as part of the command line
@@ -139,10 +139,10 @@ arguments. For this example the multiplicity used was (1:2:3)
 
 Execute the following command:
 
-    fold2Bloch tfold2bloch_WFK 1:2:3
+    fold2Bloch tfold2bloch_1o_DS2_WFK 1:2:3
 
 You should see the following:
-    
+
 ```
       ***********************
       ** Fold2Bloch V 1.0  **
@@ -156,17 +156,17 @@ You should see the following:
    97% Processing K point:    0.000000    0.000000    0.450000
   100% Processing K point:    0.000000    0.000000    0.500000
  Number of K points processed:          43
- Data was written to: fold2Bloch.out
+ Data was written to: fold2Bloch.f2b
  Data format: KX, KY, KZ, Eigenvalue(Ha), Weight
 ```
 
 That output tells us which K-point was processed, total number of K-points
 processed, output file, and the format that the data is written in.
 
-Now take a look at the *fold2Bloch.out*. The first few lines should be as follows:
+Now take a look at the *tfold2Bloch.f2b*. The first few lines should be as follows:
 
-    less fold2Bloch.out
-    
+    less tfold2Bloch.f2b
+
     0.000000  -0.250000   0.000000  -0.317960   0.579542
     0.000000  -0.250000   0.333333  -0.317960   0.000000
     0.000000  -0.250000  -0.333333  -0.317960   0.000000
@@ -217,16 +217,16 @@ apparent from the folded band structure.
     band structure visualization proceed to the next step.
 
 ## Unfolded band structure
-  
+
 Lets visualize the unfolded band structure. It is different from a regular
-band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight. 
+band structure plot, though. Now we have one additional dimension -- the Bloch spectral weight.
 There are several alternative visualization strategies. Here
-we use the scatter plot with the point size proportional to the spectral weight. 
+we use the scatter plot with the point size proportional to the spectral weight.
 The following MatLab script will help you build a graph for any
 *fold2Bloch* output: [ubs_dots.m](fold2bloch_assets/ubs_dots.m)
 
 Make sure the following parameters in *ubs_dots.m* are set as follows:
-    
+
 ```matlab
 KPATH = [0 1/2 0; ...
         0 0 0; ...
@@ -236,15 +236,15 @@ finpt='tfold2bloch_1o.f2b';
 ```
 
 and:
-    
+
 ```matlab
 G = [0.3333333 0.0000000 0.0000000;
    0.000000  0.1666667 0.0000000;
    0.000000  0.000000  0.1111111]; % Reciprocal latt. vect. [Bohr^-1] from *.out
 ```
-    
+
 Reciprocal lattice vector information must match that in *tfold2bloch_1.out*:
-    
+
     Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
      R(1)=  3.0000000  0.0000000  0.0000000  G(1)=  0.3333333  0.0000000  0.0000000
      R(2)=  0.0000000  6.0000000  0.0000000  G(2)=  0.0000000  0.1666667  0.0000000
@@ -252,7 +252,7 @@ Reciprocal lattice vector information must match that in *tfold2bloch_1.out*:
      Unit cell volume ucvol=  1.6200000E+02 bohr^3
      Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
-For graphing any other *fold2Bloch* output, make sure that the "%%Init Parameters" 
+For graphing any other *fold2Bloch* output, make sure that the "%%Init Parameters"
 are set accordingly to size of the supercell constructed.
 
 After running the script you should see the following graph:
@@ -262,7 +262,7 @@ After running the script you should see the following graph:
 As you can see the unfolded band structure perfectly reproduces the
 anticipated dispersion relation $E(k)=E_0 - 2A \cos(kb)$. We can even
 estimate the magnitude of the hopping matrix element between adjacent atoms
-VssG = -A. The band width is 4A = (-1) - (-12) = 11 eV which results in VssG = -2.75 eV.
+$V_{ssG} = -A$. The band width is $4A = (-1) - (-12) = 11$ eV which results in $V_{ssG} = -2.75$ eV.
 
 To analyze the results with AbiPy use:
 
@@ -279,5 +279,5 @@ In [3] abifile.plot_unfolded(kbounds, klabels, title="Unfolded bands")
 
 ![](fold2bloch_assets/spectralw_unfolded.png)
 
-See also 
+See also
 [this example](http://abinit.github.io/abipy/gallery/plot_fold2bloch.html#sphx-glr-gallery-plot-fold2bloch-py).

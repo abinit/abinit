@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_predict_string
 !! NAME
 !!  m_predict_string
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (XG,ARom,MT)
+!!  Copyright (C) 2009-2020 ABINIT group (XG,ARom,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,13 +26,13 @@
 module m_predict_string
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_splines
  use m_mep
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_results_img, only : results_img_type, gather_array_img, get_geometry_img
 
  implicit none
@@ -103,15 +102,6 @@ contains
 
 subroutine predict_string(itimimage,itimimage_eff,list_dynimage,mep_param,mpi_enreg,natom,&
 &                         ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_string'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

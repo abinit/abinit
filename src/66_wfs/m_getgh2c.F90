@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_getgh2c
 !! NAME
 !!  m_getgh2c
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2018 ABINIT group (MT,JLJ)
+!!  Copyright (C) 2015-2020 ABINIT group (MT,JLJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,10 +26,10 @@
 module m_getgh2c
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : mpi_type
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
  use m_nonlop,      only : nonlop
@@ -106,15 +105,6 @@ contains
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 &                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl,optkin)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgh2c'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in),optional :: conj
@@ -154,6 +144,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+ ABI_UNUSED(tim_getgh2c)
 
 !Keep track of total time spent in getgh2c
 !call timab(196+tim_getgh2c,1,tsec)
@@ -189,13 +180,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    if (present(enl)) then
      enl_ptr => enl
    else if (associated(rf_hamkq%e1kbfr).and.associated(rf_hamkq%e1kbsc).and.optnl==2) then
-     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
-     ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: cplex_rf>1!')
+     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: qphase>1!')
+     ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: qphase>1!')
      ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq))
      enl_temp(:,:,:,:) = rf_hamkq%e1kbfr(:,:,:,:) + rf_hamkq%e1kbsc(:,:,:,:)
      enl_ptr => enl_temp
    else if (associated(rf_hamkq%e1kbfr)) then
-     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
+     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: qphase>1!')
      enl_ptr => rf_hamkq%e1kbfr
    else
      msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be associated or enl optional input must be present.'

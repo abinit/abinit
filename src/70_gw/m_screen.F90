@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screen
 !! NAME
 !!  m_screen
@@ -7,7 +6,7 @@
 !!   Screening object used in the BSE code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (MG)
+!!  Copyright (C) 2014-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +24,6 @@
 MODULE m_screen
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_hide_blas
  use m_errors
@@ -43,7 +41,7 @@ MODULE m_screen
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_BZ_item, has_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul,          only : vcoul_t
+ use m_vcoul,          only : vcoul_t 
  use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
 &                             hscr_copy, hscr_t, hscr_bcast, hscr_from_file, ncname_from_id, em1_ncname, chi0_ncname
  use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer
@@ -345,15 +343,6 @@ CONTAINS  !=====================================================================
 
 subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_info_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
@@ -426,15 +415,6 @@ end subroutine screen_info_print
 
 subroutine fgg_free_0D(Fgg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_free_0D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(fgg_t),intent(inout) :: Fgg
@@ -470,15 +450,6 @@ end subroutine fgg_free_0D
 !! SOURCE
 
 subroutine fgg_free_1D(Fgg,keep_q)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_free_1D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -525,15 +496,6 @@ end subroutine fgg_free_1D
 
 subroutine fgg_init(Fgg,npw,nomega,nqlwl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,nqlwl,nomega
@@ -550,8 +512,7 @@ subroutine fgg_init(Fgg,npw,nomega,nqlwl)
  Fgg%nqlwl = nqlwl
 
  if (npw>0.and.nomega>0) then
-   ABI_STAT_MALLOC(Fgg%mat,(npw,npw,nomega), ierr)
-   ABI_CHECK(ierr==0, "out of memory in Fgg%mat")
+   ABI_MALLOC_OR_DIE(Fgg%mat,(npw,npw,nomega), ierr)
    Fgg%has_mat = MAT_ALLOCATED
  end if
 
@@ -587,15 +548,6 @@ end subroutine fgg_init
 !! SOURCE
 
 subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_fgg_qbz_set'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -682,15 +634,6 @@ end subroutine screen_fgg_qbz_set
 
 pure function screen_ihave_fgg(W,iq_ibz,how)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_ihave_fgg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_ibz
@@ -750,15 +693,6 @@ end function screen_ihave_fgg
 
 subroutine screen_nullify(W)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_nullify'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(screen_t),intent(inout) :: W
@@ -798,15 +732,6 @@ end subroutine screen_nullify
 !! SOURCE
 
 subroutine screen_free(W)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -917,15 +842,6 @@ end subroutine screen_free
 
 subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 &  iomode,ngfftf,nfftf_tot,nsppol,nspden,ae_rhor,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1168,7 +1084,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      !
      ! Read data from file (use MPI-IO if possible)
      if (W%iomode /= IO_MODE_ETSF .and. xmpi_mpiio==1) then
-       call wrtout(std_out,ABI_FUNC//"read_screening with MPI_IO","COLL")
+       call wrtout(std_out, "read_screening with MPI_IO")
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,IO_MODE_MPI,comm,iqiA=iq_ibz)
      else
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,W%iomode,comm,iqiA=iq_ibz)
@@ -1288,15 +1204,6 @@ end subroutine screen_init
 !! SOURCE
 
 subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_symmetrizer'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1449,15 +1356,6 @@ end subroutine screen_symmetrizer
 
 subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out_ket)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_w0gemv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: in_npw,nspinor
@@ -1565,15 +1463,6 @@ end subroutine screen_w0gemv
 
 subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1_symmetrize_ip'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz,nomega,npwc
@@ -1587,7 +1476,7 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
  integer :: iw,g1,g2,isg1,isg2,iq_ibz,itim_q,isym_q,ierr
  logical :: q_isirred
  complex(gwpc) :: phmsg1t,phmsg2t_star
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  real(dp) :: qbz(3)
  complex(gwpc),allocatable :: work(:,:)
@@ -1599,9 +1488,8 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 
  if (q_isirred) RETURN ! Nothing to do
 
- write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npwc**2*gwpc*b2Mb," Mb"
- ABI_STAT_MALLOC(work,(npwc,npwc), ierr)
- ABI_CHECK(ierr==0, msg)
+ !write(msg,'(a,f8.2,a)')" out of memory in work , requiring ",npwc**2*gwpc*b2Mb," Mb"
+ ABI_MALLOC_OR_DIE(work,(npwc,npwc), ierr)
 
 !$OMP PARALLEL DO PRIVATE(isg2,isg1,phmsg1t,phmsg2t_star,work) IF (nomega > 1)
  do iw=1,nomega
@@ -1673,15 +1561,6 @@ end subroutine em1_symmetrize_ip
 !! SOURCE
 
 subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1_symmetrize_op'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

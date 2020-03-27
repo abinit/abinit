@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/work_var_lotf
 !! NAME
 !! work_var_lotf
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MMancini)
+!! Copyright (C) 2005-2020 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,13 +68,6 @@ contains
 
  subroutine work_var_set()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'work_var_set'
-!End of the abilint section
-
   implicit none
   !Local-----------------------------
   integer :: iat
@@ -119,13 +111,6 @@ contains
  subroutine work_var_dealloc()
 
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'work_var_dealloc'
-!End of the abilint section
-
    ABI_DEALLOCATE(iq)
    ABI_DEALLOCATE(ifixed)
  end subroutine work_var_dealloc
@@ -150,13 +135,6 @@ contains
  subroutine cutoff_init()
   use pbc_lotf,only : pbc_bb_contract
   !Local ---------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cutoff_init'
-!End of the abilint section
-
   real(dp)  :: bl(3),blmin
   character(len=500) :: message
 
@@ -213,13 +191,6 @@ contains
  subroutine smallfit(tau0,ndum)
   use bond_lotf,only : tafit
   USE pbc_lotf,only : dist_pbc,r2
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smallfit'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------

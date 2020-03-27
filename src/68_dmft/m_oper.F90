@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_oper
 !! NAME
 !!  m_oper
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,14 +135,6 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_oper'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, optional, intent(in) :: nkpt
@@ -244,14 +235,6 @@ subroutine destroy_oper(oper)
  use m_matlu, only : destroy_matlu
  use m_errors
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_oper'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(oper_type),intent(inout) :: oper
@@ -304,14 +287,6 @@ subroutine copy_oper(oper1,oper2)
  use defs_basis
  use m_matlu, only : copy_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_oper'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -376,14 +351,6 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  use m_matlu, only : print_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_oper'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -529,14 +496,6 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  use m_matlu, only : inverse_matlu
  use m_errors
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inverse_oper'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !type
  integer, intent(in):: option
@@ -622,14 +581,6 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'loc_oper'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -739,19 +690,11 @@ end subroutine loc_oper
 !!
 !! SOURCE
 
-subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
+subroutine upfold_oper(oper,paw_dmft,option,procb,iproc,prt)
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfold_oper'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -760,12 +703,15 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, optional, intent(in) :: iproc
  integer, optional, intent(in) :: procb(oper%nkpt)
+ integer, optional, intent(in) :: prt
 !oper variables-------------------------------
  integer :: iatom,ib,ib1,ikpt,ispinor,ispinor1,isppol,im1,im
  integer :: natom,mbandc,ndim,nkpt,nspinor,nsppol,paral
  integer, allocatable :: procb2(:)
  character(len=500) :: message
 ! *********************************************************************
+
+ ABI_UNUSED(prt)
  ABI_ALLOCATE(procb2,(oper%nkpt))
  if(present(procb).and.present(iproc)) then
    paral=1
@@ -815,13 +761,13 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
 &                     + ( paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)        &
 &                     * oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)    &
 &                     * conjg(paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im)))
-!               if(ib==1.and.ib1==3) then
-!                 write(std_out,*) "im,im1",im,im1
-!                 write(std_out,*) "ispinor,ispinor1",ispinor,ispinor1
-!                 write(std_out,*) "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
-!                 write(std_out,*) "psichi 2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
-!                 write(std_out,*) "oper%matlu", oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
-!               endif
+              ! if(present(prt).and.(ib==1.and.ib1==1)) then
+              !   write(6,*) "im,im1",im,im1
+              !   write(6,*) "ispinor,ispinor1",ispinor,ispinor1
+              !   write(6,*) "psichi",paw_dmft%psichi(isppol,ikpt,ib1,ispinor1,iatom,im1)
+              !   write(6,*) "psichi 2",paw_dmft%psichi(isppol,ikpt,ib,ispinor,iatom,im1)
+              !   write(6,*) "oper%matlu", oper%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)
+              ! endif
 
                    enddo ! ispinor1
                  enddo ! ispinor
@@ -865,14 +811,6 @@ subroutine identity_oper(oper,option)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'identity_oper'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -961,14 +899,6 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  use m_matlu, only : diff_matlu
  use m_errors
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diff_oper'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(oper_type), intent(in) :: occup1,occup2
@@ -1039,14 +969,6 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
  use m_matlu, only : trace_matlu
  use m_errors
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trace_oper'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(oper_type),intent(in) :: oper
@@ -1113,14 +1035,6 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc)
  use defs_basis
  use m_errors
  use m_matlu, only : prod_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prod_oper'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !type

@@ -11,7 +11,6 @@ rprimd = 12, 0, 0, 0, 11, 0, 0, 0, 13,
 kpoint = 0.0, 0.5, 0.0,
 /
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = fftprof

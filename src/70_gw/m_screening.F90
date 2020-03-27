@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screening
 !! NAME
 !!  m_screening
@@ -8,7 +7,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +25,6 @@
 MODULE m_screening
 
  use defs_basis
- use defs_abitypes
  use m_hide_blas
  use m_linalg_interfaces
  use m_xmpi
@@ -35,11 +33,14 @@ MODULE m_screening
  use m_splines
  use m_abicore
  use m_lebedev
+ use m_spectra
  use m_nctk
+ use m_distribfft
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_abitypes,     only : MPI_type
  use m_gwdefs,          only : GW_TOLQ0, czero_gw, GW_Q0_DEFAULT
  use m_fstrings,        only : toupper, endswith, sjoin, itoa
  use m_io_tools,        only : open_file
@@ -53,10 +54,9 @@ MODULE m_screening
  use m_fftcore,         only : kgindex
  use m_fft,             only : fourdp
  use m_gsphere,         only : gsphere_t
- use m_vcoul,           only : vcoul_t
+ use m_vcoul,           only : vcoul_t 
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
- use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
@@ -282,15 +282,6 @@ CONTAINS  !=====================================================================
 
 subroutine em1results_free(Er)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1results_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(Epsilonm1_results),intent(inout) :: Er
@@ -351,15 +342,6 @@ end subroutine em1results_free
 !! SOURCE
 
 subroutine em1results_print(Er,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1results_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: unit,prtvol
@@ -543,15 +525,6 @@ end subroutine em1results_print
 
 subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,epsm1_qbz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Epsm1_symmetrizer'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz,nomega,npwc
@@ -677,15 +650,6 @@ end subroutine Epsm1_symmetrizer
 
 subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Epsm1_symmetrizer_inplace'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz,nomega,npwc
@@ -781,15 +745,6 @@ end subroutine Epsm1_symmetrizer_inplace
 !! SOURCE
 
 subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_Er_from_file'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mqmem,npwe_asked,comm
@@ -926,15 +881,6 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 &                    ikxc_required,option_test,fname_dump,iomode,&
 &                    nfftot,ngfft,comm,fxc_ADA)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkdump_Er'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: id_required,approx_type,option_test,ikxc_required,nkxc
@@ -989,13 +935,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
    if (Er%mqmem>0) then
      ! In-core solution.
-     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb]'
-     call wrtout(std_out,msg,'PERS')
-     ABI_STAT_MALLOC(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
-     ABI_CHECK(ierr==0, "Out-of-memory in Er%epsm1 (in-core)")
+     write(msg,'(a,f12.1,a)')' Memory needed for Er%epsm1 = ',two*gwpc*npwe**2*Er%nomega*Er%nqibz*b2Mb,' [Mb] <<< MEM'
+     call wrtout(std_out,msg)
+     ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      if (iomode == IO_MODE_MPI) then
-       !call wrtout(std_out,sjoin(ABI_FUNC, " read_screening with MPI_IO"))
+       !call wrtout(std_out, "read_screening with MPI_IO")
        MSG_WARNING("SUSC files is buggy. Using Fortran IO")
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      else
@@ -1047,8 +992,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        call hscr_io(hscr_cp,fform,rdwr,unt_dump,comm_self,master,iomode)
        call hscr_free(Hscr_cp)
 
-       ABI_STAT_MALLOC(epsm1,(npwe,npwe,Er%nomega), ierr)
-       ABI_CHECK(ierr==0, "out of memory in epsm1")
+       ABI_MALLOC_OR_DIE(epsm1,(npwe,npwe,Er%nomega), ierr)
 
        do iqibz=1,Er%nqibz
          is_qeq0=0
@@ -1083,11 +1027,11 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_FREE(dummy_lwing)
 
          if (is_qeq0==1) then
-           call spectra_repr(spectra,msg)
+           call spectra%repr(msg)
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          end if
-         call spectra_free(spectra)
+         call spectra%free()
 
          call write_screening(out_varname,unt_dump,iomode,npwe,Er%nomega,iqibz,epsm1)
        end do
@@ -1122,12 +1066,11 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ! ========================
      ! === In-core solution ===
      ! ========================
-     ABI_STAT_MALLOC(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
-     ABI_CHECK(ierr==0, 'Out-of-memory in Er%epsm1 (in-core)')
+     ABI_MALLOC_OR_DIE(Er%epsm1,(npwe,npwe,Er%nomega,Er%nqibz), ierr)
 
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
-     !  !call wrtout(std_out,sjoin(ABI_FUNC, "read_screening with MPI_IO"))
+     !  !call wrtout(std_out, "read_screening with MPI_IO")
      !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
      !  call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      !else
@@ -1159,12 +1102,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_FREE(dummy_head)
 
        if (is_qeq0==1) then
-         call spectra_repr(spectra,msg)
+         call spectra%repr(msg)
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        end if
 
-       call spectra_free(spectra)
+       call spectra%free()
      end do
 
      Er%id = id_required
@@ -1216,15 +1159,6 @@ end subroutine mkdump_Er
 
 subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_epsm1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode,option_test,approx_type,comm
@@ -1250,8 +1184,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
    if (allocated(Er%epsm1))  then
      ABI_FREE(Er%epsm1)
    end if
-   ABI_STAT_MALLOC(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
-   ABI_CHECK(ierr==0, 'Out-of-memory in Er%epsm1 (out-of-core)')
+   ABI_MALLOC_OR_DIE(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
 
    ! FIXME there's a problem with SUSC files and MPI-IO
    !if (iomode == IO_MODE_MPI) then
@@ -1301,15 +1234,6 @@ end subroutine get_epsm1
 !! SOURCE
 
 subroutine decompose_epsm1(Er,iqibz,eigs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'decompose_epsm1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1370,8 +1294,7 @@ subroutine decompose_epsm1(Er,iqibz,eigs)
      ABI_MALLOC(work,(lwork))
      ABI_MALLOC(rwork,(3*npwe-2))
      ABI_MALLOC(eigvec,(npwe,npwe))
-     ABI_STAT_MALLOC(Adpp,(npwe*(npwe+1)/2), ierr)
-     ABI_CHECK(ierr==0, 'out of memory in Adpp')
+     ABI_MALLOC_OR_DIE(Adpp,(npwe*(npwe+1)/2), ierr)
 
      idx=0 ! Pack the matrix
      do ig2=1,npwe
@@ -1480,15 +1403,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
   chi0_lwing,chi0_uwing,chi0,spectra,comm,&
   fxc_ADA) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_epsm1_driver'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nI,nJ,npwe,nomega,dim_wing,approx_type,option_test,nkxc,nfftot,comm
@@ -1521,14 +1435,12 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
  complex(dpc),allocatable :: buffer_lwing(:,:),buffer_uwing(:,:)
  complex(gwpc),allocatable :: kxcg_mat(:,:)
 
-!bootstrap @WC
+!bootstrap 
  integer :: istep,nstep
  logical :: converged
- real(dp) :: conv_err
+ real(dp) :: conv_err, alpha
  real(gwpc) :: chi00_head, fxc_head
- !real(gwpc) :: chi00_head, chi00rpa_head, fxc_head
- complex(gwpc),allocatable :: vfxc_boot(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
- !complex(gwpc),allocatable :: fxc_lrc(:,:), vfxc_boot(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
+ complex(gwpc),allocatable :: vfxc_boot(:,:), vfxc_boot0(:,:), chi0_tmp(:,:), chi0_save(:,:,:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: vc_sqrt(:)
 
 ! *************************************************************************
@@ -1556,7 +1468,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ! * Initialize distribution table for frequencies.
    ABI_MALLOC(istart,(nprocs))
    ABI_MALLOC(istop,(nprocs))
-   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop,msg,ierr)
+   call xmpi_split_work2_i4b(nomega,nprocs,istart,istop)
    omega_distrb(:)=xmpi_undefined_rank
    do irank=0,nprocs-1
      i1 = istart(irank+1)
@@ -1623,8 +1535,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ABI_CHECK(nkxc==1,"nkxc/=1 not coded")
 
    ! Make kxcg_mat(G1,G2) = kxcg(G1-G2) from kxcg defined on the FFT mesh.
-   ABI_STAT_MALLOC(kxcg_mat,(npwe,npwe), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory kxcg_mat")
+   ABI_MALLOC_OR_DIE(kxcg_mat,(npwe,npwe), ierr)
 
    ierr=0
    do ig2=1,npwe
@@ -1695,13 +1606,11 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
  CASE (4)
-   !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]] 
-   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
-   ABI_STAT_MALLOC(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_tmp")
-   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+   ! Bootstrap vertex corrections, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]]
+   ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(vfxc_boot0,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -1711,6 +1620,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
    chi0_save = chi0 ! a copy of chi0 (ks)
    nstep = 50 ! max iteration steps
+   alpha = 0.6 ! mixing
    chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    fxc_head = czero; vfxc_boot = czero; chi0_tmp = czero
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
@@ -1719,15 +1629,9 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
    do istep=1,nstep
      chi0 = chi0_save
-     do io=1,1 ! static
-       !if (omega_distrb(io) == my_rank) then
-       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
-&       chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
-       epsm_lf(io,:) = tmp_lf
-       epsm_nlf(io,:) = tmp_nlf
-       eelf(io,:) = tmp_eelf
-       !end if
-     end do
+     io=1 ! static
+     call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
+&     chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
 
      conv_err = smallest_real
      do ig2=1,npwe*nJ
@@ -1764,7 +1668,10 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      else if (istep < nstep) then
        chi0_tmp = chi0(:,:,1)
        vfxc_boot = chi0(:,:,1)/chi00_head ! full G vectors
-       !vfxc_boot = czero; vfxc_boot(1,1) = chi0(1,1,1)/chi00_head ! head only
+       if (istep > 1) then
+         vfxc_boot = alpha*vfxc_boot0 + (one-alpha)*vfxc_boot
+       end if
+       vfxc_boot0 = vfxc_boot
        fxc_head = vfxc_boot(1,1)
        do ig1=1,npwe
          vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
@@ -1772,7 +1679,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
      else
        write(msg,'(a,i4,a)') ' -> bootstrap fxc not converged after ', nstep, ' iterations'
        MSG_WARNING(msg)
-       ! proceed to calculate the dielectric function even fxc is not converged
+       ! proceed to calculate the dielectric function even if fxc is not converged
        chi0 = chi0_save
        do io=1,nomega
          if (omega_distrb(io) == my_rank) then
@@ -1789,6 +1696,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    ABI_FREE(chi0_tmp)
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
+   ABI_FREE(vfxc_boot0)
 
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
@@ -1798,10 +1706,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
  CASE(5)
    !@WC: one-shot scalar bootstrap approximation
-   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
-   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+   ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -1846,11 +1752,10 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
 CASE(6)
    !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) [[cite:Rigamonti2015]]
-   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]] 
-   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
-   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
+   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]]
+   ABI_MALLOC_OR_DIE(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
+   ABI_MALLOC_OR_DIE(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
+   ABI_MALLOC_OR_DIE(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
 
    if (iqibz==1) then
      vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
@@ -1861,17 +1766,39 @@ CASE(6)
    chi0_save = chi0 ! a copy of chi0
    fxc_head = czero; vfxc_boot = czero;
    epsm_lf = czero; epsm_nlf = czero; eelf = zero
-   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
+   !chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
    write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ',chi00_head
    call wrtout(std_out,msg,'COLL')
 
-   ! static
-   io = 1
+   io = 1 ! static
    call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
 &    chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
    epsm_lf(1,:) = tmp_lf
 
-   vfxc_boot(1,1) = 1.0/(chi00_head * epsm_lf(1,1))
+   ! chi(RPA) = chi0 * (1 - chi0 * v_c)^-1
+   chi0 = chi0_save
+   do ig2=2,npwe
+     do ig1=2,npwe
+       chi0(ig1,ig2,io)=-vc_sqrt(ig1)*chi0(ig1,ig2,io)*vc_sqrt(ig2)
+     end do
+     chi0(ig2,ig2,io)=one+chi0(ig2,ig2,io)
+   end do
+   chi0(1,:,io) = czero; chi0(:,1,io) = czero; chi0(1,1,io) = one
+   chi0_tmp = chi0(:,:,io)
+   call xginv(chi0_tmp,npwe,comm=comm) 
+   chi0 = chi0_save
+   chi0_tmp = MATMUL(chi0(:,:,io), chi0_tmp(:,:)) ! chi(RPA)
+   do ig1=1,npwe
+     chi0_tmp(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*chi0_tmp(ig1,:)
+   end do 
+   !call xginv(chi0_tmp,npwe,comm=comm) ! chi(RPA)^-1
+   !vfxc_boot = chi0_tmp/epsm_lf(1,1)
+   !
+   !vfxc_boot(1,1) = chi0_tmp(1,1)/epsm_lf(1,1)
+   vfxc_boot(1,1) = one/chi0_tmp(1,1)/epsm_lf(1,1)
+   !@WC: alternatively:
+   !chi00_head = chi0(1,1,io)*vc_sqrt(1)**2
+   !vfxc_boot(1,1) = one/chi00_head/epsm_lf(1,1)
    fxc_head = vfxc_boot(1,1)
    do ig1=1,npwe
      vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
@@ -1894,6 +1821,7 @@ CASE(6)
 
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
+   ABI_FREE(chi0_tmp)
 
    do io=1,nomega
      write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
@@ -2003,15 +1931,6 @@ end subroutine make_epsm1_driver
 !! SOURCE
 
 subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rpa_symepsm1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2168,15 +2087,6 @@ end subroutine rpa_symepsm1
 subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nqlwl,dim_wing,omega,&
 & chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atddft_symepsm1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nI,nJ,npwe,dim_wing,my_nqlwl
@@ -2231,8 +2141,7 @@ subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nql
  end if
 
  write(msg,'(a,f8.2,a)')" chitmp requires: ",npwe**2*gwpc*b2Mb," Mb"
- ABI_STAT_MALLOC(chitmp,(npwe,npwe), ierr)
- ABI_CHECK(ierr==0, msg)
+ ABI_MALLOC_OR_DIE(chitmp,(npwe,npwe), ierr)
  !
  ! * Calculate chi0*fxc.
  chitmp = MATMUL(chi0,kxcg_mat)
@@ -2395,15 +2304,6 @@ end subroutine atddft_symepsm1
 
 subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_uwing,chi0,eps_head,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkem1_q0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwe,nomega,n1,n2,comm
@@ -2525,15 +2425,6 @@ end subroutine mkem1_q0
 
 subroutine lebedev_laikov_int()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lebedev_laikov_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 
 !Local variables-------------------------------
@@ -2652,15 +2543,6 @@ end subroutine lebedev_laikov_int
 
 function ylmstar_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmstar_over_qTq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: cart_vers(3)
@@ -2720,15 +2602,6 @@ end function ylmstar_over_qTq
 
 function ylmstar_wtq_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmstar_wtq_over_qTq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: cart_vers(3)
@@ -2784,15 +2657,6 @@ end function ylmstar_wtq_over_qTq
 !! SOURCE
 
 elemental function mdielf_bechstedt(eps_inf,qnrm,rhor) result(mdielf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mdielf_bechstedt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2851,15 +2715,6 @@ end function mdielf_bechstedt
 
 subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,nspden,nfft,ngfft,rhor,which,w_qbz,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_mdielf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,nomega,nfft,nspden,iq_bz,comm,model_type
@@ -2882,7 +2737,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  real(dp) :: qpg2_nrm
  complex(dpc) :: ph_mqbzt
  logical :: is_qeq0,isirred
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: umklp(3)
@@ -2902,7 +2757,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
 
  nprocs = xmpi_comm_size(comm)
- call xmpi_split_work(npw,comm,my_gstart,my_gstop,msg,ierr)
+ call xmpi_split_work(npw,comm,my_gstart,my_gstop)
 
  call get_bz_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym_q,itim_q,ph_mqbzt,umklp,isirred)
 
@@ -2957,7 +2812,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
        MSG_ERROR(sjoin("Unknown model_type:",itoa(model_type)))
      end select
 
-     call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,ngfft,paral_kgb0,tim_fourdp0)
+     call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,1,ngfft,tim_fourdp0)
      !
      ! Here, unlike the other parts of the code, the unsymmetrized e^{-1} is used.
      do ig1=1,npw
@@ -2975,8 +2830,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  !
  ! W = 1/2 * (A + A^H)
  ! The MPI sum is done inside the loop to avoid problems with the size of the packet.
- ABI_STAT_MALLOC(ctmp,(npw,npw), ierr)
- ABI_CHECK(ierr==0, "out of memory in ctmp")
+ ABI_MALLOC_OR_DIE(ctmp,(npw,npw), ierr)
 
  do iw=1,nomega
    !ctmp = TRANSPOSE(CONJG(w_qbz(:,:,iw)))
@@ -3034,15 +2888,6 @@ end subroutine screen_mdielf
 
 type(chi_t) function chi_new(npwe, nomega) result(chi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi_new'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: npwe,nomega
 
@@ -3079,15 +2924,6 @@ end function chi_new
 !! SOURCE
 
 subroutine chi_free(chi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3131,15 +2967,6 @@ end subroutine chi_free
 !! SOURCE
 
 subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0_lwing, chi0_uwing, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_write'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3305,15 +3132,6 @@ end subroutine lwl_write
 
 subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,method,npwe
@@ -3385,15 +3203,6 @@ end subroutine lwl_init
 !! SOURCE
 
 subroutine lwl_free(lwl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

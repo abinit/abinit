@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_model_screening
 !! NAME
 !! m_model_screening
@@ -7,7 +6,7 @@
 !!  Module containing functions for calculating and fitting model dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MS)
+!!  Copyright (C) 2008-2020 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,13 +87,6 @@ CONTAINS  !=====================================================================
 
 subroutine im_screening(omega,fval,nomega,coeff,ncoeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'im_screening'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -166,13 +158,6 @@ end subroutine im_screening
 !! SOURCE
 
 subroutine re_screening(omega,fval,nomega,coeff,ncoeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 're_screening'
-!End of the abilint section
 
   implicit none
 
@@ -246,13 +231,6 @@ end subroutine re_screening
 !! SOURCE
 
 subroutine re_and_im_screening(omega,fval,nomega,coeff,ncoeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 're_and_im_screening'
-!End of the abilint section
 
   implicit none
 
@@ -329,13 +307,6 @@ end subroutine re_and_im_screening
 !! SOURCE
 
 subroutine re_and_im_screening_with_phase(omega,fval,nomega,coeff,ncoeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 're_and_im_screening_with_phase'
-!End of the abilint section
 
   implicit none
 
@@ -418,13 +389,6 @@ end subroutine re_and_im_screening_with_phase
 
 subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
 & ncoeff,prtvol,startcoeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sequential_fitting'
-!End of the abilint section
 
   implicit none
 
@@ -510,13 +474,6 @@ end subroutine sequential_fitting
 !! SOURCE
 
 subroutine init_peaks_from_grid(omega,fval,nomega,nfreqre,nfreqim,coeff,ncoeff,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_peaks_from_grid'
-!End of the abilint section
 
   implicit none
 
@@ -641,13 +598,6 @@ end subroutine init_peaks_from_grid
 
 subroutine init_single_peak(omega,refval,imfval,nomega,nfreqre,coeff,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_single_peak'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -721,13 +671,6 @@ end subroutine init_single_peak
 !! SOURCE
 
 subroutine init_peaks_even_dist(omega,fval,nomega,nfreqre,coeff,ncoeff,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_peaks_even_dist'
-!End of the abilint section
 
   implicit none
 
@@ -813,13 +756,6 @@ end subroutine init_peaks_even_dist
 !! SOURCE
 
 subroutine print_peaks(omega,fval,nomega,nfreqre,nfreqim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_peaks'
-!End of the abilint section
 
  implicit none
 
@@ -957,13 +893,6 @@ end subroutine print_peaks
 !! SOURCE
 
 subroutine find_peaks(fval,nomega,nfreqre,nfreqim,ploc,npoles,iline)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_peaks'
-!End of the abilint section
 
   implicit none
 
@@ -1143,13 +1072,6 @@ end subroutine find_peaks
 !! SOURCE
 
 subroutine remove_phase(fval,nomega,phase)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'remove_phase'
-!End of the abilint section
 
   implicit none
 

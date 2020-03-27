@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spgbuilder
 !! NAME
 !! m_spgbuilder
@@ -7,7 +6,7 @@
 !!  Spacegroup builder.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (RC, XG)
+!!  Copyright (C) 2008-2020 ABINIT group (RC, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,15 +89,6 @@ contains
 !! SOURCE
 
 subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gensymspgr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -605,15 +595,6 @@ end subroutine gensymspgr
 !! SOURCE
 
 subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gensymshub'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1320,15 +1301,6 @@ end subroutine gensymshub
 !! SOURCE
 
 subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gensymshub4'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -33,7 +33,6 @@
         0.1846858603      1.0293890254E-07  1.3165386139E-08
  znucl  14.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

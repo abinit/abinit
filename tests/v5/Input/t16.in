@@ -245,13 +245,12 @@ prtden 0  prteig 0  prtwf 0
 optforces 1
 pawprtvol 3
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t16.out, tolnlines = 20, tolabs = 1.100e-05, tolrel = 2.000e-02, fld_options = -medium
+#%%   t16.out, tolnlines = 26, tolabs = 9.000e-02, tolrel = 2.000e-02, fld_options = -medium
 #%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 3

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dmft
 !! NAME
 !!  m_dmft
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +30,35 @@
 MODULE m_dmft
 
  use defs_basis
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_xmpi
+ use m_errors
+ use m_abicore
+ use m_data4entropyDMFT
+
+ use m_time,           only : timab
+ use m_pawang, only : pawang_type
+ use m_pawtab, only : pawtab_type
+ use m_paw_dmft, only: paw_dmft_type
+ use m_crystal, only : crystal_t
+ use m_green, only : green_type, destroy_green, icip_green,init_green,&
+&                    print_green,printocc_green,&
+&                    integrate_green,copy_green,compute_green,&
+&                    check_fourier_green,local_ks_green,fermi_green, &
+&                    fourier_green, init_green_tau,destroy_green_tau
+ use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper, trace_oper, inverse_oper !,upfold_oper,init_oper,destroy_oper,print_oper
+ use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
+ use m_hu, only : hu_type,init_hu,destroy_hu
+ use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
+ use m_matlu, only : print_matlu,sym_matlu, matlu_type,init_matlu,destroy_matlu, add_matlu, copy_matlu
+ use m_datafordmft, only : psichi_renormalization
+ use m_io_tools, only : flush_unit
+ use m_hubbard_one, only : hubbard_one
+ use m_ldau_self, only : ldau_self
+ use m_forctqmc, only : qmc_prep_ctqmc
+
  implicit none
 
  private
@@ -49,13 +77,6 @@ contains
 !!
 !! FUNCTION
 !! Solve the DMFT loop from PAW data.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -87,38 +108,6 @@ contains
 
 subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtvol)
 
-
- use defs_basis
- use defs_abitypes
- use m_xmpi
- use m_errors
- use m_abicore
- use m_data4entropyDMFT
-
- use m_time,           only : timab
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type, destroy_green, icip_green,init_green,&
-&                    print_green,printocc_green,&
-&                    integrate_green,copy_green,compute_green,&
-&                    check_fourier_green,local_ks_green,fermi_green
- use m_oper, only : oper_type,diff_oper,upfold_oper,loc_oper
- use m_self, only : self_type,initialize_self,destroy_self,print_self,dc_self,rw_self,new_self,make_qmcshift_self
- use m_hu, only : hu_type,init_hu,destroy_hu
- use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
- use m_matlu, only : print_matlu,sym_matlu
- use m_datafordmft, only : psichi_renormalization
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dmft_solve'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: istep
@@ -135,7 +124,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  real(dp) :: tsec(2)
 !scalars
  integer :: check,idmftloop,istep_iter,spaceComm,my_rank,opt_renorm
- integer :: itypat
+ integer :: itypat,natomcor,iatom
  logical :: etot_var
  character(len=200) :: char_enddmft
 ! type
@@ -145,6 +134,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  type(green_type) :: weiss
  type(self_type) :: self
  type(self_type) :: self_new
+ !type(oper_type) :: self_minus_hdc_oper
  type(energy_type) :: energies_dmft
  type(energy_type) :: energies_tmp
  character(len=500) :: message
@@ -156,9 +146,9 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  my_rank = xmpi_comm_rank(paw_dmft%spacecomm)
 
  check=paw_dmft%dmftcheck ! checks enabled
- paw_dmft%dmft_fepr=tol5
- paw_dmft%dmft_chpr=tol6
-!paw_dmft%dmft_chpr=20_dp ! total number of electron.
+ !paw_dmft%dmft_fermi_prec=tol5
+ paw_dmft%dmft_fermi_prec=paw_dmft%dmft_charge_prec*ten
+!paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
  paw_dmft%dmft_prgn=1
  paw_dmft%dmft_prgn=0
  etot_var=.true.
@@ -219,11 +209,32 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !== Orthonormalize psichi
 !----------------------------------------------------------------------
  call timab(621,1,tsec)
+ natomcor=0
+ do iatom=1,paw_dmft%natom
+   if(paw_dmft%lpawu(iatom).ne.-1) then
+     natomcor=natomcor+1
+   end if
+ end do
  opt_renorm=3
- if(paw_dmft%nspinor==2.and.paw_dmft%dmft_solv==5) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
+! write(6,*) "natomcor",natomcor
+! if(natomcor>1) opt_renorm=2
+ if(paw_dmft%nspinor==2.and.(paw_dmft%dmft_solv==8.or.paw_dmft%dmft_solv==9)) opt_renorm=2 ! necessary to use hybri_limit in qmc_prep_ctqmc
                                                                 ! ought to be  generalized  in the  future
  if(paw_dmft%dmft_solv/=-1) then
    call psichi_renormalization(cryst_struc,paw_dmft,pawang,opt=opt_renorm)
+
+
+   ! check that loc_oper(upfold_oper)=I
+   !  call init_oper(paw_dmft,self_minus_hdc_oper)
+   !  call identity_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom)
+   !  call print_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,1)
+   !  call upfold_oper(self_minus_hdc_oper,paw_dmft,1)
+   !  call print_oper(self_minus_hdc_oper,9,paw_dmft,3)
+   !  call loc_oper(self_minus_hdc_oper,paw_dmft,1)
+   !  call sym_matlu(cryst_struc,self_minus_hdc_oper%matlu,pawang)
+   !  call print_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,1)
+   !  call destroy_oper(self_minus_hdc_oper)
+
 
 !  ===========================================================================
 !  ==  re-construct LDA green function with new psichis
@@ -262,7 +273,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !== define Interaction from input upawu and jpawu
 !----------------------------------------------------------------------
  ABI_DATATYPE_ALLOCATE(hu,(cryst_struc%ntypat))
- call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g)
+ call init_hu(cryst_struc,pawtab,hu,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call initialize_self(self,paw_dmft)
 
  ! Set Hu in density representation for calculation of entropy if needed...
@@ -456,7 +467,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 !  == Save self on disk
 !  ---------------------------------------------------------------------
    call timab(627,1,tsec)
-   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2)
+   call rw_self(self,paw_dmft,prtopt=2,opt_rw=2,pawang=pawang,cryst_struc=cryst_struc)
    call timab(627,2,tsec)
 
 !  == Test convergency
@@ -534,7 +545,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  call destroy_green(green)
 !todo_ab rotate back density matrix into unnormalized basis just for
 !printout
- call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g)
+ call destroy_hu(hu,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
  call destroy_self(self)
  call destroy_energy(energies_dmft,paw_dmft)
 
@@ -556,13 +567,6 @@ end subroutine dmft_solve
 !!
 !! FUNCTION
 !! Solve the Impurity problem
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
@@ -588,37 +592,6 @@ end subroutine dmft_solve
 
 subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,self_new,weiss,pawprtvol)
-
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_time,    only : timab
- use m_crystal, only : crystal_t
- use m_green, only : green_type, fourier_green&
-& ,init_green_tau,destroy_green_tau,print_green,printocc_green,integrate_green,copy_green
- use m_paw_dmft, only : paw_dmft_type
- use m_oper,     only : trace_oper
- use m_hu, only : hu_type
- use m_matlu, only : matlu_type,print_matlu,init_matlu,destroy_matlu
- use m_self, only : self_type
- use m_energy, only : energy_type
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_io_tools, only : flush_unit
- use m_hubbard_one, only : hubbard_one
- use m_ldau_self, only : ldau_self
- use m_forctqmc, only : qmc_prep_ctqmc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'impurity_solve'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -856,13 +829,6 @@ end subroutine impurity_solve
 !! FUNCTION
 !! Use the Dyson Equation to compute self-energy from green function
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  istep    =  step of iteration for LDA.
@@ -889,26 +855,6 @@ end subroutine impurity_solve
 !! SOURCE
 
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
-
- use defs_basis
- use m_abicore
- use m_errors
-
- use m_time,         only : timab
- use m_paw_dmft, only: paw_dmft_type
- use m_crystal, only : crystal_t
- use m_green, only : green_type, destroy_green,init_green,copy_green
- use m_oper, only : oper_type,inverse_oper
- use m_matlu, only : matlu_type,add_matlu,print_matlu
- use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dyson'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1005,13 +951,6 @@ end subroutine dyson
 !! FUNCTION
 !! Print the spectral function computed from Green function in real frequency
 !!
-!! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
 !!  green  <type(green_type)>= green function data
@@ -1022,7 +961,7 @@ end subroutine dyson
 !!  prtopt= option for printing
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft = data for self-consistent LDA+DMFT calculations.
 !!
 !! NOTES
 !!
@@ -1038,31 +977,6 @@ end subroutine dyson
 
 subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 & pawang,pawtab,self_old,prtopt)
-
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_crystal, only : crystal_t
- use m_green, only : init_green,green_type,print_green,copy_green,compute_green,destroy_green
- use m_matlu, only : copy_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_hu, only : hu_type
- use m_self, only : self_type,initialize_self,dc_self,destroy_self,rw_self
- use m_energy, only : energy_type
- use m_pawang, only : pawang_type
- use m_pawtab, only : pawtab_type
- use m_hubbard_one, only : hubbard_one
- use m_ldau_self, only : ldau_self
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectral_function'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

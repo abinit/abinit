@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_polarisability
 !! NAME
 !! m_gwls_polarisability
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -102,13 +101,6 @@ subroutine Pk(psi_inout,omega)
 !  configuration of the data. For more information, see the lobpcgwf.F90, and 
 !  the article by F. Bottin et al.
 !===============================================================================
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Pk'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(inout) :: psi_inout(2,npw_k)
@@ -678,13 +670,6 @@ end subroutine Pk
 
 subroutine epsilon_k(psi_out,psi_in,omega)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'epsilon_k'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(out) :: psi_out(2,npw_k)
@@ -724,13 +709,6 @@ subroutine set_dielectric_function_frequency(omega)
 !----------------------------------------------------------------------------------------------------
 ! This routine sets the value of the module's frequency.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_dielectric_function_frequency'
-!End of the abilint section
-
 implicit none
 real(dp), intent(in) :: omega(2)
 
@@ -764,13 +742,6 @@ subroutine matrix_function_epsilon_k(vector_out,vector_in,Hsize)
 ! This function is a simple wrapper around epsilon_k to be fed to the Lanczos
 ! algorithm.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_function_epsilon_k'
-!End of the abilint section
-
 implicit none
 integer,      intent(in)  :: Hsize
 complex(dpc), intent(out) :: vector_out(Hsize)

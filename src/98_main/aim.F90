@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/aim
 !! NAME
 !! aim
@@ -7,7 +6,7 @@
 !! Main routine for Bader Atom-In-Molecule analysis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2018 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2020 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +38,6 @@
 program aim
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_build_info
@@ -55,12 +53,6 @@ program aim
  use m_fstrings, only : int2char4
  use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'aim'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -73,9 +65,8 @@ program aim
  integer :: lenstr,me,nproc,comm
  real(dp) :: tcpu,tcpui,twall,twalli
  real(dp) :: tsec(2)
- character(len=fnlen) :: dnfile,hname,infile,ofile
+ character(len=fnlen) :: dnfile,hname,infile,ofile,tmpfilename
  character(len=strlen) :: instr
- character(len=fnlen) :: tmpfilename
  character(len=10) :: procstr
  character(len=24) :: codename
  type(aim_dataset_type) :: aim_dtset
@@ -159,10 +150,6 @@ program aim
    call herald(codename,abinit_version,std_out)
  end if
 
-!DEBUG
-!stop   ! Works in paralel up to here
-!ENDDEBUG
-
  unt=21 ! WARNING : this number is used to define other unit numbers, in init.f
  unt0=9
 
@@ -178,13 +165,6 @@ program aim
  untg=20
 
 !OPENING OF THE INPUT FILES
-
-!DEBUG
-!write(std_out,*) ' me,master=',me,master
-!call flush(std_out)
-!call xmpi_end()
-!stop  ! OK until here
-!ENDDEBUG
 
  aim_iomode = IO_MODE_FORTRAN
  if(me==master)then
@@ -225,14 +205,6 @@ program aim
 
 !READING OF THE MAIN INPUT FILE
 
-!DEBUG
-!write(std_out,*) ' me,master=',me,master
-!call flush(std_out)
-!call xmpi_end()
-!stop ! OK until here
-!ENDDEBUG
-
-
 !Setting the input variables to their default values
  call defad(aim_dtset)
 
@@ -242,20 +214,6 @@ program aim
  end if
  call xmpi_bcast (lenstr, master, comm, ierr)
  call xmpi_bcast (instr(1:lenstr), master, comm, ierr)
-
-!DEBUG
-!write(std_out,*) ' after inpar, infile= ',infile
-!write(std_out,*) ' after inpar, dnfile= ',dnfile
-!write(std_out,*) ' after inpar, ofile= ',ofile
-!do ii=1,nfcfile
-!write(std_out,*) ' after inpar, fcfile(',ii,')= ',fcfile(ii)
-!enddo
-!write(std_out,*) ' after inpar, instr= ',instr(1:lenstr)
-!write(std_out,*) ' after inpar, lenstr= ',lenstr
-!call flush(std_out)
-!call xmpi_end()
-!stop   ! OK until here
-!ENDDEBUG
 
 !Analysis of the input string, setting of input variables in aim_dtset
  call adini(aim_dtset,instr,lenstr)

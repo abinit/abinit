@@ -13,7 +13,6 @@ teph_1o_DS9_GKK2
 teph_1o_DS9_GKK3
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrggkk
@@ -26,6 +25,6 @@ teph_1o_DS9_GKK3
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Verstraete 
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description =  Input file for mrggkk
 #%%<END TEST_INFO>

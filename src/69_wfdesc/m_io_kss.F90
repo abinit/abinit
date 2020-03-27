@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_kss
 !! NAME
 !!  m_io_kss
@@ -7,7 +6,7 @@
 !!  This module contains procedured dealing with the IO of the KSS file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
+!! Copyright (C) 1999-2020 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +27,6 @@
 MODULE m_io_kss
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -46,18 +43,20 @@ MODULE m_io_kss
  use m_paw_ij
  use m_pawcprj
  use m_pawfgr
+ use m_dtfil
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_io_tools,         only : open_file
  use m_fstrings,         only : sjoin, itoa, strcat
  use m_hide_lapack,      only : xheevx, xhegvx
  use m_geometry,         only : metric, remove_inversion
- use m_dtset,            only : dtset_copy, dtset_free
  use m_mpinfo,           only : destroy_mpi_enreg, proc_distrb_cycle
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
  use m_crystal ,         only : crystal_t
- use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_kg,               only : mkkin, mkkpg
  use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
@@ -122,15 +121,6 @@ CONTAINS  !===========================================================
 
 subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2,tnons2,occ,gbig,shlim,&
 &  crystal,Dtset,Hdr,Psps,iomode,kss_unt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_kss_header'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -207,8 +197,8 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 !Copy the occ number in the new header with correct dimensions
 !fill with zero the rest since mband can be < nbandksseff
  !write(std_out,*)associated(my_Hdr%occ)
- ABI_DEALLOCATE(my_Hdr%occ)
- ABI_ALLOCATE(my_Hdr%occ,(my_Hdr%bantot))
+ ABI_FREE(my_Hdr%occ)
+ ABI_MALLOC(my_Hdr%occ,(my_Hdr%bantot))
  !mband = MAXVAL(Hdr%nband)
 
  my_Hdr%occ=zero; nb=MIN(mband,nbandksseff)
@@ -221,7 +211,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  end do
 
 !Change dimension in the local Dtset_cpy as well.
- call dtset_copy(Dtset_cpy, Dtset)
+ dtset_cpy = Dtset%copy()
  Dtset_cpy%mpw   = kss_npw
  Dtset_cpy%mband = nbandksseff
 
@@ -235,7 +225,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
      MSG_ERROR(msg)
    end if
 
-   call hdr_fort_write(my_hdr, kss_unt, fform, ierr)
+   call my_hdr%fort_write(kss_unt, fform, ierr)
    ABI_CHECK(ierr == 0, "hdr_Fort_write returned ierr != 0")
 
    title='Results from ABINIT code';          write(kss_unt) title(1:80)
@@ -252,7 +242,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    ! Moreover the allocation is done in the wrong order for dimensions...
    ! but if I change this code, compatibility with external codes is broken.
    if (Psps%usepaw==0) then
-     ABI_ALLOCATE(vkbsign,(Psps%ntypat,Psps%mpsang))
+     ABI_MALLOC(vkbsign,(Psps%ntypat,Psps%mpsang))
      vkbsign(:,:)=zero
      do itypat=1,Psps%ntypat
        il0=0
@@ -266,7 +256,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
        end do
      end do
      write(kss_unt) ((vkbsign(itypat,il),il=1,Psps%mpsang),itypat=1,Psps%ntypat)
-     ABI_DEALLOCATE(vkbsign)
+     ABI_FREE(vkbsign)
    end if
 
 #ifdef HAVE_NETCDF
@@ -276,13 +266,13 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    NCF_CHECK(nctk_open_create(kss_unt, nctk_ncify(filekss), xmpi_comm_self))
 
    ! Add additional info from abinit header.
-   NCF_CHECK(hdr_ncwrite(my_hdr, kss_unt, fform, nc_define=.True.))
+   NCF_CHECK(my_hdr%ncwrite(kss_unt, fform, nc_define=.True.))
 
    ! Add info on crystalline structure
    ! FIXME: Check symmorphi trick and crystal%symrel!
    ! We currently use the dataset symmetries, as defined in the Hdr structure
    ! instead of the symmetries recomputed in outkss.
-   NCF_CHECK(crystal_ncwrite(crystal, kss_unt))
+   NCF_CHECK(crystal%ncwrite(kss_unt))
 
    ! Defined G-vectors and wavefunctions.
    call wfk_ncdef_dims_vars(kss_unt, my_hdr, fform, iskss=.True.)
@@ -311,7 +301,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
      ])
      NCF_CHECK(ncerr)
 
-     ABI_ALLOCATE(vkbsign_int, (psps%mproj, Psps%mpsang, Psps%ntypat))
+     ABI_MALLOC(vkbsign_int, (psps%mproj, Psps%mpsang, Psps%ntypat))
      vkbsign_int=0
      do itypat=1,Psps%ntypat
        do ilmn=1,Psps%lmnmax
@@ -325,7 +315,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
 
      ! Write KB sign here
      NCF_CHECK(nf90_put_var(kss_unt, nctk_idname(kss_unt, "kb_formfactor_sign"), vkbsign_int))
-     ABI_DEALLOCATE(vkbsign_int)
+     ABI_FREE(vkbsign_int)
    end if
 
    NCF_CHECK(nctk_set_datamode(kss_unt))
@@ -335,8 +325,8 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
- call dtset_free(Dtset_cpy)
- call hdr_free(my_Hdr)
+ call Dtset_cpy%free()
+ call my_Hdr%free()
 
  DBG_EXIT("COLL")
 
@@ -378,15 +368,6 @@ end subroutine write_kss_header
 
 subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_vkb'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,iomode,kss_npw,kss_unt
@@ -410,12 +391,12 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
  mpsang = Psps%mpsang; ntypat = Psps%ntypat
 
- ABI_ALLOCATE(vkb ,(kss_npw,ntypat,mpsang))
- ABI_ALLOCATE(vkbd,(kss_npw,ntypat,mpsang))
- ABI_ALLOCATE(dum_vkbsign,(ntypat,mpsang))
+ ABI_MALLOC(vkb ,(kss_npw,ntypat,mpsang))
+ ABI_MALLOC(vkbd,(kss_npw,ntypat,mpsang))
+ ABI_MALLOC(dum_vkbsign,(ntypat,mpsang))
 
  call kss_calc_vkb(Psps,kpoint,kss_npw,gbig,rprimd,dum_vkbsign,vkb,vkbd)
- ABI_DEALLOCATE(dum_vkbsign)
+ ABI_FREE(dum_vkbsign)
 
  SELECT CASE (iomode)
 
@@ -429,8 +410,8 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
 
 #ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
-   ABI_ALLOCATE(vkb_tgt ,(kss_npw,1,mpsang,ntypat))
-   ABI_ALLOCATE(vkbd_tgt,(kss_npw,1,mpsang,ntypat))
+   ABI_MALLOC(vkb_tgt ,(kss_npw,1,mpsang,ntypat))
+   ABI_MALLOC(vkbd_tgt,(kss_npw,1,mpsang,ntypat))
    do itypat=1,ntypat
      do il=1,mpsang
        do ig=1,kss_npw
@@ -460,16 +441,16 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
    ncerr = nf90_put_var(kss_unt, varid, vkbd_tgt, start=[1,ikpt,1,1,1], count=[kss_npw,1,1,mpsang,ntypat])
    NCF_CHECK(ncerr)
 
-   ABI_DEALLOCATE(vkb_tgt)
-   ABI_DEALLOCATE(vkbd_tgt)
+   ABI_FREE(vkb_tgt)
+   ABI_FREE(vkbd_tgt)
 #endif
 
  CASE DEFAULT
    MSG_ERROR(sjoin("Unsupported value for iomode:", itoa(iomode)))
  END SELECT
 
- ABI_DEALLOCATE(vkb)
- ABI_DEALLOCATE(vkbd)
+ ABI_FREE(vkb)
+ ABI_FREE(vkbd)
 
 end subroutine write_vkb
 !!***
@@ -515,15 +496,6 @@ end subroutine write_vkb
 
 subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 &          nbandksseff,natom,Psps,ene_k,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_kss_wfgk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -654,15 +626,6 @@ end subroutine write_kss_wfgk
 subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nbandksseff,ngfft,gmet,&
 &  MPI_enreg,gbig,ug,icg,cg,eig_vec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k2gamma_centered'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbandksseff,nspinor,kss_npw,npw_k,istwf_k
@@ -699,7 +662,7 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
 
 ! Mapping between the gamma-centered basis set and the k-centered one.
 ! trsl(ig)=npw_k+1 if vector ig is not inside the k-centered G-sphere.
- ABI_ALLOCATE(trsl,(kss_npw))
+ ABI_MALLOC(trsl,(kss_npw))
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
@@ -746,9 +709,9 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
      !
      ! Convert input wfs from reduced to full G-sphere.
      ndat=1
-     ABI_ALLOCATE(cfft,(2,n4,n5,n6*ndat))
-     ABI_ALLOCATE(full_cg,(2,full_npw_k*ndat))
-     ABI_ALLOCATE(tmp_cg,(2,npw_k*ndat))
+     ABI_MALLOC(cfft,(2,n4,n5,n6*ndat))
+     ABI_MALLOC(full_cg,(2,full_npw_k*ndat))
+     ABI_MALLOC(tmp_cg,(2,npw_k*ndat))
 
      !write(std_out,*)"npw_k, full_kg_k",npw_k,full_npw_k
 
@@ -771,9 +734,9 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
        end do
      end do !band
 
-     ABI_DEALLOCATE(cfft)
-     ABI_DEALLOCATE(tmp_cg)
-     ABI_DEALLOCATE(full_cg)
+     ABI_FREE(cfft)
+     ABI_FREE(tmp_cg)
+     ABI_FREE(full_cg)
 
    CASE DEFAULT
      MSG_BUG("Wrong istwf_k")
@@ -807,9 +770,9 @@ subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nband
    MSG_ERROR("neither cg not eig_vec are in input")
  end if
 
- ABI_DEALLOCATE(trsl)
+ ABI_FREE(trsl)
  if (allocated(full_kg_k))  then
-   ABI_DEALLOCATE(full_kg_k)
+   ABI_FREE(full_kg_k)
  end if
 
 end subroutine k2gamma_centered
@@ -852,15 +815,6 @@ end subroutine k2gamma_centered
 !! SOURCE
 
 subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,prtvol,npwkss,gvec_kss,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_gvec_kss'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1022,15 +976,6 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
   rprimd, xred, eigen, npwarr, kg, ylm, ngfftc, nfftc, ngfftf, nfftf, vtrial,&
   electronpositron) ! Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gshgg_mkncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,nfftc,nfftf
@@ -1073,7 +1018,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  real(dp),allocatable :: eig_ene(:),eig_vec(:,:,:),ph3d(:,:,:),pwave(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),vlocal_tmp(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlc(:,:),gsc(:,:),ghg_mat(:,:,:),gtg_mat(:,:,:),cgrvtrial(:,:)
+ real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gtg_mat(:,:,:),cgrvtrial(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
@@ -1215,7 +1160,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
    end if
 
    !Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
 
    do ikpt=1,dtset%nkpt
      nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
@@ -1238,19 +1183,19 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 
      ! Set up remaining of the Hamiltonian
      ! Compute (1/2) (2 Pi)**2 (k+G)**2:
-     ABI_ALLOCATE(kinpw,(npw_k))
+     ABI_MALLOC(kinpw,(npw_k))
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
      ! Compute (k+G) vectors (only if useylm=1)
      nkpg=3*dtset%nloalg(3)
-     ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+     ABI_MALLOC(kpg_k,(npw_k,nkpg))
      if (nkpg>0) then
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
      end if
 
      ! Compute nonlocal form factors ffnl at all (k+G):
      ider=0; idir=0; dimffnl=1
-     ABI_ALLOCATE(ffnl, (npw_k,dimffnl,psps%lmnmax,ntypat))
+     ABI_MALLOC(ffnl, (npw_k,dimffnl,psps%lmnmax,ntypat))
 
      call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
        gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
@@ -1262,10 +1207,10 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ABI_FREE(ylm_k)
 
 !    Load k-dependent part in the Hamiltonian datastructure
-     ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=dtset%kptns(:,ikpt),npw_k=npw_k,istwf_k=istwf_k,&
-&                            kinpw_k=kinpw,kg_k=kg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
-&                            compute_ph3d=.true.,compute_gbound=.true.)
+     ABI_MALLOC(ph3d,(2,npw_k,gs_hamk%matblk))
+     call gs_hamk%load_k(kpt_k=dtset%kptns(:,ikpt),npw_k=npw_k,istwf_k=istwf_k,&
+                         kinpw_k=kinpw,kg_k=kg_k,ffnl_k=ffnl,ph3d_k=ph3d,&
+                         compute_ph3d=.true.,compute_gbound=.true.)
 
      ! Prepare the call to getghc.
      ndat=1; lambda=zero; type_calc=0         ! For applying the whole Hamiltonian
@@ -1291,7 +1236,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      pwave=zero ! Initialize plane-wave array:
 
      ABI_MALLOC(ghc  ,(2,npw_k*nspinor*ndat))
-     ABI_MALLOC(gvnlc,(2,npw_k*nspinor*ndat))
+     ABI_MALLOC(gvnlxc,(2,npw_k*nspinor*ndat))
      ABI_MALLOC(gsc  ,(2,npw_k*nspinor*ndat*(sij_opt+1)/2))
 
      if (dtset%prtvol > 0) call wrtout(std_out,' Calculating <G|H|G''> elements','PERS')
@@ -1303,7 +1248,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
        pwave = zero
        pwave(1,igsp2)=one
 
-       call getghc(cpopt,pwave,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+       call getghc(cpopt,pwave,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,mpi_enreg,ndat,&
 &                  dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
        ! Fill the upper triangle.
@@ -1318,7 +1263,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ABI_FREE(ph3d)
      ABI_FREE(pwave)
      ABI_FREE(ghc)
-     ABI_FREE(gvnlc)
+     ABI_FREE(gvnlxc)
      ABI_FREE(gsc)
 
      if (psps%usepaw==1.and.cpopt==0) call pawcprj_free(cwaveprj)
@@ -1412,7 +1357,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  ABI_FREE(kg_k)
  ABI_FREE(vlocal)
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
 #ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))
@@ -1464,15 +1409,6 @@ end subroutine gshgg_mkncwrite
 !! SOURCE
 
 subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kss_calc_vkb'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1714,14 +1650,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 
  use m_linalg_interfaces
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outkss'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kssform,mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,usecprj
@@ -1821,7 +1749,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  if (nprocs==1) then
    ltest=allocated(MPI_enreg%proc_distrb)
    if (.not.ltest) then
-     ABI_ALLOCATE(MPI_enreg%proc_distrb,(nkpt,mband,nsppol))
+     ABI_MALLOC(MPI_enreg%proc_distrb,(nkpt,mband,nsppol))
      MPI_enreg%proc_distrb=my_rank
      lhack=.TRUE.
    end if
@@ -1973,7 +1901,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  ecut_eff = ecut * Dtset%dilatmx**2  ! Use ecut_eff instead of ecut_eff since otherwise
 !one cannot restart from a previous density file
  sizepw=2*mpw ; do_diago=(kssform/=3)
- ABI_ALLOCATE(dimlmn,(natom*Psps%usepaw))
+ ABI_MALLOC(dimlmn,(natom*Psps%usepaw))
  if (Psps%usepaw==1) then
    call pawcprj_getdim(dimlmn,natom,nattyp_dum,ntypat,Dtset%typat,pawtab,'R')
  end if
@@ -1999,8 +1927,8 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !  If in the input file symmorphi==1 all the symmetry operations are retained:
 !  both identity and inversion (if any) as well as non-symmorphic operations.
    nsym2=nsym ; pinv=1
-   ABI_ALLOCATE(symrel2,(3,3,nsym))
-   ABI_ALLOCATE(tnons2,(3,nsym))
+   ABI_MALLOC(symrel2,(3,3,nsym))
+   ABI_MALLOC(tnons2,(3,nsym))
    symrel2(:,:,:)=Dtset%symrel(:,:,1:nsym)
    tnons2(:,:)   =Dtset%tnons(:,1:nsym)
  else
@@ -2148,7 +2076,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 &   crystal,Dtset,Hdr,Psps,iomode,untkss)
  end if
 
- ABI_DEALLOCATE(shlim)
+ ABI_FREE(shlim)
 
  if (     do_diago) msg = ' Diagonalized eigenvalues'
  if (.not.do_diago) msg = ' Conjugate gradient eigenvalues'
@@ -2200,10 +2128,10 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 
        if (do_diago) then ! Direct diagonalization of the KS Hamiltonian.
          if (associated(eig_ene))  then
-           ABI_DEALLOCATE(eig_ene)
+           ABI_FREE(eig_ene)
          end if
          if (associated(eig_vec))  then
-           ABI_DEALLOCATE(eig_vec)
+           ABI_FREE(eig_vec)
          end if
          comm_self = xmpi_comm_self
 
@@ -2251,13 +2179,13 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
        if (my_rank==receiver.or.my_rank==sender) then
 
          if (do_diago.and.(my_rank==receiver.and.my_rank/=sender)) then ! Alloc arrays if not done yet.
-           ABI_ALLOCATE(eig_ene,(npw_k*dtset%nspinor))
-           ABI_ALLOCATE(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
+           ABI_MALLOC(eig_ene,(npw_k*dtset%nspinor))
+           ABI_MALLOC(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
          end if
 
          if (.not.do_diago) then
 
-           ABI_ALLOCATE(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
+           ABI_MALLOC(eig_vec,(2,npw_k*dtset%nspinor,nbandkssk(ikpt)))
 
            if (my_rank==sender) then
              do ib=1,nbandksseff
@@ -2311,8 +2239,8 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      call timab(938,1,tsec) !outkss(write)
 
      if (my_rank==master) then ! Prepare data for writing on disk.
-       ABI_ALLOCATE(ene,(nbandksseff))
-       ABI_ALLOCATE(wfg,(2,npwkss*dtset%nspinor,nbandksseff))
+       ABI_MALLOC(ene,(nbandksseff))
+       ABI_MALLOC(wfg,(2,npwkss*dtset%nspinor,nbandksseff))
        ene=zero; wfg=zero
 
        if (.not.do_diago) then
@@ -2423,7 +2351,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
        call wrtout(std_out,msg,'COLL')
 !
 !      * Write occupation numbers on std_out.
-       ABI_ALLOCATE(occ_k,(MAX(nband_k,nbandksseff)))
+       ABI_MALLOC(occ_k,(MAX(nband_k,nbandksseff)))
        occ_k(1:nband_k)=occ(1+bdtot_index:nband_k+bdtot_index)
        if (nband_k < nbandksseff) occ_k(nband_k+1:nbandksseff)=zero
 
@@ -2442,21 +2370,21 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !      ==== Write wavefunctions, KB and PAW matrix elements on disk ====
 !      =================================================================
        call write_kss_wfgk(untkss,ikpt,isppol,kpoint,dtset%nspinor,npwkss,&
-&           nbandksseff,natom,Psps,ene,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
+             nbandksseff,natom,Psps,ene,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
-       ABI_DEALLOCATE(occ_k)
-       ABI_DEALLOCATE(ene)
-       ABI_DEALLOCATE(wfg)
+       ABI_FREE(occ_k)
+       ABI_FREE(ene)
+       ABI_FREE(wfg)
 
      end if ! my_rank==master
      call timab(938,2,tsec) !outkss(write)
 
      if (my_rank==master.or.my_rank==MPI_enreg%proc_distrb(ikpt,1,isppol)) then
        if (associated(eig_ene))  then
-         ABI_DEALLOCATE(eig_ene)
+         ABI_FREE(eig_ene)
        end if
        if (associated(eig_vec))  then
-         ABI_DEALLOCATE(eig_vec)
+         ABI_FREE(eig_vec)
        end if
 
        if (Psps%usepaw==1) then
@@ -2466,7 +2394,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      ABI_DATATYPE_DEALLOCATE(Cprjnk_k)
 
      if (allocated(kg_k))  then
-       ABI_DEALLOCATE(kg_k)
+       ABI_FREE(kg_k)
      end if
 
 !    if (MPI_enreg%paral_compil_kpt==1) then !cannot be used in seq run!
@@ -2492,11 +2420,11 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
- ABI_DEALLOCATE(gbig)
- ABI_DEALLOCATE(symrel2)
- ABI_DEALLOCATE(tnons2)
+ ABI_FREE(gbig)
+ ABI_FREE(symrel2)
+ ABI_FREE(tnons2)
  if (Psps%usepaw==1)  then
-   ABI_DEALLOCATE(dimlmn)
+   ABI_FREE(dimlmn)
    if (do_diago.and.MPI_enreg%nproc_atom>1) then
      ABI_DATATYPE_DEALLOCATE(Paw_ij_all)
    end if
@@ -2518,7 +2446,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  end if
 
  if (lhack)  then
-   ABI_DEALLOCATE(MPI_enreg%proc_distrb)
+   ABI_FREE(MPI_enreg%proc_distrb)
  end if
 
  call wrtout(std_out, "outkss done", "COLL")
@@ -2564,15 +2492,6 @@ contains
 !! SOURCE
 
 subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,ntypat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memkss'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2626,7 +2545,7 @@ subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,nty
  isize=isize+16*mpw*natom                   !ph3d
  memsize=max(memsize,isize)
  isize=isize+48*mpw*nspinor&
-& +8*mpw*nspinor*(mpw*nspinor+1)        !pwave,subghg,gvnlg
+& +8*mpw*nspinor*(mpw*nspinor+1)            !pwave,subghg,gvnlg
  if (nspinor==2)&
 & isize=isize+40*mpw*nspinor                !pwave_so,subghg_so
  memsize=max(memsize,isize)
@@ -2702,15 +2621,6 @@ end subroutine memkss
 !! SOURCE
 
 subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,nsppol,nsym2,dimlmn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dsksta'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

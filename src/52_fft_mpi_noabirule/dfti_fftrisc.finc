@@ -100,7 +100,7 @@ if (istwf_k==1) then
    do cidx=1,mgb*nz
      cuboid(cidx) = MYCZERO
    end do
-   !
+
    ! Insert fofgin into the work array
 !$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
    do ig=1,npwin
@@ -144,7 +144,6 @@ if (istwf_k==1) then
 
    status = DftiFreeDescriptor(bw_plan)
    DFTI_CHECK(status)
-   !
    ! Now we have cuboid(Gx,Gy,z) in the cuboid enclosing the G-sphere
  end if
  !
@@ -160,7 +159,7 @@ if (istwf_k==1) then
  g2min_out = gboundout(3,1) 
  g2max_out = gboundout(4,1)
 
-! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx for Gy >= 0 
+ ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx for Gy >= 0 
  ng2_pos = g2max_in + 1
  status = DftiCreateDescriptor(bw_plan_xg2pos , FFT_PRECISION, DFTI_COMPLEX, 1, nx)
  DFTI_CHECK(status)
@@ -176,7 +175,7 @@ if (istwf_k==1) then
  status = DftiCommitDescriptor(bw_plan_xg2pos)
  DFTI_CHECK(status)
 
-! ng2_neg 1D transforms of f(Gx,Gy,z) along Gx for Gy < 0
+ ! ng2_neg 1D transforms of f(Gx,Gy,z) along Gx for Gy < 0
  ng2_neg = -g2min_in
  status = DftiCreateDescriptor(bw_plan_xg2neg , FFT_PRECISION, DFTI_COMPLEX, 1, nx)
  DFTI_CHECK(status)
@@ -192,7 +191,7 @@ if (istwf_k==1) then
  status = DftiCommitDescriptor(bw_plan_xg2neg)
  DFTI_CHECK(status)
 
-! nx 1D transforms of f(x,Gy,z) along Gy.
+ ! nx 1D transforms of f(x,Gy,z) along Gy.
  status = DftiCreateDescriptor(bw_plan_y, FFT_PRECISION, DFTI_COMPLEX, 1, ny)
  DFTI_CHECK(status)
 
@@ -256,10 +255,8 @@ if (istwf_k==1) then
    status = DftiCommitDescriptor(fw_plan_xg2neg)
    DFTI_CHECK(status)
  end if
- !
- ! Open OMP parallel region and allocate two 2-dimensional work arrays for out-of-place transforms.
- !
 
+ ! Open OMP parallel region and allocate two 2-dimensional work arrays for out-of-place transforms.
 #ifdef DEV_USE_ABIMALLOC
 !$OMP PARALLEL PRIVATE(status,ix,iy,cidx,sidx,padx,xyplane,pt,vloc,slice_a,slice_b)
 
@@ -273,16 +270,14 @@ if (istwf_k==1) then
  call dfti_alloc_complex(ldxy,cptr_sa,slice_a)
  call dfti_alloc_complex(ldxy,cptr_sb,slice_b)
 #endif
- !
+
  ! Big Loop over z parallelized with OpenMP.
 !$OMP DO
  do iz=1,nz
 
    if (option/=3) then
-     !
      ! Zero the values on the current plane
      slice_a(:) = MYCZERO
-     !
      ! Copy the data in the current plane
      do igb=1,ngbin
        ix   = indpw_kin(1,igb) 
@@ -291,7 +286,6 @@ if (istwf_k==1) then
        sidx = ix + (iy-1)*ldx
        slice_a(sidx) = cuboid(cidx)
      end do
-     !
      ! Perform Gx transform, taking into account arrays of zeros
      if (g2min_in+ny >= g2max_in+2) then
        do iy=g2max_in+2,g2min_in+ny
@@ -309,19 +303,17 @@ if (istwf_k==1) then
      pt = 1 + (g2min_in+ny)*ldx
      status = DftiComputeBackward(bw_plan_xg2neg, slice_a(pt:), slice_b(pt:))
      DFTI_CHECK(status)
-     !
      ! Got f(x,Gy,z). Now perform y transform
      status = DftiComputeBackward(bw_plan_y, slice_b, slice_a)
      DFTI_CHECK(status)
    end if
-   !
    ! The wave function is now in real space, for the current z plane
-   !
-   SELECT CASE (option)
 
+   SELECT CASE (option)
    CASE (0)
      ! Copy the transformed function at the right place and we are done!
      xyplane = 1 + (iz-1)*ldx*ldy
+#ifndef HAVE_DFTI_MIXED_PRECISION
      if (MYKIND==dpc) then
        call ZCOPY(ldxy,slice_a,1,fofr(1,xyplane),1)
      else if (MYKIND==spc) then
@@ -329,6 +321,12 @@ if (istwf_k==1) then
      else
        MSG_ERROR("Wrong FFT precision")
      end if
+#else
+     do ix=0,ldxy-1
+       fofr(1, xyplane + ix) = real(slice_a(ix+1), kind=dp)
+       fofr(2, xyplane + ix) = aimag(slice_a(ix+1))
+     end do
+#endif
 
    CASE (1)
      ! Accumulate density
@@ -375,6 +373,7 @@ end if
    CASE (3)
      ! Copy the function to be tranformed at the right place
      xyplane = 1 + (iz-1)*ldx*ldy
+#ifndef HAVE_DFTI_MIXED_PRECISION
      if (MYKIND==dpc) then
        call ZCOPY(ldxy,fofr(1,xyplane),1,slice_a,1)
      else if (MYKIND==spc) then
@@ -382,6 +381,11 @@ end if
      else
        MSG_ERROR("Wrong FFT precision")
      end if
+#else
+     do ix=1,ldxy
+       slice_a(ix) = cmplx(fofr(1, xyplane + ix -1), fofr(2, xyplane + ix -1), kind=MYKIND)
+     end do
+#endif
    END SELECT
 
    if (option==2 .or. option==3) then  
@@ -421,7 +425,7 @@ end if
 #endif
 !$OMP END PARALLEL
 
-! Free plans
+ ! Free plans
  status = DftiFreeDescriptor(bw_plan_xg2pos)
  status = DftiFreeDescriptor(bw_plan_xg2neg)
  status = DftiFreeDescriptor(bw_plan_y)
@@ -516,9 +520,7 @@ else if (istwf_k>=2) then
      end do
    end if
 
-
    if (option/=3) then
-
      ! Zero the components of cuboid
 !$OMP PARALLEL DO 
      do cidx=1,mgb*nz
@@ -637,7 +639,7 @@ else if (istwf_k>=2) then
      status = DftiCommitDescriptor(bw_plan)
      DFTI_CHECK(status)
 
-     status =  DftiComputeBackward(bw_plan, cuboid)
+     status = DftiComputeBackward(bw_plan, cuboid)
      DFTI_CHECK(status)
      status = DftiFreeDescriptor(bw_plan)
      DFTI_CHECK(status)
@@ -742,11 +744,9 @@ else if (istwf_k>=2) then
                                                                                         
      status = DftiCommitDescriptor(fw_plan_xg2pos)
      DFTI_CHECK(status)
-
    end if
 
    ! Do-loop on the planes stacked in the z direction
-
 #ifdef DEV_USE_ABIMALLOC
 !$OMP PARALLEL PRIVATE(ix,iy,iiy,cidx,sidx,pidx,fidx,padx,padz,phase,slice_a,slice_b,slice_c,slice_d)
    ! Allocate two 2-dimensional work arrays

@@ -7,7 +7,7 @@
 //
 //
 // COPYRIGHT
-// Copyright (C) 1998-2018 ABINIT group (FDahm)
+// Copyright (C) 1998-2020 ABINIT group (FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,7 @@
 
 #include "abi_common.h"
 #include "stdio.h"
-#include "gpu_four_header.h"
+#include "abi_gpu_header.h"
 
 
 /******************************************************************/

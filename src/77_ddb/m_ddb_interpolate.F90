@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_interpolate
 !! NAME
 !!  m_ddb_interpolate
@@ -8,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (GA)
+!!  Copyright (C) 2008-2020 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +40,6 @@ module m_ddb_interpolate
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_io_tools,       only : get_unit
  use m_fstrings,       only : strcat
  use m_dynmat,         only : gtdyn9, d2cart_to_red
@@ -77,21 +75,12 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_blok
+!!      d2cart_to_red,ddb_free,ddb_hdr_open_write,ddb_malloc,ddb_write_block
 !!      gtblk9,gtdyn9,outddbnc,wrtout
 !!
 !! SOURCE
 
 subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_interpolate'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -154,13 +143,13 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
  ddb_hdr%mblktyp = mtyp
 
- mpert = natom + 6
+ mpert = natom + MPERT_MAX
  msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
 
  ddb_new%nblok = nblok
- call ddb_malloc(ddb_new,msize,nblok,natom,ntypat)
+ call ddb_new%malloc(msize,nblok,natom,ntypat)
  ddb_new%flg = 0
  ddb_new%amu = ddb%amu
  ddb_new%typ = 1
@@ -196,38 +185,36 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
    ! Look for the information in the DDB
    qpt_padded(:,1) = qpt
-   call gtblk9(ddb,iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
+   call ddb%get_block(iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
 
    if (iblok /= 0) then
      ! DEBUG
-     write(*,*) 'DDB found in file for qpt=', qpt
+     !write(*,*) 'DDB found in file for qpt=', qpt
      ! END DEBUG
 
      ! q-point is present in the ddb. No interpolation needed.
 
      !d2cart(:,1:msize) = ddb%val(:,:,iblok)
-     d2cart(1,:,:,:,:) = reshape(ddb%val(1,:,iblok), &
-&     shape = (/3,mpert,3,mpert/))
-     d2cart(2,:,:,:,:) = reshape(ddb%val(2,:,iblok), &
-&     shape = (/3,mpert,3,mpert/))
+     d2cart(1,:,:,:,:) = reshape(ddb%val(1,:,iblok), shape = (/3,mpert,3,mpert/))
+     d2cart(2,:,:,:,:) = reshape(ddb%val(2,:,iblok), shape = (/3,mpert,3,mpert/))
    else
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
-&     crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
-&     qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
-&     Ifc%wghatm,crystal%xred,ifc%zeff)
+      crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
+      qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
+      Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self, &
+      dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
    end if
 
    ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-   call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
+   call asrq0%apply(natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
 
    ! Transform d2cart into reduced coordinates.
    call d2cart_to_red(d2cart,d2red,crystal%gprimd,crystal%rprimd,mpert, &
 &   natom,ntypat,crystal%typat,crystal%ucvol,crystal%zion)
-
 
    ! Store the dynamical matrix into a block of the new ddb
    jblok = iqpt
@@ -258,8 +245,8 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  ! Copy the flags for Gamma
  qpt_padded(:,1) = zero
  qptnrm = one
- call gtblk9(ddb,iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
- call gtblk9(ddb_new,jblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb%get_block(iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
+ call ddb_new%get_block(jblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
 
  if (iblok /= 0 .and. jblok /= 0) then
 
@@ -293,16 +280,14 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    call wrtout(std_out,' write the DDB ','COLL')
    choice=2
    do iblok=1,nblok
-     call ddb_write_blok(ddb_new,iblok,choice,ddb_hdr%mband,mpert,msize,&
-&     ddb_hdr%nkpt,unddb)
+     call ddb_new%write_block(iblok,choice,ddb_hdr%mband,mpert,msize,ddb_hdr%nkpt,unddb)
    end do
 
    ! Also write summary of bloks at the end
    write(unddb, '(/,a)' )' List of bloks and their characteristics '
    choice=3
    do iblok=1,nblok
-     call ddb_write_blok(ddb_new,iblok,choice,ddb_hdr%mband,mpert,msize,&
-&     ddb_hdr%nkpt,unddb)
+     call ddb_new%write_block(iblok,choice,ddb_hdr%mband,mpert,msize,ddb_hdr%nkpt,unddb)
    end do
 
    close (unddb)
@@ -334,7 +319,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  ! Free memory
  ! ===========
 
- call ddb_free(ddb_new)
+ call ddb_new%free()
  ABI_FREE(d2cart)
  ABI_FREE(d2red)
  ABI_FREE(blkflg)
@@ -373,17 +358,6 @@ end subroutine ddb_interpolate
 !! SOURCE
 
 subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
-
- !use defs_datatypes
- !use defs_abitypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outddbnc'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -462,9 +436,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  ! ------------------------------
  ! Write crystal info
  ! ------------------------------
- ncerr = crystal_ncwrite(Crystal, ncid)
- NCF_CHECK(ncerr)
-
+ NCF_CHECK(crystal%ncwrite(ncid))
 
  ! ------------------------------
  ! Write DDB
@@ -476,29 +448,24 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  cart_dir = 3
 
  ncerr = nctk_def_dims(ncid, [&
-& nctkdim_t('current_one_dim', one_dim), &
-& nctkdim_t('number_of_atoms', natom), &
-& nctkdim_t('number_of_cartesian_directions', cart_dir), &
-& nctkdim_t('number_of_perturbations', mpert), &
-& nctkdim_t('cplex',cplex)], defmode=.True.)
+  nctkdim_t('current_one_dim', one_dim), &
+  nctkdim_t('number_of_atoms', natom), &
+  nctkdim_t('number_of_cartesian_directions', cart_dir), &
+  nctkdim_t('number_of_perturbations', mpert), &
+  nctkdim_t('cplex',cplex)], defmode=.True.)
  NCF_CHECK(ncerr)
 
- ! Create the arrays
+! Create the arrays
  ncerr = nctk_def_arrays(ncid, [&
- nctkarr_t('atomic_masses_amu', "dp", 'number_of_atom_species'),&
+ &nctkarr_t('atomic_masses_amu', "dp", 'number_of_atom_species'),&
  nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
- nctkarr_t('second_derivative_of_energy', "dp", 'cplex, &
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions, number_of_atoms'), &
- nctkarr_t('second_derivative_of_energy_mask', "i", '&
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions, number_of_atoms'), &
- nctkarr_t('born_effective_charge_tensor', "dp", '&
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions'), &
- nctkarr_t('born_effective_charge_tensor_mask', "i", ' &
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions')])
+ nctkarr_t('second_derivative_of_energy', "dp", &
+ &'cplex, number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
+ nctkarr_t('second_derivative_of_energy_mask', "i",&
+ &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
+ nctkarr_t('born_effective_charge_tensor', "dp",'number_of_cartesian_directions,number_of_atoms,number_of_cartesian_directions'),&
+ nctkarr_t('born_effective_charge_tensor_mask', "i",&
+ &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions')])
  NCF_CHECK(ncerr)
 
 ! Write data
@@ -525,14 +492,6 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 
  contains
    integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

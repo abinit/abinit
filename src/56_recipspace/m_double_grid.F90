@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_double_grid
 !! NAME
 !!  m_double_grid
@@ -9,7 +8,7 @@
 !! and contains the mapping between the two meshes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (YG, SP, MJV)
+!! Copyright (C) 2008-2020 ABINIT group (YG, SP, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +30,7 @@ MODULE m_double_grid
  use m_abicore
  use m_hide_blas
  use m_bz_mesh
- use m_kptrank
+ use m_krank
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d_indices
  use m_symtk,          only : matr3inv
@@ -176,15 +175,6 @@ CONTAINS  !=====================================================================
 
 subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'double_grid_init'
-!End of the abilint section
-
- implicit none
-
 !Argument ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh_coarse,Kmesh_dense
@@ -303,15 +293,6 @@ end subroutine double_grid_init
 
 subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_closed, indices, g0, iktoint, inttoik)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_indices_coarse'
-!End of the abilint section
-
- implicit none
-
 !Argument ------------------------------------
 !scalars
  integer,intent(in) :: nbz,nshiftk,nbz_closed
@@ -393,15 +374,6 @@ end subroutine create_indices_coarse
 !! SOURCE
 
 subroutine get_kpt_from_indices_coarse(indices,maxcomp,inttoik,allg0,nkpt,ikpt,g0)
-!subroutine get_kpt_from_indices_coarse(double_grid,indices,ikpt,g0)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_kpt_from_indices_coarse'
-!End of the abilint section
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -460,15 +432,6 @@ end subroutine get_kpt_from_indices_coarse
 
 subroutine create_indices_dense(klatt_coarse, maxcomp, &
 & bz_dense, nbz_dense, nshiftk, shiftk, kmult, indices, g0, inttoik, iktoint)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_indices_dense'
-!End of the abilint section
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -564,15 +527,6 @@ end subroutine create_indices_dense
 !! SOURCE
 
 subroutine get_kpt_from_indices_dense(indices,maxcomp,kmult,inttoik,allg0,nkpt,ikpt,g0)
-!subroutine get_kpt_from_indices_dense(double_grid,indices,ikpt,g0)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_kpt_from_indices_dense'
-!End of the abilint section
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -629,15 +583,6 @@ end subroutine get_kpt_from_indices_dense
 
 subroutine compute_neighbours(nbz_dense, iktoint_dense, indices_dense, maxcomp_coarse, &
 &  inttoik_coarse, g0_coarse, nbz_closedcoarse, nbz_coarse, ndiv, dense_to_coarse, coarse_to_dense)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_neighbours'
-!End of the abilint section
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -716,15 +661,6 @@ end subroutine compute_neighbours
 
 subroutine compute_corresp(double_grid, div2kdense, kdense2div)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_corresp'
-!End of the abilint section
-
- implicit none
-
 !Argument ------------------------------------
 !scalars
  type(double_grid_t),intent(in) :: double_grid
@@ -789,66 +725,26 @@ end subroutine compute_corresp
 
 subroutine double_grid_free(grid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'double_grid_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(double_grid_t),intent(inout) :: grid
 
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
- !@double_grid
-
 !integer
- if (allocated(grid%inttoik_coarse))  then
-   ABI_DEALLOCATE(grid%inttoik_coarse)
- end if
- if (allocated(grid%inttoik_dense))  then
-   ABI_DEALLOCATE(grid%inttoik_dense)
- end if
- if (allocated(grid%iktoint_coarse))  then
-   ABI_DEALLOCATE(grid%iktoint_coarse)
- end if
- if (allocated(grid%iktoint_dense))  then
-   ABI_DEALLOCATE(grid%iktoint_dense)
- end if
- if (allocated(grid%indices_coarse))  then
-   ABI_DEALLOCATE(grid%indices_coarse)
- end if
- if (allocated(grid%indices_dense))  then
-   ABI_DEALLOCATE(grid%indices_dense)
- end if
- if (allocated(grid%g0_coarse))  then
-   ABI_DEALLOCATE(grid%g0_coarse)
- end if
- if (allocated(grid%g0_dense))  then
-   ABI_DEALLOCATE(grid%g0_dense)
- end if
- if (allocated(grid%dense_to_coarse)) then
-   ABI_DEALLOCATE(grid%dense_to_coarse)
- end if
- if (allocated(grid%coarse_to_dense)) then
-   ABI_DEALLOCATE(grid%coarse_to_dense)
- end if
+ ABI_SFREE(grid%inttoik_coarse)
+ ABI_SFREE(grid%inttoik_dense)
+ ABI_SFREE(grid%iktoint_coarse)
+ ABI_SFREE(grid%iktoint_dense)
+ ABI_SFREE(grid%indices_coarse)
+ ABI_SFREE(grid%indices_dense)
+ ABI_SFREE(grid%g0_coarse)
+ ABI_SFREE(grid%g0_dense)
+ ABI_SFREE(grid%dense_to_coarse)
+ ABI_SFREE(grid%coarse_to_dense)
 
 !real
- if (allocated(grid%shiftk_dense)) then
-   ABI_DEALLOCATE(grid%shiftk_dense)
- end if
-
- if (allocated(grid%shiftk_coarse)) then
-   ABI_DEALLOCATE(grid%shiftk_coarse)
- end if
-
- DBG_EXIT("COLL")
+ ABI_SFREE(grid%shiftk_dense)
+ ABI_SFREE(grid%shiftk_coarse)
 
 end subroutine double_grid_free
 !!***
@@ -886,15 +782,6 @@ end subroutine double_grid_free
 !! SOURCE
 
 subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,wgt_sub)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kptfine_av'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1043,25 +930,16 @@ end subroutine kptfine_av
 !! PARENTS
 !!
 !! CHILDREN
-!!      get_rank_1kpt,interpol3d_indices,wrap2_zero_one
+!!      get_rank,interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
-subroutine k_neighbors (kpt, kptrlatt,kptrank_t, rel_kpt, kpt_phon_indices)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k_neighbors'
-!End of the abilint section
-
- implicit none
+subroutine k_neighbors (kpt, kptrlatt,krank, rel_kpt, kpt_phon_indices)
 
 ! inputs
  real(dp), intent(in) :: kpt(3)
  integer, intent(in) :: kptrlatt(3,3)
- type(kptrank_type), intent(in) :: kptrank_t
+ type(krank_t), intent(in) :: krank
 
 ! outputs
  real(dp), intent(out) :: rel_kpt(3)
@@ -1086,36 +964,36 @@ subroutine k_neighbors (kpt, kptrlatt,kptrank_t, rel_kpt, kpt_phon_indices)
 !order of kpt_phons:
 !ir1 ir2 ir3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(1) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank(cornerkpt)
+ kpt_phon_indices(1) = krank%invrank(symrankkpt)
 !pr1 ir2 ir3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(2) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(2) = krank%invrank(symrankkpt)
 !ir1 pr2 ir3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(3) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(3) = krank%invrank(symrankkpt)
 !pr1 pr2 ir3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(ir3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(4) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(4) = krank%invrank(symrankkpt)
 !ir1 ir2 pr3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(5) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(5) = krank%invrank(symrankkpt)
 !pr1 ir2 pr3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(ir2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(6) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(6) = krank%invrank(symrankkpt)
 !ir1 pr2 pr3
  cornerkpt = (/real(ir1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(7) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(7) = krank%invrank(symrankkpt)
 !pr1 pr2 pr3
  cornerkpt = (/real(pr1-1)/kptrlatt(1,1),real(pr2-1)/kptrlatt(2,2), real(pr3-1)/kptrlatt(3,3)/)
- call get_rank_1kpt (cornerkpt,symrankkpt,kptrank_t)
- kpt_phon_indices(8) = kptrank_t%invrank(symrankkpt)
+ symrankkpt = krank%get_rank (cornerkpt)
+ kpt_phon_indices(8) = krank%invrank(symrankkpt)
 
 !retrieve the gkq matrix for all q, at the neighbor k vectors
  rel_kpt(1) = redkpt(1)*kptrlatt(1,1)-real(ir1-1)

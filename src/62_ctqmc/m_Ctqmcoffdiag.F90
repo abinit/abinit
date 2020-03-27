@@ -1,7 +1,7 @@
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_Ctqmcoffdiag
 !! NAME
 !!  m_Ctqmcoffdiag
@@ -12,7 +12,7 @@
 !!  Please use CtqmcoffdiagInterface
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder, B. Amadon, J. Denier)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder, B. Amadon, J. Denier)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,7 +94,7 @@ MODULE m_Ctqmcoffdiag
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -300,7 +300,7 @@ CONTAINS
 !!  Allocate all the non optional variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -330,13 +330,6 @@ CONTAINS
 SUBROUTINE Ctqmcoffdiag_init(op, ostream, istream, bFile, MY_COMM, iBuffer)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_init'
-!End of the abilint section
-
-
 #ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
@@ -351,7 +344,7 @@ include 'mpif.h'
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
 #endif
-  INTEGER                                       :: iflavor
+  !INTEGER                                       :: iflavor
 #ifdef __GFORTRAN__
 !  INTEGER                                       :: pid
 !  CHARACTER(LEN=5)                              :: Cpid
@@ -439,7 +432,7 @@ include 'mpif.h'
 !  op%seg_sign     = 0.d0
 !  op%anti_sign    = 0.d0
   op%stats(:)     = 0.d0
- ! write(6,*) "op%stats",op%stats
+ ! write(std_out,*) "op%stats",op%stats
   op%signvalue    = 1.d0
 !  op%signvaluecurrent    = 0.d0
 !  op%signvaluemeas = 0.d0
@@ -470,7 +463,7 @@ END SUBROUTINE Ctqmcoffdiag_init
 !!  set all parameters and operators
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -496,13 +489,6 @@ END SUBROUTINE Ctqmcoffdiag_init
 SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setParameters'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                         :: op
   DOUBLE PRECISION, DIMENSION(1:10), INTENT(IN   ) :: buffer
 
@@ -531,7 +517,7 @@ SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
     op%setU = .TRUE.
   END IF
 !  op%mu = op%mu + op%Impurity%shift_mu
-!sui!write(6,*) "op%opt_nondiag",op%opt_nondiag
+!sui!write(std_out,*) "op%opt_nondiag",op%opt_nondiag
   CALL BathOperatoroffdiag_init(op%Bath, op%flavors, op%samples, op%beta, INT(buffer(9)), op%opt_nondiag)
 
   op%para = .TRUE.
@@ -547,7 +533,7 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 !!  set the number of sweeps
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -573,18 +559,11 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 SUBROUTINE Ctqmcoffdiag_setSweeps(op,sweeps)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setSweeps'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)         , INTENT(INOUT) :: op
   DOUBLE PRECISION  , INTENT(IN   ) :: sweeps
 
   op%sweeps = NINT(sweeps / DBLE(op%size))
-!  !write(6,*) op%sweeps,NINT(sweeps / DBLE(op%size)),ANINT(sweeps/DBLE(op%size))
+!  !write(std_out,*) op%sweeps,NINT(sweeps / DBLE(op%size)),ANINT(sweeps/DBLE(op%size))
   IF ( DBLE(op%sweeps) .NE. ANINT(sweeps/DBLE(op%size)) ) &
     CALL ERROR("Ctqmcoffdiag_setSweeps : sweeps is negative or too big     ")
   IF ( op%sweeps .LT. 2*CTQMC_SLICE1 ) THEN  !202
@@ -615,7 +594,7 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 !!  initialize random number generator
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -641,13 +620,6 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 SUBROUTINE Ctqmcoffdiag_setSeed(op,iseed)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setSeed'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)           :: op
   INTEGER  , INTENT(IN   )           :: iseed
 !Local variables ------------------------------
@@ -677,7 +649,7 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 !!  Allocate all non option variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -702,15 +674,6 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_allocateAll'
-!End of the abilint section
-
-  implicit none
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: flavors
@@ -749,7 +712,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 !!  allocate all option variables 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -774,13 +737,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_allocateOpt'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
@@ -914,7 +870,7 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!  Set Gow from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -941,13 +897,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setG0wTab'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
   INTEGER                         , INTENT(IN ) :: opt_fk
@@ -1008,7 +957,7 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!  set the interaction matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1034,13 +983,6 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 SUBROUTINE Ctqmcoffdiag_setU(op,matU)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setU'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) ::op
 !Local variables ------------------------------
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: matU
@@ -1061,7 +1003,7 @@ END SUBROUTINE Ctqmcoffdiag_setU
 !!  clear a ctqmc run
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1086,13 +1028,6 @@ END SUBROUTINE Ctqmcoffdiag_setU
 SUBROUTINE Ctqmcoffdiag_clear(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_clear'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
@@ -1154,7 +1089,7 @@ END SUBROUTINE Ctqmcoffdiag_clear
 !!  reset a ctqmc simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1179,16 +1114,9 @@ END SUBROUTINE Ctqmcoffdiag_clear
 SUBROUTINE Ctqmcoffdiag_reset(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_reset'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
-  INTEGER                  :: iflavor
+  !INTEGER                  :: iflavor
   DOUBLE PRECISION         :: sweeps
 
   CALL GreenHyboffdiag_reset(op%Greens)
@@ -1226,7 +1154,7 @@ END SUBROUTINE Ctqmcoffdiag_reset
 !!  impose energy levels
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1253,13 +1181,6 @@ END SUBROUTINE Ctqmcoffdiag_reset
 SUBROUTINE Ctqmcoffdiag_setMu(op, levels)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setMu'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ) :: levels
 
@@ -1280,7 +1201,7 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 !!  use coefficient A such that F=-A/(iwn) given by DMFT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1307,13 +1228,6 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 SUBROUTINE Ctqmcoffdiag_sethybri_limit(op, hybri_limit)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_sethybri_limit'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   COMPLEX(KIND=8) , DIMENSION(:,:),  INTENT(IN ) :: hybri_limit
 
@@ -1332,7 +1246,7 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !!  Compute the hybridization function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1361,13 +1275,6 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
 
  use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_computeF'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                       , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN   ) :: Gomega
   !INTEGER                         , INTENT(IN   ) :: Wmax
@@ -1382,23 +1289,25 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   INTEGER                                         :: itau
   DOUBLE PRECISION                                :: pi_invBeta
   DOUBLE PRECISION                                :: K
-  DOUBLE PRECISION                                :: re
-  DOUBLE PRECISION                                :: im
-  DOUBLE PRECISION                                :: det
+  !DOUBLE PRECISION                                :: re
+  !DOUBLE PRECISION                                :: im
+  !DOUBLE PRECISION                                :: det
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: F_omega
   COMPLEX(KIND=8), DIMENSION(:,:), ALLOCATABLE   :: F_omega_inv
   COMPLEX(KIND=8), DIMENSION(:,:,:), ALLOCATABLE   :: Gomega_tmp
   TYPE(GreenHyboffdiag)                                     :: F_tmp
-  character(len=4) :: tag_proc
-  character(len=30) :: tmpfil
-  INTEGER :: unitnb
+  !character(len=4) :: tag_proc
+  !character(len=30) :: tmpfil
+  !INTEGER :: unitnb
+
+  ABI_UNUSED((/opt_fk/))
 
   flavors    = op%flavors
 
   samples    = op%samples
   pi_invBeta = ACOS(-1.d0) / op%beta
   op%Wmax=SIZE(Gomega,1)
-!sui!write(6,*) "op%Wmax",op%Wmax
+!sui!write(std_out,*) "op%Wmax",op%Wmax
   !=================================
   ! --- Initialize F_tmp 
   !=================================
@@ -1505,7 +1414,7 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      !  for test: Fourier of G0(iwn)
      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   !sui!write(6,*) "opt_fk=0"
+   !sui!write(std_out,*) "opt_fk=0"
      CALL GreenHyboffdiag_setOperW(F_tmp,F_omega)
   ! IF ( op%rank .EQ. 0 ) THEN
   !    DO iflavor = 1, flavors
@@ -1550,23 +1459,23 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
          END DO
        END DO
      END DO
-     open (unit=436,file='G0tau_fromF',status='unknown',form='formatted')
-     rewind(436)
-     !IF ( op%rank .EQ. 0 ) THEN
-     !  DO iflavor = 1, flavors
-     !    DO iflavor2 = 1, flavors
-     !        write(436,*) "#",iflavor,iflavor2
-     !      do  itau=1,op%samples+1
-     !        write(436,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
-     !      enddo
-     !        write(436,*) 
-     !    END DO
-     !  !sui!write(6,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
-     !  END DO
-     !ENDIF
+     open (unit=4367,file='G0tau_fromF',status='unknown',form='formatted')
+     rewind(4367)
+     IF ( op%rank .EQ. 0 ) THEN
+       DO iflavor = 1, flavors
+         DO iflavor2 = 1, flavors
+             write(4367,*) "#",iflavor,iflavor2
+           do  itau=1,op%samples+1
+             write(4367,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
+           enddo
+             write(4367,*) 
+         END DO
+       !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
+       END DO
+     ENDIF
      !call flush(436)
      !call flush(437)
-     close(436)
+     close(4367)
      !call flush(6)
      
      call xmpi_barrier(op%MY_COMM)
@@ -1704,9 +1613,9 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   ! --- For all iflavor and iflavor2, do the Fourier transformation to
   ! --- have (F(\tau))
   !CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
-   write(6,*) "WARNING opt_hybri_limit==1"
- ! CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
-  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
+   write(std_out,*) "WARNING opt_hybri_limit==0"
+  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
+!  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
  ! CALL GreenHyboffdiag_backFourier(F_tmp)
 
   ! --- Put the result in F
@@ -1840,7 +1749,7 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!  set all options and run a simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1870,13 +1779,6 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_run(op,opt_order,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_run'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -1926,19 +1828,19 @@ include 'mpif.h'
     op%opt_spectra = opt_spectra
 
   op%modGlobalMove(1) = max(op%sweeps,op%thermalization)+1 ! No Global Move
-!!sui!write(6,*) "op%sweeps",op%thermalization,op%sweeps,opt_gMove
+!!sui!write(std_out,*) "op%sweeps",op%thermalization,op%sweeps,opt_gMove
   op%modGlobalMove(2) = 0
   IF ( PRESENT ( opt_gMove ) ) THEN
     IF ( opt_gMove .LE. 0 .OR. opt_gMove .GT. op%sweeps ) THEN
      ! op%modGlobalMove(1) = op%sweeps+1
       op%modGlobalMove(1) = max(op%sweeps,op%thermalization)+1 ! No Global Move
-      !write(6,*) "op%sweeps",op%sweeps, op%modGlobalMove(1)
+      !write(std_out,*) "op%sweeps",op%sweeps, op%modGlobalMove(1)
       CALL WARNALL("Ctqmcoffdiag_run : global moves option is <= 0 or > sweeps/cpu -> No global Moves")
     ELSE 
       op%modGlobalMove(1) = opt_gMove 
     END IF
   END IF
-!sui!write(6,*) "op%sweeps",op%thermalization,op%sweeps
+!sui!write(std_out,*) "op%sweeps",op%thermalization,op%sweeps
 
   CALL Ctqmcoffdiag_allocateOpt(op)
   
@@ -1968,8 +1870,8 @@ include 'mpif.h'
   !=================================
   ! STARTING THERMALIZATION 
   !=================================
-  !write(6,*) "sweeps before thermalization",op%sweeps
-  !write(6,*) "op%stats",op%stats
+  !write(std_out,*) "sweeps before thermalization",op%sweeps
+  !write(std_out,*) "op%stats",op%stats
   CALL Ctqmcoffdiag_loop(op,op%thermalization,ilatex)
   !=================================
   ! ENDING   THERMALIZATION 
@@ -1996,8 +1898,8 @@ include 'mpif.h'
   !=================================
   ! STARTING CTQMC          
   !=================================
-  !write(6,*) "sweeps before loop",op%sweeps
-  !write(6,*) "op%stats",op%stats
+  !write(std_out,*) "sweeps before loop",op%sweeps
+  !write(std_out,*) "op%stats",op%stats
   CALL Ctqmcoffdiag_loop(op,op%sweeps,ilatex)
   !=================================
   ! ENDING   CTQMC          
@@ -2010,7 +1912,7 @@ include 'mpif.h'
   END IF
 
   op%done     = .TRUE.
-!sui!write(6,*) "op%stats en of ctqmc_run",op%stats
+!sui!write(std_out,*) "op%stats en of ctqmc_run",op%stats
 
 END SUBROUTINE Ctqmcoffdiag_run
 !!***
@@ -2023,7 +1925,7 @@ END SUBROUTINE Ctqmcoffdiag_run
 !!  Definition the main loop of the CT-QMC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2050,13 +1952,6 @@ END SUBROUTINE Ctqmcoffdiag_run
 SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_loop'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)         :: op
   INTEGER    , INTENT(IN   )         :: itotal
   INTEGER    , INTENT(IN   )         :: ilatex
@@ -2079,7 +1974,7 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   INTEGER                            :: swapUpdate2
   INTEGER                            :: old_percent
   INTEGER                            :: new_percent
-  INTEGER                            :: ipercent,ii
+  INTEGER                            :: ipercent !,ii
   INTEGER                            :: iflavor,ifl1,iflavor_d
   INTEGER                            :: isweep
 
@@ -2136,24 +2031,24 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
   END IF
 
   total = DBLE(itotal)
-  !write(6,*) "itotal",itotal
+  !write(std_out,*) "itotal",itotal
   indDensity = 1
-  !write(6,*) "op%stats",op%stats
+  !write(std_out,*) "op%stats",op%stats
   DO isweep = 1, itotal
-  !ii if(op%prtopt==1) write(6,*) "======== Isweep = ",isweep
+  !ii if(op%prtopt==1) write(std_out,*) "======== Isweep = ",isweep
     !updated_seg=.FALSE.
     DO iflavor = 1, flavors
-     ! if(isweep==itotal) write(6,*) "    Iflavor = ",iflavor,op%Impurity%Particles(iflavor)%tail
-   !ii if(op%prtopt==1)  write(6,*) "      ===Iflavor = ",iflavor
+     ! if(isweep==itotal) write(std_out,*) "    Iflavor = ",iflavor,op%Impurity%Particles(iflavor)%tail
+   !ii if(op%prtopt==1)  write(std_out,*) "      ===Iflavor = ",iflavor
       op%Impurity%activeFlavor=iflavor
       op%Bath%activeFlavor=iflavor ; op%Bath%MAddFlag= .FALSE. ; op%Bath%MRemoveFlag = .FALSE.
 
-      !write(6,*) "before tryaddremove"
+      !write(std_out,*) "before tryaddremove"
 
       ! For iflavor, Try a move
       !==========================
       CALL Ctqmcoffdiag_tryAddRemove(op,updated_seg)
-    !sui!write(6,*) "after tryaddremove",updated_seg
+    !sui!write(std_out,*) "after tryaddremove",updated_seg
 
       updated = updated_seg .OR.  updated_swap(iflavor).OR.(isweep==1)
       updated_swap(iflavor) = .FALSE.
@@ -2173,9 +2068,9 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
     !END DO
 
     IF ( MOD(isweep,modGlobalMove) .EQ. 0 ) THEN
-  ! !sui!write(6,*) "isweep,modGlobalMove,inside",isweep,modGlobalMove
+  ! !sui!write(std_out,*) "isweep,modGlobalMove,inside",isweep,modGlobalMove
       CALL Ctqmcoffdiag_trySwap(op,swapUpdate1, swapUpdate2)
-     ! !write(6,*) "no global move yet for non diag hybridization"
+     ! !write(std_out,*) "no global move yet for non diag hybridization"
       IF ( swapUpdate1 .NE. 0 .AND. swapUpdate2 .NE. 0 ) THEN
         updated_swap(swapUpdate1) = .TRUE.
         updated_swap(swapUpdate2) = .TRUE.
@@ -2282,7 +2177,7 @@ END SUBROUTINE Ctqmcoffdiag_loop
 !!  Try to add or remove a segment and an anti-segment
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2308,13 +2203,6 @@ END SUBROUTINE Ctqmcoffdiag_loop
 SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_tryAddRemove'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
 !  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
@@ -2323,7 +2211,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   INTEGER                               :: position
   INTEGER         , DIMENSION(1:2)     :: nature ! -2 for antiseg and 1 for seg
   INTEGER                               :: i! -2 for antiseg and 1 for seg
-  INTEGER                               :: ii,it,it1
+  !INTEGER                               :: it,it1 !ii,
   DOUBLE PRECISION                      :: action
   DOUBLE PRECISION                      :: beta
   DOUBLE PRECISION                      :: time1
@@ -2341,7 +2229,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   IF ( .NOT. op%set ) &
     CALL ERROR("Ctqmcoffdiag_trySegment : QMC not set                       ")
 
-        !write(6,*) "      TryAddRemove start"
+        !write(std_out,*) "      TryAddRemove start"
   nature(1) = CTQMC_SEGME
   nature(2) = CTQMC_ANTIS
   beta      = op%beta
@@ -2349,7 +2237,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
   updated = .FALSE.
   tailint  = (op%Impurity%particles(op%Impurity%activeFlavor)%tail)
   tail  = DBLE(tailint)
-  !write(6,*) "op%Impurity%particles(op%Impurity%activeFlavor)%tail",op%Impurity%activeFlavor,tail
+  !write(std_out,*) "op%Impurity%particles(op%Impurity%activeFlavor)%tail",op%Impurity%activeFlavor,tail
 
 
   !=====================================
@@ -2361,16 +2249,16 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 !      -----  2: antisegment    signe=-1  ( CTQMC_ANTIS = -2 )
 !    NB: Sign(a,b) = sign(b) * a
 
- !prt!if(op%prtopt==1) write(6,*) "       ==Starting configuration",i
- !prt!if(op%prtopt==1) write(6,*) "        = Segments:"
+ !prt!if(op%prtopt==1) write(std_out,*) "       ==Starting configuration",i
+ !prt!if(op%prtopt==1) write(std_out,*) "        = Segments:"
     tailint  = (op%Impurity%particles(op%Impurity%activeFlavor)%tail)
 !prt!    do ii=0, op%Impurity%Particles(op%Impurity%activeFlavor)%tail
- !prt!if(op%prtopt==1)  write(6,*) ii, op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,1), &
+ !prt!if(op%prtopt==1)  write(std_out,*) ii, op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,1), &
 !prt!&                    op%Impurity%Particles(op%Impurity%activeFlavor)%list(ii,2)
 !prt!    enddo
-  !sui!write(6,*) "        = M Matrix",op%Bath%sumtails
+  !sui!write(std_out,*) "        = M Matrix",op%Bath%sumtails
 !prt!    do it=1,op%Bath%sumtails
-    !sui!write(6,'(a,3x,500e10.3)') "        M start",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
+    !sui!write(std_out,'(a,3x,500e10.3)') "        M start",(op%Bath%M%mat(it,it1),it1=1,op%Bath%sumtails)
 !prt!    enddo
     CALL OurRng(op%seed,action)
 
@@ -2378,7 +2266,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
     ! Add segment/antisegment
     !==========================
     IF ( action .LT. .5d0 ) THEN ! Add a segment or antisegment
-     !ii  write(6,*) "        =try: Segment added of type",i,op%prtopt
+     !ii  write(std_out,*) "        =try: Segment added of type",i,op%prtopt
 
       ! Select time1 (>0) in [0,beta]
       !==============================
@@ -2392,7 +2280,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
       ! ImpurityOperator_getAvailableTime < 0 for an antisegment (signe<0) -> time_avail>0
       !====================================================================
       time_avail = ImpurityOperator_getAvailableTime(op%Impurity,time1,position) * signe
-     !ii  write(6,*) "        =try: time_avail",time_avail,time1
+     !ii  write(std_out,*) "        =try: time_avail",time_avail,time1
       IF ( time_avail .GT. 0.d0 ) THEN
 
         ! Time2 is  the length of the proposed new (anti)segment
@@ -2404,7 +2292,7 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         ! time2 > time1 
         !====================================================================
         time2     = time1 + time2 * time_avail
-      !sui!write(6,*) tailint+1,time1,time2,position
+      !sui!write(std_out,*) tailint+1,time1,time2,position
 !        CALL CdagC_init(CdagC_1,time1,time2)
 
         ! CdagC_1 gives the stard/end times for the proposed new segment/antisegment
@@ -2420,8 +2308,8 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         CdagC_1(C_   ) = ((1.d0+signe)*time2+(1.d0-signe)*time1)*0.5d0
 !        length    = CdagC_length(CdagC_1)
         length    = CdagC_1(C_   ) - CdagC_1(Cdag_)
-        !write(6,*) "      try : times", CdagC_1(C_   ),CdagC_1(Cdag_)
-        !write(6,*) "      length", length
+        !write(std_out,*) "      try : times", CdagC_1(C_   ),CdagC_1(Cdag_)
+        !write(std_out,*) "      length", length
 
 !      -----  Computes the determinant ratio
         det_ratio = BathOperatoroffdiag_getDetAdd(op%Bath,CdagC_1,position,op%Impurity%particles) 
@@ -2430,14 +2318,14 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
         overlap   = ImpurityOperator_getNewOverlap(op%Impurity,CdagC_1)
         signdetprev  = ImpurityOperator_getsign(op%Impurity, time2, i, action, position)
 
-        !write(6,*) "      overlap   ", overlap
+        !write(std_out,*) "      overlap   ", overlap
         CALL OurRng(op%seed,time1)
-        !write(6,*) "      Rnd", time1
+        !write(std_out,*) "      Rnd", time1
         signdet=1.d0
         det_ratio=det_ratio*signdetprev
                  
         IF ( det_ratio .LT. 0.d0 ) THEN
-        !sui!write(6,*) "         NEGATIVE DET",det_ratio,signdetprev
+        !sui!write(std_out,*) "         NEGATIVE DET",det_ratio,signdetprev
           det_ratio   = - det_ratio
           sign_det_ratio=-1
           op%stats(nature(i)+CTQMC_DETSI) = op%stats(nature(i)+CTQMC_DETSI) + 1.d0
@@ -2446,12 +2334,12 @@ SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
           sign_det_ratio=1
        !  op%signvaluecurrent=+1.d0
          ! signdet=-1.d0
-        !sui!write(6,*) "                  DET",det_ratio,signdetprev
+        !sui!write(std_out,*) "                  DET",det_ratio,signdetprev
         END IF
-      !ii  write(6,*) "                  DET",det_ratio
+      !ii  write(std_out,*) "                  DET",det_ratio
        ! op%signvaluemeas=op%signvaluemeas+1.d0
-        !write(6,*) "        .................",(time1 * (tail + 1.d0 )),beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap)
-        !write(6,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor
+        !write(std_out,*) "        .................",(time1 * (tail + 1.d0 )),beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap)
+        !write(std_out,*) "        .................",beta , time_avail , op%mu(op%Impurity%activeFlavor),op%Impurity%activeFlavor
 
         IF ( (time1 * (tail + 1.d0 )) &
              .LT. (beta * time_avail * det_ratio * DEXP(op%mu(op%Impurity%activeFlavor)*length + overlap) ) ) THEN
@@ -2733,7 +2621,7 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!  try a global move (swap to flavors)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2760,13 +2648,6 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_trySwap'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)           , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
 !  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
@@ -2774,7 +2655,7 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   INTEGER               , INTENT(  OUT) :: flav_j
 !Local variables ------------------------------
   INTEGER :: flavor_i
-  INTEGER :: flavor_j,ii,it,it1,iflavor
+  INTEGER :: flavor_j !,ii,it,it1 !,iflavor
   DOUBLE PRECISION :: rnd
   DOUBLE PRECISION :: lengthi
   DOUBLE PRECISION :: lengthj
@@ -2782,10 +2663,10 @@ SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
   DOUBLE PRECISION :: overlapjc1
   DOUBLE PRECISION :: overlapic2
   DOUBLE PRECISION :: overlapjc2
-  DOUBLE PRECISION :: detic1
-  DOUBLE PRECISION :: detjc1
-  DOUBLE PRECISION :: detic2
-  DOUBLE PRECISION :: detjc2
+  !DOUBLE PRECISION :: detic1
+  !DOUBLE PRECISION :: detjc1
+  !DOUBLE PRECISION :: detic2
+  !DOUBLE PRECISION :: detjc2
   DOUBLE PRECISION :: det_ratio,detnew,detold
   DOUBLE PRECISION :: local_ratio
  ! TYPE(BathOperatoroffdiag)  :: Bathnew
@@ -2913,7 +2794,7 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!  with the correct weight.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2940,13 +2821,6 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measN'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
@@ -2988,7 +2862,7 @@ END SUBROUTINE Ctqmcoffdiag_measN
 !!  measure all correlations in times for a flavor
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3014,13 +2888,6 @@ END SUBROUTINE Ctqmcoffdiag_measN
 SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measCorrelation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)       :: op
   !TYPE(ImpurityOperator), INTENT(IN   )       :: impurity
   INTEGER               , INTENT(IN   )       :: iflavor
@@ -3087,7 +2954,7 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 !!  measure perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3113,13 +2980,6 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 SUBROUTINE Ctqmcoffdiag_measPerturbation(op, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measPerturbation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
@@ -3152,7 +3012,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3175,13 +3035,6 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_getResult(op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getResult'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -3671,7 +3524,7 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 !!  optionnaly symmetrize the green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3698,21 +3551,16 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_symmetrizeGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: syms
 !Local variables ------------------------------
-  INTEGER :: iflavor1
-  INTEGER :: iflavor2
-  INTEGER :: flavors
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: green_tmp
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) :: n_tmp
+  !INTEGER :: iflavor1
+  !INTEGER :: iflavor2
+  !INTEGER :: flavors
+  !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: green_tmp
+  !DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:  ) :: n_tmp
+
+  ABI_UNUSED((/syms(1,1), op%swap/))
 
 !  flavors = op%flavors
 !  IF ( SIZE(syms,1) .NE. flavors .OR. SIZE(syms,2) .NE. flavors ) THEN
@@ -3749,7 +3597,7 @@ END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
 !!  Get the full green functions in time and/or frequency
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3777,20 +3625,13 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
 !Arguments ------------------------------------
  USE m_GreenHyboffdiag
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(INOUT)    :: op
   DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gtau
   COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
 !Local variables ------------------------------
   !INTEGER                            :: itime
   INTEGER                            :: iflavor1
-  INTEGER                            :: iflavor1b,iflavor,iflavorbis
+  INTEGER                            :: iflavor1b !,iflavor,iflavorbis
   INTEGER                            :: iflavor2
   INTEGER                            :: iflavor3
   INTEGER                            :: flavors,tail
@@ -3799,7 +3640,7 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
   DOUBLE PRECISION :: u2
   DOUBLE PRECISION :: u3
   DOUBLE PRECISION :: Un
-  DOUBLE PRECISION :: UUnn,omega,iw
+  DOUBLE PRECISION :: UUnn,iw !omega,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   TYPE(GreenHyboffdiag)                     :: F_tmp
@@ -4034,7 +3875,7 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 !!  get double occupation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4060,13 +3901,6 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 SUBROUTINE Ctqmcoffdiag_getD(op, D)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getD'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: D
 !Local variables ------------------------------
@@ -4101,7 +3935,7 @@ END SUBROUTINE Ctqmcoffdiag_getD
 !!  get interaction energy and noise on it
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4128,13 +3962,6 @@ END SUBROUTINE Ctqmcoffdiag_getD
 SUBROUTINE Ctqmcoffdiag_getE(op,E,noise)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getE'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: E
   DOUBLE PRECISION, INTENT(OUT) :: Noise
@@ -4152,7 +3979,7 @@ END SUBROUTINE Ctqmcoffdiag_getE
 !!  print different functions computed during the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4177,13 +4004,6 @@ END SUBROUTINE Ctqmcoffdiag_getE
 SUBROUTINE Ctqmcoffdiag_printAll(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printAll'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 
   IF ( .NOT. op%done ) &
@@ -4217,7 +4037,7 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 !!  print ctqmc statistics
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4242,13 +4062,6 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 SUBROUTINE Ctqmcoffdiag_printQMC(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printQMC'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: ostream
@@ -4385,7 +4198,7 @@ END SUBROUTINE Ctqmcoffdiag_printQMC
 !!  print green functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4412,13 +4225,6 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
 
 !Arguments ------------------------------------
   use m_io_tools, only : flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)        , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4426,7 +4232,7 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
   INTEGER                            :: itime
   INTEGER                            :: sp1
   INTEGER                            :: iflavor,iflavorb
-  INTEGER                            :: flavors,iflavor1,iflavor2
+  INTEGER                            :: flavors, iflavor2 !,iflavor1,
   CHARACTER(LEN=4)                   :: cflavors
   CHARACTER(LEN=50)                  :: string
   DOUBLE PRECISION                   :: dt
@@ -4517,7 +4323,7 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 !!  print individual double occupancy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4543,13 +4349,6 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 SUBROUTINE Ctqmcoffdiag_printD(op,oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printD'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4586,7 +4385,7 @@ END SUBROUTINE Ctqmcoffdiag_printD
 !!  print energy and noise 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4612,13 +4411,6 @@ END SUBROUTINE Ctqmcoffdiag_printD
 SUBROUTINE Ctqmcoffdiag_printE(op,oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printE'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4654,7 +4446,7 @@ END SUBROUTINE Ctqmcoffdiag_printE
 !!  print perturbation order
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4681,13 +4473,6 @@ END SUBROUTINE Ctqmcoffdiag_printE
 SUBROUTINE Ctqmcoffdiag_printPerturbation(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printPerturbation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)           :: op
   INTEGER  , OPTIONAL,  INTENT(IN)          :: oFileIn
 !Local variables-------------------------------
@@ -4732,7 +4517,7 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 !!  print correlation fonctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4758,13 +4543,6 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 SUBROUTINE Ctqmcoffdiag_printCorrelation(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printCorrelation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
@@ -4819,7 +4597,7 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 !!  print fourier transform of time evolution of number of electrons
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4845,13 +4623,6 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printSpectra'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
@@ -4901,7 +4672,7 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 !!  destroy and deallocate all variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -4926,16 +4697,9 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 SUBROUTINE Ctqmcoffdiag_destroy(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_destroy'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
-  INTEGER                  :: iflavor
+  !INTEGER                  :: iflavor
   INTEGER                  :: flavors
   INTEGER                  :: i
   INTEGER                  :: j

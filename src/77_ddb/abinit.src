@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -25,6 +25,7 @@ sources = [
  "m_ddb_interpolate.F90",
  "m_eliashberg_1d.F90",
  "m_elphon.F90",
+ "m_ddb_flexo.F90",
  "m_harmonic_thermo.F90",
  "m_ddb_internalstr.F90",
  "m_a2ftr.F90",

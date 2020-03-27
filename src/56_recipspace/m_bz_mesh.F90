@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bz_mesh
 !! NAME
 !!  m_bz_mesh
@@ -12,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,6 +49,7 @@ MODULE m_bz_mesh
  use m_errors
  use m_abicore
  use m_sort
+ use m_xmpi
 
  use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
@@ -57,17 +57,17 @@ MODULE m_bz_mesh
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : getkgrid
- use m_symkpt,     only : symkpt
+ use m_symkpt,         only : symkpt
 
  implicit none
 
  private
 
- real(dp),parameter :: TOL_KDIFF=0.0001_dp
+ real(dp),parameter :: TOL_KDIFF = 0.0001_dp
  ! Tolerance below which two points are considered equal within a RL vector:
  ! for each reduced direction the absolute difference between the coordinates must be less that TOL_KDIFF
 
- integer,parameter :: NONE_KPTRLATT(3,3)=RESHAPE((/0,0,0,0,0,0,0,0,0/),(/3,3/))
+ integer,parameter :: NONE_KPTRLATT(3,3) = RESHAPE((/0,0,0,0,0,0,0,0,0/),(/3,3/))
 !!***
 
 !!****t* m_bz_mesh/kmesh_t
@@ -84,12 +84,12 @@ MODULE m_bz_mesh
  type,public :: kmesh_t
 
   !scalars
-  integer :: nshift=0
+  integer :: nshift = 0
 
-  integer :: nbz=0
+  integer :: nbz = 0
   ! Number of points in the BZ.
 
-  integer :: nibz=0
+  integer :: nibz = 0
   ! Number of points in the IBZ.
 
   integer :: nsym
@@ -209,22 +209,22 @@ MODULE m_bz_mesh
 !!
 !! SOURCE
 
-type,public :: kpath_t
+ type,public :: kpath_t
 
-  integer :: nbounds=0
+  integer :: nbounds = 0
     ! Number of extrema defining the path.
 
-  integer :: ndivsm=0
+  integer :: ndivsm = 0
     ! Number of divisions used to sample the smallest segment.
 
-  integer :: npts=0
+  integer :: npts = 0
     ! Total number of points in the path.
 
   real(dp) :: gprimd(3,3)
    ! Reciprocal lattice vectors.
 
   real(dp) :: gmet(3,3)
-   ! Metric matrix in G space.
+   ! Metric matrix in G-space.
 
   integer,allocatable :: ndivs(:)
    ! ndivs(nbounds-1)
@@ -246,12 +246,18 @@ type,public :: kpath_t
     ! dl(npts)
     ! dl(i) = Distance between the (i-1)-th and the i-th k-point. dl(1) = zero
 
+ contains
+
+  procedure :: free => kpath_free
+   ! Free memory
+
+  procedure :: print => kpath_print
+   ! Print the path.
+
  end type kpath_t
 
  public :: kpath_new        ! Construct a new path
- public :: kpath_free       ! Free memory
  public :: make_path        ! Construct a normalized path. TODO: Remove
- public :: kpath_print      ! Print the path.
 !!***
 
 !----------------------------------------------------------------------
@@ -392,15 +398,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symmetry)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kmesh_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -566,15 +563,6 @@ end subroutine kmesh_init
 
 subroutine kmesh_free(Kmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kmesh_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(inout) :: Kmesh
@@ -583,43 +571,21 @@ subroutine kmesh_free(Kmesh)
 
  !@kmesh_t
 !integer
- if (allocated(Kmesh%rottb)) then
-   ABI_FREE(Kmesh%rottb)
- end if
- if (allocated(Kmesh%rottbm1)) then
-   ABI_FREE(Kmesh%rottbm1)
- end if
- if (allocated(Kmesh%tab)) then
-   ABI_FREE(Kmesh%tab)
- end if
- if (allocated(Kmesh%tabi)) then
-   ABI_FREE(Kmesh%tabi)
- end if
- if (allocated(Kmesh%tabo)) then
-   ABI_FREE(Kmesh%tabo)
- end if
- if (allocated(Kmesh%umklp)) then
-   ABI_FREE(Kmesh%umklp)
- end if
+ ABI_SFREE(Kmesh%rottb)
+ ABI_SFREE(Kmesh%rottbm1)
+ ABI_SFREE(Kmesh%tab)
+ ABI_SFREE(Kmesh%tabi)
+ ABI_SFREE(Kmesh%tabo)
+ ABI_SFREE(Kmesh%umklp)
 
 !real
- if (allocated(Kmesh%ibz)) then
-   ABI_FREE(Kmesh%ibz)
- end if
- if (allocated(Kmesh%bz)) then
-   ABI_FREE(Kmesh%bz)
- end if
- if (allocated(Kmesh%shift)) then
-   ABI_FREE(Kmesh%shift)
- end if
- if (allocated(Kmesh%wt)) then
-   ABI_FREE(Kmesh%wt)
- end if
+ ABI_SFREE(Kmesh%ibz)
+ ABI_SFREE(Kmesh%bz)
+ ABI_SFREE(Kmesh%shift)
+ ABI_SFREE(Kmesh%wt)
 
 !complex
- if (allocated(Kmesh%tabp)) then
-   ABI_FREE(Kmesh%tabp)
- end if
+ ABI_SFREE(Kmesh%tabp)
 
 end subroutine kmesh_free
 !!***
@@ -652,15 +618,6 @@ end subroutine kmesh_free
 !! SOURCE
 
 subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kmesh_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -774,15 +731,6 @@ end subroutine kmesh_print
 !! SOURCE
 
 subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_k_rotation'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -940,15 +888,6 @@ end subroutine setup_k_rotation
 
 subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_bz_item'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_bz
@@ -1013,15 +952,6 @@ end subroutine get_bz_item
 
 subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_IBZ_item'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz
@@ -1070,15 +1000,6 @@ end subroutine get_IBZ_item
 !! SOURCE
 
 subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_BZ_diff'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1161,15 +1082,6 @@ end subroutine get_BZ_diff
 
 logical function isamek(k1,k2,g0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isamek'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(out) :: g0(3)
@@ -1209,15 +1121,6 @@ end function isamek
 !! SOURCE
 
 logical function isequalk(q1,q2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isequalk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: q1(3),q2(3)
@@ -1262,15 +1165,6 @@ end function isequalk
 !! SOURCE
 
 logical function has_BZ_item(Kmesh,item,ikbz,g0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'has_BZ_item'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1332,15 +1226,6 @@ end function has_BZ_item
 
 logical function has_IBZ_item(Kmesh,item,ikibz,g0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'has_IBZ_item'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ikibz
@@ -1399,15 +1284,6 @@ end function has_IBZ_item
 
 pure logical function bz_mesh_isirred(Kmesh,ik_bz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bz_mesh_isirred'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_bz
@@ -1460,15 +1336,6 @@ end function bz_mesh_isirred
 subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 &  vacuum,break_symmetry)  ! Optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_mesh'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nshiftk,kptopt
@@ -1509,8 +1376,8 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  my_vacuum = (/0,0,0/); if (PRESENT(vacuum)) my_vacuum=vacuum
 
  my_nshiftk = nshiftk
- ABI_CHECK(my_nshiftk>0.and.my_nshiftk<=210,"Wrong nshiftk")
- ABI_MALLOC(my_shiftk,(3,210))
+ ABI_CHECK(my_nshiftk>0.and.my_nshiftk<=MAX_NSHIFTK, sjoin("Wrong nshiftk must be between 1 and ", itoa(MAX_NSHIFTK)))
+ ABI_MALLOC(my_shiftk, (3, MAX_NSHIFTK))
  my_shiftk=zero; my_shiftk(:,1:nshiftk) = shiftk(:,:)
 
  !write(std_out,*)" In make_mesh"
@@ -1613,15 +1480,6 @@ end subroutine make_mesh
 !! SOURCE
 
 subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,ktabo,nkbz,wtk,ref_bz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'identk'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1813,15 +1671,6 @@ end subroutine identk
 
 subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_ng0sh'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nk1,nk2,nkfold
@@ -1957,13 +1806,6 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getkptnorm_bycomponent'
-!End of the abilint section
-
  integer,intent(in) :: factor
  real(dp),intent(out):: norm
 !arrays
@@ -2021,15 +1863,6 @@ end subroutine getkptnorm_bycomponent
 !! SOURCE
 
 subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_path'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2141,15 +1974,6 @@ end subroutine make_path
 
 subroutine find_qmesh(Qmesh,Cryst,Kmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_qmesh'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh
@@ -2211,15 +2035,6 @@ end subroutine find_qmesh
 
 subroutine findnq(nkbz,kbz,nsym,symrec,symafm,nqibz,timrev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findnq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: timrev,nkbz,nsym
@@ -2241,8 +2056,7 @@ subroutine findnq(nkbz,kbz,nsym,symrec,symafm,nqibz,timrev)
  nqallm=1000
  do
    memory_exhausted=0
-   ABI_STAT_MALLOC(qall,(3,nqallm), ierr)
-   ABI_CHECK(ierr==0, 'out-of-memory qall')
+   ABI_MALLOC_OR_DIE(qall,(3,nqallm), ierr)
    nqall=0
 
    ! Loop over all k-points in BZ, forming k-k1.
@@ -2317,15 +2131,6 @@ end subroutine findnq
 
 
 subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2426,15 +2231,6 @@ end subroutine findq
 
 subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findqg0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqbz
@@ -2458,7 +2254,8 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
  iq=0
 
- if (ALL(ABS(kmkp(:))<EPSILON(one))) then ! Find q close to 0 ===
+ if (ALL(ABS(kmkp(:))<EPSILON(one))) then
+   ! Find q close to 0
    do iqbz=1,nqbz
      if (ALL(ABS(qbz(:,iqbz))<tolq0)) then
        iq=iqbz
@@ -2470,7 +2267,8 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    end if
    g0(:)=0; RETURN
 
- else ! q is not zero, find q such as k-kp=q+G0.
+ else
+   ! q is not zero, find q such as k-kp=q+G0.
 
    ! Try with G0=0 first.
    !do iqbz=1,nqbz
@@ -2613,15 +2411,6 @@ end subroutine findqg0
 
 subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwe,use_umklp
@@ -2643,7 +2432,7 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 !arrays
  integer :: g0(3),gg(3),gmG0(3),identity(3,3),nop(Cryst%timrev),nopg0(2)
  integer :: symxpt(4,2,Cryst%nsym)
- integer,allocatable :: indkpt1(:),symafm_ltg(:),symrec_Ltg(:,:,:)
+ integer,allocatable :: indkpt1(:),symafm_ltg(:),symrec_Ltg(:,:,:),bz2ibz_smap(:,:)
  integer,pointer :: symafm(:),symrec(:,:,:)
  real(dp) :: knew(3)
  real(dp),allocatable :: ktest(:,:),wtk(:),wtk_folded(:)
@@ -2759,10 +2548,13 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  ABI_MALLOC(indkpt1,(nbz))
  ABI_MALLOC(wtk_folded,(nbz))
  ABI_MALLOC(wtk,(nbz))
+ ABI_MALLOC(bz2ibz_smap, (6, nbz))
  wtk=one; iout=0; dummy_timrev=0
 
- call symkpt(0,Cryst%gmet,indkpt1,iout,Kmesh%bz,nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded)
+ call symkpt(0,Cryst%gmet,indkpt1,iout,Kmesh%bz,nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded, &
+     bz2ibz_smap, xmpi_comm_self)
 
+ ABI_FREE(bz2ibz_smap)
  ABI_FREE(indkpt1)
  ABI_FREE(wtk)
 
@@ -2946,15 +2738,6 @@ end subroutine littlegroup_init
 
 subroutine littlegroup_free_0D(Ltg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_free_0D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(littlegroup_t),intent(inout) :: Ltg
@@ -2962,39 +2745,17 @@ subroutine littlegroup_free_0D(Ltg)
 ! *********************************************************************
 
  !@littlegroup_t
- if (allocated(Ltg%g0)) then
-   ABI_FREE(Ltg%g0)
- end if
- if (allocated(Ltg%ibzq)) then
-   ABI_FREE(Ltg%ibzq)
- end if
- if (allocated(Ltg%bz2ibz)) then
-   ABI_FREE(Ltg%bz2ibz)
- end if
- if (allocated(Ltg%ibz2bz)) then
-   ABI_FREE(Ltg%ibz2bz)
- end if
- if (allocated(Ltg%igmG0)) then
-   ABI_FREE(Ltg%igmG0)
- end if
- if (allocated(Ltg%flag_umklp)) then
-   ABI_FREE(Ltg%flag_umklp)
- end if
- if (allocated(Ltg%preserve)) then
-   ABI_FREE(Ltg%preserve)
- end if
- if (allocated(Ltg%tab)) then
-   ABI_FREE(Ltg%tab)
- end if
- if (allocated(Ltg%tabo)) then
-   ABI_FREE(Ltg%tabo)
- end if
- if (allocated(Ltg%tabi)) then
-   ABI_FREE(Ltg%tabi)
- end if
- if (allocated(Ltg%wtksym)) then
-   ABI_FREE(Ltg%wtksym)
- end if
+ ABI_SFREE(Ltg%g0)
+ ABI_SFREE(Ltg%ibzq)
+ ABI_SFREE(Ltg%bz2ibz)
+ ABI_SFREE(Ltg%ibz2bz)
+ ABI_SFREE(Ltg%igmG0)
+ ABI_SFREE(Ltg%flag_umklp)
+ ABI_SFREE(Ltg%preserve)
+ ABI_SFREE(Ltg%tab)
+ ABI_SFREE(Ltg%tabo)
+ ABI_SFREE(Ltg%tabi)
+ ABI_SFREE(Ltg%wtksym)
 
 end subroutine littlegroup_free_0D
 !!***
@@ -3020,15 +2781,6 @@ end subroutine littlegroup_free_0D
 !! SOURCE
 
 subroutine littlegroup_free_1D(Ltg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_free_1D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3073,15 +2825,6 @@ end subroutine littlegroup_free_1D
 
 subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol,unit
@@ -3118,13 +2861,13 @@ subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
  do itim=1,Ltg%timrev
    if (itim==1) then
      write(msg,'(a,2(a,i2,a))')ch10,&
-&      '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
-&      '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
+       '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
+       '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
      call wrtout(my_unt,msg,my_mode)
    else if (itim==2) then
      write(msg,'(a,2(a,i2,a))')ch10,&
-&      '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
-&      '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
+       '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
+       '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
      call wrtout(my_unt,msg,my_mode)
    end if
  end do
@@ -3154,15 +2897,6 @@ end subroutine littlegroup_print
 !! SOURCE
 
 function box_len(qpt,gprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'box_len'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3254,15 +2988,6 @@ end function box_len
 
 type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpath_new'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndivsm
@@ -3330,40 +3055,17 @@ end function kpath_new
 
 subroutine kpath_free(Kpath)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpath_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(kpath_t),intent(inout) :: Kpath
+ class(kpath_t),intent(inout) :: Kpath
 
 ! *************************************************************************
 
- if (allocated(Kpath%ndivs)) then
-   ABI_FREE(Kpath%ndivs)
- end if
-
- if (allocated(Kpath%bounds2kpt)) then
-   ABI_FREE(Kpath%bounds2kpt)
- end if
-
- if (allocated(Kpath%bounds)) then
-   ABI_FREE(Kpath%bounds)
- end if
-
- if (allocated(Kpath%points)) then
-   ABI_FREE(Kpath%points)
- end if
-
- if (allocated(Kpath%dl)) then
-   ABI_FREE(Kpath%dl)
- end if
+ ABI_SFREE(Kpath%ndivs)
+ ABI_SFREE(Kpath%bounds2kpt)
+ ABI_SFREE(Kpath%bounds)
+ ABI_SFREE(Kpath%points)
+ ABI_SFREE(Kpath%dl)
 
 end subroutine kpath_free
 !!***
@@ -3395,20 +3097,11 @@ end subroutine kpath_free
 
 subroutine kpath_print(kpath, header, unit, prtvol, pre)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpath_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
  character(len=*),optional,intent(in) :: header,pre
- type(kpath_t),intent(in) :: kpath
+ class(kpath_t),intent(in) :: kpath
 
 !Local variables-------------------------------
  integer :: unt,my_prtvol,ii

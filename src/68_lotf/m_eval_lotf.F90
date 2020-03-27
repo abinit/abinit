@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/eval_lotf
 !! NAME
 !! eval_lotf
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MMancini)
+!! Copyright (C) 2005-2020 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,13 +61,6 @@ contains
   use pbc_lotf,only : dist_pbc
 
   ! INPUT/OUTPUT
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phi_n_calc'
-!End of the abilint section
-
   real(dp),intent(in) :: alpha_dum(3,nbondex)
   integer ::  nneig,  iat, jat
   integer ::  nlist(0:nneig)
@@ -195,13 +187,6 @@ contains
 
   USE pbc_lotf,only : dist_pbc
   USE GLUE_LOTF,only : calc_coord,rmrho
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coord2'
-!End of the abilint section
-
   integer,intent(in) :: nneig
   real(dp),intent(out) :: coordatom_dum
   real(dp),intent(in) :: r0(3),rv(3,nneig)
@@ -245,13 +230,6 @@ contains
   use pbc_lotf,only : dist_pbc
   use defs_param_lotf,only : lotfvar
   use GLUE_LOTF, only :  rmrho,calc_rhop
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_forces_U_n'
-!End of the abilint section
-
   integer,intent(in) ::  nneig,nlist(0:lotfvar%nneigx)
   real(dp),intent(in) :: r0(3),rv(3,nneig),up_list(lotfvar%natom)
   real(dp),intent(out):: forc_dum2(3)
@@ -307,13 +285,6 @@ contains
   use bond_lotf,only : nbondex,tafit,imat,ibmat_large
 
   ! Input/Output variables
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_forces_U_n_2'
-!End of the abilint section
-
   real(dp),intent(in) ::  alpha_dum(3,nbondex)
   integer,intent(in) ::  nneig,nlist(0:lotfvar%nneigx)
   real(dp),intent(in) ::  r0(3),rv(3,nneig),up_list(lotfvar%natom)
@@ -397,13 +368,6 @@ contains
   use GLUE_LOTF,only : rmrho,dphi,rho_devs
   use defs_param_lotf,only : lotfvar
   use bond_lotf,only : nbondex,nfitmax,tafit,imat,ibmat_large
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_force_devs_new_d'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -597,13 +561,6 @@ contains
   use work_var_lotf,only : rcut_nbl
   use tools_lotf,only : icf
   use pbc_lotf,only : dist_pbc,r2,rd,pbc_bb_proj,pbc_bb_contract,pbc_aa_contract
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upd_lis0'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -845,13 +802,6 @@ contains
   use defs_param_lotf,only : lotfvar
   use bond_lotf,only : ibn_tot,ibnd_mat,nbondex
   USE pbc_lotf,only : dist_pbc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tuneparms'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------

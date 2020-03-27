@@ -94,7 +94,6 @@
  prtvolimg 0                     # Printing volume (0=full, 1=intermediate, 2=minimal)
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -111,7 +110,7 @@
 #%% keywords = 
 #%% description = 
 #%%   Hydronium ion + NH3 molecule      
-#%% String method                    
-#%% Moving the proton from H2O to NH3
-#%% keeping O and H atoms fixed      
+#%%   String method                    
+#%%   Moving the proton from H2O to NH3
+#%%   keeping O and H atoms fixed      
 #%%<END TEST_INFO>

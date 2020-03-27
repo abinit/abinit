@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_Projected_AT
 !! NAME
 !! m_gwls_Projected_AT
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,13 +102,6 @@ subroutine compute_AT_shift_Lanczos(nfreq,list_external_omega,model_parameter,lm
 !  This function does not use SQMR, but rather shift Lanczos to extract the values of the matrix elements for 
 !  all external frequencies.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_AT_shift_Lanczos'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in) :: nfreq

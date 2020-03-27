@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawfgr
 !! NAME
 !!  m_pawfgr
@@ -9,7 +8,7 @@
 !!  pawfgr_type variables define Fine rectangular GRid parameters and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2020 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,10 +18,10 @@
 !! OUTPUT
 !!
 !! NOTES
-!!  * Routines tagged with "@type_name" are strongly connected to the definition of the data type. 
-!!    Strongly connected means that the proper functioning of the implementation relies on the 
+!!  * Routines tagged with "@type_name" are strongly connected to the definition of the data type.
+!!    Strongly connected means that the proper functioning of the implementation relies on the
 !!    assumption that the tagged procedure is consistent with the type declaration.
-!!    Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure 
+!!    Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure
 !!    that all the strongly connected routines are changed accordingly to accommodate the modification of the data type
 !!    Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
@@ -44,8 +43,8 @@ MODULE m_pawfgr
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_dtset
 
- use defs_abitypes, only : dataset_type
  use m_kg,       only : getcut
 
  implicit none
@@ -167,13 +166,6 @@ CONTAINS
 
 subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
 &                      gsqcutc_eff,gsqcutf_eff,gmet,k0) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_init'
-!End of the abilint section
 
  implicit none
 
@@ -309,13 +301,6 @@ end subroutine pawfgr_init
 
 subroutine pawfgr_destroy(Pawfgr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -329,15 +314,15 @@ subroutine pawfgr_destroy(Pawfgr)
  DBG_ENTER("COLL")
 
 !@Pawfgr_type
- 
-  if (associated(Pawfgr%coatofin))  then
-    ABI_DEALLOCATE(Pawfgr%coatofin)
-  end if
-  if (associated(Pawfgr%fintocoa))  then
-    ABI_DEALLOCATE(Pawfgr%fintocoa)
-  end if
 
-  Pawfgr%usefinegrid=0
+ if (associated(Pawfgr%coatofin))  then
+   ABI_DEALLOCATE(Pawfgr%coatofin)
+ end if
+ if (associated(Pawfgr%fintocoa))  then
+   ABI_DEALLOCATE(Pawfgr%fintocoa)
+ end if
+
+ Pawfgr%usefinegrid=0
 
  DBG_EXIT("COLL")
 
@@ -364,13 +349,6 @@ end subroutine pawfgr_destroy
 !! SOURCE
 
 subroutine pawfgr_nullify(Pawfgr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_nullify'
-!End of the abilint section
 
  implicit none
 
@@ -403,7 +381,7 @@ end subroutine pawfgr_nullify
 !! Calculate the correspondance between the coarse grid and the fine grid
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2020 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -431,13 +409,6 @@ end subroutine pawfgr_nullify
 !! SOURCE
 
 subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indgrid'
-!End of the abilint section
 
  implicit none
 

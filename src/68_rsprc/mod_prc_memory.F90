@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/mod_prc_memory
 !! NAME
 !! mod_prc_memory
@@ -8,7 +7,7 @@
 !! preconditionning of potential residuals.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (PMA).
+!! Copyright (C) 2009-2020 ABINIT group (PMA).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,13 +64,6 @@ public :: prc_mem_free
 
 subroutine prc_mem_init(nfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prc_mem_init'
-!End of the abilint section
-
 implicit none
 
 !Arguments -------------------------------
@@ -106,13 +98,6 @@ integer, intent(in) :: nfft
 !! SOURCE
 
 subroutine prc_mem_free()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prc_mem_free'
-!End of the abilint section
 
 implicit none
 

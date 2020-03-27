@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_energy
 !! NAME
 !!  m_energy
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -131,13 +130,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_energy(cryst_struc,energies_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_energy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -192,13 +184,6 @@ end subroutine init_energy
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_energy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -249,13 +234,6 @@ end subroutine destroy_energy
 !! SOURCE
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_energy'
-!End of the abilint section
 
  implicit none
 
@@ -342,13 +320,6 @@ end subroutine print_energy
 !! SOURCE
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_energy'
-!End of the abilint section
 
  implicit none
 
@@ -464,7 +435,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 &       energies_dmft%e_hu_tot,energies_dmft%e_hu_mig_tot,occ_type
        MSG_ERROR(message)
      endif
-   else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+   else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
      energies_dmft%e_hu= energies_dmft%e_hu_mig
      energies_dmft%e_hu_tot= energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot
@@ -524,13 +495,6 @@ end subroutine compute_energy
 !! SOURCE
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,fcalc_lda,ecalc_dmft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_band_energy'
-!End of the abilint section
 
  implicit none
 
@@ -679,13 +643,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_migdal_energy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -829,13 +786,6 @@ end subroutine compute_migdal_energy
 !! SOURCE
 
 subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_ldau_energy'
-!End of the abilint section
 
  implicit none
 
@@ -1005,13 +955,6 @@ end subroutine compute_ldau_energy
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_noninterentropy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1116,13 +1059,6 @@ end subroutine compute_noninterentropy
 !! SOURCE
 
  function occup_fd(eig,fermie,temp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occup_fd'
-!End of the abilint section
 
  implicit none
 

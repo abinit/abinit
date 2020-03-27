@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sgfft
 !! NAME
 !!  m_sgfft
@@ -8,7 +7,7 @@
 !!
 !! COPYRIGHT
 !! Copyright by Stefan Goedecker, Ithaca, NY USA, July 14, 1993
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -95,13 +94,6 @@ CONTAINS  !====================================================================
 
 subroutine sg_fft_cc(fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign,arr,ftarr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fft_cc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -174,13 +166,6 @@ end subroutine sg_fft_cc
 !! SOURCE
 
 subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_cc_one_nothreadsafe'
-!End of the abilint section
 
  implicit none
 
@@ -289,13 +274,6 @@ end subroutine fft_cc_one_nothreadsafe
 !! SOURCE
 
 subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fft_rc'
-!End of the abilint section
 
  implicit none
 
@@ -636,13 +614,6 @@ end subroutine sg_fft_rc
 
 subroutine sg_fftpad(fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,gbound,isign,arr,ftarr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftpad'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -709,13 +680,6 @@ end subroutine sg_fftpad
 !! SOURCE
 
 subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftpad_one_nothreadsafe'
-!End of the abilint section
 
  implicit none
 
@@ -917,13 +881,6 @@ end subroutine fftpad_one_nothreadsafe
 
 subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 &    z,zbr,trig,aft,now,bef,ris,ind,ic,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftpx'
-!End of the abilint section
 
  implicit none
 
@@ -1669,13 +1626,6 @@ end subroutine sg_fftpx
 subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 & trig,aft,now,bef,ris,ind,ic)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftx'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2391,13 +2341,6 @@ end subroutine sg_fftx
 subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 &          z,zbr,trig,aft,now,bef,ris,ind,ic)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_ffty'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3073,13 +3016,6 @@ end subroutine sg_ffty
 !! SOURCE
 
 subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,ic)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftz'
-!End of the abilint section
 
  implicit none
 
@@ -3828,13 +3764,6 @@ end subroutine sg_fftz
 
 subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_ctrig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3995,13 +3924,6 @@ end subroutine sg_ctrig
 subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r, weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftrisc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4145,13 +4067,6 @@ end subroutine sg_fftrisc
 
 subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftrisc_one_nothreadsafe'
-!End of the abilint section
 
  implicit none
 
@@ -5079,13 +4994,6 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 & istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2,&
 & luse_ndo,fofgin_p) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftrisc_2'
-!End of the abilint section
 
  implicit none
 
@@ -6112,13 +6020,6 @@ end subroutine sg_fftrisc_2
 !! SOURCE
 
 subroutine sg_poisson(fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_poisson'
-!End of the abilint section
 
  implicit none
 

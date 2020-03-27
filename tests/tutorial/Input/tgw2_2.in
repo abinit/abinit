@@ -49,14 +49,13 @@ prtvol     5
 enunit     1
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = tgw2_1.in, tgw2_2.in, tgw2_3.in, tgw2_4.in
 #%% [files]
 #%% files_to_test = 
-#%%   tgw2_2.out, tolnlines= 28, tolabs=  1.10e-02, tolrel=  4.0e-01 
+#%%   tgw2_2.out, tolnlines= 32, tolabs=  1.1e-02, tolrel=  4.0e-01 
 #%% psp_files = 13al.981214.fhi
 #%% [shell]
 #%% post_commands = 

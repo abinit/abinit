@@ -27,7 +27,7 @@ these input variables ([[nline]] and [[tolrde]]) are usually used only by
 experts. However, in cases where the convergence is difficult, it might be
 interesting to test improving them, as well as modifying [[nnsclo]].
 
-The [[accuracy]] variable enables to tune the accuracy of a calculation by
+The [[accuracy]] variable enables one to tune the accuracy of a calculation by
 setting automatically up to seventeen variables.
 
 

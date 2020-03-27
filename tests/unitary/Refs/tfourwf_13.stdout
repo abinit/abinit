@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of FFTPROF 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of FFTPROF 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  FFTPROF comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 16h45 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h24 )
   
  Tool for profiling and testing the FFT libraries used in ABINIT.
  Allowed options are: 
@@ -85,11 +85,11 @@
 ==== fourwf with option  0, cplex  0, ndat  1, istwf_k  9 ====
 ==============================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (110)       0.0214     0.0218      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker (111)       0.0139     0.0140      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (110)       0.0169     0.0176      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (111)       0.0122     0.0125      1 (100%) 5     0.00E+00    0.00E+00
 - Goedecker (112)         N/A        N/A        N/A     N/A       N/A        N/A
-- Goedecker2002 (410)   0.0341     0.0341      1 (100%) 5     4.53E-14    2.01E-15
-- Goedecker2002 (411)   0.0110     0.0110      1 (100%) 5     4.53E-14    2.01E-15
+- Goedecker2002 (410)   0.0392     0.0394      1 (100%) 5     4.53E-14    2.01E-15
+- Goedecker2002 (411)   0.0098     0.0098      1 (100%) 5     4.53E-14    2.01E-15
 - Goedecker2002 (412)     N/A        N/A        N/A     N/A       N/A        N/A
 - FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
 - DFTI (512)              N/A        N/A        N/A     N/A       N/A        N/A
@@ -101,13 +101,13 @@
 ==== fourwf with option  1, cplex  1, ndat  1, istwf_k  9 ====
 ==============================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (110)       0.0213     0.0213      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker (111)       0.0140     0.0140      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker (112)       0.0062     0.0062      1 (100%) 5     3.64E-12    1.04E-14
-- Goedecker2002 (410)   0.0336     0.0336      1 (100%) 5     2.05E-12    1.05E-14
-- Goedecker2002 (411)   0.0130     0.0130      1 (100%) 5     2.05E-12    1.06E-14
-- Goedecker2002 (412)   0.0113     0.0113      1 (100%) 5     2.05E-12    1.05E-14
-- FFTW3 (312)           0.0058     0.0058      1 (100%) 5     2.96E-12    1.04E-14
+- Goedecker (110)       0.0150     0.0150      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (111)       0.0096     0.0096      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0049     0.0050      1 (100%) 5     3.64E-12    1.04E-14
+- Goedecker2002 (410)   0.0434     0.0449      1 (100%) 5     2.05E-12    1.05E-14
+- Goedecker2002 (411)   0.0108     0.0109      1 (100%) 5     2.05E-12    1.06E-14
+- Goedecker2002 (412)   0.0091     0.0091      1 (100%) 5     2.05E-12    1.05E-14
+- FFTW3 (312)           0.0049     0.0049      1 (100%) 5     2.96E-12    1.04E-14
 - DFTI (512)              N/A        N/A        N/A     N/A       N/A        N/A
 
  Consistency check: MAX(Max_|Err|) =  3.64E-12, Max(<|Err|>) =  1.06E-14, reference_lib: Goedecker (110)
@@ -117,13 +117,13 @@
 ==== fourwf with option  2, cplex  1, ndat  1, istwf_k  9 ====
 ==============================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (110)       0.0344     0.0346      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker (111)       0.0205     0.0205      1 (100%) 5     1.11E-16    5.59E-20
-- Goedecker (112)       0.0097     0.0097      1 (100%) 5     1.68E-16    1.08E-19
-- Goedecker2002 (410)   0.0570     0.0571      1 (100%) 5     3.23E-16    1.56E-19
-- Goedecker2002 (411)   0.0213     0.0214      1 (100%) 5     3.26E-16    1.39E-19
-- Goedecker2002 (412)   0.0174     0.0176      1 (100%) 5     3.26E-16    1.39E-19
-- FFTW3 (312)           0.0081     0.0082      1 (100%) 5     2.76E-16    1.32E-19
+- Goedecker (110)       0.0231     0.0232      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (111)       0.0175     0.0177      1 (100%) 5     1.11E-16    5.59E-20
+- Goedecker (112)       0.0086     0.0086      1 (100%) 5     1.68E-16    1.08E-19
+- Goedecker2002 (410)   0.0576     0.0578      1 (100%) 5     3.23E-16    1.56E-19
+- Goedecker2002 (411)   0.0172     0.0173      1 (100%) 5     3.26E-16    1.39E-19
+- Goedecker2002 (412)   0.0166     0.0167      1 (100%) 5     3.26E-16    1.39E-19
+- FFTW3 (312)           0.0081     0.0082      1 (100%) 5     2.54E-16    1.33E-19
 - DFTI (512)              N/A        N/A        N/A     N/A       N/A        N/A
 
  Consistency check: MAX(Max_|Err|) =  3.26E-16, Max(<|Err|>) =  1.56E-19, reference_lib: Goedecker (110)
@@ -133,13 +133,13 @@
 ==== fourwf with option  3, cplex  0, ndat  1, istwf_k  9 ====
 ==============================================================
         Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
-- Goedecker (110)       0.0152     0.0152      1 (100%) 5     0.00E+00    0.00E+00
-- Goedecker (111)       0.0085     0.0086      1 (100%) 5     3.33E-16    4.07E-20
-- Goedecker (112)       0.0069     0.0072      1 (100%) 5     3.33E-16    4.07E-20
-- Goedecker2002 (410)   0.0221     0.0228      1 (100%) 5     3.61E-16    8.17E-20
+- Goedecker (110)       0.0106     0.0109      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (111)       0.0070     0.0070      1 (100%) 5     3.33E-16    4.07E-20
+- Goedecker (112)       0.0071     0.0072      1 (100%) 5     3.33E-16    4.07E-20
+- Goedecker2002 (410)   0.0239     0.0243      1 (100%) 5     3.61E-16    8.17E-20
 - Goedecker2002 (411)     N/A        N/A        N/A     N/A       N/A        N/A
 - Goedecker2002 (412)     N/A        N/A        N/A     N/A       N/A        N/A
-- FFTW3 (312)           0.0088     0.0089      1 (100%) 5     3.33E-16    7.23E-20
+- FFTW3 (312)           0.0060     0.0060      1 (100%) 5     3.33E-16    7.23E-20
 - DFTI (512)              N/A        N/A        N/A     N/A       N/A        N/A
 
  Consistency check: MAX(Max_|Err|) =  3.61E-16, Max(<|Err|>) =  8.17E-20, reference_lib: Goedecker (110)

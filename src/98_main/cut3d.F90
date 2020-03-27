@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/cut3d
 !! NAME
 !! cut3d
@@ -8,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2020 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +47,6 @@
 program cut3d
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_build_info
  use m_xmpi
@@ -63,8 +61,8 @@ program cut3d
  use m_hdr
  use m_cut3d
  use m_crystal
- use m_crystal_io
 
+ use defs_abitypes,     only : MPI_type
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein
@@ -74,19 +72,12 @@ program cut3d
  use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
  character(len=1) :: outputchar,blank=' '
 !scalars
- integer,parameter :: paral_kgb0=0,mfiles=10,exchn2n3d0=0
+ integer,parameter :: mfiles=10,exchn2n3d0=0
  integer :: fform0,gridshift1,gridshift2,gridshift3,i1,i2,i3
  integer :: iatom,ifiles,ii,ii1,ii2,ii3,index,iprompt,ir1,ir2,ir3,ispden,cplex
  integer :: itask,jfiles,natom,nfiles,nr1,nr2,unt,comm,iomode,nprocs,my_rank
@@ -180,7 +171,7 @@ program cut3d
    ABI_CHECK(abifile%fform /= 0, "Cannot detect abifile from fform")
 
 !  Echo part of the header
-   call hdr_echo(hdr, fform0, 4)
+   call hdr%echo(fform0, 4)
 
    nr1=hdr%ngfft(1); nr2=hdr%ngfft(2); nr3=hdr%ngfft(3)
    natom=hdr%natom
@@ -259,8 +250,8 @@ program cut3d
      iprompt = 0 ! this needs to be initialized, as it is used after the loop on files...
 
      call cut3d_wffile(filrho,hdr%ecut_eff,exchn2n3d0,hdr%istwfk,hdr%kptns,natom,hdr%nband,hdr%nkpt,hdr%npwarr,&
-&     nr1,nr2,nr3,hdr%nspinor,hdr%nsppol,ntypat,paral_kgb0,rprimd,xcart,hdr%typat,hdr%znucltypat)
-     call hdr_free(hdr)
+&     nr1,nr2,nr3,hdr%nspinor,hdr%nsppol,ntypat,rprimd,xcart,hdr%typat,hdr%znucltypat)
+     call hdr%free()
 
 !    -------------------------------------------------------------------------
 ! This is a DEN/POT file
@@ -766,7 +757,7 @@ program cut3d
          case (15)
            ! Write netcdf file.
            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-           call crystal_from_hdr(cryst, hdr, timrev)
+           cryst = hdr%get_crystal(timrev)
            call ngfft_seq(ngfft, [nr1, nr2, nr3])
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))
@@ -775,7 +766,7 @@ program cut3d
            call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
 
            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
-           call crystal_free(cryst)
+           call cryst%free()
 
          case(0)
            write(std_out,*)' Exit requested by user'
@@ -791,7 +782,7 @@ program cut3d
        write(std_out,'(a)') ' More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)'
        read(std_in,*) iprompt
        if(iprompt/=1) then
-         call hdr_free(hdr)
+         call hdr%free()
          exit
        else
          cycle

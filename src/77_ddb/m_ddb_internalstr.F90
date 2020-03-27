@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_internalstr
 !! NAME
 !!  m_ddb_internalstr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (XW)
+!!  Copyright (C) 1999-2020 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,9 +65,9 @@ contains
 !! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
-!! prt_internalstr=if 2 or higher, print force and displacement internal strain, 
-!!                 if 1, print only force internal strain, 
-!!                 if 0, do not print internal strain. 
+!! prt_internalstr=if 2 or higher, print force and displacement internal strain,
+!!                 if 1, print only force internal strain,
+!!                 if 0, do not print internal strain.
 !!
 !! OUTPUT
 !! instrain=force response internal strain tensor
@@ -93,15 +92,6 @@ subroutine ddb_internalstr(asr,&
 & d2asr,iblok,instrain,iout,mpert,&
 !&msize,&
 natom,nblok,prt_internalstr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_internalstr'
-!End of the abilint section
-
- implicit none
 
 !Arguments----------------------------------------------
 !scalars
@@ -472,7 +462,6 @@ natom,nblok,prt_internalstr)
 
 !Now do simple mulplication to obtain the displacement response
 !internal strain tensor
-
  instrain_dis(:,:)=0.0_dp
  do ivarA=1,6
    do ivarB=1,3*natom

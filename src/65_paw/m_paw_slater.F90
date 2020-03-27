@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_slater
 !! NAME
 !!  m_paw_slater
@@ -8,7 +7,7 @@
 !!  using real spherical Harmonics.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +39,8 @@ MODULE m_paw_slater
  use m_paw_atomorb,  only : atomorb_type, init_atomorb, print_atomorb, destroy_atomorb, get_overlap
  use m_crystal,      only : crystal_t
  use m_paw_io,       only : pawio_print_ij
- use m_pawang,       only : pawang_type, realgaunt
+ use m_pawang,       only : pawang_type
+ use m_paw_sphharm,   only : realgaunt
  use m_pawrad,       only : pawrad_type, pawrad_free, pawrad_isame, &
 &                           pawrad_deducer0, simp_gen, calc_slatradl
  use m_pawtab,       only : pawtab_type
@@ -258,13 +258,6 @@ CONTAINS  !=====================================================================
 
 subroutine slatang_cshell_init(Slatang3l,l_max,lm2_size,lc_max,klm2lm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatang_cshell_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -424,13 +417,6 @@ end subroutine slatang_cshell_init
 
 subroutine slatang_cshell_free(Slatang3l)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatang_cshell_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -475,13 +461,6 @@ end subroutine slatang_cshell_free
 !! SOURCE
 
 subroutine slatrad_cshell_free(Slatrad3l)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_cshell_free'
-!End of the abilint section
 
  implicit none
 
@@ -535,13 +514,6 @@ end subroutine slatrad_cshell_free
 !! SOURCE
 
 subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_cshell_init'
-!End of the abilint section
 
  implicit none
 
@@ -750,13 +722,6 @@ end subroutine slatrad_cshell_init
 
 subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc_core)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_sigxcore'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -901,13 +866,6 @@ end subroutine paw_sigxcore
 
 subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,dijexc_core,pawprtvol,filpsp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_mkdijexc_core'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1015,13 +973,6 @@ end subroutine paw_mkdijexc_core
 
 subroutine slatrad_free_0D(Slatrad)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1058,13 +1009,6 @@ end subroutine slatrad_free_0D
 !! SOURCE
 
 subroutine slatrad_free_1D(Slatrad)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_free_1D'
-!End of the abilint section
 
  implicit none
 
@@ -1131,13 +1075,6 @@ end subroutine slatrad_free_1D
 !! SOURCE
 
 subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_init'
-!End of the abilint section
 
  implicit none
 
@@ -1354,6 +1291,7 @@ end subroutine slatrad_init
 !! INPUTS
 !!  ndij=Usually ndij=nspden, except for spin-orbit (where ndij=nspinor**2)
 !!  cplex_dij=1 if sigx_dij is real, 2 if they are complex
+!!  qphase=2 if dij contains a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
 !!  lmn2_size_max=Max Number of (klmn) channels over type of atoms.
 !!  my_natom=number of atoms treated by current process
 !!  ntypat=number of atom types
@@ -1390,21 +1328,14 @@ end subroutine slatrad_init
 !!
 !! SOURCE
 
-subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,Pawang,Pawrhoij,&
+subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,Pawang,Pawrhoij,&
 &                    sigx_dij,pawprtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_dijhf'
-!End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: pawprtvol,ndij,cplex_dij,lmn2_size_max,my_natom,ntypat
+ integer,intent(in) :: pawprtvol,ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,qphase
  type(pawang_type),intent(in) :: Pawang
 !arrays
  real(dp),target,intent(out) :: sigx_dij(cplex_dij*lmn2_size_max,ndij,my_natom) !TODO use ragged arrays pawij?
@@ -1415,18 +1346,17 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: cplex=1    ! FIXME preliminary implementation
- integer :: iatom,itypat,lmn_size,lmn2_size,ispden,nspden,ln2_size
+ integer :: cplex_rhoij,iatom,iq,iq0_dij,iq0_rhoij,itypat,lmn_size,lmn2_size,ispden,nspden,ln2_size
  integer :: lm2_size !,isppol ln_size,
- integer :: irhoij,jrhoij,dplex
+ integer :: irhoij,jrhoij
  integer :: rho_lmn !,rho_klm,rho_kln,rho_lmin,rho_lmax,rho_iln,rho_jln
  integer :: klmn
  integer :: i_lmn,j_lmn,k_lmn,l_lmn
  integer :: which_intg,l_max,opt_l
- real(dp) :: slt_ikjl,slt_iljk
+ real(dp) :: ro,slt_ikjl,slt_iljk
  !character(len=500) :: msg
 !arrays
  integer :: opt_l_index(0,0),pack2ij(0)
- real(dp) :: ro(cplex)
  real(dp), ABI_CONTIGUOUS pointer :: sigx_atm(:,:)
  type(slatrad_t),allocatable :: Slatrad4(:)
 
@@ -1439,12 +1369,11 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
  ABI_CHECK(lmn2_size_max==MAXVAL(Pawtab(:)%lmn2_size),"Wrong lmn2_size_max")
 
  if (my_natom>0) then
-   if (pawrhoij(1)%cplex<cplex) then
-     MSG_BUG('Must have pawrhoij()%cplex >= cplex !')
+   if (pawrhoij(1)%qphase<cplex) then
+     MSG_BUG('Must have pawrhoij()%qphase >= cplex !')
    end if
  end if
 
- dplex=cplex-1 ! used to select the elements of rho_ij.
  sigx_dij=zero
 
  do iatom=1,my_natom
@@ -1453,6 +1382,7 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
    lmn2_size=Pawtab(itypat)%lmn2_size
    l_max    =(Pawtab(itypat)%l_size+1)/2
    lm2_size = (l_max**2)*(l_max**2+1)/2
+   cplex_rhoij=Pawrhoij(iatom)%cplex_rhoij
    !write(std_out,*)"in atom ",iatom,"lm2_size=",lm2_size
 
    ! Calculate Slater integral for this atom type.
@@ -1463,60 +1393,68 @@ subroutine paw_dijhf(ndij,cplex_dij,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,
    call slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad(itypat),Pawtab(itypat))
 
    sigx_atm => sigx_dij(:,:,iatom)
-   !
-   ! * Loop over spin components.
-   nspden=ndij
-   do ispden=1,ndij
-     !
-     ! ============================================================
-     ! ==== Summing over the non-zero lk channels of \rho_{lk} ====
-     ! ============================================================
-     jrhoij=1
-     do irhoij=1,pawrhoij(iatom)%nrhoijsel
-       rho_lmn=pawrhoij(iatom)%rhoijselect(irhoij)
 
-       ! check wheter rho_lmin is consistent with the Indexing used in slatrad
-       !rho_klm =pawtab(itypat)%indklmn(1,rho_lmn)
-       !rho_kln =pawtab(itypat)%indklmn(2,rho_lmn)
-       !rho_lmin=pawtab(itypat)%indklmn(3,rho_lmn)
-       !rho_lmax=pawtab(itypat)%indklmn(4,rho_lmn)
+!  Loop over phase exp(iqr) phase real/imaginary part, if any
+   do iq=1,qphase
+     !First loop: we store the real part in dij(1 -> lmn2_size)
+     !2nd loop: we store the imaginary part in dij(lmn2_size+1 -> 2*lmn2_size)
+     iq0_dij=merge(0,cplex_dij*lmn2_size,iq==1)
+     iq0_rhoij=merge(0,cplex_rhoij*lmn2_size,iq==1)
 
-       ! Retrieve rhoij for this ispden.
-       if (nspden/=2) then
-         ro(1:cplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-       else
-         MSG_ERROR("Recheck this part")
-         if (ispden==1) then
-           ro(1:cplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1) + pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,2)
-         else if (ispden==2) then
-           ro(1:cplex)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,1)
-         end if
-       end if
+     ! * Loop over spin components.
+     nspden=ndij
+     do ispden=1,ndij
        !
-       ! Avoid double-counting the diagonal of rho.
-       ro(1:cplex)=ro(1:cplex)*pawtab(itypat)%dltij(rho_lmn)*half
+       ! ============================================================
+       ! ==== Summing over the non-zero lk channels of \rho_{lk} ====
+       ! ============================================================
+       jrhoij=1+iq0_rhoij
+       do irhoij=1,pawrhoij(iatom)%nrhoijsel
+         rho_lmn=pawrhoij(iatom)%rhoijselect(irhoij)
 
-       call klmn2ijlmn(rho_lmn,lmn_size,k_lmn,l_lmn)
+         ! check wheter rho_lmin is consistent with the Indexing used in slatrad
+         !rho_klm =pawtab(itypat)%indklmn(1,rho_lmn)
+         !rho_kln =pawtab(itypat)%indklmn(2,rho_lmn)
+         !rho_lmin=pawtab(itypat)%indklmn(3,rho_lmn)
+         !rho_lmax=pawtab(itypat)%indklmn(4,rho_lmn)
 
-       ! Loop over the upper triangle of the D_{ij) matrix and accumulate:
-       ! sum_\lk rho_\kl [ \Phi_{ikjl} + \Phi_{iljk} - \Phihat_{ikjl} - \Phihat_{iljk} ]
-       do klmn=1,lmn2_size
-         ! Calculate the indeces in the Slatrad4 structure.
-         call klmn2ijlmn(klmn,lmn_size,i_lmn,j_lmn)
+         ! Retrieve rhoij for this ispden.
+         if (nspden/=2) then
+           ro=pawrhoij(iatom)%rhoijp(jrhoij,ispden)
+         else
+           MSG_ERROR("Recheck this part")
+           if (ispden==1) then
+             ro=pawrhoij(iatom)%rhoijp(jrhoij,1) + pawrhoij(iatom)%rhoijp(jrhoij,2)
+           else if (ispden==2) then
+             ro=pawrhoij(iatom)%rhoijp(jrhoij,1)
+           end if
+         end if
+         !
+         ! Avoid double-counting the diagonal of rho.
+         ro=ro*pawtab(itypat)%dltij(rho_lmn)*half
 
-         ! My formula
-         slt_ikjl = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,k_lmn,j_lmn,l_lmn)
-         slt_iljk = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,l_lmn,j_lmn,k_lmn)
+         call klmn2ijlmn(rho_lmn,lmn_size,k_lmn,l_lmn)
 
-         !slt_ikjl = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,k_lmn,l_lmn,j_lmn)
-         !slt_iljk = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,l_lmn,k_lmn,j_lmn)
-         !slt_iljk = slt_ikjl
+         ! Loop over the upper triangle of the D_{ij) matrix and accumulate:
+         ! sum_\lk rho_\kl [ \Phi_{ikjl} + \Phi_{iljk} - \Phihat_{ikjl} - \Phihat_{iljk} ]
+         do klmn=1,lmn2_size
+           ! Calculate the indeces in the Slatrad4 structure.
+           call klmn2ijlmn(klmn,lmn_size,i_lmn,j_lmn)
 
-         sigx_atm(klmn,ispden) = sigx_atm(klmn,ispden) + ro(1) * (slt_ikjl + slt_iljk)
-       end do ! klmn
+           ! My formula
+           slt_ikjl = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,k_lmn,j_lmn,l_lmn)
+           slt_iljk = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,l_lmn,j_lmn,k_lmn)
 
-       jrhoij=jrhoij+pawrhoij(iatom)%cplex
-     end do ! irhoij
+           !slt_ikjl = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,k_lmn,l_lmn,j_lmn)
+           !slt_iljk = slat_intg(Slatrad4,Pawtab(itypat),Pawang,i_lmn,l_lmn,k_lmn,j_lmn)
+           !slt_iljk = slt_ikjl
+
+           sigx_atm(klmn+iq0_dij,ispden) = sigx_atm(klmn,ispden) + ro * (slt_ikjl + slt_iljk)
+         end do ! klmn
+
+         jrhoij=jrhoij+cplex_rhoij
+       end do ! irhoij
+     end do ! iq
    end do ! ispden
 
    if (ABS(pawprtvol)>=1) then ! * Print values
@@ -1559,13 +1497,6 @@ end subroutine paw_dijhf
 !! SOURCE
 
 function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'summ_2gaunt'
-!End of the abilint section
 
  implicit none
 
@@ -1628,13 +1559,6 @@ end function summ_2gaunt
 !! SOURCE
 
 function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slat_intg'
-!End of the abilint section
 
  implicit none
 

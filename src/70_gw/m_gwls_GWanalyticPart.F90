@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_GWanalyticPart
 !! NAME
 !! m_gwls_GWanalyticPart
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -95,13 +94,6 @@ subroutine get_projection_band_indices(omega,band_index_below, band_index_above)
 !                Pe : projection on states such that epsilon_n < omega
 !                Qe : projection on states such that epsilon_n > omega
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_projection_band_indices'
-!End of the abilint section
-
 implicit none
 
 real(dp),intent(in)  :: omega 

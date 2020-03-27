@@ -1,8 +1,8 @@
 
-.Version 8.10.0 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of MULTIBINIT 
+.(sequential version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 27 Sep 2018.
-- ( at 13h05 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 14h22 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/v8/Input/t13_ddb.in
+-t13_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -36,16 +36,16 @@
  Fit the coefficients :
          fit_coeff  1
  fit_generateCoeff  1
-        fit_cutoff  7.00000000E+00
+        fit_cutoff  5.40000000E+00
         fit_option  0
-        fit_ncoeff  10
+         fit_iatom  0
+        fit_ncoeff  2
           fit_grid  1  1  1
          ts_option  0
-    fit_rangePower  3  4
+    fit_rangePower  3  3
     fit_anhaStrain  0
-    fit_SPCoupling  1
-     fit_nfixcoeff  2
-      fit_fixcoeff         48     50
+    fit_SPCoupling  0
+      fit_SPC_maxS  1
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -159,6 +159,10 @@
 
 
 
+ Bound for ifc SR:
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
 ================================================================================
 
  Impose acoustic sum rule on total ifc
@@ -171,8 +175,8 @@
 
 ================================================================================
 
--Reading the file the HIST file :
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/v8/Input/t13_HIST
+-Reading the training-set file :
+-t13_HIST
 
 
 ================================================================================
@@ -181,8 +185,9 @@
 
 --------------------------------------------------------------------------------
 
- The coefficients for the fit will be generated
- 825 coefficients generated 
+ The coefficients for the fit around atom  1: Sr, will be generated
+
+ 183 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV/atm):
    Energy          :   7.4104178298699275E-01
@@ -193,37 +198,177 @@
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     714         5.1238442309E-01  5.2912402489E-03  5.1870133634E-03  1.0422688544E-04
- 4     539         3.8879821563E-01  4.4295944236E-03  4.3237449857E-03  1.0584943786E-04
- 5     95          3.9393814175E-01  3.9429574888E-03  3.8379930016E-03  1.0496448720E-04
- 6     734         4.0077144898E-01  3.7341077229E-03  3.6294179093E-03  1.0468981364E-04
- 7     305         3.9273811249E-01  3.5446666843E-03  3.4399466298E-03  1.0472005442E-04
- 8     203         3.8603426078E-01  3.4270143374E-03  3.3221029103E-03  1.0491142707E-04
- 9     134         4.0807582248E-01  3.2721344818E-03  3.1676473469E-03  1.0448713489E-04
- 10    25          4.0732861119E-01  3.1465833024E-03  3.0419084233E-03  1.0467487910E-04
- 11    23          4.0431950443E-01  3.0437002651E-03  2.9389297950E-03  1.0477047014E-04
- 12    561         4.0394442383E-01  2.9470810833E-03  2.8421558478E-03  1.0492523558E-04
+ 1     84          7.0676564672E-01  7.2017863091E-03  7.0615793529E-03  1.4020695618E-04
+ 2     122         6.9962949054E-01  7.1214185840E-03  6.9812440773E-03  1.4017450671E-04
 
  Fitted coefficients at the end of the fit process:
- 48 =>  -5.6544276111E+00 (Sr_x-O1_x)^2(Ru_y-O1_y)^1(eta_2)^1
- 50 =>  -4.6629951052E-01 (Sr_x-O1_x)^2(Ru_y-O1_y)^1(eta_4)^1
- 714 =>   9.2439066391E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 539 =>   4.4084091038E-01 (Sr_x-Ru_x)^4
- 95 =>  -4.3544819421E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 734 =>   8.1522514170E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
- 305 =>   1.9783239321E-01 (Sr_y-O1_y)^3(Sr_x-Ru_x)^1
- 203 =>  -1.6140858293E+00 (Sr_x-O1_x)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_z-O2_z)^1
- 134 =>  -4.9096364217E-01 (Sr_x-O1_x)^1(Sr_x-Ru_x)^3
- 25 =>   5.7005083711E-01 (Sr_x-O1_x)^2(Sr_x-Ru_x)^1(O1_z-O2_z)^1
- 23 =>  -3.8083442541E-01 (Sr_x-O1_x)^2(Sr_x-Ru_x)^1(Ru_y-O1_y)^1
- 561 =>   2.1418856157E-02 (Sr_x-Ru_x)^2(Ru_y-O1_y)^1
+ 84 =>  -4.4186187417E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 122 =>  -1.5227003171E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
 
- Mean Standard Deviation values at the end of the fit process (meV/atm):
-   Energy          :   4.0394442382594226E-01
+ Mean Standard Deviation values at the end of the fit process (meV/atm): 
+   Energy          :   6.9962949054272250E-01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   2.9470810833375585E-03
-   Forces          :   2.8421558477571929E-03
-   Stresses        :   1.0492523558036568E-04
+   Forces+Stresses :   7.1214185840430483E-03
+   Forces          :   6.9812440773358454E-03
+   Stresses        :   1.4017450670720326E-04
+
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  2: Ru, will be generated
+
+ 29 coefficients generated 
+
+ Mean Standard Deviation values at the begining of the fit process (meV/atm):
+   Energy          :   7.4104178298699275E-01
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3     10          5.9658584105E-01  6.2590670709E-03  6.1165342611E-03  1.4253280980E-04
+ 4     9           5.8343093697E-01  6.0493031075E-03  5.9065291165E-03  1.4277399102E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -4.4473828948E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -1.1749743963E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 10 =>  -1.2591140436E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 9 =>   8.0804892573E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+
+ Mean Standard Deviation values at the end of the fit process (meV/atm): 
+   Energy          :   5.8343093696735315E-01
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   6.0493031075226173E-03
+   Forces          :   5.9065291165023726E-03
+   Stresses        :   1.4277399102024434E-04
+
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  3: O1, will be generated
+
+ 233 coefficients generated 
+
+ Mean Standard Deviation values at the begining of the fit process (meV/atm):
+   Energy          :   7.4104178298699275E-01
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 5     90          5.7100371040E-01  5.6680044754E-03  5.5249184952E-03  1.4308598021E-04
+ 6     191         5.3430741742E-01  5.2535705526E-03  5.1095159514E-03  1.4405460122E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -4.0214751115E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -7.6881737786E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 3 =>  -1.2628600730E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 4 =>   9.8639222651E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 90 =>  -7.1286742759E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
+ 191 =>   7.7630824473E-02 (Ru_y-O1_y)^2(O3_z-O1_z)^1
+
+ Mean Standard Deviation values at the end of the fit process (meV/atm): 
+   Energy          :   5.3430741741764576E-01
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   5.2535705525749215E-03
+   Forces          :   5.1095159513539629E-03
+   Stresses        :   1.4405460122095861E-04
+
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  4: O2, will be generated
+
+ 33 coefficients generated 
+
+ Mean Standard Deviation values at the begining of the fit process (meV/atm):
+   Energy          :   7.4104178298699275E-01
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
+
+ N   Selecting          MSDE              MSDFS              MSDF              MSDS
+    Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 7     19          5.4944745043E-01  5.1569482809E-03  5.0133929868E-03  1.4355529408E-04
+ 8     33          5.4787796112E-01  5.0912805416E-03  4.9476855133E-03  1.4359502831E-04
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -4.5154215041E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -7.1463885801E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 3 =>  -1.3264195898E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 4 =>   1.0080582323E-01 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 5 =>  -7.4388709320E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
+ 6 =>   8.5218750265E-02 (Ru_y-O1_y)^2(O3_z-O1_z)^1
+ 19 =>  -3.3339469735E-02 (O1_x-O2_x)^1(O2_y-O1_y)^1(O2_y-O3_y[0 -1 1])^1
+ 33 =>   2.2406802807E-02 (O1_x-O2_x)^1(O2_y-O3_y)^2
+
+ Mean Standard Deviation values at the end of the fit process (meV/atm): 
+   Energy          :   5.4787796111723697E-01
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   5.0912805416279657E-03
+   Forces          :   4.9476855133139177E-03
+   Stresses        :   1.4359502831404812E-04
+
+
+================================================================================
+
+ Starting Fit process
+
+--------------------------------------------------------------------------------
+
+ The coefficients present in the effective potential will be used for the fit
+
+ The coefficients for the fit around atom  5: O3, will be generated
+
+ 0 coefficients generated 
+
+ Mean Standard Deviation values at the begining of the fit process (meV/atm):
+   Energy          :   7.4104178298699275E-01
+ Goal function values at the begining of the fit process (eV^2/A^2):
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
+
+
+ Fitted coefficients at the end of the fit process:
+ 1 =>  -4.5154215041E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -7.1463885801E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 3 =>  -1.3264195898E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 4 =>   1.0080582323E-01 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 5 =>  -7.4388709320E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
+ 6 =>   8.5218750265E-02 (Ru_y-O1_y)^2(O3_z-O1_z)^1
+ 7 =>  -3.3339469735E-02 (O1_x-O2_x)^1(O2_y-O1_y)^1(O2_y-O3_y[0 -1 1])^1
+ 8 =>   2.2406802807E-02 (O1_x-O2_x)^1(O2_y-O3_y)^2
+
+ Mean Standard Deviation values at the end of the fit process (meV/atm): 
+   Energy          :   5.4787796111723697E-01
+ Goal function values at the end of the fit process (eV^2/A^2):
+   Forces+Stresses :   5.0912805416279657E-03
+   Forces          :   4.9476855133139177E-03
+   Stresses        :   1.4359502831404812E-04
 
 
 ================================================================================
@@ -235,10 +380,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.4
+- Proc.   0 individual time (sec): cpu=         20.2  wall=         16.7
 
 ================================================================================
 
-+Total cpu time      5.349  and wall time      5.356 sec
++Total cpu time     20.169  and wall time     16.726 sec
 
  multibinit : the run completed succesfully.

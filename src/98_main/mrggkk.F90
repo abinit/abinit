@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/mrggkk
 !! NAME
 !! mrggkk
@@ -8,7 +7,7 @@
 !! different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2020 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +47,6 @@
 program mrggkk
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_abicore
  use m_xmpi
@@ -65,12 +63,6 @@ program mrggkk
  use m_io_tools,        only : flush_unit, open_file, file_exists
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrggkk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -86,7 +78,6 @@ program mrggkk
  character(len=24) :: codename
  character(len=500) :: message
  character(len=fnlen) :: file1wf,filegkk,filegs,outfile
- type(MPI_type) :: mpi_enreg
  type(hdr_type) :: hdr,hdr1
  type(wfk_t) :: GS_wfk,PH_wfk
 !arrays
@@ -107,9 +98,6 @@ program mrggkk
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
 #endif
-
-!Default for sequential use
- call initmpi_seq(mpi_enreg)
 
  codename='MRGGKK'//repeat(' ',18)
 
@@ -195,9 +183,9 @@ program mrggkk
 !Copy header of GS file to output.
  if (binascii /= 2) then
    if (rdwrout == 4) then
-     call hdr_echo(GS_wfk%Hdr, GS_wfk%fform, rdwrout)
+     call GS_wfk%Hdr%echo(GS_wfk%fform, rdwrout)
    else
-     call hdr_fort_write(GS_wfk%Hdr, unitout, GS_wfk%fform, ierr)
+     call GS_wfk%Hdr%fort_write(unitout, GS_wfk%fform, ierr)
      ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
    end if
  end if
@@ -211,7 +199,7 @@ program mrggkk
    do ik_ibz=1,GS_wfk%nkpt
      nband_k = GS_wfk%nband(ik_ibz,spin)
 
-     call wfk_read_eigk(GS_wfk,ik_ibz,spin,xmpio_single,eig_k)
+     call GS_wfk%read_eigk(ik_ibz,spin,xmpio_single,eig_k)
      if (binascii==0) then
        write(unitout) eig_k(1:nband_k)
      else
@@ -223,7 +211,7 @@ program mrggkk
  ABI_FREE(eig_k)
 
 !Close GS wf file
- call wfk_close(GS_wfk)
+ call GS_wfk%close()
 
  ntot = n1wf + ntotgkk
  if (binascii==0) then
@@ -257,9 +245,9 @@ program mrggkk
 !  copy header of 1WF file to output
    if (binascii /= 2) then
      if (rdwrout == 4) then
-       call hdr_echo(hdr1, PH_wfk%fform, rdwrout)
+       call hdr1%echo(PH_wfk%fform, rdwrout)
      else
-       call hdr_fort_write(hdr1, unitout, PH_wfk%fform, ierr)
+       call hdr1%fort_write(unitout, PH_wfk%fform, ierr)
        ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
      end if
    else
@@ -279,7 +267,7 @@ program mrggkk
 !      write(std_out,*) 'spin,ik_ibz = ', spin,ik_ibz
        nband_k = PH_wfk%nband(ik_ibz,spin)
 
-       call wfk_read_eigk(PH_wfk,ik_ibz,spin,xmpio_single,eig_k)
+       call PH_wfk%read_eigk(ik_ibz,spin,xmpio_single,eig_k)
 
        !base = 0
        !do jband=1,nband_k
@@ -318,10 +306,9 @@ program mrggkk
 
    ABI_FREE(eig_k)
 
-!  clean header to deallocate everything
-   call hdr_free(hdr1)
-
-   call wfk_close(PH_wfk)
+   ! clean header to deallocate everything
+   call hdr1%free()
+   call PH_wfk%close()
  end do
 
 !-------------------------------------------------------
@@ -375,9 +362,9 @@ program mrggkk
 !    copy header of 1WF file to output
      if (binascii /= 2) then
        if (rdwrout == 4) then
-         call hdr_echo(hdr1, fform, rdwrout)
+         call hdr1%echo(fform, rdwrout)
        else
-         call hdr_fort_write(hdr1, unitout, fform, ierr)
+         call hdr1%fort_write(unitout, fform, ierr)
          ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
        end if
      else
@@ -418,13 +405,13 @@ program mrggkk
        end do
        if (binascii==2) write(unitout,'(2a)') ch10, ch10
      end do
-     call hdr_free(hdr1)
+     call hdr1%free()
    end do !  end loop over 1wf segments in small gkk file
 
    ABI_FREE(eig_k)
 
    close (unitgkk)
-   call hdr_free(hdr)
+   call hdr%free()
  end do !end loop over small gkk files
 
  close(unitout)
@@ -433,8 +420,6 @@ program mrggkk
  call wrtout(std_out,message,'COLL')
 
  call flush_unit(std_out)
-
- call destroy_mpi_enreg(mpi_enreg)
 
  call abinit_doctor("__mrggkk")
 

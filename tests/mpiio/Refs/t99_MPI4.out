@@ -2,7 +2,7 @@
 .Version 8.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -75,6 +75,8 @@ _ WF disk file :      0.435 Mbytes ; DEN or POT disk file :      0.424 Mbytes.
 -          iomode           1
             acell      7.9270000000E+00  7.9270000000E+00  7.9270000000E+00 Bohr
               amu      5.86900000E+01  1.59994000E+01
+           bandpp1          1
+           bandpp2         17
       chksymbreak           0
      densfor_pred           6
         dmatpuopt           1
@@ -88,6 +90,8 @@ _ WF disk file :      0.435 Mbytes ; DEN or POT disk file :      0.424 Mbytes.
         dmft_nwli2      20000
         dmft_nwlo1          0
         dmft_nwlo2         32
+  dmft_occnd_imag1          1
+  dmft_occnd_imag2          0
         dmft_solv1          5
         dmft_solv2          2
              ecut      8.00000000E+00 Hartree
@@ -346,7 +350,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.30000     8.540801     8.540801     17.081602     0.000000
     2   2.30000     8.540801     8.540801     17.081602     0.000000
@@ -1042,10 +1046,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
        -0.01158   0.01158   0.00049   0.90250   0.00086
        -0.00000  -0.00086  -0.00000   0.00086   0.82955
 
-
- Parallelization over bands is not yet compatible with self-consistency in DMFT 
- Calculation of density does not taken into account non diagonal occupations
-
  ETOT  1  -370.69861112926    -3.71E+02 2.10E-22 1.62E-01 0.000
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1060,7 +1060,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.30000     8.515145     8.515145     17.030290     0.000000
     2   2.30000     8.515145     8.515145     17.030290     0.000000
@@ -1657,6 +1657,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
 -          iomode           1
             acell      7.9270000000E+00  7.9270000000E+00  7.9270000000E+00 Bohr
               amu      5.86900000E+01  1.59994000E+01
+           bandpp1          1
+           bandpp2         17
       chksymbreak           0
      densfor_pred           6
         dmatpuopt           1
@@ -1670,6 +1672,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
         dmft_nwli2      20000
         dmft_nwlo1          0
         dmft_nwlo2         32
+  dmft_occnd_imag1          1
+  dmft_occnd_imag2          0
         dmft_solv1          5
         dmft_solv2          2
              ecut      8.00000000E+00 Hartree

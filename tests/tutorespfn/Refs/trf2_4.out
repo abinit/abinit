@@ -1,8 +1,8 @@
 
-.Version 8.0.5 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 12 May 2016.
-- ( at 02h17 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h46 )
   
 
 ================================================================================
@@ -29,6 +29,8 @@
       chneut         1
  Interatomic Force Constants Inputs :
       dipdip         1
+      dipqua         0
+      quadqu         0
       ifcana         1
       ifcout        20
       natifc         1
@@ -65,31 +67,32 @@
     atom        electric field
  displacement     direction
        1               1       -0.022872        0.000000
-       1               2       -0.000000        0.000000
-       1               3       -0.000000        0.000000
-       2               1       -0.000000        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
        2               2       -0.022872        0.000000
-       2               3        0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
        3               3       -0.022872        0.000000
 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00    2.191360E-17    2.223726E-17
-         1         2    2.191360E-17    2.115792E+00   -2.158994E-17
-         1         3   -2.191360E-17   -2.191360E-17    2.115792E+00
-         2         1   -2.115792E+00   -2.191360E-17   -2.223726E-17
-         2         2   -2.191360E-17   -2.115792E+00    2.158994E-17
-         2         3    2.191360E-17    2.191360E-17   -2.115792E+00
+         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
+         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         3    9.041670E-17    9.041670E-17    2.115792E+00
+         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.022  and twall      0.024 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -565,10 +568,10 @@
   -0.43386 -0.69241  0.00003   0.00000 -0.77821  0.00000  -0.43386  0.08580  0.00003
   -0.00001  0.00002 -0.74001   0.00000  0.00000 -0.77821  -0.00001  0.00002  0.03820
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
-+Total cpu time      1.707  and wall time      1.717 sec
++Total cpu time      1.074  and wall time      1.076 sec
 
  anaddb : the run completed succesfully.

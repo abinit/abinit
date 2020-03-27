@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_anharmonics_terms
 !!
 !! NAME
@@ -8,7 +7,7 @@
 !! Module with datatype and tools for the anharmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +28,7 @@ module m_anharmonics_terms
  use m_errors
  use m_abicore
  use m_polynomial_coeff
- use m_ifc, only : ifc_type,ifc_free
+ use m_ifc, only : ifc_type
 
  implicit none
 
@@ -132,15 +131,6 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
 &                                 bounded,elastic3rd,elastic4th,elastic_displacement,&
 &                                 phonon_strain,coeffs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,ncoeff
@@ -236,15 +226,6 @@ end subroutine anharmonics_terms_init
 
 subroutine anharmonics_terms_free(anharmonics_terms)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_free'
-!End of the abilint section
-
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -269,7 +250,7 @@ subroutine anharmonics_terms_free(anharmonics_terms)
 
   if(allocated(anharmonics_terms%phonon_strain))then
     do ii = 1,6
-       call ifc_free(anharmonics_terms%phonon_strain(ii))
+       call anharmonics_terms%phonon_strain(ii)%free()
     end do
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%phonon_strain)
   end if
@@ -307,15 +288,6 @@ end subroutine anharmonics_terms_free
 !! SOURCE
 
 subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_freeCoeffs'
-!End of the abilint section
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -367,14 +339,6 @@ end subroutine anharmonics_terms_freeCoeffs
 subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
 
  use m_polynomial_coeff
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setCoeffs'
-!End of the abilint section
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -439,15 +403,6 @@ end subroutine anharmonics_terms_setCoeffs
 
 subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setElastic3rd'
-!End of the abilint section
-
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -497,15 +452,6 @@ end subroutine anharmonics_terms_setElastic3rd
 !! SOURCE
 
 subroutine anharmonics_terms_setElastic4th(anharmonics_terms,elastics)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setElastic4th'
-!End of the abilint section
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -558,15 +504,6 @@ end subroutine anharmonics_terms_setElastic4th
 
 subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,phonon_strain)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setStrainPhononCoupling'
-!End of the abilint section
-
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: natom
@@ -594,7 +531,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
   anharmonics_terms%has_strain_coupling  = .FALSE.
   if(allocated(anharmonics_terms%phonon_strain))then
     do ii = 1,6
-       call ifc_free(anharmonics_terms%phonon_strain(ii))
+       call anharmonics_terms%phonon_strain(ii)%free()
     end do
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%phonon_strain)
   end if
@@ -649,15 +586,6 @@ end subroutine anharmonics_terms_setStrainPhononCoupling
 !! SOURCE
 
 subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setElasticDispCoupling'
-!End of the abilint section
-
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -732,13 +660,6 @@ end subroutine anharmonics_terms_setElasticDispCoupling
 !!
 subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,ncell,strten,strain,&
 &                                            elastic3rd,elastic4th,elastic_displacement)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_evaluateElastic'
-!End of the abilint section
 
  real(dp),intent(out):: energy
  integer, intent(in) :: natom,natom_uc,ncell
@@ -860,15 +781,6 @@ end subroutine anharmonics_terms_evaluateElastic
 subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy,fcart,natom,natom_uc,&
 &                                                      sc_size,strain,strten,cells,ncell,&
 &                                                      index_cells,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_evaluateIFCStrainCoupling'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 ! scalars

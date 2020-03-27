@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -91,8 +91,15 @@ libabinit.a:
 
 # Process each library
 for lib in abinit_corelibs:
-  tgt_lib += "\n\tcd $(libabinit_tmpdir) && $(AR) xv $(abs_top_builddir)/src/%s/lib%s.a" \
-      % (lib,lib)
+  parent = cnf.get(lib, "parent")
+  if ( parent == "common" ):
+    par_dir = "$(abs_top_builddir)/shared/common/src/%s" % lib
+  elif ( parent == "libpaw" ):
+    par_dir = "$(abs_top_builddir)/shared/libpaw/src"
+  else:
+    par_dir = "$(abs_top_builddir)/src/%s" % lib
+  tgt_lib += "\n\tcd $(libabinit_tmpdir) && $(AR) xv %s/lib%s.a" \
+      % (par_dir,lib)
 
 # Finish setting targets
 tgt_lib += """

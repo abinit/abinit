@@ -37,7 +37,6 @@
  xred  0.0 0.0  0.1155     0.0 0.0 -0.1155
  znucl  8.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

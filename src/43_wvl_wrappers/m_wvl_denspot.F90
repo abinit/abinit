@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_denspot
 !! NAME
 !!  m_wvl_denspot
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (DC)
+!!  Copyright (C) 2008-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +30,7 @@ module m_wvl_denspot
  use m_abicore
  use m_xmpi
 
+ use defs_datatypes, only : pseudopotential_gth_type
  use m_geometry,   only : xred2xcart
 
  implicit none
@@ -75,20 +75,12 @@ contains
 subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 &                          wvl_crmult,wvl_frmult,wvl_mpi_comm,xred)
 
- use defs_datatypes
  use defs_wvltypes
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,only: initialize_DFT_local_fields,allocateRhoPot, &
 &                     input_variables,dpbox_set,density_descriptors
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_denspot_set'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -201,13 +193,6 @@ subroutine wvl_denspot_free(den)
       & deallocate_denspot_distribution, denspot_free_history
  use dynamic_memory
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_denspot_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

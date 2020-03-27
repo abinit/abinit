@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -55,7 +55,7 @@ def makefile_header(name,stamp):
 
 # Initial setup
 my_name    = "make-makefiles-corelibs"
-my_configs = ["config/specs/corelibs.conf"]
+my_configs = ["config/specs/corelibs.conf", "config/specs/dependencies.conf"]
 
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
@@ -82,6 +82,8 @@ cnf = MyConfigParser()
 cnf.read(my_configs[0])
 abinit_corelibs = cnf.sections()
 abinit_corelibs.sort()
+dep_cnf = MyConfigParser()
+dep_cnf.read(my_configs[1])
 
 # Hard-coded libraries for check programs
 hard_chklibs = [
@@ -89,7 +91,6 @@ hard_chklibs = [
   "14_hidewrite",
   "12_hide_mpi",
   "11_memory_mpi",
-  "10_dumpinfo",
   "10_defs",
   ]
 
@@ -105,6 +106,7 @@ for lib in abinit_corelibs:
   # Init
   lib_opt = cnf.get(lib,"optional")
   lib_rul = cnf.get(lib,"abirules")
+  lib_par = cnf.get(lib,"parent")
   try:
     lib_deps = cnf.get(lib,"dependencies").split()
   except NoOptionError:
@@ -120,8 +122,16 @@ for lib in abinit_corelibs:
   sources_specs = dict()
   checkers = None
 
+  # Select parent dir
+  if ( lib_par == "common" ):
+    par_dir = os.path.join("shared", "common", "src", lib)
+  elif ( lib_par == "libpaw" ):
+    par_dir = os.path.join("shared", "libpaw", "src")
+  else:
+    par_dir = os.path.join("src", lib)
+
   # Import source configuration
-  src_cnf = "src/%s/abinit.src" % (lib)
+  src_cnf = os.path.join(par_dir, "abinit.src")
   if ( os.path.exists(src_cnf) ):
     exec(compile(open(src_cnf).read(), src_cnf, 'exec'))
   else:
@@ -130,22 +140,23 @@ for lib in abinit_corelibs:
     sys.exit(3)
 
   # Import inter-directory dependency configuration
-  dir_cnf = "src/%s/abinit.dir" % (lib)
+  dir_cnf = os.path.join(par_dir, "abinit.dir")
   if ( os.path.exists(dir_cnf) ):
     exec(compile(open(dir_cnf).read(), dir_cnf, 'exec'))
   else:
     include_dirs = []
 
-  # FIXME: hard-coded include list
-  include_dirs += ["incs"]
+  # FIXME: abisrc.py glitches
+  if ( lib in ["57_iovars", "66_nonlocal", "70_gw"] ):
+    include_dirs.append("33_xc_lowlevel")
 
-  # Import interfaces
-  if ( os.path.exists("src/%s/interfaces_%s.F90" % (lib,lib)) ):
-    sources.append("interfaces_%s.F90" % (lib))
+  # Add special dirs to include list
+  include_dirs += ["common", "core", "libpaw"]
 
   # Initialize internal variables
   dd_srcs = "lib%s_srcs =" % (lib)
   nd_srcs = "lib%s_srcs_built =" % (lib)
+  ed_srcs = ""
   ob_srcs = ""
 
   cleans = ""
@@ -155,27 +166,34 @@ for lib in abinit_corelibs:
   obs_print = False
 
   # Initialize build flags
+  # FIXME: hard-coded TRIQS C++ flags
   makefile += "AM_CFLAGS = @ABI_CPPFLAGS@\n"
-  makefile += "AM_FCFLAGS = @FPPFLAGS@ @FCFLAGS_FREEFORM@ @FCFLAGS_MODDIR@ @fcflags_opt_%s@\n\n" % (lib)
+  makefile += "AM_CXXFLAGS = $(sd_triqs_cxxflags)\n"
+  makefile += "AM_FCFLAGS = @FPPFLAGS@ @FCFLAGS_FREEFORM@ @FCFLAGS_MODDIR@ @fcflags_opt_%s@ @sd_sys_fcflags@\n\n" % (lib)
 
   # Initialize includes
   inc = ""
   for dep in include_dirs:
-    inc += " \\\n\t@src_%s_incs@" % (dep)
+    inc += " \\\n\t@src_%s_fcflags@" % (dep)
 
   # Dependencies
   if ( cnf.has_option(lib,"dependencies") ):
     for dep in cnf.get(lib,"dependencies").split():
-      inc += " \\\n\t@lib_%s_incs@" % (dep)
-
-  # FIXME: hard-coded include for fallbacks
-  inc += " \\\n\t@fallbacks_incs@"
-
-  # FIXME: hard-coded extra includes
-  inc += " \\\n\t@abi_extra_incs@"
+      if ( dep in dep_cnf.sections() ):
+        if ( dep_cnf.get(dep, "detector") == "steredeg" ):
+          dep_pfx = "sd"
+        else:
+          dep_pfx = "abi"
+        dep_lngs = dep_cnf.get(dep, "languages").split()
+        if ( ("c" in dep_lngs) or ("c++" in dep_lngs) ):
+          inc += " \\\n\t@%s_%s_cppflags@" % (dep_pfx, dep)
+        if ( "fortran" in dep_lngs ):
+          inc += " \\\n\t@%s_%s_fcflags@" % (dep_pfx, dep)
+      else:
+        raise ValueError("invalid external dependency: '%s'" % dep)
 
   # Required basic Fortran includes (must be last!)
-  inc += " \\\n\t@fc_mod_incs@"
+  inc += " \\\n\t@fc_mod_fcflags@"
 
   if ( inc != "" ):
     makefile += "AM_CPPFLAGS =%s\n\n" % (inc)
@@ -191,11 +209,12 @@ for lib in abinit_corelibs:
     if ( (src_specs & ABI_SRC_BLT) != 0 ):
       distcleans += " \\\n\t%s" % (src)
       nd_srcs += " \\\n\t%s" % (src)
+      ed_srcs += " \\\n\t%s.in" % (src)
       nds_print = True
     else:
       dd_srcs += " \\\n\t%s" % (src)
-      if ( not os.path.exists("src/%s/%s" % (lib,src)) ):
-        sys.stderr.write("Error: No such file or directory: 'src/%s/%s'\n" % (lib,src))
+      if ( not os.path.exists("%s/%s" % (par_dir,src)) ):
+        sys.stderr.write("Error: No such file or directory: '%s/%s'\n" % (par_dir,src))
         sys.exit(4)
 
     # Check whether to clean the preprocessed source file
@@ -260,7 +279,7 @@ for lib in abinit_corelibs:
   makefile += "\nEXTRA_DIST = abinit.src\n"
 
   # Write internal library dependencies
-  dep = "src/%s/abinit.dep" % (lib)
+  dep = os.path.join(par_dir, "abinit.dep")
   if ( os.path.exists(dep) ):
     makefile += "\nEXTRA_DIST += abinit.dep\n"
     makefile += "\n"+ open(dep,"rt").read()
@@ -277,13 +296,13 @@ for lib in abinit_corelibs:
     for chk in checkers:
       # FIXME: hard-coded for now
       makefile += "\n%s_SOURCES = %s.F90" % (chk,chk)
-      makefile += "\n%s_CPPFLAGS = @lib_netcdf_incs@ @lib_etsf_io_incs@ @lib_linalg_incs@ -I$(top_srcdir)/src/incs" % \
+      makefile += "\n%s_CPPFLAGS = @sd_netcdf_cppflags@ @sd_linalg_cppflags@ -I$(top_srcdir)/shared/common/src/incs -I$(top_srcdir)/src/incs -I$(top_builddir)/shared/common/src/mods -I$(top_builddir)/src/mods" % \
        (chk)
       makefile += "\n%s_LDADD = \\\n\tlib%s.a" % (chk,lib)
       for elc in checkers[chk] + hard_chklibs:
         makefile += " \\\n\t../%s/lib%s.a" % (elc,elc)
       makefile += " \\\n\t@%s@\n" % \
-        ("@ \\\n\t@".join(["lib_etsf_io_libs","lib_netcdf_libs","lib_linalg_libs"]))
+        ("@ \\\n\t@".join(["sd_netcdf_libs","sd_linalg_libs"]))
     makefile += "\ncheck-local:\n"
     for chk in checkers:
       makefile += "\t./%s >%s.log 2>&1; grep '^TEST FAILED' %s.log && echo 'Unit test %s FAILED' || echo 'Unit test %s OK'\n" % \
@@ -309,19 +328,22 @@ for lib in abinit_corelibs:
   #except NameError:
   #  pass
 
-  dd_srcs += "\n\n"
+  # Write source file templates
+  if ( len(ed_srcs) > 0 ):
+    makefile += "\n\nEXTRA_DIST +=" + ed_srcs + "\n"
+
   # Write additional hand-made information
-  add = "src/%s/abinit.amf" % (lib)
+  add = os.path.join(par_dir, "abinit.amf")
   if ( os.path.exists(add) ):
     makefile += "\nEXTRA_DIST += abinit.amf\n"
     makefile += "\n" + open(add, "rt").read()
 
   # Include RoboDOC header
-  hdr = "src/%s/_%s_" % (lib,lib)
+  hdr = "%s/_%s_" % (par_dir,lib)
   if ( os.path.exists(hdr) ):
     makefile += "\nEXTRA_DIST += _%s_\n" % (lib)
 
   # Output to Makefile.am
-  mf = open("src/%s/Makefile.am" % (lib), "wt")
+  mf = open(os.path.join(par_dir, "Makefile.am"), "wt")
   mf.write(makefile)
   mf.close()

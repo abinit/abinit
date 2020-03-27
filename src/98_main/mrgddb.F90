@@ -6,7 +6,7 @@
 !! This code merges the derivative databases.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, SP)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, SP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 !! The whole database will be stored in
 !! central memory. One could introduce a third mode in which
 !! only the temporary DDB is in central memory, while the
-!! input DDB is read twice : first to make a table of blocks,
+!! input DDB is read twice: first to make a table of blocks,
 !! counting the final number of blocks, and second to merge
 !! the two DDBs. This would save memory.
 !!
@@ -55,33 +55,26 @@ program mrgddb
  use m_xmpi
  use m_ddb_hdr
 
- use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_specialmsg,   only : herald
  use m_time ,        only : asctime, timein
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
  use m_ddb,          only : DDB_VERSION, mblktyp1, mblktyp5
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrgddb'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mddb=5000,ddbun=2 ! mddb=maximum number of databases (cannot be made dynamic)
- integer :: chkopt,ios
+ integer,parameter :: ddbun=2
+ integer :: chkopt,ios, mddb
  integer :: iddb,ii,mblktyp,mblktyptmp,nddb,nfiles_cli,nargs,msym,comm,my_rank
  real(dp) :: tcpu,tcpui,twall,twalli
  logical :: cannot_overwrite=.True.
  character(len=24) :: codename
- character(len=fnlen) :: dscrpt
+ character(len=fnlen) :: dscrpt, outname
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
  real(dp) :: tsec(2)
- character(len=fnlen) :: filnam(mddb+1)
+ character(len=fnlen),allocatable :: filnam(:),copy_filnam(:)
  character(len=500) :: msg,arg
 
 !******************************************************************
@@ -108,6 +101,8 @@ program mrgddb
  ABI_CHECK(xmpi_comm_size(comm)==1, "mrgddb not programmed for parallel execution")
 
  nargs = command_argument_count()
+
+ mddb = 5000 ! maximum number of databases (initial guess)
 
  chkopt = 1; nfiles_cli = 0
  do ii=1,nargs
@@ -139,12 +134,20 @@ program mrgddb
 
    else
      ! Save filenames passed via command-line.
+     if (.not. allocated(filnam)) then
+       ABI_MALLOC(filnam, (mddb+1))
+     end if
      nfiles_cli = nfiles_cli + 1
      if (nfiles_cli > mddb+1) then
-       write(msg, '(a,i0,2a)')&
-       'Number of files should be lower than mddb+1= ',mddb+1,ch10,&
-       'Action: change mddb in mrgddb.f90 and recompile.'
-       MSG_ERROR(msg)
+       ! Extend filnam
+       ABI_MALLOC(copy_filnam, (mddb+1))
+       copy_filnam = filnam
+       iddb = mddb + 1
+       mddb = 2 * mddb
+       ABI_FREE(filnam)
+       ABI_MALLOC(filnam, (mddb+1))
+       filnam(:iddb) = copy_filnam(:iddb)
+       ABI_FREE(copy_filnam)
      end if
      filnam(nfiles_cli) = trim(arg)
    end if
@@ -156,13 +159,13 @@ program mrgddb
 
    ! Read the name of the output ddb
    write(std_out,*)' Give name for output derivative database : '
-   read(std_in, '(a)' ) filnam(1)
-   write(std_out,'(a,a)' )' ',trim(filnam(1))
+   read(std_in, '(a)' ) outname
+   write(std_out,'(2a)' )' ',trim(outname)
 
    ! Read the description of the derivative database
    write(std_out,*)' Give short description of the derivative database :'
    read(std_in, '(a)' )dscrpt
-   write(std_out,'(a,a)' )' ',trim(dscrpt)
+   write(std_out,'(2a)' )' ',trim(dscrpt)
 
    ! Read the number of input ddbs, and check its value
    ! MG NOTE: In the documentation of mrgddb_init I found:
@@ -177,33 +180,28 @@ program mrgddb
    write(std_out,*)' Give number of input ddbs, or 1 if input GS file'
    read(std_in,*)nddb
    write(std_out,*)nddb
-   if (nddb<=0 .or. nddb>mddb) then
-     write(msg, '(a,a,i0,a,i0,a,a,a)' )&
-&     'nddb should be positive, >1 , and lower',&
-&     'than mddb= ',mddb,' while the input nddb is ',nddb,'.',ch10,&
-&     'Action: change mddb in mrgddb.F90 and recompile.'
-     MSG_ERROR(msg)
-   end if
+   ABI_MALLOC(filnam, (nddb+1))
+   filnam(1) = outname
 
    ! Read the file names
    if (nddb==1) then
      write(std_out,*)' Give name for ABINIT input file : '
      read(std_in, '(a)' ) filnam(2)
-     write(std_out,'(a,a)' )' ',trim(filnam(2))
+     write(std_out,'(2a)' )' ',trim(filnam(2))
    else
      do iddb=1,nddb
        !Added to catch error message if the number of input ddbs is greater than the
        !actually number of ddb files entered by the user.
        read(std_in, '(a)',IOSTAT =ios ) filnam(iddb+1)
        if (ios < 0) then
-         write(msg, '(a,i0,a,a,a,a)' )&
+         write(msg, '(a,i0,4a)' )&
 &         'The number of input ddb files: ',nddb,' exceeds the number ',&
 &         'of ddb file names.', ch10, &
 &         'Action: change the number of ddb files in the mrgddb input file.'
          MSG_ERROR(msg)
        else
          write(std_out,*)' Give name for derivative database number',iddb,' : '
-         write(std_out,'(a,a)' )' ',trim(filnam(iddb+1))
+         write(std_out,'(2a)' )' ',trim(filnam(iddb+1))
        end if
      end do
    end if
@@ -231,7 +229,6 @@ program mrgddb
  end do
 
  mblktyp = mblktyptmp
- ! write(std_out,*),'mblktyp',mblktyp
 
  if (mblktyp==5) then
    ! Memory optimized routine
@@ -241,6 +238,8 @@ program mrgddb
    call mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,DDB_VERSION)
  end if
 
+ ABI_FREE(filnam)
+
 !**********************************************************************
 
  call timein(tcpu,twall)
@@ -248,7 +247,7 @@ program mrgddb
  tsec(1)=tcpu-tcpui
  tsec(2)=twall-twalli
 
- write(std_out, '(a,a,a,f13.1,a,f13.1)' ) &
+ write(std_out, '(3a,f13.1,a,f13.1)' ) &
 & '-',ch10,'- Proc.   0 individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  call wrtout(std_out,'+mrgddb : the run completed successfully ','COLL', do_flush=.True.)
 

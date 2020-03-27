@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fit_data
 !!
 !! NAME
@@ -7,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -122,7 +121,7 @@ module m_fit_data
 !    datatype with the informations of the training set
    
  end type fit_data_type
- 
+
 !routine for fit_data
  public :: fit_data_compute
  public :: fit_data_init
@@ -166,13 +165,6 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_init'
-!End of the abilint section
-
  integer,intent(in) :: natom,ntime
 !arrays
  real(dp),intent(in) :: energy_diff(ntime),fcart_diff(3,natom,ntime)
@@ -241,13 +233,6 @@ end subroutine fit_data_init
 
 subroutine fit_data_free(fit_data)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_free'
-!End of the abilint section
-
  implicit none
   
 !Arguments ------------------------------------
@@ -313,13 +298,6 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  use m_effective_potential,only : effective_potential_getDisp
  use m_abihist, only : abihist
  use m_strain,only : strain_type,strain_get
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_compute'
-!End of the abilint section
-
  implicit none
   
 !Arguments ------------------------------------
@@ -423,7 +401,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
    fcart_diff(:,:,itime) =  hist%fcart(:,:,itime) - fcart_fixed(:,:,itime)
    energy_diff(itime)    =  hist%etot(itime) - energy
    strten_diff(:,itime)  =  hist%strten(:,itime) - strten_fixed(:,itime)
- end do
+ end do ! End Loop itime 
    
 !Set the training set
  call training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
@@ -446,6 +424,9 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 
 end subroutine fit_data_compute
 !!***
+
+
+
 
 !!****f* m_fit_data/training_set_init
 !!
@@ -478,13 +459,6 @@ subroutine training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'training_set_init'
-!End of the abilint section
-
  integer,intent(in) :: natom,ntime
 !arrays
  real(dp),intent(in) :: displacement(3,natom,ntime),du_delta(6,3,natom,ntime)
@@ -541,13 +515,6 @@ end subroutine training_set_init
 !! SOURCE
 
 subroutine training_set_free(ts)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'training_set_free'
-!End of the abilint section
 
  implicit none
   

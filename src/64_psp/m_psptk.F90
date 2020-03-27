@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psptk
 !! NAME
 !!  m_psptk
@@ -7,7 +6,7 @@
 !!  This module collects low-level procedures used by the other psp modules
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,7 +85,7 @@ contains
 !!\end{equation} }}
 !!
 !! WARNINGS
-!! Warning : the fifth derivative is not yet delivered.
+!! Warning: the fifth derivative is not yet delivered.
 !!
 !! PARENTS
 !!      psp1in,psp5in
@@ -97,15 +96,6 @@ contains
 !! SOURCE
 
 subroutine psp1cc(fchrg,n1xccc,xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp1cc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -237,15 +227,6 @@ end subroutine psp1cc
 
 subroutine gg1cc(gg1cc_xx,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gg1cc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: xx
@@ -310,15 +291,6 @@ end subroutine gg1cc
 !! SOURCE
 
 subroutine gp1cc(gp1cc_xx,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gp1cc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -390,15 +362,6 @@ end subroutine gp1cc
 !! SOURCE
 
 subroutine gpp1cc(gpp1cc_xx,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpp1cc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -547,15 +510,6 @@ end subroutine gpp1cc
 
 subroutine psp5lo(al,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 &                  vloc,yp1,ypn,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp5lo'
-!End of the abilint section
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -733,15 +687,6 @@ end subroutine psp5lo
 !! SOURCE
 
 subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfll)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp5nl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1179,25 +1124,11 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 
    function  bes0_psp5(arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bes0_psp5'
-!End of the abilint section
-
    real(dp) :: bes0_psp5,arg
    bes0_psp5=sin(arg)/arg
  end function bes0_psp5
 
    function bes1_psp5(arg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bes1_psp5'
-!End of the abilint section
 
    real(dp) :: bes1_psp5,arg
    bes1_psp5=(sin(arg)-arg*cos(arg))/arg**2
@@ -1205,26 +1136,12 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 
    function bes2_psp5(arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bes2_psp5'
-!End of the abilint section
-
    real(dp) :: bes2_psp5,arg
    bes2_psp5=( (3.0d0-arg**2)*sin(arg)-&
 &   3.0d0*arg*cos(arg) )      /arg**3
  end function bes2_psp5
 
    function bes3_psp5(arg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bes3_psp5'
-!End of the abilint section
 
    real(dp) :: bes3_psp5, arg
    bes3_psp5=(15.d0*sin(arg)-15.d0*arg*cos(arg) &
@@ -1273,15 +1190,6 @@ end subroutine psp5nl
 !! SOURCE
 
 subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp8lo'
-!End of the abilint section
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -1458,15 +1366,6 @@ end subroutine psp8lo
 !! SOURCE
 
 subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vpspll)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp8nl'
-!End of the abilint section
-
- implicit none
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -1673,15 +1572,6 @@ end subroutine psp8nl
 !! SOURCE
 
 subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cc_derivatives'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 ! scalars

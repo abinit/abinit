@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_a2ftr
 !! NAME
 !! m_a2ftr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2004-2018 ABINIT group (JPC, MJV, BXU)
+!!   Copyright (C) 2004-2020 ABINIT group (JPC, MJV, BXU)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,24 +26,22 @@
 module m_a2ftr
 
  use defs_basis
- use defs_datatypes
  use defs_elphon
  use m_errors
  use m_abicore
  use m_xmpi
- use m_kptrank
  use m_splines
  use m_ebands
 
+ use defs_datatypes,    only : ebands_t
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int
  use m_hide_lapack,     only : matrginv
  use m_geometry,        only : phdispl_cart2red
  use m_crystal,         only : crystal_t
- use m_ifc,             only : ifc_type, ifc_fourq
+ use m_ifc,             only : ifc_type
  use m_dynmat,          only : ftgam_init, ftgam
  use m_epweights,       only : d2c_wtq, ep_ph_weights, ep_el_weights, ep_ph_weights
- use m_fstab,           only : mkqptequiv
 
  implicit none
 
@@ -107,15 +104,6 @@ contains
 !! SOURCE
 
 subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f_tr'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -239,7 +227,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
  omega_min = omega_min - domega
 
@@ -269,7 +257,7 @@ subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elp
  ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_phon%nkpt))
 
  do iFSqpt=1,elph_ds%k_phon%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_phon%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  ABI_ALLOCATE(elph_tr_ds%a2f_1d_tr,(elph_ds%na2f,9,elph_ds%nsppol,4,tmp_nenergy**2,ntemper))
@@ -1070,15 +1058,6 @@ end subroutine mka2f_tr
 
 subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f_tr_lova'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ntemper
@@ -1181,7 +1160,7 @@ subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr
  ABI_ALLOCATE(pheigvec,(2*elph_ds%nbranch*elph_ds%nbranch, elph_ds%k_fine%nkpt))
 
  do iFSqpt=1,elph_ds%k_fine%nkpt
-   call ifc_fourq(ifc,crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(crystal,elph_ds%k_fine%kpt(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = minval(phfrq)
@@ -1672,7 +1651,7 @@ end subroutine mka2f_tr_lova
 !!
 !! FUNCTION
 !!  Calculate the k-dependent relaxation time due to EPC. Impelementation based
-!!  on derivation from Grmvall's book or 
+!!  on derivation from Grmvall's book or
 !!  OD Restrepo's paper (PRB 94 212103 (2009) [[cite:Restrepo2009]])
 !!
 !! INPUTS
@@ -1697,15 +1676,6 @@ end subroutine mka2f_tr_lova
 !! SOURCE
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_tau_k'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(crystal_t),intent(in) :: Cryst
@@ -1888,7 +1858,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  ABI_ALLOCATE(pheigvec,(2*nbranch*nbranch, nkptirr))
 
  do iFSqpt = 1, nkptirr
-   call ifc_fourq(ifc,cryst,elph_ds%k_phon%kptirr(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
+   call ifc%fourq(cryst,elph_ds%k_phon%kptirr(:,iFSqpt),phfrq(:,iFSqpt),displ(:,:,:,iFSqpt),out_eigvec=pheigvec(:,iFSqpt))
  end do
 
  omega_min = omega_min - domega
@@ -2294,7 +2264,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  if (elph_ds%prtbltztrp == 1) then
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
-&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,natom,nband,elph_ds%nelect,new_nkptirr, &
+&   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &
 &   elph_ds%nspinor,nsppol,Cryst%nsym,Cryst%rprimd,Cryst%symrel,tmp_tau_k)
  end if !prtbltztrp
  ABI_DEALLOCATE(tmp_eigenGS)

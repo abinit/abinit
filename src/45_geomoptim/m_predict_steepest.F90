@@ -1,11 +1,10 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_predict_steepest
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (XG)
+!!  Copyright (C) 2009-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,13 +92,6 @@ contains
 
 subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,natom,&
 &                           ndynimage,nimage,ntimimage_stored,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_steepest'
-!End of the abilint section
 
  implicit none
 

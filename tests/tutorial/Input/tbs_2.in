@@ -6,7 +6,7 @@ optdriver 99  # BS calculation
 irdwfk  1     # Read the WFK file produced in tbs_1 
 irdscr  1     # Read the SCR file produced in tbs_1 
 
-bs_calctype       1       # L0 is contstructed with KS orbitals and energies.
+bs_calctype       1       # L0 is constructed with KS orbitals and energies.
 mbpt_sciss          0.8 eV  # Scissors operator used to correct the KS band structure.
 bs_exchange_term  1       # Exchange term included.
 bs_coulomb_term   11      # Coulomb term included using the full matrix W_GG'
@@ -65,7 +65,6 @@ nstep  50      # Maximal number of SCF cycles
 diemac 12.0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

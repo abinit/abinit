@@ -67,7 +67,6 @@ toldfe 1.0d-6     # Will stop when, twice in a row, the difference
                   # This value is way too large for most realistic studies of materials
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

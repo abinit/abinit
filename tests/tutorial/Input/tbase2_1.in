@@ -70,7 +70,6 @@ diemac 2.0        # Although this is not mandatory, it is worth to
                   # in a big box
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

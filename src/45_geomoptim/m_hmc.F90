@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hmc
 !! NAME
 !!  m_hmc
@@ -7,7 +6,7 @@
 !!  Auxiliary hmc functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (SPr)
+!!  Copyright (C) 2018-2020 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,16 +71,6 @@ contains
 
 subroutine compute_kinetic_energy(ab_mover,vel,ekin)
     
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_kinetic_energy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover              
  real(dp),      intent(in)   :: vel(3,ab_mover%natom) ! velocities
@@ -131,16 +120,6 @@ end subroutine compute_kinetic_energy
 
 subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
     
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'generate_random_velocities'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover              
  integer,       intent(inout):: seed
@@ -218,16 +197,6 @@ end subroutine generate_random_velocities
 
 subroutine metropolis_check(seed,de,kbtemp,iacc)
     
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metropolis_check'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,       intent(inout):: seed
  real(dp),      intent(in)   :: de         

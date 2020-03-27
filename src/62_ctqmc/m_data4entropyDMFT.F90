@@ -1,13 +1,12 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_data4entropyDMFT
 !! NAME
 !!  m_data4entropyDMFT
-!! 
-!! FUNCTION 
-!!  FIXME: add description. 
+!!
+!! FUNCTION
+!!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,8 +30,8 @@
 module m_data4entropyDMFT
 
   use defs_basis
-  use defs_abitypes
   use m_errors
+  use m_abicore
 
   implicit none
 
@@ -54,7 +53,7 @@ module m_data4entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,7 +84,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,13 +109,6 @@ contains
 subroutine data4entropyDMFT_init(this,natom,typat,lpawu,uset2g,upawu,jpawu)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'data4entropyDMFT_init'
-!End of the abilint section
-
   type(data4entropyDMFT_t) , intent(inout) :: this
   integer               , intent(in   ) :: natom
   integer , dimension(:), intent(in   ) :: typat
@@ -191,7 +183,7 @@ end subroutine data4entropyDMFT_init
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -216,13 +208,6 @@ end subroutine data4entropyDMFT_init
 subroutine data4entropyDMFT_setDocc(this,iatom,Docc,Nocc)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'data4entropyDMFT_setDocc'
-!End of the abilint section
-
     type(data4entropyDMFT_t), intent(inout) :: this
     integer           , intent(in   ) :: iatom
     real(dp), optional, intent(in   ) :: Docc(:,:) !iflavor,iflavor
@@ -270,7 +255,7 @@ subroutine data4entropyDMFT_setDocc(this,iatom,Docc,Nocc)
                               " maxnflavor=", maxnflavor
         MSG_ERROR(message)
       end if
-      
+
       do iflavor1 = 1, (2*size(Nocc,1)+1)
         do iflavor2 = 1, (2*size(Nocc,1)+1)
           this%docc(iflavor2,iflavor1,iatom) = Nocc(iflavor1)*Nocc(iflavor2)
@@ -289,7 +274,7 @@ end subroutine data4entropyDMFT_setDocc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -314,13 +299,6 @@ end subroutine data4entropyDMFT_setDocc
 subroutine data4entropyDMFT_setHu(this,itypat,hu)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'data4entropyDMFT_setHu'
-!End of the abilint section
-
     type(data4entropyDMFT_t), intent(inout) :: this
     integer           , intent(in   ) :: itypat
     real(dp)          , intent(in   ) :: hu(:,:)   !iflavor
@@ -357,7 +335,7 @@ end subroutine data4entropyDMFT_setHu
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -383,13 +361,6 @@ end subroutine data4entropyDMFT_setHu
 subroutine data4entropyDMFT_setDc(this,dc)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'data4entropyDMFT_setDc'
-!End of the abilint section
-
     type(data4entropyDMFT_t) , intent(inout) :: this
     real(dp), dimension(:), intent(in   ) :: dc
 !Local variables ------------------------------
@@ -418,7 +389,7 @@ end subroutine data4entropyDMFT_setDc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -443,13 +414,6 @@ end subroutine data4entropyDMFT_setDc
 subroutine data4entropyDMFT_destroy(this)
 
   !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'data4entropyDMFT_destroy'
-!End of the abilint section
-
   type(data4entropyDMFT_t), intent(inout) :: this
 
   if ( .not. this%isset ) return

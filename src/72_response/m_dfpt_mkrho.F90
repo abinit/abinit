@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkrho
 !! NAME
 !!  m_dfpt_mkrho
@@ -7,7 +6,7 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,18 +26,18 @@
 module m_dfpt_mkrho
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_cgtools
  use m_xmpi
 
+
+ use defs_abitypes, only : MPI_type
  use m_time,            only : timab
  use m_io_tools,        only : get_unit, iomode_from_fname
  use m_fftcore,         only : sphereboundary
  use m_fft,             only : fftpac, fourwf
  use m_spacepar,        only : symrhg
- use m_dtfil,           only : status
  use m_hamiltonian,     only : gs_hamiltonian_type
  use m_pawrhoij,        only : pawrhoij_type
  use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free
@@ -121,21 +120,12 @@ contains
 subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & kg,kg1,mband,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
-& occ_rbz,paral_kgb,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkrho'
-!End of the abilint section
-
- implicit none
+& occ_rbz,phnons,rhog1,rhor1,rprimd,symafm,symrel,tnons,ucvol,wtk_rbz)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,mband,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
- integer,intent(in) :: nspden,nspinor,nsppol,nsym,paral_kgb
+ integer,intent(in) :: nspden,nspinor,nsppol,nsym
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -147,7 +137,8 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol),gprimd(3,3)
  real(dp),intent(in) :: occ_rbz(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: phnons(2,nfft**(1-1/nsym),(nspden/nsppol)-3*(nspden/4))
- real(dp),intent(in) :: rprimd(3,3),wtk_rbz(nkpt_rbz)
+ real(dp),intent(in) :: rprimd(3,3),tnons(3,nsym)
+ real(dp),intent(in) :: wtk_rbz(nkpt_rbz)
  real(dp),intent(out) :: rhog1(2,nfft),rhor1(cplex*nfft,nspden)
 
 !Local variables-------------------------------
@@ -177,13 +168,11 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !DBG_ENTER("COLL")
 
  if(nspden==4)then
-!  NOTE : see mkrho for the modifications needed for non-collinear treatment
-   write(message, '(a,a,a,a,a,a,a,a)' ) ch10,&
-&   ' dfpt_mkrho : WARNING -',ch10,&
-&   '  Linear-response calculations are under construction with nspden=4',ch10,&
-&   ' Action : modify value of nspden in input file unless you know what you are doing.'
-!   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+!  NOTE: see mkrho for the modifications needed for non-collinear treatment
+   write(message, '(3a)' )&
+    ' Linear-response calculations are under construction with nspden=4',ch10,&
+    ' Action: modify value of nspden in input file unless you know what you are doing.'
+   MSG_WARNING(message)
  end if
 
 !Init spaceworld
@@ -258,7 +247,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
 !      In these two calls, rhoaug, rhoaug1 and weight are dummy variables, and are not modified
              call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
-&             istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,0,paral_kgb,tim_fourwf7,weight,weight)
+&             istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,0,tim_fourwf7,weight,weight)
 
 ! TODO: here ispinor should be ispinorp to get full matrix and nspden 4
              ptr = 1 + (ispinor-1)*npw1_k + (iband-1)*npw1_k*nspinor + icg1
@@ -266,7 +255,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
              call fourwf(cplex,rhoaug1,cwavef1,dummy,wfraug1,gbound1,gbound1,&
 &             istwf_k,kg1_k,kg1_k,mgfft,mpi_enreg,1,ngfft,npw1_k,1,n4,n5,n6,0,&
-&             paral_kgb,tim_fourwf7,weight,weight)
+&             tim_fourwf7,weight,weight)
 
 !          Compute the weight, note that the factor 2 is
 !          not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
@@ -418,17 +407,17 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
          call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gbound,gbound,istwf_k,kg_k,kg_k,&
 &         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
-&         0,paral_kgb,tim_fourwf7,weight,weight)
+&         0,tim_fourwf7,weight,weight)
          call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gbound,gbound,istwf_k,kg_k,kg_k,&
 &         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
-&         0,paral_kgb,tim_fourwf7,weight,weight)
+&         0,tim_fourwf7,weight,weight)
  !1st order wfk Fourrier Transform
          call fourwf(1,rhoaug1(:,:,:,2),cwave1_up,dummy,wfraug1_up,gbound,gbound,istwf_k,kg_k,kg_k,&
 &         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
-&         0,paral_kgb,tim_fourwf7,weight,weight)
+&         0,tim_fourwf7,weight,weight)
          call fourwf(1,rhoaug1(:,:,:,2),cwave1_down,dummy,wfraug1_down,gbound,gbound,istwf_k,kg_k,kg_k,&
 &         mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,&
-&         0,paral_kgb,tim_fourwf7,weight,weight)
+&         0,tim_fourwf7,weight,weight)
 
 !    Accumulate 1st-order density (x component)
          if (cplex==2) then
@@ -533,8 +522,8 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  call timab(71,2,tsec)
  call timab(48,2,tsec)
 
- call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,paral_kgb,phnons,&
-& rhog1,rhor1,rprimd,symafm,symrel)
+ call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,phnons,&
+             rhog1,rhor1,rprimd,symafm,symrel,tnons)
 
 !We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !we also have the spin-up density, symmetrized, in rhor1(:,2).
@@ -554,14 +543,12 @@ end subroutine dfpt_mkrho
 !!  Also accumulate zero-order potential part of the 2nd-order total energy (if needed)
 !!
 !! INPUTS
-!!  counter=counter for status file
 !!  cplex=1 if 1st-order density is real, 2 if 1st-order density is complex
 !!  cwave0(2,npw*nspinor)=GS wavefunction at k, in reciprocal space
 !!  cwave1(2,npw1*nspinor)=1st-order wavefunction at k,q, in reciprocal space
 !!  cwavef(2,npw1*nspinor)=1st-order wavefunction at k,q, in reciprocal space, without correction due to occupation change
 !!  cwaveprj0(natom,nspinor*usecprj)= GS wave function at k projected with nl projectors
 !!  cwaveprj1(natom,nspinor*usecprj)= 1st-order wave function at k,q projected with nl projectors
-!!  filstat=name of the status file
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  iband=index of current band
 !!  idir=direction of the current perturbation
@@ -581,7 +568,6 @@ end subroutine dfpt_mkrho
 !!  option= 1: accumulate 1st-order density,
 !!          2: accumulate 0-order potential part of the 2nd-order total energy
 !!          3: accumulate both
-!!  prtvol=control print volume and debugging output
 !!  tim_fourwf= timing code for fourwf (5 from dfpt_vtowfk, 18 from dfpt_nstwf)
 !!  wf_corrected=flag put to 1 if cwave1 is different from cwavef (if there is a contribution from occ. change)
 !!  wtk_k=weight assigned to the k point.
@@ -608,34 +594,23 @@ end subroutine dfpt_mkrho
 !!
 !! CHILDREN
 !!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
-!!      status
 !!
 !! SOURCE
 
-subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
-&                  eloc0_k,filstat,gs_hamkq,iband,idir,ipert,isppol,kptopt,&
+subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
+&                  eloc0_k,gs_hamkq,iband,idir,ipert,isppol,kptopt,&
 &                  mpi_enreg,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
-&                  option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,wf_corrected,&
+&                  option,pawrhoij1,rhoaug1,tim_fourwf,wf_corrected,&
 &                  wtk_k,comm_atom,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_accrho'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: counter,cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k
- integer,intent(in) :: ncpgr,npw_k,npw1_k,nspinor,option,prtvol,tim_fourwf,wf_corrected
+ integer,intent(in) :: cplex,iband,idir,ipert,isppol,kptopt,natom,nband_k
+ integer,intent(in) :: ncpgr,npw_k,npw1_k,nspinor,option,tim_fourwf,wf_corrected
  integer,optional,intent(in) :: comm_atom
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: wtk_k
  real(dp),intent(out) :: eloc0_k
- character(len=fnlen),intent(in) :: filstat
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -649,7 +624,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=14
- integer :: choice,cplex_cprj,i1,i2,i3,iexit,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
+ integer :: choice,cplex_cprj,i1,i2,i3,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
  logical :: my_atmtab_allocated,paral_atom
  logical :: usetimerev
  real(dp) :: im0,im1,re0,re1,valuer,diag,offdiag,weight
@@ -664,9 +639,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  real(dp),pointer :: cwave0_up(:,:),cwave0_down(:,:),cwave1_up(:,:),cwave1_down(:,:)
  real(dp),pointer :: vlocal(:,:,:,:)=>null()
  type(pawcprj_type),allocatable :: cwaveprj_tmp(:,:)
-!TEST
-!  real(dp),save :: v1,v2
-!  real(dp) :: r1,r2
+
 ! *********************************************************************
  DBG_ENTER("COLL")
 
@@ -685,10 +658,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
    do ispinor=1,nspinor
 
-     if (prtvol>=10) then
-       call status(counter,filstat,iexit,level,'density update')
-     end if
-
 !  Part devoted to the accumulation of the 0-order potential part of the 2nd-order total energy
 !  --------------------------------------------------------------------------------------------
 
@@ -702,7 +671,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        !make an inverse FFT from cwavef_sp to wfraug1
        call fourwf(cplex,rhoaug,cwavef_sp,dummy,wfraug1,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        nullify(cwavef_sp)
      end if
@@ -739,7 +708,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
          end if
          call fourwf(cplex,rhoaug,cwavef_sp,dummy,wfraug1,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &         gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&         gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&         gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
          nullify(cwavef_sp)
        end if
@@ -754,7 +723,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        end if
        call fourwf(1,rhoaug,cwavef_sp,dummy,wfraug,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&       gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        nullify(cwavef_sp)
 
@@ -793,9 +762,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  else ! nvloc = 4
 ! The same lines of code are in 72_response/dfpt_mkrho.F90
 ! TODO merge these lines in a single routine??!!
-   if (prtvol>=10) then
-     call status(counter,filstat,iexit,level,'density update')
-   end if
    ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
    ABI_ALLOCATE(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
@@ -810,14 +776,14 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      cwavef_up => cwavef(:,1:npw1_k) ! wfs up spin-polarized
      call fourwf(cplex,rhoaug(:,:,:,1),cwavef_up,dummy,wfraug1_up,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      nullify(cwavef_up)
 
      cwavef_down => cwavef(:,1+npw1_k:2*npw1_k) ! wfs down spin-polarized
      call fourwf(cplex,rhoaug(:,:,:,1),cwavef_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      nullify(cwavef_down)
    end if
@@ -829,7 +795,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      do i3=1,n3
        do i2=1,n2
          do i1=1,n1
-!TEST DFPT
            diag=vlocal(i1,i2,i3,1)*(wfraug1_up(1,i1,i2,i3)**2+wfraug1_up(2,i1,i2,i3)**2)&
 &           +vlocal(i1,i2,i3,2)*(wfraug1_down(1,i1,i2,i3)**2+wfraug1_down(2,i1,i2,i3)**2)
            offdiag=(two*vlocal(i1,i2,i3,3)*((wfraug1_up(1,i1,i2,i3)*wfraug1_down(1,i1,i2,i3))+&
@@ -860,13 +825,13 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
        call fourwf(cplex,rhoaug(:,:,:,1),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        nullify(cwave1_up)
 
        call fourwf(cplex,rhoaug(:,:,:,1),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        nullify(cwave1_down)
      end if
@@ -886,12 +851,12 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
      call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      nullify(cwave0_up)
      call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
 &     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      nullify(cwave0_down)
 !    Accumulate 1st-order density (x component)
@@ -984,113 +949,9 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    option_rhoij=2;usetimerev=(kptopt>0.and.kptopt<3)
 
    if (gs_hamkq%usecprj==1) then
-!TEST
-! if (iband==1) then
-!  if (nspinor==1) then
-!   if (iband==1) write(100+iband,*) "===================================="
-!   if (iband==1) write(200+iband,*) "===================================="
-!   if (iband==1) write(300+iband,*) "===================================="
-!   if (iband==1) write(400+iband,*) "===================================="
-!   write(100+iband,*) cwaveprj0(1,1)%cp(1,1)**2+cwaveprj0(1,1)%cp(2,1)**2,&
-! &                    cwaveprj0(1,1)%cp(1,2)**2+cwaveprj0(1,1)%cp(2,2)**2,&
-! &                    cwaveprj0(1,1)%cp(1,3)**2+cwaveprj0(1,1)%cp(2,3)**2,&
-! &                    cwaveprj0(1,1)%cp(1,4)**2+cwaveprj0(1,1)%cp(2,4)**2,&
-! &                    cwaveprj0(1,1)%cp(1,5)**2+cwaveprj0(1,1)%cp(2,5)**2,&
-! &                    cwaveprj0(1,1)%cp(1,6)**2+cwaveprj0(1,1)%cp(2,6)**2,&
-! &                    cwaveprj0(1,1)%cp(1,7)**2+cwaveprj0(1,1)%cp(2,7)**2,&
-! &                    cwaveprj0(1,1)%cp(1,8)**2+cwaveprj0(1,1)%cp(2,8)**2
-!   write(200+iband,*) cwaveprj1(1,1)%cp(1,1)**2+cwaveprj1(1,1)%cp(2,1)**2,&
-! &                    cwaveprj1(1,1)%cp(1,2)**2+cwaveprj1(1,1)%cp(2,2)**2,&
-! &                    cwaveprj1(1,1)%cp(1,3)**2+cwaveprj1(1,1)%cp(2,3)**2,&
-! &                    cwaveprj1(1,1)%cp(1,4)**2+cwaveprj1(1,1)%cp(2,4)**2,&
-! &                    cwaveprj1(1,1)%cp(1,5)**2+cwaveprj1(1,1)%cp(2,5)**2,&
-! &                    cwaveprj1(1,1)%cp(1,6)**2+cwaveprj1(1,1)%cp(2,6)**2,&
-! &                    cwaveprj1(1,1)%cp(1,7)**2+cwaveprj1(1,1)%cp(2,7)**2,&
-! &                    cwaveprj1(1,1)%cp(1,8)**2+cwaveprj1(1,1)%cp(2,8)**2
-!   write(300+iband,*) cwave0(1,1)**2+cwave0(2,1)**2,&
-!                      cwave0(1,5)**2+cwave0(2,5)**2,&
-!                      cwave0(1,9)**2+cwave0(2,9)**2
-!   write(400+iband,*) cwave1(1,1)**2+cwave1(2,1)**2,&
-!                      cwave1(1,5)**2+cwave1(2,5)**2,&
-!                      cwave1(1,9)**2+cwave1(2,9)**2
-!  end if
-!  if (nspinor==2) then
-!   if (iband==1) write(100+iband,*) "===================================="
-!   if (iband==1) write(200+iband,*) "===================================="
-!   if (iband==1) write(300+iband,*) "===================================="
-!   if (iband==1) write(400+iband,*) "===================================="
-!   write(100+iband,*) cwaveprj0(1,1)%cp(1,1)**2+cwaveprj0(1,1)%cp(2,1)**2 + cwaveprj0(1,2)%cp(1,1)**2+cwaveprj0(1,2)%cp(2,1)**2,&
-! &                    cwaveprj0(1,1)%cp(1,2)**2+cwaveprj0(1,1)%cp(2,2)**2 + cwaveprj0(1,2)%cp(1,2)**2+cwaveprj0(1,2)%cp(2,2)**2,&
-! &                    cwaveprj0(1,1)%cp(1,3)**2+cwaveprj0(1,1)%cp(2,3)**2 + cwaveprj0(1,2)%cp(1,3)**2+cwaveprj0(1,2)%cp(2,3)**2,&
-! &                    cwaveprj0(1,1)%cp(1,4)**2+cwaveprj0(1,1)%cp(2,4)**2 + cwaveprj0(1,2)%cp(1,4)**2+cwaveprj0(1,2)%cp(2,4)**2,&
-! &                    cwaveprj0(1,1)%cp(1,5)**2+cwaveprj0(1,1)%cp(2,5)**2 + cwaveprj0(1,2)%cp(1,5)**2+cwaveprj0(1,2)%cp(2,5)**2,&
-! &                    cwaveprj0(1,1)%cp(1,6)**2+cwaveprj0(1,1)%cp(2,6)**2 + cwaveprj0(1,2)%cp(1,6)**2+cwaveprj0(1,2)%cp(2,6)**2,&
-! &                    cwaveprj0(1,1)%cp(1,7)**2+cwaveprj0(1,1)%cp(2,7)**2 + cwaveprj0(1,2)%cp(1,7)**2+cwaveprj0(1,2)%cp(2,7)**2,&
-! &                    cwaveprj0(1,1)%cp(1,8)**2+cwaveprj0(1,1)%cp(2,8)**2 + cwaveprj0(1,2)%cp(1,8)**2+cwaveprj0(1,2)%cp(2,8)**2
-!   write(200+iband,*) cwaveprj1(1,1)%cp(1,1)**2+cwaveprj1(1,1)%cp(2,1)**2 + cwaveprj1(1,2)%cp(1,1)**2+cwaveprj1(1,2)%cp(2,1)**2,&
-! &                    cwaveprj1(1,1)%cp(1,2)**2+cwaveprj1(1,1)%cp(2,2)**2 + cwaveprj1(1,2)%cp(1,2)**2+cwaveprj1(1,2)%cp(2,2)**2,&
-! &                    cwaveprj1(1,1)%cp(1,3)**2+cwaveprj1(1,1)%cp(2,3)**2 + cwaveprj1(1,2)%cp(1,3)**2+cwaveprj1(1,2)%cp(2,3)**2,&
-! &                    cwaveprj1(1,1)%cp(1,4)**2+cwaveprj1(1,1)%cp(2,4)**2 + cwaveprj1(1,2)%cp(1,4)**2+cwaveprj1(1,2)%cp(2,4)**2,&
-! &                    cwaveprj1(1,1)%cp(1,5)**2+cwaveprj1(1,1)%cp(2,5)**2 + cwaveprj1(1,2)%cp(1,5)**2+cwaveprj1(1,2)%cp(2,5)**2,&
-! &                    cwaveprj1(1,1)%cp(1,6)**2+cwaveprj1(1,1)%cp(2,6)**2 + cwaveprj1(1,2)%cp(1,6)**2+cwaveprj1(1,2)%cp(2,6)**2,&
-! &                    cwaveprj1(1,1)%cp(1,7)**2+cwaveprj1(1,1)%cp(2,7)**2 + cwaveprj1(1,2)%cp(1,7)**2+cwaveprj1(1,2)%cp(2,7)**2,&
-! &                    cwaveprj1(1,1)%cp(1,8)**2+cwaveprj1(1,1)%cp(2,8)**2 + cwaveprj1(1,2)%cp(1,8)**2+cwaveprj1(1,2)%cp(2,8)**2
-!   write(300+iband,*) cwave0(1,1)**2+cwave0(2,1)**2 + cwave0(1,npw_k+1)**2+cwave0(2,npw_k+1)**2,&
-!                      cwave0(1,5)**2+cwave0(2,5)**2 + cwave0(1,npw_k+5)**2+cwave0(2,npw_k+5)**2,&
-!                      cwave0(1,9)**2+cwave0(2,9)**2 + cwave0(1,npw_k+9)**2+cwave0(2,npw_k+9)**2
-!   write(400+iband,*) cwave1(1,1)**2+cwave1(2,1)**2 + cwave1(1,npw_k+1)**2+cwave1(2,npw_k+1)**2,&
-! &                    cwave1(1,5)**2+cwave1(2,5)**2 + cwave1(1,npw_k+5)**2+cwave1(2,npw_k+5)**2,&
-! &                    cwave1(1,9)**2+cwave1(2,9)**2 + cwave1(1,npw_k+9)**2+cwave1(2,npw_k+9)**2
-!  end if
-! end if
      call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj0,cwaveprj1,ipert,isppol,&
 &     my_natom,natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k,&
 &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
-!TEST
-!if (iband==1) then
-!  if (nspinor==1) then
-!   if (iband==1) v1=zero
-!   if (iband==1) v2=zero
-!   i1=1;i2=1
-!   v1=v1+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
-! &      +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1))&
-! &     *occ_k(iband)*wtk_k
-!   i1=1;i2=3
-!   v2=v2+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
-! &     +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1))&
-! &     *occ_k(iband)*wtk_k
-!   write(500,*) "A: ",v1,v2
-!   write(500,*) "B: ",pawrhoij1(1)%rhoij_(1,1),pawrhoij1(1)%rhoij_(4,1)
-!  end if
-!  if (nspinor==2) then
-!   if (iband==1) v1=zero
-!   if (iband==1) v2=zero
-!   i1=1;i2=1
-!   v1=v1+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
-! &       +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1) &
-! &       +cwaveprj0(1,2)%cp(1,i1)*cwaveprj1(1,2)%cp(1,i2)+cwaveprj0(1,2)%cp(1,i2)*cwaveprj1(1,2)%cp(1,i1) &
-! &       +cwaveprj0(1,2)%cp(2,i1)*cwaveprj1(1,2)%cp(2,i2)+cwaveprj0(1,2)%cp(2,i2)*cwaveprj1(1,2)%cp(2,i1))&
-! &     *occ_k(iband)*wtk_k
-!   i1=1;i2=3
-!   r1=cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
-! &   +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1)
-!   r2=cwaveprj0(1,2)%cp(1,i1)*cwaveprj1(1,2)%cp(1,i2)+cwaveprj0(1,2)%cp(1,i2)*cwaveprj1(1,2)%cp(1,i1) &
-! &   +cwaveprj0(1,2)%cp(2,i1)*cwaveprj1(1,2)%cp(2,i2)+cwaveprj0(1,2)%cp(2,i2)*cwaveprj1(1,2)%cp(2,i1)
-!  v2=v2+(cwaveprj0(1,1)%cp(1,i1)*cwaveprj1(1,1)%cp(1,i2)+cwaveprj0(1,1)%cp(1,i2)*cwaveprj1(1,1)%cp(1,i1) &
-! &       +cwaveprj0(1,1)%cp(2,i1)*cwaveprj1(1,1)%cp(2,i2)+cwaveprj0(1,1)%cp(2,i2)*cwaveprj1(1,1)%cp(2,i1) &
-! &       +cwaveprj0(1,2)%cp(1,i1)*cwaveprj1(1,2)%cp(1,i2)+cwaveprj0(1,2)%cp(1,i2)*cwaveprj1(1,2)%cp(1,i1) &
-! &       +cwaveprj0(1,2)%cp(2,i1)*cwaveprj1(1,2)%cp(2,i2)+cwaveprj0(1,2)%cp(2,i2)*cwaveprj1(1,2)%cp(2,i1))&
-! &       *occ_k(iband)*wtk_k
-!
-! i1=1;i2=3
-!   write(500,*) "A: ",v2,r1,r2,&
-! & cwaveprj0(1,1)%cp(1:2,i1),cwaveprj0(1,1)%cp(1:2,i2),&
-! & cwaveprj0(1,2)%cp(1:2,i1),cwaveprj0(1,2)%cp(1:2,i2),&
-! & cwaveprj1(1,1)%cp(1:2,i1),cwaveprj1(1,1)%cp(1:2,i2),&
-! & cwaveprj1(1,2)%cp(1:2,i1),cwaveprj1(1,2)%cp(1:2,i2)
-!   write(500,*) "B: ",pawrhoij1(1)%rhoij_(4,1)
-!  end if
-!end if
    else
      ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,nspinor))
      call pawcprj_alloc(cwaveprj_tmp,ncpgr,gs_hamkq%dimcprj)

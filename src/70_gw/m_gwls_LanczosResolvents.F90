@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_LanczosResolvents
 !! NAME
 !! m_gwls_LanczosResolvents
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -108,13 +107,6 @@ subroutine setup_LanczosResolvents(kmax, prec)
 !
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_LanczosResolvents'
-!End of the abilint section
-
 implicit none
 
 !------------------------------
@@ -184,13 +176,6 @@ subroutine cleanup_LanczosResolvents
 !
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cleanup_LanczosResolvents'
-!End of the abilint section
-
 implicit none
 
 ! *************************************************************************
@@ -234,13 +219,6 @@ subroutine matrix_function_preconditioned_Hamiltonian(vector_out,vector_in,Hsize
 ! where C^{-2} ~ 1 / T, where T is the kinetic energy.
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_function_preconditioned_Hamiltonian'
-!End of the abilint section
-
 implicit none
 integer,      intent(in)  :: Hsize
 complex(dpc), intent(out) :: vector_out(Hsize)
@@ -293,13 +271,6 @@ subroutine build_preconditioned_Hamiltonian_Lanczos_basis(seed_vector)
 !----------------------------------------------------------------------------------------------------
 ! This function Computes the Lanczos basis of the preconditioned Hamiltonian.
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_preconditioned_Hamiltonian_Lanczos_basis'
-!End of the abilint section
-
 implicit none
 complex(dpc), intent(in) :: seed_vector(npw_g)
 
@@ -374,13 +345,6 @@ subroutine compute_resolvent_column_shift_lanczos(nz, list_z, nvec, list_left_ve
 !
 ! where |xi(z) > is obtained from the shift lanczos scheme. 
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_resolvent_column_shift_lanczos'
-!End of the abilint section
-
 implicit none
 
 integer     , intent(in) :: nz
@@ -499,13 +463,6 @@ subroutine compute_resolvent_column_shift_lanczos_right_vectors(seed_vector, rig
 !
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_resolvent_column_shift_lanczos_right_vectors'
-!End of the abilint section
-
 implicit none
 
 complex(dpc), intent(in) :: seed_vector(npw_g)
@@ -567,13 +524,6 @@ subroutine invert_general_matrix(n,matrix)
 !----------------------------------------------------------------------------------------------------
 ! Simple wrapper around lapack routines to invert a general matrix
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invert_general_matrix'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in)    :: n

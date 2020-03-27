@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_model_polarisability
 !! NAME
 !! m_gwls_model_polarisability
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -95,13 +94,6 @@ contains
 
 subroutine epsilon_k_model(psi_out,psi_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'epsilon_k_model'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(out) :: psi_out(2,npw_k)
@@ -154,13 +146,6 @@ subroutine setup_Pk_model(omega,epsilon_0)
 ! It is assumed that omega and epsilon_0 >= 0. Also, the model
 ! describes an IMAGINARY frequency i omega.
 !---------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_Pk_model'
-!End of the abilint section
-
 real(dp), intent(in) :: epsilon_0, omega
 
 real(dp) ::  theta, R_omega
@@ -297,13 +282,6 @@ end subroutine setup_Pk_model
 
 subroutine cleanup_Pk_model()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cleanup_Pk_model'
-!End of the abilint section
-
 implicit none
 
 ! *************************************************************************
@@ -356,13 +334,6 @@ subroutine Pk_model(psi_out,psi_in)
 !------------------------------------------------------------------------------------------------------------------------
 ! Returns the action of a frequency-dependent model susceptibility
 !------------------------------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Pk_model'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(out) :: psi_out(2,npw_k)
@@ -402,13 +373,6 @@ subroutine Pk_model_implementation_1(psi_out,psi_in)
 !------------------------------------------------------------------------------------------------------------------------
 ! Returns the action of a frequency-dependent model susceptibility
 !------------------------------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Pk_model_implementation_1'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(out) :: psi_out(2,npw_k)
@@ -673,13 +637,6 @@ subroutine matrix_function_epsilon_model_operator(vector_out,vector_in,Hsize)
 !    
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrix_function_epsilon_model_operator'
-!End of the abilint section
-
 implicit none
 integer,      intent(in)  :: Hsize
 complex(dpc), intent(out) :: vector_out(Hsize)

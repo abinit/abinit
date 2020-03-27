@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_atprj
 !!
 !! NAME
@@ -8,7 +7,7 @@
 !! Module to output atomic projections of phonon modes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (MJV)
+!! Copyright (C) 2011-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,15 +87,6 @@ contains
 
 subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_init'
-!End of the abilint section
-
- implicit none
-
  type(atprj_type), intent(out) :: t_atprj
  integer, intent(in) :: natom
  integer, intent(in) :: natprj_bs
@@ -169,15 +159,6 @@ end subroutine atprj_init
 
 subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_print'
-!End of the abilint section
-
- implicit none
-
 !arguments
  integer, intent(in) :: iq
  type(atprj_type), intent(in) :: t_atprj
@@ -234,15 +215,6 @@ end subroutine atprj_print
 !! SOURCE
 
 subroutine atprj_destroy(t_atprj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_destroy'
-!End of the abilint section
-
- implicit none
 
  type(atprj_type), intent(inout) :: t_atprj
 

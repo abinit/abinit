@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_itdiago
 !! NAME
 !! m_exc_itdiago
@@ -7,7 +6,7 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,13 +27,13 @@
 MODULE m_exc_itdiago
 
  use defs_basis
- use defs_abitypes
  use m_bs_defs
  use m_errors
  use m_abicore
  use m_linalg_interfaces
+ use m_hdr
  use m_xmpi
-#if defined HAVE_MPI2
+#ifdef HAVE_MPI2
  use mpi
 #endif
 
@@ -55,7 +54,7 @@ MODULE m_exc_itdiago
  public :: exc_iterative_diago    ! Calculates eigenvalues and eigenvectors of the Resonant BSE Hamiltonian
 !!***
 
-CONTAINS  !=========================================================================================================================
+CONTAINS  !===============================================================
 !!***
 
 !!****f* m_exc_itdiago/exc_iterative_diago
@@ -109,20 +108,10 @@ CONTAINS  !=====================================================================
 !!      m_exc_diago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_iterative_diago'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -202,10 +191,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
  ABI_CHECK(nstates <= hexc_size,"nstates cannot be greater that hexc size!")
 
  ! Divide the columns of the Hamiltonian among the nodes.
- call xmpi_split_work(hexc_size,comm,my_t1,my_t2,msg,ierr)
- if (ierr/=0) then
-   MSG_WARNING(msg)
- end if
+ call xmpi_split_work(hexc_size,comm,my_t1,my_t2)
 
  my_nt = my_t2-my_t1+1
  write(msg,'(a,i0,a)')" Will handle ",my_nt," columns of the excitonic Hamiltonian. "
@@ -246,8 +232,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
  call wrtout(std_out,msg,"COLL")
 
  ABI_MALLOC(hexc_diagonal,(my_t1:my_t2))
- ABI_STAT_MALLOC(hexc,(hexc_size,my_t1:my_t2), ierr)
- ABI_CHECK(ierr==0, 'out of memory: excitonic hamiltonian')
+ ABI_MALLOC_OR_DIE(hexc,(hexc_size,my_t1:my_t2), ierr)
  !
  ! Read and construct full excitonic Hamiltonian using Hermiticity.
  if (BS_files%in_hreso /= BSE_NOFILE) then
@@ -277,8 +262,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
  write(msg,'(a,f8.1,a)')' Allocating BSE eigenvectors. Memory requested: ',bsize_phi_block*b2Mb,' Mb.'
  call wrtout(std_out,msg,"COLL",do_flush=.True.)
 
- ABI_STAT_MALLOC(phi_block,(my_t1:my_t2,nstates), ierr)
- ABI_CHECK(ierr==0, "out-of-memory phi_block")
+ ABI_MALLOC_OR_DIE(phi_block,(my_t1:my_t2,nstates), ierr)
 
  ihexc_fname = ""
  if (BS_files%in_eig /= BSE_NOFILE) ihexc_fname = BS_files%in_eig
@@ -382,7 +366,7 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
 
        do ii=my_t1,my_t2
          ! Teter polynomial ratio, modified according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
-         xx = hexc_diagonal(ii)/den 
+         xx = hexc_diagonal(ii)/den
          poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
          fac=poly/(poly+16._dp*xx**4)
          kprc = fac*four/(three*den)
@@ -662,20 +646,10 @@ CONTAINS  !===========================================================
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_init_phi_block'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -831,20 +805,10 @@ end subroutine exc_init_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_write_phi_block(oeig_fname,use_mpio)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_phi_block'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -887,8 +851,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
 
    ! Wavefunctions are gathered on the master node band-by-band.
    ! TODO bands should be treated in blocks to minimize the number of MPI calls.
-   ABI_STAT_MALLOC(buffer_dpc,(hexc_size), ierr)
-   ABI_CHECK(ierr==0, "out of memory buffer_dpc")
+   ABI_MALLOC_OR_DIE(buffer_dpc,(hexc_size), ierr)
 
    do state=1,nstates
      buffer_dpc=czero
@@ -1001,20 +964,10 @@ end subroutine exc_write_phi_block
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_subspace_rotation()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_subspace_rotation'
-!End of the abilint section
-
- implicit none
 
 !Local variables ------------------------------
  integer :: ii,jj,ipack,ierr
@@ -1113,86 +1066,76 @@ end subroutine exc_subspace_rotation
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_cholesky_ortho()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_cholesky_ortho'
-!End of the abilint section
-
- implicit none
-
 !Local variables ------------------------------
  integer :: my_info,ii,jj,ipack,ierr
+ logical,parameter :: use_unpacked = .False.
 !arrays
  complex(dpc),allocatable :: overlap(:,:),povlp(:)
 
 !************************************************************************
 
  ! 1) overlap_ij =  <phi_i|phi_j>
- ABI_MALLOC(overlap,(nstates,nstates))
+ ABI_MALLOC(overlap, (nstates,nstates))
 
-#if defined HAVE_BSE_UNPACKED
- overlap = czero
+ if (use_unpacked) then
+   overlap = czero
 
- call ZGEMM('C','N',nstates,nstates,my_nt,cone,phi_block,my_nt,phi_block,my_nt,czero,overlap,nstates)
- call xmpi_sum(overlap,comm,ierr)
+   call ZGEMM('C','N',nstates,nstates,my_nt,cone,phi_block,my_nt,phi_block,my_nt,czero,overlap,nstates)
+   call xmpi_sum(overlap,comm,ierr)
 
- do ii=1,nstates
-   overlap(ii,ii)=REAL(overlap(ii,ii),kind=dp)
- end do
-
- ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
- call ZPOTRF('U',nstates,overlap,nstates,my_info)
- if (my_info/=0)  then
-   write(msg,'(a,i3)')' ZPOTRF returned info= ',my_info
-   MSG_ERROR(msg)
- end if
-
-#else
-
- ! 1) Calculate overlap_ij =  <phi_i|phi_j> in packed form.
- ABI_MALLOC(povlp,(nstates*(nstates+1)/2))
- povlp = czero; ipack=0
- do jj=1,nstates
-   do ii=1,jj
-     ipack=ipack+1
-     povlp(ipack) = DOT_PRODUCT( phi_block(my_t1:my_t2,ii), phi_block(my_t1:my_t2,jj) )
-     if (ii==jj) povlp(ipack) = REAL(povlp(ipack),kind=dp)
+   do ii=1,nstates
+     overlap(ii,ii)=REAL(overlap(ii,ii),kind=dp)
    end do
- end do
- call xmpi_sum(povlp,comm,ierr)
 
- ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
- call ZPPTRF("U",nstates,povlp,my_info)
- if (my_info/=0)  then
-   write(msg,'(a,i3)')' ZPPTRF returned info= ',my_info
-   MSG_ERROR(msg)
- end if
- !call xmpi_sum(povlp,comm,ierr)
- !povlp=povlp/nproc
+   ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
+   call ZPOTRF('U',nstates,overlap,nstates,my_info)
+   if (my_info/=0)  then
+     write(msg,'(a,i3)')' ZPOTRF returned info= ',my_info
+     MSG_ERROR(msg)
+   end if
 
- !unpack povlp to prepare call to ZTRSM.
- ipack=0
- do jj=1,nstates
-   do ii=1,jj
-     ipack=ipack+1
-     if (ii/=jj) then
-       overlap(ii,jj)=      povlp(ipack)
-       overlap(jj,ii)=CONJG(povlp(ipack))
-     else
-       overlap(ii,ii)=REAL(povlp(ipack),kind=dp)
-     end if
+ else
+   ! 1) Calculate overlap_ij =  <phi_i|phi_j> in packed form.
+   ABI_MALLOC(povlp,(nstates*(nstates+1)/2))
+   povlp = czero; ipack=0
+   do jj=1,nstates
+     do ii=1,jj
+       ipack=ipack+1
+       povlp(ipack) = DOT_PRODUCT( phi_block(my_t1:my_t2,ii), phi_block(my_t1:my_t2,jj) )
+       if (ii==jj) povlp(ipack) = REAL(povlp(ipack),kind=dp)
+     end do
    end do
- end do
- ABI_FREE(povlp)
-#endif
+   call xmpi_sum(povlp,comm,ierr)
+
+   ! 2) Cholesky factorization: overlap = U^H U with U upper triangle matrix.
+   call ZPPTRF("U",nstates,povlp,my_info)
+   if (my_info/=0)  then
+     write(msg,'(a,i3)')' ZPPTRF returned info= ',my_info
+     MSG_ERROR(msg)
+   end if
+   !call xmpi_sum(povlp,comm,ierr)
+   !povlp=povlp/nproc
+
+   !unpack povlp to prepare call to ZTRSM.
+   ipack=0
+   do jj=1,nstates
+     do ii=1,jj
+       ipack=ipack+1
+       if (ii/=jj) then
+         overlap(ii,jj)=      povlp(ipack)
+         overlap(jj,ii)=CONJG(povlp(ipack))
+       else
+         overlap(ii,ii)=REAL(povlp(ipack),kind=dp)
+       end if
+     end do
+   end do
+   ABI_FREE(povlp)
+ end if
 
  ! Check if this can be done with Scalapack. Direct PZTRSM is not provided
 
@@ -1225,15 +1168,6 @@ end subroutine exc_cholesky_ortho
 !! SOURCE
 
 function convergence_degree(resid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'convergence_degree'
-!End of the abilint section
-
- implicit none
 
 !Arguments
  integer :: convergence_degree
@@ -1268,20 +1202,10 @@ end function convergence_degree
 !!      m_exc_itdiago
 !!
 !! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
 subroutine exc_check_phi_block(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_check_phi_block'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abihist
 !! NAME
 !! m_abihist
@@ -22,7 +21,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2020 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,7 +173,7 @@ contains  !=============================================================
 !! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
- 
+!!
 !!  natom = Number of atoms per unitary cell
 !!  mxhist = Maximal number of records to store
 !!  isVUsed,isARUsed=flags used to initialize hsit structure
@@ -194,15 +193,6 @@ contains  !=============================================================
 !! SOURCE
 
 subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_init_0D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: natom,mxhist
@@ -277,15 +267,6 @@ end subroutine abihist_init_0D
 
 subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_init_1D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: natom,mxhist
  logical,intent(in) :: isVUsed,isARUsed
@@ -329,15 +310,6 @@ end subroutine abihist_init_1D
 !! SOURCE
 
 subroutine abihist_free_0D(hist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_free_0D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(abihist),intent(inout) :: hist
@@ -418,15 +390,6 @@ end subroutine abihist_free_0D
 
 subroutine abihist_free_1D(hist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_free_1D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(abihist),intent(inout) :: hist(:)
 
@@ -470,15 +433,6 @@ end subroutine abihist_free_1D
 !! SOURCE
 
 subroutine abihist_bcast_0D(hist,master,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_bcast_0D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -680,15 +634,6 @@ end subroutine abihist_bcast_0D
 
 subroutine abihist_bcast_1D(hist,master,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_bcast_1D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: master,comm
@@ -742,15 +687,6 @@ end subroutine abihist_bcast_1D
 !! SOURCE
 
 subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'var2hist'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -814,15 +750,6 @@ end subroutine var2hist
 !! SOURCE
 
 function abihist_findIndex(hist,step) result(index)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_findIndex'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -895,15 +822,6 @@ end function abihist_findIndex
 
 subroutine hist2var(acell,hist,natom,rprimd,xred,zDEBUG)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hist2var'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 integer,intent(in) :: natom
@@ -973,15 +891,6 @@ end subroutine hist2var
 
 subroutine vel2hist(amass,hist,vel,vel_cell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vel2hist'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 type(abihist),intent(inout) :: hist
@@ -1050,15 +959,6 @@ end subroutine vel2hist
 
 subroutine abihist_copy(hist_in,hist_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_copy'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 type(abihist),intent(in) :: hist_in
@@ -1126,15 +1026,6 @@ end subroutine abihist_copy
 !! SOURCE
 
 subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abihist_compare_and_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1266,15 +1157,6 @@ end subroutine abihist_compare_and_copy
 
 subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 &                        typat,amu,znucl,dtion,mdtemp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_md_hist'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1411,15 +1293,6 @@ subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
 &                            typat,amu,znucl,dtion,&
 &                            nimage,imgmov,mdtemp,comm_img,imgtab) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_md_hist_img'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ifirst,itime,natom,ntypat
@@ -1555,15 +1428,6 @@ end subroutine write_md_hist_img
 
 subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_md_hist'
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: isVUsed,isARUsed,readOnlyLast
@@ -1662,15 +1526,6 @@ end subroutine read_md_hist
 !! SOURCE
 
 subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_md_hist_img'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1785,15 +1640,6 @@ end subroutine read_md_hist_img
 
 subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'def_file_hist'
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -1809,7 +1655,7 @@ implicit none
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
  integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id, two_id,mdtemp_id
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
 #endif
@@ -1821,8 +1667,7 @@ implicit none
 !1.Define the dimensions
 
  if (npsp/=ntypat) then
-   msg='HIST file does not support alchemical mixing!'
-   MSG_WARNING(msg)
+   MSG_WARNING('HIST file does not support alchemical mixing!')
  end if
 
  ncerr = nf90_def_dim(ncid,"natom",natom,natom_id)
@@ -1998,15 +1843,6 @@ end subroutine def_file_hist
 subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
 &          natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dims_hist'
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -2088,15 +1924,6 @@ end subroutine get_dims_hist
 
 subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,&
 &          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id,has_nimage)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_varid_hist'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2183,15 +2010,6 @@ end subroutine get_varid_hist
 
 subroutine read_csts_hist(ncid,dtion,typat,znucl,amu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_csts_hist'
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -2263,15 +2081,6 @@ end subroutine read_csts_hist
 !! SOURCE
 
 subroutine write_csts_hist(ncid,dtion,imgmov,typat,znucl,amu,mdtemp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_csts_hist'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2359,15 +2168,6 @@ end subroutine write_csts_hist
 subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,itime,&
 &          xcart_id,xred_id,fcart_id,fred_id,vel_id,vel_cell_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_vars_hist'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2532,15 +2332,6 @@ end subroutine write_vars_hist
 subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,start_time,&
 &          xred_id,fcart_id,vel_id,vel_cell_id,rprimd_id,acell_id,&
 &          strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_vars_hist'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
 !scalars

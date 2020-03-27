@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp9
 !! NAME
 !! m_psp9
@@ -7,7 +6,7 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2018 ABINIT group (JJ, MVer, YP)
+!!  Copyright (C) 1999-2020 ABINIT group (JJ, MVer, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +29,7 @@ module m_psp9
  use m_splines
  use m_errors
  use m_abicore
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  use m_psml
 #endif
 
@@ -121,13 +120,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp9in'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -147,7 +139,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  integer :: iln,pspindex,ipsang,irad,kk,ll
  integer :: mm,nn,nso,ii,ir,il
  integer :: nshells
@@ -164,7 +156,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  type(pawrad_type) :: mesh
 #endif
 !arrays
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  integer, allocatable :: idx_so(:),idx_sr(:)
  real(dp),allocatable :: rad(:),vloc(:),vpspll(:,:),work_spl(:)
  type(ps_t) :: psxml
@@ -172,7 +164,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 ! ***************************************************************************
 
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
 
  call ps_destroy(psxml)
  call psml_reader(filpsp,psxml,debug=.true.)
@@ -663,16 +655,16 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  indlmn=0 ; mmax=0 ; nproj=0
  ekb=zero ; epsatm=zero ; ffspl=zero ; qchrg=zero ; vlspl=zero ; xcccrc=zero ; xccc1d=zero
 
- if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_PSML is false
- if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_PSML is false
- if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_PSML is false
- if(.false.)write(std_out,*)mpsang ! Just to keep mpsang when HAVE_PSML is false
- if(.false.)write(std_out,*)pspso  ! Just to keep pspso when HAVE_PSML is false
- if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_PSML is false
- if(.false.)write(std_out,*)qgrid_vl ! Just to keep qgrid_vl when HAVE_PSML is false
- if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_PSML is false
- if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_PSML is false
- if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_PSML is false
+ if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)mpsang ! Just to keep mpsang when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)pspso  ! Just to keep pspso when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)qgrid_vl ! Just to keep qgrid_vl when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_LIBPSML is false
+ if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_LIBPSML is false
 #endif
 
 end subroutine psp9in
@@ -706,16 +698,9 @@ end subroutine psp9in
 !!
 !! SOURCE
 
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
 
 subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp9cc'
-!End of the abilint section
 
  implicit none
 

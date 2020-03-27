@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2014-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -56,7 +56,59 @@ AC_DEFUN([ABIBND_CHECK_PYTHON],
   dnl Init
   abi_python_ok="no"
   abi_save_CPPFLAGS="${CPPFLAGS}"
+  abi_save_CFLAGS="${CFLAGS}"
+  abi_save_LDFLAGS="${LDFLAGS}"
+  abi_save_LIBS="${LIBS}"
+
+  dnl Look for Python interpreter
+  AC_CHECK_PROGS(PYTHON,
+    [python3.7 python3.6 python3.5 python3.4 python3 python2.7 python])
+  AC_CHECK_PROGS(PYTHON_CONFIG,
+    [python3.7-config python3.6-config python3.5-config python3.4-config python3-config python2.7-config python-config])
+
+  dnl Get Python CPPFLAGS
+  if test "${PYTHON}" != "" -a "${PYTHON_CONFIG}" != ""; then
+    if test "${PYTHON_CPPFLAGS}" = ""; then
+      PYTHON_CPPFLAGS=`${PYTHON_CONFIG} --includes`
+    fi
+    if test "${PYTHON_CFLAGS}" = ""; then
+      PYTHON_CFLAGS=`${PYTHON_CONFIG} --cflags`
+    fi
+    if test "${PYTHON_LDFLAGS}" = ""; then
+      PYTHON_LDFLAGS=`${PYTHON_CONFIG} --ldflags`
+    fi
+    if test "${PYTHON_LIBS}" = ""; then
+      PYTHON_LIBS=`${PYTHON_CONFIG} --libs`
+    fi
+  fi
+  AC_MSG_CHECKING([for Python CPPFLAGS])
+  if test "${PYTHON_CPPFLAGS}" = ""; then
+    AC_MSG_RESULT([none found])
+  else
+    AC_MSG_RESULT([${PYTHON_CPPFLAGS}])
+  fi
   CPPFLAGS="${PYTHON_CPPFLAGS} ${CPPFLAGS}"
+  AC_MSG_CHECKING([for Python CFLAGS])
+  if test "${PYTHON_CFLAGS}" = ""; then
+    AC_MSG_RESULT([none found])
+  else
+    AC_MSG_RESULT([${PYTHON_CFLAGS}])
+  fi
+  CFLAGS="${PYTHON_CFLAGS} ${CFLAGS}"
+  AC_MSG_CHECKING([for Python LDFLAGS])
+  if test "${PYTHON_LDFLAGS}" = ""; then
+    AC_MSG_RESULT([none found])
+  else
+    AC_MSG_RESULT([${PYTHON_LDFLAGS}])
+  fi
+  LDFLAGS="${PYTHON_LDFLAGS} ${LDFLAGS}"
+  AC_MSG_CHECKING([for Python LIBS])
+  if test "${PYTHON_LIBS}" = ""; then
+    AC_MSG_RESULT([none found])
+  else
+    AC_MSG_RESULT([${PYTHON_LIBS}])
+  fi
+  LIBS="${PYTHON_LIBS} ${LIBS}"
 
   dnl Preliminary Pyton tests
   AC_CHECK_HEADER([Python.h],[abi_python_ok="yes"])
@@ -78,4 +130,7 @@ AC_DEFUN([ABIBND_CHECK_PYTHON],
 
   dnl Restore environment
   CPPFLAGS="${abi_save_CPPFLAGS}"
+  CFLAGS="${abi_save_CFLAGS}"
+  LDFLAGS="${abi_save_LDFLAGS}"
+  LIBS="${abi_save_LIBS}"
 ]) # ABIBND_CHECK_PYTHON

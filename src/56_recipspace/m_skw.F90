@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_skw
 !! NAME
 !!  m_skw
@@ -7,7 +6,7 @@
 !!  Shankland-Koelling-Wood Fourier interpolation scheme.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,12 +31,17 @@ module m_skw
  use m_xmpi
  use m_crystal
  use m_sort
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_fstrings,       only : itoa, sjoin, ktoa, yesno, ftoa
  use m_special_funcs,  only : abi_derfc
- use m_time,           only : cwtime
+ use m_time,           only : cwtime, cwtime_report
  use m_numeric_tools,  only : imax_loc, vdiff_t, vdiff_eval, vdiff_print
  use m_bz_mesh,        only : isamek
+ use m_gsphere,        only : get_irredg
 
  implicit none
 
@@ -80,6 +84,9 @@ module m_skw
   integer :: band_block(2)
    ! Initial and final band index.
 
+  integer :: bcount
+   ! Number of bands
+
   integer :: nsppol
    ! Number of independent spin polarizations.
 
@@ -96,10 +103,7 @@ module m_skw
     ! operations of the point group (reciprocal space).
 
   complex(dpc),allocatable :: coefs(:,:,:)
-   ! coefs(nr, nbcount, nsppol).
-
-   !type(skcoefs_t),allocatable :: coefs(:,:)
-   ! coefs(mband, nsppol)
+   ! coefs(nr, bcount, nsppol).
 
   complex(dpc),allocatable :: cached_srk(:)
    ! cached_srk(%nr)
@@ -116,13 +120,24 @@ module m_skw
    ! The 2d derivatives wrt k of the star function for cached_kpt_dk2 (used in skw_eval_bks).
   real(dp) :: cached_kpt_dk2(3)
 
+ contains
+
+   procedure :: print => skw_print
+   ! Print info about object.
+
+   procedure :: ncwrite => skw_ncwrite
+   ! Write the object in netcdf format
+
+   procedure :: eval_bks => skw_eval_bks
+   ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
+
+   procedure :: free => skw_free
+   ! Free memory.
+
  end type skw_t
+!!***
 
  public :: skw_new          ! Create new object.
- public :: skw_print        ! Print info about object.
- public :: skw_eval_bks     ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
- public :: skw_free         ! Free memory.
-!!***
 
 CONTAINS  !=====================================================================================
 !!***
@@ -147,7 +162,7 @@ CONTAINS  !=====================================================================
 !!  kpts(3,nkpt)=ab-initio k-points in reduced coordinates.
 !!  eig(nband,nkpt,nsppol)=ab-initio eigenvalues.
 !!  band_block(2)=Initial and final band index to interpolate. If [0,0], all bands are used
-!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
+!!    This is a global variable i.e. all MPI procs MUST call the routine with the same value.
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -158,15 +173,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_new'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -205,11 +211,10 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  ! Get slice of bands to be treated.
  new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, nband]
  bstart = new%band_block(1); bstop = new%band_block(2); bcount = bstop - bstart + 1
- new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol
+ new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol; new%bcount = bcount
 
  ! Get point group operations.
- call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, &
-   include_timrev=cplex==1)
+ call cryst%get_point_group(new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, include_timrev=cplex==1)
 
  ! -----------------------
  ! Find nrwant star points
@@ -226,19 +231,18 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  do
    call find_rstar_gen(new, cryst, nrwant, rmax, r2vals, comm)
    if (new%nr >= nrwant) then
-     write(std_out,*)"Entered with rmax",rmax,"abs(skw%rpts(last)): ",abs(new%rpts(:,new%nr))
+     !write(std_out,*)"Entered with rmax", rmax," abs(skw%rpts(last)): ", abs(new%rpts(:,new%nr))
      exit
    end if
-   write(std_out,*)"rmax: ",rmax," was not large enough to find ",nrwant," R-star points."
+   write(std_out,*)"rmax: ", rmax," was not large enough to find ", nrwant," R-star points."
    rmax = 2 * rmax
    write(std_out,*)"Will try again with enlarged rmax: ",rmax
    ABI_FREE(r2vals)
  end do
  nr = new%nr
- call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" find_rstar_gen: cpu: ",cpu,", wall: ",wall
+ call cwtime_report(" find_rstar_gen", cpu, wall, gflops)
 
- if (my_rank == master) call skw_print(new, std_out)
+ if (my_rank == master) call new%print(std_out)
 
  ! Compute (inverse) roughness function.
  r2min = r2vals(2)
@@ -279,9 +283,8 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    end do
  end do
 
- ! Solve all bands and spins at once
- call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", & ! [[cite:Pickett1988]]
-             do_flush=.True.)
+ ! Solve all bands and spins at once [[cite:Pickett1988]]
+ call wrtout(std_out, " Solving system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)...", do_flush=.True.)
  call cwtime(cpu, wall, gflops, "start")
  ABI_MALLOC(ipiv, (nkpt-1))
 
@@ -304,8 +307,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    ABI_CHECK(ierr == 0, sjoin("ZHESV returned:", itoa(ierr)))
    ABI_FREE(work)
  end if
- call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" ZHESV call: cpu: ",cpu,", wall: ",wall
+ call cwtime_report(" ZHESV", cpu, wall, gflops)
 
  ! Compute coefficients
  ABI_MALLOC(new%coefs, (nr,bcount,nsppol))
@@ -327,7 +329,6 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    rcut = params(2) * sqrt(r2vals(new%nr))
    rsigma = params(3); if (rsigma <= zero) rsigma = five
    call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)") ! [[cite:Uehara2000]]
-   !call wrtout(std_out," cut sigma
    do ir=2,nr
      new%coefs(ir,:,:) = new%coefs(ir,:,:) * half * abi_derfc((sqrt(r2vals(ir)) - rcut) / rsigma)
    end do
@@ -353,14 +354,14 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  fmt = sjoin("(a,", itoa(bcount), "(es12.4))")
  bstop = bstart + bcount - 1
  mare = zero; mae_meV = zero; cnt = 0
- call wrtout(std_out, ch10//"Comparing ab-initio energies with SKW interpolated results...")
+ call wrtout(std_out, ch10//" Comparing ab-initio energies with SKW interpolated results...")
  do spin=1,nsppol
    do ik=1,nkpt
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi parallelism.
 
      do ib=1,bcount
        band = ib + new%band_block(1) - 1
-       call skw_eval_bks(new, band, kpts(:,ik), spin, oeig(ib))
+       call new%eval_bks(band, kpts(:,ik), spin, oeig(ib))
 
        adiff_meV = abs(eig(band,ik,spin) - oeig(ib)); rel_err = zero
        if (abs(eig(band,ik,spin)) > tol16) rel_err = adiff_meV / abs(eig(band,ik,spin))
@@ -373,7 +374,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
        rval = (eig(bstart+ib-1,ik,spin) - oeig(ib)) * Ha_meV
        write(std_out,"(a,es12.4,2a)") &
          " SKW maxerr: ", rval, &
-         " [meV], kpt: ", sjoin(ktoa(kpts(:,ik)), "band:",itoa(bstart+ib-1),", spin:", itoa(spin))
+         " (meV), kpt: ", sjoin(ktoa(kpts(:,ik)), "band:",itoa(bstart+ib-1),", spin: ", itoa(spin))
        !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
        !write(std_out,fmt)"-- int ", oeig * Ha_meV
        !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
@@ -385,16 +386,15 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  ! Issue warning if error too large.
  list2 = [mare, mae_meV]; call xmpi_sum(list2, comm, ierr); mare = list2(1); mae_meV = list2(2)
  cnt = bcount * nkpt * nsppol; mare = mare / cnt; mae_meV = mae_meV / cnt
- write(std_out,"(2(a,es12.4),a)")" MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
+ write(std_out,"(2(a,es12.4),a,/)")" MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
  if (mae_meV > ten) then
    write(msg,"(2a,2(a,es12.4),a)") &
-     "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
+     "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, " (meV)"
    call wrtout(ab_out, msg)
    MSG_WARNING(msg)
  end if
 
- call cwtime(cpu_tot, wall_tot, gflops_tot, "stop")
- write(std_out,"(2(a,f6.2))")" skw_new: cpu: ",cpu_tot,", wall: ",wall_tot
+ call cwtime_report(" skw_new", cpu_tot, wall_tot, gflops_tot, end_str=ch10)
 
 end function skw_new
 !!***
@@ -424,18 +424,9 @@ end function skw_new
 
 subroutine skw_print(skw, unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(skw_t),intent(in) :: skw
+ class(skw_t),intent(in) :: skw
  integer,intent(in) :: unt
 
 ! *********************************************************************
@@ -452,6 +443,82 @@ end subroutine skw_print
 
 !----------------------------------------------------------------------
 
+!!****f* m_skw/skw_ncwrite
+!! NAME
+!! skw_ncwrite
+!!
+!! FUNCTION
+!!   Write the object in netcdf format
+!!
+!! INPUTS
+!!  ncid=NC file handle.
+!!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
+!!   "skw" if not specified.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function skw_ncwrite(self, ncid, prefix) result(ncerr)
+
+!Arguments ------------------------------------
+!scalars
+ class(skw_t),intent(in) :: self
+ integer,intent(in) :: ncid
+ character(len=*),optional,intent(in) :: prefix
+
+#ifdef HAVE_NETCDF
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: prefix_
+!arrays
+ real(dp),allocatable :: real_coefs(:,:,:,:)
+
+! *************************************************************************
+
+ prefix_ = "skw"; if (present(prefix)) prefix_ = trim(prefix)
+
+ ! Define dimensions.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("nr", self%nr), nctkdim_t("nkpt", self%nkpt), nctkdim_t("bcount", self%bcount), &
+   nctkdim_t("nsppol", self%nsppol)], &
+   defmode=.True., prefix=prefix_)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [ &
+  ! Atomic structure and symmetry operations
+  nctkarr_t("rpts", "dp", "three, number_of_cartesian_directions, number_of_vectors"), &
+  nctkarr_t("kpts", "dp", "three, nkpt"), &
+  nctkarr_t("coefs", "dp", "two, nr, bcount, nsppol") &
+ ], prefix=prefix_)
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("rpts")), self%rpts))
+ !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("kpts")), self%kpts))
+ ABI_MALLOC(real_coefs, (2, self%nr, self%bcount, self%nsppol))
+ real_coefs(1,:,:,:) = real(self%coefs); real_coefs(2,:,:,:) = aimag(self%coefs)
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("coefs")), real_coefs))
+ ABI_FREE(real_coefs)
+
+contains
+  pure function pre(istr) result(ostr)
+    character(len=*),intent(in) :: istr
+    character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
+    ostr = trim(prefix_) // trim(istr)
+  end function pre
+
+#endif
+
+end function skw_ncwrite
+!!***
+
 !!****f* m_skw/skw_eval_bks
 !! NAME
 !!  skw_eval_bks
@@ -460,7 +527,7 @@ end subroutine skw_print
 !!  Interpolate the energies for an arbitrary k-point and spin with slow FT.
 !!
 !! INPUTS
-!!  band=Band index.
+!!  band=Band index (global index associated to the input eigenvalues, i.e. independent of band_block)
 !!  kpt(3)=K-point in reduced coordinates.
 !!  spin=Spin index.
 !!
@@ -482,19 +549,10 @@ end subroutine skw_print
 
 subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_eval_bks'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,spin
- type(skw_t),intent(inout) :: skw
+ class(skw_t),intent(inout) :: skw
 !arrays
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(out) :: oeig
@@ -506,7 +564,7 @@ subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
 ! *********************************************************************
 
  ib = band - skw%band_block(1) + 1
- !DBG_CHECK(ib >= 1 .and. ib <= skw%bcount, sjoin("out of range band:", itoa(band)))
+ ABI_CHECK(ib >= 1 .and. ib <= skw%bcount, sjoin("out of range band:", itoa(band)))
 
  ! Compute star function for this k-point (if not already in memory)
  if (any(kpt /= skw%cached_kpt)) then
@@ -525,7 +583,7 @@ subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
    end if
 
    do ii=1,3
-     oder1(ii) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk1(:,ii))
+     oder1(ii) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk1(:,ii)) * two_pi
    end do
  end if
 
@@ -539,7 +597,7 @@ subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
    oder2 = zero
    do jj=1,3
      do ii=1,jj
-       oder2(ii, jj) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk2(:,ii,jj))
+       oder2(ii, jj) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk2(:,ii,jj)) * two_pi**2
        if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
      end do
    end do
@@ -580,15 +638,6 @@ end subroutine skw_eval_bks
 !! SOURCE
 
 subroutine skw_eval_fft(skw, ngfft, nfft, band, spin, oeig_mesh, oder1_mesh, oder2_mesh)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_eval_fft'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -704,48 +753,22 @@ end subroutine skw_eval_fft
 
 subroutine skw_free(skw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(skw_t),intent(inout) :: skw
+ class(skw_t),intent(inout) :: skw
 
 ! *********************************************************************
 
- if (allocated(skw%rpts)) then
-   ABI_FREE(skw%rpts)
- end if
- if (allocated(skw%ptg_symrel)) then
-   ABI_FREE(skw%ptg_symrel)
- end if
- if (allocated(skw%ptg_symrec)) then
-   ABI_FREE(skw%ptg_symrec)
- end if
+ ABI_SFREE(skw%rpts)
+ ABI_SFREE(skw%ptg_symrel)
+ ABI_SFREE(skw%ptg_symrec)
+ ABI_SFREE(skw%coefs)
 
- if (allocated(skw%coefs)) then
-   ABI_FREE(skw%coefs)
- end if
-
- if (allocated(skw%cached_srk)) then
-   ABI_FREE(skw%cached_srk)
- end if
+ ABI_SFREE(skw%cached_srk)
  skw%cached_kpt = huge(one)
-
- if (allocated(skw%cached_srk_dk1)) then
-   ABI_FREE(skw%cached_srk_dk1)
- end if
+ ABI_SFREE(skw%cached_srk_dk1)
  skw%cached_kpt_dk1 = huge(one)
-
- if (allocated(skw%cached_srk_dk2)) then
-   ABI_FREE(skw%cached_srk_dk2)
- end if
+ ABI_SFREE(skw%cached_srk_dk2)
  skw%cached_kpt_dk2 = huge(one)
 
 end subroutine skw_free
@@ -775,15 +798,6 @@ end subroutine skw_free
 !! SOURCE
 
 subroutine mkstar(skw, kpt, srk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -836,15 +850,6 @@ end subroutine mkstar
 !! SOURCE
 
 subroutine mkstar_dk1(skw, kpt, srk_dk1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar_dk1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -900,15 +905,6 @@ end subroutine mkstar_dk1
 !! SOURCE
 
 subroutine mkstar_dk2(skw, kpt, srk_dk2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar_dk2'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -982,16 +978,6 @@ end subroutine mkstar_dk2
 
 subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 
- use m_gsphere,  only : get_irredg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_rstar_gen'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(skw_t),intent(inout) :: skw
@@ -1005,7 +991,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 !scalars
  integer :: cnt,nstars,i1,i2,i3,msize,ir,nsh,ish,ss,ee,nst,ierr,nprocs,my_rank,ii
  real(dp) :: r2_prev
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: iperm(:),rtmp(:,:),rgen(:,:),r2sh(:),shlim(:),sh_start(:),sh_stop(:)
  integer,allocatable :: recvcounts(:),displs(:),recvbuf(:,:)
@@ -1064,7 +1050,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
  ! Each proc works on a contigous block of shells, then we have to gather the results.
  ABI_MALLOC(sh_start, (0:nprocs-1))
  ABI_MALLOC(sh_stop, (0:nprocs-1))
- call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop, msg, ierr)
+ call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop)
 
  ABI_MALLOC(cnorm, (msize))
  nstars = 0

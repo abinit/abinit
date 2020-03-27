@@ -43,13 +43,12 @@ prtvxc     0
 prt1dm     0
 ixc -101130
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t12.out, tolnlines = 0, tolabs = 1.1e-06, tolrel = 0.00e+00
+#%%  t12.out, tolnlines = 3, tolabs = 1.1e-06, tolrel = 0.002
 #%% psp_files = 13_Al_atom.psml
 #%% [paral_info]
 #%% max_nprocs = 8

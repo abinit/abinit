@@ -1,4 +1,4 @@
-# Calculation of Grunesein parameters.
+# Calculation of Gruneisen parameters.
 prtvol 1
 ngqpt 8 8 8  # Ab-initio q-mesh
 ifcflag 1

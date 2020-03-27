@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h40 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h44 )
   
-- input  file    -> tbase4_2.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbase4_2/tbase4_2.in
 - output file    -> tbase4_2.out
 - root for input  files -> tbase4_2i
 - root for output files -> tbase4_2o
@@ -34,7 +34,7 @@
 -    mband =           3        mffmem =           1         mkmem =           2
        mpw =          90          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       2.142 Mbytes of memory.
+P This job should need less than                       2.130 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          10
        mpw =          92          nfft =        3375          nkpt =          10
 ================================================================================
-P This job should need less than                       2.188 Mbytes of memory.
+P This job should need less than                       2.175 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          28
        mpw =          94          nfft =        3375          nkpt =          28
 ================================================================================
-P This job should need less than                       2.294 Mbytes of memory.
+P This job should need less than                       2.281 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          60
        mpw =          95          nfft =        3375          nkpt =          60
 ================================================================================
-P This job should need less than                       2.482 Mbytes of memory.
+P This job should need less than                       2.469 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -95,7 +95,7 @@ _ WF disk file :      0.263 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -385,7 +385,16 @@ P           mkmem4         60
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 2, mband: 3, nsppol: 1, nspinor: 1, nspden: 1, mpw: 90, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   5.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 1, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -410,14 +419,14 @@ P           mkmem4         60
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm : epsatm=    1.36305739
+  pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -438,6 +447,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0976647769158    -2.098E+00 1.024E-03 3.819E-01
  ETOT  2  -2.0979329058481    -2.681E-04 3.236E-10 1.004E-02
@@ -452,6 +467,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
   sigma(1 1)=  4.64978647E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.64978647E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.64978647E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
+lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0974400E+02
+convergence: {deltae: -7.432E-11, res2:  7.991E-10, residm:  1.449E-12, diffor: null, }
+etotal    :  -2.09793875E+00
+entropy   :   0.00000000E+00
+fermie    :   2.62829541E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  4.64978647E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.64978647E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.64978647E-05, ]
+pressure_GPa:  -1.3680E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -480,15 +522,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  4.64978646705628E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  4.64978646705628E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  4.64978646705626E-05
+  4.64978646705424E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  4.64978646705426E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  4.64978646705423E-05
  Total energy (etotal) [Ha]= -2.09793874540555E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0979574504259    -2.098E+00 2.153E-12 1.594E-05
@@ -502,6 +550,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
   sigma(1 1)=  3.50337004E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.50337004E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.50337004E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7946992,   3.7946992, ]
+- [  3.7946992,   0.0000000,   3.7946992, ]
+- [  3.7946992,   3.7946992,   0.0000000, ]
+lattice_lengths: [   5.36652,    5.36652,    5.36652, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0928538E+02
+convergence: {deltae: -5.036E-10, res2:  5.972E-10, residm:  7.562E-12, diffor: null, }
+etotal    :  -2.09795746E+00
+entropy   :   0.00000000E+00
+fermie    :   2.64275309E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.50337004E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.50337004E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.50337004E-05, ]
+pressure_GPa:  -1.0307E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -519,20 +594,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.58939848685511E+00  7.58939848685511E+00  7.58939848685511E+00
+  7.58939848685512E+00  7.58939848685512E+00  7.58939848685512E+00
  Real space primitive translations (rprimd) [bohr]
   0.00000000000000E+00  3.79469924342756E+00  3.79469924342756E+00
   3.79469924342756E+00  0.00000000000000E+00  3.79469924342756E+00
   3.79469924342756E+00  3.79469924342756E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.09285382787543E+02
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.09285382787544E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.36651513518217E+00  5.36651513518217E+00  5.36651513518217E+00
+  5.36651513518218E+00  5.36651513518218E+00  5.36651513518218E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  3.50337003584680E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  3.50337003584681E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  3.50337003584681E-05
+  3.50337003584542E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.50337003584542E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  3.50337003584542E-05
  Total energy (etotal) [Ha]= -2.09795745823946E+00
 
  Difference of energy with previous step (new-old):
@@ -543,6 +618,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0979806466429    -2.098E+00 2.544E-11 1.452E-04
@@ -556,6 +637,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
   sigma(1 1)= -1.57916195E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.57916195E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.57916195E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7787716,   3.7787716, ]
+- [  3.7787716,   0.0000000,   3.7787716, ]
+- [  3.7787716,   3.7787716,   0.0000000, ]
+lattice_lengths: [   5.34399,    5.34399,    5.34399, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0791503E+02
+convergence: {deltae: -4.468E-09, res2:  5.451E-09, residm:  6.557E-11, diffor: null, }
+etotal    :  -2.09798072E+00
+entropy   :   0.00000000E+00
+fermie    :   2.68658940E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.57916195E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.57916195E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.57916195E-06, ]
+pressure_GPa:   4.6461E-02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -584,9 +692,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.34399003918522E+00  5.34399003918522E+00  5.34399003918522E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -1.57916194929982E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -1.57916194929992E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.57916194929976E-06
+ -1.57916194931413E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -1.57916194931407E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.57916194931424E-06
  Total energy (etotal) [Ha]= -2.09798071631288E+00
 
  Difference of energy with previous step (new-old):
@@ -598,18 +706,51 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0979807617150    -2.098E+00 3.701E-14 2.827E-07
  ETOT  2  -2.0979807618420    -1.270E-10 3.414E-17 1.752E-08
- ETOT  3  -2.0979807618507    -8.748E-12 1.272E-13 1.018E-11
+ ETOT  3  -2.0979807618507    -8.749E-12 1.272E-13 1.018E-11
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  8.748E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  8.749E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.13669732E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.13669732E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.13669732E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.13669733E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.13669733E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.13669733E-08  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7794503,   3.7794503, ]
+- [  3.7794503,   0.0000000,   3.7794503, ]
+- [  3.7794503,   3.7794503,   0.0000000, ]
+lattice_lengths: [   5.34495,    5.34495,    5.34495, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0797319E+02
+convergence: {deltae: -8.749E-12, res2:  1.018E-11, residm:  1.272E-13, diffor: null, }
+etotal    :  -2.09798076E+00
+entropy   :   0.00000000E+00
+fermie    :   2.68470411E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.13669733E-08,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.13669733E-08,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.13669733E-08, ]
+pressure_GPa:  -6.2864E-04
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -627,25 +768,25 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55890065805729E+00  7.55890065805729E+00  7.55890065805729E+00
+  7.55890065805730E+00  7.55890065805730E+00  7.55890065805730E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77945032902864E+00  3.77945032902864E+00
-  3.77945032902864E+00  0.00000000000000E+00  3.77945032902864E+00
-  3.77945032902864E+00  3.77945032902864E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.77945032902865E+00  3.77945032902865E+00
+  3.77945032902865E+00  0.00000000000000E+00  3.77945032902865E+00
+  3.77945032902865E+00  3.77945032902865E+00  0.00000000000000E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  1.07973187339919E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34494991362776E+00  5.34494991362776E+00  5.34494991362776E+00
+  5.34494991362777E+00  5.34494991362777E+00  5.34494991362777E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.13669732306715E-08  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.13669732307257E-08  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.13669732308883E-08
+  2.13669732895979E-08  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.13669732895437E-08  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.13669732896521E-08
  Total energy (etotal) [Ha]= -2.09798076185070E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-4.55378E-08
-           Relative     =-2.17055E-08
+           Relative     =-2.17056E-08
 
  At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 2.1367E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
@@ -654,8 +795,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.6493E-14; max=  1.2721E-13
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   76.493E-15; max=  12.721E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -683,38 +823,46 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.70954147704489E-01
+hartree             :  3.84986046238217E-03
+xc                  : -8.08433967811637E-01
+Ewald energy        : -2.72948147711399E+00
+psp_core            :  3.78721075037981E-02
+local_psp           :  8.26676841340783E-02
+non_local_psp       :  4.52588174121219E-01
+internal            : -2.08998347099966E+00
+'-kT*entropy'       : -7.99729085104574E-03
+total_energy        : -2.09798076185071E+00
+total_energy_eV     : -5.70889598416148E+01
+band_energy         :  3.60596868160630E-01
+...
 
-    Kinetic energy  =  8.70954147704494E-01
-    Hartree energy  =  3.84986046238219E-03
-    XC energy       = -8.08433967811640E-01
-    Ewald energy    = -2.72948147711399E+00
-    PspCore energy  =  3.78721075037982E-02
-    Loc. psp. energy=  8.26676841340823E-02
-    NL   psp  energy=  4.52588174121220E-01
-    >>>>> Internal E= -2.08998347099966E+00
-
-    -kT*entropy     = -7.99729085104569E-03
-    >>>>>>>>> Etotal= -2.09798076185070E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.70889598416147E+01 ; Band energy (Ha)=   3.6059686816E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.13669732E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.13669732E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.13669732E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.13669733E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.13669733E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.13669733E-08  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.2864E-04 GPa]
-- sigma(1 1)=  6.28637950E-04  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.28637950E-04  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.28637950E-04  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.28637952E-04  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.28637952E-04  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.28637952E-04  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 10, mband: 3, nsppol: 1, nspinor: 1, nspden: 1, mpw: 92, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   5.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 1, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -754,6 +902,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0980846505283    -2.098E+00 3.079E-02 1.763E-04
  ETOT  2  -2.0980848307785    -1.803E-07 8.906E-07 1.026E-05
@@ -766,6 +920,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
   sigma(1 1)=  9.69836886E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  9.69836886E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.69836886E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
+lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0974400E+02
+convergence: {deltae: -6.958E-09, res2:  5.548E-09, residm:  3.125E-09, diffor: null, }
+etotal    :  -2.09808484E+00
+entropy   :   0.00000000E+00
+fermie    :   2.78812451E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  9.69836886E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.69836886E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   9.69836886E-05, ]
+pressure_GPa:  -2.8534E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -794,15 +975,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  9.69836885826922E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  9.69836885826923E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  9.69836885826920E-05
+  9.69836885826789E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  9.69836885826788E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  9.69836885826786E-05
  Total energy (etotal) [Ha]= -2.09808483773688E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0981675614304    -2.098E+00 4.053E-08 7.543E-05
@@ -816,6 +1003,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
   sigma(1 1)=  7.61857278E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  7.61857278E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.61857278E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7889439,   3.7889439, ]
+- [  3.7889439,   0.0000000,   3.7889439, ]
+- [  3.7889439,   3.7889439,   0.0000000, ]
+lattice_lengths: [   5.35838,    5.35838,    5.35838, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0878888E+02
+convergence: {deltae: -2.336E-09, res2:  3.604E-09, residm:  4.878E-11, diffor: null, }
+etotal    :  -2.09816760E+00
+entropy   :   0.00000000E+00
+fermie    :   2.81975937E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  7.61857278E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.61857278E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.61857278E-05, ]
+pressure_GPa:  -2.2415E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -842,11 +1056,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.35837579317738E+00  5.35837579317738E+00  5.35837579317738E+00
+  5.35837579317739E+00  5.35837579317739E+00  5.35837579317739E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  7.61857277585572E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  7.61857277585571E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  7.61857277585572E-05
+  7.61857277585706E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  7.61857277585705E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  7.61857277585708E-05
  Total energy (etotal) [Ha]= -2.09816759743932E+00
 
  Difference of energy with previous step (new-old):
@@ -857,6 +1071,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0982854570789    -2.098E+00 1.283E-06 9.329E-04
@@ -870,6 +1090,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
   sigma(1 1)= -8.30775905E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -8.30775905E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -8.30775905E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7500366,   3.7500366, ]
+- [  3.7500366,   0.0000000,   3.7500366, ]
+- [  3.7500366,   3.7500366,   0.0000000, ]
+lattice_lengths: [   5.30335,    5.30335,    5.30335, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0547184E+02
+convergence: {deltae: -2.707E-08, res2:  4.450E-08, residm:  5.478E-10, diffor: null, }
+etotal    :  -2.09828588E+00
+entropy   :   0.00000000E+00
+fermie    :   2.93316861E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -8.30775905E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -8.30775905E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -8.30775905E-06, ]
+pressure_GPa:   2.4442E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -887,21 +1134,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50007321053832E+00  7.50007321053832E+00  7.50007321053832E+00
+  7.50007321053823E+00  7.50007321053823E+00  7.50007321053823E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75003660526916E+00  3.75003660526916E+00
-  3.75003660526916E+00  0.00000000000000E+00  3.75003660526916E+00
-  3.75003660526916E+00  3.75003660526916E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05471838599734E+02
+  0.00000000000000E+00  3.75003660526911E+00  3.75003660526911E+00
+  3.75003660526911E+00  0.00000000000000E+00  3.75003660526911E+00
+  3.75003660526911E+00  3.75003660526911E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05471838599730E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30335262656721E+00  5.30335262656721E+00  5.30335262656721E+00
+  5.30335262656714E+00  5.30335262656714E+00  5.30335262656714E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -8.30775904832304E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -8.30775904832310E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -8.30775904832310E-06
- Total energy (etotal) [Ha]= -2.09828588229946E+00
+ -8.30775904843146E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -8.30775904843157E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -8.30775904843157E-06
+ Total energy (etotal) [Ha]= -2.09828588229945E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.18285E-04
@@ -911,6 +1158,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0982870933094    -2.098E+00 7.661E-11 9.779E-06
@@ -924,6 +1177,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
   sigma(1 1)=  5.81836167E-07  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.81836167E-07  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.81836167E-07  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7537566,   3.7537566, ]
+- [  3.7537566,   0.0000000,   3.7537566, ]
+- [  3.7537566,   3.7537566,   0.0000000, ]
+lattice_lengths: [   5.30861,    5.30861,    5.30861, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0578603E+02
+convergence: {deltae: -2.881E-10, res2:  4.262E-10, residm:  5.903E-12, diffor: null, }
+etotal    :  -2.09828710E+00
+entropy   :   0.00000000E+00
+fermie    :   2.92217046E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.81836167E-07,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.81836167E-07,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.81836167E-07, ]
+pressure_GPa:  -1.7118E-02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -950,11 +1230,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30861355273404E+00  5.30861355273404E+00  5.30861355273404E+00
+  5.30861355273403E+00  5.30861355273403E+00  5.30861355273403E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  5.81836166951963E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  5.81836166952017E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  5.81836166951909E-07
+  5.81836166957926E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  5.81836166958088E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  5.81836166958034E-07
  Total energy (etotal) [Ha]= -2.09828709781827E+00
 
  Difference of energy with previous step (new-old):
@@ -966,18 +1246,51 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 5, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0982871038458    -2.098E+00 3.454E-13 4.170E-08
  ETOT  2  -2.0982871038638    -1.798E-11 1.086E-16 2.545E-09
- ETOT  3  -2.0982871038650    -1.227E-12 2.514E-14 1.824E-12
+ ETOT  3  -2.0982871038650    -1.224E-12 2.514E-14 1.824E-12
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.227E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  1.224E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.46040375E-09  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.46040375E-09  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.46040375E-09  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7535125,   3.7535125, ]
+- [  3.7535125,   0.0000000,   3.7535125, ]
+- [  3.7535125,   3.7535125,   0.0000000, ]
+lattice_lengths: [   5.30827,    5.30827,    5.30827, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0576539E+02
+convergence: {deltae: -1.224E-12, res2:  1.824E-12, residm:  2.514E-14, diffor: null, }
+etotal    :  -2.09828710E+00
+entropy   :   0.00000000E+00
+fermie    :   2.92289186E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.46040375E-09,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.46040375E-09,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.46040375E-09, ]
+pressure_GPa:  -4.2967E-05
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -997,18 +1310,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Scale of Primitive Cell (acell) [bohr]
   7.50702496528073E+00  7.50702496528073E+00  7.50702496528073E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75351248264037E+00  3.75351248264037E+00
-  3.75351248264037E+00  0.00000000000000E+00  3.75351248264037E+00
-  3.75351248264037E+00  3.75351248264037E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.75351248264036E+00  3.75351248264036E+00
+  3.75351248264036E+00  0.00000000000000E+00  3.75351248264036E+00
+  3.75351248264036E+00  3.75351248264036E+00  0.00000000000000E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  1.05765393403973E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
   5.30826825948671E+00  5.30826825948671E+00  5.30826825948671E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.46040375251883E-09  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.46040375251883E-09  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.46040375268146E-09
+  1.46040375474145E-09  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.46040375457882E-09  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.46040375479566E-09
  Total energy (etotal) [Ha]= -2.09828710386503E+00
 
  Difference of energy with previous step (new-old):
@@ -1022,8 +1335,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.1485E-14; max=  2.5137E-14
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   11.485E-15; max=  25.137E-15
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1051,24 +1363,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 2, itime: 5, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.75807506688896E-01
+hartree             :  4.20236790650239E-03
+xc                  : -8.13718985286753E-01
+Ewald energy        : -2.74834297593689E+00
+psp_core            :  3.86626667462624E-02
+local_psp           :  9.56059157068175E-02
+non_local_psp       :  4.51121345104898E-01
+internal            : -2.09666215907027E+00
+'-kT*entropy'       : -1.62494479476626E-03
+total_energy        : -2.09828710386503E+00
+total_energy_eV     : -5.70972958317591E+01
+band_energy         :  3.70689429695591E-01
+...
 
-    Kinetic energy  =  8.75807506688895E-01
-    Hartree energy  =  4.20236790650235E-03
-    XC energy       = -8.13718985286754E-01
-    Ewald energy    = -2.74834297593689E+00
-    PspCore energy  =  3.86626667462623E-02
-    Loc. psp. energy=  9.56059157068170E-02
-    NL   psp  energy=  4.51121345104898E-01
-    >>>>> Internal E= -2.09666215907027E+00
-
-    -kT*entropy     = -1.62494479476630E-03
-    >>>>>>>>> Etotal= -2.09828710386503E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.70972958317591E+01 ; Band energy (Ha)=   3.7068942970E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.46040375E-09  sigma(3 2)=  0.00000000E+00
@@ -1082,7 +1393,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 1, nkpt: 28, mband: 3, nsppol: 1, nspinor: 1, nspden: 1, mpw: 94, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   5.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 1, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1122,6 +1442,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0983307444550    -2.098E+00 1.789E-03 1.165E-03
  ETOT  2  -2.0983313974568    -6.530E-07 2.537E-09 6.943E-05
@@ -1134,6 +1460,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
   sigma(1 1)=  1.02680231E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.02680231E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.02680231E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
+lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0974400E+02
+convergence: {deltae: -4.391E-08, res2:  7.512E-08, residm:  2.118E-09, diffor: null, }
+etotal    :  -2.09833144E+00
+entropy   :   0.00000000E+00
+fermie    :   2.77036956E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.02680231E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.02680231E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.02680231E-04, ]
+pressure_GPa:  -3.0210E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1164,13 +1517,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
   1.02680230825968E-04  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  1.02680230825968E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.02680230825967E-04
+  0.00000000000000E+00  0.00000000000000E+00  1.02680230825968E-04
  Total energy (etotal) [Ha]= -2.09833144136934E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0984239694003    -2.098E+00 2.129E-07 8.724E-05
@@ -1184,6 +1543,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
   sigma(1 1)=  8.01971007E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  8.01971007E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  8.01971007E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7882945,   3.7882945, ]
+- [  3.7882945,   0.0000000,   3.7882945, ]
+- [  3.7882945,   3.7882945,   0.0000000, ]
+lattice_lengths: [   5.35746,    5.35746,    5.35746, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0873295E+02
+convergence: {deltae: -2.717E-09, res2:  3.684E-09, residm:  8.411E-11, diffor: null, }
+etotal    :  -2.09842401E+00
+entropy   :   0.00000000E+00
+fermie    :   2.80403949E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  8.01971007E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.01971007E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   8.01971007E-05, ]
+pressure_GPa:  -2.3595E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1212,9 +1598,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.35745739466529E+00  5.35745739466529E+00  5.35745739466529E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  8.01971007459480E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  8.01971007459479E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  8.01971007459479E-05
+  8.01971007459460E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  8.01971007459461E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  8.01971007459460E-05
  Total energy (etotal) [Ha]= -2.09842401065515E+00
 
  Difference of energy with previous step (new-old):
@@ -1226,9 +1612,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0985552896208    -2.099E+00 4.546E-02 1.023E-03
- ETOT  2  -2.0985557191207    -4.295E-07 2.486E-09 6.244E-05
+ ETOT  2  -2.0985557191206    -4.295E-07 2.486E-09 6.244E-05
  ETOT  3  -2.0985557489150    -2.979E-08 9.310E-10 4.282E-08
 
  At SCF step    3, etot is converged : 
@@ -1238,6 +1630,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
   sigma(1 1)= -5.47515357E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -5.47515357E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -5.47515357E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7482418,   3.7482418, ]
+- [  3.7482418,   0.0000000,   3.7482418, ]
+- [  3.7482418,   3.7482418,   0.0000000, ]
+lattice_lengths: [   5.30081,    5.30081,    5.30081, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0532047E+02
+convergence: {deltae: -2.979E-08, res2:  4.282E-08, residm:  9.310E-10, diffor: null, }
+etotal    :  -2.09855575E+00
+entropy   :   0.00000000E+00
+fermie    :   2.92140448E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -5.47515357E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -5.47515357E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -5.47515357E-06, ]
+pressure_GPa:   1.6108E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1255,20 +1674,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49648352224166E+00  7.49648352224166E+00  7.49648352224166E+00
+  7.49648352224167E+00  7.49648352224167E+00  7.49648352224167E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74824176112083E+00  3.74824176112083E+00
-  3.74824176112083E+00  0.00000000000000E+00  3.74824176112083E+00
-  3.74824176112083E+00  3.74824176112083E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05320468140288E+02
+  0.00000000000000E+00  3.74824176112084E+00  3.74824176112084E+00
+  3.74824176112084E+00  0.00000000000000E+00  3.74824176112084E+00
+  3.74824176112084E+00  3.74824176112084E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05320468140289E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30081433363029E+00  5.30081433363029E+00  5.30081433363029E+00
+  5.30081433363030E+00  5.30081433363030E+00  5.30081433363030E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -5.47515356743103E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -5.47515356743124E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -5.47515356743108E-06
+ -5.47515356740972E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -5.47515356740978E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -5.47515356740961E-06
  Total energy (etotal) [Ha]= -2.09855574891505E+00
 
  Difference of energy with previous step (new-old):
@@ -1279,6 +1698,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0985563090377    -2.099E+00 3.821E-09 4.531E-06
@@ -1292,6 +1717,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
   sigma(1 1)=  1.31690802E-07  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.31690802E-07  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.31690802E-07  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7507261,   3.7507261, ]
+- [  3.7507261,   0.0000000,   3.7507261, ]
+- [  3.7507261,   3.7507261,   0.0000000, ]
+lattice_lengths: [   5.30433,    5.30433,    5.30433, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0553003E+02
+convergence: {deltae: -1.339E-10, res2:  1.686E-10, residm:  4.093E-12, diffor: null, }
+etotal    :  -2.09855631E+00
+entropy   :   0.00000000E+00
+fermie    :   2.91401685E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.31690802E-07,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.31690802E-07,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.31690802E-07, ]
+pressure_GPa:  -3.8745E-03
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1309,21 +1761,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50145220606619E+00  7.50145220606619E+00  7.50145220606619E+00
+  7.50145220606618E+00  7.50145220606618E+00  7.50145220606618E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75072610303310E+00  3.75072610303310E+00
-  3.75072610303310E+00  0.00000000000000E+00  3.75072610303310E+00
-  3.75072610303310E+00  3.75072610303310E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.75072610303309E+00  3.75072610303309E+00
+  3.75072610303309E+00  0.00000000000000E+00  3.75072610303309E+00
+  3.75072610303309E+00  3.75072610303309E+00  0.00000000000000E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  1.05530026806759E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30432772365619E+00  5.30432772365619E+00  5.30432772365619E+00
+  5.30432772365618E+00  5.30432772365618E+00  5.30432772365618E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.31690801723444E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.31690801723281E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.31690801723552E-07
- Total energy (etotal) [Ha]= -2.09855631110207E+00
+  1.31690801695417E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.31690801695526E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.31690801695472E-07
+ Total energy (etotal) [Ha]= -2.09855631110206E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-5.62187E-07
@@ -1336,8 +1788,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3398E-12; max=  4.0935E-12
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   13.398E-13; max=  40.935E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1365,24 +1816,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 3, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.75365350354308E-01
+hartree             :  4.11115364640790E-03
+xc                  : -8.14181929439111E-01
+Ewald energy        : -2.75038469442328E+00
+psp_core            :  3.87488971831025E-02
+local_psp           :  9.71131181244894E-02
+non_local_psp       :  4.51409219878590E-01
+internal            : -2.09781888467549E+00
+'-kT*entropy'       : -7.37426426570080E-04
+total_energy        : -2.09855631110206E+00
+total_energy_eV     : -5.71046213332238E+01
+band_energy         :  3.71252295339265E-01
+...
 
-    Kinetic energy  =  8.75365350354304E-01
-    Hartree energy  =  4.11115364640784E-03
-    XC energy       = -8.14181929439111E-01
-    Ewald energy    = -2.75038469442327E+00
-    PspCore energy  =  3.87488971831023E-02
-    Loc. psp. energy=  9.71131181244859E-02
-    NL   psp  energy=  4.51409219878589E-01
-    >>>>> Internal E= -2.09781888467550E+00
-
-    -kT*entropy     = -7.37426426570107E-04
-    >>>>>>>>> Etotal= -2.09855631110207E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.71046213332239E+01 ; Band energy (Ha)=   3.7125229534E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.31690802E-07  sigma(3 2)=  0.00000000E+00
@@ -1396,7 +1846,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 1, nkpt: 60, mband: 3, nsppol: 1, nspinor: 1, nspden: 1, mpw: 95, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   5.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 1, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   3.
 
@@ -1436,8 +1895,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 4, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0985269596665    -2.099E+00 7.229E-03 1.037E-03
+ ETOT  1  -2.0985269596664    -2.099E+00 7.229E-03 1.037E-03
  ETOT  2  -2.0985275087088    -5.490E-07 9.211E-06 6.481E-05
  ETOT  3  -2.0985275472231    -3.851E-08 6.492E-08 3.083E-08
 
@@ -1448,6 +1913,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
   sigma(1 1)=  1.03680705E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.03680705E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.03680705E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
+lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0974400E+02
+convergence: {deltae: -3.851E-08, res2:  3.083E-08, residm:  6.492E-08, diffor: null, }
+etotal    :  -2.09852755E+00
+entropy   :   0.00000000E+00
+fermie    :   2.76636729E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.03680705E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.03680705E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.03680705E-04, ]
+pressure_GPa:  -3.0504E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1476,15 +1968,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.03680705366245E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.03680705366245E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.03680705366245E-04
+  1.03680705366249E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.03680705366249E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.03680705366249E-04
  Total energy (etotal) [Ha]= -2.09852754722313E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 4, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0986220460164    -2.099E+00 3.975E-07 8.933E-05
@@ -1498,6 +1996,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
   sigma(1 1)=  8.13305714E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  8.13305714E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  8.13305714E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7881804,   3.7881804, ]
+- [  3.7881804,   0.0000000,   3.7881804, ]
+- [  3.7881804,   3.7881804,   0.0000000, ]
+lattice_lengths: [   5.35730,    5.35730,    5.35730, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0872313E+02
+convergence: {deltae: -2.785E-09, res2:  3.692E-09, residm:  1.126E-10, diffor: null, }
+etotal    :  -2.09862209E+00
+entropy   :   0.00000000E+00
+fermie    :   2.80040801E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  8.13305714E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.13305714E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   8.13305714E-05, ]
+pressure_GPa:  -2.3928E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1515,7 +2040,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.57636079917650E+00  7.57636079917650E+00  7.57636079917650E+00
+  7.57636079917649E+00  7.57636079917649E+00  7.57636079917649E+00
  Real space primitive translations (rprimd) [bohr]
   0.00000000000000E+00  3.78818039958825E+00  3.78818039958825E+00
   3.78818039958825E+00  0.00000000000000E+00  3.78818039958825E+00
@@ -1526,9 +2051,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
  Lengths [Bohr]
   5.35729609781363E+00  5.35729609781363E+00  5.35729609781363E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  8.13305714070643E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  8.13305714070643E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  8.13305714070642E-05
+  8.13305714070711E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  8.13305714070712E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  8.13305714070712E-05
  Total energy (etotal) [Ha]= -2.09862208817023E+00
 
  Difference of energy with previous step (new-old):
@@ -1540,9 +2065,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 4, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0987590235183    -2.099E+00 2.534E-06 1.088E-03
- ETOT  2  -2.0987594789497    -4.554E-07 2.098E-09 6.646E-05
+ ETOT  2  -2.0987594789496    -4.554E-07 2.098E-09 6.646E-05
  ETOT  3  -2.0987595106180    -3.167E-08 1.232E-09 4.419E-08
 
  At SCF step    3, etot is converged : 
@@ -1552,6 +2083,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
   sigma(1 1)= -5.70900236E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -5.70900236E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -5.70900236E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7469650,   3.7469650, ]
+- [  3.7469650,   0.0000000,   3.7469650, ]
+- [  3.7469650,   3.7469650,   0.0000000, ]
+lattice_lengths: [   5.29901,    5.29901,    5.29901, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0521288E+02
+convergence: {deltae: -3.167E-08, res2:  4.419E-08, residm:  1.232E-09, diffor: null, }
+etotal    :  -2.09875951E+00
+entropy   :   0.00000000E+00
+fermie    :   2.92136316E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -5.70900236E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -5.70900236E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -5.70900236E-06, ]
+pressure_GPa:   1.6796E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1569,20 +2127,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49392990887997E+00  7.49392990887997E+00  7.49392990887997E+00
+  7.49392990887994E+00  7.49392990887994E+00  7.49392990887994E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74696495443998E+00  3.74696495443998E+00
-  3.74696495443998E+00  0.00000000000000E+00  3.74696495443998E+00
-  3.74696495443998E+00  3.74696495443998E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05212875233744E+02
+  0.00000000000000E+00  3.74696495443997E+00  3.74696495443997E+00
+  3.74696495443997E+00  0.00000000000000E+00  3.74696495443997E+00
+  3.74696495443997E+00  3.74696495443997E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05212875233743E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.29900865630571E+00  5.29900865630571E+00  5.29900865630571E+00
+  5.29900865630569E+00  5.29900865630569E+00  5.29900865630569E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -5.70900235979314E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -5.70900235979314E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -5.70900235979309E-06
+ -5.70900235983656E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -5.70900235983662E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -5.70900235983662E-06
  Total energy (etotal) [Ha]= -2.09875951061798E+00
 
  Difference of energy with previous step (new-old):
@@ -1593,6 +2151,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 4, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0987601187968    -2.099E+00 1.064E-08 5.084E-06
@@ -1606,6 +2170,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
   sigma(1 1)=  1.99298353E-07  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.99298353E-07  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.99298353E-07  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7495866,   3.7495866, ]
+- [  3.7495866,   0.0000000,   3.7495866, ]
+- [  3.7495866,   3.7495866,   0.0000000, ]
+lattice_lengths: [   5.30272,    5.30272,    5.30272, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0543387E+02
+convergence: {deltae: -1.503E-10, res2:  1.820E-10, residm:  6.003E-12, diffor: null, }
+etotal    :  -2.09876012E+00
+entropy   :   0.00000000E+00
+fermie    :   2.91355070E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.99298353E-07,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.99298353E-07,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.99298353E-07, ]
+pressure_GPa:  -5.8636E-03
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1623,20 +2214,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49917316490753E+00  7.49917316490753E+00  7.49917316490753E+00
+  7.49917316490755E+00  7.49917316490755E+00  7.49917316490755E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74958658245376E+00  3.74958658245376E+00
-  3.74958658245376E+00  0.00000000000000E+00  3.74958658245376E+00
-  3.74958658245376E+00  3.74958658245376E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.74958658245377E+00  3.74958658245377E+00
+  3.74958658245377E+00  0.00000000000000E+00  3.74958658245377E+00
+  3.74958658245377E+00  3.74958658245377E+00  0.00000000000000E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  1.05433871739962E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30271619819830E+00  5.30271619819830E+00  5.30271619819830E+00
+  5.30271619819831E+00  5.30271619819831E+00  5.30271619819831E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.99298352524695E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.99298352524478E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.99298352524641E-07
+  1.99298352539495E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.99298352539386E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.99298352539278E-07
  Total energy (etotal) [Ha]= -2.09876012110959E+00
 
  Difference of energy with previous step (new-old):
@@ -1650,8 +2241,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.5560E-12; max=  6.0031E-12
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   15.560E-13; max=  60.031E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1679,24 +2269,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.363      89.331
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 4, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.75188418529849E-01
+hartree             :  4.09223922623571E-03
+xc                  : -8.14388461301183E-01
+Ewald energy        : -2.75122055189487E+00
+psp_core            :  3.87842359479173E-02
+local_psp           :  9.74704360150508E-02
+non_local_psp       :  4.51721624905322E-01
+internal            : -2.09835205857167E+00
+'-kT*entropy'       : -4.08062537920210E-04
+total_energy        : -2.09876012110959E+00
+total_energy_eV     : -5.71101672855733E+01
+band_energy         :  3.71436218781175E-01
+...
 
-    Kinetic energy  =  8.75188418529852E-01
-    Hartree energy  =  4.09223922623576E-03
-    XC energy       = -8.14388461301182E-01
-    Ewald energy    = -2.75122055189487E+00
-    PspCore energy  =  3.87842359479176E-02
-    Loc. psp. energy=  9.74704360150527E-02
-    NL   psp  energy=  4.51721624905322E-01
-    >>>>> Internal E= -2.09835205857167E+00
-
-    -kT*entropy     = -4.08062537920202E-04
-    >>>>>>>>> Etotal= -2.09876012110959E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.71101672855733E+01 ; Band energy (Ha)=   3.7143621878E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.99298353E-07  sigma(3 2)=  0.00000000E+00
@@ -1948,13 +2537,13 @@ P           mkmem4         60
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         225
-           strten1     2.1366973231E-08  2.1366973231E-08  2.1366973231E-08
+           strten1     2.1366973290E-08  2.1366973290E-08  2.1366973290E-08
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     1.4604037525E-09  1.4604037525E-09  1.4604037527E-09
+           strten2     1.4604037547E-09  1.4604037546E-09  1.4604037548E-09
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     1.3169080172E-07  1.3169080172E-07  1.3169080172E-07
+           strten3     1.3169080170E-07  1.3169080170E-07  1.3169080170E-07
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     1.9929835252E-07  1.9929835252E-07  1.9929835252E-07
+           strten4     1.9929835254E-07  1.9929835254E-07  1.9929835254E-07
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -2025,51 +2614,79 @@ P           mkmem4         60
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
-- Comment : Some pseudopotential generated using the FHI code were used.
+- Comment: Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
--
-- [3] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
+- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         14.2  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          6.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.2  wall=          6.1
+.Delivered   1 WARNINGs and  34 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.3  wall=          6.5

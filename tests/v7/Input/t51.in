@@ -44,7 +44,6 @@
  tolwfr 1.0d-16
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -57,7 +56,7 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%   This tests make use of the irdwfkfine variable instead of the getwfkfine variable used in the
 #%%   previous test. The third q-point is computed here.

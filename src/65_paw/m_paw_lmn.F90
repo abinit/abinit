@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_lmn
 !! NAME
 !!  m_paw_lmn
@@ -8,7 +7,7 @@
 !!  over the the (l,m,n) channels of the PAW partial waves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,13 +68,6 @@ CONTAINS  !=====================================================================
 
 subroutine ilm2lm(ilm,ll,mm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ilm2lm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -133,13 +125,6 @@ end subroutine ilm2lm
 !! SOURCE
 
 subroutine make_indlmn(ln_size,lmn_size,orbitals,indlmn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_indlmn'
-!End of the abilint section
 
  implicit none
 
@@ -211,13 +196,6 @@ end subroutine make_indlmn
 !! SOURCE
 
 subroutine make_indklmn(lcutdens,lmn_size,lmn2_size,indlmn,indklmn,klm_diag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_indklmn'
-!End of the abilint section
 
  implicit none
 
@@ -307,13 +285,6 @@ end subroutine make_indklmn
 
 subroutine make_kln2ln(lmn_size,lmn2_size,ln2_size,indlmn,indklmn,kln2ln)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_kln2ln'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -398,13 +369,6 @@ end subroutine make_kln2ln
 !! SOURCE
 
 subroutine make_klm2lm(lmn_size,lmn2_size,lm2_size,indlmn,indklmn,klm2lm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_klm2lm'
-!End of the abilint section
 
  implicit none
 
@@ -494,13 +458,6 @@ end subroutine make_klm2lm
 
 subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'klmn2ijlmn'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -557,13 +514,6 @@ end subroutine klmn2ijlmn
 
 subroutine make_indln(lmn_size,ln_size,indlmn,indln)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_indln'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -615,13 +565,6 @@ end subroutine make_indln
 !! SOURCE
 
 function uppert_index(ii,jj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'uppert_index'
-!End of the abilint section
 
  implicit none
 

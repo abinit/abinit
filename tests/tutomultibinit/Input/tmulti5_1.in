@@ -1,0 +1,42 @@
+##############################################################################
+#Test for multibinit, just read xml and run spin dynamics
+##############################################################################
+prt_model = 0
+ncell =   16 16 16              ! number of unit cells in supercell
+
+spin_dynamics = 1               ! switch on spin dynamics
+spin_init_state = 2             ! ferromagnetic initial state
+
+spin_temperature = 600          ! temperature of spin (Kelvin)
+spin_ntime_pre = 10000          ! time steps for thermolization
+spin_ntime = 20000              ! time steps for measurement
+spin_nctime = 100               ! Number of time steps between two writes 
+                                ! into netcdf 
+spin_dt = 1e-16 s               ! Time step (seconds)  
+spin_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each 
+                                ! sublattice.
+
+spin_write_traj = 0             ! do not write spin trajectory to netcdf file
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% system_xml = tmulti5_1.xml
+#%% exclude_hosts = nag@abiref
+#%% coeff_xml = no
+#%% [files]
+#%% files_to_test = 
+#%%   tmulti5_1.out,tolnlines = 1, tolabs = 2.000e+03, tolrel = 3.000e-1, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. He
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read xml  and run spin dynamics. 
+#%%   The system is a simple cubic system with one spin per uc.
+#%%   The exchange is defined so that the Tc is about 620 K.
+#%%   Note: ncell, spin_ntime_pre, and spin_ntime are small.
+#%%<END TEST_INFO>

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rayleigh_ritz
 !! NAME
 !!  m_rayleigh_ritz
@@ -9,7 +8,7 @@
 !! distributed matrix in block-cyclic form (_distributed)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2018 ABINIT group (AL)
+!!  Copyright (C) 2014-2020 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +28,6 @@
 module m_rayleigh_ritz
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_cgtools
  use m_xmpi
@@ -37,6 +35,7 @@ module m_rayleigh_ritz
  use m_abi_linalg
  use m_slk
 
+ use defs_abitypes,   only : mpi_type
  use m_time,          only : timab
  use m_numeric_tools, only : pack_matrix
 
@@ -67,7 +66,7 @@ contains
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point
-!!  usepaw=do we use the PAW method
+!!  usepaw=if 1 we use the PAW method
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
@@ -76,7 +75,7 @@ contains
 !!  cg(2,*)=updated wavefunctions
 !!  ghc(2,*)=updated ghc
 !!  gsc(2,*)=updated gsc
-!!  gvnlc(2,*)=updated gvnlc
+!!  gvnlxc(2,*)=updated gvnlxc
 !!
 !! PARENTS
 !!      chebfi
@@ -88,22 +87,14 @@ contains
 !!
 !! SOURCE
 
-subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rayleigh_ritz_subdiago'
-!End of the abilint section
-
- implicit none
+subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
  ! Arguments
  type(mpi_type),intent(inout) :: mpi_enreg
  integer,intent(in) :: nband,npw,nspinor,usepaw,istwf_k
- real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlc(2,npw*nspinor*nband)
+ real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlxc(2,npw*nspinor*nband)
  real(dp),intent(out) :: eig(nband)
+ logical :: has_fock
 
  ! Locals
  real(dp), allocatable :: subham(:), totham(:,:)
@@ -186,7 +177,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  call timab(timer_subdiago, 1, tsec)
  ABI_ALLOCATE(evec, (cplx*nband, nband))
 
- call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
+ call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,nband,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
 
  ABI_DEALLOCATE(subham)
  ABI_DEALLOCATE(subovl)
@@ -209,9 +200,10 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  if(usepaw == 1) then
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gsc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gsc = gtempc
- else
-   call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
-   gvnlc = gtempc
+ endif
+ if(usepaw==0 .or. has_fock)then
+   call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
+   gvnlxc = gtempc
  end if
  ABI_DEALLOCATE(evec)
  call timab(timer_subdiago, 2, tsec)
@@ -223,20 +215,21 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
 
  ! orthonormalization
  call timab(timer_ortho, 1, tsec)
- if (paw) then
+ if (usepaw==1) then
    call abi_xorthonormalize(cg, gsc,nband, mpi_enreg%comm_bandspinorfft, sqgram, npw*nspinor, 2)
  else
    call abi_xorthonormalize(cg, cg, nband, mpi_enreg%comm_bandspinorfft, sqgram, npw*nspinor, 2)
  end if
  call timab(timer_ortho, 2, tsec)
 
- ! rotate ghc, gsc and gvnlc
+ ! rotate ghc, gsc and gvnlxc
  call timab(timer_rotation, 1, tsec)
  call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, ghc,npw*nspinor,x_cplx=2)
- if(paw) then
+ if(usepaw==1) then
    call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gsc,npw*nspinor,x_cplx=2)
- else
-   call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gvnlc,npw*nspinor,x_cplx=2)
+ endif
+ if(usepaw==0 .or has_fock)then
+   call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gvnlxc,npw*nspinor,x_cplx=2)
  end if
  call timab(timer_rotation, 2, tsec)
 
@@ -265,13 +258,13 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  write(message, *) 'Diagonalization done'
  call wrtout(std_out,message,'COLL')
 
- ! Rotate ghc and gvnlc according to evecs
+ ! Rotate ghc and gvnlxc according to evecs
  call timab(timer_rotation, 1, tsec)
  call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,ghc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
  ghc = gtempc
- if(.not. paw) then
-   call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,gvnlc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
-   gvnlc = gtempc
+ if(usepaw==0 .or has_fock)then
+   call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,gvnlxc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
+   gvnlxc = gtempc
  end if
  call timab(timer_rotation, 2, tsec)
 
@@ -303,7 +296,7 @@ end subroutine rayleigh_ritz_subdiago
 !!  cg(2,*)=updated wavefunctions
 !!  ghc(2,*)=updated ghc
 !!  gsc(2,*)=updated gsc
-!!  gvnlc(2,*)=updated gvnlc
+!!  gvnlxc(2,*)=updated gvnlxc
 !!
 !! PARENTS
 !!      chebfi
@@ -318,29 +311,21 @@ end subroutine rayleigh_ritz_subdiago
 !!
 !! SOURCE
 
-subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rayleigh_ritz_distributed'
-!End of the abilint section
-
- implicit none
+subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
  integer,external :: NUMROC
 
  ! Arguments
  type(mpi_type),intent(inout) :: mpi_enreg
  integer,intent(in) :: nband,npw,nspinor,usepaw,istwf_k
- real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlc(2,npw*nspinor*nband)
+ real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlxc(2,npw*nspinor*nband)
  real(dp),intent(out) :: eig(nband)
+ logical :: has_fock
 
  ! Locals
  integer :: blocksize,nbproc,iproc,ierr,cplx,vectsize
  integer :: buffsize_iproc(2), coords_iproc(2), grid_dims(2)
- real(dp) :: cg_new(2,npw*nspinor*nband),gsc_or_vnlc_new(2,npw*nspinor*nband),ghc_new(2,npw*nspinor*nband)
+ real(dp) :: cg_new(2,npw*nspinor*nband),gsc_or_vnlxc_new(2,npw*nspinor*nband),ghc_new(2,npw*nspinor*nband)
  real(dp), allocatable :: ham_iproc(:,:), ovl_iproc(:,:), evec_iproc(:,:), left_temp(:,:), right_temp(:,:)
  real(dp) :: tsec(2)
  type(matrix_scalapack) :: sca_ham, sca_ovl, sca_evec
@@ -368,14 +353,14 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  !======================================================================================================
  ! Init Scalapack matrices
  !======================================================================================================
- call init_matrix_scalapack(sca_ham ,nband,nband,abi_processor,istwf_k,10)
- call init_matrix_scalapack(sca_ovl ,nband,nband,abi_processor,istwf_k,10)
- call init_matrix_scalapack(sca_evec,nband,nband,abi_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_ham ,nband,nband,slk_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_ovl ,nband,nband,slk_processor,istwf_k,10)
+ call init_matrix_scalapack(sca_evec,nband,nband,slk_processor,istwf_k,10)
 
  ! Get info
  blocksize = sca_ham%sizeb_blocs(1) ! Assume square blocs
- nbproc = abi_processor%grid%nbprocs
- grid_dims = abi_processor%grid%dims
+ nbproc = slk_processor%grid%nbprocs
+ grid_dims = slk_processor%grid%dims
 
  !======================================================================================================
  ! Build hamiltonian and overlap matrices
@@ -406,8 +391,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
    coords_iproc(2) = MOD(iproc,  grid_dims(2))
 
    ! Get buffersize of iproc
-   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,abi_processor%grid%dims(1))
-   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,abi_processor%grid%dims(2))
+   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,slk_processor%grid%dims(1))
+   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,slk_processor%grid%dims(2))
 
    ! Allocate matrices_iproc, that will gather the contribution of this proc to the block owned by iproc
    ABI_ALLOCATE(ham_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
@@ -437,9 +422,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
 &   right_temp,vectsize,czero,ham_iproc,buffsize_iproc(1), x_cplx=cplx)
 
    ! Sum to iproc, and fill sca_ matrices
-   call xmpi_sum_master(ham_iproc, iproc, abi_communicator, ierr)
-   call xmpi_sum_master(ovl_iproc, iproc, abi_communicator, ierr)
-   if(iproc == abi_processor%myproc) then
+   call xmpi_sum_master(ham_iproc, iproc, slk_communicator, ierr)
+   call xmpi_sum_master(ovl_iproc, iproc, slk_communicator, ierr)
+   if(iproc == slk_processor%myproc) then
      ! DCOPY to bypass the real/complex issue
      if(cplx == 2) then
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), ham_iproc, 1, sca_ham%buffer_cplx, 1)
@@ -458,11 +443,11 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
 
  ! Final sum
  if(cplx == 2) then
-   call xmpi_sum(sca_ham%buffer_cplx, abi_complement_communicator, ierr)
-   call xmpi_sum(sca_ovl%buffer_cplx, abi_complement_communicator, ierr)
+   call xmpi_sum(sca_ham%buffer_cplx, slk_complement_communicator, ierr)
+   call xmpi_sum(sca_ovl%buffer_cplx, slk_complement_communicator, ierr)
  else
-   call xmpi_sum(sca_ham%buffer_real, abi_complement_communicator, ierr)
-   call xmpi_sum(sca_ovl%buffer_real, abi_complement_communicator, ierr)
+   call xmpi_sum(sca_ham%buffer_real, slk_complement_communicator, ierr)
+   call xmpi_sum(sca_ovl%buffer_real, slk_complement_communicator, ierr)
  end if
 
  ! Transform back
@@ -484,8 +469,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  !write(message, *) 'RR: diag'
  !call wrtout(std_out,message,'COLL')
  call timab(timer_subdiago, 1, tsec)
- call compute_generalized_eigen_problem(abi_processor,sca_ham,sca_ovl,&
-& sca_evec,eig,abi_communicator,istwf_k)
+ call compute_generalized_eigen_problem(slk_processor,sca_ham,sca_ovl,&
+& sca_evec,eig,slk_communicator,istwf_k)
  call timab(timer_subdiago, 2, tsec)
 
  !======================================================================================================
@@ -493,7 +478,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  !======================================================================================================
  call timab(timer_rotation, 1, tsec)
  cg_new = zero
- gsc_or_vnlc_new = zero
+ gsc_or_vnlxc_new = zero
  ghc_new = zero
  do iproc=0,nbproc-1
    ! Compute the contribution to the rotated matrices from this block
@@ -505,19 +490,19 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
    coords_iproc(2) = MOD(iproc,  grid_dims(2))
 
    ! Get buffersize of iproc
-   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,abi_processor%grid%dims(1))
-   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,abi_processor%grid%dims(2))
+   buffsize_iproc(1) = NUMROC(nband,blocksize,coords_iproc(1),0,slk_processor%grid%dims(1))
+   buffsize_iproc(2) = NUMROC(nband,blocksize,coords_iproc(2),0,slk_processor%grid%dims(2))
 
    ! Get data from iproc
    ABI_ALLOCATE(evec_iproc, (cplx*buffsize_iproc(1), buffsize_iproc(2)))
-   if(iproc == abi_processor%myproc) then
+   if(iproc == slk_processor%myproc) then
      if(cplx == 2) then
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), sca_evec%buffer_cplx, 1, evec_iproc, 1)
      else
        call DCOPY(cplx*buffsize_iproc(1)*buffsize_iproc(2), sca_evec%buffer_real, 1, evec_iproc, 1)
      end if
    end if
-   call xmpi_bcast(evec_iproc,iproc,abi_communicator,ierr)
+   call xmpi_bcast(evec_iproc,iproc,slk_communicator,ierr)
 
    ! Compute contribution to the rotated matrices from iproc
    ABI_ALLOCATE(left_temp,  (2,npw*nspinor*buffsize_iproc(1)))
@@ -543,13 +528,14 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
    if(usepaw == 1) then
      call from_mat_to_block_cyclic(gsc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
-   else
-     call from_mat_to_block_cyclic(gvnlc, npw*nspinor, nband, left_temp, &
+   endif
+   if(usepaw==0 .or. has_fock)then
+     call from_mat_to_block_cyclic(gvnlxc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
    end if
    call abi_xgemm('n','n',vectsize,buffsize_iproc(2),buffsize_iproc(1),cone,left_temp,vectsize,&
 &   evec_iproc, buffsize_iproc(1), czero, right_temp, vectsize, x_cplx=cplx)
-   call from_block_cyclic_to_mat(gsc_or_vnlc_new, npw*nspinor, nband, right_temp, &
+   call from_block_cyclic_to_mat(gsc_or_vnlxc_new, npw*nspinor, nband, right_temp, &
 &   buffsize_iproc(2), blocksize, coords_iproc(2), grid_dims(2))
 
    ABI_DEALLOCATE(evec_iproc)
@@ -561,9 +547,10 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  cg = cg_new
  ghc = ghc_new
  if(usepaw == 1) then
-   gsc = gsc_or_vnlc_new
- else
-   gvnlc = gsc_or_vnlc_new
+   gsc = gsc_or_vnlxc_new
+ endif
+ if(usepaw==0 .or. has_fock)then
+   gvnlxc = gsc_or_vnlxc_new
  end if
  call timab(timer_rotation, 2, tsec)
 
@@ -598,15 +585,6 @@ end subroutine rayleigh_ritz_distributed
 !!
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'from_mat_to_block_cyclic'
-!End of the abilint section
-
- implicit none
 
  integer, intent(in) :: vectsize, nband, buffsize, blocksize, iproc, nprocs
  real(dp), intent(in) :: full_mat(2, vectsize*nband)
@@ -662,15 +640,6 @@ end subroutine from_mat_to_block_cyclic
 !! SOURCE
 
 subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'from_block_cyclic_to_mat'
-!End of the abilint section
-
- implicit none
 
  integer, intent(in) :: vectsize, nband, buffsize, blocksize, iproc, nprocs
  real(dp), intent(inout) :: full_mat(2, vectsize*nband)

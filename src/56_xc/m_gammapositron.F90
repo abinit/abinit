@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gammapositron
 !! NAME
 !!  m_gammapositron
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (MT,GJ)
+!!  Copyright (C) 1998-2020 ABINIT group (MT,GJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +25,11 @@
 module m_gammapositron
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_electronpositron
 
+ use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : invcb
  use m_xctk,            only : xcden
 
@@ -92,15 +91,6 @@ contains
 !! SOURCE
 
 subroutine gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,npt,rhocore,rhoer,rhopr,usecore)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gammapositron'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -319,15 +309,6 @@ end subroutine gammapositron
 subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
 &                            n3xccc,nfft,ngfft,rhor_e,rhor_p,xccc3d)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gammapositron_fft'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: igamma,n3xccc,nfft
@@ -359,16 +340,14 @@ subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
  ABI_ALLOCATE(grhocore2,(ngr*usecore))
 
 !Store electronic density and its gradients
- call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,&
-& mpi_enreg%paral_kgb,qphon,rhor_e,rhoe)
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,qphon,rhor_e,rhoe)
 
 !Compute squared gradient of the electronic density
  if (ngrad==2) then
    grhoe2(:)=rhoe(:,1,2)**2+rhoe(:,1,3)**2+rhoe(:,1,4)**2
    if (usecore>0) then
      ABI_ALLOCATE(rhoc,(nfft,1,ngrad**2))
-     call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,&
-&     mpi_enreg%paral_kgb,qphon,xccc3d,rhoc)
+     call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,qphon,xccc3d,rhoc)
      grhocore2(:)=rhoc(:,1,2)**2+rhoc(:,1,3)**2+rhoc(:,1,4)**2
      ABI_DEALLOCATE(rhoc)
    end if

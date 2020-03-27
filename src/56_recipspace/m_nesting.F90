@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nesting
 !! NAME
 !!  m_nesting
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, MJV)
+!! Copyright (C) 2008-2020 ABINIT group (MG, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +27,7 @@ MODULE m_nesting
  use defs_basis
  use m_errors
  use m_abicore
- use m_kptrank
+ use m_krank
  use m_sort
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d
@@ -83,16 +82,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfactor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bfactor'
-!End of the abilint section
-
- implicit none
+subroutine bfactor(nkptfull,kptfull,nqpt,qpt,krank,nkpt,weight,nband,nestfactor)
 
 !Arguments ------------------------------------
 !scalars
@@ -100,7 +90,7 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfac
 !arrays
  real(dp),intent(in) :: kptfull(3,nkptfull),qpt(3,nqpt),weight(nband,nkpt)
  real(dp),intent(out) :: nestfactor(nqpt)
- type(kptrank_type), intent(in) :: kptrank_t
+ type(krank_t), intent(in) :: krank
 
 !Local variables-------------------------------
 !scalars
@@ -117,13 +107,13 @@ subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfac
 
  do iqpt=1,nqpt
    do ikpt=1,nkptfull
-     call get_rank_1kpt (kptfull(:,ikpt),irank_kpt,kptrank_t)
-     ikpt_irr = kptrank_t%invrank(irank_kpt)
+     irank_kpt = krank%get_rank(kptfull(:,ikpt))
+     ikpt_irr = krank%invrank(irank_kpt)
 
      kptpq(:) = kptfull(:,ikpt) + qpt(:,iqpt)
-     call get_rank_1kpt (kptpq,symrank_kpt,kptrank_t)
+     symrank_kpt = krank%get_rank(kptpq)
 
-     ikplusq_irr = kptrank_t%invrank(symrank_kpt)
+     ikplusq_irr = krank%invrank(symrank_kpt)
      if (ikplusq_irr == -1) then
        MSG_ERROR('It looks like no kpoint equiv to k+q!')
      end if
@@ -185,15 +175,6 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 & qpath_vertices,nqptfull,qptfull,base_name,gprimd,gmet,prtnest,qptrlatt,&
 & nsym,symrec) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mknesting'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband,nkpt,nqpath,prtnest
@@ -215,7 +196,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  integer :: ikpt,jkpt
  integer :: ik1, ik2, ik3, nkptfull
  character(len=500) :: message
- type(kptrank_type) :: kptrank_t
+ type(krank_t) :: krank
 !arrays
  integer,allocatable :: tmprank(:),ktable(:)
  character(len=fnlen) :: tmpname
@@ -225,10 +206,10 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 ! *************************************************************************
 
  if (kptrlatt(1,2) /= 0 .or. kptrlatt(1,3) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
-&    kptrlatt(2,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. kptrlatt(3,2) /= 0 ) then
+    kptrlatt(2,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. kptrlatt(3,2) /= 0 ) then
    write (message,'(4a)')&
-&   'kptrlatt should be diagonal in order to calculate the nesting factor,',ch10,&
-&   'skipping the nesting factor calculation ',ch10
+    'kptrlatt should be diagonal in order to calculate the nesting factor,',ch10,&
+    'skipping the nesting factor calculation ',ch10
    MSG_WARNING(message)
    return
  end if
@@ -259,12 +240,12 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 !new version now puts kptfull in correct order before bfactor, so no need to re-order...
  if (present(symrec)) then
    ABI_CHECK(present(nsym), "error - provide nsym and symrec arguments together")
-   call mkkptrank (kpt,nkpt,kptrank_t, nsym, symrec)
+   krank = krank_new(nkpt, kpt, nsym=nsym, symrec=symrec)
  else
-   call mkkptrank (kpt,nkpt,kptrank_t)
+   krank = krank_new(nkpt, kpt)
  end if
 
- call bfactor(nkptfull,kptfull,nkptfull,kptfull,kptrank_t,nkpt,weight,nband,nestordered)
+ call bfactor(nkptfull,kptfull,nkptfull,kptfull,krank,nkpt,weight,nband,nestordered)
 
 !================================================================================================
 !use linear interpolation to plot the bfactor along the given q-path
@@ -279,12 +260,12 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 !now do the same, but for the nesting factor over the phonon qpoints only
 !
  ABI_MALLOC(nestfactor,(nqptfull))
- call bfactor(nkptfull,kptfull,nqptfull,qptfull,kptrank_t,nkpt,weight,nband,nestfactor)
+ call bfactor(nkptfull,kptfull,nqptfull,qptfull,krank,nkpt,weight,nband,nestfactor)
 
- call destroy_kptrank (kptrank_t)
+ call krank%free()
  ABI_FREE(kptfull)
 
- call mkkptrank (qptfull,nqptfull,kptrank_t)
+ krank = krank_new(nqptfull, qptfull)
 
  ABI_MALLOC(ktable,(nqptfull))
  do ikpt=1,nqptfull
@@ -292,10 +273,12 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
  end do
 
  ABI_MALLOC(tmprank, (nqptfull))
- tmprank = kptrank_t%rank
+ do ikpt=1,nqptfull
+   tmprank(ikpt) = krank%get_rank(qptfull(:,ikpt))
+ end do
  call sort_int(nqptfull, tmprank, ktable)
  ABI_FREE(tmprank)
- call destroy_kptrank (kptrank_t)
+ call krank%free()
 
 !fill the datagrid for the nesting factor using the Fortran convention and the conventional unit cell
 !NOTE: the Fortran convention is a must if we want to plot the data
@@ -351,15 +334,6 @@ end subroutine mknesting
 !! SOURCE
 
 subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prtnest,qpath_vertices)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outnesting'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nqpath,prtnest,nkpt

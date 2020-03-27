@@ -1,0 +1,591 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/xmpi_exch_intn
+!! NAME
+!!  xmpi_exch_intn
+!!
+!! FUNCTION
+!!  This module contains functions that calls MPI routine,
+!!  if we compile the code using the MPI CPP flags.
+!!  xmpi_exch is the generic function.
+!!  Note that there exist two versions of the xmpi_exch,
+!!  irrespective of the kind of data that is exchanged : in a first version,
+!!  one suppose that there will be no confusion between different messages exchanged
+!!  between a pair (sender,receiver), so that no message tag is to be specified
+!!  (one tag will be automatically generated), while in the second version (safer !),
+!!  a tag is specified.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2001-2020 ABINIT group (MB)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~ABINIT/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTE
+!!  In the version with a tag automatically generated, the tag conforms
+!!  to the MPI request that the tag is lower than 32768, by using a modulo call.
+!!
+!! SOURCE
+
+!--------------------------------------------------------------------
+
+subroutine xmpi_exch_intn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: n1
+ integer, DEV_CONTARRD intent(in) :: vsend(:)
+ integer, DEV_CONTARRD intent(inout) :: vrecv(:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag = MOD(n1,xmpi_tag_ub)
+ if (recever==me) then
+   call MPI_RECV(vrecv,n1,MPI_INTEGER,sender,tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,n1,MPI_INTEGER,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_intn
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_int2d
+!! NAME
+!!  xmpi_exch_int2d
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: two-dimensional integer arrays.
+!!
+!! INPUTS
+!!  nt= vector length
+!!  vsend= send buffer
+!!  sender= node sending the data
+!!  recever= node receiving the data
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  vrecv= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_exch_int2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: nt
+ integer, DEV_CONTARRD intent(in) :: vsend(:,:)
+ integer, DEV_CONTARRD intent(inout) :: vrecv(:,:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag = MOD(nt, xmpi_tag_ub)
+
+ if (recever==me) then
+   call MPI_RECV(vrecv,nt,MPI_INTEGER,sender,tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,nt,MPI_INTEGER,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_int2d
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_dpn
+!! NAME
+!!  xmpi_exch_dpn
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: one-dimensional double precision arrays.
+!!
+!! INPUTS
+!!  n1= first dimension of the array
+!!  vsend= send buffer
+!!  sender= node sending the data
+!!  recever= node receiving the data
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  vrecv= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: n1
+ real(dp), DEV_CONTARRD intent(in) :: vsend(:)
+ real(dp), DEV_CONTARRD intent(inout) :: vrecv(:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out)   :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag = MOD(n1, xmpi_tag_ub)
+ if (recever==me) then
+   call MPI_RECV(vrecv,n1,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,n1,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_dpn
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_dp2d
+!! NAME
+!!  xmpi_exch_dp2d
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: double precision two-dimensional arrays.
+!!
+!! INPUTS
+!!  nt= vector length
+!!  vsend= send buffer
+!!  sender= node sending the data
+!!  recever= node receiving the data
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  vrecv= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: nt
+ real(dp), DEV_CONTARRD intent(in) :: vsend(:,:)
+ real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out)   :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag=MOD(nt, xmpi_tag_ub)
+ if (recever==me) then
+   call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,nt,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_dp2d
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_dp3d
+!! NAME
+!!  xmpi_exch_dp3d
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: double precision three-dimensional arrays.
+!!
+!! INPUTS
+!!  nt= vector length
+!!  vsend= send buffer
+!!  sender= node sending the data
+!!  recever= node receiving the data
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  vrecv= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: nt
+ real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:)
+ real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:,:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag=MOD(nt, xmpi_tag_ub)
+ if (recever==me) then
+   call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,nt,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_dp3d
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_dp4d_tag
+!! NAME
+!!  xmpi_exch_dp4d_tag
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: double precision four-dimensional arrays.
+!!
+!! INPUTS
+!!  mtag= message tag
+!!  vsend= send buffer
+!!  sender= node sending the data
+!!  recever= node receiving the data
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  vrecv= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: mtag
+ real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:,:)
+ real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:,:,:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: me,my_dt,my_op,n1,n2,n3,n4,tag
+ integer(kind=int64) :: ntot
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ n1 =size(vsend,dim=1)
+ n2 =size(vsend,dim=2)
+ n3 =size(vsend,dim=3)
+ n4 =size(vsend,dim=4)
+ tag = MOD(mtag, xmpi_tag_ub)
+
+ !This product of dimensions can be greater than a 32bit integer
+ !We use a INT64 to store it. If it is too large, we switch to an
+ !alternate routine because MPI<4 doesnt handle 64 bit counts.
+ ntot=int(n1*n2*n3*n4,kind=int64)
+
+ if (recever==me) then
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_RECV(vrecv,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_RECV(vrecv,1,my_dt,sender,tag,spaceComm,statux,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+ if (sender==me) then
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_SEND(vsend,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_SEND(vsend,1,my_dt,recever,tag,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_exch_dp4d_tag
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_dp5d_tag
+!! NAME
+!!  xmpi_exch_dp5d_tag
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: double precision five-dimensional arrays.
+!!
+!! INPUTS
+!!  mtag= message tag
+!!  vsend= send buffer
+!!  sender= node sending the data
+!!  recever= node receiving the data
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  vrecv= receive buffer
+!!
+!! SOURCE
+
+subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) ::mtag
+ real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:,:,:)
+ real(dp), DEV_CONTARRD intent(inout) :: vrecv(:,:,:,:,:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: me,my_dt,my_op,n1,n2,n3,n4,n5,tag
+ integer :: statux(MPI_STATUS_SIZE)
+ integer(kind=int64) :: ntot
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ n1 =size(vsend,dim=1)
+ n2 =size(vsend,dim=2)
+ n3 =size(vsend,dim=3)
+ n4 =size(vsend,dim=4)
+ n5 =size(vsend,dim=5)
+ tag = MOD(mtag,xmpi_tag_ub)
+
+ !This product of dimensions can be greater than a 32bit integer
+ !We use a INT64 to store it. If it is too large, we switch to an
+ !alternate routine because MPI<4 doesnt handle 64 bit counts.
+ ntot=int(n1*n2*n3*n4*n5,kind=int64)
+
+ if (recever==me) then
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_RECV(vrecv,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_RECV(vrecv,1,my_dt,sender,tag,spaceComm,statux,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+ if (sender==me) then
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_SEND(vsend,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_SEND(vsend,1,my_dt,recever,tag,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
+ end if
+#endif
+
+end subroutine xmpi_exch_dp5d_tag
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_spc_1d
+!! NAME
+!!  xmpi_exch_spc_1d
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: one-dimensional single precision complex arrays.
+!!
+!! SOURCE
+
+subroutine xmpi_exch_spc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: n1
+ complex(spc), DEV_CONTARRD intent(in) :: vsend(:)
+ complex(spc), DEV_CONTARRD intent(inout) :: vrecv(:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag= MOD(n1, xmpi_tag_ub)
+ if (recever==me) then
+   call MPI_RECV(vrecv,n1,MPI_COMPLEX,sender, tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,n1,MPI_COMPLEX,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_spc_1d
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_dpc_1d
+!! NAME
+!!  xmpi_exch_dpc_1d
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: one-dimensional double precision complex arrays.
+!!
+!! SOURCE
+
+subroutine xmpi_exch_dpc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: n1
+ complex(dpc), DEV_CONTARRD intent(in) :: vsend(:)
+ complex(dpc), DEV_CONTARRD intent(inout) :: vrecv(:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(n1==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag = MOD(n1, xmpi_tag_ub)
+ if (recever==me) then
+   call MPI_RECV(vrecv,n1,MPI_DOUBLE_COMPLEX,sender, tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,n1,MPI_DOUBLE_COMPLEX,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_dpc_1d
+!!***
+
+!--------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_exch_dpc_2d
+!! NAME
+!!  xmpi_exch_dpc_2d
+!!
+!! FUNCTION
+!!  Sends and receives data.
+!!  Target: two-dimensional double precision complex arrays.
+!!
+!! SOURCE
+
+subroutine xmpi_exch_dpc_2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
+
+!Arguments----------------
+ integer,intent(in) :: nt
+ complex(dpc), DEV_CONTARRD intent(in) :: vsend(:,:)
+ complex(dpc), DEV_CONTARRD intent(inout) :: vrecv(:,:)
+ integer,intent(in) :: sender,recever,spaceComm
+ integer,intent(out) :: ier
+
+!Local variables--------------
+#if defined HAVE_MPI
+ integer :: statux(MPI_STATUS_SIZE)
+ integer :: tag,me
+#endif
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (sender==recever.or.spaceComm==MPI_COMM_NULL.or.(nt==0)) return
+ call MPI_COMM_RANK(spaceComm,me,ier)
+ tag=MOD(nt, xmpi_tag_ub)
+ if (recever==me) then
+   call MPI_RECV(vrecv,nt,MPI_DOUBLE_COMPLEX,sender, tag,spaceComm,statux,ier)
+ end if
+ if (sender==me) then
+   call MPI_SEND(vsend,nt,MPI_DOUBLE_COMPLEX,recever,tag,spaceComm,ier)
+ end if
+#endif
+
+end subroutine xmpi_exch_dpc_2d
+!!***

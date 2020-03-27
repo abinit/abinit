@@ -4,7 +4,6 @@ t60o_DEN   # DEN file
 0.17-Cl.8.density.AE
 0          # Exit
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d
@@ -13,7 +12,7 @@ t60o_DEN   # DEN file
 #%% files_to_test = 
 #%%   t61.stdout, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [shell]
-#%% Copy from Psps_dir to Workdir
+#%% # Copy from Psps_dir to Workdir
 #%% pre_commands =  
 #%%    pw_cp 0.11-Na.8.density.AE 0.11-Na.8.density.AE; 
 #%%    pw_cp 0.17-Cl.8.density.AE 0.17-Cl.8.density.AE  

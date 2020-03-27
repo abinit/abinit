@@ -27,5 +27,5 @@ inp_files = [
 "t51.in",
 "t62.in",
 "t69.in", 
-"t99.in",
+"-t99.in", # disabled since it have no meaning with my modifications
 ]

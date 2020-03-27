@@ -49,7 +49,6 @@ toldfe 1.0d-11
 prtwf 0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -61,10 +60,10 @@ prtwf 0
 #%% [extra_info]
 #%% authors =  P.M. Anglade
 #%% keywords = 
-#%% description = 
-#%% Simple test for TFvW preconditionner (not already effective) simple scf calculation
-#%% following part of the code are tested:
-#%% 04rsprc/prctfw.F90
-#%% 01cg/*
-#%% WARNING : HAS BEEN TRANSFERRED TO tests/seq
+#%%   description = 
+#%%   Simple test for TFvW preconditionner (not already effective) simple scf calculation
+#%%   following part of the code are tested:
+#%%   04rsprc/prctfw.F90
+#%%   01cg/*
+#%%   WARNING : HAS BEEN TRANSFERRED TO tests/seq
 #%%<END TEST_INFO>

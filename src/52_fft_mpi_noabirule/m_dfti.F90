@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfti
 !! NAME
 !! m_dfti
@@ -7,7 +6,7 @@
 !!  This module provides wrappers for the MKL DFTI routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG)
+!! Copyright (C) 2009-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +24,7 @@
 
 #include "abi_common.h"
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 ! Include and generate MKL_DFTI module
 #include "mkl_dfti.f90"
@@ -34,6 +33,10 @@
 #define FFTLIB "DFTI"
 #define FFT_PREF(name) CONCAT(dfti_,name)
 #define SPAWN_THREADS_HERE(ndat, nthreads) dfti_spawn_threads_here(ndat, nthreads)
+
+#define FFT_DOUBLE 1
+#define FFT_SINGLE 2
+#define FFT_MIXPREC 3
 
 #endif
 
@@ -47,7 +50,7 @@ MODULE m_dfti
  use m_cplxtools
  use m_fftcore
  use iso_c_binding
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
  use MKL_DFTI
 #endif
 
@@ -60,7 +63,7 @@ MODULE m_dfti
  private
 
 ! Entry points for client code
- public :: dfti_seqfourdp         ! 3D FFT of lengths nx, ny, nz. Mainly used for densities or potentials.
+ public :: dfti_seqfourdp      ! 3D FFT of lengths nx, ny, nz. Mainly used for densities or potentials.
  public :: dfti_seqfourwf      ! FFT transform of wavefunctions (high-level interface).
  public :: dfti_fftrisc
  public :: dfti_fftug          ! G-->R, 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
@@ -137,7 +140,7 @@ MODULE m_dfti
 
  logical,private,save :: USE_LIB_THREADS = .FALSE.
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
  ! dfti_alloc_* allocates arrays aligned on DFTI_DEFAULT_ALIGNMENT boundaries.
  integer(C_INT),private,parameter :: DFTI_DEFAULT_ALIGNMENT_SP = 64
  integer(C_INT),private,parameter :: DFTI_DEFAULT_ALIGNMENT_DP = 64
@@ -205,15 +208,6 @@ CONTAINS  !===========================================================
 
 subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_seqfourdp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -221,37 +215,71 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
  real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
  real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
 
+!Local variables-------------------------------
+!scalars
+ integer :: ii,jj
+ complex(spc), allocatable :: work_sp(:)
+
 ! *************************************************************************
 
  select case (cplex)
- case (2) ! Complex to Complex.
+ case (2)
+   ! Complex to Complex.
+   if (fftcore_mixprec == 1) then
+     ! Mixed precision: copyin + in-place + copyout
+     ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
+     if (isign == +1) then
+       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+     else if (isign == -1) then
+       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+     else
+       MSG_BUG("Wrong isign")
+     end if
 
-   select case (isign)
-   case (+1)
-     call dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
+     call dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp)
 
-   case (-1) ! -1
-     call dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg)
+     if (isign == +1) then
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofr(jj) = real(work_sp(ii), kind=dp)
+         fofr(jj+1) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     else if (isign == -1) then
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofg(jj) = real(work_sp(ii), kind=dp)
+         fofg(jj+1) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     end if
+     ABI_FREE(work_sp)
 
-   case default
-     MSG_BUG("Wrong isign")
-   end select
+   else
+     ! double precision version.
+     select case (isign)
+     case (+1)
+       call dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
+     case (-1) ! -1
+       call dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg)
+     case default
+       MSG_BUG("Wrong isign")
+     end select
+   end if
 
  case (1) ! Real case.
 
    select case (isign)
    case (+1) ! G --> R
      call dfti_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr)
-
    case (-1) ! R --> G
      call dfti_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg)
-
    case default
      MSG_BUG("Wrong isign")
    end select
 
  case default
-   MSG_BUG(" Wrong value for cplex")
+   MSG_BUG("Wrong value for cplex")
  end select
 
 end subroutine dfti_seqfourdp
@@ -331,15 +359,6 @@ end subroutine dfti_seqfourdp
 subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_seqfourwf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,ldx,ldy,ldz,ndat,npwin,npwout,option,mgfft
@@ -381,11 +400,15 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
  if (use_fftrisc) then
-   !call wrtout(std_out,strcat(ABI_FUNC," calls dfti_fftrisc"),"COLL")
-   if (ndat==1) then
-     call dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&      mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
+   !call wrtout(std_out, " calls dfti_fftrisc")
+   if (ndat == 1) then
+     if (fftcore_mixprec == 0) then
+       call dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+         mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+     else
+       call dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+         mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+     end if
    else
      ! All this boilerplate code is needed because the caller might pass zero-sized arrays
      ! for the arguments that are not referenced and we don't want to have problems at run-time.
@@ -428,8 +451,13 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
-           call dfti_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           if (fftcore_mixprec == 0) then
+             call dfti_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,&
+               kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           else
+             call dfti_fftrisc_mixprec(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,&
+               kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           end if
          end do
        else
 !$OMP PARALLEL DO PRIVATE(ptgin,ptgout)
@@ -552,65 +580,7 @@ end subroutine dfti_seqfourwf
 !! Carry out Fourier transforms between real and reciprocal (G) space,
 !! for wavefunctions, contained in a sphere in reciprocal space,
 !! in both directions. Also accomplish some post-processing.
-!!
-!! NOTES
-!! Specifically uses rather sophisticated algorithms, based on S Goedecker
-!! routines, specialized for superscalar RISC architecture.
-!! Zero padding : saves 7/12 execution time
-!! Bi-dimensional data locality in most of the routine : cache reuse
-!! For k-point (0 0 0) : takes advantage of symmetry of data.
-!! Note however that no blocking is used, in both 1D z-transform
-!! or subsequent 2D transform. This should be improved.
-!!
-!! INPUTS
-!!  cplex= if 1 , denpot is real, if 2 , denpot is complex
-!!     (cplex=2 only allowed for option=2 when istwf_k=1)
-!!     one can also use cplex=0 if option=0 or option=3
-!!  fofgin(2,npwin)=holds input wavefunction in G vector basis sphere.
-!!  gboundin(2*mgfft+8,2)=sphere boundary info for reciprocal to real space
-!!  gboundout(2*mgfft+8,2)=sphere boundary info for real to reciprocal space
-!!  istwf_k=option parameter that describes the storage of wfs
-!!  kg_kin(3,npwin)=reduced planewave coordinates, input
-!!  kg_kout(3,npwout)=reduced planewave coordinates, output
-!!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
-!!  npwout=number of elements in fofgout array (for option 2 and 3)
-!!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
-!!  option= if 0: do direct FFT
-!!          if 1: do direct FFT, then sum the density
-!!          if 2: do direct FFT, multiply by the potential, then do reverse FFT
-!!          if 3: do reverse FFT only
-!!  weight=weight to be used for the accumulation of the density in real space
-!!          (needed only when option=1)
-!!
-!! OUTPUT
-!!  (see side effects)
-!!
-!! OPTIONS
-!!  The different options are:
-!!  - reciprocal to real space and output the result (when option=0),
-!!  - reciprocal to real space and accumulate the density (when option=1) or
-!!  - reciprocal to real space, apply the local potential to the wavefunction
-!!    in real space and produce the result in reciprocal space (when option=2)
-!!  - real space to reciprocal space (when option=3).
-!!  option=0 IS NOT ALLOWED when istwf_k>2
-!!  option=3 IS NOT ALLOWED when istwf_k>=2
-!!
-!! SIDE EFFECTS
-!!  for option==0, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 fofr(2,ldx,ldy,ldz) contains the Fourier Transform of fofgin;
-!!                 no use of denpot, fofgout and npwout.
-!!  for option==1, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 denpot(cplex*ldx,ldy,ldz) contains the input density at input,
-!!                 and the updated density at output;
-!!                 no use of fofgout and npwout.
-!!  for option==2, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 denpot(cplex*ldx,ldy,ldz) contains the input local potential;
-!!                 fofgout(2,npwout) contains the output function;
-!!  for option==3, fofr(2,ldx,ldy,ldz) contains the real space wavefunction;
-!!                 fofgout(2,npwout) contains its Fourier transform;
-!!                 no use of fofgin and npwin.
+!! See dfti_fftrisc_dp for API doc.
 !!
 !! PARENTS
 !!
@@ -621,15 +591,6 @@ end subroutine dfti_seqfourwf
 
 subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftrisc_sp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -645,7 +606,7 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 #undef FFT_PRECISION
 #undef MYKIND
@@ -753,15 +714,6 @@ end subroutine dfti_fftrisc_sp
 subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftrisc_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
@@ -776,7 +728,7 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -800,6 +752,74 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 #endif
 
 end subroutine dfti_fftrisc_dp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dfti/dfti_fftrisc_mixprec
+!! NAME
+!! dfti_fftrisc_mixprec
+!!
+!! FUNCTION
+!! Carry out Fourier transforms between real and reciprocal (G) space,
+!! for wavefunctions, contained in a sphere in reciprocal space,
+!! in both directions. Also accomplish some post-processing.
+!! This is the Mixed Precision version (dp in input, FFT done with sp data, output is dp)
+!! See dfti_fftrisc_dp for API doc.
+!!
+!! PARENTS
+!!      m_dfti
+!!
+!! CHILDREN
+!!      c_f_pointer
+!!
+!! SOURCE
+
+subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
+ real(dp),intent(in) :: weight_i,weight_r
+!arrays
+ integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
+ integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
+ real(dp),intent(in) :: fofgin(2,npwin)
+ real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz)
+ real(dp),intent(inout) :: fofr(2,ldx*ldy*ldz)
+ real(dp),intent(inout) :: fofgout(2,npwout)    !vz_i
+
+! *************************************************************************
+
+#ifdef HAVE_DFTI
+
+#undef  FFT_PRECISION
+#undef  MYKIND
+#undef  MYCZERO
+#undef  MYCMPLX
+#undef  MYCONJG
+
+#define FFT_PRECISION DFTI_SINGLE
+#define MYKIND SPC
+#define MYCZERO (0._sp,0._sp)
+#define MYCMPLX  CMPLX
+#define MYCONJG  CONJG
+
+#define HAVE_DFTI_MIXED_PRECISION 1
+
+#include "dfti_fftrisc.finc"
+
+#undef HAVE_DFTI_MIXED_PRECISION
+
+#else
+ MSG_ERROR("DFTI support not activated")
+ ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
+ ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
+ ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
+#endif
+
+end subroutine dfti_fftrisc_mixprec
 !!***
 
 !----------------------------------------------------------------------
@@ -839,15 +859,6 @@ end subroutine dfti_fftrisc_dp
 
 subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftug_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -857,7 +868,7 @@ subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  real(dp),target,intent(in) :: ug(2*npw_k*ndat)
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
@@ -917,15 +928,6 @@ end subroutine dfti_fftug_dp
 
 subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftug_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -935,7 +937,7 @@ subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(spc),target,intent(in) :: ug(npw_k*ndat)
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -995,15 +997,6 @@ end subroutine dfti_fftug_spc
 
 subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftug_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1013,7 +1006,7 @@ subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(dpc),target,intent(in) :: ug(npw_k*ndat)
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1076,15 +1069,6 @@ end subroutine dfti_fftug_dpc
 
 subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftur_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1094,7 +1078,7 @@ subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
  real(dp),target,intent(inout) :: ug(2*npw_k*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
@@ -1159,15 +1143,6 @@ end subroutine dfti_fftur_dp
 
 subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftur_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1177,7 +1152,7 @@ subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(spc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1241,15 +1216,6 @@ end subroutine dfti_fftur_spc
 
 subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftur_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1259,7 +1225,7 @@ subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(dpc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1314,15 +1280,6 @@ end subroutine dfti_fftur_dpc
 
 subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_ip_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -1334,6 +1291,7 @@ subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_SINGLE
+
 #include "dfti_c2c_ip.finc"
 
 end subroutine dfti_c2c_ip_spc
@@ -1368,15 +1326,6 @@ end subroutine dfti_c2c_ip_spc
 
 subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_ip_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -1388,6 +1337,7 @@ subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_DOUBLE
+
 #include "dfti_c2c_ip.finc"
 
 end subroutine dfti_c2c_ip_dpc
@@ -1422,15 +1372,6 @@ end subroutine dfti_c2c_ip_dpc
 
 subroutine dfti_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_op_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
@@ -1443,6 +1384,7 @@ subroutine dfti_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_SINGLE
+
 #include "dfti_c2c_op.finc"
 
 end subroutine dfti_c2c_op_spc
@@ -1477,15 +1419,6 @@ end subroutine dfti_c2c_op_spc
 
 subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_op_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
@@ -1498,6 +1431,7 @@ subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
 #define DEV_DFTI_PRECISION DFTI_DOUBLE
+
 #include "dfti_c2c_op.finc"
 
 end subroutine dfti_c2c_op_dpc
@@ -1534,15 +1468,6 @@ end subroutine dfti_c2c_op_dpc
 
 subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_many_dft_op'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -1550,7 +1475,7 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
  real(dp),target,intent(in) :: fin(2*ldx*ldy*ldz*ndat)
  real(dp),target,intent(out) :: fout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: fin_cptr, fout_cptr
@@ -1610,22 +1535,13 @@ end subroutine dfti_many_dft_op
 
 subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_many_dft_ip'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
 !arrays
  real(dp),target,intent(inout) :: finout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: finout_cptr
@@ -1685,15 +1601,6 @@ end subroutine dfti_many_dft_ip
 
 subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftpad_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
@@ -1702,7 +1609,7 @@ subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  real(dp),target,intent(inout) :: ff(2*ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !scalars
  type(C_ptr) :: cptr
 !arrays
@@ -1762,15 +1669,6 @@ end subroutine dfti_fftpad_dp
 
 subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftpad_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
@@ -1780,7 +1678,7 @@ subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 ! *************************************************************************
 
@@ -1834,25 +1732,13 @@ end subroutine dfti_fftpad_dpc
 
 subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftpad_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
-
-!Local variables-------------------------------
-!scalars
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 ! *************************************************************************
 
@@ -1900,15 +1786,6 @@ end subroutine dfti_fftpad_spc
 
 subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_r2c_op_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -1916,7 +1793,7 @@ subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  real(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer :: status,nhp,padx,i1,i2,i3,igp,igf,imgf,ii
@@ -2037,15 +1914,6 @@ end subroutine dfti_r2c_op_dpc
 
 subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_r2c_op_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2053,7 +1921,7 @@ subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  real(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
  real(dp),target,intent(out) :: gg(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: gg_cptr
@@ -2105,15 +1973,6 @@ end subroutine dfti_r2c_op_dp
 
 subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2r_op_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2121,7 +1980,7 @@ subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer :: status,nhp,padx,i2,i3,igp,igf,idat,padatf,padatp,ii
@@ -2216,15 +2075,6 @@ end subroutine dfti_c2r_op_dpc
 
 subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2r_op_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2232,7 +2082,7 @@ subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  real(dp),target,intent(in) :: ff(2*ldx*ldy*ldz*ndat)
  real(dp),intent(inout) :: gg(ldx*ldy*ldz*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: ff_cptr
@@ -2276,18 +2126,9 @@ end subroutine dfti_c2r_op_dp
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_check_status(status,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_check_status'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2351,15 +2192,6 @@ end subroutine dfti_check_status
 
 function dfti_spawn_threads_here(ndat,nthreads) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_spawn_threads_here'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndat,nthreads
@@ -2398,15 +2230,6 @@ end function dfti_spawn_threads_here
 
 subroutine dfti_use_lib_threads(logvar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_use_lib_threads'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: logvar
@@ -2437,18 +2260,9 @@ end subroutine dfti_use_lib_threads
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_alloc_real_dp(size,cptr,fptr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_alloc_real_dp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2490,18 +2304,9 @@ end subroutine dfti_alloc_real_dp
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_alloc_complex_spc(size,cptr,fptr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_alloc_complex_spc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2543,18 +2348,9 @@ end subroutine dfti_alloc_complex_spc
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_alloc_complex_dpc(size,cptr,fptr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_alloc_complex_dpc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

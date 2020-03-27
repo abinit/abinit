@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_psi
 !! NAME
 !!  m_wvl_psi
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (DC, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DC, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,13 +25,14 @@
 module m_wvl_psi
 
   use defs_basis
-  use defs_abitypes
-  use defs_datatypes
   use defs_wvltypes
   use m_errors
   use m_xmpi
   use m_abicore
+  use m_dtset
 
+  use defs_datatypes, only : pseudopotential_type
+  use defs_abitypes,  only : MPI_type
   use m_energies, only : energies_type
   use m_pawcprj,  only : pawcprj_type, pawcprj_alloc
   use m_abi2big,  only : wvl_vxc_abi2big, wvl_vtrial_abi2big
@@ -73,7 +73,7 @@ contains
 !!  energies <type(energies_type)>=storage for energies computed here :
 !!   | e_kinetic(OUT)=kinetic energy part of total energy
 !!   | e_localpsp(OUT)=local pseudopotential part of total energy
-!!   | e_nonlocalpsp(OUT)=nonlocal pseudopotential part of total energy
+!!   | e_nlpsp_vfock(OUT)=nonlocal psp + potential Fock ACE part of total energy
 !!  residm=max value for gradient in the minimisation process.
 !!  rhor(dtset%nfft)=electron density in r space
 !!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
@@ -92,13 +92,6 @@ subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xc
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : hpsitopsi, calculate_energy_and_gradient
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_hpsitopsi'
-!End of the abilint section
-
   implicit none
 
 !Arguments -------------------------------
@@ -167,7 +160,7 @@ subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xc
  if(dtset%usepaw==1) then
    call hpsitopsi(me, nproc, istep, ids, wvl%wfs%ks,&
 &   wvl%descr%atoms,wvl%projectors%nlpsp,&
-&   wvl%descr%paw,xcart,energies%e_nonlocalpsp,wvl%projectors%G)
+&   wvl%descr%paw,xcart,energies%e_nlpsp_vfock,wvl%projectors%G)
  else
    call hpsitopsi(me, nproc, istep, ids, wvl%wfs%ks,&
 &   wvl%descr%atoms,wvl%projectors%nlpsp)
@@ -235,13 +228,6 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: psitohpsi, KS_POTENTIAL, total_energies
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_psitohpsi'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -366,13 +352,6 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: nonlocal_forces
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nl_gradient'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -471,13 +450,6 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: CalculateTailCorrection
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_tail_corrections'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -517,7 +489,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 & energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
 & energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
- if (dtset%usepaw==0) etotal = etotal + energies%e_nonlocalpsp
+ if (dtset%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock
  if (dtset%usepaw/=0) etotal = etotal + energies%e_paw
  write(message,'(a,2x,e19.12)') ' Total energy before tail correction', etotal
  call wrtout(std_out, message, 'COLL')
@@ -568,7 +540,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 
  energies%e_kinetic = ekin_sum
  energies%e_localpsp = epot_sum - two * energies%e_hartree
- energies%e_nonlocalpsp = eproj_sum
+ energies%e_nlpsp_vfock = eproj_sum
  energies%e_corepsp = zero
  energies%e_chempot = zero
 #if defined HAVE_BIGDFT
@@ -586,7 +558,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 & energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
 & energies%e_ewald + energies%e_vdw_dftd
- if (dtset%usepaw==0) etotal = etotal + energies%e_nonlocalpsp
+ if (dtset%usepaw==0) etotal = etotal + energies%e_nlpsp_vfock
  if (dtset%usepaw/=0) etotal = etotal + energies%e_paw
 
  write(message,'(a,2x,e19.12)') ' Total energy with tail correction', etotal
