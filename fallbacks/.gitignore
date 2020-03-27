@@ -2,3 +2,5 @@
 *
 !/abinit-fallbacks-*.tar.gz
 !/build-abinit-fallbacks.sh.in
+!/README
+!/INSTALL
