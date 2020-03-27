@@ -11262,14 +11262,13 @@ Variable(
     topics=['AtomTypes_useful', 'PseudosPAW_expert'],
     dimensions="scalar",
     defaultval="[[ntypat]]",
-    mnemonics="Number of PSeudoPotentials",
+    mnemonics="Number of PSeudoPotentials to be read",
     characteristics=['[[NO_MULTI]]'],
     added_in_version="before_v9",
     text=r"""
-Usually, the number of pseudopotentials to be read is equal to the number of
-type of atoms. However, in the case an alchemical mixing of pseudopotential is
-to be used, often the number of pseudopotentials to be read will not equal the
-number of types of atoms.
+Usually, the number of pseudopotentials to be read, [[npsp]], is equal to the number of
+type of atoms, [[ntypat]]. However, in the case an alchemical mixing of pseudopotential is
+used, [[npsp]] will be bigger than [[ntypat]].
 
 Alchemical pseudopotentials will be present when [[ntypalch]] is non-zero. See
 [[ntypalch]] to understand how to use alchemical potentials in ABINIT. The
@@ -11290,12 +11289,14 @@ Variable(
     defaultval="[[npsp]]-[[ntyppure]]",
     mnemonics='Number of PSeudoPotentials that are "ALCHemical"',
     characteristics=['[[INTERNAL_ONLY]]'],
-    requires="[[ntypalch]]/=0",
+    requires="[[ntypalch]]>0",
     added_in_version="before_v9",
     text=r"""
 Gives the number of pseudopotentials that are used for alchemical mixing (when [[ntypalch]] is non-zero):
 
 [[npspalch]] = [[npsp]]-[[ntyppure]]
+
+When alchemical mixing of potentials is used (that is, when [[ntypalch]]>0), then [[npspalch]] must be greater than 0.
 """,
 ),
 
@@ -11800,8 +11801,9 @@ E.g. for a homopolar system (e.g. pure Si) **ntypat** is 1.
 The code tries to read the same number of pseudopotential files. The first
 pseudopotential is assigned type number 1, and so on...
 
-There is an exception in the case of alchemical mixing of potentials, for
-which there is a different number of pseudopotentials atomic types. See [[mixalch]].
+There is an exception in the case of alchemical mixing of potentials. In this case,
+the number of atomic types will differ from the number of pseudopotentials.
+See [[mixalch]], [[npsp]], [[ntypalch]] and [[npspalch]].
 """,
 ),
 
