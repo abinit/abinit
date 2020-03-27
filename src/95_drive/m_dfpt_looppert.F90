@@ -1003,7 +1003,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(142,2,tsec)
 
 !  Allocate some k-dependent arrays at k
-   ABI_ALLOCATE(kg,(3,mpw*nkpt_rbz))
+!   ABI_ALLOCATE(kg,(3,mpw*nkpt_rbz))
    ABI_ALLOCATE(npwarr,(nkpt_rbz))
    ABI_ALLOCATE(npwtot,(nkpt_rbz))
 
@@ -1025,7 +1025,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #ifdef DEV_MJV
 print *, ' dtset%mkmem, mkmem_rbz, nkpt_rbz ', dtset%mkmem, mkmem_rbz, nkpt_rbz
 print *, 'mband_mem_rbz ', mband_mem_rbz
-print *, 'call initmpi_band ', mkmem_rbz
+print *, 'call initmpi_band ', mkmem_rbz, mk1mem_rbz
 #endif
    call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
 
@@ -1039,6 +1039,7 @@ print *, 'call initmpi_band ', mkmem_rbz
 print *, ' calling kpgio '
 #endif
 !  Set up the basis sphere of planewaves at k
+   ABI_ALLOCATE(kg,(3,mpw*mkmem_rbz))
    call timab(143,1,tsec)
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 &    kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,&
@@ -2091,7 +2092,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
 &                dtset%nsppol,resid)
      ! Output 1st-order wavefunctions in file
      call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, formeig, hdr, dtset%iomode, &
-&          dtset%mband, mband_mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
+&          dtset%mband, mband_mem_rbz, mk1mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
 &          cg1, kg1, eigen1)
 
 !     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&

@@ -1919,6 +1919,9 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
 
  if (PRESENT(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
+#ifdef DEV_MJV
+print *, 'ik_ibz SIZE(kg_k,DIM=2), npw_disk ', ik_ibz, SIZE(kg_k,DIM=2), npw_disk
+#endif
  end if
 
  if (PRESENT(cg_k)) then
@@ -3643,20 +3646,21 @@ end subroutine wfk_read_my_kptbands
 !! SOURCE
 
 subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
-&          iomode_, mband_in, mband_mem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
+&          iomode_, mband_in, mband_mem_in, mkmem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
 &          cg, kg, eigen, occ)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: comm, nkpt_in, formeig, iomode_
  integer, intent(in) :: mband_in,mband_mem_in,mpw_in, nspinor_in, nsppol_in
+ integer, intent(in) :: mkmem_in
  type(hdr_type),intent(in) :: hdr
 !arrays
  character(len=fnlen), intent(in) :: outpath_
  logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
 
- real(dp), intent(in) :: cg(2,mpw_in*nspinor_in*mband_mem_in*nkpt_in*nsppol_in)
- integer,  intent(in) :: kg(3,mpw_in*nkpt_in)
+ real(dp), intent(in) :: cg(2,mpw_in*nspinor_in*mband_mem_in*mkmem_in*nsppol_in)
+ integer,  intent(in) :: kg(3,mpw_in*mkmem_in)
  real(dp), intent(in) :: eigen((mband_in*(2*mband_in)**formeig)*nkpt_in*nsppol_in)
  real(dp), intent(in),optional :: occ(mband_in*nkpt_in*nsppol_in)
 
@@ -3665,7 +3669,12 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
  integer :: spin,ik_rbz,nband_k
  integer :: npw_k
  integer :: iomode
- integer :: wfk_unt, ibdocc, ibdeig, icg, ikg, iband, nband_me
+ integer :: wfk_unt, iband, nband_me
+ integer :: ii,jj,kk,ll
+ integer, allocatable :: icg(:,:)
+ integer, allocatable :: ikg(:)
+ integer, allocatable :: ibdeig(:,:)
+ integer, allocatable :: ibdocc(:,:)
  character(len=fnlen) :: outpath
  real(dp) :: cpu,wall,gflops
  type(wfk_t),target :: wfk_disk
@@ -3692,6 +3701,46 @@ print *, 'formeig,outpath ', formeig, outpath
  wfk_disk%debug = .true.
  call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,comm) !xmpi_comm_self)
 
+ ABI_ALLOCATE(icg, (nkpt_in,nsppol_in))
+ ABI_ALLOCATE(ikg, (nkpt_in))
+ ABI_ALLOCATE(ibdeig, (nkpt_in,nsppol_in))
+ ABI_ALLOCATE(ibdocc, (nkpt_in,nsppol_in))
+ icg = 0
+ ikg = 0
+ ibdeig = 0
+ ibdocc = 0
+ ii = 0
+ kk = 0
+ ll = 0
+ do spin=1,nsppol_in
+   jj = 0
+   do ik_rbz=1,nkpt_in
+
+! this allows for reading fewer bands from disk than the disk version of nband
+     nband_k = hdr%nband(ik_rbz+(spin-1)*hdr%nkpt)
+     ibdeig(ik_rbz,spin) = kk
+     ibdocc(ik_rbz,spin) = ll
+     kk = kk+nband_k*(2*nband_k)**formeig
+     ll = ll+nband_k
+
+     if (.not. any(distrb_flags(ik_rbz,:,spin))) cycle
+! TODO: this does not take into account variable nband(ik)
+     icg(ik_rbz,spin) = ii
+     ikg(ik_rbz) = jj
+! this allows for variable nband_k < mband_mem
+     ii = ii+min(nband_k,mband_mem_in)*hdr%npwarr(ik_rbz)*nspinor_in
+     jj = jj+hdr%npwarr(ik_rbz)
+
+#ifdef DEV_MJV
+print *, 'icg counts ik_rbz, spin, nband_k ', icg(ik_rbz,spin),ik_rbz,spin, nband_k
+if (ii > size(cg, dim=2)) then
+print *, 'error : icg went past end of cg ii ', ii, ' ik_rbz, mcg ', ik_rbz, size(cg, dim=2), &
+&        ' spin, nband_k,mband_mem_in  ', spin, nband_k,mband_mem_in
+end if
+#endif
+   end do
+ end do
+ 
 #ifdef DEV_MJV
 print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
 #endif
@@ -3699,11 +3748,11 @@ print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
  ibdeig = 0
  ibdocc = 0
  do spin=1,nsppol_in
-   ikg = 0
    do ik_rbz=1,nkpt_in
+
 #ifdef DEV_MJV
 print *, 'spin, ik_rbz, nkpt_in ', spin, ik_rbz, nkpt_in
-print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig, ibdocc, icg, ikg
+print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig(ik_rbz,spin), ibdocc(ik_rbz,spin), icg(ik_rbz,spin), ikg(ik_rbz)
 print *, 'shapekg ', shape(kg)
 print *, 'shapecg ', shape(cg)
 print *, 'shapeeig ', shape(eigen)
@@ -3711,11 +3760,15 @@ print *, 'shapeeig ', shape(eigen)
      nband_k = hdr%nband(ik_rbz+(spin-1)*hdr%nkpt)
      npw_k = hdr%npwarr(ik_rbz)
 #ifdef DEV_MJV
-print *, ' nband_k npw_k ', nband_k, npw_k
+print *, ' nband_k npw_k, countdistrbflag ', nband_k, npw_k, count(distrb_flags(ik_rbz,:,spin))
 #endif
 
      ! even if I do not have any bands to run, go through the mpio calls to avoid deadlocks
-     !if (.not. any(distrb_flags(ik_rbz,:,spin))) cycle
+!     if (.not. any(distrb_flags(ik_rbz,:,spin))) then
+!       ibdeig = ibdeig + nband_k*(2*nband_k)**formeig
+!       ibdocc = ibdocc + nband_k
+!       cycle
+!     end if
 
      ! in case nband is not constant with k this creates chaos in the file writing
      ! as distrb_flags is allocated for mband, and true
@@ -3740,22 +3793,23 @@ print *, 'nband_me, distrb_flags(ik_rbz,iband,spin)) ', nband_me, distrb_flags(i
 print *, 'shapeocc ', shape(occ)
 #endif
        call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_collective,&
-&        kg_k=kg(:,ikg+1:ikg+npw_k), &
-&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*nspinor_in),&
-&        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig), &
-&        occ_k=occ(ibdocc+1:ibdocc+nband_k))
+&        kg_k=kg(:,ikg(ik_rbz)+1:ikg(ik_rbz)+npw_k), &
+&        cg_k=cg(:,icg(ik_rbz,spin)+1:icg(ik_rbz,spin)+npw_k*nband_me*nspinor_in),&
+&        eig_k=eigen(ibdeig(ik_rbz,spin)+1:ibdeig(ik_rbz,spin)+nband_k*(2*nband_k)**formeig), &
+&        occ_k=occ(ibdocc(ik_rbz,spin)+1:ibdocc(ik_rbz,spin)+nband_k))
      else
 #ifdef DEV_MJV
 print *, 'no occ, could be printing RF WFK formeig ', formeig
 #endif
        call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_collective,&
-&        kg_k=kg(:,ikg+1:ikg+npw_k), &
-&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*nspinor_in),&
-&        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig))
+&        kg_k=kg(:,ikg(ik_rbz)+1:ikg(ik_rbz)+npw_k), &
+&        cg_k=cg(:,icg(ik_rbz,spin)+1:icg(ik_rbz,spin)+npw_k*nband_me*nspinor_in),&
+&        eig_k=eigen(ibdeig(ik_rbz,spin)+1:ibdeig(ik_rbz,spin)+nband_k*(2*nband_k)**formeig))
      end if
  
-     ikg = ikg + npw_k
+! these two run up to mkmem kpts only
      icg = icg + npw_k*nband_me*nspinor_in
+
      ibdeig = ibdeig + nband_k*(2*nband_k)**formeig
      ibdocc = ibdocc + nband_k
 
@@ -3763,6 +3817,11 @@ print *, 'no occ, could be printing RF WFK formeig ', formeig
  end do ! sppol
 
  call wfk_disk%close()
+
+ ABI_DEALLOCATE(icg)
+ ABI_DEALLOCATE(ikg)
+ ABI_DEALLOCATE(ibdeig)
+ ABI_DEALLOCATE(ibdocc)
 
 end subroutine wfk_write_my_kptbands
 !!***
