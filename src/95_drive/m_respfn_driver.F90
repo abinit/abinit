@@ -478,7 +478,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
  call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spaceworld, dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, dtset%istwfk, dtset%kptns, mcg, dtset%mband, dtset%mband_mem,dtset%mpw,&
+&          formeig, dtset%istwfk, dtset%kptns, mcg, dtset%mband, dtset%mband_mem,dtset%mkmem,dtset%mpw,&
 &          dtset%natom, dtset%nkpt, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
  ABI_DEALLOCATE(distrb_flags)

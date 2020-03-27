@@ -3119,14 +3119,14 @@ end subroutine wfk_read_eigenvalues
 !! SOURCE
 
 subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
-&          formeig, istwfk_in, kptns_in, mcg, mband_in, mband_mem_in, mpw_in,&
+&          formeig, istwfk_in, kptns_in, mcg, mband_in, mband_mem_in, mkmem_in, mpw_in,&
 &          natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in,&
 &          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: comm, nkpt_in, formeig
- integer, intent(in) :: mcg, mpw_in
+ integer, intent(in) :: mcg, mpw_in, mkmem_in
  integer, intent(in) ::  mband_in, mband_mem_in, natom_in, nspinor_in, nsppol_in, usepaw_in
  real(dp), intent(in) :: ecut_eff_in 
 !=dtset%ecut*(dtset%dilatmx)**2 ! ecut * dilatmx**2
@@ -3138,7 +3138,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
 
  real(dp), intent(out) :: cg(2,mcg)
- integer, intent(out), optional :: kg(3,mpw_in*nkpt_in)
+ integer, intent(out), optional :: kg(3,mpw_in*mkmem_in)
  real(dp), intent(out), optional :: eigen(mband_in*(2*mband_in)**formeig*nkpt_in*nsppol_in)
  real(dp), intent(out), optional :: occ(mband_in*nkpt_in*nsppol_in)
  type(pawrhoij_type),intent(out),optional,target :: pawrhoij(natom_in)
@@ -3335,21 +3335,21 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
      if (convnsppol1to2) spin_sym=1
 ! this allows for reading fewer bands from disk than the disk version of nband
      nband_k = min(wfk_disk%nband(ik_disk,spin_sym), mband_in)
-     ikg(ikpt) = jj
      ibdeig(ikpt,spin) = kk
      ibdocc(ikpt,spin) = ll
-     jj = jj+npwarr(ikpt)
      kk = kk+nband_k*(2*nband_k)**formeig
      ll = ll+nband_k
 
      if (.not. any(distrb_flags(ikpt,:,spin))) cycle
 ! TODO: this does not take into account variable nband(ik)
      icg(ikpt,spin) = ii
+     ikg(ikpt) = jj
 #ifdef DEV_MJV
 print *, 'icg counts ikpt, spin, nband_k ', icg(ikpt,spin),ikpt,spin, nband_k
 #endif
 ! this allows for variable nband_k < mband_mem
      ii = ii+min(nband_k,mband_mem_in)*npwarr(ikpt)*nspinor_in
+     jj = jj+npwarr(ikpt)
 #ifdef DEV_MJV
 if (ii > size(cg, dim=2)) then
 print *, 'error : icg went past end of cg ii ', ii, ' ikpt, mcg ', ikpt, mcg, &

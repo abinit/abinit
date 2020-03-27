@@ -1134,7 +1134,7 @@ print *, 'shape cg 1 ', shape(cg)
 
 ! Initialize the wave function type and read GS WFK
    call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpt_rbz, mcg, dtset%mband, mband_mem_rbz, mpw,&
+&          formeig, istwfk_rbz, kpt_rbz, mcg, dtset%mband, mband_mem_rbz, mkmem_rbz, mpw,&
 &          dtset%natom, nkpt_rbz, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg, eigen=eigen0, occ=occ_disk)
   
@@ -1304,7 +1304,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    else
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpq_rbz, mcgq, dtset%mband, mband_mem_rbz, mpw1,&
+&          formeig, istwfk_rbz, kpq_rbz, mcgq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1,&
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
@@ -1313,7 +1313,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, istwfk_rbz, kmq_rbz, mcgmq, dtset%mband, mband_mem_rbz, mpw1_mq,&
+&          formeig, istwfk_rbz, kmq_rbz, mcgmq, dtset%mband, mband_mem_rbz, mkqmem_rbz, mpw1_mq,&
 &          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg_mq, eigen=eigen_mq, occ=occ_disk)
        call timab(144,2,tsec)
@@ -1508,7 +1508,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
      call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpq_rbz, mcg1, dtset%mband, mband_mem_rbz, mpw1,&
+&          formeig, istwfk_rbz, kpq_rbz, mcg1, dtset%mband, mband_mem_rbz, mk1mem_rbz, mpw1,&
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg1, eigen=eigen1, ask_accurate_=0)
    else
@@ -1525,7 +1525,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
      if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
        call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, istwfk_rbz, kmq_rbz, mcg1mq, dtset%mband, mband_mem_rbz, mpw1_mq,&
+&          formeig, istwfk_rbz, kmq_rbz, mcg1mq, dtset%mband, mband_mem_rbz, mk1mem_rbz, mpw1_mq,&
 &          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
      else
