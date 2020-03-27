@@ -21,7 +21,7 @@ ndtset 3 jdtset 1 2 3
   tolwfr2   1.0d-20
    prtwf2   1
 
-#Dataset 12 : response function strain perturbation calculation
+#Dataset 3 : response function strain perturbation calculation
   rfstrs3  3
   rfphon3  1
   rfelfd3  3
