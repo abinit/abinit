@@ -682,12 +682,12 @@ end subroutine symkpt_new
 !!
 !! SOURCE
 
-subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
+subroutine mapkptsets(chksymbreak,gmet,k_in,nk_in,&
 &   kbz,nkbz,nkirred,nsym,symrec,timrev,bz2kin_smap, comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: chksymbreak,iout,nkbz,nsym,timrev,comm
+ integer,intent(in) :: chksymbreak,nkbz,nsym,timrev,comm
  integer,intent(in) :: nk_in
  integer,intent(out) :: nkirred
 !arrays

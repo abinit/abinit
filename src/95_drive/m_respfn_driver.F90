@@ -249,7 +249,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
- integer :: mcg_tmp
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
@@ -261,11 +260,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  character(len=500) :: message
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_fine,hdr0,hdr_den
- type(hdr_type) :: hdr_tmp
  type(ddb_hdr_type) :: ddb_hdr
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
- type(wffile_type) :: wffgs,wfftgs
  type(wvl_data) :: wvl
  type(crystal_t) :: Crystal
  type(xcdata_type) :: xcdata
@@ -301,9 +298,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: vxc(:,:),work(:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
  real(dp),allocatable :: eigen0_pert(:),eigenq_pert(:),occ_rbz_pert(:)
- real(dp), allocatable :: cg_tmp(:,:)
- real(dp), allocatable :: eigen0_tmp(:)
- real(dp), allocatable :: occ_tmp(:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
@@ -311,7 +305,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(pawfgrtab_type),allocatable,save :: pawfgrtab(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 
-integer :: icg, icg_tmp, ibdoffst, npw, iband_me
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -485,7 +478,7 @@ integer :: icg, icg_tmp, ibdoffst, npw, iband_me
  ABI_ALLOCATE(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
  call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spaceworld, dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, dtset%istwfk, dtset%kptns, dtset%kptopt, mcg, dtset%mband, dtset%mband_mem,dtset%mpw,&
+&          formeig, dtset%istwfk, dtset%kptns, mcg, dtset%mband, dtset%mband_mem,dtset%mpw,&
 &          dtset%natom, dtset%nkpt, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
  ABI_DEALLOCATE(distrb_flags)

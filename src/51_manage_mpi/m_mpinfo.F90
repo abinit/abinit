@@ -2483,7 +2483,6 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
  integer :: inb,inb1,ind,ind0,nband_k,proc_max,proc_min
  integer :: nband_k_sp2
  integer :: iiband,iikpt,iisppol,ikpt_this_proc,nbsteps,nproc_kpt,temp_unit
- integer :: iband_this_proc, iband
  integer :: kpt_distrb(nkpt)
  logical,save :: first=.true.,has_file
  character(len=500) :: msg

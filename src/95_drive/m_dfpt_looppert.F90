@@ -291,7 +291,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: mband_mem_rbz
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
- integer :: icg
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
@@ -317,12 +316,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(ebands_t) :: ebands_kmq !+/-q duplicates
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
- type(hdr_type) :: hdr,hdr_den,hdr_tmp
+ type(hdr_type) :: hdr,hdr_den
+#ifdef HAVE_NETCDF
+ type(hdr_type) :: hdr_tmp
+#endif
  type(ddb_hdr_type) :: ddb_hdr
  type(pawang_type) :: pawang1
- type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
- type(wfk_t) :: wfk0, wfkq, wfk1
  type(wvl_data) :: wvl
 !arrays
  integer :: eq_symop(3,3),ngfftf(18),file_index(4),rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
@@ -363,10 +363,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawrhoij_type),pointer :: pawrhoij_pert(:)
  type(ddb_type) :: ddb
 
- integer :: mcg_tmp, iband_me, icg_tmp, npw, ibdoffst
- real(dp), allocatable :: cg_tmp(:,:)
- real(dp), allocatable :: eigen_tmp(:)
- real(dp),allocatable :: occ_tmp(:)
  real(dp),allocatable :: doccde_tmp(:)
 
 ! ***********************************************************************
@@ -1138,7 +1134,7 @@ print *, 'shape cg 1 ', shape(cg)
 
 ! Initialize the wave function type and read GS WFK
    call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpt_rbz, dtset%kptopt, mcg, dtset%mband, mband_mem_rbz, mpw,&
+&          formeig, istwfk_rbz, kpt_rbz, mcg, dtset%mband, mband_mem_rbz, mpw,&
 &          dtset%natom, nkpt_rbz, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg, eigen=eigen0, occ=occ_disk)
   
@@ -1308,7 +1304,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    else
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcgq, dtset%mband, mband_mem_rbz, mpw1,&
+&          formeig, istwfk_rbz, kpq_rbz, mcgq, dtset%mband, mband_mem_rbz, mpw1,&
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
@@ -1317,20 +1313,21 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcgmq, dtset%mband, mband_mem_rbz, mpw1_mq,&
+&          formeig, istwfk_rbz, kmq_rbz, mcgmq, dtset%mband, mband_mem_rbz, mpw1_mq,&
 &          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
-&          cg_mq, eigen=eigen_mq, occ=occ_tmp)
+&          cg_mq, eigen=eigen_mq, occ=occ_disk)
        call timab(144,2,tsec)
 
      end if
    end if
+   ABI_DEALLOCATE(occ_disk)
+
    ! Update energies GS energies at k + q
    call put_eneocc_vect(ebands_kq, "eig", eigenq)
    if (.not.kramers_deg) then
      call put_eneocc_vect(ebands_kmq, "eig", eigen_mq)
    end if
 
-   ABI_DEALLOCATE(occ_disk)
 
 !  PAW: compute on-site projections of GS wavefunctions (cprjq) (and derivatives) at k+q
    ABI_DATATYPE_ALLOCATE(cprjq,(0,0))
@@ -1511,7 +1508,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
      call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcg1, dtset%mband, mband_mem_rbz, mpw1,&
+&          formeig, istwfk_rbz, kpq_rbz, mcg1, dtset%mband, mband_mem_rbz, mpw1,&
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg1, eigen=eigen1, ask_accurate_=0)
    else
@@ -1528,7 +1525,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
      if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
        call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcg1mq, dtset%mband, mband_mem_rbz, mpw1_mq,&
+&          formeig, istwfk_rbz, kmq_rbz, mcg1mq, dtset%mband, mband_mem_rbz, mpw1_mq,&
 &          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
      else

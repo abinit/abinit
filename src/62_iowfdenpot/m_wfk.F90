@@ -1884,7 +1884,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr,npw_disk,nspinor_disk,nband_disk,band
+ integer :: npw_disk,nspinor_disk,nband_disk,band
  integer :: ipw,my_bcount,npwso,npw_tot,nb_block,base
  character(len=500) :: errmsg !msg,
 !arrays
@@ -1894,7 +1894,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  integer :: mpierr,bufsz,recnpw_type,gkk_type,cgblock_type
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  integer :: sizes(2),subsizes(2),starts(2),dims(3),types(2)
- integer(XMPI_OFFSET_KIND) :: bsize_rec(1)
+! integer(XMPI_OFFSET_KIND) :: bsize_rec(1)
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
 #ifdef HAVE_NETCDF
@@ -2041,8 +2041,8 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW)
 
 !   bsize_rec(1) = 3 * xmpi_bsize_int
-!   call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
-!   ABI_CHECK(ierr==0,"ierr!=0")
+!   call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
+!   ABI_CHECK(mpierr==0,"mpierr!=0")
 
 #ifdef DEV_MJV
 print *, ' write npw '
@@ -2081,7 +2081,7 @@ print *, ' write kg '
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG)
 
 !     bsize_rec(1) = 3 * npw_disk * xmpi_bsize_int
-!     call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
+!     call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
 
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG) + xmpio_bsize_frm
 
@@ -2106,7 +2106,7 @@ print *, ' write eigk formeig 0'
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG)
 
 !       bsize_rec(1) = 2 * nband_disk * xmpi_bsize_dp
-!       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
+!       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
 
 !TODO: check if we need 2*bsize_frm here
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + xmpio_bsize_frm
@@ -2136,8 +2136,8 @@ print *, 'GS writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), 
 &                     ik_ibz, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, xmpio_bsize_frm
 #endif
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + (band_block(1)-1) * (bsize_frecords(1) + 2*xmpio_bsize_frm)
-       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,nb_block,bsize_frecords,ierr)
-       ABI_CHECK(ierr==0,"ierr!=0")
+       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,nb_block,bsize_frecords,mpierr)
+       ABI_CHECK(mpierr==0,"mpierr!=0")
        ABI_FREE(bsize_frecords)
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG)
@@ -2146,8 +2146,8 @@ print *, 'GS writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), 
        bufsz = 2 * npw_disk * nspinor_disk * nb_block
        starts = [1, band_block(1)]
 
-       call mpiotk_write_fsuba_dp2D(Wfk%fh,my_offset,sizes,subsizes,starts,bufsz,cg_k,Wfk%chunk_bsize,sc_mode,Wfk%comm,ierr)
-       ABI_CHECK(ierr==0,"ierr!=0")
+       call mpiotk_write_fsuba_dp2D(Wfk%fh,my_offset,sizes,subsizes,starts,bufsz,cg_k,Wfk%chunk_bsize,sc_mode,Wfk%comm,mpierr)
+       ABI_CHECK(mpierr==0,"mpierr!=0")
      end if
 
 !----------------------------------------------------------------------------
@@ -2379,7 +2379,7 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr,npw_disk,nspinor_disk,nband_disk,ipw,my_bcount,cnt,npwso,npw_tot,pt1,pt2,band
+ integer :: npw_disk,nspinor_disk,nband_disk,ipw,my_bcount,cnt,npwso,npw_tot,pt1,pt2,band
  integer :: npw_read,nspinor_read,nband_read,nb_tot,ncount,my_bcnt,my_maxb,base,nb
  character(len=500) :: msg,errmsg
 !arrays
@@ -2615,8 +2615,8 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
            starts = [1, bstart]
 
            call mpiotk_read_fsuba_dp2D(Wfk%fh,base_ofs,sizes,subsizes,starts,&
-              bufsz,buffer,Wfk%chunk_bsize,sc_mode,Wfk%comm,ierr)
-           ABI_CHECK(ierr==0,"Fortran record too big")
+              bufsz,buffer,Wfk%chunk_bsize,sc_mode,Wfk%comm,mpierr)
+           ABI_CHECK(mpierr==0,"Fortran record too big")
 
          else if (wfk%formeig == 1) then
 
@@ -3015,7 +3015,7 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,formeig0=0
- integer :: ik_ibz,spin,my_rank,ierr,iomode,funt,sc_mode,mband
+ integer :: ik_ibz,spin,my_rank,mpierr,iomode,funt,sc_mode,mband
  real(dp) :: cpu, wall, gflops
  type(wfk_t) :: Wfk
 
@@ -3065,8 +3065,8 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
        ABI_MALLOC(occ, (mband,Hdr_out%nkpt,Hdr_out%nsppol))
      end if
    end if
-   call xmpi_bcast(eigen,master,comm,ierr)
-   if (present(occ)) call xmpi_bcast(occ,master,comm,ierr)
+   call xmpi_bcast(eigen,master,comm,mpierr)
+   if (present(occ)) call xmpi_bcast(occ,master,comm,mpierr)
  end if
 
  call cwtime_report(" wfk_read_eigenvalues", cpu, wall, gflops)
@@ -3095,7 +3095,6 @@ end subroutine wfk_read_eigenvalues
 !!  nkpt_in = number of requested k
 !!  npwarr = array of number of plane waves at each k
 !!  istwfk_in = storage flag for plane waves
-!!  kptopt_in = option for kpoint reduction by symmetry
 !!  mcg = max size of cg array
 !!  mband_in = max number of bands over all k
 !!  mband_mem_in = max number of bands stored on each processor
@@ -3120,7 +3119,7 @@ end subroutine wfk_read_eigenvalues
 !! SOURCE
 
 subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
-&          formeig, istwfk_in, kptns_in, kptopt_in, mcg, mband_in, mband_mem_in, mpw_in,&
+&          formeig, istwfk_in, kptns_in, mcg, mband_in, mband_mem_in, mpw_in,&
 &          natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in,&
 &          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
@@ -3128,7 +3127,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 !scalars
  integer, intent(in) :: comm, nkpt_in, formeig
  integer, intent(in) :: mcg, mpw_in
- integer, intent(in) :: kptopt_in, mband_in, mband_mem_in, natom_in, nspinor_in, nsppol_in, usepaw_in
+ integer, intent(in) ::  mband_in, mband_mem_in, natom_in, nspinor_in, nsppol_in, usepaw_in
  real(dp), intent(in) :: ecut_eff_in 
 !=dtset%ecut*(dtset%dilatmx)**2 ! ecut * dilatmx**2
 !arrays
@@ -3155,14 +3154,13 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  integer :: wfk_unt, iband, nband_me, nband_me_disk
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
  integer :: spin_saved, spin_sym
- integer :: itimrev_disk, ierr
+ integer :: mpierr
  integer :: ask_accurate, sppoldbl
- real(dp) :: cpu,wall,gflops, res
+ real(dp) :: cpu,wall,gflops
  real(dp) :: ecut_eff_disk
  real(dp) :: dksqmax
- character(len=500) :: msg
  character(len=fnlen) :: inpath
- logical :: isirred_kf, foundk
+ logical :: isirred_kf
  logical :: needthisk
  logical :: convnsppol1to2
  logical,parameter :: force_istwfk1=.False.
@@ -3174,7 +3172,6 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  integer,allocatable :: symrelT(:,:,:)
  integer,allocatable :: rbz2disk(:,:),kg_disk(:,:),iperm(:),rbz2disk_sort(:)
  real(dp) :: kf(3),k_disk(3), ksym(3)
- real(dp) :: kdiff(3)
  real(dp),allocatable :: cg_disk(:,:),eig_disk(:),occ_disk(:),work(:,:,:,:)
 
 ! *************************************************************************
@@ -3251,7 +3248,7 @@ print *, 'npwarr ',npwarr
 
  itimrev = kpts_timrev_from_kptopt(wfk_disk%hdr%kptopt)
 #ifdef DEV_MJV
-print *, 'itimrev,kptopt_in ', itimrev, kptopt_in
+print *, 'itimrev ', itimrev
 print *, 'wfk_disk%hdr%nsym, wfk_disk%hdr%symrel ', wfk_disk%hdr%nsym, wfk_disk%hdr%symrel
 call wfk_disk%hdr%echo(ask_accurate,4)
 print *, 'fform ', ask_accurate
@@ -3277,7 +3274,7 @@ print *, 'fform ', ask_accurate
 #ifdef DEV_MJV
 print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
 #endif
-   call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
+   call mapkptsets(chksymbreak, cryst%gmet, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
 &       nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 
  end if ! no accurate k
@@ -3571,13 +3568,13 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff_in ecut ', npw_kf,npwarr(ik
  end do ! sppol
 
  if(present(eigen)) then
-   call xmpi_sum(eigen,comm,ierr)
+   call xmpi_sum(eigen,comm,mpierr)
  end if
  if(present(occ)) then
-   call xmpi_sum(occ,comm,ierr)
+   call xmpi_sum(occ,comm,mpierr)
  end if
  if(present(kg)) then
-   call xmpi_sum(kg,comm,ierr)
+   call xmpi_sum(kg,comm,mpierr)
  end if
 
  if(present(pawrhoij) .and. usepaw_in==1) then
