@@ -693,7 +693,6 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 !Local variables ---------------------------------------
 !scalars
   integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
-  integer :: berryopt,jellslab=0,noncoll=0,nptsym,nzchempot=0,use_inversion
   integer :: chkprim,nsym
 ! Arrays
   integer :: bravais(11),ptsymrel(3,3,msym)
