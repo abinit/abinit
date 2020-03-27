@@ -1365,6 +1365,30 @@ Indices of the terms to refit in the effective potential.
 """,
 ),
 
+Variable(
+    abivarname="slc_coupling@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinLatticeCoupling'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SpinLatticeCoupling_Coupling",
+    added_in_version="9.0.0",
+    text=r"""
+Which spin-lattice coupling terms are used in the calculation, different terms can be combined in a binary fashion, i.e. 1010 turns on all terms quadratic in spin.
+
+* 0    --> No coupling.
+
+* 0001 --> Coupling term linear in spin and lattice coordinate
+
+* 0010 --> Coupling term quadratic in spin and linear in lattice coordinate
+
+* 0100 --> Coupling term linear in spin and quadratic in lattice coordinate
+
+* 1000 --> Coupling term quadratic in spin and lattice coordinate
+""",
+),
+
 
 ]
 

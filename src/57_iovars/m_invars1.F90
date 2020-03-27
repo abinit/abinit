@@ -411,7 +411,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    if(tread==1) dtsets(idtset)%usewvl=intarr(1)
 
    call geo%free()
- end do
+ end do ! idtset
 
 !mxnatom =maxval(dtsets(1:ndtset_alloc)%natom)
 !mxntypat =maxval(dtsets(1:ndtset_alloc)%ntypat)
@@ -454,13 +454,21 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%ntypat/=mxntypat)then
          write(msg, '(5a,i0,a,i0,2a,i0,2a)' )&
-         'When npsp is not defined, the input variable ntypat must be',ch10,&
-         'the same for all datasets. However, it has been found that for',ch10,&
-         'jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
-         'differs from the maximum value of ntypat= ',mxntypat,ch10,&
-         'Action: check the input variables npsp and ntypat.'
+          ' When npsp is not defined, the input variable ntypat must be',ch10,&
+          ' the same for all datasets. However, it has been found that for',ch10,&
+          ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
+          ' differs from the maximum value of ntypat= ',mxntypat,ch10,&
+          ' Action: check the input variables npsp and ntypat.'
          MSG_ERROR(msg)
        end if
+       if(dtsets(idtset)%ntypat>npsp)then
+         write(msg, '(5a,i0,a,i0,a,i0,2a)' )&
+          ' The number of pseudopotentials, npsp, must never be smaller than ntypat.',ch10,&
+          ' However, it has been found that for',ch10,&
+          ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,' and npsp=',npsp,ch10,&
+          ' Action: check the input variables npsp and ntypat.'
+         MSG_ERROR(msg)
+       endif
      end do
    end if
  end if
@@ -1572,15 +1580,15 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) nkpt=intarr(1)
 
  ! or from KERANGE file.
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr), "getkerange_path", tread, 'KEY', key_value=key_value)
- if (tread==1) dtset%getkerange_path = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr), "getkerange_filepath", tread, 'KEY', key_value=key_value)
+ if (tread==1) dtset%getkerange_filepath = key_value
 
 #ifdef HAVE_NETCDF
- if (dtset%getkerange_path /= ABI_NOFILE) then
+ if (dtset%getkerange_filepath /= ABI_NOFILE) then
    ! Get number of k-points in sigma_erange energy windows.
    !dtset%kptopt = 0
    if (my_rank == master) then
-     NCF_CHECK(nctk_open_read(ncid, dtset%getkerange_path, xmpi_comm_self))
+     NCF_CHECK(nctk_open_read(ncid, dtset%getkerange_filepath, xmpi_comm_self))
      NCF_CHECK(nctk_get_dim(ncid, "nkpt_inerange", nkpt, datamode=.True.))
      NCF_CHECK(nf90_close(ncid))
    end if
@@ -1634,7 +1642,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
-     kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_path, &
+     kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_filepath, &
      nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)

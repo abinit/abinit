@@ -2033,7 +2033,7 @@ Variable(
     text=r"""
 This variable is mandatory when [[optdriver]] == 7. It defines the number of
 divisions in the (homogeneous) q-mesh used to generate the DDB file. See also
-the description of the [[getddb]], [[getddb_path]] input variables.
+the description of the [[getddb]], [[getddb_filepath]] input variables.
 """,
 ),
 
@@ -4834,7 +4834,7 @@ dataset to find the proper dataset. As an example:
 
 refers to dataset 2 when dataset 4 is initialized.
 
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the file directly.
 """,
 ),
 
@@ -5097,7 +5097,7 @@ to read a DVDB file produced in a previous dataset.
 For example, one can concatenate a dataset in which an initial set of DFPT potentials
 on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
 
-Note also that, starting Abinit v9, one can also use [[getdvdb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getdvdb_filepath]] to specify the path of the file directly.
 """
 ),
 
@@ -5241,7 +5241,7 @@ a GW calculation), to indicate that the dielectric matrix (_SCR file) is to be
 taken from the output of a previous dataset. It is used to chain the
 calculations, since it describes from which dataset the OUTPUT dielectric
 matrix is to be taken, as INPUT of the present dataset.
-Note also that, starting Abinit v9, one can also use [[getscr_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getscr_filepath]] to specify the path of the file directly.
 
 If [[getscr]] == 0, no such use of previously computed output _SCR file is done.
 If [[getscr]] is positive, its value gives the index of the dataset from which
@@ -5346,7 +5346,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfk]],.
-Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfk_filepath]] to specify the path of the file directly.
 
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -5446,7 +5446,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfq]].
-Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfq_filepath]] to specify the path of the file directly.
 
 The **getwfk**, [[getwfq]], **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -7503,7 +7503,7 @@ the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the DDB file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the DDB file directly.
 """,
 
 ),
@@ -11262,14 +11262,13 @@ Variable(
     topics=['AtomTypes_useful', 'PseudosPAW_expert'],
     dimensions="scalar",
     defaultval="[[ntypat]]",
-    mnemonics="Number of PSeudoPotentials",
+    mnemonics="Number of PSeudoPotentials to be read",
     characteristics=['[[NO_MULTI]]'],
     added_in_version="before_v9",
     text=r"""
-Usually, the number of pseudopotentials to be read is equal to the number of
-type of atoms. However, in the case an alchemical mixing of pseudopotential is
-to be used, often the number of pseudopotentials to be read will not equal the
-number of types of atoms.
+Usually, the number of pseudopotentials to be read, [[npsp]], is equal to the number of
+type of atoms, [[ntypat]]. However, in the case an alchemical mixing of pseudopotential is
+used, [[npsp]] will be bigger than [[ntypat]].
 
 Alchemical pseudopotentials will be present when [[ntypalch]] is non-zero. See
 [[ntypalch]] to understand how to use alchemical potentials in ABINIT. The
@@ -11290,12 +11289,14 @@ Variable(
     defaultval="[[npsp]]-[[ntyppure]]",
     mnemonics='Number of PSeudoPotentials that are "ALCHemical"',
     characteristics=['[[INTERNAL_ONLY]]'],
-    requires="[[ntypalch]]/=0",
+    requires="[[ntypalch]]>0",
     added_in_version="before_v9",
     text=r"""
 Gives the number of pseudopotentials that are used for alchemical mixing (when [[ntypalch]] is non-zero):
 
 [[npspalch]] = [[npsp]]-[[ntyppure]]
+
+When alchemical mixing of potentials is used (that is, when [[ntypalch]]>0), then [[npspalch]] must be greater than 0.
 """,
 ),
 
@@ -11800,8 +11801,9 @@ E.g. for a homopolar system (e.g. pure Si) **ntypat** is 1.
 The code tries to read the same number of pseudopotential files. The first
 pseudopotential is assigned type number 1, and so on...
 
-There is an exception in the case of alchemical mixing of potentials, for
-which there is a different number of pseudopotentials atomic types. See [[mixalch]].
+There is an exception in the case of alchemical mixing of potentials. In this case,
+the number of atomic types will differ from the number of pseudopotentials.
+See [[mixalch]], [[npsp]], [[ntypalch]] and [[npspalch]].
 """,
 ),
 
@@ -14702,7 +14704,7 @@ Variable(
     mnemonics="PRinT the GEOmetry analysis",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of geometrical analysis (bond
+If set to 1 or a larger value, provide output of geometry analysis (bond
 lengths and bond angles). The value of [[prtgeo]] is taken by the code to be
 the maximum coordination number of atoms in the system.
 It will deduce a maximum number of "nearest" and "next-nearest" neighbors
@@ -14982,10 +14984,10 @@ Variable(
     text=r"""
 Print out VASP-style PROCAR files, to generate "fat band" structures, where the
 thickness is proportional to the atomic and angular momentum character. Used in
-particular with the [pyprocar](https://github.com/romerogroup/pyprocar]
+particular with the [pyprocar](https://github.com/romerogroup/pyprocar)
 package. The same fractions are used as with [[prtdos]] 3, but output in the
 VASP format. Attempts have been made to support spin polarized and spinor
-calculations, but there may be subtle inconsistencies
+calculations, but there may be subtle inconsistencies.
 """,
 ),
 
@@ -20682,7 +20684,7 @@ the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1
 during the GS run and the specification of [[tolwfr]] in the EPH input file.
-The path to the POT file used in the EPH calculation is specified via [[getpot_path]].
+The path to the POT file used in the EPH calculation is specified via [[getpot_filepath]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
@@ -20698,7 +20700,7 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
 ),
 
 Variable(
-    abivarname="getkerange_path",
+    abivarname="getkerange_filepath",
     varset="eph",
     vartype="string",
     topics=['ElPhonInt_expert'],
@@ -20872,7 +20874,7 @@ at the input [[qpt]].
 #),
 
 Variable(
-    abivarname="getpot_path",
+    abivarname="getpot_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20890,7 +20892,7 @@ Note also that relative paths are interpreted according to the working directory
 ),
 
 Variable(
-    abivarname="getwfk_path",
+    abivarname="getwfk_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20902,13 +20904,13 @@ Variable(
 Specify the path of the WFK file using a string instead of the dataset index.
 Alternative to [[getwfk]] and [[irdwfk]]. The string must be enclosed between quotation marks:
 
-    getwfk_path "../outdata/out_WFK"
+    getwfk_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfkfine_path",
+    abivarname="getwfkfine_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20920,13 +20922,13 @@ Variable(
 Specify the path of the fine WFK file using a string instead of the dataset index.
 Alternative to [[getwfkfine]] and [[irdwfkfine]]. The string must be enclosed between quotation marks:
 
-    getwfkfine_path "../outdata/out_WFK"
+    getwfkfine_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfq_path",
+    abivarname="getwfq_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20938,12 +20940,12 @@ Variable(
 Specify the path of the WFQ file using a string instead of the dataset index.
 Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
 
-    getwfq_path "../outdata/out_WFQ"
+    getwfq_filepath "../outdata/out_WFQ"
 """
 ),
 
 Variable(
-    abivarname="getddb_path",
+    abivarname="getddb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20955,12 +20957,12 @@ Variable(
 Specify the path of the DDB file using a string instead of the dataset index.
 Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between quotation marks:
 
-    getddb_path "../outdata/out_DDB"
+    getddb_filepath "../outdata/out_DDB"
 """
 ),
 
 Variable(
-    abivarname="getdvdb_path",
+    abivarname="getdvdb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20972,12 +20974,12 @@ Variable(
 Specify the path of the DVDB file using a string instead of the dataset index.
 Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
 
-    getdvdb_path "../outdata/out_DVDB"
+    getdvdb_filepath "../outdata/out_DVDB"
 """
 ),
 
 Variable(
-    abivarname="getden_path",
+    abivarname="getden_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20989,12 +20991,12 @@ Variable(
 Specify the path of the DEN file using a string instead of the dataset index.
 Alternative to [[getden]] and [[irdden]]. The string must be enclosed between quotation marks:
 
-    getden_path "../outdata/out_DEN"
+    getden_filepath "../outdata/out_DEN"
 """
 ),
 
 Variable(
-    abivarname="getscr_path",
+    abivarname="getscr_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -21006,7 +21008,7 @@ Variable(
 Specify the path of the SCR file using a string instead of the dataset index.
 Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between quotation marks:
 
-    getscr_path "../outdata/out_SCR"
+    getscr_filepath "../outdata/out_SCR"
 """
 ),
 
@@ -21197,7 +21199,7 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable provides a simplified interface to build the crystalline structure from an external file.
-The idea is to keep the **geometrical information** separated from the input file so that one
+The idea is to keep the **geometry information** separated from the input file so that one
 can perform multiple calculations in different input files sharing the same structure
 without having to copy & paste the description of the unit cell inside the input.
 The single source of truth is now given by an external file that can be easily shared.

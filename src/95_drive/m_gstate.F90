@@ -1400,8 +1400,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
     occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
-   if (dtset%getkerange_path /= ABI_NOFILE) then
-     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_path, dtset, comm)
+   if (dtset%getkerange_filepath /= ABI_NOFILE) then
+     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_filepath, dtset, comm)
    end if
 
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
