@@ -12,6 +12,6 @@ should configure, build, and install all mandatory fallbacks.
 
 Mandatory fallbaks are : HDF5, netCDF4, netCDF4-fortran and libXC.
 
-The more-detailed instructions are available at
+More detailed instructions are available at
 
-    https://www.abinit.org/fbks_installation
+    https://wiki.abinit.org/doku.php?id=build:fallbacks
