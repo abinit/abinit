@@ -1369,7 +1369,7 @@ Variable(
     abivarname="slc_coupling@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinLatticeCoupling'],
+    topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SpinLatticeCoupling_Coupling",
