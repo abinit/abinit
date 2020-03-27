@@ -171,18 +171,17 @@ Many new input variables are present.
 Not all these new input variables are present in automatic tests, though, in this beta-release. 
 These "non-tested" input variables are indicated below with 'NT'.
 This will be completed for the production version v9.2 .
-List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]].
-New input variables: slc_coupling (NT),
-[[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]] (NT), 
+List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]], [[test:v9_81]], and [[test:v9_82]].
+New input variables: 
+[[slc_coupling@multibinit|slc_coupling]], 
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
-[[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]] (NT), 
-[[spin_damping@multibinit|spin_damping]] (NT), 
-[[spin_init_orientation@multibinit|spin_init_orientation]] (NT), 
-[[spin_init_qpoint@multibinit|spin_init_qpoint]] (NT),
-[[spin_init_rotate_axis@multibinit|spin_init_rotate_axis]] (NT), 
+[[spin_damping@multibinit|spin_damping]], 
+[[spin_init_orientation@multibinit|spin_init_orientation]], 
+[[spin_init_qpoint@multibinit|spin_init_qpoint]],
+[[spin_init_rotate_axis@multibinit|spin_init_rotate_axis]], 
 [[spin_init_state@multibinit|spin_init_state]], 
 [[spin_ntime_pre@multibinit|spin_ntime_pre]], 
-[[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT), 
+[[spin_projection_qpoint@multibinit|spin_projection_qpoint]], 
 [[spin_sia_add@multibinit|spin_sia_add]], 
 [[spin_sia_k1amp@multibinit|spin_sia_k1amp]], 
 [[spin_sia_k1dir@multibinit|spin_sia_k1dir]], 
@@ -192,7 +191,7 @@ New input variables: slc_coupling (NT),
 [[spin_var_temperature@multibinit|spin_var_temperature]], 
 [[spin_write_traj@multibinit|spin_write_traj]].
 
-By He Xu, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete
+By Xu He, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete
 
 
 **B.4** Constrained DFT
@@ -420,7 +419,7 @@ Miscellaneous improvements have been made to the lattice part of Multibinit.
 See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
 See also [[test:v8_94]], test of the supercell_latt input variable (NOT DOCUMENTED).
 
-New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]] and [[test:v8_99]]. 
+New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]], [[test:v8_99]], [[test:v9_83]],  [[test:v9_84]], and [[test:v9_85]]. 
 New input variables are listed below.
 Not all these new input variables are present in automatic tests, though, in this beta-release.
 These "non-tested" input variables are indicated below with 'NT'.
@@ -431,17 +430,17 @@ This will be completed for the production version v9.2 .
 - fit_SPC_maxS@multibinit (NT)
 - fit_iatom@multibinit [[test:paral_81]], [[test:paral_82]], [[test:v8_13]], [[test:v8_14]], but not documented. 
 - latt_compressibility@multibinit, NOT TESTED, NOT DOCUMENTED
-- [[latt_friction@multibinit|latt_friction]] (NT)
+- [[latt_friction@multibinit|latt_friction]] 
 - latt_mask@multibinit, NOT TESTED, NOT DOCUMENTED
 - [[latt_taup@multibinit|latt_taup]] (NT)
-- [[latt_taut@multibinit|latt_taut]] (NT)
+- [[latt_taut@multibinit|latt_taut]] 
 - [[opt_effpot@multibinit|opt_effpot]]
 - [[opt_ncoeff@multibinit|opt_ncoeff]]
 - [[opt_coeff@multibinit|opt_coeff]]
 - prt_names, NOT TESTED, NOT DOCUMENTED
 - [[test_effpot@multibinit|test_effpot]] v8#98
 
-By M. Schmitt, He Xu, F. Ricci, M. Verstraete, Ph. Ghosez
+By M. Schmitt, Xu He, F. Ricci, M. Verstraete, Ph. Ghosez
 
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
@@ -481,7 +480,7 @@ By M. Torrent (MR502).
 
 **D.9** Test wannier90 interface with [[nsppol]]=2 and [[nspden]]=2, [[test:wannier90_04]].
 
-By He Xu
+By Xu He
 
 **D.10** Mixed precision for FFT transforms. New input variable [[mixprec]]
 see [[test:v8_44]], [[test:v9_57]], [[test:v9_60]], and [[test:v9_61]].
@@ -574,7 +573,7 @@ By X. Gonze (MR628)
 By M. Verstraete (MR630)
 
 **D.30** Miscellaneous additional bug fixes and improvements of documentation.
-L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu.
+L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
 
 * * *
