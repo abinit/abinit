@@ -30,6 +30,8 @@
       chneut         1
  Interatomic Force Constants Inputs :
       dipdip         0
+      dipqua         0
+      quadqu         0
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -92,6 +94,8 @@
 -  4.153509E+03
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
         degenerate with vibration mode #   2
   2.0

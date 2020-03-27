@@ -2033,7 +2033,7 @@ Variable(
     text=r"""
 This variable is mandatory when [[optdriver]] == 7. It defines the number of
 divisions in the (homogeneous) q-mesh used to generate the DDB file. See also
-the description of the [[getddb]], [[getddb_path]] input variables.
+the description of the [[getddb]], [[getddb_filepath]] input variables.
 """,
 ),
 
@@ -2624,11 +2624,12 @@ Variable(
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
-    defaultval=1,
+    defaultval=1e-06,
     mnemonics="Dynamical Mean Field Theory: charge density precision",
     added_in_version="before_v9",
     text=r"""
 Precision to achieve in determining the charge density in the computation of the fermi level.
+Should be decreased to increase precision. However, for a large system, it can increase importantly computer time.
 """,
 ),
 
@@ -2644,8 +2645,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-Value of double counting used for DMFT. Only value 1 is activated for the
-moment and is the FLL double counting.
+Value of double counting used for DMFT. Only value 1 is currently activated.
+It corresponds to the "Full Localized Limit" double counting.
 """,
 ),
 
@@ -2666,6 +2667,28 @@ implementation, this is only possible with [[dmft_solv]] = 5 (Continuous Time
 Quantum Monte Carlo). See also the input variable [[dmft_nlambda]].
 """,
 ),
+
+Variable(
+    abivarname="dmft_kspectral_func",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: compute K-resolved SPECTRAL FUNCtion",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.0.0",
+    text=r"""
+
+When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
+of k-resolved spectral function (or density of state) is possible.
+However, the calculation requires as input the self-energy computed in the real
+axis using an external analytical continuation code.
+The section 7 of the DFT+DMFT tutorial  details how to obtain this data
+and related informations.
+""",
+),
+
 
 Variable(
     abivarname="dmft_iter",
@@ -2693,7 +2716,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Mixing parameter for the simple mixing of the self-energy (should be between 0.3 and 0.8).
+Mixing parameter for the simple mixing of the self-energy (0.3 is safe, but it can be increased most of the time to 0.6).
 """,
 ),
 
@@ -2784,6 +2807,7 @@ where it stopped (assuming a restart with the wave functions, see [[getwfk]]).
 
 An alternative and more simple way to restart a DFT+DMFT calculation is to use
 the density file (obtained with [[prtden]] = 1 or [[prtden]] = -1) and the self-energy (see [[dmft_rslf]]).
+In this case, use [[dmft_read_occnd]]=0.
 """,
 ),
 
@@ -2800,6 +2824,7 @@ Variable(
     text=r"""
 Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
 If self-energy file is missing, the self-energy is initialized to the double counting at the first iteration.
+Importantly, in order to the calculation to restart easily, the self-energy is read and write in the same file.
 """,
 ),
 
@@ -2818,10 +2843,11 @@ Choice of solver for the Impurity model.
 
   * 0 --> No solver and U=0, J=0 (see [[upawu]] and [[jpawu]]).
   * 1 --> LDA+U self-energy is used (for testing purpose)
-  * 2 --> Hubbard one solver. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
-  * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density representation, CTQMC calculations are much more time consuming that Hubbard I calculations. Nevertheless, the calculation is fully parallelised.
+  * 2 --> Hubbard one solver in the density density approximation of the Coulomb interaction. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
+  * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density approximation of the Coulomb interaction. The calculation is fully parallelised over MPI processes.
   * 6 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS in the density density representation.
   * 7 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS with the rotationally invariant formulation.
+  * 8 --> Same as 5, but off-diagonal elements of the hybridization function are taken into account (useful for low symetry systems or with spin orbit coupling).
   * 9 --> Python invocation. Give a symbolic link to your python interpreter as an input like 'input-tag'_TRIQS_python_lib and the python script as an input like 'input-tag'_TRIQS_script.py. The inputs for the script will be written in dft_for_triqs.nc and the output as triqs_for_dft.nc.
 
 The CT Hyb algorithm is described in [[cite:Werner2006]]. For a
@@ -2890,9 +2916,9 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Tolerance for the variation of Local Charge during iterations of the DMFT Loop.
-The default value is good for fast calculations. However, to obtain good
-convergence of the DFT Loop, the DMFT Loop needs a better convergence criterion.
+Tolerance for the variation of Local Charge for convergence of the DMFT Loop.
+Most of the time however, DFT+DMFT calculations can converge fastly using [[dmft_iter]]=1, so
+that this variable is not required. 
 """,
 ),
 
@@ -4808,7 +4834,7 @@ dataset to find the proper dataset. As an example:
 
 refers to dataset 2 when dataset 4 is initialized.
 
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the file directly.
 """,
 ),
 
@@ -5071,7 +5097,7 @@ to read a DVDB file produced in a previous dataset.
 For example, one can concatenate a dataset in which an initial set of DFPT potentials
 on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
 
-Note also that, starting Abinit v9, one can also use [[getdvdb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getdvdb_filepath]] to specify the path of the file directly.
 """
 ),
 
@@ -5215,7 +5241,7 @@ a GW calculation), to indicate that the dielectric matrix (_SCR file) is to be
 taken from the output of a previous dataset. It is used to chain the
 calculations, since it describes from which dataset the OUTPUT dielectric
 matrix is to be taken, as INPUT of the present dataset.
-Note also that, starting Abinit v9, one can also use [[getscr_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getscr_filepath]] to specify the path of the file directly.
 
 If [[getscr]] == 0, no such use of previously computed output _SCR file is done.
 If [[getscr]] is positive, its value gives the index of the dataset from which
@@ -5320,7 +5346,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfk]],.
-Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfk_filepath]] to specify the path of the file directly.
 
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -5420,7 +5446,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfq]].
-Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfq_filepath]] to specify the path of the file directly.
 
 The **getwfk**, [[getwfq]], **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -7477,7 +7503,7 @@ the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the DDB file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the DDB file directly.
 """,
 
 ),
@@ -20636,7 +20662,7 @@ the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1
 during the GS run and the specification of [[tolwfr]] in the EPH input file.
-The path to the POT file used in the EPH calculation is specified via [[getpot_path]].
+The path to the POT file used in the EPH calculation is specified via [[getpot_filepath]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
@@ -20652,7 +20678,7 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
 ),
 
 Variable(
-    abivarname="getkerange_path",
+    abivarname="getkerange_filepath",
     varset="eph",
     vartype="string",
     topics=['ElPhonInt_expert'],
@@ -20725,7 +20751,7 @@ Variable(
     dimensions=[5],
     defaultval=0,
     mnemonics="EPH Number of Processors for Perturbations, Q-points, Bands, K-points, Spin.",
-    added_in_version="9.0.0",
+    added_in_version="9.1.0",
     text=r"""
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors
@@ -20826,7 +20852,7 @@ at the input [[qpt]].
 #),
 
 Variable(
-    abivarname="getpot_path",
+    abivarname="getpot_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20844,7 +20870,7 @@ Note also that relative paths are interpreted according to the working directory
 ),
 
 Variable(
-    abivarname="getwfk_path",
+    abivarname="getwfk_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20856,13 +20882,13 @@ Variable(
 Specify the path of the WFK file using a string instead of the dataset index.
 Alternative to [[getwfk]] and [[irdwfk]]. The string must be enclosed between quotation marks:
 
-    getwfk_path "../outdata/out_WFK"
+    getwfk_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfkfine_path",
+    abivarname="getwfkfine_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20874,13 +20900,13 @@ Variable(
 Specify the path of the fine WFK file using a string instead of the dataset index.
 Alternative to [[getwfkfine]] and [[irdwfkfine]]. The string must be enclosed between quotation marks:
 
-    getwfkfine_path "../outdata/out_WFK"
+    getwfkfine_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfq_path",
+    abivarname="getwfq_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20892,12 +20918,12 @@ Variable(
 Specify the path of the WFQ file using a string instead of the dataset index.
 Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
 
-    getwfq_path "../outdata/out_WFQ"
+    getwfq_filepath "../outdata/out_WFQ"
 """
 ),
 
 Variable(
-    abivarname="getddb_path",
+    abivarname="getddb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20909,12 +20935,12 @@ Variable(
 Specify the path of the DDB file using a string instead of the dataset index.
 Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between quotation marks:
 
-    getddb_path "../outdata/out_DDB"
+    getddb_filepath "../outdata/out_DDB"
 """
 ),
 
 Variable(
-    abivarname="getdvdb_path",
+    abivarname="getdvdb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20926,12 +20952,12 @@ Variable(
 Specify the path of the DVDB file using a string instead of the dataset index.
 Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
 
-    getdvdb_path "../outdata/out_DVDB"
+    getdvdb_filepath "../outdata/out_DVDB"
 """
 ),
 
 Variable(
-    abivarname="getden_path",
+    abivarname="getden_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20943,12 +20969,12 @@ Variable(
 Specify the path of the DEN file using a string instead of the dataset index.
 Alternative to [[getden]] and [[irdden]]. The string must be enclosed between quotation marks:
 
-    getden_path "../outdata/out_DEN"
+    getden_filepath "../outdata/out_DEN"
 """
 ),
 
 Variable(
-    abivarname="getscr_path",
+    abivarname="getscr_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20960,7 +20986,7 @@ Variable(
 Specify the path of the SCR file using a string instead of the dataset index.
 Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between quotation marks:
 
-    getscr_path "../outdata/out_SCR"
+    getscr_filepath "../outdata/out_SCR"
 """
 ),
 

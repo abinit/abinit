@@ -73,6 +73,8 @@ module m_driver
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
 
+ use m_longwave
+
  implicit none
 
  private
@@ -356,6 +358,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      case (RUNL_EPH)
        call ydoc%add_ints("optdriver, eph_task", &
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
+
+     case(RUNL_LONGWAVE)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
 
      case default
        MSG_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
@@ -819,6 +825,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call dtsets(0)%free_nkpt_arrays()
      call dtsets(idtset)%free_nkpt_arrays()
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
+
+   case(RUNL_LONGWAVE)
+
+     call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
+&     pawrad,pawtab,psps,xred)
 
    case default
      ! Bad value for optdriver

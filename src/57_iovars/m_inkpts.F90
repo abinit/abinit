@@ -80,7 +80,7 @@ contains
 !! lenstr=actual length of the string
 !! kptopt=option for the generation of k points
 !! msym=default maximal number of symmetries
-!! getkerange_path= Path of KERANGE.nc file used to initialize k-point sampling if kptopt == 0 and string != ABI_NOFILE
+!! getkerange_filepath= Path of KERANGE.nc file used to initialize k-point sampling if kptopt == 0 and string != ABI_NOFILE
 !! nqpt=number of q points (0 or 1)
 !! nsym=number of symetries
 !! occopt=option for occupation numbers
@@ -133,7 +133,7 @@ contains
 !! SOURCE
 
 subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
-& kpt,kpthf,kptopt,kptnrm,kptrlatt_orig,kptrlatt,kptrlen,lenstr,msym, getkerange_path, &
+& kpt,kpthf,kptopt,kptnrm,kptrlatt_orig,kptrlatt,kptrlen,lenstr,msym, getkerange_filepath, &
 & nkpt,nkpthf,nqpt,ngkpt,nshiftk,nshiftk_orig,shiftk_orig,nsym,&
 & occopt,qptn,response,rprimd,shiftk,string,symafm,symrel,vacuum,wtk,comm,&
 & impose_istwf_1) ! Optional argument
@@ -148,7 +148,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  integer,intent(out) :: fockdownsampling(3)
  real(dp),intent(out) :: kptnrm,kptrlen
  character(len=*),intent(in) :: string
- character(len=*),intent(in) :: getkerange_path
+ character(len=*),intent(in) :: getkerange_filepath
 !arrays
  integer,intent(in) :: bravais(11),symafm(msym),symrel(3,3,msym),vacuum(3)
  integer,intent(out) :: istwfk(nkpt),kptrlatt(3,3),kptrlatt_orig(3,3),ngkpt(3)
@@ -205,7 +205,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
  if(tread==1)kptrlen=dprarr(1)
 
  ! Initialize kpt, kptnrm and wtk according to kptopt.
- if (kptopt == 0 .and. getkerange_path == ABI_NOFILE) then
+ if (kptopt == 0 .and. getkerange_filepath == ABI_NOFILE) then
    ! For kptopt==0, one must have nkpt defined.
    kpt(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*nkpt,string(1:lenstr),'kpt',tread,'DPR')
@@ -248,21 +248,21 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      end if
    end if
 
- else if (kptopt == 0 .and. getkerange_path /= ABI_NOFILE) then
+ else if (kptopt == 0 .and. getkerange_filepath /= ABI_NOFILE) then
    ! Initialize kpts from kerange_path file.
    ABI_MALLOC(krange2ibz, (nkpt))
    if (my_rank == master) then
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_read(ncid, getkerange_path, xmpi_comm_self))
+     NCF_CHECK(nctk_open_read(ncid, getkerange_filepath, xmpi_comm_self))
      call hdr_ncread(hdr, ncid, fform)
-     ABI_CHECK(fform == fform_from_ext("KERANGE.nc"), sjoin("Error while reading:", getkerange_path, ", fform:", itoa(fform)))
+     ABI_CHECK(fform == fform_from_ext("KERANGE.nc"), sjoin("Error while reading:", getkerange_filepath, ", fform:", itoa(fform)))
      ! TODO Add code for consistency check
      !kptopt, nsym, occopt
      !ABI_CHECK(nkpt == hdr%nkpt, "nkpt from kerange != nkpt")
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
      NCF_CHECK(nf90_close(ncid))
 #else
-     MSG_ERROR("getkerange_path requires NETCDF support")
+     MSG_ERROR("getkerange_filepath requires NETCDF support")
 #endif
    end if
    call xmpi_bcast(krange2ibz, master, comm, ierr)
