@@ -81,7 +81,7 @@ module defs_basis
 ! do not trim input strings and use character(len=500) :: msg
 
  integer, parameter :: fnlen=264     ! maximum length of file name variables
- integer, parameter :: strlen=4000000 ! maximum length of input string
+ integer, parameter :: strlen=2000000 ! maximum length of input string
 
  ! The input file used to run the code, set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
