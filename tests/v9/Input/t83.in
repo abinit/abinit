@@ -37,5 +37,5 @@ latt_friction=0.1
 #%%   need to run multibinit --F03 to use the new implementation.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
-#%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
+#%%   The random number generator is in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
 #%%<END TEST_INFO>

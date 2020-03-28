@@ -423,7 +423,7 @@ New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]], [[test:v8_99]], [[tes
 New input variables are listed below.
 Not all these new input variables are present in automatic tests, though, in this beta-release.
 These "non-tested" input variables are indicated below with 'NT'.
-Also, not all of these are documented.
+Also, not all of these are documented, or only partly documented (e.g. variable type, acronym, default, but no more).
 This will be completed for the production version v9.2 .
 
 - [[analyze_anh_pot@multibinit|analyze_anh_pot]] 
@@ -432,11 +432,11 @@ This will be completed for the production version v9.2 .
 - latt_compressibility@multibinit, NOT TESTED, NOT DOCUMENTED
 - [[latt_friction@multibinit|latt_friction]] 
 - latt_mask@multibinit, NOT TESTED, NOT DOCUMENTED
-- [[latt_taup@multibinit|latt_taup]] (NT)
-- [[latt_taut@multibinit|latt_taut]] 
+- [[latt_taup@multibinit|latt_taup]] Despite the link, NOT TESTED, only partly DOCUMENTED
+- [[latt_taut@multibinit|latt_taut]] Despite the link only partly DOCUMENTED
+- [[opt_coeff@multibinit|opt_coeff]]
 - [[opt_effpot@multibinit|opt_effpot]]
 - [[opt_ncoeff@multibinit|opt_ncoeff]]
-- [[opt_coeff@multibinit|opt_coeff]]
 - prt_names, NOT TESTED, NOT DOCUMENTED
 - [[test_effpot@multibinit|test_effpot]] v8#98
 

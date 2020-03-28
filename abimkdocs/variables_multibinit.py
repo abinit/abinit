@@ -1389,7 +1389,6 @@ Which spin-lattice coupling terms are used in the calculation, different terms c
 """,
 ),
 
-
 ]
 
 
