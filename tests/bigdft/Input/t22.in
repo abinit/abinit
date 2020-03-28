@@ -8,10 +8,10 @@ ntypat 2
 znucl 1 8
 typat 1 1 2
 # eventually add 1/2 box size to center molecule
-xangst
+xcart
 0.610145  0.730174 0.
 0.610145 -0.730174 0.
-0. 0. 0.
+0. 0. 0.                Angstrom
 
 nstep 100
 #tolwfr 1.0e-20
