@@ -5,10 +5,6 @@
  thmflag   1     ! Thermal flag. Gives Internal energy, entropy,
                  !   heat capacity, phonon DOS, Debye-Waller factor)
 
-#Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-                 !        1=> equal portion of the missing charge
-
 #Interatomic force constant info
   dipdip  0      ! No explicit dipole-dipole treatment
   ifcana  1      ! Analysis of the IFCs
