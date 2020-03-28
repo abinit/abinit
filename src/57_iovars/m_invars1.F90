@@ -276,17 +276,14 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    !  done!
 
    !  Generate the supercell if supercell_latt is specified and update string
-   dtsets(idtset)%supercell_latt(:,:) = 0
+   dtsets(idtset)%supercell_latt(:) = 0
    do ii=1,3
-     dtsets(idtset)%supercell_latt(ii,ii) = 1
+     dtsets(idtset)%supercell_latt(ii) = 1
    end do
-   call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),"supercell_latt",tread,'INT')
-   if (tread==1) dtsets(idtset)%supercell_latt(:,:)=reshape(intarr(1:marr),(/3,3/))
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),"supercell_latt",tread,'INT')
+   if (tread==1) dtsets(idtset)%supercell_latt(:)=intarr(1:3)
    !This test should be update if in the future we allow non-diagonal supercell
-   if (any(dtsets(idtset)%supercell_latt(:,:) < zero).or.&
-          (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
-           dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
-           dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
+   if (any(dtsets(idtset)%supercell_latt(:) < tol10 )) then
      write(msg, '(5a)' )&
       'supercell_latt must have positive parameters and diagonal part',ch10,&
       'This is not allowed.  ',ch10,&
@@ -294,7 +291,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      MSG_ERROR(msg)
    end if
    ! Compute the multiplicity of the supercell
-   call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
+   multiplicity=dtsets(idtset)%supercell_latt(1)  &
+&   *dtsets(idtset)%supercell_latt(2)  & 
+&   *dtsets(idtset)%supercell_latt(3)  
+!  call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
 
    ! Read natom from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')

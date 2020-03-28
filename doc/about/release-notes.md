@@ -172,8 +172,8 @@ Not all these new input variables are present in automatic tests, though, in thi
 These "non-tested" input variables are indicated below with 'NT'.
 This will be completed for the production version v9.2 .
 List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]], [[test:v9_81]], and [[test:v9_82]].
-New input variables: 
-[[slc_coupling@multibinit|slc_coupling]], 
+
+New input variables tested and documented: 
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
 [[spin_damping@multibinit|spin_damping]], 
 [[spin_init_orientation@multibinit|spin_init_orientation]], 
@@ -190,6 +190,11 @@ New input variables:
 [[spin_temperature_nstep@multibinit|spin_temperature_nstep]], 
 [[spin_var_temperature@multibinit|spin_var_temperature]], 
 [[spin_write_traj@multibinit|spin_write_traj]].
+Additionnal new input variables:
+[[slc_coupling@multibinit|slc_coupling]](NT),
+[[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]] (NT and not documented), 
+[[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]] (NT and not documented), 
+[[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT). 
 
 By Xu He, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete
 
@@ -417,7 +422,6 @@ See related information in Sec. 5.4 of [[cite:Gonze2020]].
 
 Miscellaneous improvements have been made to the lattice part of Multibinit.
 See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
-See also [[test:v8_94]], test of the supercell_latt input variable (NOT DOCUMENTED).
 
 New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]], [[test:v8_99]], [[test:v9_83]],  [[test:v9_84]], and [[test:v9_85]]. 
 New input variables are listed below.
@@ -572,7 +576,12 @@ By X. Gonze (MR628)
 
 By M. Verstraete (MR630)
 
-**D.30** Miscellaneous additional bug fixes and improvements of documentation.
+**D.30** The ABINIT input variable [[supercell_latt]] is documented. 
+See also [[test:v8_94]].
+
+By X. Gonze
+
+**D.31** Miscellaneous additional bug fixes and improvements of documentation.
 L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
 

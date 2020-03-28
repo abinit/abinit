@@ -21162,6 +21162,31 @@ If [[pp_dirpath]] is not present, the filenames specified in [[pseudos]] are use
 ),
 
 Variable(
+    abivarname="supercell_latt",
+    varset="gstate",
+    vartype="integer",
+    topics=['UnitCell_useful'],
+    dimensions=[3],
+    defaultval=[1 1 1],
+    mnemonics="SUPERCELL LATTice",
+    added_in_version="before v9",
+    text=r"""
+Factor that multiplies the three primitive vectors to generate a supercell.
+The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]] 
+are simply replicated in the different images of the original primitive cell.
+If present, [[spinat]] and [[chrgat]] are also replicated without change.
+Note that [[supercell_latt]] is not echoed. It is immediately used to change 
+[[natom]], [[typat]], and all input variables that depend on [[natom]] and [[typat]].
+
+This input variable cannot be used jointly with non-default values of [[natrd]] and [[nobj]].
+Also, [[nsym]] is set to 1. Also note that [[vel]], if defined, must have the dimensions of the
+number of atoms in the supercell, not the initial [[natom]], because it is not replicated.
+[[supercell_latt]] is typically used to initialize molecular dynamics runs.
+"""
+),
+
+
+Variable(
     abivarname="pseudos",
     varset="files",
     vartype="string",

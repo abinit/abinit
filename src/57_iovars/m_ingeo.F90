@@ -88,7 +88,7 @@ contains
 !! ratsph(1:ntypat)=radius of the atomic sphere
 !! string*(*)=character string containing all the input data, used
 !!  only if choice=1 or 3. Initialized previously in instrng.
-!! supercell_latt(3,3)=supercell lattice
+!! supercell_latt(3)=supercell lattice
 !! comm: MPI communicator
 !!
 !! OUTPUT
@@ -159,7 +159,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp),intent(out) :: slabzbeg,slabzend,tolsym
  character(len=*),intent(in) :: string
 !arrays
- integer,intent(in) :: supercell_lattice(3,3)
+ integer,intent(in) :: supercell_lattice(3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
@@ -310,7 +310,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  scalecart(:)=one
 
  ! Compute the multiplicity of the supercell
- call mati3det(supercell_lattice,multiplicity)
+ multilicity=supercell_lattice(1)*supercell_lattice(2)*supercell_lattice(3)
 
  if (tread_geo == 0) then
    ! Get the number of atom in the unit cell. Read natom from string
@@ -329,9 +329,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Multiply the rprim to get the rprim of the supercell
  if(multiplicity > 1)then
-   rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
-   rprim(:,2) = rprim(:,2) * supercell_lattice(2,2)
-   rprim(:,3) = rprim(:,3) * supercell_lattice(3,3)
+   rprim(:,1) = rprim(:,1) * supercell_lattice(1)
+   rprim(:,2) = rprim(:,2) * supercell_lattice(2)
+   rprim(:,3) = rprim(:,3) * supercell_lattice(3)
  end if
 
  ! Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
@@ -386,8 +386,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      else
        write(msg,'(3a,I0,a,I0,a,I0,2a)')&
        'The input variable supercell_latt is present',ch10,&
-       'thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
-       ' ',supercell_lattice(3,3),' is generated',ch10
+       'thus a supercell ',supercell_lattice(1),' ',supercell_lattice(2),&
+       ' ',supercell_lattice(3),' is generated',ch10
        MSG_WARNING(msg)
      end if
    else
@@ -665,9 +665,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    ! Compute xred/typat and spinat for the supercell
    if(multiplicity > 1)then
      iatom_supercell = 0
-     do i1 = 1, supercell_lattice(1,1)
-       do i2 = 1, supercell_lattice(2,2)
-         do i3 = 1, supercell_lattice(3,3)
+     do i1 = 1, supercell_lattice(1)
+       do i2 = 1, supercell_lattice(2)
+         do i3 = 1, supercell_lattice(3)
            do iatom = 1, natom_uc
              iatom_supercell = iatom_supercell + 1
              xcart(:,iatom_supercell) = xcart_read(:,iatom) + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
