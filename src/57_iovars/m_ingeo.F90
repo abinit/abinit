@@ -310,7 +310,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  scalecart(:)=one
 
  ! Compute the multiplicity of the supercell
- multilicity=supercell_lattice(1)*supercell_lattice(2)*supercell_lattice(3)
+ multiplicity=supercell_lattice(1)*supercell_lattice(2)*supercell_lattice(3)
 
  if (tread_geo == 0) then
    ! Get the number of atom in the unit cell. Read natom from string
