@@ -49,7 +49,7 @@ MODULE m_hexc
  use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_read_rcblock, exc_write_optme, exc_ham_ncwrite
  use m_pawtab,            only : pawtab_type
- use m_vcoul_dt
+ use m_vcoul,             only : vcoul_t
  use m_bseinterp,         only : interpolator_t, interpolator_init, interpolator_normalize, &
 &                                interpolator_free, int_alloc_work, int_free_work
 
