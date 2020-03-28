@@ -55,6 +55,8 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
 **A.4** The initialization of the wavefunctions when [[paral_kgb]]=1 and [[nspinor]]=2 has been changed, since the previous one could prevent the code to converge.
     By M Torrent (MR 562).
 
+**A.5** The input variable xangst has been disabled. Use xcart instead, and specify the unit, namely Angstrom.
+
 * * *
 
 ### **B.** Most noticeable achievements
