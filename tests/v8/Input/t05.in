@@ -61,7 +61,6 @@ prtwf 0  prtden 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [files]
 #%% files_to_test =
 #%%   t05.out, tolnlines = 140, tolabs = 2.e-5, tolrel = 5.e-2

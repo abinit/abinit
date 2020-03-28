@@ -21,7 +21,6 @@ latt_friction=0.1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% exclude_hosts = nag@abiref
 #%% system_xml = t83.nc
 #%% exec_args = --F03
