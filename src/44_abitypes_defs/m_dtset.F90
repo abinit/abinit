@@ -3265,7 +3265,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
 !X
- list_vars=trim(list_vars)//' xangst xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile'
+ list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile'
 !Y
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'

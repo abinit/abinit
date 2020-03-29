@@ -268,8 +268,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! call expand_supercell_input(jdtset, lenstr, string)
    !  find supercell, else exit
    !  determinant = ncells
-   !  copy rprim,    acell,    xred,    xcart,    xangst,    vel,    typat,   to
-   !       rprim_uc, acell_uc, xred_uc, xcart_uc, xangst_uc, vel_uc, typat_uc
+   !  copy rprim,    acell,    xred,    xcart,    vel,    typat,   to
+   !       rprim_uc, acell_uc, xred_uc, xcart_uc, vel_uc, typat_uc
    !     NB: also rprim and angdeg need to be updated in non diagonal case!!!
    !  generate supercell info for each of these copying out with translation vectors etc...
    !  set chkprim to 0

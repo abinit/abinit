@@ -743,7 +743,7 @@ then reduce the unit cell to a primitive unit cell. The echo of [[acell]] and
 [[rprim]] might thus differ from those derived directly from the input
 variables. Also, the input variable [[xred]] will refer to the CONVENTIONAL
 unit cell, but its echo will refer to the preprocessed PRIMITIVE unit cell.
-There is of course no problem with [[xangst]] and [[xcart]], as they are
+There is of course no problem with [[xcart]], as it is
 independent of the unit cell.
 
 The echo of *brvltt* in the output file will be one of the following Bravais lattices:
@@ -9845,7 +9845,7 @@ Variable(
     text=r"""
 Gives the number of atoms to be read from the input file, in the case the atom
 manipulator or the smart symmetriser is used. In this case, [[natrd]] is also
-used to dimension the array [[typat]], and the arrays [[xred]], [[xangst]] and [[xcart]].
+used to dimension the array [[typat]], and the arrays [[xred]] and [[xcart]].
 Must take into account the vacancies (see [[vacnum]] and [[vaclst]]).
 Despite possible vacancies, cannot be bigger than [[natom]].
 """,
@@ -10635,7 +10635,6 @@ to define the images:
   * [[upawu]]
   * [[vel]]
   * [[vel_cell]]
-  * [[xangst]]
   * [[xcart]]
   * [[xred]]
 
@@ -11894,7 +11893,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the list of atoms in object a. This list is specified by giving, for
-each atom, its index in the list of coordinates ([[xred]], [[xangst]] or
+each atom, its index in the list of coordinates ([[xred]] or
 [[xcart]]), that also corresponds to a type of atom (given by the array type).
 These objects can be thought as molecules, or groups of atoms, or parts of
 molecules, to be repeated, rotated and translated to generate the full set of atoms.
@@ -12043,7 +12042,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the list of atoms in object b. This list is specified by giving, for
-each atom, its index in the list of coordinates ([[xred]], [[xangst]] or
+each atom, its index in the list of coordinates ([[xred]] or
 [[xcart]]), that also corresponds to a type of atom (given by the array type).
 These objects can be thought as molecules, or groups of atoms, or parts of
 molecules, to be repeated, rotated and translated to generate the full set of
@@ -18228,7 +18227,7 @@ one of Ti is number 2, and the one of O is number 3, the actual value of the
       typat 1 2 3 3 3
 
 The array [[typat]] has to agree with the actual locations of atoms given in
-[[xred]], [[xcart]] or [[xangst]], and the input of pseudopotentials has to
+[[xred]] or [[xcart]], and the input of pseudopotentials has to
 be ordered to agree with the atoms identified in [[typat]].
 The nuclear charge of the elements, given by the array [[znucl]], also must
 agree with the type of atoms designated in "[[typat]]".
@@ -20084,30 +20083,6 @@ conjugate gradient iterations on each wavefunction convergence step.
 ),
 
 Variable(
-    abivarname="xangst",
-    varset="basic",
-    vartype="real",
-    topics=['crystal_compulsory'],
-    dimensions=[3, 'min([[natom]],[[natrd]])'],
-    mnemonics="vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-",
-    characteristics=['[[INPUT_ONLY]]'],
-    added_in_version="before_v9",
-    text=r"""
-Gives the cartesian coordinates of atoms within unit cell, in angstrom. This
-information is redundant with that supplied by array [[xred]] or [[xcart]].
-If [[xred]] and [[xangst]] are ABSENT from the input file and [[xcart]] is
-provided, then the values of [[xred]] will be computed from the provided
-[[xcart]] (i.e. the user may use xangst instead of [[xred]] or [[xcart]] to
-provide starting coordinates).
-One and only one of [[xred]], [[xcart]] and [[xangst]] must be provided.
-The conversion factor between Bohr and Angstrom is 1 Bohr=0.5291772108
-Angstrom, see the [NIST site](http://physics.nist.gov/cuu/Constants/index.html).
-Atomic positions evolve if [[ionmov]]/=0. In constrast with [[xred]] and
-[[xcart]], [[xangst]] is not internal.
-""",
-),
-
-Variable(
     abivarname="xc_denpos",
     varset="dev",
     vartype="real",
@@ -20183,14 +20158,14 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the cartesian coordinates of atoms within unit cell. This information is
-redundant with that supplied by array [[xred]] or [[xangst]]. By default,
+redundant with that supplied by array [[xred]]. By default,
 [[xcart]] is given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms),
 although Angstrom can be specified, if preferred, since [[xcart]] has the [[LENGTH]] characteristics.
-If [[xred]] and [[xangst]] are ABSENT from the input file and [[xcart]] is
+If [[xred]] are ABSENT from the input file and [[xcart]] is
 provided, then the values of [[xred]] will be computed from the provided
-[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]] or [[xangst]]
+[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]] 
 to provide starting coordinates).
-One and only one of [[xred]], [[xcart]] and **xangst** must be provided.
+One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
 """,
 ),
@@ -20237,10 +20212,13 @@ where (xred1,xred2,xred3) are the "reduced coordinates" given in columns of
 array "[[rprimd]]" in Bohr.
 
 If you prefer to work only with cartesian coordinates, you may work entirely
-with "[[xcart]]" or "[[xangst]]" and ignore [[xred]], in which case [[xred]]
+with "[[xcart]]" and ignore [[xred]], in which case [[xred]]
 must be absent from the input file.
-One and only one of [[xred]], [[xcart]] and [[xangst]] must be provided.
+One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
+
+The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom, 
+named [[xangst]].
 """,
 ),
 
@@ -20271,7 +20249,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the name of a xyz format file, to take [[natom]], [[ntypat]], [[typat]],
-[[znucl]], and [[xangst]] from. This input can not be mixed with normal atom
+[[znucl]], and [[xcart]] (in Angstrom) from it. This input can not be mixed with normal atom
 specifications for other datasets.
 
 Notes: do not quote the file name in the abinit input file, simply leave a
