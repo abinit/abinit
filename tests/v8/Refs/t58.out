@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -879,11 +879,6 @@
 -  5.273513E+02  6.265104E+02  6.265104E+02  8.044522E+02  8.059632E+02
 -  8.059632E+02  1.058276E+03  1.059961E+03  1.059961E+03  1.144351E+03
 -  1.162574E+03  1.162574E+03
-
-================================================================================
-
- Treat the second list of vectors 
-
   
  Mode effective charges 
  Mode number.     x               y               z 
