@@ -787,12 +787,14 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,nqpt,qptn,wtqc,rprimd
    MSG_ERROR(msg)
  end if
 
- if(nqpt==0 .and. tread_q_sum/=0)then
-    write(msg, '(5a)' ) &
-    'When nqpt is zero, the following input variables cannot be defined :',ch10, &
-    ' iqpt, ngqpt, nshiftq, qptopt, qpt, qptnrm, qptrlatt, shiftq, wtq . ',ch10, &
-    'Action: change nqpt to 1, or undefine all the variables above.'
- endif
+! See issue #31 on gitlab. Not really a good idea.
+!if(nqpt==0 .and. tread_q_sum/=0)then
+!  write(msg, '(5a)' ) &
+!   'When nqpt is zero, the following input variables cannot be defined :',ch10, &
+!   ' iqpt, ngqpt, nshiftq, qptopt, qpt, qptnrm, qptrlatt, shiftq, wtq . ',ch10, &
+!   'Action: change nqpt to 1, or un-define all the variables above.'
+!  MSG_ERROR(msg)
+!endif
 
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)
