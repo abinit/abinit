@@ -2030,11 +2030,11 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  !Write the coordinates
  lenstr_old=lenstr_new
  lenstr_new=lenstr_new+8+len_trim(dtset_char)+1
- string(lenstr_old+1:lenstr_new)=" _XANGST"//trim(dtset_char)//blank
+ string(lenstr_old+1:lenstr_new)=" _XCART"//trim(dtset_char)//blank
 
  do iatom=1,natom
    do mu=1,3
-     write(string20,'(f20.12)')xcart(mu,iatom)*Bohr_Ang
+     write(string20,'(f20.12)')xcart(mu,iatom)
      lenstr_old=lenstr_new
      lenstr_new=lenstr_new+20
      string(lenstr_old+1:lenstr_new)=string20
