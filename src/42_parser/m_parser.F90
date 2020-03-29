@@ -1994,7 +1994,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  ! read atomic types and positions
  do iatom = 1, natom
    read(unitxyz,*) elementtype(iatom), xcart(:,iatom)
-   xcart=xcart/Bohr_Ang
+   xcart(:,iatom)=xcart(:,iatom)/Bohr_Ang
    ! extract znucl for each atom type
    call atomdata_from_symbol(atom,elementtype(iatom))
    znucl = atom%znucl
