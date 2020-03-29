@@ -7,12 +7,14 @@ Many thanks to the contributors to the ABINIT project between
 October 2018 and March 2020. These release notes
 are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10
 (merge requests up to, and including, MR613 are taken into account,
-as well as MR621, 623, 626, 628-632).
+as well as MR636).
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
-Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, B. Guster, G. Hautier, Xu He, N. Helbig, F. Jollet,
-H. Miranda, F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Schmitt, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
+J.-B. Charraud, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, 
+B. Guster, G. Hautier, Xu He, N. Helbig, F. Jollet,
+H. Miranda, F. Naccarato, R. Outerov, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Royo,
+M. Schmitt, M. Stengel, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -113,6 +115,54 @@ For further details about the implementation, please consult this [preprint](htt
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
 
 
+**B.2** Flexoelectricity and dynamical quadrupoles
+
+ABINITv9 allows one to compute flexoelectricity as well as dynamical quadrupoles, as described
+in the Sec. V. D of [[cite:Romero2020]], with underlying theory and test calculations
+presented in [[cite:Royo2019]]. The user is advised to consult these references.
+
+At the practical level, see [[cite:Romero2020]]: 
+
+>   In this way, both perturbations are generalized to finite q, as
+>   is already the case for atomic displacements. This enables us
+>   to carry out an analytical third order derivative of the energy
+>   with respect to two of the standard perturbations, and to the
+>   momentum q, which directly provides the sought-after spatial
+>   dispersion tensors. Remarkably, by virtue of the 2n+1 theorem9,
+>   the third-order energies are computed in one shot using
+>   precalculated first-order response functions to the standard
+>   perturbations, without the necessity of self-consistently computing
+>   any response function to a perturbation gradient. After
+>   execution, the long-wave DFPT routines generate a derivative
+>   database that is subsequently used by post-processing tools
+>   implemented in ANADDB to compute and print the different
+>   contributions to the FxE tensor.
+
+>   The dynamical quadrupoles are the spatial dispersion counterparts of the Born effective charges,
+>   and can be used in lattice dynamics calculations
+>   to improve the prevalent dipole-dipole treatment of the
+>   long-range interactions. The ANADDB routines that carry
+>   out the process of interpolating the dynamical matrix following
+>   Ref. 34 have been adapted to incorporate the dipolequadrupole
+>   and quadrupole-quadrupole electrostatic interactions
+>   derived in Ref. 102. This new functionality results in a
+>   faster convergence of the phonon bands calculation with respect
+>   to the density of q points and, in some materials, represents
+>   the only route to obtain the correct sound velocities.
+
+>   Currently, the implementation is restricted to the use of
+>   norm-conserving pseudopotentials without non-linear core corrections, and the LDA
+>   functional.
+
+A tutorial is in preparation, with tests [[tests:lw_1]] to [[tests:lw_2]].
+
+New input variables have been defined: lw_flexo, lwqdvpl, prepalw, and d3e_pert2_strs. 
+At present (v9.0.2) they are not yet documented, although explained and tested in the above-mentioned tutorial.
+This will be completed for v9.2.
+
+M. Royo, M. Stengel, M. Giantomassi (MR 618).
+
+
 **B.2** DFT+DMFT
 
 The new capabilities of ABINITv9 related to DFT+DMFT calculations are described
@@ -208,7 +258,9 @@ with a new algorithm allowing to impose the constraints to arbitrary precision,
 whether it relates to the charge, magnetization, magnetization direction, or magnetisation size,
 or a combination thereof for different atoms. The constraints are smeared spherical integrals
 with ajustable sphere radius, centered on atoms. The algorithms has been demonstrated for norm-conserving pseudopotentials
-as well as PAW.
+as well as PAW. Forces and derivatives with respect to the constraints 
+are available (i.e. magnetic torque for the non-collinear spin case).
+Stresses are still to be coded, will be available in ABINITv9.2.
 
 New tests: v8#24-29, v8#95-97 and v9#1-3.
 New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
@@ -415,6 +467,11 @@ and one for more specific routines to ABINIT. The low-level routines should beco
 At present the low-level library have been moved out of src, inside the shared/common/src directory.
 See related information in Sec. 5.4 of [[cite:Gonze2020]].
 
+**C.8** New FFT specifications for the build system
+See https://gitlab.abinit.org/pouillon/abinit/-/issues/33 .
+
+By Y. Pouillon (MR 619)
+
 * * *
 
 <a name="v9.0.D.1"></a>
@@ -583,7 +640,23 @@ See also [[test:v8_94]].
 
 By X. Gonze
 
-**D.31** Miscellaneous additional bug fixes and improvements of documentation.
+**D.31** New implementation of the cRPA (to compute U and J in DFT+U or DFT+DMFT) 
+that can consider any subset of orbitals in the system.
+Compilation was a bit long on certain compilers, so new keywords have been added to the build system:
+enable_crpa_optim and enable_crpa_no_optim
+
+By R. Outerov and B. Amadon (MR622).
+
+**D.32** Work on mGGA+PAW.
+All internal and unit tests are OK. The implementation seems close to the end. Still need to perform physical tests.
+
+By M. Torrent and J.-B. Charraud (MR 625).
+
+**D.33** Work on refactoring the Coulomb interaction part of ABINIT.
+
+By B. Guster, M. GIantomassi and X. Gonze (MR 627&633).
+
+**D.34** Miscellaneous additional bug fixes and improvements of documentation.
 L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
 
