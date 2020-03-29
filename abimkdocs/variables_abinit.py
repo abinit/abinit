@@ -10594,7 +10594,10 @@ Variable(
     requires="[[nqpt]] == 1 and [[kptopt]] >= 0",
     added_in_version="before_v9",
     text=r"""
-At variance with [[ngkpt]], note that only one q point is selected per dataset
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done, 
+and the default value of [[ngqpt]] is kept.
+
+Similar to [[ngkpt]], but for the q-wavevector. At variance with [[ngkpt]], note that only one q point is selected per dataset
 (see [[iqpt]]).
 Its three positive components give the number of q points of Monkhorst-Pack
 grids (defined with respect to primitive axis in reciprocal space) in each of
@@ -11528,6 +11531,9 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done, 
+and the default value of [[nshiftq]] is kept.
+
 This parameter gives the number of shifted grids to be used concurrently to
 generate the full grid of q points. It can be used with primitive grids
 defined either from [[ngqpt]] or [[qptrlatt]]. The maximum allowed value of
@@ -15631,7 +15637,8 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-Only used if [[nqpt]] = 1.
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done, 
+and the default value of [[qpt]], namely the null vector, is kept.
 
 Combined with [[qptnrm]], define the q vector [[qptn]](1:3) in the case
 [[qptopt]] = 0.
@@ -15721,7 +15728,8 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-Only used if [[nqpt]] = 1.
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done, 
+and the default value of [[qptopt]] is kept.
 
 Controls the set up to generate the Q point [[qptn]](1:3) to be used for the
 specific dataset, either as a shift of k-point grid in ground-state
@@ -15772,6 +15780,9 @@ Variable(
     excludes="[[ngqpt]]",
     added_in_version="before_v9",
     text=r"""
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done, 
+and the default value of [[qptrlatt]] is kept.
+
 This input variable is used only when [[qptopt]] is positive. It partially
 defines the q point grid. The other piece of information is contained in
 [[shiftq]]. [[qptrlatt]] cannot be used together with [[ngqpt]].
@@ -16823,6 +16834,9 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done, 
+and the default value of [[shiftq]] is kept.
+
 It is used only when [[qptopt]] >= 0, and must be defined if [[nshiftq]] is larger than 1.
 [[shiftq]](1:3,1:[[nshiftq]]) defines [[nshiftq]] shifts of the homogeneous
 grid of q points based on [[ngqpt]] or [[qptrlatt]].
@@ -21145,7 +21159,7 @@ Variable(
     vartype="integer",
     topics=['UnitCell_useful'],
     dimensions=[3],
-    defaultval=[1 1 1],
+    defaultval=[1, 1, 1],
     mnemonics="SUPERCELL LATTice",
     added_in_version="before v9",
     text=r"""

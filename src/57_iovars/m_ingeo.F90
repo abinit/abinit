@@ -460,8 +460,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xred',txred,'DPR')
      if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
 
-     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xangst',txcart,'DPR')
-     if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])/Bohr_Ang
+     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xcart',txcart,'DPR')
+     if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    end if
 
  else

@@ -1635,9 +1635,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
    ! Find the q-point, if any.
-   call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,nqpt,dtset%qptn,dtset%wtq,&
-     dtset%rprimd_orig(1:3,1:3,intimage),dtset%spinat,string,dtset%typat,&
-     vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
+   if(nqpt/=0)then
+     call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
+       dtset%rprimd_orig(1:3,1:3,intimage),dtset%spinat,string,dtset%typat,&
+       vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
+   endif
 
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&

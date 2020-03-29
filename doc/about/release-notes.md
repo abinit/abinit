@@ -244,8 +244,8 @@ New input variables tested and documented:
 [[spin_write_traj@multibinit|spin_write_traj]].
 Additionnal new input variables:
 [[slc_coupling@multibinit|slc_coupling]](NT),
-[[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]] (NT and not documented), 
-[[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]] (NT and not documented), 
+spin_calc_correlation_obs (NT and not documented), 
+spin_calc_traj_obs (NT and not documented), 
 [[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT). 
 
 By Xu He, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete
