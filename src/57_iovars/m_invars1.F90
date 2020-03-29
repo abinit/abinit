@@ -1636,7 +1636,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
    ! Find the q-point, if any.
    if(nqpt/=0)then
-     call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,nqpt,dtset%qptn,dtset%wtq,&
+     call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
        dtset%rprimd_orig(1:3,1:3,intimage),dtset%spinat,string,dtset%typat,&
        vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    endif

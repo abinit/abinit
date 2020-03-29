@@ -21159,7 +21159,7 @@ Variable(
     vartype="integer",
     topics=['UnitCell_useful'],
     dimensions=[3],
-    defaultval=[1 1 1],
+    defaultval=[1, 1, 1],
     mnemonics="SUPERCELL LATTice",
     added_in_version="before v9",
     text=r"""

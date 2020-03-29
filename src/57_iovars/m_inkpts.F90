@@ -551,7 +551,6 @@ end subroutine inkpts
 !!  lenstr=actual length of the string
 !!  msym=default maximal number of symmetries
 !!  natom=number of atoms
-!!  nqpt=number of  q point, might be 0 or 1. If 0, checks that qptopt, qpt and ngqpt are not read.
 !!  rprimd(3,3)=dimensional real space primitive translations (bohr)
 !!  spinat(3,1:natom)=spin-magnetization of the atoms
 !!  string*(*)=character string containing all the input data. Initialized previously in instrng.
@@ -572,11 +571,11 @@ end subroutine inkpts
 !!
 !! SOURCE
 
-subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,nqpt,qptn,wtqc,rprimd,spinat,string,typat,vacuum,xred,qptrlatt)
+subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spinat,string,typat,vacuum,xred,qptrlatt)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)   :: chksymbreak,iout,jdtset,lenstr,msym,natom,nqpt
+ integer,intent(in)   :: chksymbreak,iout,jdtset,lenstr,msym,natom
  real(dp),intent(inout) :: wtqc
  character(len=*),intent(in) :: string
 !arrays
