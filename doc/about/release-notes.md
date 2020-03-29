@@ -6,8 +6,7 @@ List of changes with respect to version 8.10.
 Many thanks to the contributors to the ABINIT project between
 October 2018 and March 2020. These release notes
 are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10
-(merge requests up to, and including, MR613 are taken into account,
-as well as MR636).
+(merge requests up to, and including, MR636 are taken into account)
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
@@ -36,18 +35,26 @@ In particular:
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
-as this was not sustainable (see [B.5](#v9.0.B.5)) and nowadays most users install themselves prerequired libraries.
+as this was not sustainable (see [B.5](#v9.0.B.5)) and nowadays most users install prerequisite libraries themselves.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
     This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.0.B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#v9.0.A.3).
 
 
 **A.2** 
-A new account of the ABINIT effort has been published [[cite:Gonze2020]], and provides description
-of several new features.
-A version of this paper, that is not formatted for Computer Phys. Comm., is also 
-[available](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
+A new account of the ABINIT effort has been published in Computer Phys. Comm. [[cite:Gonze2020]]
+It provides description of several new features.
+A version of this paper that is not formatted for Computer Phys. Comm.  
+[is also available](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
 The licence allows the authors to put it on the Web.
+
+A second new account of the ABINIT effort has been published in J. Chem. Phys. [[cite:Romero2020]].
+The scope of this second paper is different from the first one. It is more a survey of ABINIT, 
+focusing on its specific capabilities. Still, it contains also some description of some new features.
+A version of this paper that is not formatted for J. Chem. Phys. 
+[is also available](https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf).
+The licence allows the authors to put it on the Web.
+
 Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments).
 
 <a name="v9.0.A.3"></a>
@@ -114,12 +121,20 @@ For further details about the implementation, please consult this [preprint](htt
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
 
-
+<!--
 **B.2** Flexoelectricity and dynamical quadrupoles
 
-ABINITv9 allows one to compute flexoelectricity as well as dynamical quadrupoles, as described
+A new driver has been included in abinit that allows one to compute 
+4 new spatial dispersion tensors: clamped-ion FxE tensor, dynamic quadrupoles, 
+first moment of IFC matrix and square bracket tensor of Born and Huang. 
+Precalculation of ground state, first and second (d2_dkdk) order response functions is required. 
+After execution, the driver creates a 3rd order energy derivative database file 
+that will be used by anaddb to compute the lattice-mediated FxE components 
+or to include the dipole-quadrupole and quadrupole-quadrupole electrostatic interactions in the calculation of the dynamical matrix.
+
+See the complementary description
 in the Sec. V. D of [[cite:Romero2020]], with underlying theory and test calculations
-presented in [[cite:Royo2019]]. The user is advised to consult these references.
+presented in [[cite:Royo2019]]. 
 
 At the practical level, see [[cite:Romero2020]]: 
 
@@ -128,7 +143,7 @@ At the practical level, see [[cite:Romero2020]]:
 >   to carry out an analytical third order derivative of the energy
 >   with respect to two of the standard perturbations, and to the
 >   momentum q, which directly provides the sought-after spatial
->   dispersion tensors. Remarkably, by virtue of the 2n+1 theorem9,
+>   dispersion tensors. Remarkably, by virtue of the 2n+1 theorem,
 >   the third-order energies are computed in one shot using
 >   precalculated first-order response functions to the standard
 >   perturbations, without the necessity of self-consistently computing
@@ -154,13 +169,14 @@ At the practical level, see [[cite:Romero2020]]:
 >   norm-conserving pseudopotentials without non-linear core corrections, and the LDA
 >   functional.
 
-A tutorial is in preparation, with tests [[tests:lw_1]] to [[tests:lw_2]].
+A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]].
 
 New input variables have been defined: lw_flexo, lwqdvpl, prepalw, and d3e_pert2_strs. 
-At present (v9.0.2) they are not yet documented, although explained and tested in the above-mentioned tutorial.
-This will be completed for v9.2.
+At present (v9.0.2) they are not yet documented, although tested in the above-mentioned examples.
+A tutorial should be set up, as well as a specific topic.
 
 M. Royo, M. Stengel, M. Giantomassi (MR 618).
+-->
 
 
 **B.2** DFT+DMFT
@@ -395,7 +411,7 @@ By M. Giantomassi, G. Petretto, F. Naccarato.
 
 * * *
 
-### **C.** Changes for the developers (also compilers)
+### **C.** Changes for the developers (incluses information about compilers)
 
 **C.1** A python script to help ABINIT developers and development.
 
@@ -517,7 +533,7 @@ By J. Zwanziger (MR 469, 500, 545, 588)
 By M. Giantomassi
 
 
-**D.4** Test of linear electro-optical coefficient, tutorespfn toptic#5.
+**D.4** Test linear electro-optical coefficient, tutorespfn [[test:optic_5]].
 
 By N. Pike (MR 575).
 
@@ -551,14 +567,14 @@ see [[test:v8_44]], [[test:v9_57]], [[test:v9_60]], and [[test:v9_61]].
 From M. Giantomassi (MR491).
 
 **D.11** Multibinit has been interfaced with scale-up,
-https://www.secondprinciples.unican.es
+[[https://www.secondprinciples.unican.es]]
 
 By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 
 **D.12** The following units are now also allowed in input files:
 
 - S Sec Second  for the ABINIT input file;
-- nm (for nanometer)  got the ABINIT and ANADDB input files.
+- nm (for nanometer)  for the ABINIT and ANADDB input files.
 
 **D.13** TDEP utility:
 added [[guide:tdep|A-TDep user guide]],
@@ -575,8 +591,9 @@ Write Raman susceptibilities to netcdf in anaddb.
 By G. Petretto  (MR 599).
 
 **D.15** MetaGGA + PAW in progress.
+All internal and unit tests are OK. The implementation seems close to the end. Still need to perform physical tests.
 
-By M. Torrent, JB Charraud (MR 587, 558).
+By M. Torrent and J.-B. Charraud (MR 587, 558, 625).
 
 **D.16** Implementation of an alternate version of MPI reductions valid when the number of data exceeds 2^32.
 
@@ -619,7 +636,7 @@ By F. Jollet (MR 423)
 
 By F. Jollet (MR 412)
 
-**D.26** Added a preview for the toptic_4.in files in the optic tutorial.
+**D.26** Added a preview for the toptic_4.in file in the optic tutorial.
 
 By F. Goudreault (MR 408)
 
@@ -647,16 +664,11 @@ enable_crpa_optim and enable_crpa_no_optim
 
 By R. Outerov and B. Amadon (MR622).
 
-**D.32** Work on mGGA+PAW.
-All internal and unit tests are OK. The implementation seems close to the end. Still need to perform physical tests.
+**D.32** Work on refactoring the Coulomb interaction part of ABINIT.
 
-By M. Torrent and J.-B. Charraud (MR 625).
+By B. Guster, M. Giantomassi and X. Gonze (MR 627&633).
 
-**D.33** Work on refactoring the Coulomb interaction part of ABINIT.
-
-By B. Guster, M. GIantomassi and X. Gonze (MR 627&633).
-
-**D.34** Miscellaneous additional bug fixes and improvements of documentation.
+**D.33** Miscellaneous additional bug fixes and improvements of documentation.
 L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
 

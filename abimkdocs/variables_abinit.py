@@ -20232,7 +20232,7 @@ One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
 
 The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom, 
-named [[xangst]].
+named `xangst`.
 """,
 ),
 
