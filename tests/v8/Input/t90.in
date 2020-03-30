@@ -1,4 +1,4 @@
-# HF calculation with NC pseudos, nspinor in [1, 2], no SOC
+# HF calculation with NC pseudopotentials, nspinor in [1, 2], no SOC
 ndtset 6
 
 nband     16
@@ -111,7 +111,7 @@ xred
 #%% authors = M. Giantomassi
 #%% keywords = NC, GW, SOC
 #%% description = 
-#%%   HF calculation with NC pseudos, different compinations of nspinor in [1, 2], with/wo SOC
+#%%   HF calculation with NC pseudopotentials, different combinations of nspinor in [1, 2], with/wo SOC
 #%%   Test WFK IO and wafunction conversion nspinor 1 --> nspinor 2
 #%%   HF results in dataset 4-5 should be indentical, dataset 6 should show SOC splitting.
 #%%<END TEST_INFO>

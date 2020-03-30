@@ -4,9 +4,6 @@
  ifcflag   1     ! Interatomic force constant flag
 !  eivec   3     ! Write lwf-formatted file
 
-!Effective charges
-  chneut   1      ! Charge neutrality requirement for effective charges.
-
 !Interatomic force constant info
   dipdip   0      ! Dipole-dipole interaction treatment
   ifcana   0      ! Analysis of the IFCs

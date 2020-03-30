@@ -1,7 +1,6 @@
 !anaddb calculation of flexoelectric tensor
 
 flexoflag  1  
-chneut  1  
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -264,7 +264,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
        call wrtout(std_out,msg,'COLL')
        do ii=0,(nband_k-1)/8
-         write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+         write(msg,'(1x,1p,8e10.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
          if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
          call wrtout(std_out,msg,'COLL')
        end do
