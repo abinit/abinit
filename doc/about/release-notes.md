@@ -264,7 +264,7 @@ spin_calc_correlation_obs (NT and not documented),
 spin_calc_traj_obs (NT and not documented), 
 [[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT). 
 
-By Xu He, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete
+By Xu He, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete, E. Bousquet.
 
 
 **B.4** Constrained DFT
