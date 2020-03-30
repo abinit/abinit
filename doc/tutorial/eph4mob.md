@@ -28,9 +28,9 @@ The imaginary part of the electron-phonon (eph) self-energy evaluated at the KS 
     \lim_{\eta \rightarrow 0^+} & \Im\{\Sigma^\FM_{n\kk}(\enk)\} =
                 \pi \sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} |\gkkp|^2\\
                 & \times \left[ (n_\qnu + f_{m\kk+\qq})
-                                \delta(\enk - \emkq  + \wnuq) \right.\\
+                                \delta(\enk - \emkq  + \wqnu) \right.\\
                 & \left. + (n_\qnu + 1 - f_{m\kk+\qq})
-                                \delta(\enk - \emkq  - \wnuq ) \right]
+                                \delta(\enk - \emkq  - \wqnu ) \right]
 \end{split}
 \label{eq:imagfanks_selfen}
 \end{equation}
@@ -50,7 +50,7 @@ The generalized transport coefficients are given by~\cite{Madsen2018}
 
 \begin{equation}
     \begin{split}
-    \Lc^{(m)}_{\alpha\beta} = 
+    \mcL^{(m)}_{\alpha\beta} = 
     - \sum_n \int \frac{d\kk}{\Omega_\BZ} \vnka \vnkb\, \tau_{n\kk} & \\
     \times (\enk-\ef)^m 
     \left.\frac{\partial f}{\partial\varepsilon}\right|_{\enk}
@@ -66,7 +66,7 @@ thermal conductivity tensors~\cite{Madsen2018}. The electrical conductivity tens
 
 \begin{equation}
     \sigma_{\alpha\beta} =
-    \frac{1}{\Omega} \Lc_{\alpha\beta}^{(0)} \label{eq:transport_sigma}
+    \frac{1}{\Omega} \mcL_{\alpha\beta}^{(0)} \label{eq:transport_sigma}
 \end{equation}
 
 and can be divided into hole and electron contributions
@@ -83,8 +83,8 @@ For electrons,
 
 \begin{equation}
 \begin{split}
-    n_e = \sum_{n\in \text{CB}} \int \dfrac{d\kb}{\Omega_\BZ} f_{n\kb}, \\
-    \mu_e = \dfrac{1}{n_e \Omega}\, \Lc_{n\in \text{CB}}^{(0)}
+    n_e = \sum_{n\in \text{CB}} \int \dfrac{d\kk}{\Omega_\BZ} f_{n\kk}, \\
+    \mu_e = \dfrac{1}{n_e \Omega}\, \mcL_{n\in \text{CB}}^{(0)}
 \end{split}
 \end{equation}
 
