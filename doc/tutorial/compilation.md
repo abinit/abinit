@@ -6,14 +6,16 @@ authors: MG
 
 This tutorial explains how to compile ABINIT and the required dependencies
 without relying on pre-compiled libraries, package managers and root privileges.
-You will learn how to use the standard approach based on **configure** and **GNU make** 
-to build and install your own software stack.
+You will learn how to use the standard approach based on **configure** and **make** 
+to build and install your software stack including MPI.
 It is assumed that you already have a standard Linux installation 
 that already provides some basic tools to build software from source.
 The changes required for MacOsX are briefly mentioned when needed.
-In the last part of the tutorial, we briefly explain how to use modules 
-to load the external dependencies, how to link against the intel MKL library and, optionally, 
-how to activate support for  OpenMP threads. 
+Windows users should install [cygwin](https://cygwin.com/index.html) that 
+provides a POSIX-compatible environment 
+or use a [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about).
+In the last part of the tutorial, we cover more advanced topics related to modules, and we explain
+how to link against the intel MKL library and how to activate support for OpenMP threads. 
 
 <!--
 We will make extensive use of the shell hence familiarity with the Unix terminal is assumed.
@@ -41,17 +43,18 @@ needed to build application from source.
 
 ## Getting started
 
-Since ABINIT is written in Fortran, we need a modern Fortran compiler that supports the **F2003 specifications**
-as well as a C compiler (the C++ compiler is optional and required for advanced features such as DMFT).
+Since ABINIT is written in Fortran, we need a **recent** Fortran compiler 
+supporting the **F2003 specifications** as well as a C compiler.
+The C++ compiler is optional and required only if you need advanced features such as DMFT with the TRIQS library.
 In what follows, we will be focusing on the GNU toolchain: *gcc* for C and *gfortran* for Fortran.
 
-In the terminal, issue:
+First of all, let's make sure the `gfortran` compiler is installed by issuing:
 
 ```sh
 gfortran --version
 ```
 
-to get the version of the compiler (must be >= ??).
+in the terminal to get the version of the compiler (it must be >= ??).
 
 !!! tip
 
@@ -62,37 +65,43 @@ to get the version of the compiler (must be >= ??).
     sudo apt-get install gfortran
     ```
 
-    Life is much more complicated if you are a Mac-OsX users since Mac does not officialy 
+    Life is more complicated if you are a Mac-OsX users since Mac does not officialy 
     support Fortran and you will need to install a Fortran compiler.
+    Possible solutions are homebrew, macport or DMG packages such as this one.
 
 
-The *which* command, reports the absolute path of the executable.
+The *which* command, returns the absolute path of the executable.
 
 ```sh
 which gfortran
 ```
 
-This point is very important as we will use the *which* command as lot in the rest of this tutorial 
-to find the location of the different dependencies.
+Note that we will use the *which* command as lot in the rest of this tutorial.
+Remember that `which` is extremely useful to pin point possible problems 
 
-Now check whether GNU **make** is installed with
+Now let's check whether GNU **make** is installed with
 
 ```sh
 which make
 ```
 
-MaxOsX users will need to install **make** via Xcode.
+!!! tip
+
+    MaxOsX users will need to install **make** via Xcode.
+
 
 ## How to compile BLAS and LAPACK
 
-BLAS/LAPACK represents the workhorse of any scientific code.
+BLAS/LAPACK represents the workhorse of any scientific code. 
 <!--
+and you should always use 
+an optimized external library if performance if of concern.
+-->
 In principle this step can be skipped since any decent Linux distribution already provides
 pre-compiled versions but, as already mentioned in the introduction, we prefer 
-to compile everything from source and BLAS/LAPACK represents an excellent exercise.
--->
-The compilation of these two libraries is indeed straightforward and this allows us 
-to introduce some basic concepts that will reveal useful in the other parts of the tutorial.
+to compile everything from source and BLAS/LAPACK represents an excellent exercise to start with.
+This step, indeed, allows us to discuss some basic concepts that will reveal useful 
+in the other parts of the tutorial.
 
 First of all, let's create a directory in your `$HOME` directory (let's call it *local*).
 The *src* directory will be used to store the different source files while artifacts 
@@ -121,11 +130,20 @@ Download the openblas tarball from the [openblas website](https://www.openblas.n
 wget https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 ```
 
-If `wget` is not available, use
+If `wget` is not available, use `curl` and the command line:
 
 ```
 curl
 ```
+
+!!! tip
+
+    To get the URL inside the web-brower, hover the mouse over the link, press the right mouse button
+    and then select `Copy Link` to copy the link to the system clipboard. 
+    Now one can paste the link in the terminal by selecting the Copy action in the menu 
+    activate by the right click.
+    Alternatively, one can click the central button (mouse wheel) or use CMD + V in MacOsX.
+
 
 Now unpack the tarball with:
 
@@ -133,13 +151,13 @@ Now unpack the tarball with:
 tar -xvf v0.3.7.tar.gz
 ```
 
-then cd to the directory with
+then `cd` to the directory with
 
 ```sh
 cd OpenBLAS-0.3.7/
 ```
 
-and execute the *configure* script with:
+and execute the `configure` script with:
 
 ```sh
 ./configure --prefix=$HOME/local/
@@ -148,9 +166,10 @@ make -j2
 
 There are two things worth noticing here:
 
-* The `--prefix` option specifies the location where all the libraries, executables, include files, modules, 
-  documentation pages, etc will be installed when `make install` is issued.
-* The `-j2` option tells make to use 2 processes to build the package. 
+* The `--prefix` option specifies the location where all the libraries, executables, include files, 
+  Fortran modules, man pages, etc will be installed when we issue `make install`
+
+* The `-j2` option tells make to use 2 processes to build the package to speed up the compilation. 
   Adjust this value according to the number of CPUs available on your machine.
 
 At the end of make, you should get the following output:
@@ -168,21 +187,22 @@ At the end of make, you should get the following output:
 To install the library, you can run "make PREFIX=/path/to/your/installation install".
 ```
 
-Before installing the library, it is good common practice to run the test suite to validate the build.
-Many packages allows users to run the test suite by issuing:
+Before installing the library, it is good common practice to run the test suite to **validate** the build.
+Many packages allow users to run the test suite by issuing:
 
 ```sh
 make tests
 ```
 
-other packages provide `make check`. 
-As usual, use `make --help` to list the available options.
+other packages provide a `make check` option.
+If in doubt, use `make --help` to list the available options.
+
+If all the tests are OK, install the library by issuing:
 
 ```sh
 make PREFIX=$HOME/local/ install
 ```
 
-So far so good, we managed to compile and install our own version of BLAS/LAPACK.
 At this point, you should have the following libraries in $HOME/local/lib:
 
 ```sh
@@ -193,6 +213,7 @@ libopenblas.a  libopenblas.so.0  libopenblas_haswellp-r0.3.7.so
 ```
 
 <!--
+So far so good, we managed to compile and install our version of BLAS/LAPACK.
 Use
 
 ```sh
@@ -202,9 +223,10 @@ nm $HOME/local/lib/libopenblas.so
 to list the symbols presented in the library.
 -->
 
-Since we have installed the package inside a non-standard location ($HOME/local), 
-we need to update two important shell variables so that bash and 
-Add these two lines at the end of your $HOME/.bash_profile file 
+Since we have installed the package inside a non-standard directory ($HOME/local), 
+we need to update two important shell variables: `$PATH` and `$LD_LIBRARY_PATH`.
+
+Add these two lines at the end of your `$HOME/.bash_profile` file 
 
 ```sh
 export PATH=$HOME/local/bin:$PATH
@@ -217,7 +239,8 @@ and then execute:
 source $HOME/.bash_profile file
 ```
 
-to activate these changes.
+to activate these changes without having to start a new terminal session.
+
 Now use
 
 ```sh
@@ -225,10 +248,11 @@ echo $PATH
 echo $LD_LIBRARY_PATH
 ```
 
-to print the value of the variables.
+to print the value of these variables.
 
-If this is the first time you hear about $PATH and $LD_LIBRARY_PATH, please take some time to read
+If this is the first time you hear about $PATH and $LD_LIBRARY_PATH, please take some time to learn
 about the meaning of this environment variables.
+More information about the meaning of `$PATH` are available [here](http://www.linfo.org/path_env_var.html)
 Also remember that one can use `env` to print all the environment variables.
 
 !!! tip
@@ -236,12 +260,12 @@ Also remember that one can use `env` to print all the environment variables.
     MaxOsx users should replace `LD_LIBRARY_PATH` with `DYLD_LIBRARY_PATH`
 
 
-## How to compile Libxc
+## How to compile libxc
 
 At this point, it should not be so difficult to compile and install the libxc library for the XC functional.
-Libxc is written in C, it supports the standard `configure && make` approach and, most importantly, 
-the library does not have any external dependecies other than basic libraries that are available on every decent
-Unix-like installations.
+Libxc is written in C and the build systems supports the standard `configure && make` approach.
+The library does not have any external dependency other than basic libraries that are already installed
+on every decent Unix-like installations.
 The only thing worth noticing is that you will need to activate the Fortran interface
 
 Also in this case, you are supposed to configure the package with the *--prefix* option, run the tests
@@ -274,13 +298,16 @@ Let's have a look at the libraires we have just installed:
 ## Installing FFTW
 
 FFTW is a C library for computing the Fast Fourier transform in one or more dimensions.
-Abinit alread provides an internal implementation of the FFT algorithm in Fortran 
-so FFTW is an optional dependency.
-If you care about performance, FFTW (or MKL) is a nice thing to have because it is usually faster 
-than the internal version.
-
 The FFTW source code can be dowloaded from [fftw.org](http://www.fftw.org/), 
 the tarball of the latest version is available at this URL: <http://www.fftw.org/fftw-3.3.8.tar.gz>.
+
+
+!!! important 
+
+    Abinit alread provides an internal implementation of the FFT algorithm
+    hence FFTW is an optional dependency.
+    If you care about performance, FFTW (or MKL DFTI) is a nice thing to have because these 
+    implementations are usually faster than the internal Fortran version.
 
 The compilation procedure is very similar to the one previously used for libxc. 
 Note, however, that Abinit needs both the **single-precision** and the **double-precision** version.
@@ -290,34 +317,47 @@ At the end, you should have the following libraries installed
 
 ```sh
 [gmatteo@bob libxc-4.3.4]$ ls ~/local/lib/libxc*
-/home/gmatteo/local/lib/libxc.a   /home/gmatteo/local/lib/libxcf03.a   /home/gmatteo/local/lib/libxcf90.a
-/home/gmatteo/local/lib/libxc.la  /home/gmatteo/local/lib/libxcf03.la  /home/gmatteo/local/lib/libxcf90.la
 ```
 
 ## Installing MPI
 
-<!--
-This sections is optional although highly recommended as in 99.9% of the cases, 
-you will be using a parallel version of ABINIT to perform some serious calculation.
--->
+In this section, we discuss how to compile and install the MPI library.
+This step is required if you want to run calculations with multiple processes (most common scenario)
+or if you nede to compile MPI-based libraries such as Scalapack or HDF5 with MPI-IO support.
 
 First of all, keep in mind that there are several MPI implementations available 
-(openmpi, mpich, intel mpi, etc) so you must choose one and stick to it.
+(openmpi, mpich, intel mpi, etc) so you must choose one and **stick to it** 
+when building your software stack.
 Each MPI library provides a `mpif90` script wrapping the Fortran compiler 
-and a `mpirun` (`mpiexec`) launcher to run applications with multiple processes.
+as well as a `mpirun` (`mpiexec`) launcher to execute MPI applications with multiple processes.
+<!--
+Hopefully, you already sysadmins of clusters already provide an optimized version of MPI (that you should use) 
+but the goal of this tutorial is to show how to build your own MPI library and how to use it to compile ABINIT.
+-->
 
-All the libraries (executables) requiring MPI should be compiled, linked and executed 
-with the same MPI library.
-In other words, don't try to link a library compiled with mpich if you are building the source code with openmpi 
-and don't try to execute an executable compiled with intel mpi with the mpirun provided by the openmpi implementation!
-Also in this case, the `which` command allows you
+!!! warning
+
+    All the libraries (executables) requiring MPI should be compiled, linked and executed 
+    with the same MPI library.
+    In other words, don't try to link a library compiled with mpich if you are building the source code with openmpi 
+    and don't try to execute an executable compiled with intel mpi with the mpirun 
+    provided by the openmpi implementation!
+    Also in this case, the `which` command allows you
+
 
 In this tutorial, we use the mpich implementation 
-that can be downloaded from [this page](https://www.mpich.org/downloads/).
+that can be downloaded from [this webpage](https://www.mpich.org/downloads/).
+In the terminal, issue:
 
 ```sh
 wget http://www.mpich.org/static/downloads/3.3.2/mpich-3.3.2.tar.gz
 tar -zxvf mpich-3.3.2.tar.gz
+```
+
+to download and unpach the tarball.
+Now, let's compile/test/install the library with:
+
+```sh
 cd mpich-3.3.2/
 ./configure --prefix=$HOME/local
 
@@ -326,14 +366,21 @@ make check
 make install
 ```
 
+Let's have a look at the MPI executables we just installed:
+
 ```sh
 [gmatteo@bob mpich-3.3.2]$ ls $HOME/local/bin/mpi*
 /home/gmatteo/local/bin/mpic++        /home/gmatteo/local/bin/mpiexec        /home/gmatteo/local/bin/mpifort
 /home/gmatteo/local/bin/mpicc         /home/gmatteo/local/bin/mpiexec.hydra  /home/gmatteo/local/bin/mpirun
 /home/gmatteo/local/bin/mpichversion  /home/gmatteo/local/bin/mpif77         /home/gmatteo/local/bin/mpivars
 /home/gmatteo/local/bin/mpicxx        /home/gmatteo/local/bin/mpif90
+```
 
 
+The C include files and the Fortran modules are installed in `$HOME/local/include/`:
+
+
+```sh
 [gmatteo@bob mpich-3.3.2]$ ls $HOME/local/include/mpi*
 /home/gmatteo/local/include/mpi.h              /home/gmatteo/local/include/mpicxx.h
 /home/gmatteo/local/include/mpi.mod            /home/gmatteo/local/include/mpif.h
@@ -344,26 +391,27 @@ make install
 
 !!! important
 
-    The `.mod` files are Fortran modules generated by the Fortran compiler
-    These modules will be "used" by other Fortran codes such as Abinit during the compilation process.
-    Unfortunately, `.mod` files are compiler-depedent and the format may also depend on the compiler version.
+    The `.mod` files are Fortran modules produced by the Fortran compiler.
+    These modules are "used" by other Fortran modules/programs such as ABINIT during the compilation process.
+    Note that the `.mod` files are compiler-dependent and the format may also depend on the compiler version.
     In a nutshell, one cannot use this MPI library to compile the code with another Fortran compiler.
 
 
 ## Installing HDF5 and netcdf4 (C and Fortran bindings)
 
-Netcdf4 is built on top of HDF5 and consists of two different parts: the low-level layer implemented in C
-and the Fortran bindings.
-To create the libraries required by ABINIT, we will build these three different pieces 
-in bottom-up fashion starting from HDF5.
+Netcdf4 is built on top of HDF5 and consists of two different parts: the low-level C layer
+and the Fortran bindings (Fortran code calling C).
+To build the libraries required by ABINIT, we will compile these three different pieces of software
+in a bottom-up fashion starting from HDF5.
 
-Download the HDF5 tarball from https://www.hdfgroup.org/downloads/hdf5
-
-Configure the package with:
+First of all, download the HDF5 tarball from this [download page](https://www.hdfgroup.org/downloads/hdf5).
+and configure the package with:
 
 ```sh
     ./configure --prefix=$HOME/local/ CC=$HOME/local/bin/mpicc --enable-parallel
 ```
+
+At the end of the configuration step, you should get:
 
 
 ```sh
@@ -402,12 +450,21 @@ Parallel Filtered Dataset Writes: yes
 ```
 
 
+The section with
+
+```
+Parallel HDF5: yes
+```
+
+tells us that HDF5 will support parallel IO.
+Also note that we don't need support for Fortran at this level because the 
+implementation of Fortran bindings will be delegated to the netcdf library.
+
 Again make check (Warning: it may take some time!) and make install
 
 Now let's move to netcdf.
 Download the C version and the Fortran bindings from the 
 [netcdf website](https://www.unidata.ucar.edu/downloads/netcdf/) with:
-
 
 ```sh
 wget ftp://ftp.unidata.ucar.edu/pub/netcdf/netcdf-c-4.7.3.tar.gz
@@ -424,6 +481,7 @@ cd netcdf-c-4.7.3/
 
 where we have used the `CC` variable to specify that we want to use the `mpicc` wrapper installed previously.
 This step is important if we want to activate support for parallel IO.
+At the end of the configure step, you should have
 
 ```sh
 # NetCDF C Configuration Summary
@@ -472,11 +530,16 @@ Relaxed Boundary Check:	yes
 
 Now use the standard sequence of commands to compile and install HDF5:
 
+```sh
     make -j4
     make check
     make install
+```
 
-Once your are done with the installation
+Once your are done with the installation, we can start to use `nc-config` to 
+inspect the features provided by the library we've just installed.
+
+
 
 ```sh
 [gmatteo@bob netcdf-c-4.7.3]$ which nc-config
@@ -502,13 +565,14 @@ To compile the Fortran bindings, use:
     ./configure --prefix=$HOME/local/ FC=$HOME/local/bin/mpif90
 ```
 
-where `FC` points to out mpif90 wrapper.
+where `FC` points to our mpif90 wrapper.
 Again:
 
+```sh
     make -j4
     make check
     make install
-
+```
 
 nf-config
 
@@ -525,7 +589,9 @@ There are two ways of getting the source code of ABINIT:
 
 Once you have got the tarball, uncompress it by typing:
 
-    tar xvzf abinit-<version> .tar.gz
+```sh
+tar xvzf abinit-<version> .tar.gz
+````
 
 where _<version>_ is the version number you downloaded, e.g. "8.6.3". Then go
 into the newly-created _abinit- <version>_ directory and have a look at it.
@@ -536,7 +602,9 @@ the INSTALL file. Please read it now.
 
 Before actually starting the compilation, type:
 
-    ./configure --help
+```sh
+./configure --help
+```
 
 and read carefully the output. You might then find useful to have a look at
 the template for config files stored in _~abinit/doc/build/config-template.ac9_
@@ -546,20 +614,19 @@ quickly.  If you have a configuration file called _~/.abinit/build/hostname.ac_
 (with hostname equal to the $HOSTNAME shell variable for your machine) ABINIT's
 configure will load it at runtime.
 
-The compilation will likely take more than 10 minutes. 
-
 
 ## Compiling Abinit on a cluster with the Intel toolchain
 
 On intel-based machines, we suggest to compile ABINIT with the intel compilers and the intel mkl library 
-The mkl package, in particular, implements highly-optimized versions of BLAS/LAPACK, FFT routines
-as well as SCALAPACK.
-that are usually more performant that 
-usually 
+The mkl library, in particular, provides highly-optimized versions of BLAS, LAPACK, FFT routines
+as well as SCALAPACK that can lead to a significant speedup on intel architectures.
+In what follows, we assume an 
 
 To list the available modules, use:
 
-    module avail
+```sh
+module avail
+```
 
 At this point, you should decide the toolchain to be used to compile Abinit:
 the compiler e.g. intel ifort, GNU gfortran
@@ -570,17 +637,17 @@ This step is strongly cluster-dependent
 
 Compiling ABINIT with OpenMP is not that difficult as everything boils down to:
 
-* Using a threaded version for BLAS/LAPACK/FFT
+* Using a threaded version for the BLAS/LAPACK/FFT libraries
 * Passing the correct options and libraries to the ABINIT configure script
 
 On the contrary, answering the questions:
 
-* When and why should I use threads?
+* When and why should I use OpenMP threads?
 * How many threads should I use and what is the parallel speedup I should expect?
 
 is more difficult because there are several factors that should be considered.
 
-To keep a long story short, one should start to look into threads 
+To keep a long story short, one should start to use OpenMP threads 
 when we start to trigger limitations and bottlenecks in the MPI implementation, 
 especially at the level of the memory requirements.
 These problems are usually observed in large calculations
