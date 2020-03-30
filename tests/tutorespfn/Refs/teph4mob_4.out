@@ -1,6 +1,6 @@
 
-.Version 9.1.1 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
+.Version 9.1.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 16 Mar 2020.
-- ( at 12h05 )
+.Starting date : Mon 30 Mar 2020.
+- ( at 23h37 )
   
-- input  file    -> /home/gbrunin/Software/abinit/eph_tuto/build/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_4.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_4.in
 - output file    -> teph4mob_4.out
 - root for input  files -> teph4mob_4i
 - root for output files -> teph4mob_4o
@@ -78,7 +78,7 @@ _ WF disk file :     26.705 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -88,7 +88,7 @@ _ WF disk file :     26.705 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
               amu      2.69815390E+01  7.49215900E+01
            diemac      9.00000000E+00
              ecut      3.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         312
            getden1          0
            getden2          1
            getden3          1
@@ -332,8 +332,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -345,8 +345,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -376,17 +376,17 @@ tolerances: {tolvrs: 1.00E-18, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -9.7524358209150    -9.752E+00 1.922E-03 1.010E+00
  ETOT  2  -9.7569449951238    -4.509E-03 2.745E-06 5.186E-02
- ETOT  3  -9.7571805517698    -2.356E-04 1.290E-05 3.719E-03
+ ETOT  3  -9.7571805517757    -2.356E-04 1.290E-05 3.719E-03
  ETOT  4  -9.7571932315233    -1.268E-05 4.462E-07 7.340E-05
  ETOT  5  -9.7571933487539    -1.172E-07 7.043E-09 3.921E-07
- ETOT  6  -9.7571933493279    -5.741E-10 3.860E-11 9.004E-09
- ETOT  7  -9.7571933493411    -1.319E-11 1.121E-12 1.432E-10
- ETOT  8  -9.7571933493414    -2.860E-13 6.195E-14 3.955E-13
- ETOT  9  -9.7571933493414    -3.197E-14 4.608E-15 1.946E-15
- ETOT 10  -9.7571933493414     1.776E-14 6.158E-16 1.490E-18
- ETOT 11  -9.7571933493414     3.197E-14 4.134E-17 5.833E-21
+ ETOT  6  -9.7571933493279    -5.740E-10 3.860E-11 9.004E-09
+ ETOT  7  -9.7571933493411    -1.326E-11 1.121E-12 1.432E-10
+ ETOT  8  -9.7571933493414    -2.842E-13 6.194E-14 3.951E-13
+ ETOT  9  -9.7571933493414    -1.954E-14 4.608E-15 1.927E-15
+ ETOT 10  -9.7571933493414     3.553E-15 6.158E-16 1.491E-18
+ ETOT 11  -9.7571933493414     3.375E-14 4.134E-17 5.836E-21
 
- At SCF step   11       vres2   =  5.83E-21 < tolvrs=  1.00E-18 =>converged.
+ At SCF step   11       vres2   =  5.84E-21 < tolvrs=  1.00E-18 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.80097263E-04  sigma(3 2)=  0.00000000E+00
@@ -404,7 +404,7 @@ lattice_vectors:
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9859750E+02
-convergence: {deltae:  3.553E-14, res2:  5.835E-21, residm:  4.134E-17, diffor: null, }
+convergence: {deltae:  3.375E-14, res2:  5.836E-21, residm:  4.134E-17, diffor: null, }
 etotal    :  -9.75719335E+00
 entropy   :   0.00000000E+00
 fermie    :   8.65978298E-02
@@ -431,7 +431,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   11.341E-19; max=  41.336E-18
+ Mean square residual over all n,k,spin=   11.341E-19; max=  41.337E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -474,7 +474,7 @@ local_psp           : -2.43103083154896E+00
 non_local_psp       :  5.89976109402721E-01
 total_energy        : -9.75719334934140E+00
 total_energy_eV     : -2.65506733625168E+02
-band_energy         : -6.98719956322869E-01
+band_energy         : -6.98719956322867E-01
 ...
 
 
@@ -575,7 +575,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25   55 max resid (incl. the buffer)=  4.86397E-16
   prteigrs : nnsclo,ikpt=   25   56 max resid (incl. the buffer)=  7.11233E-17
   prteigrs : nnsclo,ikpt=   25   57 max resid (incl. the buffer)=  3.00940E-18
-  prteigrs : nnsclo,ikpt=   25   58 max resid (incl. the buffer)=  3.63233E-18
+  prteigrs : nnsclo,ikpt=   25   58 max resid (incl. the buffer)=  3.63239E-18
   prteigrs : nnsclo,ikpt=   25   59 max resid (incl. the buffer)=  3.30149E-18
   prteigrs : nnsclo,ikpt=   25   60 max resid (incl. the buffer)=  2.68952E-14
   prteigrs : nnsclo,ikpt=   25   61 max resid (incl. the buffer)=  6.18561E-16
@@ -594,12 +594,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25   74 max resid (incl. the buffer)=  3.44458E-15
   prteigrs : nnsclo,ikpt=   25   75 max resid (incl. the buffer)=  1.32781E-14
   prteigrs : nnsclo,ikpt=   25   76 max resid (incl. the buffer)=  3.78963E-17
-  prteigrs : nnsclo,ikpt=   25   77 max resid (incl. the buffer)=  5.39607E-16
+  prteigrs : nnsclo,ikpt=   25   77 max resid (incl. the buffer)=  5.39647E-16
   prteigrs : nnsclo,ikpt=   25   78 max resid (incl. the buffer)=  8.53436E-13
   prteigrs : nnsclo,ikpt=   25   79 max resid (incl. the buffer)=  3.90698E-14
   prteigrs : nnsclo,ikpt=   25   80 max resid (incl. the buffer)=  5.62338E-16
   prteigrs : nnsclo,ikpt=   25   81 max resid (incl. the buffer)=  1.45748E-17
-  prteigrs : nnsclo,ikpt=   25   82 max resid (incl. the buffer)=  8.31691E-20
+  prteigrs : nnsclo,ikpt=   25   82 max resid (incl. the buffer)=  8.31690E-20
   prteigrs : nnsclo,ikpt=   25   83 max resid (incl. the buffer)=  2.40068E-20
   prteigrs : nnsclo,ikpt=   25   84 max resid (incl. the buffer)=  6.37412E-20
   prteigrs : nnsclo,ikpt=   25   85 max resid (incl. the buffer)=  3.00208E-17
@@ -611,7 +611,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25   91 max resid (incl. the buffer)=  2.61319E-14
   prteigrs : nnsclo,ikpt=   25   92 max resid (incl. the buffer)=  9.28164E-16
   prteigrs : nnsclo,ikpt=   25   93 max resid (incl. the buffer)=  2.28583E-15
-  prteigrs : nnsclo,ikpt=   25   94 max resid (incl. the buffer)=  4.79446E-14
+  prteigrs : nnsclo,ikpt=   25   94 max resid (incl. the buffer)=  4.79482E-14
   prteigrs : nnsclo,ikpt=   25   95 max resid (incl. the buffer)=  3.38393E-12
   prteigrs : nnsclo,ikpt=   25   96 max resid (incl. the buffer)=  2.91106E-13
   prteigrs : nnsclo,ikpt=   25   97 max resid (incl. the buffer)=  1.90897E-16
@@ -1185,7 +1185,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  199 max resid (incl. the buffer)=  7.11233E-17
   prteigrs : nnsclo,ikpt=   25  200 max resid (incl. the buffer)=  4.38516E-18
   prteigrs : nnsclo,ikpt=   25  201 max resid (incl. the buffer)=  3.00940E-18
-  prteigrs : nnsclo,ikpt=   25  202 max resid (incl. the buffer)=  1.53559E-19
+  prteigrs : nnsclo,ikpt=   25  202 max resid (incl. the buffer)=  1.53560E-19
   prteigrs : nnsclo,ikpt=   25  203 max resid (incl. the buffer)=  1.12242E-18
   prteigrs : nnsclo,ikpt=   25  204 max resid (incl. the buffer)=  2.21864E-17
   prteigrs : nnsclo,ikpt=   25  205 max resid (incl. the buffer)=  9.10442E-17
@@ -1224,7 +1224,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  238 max resid (incl. the buffer)=  7.49145E-17
   prteigrs : nnsclo,ikpt=   25  239 max resid (incl. the buffer)=  3.20954E-16
   prteigrs : nnsclo,ikpt=   25  240 max resid (incl. the buffer)=  6.66678E-17
-  prteigrs : nnsclo,ikpt=   25  241 max resid (incl. the buffer)=  3.63233E-18
+  prteigrs : nnsclo,ikpt=   25  241 max resid (incl. the buffer)=  3.63239E-18
   prteigrs : nnsclo,ikpt=   25  242 max resid (incl. the buffer)=  1.58174E-16
   prteigrs : nnsclo,ikpt=   25  243 max resid (incl. the buffer)=  3.30149E-18
   prteigrs : nnsclo,ikpt=   25  244 max resid (incl. the buffer)=  1.21523E-14
@@ -1261,7 +1261,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  275 max resid (incl. the buffer)=  1.32781E-14
   prteigrs : nnsclo,ikpt=   25  276 max resid (incl. the buffer)=  3.30818E-15
   prteigrs : nnsclo,ikpt=   25  277 max resid (incl. the buffer)=  3.78963E-17
-  prteigrs : nnsclo,ikpt=   25  278 max resid (incl. the buffer)=  1.31641E-15
+  prteigrs : nnsclo,ikpt=   25  278 max resid (incl. the buffer)=  1.31649E-15
   prteigrs : nnsclo,ikpt=   25  279 max resid (incl. the buffer)=  1.65928E-18
   prteigrs : nnsclo,ikpt=   25  280 max resid (incl. the buffer)=  4.48461E-16
   prteigrs : nnsclo,ikpt=   25  281 max resid (incl. the buffer)=  2.16192E-14
@@ -1295,7 +1295,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  310 max resid (incl. the buffer)=  2.68189E-15
   prteigrs : nnsclo,ikpt=   25  311 max resid (incl. the buffer)=  9.52513E-14
   prteigrs : nnsclo,ikpt=   25  312 max resid (incl. the buffer)=  1.24057E-14
-  prteigrs : nnsclo,ikpt=   25  313 max resid (incl. the buffer)=  5.39607E-16
+  prteigrs : nnsclo,ikpt=   25  313 max resid (incl. the buffer)=  5.39647E-16
   prteigrs : nnsclo,ikpt=   25  314 max resid (incl. the buffer)=  4.21735E-14
   prteigrs : nnsclo,ikpt=   25  315 max resid (incl. the buffer)=  8.53436E-13
   prteigrs : nnsclo,ikpt=   25  316 max resid (incl. the buffer)=  1.83108E-13
@@ -1305,7 +1305,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  320 max resid (incl. the buffer)=  7.19436E-17
   prteigrs : nnsclo,ikpt=   25  321 max resid (incl. the buffer)=  1.45748E-17
   prteigrs : nnsclo,ikpt=   25  322 max resid (incl. the buffer)=  5.19119E-18
-  prteigrs : nnsclo,ikpt=   25  323 max resid (incl. the buffer)=  8.31691E-20
+  prteigrs : nnsclo,ikpt=   25  323 max resid (incl. the buffer)=  8.31690E-20
   prteigrs : nnsclo,ikpt=   25  325 max resid (incl. the buffer)=  2.40068E-20
   prteigrs : nnsclo,ikpt=   25  327 max resid (incl. the buffer)=  6.37412E-20
   prteigrs : nnsclo,ikpt=   25  328 max resid (incl. the buffer)=  1.95348E-20
@@ -1326,7 +1326,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  343 max resid (incl. the buffer)=  9.28164E-16
   prteigrs : nnsclo,ikpt=   25  344 max resid (incl. the buffer)=  5.38189E-15
   prteigrs : nnsclo,ikpt=   25  345 max resid (incl. the buffer)=  2.28583E-15
-  prteigrs : nnsclo,ikpt=   25  346 max resid (incl. the buffer)=  2.53407E-16
+  prteigrs : nnsclo,ikpt=   25  346 max resid (incl. the buffer)=  2.53437E-16
   prteigrs : nnsclo,ikpt=   25  347 max resid (incl. the buffer)=  2.56621E-12
   prteigrs : nnsclo,ikpt=   25  348 max resid (incl. the buffer)=  3.05799E-12
   prteigrs : nnsclo,ikpt=   25  349 max resid (incl. the buffer)=  2.57428E-14
@@ -1352,7 +1352,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  374 max resid (incl. the buffer)=  2.64530E-14
   prteigrs : nnsclo,ikpt=   25  375 max resid (incl. the buffer)=  9.13125E-18
   prteigrs : nnsclo,ikpt=   25  376 max resid (incl. the buffer)=  2.89837E-16
-  prteigrs : nnsclo,ikpt=   25  377 max resid (incl. the buffer)=  4.79446E-14
+  prteigrs : nnsclo,ikpt=   25  377 max resid (incl. the buffer)=  4.79482E-14
   prteigrs : nnsclo,ikpt=   25  378 max resid (incl. the buffer)=  1.54597E-10
   prteigrs : nnsclo,ikpt=   25  379 max resid (incl. the buffer)=  3.38393E-12
   prteigrs : nnsclo,ikpt=   25  380 max resid (incl. the buffer)=  1.02547E-12
@@ -1377,7 +1377,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  403 max resid (incl. the buffer)=  1.12553E-15
   prteigrs : nnsclo,ikpt=   25  404 max resid (incl. the buffer)=  8.20664E-16
   prteigrs : nnsclo,ikpt=   25  405 max resid (incl. the buffer)=  2.28864E-16
-  prteigrs : nnsclo,ikpt=   25  406 max resid (incl. the buffer)=  8.37505E-15
+  prteigrs : nnsclo,ikpt=   25  406 max resid (incl. the buffer)=  8.37519E-15
   prteigrs : nnsclo,ikpt=   25  407 max resid (incl. the buffer)=  2.67603E-10
   prteigrs : nnsclo,ikpt=   25  408 max resid (incl. the buffer)=  1.53849E-12
   prteigrs : nnsclo,ikpt=   25  409 max resid (incl. the buffer)=  3.53826E-12
@@ -1593,7 +1593,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  624 max resid (incl. the buffer)=  5.88358E-20
   prteigrs : nnsclo,ikpt=   25  627 max resid (incl. the buffer)=  2.45895E-20
   prteigrs : nnsclo,ikpt=   25  628 max resid (incl. the buffer)=  1.67504E-19
-  prteigrs : nnsclo,ikpt=   25  629 max resid (incl. the buffer)=  5.53025E-19
+  prteigrs : nnsclo,ikpt=   25  629 max resid (incl. the buffer)=  5.53024E-19
   prteigrs : nnsclo,ikpt=   25  630 max resid (incl. the buffer)=  4.42802E-18
   prteigrs : nnsclo,ikpt=   25  631 max resid (incl. the buffer)=  1.76215E-17
   prteigrs : nnsclo,ikpt=   25  632 max resid (incl. the buffer)=  2.44797E-15
@@ -1902,7 +1902,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  945 max resid (incl. the buffer)=  4.03454E-16
   prteigrs : nnsclo,ikpt=   25  946 max resid (incl. the buffer)=  6.64327E-18
   prteigrs : nnsclo,ikpt=   25  947 max resid (incl. the buffer)=  1.04355E-18
-  prteigrs : nnsclo,ikpt=   25  948 max resid (incl. the buffer)=  9.78331E-20
+  prteigrs : nnsclo,ikpt=   25  948 max resid (incl. the buffer)=  9.78330E-20
   prteigrs : nnsclo,ikpt=   25  950 max resid (incl. the buffer)=  5.63428E-19
   prteigrs : nnsclo,ikpt=   25  951 max resid (incl. the buffer)=  4.15815E-20
   prteigrs : nnsclo,ikpt=   25  952 max resid (incl. the buffer)=  1.26061E-20
@@ -1914,7 +1914,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  958 max resid (incl. the buffer)=  4.50473E-13
   prteigrs : nnsclo,ikpt=   25  959 max resid (incl. the buffer)=  1.19397E-13
   prteigrs : nnsclo,ikpt=   25  960 max resid (incl. the buffer)=  5.33715E-15
-  prteigrs : nnsclo,ikpt=   25  961 max resid (incl. the buffer)=  9.85853E-18
+  prteigrs : nnsclo,ikpt=   25  961 max resid (incl. the buffer)=  9.85852E-18
   prteigrs : nnsclo,ikpt=   25  962 max resid (incl. the buffer)=  1.20200E-15
   prteigrs : nnsclo,ikpt=   25  963 max resid (incl. the buffer)=  6.52078E-16
   prteigrs : nnsclo,ikpt=   25  964 max resid (incl. the buffer)=  1.03989E-16
@@ -1929,7 +1929,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25  973 max resid (incl. the buffer)=  3.95986E-20
   prteigrs : nnsclo,ikpt=   25  974 max resid (incl. the buffer)=  3.82394E-20
   prteigrs : nnsclo,ikpt=   25  975 max resid (incl. the buffer)=  8.81884E-20
-  prteigrs : nnsclo,ikpt=   25  976 max resid (incl. the buffer)=  1.30047E-19
+  prteigrs : nnsclo,ikpt=   25  976 max resid (incl. the buffer)=  1.30046E-19
   prteigrs : nnsclo,ikpt=   25  977 max resid (incl. the buffer)=  1.67172E-19
   prteigrs : nnsclo,ikpt=   25  978 max resid (incl. the buffer)=  1.46502E-18
   prteigrs : nnsclo,ikpt=   25  979 max resid (incl. the buffer)=  2.33899E-17
@@ -2665,7 +2665,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   prteigrs : nnsclo,ikpt=   25 1711 max resid (incl. the buffer)=  1.29694E-17
   prteigrs : nnsclo,ikpt=   25 1712 max resid (incl. the buffer)=  5.75609E-19
   prteigrs : nnsclo,ikpt=   25 1713 max resid (incl. the buffer)=  1.23523E-18
-  prteigrs : nnsclo,ikpt=   25 1714 max resid (incl. the buffer)=  2.08335E-20
+  prteigrs : nnsclo,ikpt=   25 1714 max resid (incl. the buffer)=  2.08334E-20
   prteigrs : nnsclo,ikpt=   25 1715 max resid (incl. the buffer)=  4.02447E-18
   prteigrs : nnsclo,ikpt=   25 1716 max resid (incl. the buffer)=  7.62844E-17
   prteigrs : nnsclo,ikpt=   25 1717 max resid (incl. the buffer)=  5.56843E-16
@@ -3776,7 +3776,7 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -9.7571933493E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getden1          0
            getden2          1
            getden3          1
@@ -4076,10 +4076,10 @@ P           mkmem3       2769
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         43.0  wall=         43.0
+- Proc.   0 individual time (sec): cpu=         61.7  wall=         62.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         43.0  wall=         43.0
++Overall time at end (sec) : cpu=         61.7  wall=         62.5

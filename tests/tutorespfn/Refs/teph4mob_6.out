@@ -1,6 +1,6 @@
 
-.Version 9.1.1 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
+.Version 9.1.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 16 Mar 2020.
-- ( at 12h06 )
+.Starting date : Mon 30 Mar 2020.
+- ( at 23h38 )
   
-- input  file    -> /home/gbrunin/Software/abinit/eph_tuto/build/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.in
 - output file    -> teph4mob_6.out
 - root for input  files -> teph4mob_6i
 - root for output files -> teph4mob_6o
@@ -129,7 +129,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -445,12 +445,12 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -6.755301E-17   -6.780632E-17
-         1         2   -6.755301E-17    2.115792E+00    6.729970E-17
-         1         3    6.755301E-17    6.755301E-17    2.115792E+00
-         2         1   -2.115792E+00    6.755301E-17    6.780632E-17
-         2         2    6.755301E-17   -2.115792E+00   -6.729970E-17
-         2         3   -6.755301E-17   -6.755301E-17   -2.115792E+00
+         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
+         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         3    9.041670E-17    9.041670E-17    2.115792E+00
+         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -523,12 +523,12 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176172E-02 (at units)
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306392E-03 (Ha)
--                                 =     0.6419999198E+01 (THz)
--Debye temperature from partial sums:     0.3081110011E+03 (K)
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999190E+01 (THz)
+-Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS1_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -580,8 +580,8 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -593,8 +593,8 @@ All the independent perturbations are available
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -659,27 +659,27 @@ Notations:
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31522.6    0.000
+   5   3.573    0.000  31428.2    0.000
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    481.8    0.000
+   5   3.608    0.001    481.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783221.2    0.000
+   5   3.525    0.000 783221.3    0.000
 ============================================================================================
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.33            0.00
-          123.00        0.23E+17        0.00E+00          345.14            0.00
-          182.00        0.23E+17        0.00E+00          423.31            0.00
-          241.00        0.23E+17        0.00E+00          418.73            0.00
-          300.00        0.23E+17        0.00E+00          363.19            0.00
+           64.00        0.23E+17        0.00E+00           38.15            0.00
+          123.00        0.23E+17        0.00E+00          344.31            0.00
+          182.00        0.23E+17        0.00E+00          422.70            0.00
+          241.00        0.23E+17        0.00E+00          418.20            0.00
+          300.00        0.23E+17        0.00E+00          362.75            0.00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -751,12 +751,12 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -6.755301E-17   -6.780632E-17
-         1         2   -6.755301E-17    2.115792E+00    6.729970E-17
-         1         3    6.755301E-17    6.755301E-17    2.115792E+00
-         2         1   -2.115792E+00    6.755301E-17    6.780632E-17
-         2         2    6.755301E-17   -2.115792E+00   -6.729970E-17
-         2         3   -6.755301E-17   -6.755301E-17   -2.115792E+00
+         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
+         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         3    9.041670E-17    9.041670E-17    2.115792E+00
+         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -829,12 +829,12 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176172E-02 (at units)
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306392E-03 (Ha)
--                                 =     0.6419999198E+01 (THz)
--Debye temperature from partial sums:     0.3081110011E+03 (K)
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999190E+01 (THz)
+-Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS2_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -934,27 +934,27 @@ Notations:
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31522.6    0.000
+   5   3.573    0.000  31428.2    0.000
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    481.8    0.000
+   5   3.608    0.001    481.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783221.2    0.000
+   5   3.525    0.000 783221.3    0.000
 ============================================================================================
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.33            0.00
-          123.00        0.23E+17        0.00E+00          345.14            0.00
-          182.00        0.23E+17        0.00E+00          423.31            0.00
-          241.00        0.23E+17        0.00E+00          418.73            0.00
-          300.00        0.23E+17        0.00E+00          363.19            0.00
+           64.00        0.23E+17        0.00E+00           38.15            0.00
+          123.00        0.23E+17        0.00E+00          344.31            0.00
+          182.00        0.23E+17        0.00E+00          422.70            0.00
+          241.00        0.23E+17        0.00E+00          418.20            0.00
+          300.00        0.23E+17        0.00E+00          362.75            0.00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1026,12 +1026,12 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -6.755301E-17   -6.780632E-17
-         1         2   -6.755301E-17    2.115792E+00    6.729970E-17
-         1         3    6.755301E-17    6.755301E-17    2.115792E+00
-         2         1   -2.115792E+00    6.755301E-17    6.780632E-17
-         2         2    6.755301E-17   -2.115792E+00   -6.729970E-17
-         2         3   -6.755301E-17   -6.755301E-17   -2.115792E+00
+         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
+         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         3    9.041670E-17    9.041670E-17    2.115792E+00
+         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -1104,12 +1104,12 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176172E-02 (at units)
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306392E-03 (Ha)
--                                 =     0.6419999198E+01 (THz)
--Debye temperature from partial sums:     0.3081110011E+03 (K)
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999190E+01 (THz)
+-Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS3_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -1209,27 +1209,27 @@ Notations:
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31522.6    0.000
+   5   3.573    0.000  31428.2    0.000
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    481.8    0.000
+   5   3.608    0.001    481.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783221.2    0.000
+   5   3.525    0.000 783221.3    0.000
 ============================================================================================
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.33            0.00
-          123.00        0.23E+17        0.00E+00          345.14            0.00
-          182.00        0.23E+17        0.00E+00          423.31            0.00
-          241.00        0.23E+17        0.00E+00          418.73            0.00
-          300.00        0.23E+17        0.00E+00          363.19            0.00
+           64.00        0.23E+17        0.00E+00           38.15            0.00
+          123.00        0.23E+17        0.00E+00          344.31            0.00
+          182.00        0.23E+17        0.00E+00          422.70            0.00
+          241.00        0.23E+17        0.00E+00          418.20            0.00
+          300.00        0.23E+17        0.00E+00          362.75            0.00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1301,12 +1301,12 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -6.755301E-17   -6.780632E-17
-         1         2   -6.755301E-17    2.115792E+00    6.729970E-17
-         1         3    6.755301E-17    6.755301E-17    2.115792E+00
-         2         1   -2.115792E+00    6.755301E-17    6.780632E-17
-         2         2    6.755301E-17   -2.115792E+00   -6.729970E-17
-         2         3   -6.755301E-17   -6.755301E-17   -2.115792E+00
+         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
+         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         3    9.041670E-17    9.041670E-17    2.115792E+00
+         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -1379,12 +1379,12 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176172E-02 (at units)
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306392E-03 (Ha)
--                                 =     0.6419999198E+01 (THz)
--Debye temperature from partial sums:     0.3081110011E+03 (K)
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999190E+01 (THz)
+-Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS4_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -1493,15 +1493,15 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31522.6    0.000
+   5   3.573    0.000  31428.2    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    481.8    0.000
+   5   3.608    0.001    481.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783221.2    0.000
+   5   3.525    0.000 783221.3    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1510,11 +1510,11 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.33            0.00
-          123.00        0.23E+17        0.00E+00          345.05            0.00
-          182.00        0.23E+17        0.00E+00          423.74            0.00
-          241.00        0.23E+17        0.00E+00          422.04            0.00
-          300.00        0.23E+17        0.00E+00          371.07            0.00
+           64.00        0.23E+17        0.00E+00           38.15            0.00
+          123.00        0.23E+17        0.00E+00          344.22            0.00
+          182.00        0.23E+17        0.00E+00          423.13            0.00
+          241.00        0.23E+17        0.00E+00          421.51            0.00
+          300.00        0.23E+17        0.00E+00          370.63            0.00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1586,12 +1586,12 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -6.755301E-17   -6.780632E-17
-         1         2   -6.755301E-17    2.115792E+00    6.729970E-17
-         1         3    6.755301E-17    6.755301E-17    2.115792E+00
-         2         1   -2.115792E+00    6.755301E-17    6.780632E-17
-         2         2    6.755301E-17   -2.115792E+00   -6.729970E-17
-         2         3   -6.755301E-17   -6.755301E-17   -2.115792E+00
+         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
+         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         3    9.041670E-17    9.041670E-17    2.115792E+00
+         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -1664,12 +1664,12 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176172E-02 (at units)
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306392E-03 (Ha)
--                                 =     0.6419999198E+01 (THz)
--Debye temperature from partial sums:     0.3081110011E+03 (K)
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999190E+01 (THz)
+-Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS5_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -1783,15 +1783,15 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T=    5.0 [K]
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31522.6    0.000
+   5   3.573    0.000  31428.2    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    481.8    0.000
+   5   3.608    0.001    481.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783221.2    0.000
+   5   3.525    0.000 783221.3    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1800,11 +1800,11 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.33            0.00
-          123.00        0.23E+17        0.00E+00          345.06            0.00
-          182.00        0.23E+17        0.00E+00          424.33            0.00
-          241.00        0.23E+17        0.00E+00          425.45            0.00
-          300.00        0.23E+17        0.00E+00          378.96            0.00
+           64.00        0.23E+17        0.00E+00           38.15            0.00
+          123.00        0.23E+17        0.00E+00          344.23            0.00
+          182.00        0.23E+17        0.00E+00          423.73            0.00
+          241.00        0.23E+17        0.00E+00          424.92            0.00
+          300.00        0.23E+17        0.00E+00          378.50            0.00
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1876,12 +1876,12 @@ meta: {optdriver: 7, eph_task: -4, }
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.115792E+00   -6.755301E-17   -6.780632E-17
-         1         2   -6.755301E-17    2.115792E+00    6.729970E-17
-         1         3    6.755301E-17    6.755301E-17    2.115792E+00
-         2         1   -2.115792E+00    6.755301E-17    6.780632E-17
-         2         2    6.755301E-17   -2.115792E+00   -6.729970E-17
-         2         3   -6.755301E-17   -6.755301E-17   -2.115792E+00
+         1         1    2.115792E+00   -9.041670E-17   -9.047704E-17
+         1         2   -9.041670E-17    2.115792E+00    9.035635E-17
+         1         3    9.041670E-17    9.041670E-17    2.115792E+00
+         2         1   -2.115792E+00    9.041670E-17    9.047704E-17
+         2         2    9.041670E-17   -2.115792E+00   -9.035635E-17
+         2         3   -9.041670E-17   -9.041670E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
@@ -1954,12 +1954,12 @@ Values initialized with zeros
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1673176172E-02 (at units)
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
 -                                   =           3.6604 [km/s]
 
- Debye frequency from partial sums:     0.9757306392E-03 (Ha)
--                                 =     0.6419999198E+01 (THz)
--Debye temperature from partial sums:     0.3081110011E+03 (K)
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999190E+01 (THz)
+-Debye temperature from partial sums:     0.3081110007E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS6_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -2073,15 +2073,15 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T=    5.0 [K]
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  31522.6    0.000
+   5   3.573    0.000  31428.2    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.608    0.001    481.8    0.000
+   5   3.608    0.001    481.6    0.000
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783221.2    0.000
+   5   3.525    0.000 783221.3    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2090,11 +2090,11 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
-           64.00        0.23E+17        0.00E+00           38.33            0.00
-          123.00        0.23E+17        0.00E+00          345.06            0.00
-          182.00        0.23E+17        0.00E+00          424.33            0.00
-          241.00        0.23E+17        0.00E+00          425.45            0.00
-          300.00        0.23E+17        0.00E+00          378.96            0.00
+           64.00        0.23E+17        0.00E+00           38.15            0.00
+          123.00        0.23E+17        0.00E+00          344.23            0.00
+          182.00        0.23E+17        0.00E+00          423.73            0.00
+          241.00        0.23E+17        0.00E+00          424.92            0.00
+          300.00        0.23E+17        0.00E+00          378.50            0.00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2127,7 +2127,7 @@ Transport calculation results
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
      frohl_params      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        1.00000000E-01
               ixc           7
@@ -2380,10 +2380,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        101.3  wall=        101.5
+- Proc.   0 individual time (sec): cpu=        155.9  wall=        157.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  40 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        101.3  wall=        101.5
+.Delivered   9 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=        155.9  wall=        157.8
