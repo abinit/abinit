@@ -16,7 +16,7 @@ This lesson should take about 1 hour.
 ## Formalism
 
 Before starting, it is worth summarizing the most important equations implemented in the code.
-For a more complete description of the ABINIT implementation, please consult [[cite:Brunin2020]].
+For a more detailed description of the ABINIT implementation, please consult [[cite:Brunin2020]].
 
 If what follows, we will be working within the 
 self-energy relaxation time approximation (SERTA) [[cite:Giustino2017]].
@@ -105,16 +105,18 @@ These steps can be summarized by the following graph:
 
 ![](eph4mob_assets/workflow.png)
 
-Note that all these capabilities are integrated directly in ABINIT.
-This implementation differs from the one available in ANADDB: 
-the anaddb version acts as a direct post-processing of the e-ph matrix elements computed in the DFPT part 
-whereas the EPH code integrated in ABINIT computes the e-ph matrix elements directly using 
-the GS wavefunctions and the DFPT potentials.
+!!! important
+
+    Note that all these capabilities are integrated directly in ABINIT.
+    This implementation differs from the one available in ANADDB: 
+    the anaddb version acts as a direct post-processing of the e-ph matrix elements computed in the DFPT part 
+    whereas the EPH code integrated in ABINIT computes the e-ph matrix elements directly using 
+    the GS wavefunctions and the DFPT potentials.
 
 Note also that in order to analyze the results, you will need ABINIT compiled with netCDF support.
 All the results of the calculation are indeed saved in netcdf format,
-while the log and output files are mainly used to report selected quantities for testing purposes.
-Visualisation tools are NOT covered in this tutorial.
+while the log and output files are used to report selected quantities mainly for testing purposes.
+Post-processing and visualisation tools are NOT covered in this tutorial.
 Powerful tools based on python and matplotlib are provided by Abipy
 See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
@@ -123,8 +125,8 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 ## Ground state and phonons of fcc AlAs
 
-*Before beginning, you might consider creating a different subdirectory to work
-in. Why not create Work_eph4mob ?*
+*Before beginning, you might consider creating a different subdirectory to work in. 
+Why not create Work_eph4mob ?*
 
 The file *teph4mob_1.in* is the input file for the first step (GS + DFPT perturbations).
 You can copy it to the working directory with:
@@ -146,20 +148,21 @@ cp ../teph4mob_1.in .
     This variable gives the different paths to the pseudopotentials. 
     Use, for instance, 
 
-         pseudos   "../../../Psps_for_tests/13al.981214.fhi, ../../../Psps_for_tests/33as.pspnc"
+         pseudos "../../../Psps_for_tests/13al.981214.fhi, ../../../Psps_for_tests/33as.pspnc"
 
     to specify the relative path to the pseudos if you are following the conventions employed in this tutorials
     You may need to adapt the paths depending on your *$ABI_PSPDIR*.
 
 This tutorial starts with the DFPT calculation for all the $\qq$-points that might be quite time-consuming.
-You can immediately start the job with:
+You can immediately start the job in background with:
 
     abinit teph4mob_1.in > teph4mob_1.log 2> err &
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
 Many input parameters are also quite similar. 
 For more details about this first step, please refer to the first and second tutorials on DFPT.
-Since AlAs is a polar semiconductor, we need to compute with DFPT the Born effective charges and the dielectric tensor
+Since AlAs is a polar semiconductor, we need to compute with DFPT the Born effective charges 
+and the static dielectric tensor
 These quantities are then used to treat the long-range part of the dynamical matrix in the Fourier interpolation 
 of the phonon frequencies. 
 We will see that these quantities are also needed in the Fourier interpolation of the DFPT potential.
@@ -177,14 +180,14 @@ File *\$ABI_TUTORESPFN/Input/teph4mob_2.in* is an example of input file for *mrg
 
 {% dialog tests/tutorespfn/Input/teph4mob_2.in %}
 
-You can copy it in the *Work_eph4mob* directory, and run *mrgddb* as follows:
+You can copy it in the *Work_eph4mob* directory, and run *mrgddb* using:
 
     mrgddb < teph4mob_2.in
 
 !!! tip
 
     Alternatively, one can specify the name of the output DDB and the list of DDB files 
-    to be merged via the command line. 
+    to be merged via command line arguments.
     This approach is quite handy especially if used in conjuction with shell globbing and the "star" syntax:
 
         mrgddb teph4mob_2_DDB teph4mob_1o_DS*_DDB
@@ -198,7 +201,7 @@ File *\$ABI_TUTORESPFN/Input/teph4mob_3.in* is an example of input file for *mrg
 
 {% dialog tests/tutorespfn/Input/teph4mob_3.in %}
 
-You can copy it in the *Work_eph4mob* directory, and merge the files with:
+You can copy it in the *Work_eph4mob* directory, and then merge the files with:
 
     mrgdv < teph4mob_3.in
 
@@ -213,7 +216,7 @@ You can copy it in the *Work_eph4mob* directory, and merge the files with:
 
 We now have all the phonon-related files needed to compute the mobility.
 The DDB will be used to Fourier interpolate the phonon frequencies on an **arbitrarily** dense $\qq$-mesh while
-the DVDB will be used to Fourier interpolate the scattering potentials [[cite:Brunin2020]].
+the DVDB will be used to Fourier interpolate the DFPT scattering potentials [[cite:Brunin2020]].
 The only ingredient left is the set of GS wavefunctions on the dense $\kk$-mesh.
 
 ## Calculation of the dense WFK file
@@ -277,14 +280,14 @@ The job should take $\sim$15 seconds on a recent CPU.
 Let's discuss the meaning of the e-ph variables in more details.
 
 [[optdriver]] 7 is required to activate the e-ph driver while
-[[eph_task]] -4 tells ABINIT that we only need the imaginary part of the Fan-Migdal
-self-energy, which directly gives the electron lifetimes, see [[cite:Brunin2020]].
+[[eph_task]] -4 tells ABINIT that we only need the imaginary part 
+of the e-ph self-energy, which directly gives the electron lifetimes, see [[cite:Brunin2020]].
 
 The dense $\kk$-mesh is specified by [[ngkpt]] = 24 24 24. 
 It should be the same mesh as the one used for the dense WFK computation. 
 [[occopt]] 3 is required to correctly compute the
 location of the Fermi level, using the Fermi-Dirac occupation function.
-The initial grid used for the phonon (used in the DFPT computation) was a 4x4x4. 
+The initial grid used for the phonons (used in the DFPT computation) was a 4x4x4. 
 These are the values that we need to specify for [[ddb_ngqpt]].
 The dense $\qq$-mesh onto which the scattering potentials are interpolated and the 
 e-ph matrix elements are computed is given by [[eph_ngqpt_fine]]. 
@@ -299,14 +302,17 @@ over the $\qq$-mesh). This allows to efficiently filter out the $\qq$-points tha
 to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
 ensure energy and momentum conservation for a given $\kk$-point. 
 All the other $\qq$-points do not need to be considered and can be filtered out.
-The use of the tetrahedron method is automatically activated (see [[eph_intmeth]]).  
+The use of the tetrahedron method is automatically activated when only 
+the imaginary part is wanted (see [[eph_intmeth]]).  
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
 The carrier concentration is deduced from the number of extra electrons in the unit cell,
-given by [[eph_extrael]]. You should use a very small number, corresponding to
-$10^{15}$ to $10^{18}$ electrons per cm$^3$. 
+specified by [[eph_extrael]]. 
+To obtain results that are representative of the intrinsic mobility, 
+we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$. 
+
 The [[sigma_erange]] variable describes the energy window, below the VBM and above the
-CBM, within which the lifetimes will be computed.
+CBM where the lifetimes will be computed.
 Since the BTE contains a derivative of the Fermi-Dirac occupation function centered on the Fermi level,
 it is possible to filter the $\kk$-points that will contribute to the mobility and compute
 the lifetimes for these $\kk$-points only. Indeed, the value of the derivative decreases rapidly
@@ -322,14 +328,15 @@ An exact representation of densities/potentials in $\GG$-space is obtained with 
 but we found that using a value of 1.1 does not change the result (in the materials we tested; 
 this might not be true in general and requires testing from the user) but allows
 to decrease the memory by a factor close to 8. 
-These tricks are not activated by default because users are supposed to perform preliminary tests
-to make sure that the quality of the results is not affected by these options.
+These tricks **are not activated by default** because users are supposed to perform preliminary tests
+to make sure the quality of the results is not affected by these options.
 
-We can now examine the log file. Let us describe it in detail here.
-After the standard printing of the input variables,
+We can now examine the log file in detail.
+After the standard output of the input variables,
 the code reports the different parameters for the long-range potentials: the Born effective charges,
-the dielectric constant, and the quadrupolar tensor. Make sure to have all of them in order to have a 
-precise interpolation of the scattering potentials [[cite:Brunin2020]] !
+the dielectric constant, and the quadrupolar tensor. 
+Make sure to have all of them in order to have an
+accurate interpolation of the scattering potentials, see discussion in [[cite:Brunin2020]].
 
 *Note: for the moment, the computation of the quadrupole is not available in the public version, 
 and you should have the following in the log file:*
@@ -419,8 +426,10 @@ give more details about convergence and additional tricks that can be used to de
 ### Convergence w.r.t. the energy range
 
 The first convergence study to be performed is to determine the energy range to be used
-for our computations. We can do that by performing the same mobility computation (same k- and q-meshes)
+for our computations. 
+We can do that by performing the same mobility computation (same k- and q-meshes)
 for an increasing energy window. 
+
 The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.in* is an example of such computation.
 
 {% dialog tests/tutorespfn/Input/teph4mob_6.in %}
@@ -431,23 +440,24 @@ Copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
 This run should take a few minutes.
 
-You can then analyze the variation of the mobility with the value of [[sigma_erange]]. 
+We can now analyze the variation of the mobility with respect to [[sigma_erange]]. 
 Once enough $\kk$-points are included, the mobility should not vary, and computing more $\kk$-points will
 only increase the computation time.
 Note that you should perform this convergence study with a $\kk$-mesh that is already dense enough to 
 capture the band dispersion correctly. 
-In this case, we use a 24x24x24 mesh, which is not very dense for such computations. 
+In this case, we are using a 24x24x24 mesh, which is not very dense for such computations. 
 This means that, when increasing [[sigma_erange]], sometimes
 no additional $\kk$-points are considered. It is the case here for the first 3 datasets (3 k-points),
 and the last two datasets (6 k-points). 
-If a finer mesh was used, the number of k-points would have increased in a more monotonic way.
+If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
 
 ### Convergence w.r.t. the k- and q-meshes
 
-Once the energy window has been set, you should converge the mobility with respect to the 
-dense $\kk$- and $\qq$-meshes. The previous computations used 24x24x24 meshes. This is far from convergence.
-For instance, in silicon, a 45x45x45 $\kk$-mesh and 90x90x90 $\qq$-mesh are needed to have results converged
-within 5%. 
+Once the energy window has been set, we can start to converge the mobility with respect to the 
+dense $\kk$- and $\qq$-meshes. 
+The previous computations used 24x24x24 meshes. This is far from convergence.
+For instance, in silicon, a 45x45x45 $\kk$-mesh and 90x90x90 $\qq$-mesh are needed 
+to have results converged within 5%. 
 
 In order to compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh, there are two possibilities. 
 Let us take the previous example of silicon.
@@ -467,22 +477,25 @@ You should obtain something like this, for T = 300 K:
 
 ![](eph4mob_assets/teph4mob_conv.png)
 
-Note that in order to get sensible results, one should use a denser DFPT $\qq$-mesh (around 9x9x9), and a larger cut-off
-for the planewave basis set ([[ecut]]). 
-The inputs in this tutorial have been made so that the computations are quite fast,
+Note that in order to get sensible results, one should use a denser DFPT $\qq$-mesh (around 9x9x9), 
+and a larger energy cutoff for the planewave basis set ([[ecut]]). 
+The inputs of this tutorial have been tuned so that the computations are quite fast,
 but they are not converged. 
-You should find the suitable parameters for your own work.
+In real life, you should perform convergence studies to find suitable parameters.
 
 ### Double-grid technique
 
 Another possibility to improve the results without increasing the computation time significantly is to use
-a double-grid technique. A coarse mesh will be used for the $\kk$-mesh and the $\qq$-mesh for the e-ph matrix elements,
-but a finer mesh will be used for the phonon absorption-emission terms. This technique helps to better capture
-these processes, while computing the matrix elements on a coarser mesh. The efficiency of this method will depend
+the double-grid technique.
+In this case, a coarse mesh is used for the $\kk$-mesh and the $\qq$-mesh for the e-ph matrix elements,
+but a finer mesh is used for the phonon absorption-emission terms. 
+This technique helps to better capture
+these processes, while computing the matrix elements on a coarser mesh. 
+The efficiency of this method depends
 on the polar divergence of the matrix elements: if this divergence is very difficult to capture numerically,
 the coarse $\qq$-mesh for the e-ph matrix elements will have to be dense.
 
-The double-grid technique requires a second WFK file, containing the dense mesh. 
+The double-grid technique requires a second WFK file, containing the eigenvalues on the dense mesh. 
 You can specify the path to the dense WFK file using [[getwfkfine_filepath]]:
 
      getwfkfine_filepath "teph4mob_4o_DS3_WFK"

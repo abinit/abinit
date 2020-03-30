@@ -14,6 +14,7 @@ teph4mob_1o_DS10_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in,
 #%% [files]
 #%% files_to_test = 

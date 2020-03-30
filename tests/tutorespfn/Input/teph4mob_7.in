@@ -72,6 +72,7 @@ nband 8
 #%% [setup]
 #%% executable = abinit
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% [files]
 #%% files_to_test = 
 #%%   teph4mob_7.out, tolnlines= 57, tolabs=  30, tolrel= 0.03
