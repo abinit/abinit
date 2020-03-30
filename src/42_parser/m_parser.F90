@@ -1597,7 +1597,7 @@ end subroutine intagm
 !!
 !!  This function is exposed through generic interface that allows to
 !!  initialize some of the geometry variables in the case of "images".
-!!  Set up: acell, scalecart, rprim, angdeg, xred, xangst, xcart, vel
+!!  Set up: acell, scalecart, rprim, angdeg, xred, xcart, vel
 !!  These variables can be defined for a set of images of the cell.
 !!  They also can be be defined along a path (in the configuration space).
 !!  The path must be defined with its first and last points, but also

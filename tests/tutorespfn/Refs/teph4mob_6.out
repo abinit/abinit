@@ -138,13 +138,13 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
         boxcutmin      1.10000000E+00
-             ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
-         eph_task          -4
-   eph_ngqpt_fine       24   24   24
         ddb_ngqpt        4    4    4
        dvdb_ngqpt        4    4    4
--          fftalg         112
+             ecut      3.00000000E+00 Hartree
+      eph_extrael      1.00000000E-06
+   eph_ngqpt_fine       24   24   24
+         eph_task          -4
+-          fftalg         312
      frohl_params      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        1.00000000E-01
            istwfk        2    0    0    0    0    0    0    0    0    0
@@ -2103,12 +2103,12 @@ Transport calculation results
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
         boxcutmin      1.10000000E+00
-             ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
-         eph_task          -4
-   eph_ngqpt_fine       24   24   24
         ddb_ngqpt        4    4    4
        dvdb_ngqpt        4    4    4
+             ecut      3.00000000E+00 Hartree
+      eph_extrael      1.00000000E-06
+   eph_ngqpt_fine       24   24   24
+         eph_task          -4
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
