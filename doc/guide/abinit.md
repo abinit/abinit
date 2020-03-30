@@ -293,7 +293,7 @@ an 'object' ([[objaax]], [[objaax]], [[objbax]], [[objatr]], [[objbtr]]), and
 the initial velocity of atoms ([[vel]] if needed).
 
 The initial atomic positions can be input in Bohr or Angstrom through
-[[xcart]], but also, independently, in Angstrom through [[xangst]], or
+[[xcart]] (possibly use the Angstrom unit), or
 even in reduced coordinates, through [[xred]].
 
 #### Flow information

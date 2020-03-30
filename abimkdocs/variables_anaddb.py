@@ -2182,13 +2182,13 @@ instead of the legacy mode based on the files file. Example:
 ),
 
 Variable(
-    abivarname="output@anaddb",
+    abivarname="output_file@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
-    mnemonics="OUTPUT file",
+    mnemonics="OUTPUT FILE",
     added_in_version="9.0.0",
     text=r"""
 This variable specifies the name of the output file when anaddb is invoked with the new syntax:

@@ -50,7 +50,6 @@ iomode  3
 #%% [setup]
 #%% no_check = yes
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [files]
 #%% psp_files= 20ca.paw
 #%% [paral_info]

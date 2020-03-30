@@ -21,7 +21,6 @@ fit_iatom = -1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t13.in,t14.in,t15.in
 #%% system_xml = t14_sys.xml
 #%% coeff_xml = t14_coeffs.xml

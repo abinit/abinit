@@ -12,11 +12,11 @@ prtwf 0
 toldff 1.0d-08 
 
 #geometry
-xangst 0.0  0.0 0.0
-       0.75 0.0 0.0
-xangst_lastimg
+xcart  0.0  0.0 0.0
+       0.75 0.0 0.0  Angstrom
+xcart_lastimg
        0.0  0.0 0.0
-       0.75 0.0 0.0
+       0.75 0.0 0.0  Angstrom
 acell 3*5.0
 acell_lastimg 3*5.0
 

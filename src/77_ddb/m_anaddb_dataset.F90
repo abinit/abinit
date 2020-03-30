@@ -366,7 +366,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !C
 
- anaddb_dtset%chneut=0
+ anaddb_dtset%chneut=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
  if(tread==1) anaddb_dtset%chneut=intarr(1)
  if(anaddb_dtset%chneut<0.or.anaddb_dtset%chneut>2)then
@@ -1802,7 +1802,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    if(anaddb_dtset%enunit/=0)write(nunit,'(3x,a9,3i10)')'   enunit',anaddb_dtset%enunit
    if(anaddb_dtset%eivec/=0) write(nunit,'(3x,a9,3i10)')'    eivec',anaddb_dtset%eivec
    if(anaddb_dtset%asr/=0)   write(nunit,'(3x,a9,3i10)')'      asr',anaddb_dtset%asr
-   if(anaddb_dtset%chneut/=0)write(nunit,'(3x,a9,3i10)')'   chneut',anaddb_dtset%chneut
+   if(anaddb_dtset%chneut/=1)write(nunit,'(3x,a9,3i10)')'   chneut',anaddb_dtset%chneut
    if(anaddb_dtset%selectz/=0)write(nunit,'(3x,a9,3i10)')'  selectz',anaddb_dtset%selectz
    if(anaddb_dtset%symdynmat/=1)write(nunit,'(3x,a9,3i10)')'symdynmat',anaddb_dtset%symdynmat
  end if
