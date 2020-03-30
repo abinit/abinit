@@ -386,6 +386,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  Copy input values
    mkmems(1) = dtset%mkmem
+print *, 'driver dtset%mkmem ', dtset%mkmem
    mkmems(2) = dtset%mkqmem
    mkmems(3) = dtset%mk1mem
 

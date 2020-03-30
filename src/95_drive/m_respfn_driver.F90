@@ -474,6 +474,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
+print *, 'respfn dtset%mkmem ', dtset%mkmem
 ! Initialize the wave function type and read GS WFK
  ABI_ALLOCATE(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)

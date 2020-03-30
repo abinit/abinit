@@ -1217,6 +1217,11 @@ subroutine initmpi_atom(dtset,mpi_enreg)
    end if
 
  end if
+#ifdef DEV_MJV
+print *, ' initmpi_atom mpi_enreg%my_atmtab ', mpi_enreg%my_atmtab
+print *, ' initmpi_atom mpi_enreg%my_natom, paral_atom, my_atmtab_allocated ', &
+&                       mpi_enreg%my_natom, paral_atom, my_atmtab_allocated 
+#endif
 
  DBG_EXIT("COLL")
 

@@ -4324,9 +4324,8 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),intent(inout) :: eig1_k(2*nband_k**2)
  real(dp),intent(out) :: fe1fixed_k(nband_k)
  real(dp),intent(out) :: fe1norm_k(nband_k)
- type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband*mkmem*nsppol*gs_hamkq%usecprj)
 !TODO distribute cprj over bands
- !type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband_mem*mkmem*nsppol*gs_hamkq%usecprj)
+ type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband_mem*mkmem*nsppol*gs_hamkq%usecprj)
  type(pawcprj_type),intent(in) :: cprjq(gs_hamkq%natom,mcprjq)
  type(pawrhoij_type),intent(inout) :: pawrhoijfermi(gs_hamkq%natom*gs_hamkq%usepaw)
 
@@ -4334,7 +4333,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 !scalars
  integer,parameter :: level=18
  integer :: berryopt,iband,ii,indx,iorder_cprj
- integer :: iband_me
+ integer :: iband_me, nband_me
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
  real(dp) :: dotr,lambda,wtband
@@ -4402,6 +4401,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Loop over bands
  iband_me = 0
+ nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
  do iband=1,nband_k
 
 !  Skip bands not treated by current proc
@@ -4420,10 +4420,10 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
      if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
 !      Read PAW ground state projected WF (cprj)
-! TODO: has mpi information and could work on distributed cprj array
-       call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,gs_hamkq%natom,iband,ibg,ikpt,iorder_cprj,&
-&       isppol,mband,mkmem,gs_hamkq%natom,1,nband_k,nspinor,nsppol,dtfil%unpaw,&
-&       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,&
+!   cprj is already distributed in band and k, just get the corresponding cprj in cwaveprj0
+       call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,gs_hamkq%natom,iband_me,ibg,ikpt,iorder_cprj,&
+&       isppol,mband_mem,mkmem,gs_hamkq%natom,1,nband_me,nspinor,nsppol,dtfil%unpaw,&
+!&       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,&
 &       icpgr=idir,ncpgr=ncpgr)
      end if
 
@@ -4432,7 +4432,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
      cwaveq(:,1:npw_k*nspinor)=wtband*cgq(:,1+indx:npw_k*nspinor+indx)
      if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
 !      Read PAW ground state projected WF (cprj)
-       indx=nspinor*(iband-1)+ibgq
+       indx=nspinor*(iband_me-1)+ibgq
 ! TODO: cprj distributed -> iband_me
        !indx=nspinor*(iband-1)+ibgq
        call pawcprj_copy(cprjq(:,1+indx:nspinor+indx),cwaveprjq)

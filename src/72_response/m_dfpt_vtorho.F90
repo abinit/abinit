@@ -48,7 +48,7 @@ module m_dfpt_vtorho
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, &
 &                       pawrhoij_init_unpacked, pawrhoij_free_unpacked, &
 &                       pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
+ use m_pawcprj,  only : pawcprj_type
  use m_pawfgr,   only : pawfgr_type
  use m_paw_mkrho,only : pawmkrho
  use m_fft,      only : fftpac
@@ -196,7 +196,7 @@ contains
 !!    nres2=square of the norm of the residual
 !!    nvresid1(cplex*nfftf,nspden)=1st-order density residual
 !!  ==== if psps%usepaw==1
-!!    cprj1(natom,nspinor*mband*mk1mem*nsppol*usecprj)=
+!!    cprj1(natom,nspinor*mband_mem*mk1mem*nsppol*usecprj)=
 !!              1st-order wave functions at k,q projected with non-local projectors:
 !!                       cprj1=<p_i|C1nk,q> where p_i is a non-local projector
 !!    nhat1(cplex*nfftf,nspden*psps%usepaw)=1st-order compensation charge density
@@ -283,10 +283,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt_rbz,2,3)
-!TODO: mband_mem to distribute cprj over bands
- type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband*mkmem *nsppol*usecprj)
- type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband*mkqmem*nsppol*usecprj)
- type(pawcprj_type),intent(inout) :: cprj1(natom,dtset%nspinor*mband*mk1mem*nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband_mem*mkmem *nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj)
+ type(pawcprj_type),intent(inout) :: cprj1(natom,dtset%nspinor*mband_mem*mk1mem*nsppol*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*psps%usepaw),paw_ij1(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom*psps%usepaw)
@@ -401,8 +400,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !Prepare RF PAW files
  if (psps%usepaw==1) then
-!TODO MJV: PAW mband_mem
-   mcprjq=dtset%nspinor*mband*mkqmem*nsppol*usecprj;mcprjq_disk=0
+   mcprjq=dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj;mcprjq_disk=0
  else
    mcprjq=0;mcprjq_disk=0
  end if
@@ -698,16 +696,16 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
 
 !    Shift array memory
      if (mkmem/=0) then
-       ibg=ibg+dtset%nspinor*nband_k
+       ibg=ibg+dtset%nspinor*nband_me
        icg=icg+npw_k*dtset%nspinor*nband_me
        ikg=ikg+npw_k
      end if
      if (mkqmem/=0) then
-       ibgq=ibgq+dtset%nspinor*nband_k
+       ibgq=ibgq+dtset%nspinor*nband_me
        icgq=icgq+npw1_k*dtset%nspinor*nband_me
      end if
      if (mk1mem/=0) then
-       ibg1=ibg1+dtset%nspinor*nband_k
+       ibg1=ibg1+dtset%nspinor*nband_me
        icg1=icg1+npw1_k*dtset%nspinor*nband_me
        ikg1=ikg1+npw1_k
      end if
@@ -724,6 +722,10 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
 ! FR EB for the non-collinear part see vtorho.F90
    if(iscf_mod>0) then
      if (psps%usepaw==0) then
+#ifdef DEV_MJV
+print *, ' rhor1 726 ', rhor1(:,1:10)
+print *, ' rhoaug1 726 ', rhoaug1(:,1:10,1,1)
+#endif
        call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhor1,rhoaug1(:,:,:,1),1)
        if(nspden==4)then
          do ispden=2,4
@@ -731,6 +733,10 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
          end do
        end if
      else
+#ifdef DEV_MJV
+print *, ' rho1wfr 737 ', rho1wfr(1:10,:)
+print *, ' rhoaug1 737 ', rhoaug1(:,1:10,1,1)
+#endif
        call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rho1wfr,rhoaug1(:,:,:,1),1)
        if(nspden==4)then
          do ispden=2,4
@@ -805,10 +811,13 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
      if (psps%usepaw==0) then
        rhor1(:,:)  =reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
 #ifdef DEV_MJV
-print *, 'vtorho rhor1 ', rhor1(1:5,:)
+print *, 'vtorho rhor1 814 ', rhor1(1:5,:)
 #endif
      else
        rho1wfr(:,:)=reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
+#ifdef DEV_MJV
+print *, 'vtorho rho1wfr 814 ', rho1wfr(1:5,:)
+#endif
      end if
    else
      index1=0
@@ -854,10 +863,19 @@ print *, 'vtorho rhor1 ', rhor1(1:5,:)
      rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
    end if
 !
+#ifdef DEV_MJV
+print *, ' calling symrhg '
+#endif
    if (psps%usepaw==0) then
+#ifdef DEV_MJV
+print *, 'rhog1 ', rhog1(:,1:10)
+#endif
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1)
    else
+#ifdef DEV_MJV
+print *, 'rho1wfg ', rho1wfg(:,1:10)
+#endif
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1)
    end if
@@ -887,11 +905,18 @@ print *, 'vtorho rhor1 ', rhor1(1:5,:)
 !  Compute and add the 1st-order compensation density to rho1wfr
 !  to get the total 1st-order density
    if (psps%usepaw==1) then
+#ifdef DEV_MJV
+print *, 'calling pawmkrho ', my_natom, ' atmtab ', mpi_enreg%my_atmtab
+print *, 'calling pawmkrho rho1wfg ', rho1wfg(:,1:10)
+#endif
      call pawmkrho(1,arg,cplex,gprimd,idir,indsy1,ipert,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &     dtset%pawprtvol,pawrhoij1,pawrhoij1_unsym,pawtab,dtset%qptn,rho1wfg,rho1wfr,&
 &     rhor1,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
 &     pawang_sym=pawang1,pawnhat=nhat1,pawrhoij0=pawrhoij,rhog=rhog1)
+#ifdef DEV_MJV
+print *, 'called pawmkrho ', rhor1(1:10,1)
+#endif
      ABI_DEALLOCATE(rho1wfr)
      ABI_DEALLOCATE(rho1wfg)
      if (paral_atom) then

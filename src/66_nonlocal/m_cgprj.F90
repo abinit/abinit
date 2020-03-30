@@ -919,7 +919,7 @@ contains
  end if
 
 !If needed, gather computed scalars
- if (.not.cg_band_distributed) then
+ if (.not.(cg_band_distributed .and. cprj_band_distributed)) then
    call pawcprj_mpi_sum(cprj,spaceComm_band,ierr)
  end if
 

@@ -3154,6 +3154,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
  integer :: iomode,nsppol,nkirred_disk,isym,itimrev
  integer :: npw_disk,npw_kf,istwf_disk,istwf_kf
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
+ integer :: ibdoff
  integer :: wfk_unt, iband, nband_me, nband_me_disk
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
  integer :: spin_saved, spin_sym
@@ -3505,13 +3506,16 @@ print *, 'ikf, kf, isym, itimrev, g0,  jj, iqst, ik_disk, k_disk ', &
 &         ikf, kf, isym, itimrev, g0,  jj, iqst, ik_disk, k_disk
 #endif
          if (present(eigen)) then
-           eigen(ibdeig(ikf,spin_sym)+1:ibdeig(ikf,spin_sym)+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
+           ibdoff = ibdeig(ikf,spin_sym)+(iband-1)*(2*nband_k)**formeig
+           eigen(ibdoff+1:ibdoff+nband_me*(2*nband_k)**formeig) = &
+&            eig_disk((iband-1)*(2*nband_k)**formeig+1:(iband-1+nband_me)*(2*nband_k)**formeig)
 #ifdef DEV_MJV
-print *, 'nbandk, eigen ', nband_k, eigen(ibdeig(ikf,spin_sym)+1:ibdeig(ikf,spin_sym)+nband_k*(2*nband_k)**formeig)
+print *, 'nbandk, eigen ', nband_k, eigen(ibdoff+1:ibdoff+nband_me*(2*nband_k)**formeig)
 #endif
          end if
          if (present(occ)) then
-           occ(ibdocc(ikf,spin_sym)+1:ibdocc(ikf,spin_sym)+nband_k) = occ_disk(1:nband_k)
+           ibdoff = ibdocc(ikf,spin_sym)+(iband-1)
+           occ(ibdoff+1:ibdoff+nband_me) = occ_disk(iband:iband-1+nband_me)
 #ifdef DEV_MJV
 print *, 'nbandk, occ ', nband_k, occ(ibdocc(ikf,spin_sym)+1:ibdocc(ikf,spin_sym)+nband_k)
 #endif
@@ -3570,6 +3574,8 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff_in ecut ', npw_kf,npwarr(ik
    end do ! kpt disk
  end do ! sppol
 
+! this sums over the whole kpt communicator, so also the band procs.
+! need to 0 out bands which are not mine
  if(present(eigen)) then
    call xmpi_sum(eigen,comm,mpierr)
  end if
@@ -3647,7 +3653,7 @@ end subroutine wfk_read_my_kptbands
 
 subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 &          iomode_, mband_in, mband_mem_in, mkmem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
-&          cg, kg, eigen, occ)
+&          cg_in, kg_in, eigen, occ)
 
 !Arguments ------------------------------------
 !scalars
@@ -3659,8 +3665,8 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
  character(len=fnlen), intent(in) :: outpath_
  logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
 
- real(dp), intent(in) :: cg(2,mpw_in*nspinor_in*mband_mem_in*mkmem_in*nsppol_in)
- integer,  intent(in) :: kg(3,mpw_in*mkmem_in)
+ real(dp), intent(in), target :: cg_in(2,mpw_in*nspinor_in*mband_mem_in*mkmem_in*nsppol_in)
+ integer,  intent(in), target :: kg_in(3,mpw_in*mkmem_in)
  real(dp), intent(in) :: eigen((mband_in*(2*mband_in)**formeig)*nkpt_in*nsppol_in)
  real(dp), intent(in),optional :: occ(mband_in*nkpt_in*nsppol_in)
 
@@ -3678,6 +3684,8 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
  character(len=fnlen) :: outpath
  real(dp) :: cpu,wall,gflops
  type(wfk_t),target :: wfk_disk
+ real(dp), pointer :: cg(:,:)
+ integer, pointer :: kg(:,:)
 
 ! *************************************************************************
 
@@ -3695,11 +3703,20 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 
 
 #ifdef DEV_MJV
-print *, 'formeig,outpath ', formeig, outpath
+print *, 'formeig,outpath, mkmem_in ', formeig, outpath, mkmem_in
 #endif
  wfk_unt = get_unit()
  wfk_disk%debug = .true.
  call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,comm) !xmpi_comm_self)
+
+! no kpt on this proc, make local dummies for cg and kg
+ if (mkmem_in == 0) then
+   ABI_MALLOC(cg, (2,mpw_in))
+   ABI_MALLOC(kg, (3,mpw_in))
+ else
+   cg => cg_in
+   kg => kg_in
+ end if
 
  ABI_ALLOCATE(icg, (nkpt_in,nsppol_in))
  ABI_ALLOCATE(ikg, (nkpt_in))
@@ -3743,19 +3760,16 @@ end if
  
 #ifdef DEV_MJV
 print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
+print *, 'shapekg ', shape(kg)
+print *, 'shapecg ', shape(cg)
+print *, 'shapeeig ', shape(eigen)
 #endif
- icg = 0
- ibdeig = 0
- ibdocc = 0
  do spin=1,nsppol_in
    do ik_rbz=1,nkpt_in
 
 #ifdef DEV_MJV
 print *, 'spin, ik_rbz, nkpt_in ', spin, ik_rbz, nkpt_in
 print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig(ik_rbz,spin), ibdocc(ik_rbz,spin), icg(ik_rbz,spin), ikg(ik_rbz)
-print *, 'shapekg ', shape(kg)
-print *, 'shapecg ', shape(cg)
-print *, 'shapeeig ', shape(eigen)
 #endif
      nband_k = hdr%nband(ik_rbz+(spin-1)*hdr%nkpt)
      npw_k = hdr%npwarr(ik_rbz)
@@ -3807,21 +3821,21 @@ print *, 'no occ, could be printing RF WFK formeig ', formeig
 &        eig_k=eigen(ibdeig(ik_rbz,spin)+1:ibdeig(ik_rbz,spin)+nband_k*(2*nband_k)**formeig))
      end if
  
-! these two run up to mkmem kpts only
-     icg = icg + npw_k*nband_me*nspinor_in
-
-     ibdeig = ibdeig + nband_k*(2*nband_k)**formeig
-     ibdocc = ibdocc + nband_k
-
    end do ! kpt
  end do ! sppol
 
  call wfk_disk%close()
 
+ call cwtime_report(" MY_KPT_BANDS part of WFK written to file. ", cpu, wall, gflops)
+
  ABI_DEALLOCATE(icg)
  ABI_DEALLOCATE(ikg)
  ABI_DEALLOCATE(ibdeig)
  ABI_DEALLOCATE(ibdocc)
+ if (mkmem_in == 0) then
+   ABI_DEALLOCATE(cg)
+   ABI_DEALLOCATE(kg)
+ end if
 
 end subroutine wfk_write_my_kptbands
 !!***

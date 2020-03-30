@@ -74,17 +74,17 @@ contains
 !!  cwave0(2,npw*nspinor)=GS wavefunction at k, in reciprocal space
 !!  cwaveprj0(natom,nspinor*usecprj)=GS wave function at k projected with nl projectors
 !!  band_procs(nband)=tags for processors which have the other bands for cgq below
-!!  eig0nk=0-order eigenvalue for the present wavefunction at k
+!!  eig0_k=0-order eigenvalues for the present wavefunction at k
 !!  eig0_kq(nband)=GS eigenvalues at k+Q (hartree)
 !!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
-!!  gscq(2,mgscq)=<g|S|Cnk+q> coefficients for ALL bands (PAW) at k+Q
+!!  gscq(2,mgscq)=<g|S|Cnk+q> coefficients for MY bands (PAW) at k+Q
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+Q
 !!  icgq=shift to be applied on the location of data in the array cgq
 !!  igscq=shift to be applied on the location of data in the array gscq
 !!  idir=direction of the perturbation
 !!  ipert=type of the perturbation
 !!  mcgq=second dimension of the cgq array
-!!  mgscq=second dimension of gscq
+!!  mgscq=second dimension of gscq, with only mband_mem bands
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw1=maximum number of planewave for first-order wavefunctions
 !!  natom=number of atoms in cell.
@@ -153,7 +153,7 @@ contains
 
 subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 & rf2,dcwavef,&
-& eig0nk,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
+& eig0_k,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
 & gs_hamkq,gvnlxc,gvnlx1,icgq,idir,ipert,igscq,&
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nband_me,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
@@ -167,7 +167,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  integer,intent(in) :: nbdbuf,nline_in,npw,npw1,nspinor,opt_gvnlx1
  integer,intent(in) :: prtvol,quit,usedcwavef,wfoptalg
  integer,intent(inout) :: nlines_done
- real(dp),intent(in) :: eig0nk,dfpt_sciss,tolrde,tolwfr
+ real(dp),intent(in) :: dfpt_sciss,tolrde,tolwfr
  real(dp),intent(out) :: resid
  type(MPI_type),intent(in) :: mpi_enreg
  type(rf2_t), intent(in) :: rf2
@@ -176,6 +176,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
 !arrays
  integer,intent(in) :: band_procs(nband)
  real(dp),intent(in) :: cgq(2,mcgq),eig0_kq(nband)
+ real(dp),intent(in) :: eig0_k(nband)
  real(dp),intent(in) :: grad_berry(2,mpw1*nspinor,nband),gscq(2,mgscq)
  real(dp),intent(inout) :: cwave0(2,npw*nspinor),cwavef(2,npw1*nspinor)
  real(dp),intent(inout) :: dcwavef(2,npw1*nspinor*((usedcwavef+1)/2))
@@ -273,7 +274,7 @@ print *, 'bands_skipped_now ', bands_skipped_now
  useoverlap=0;if (gen_eigenpb) useoverlap=1
 
  ! Use scissor shift on 0-order eigenvalue
- eshift=eig0nk-dfpt_sciss
+ eshift=eig0_k(band)-dfpt_sciss
 
  ! Additional initializations
  istwf_k=gs_hamkq%istwf_k
@@ -519,7 +520,6 @@ print *, 'gh1c 490 ', gh1c(:,1:10)
      ! dcwavef is delta_Psi(1)=-1/2.Sum_{j}[<C0_k+q_j|S(1)|C0_k_i>.|C0_k+q_j>]
      ! see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
      if (usedcwavef==2) then
-!TODO MJV: fix this for paralbd case
        call getdc1(band,band_procs,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
 &           0,icgq,istwf_k,mcgq,0,&
 &           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c)
@@ -574,6 +574,9 @@ print *, 'gh1c 490 ', gh1c(:,1:10)
 
  call cg_zcopy(npw1*nspinor,gh1c,gh1c_n)
 
+#ifdef DEV_MJV
+print *, 'gh1c 578 ', gh1c(:,1:10)
+#endif
  ! Projecting out all bands
  ! While we could avoid calculating all the eig1_k to obtain the perturbed density,
  ! we do need all of the matrix elements when outputing the full 1st-order wfn.
@@ -586,11 +589,13 @@ print *, 'gh1c 490 ', gh1c(:,1:10)
 print *, 'iband, bands_treated_now(iband), bands_skipped_now(iband) ', iband, bands_treated_now(iband), bands_skipped_now(iband)
 #endif
    if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+   work = zero
    if (iband == band) then
      work = gh1c
    end if
 #ifdef DEV_MJV
-print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enreg%comm_band
+print *, ' band_procs(iband), mpi_enreg%comm_band,mpi_enreg%nproc_band ', &
+           band_procs(iband), mpi_enreg%comm_band, mpi_enreg%nproc_band
 #endif
    call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
@@ -602,10 +607,16 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
        dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
    end if
 
+#ifdef DEV_MJV
+print *, 'work1 611 ', work(:,1:10)
+#endif
 ! sum projections against all bands k+q
    call xmpi_sum(work,mpi_enreg%comm_band,ierr)
+#ifdef DEV_MJV
+print *, 'work2 616 ', work(:,1:10)
+#endif
 
-   ! scprod now contains scalar products of band i (runs over all bands in current queue) with local bands j
+   ! scprod now contains scalar products of band iband (runs over all bands in current queue) with local bands j
    jband_me = 0
    do jband=1,nband
      if (band_procs(jband) /= me_band) cycle
@@ -618,10 +629,15 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
 !TODO: make this a blas call? zaxpy
      gh1c = work - (mpi_enreg%nproc_band-1)*gh1c
    end if
- end do
+
+#ifdef DEV_MJV
+print *, 'eig1_k_loc 619 line for iband ', iband, eig1_k_loc(:,:,iband)
+#endif
+ end do !iband
 
 #ifdef DEV_MJV
 print *, 'gh1c 619 ', gh1c(:,1:10)
+print *, 'gscq 619 ', gscq(:,1:10)
 #endif
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
@@ -634,9 +650,9 @@ print *, 'gh1c 619 ', gh1c(:,1:10)
    !
    ! NB: 2019 11 15: MJV: I swapped the names of jband and iband to be more consistent with other loops above
    if (gen_eigenpb) then
-     indx_cgq=icgq
      do iband=1,nband
        if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
+       work = zero
        if (iband==band) then
          work = gs1c
        end if
@@ -644,19 +660,21 @@ print *, 'gh1c 619 ', gh1c(:,1:10)
        call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr) 
 
      ! add PAW overlap correction term to present iband (all procs) and local jband elements
-       jband_me = 0
+       indx_cgq=icgq
        do jband=1,nband
          if (band_procs(jband) /= me_band) cycle
-         jband_me = jband_me + 1
      
-         eshiftkq=half*(eig0_kq(jband)-eig0nk)
+         eshiftkq=half*(eig0_kq(jband)-eig0_k(iband))
          call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,cgq(:,indx_cgq+1:indx_cgq+npw1*nspinor),work,&
            me_g0,mpi_enreg%comm_spinorfft)
          eig1_k_loc(1,jband,iband)=eig1_k_loc(1,jband,iband)-eshiftkq*dotr
          eig1_k_loc(2,jband,iband)=eig1_k_loc(2,jband,iband)-eshiftkq*doti
          indx_cgq=indx_cgq+npw1*nspinor
        end do
-     end do
+#ifdef DEV_MJV
+print *, 'me ', me_band, ' eig1_k_loc 672 line for iband ', iband, eig1_k_loc(:,:,iband)
+#endif
+     end do ! iband
    end if ! PAW and generalized eigenproblem
 
    ! No more need of gs1c
@@ -674,6 +692,9 @@ print *, 'gh1c 619 ', gh1c(:,1:10)
        eig1_k(2*jband-1+band_off)=eig1_k_loc(1,jband,iband)
        eig1_k(2*jband  +band_off)=eig1_k_loc(2,jband,iband)
      end do
+#ifdef DEV_MJV
+print *, 'me ', me_band, ' eig1_k 693 line for iband ', iband, eig1_k(band_off+1:band_off+2*nband)
+#endif
    end do
  end if ! ipert/=natom+10.and.ipert/=natom+11
 
@@ -795,9 +816,11 @@ print *, 'skipping for buffer band'
    call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
  end if
 #ifdef DEV_MJV
-print *, 'cwavef 763 ', cwavef(:,23)
-print *, 'ghc 778 ', ghc(:,1:10)
-print *, 'gh1c 778 ', gh1c(:,1:10)
+print *, 'cgwf berryopt ', berryopt
+print *, 'cwavef 763 ', cwavef(:,1:10)
+print *, 'gsc 778 ', band, gsc(:,1:10)
+print *, 'ghc 778 ',band,  ghc(:,1:10)
+print *, 'gh1c 778 ',band,  gh1c(:,1:10)
 #endif
 
  ! Initialize resid, in case of nline==0
@@ -840,7 +863,7 @@ print *, 'gh1c 778 ', gh1c(:,1:10)
    end if
 
 #ifdef DEV_MJV
-print *, 'gresid 821 ', gresid(:,1:5)
+print *, 'band gresid 821 ', band, gresid(:,1:5)
 #endif
    ! ======================================================================
    ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
@@ -882,7 +905,7 @@ print *, 'gresid 821 ', gresid(:,1:5)
 
    call cg_zcopy(npw1*nspinor,gresid,direc)
 #ifdef DEV_MJV
-print *, ' gresid ', gresid (:,1:5)
+print *, ' cgwf band gresid 906 ', band, gresid (:,1:5)
 #endif
 
    ! ======================================================================
@@ -897,6 +920,9 @@ print *, ' gresid ', gresid (:,1:5)
 
    ! Compute residual (squared) norm
    call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
+#ifdef DEV_MJV
+print *, ' cgwf band, resid ', band, resid
+#endif
    if (prtvol==-level.or.prtvol==-19)then
      write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
       ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
@@ -1525,7 +1551,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
  ABI_DATATYPE_DEALLOCATE(conjgrprj)
 
 #ifdef DEV_MJV
-print *, 'band, resid    ', band, resid
+print *, 'cgwf band, resid 1553   ', band, resid
 #endif
  if(band>max(1,nband-nbdbuf))then
    ! A small negative residual will be associated with these

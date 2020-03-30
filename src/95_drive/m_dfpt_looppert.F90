@@ -417,7 +417,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  iscf_mod=dtset%iscf
  ntypat=psps%ntypat
  nkpt_max=50;if (xmpi_paral==1) nkpt_max=-1
+!TODO: this flag for paral_atom is ignored below
  paral_atom=(dtset%natom/=my_natom)
+#ifdef DEV_MJV
+print *, 'paral_atom, dtset%natom, my_natom ', paral_atom, dtset%natom, my_natom
+#endif
  cplex=2-timrev !cplex=2 ! DEBUG: impose cplex=2
  first_entry=.true.
  initialized=0
@@ -668,6 +672,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !*Redistribute PAW on-site data
  nullify(old_atmtab,pawfgrtab_pert,pawrhoij_pert,paw_an_pert,paw_ij_pert)
+#ifdef DEV_MJV
+print *, 'paral_pert_inplace ', paral_pert_inplace
+#endif
  if (paral_pert_inplace) then
    call set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &   paw_an,paw_ij,pawfgrtab,pawrhoij)
@@ -1154,12 +1161,11 @@ print *, 'shape cg 1 ', shape(cg)
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
 !TODO : distribute cprj by band as well?
-       !mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
-       mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
-       !mcprj=dtset%nspinor*dtset%mband*nkpt_rbz*dtset%nsppol
+       mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
+       !mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
 #ifdef DEV_MJV
-print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
-& mcprj, dtset%nspinor, dtset%mband, mkmem_rbz, dtset%nsppol, nband_rbz
+print *, 'mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol    +  nband_rbz (for info)', &
+& mcprj, dtset%nspinor, mband_mem_rbz, mkmem_rbz, dtset%nsppol, nband_rbz
 #endif
        ABI_DATATYPE_DEALLOCATE(cprj)
        ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
@@ -1302,6 +1308,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
      call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
+print *, 'eigenq ', eigenq 
    else
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
@@ -1334,13 +1341,16 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    ABI_DATATYPE_ALLOCATE(cprjq,(0,0))
    if (psps%usepaw==1) then
      if (usecprj==1) then
-       mcprjq=dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+       mcprjq=dtset%nspinor*mband_mem_rbz*mkqmem_rbz*dtset%nsppol
 !TODO : distribute cprj by band as well?
        !mcprjq=dtset%nspinor*mband_mem_rbz*mkqmem_rbz*dtset%nsppol
        ABI_DATATYPE_DEALLOCATE(cprjq)
        ABI_DATATYPE_ALLOCATE(cprjq,(dtset%natom,mcprjq))
        call pawcprj_alloc(cprjq,0,dimcprj_srt)
        if (ipert<=dtset%natom.and.(sum(dtset%qptn(1:3)**2)>=1.d-14)) then ! phonons at non-zero q
+#ifdef DEV_MJV
+print *, 'q/=0 cprjq calculated'
+#endif
          choice=1 ; iorder_cprj=0 ; idir0=0
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
 &         kg1,kpq_rbz,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
@@ -1348,6 +1358,9 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
 &         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,xred,ylm1,ylmgr1)
        else if (mcprjq>0) then
+#ifdef DEV_MJV
+print *, 'q=0 cprjq copied over'
+#endif
          call pawcprj_copy(cprj,cprjq)
        end if
      end if
