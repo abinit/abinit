@@ -38,6 +38,7 @@ module m_cutoff_cylinder
 !!***
 
  public :: cutoff_cylinder, K0cos
+!!***
 
 ! private variables used for the integration needed by the cylindrical case.
  integer,save :: npts_,ntrial_,qopt_
