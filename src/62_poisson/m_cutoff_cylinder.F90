@@ -43,7 +43,7 @@ module m_cutoff_cylinder
  integer,save :: npts_,ntrial_,qopt_
  real(dp),save :: ha_,hb_,r0_
  real(dp),save :: qpg_perp_,qpg_para_,qpgx_,qpgy_
- real(dp),save :: zz_,xx_,rho_
+ real(dp),save :: zz_,xx_
  real(dp),save :: hcyl_,rcut_,accuracy_
 
 CONTAINS  
