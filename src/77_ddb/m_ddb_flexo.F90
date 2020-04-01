@@ -1007,7 +1007,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
 
-   write(msg,'(3a)')ch10,' Displacement-response flexoelectric force response tensor (units: eV)',ch10
+   write(msg,'(3a)')ch10,' Flexoelectric force response tensor (units: eV)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
    call wrtout([ab_out,std_out],msg,'COLL')
