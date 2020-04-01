@@ -288,6 +288,9 @@ By X. Gonze.
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
 Fully documented example files can be found in doc/build/config-examples.
+A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
+   to convert from the old `.ac`format to `.ac9`.
+
 The build system of ABINITv9 does not build anymore the (hard and soft) dependencies (Linalg, NetCDF4, HDF, LibXC, Wannier90, ...), as this was not sustainable.
 Three libraries are now mandatory: linalg, NetCDF4/HDF5 and LibXC. Failing to link to them will prevent building ABINIT.
 The other libraries are optional, there will only be a warning if they are not available.
