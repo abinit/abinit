@@ -234,7 +234,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,order_int,ifreqs,gaussian_kind!,gw1rdm -> to be used with gwcalctyp !MRM
+ integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm !-> to be used with gwcalctyp !MRM
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -344,10 +344,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wrtout(ab_out,msg,'COLL')
 
  gwcalctyp=Dtset%gwcalctyp
-! gw1rdm=Dtset%gw1rdm ! MRM input variable
-!     write(msg,'(i5)') gw1rdm
-!     call wrtout(std_out,msg,'COLL')
-!     call wrtout(ab_out,msg,'COLL')
+ gw1rdm=Dtset%gw1rdm ! MRM input variable
+     write(msg,'(i5)') gw1rdm
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
  
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -844,7 +844,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
- if(Dtset%gwcalctyp==21) then ! MRM print initial density
+ if(Dtset%gwcalctyp==21 .and. gw1rdm==1) then ! MRM print initial density
    gw1rdm_fname='initial_DEN'
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
@@ -2179,7 +2179,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_FREE(M1_q_m)
 
  else
-   if(gwcalctyp==21) then  !! MRM allocate the 1-RDM correction info if gwcalctyp=21
+   if(gwcalctyp==21 .and. gw1rdm==1) then  !! MRM allocate the 1-RDM correction info if gwcalctyp=21
      if(Sigp%nsppol/=1) MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
@@ -2246,7 +2246,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
       ! MRM compute 1-RDM correction?
-      if(gwcalctyp==21) then 
+      if(gwcalctyp==21 .and. gw1rdm==1) then 
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=0.0d0 
@@ -2298,7 +2298,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        ! MRM compute 1-RDM correction and update dm1
-       if(gwcalctyp==21) then
+       if(gwcalctyp==21 .and. gw1rdm==1) then
          dm1k=0.0d0 
          if(dtset%userib==0) then
            call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,dtset%useria,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
@@ -2313,7 +2313,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      end do
    end if
    ! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
-   if(gwcalctyp==21) then
+   if(gwcalctyp==21 .and. gw1rdm==1) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
      ! MRM only the master has bands on Wfd_dm so let it print everything
      if(my_rank==0) then
