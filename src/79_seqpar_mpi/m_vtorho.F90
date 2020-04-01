@@ -969,7 +969,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        !blanchet PRINT WAVE FUNCTIONS COEFFICIENTS
        if(dtset%userid==6661) then
-         call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,0,dtfil%filnam_ds(4),&
+         call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
 &         dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
 &         dtset%nkpt,npw_k,dtset%nsppol,rprimd)
         end if

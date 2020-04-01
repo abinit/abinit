@@ -55,7 +55,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_cg(cg,ckpt,ecut,eig_k,exchn2n3d,fnameabo,istwfk,kg_k,kpt,&
+  subroutine hightemp_prt_cg(cg,ckpt,ecut,eig_k,ek_k,exchn2n3d,fnameabo,istwfk,kg_k,kpt,&
   & mcg,mpi_enreg,mpw,nband,nkpt,npw_k,nsppol,rprimd)
     ! Arguments -------------------------------
     ! Scalars
@@ -66,7 +66,7 @@ contains
     integer,intent(in) :: istwfk(nkpt),kg_k(3,npw_k),nband(nkpt)
     real(dp),intent(in) :: kpt(3,nkpt),rprimd(3,3)
     real(dp),intent(in) :: cg(2,mcg)
-    real(dp),intent(in) :: eig_k(nband(ckpt))
+    real(dp),intent(in) :: eig_k(nband(ckpt)),ek_k(nband(ckpt))
     character(len=*),intent(in) :: fnameabo
 
     ! Local variables -------------------------
@@ -147,6 +147,12 @@ contains
       write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ckpt
       open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
       write(23,'(ES12.5)') eig_k
+      close(23)
+
+      ! Writting Kinetic energies
+      write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ckpt
+      open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
+      write(23,'(ES12.5)') ek_k
       close(23)
 
       ABI_ALLOCATE(tempwfk,(npw_tot, 3))
