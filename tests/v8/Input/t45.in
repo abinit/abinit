@@ -12,6 +12,7 @@ gruns_ddbs
 
 asr 1
 dipdip 1
+chneut 0
 #dipdip 0
 vs_qrad_tolkms 0.001 0.2
 #vs_qrad_tolkms 0.001 0.3

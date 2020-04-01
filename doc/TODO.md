@@ -2,7 +2,7 @@ TODO list for the documentation of ABINIT
 =========================================
 
 The first version of this TODO was written by Yann.
-Several points have been adressed in the mkdocs version but ther
+Several points have been adressed in the mkdocs version but there
 are still points worth discussing
 
 * General remarks:

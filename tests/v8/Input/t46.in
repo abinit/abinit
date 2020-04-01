@@ -3,7 +3,6 @@ ifcflag 1
 ngqpt 11 7 7 
 nsphere -1
 dipdip 1
-chneut 1
 asr 2
 
 # make thermally occupied supercell of size 2x2x2 
