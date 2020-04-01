@@ -250,7 +250,7 @@ New input variables tested and documented:
 [[spin_init_state@multibinit|spin_init_state]], 
 [[spin_ntime_pre@multibinit|spin_ntime_pre]], 
 [[spin_projection_qpoint@multibinit|spin_projection_qpoint]], 
-[[spin_sia_add@multibinit|spin_sia_
+[[spin_sia_add@multibinit|spin_sia_add]],
 [[spin_sia_k1amp@multibinit|spin_sia_k1amp]], 
 [[spin_sia_k1dir@multibinit|spin_sia_k1dir]], 
 [[spin_temperature_start@multibinit|spin_temperature_start]], 
@@ -668,7 +668,7 @@ By R. Outerov and B. Amadon (MR622).
 
 By B. Guster, M. Giantomassi and X. Gonze (MR 627&633).
 
-**D.33** New TB2J python script to compute the superexchange (J) and the Dzyaloshinskii-Moriya (DMI) interactions. The script can be found in [http://gitlab.abinit.org/xuhe/TB2J](http://gitlab.abinit.org/xuhe/TB2J) with doc and tutorials. The script is interfaced with wannier90 and use the w90 output files. The J calculation works in production, the DMI is much more sensitive to disentanglement noise and have to be use with care. An article is under construction to describe the method and its implementation. The script can deliver input data file for the spin model of Mutltibinit.
+**D.33** New TB2J python script to compute the superexchange (J) and the Dzyaloshinskii-Moriya (DMI) interactions. The script can be found in [http://gitlab.abinit.org/xuhe/TB2J](http://gitlab.abinit.org/xuhe/TB2J) with doc and tutorials. The script is interfaced with wannier90 and use the w90 output files. The J calculation works in production, the DMI is much more sensitive to disentanglement noise and have to be use with care. An article is under construction to describe the method and its implementation. The script can deliver input data file for the spin model of Multibinit.
 
 By He Xu, M. Verstraete and E. Bousquet
 
