@@ -1664,6 +1664,5 @@ function int_I0ln(xx) result(res)
 
 end function int_I0ln
 
-
 END MODULE m_vcoul
 !!***

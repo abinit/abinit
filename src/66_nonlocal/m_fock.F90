@@ -2056,7 +2056,7 @@ end subroutine fock_print
 !!  icutcoul=Option for the Coulomb potential cutoff technique
 !!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
-!!  izero=if 1, unbalanced components of V(q,g) are set to zero
+!!  izero=if 1, unbalanced components of V(q,g) are set to zero # Used by the PAW library
 !!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
 !!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
