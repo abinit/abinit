@@ -76,6 +76,7 @@ program anaddb
  use m_elphon,         only : elphon
  use m_harmonic_thermo,only : harmonic_thermo
  use m_thmeig,         only : thmeig
+ use m_symfind,        only : symanal
  use m_raman,          only : ramansus, electrooptic
  use m_ddb_diel,       only : ddb_diel
  use m_relaxpol,       only : relaxpol
@@ -93,13 +94,13 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
- integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
+ integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr,ptgroupma,spgroup
  logical :: iam_master
- integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
+ integer :: bravais(11),rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer :: count_wminmax(2)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli !,cpu, wall, gflops
- real(dp) :: dielt(3,3)
+ real(dp) :: dielt(3,3),genafm(3)
  real(dp) :: compl(6,6),compl_clamped(6,6),compl_stress(6,6)
  real(dp) :: dielt_rlx(3,3),elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: epsinf(3,3),red_ptot(3),pel(3)
@@ -695,6 +696,8 @@ program anaddb
 
        ! Determine the symmetries of the phonon modes at Gamma
        if (sum(abs(qphon(:,1)))<DDB_QTOL) then
+         call symanal(bravais,0,genafm,nsym,nsym,ptgroupma,Crystal%rprimd,spgroup,&
+&          Crystal%symafm,Crystal%symrel,Crystal%tnons,tol3,verbose=.TRUE.)
          call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
        end if
 

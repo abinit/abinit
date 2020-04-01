@@ -23,7 +23,6 @@
  -outvars_anaddb: echo values of input variables ----------------------
 
  Miscellaneous information :
-      chneut         1
  First list of wavevector (reduced coord.) :
        nph1l         2
        qph1l
@@ -105,6 +104,8 @@
 -  3.886644E+02  3.886644E+02  5.241847E+02  5.241847E+02  5.241847E+02
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0

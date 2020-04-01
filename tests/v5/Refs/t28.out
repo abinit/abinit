@@ -28,7 +28,6 @@
  Miscellaneous information :
        eivec         4
          asr         1
-      chneut         1
  Interatomic Force Constants Inputs :
       dipdip         0
       dipqua         0
@@ -103,6 +102,8 @@
 -  5.141368E+02
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0

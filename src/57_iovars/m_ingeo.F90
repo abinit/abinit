@@ -88,7 +88,7 @@ contains
 !! ratsph(1:ntypat)=radius of the atomic sphere
 !! string*(*)=character string containing all the input data, used
 !!  only if choice=1 or 3. Initialized previously in instrng.
-!! supercell_latt(3,3)=supercell lattice
+!! supercell_latt(3)=supercell lattice
 !! comm: MPI communicator
 !!
 !! OUTPUT
@@ -159,7 +159,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp),intent(out) :: slabzbeg,slabzend,tolsym
  character(len=*),intent(in) :: string
 !arrays
- integer,intent(in) :: supercell_lattice(3,3)
+ integer,intent(in) :: supercell_lattice(3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
@@ -182,7 +182,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  integer :: ipsp,irreducible,isym,itypat,jsym,marr,mu,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma, tread_geo
- integer :: txangst,txcart,txred,txrandom,use_inversion
+ integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,a2,aa,cc,cosang,ucvol,sumalch
  character(len=500) :: msg
  character(len=lenstr) :: geo_string
@@ -194,7 +194,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:),xangst_read(:,:)
+ real(dp),allocatable :: tnons_cart(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -310,7 +310,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  scalecart(:)=one
 
  ! Compute the multiplicity of the supercell
- call mati3det(supercell_lattice,multiplicity)
+ multiplicity=supercell_lattice(1)*supercell_lattice(2)*supercell_lattice(3)
 
  if (tread_geo == 0) then
    ! Get the number of atom in the unit cell. Read natom from string
@@ -329,9 +329,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Multiply the rprim to get the rprim of the supercell
  if(multiplicity > 1)then
-   rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
-   rprim(:,2) = rprim(:,2) * supercell_lattice(2,2)
-   rprim(:,3) = rprim(:,3) * supercell_lattice(3,3)
+   rprim(:,1) = rprim(:,1) * supercell_lattice(1)
+   rprim(:,2) = rprim(:,2) * supercell_lattice(2)
+   rprim(:,3) = rprim(:,3) * supercell_lattice(3)
  end if
 
  ! Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
@@ -386,8 +386,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      else
        write(msg,'(3a,I0,a,I0,a,I0,2a)')&
        'The input variable supercell_latt is present',ch10,&
-       'thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
-       ' ',supercell_lattice(3,3),' is generated',ch10
+       'thus a supercell ',supercell_lattice(1),' ',supercell_lattice(2),&
+       ' ',supercell_lattice(3),' is generated',ch10
        MSG_WARNING(msg)
      end if
    else
@@ -425,7 +425,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end do
 
  ! 6) Read coordinates for each atom in the primitive set--------
- ABI_ALLOCATE(xangst_read,(3,natrd))
  ABI_ALLOCATE(xcart_read,(3,natrd))
  ABI_ALLOCATE(xred_read,(3,natrd))
 
@@ -452,43 +451,38 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if (txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd) , [3, natrd])
    call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
 
-   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xangst',txangst,'DPR')
-   if (txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
-   call intagm_img(xangst_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xangst",txangst,'DPR')
-
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xcart',txcart,'LEN')
    if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    call intagm_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
 
    ! Might initialize xred from XYZ file
-   if (txred+txcart+txangst+txrandom==0) then
+   if (txred+txcart+txrandom==0) then
      call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xred',txred,'DPR')
      if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
 
-     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xangst',txangst,'DPR')
-     if (txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
+     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xcart',txcart,'DPR')
+     if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    end if
 
  else
-   txcart = 0; txangst = 0; txrandom = 0; txred = 1
+   txcart = 0; txrandom = 0; txred = 1
    xred_read = geo%xred
  end if
 
- if (txred + txcart + txangst + txrandom == 0) then
+ if (txred + txcart + txrandom == 0) then
    write(msg, '(3a)' )&
-    'Neither xred nor xangst nor xcart are present in input file. ',ch10,&
+    'Neither xred nor xcart are present in input file. ',ch10,&
     'Action: define one of these in your input file.'
    MSG_ERROR(msg)
  end if
 
  if (txred==1)   write(msg, '(a)' ) '  xred   is defined in input file'
- if (txangst==1) write(msg, '(a)' ) '  xangst is defined in input file'
- if (txcart ==1) write(msg, '(a)' ) '  xcart  is defined in input file'
+ if (txcart ==1) write(msg, '(a)' ) '  xcart  is defined in input file (possibly in Angstrom)'
  if (txrandom ==1) write(msg, '(a)' ) '  xred  as random positions in the unit cell'
  if (txrandom ==1) write(msg, '(a)' ) '  xcart  are defined from a random distribution '
  call wrtout(std_out, msg)
 
- if (txred + txcart + txangst + txrandom > 1)then
+ if (txred + txcart + txrandom > 1)then
    write(msg, '(3a)' )&
     'Too many input channels for atomic positions are defined.',ch10,&
     'Action: choose to define only one of these.'
@@ -499,13 +493,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call wrtout(std_out,' ingeo: takes atomic coordinates from input array xred ')
    call xred2xcart(natrd,rprimd_read,xcart_read,xred_read)
  else
-   if(txangst==1)then
-     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xangst')
-     xcart_read(:,:)=xangst_read(:,:)/Bohr_Ang
-   else
-     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xcart')
-   end if
-   txred=1
+   call wrtout(std_out,' ingeo: takes atomic coordinates from input array xcart')
+   txcart=1
  end if
 
  !At this stage, the cartesian coordinates are known, for the atoms whose coordinates where read.
@@ -665,9 +654,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    ! Compute xred/typat and spinat for the supercell
    if(multiplicity > 1)then
      iatom_supercell = 0
-     do i1 = 1, supercell_lattice(1,1)
-       do i2 = 1, supercell_lattice(2,2)
-         do i3 = 1, supercell_lattice(3,3)
+     do i1 = 1, supercell_lattice(1)
+       do i2 = 1, supercell_lattice(2)
+         do i3 = 1, supercell_lattice(3)
            do iatom = 1, natom_uc
              iatom_supercell = iatom_supercell + 1
              xcart(:,iatom_supercell) = xcart_read(:,iatom) + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
@@ -970,7 +959,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end if ! check of existence of an object
 
  ABI_DEALLOCATE(ptsymrel)
- ABI_DEALLOCATE(xangst_read)
  ABI_DEALLOCATE(xcart_read)
  ABI_DEALLOCATE(xcart)
  ABI_DEALLOCATE(xred_read)

@@ -3,9 +3,6 @@
 !Flags
  dieflag   2     ! 2=> electronic dielectric tensor only
 
-!Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-
 !Wavevector list number 1 (Reduced coordinates and normalization factor)
   nph1l    7       ! number of phonons in list 1
   qph1l   0.0    0.0    0.0       1.0  !  (Gamma point)
