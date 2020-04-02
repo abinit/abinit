@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
 ! MRM density matrix module and Gaussian quadrature one
- use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst!,update_wfd_bst
+ use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
  implicit none
@@ -234,7 +234,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm !-> to be used with gwcalctyp !MRM
+ integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,verbose !MRM new gw1rdm
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -345,10 +345,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  gwcalctyp=Dtset%gwcalctyp
  gw1rdm=Dtset%gw1rdm ! MRM input variable
-     write(msg,'(i5)') gw1rdm
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
- 
+ verbose=0           ! MRM change to verbose=1 for debug mode 
+
  mod10 =MOD(Dtset%gwcalctyp,10)
 
  ! Perform some additional checks for hybrid functional calculations
@@ -736,7 +734,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ! MRM also initialize the Wfd_dm for GW 1-RDM if required.
  ! Warning, this should be replaced by copy but copy fails. Do it in the future! FIXME 
- if (gwcalctyp==21) then
+ if (gwcalctyp==21 .and. gw1rdm>0) then
    call wfd_init(Wfd_dm,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,xmpi_comm_self)!comm)  ! MPI_COMM_SELF 
@@ -844,7 +842,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
- if(Dtset%gwcalctyp==21 .and. gw1rdm==1) then ! MRM print initial density
+ if(Dtset%gwcalctyp==21 .and. gw1rdm>0) then ! MRM print initial density
    gw1rdm_fname='initial_DEN'
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
@@ -2179,7 +2177,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_FREE(M1_q_m)
 
  else
-   if(gwcalctyp==21 .and. gw1rdm==1) then  !! MRM allocate the 1-RDM correction info if gwcalctyp=21
+   if(gwcalctyp==21 .and. gw1rdm>0) then  ! MRM allocate the 1-RDM correction info if gwcalctyp=21 and gw1rdm>0
      if(Sigp%nsppol/=1) MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
@@ -2198,44 +2196,34 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          nateigv(ib,ib,ikcalc,1)=1.0d0
        enddo  
      enddo
-     order_int=Sigp%nomegasi 
-     write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a1)')' '
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     order_int=Sigp%nomegasi 
-     ABI_MALLOC(freqs,(order_int))
-     ABI_MALLOC(weights,(order_int))
-     if(dtset%userid==0) then
-       call get_frequencies_and_weights_legendre(order_int,freqs,weights)
-     else
+     if(gw1rdm>1) then   ! We also want Sigma_c correction
+       order_int=Sigp%nomegasi 
+       write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a1)')' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       order_int=Sigp%nomegasi 
+       ABI_MALLOC(freqs,(order_int))
+       ABI_MALLOC(weights,(order_int))
+       !call get_frequencies_and_weights_legendre(order_int,freqs,weights) ! -> Calls cgqf
        gaussian_kind=1
        gwalpha=0.0_dp
        gwbeta=0.0_dp
-       wmin=dtset%userra
-       wmax=dtset%userrb
-       if(wmin==0.0_dp .and. wmax==1.0_dp) then
-         call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
-         !weights(:)=weights(:)/freqs(:)**2.0_dp          ! Chi scheme
-         !freqs(:)=1.0_dp/freqs(:)-1.0_dp
-         weights(:)=weights(:)/(1.0_dp-freqs(:))**2.0_dp  ! Cubature scheme
-         freqs(:)=freqs(:)/(1.0_dp-freqs(:))
-       else
-         call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
-       endif
-     endif
-     !Form complex frequencies from 0 to iInf and print them
-     do ifreqs=1,order_int
-       Sigp%omegasi(ifreqs)=cmplx(0.0d0,freqs(ifreqs))
-       Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
-       if(dtset%useria==0) then
+       wmin=0.0_dp
+       wmax=1.0_dp
+       call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
+       weights(:)=weights(:)/(1.0_dp-freqs(:))**2.0_dp  ! Cubature library scheme. Same freqs and weights as:
+       freqs(:)=freqs(:)/(1.0_dp-freqs(:))              ! get_frequencies_and_weights_legendre
+       !Form complex frequencies from 0 to iInf and print them in the log file
+       do ifreqs=1,order_int
+         Sigp%omegasi(ifreqs)=cmplx(0.0d0,freqs(ifreqs))
+         Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
          write(msg,'(3f10.5)') Sr%omega_i(ifreqs),weights(ifreqs)
          call wrtout(std_out,msg,'COLL')
-         call wrtout(ab_out,msg,'COLL')
-       endif 
-     enddo
+       enddo
+     endif
    endif  
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
@@ -2246,11 +2234,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
       ! MRM compute 1-RDM correction?
-      if(gwcalctyp==21 .and. gw1rdm==1) then 
+      if(gwcalctyp==21 .and. gw1rdm>0) then 
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=0.0d0 
-        call calc_rdmx(ib1,ib2,ikcalc,0,dtset%useria,potk,dm1k,QP_BSt) ! Only restricted calcs 
+        call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange (k-point) one
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !       Compute NAT ORBS for exchange corrected 1-RDM?
@@ -2298,10 +2286,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        ! MRM compute 1-RDM correction and update dm1
-       if(gwcalctyp==21 .and. gw1rdm==1) then
+       if(gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=0.0d0 
-         if(dtset%userib==0) then
-           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,dtset%useria,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
+         if(gw1rdm>1) then
+           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
          endif
 !        Update the full 1RDM with the correlation (k-point) one
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2312,8 +2300,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_DEALLOCATE(sigcme_k)
      end do
    end if
-   ! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
-   if(gwcalctyp==21 .and. gw1rdm==1) then
+   call xmpi_barrier(Wfd%comm)
+   ! MRM print WFK and DEN files. 
+   if(gwcalctyp==21 .and. gw1rdm>2) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
      ! MRM only the master has bands on Wfd_dm so let it print everything
      if(my_rank==0) then
@@ -2326,24 +2315,28 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
      endif
-     call xmpi_barrier(Wfd%comm)
      ABI_FREE(gw_rhor)
-     ! MRM prepare deallocation of Wfd_dm
+   endif  
+   call xmpi_barrier(Wfd%comm)
+   ! MRM Finally, deallocate all arrays used for 1-RDM update
+   if(gwcalctyp==21 .and. gw1rdm>0) then
      Wfd_dm%bks_comm = xmpi_comm_null
      call Wfd_dm%free()
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 
-     ABI_FREE(freqs)
-     ABI_FREE(weights) 
      ABI_FREE(potk)     
      ABI_FREE(dm1k) 
-     ABI_FREE(occs) 
+     ABI_FREE(occs)
+     if(gw1rdm>1) then 
+       ABI_FREE(freqs)
+       ABI_FREE(weights) 
+     endif
    endif  
 
    call xmpi_barrier(Wfd%comm)
 
-  !MRM skip the rest for gwcalctyp=21  
-  if(gwcalctyp/=21) then 
+  !MRM skip the rest for gw1rdm>0 and gwcalctyp/=21 
+  if(gw1rdm==0 .and. gwcalctyp/=21) then 
    !  =====================================================
    !  ==== Solve Dyson equation storing results in Sr% ====
    !  =====================================================
