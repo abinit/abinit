@@ -975,10 +975,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        e_zeeman = -half * (dtset%zeemanfield(1)*rhomag(1,2)& ! x
 &                         +dtset%zeemanfield(2)*rhomag(1,3)& ! y
 &                         +dtset%zeemanfield(3)*rhomag(1,4)) ! z
-       write (message, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), " (in # of spins, without 1/2 for magnetic moment) "
+       write (message, "(a,3E20.10,a)") " Magnetization vector ", rhomag(1,2:4), &
+&            " (in # of spins, without 1/2 for magnetic moment) "
        call wrtout([std_out, ab_out], message)
      end if
-!TODO: this quantity should also be calculated in rhotov, and stored in results_gs%energies%e_zeeman, but for the moment it comes out 0
+!TODO: this quantity should also be calculated in rhotov, and stored in 
+!    results_gs%energies%e_zeeman, but for the moment it comes out 0
      write (message, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha" 
      call wrtout([std_out, ab_out], message)
    end if
