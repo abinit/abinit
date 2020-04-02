@@ -1,7 +1,7 @@
 # ANADDB input for phonon bands and DOS
  ng2qpt 9 9 9
 
- ddb_path = "t52_mp-149_+0_DDB"
+ ddb_filepath = "t52_mp-149_+0_DDB"
  output_file = "t52.output"
 
  prtdos 2
@@ -10,7 +10,6 @@
  qpath
     0.0    0.0    0.0
     0.5    0.0    0.5
- chneut 1
  asr 2
  ngqpt 8 8 8
  dipdip 1

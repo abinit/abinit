@@ -62,8 +62,7 @@ module m_bethe_salpeter
                                ebands_update_occ, get_valence_idx, apply_scissor, ebands_report_gap
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
- use m_vcoul_dt
- use m_vcoul,           only : vcoul_init, vcoul_free
+ use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfd_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
@@ -1204,7 +1203,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  nqlwl = 0
  w_fname = ABI_NOFILE
- if (Dtset%getscr/=0 .or. Dtset%irdscr/=0 .or. dtset%getscr_path /= ABI_NOFILE) then
+ if (Dtset%getscr/=0 .or. Dtset%irdscr/=0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
    w_fname=Dtfil%fnameabi_scr
  else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
    w_fname=Dtfil%fnameabi_sus

@@ -79,7 +79,7 @@ diemac 12.0       # Although this is not mandatory, it is worth to
 #%% keywords = 
 #%% description = 
 #%%   Crystalline Silicon to test the CP2K pseudopotential implementation with
-#%%   the new pseudo type: pspcod 10 (same formalism as HGH pseudos, pspcod 3).
+#%%   the new pseudo type: pspcod 10 (same formalism as HGH pseudopotentials, pspcod 3).
 #%%   Same input file as t35.in of tests/tutorial, the only difference is that
 #%%   in the test the used pseudo is taken from the CP2K library.
 #%%   (http://cvs.berlios.de/cgi-bin/viewcvs.cgi/cp2k/potentials/Goedecker/abinit/)

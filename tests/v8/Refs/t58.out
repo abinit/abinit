@@ -27,7 +27,6 @@
      ifcflag         1
  Miscellaneous information :
          asr         2
-      chneut         1
  Frequency information :
        nfreq         1
        frmin         0.00000000E+00
@@ -191,6 +190,8 @@
 -  1.141440E+03  1.141440E+03
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -1.0  0.0 -1.0  0.0 -1.0
@@ -443,6 +444,8 @@
 -  1.141440E+03  1.141440E+03
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -1.0  0.0 -1.0  0.0 -1.0
