@@ -2194,7 +2194,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
            ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
          end if
 
-!         den=piinv/gs
+         den=piinv/gs
 
          call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
          
@@ -2222,7 +2222,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 !           CASE ('ERF')
 !             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*exp(-pi/(den*hyb_range_fock**2))
 !           CASE ('ERFC')
-             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+             vqg(ii)=vqg(ii)*hyb_mixing_sr !*den*(one-exp(-pi/(den*hyb_range_fock**2)))
 !          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
 !          if(divgq0<pi/(hyb_range_fock**2))then
 !            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&

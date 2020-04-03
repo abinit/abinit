@@ -113,6 +113,10 @@ subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
 
  cutoff_method="SPHERE"
 
+ ! Spence&Alavi scheme 
+ rcut  = (three*nkpt_bz*ucvol/four_pi)**(one/three)
+ divgq0= two_pi*rcut**two
+
  SELECT CASE (TRIM(cutoff_method))
 
  CASE ('SPHERE')
