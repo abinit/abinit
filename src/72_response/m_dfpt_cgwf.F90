@@ -523,6 +523,9 @@ print *, 'gh1c 490 ', gh1c(:,1:10)
        call getdc1(band,band_procs,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
 &           0,icgq,istwf_k,mcgq,0,&
 &           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c)
+#ifdef DEV_MJV
+print *, 'dcwavef 490 ', dcwavef(:,1:10)
+#endif
      end if
    end if ! gen_eigenpb
 
@@ -803,6 +806,11 @@ print *, 'skipping for buffer band'
  cwaveq(:,:)=cgq(:,1+npw1*nspinor*(band_me-1)+icgq:npw1*nspinor*band_me+icgq)
  dotgp=one
 
+#ifdef DEV_MJV
+if (gen_eigenpb) then
+print *, 'cwave 807 ', cwaveprj(1,1)%cp(:,:)
+end if
+#endif
  ! Here apply H(0) at k+q to input orthogonalized 1st-order wfs
  sij_opt=0;if (gen_eigenpb) sij_opt=1
  cpopt=-1+usepaw
@@ -816,7 +824,6 @@ print *, 'skipping for buffer band'
    call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
  end if
 #ifdef DEV_MJV
-print *, 'cgwf berryopt ', berryopt
 print *, 'cwavef 763 ', cwavef(:,1:10)
 print *, 'gsc 778 ', band, gsc(:,1:10)
 print *, 'ghc 778 ',band,  ghc(:,1:10)

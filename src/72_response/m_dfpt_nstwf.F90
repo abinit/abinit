@@ -111,8 +111,8 @@ contains
 !!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
 !!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
-!!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k projected with non-local projectors
-!!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q projected with non-local projectors
+!!  cprj(natom,nspinor*mband_mem*mkmem*nsppol*usecprj)= wave functions at k projected with non-local projectors
+!!  cprjq(natom,nspinor*mband_mem*mkqmem*nsppol*usecprj)= wave functions at k+q projected with non-local projectors
 !!  docckqde(mband*nkpt_rbz*nsppol)=derivative of occkq wrt the energy
 !!  doccde_rbz(mband*nkpt_rbz*nsppol)=derivative of occ_rbz wrt the energy
 !!  dtfil <type(datafiles_type)>=variables related to files
@@ -287,8 +287,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),target,intent(in) :: vpsp1(cplex*nfftf),vtrial(nfftf,nspden),xccc3d1(cplex*n3xccc)
  real(dp),intent(inout) :: d2nl(2,3,mpert,3,mpert)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert),d2ovl(2,3,mpert,3,mpert*usepaw)
- type(pawcprj_type),intent(in) :: cprj(dtset%natom,nspinor*dtset%mband*mkmem*nsppol*usecprj)
- type(pawcprj_type),intent(in) :: cprjq(dtset%natom,nspinor*dtset%mband*mkqmem*nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprj(dtset%natom,nspinor*mband_mem_rbz*mkmem*nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprjq(dtset%natom,nspinor*mband_mem_rbz*mkqmem*nsppol*usecprj)
  type(paw_an_type),intent(in) :: paw_an(:)
  type(paw_an_type),intent(inout) :: paw_an1(:)
  type(paw_ij_type),intent(in) :: paw_ij(:)
@@ -311,7 +311,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
- integer :: nband_me, iband_me
+ integer :: nband_me, iband_me, jband_me
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -534,7 +534,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  is_metal=((dtset%occopt>=3.and.dtset%occopt<=8).or.(abs(arg)>tol8))
  is_metal_or_qne0=((is_metal).or.(qne0))
  nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
- ABI_ALLOCATE(ch1c,(2,dtset%mband,dtset%mband,nkpt_me))
+ ABI_ALLOCATE(ch1c,(2,mband_mem_rbz,dtset%mband,nkpt_me))
  ch1c(:,:,:,:)=zero
  nzlmopt_ipert=0;nzlmopt_ipert1=0
  if (usepaw==1) then
@@ -811,7 +811,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  LOOP OVER SPINS
    do isppol=1,nsppol
 
-!    either this has to be inside the sppol loop or the size of ch1c and cs1c has to be nkpt_me*nsppol
      ikpt_me=0
 
 !    Rewind (k+G) data if needed
@@ -1061,16 +1060,17 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          bands_treated_now(iband) = 1
          call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
 #ifdef DEV_MJV
-print *, 'bands_treated_now ', bands_treated_now
+print *, 'nstpaw bands_treated_now ', bands_treated_now, iband_me, iband
 #endif
 
 !        Extract GS wavefunctions
          if (need_wfk) then
            cwave0(:,:)=cg(:,1+(iband_me-1)*npw_k*nspinor+icg:iband_me*npw_k*nspinor+icg)
            if (usecprj==1) then
-             call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,dtset%natom,iband,ibg,ikpt,iorder_cprj,&
-&             isppol,dtset%mband,mkmem,dtset%natom,1,nband_k,nspinor,nsppol,dtfil%unpaw,&
-&             mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+             call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,dtset%natom,iband_me,ibg,ikpt,iorder_cprj,&
+&             isppol,mband_mem_rbz,mkmem,dtset%natom,1,nband_me,nspinor,nsppol,dtfil%unpaw)
+! in distributed cprj memory, no need for these? cg and cprj have same distribution
+!&             mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
            end if
          end if
 
@@ -1235,6 +1235,7 @@ print *, 'bands_treated_now ', bands_treated_now
 !          At first call (when j1=j2), ch1c=<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i> is stored
 !          For the next calls, it is re-used.
            if (has_dcwf.or.(ipert==ipert1.and.idir==idir1.and.usepaw==1)) then
+print *, ' nstpaw call projbd 1239 ', has_dcwf, ipert,ipert1,idir,idir1
 !            note: gvnlx1 used as temporary space
              ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
              if (ipert==ipert1.and.idir==idir1) then
@@ -1243,9 +1244,9 @@ print *, 'bands_treated_now ', bands_treated_now
                option=1;gvnlx1=zero
              end if
 !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
-             call projbd(cgq,gvnlx1,-1,icgq,0,istwf_k,mcgq,0,nband_k,npw1_k,nspinor,&
-&             dum1,ch1c(:,1:nband_k,iband,ikpt_me),option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
-!TODO MJV
+             call projbd(cgq,gvnlx1,-1,icgq,0,istwf_k,mcgq,0,nband_me,npw1_k,nspinor,&
+&             dum1,ch1c(:,1:nband_me,iband,ikpt_me),option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+
              if (has_dcwf) then
                if (ipert==ipert1.and.idir==idir1) gvnlx1=gvnlx1-gh1
                dotr=zero;doti=zero
@@ -1277,11 +1278,14 @@ print *, 'bands_treated_now ', bands_treated_now
              ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
              dotr=zero;doti=zero
              invocc=zero ; if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
-!TODO MJV: this loop should also be parallelized
+             jband_me = 0
              do jband=1,nband_k
+               if (mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+               jband_me = jband_me + 1
+
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
                if ((ipert==ipert1.and.idir==idir1).or.(abs(occ_k(iband))>tol8)) then
-                 gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband-1)+icgq:npw1_k*nspinor*jband+icgq)
+                 gvnlx1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
                  call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,gs1,gvnlx1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
                  if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
                    cs1c(1,jband,iband,ikpt_me)=dot1r
@@ -1309,7 +1313,23 @@ print *, 'bands_treated_now ', bands_treated_now
                  end if
                end if
              end do
-             dotr=quarter*dotr;doti=quarter*doti
+! condense sum over all jband for dotr and doti
+             call xmpi_sum(dotr,mpi_enreg%comm_band,ierr)
+             call xmpi_sum(doti,mpi_enreg%comm_band,ierr)
+             if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
+               call xmpi_sum(cs1c,mpi_enreg%comm_band,ierr)
+             end if
+
+#ifdef DEV_MJV
+print *, 'nstpaw ikpt_me cs1c ', ikpt_me, '  '
+print *, '   ',  cs1c(:,1:10,1,ikpt_me)
+print *, '   ',  cs1c(:,1:10,2,ikpt_me)
+print *, '   ',  cs1c(:,1:10,3,ikpt_me)
+print *, '   ',  cs1c(:,1:10,4,ikpt_me)
+#endif
+
+             dotr=quarter*dotr
+             doti=quarter*doti
 !            Note: factor 2 (from d2E/dj1dj2=2E^(j1j2))
              d2ovl_k(1,idir1)=d2ovl_k(1,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*dotr
              d2ovl_k(2,idir1)=d2ovl_k(2,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*doti
@@ -1330,6 +1350,9 @@ print *, 'bands_treated_now ', bands_treated_now
                d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband)*two*elfd_fact*doti
              end if
 
+#ifdef DEV_MJV
+print *, ' nstpaw done with d2nl_k 1350'
+#endif
 !            Or compute localisation tensor (ddk)
 !            See M. Veithen thesis Eq(2.5)
 !            MT jan-2010: this is probably not correctly implemented for PAW !!!
@@ -1356,6 +1379,9 @@ print *, 'bands_treated_now ', bands_treated_now
                d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband)*dotr/(nband_kocc*two)
                d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband)*doti/(nband_kocc*two)
              end if
+#ifdef DEV_MJV
+print *, ' nstpaw done with d2nl_k 1379'
+#endif
            end if
 
 !          Accumulate here 1st-order density change due to overlap operator changes (if any)
@@ -1366,19 +1392,26 @@ print *, 'bands_treated_now ', bands_treated_now
                ABI_ALLOCATE(dcwavef,(2,npw1_k*nspinor))
                ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,nspinor))
                call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
+#ifdef DEV_MJV
+print *, ' nstpaw calling getdc1 iband, idir1, mband_mem_rbz ', iband, idir1, mband_mem_rbz
+print *, ' nstpaw nband_me =? ', nband_me, size(cgq,2), ' / ', mcgq, '  ', size(cprjq,2), ' / ', mcprjq
+#endif
                call getdc1(iband,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
 &                 ibgq,icgq,istwf_k,mcgq,&
 &                 mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,gs1)
 
 !              Accumulate 1st-order density due to delta_u^(j1)
                option=1;wfcorr=0
+#ifdef DEV_MJV
+print *, ' nstpaw calling accrho '
+#endif
                call dfpt_accrho(cplex,cwave0,dcwavef,dcwavef,cwaveprj0_idir1,dcwaveprj,&
 &               lambda,gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
 &               mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
 &               pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
                call pawcprj_free(dcwaveprj)
-               ABI_DEALLOCATE(dcwavef)
                ABI_DATATYPE_DEALLOCATE(dcwaveprj)
+               ABI_DEALLOCATE(dcwavef)
              end if
            end if
 
@@ -1446,16 +1479,16 @@ print *, 'bands_treated_now ', bands_treated_now
        bdtot_index=bdtot_index+nband_k
        bd2tot_index=bd2tot_index+2*nband_k**2
        if (mkmem/=0) then
-         ibg=ibg+nspinor*nband_k
+         ibg=ibg+nspinor*nband_me
          icg=icg+npw_k*nspinor*nband_me
          ikg=ikg+npw_k
        end if
        if (mkqmem/=0) then
-         ibgq=ibgq+nspinor*nband_k
+         ibgq=ibgq+nspinor*nband_me
          icgq=icgq+npw1_k*nspinor*nband_me
        end if
        if (mk1mem/=0) then
-         ibg1=ibg1+nspinor*nband_k
+         ibg1=ibg1+nspinor*nband_me
          icg1=icg1+npw1_k*nspinor*nband_me
          ikg1=ikg1+npw1_k
        end if
@@ -1487,7 +1520,9 @@ print *, 'bands_treated_now ', bands_treated_now
      ABI_DEALLOCATE(e1kbfr_spin)
    end if
    ABI_DATATYPE_DEALLOCATE(paw_ij10)
-
+#ifdef DEV_MJV
+print *, 'nstpaw has_drho, xmpi_paral ', has_drho, xmpi_paral
+#endif
 !  In case of parallelism, sum 1st-order density and occupation matrix over processors
    if (has_drho.and.xmpi_paral==1) then
 

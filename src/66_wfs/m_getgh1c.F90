@@ -34,7 +34,8 @@ module m_getgh1c
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby
+ use m_pawcprj
+!,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
  use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
@@ -1184,14 +1185,14 @@ end subroutine getgh1c_setup
 !!
 !! FUNCTION
 !! Compute |delta_C^(1)> from one wave function C - PAW ONLY
-!! Compute <G|delta_C^(1)> and eventually <P_i| delta_C^(1)> (P_i= non-local projector)
+!! Compute <G|delta_C^(1)> (dcwavef) and eventually <P_i| delta_C^(1)> (dcwaveprj) where P_i= non-local projector
 !! delta_C^(1) is the variation of wavefunction only due to variation of overlap operator S.
 !! delta_C^(1)=-1/2.Sum_j [ <C_j|S^(1)|C>.C_j
-!!         see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
+!!         see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42 and 40, term 2)
 !!
 !! INPUTS
-!!  cgq(2,mcgq)=wavefunction coefficients for all bands on present processor, at k+Q
-!!  cprjq(natom,mcprjq)= wave functions at k+q projected with non-local projectors: cprjq=<P_i|Cnk+q>
+!!  cgq(2,mcgq)=wavefunction coefficients for all bands j on present processor, at k+Q: cgq=< G |Cnk+q>
+!!  cprjq(natom,mcprjq)= wave functions j at k+q projected with non-local projectors: cprjq=<P_i|Cnk+q>
 !!  ibgq=shift to be applied on the location of data in the array cprjq
 !!  icgq=shift to be applied on the location of data in the array cgq
 !!  istwfk=option parameter that describes the storage of wfs
@@ -1239,25 +1240,29 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 !scalars
  integer, parameter :: tim_projbd=0
  integer :: ipw
- integer :: iband, ierr
+ integer :: band_, ierr
  real(dp),parameter :: scal=-half
 !arrays
  real(dp), allocatable :: dummy(:,:),scprod(:,:)
  real(dp), allocatable :: dcwavef_tmp(:,:)
- type(pawcprj_type),allocatable :: tmpcprj(:,:)
+ type(pawcprj_type),allocatable :: dcwaveprj_tmp(:,:)
 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
-!$OMP PARALLEL DO
- do ipw=1,npw1*nspinor
-   dcwavef(1:2,ipw)=s1cwave0(1:2,ipw)
- end do
+#ifdef DEV_MJV
+print *, ' getdc1 bands_treated_now ', bands_treated_now
+print *, ' getdc1 band_procs ', band_procs
+#endif
 
  ABI_ALLOCATE(dummy,(0,0))
- ABI_ALLOCATE(scprod,(2,nband))
+ ABI_ALLOCATE(scprod,(2,nband_me))
  ABI_ALLOCATE(dcwavef_tmp,(2,npw1*nspinor))
+ if (optcprj == 1) then
+   ABI_DATATYPE_ALLOCATE(dcwaveprj_tmp,(natom,nspinor*optcprj))
+   call pawcprj_alloc(dcwaveprj_tmp, 0, dcwaveprj(:,1)%nlmn)
+ end if
 
 !=== 1- COMPUTE: <G|S^(1)|C_k> - Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
 !!               using the projb routine
@@ -1265,46 +1270,90 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 !in order to get Sum[<cgq|s1|c>|cgq>]=Sum[<cgq|gs1>|cgq>]
 
 ! run over procs in my pool which have a dcwavef to projbd
- do iband = 1, nband
-   if (bands_treated_now(iband) == 0) cycle
+ do band_ = 1, nband
+#ifdef DEV_MJV
+print *, ' getdc1, band_ ', band_, ' optcprj ', optcprj
+#endif
+   if (bands_treated_now(band_) == 0) cycle
    dcwavef_tmp = zero
 
-! distribute dcwavef to my band pool 
-   if (iband == band) then
-     dcwavef_tmp = dcwavef
+! distribute dcwavef_tmp to my band pool 
+! everyone works on a single band s1cwave0 = <G|S^(1)|C_k>
+   if (band_ == band) then
+!$OMP PARALLEL DO
+     do ipw=1,npw1*nspinor
+       dcwavef_tmp(1:2,ipw)=s1cwave0(1:2,ipw)
+     end do
    end if
-   call xmpi_bcast(dcwavef_tmp,band_procs(iband),mpi_enreg%comm_band,ierr)
+   call xmpi_bcast(dcwavef_tmp,band_procs(band_),mpi_enreg%comm_band,ierr)
+#ifdef DEV_MJV
+print *, ' getdc1, after bcast band_ band ', band_, band, ' band_procs(band_) ', band_procs(band_)
+#endif
 
 ! get the projbd onto my processor's bands dcwavef = dcwavef - <cgq|dcwavef>|cgq>
+! dcwavef = <G|S^(1)|C_k> - Sum_{MYj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
+! scprod  =                            <C_k+q,j|S^(1)|C_k> for {MYj}
    call projbd(cgq,dcwavef_tmp,-1,icgq,0,istwfk,mcgq,0,nband_me,npw1,nspinor,&
 &   dummy,scprod,0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
 
+#ifdef DEV_MJV
+print *, ' getdc1, after proj band_ band, mpi_enreg%comm_band ', band_, band, mpi_enreg%comm_band
+write(100+10*mpi_enreg%me_kpt+band,*) 'band shape, dcwavef_tmp ', band, shape(dcwavef_tmp)
+write(100+10*mpi_enreg%me_kpt+band,*) dcwavef_tmp
+#endif
+
 ! sum all of the corrections 
+! dcwavef = Nprocband * <G|S^(1)|C_k> - Sum_{ALLj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
    call xmpi_sum(dcwavef_tmp,mpi_enreg%comm_band,ierr)
+#ifdef DEV_MJV
+print *, ' getdc1, after sum band_ band ierr ', band_, band, ierr
+#endif
 
 ! save to my proc if it is my turn, and subtract Ntuple counted dcwavef
-   if (iband == band) then
-     dcwavef = dcwavef_tmp - (mpi_enreg%nproc_band-1)*dcwavef
-   end if
- end do ! procs in my band pool
+   if (band_ == band) then
+! dcwavef = <G|S^(1)|C_k> - Sum_{ALLj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
+     dcwavef = dcwavef_tmp - (mpi_enreg%nproc_band-1)*s1cwave0 !dcwavef
 
 !=== 2- COMPUTE: <G|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>] by substraction
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,npw1,nspinor)
- do ipw=1,npw1*nspinor
-   dcwavef(1:2,ipw)=scal*(s1cwave0(1:2,ipw)-dcwavef(1:2,ipw))
- end do
+     do ipw=1,npw1*nspinor
+       dcwavef(1:2,ipw)=scal*(s1cwave0(1:2,ipw)-dcwavef(1:2,ipw))
+     end do
+! TODO : test:
+! the two previous operations should be equal to:
+!$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,npw1,nspinor)
+     do ipw=1,npw1*nspinor
+!       dcwavef(1:2,ipw)=
+print *, 'getdc1 : compare ', ipw, dcwavef(1:2,ipw) - (scal*(mpi_enreg%nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw)))
+     end do
+   end if
 
 !=== 3- COMPUTE: <P_i|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<P_i|C_k+q,j>]
- if (optcprj==1.and.mcprjq>0) then
-   ABI_DATATYPE_ALLOCATE(tmpcprj,(natom,nspinor))
-   call pawcprj_lincom(scprod,cprjq(:,ibgq+1:ibgq+nspinor*nband),dcwaveprj,nband)
-   call pawcprj_axpby(zero,scal,tmpcprj,dcwaveprj)
-   ABI_DATATYPE_DEALLOCATE(tmpcprj)
- end if
+! as above everyone has to operate on each band band_
+   if (optcprj==1.and.mcprjq>0) then
+!   cprjq         =                               <P_i|C_k+q,j>  for MYj
+!   dcwaveprj_tmp =  Sum_MYj [<C_k+q,j|S^(1)|C_k>.<P_i|C_k+q,j>]
+     call pawcprj_lincom(scprod,cprjq(:,ibgq+1:ibgq+nspinor*nband_me),dcwaveprj_tmp,nband_me)
+
+! still need to mpisum the dcwaveprj to get linear combination of all bands, not just mine
+!   dcwaveprj =  Sum_ALLj [<C_k+q,j|S^(1)|C_k,i>.<P_i|C_k+q,j>]
+     call pawcprj_mpi_sum(dcwaveprj_tmp,mpi_enreg%comm_band,ierr)
+
+     if (band_ == band) then
+! dcwaveprj =  -1/2 dcwaveprj_tmp
+       call pawcprj_axpby(scal,zero,dcwaveprj_tmp,dcwaveprj)
+     end if
+   end if
+
+ end do ! procs in my band pool
 
  ABI_DEALLOCATE(dummy)
  ABI_DEALLOCATE(scprod)
  ABI_DEALLOCATE(dcwavef_tmp)
+ if (optcprj == 1) then
+   call pawcprj_free(dcwaveprj_tmp)
+   ABI_DATATYPE_DEALLOCATE(dcwaveprj_tmp)
+ end if
 
  DBG_EXIT("COLL")
 
