@@ -26,6 +26,8 @@
 module m_barevcoul
 
  use defs_basis
+ use m_errors
+ use m_fstrings,        only : sjoin, itoa
  use m_fft,             only : zerosym
 
  implicit none
@@ -92,32 +94,56 @@ subroutine barevcoul(qphon,gsqcut,icutcoul,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,b
  integer              :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
- character(len=100)   :: msg,method
+ character(len=100)   :: msg,cutoff_method
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
 
 ! Re-use variable defined initially in m_vcoul
-if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
-if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
+ if (icutcoul==0) cutoff_method='SPHERE'
+ if (icutcoul==1) cutoff_method='CYLINDER'
+ if (icutcoul==2) cutoff_method='SURFACE'
+ if (icutcoul==3) cutoff_method='CRYSTAL'
+ if (icutcoul==4) cutoff_method='ERF'
+ if (icutcoul==5) cutoff_method='ERFC'
+ if (icutcoul==6) cutoff_method='AUXILIARY_FUNCTION'
+ if (icutcoul==7) cutoff_method='AUX_GB' 
 
-!Treatment of the divergence at q+g=zero
-!For the time being, only Spencer-Alavi scheme...
- rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
- divgq0= two_pi*rcut**two
-!divgq0=zero
+! Treatment of the divergence at q+g=zero
+
+ SELECT CASE (TRIM(cutoff_method))
+
+ CASE ('SPHERE')
+    ! Spence&Alavi scheme 
+    rcut  = (three*nkpt_bz*ucvol/four_pi)**(one/three)
+    divgq0= two_pi*rcut**two
+   
+ CASE ('CYLINDER')
+
+ CASE ('SURFACE')
+    ! Rozzi et al. scheme 
+
+    ! Ismail-Beigi scheme   
+    
+ CASE ('AUX_FUNCTION')
+
+ CASE ('AUX_GB')
+
+ CASE ('CRYSTAL')
+ 
+ CASE ('ERF')
+ 
+ CASE ('ERFC')
+
+ CASE DEFAULT
+   MSG_BUG(sjoin('Unknown cutoff mode: ', cutoff_method))
+   MSG_BUG('Please refer to our documentation related to icutcoul variable.')
+ END SELECT
+
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  cutoff=gsqcut*tolfix
  barev=zero
-
-!Some peculiar values of q
- qeq0=0; if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) qeq0=1
- qeq05=0
- if (qeq0==0) then
-   if (abs(abs(qphon(1))-half)<tol12.or.abs(abs(qphon(2))-half)<tol12.or. &
-&   abs(abs(qphon(3))-half)<tol12) qeq05=1
- end if
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
@@ -143,7 +169,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
    gqgm13=gq(3,i3)*gmet(1,3)*2
 
    do i2=1,n2
-     ig2=i2-(i2/id2)*n2-1
+     ig2=i2-(i2/id2)*n2-1	
      gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
      gqgm12=gq(2,i2)*gmet(1,2)*2
      gqg2p3=gqgm13+gqgm12
@@ -181,31 +207,6 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
      end do ! End loop on i1
    end do ! End loop on i2
  end do ! End loop on i3
-
- if (izero==1) then
-   ! Set contribution of unbalanced components to zero
-   if (qeq0==1) then !q=0
-     call zerosym(barev,cplex1,n1,n2,n3)
-   else if (qeq05==1) then
-     !q=1/2; this doesn't work in parallel
-     ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
-     ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
-     ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
-     if (abs(abs(qphon(1))-half)<tol12) then
-       if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
-       if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
-     end if
-     if (abs(abs(qphon(2))-half)<tol12) then
-       if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
-       if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
-     end if
-     if (abs(abs(qphon(3))-half)<tol12) then
-       if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
-       if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
-     end if
-     call zerosym(barev,cplex1,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
-   end if
- end if
 
  ABI_DEALLOCATE(gq)
 

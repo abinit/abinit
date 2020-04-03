@@ -27,7 +27,7 @@
 
 module m_fock
 
- use m_vcoul 
+ use m_barevcoul
 
  use defs_basis
  use m_abicore
@@ -2235,6 +2235,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
    end do ! End loop on i2
  end do ! End loop on i3
 
+!  izero - flag to check PAW presence
  if (izero==1) then
    ! Set contribution of unbalanced components to zero
    if (qeq0==1) then !q=0
