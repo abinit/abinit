@@ -75,7 +75,7 @@ contains
 !!
 !! SOURCE
 
-subroutine barevcoul(qphon,gsqcut,icutcoul,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,barev)
+subroutine barevcoul(qphon,gsqcut,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,barev)
 
 !Arguments ------------------------------------
 !scalars
@@ -94,7 +94,7 @@ subroutine barevcoul(qphon,gsqcut,icutcoul,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,b
  integer              :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
- character(len=100)   :: msg,cutoff_method
+ character(len=100)   :: cutoff_method
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
@@ -110,6 +110,8 @@ subroutine barevcoul(qphon,gsqcut,icutcoul,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,b
  if (icutcoul==7) cutoff_method='AUX_GB' 
 
 ! Treatment of the divergence at q+g=zero
+
+ cutoff_method="SPHERE"
 
  SELECT CASE (TRIM(cutoff_method))
 
@@ -169,7 +171,7 @@ subroutine barevcoul(qphon,gsqcut,icutcoul,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,b
    gqgm13=gq(3,i3)*gmet(1,3)*2
 
    do i2=1,n2
-     ig2=i2-(i2/id2)*n2-1	
+     ig2=i2-(i2/id2)*n2-1
      gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
      gqgm12=gq(2,i2)*gmet(1,2)*2
      gqg2p3=gqgm13+gqgm12
