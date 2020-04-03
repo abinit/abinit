@@ -75,11 +75,11 @@ contains
 !!
 !! SOURCE
 
-subroutine barevcoul(qphon,gsqcut,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,barev)
+subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)   :: izero,nfft,nkpt_bz
+ integer,intent(in)   :: nfft,nkpt_bz
  real(dp),intent(in)  :: gsqcut,ucvol
 !arrays
  integer,intent(in)   :: ngfft(18)
@@ -192,14 +192,6 @@ subroutine barevcoul(qphon,gsqcut,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,barev)
        ii=i1+i23
 
        if(gs<=cutoff)then
-         ! Identify min/max indexes (to cancel unbalanced contributions later)
-         ! Count (q+g)-vectors with similar norm
-         if ((qeq05==1).and.(izero==1)) then
-           ig1=i1-(i1/id1)*n1-1
-           ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
-           ig2max=max(ig2max,ig2); ig2min=min(ig2min,ig2)
-           ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
-         end if
 
          den=piinv/gs
 

@@ -2194,13 +2194,15 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
            ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
          end if
 
-         den=piinv/gs
+!         den=piinv/gs
 
+         call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+         
          ! Treat the Coulomb potential cut-off by selected method
          if (abs(hyb_mixing)>tol8)then
 !            SELECT CASE ( trim(method) )
 !            CASE ('SPHERE')
-             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+             vqg(ii)=vqg(ii)*hyb_mixing !*(one-cos(rcut*sqrt(four_pi/den)))
 !            CASE ('ERF')
 !             vqg(ii)=vqg(ii)+hyb_mixing*den*exp(-pi/(den*hyb_mixing**2))
 !            CASE ('ERFC')
@@ -2210,6 +2212,8 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 !              MSG_ERROR(msg)
 !            END SELECT  
           endif
+
+         den=piinv/gs
 
          if (abs(hyb_mixing_sr)>tol8) then
 !           SELECT CASE ( trim(method) )
