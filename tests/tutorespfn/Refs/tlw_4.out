@@ -1,6 +1,6 @@
 
-.Version 9.1.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  2 Mar 2020.
-- ( at 16h02 )
+.Starting date : Wed  1 Apr 2020.
+- ( at 19h40 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mroyo_develop/tests/Test_suite/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.in
 - output file    -> tlw_4.out
 - root for input  files -> tlw_4i
 - root for output files -> tlw_4o
@@ -1318,8 +1318,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mroyo_develop/tests/Psps_for_tests/31-Ga.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mroyo_develop/tests/Psps_for_tests/31-Ga.LDA.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/Psps_for_tests/31-Ga.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/Psps_for_tests/31-Ga.LDA.fhi
 - gallium, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 0 local
 - 31.00000   3.00000     11001                znucl, zion, pspdat
     6    7    3    0       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1332,8 +1332,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -1.913945
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mroyo_develop/tests/Psps_for_tests/15-P.LDA.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mroyo_develop/tests/Psps_for_tests/15-P.LDA.fhi
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/Psps_for_tests/15-P.LDA.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/Psps_for_tests/15-P.LDA.fhi
 - phosphorus, fhi98PP : Trouiller-Martins-type, LDA Ceperley/Alder Perdew/Wang (1992), l= 2 local
 - 15.00000   5.00000     21003                znucl, zion, pspdat
     6    7    3    2       499   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3714,7 +3714,7 @@ meta: {optdriver: 10, }
     3       2       3       3            0.0000030977         0.0000000000
   
  
- Electronic (frozen-ion) contribution to the piezoelectric tensor,
+ Electronic (clamped-ion) contribution to the piezoelectric tensor,
  in cartesian coordinates, (from quadrupole calculation)
  atddir   qgrdir   efidir        real part           imaginary part
     1       1       1           -0.0000000126        -0.0000000000
@@ -7514,53 +7514,10 @@ P          mk1mem12       256
 
 ================================================================================
 
-- Total cpu        time (s,m,h):        360.8        6.01      0.100
-- Total wall clock time (s,m,h):        366.8        6.11      0.102
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =          360.8, wall_time =          366.8
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                 170.168  47.2    171.453  46.7        1825141      -1.00        0.99       0.99
-- nonlop(apply)                 35.822   9.9     36.306   9.9        1527221      -1.00        0.99       0.99
-- fourwf%(G->r)                 29.178   8.1     29.198   8.0         576640      -1.00        1.00       1.00
-- projbd                        19.461   5.4     19.542   5.3        3065779      -1.00        1.00       1.00
-- getghc-other                  15.448   4.3     14.965   4.1             -1      -1.00        1.03       1.03
-- nonlop(forces)                15.320   4.2     15.460   4.2         455360      -1.00        0.99       0.99
-- dfpt_vtorho-kpt loop          14.266   4.0     14.401   3.9            419      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)          13.706   3.8     13.566   3.7             -1      -1.00        1.01       1.01
-- getgh1c_setup                 12.891   3.6     13.046   3.6          78704      -1.00        0.99       0.99
-- dfpt_vtowfk (1)                2.282   0.6      2.250   0.6          77168      -1.00        1.01       1.01
-- others (116)                  -6.681  -1.9     -7.245  -2.0             -1      -1.00        0.92       0.92
--<END_TIMER>
--
-- subtotal                     321.861  89.2    322.942  88.0                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =         360.8, wall_time =         366.8
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                 170.168  47.2    171.453  46.7        1825141      -1.00        0.99       0.99
-- nonlop(apply)                 35.822   9.9     36.306   9.9        1527221      -1.00        0.99       0.99
-- fourwf%(G->r)                 29.178   8.1     29.198   8.0         576640      -1.00        1.00       1.00
-- projbd                        19.461   5.4     19.542   5.3        3065779      -1.00        1.00       1.00
-- getghc-other                  15.448   4.3     14.965   4.1             -1      -1.00        1.03       1.03
-- nonlop(forces)                15.320   4.2     15.460   4.2         455360      -1.00        0.99       0.99
-- dfpt_vtorho-kpt loop          14.266   4.0     14.401   3.9            419      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)          13.706   3.8     13.566   3.7             -1      -1.00        1.01       1.01
-- getgh1c_setup                 12.891   3.6     13.046   3.6          78704      -1.00        0.99       0.99
-- dfpt_vtowfk (1)                2.282   0.6      2.250   0.6          77168      -1.00        1.01       1.01
-- others (116)                  -6.681  -1.9     -7.245  -2.0             -1      -1.00        0.92       0.92
--<END_TIMER>
 
-- subtotal                     321.861  89.2    322.942  88.0                                  1.00       1.00
 
 ================================================================================
 
@@ -7642,10 +7599,10 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        360.8  wall=        366.8
+- Proc.   0 individual time (sec): cpu=        303.2  wall=        334.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and 342 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        360.8  wall=        366.8
+.Delivered  10 WARNINGs and 342 COMMENTs to log file.
++Overall time at end (sec) : cpu=        303.2  wall=        334.7

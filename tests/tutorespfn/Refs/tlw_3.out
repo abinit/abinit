@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ANADDB 
+.Version 9.1.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 18 Feb 2020.
-- ( at 11h39 )
+.Starting date : Wed  1 Apr 2020.
+- ( at 19h42 )
   
 
 ================================================================================
@@ -166,7 +166,7 @@
     0.091563    0.538658   -0.017297   -0.117132    0.736437   -0.183456
     0.405365    0.431685    0.108921    0.216328   -0.089987    0.945836
 
- Displacement-response flexoelectric force response tensor (units: eV)
+ Flexoelectric force response tensor (units: eV)
 
   atom   dir        xx           yy           zz           yz           xz           xy
     1    xx     19.099531     8.580296     3.174505    -2.163455     1.023616     2.004745
@@ -224,10 +224,10 @@
    zx    0.270622    0.359056    0.422886    0.205409   -0.475066   -0.144838
    yx    0.328400    0.458742    0.075176    0.246257   -0.323697   -0.780093
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.4
 
 ================================================================================
 
-+Total cpu time      0.088  and wall time      0.089 sec
++Total cpu time      0.044  and wall time      0.441 sec
 
  anaddb : the run completed succesfully.
