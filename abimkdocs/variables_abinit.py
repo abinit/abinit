@@ -9226,10 +9226,12 @@ Variable(
     abivarname="lw_flexo",
     varset="dfpt",
     vartype="integer",
+    topics=['DFPT_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="LongWave calculation of FLEXOelectricity related spatial dispersion tensors",
-    requires="[[optdriver]] = 10, [[kptopt]] = 2 or 3 and [[useylm]] = 1",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
 Used to run the calculation of spatial dispersion tensorial quantities needed to 
@@ -9239,7 +9241,7 @@ see [[flexoflag@anaddb]]).
 
 At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
 calculated. This **requires** the precalculation of the ground-state wave-functions and
-denisty as well as response functions and densities to a set of perturbations as specified below. 
+density as well as response functions and densities to a set of perturbations as specified below. 
 All perturbations and directions need to be explicictly computed, and the linear response calculations
 have to be performed with [[prepalw]] = 1. 
 
@@ -9253,11 +9255,13 @@ have to be performed with [[prepalw]] = 1.
           the first moment of polarization response to an atomic displacement and the first
           moment of the IFCs. Related quantities that can be derived from these two tensors 
           are also printed: dynamical quadrupoles, clamped-ion piezoelectric tensor and 
-          clamped-ion internal strain tensor. Requires precomputed linear response functions and densities: 
+          piezoelectric force response tensor. Requires precomputed linear response functions and densities: 
           ddk, d2_dkdk, electric field and atomic displacement.
-    4 --> Two tensors required to build the lattice-mediated flexoelectric tensor are calculated:
+  * 4 --> Two tensors required to build the lattice-mediated flexoelectric tensor are calculated:
           the first moment of the IFCs and the first moment of the piezoelectric force response 
-          tensor. Requires precomputed linear response functions and densities: 
+          tensor. Related quantities that can be derived from these two tensors 
+          are also printed: piezoelectric force response tensor and clamped-ion elastic tensor.
+          Requires precomputed linear response functions and densities: 
           ddk, atomic displacement and strain. 
 
 """,
@@ -9267,10 +9271,12 @@ Variable(
     abivarname="lw_qdrpl",
     varset="dfpt",
     vartype="integer",
+    topics=['DFPT_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="LongWave calculation of dynamical QuaDRuPoLes tensor",
-    requires="[[optdriver]] = 10, [[kptopt]] = 2 or 3 and [[useylm]] = 1",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
 Used to run dynamical quadrupoles tensor calculation (e.g., needed to include dipole-quadrupole
@@ -9284,7 +9290,7 @@ phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
 
 At present ( |today| ), all the elements of the dynamical quadrupoles tensor are necessarily
 calculated. This **requires** the precalculation of the ground-state wave functions and
-denisty as well as response functions and densities to the following perturbations:
+density as well as response functions and densities to the following perturbations:
 ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need 
 to be explicictly computed, and the linear response calculations have to be performed with [[prepalw]] = 1. 
 """,
@@ -14201,10 +14207,12 @@ Variable(
     abivarname="prepalw",
     varset="dfpt",
     vartype="integer",
+    topics=['DFPT_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="PREPAre LongWave response calculation",
-    added_in_version="before_v9",
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
     text=r"""
 The computation of spatial dispersion quantities from the longwave DFPT 
 approach requires the first-order wavefunctions and densities obtained from 
