@@ -1,8 +1,5 @@
 #   Si in diamond structure; 2 special points.   Bond centered.
 
-# prtxcart 0    # Deprecated, use prtxtypat for large numbers of atoms 
-# prtxangst 0   # Deprecated, use prtxtypat for large numbers of atoms 
-
  acell 3*10.26311
  diemac 1.0d0
  diemix 0.333333333333d0

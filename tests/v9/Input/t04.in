@@ -4,7 +4,7 @@
 ndtset  3
 
 # This is just to test the prefix variables replacing the old files file.
-# Note the `varname = ""` format that will be searched by runtests,py to decide whether
+# Note the `varname = ""` format that will be searched by runtests.py to decide whether
 # prefix variables should be added to the initial input file before running.
 #
 indata_prefix = "t04.indata"

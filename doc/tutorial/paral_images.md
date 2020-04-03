@@ -101,27 +101,27 @@ should obtain the following positions:
 1) for the initial configuration:
 
 ```
-xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+xcart       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            -3.7593832509E-01 -2.8581911534E-01  8.7109635973E-01
            -3.8439081179E-01  8.6764073738E-01 -2.8530130333E-01
             4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             4.3461703447E+00 -9.9808458269E-02 -9.5466143436E-01
             4.3190273240E+00 -7.8675247603E-01  5.6699786920E-01
             4.3411410402E+00  8.7383785043E-01  4.0224838603E-01
-            1.0280313162E+00  2.2598784215E-02  1.5561763093E-02
+            1.0280313162E+00  2.2598784215E-02  1.5561763093E-02   Angstrom
 ```
 
 2) for the final configuration:
 
 ```
-xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+xcart       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            -3.0400286349E-01 -1.9039526061E-01  9.0873550186E-01
            -3.2251946581E-01  9.0284480687E-01 -1.8824324581E-01
             4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             4.4876385468E+00 -1.4925704575E-01 -8.9716581956E-01
             4.2142401901E+00 -7.8694929117E-01  6.3097154506E-01
             4.3498225718E+00  8.7106686509E-01  4.2709343135E-01
-            2.9570301511E+00  5.5992672027E-02 -1.3560839453E-01
+            2.9570301511E+00  5.5992672027E-02 -1.3560839453E-01    Angstrom
 ```
 
 ## 3 Related keywords
@@ -168,8 +168,8 @@ thus only perform one step of string method.
 {% dialog tests/tutoparal/Input/tstring_03.in %}
 
 Open the *tstring_03.in* file and look at it. The initial and final
-configurations are specified at the end through the keywords [[xangst] and
-[[nimage|xangst_lastimg]]. By default, ABINIT generates the intermediate
+configurations are specified at the end through the keywords [[xcart] and
+[[nimage|xcart_lastimg]]. By default, ABINIT generates the intermediate
 images by a linear interpolation between these two configurations. In this
 first calculation, we will sample the MEP with 12 points (2 are fixed and
 correspond to the initial and final states, 10 are evolving). [[nimage]] is
@@ -227,7 +227,7 @@ fcart_1img, fcart_2img, ..., fcart_12img.
 
 Total energy as a function of OH distance for the path computed with 12 images
 and [[tolimg]]=0.0001 (which is very close to the x coordinate of the proton:
-first coordinate of xangst for the 8th atom in the output file).
+first coordinate of xcart  for the 8th atom in the output file).
 
 The keyword [[npimage]] can be automatically set by ABINIT. It takes the
 requested total number of CPU cores divided by the number of dynamical images.
@@ -276,8 +276,8 @@ recompute the MEP. This will be much faster than in the previous case.
 Then you should decrease [[tolimg]] to 0.00001 and recompute the MEP. To gain
 CPU time, you can start your calculation by using the 12 images obtained at
 the end of the calculation that used [[tolimg]] = 0.0001. In your input file,
-these starting images will be specified by the keywords [[xangst]],
-[[nimage|xangst_2img]], [[nimage|xangst_3img]] ... [[nimage|xangst_12img]].
+these starting images will be specified by the keywords [[xcart]],
+[[nimage|xcart_2img]], [[nimage|xcart_3img]] ... [[nimage|xcart_12img]].
 You can copy them directly from the output file obtained at the previous
 section. The graph below superimposes the path obtained with 12 images and
 [[tolimg]]=0.001 (red curve) and the one with 12 images and [[tolimg]]=0.0001 (black curve).

@@ -61,7 +61,7 @@
  znucl 8.0 7.0 1.0               # Z of atoms
  natfix 2  iatfix 1 4            # Keep O and N atoms fixed
  charge 1.0                      # Charge of the simulation cell
- xangst                          # Atom positions in cartesian coord
+ xcart                           # Atom positions in cartesian coord
  0.000E+00  0.000E+00  0.000E+00 # O (H2O)
 -3.041E-01 -1.904E-01  9.087E-01 # H (H2O)
 -3.225E-01  9.028E-01 -1.883E-01 # H (H2O)
@@ -70,6 +70,7 @@
  4.214E+00 -7.868E-01  6.309E-01 # H (NH3)
  4.349E+00  8.709E-01  4.272E-01 # H (NH3)
  2.956E+00  5.590E-02 -1.357E-01 # H (proton)
+   Angstrom
 
 
 #%%<BEGIN TEST_INFO>

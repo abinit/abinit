@@ -334,8 +334,8 @@ in the input file, but that appear in the echo written in *tbase1_1.out*:
     code did an automatic analysis of symmetries.
     They could alternatively be set by hand, or using the symmetry builder (to be described later).
 
-[[xangst]] and [[xred]]
-:   Are alternative ways to [[xcart]] to specify the positions of atoms within the primitive cell.
+[[xred]]
+:   Alternative to [[xcart]] to specify the positions of atoms within the primitive cell.
 
 Now, you can start reading the description of the remaining of the
 *tbase1_1.out* file in [[help:abinit#6.3|section 6.3]] of the abinit help file.

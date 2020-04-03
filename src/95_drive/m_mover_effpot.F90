@@ -282,9 +282,9 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential
    dtset%strprecon = 1  ! STRess PRECONditioner
-   dtset%supercell_latt(:,:) = 0
+   dtset%supercell_latt(:) = 0
    do ii=1,3
-     dtset%supercell_latt(ii,ii) = sc_size(ii)
+     dtset%supercell_latt(ii) = sc_size(ii)
    end do
    dtset%tolmxf = 2.0d-5
    dtset%tsmear = 0.009500446 !

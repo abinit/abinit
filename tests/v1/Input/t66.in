@@ -18,8 +18,9 @@
        0 0 1
  natom  2
  ntypat  1
- xangst -0.385  0 0
+ xcart  -0.385  0 0
          0.385  0 0
+         Angstrom
  typat  2*1
  znucl  1.0
 
