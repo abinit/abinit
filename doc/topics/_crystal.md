@@ -11,7 +11,7 @@ This page gives hints on how to to specify a crystal, with atomic positions and 
 In addition to the [[topic:UnitCell|Specification of the unit cell]] and
 [[topic:AtomTypes|Atom types]], ABINIT must know the number of atoms inside
 the cell, their type, and position. This is described by [[natom]], [[typat]]
-and one of [[xred]], [[xcart]] and [[xangst]].
+and one of [[xred]] or [[xcart]].
 
 ABINIT can automatically detect the Bravais lattice and space group, and
 generate symmetries (e.g. [[nsym]], [[symrel]], [[tnons]]), from the primitive

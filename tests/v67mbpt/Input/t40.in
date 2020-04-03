@@ -1,5 +1,5 @@
 # Crystalline alpha-quartz. 
-# GW calculations with istwfk /= 1 and NC pseudos with multiple projectors.
+# GW calculations with istwfk /= 1 and NC pseudopotentials with multiple projectors.
 
 ndtset 3
 #istwfk *1
@@ -88,5 +88,5 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% keywords = NC, psp8, GW
 #%% description = 
 #%%   Crystalline alpha-quartz
-#%%   GW calculations with istwfk /= 1 and NC pseudos with multiple projectors.
+#%%   GW calculations with istwfk /= 1 and NC pseudopotentials with multiple projectors.
 #%%<END TEST_INFO>

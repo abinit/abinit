@@ -10,11 +10,13 @@ keywords = [
 
 #: List of input files
 inp_files = [
-#Constrained DFT
+# Constrained DFT
 "t01.in",
 "t02.in",
 "t03.in",
-#Electron-phonon
+# Structure variable
+"t04.in",
+# Electron-phonon
 "t50.in",
 "t51.in",
 "t52.in",
@@ -34,4 +36,6 @@ inp_files = [
 "t83.in", # Langevin NVT 
 "t84.in", # Berendsen NVT
 "t85.in", # Velocity Verlet NVE
+"t86.in", # Spin lattice coupling, Only Oiju term activated.
+"t87.in", # Spin lattice coupling, Oiju and Tijuv. 
 ]

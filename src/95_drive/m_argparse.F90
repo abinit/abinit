@@ -35,6 +35,7 @@ module m_argparse
  use m_fft
  use m_exit
  use m_clib
+ use m_nctk
 
  use m_build_info,      only : dump_config, abinit_version
  use m_io_tools,        only : open_file, file_exists
@@ -222,33 +223,16 @@ type(args_t) function args_parser() result(args)
       end if
 
     else if (arg == "--log") then
-       ! Enable logging
-       call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
-       call libpaw_log_flag_set(.True.)
+      ! Enable logging
+      call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
+      call libpaw_log_flag_set(.True.)
 
-    !else if (arg == "-i" .or. arg == "--input") then
-    !  call get_command_argument(ii + 1, arg)
-    !  args%input_path = trim(arg)
-    !  ! Redirect stdin to file.
-    !  if (iam_master) then
-    !     ABI_CHECK(file_exists(args%input_path), sjoin("Cannot find input file:", args%input_path))
-    !     !close(std_in)
-    !     !if (open_file(arg, msg, unit=std_in, form='formatted', status='old', action="read") /= 0) then
-    !     !  MSG_ERROR(msg)
-    !     !end if
-    !  end if
+    else if (arg == "--netcdf-classic") then
+      !  Use netcdf classic mode for new files when only sequential-IO needs to be performed
+      call nctk_use_classic_for_seq()
 
-    !else if (arg == "-o" .or. arg == "--output") then
-    !  ! Redirect stdout to file.
-    !  call get_command_argument(ii + 1, arg)
-    !  if (iam_master) then
-    !  close(std_out)
-    !  if (open_file(arg, msg, unit=std_out, form='formatted', status='new', action="write") /= 0) then
-    !    MSG_ERROR(message)
-    !  end if
-
-    ! For multibinit only
     else if (arg == "--F03") then
+       ! For multibinit only
        args%multibinit_F03_mode = 1
 
     else if (arg == "-h" .or. arg == "--help") then
@@ -266,8 +250,8 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"--xgemm3m[=bool]           Use [Z,C]GEMM3M]"
         write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
         write(std_out,*)"--log                      Enable log files and status files in parallel execution."
-        write(std_out,*)"-i FILE                    Read input data from FILE instead of stdin."
-        write(std_out,*)"                           Useful if MPI library does not handle `abinit < files` redirection"
+        write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
+        write(std_out,*)"                           Default is netcdf4/hdf5"
         write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm notation:"
         write(std_out,*)"                               days-hours"
         write(std_out,*)"                               days-hours:minutes"

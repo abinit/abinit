@@ -48,6 +48,7 @@ MODULE m_geometry
  public :: spinrot_cmat       ! Construct 2x2 complex matrix representing rotation operator in spin-space.
  public :: rotmat             ! Finds the rotation matrix.
  public :: fixsym             ! Check that iatfix does not break symmetry.
+ public :: det3r              ! Compute determinant of a 3x3 real matrix
  public :: metric             ! Compute metric matrices.
  public :: mkradim            ! Make rprim and acell from rprimd
  public :: mkrdim             ! Make rprimd from acell from rprim
@@ -1010,7 +1011,6 @@ end subroutine getspinrot
 
 pure function spinrot_cmat(spinrot)
 
-
 !Arguments ------------------------------------
  real(dp),intent(in) :: spinrot(4)
  complex(dpc) :: spinrot_cmat(2,2)
@@ -1207,6 +1207,30 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
 end subroutine fixsym
 !!***
 
+!!****f* m_geometry/det3r
+!! NAME
+!!  det3r
+!!
+!! FUNCTION
+!!  Compute determinant of a 3x3 real matrix
+!!
+!! SOURCE
+
+pure real(dp) function det3r(rprimd)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: rprimd(3,3)
+
+! *************************************************************************
+
+ ! Compute unit cell volume
+ det3r = rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
+         rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+         rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+
+end function det3r
+!!***
+
 !!****f* m_geometry/metric
 !! NAME
 !! metric
@@ -1278,6 +1302,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
  ucvol=rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
        rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
        rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+ !ucvol = det3r(rprimd)
 
  ! Check that the input primitive translations are not linearly dependent (and none is zero); i.e. ucvol~=0
  ! Also ask that the mixed product is positive.
@@ -1949,7 +1974,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !arrays
  integer,allocatable :: list_neighb(:,:,:)
  real(dp) :: bab(3),bac(3),dif(3),rmet(3,3)
- real(dp),allocatable :: sqrlength(:),xangst(:,:),xcart(:,:)
+ real(dp),allocatable :: sqrlength(:),xcart(:,:)
  character(len=8),allocatable :: iden(:)
 
 ! *************************************************************************
@@ -2020,10 +2045,8 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
 !Compute cartesian coordinates, and print reduced and cartesian coordinates
 !then print coordinates in angstrom, with the format neede for xmol
- ABI_ALLOCATE(xangst,(3,natom))
  ABI_ALLOCATE(xcart,(3,natom))
  call xred2xcart(natom,rprimd,xcart,xred)
- xangst(:,:)=xcart(:,:)*Bohr_Ang
 
  do ia=1,natom
    write(message, '(a,a,3f10.5,a,3f10.5)' ) &
@@ -2039,11 +2062,10 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
  do ia=1,natom
    call atomdata_from_znucl(atom,znucl(typat(ia)))
-   write(message, '(a,a,3f10.5)' )'   ',atom%symbol,xangst(1:3,ia)
+   write(message, '(a,a,3f10.5)' )'   ',atom%symbol,xcart(1:3,ia)*Bohr_Ang
    call wrtout(temp_unit,message,'COLL')
  end do
 
- ABI_DEALLOCATE(xangst)
  ABI_DEALLOCATE(xcart)
 
  ABI_ALLOCATE(list_neighb,(0:mneighb+1,4,2))

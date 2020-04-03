@@ -838,6 +838,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(symaf1_tmp,(nsym))
    ABI_ALLOCATE(symrl1_tmp,(3,3,nsym))
    ABI_ALLOCATE(tnons1_tmp,(3,nsym))
+
    if (dtset%prepanl/=1.and.&
 &   dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 &   dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17) then
@@ -868,7 +869,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &   nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
    if (psps%usepaw==1) then
 !    Allocate/initialize only zarot in pawang1 datastructure
-     call pawang_init(pawang1,0,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+     call pawang_init(pawang1,0,0,pawang%l_max-1,0,0,nsym1,0,0,0,0)
      call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
    end if
 
@@ -913,6 +914,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
 &     ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
+
+     !MR: Modified to agree with quadrupole and flexoelectrics routines
+     if(dtset%prepalw==1) then
+       if (dtset%kptopt==2) timrev_pert=1
+       if (dtset%kptopt==3) timrev_pert=0
+       timrev_kpt = timrev_pert
+       !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are 
+       !implemented in the quadrupole and flexoelectrics routines
+       nsym1=1
+     end if
+
 !    The time reversal symmetry is not used for the BZ sampling when kptopt=3 or 4
      if (dtset%kptopt==3.or.dtset%kptopt==4) timrev_kpt = 0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
@@ -1986,12 +1998,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call gkk_init(gkk,gkk2d,dtset%mband,dtset%nsppol,nkpt_rbz,1,1)
 
      ! Write the netCDF file.
-     fname = strcat(gkkfilnam,".nc")
-     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-     NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
-     call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
-     NCF_CHECK(nf90_close(ncid))
+     if (me == master) then
+       fname = strcat(gkkfilnam,".nc")
+       NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
+       NCF_CHECK(crystal%ncwrite(ncid))
+       NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
+       call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
+       NCF_CHECK(nf90_close(ncid))
+     end if
 
      ! Free memory
      ABI_DEALLOCATE(gkk)

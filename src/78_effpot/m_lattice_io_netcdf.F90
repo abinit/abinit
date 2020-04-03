@@ -342,6 +342,7 @@ contains
     real(dp), intent(inout) :: evals(:)
     complex(dp), intent(inout) :: evecs(:,:)
     call self%get_hamk(kpoint, evecs)
+    ! The evecs array is reused both as the matrix and eigenvectors.
     call eigensh(evals, evecs)
   end subroutine get_eigen
 

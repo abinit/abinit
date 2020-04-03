@@ -54,7 +54,7 @@ MODULE m_screening
  use m_fftcore,         only : kgindex
  use m_fft,             only : fourdp
  use m_gsphere,         only : gsphere_t
- use m_vcoul,           only : vcoul_t
+ use m_vcoul,           only : vcoul_t 
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_paw_sphharm,     only : ylmc

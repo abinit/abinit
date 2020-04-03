@@ -6,7 +6,7 @@
 !! FUNCTION
 !! This module provides a generic interface that allows to
 !! initialize some of the geometry variables in the case of "images".
-!! Set up: acell, scalecart, rprim, angdeg, xred, xangst, xcart, vel
+!! Set up: acell, scalecart, rprim, angdeg, xred, xcart, vel
 !! These variables can be defined for a set of images of the cell.
 !! They also can be be defined along a path (in the configuration space).
 !! The path must be defined with its first and last points, but also
@@ -93,8 +93,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -228,8 +226,6 @@ end subroutine intagm_img_1D
 !! SOURCE
 
 subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

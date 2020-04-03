@@ -22,7 +22,7 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% need_cpp_vars = HAVE_XML
 #%% system_xml = tmulti5_1.xml
 #%% exclude_hosts = nag@abiref
 #%% coeff_xml = no

@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv9.0.0 is for beta-testing
+The present release ABINITv9.0.1 is for beta-testing
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv9.0.0 is for beta-testing
 ================================================================
 0. Platforms
 
-For ABINITv9.0.0, list closed on 2020 02 27
+For ABINITv9.0.1, list closed on 2020 03 09
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -829,3 +829,15 @@ The kptgw input variables, with default values  is echoed, while the reference d
 P811.2 (XG190930)
 Test v8_t24 on Ubu Intel 17
 Numerical results are wrong. But on everyother machine, it is OK. Should clarify ...
+
+P90.1 (XG200309)
+Test tutoparal ucrpa_2 24 procs
+The value computed for 
+12772
+<      The bare interaction (no renormalization) =     16.0038 eV
+>      The bare interaction (no renormalization) =     16.3156 eV
+12773
+<      The bare interaction (for a renorm. wfn ) =     22.5848 eV
+>      The bare interaction (for a renorm. wfn ) =     23.0248 eV
+has changed largely at the switch from 9.0.0 to 9.0.1 . Should be checked what is the correct value, (e.g. in sequential),
+and debug the situation...

@@ -29,6 +29,8 @@ ngqpt 2 2 2
 asr 2 
 dipdip 0
 
+chneut 0
+
 #  bravais lattice necessary
 brav 1
 
