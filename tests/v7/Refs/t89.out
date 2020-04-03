@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.0.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h25 )
+.Starting date : Fri 20 Mar 2020.
+- ( at 07h52 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t85-t86-t87-t88-t89/t89.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t89.in
 - output file    -> t89.out
 - root for input  files -> t89i
 - root for output files -> t89o
@@ -103,11 +103,6 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.5000000000E+00  7.5000000000E+00  7.5000000000E+00 Bohr
               amu      2.69815390E+01
-             ecut      6.00000000E+00 Hartree
-         eph_task1          1
-         eph_task2          1
-         eph_task3          2
-         eph_task4         -2
         ddb_ngqpt1       0    0    0
         ddb_ngqpt2       0    0    0
         ddb_ngqpt3       4    4    4
@@ -116,6 +111,11 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
        dvdb_ngqpt2       0    0    0
        dvdb_ngqpt3       4    4    4
        dvdb_ngqpt4       4    4    4
+             ecut      6.00000000E+00 Hartree
+         eph_task1          1
+         eph_task2          1
+         eph_task3          2
+         eph_task4         -2
 -          fftalg         312
            getddb1          0
            getddb2          0
@@ -267,8 +267,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -479,6 +479,8 @@ meta: {optdriver: 7, eph_task: 2, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t89o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t89o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -625,6 +627,8 @@ meta: {optdriver: 7, eph_task: -2, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t89o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t89o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -752,11 +756,6 @@ All the independent perturbations are available
  -outvars: echo values of variables after computation  --------
             acell      7.5000000000E+00  7.5000000000E+00  7.5000000000E+00 Bohr
               amu      2.69815390E+01
-             ecut      6.00000000E+00 Hartree
-         eph_task1          1
-         eph_task2          1
-         eph_task3          2
-         eph_task4         -2
         ddb_ngqpt1       0    0    0
         ddb_ngqpt2       0    0    0
         ddb_ngqpt3       4    4    4
@@ -765,6 +764,11 @@ All the independent perturbations are available
        dvdb_ngqpt2       0    0    0
        dvdb_ngqpt3       4    4    4
        dvdb_ngqpt4       4    4    4
+             ecut      6.00000000E+00 Hartree
+         eph_task1          1
+         eph_task2          1
+         eph_task3          2
+         eph_task4         -2
            etotal3     0.0000000000E+00
            etotal4     0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -959,10 +963,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          4.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.5
++Overall time at end (sec) : cpu=          2.9  wall=          4.3

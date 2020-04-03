@@ -24,8 +24,8 @@ natom     2
 ntypat    2
 znucl     11 17
 typat     1 2
-xangst    -1.25  0.0 0.0
-          1.25  0.0 0.0
+xcart    -1.25  0.0 0.0
+          1.25  0.0 0.0   Angstrom
 
 #k-point mesh
 kptopt    2

@@ -375,6 +375,8 @@
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
         degenerate with vibration mode #   2
   2.0 -0.0 -2.0  0.0  0.0 -0.0 -0.0  0.0

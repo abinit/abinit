@@ -302,36 +302,84 @@ AC_DEFUN([_SD_LINALG_CHECK_PLASMA], [
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA], [
   sd_linalg_has_elpa="unknown"
+  sd_linalg_has_elpa_f2008="unknown"
+  sd_linalg_has_elpa_legacy="unknown"
+
 
   AC_MSG_CHECKING([for ELPA support in the specified libraries])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
-      use elpa1
-      integer,parameter :: n=1, comm=1
-      integer :: comm1, comm2, success
-      success = get_elpa_communicators(comm, n, n, comm1, comm2)
+      use elpa
+      class(elpa_t),pointer :: e
+      integer :: comm,err
+      call e%set('mpi_comm_parent',comm,err)
     ]])],
-    [sd_linalg_has_elpa="yes"; sd_linalg_provided="${sd_linalg_provided} elpa"],
-    [sd_linalg_has_elpa="no"])
+    [sd_linalg_has_elpa_f2008="yes";sd_linalg_has_elpa="yes"],
+    [sd_linalg_has_elpa_f2008="no"])
+  if test "${sd_linalg_has_elpa_f2008}" = "no"; then
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use elpa1
+        integer,parameter :: nrow=1,ncol=1,comm=1
+        integer :: comm_r,comm_c,success
+        success=get_elpa_row_col_comms(comm,nrow,ncol,comm_r,comm_c)
+      ]])],
+      [sd_linalg_has_elpa_legacy="yes";sd_linalg_has_elpa="yes"],
+      [sd_linalg_has_elpa_legacy="unknown"])
+    if test "${sd_linalg_has_elpa_legacy}" != "yes"; then
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [[
+          use elpa1
+          integer,parameter :: nrow=1,ncol=1,comm=1
+          integer :: comm_r,comm_c
+          call get_elpa_row_col_comms(comm,nrow,ncol,comm_r,comm_c)
+        ]])],
+        [sd_linalg_has_elpa_legacy="yes";sd_linalg_has_elpa="yes"],
+        [sd_linalg_has_elpa_legacy="no" ;sd_linalg_has_elpa="no"])
+    fi
+  fi  
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa}])
 
   if test "${sd_linalg_has_elpa}" = "yes"; then
+    # ===== New API
+    if test "${sd_linalg_has_elpa_f2008}" = "yes"; then
+      _SD_LINALG_CHECK_ELPA_2017_F2008
+      if test "${sd_linalg_has_elpa_2017_f2008}" != "yes"; then
+        sd_linalg_has_elpa="no"
+      fi
+    # ===== Old API
+    else
+      _SD_LINALG_CHECK_ELPA_2017_LEGACY
+      if test "${sd_linalg_has_elpa_2017_legacy}" != "yes"; then
+        _SD_LINALG_CHECK_ELPA_2016
+        if test "${sd_linalg_has_elpa_2016}" != "yes"; then
+          _SD_LINALG_CHECK_ELPA_2015_11
+          if test "${sd_linalg_has_elpa_2015_11}" != "yes"; then
+            _SD_LINALG_CHECK_ELPA_2015_02
+            if test "${sd_linalg_has_elpa_2015_02}" != "yes"; then
+              _SD_LINALG_CHECK_ELPA_2014
+              if test "${sd_linalg_has_elpa_2014}" != "yes"; then
+                _SD_LINALG_CHECK_ELPA_2013
+                if test "${sd_linalg_has_elpa_2013}" != "yes"; then
+                  sd_linalg_has_elpa="no"
+                fi
+              fi
+            fi
+          fi
+        fi
+      fi  
+    fi
+  fi
+
+  if test "${sd_linalg_has_elpa}" = "yes"; then
+    sd_linalg_provided="${sd_linalg_provided} elpa"
     AC_DEFINE([HAVE_LINALG_ELPA], 1,
       [Define to 1 if you have the ELPA linear algebra library.])
-    _SD_LINALG_CHECK_ELPA_2017
-    if test "${sd_linalg_has_elpa_2017}" != "yes"; then
-      _SD_LINALG_CHECK_ELPA_2016
-    fi
-    if test "${sd_linalg_has_elpa_2016}" != "yes"; then
-      _SD_LINALG_CHECK_ELPA_2015
-    fi
-    if test "${sd_linalg_has_elpa_2015}" != "yes"; then
-      _SD_LINALG_CHECK_ELPA_2014
-    fi
-    if test "${sd_linalg_has_elpa_2014}" != "yes"; then
-      _SD_LINALG_CHECK_ELPA_2013
+    if test "${sd_linalg_has_elpa_f2008}" = "yes"; then
+      AC_DEFINE([HAVE_LINALG_ELPA_FORTRAN2008], 1,
+        [Define to 1 if you have the ELPA Fortran 2008 API support.])
     fi
   fi
 ]) # _SD_LINALG_CHECK_ELPA
@@ -340,29 +388,33 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA], [
 # _SD_LINALG_CHECK_ELPA_2013()
 # ----------------------------
 #
-# Look for a ELPA 2013 API.
+# Look for a ELPA 2011-13 API.
 #
 AC_DEFUN([_SD_LINALG_CHECK_ELPA_2013], [
   sd_linalg_has_elpa_2013="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2013 API support in the specified libraries])
+  AC_MSG_CHECKING([for ELPA 2011-13 API support in the specified libraries])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
-      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1
-      integer, parameter :: comm_r=1, comm_c=1
-      real*8 :: a(lda,na), ev(na), q(ldq,na)
-      complex*16 :: ac(lda,na)
-      call solve_evp_real(na, nev, a, lda, ev, q, ldq, nblk, comm_r, comm_c)
-      call invert_trm_complex(na, ac, lda, nblk, comm_r, comm_c)
+      integer, parameter :: na=1,ldq=1,nev=1,nblk=1,ncb=1,nrow=1,ncol=1,comm=1
+      integer :: comm_r,comm_c,err
+      real*8 :: ar(ncol,nrow),ev(na),qr(ldq,nrow)
+      complex*16 :: ac(ncol,nrow),bc(ncol,nrow),cc(ncol,nrow)
+      character*1 :: u
+      call get_elpa_row_col_comms(comm,nrow,ncol,comm_r,comm_c)
+      call solve_evp_real(na,nev,ar,nrow,ev,qr,nrow,nblk,comm_r,comm_c)
+      call cholesky_complex(na,ac,nrow,nblk,comm_r,comm_c)
+      call invert_trm_real(na,ar,nrow,nblk,comm_r,comm_c)
+      call mult_ah_b_complex(u,u,na,ncb,ac,nrow,bc,nrow,nblk,comm_r,comm_c,cc,nrow)
     ]])], [sd_linalg_has_elpa_2013="yes"], [sd_linalg_has_elpa_2013="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2013}])
 
   if test "${sd_linalg_has_elpa_2013}" = "yes"; then
     AC_DEFINE([HAVE_LINALG_ELPA_2013], 1,
-      [Define to 1 if you have ELPA 2013 API support.])
+      [Define to 1 if you have ELPA 2011-13 API support.])
   fi
 ]) # _SD_LINALG_CHECK_ELPA_2013
 
@@ -380,14 +432,17 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
-      logical :: success
-      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1
-      integer, parameter :: comm_r=1, comm_c=1
-      real*8 :: a(lda,na), ev(na), q(ldq,na)
-      complex*16 :: ac(lda,na)
-      success = solve_evp_real(na, nev, a, lda, ev, q, ldq, nblk, &
-&       comm_r, comm_c)
-      call invert_trm_complex(na, ac, lda, nblk, comm_r, comm_c, success)
+      integer, parameter :: na=1,ldq=1,nev=1,nblk=1,ncb=1,nrow=1,ncol=1,comm=1
+      integer :: comm_r,comm_c,err
+      logical :: ok
+      real*8 :: ar(ncol,nrow),ev(na),qr(ldq,nrow)
+      complex*16 :: ac(ncol,nrow),bc(ncol,nrow),cc(ncol,nrow)
+      character*1 :: u
+      call get_elpa_row_col_comms(comm,nrow,ncol,comm_r,comm_c)
+      ok=solve_evp_real(na,nev,ar,nrow,ev,qr,nrow,nblk,comm_r,comm_c)
+      call cholesky_complex(na,ac,nrow,nblk,comm_r,comm_c,ok)
+      call invert_trm_real(na,ar,nrow,nblk,comm_r,comm_c,ok)
+      call mult_ah_b_complex(u,u,na,ncb,ac,nrow,bc,nrow,nblk,comm_r,comm_c,cc,nrow)
     ]])], [sd_linalg_has_elpa_2014="yes"], [sd_linalg_has_elpa_2014="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2014}])
@@ -399,37 +454,74 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
 ]) # _SD_LINALG_CHECK_ELPA_2014
 
 
-# _SD_LINALG_CHECK_ELPA_2015()
+# _SD_LINALG_CHECK_ELPA_2015_02()
 # ----------------------------
 #
-# Look for a ELPA 2015 API.
+# Look for a ELPA 2015.02 API.
 #
-AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015], [
-  sd_linalg_has_elpa_2015="unknown"
+AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015_02], [
+  sd_linalg_has_elpa_2015_02="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2015 API support in the specified libraries])
+  AC_MSG_CHECKING([for ELPA 2015.02 API support in the specified libraries])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
-      logical :: success1, debug
-      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1
-      integer :: comm_g=1, comm_r=1, comm_c=1, success2
-      real*8 :: a(lda,na), ev(na), q(ldq,na)
-      complex*16 :: ac(lda,na)
-      success1 = solve_evp_real(na, nev, a, lda, ev, q, ldq, nblk, &
-&       comm_r, comm_c)
-      call cholesky_complex(na, ac, lda, nblk, comm_r, comm_c, debug, success1)
-      success2 = get_elpa_row_col_comms(comm_g, na, na, comm_r, comm_c)
-    ]])], [sd_linalg_has_elpa_2015="yes"], [sd_linalg_has_elpa_2015="no"])
+      integer, parameter :: na=1,ldq=1,nev=1,nblk=1,ncb=1,nrow=1,ncol=1,comm=1
+      integer :: comm_r,comm_c,err
+      logical :: ok,debug
+      real*8 :: ar(ncol,nrow),ev(na),qr(ldq,nrow)
+      complex*16 :: ac(ncol,nrow),bc(ncol,nrow),cc(ncol,nrow)
+      character*1 :: u
+      err=get_elpa_row_col_comms(comm,nrow,ncol,comm_r,comm_c)
+      ok=solve_evp_real(na,nev,ar,nrow,ev,qr,nrow,nblk,comm_r,comm_c)
+      call cholesky_complex(na,ac,nrow,nblk,comm_r,comm_c,debug,ok)
+      call invert_trm_real(na,ar,nrow,nblk,comm_r,comm_c,debug,ok)
+      call mult_ah_b_complex(u,u,na,ncb,ac,nrow,bc,nrow,nblk,comm_r,comm_c,cc,nrow)
+    ]])], [sd_linalg_has_elpa_2015_02="yes"], [sd_linalg_has_elpa_2015_02="no"])
   AC_LANG_POP([Fortran])
-  AC_MSG_RESULT([${sd_linalg_has_elpa_2015}])
+  AC_MSG_RESULT([${sd_linalg_has_elpa_2015_02}])
 
-  if test "${sd_linalg_has_elpa_2015}" = "yes"; then
-    AC_DEFINE([HAVE_LINALG_ELPA_2015], 1,
-      [Define to 1 if you have ELPA 2015 API support.])
+  if test "${sd_linalg_has_elpa_2015_02}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2015_02], 1,
+      [Define to 1 if you have ELPA 2015.02 API support.])
   fi
-]) # _SD_LINALG_CHECK_ELPA_2015
+]) # _SD_LINALG_CHECK_ELPA_2015_02
+
+
+# _SD_LINALG_CHECK_ELPA_2015_11()
+# ----------------------------
+#
+# Look for a ELPA 2015.11 API.
+#
+AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015_11], [
+  sd_linalg_has_elpa_2015_11="unknown"
+
+  AC_MSG_CHECKING([for ELPA 2015.11 API support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      integer, parameter :: na=1,ldq=1,nev=1,nblk=1,ncb=1,nrow=1,ncol=1,comm=1
+      integer :: comm_r,comm_c,err
+      logical :: ok,debug
+      real*8 :: ar(ncol,nrow),ev(na),qr(ldq,nrow)
+      complex*16 :: ac(ncol,nrow),bc(ncol,nrow),cc(ncol,nrow)
+      character*1 :: u
+      err=get_elpa_row_col_comms(comm,nrow,ncol,comm_r,comm_c)
+      ok=solve_evp_real(na,nev,ar,nrow,ev,qr,nrow,nblk,ncol,comm_r,comm_c)
+      call cholesky_complex(na,ac,nrow,nblk,ncol,comm_r,comm_c,debug,ok)
+      call invert_trm_real(na,ar,nrow,nblk,ncol,comm_r,comm_c,debug,ok)
+      call mult_ah_b_complex(u,u,na,ncb,ac,nrow,bc,nrow,nblk,comm_r,comm_c,cc,nrow)
+    ]])], [sd_linalg_has_elpa_2015_11="yes"], [sd_linalg_has_elpa_2015_11="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_elpa_2015_11}])
+
+  if test "${sd_linalg_has_elpa_2015_11}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2015_11], 1,
+      [Define to 1 if you have ELPA 2015.11 API support.])
+  fi
+]) # _SD_LINALG_CHECK_ELPA_2015_11
 
 
 # _SD_LINALG_CHECK_ELPA_2016()
@@ -445,16 +537,17 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
-      logical :: success1, debug
-      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1, nrow=1
-      integer :: comm_g=1, comm_r=1, comm_c=1, success2
-      real*8 :: a(lda,nrow), ev(na), q(ldq,nrow)
-      complex*16 :: ac(lda,nrow)
-      success1 = solve_evp_real_1stage(na, nev, a, lda, ev, q, ldq, &
-&       nblk, nrow, comm_r, comm_c)
-      success1 = cholesky_complex(na, ac, lda, nblk, nrow, &
-&       comm_r, comm_c, debug)
-      success2 = get_elpa_communicators(comm_g, na, na, comm_r, comm_c)
+      integer, parameter :: na=1,ldq=1,nev=1,nblk=1,ncb=1,nrow=1,ncol=1,comm=1
+      integer :: comm_r,comm_c,err
+      logical :: ok,debug
+      real*8 :: ar(ncol,nrow),ev(na),qr(ldq,nrow)
+      complex*16 :: ac(ncol,nrow),bc(ncol,nrow),cc(ncol,nrow)
+      character*1 :: u
+      err=elpa_get_communicators(comm,nrow,ncol,comm_r,comm_c)
+      ok=elpa_solve_evp_real_1stage(na,nev,ar,nrow,ev,qr,nrow,nblk,ncol,comm_r,comm_c)
+      ok=elpa_cholesky_complex(na,ac,nrow,nblk,local_ncol,comm_r,comm_c,debug)
+      ok=elpa_invert_trm_real(na,ar,nrow,nblk,ncol,comm_r,comm_c,debug)
+      ok=elpa_mult_ah_b_complex(u,u,na,ncb,ac,nrow,ncol,bc,nrow,ncol,nblk,comm_r,comm_c,cc,nrow,ncol)
     ]])], [sd_linalg_has_elpa_2016="yes"], [sd_linalg_has_elpa_2016="no"])
   AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2016}])
@@ -466,35 +559,74 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
 ]) # _SD_LINALG_CHECK_ELPA_2016
 
 
-# _SD_LINALG_CHECK_ELPA_2017()
-# ----------------------------
+# _SD_LINALG_CHECK_ELPA_2017_F2008()
+# ----------------------------------
 #
-# Look for a ELPA 2017+ API.
+# Look for a ELPA 2017+ Fortran2008 API.
 #
-AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
-  sd_linalg_has_elpa_2017="unknown"
+AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017_F2008], [
+  sd_linalg_has_elpa_2017_f2008="unknown"
 
-  AC_MSG_CHECKING([for ELPA 2017 API support in the specified libraries])
+  AC_MSG_CHECKING([for ELPA 2017+ Fortran2008 API support in the specified libraries])
+
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa
       class(elpa_t),pointer :: e
-      integer,parameter :: na=1,ncol=1,nrow=1 ; integer :: err
-      real*8 :: a(ncol,nrow),ev(na),q(ncol,nrow)
-      call e%eigenvectors(a,ev,q,err)
-      call e%cholesky(a,err)
-    ]])], [sd_linalg_has_elpa_2017="yes"], [sd_linalg_has_elpa_2017="no"])
+      integer,parameter :: na=1,ncol=1,nrow=1
+      integer :: comm,err
+      character*1 :: u
+      real*8 :: ar(ncol,nrow),ev(na),qr(ncol,nrow)
+      call e%set('mpi_comm_parent',comm,err)
+      call e%eigenvectors(ar,ev,qr,err)
+      call e%cholesky(ar,err)
+      call e%invert_triangular(ar,err)
+      call e%hermitian_multiply(u,u,na,ar,ar,nrow,ncol,qr,nrow,ncol,err)
+    ]])], [sd_linalg_has_elpa_2017_f2008="yes"], [sd_linalg_has_elpa_2017_f2008="no"])
   AC_LANG_POP([Fortran])
-  AC_MSG_RESULT([${sd_linalg_has_elpa_2017}])
+  AC_MSG_RESULT([${sd_linalg_has_elpa_2017_f2008}])
 
-  if test "${sd_linalg_has_elpa_2017}" = "yes"; then
+  if test "${sd_linalg_has_elpa_2017_f2008}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2017], 1,
+      [Define to 1 if you have ELPA 2017+ F2008 API support.])
+  fi
+]) # _SD_LINALG_CHECK_ELPA_2017_F2008
+
+
+# _SD_LINALG_CHECK_ELPA_2017_LEGACY()
+# -----------------------------------
+#
+# Look for a ELPA 2017+ legacy API.
+#
+AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017_LEGACY], [
+  sd_linalg_has_elpa_2017_legacy="unknown"
+
+  AC_MSG_CHECKING([for ELPA 2017+ legacy API support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      integer, parameter :: na=1,ldq=1,nev=1,nblk=1,ncb=1,nrow=1,ncol=1,comm=1
+      integer :: comm_r,comm_c,err
+      logical :: ok,debug
+      real*8 :: ar(ncol,nrow),ev(na),qr(ldq,nrow)
+      complex*16 :: ac(ncol,nrow),bc(ncol,nrow),cc(ncol,nrow)
+      character*1 :: u
+      err=elpa_get_communicators(comm,nrow,ncol,comm_r,comm_c)
+      ok=elpa_solve_evp_real_1stage_double(na,nev,ar,nrow,ev,qr,nrow,nblk,ncol,comm_r,comm_c,comm,debug)
+      ok=elpa_cholesky_complex_double(na,ac,nrow,nblk,local_ncol,comm_r,comm_c,debug)
+      ok=elpa_invert_trm_real_double(na,ar,nrow,nblk,ncol,comm_r,comm_c,debug)
+      ok=elpa_mult_ah_b_complex_double(u,u,na,ncb,ac,nrow,ncol,bc,nrow,ncol,nblk,comm_r,comm_c,cc,nrow,ncol)
+    ]])], [sd_linalg_has_elpa_2017_legacy="yes"], [sd_linalg_has_elpa_2017_legacy="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_has_elpa_2017_legacy}])
+
+  if test "${sd_linalg_has_elpa_2017_legacy}" = "yes"; then
     AC_DEFINE([HAVE_LINALG_ELPA_2017], 1,
       [Define to 1 if you have ELPA 2017 API support.])
-    AC_DEFINE([HAVE_ELPA_FORTRAN2008], 1,
-      [Define to 1 if you have ELPA Fortran 2008 API support.])
   fi
-]) # _SD_LINALG_CHECK_ELPA_2017
+]) # _SD_LINALG_CHECK_ELPA_2017_LEGACY
 
 
                     # ------------------------------------ #

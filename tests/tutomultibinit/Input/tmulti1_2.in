@@ -11,7 +11,6 @@ dipdip  = 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% system_xml = tmulti1_2_model.xml
 #%% [files]
 #%% files_to_test = 

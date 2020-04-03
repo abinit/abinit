@@ -138,6 +138,15 @@ P           mkmem           8
            occopt           3
         optdriver           3
         pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it4       0    0    0
+     plowan_iatom4       1
+       plowan_nbl4       1
+     plowan_lcalc4       2
+  plowan_projcalc4      -2
           ppmodel           3
           spgroup           1
            tolvrs      1.00000000E-10
@@ -594,6 +603,29 @@ meta: {optdriver: 3, gwcalctyp: 0, }
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
 
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
+
 
 --------------------------------------------------------------------------------
   q-point number  1        q = ( 0.000000, 0.000000, 0.000000) [r.l.u.]
@@ -817,6 +849,15 @@ P           mkmem           8
            occopt           3
         optdriver           3
         pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it4       0    0    0
+     plowan_iatom4       1
+       plowan_nbl4       1
+     plowan_lcalc4       2
+  plowan_projcalc4      -2
           ppmodel           3
           spgroup           1
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00

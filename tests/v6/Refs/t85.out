@@ -27,7 +27,6 @@
      ifcflag         1
  Miscellaneous information :
          asr         1
-      chneut         1
  Interatomic Force Constants Inputs :
       dipdip         1
       ifcana         0
@@ -299,6 +298,8 @@
 -  2.810929E+02  2.810929E+02  4.533533E+02  4.533533E+02  4.533533E+02
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0  0.0  0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
