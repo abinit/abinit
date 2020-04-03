@@ -48,7 +48,7 @@
 
 #include "abi_common.h"
 
-program tdep
+program aTDEP
 
   use defs_basis
   use m_abicore
@@ -383,5 +383,5 @@ program tdep
 
 100 call xmpi_end()
 
- end program tdep
+ end program aTDEP
 !!***
