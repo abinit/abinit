@@ -2194,7 +2194,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
            ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
          end if
 
-         den=piinv/gs
+!         den=piinv/gs
 
          call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
          
@@ -2213,7 +2213,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 !            END SELECT  
           endif
 
-         den=piinv/gs
+!         den=piinv/gs
 
          if (abs(hyb_mixing_sr)>tol8) then
 !           SELECT CASE ( trim(method) )
