@@ -225,13 +225,15 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
 
- !Order from highes occ to lowest occ
- do ib1dm=1,ndim
-  occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
-  do ib2dm=1,ndim
-   eigenvect(ib1dm,ib2dm)=dm1_tmp(ndim-(ib1dm-1),ib2dm)
-  enddo
- enddo
+ !Order from highest occ to lowest occ
+ eigenvect=dm1_tmp
+ occs_tmp=occs
+ !do ib1dm=1,ndim
+ ! occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
+ ! do ib2dm=1,ndim
+ !  eigenvect(ib2dm,ib1dm)=dm1_tmp(ndim-(ib2dm-1),ib1dm)
+ ! enddo
+ !enddo
 
  if(info==0) then
    if(iinfo==0) then       
@@ -261,7 +263,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  toccs_k=0.0d0
  do ib1dm=1,ndim
    do ib2dm=1,ndim
-     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint,1)=eigenvect(ib2dm,ib1dm)
+     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint,1)=eigenvect(ib1dm,ib2dm)
    enddo
    occs_ks(ib1+(ib1dm-1),kpoint)=occs_tmp(ib1dm)
    toccs_k=toccs_k+occs_tmp(ib1dm)

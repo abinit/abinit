@@ -630,7 +630,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(keep_ur ,(mband,Kmesh%nibz,Sigp%nsppol))
  keep_ur=.FALSE.; bks_mask=.FALSE.
 
- if(gwcalctyp==21) then
+ if(gwcalctyp==21 .and. gw1rdm>0) then
    ABI_MALLOC(bdm_mask  ,(mband,Kmesh%nibz,Sigp%nsppol))
    ABI_MALLOC(keep_ur_dm,(mband,Kmesh%nibz,Sigp%nsppol))
    keep_ur_dm=.FALSE.; bdm_mask=.FALSE.
@@ -746,10 +746,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
  end if
- if (gwcalctyp==21) then
-   ABI_FREE(keep_ur_dm)
-   ABI_FREE(bdm_mask)
- endif
+! if (gwcalctyp==21) then
+!   ABI_FREE(keep_ur_dm)
+!   ABI_FREE(bdm_mask)
+! endif
  ABI_FREE(bks_mask)
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -2300,6 +2300,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_DEALLOCATE(sigcme_k)
      end do
    end if
+
    call xmpi_barrier(Wfd%comm)
    ! MRM print WFK and DEN files. 
    if(gwcalctyp==21 .and. gw1rdm>2) then
@@ -2307,7 +2308,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! MRM only the master has bands on Wfd_dm so let it print everything
      if(my_rank==0) then
        call update_hdr_bst(Wfd_dm,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
-       call Wfd_dm%rotate(Cryst,nateigv)                                      ! Let it generate the bmask and build NOs 
+       call Wfd_dm%rotate(Cryst,nateigv,bdm_mask)                             ! Let it generate the bmask and build NOs 
        gw1rdm_fname=dtfil%fnameabo_wfk                                         
        call Wfd_dm%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname)                   ! Print WFK file, QP_BSt contains nat. orbs.
        gw1rdm_fname=dtfil%fnameabo_den
@@ -2320,6 +2321,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call xmpi_barrier(Wfd%comm)
    ! MRM Finally, deallocate all arrays used for 1-RDM update
    if(gwcalctyp==21 .and. gw1rdm>0) then
+     ABI_FREE(keep_ur_dm)
+     ABI_FREE(bdm_mask)
      Wfd_dm%bks_comm = xmpi_comm_null
      call Wfd_dm%free()
      ABI_FREE(dm1) 
