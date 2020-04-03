@@ -176,7 +176,11 @@ New input variables have been defined: [[lw_flexo]], [[lw_qdrpl]], [[prepalw]], 
 At present (v9.0.2) they are not yet documented, although tested in the above-mentioned examples.
 A tutorial should be set up, as well as a specific topic.
 
-By M. Royo, M. Stengel, M. Giantomassi (MR 618).
+This capability is still under development and not completely stable.
+Interested users are strongly recommended to contact Miquel Royo (mroyo@icmab.es)
+or Massimiliano Stengel (mstengel@icmab.es) before start using it.   
+
+By M. Royo, M. Stengel, M. Giantomassi.
 
 
 **B.2** DFT+DMFT

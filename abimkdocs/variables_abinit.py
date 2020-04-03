@@ -9223,6 +9223,75 @@ are allowed)  on which to apply the LDA+U correction.
 ),
 
 Variable(
+    abivarname="lw_flexo",
+    varset="dfpt",
+    vartype="integer",
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of FLEXOelectricity related spatial dispersion tensors",
+    requires="[[optdriver]] = 10, [[kptopt]] = 2 or 3 and [[useylm]] = 1",
+    added_in_version="v9",
+    text=r"""
+Used to run the calculation of spatial dispersion tensorial quantities needed to 
+build the bulk flexoelectric tensor (the clamped-ion contribution is alread calculated by
+abint whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation, 
+see [[flexoflag@anaddb]]).
+
+At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
+calculated. This **requires** the precalculation of the ground-state wave-functions and
+denisty as well as response functions and densities to a set of perturbations as specified below. 
+All perturbations and directions need to be explicictly computed, and the linear response calculations
+have to be performed with [[prepalw]] = 1. 
+
+  * 0 --> No flexoelectric spatial dispersion tensors are calculated.
+  * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
+          are calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field, atomic displacement and strain.
+  * 2 --> Clamped-ion flexoelectric tensor is calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field and strain.
+  * 3 --> Two tensors required to build the mixed flexoelectric tensor are calculated:
+          the first moment of polarization response to an atomic displacement and the first
+          moment of the IFCs. Related quantities that can be derived from these two tensors 
+          are also printed: dynamical quadrupoles, clamped-ion piezoelectric tensor and 
+          clamped-ion internal strain tensor. Requires precomputed linear response functions and densities: 
+          ddk, d2_dkdk, electric field and atomic displacement.
+    4 --> Two tensors required to build the lattice-mediated flexoelectric tensor are calculated:
+          the first moment of the IFCs and the first moment of the piezoelectric force response 
+          tensor. Requires precomputed linear response functions and densities: 
+          ddk, atomic displacement and strain. 
+
+""",
+),
+
+Variable(
+    abivarname="lw_qdrpl",
+    varset="dfpt",
+    vartype="integer",
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of dynamical QuaDRuPoLes tensor",
+    requires="[[optdriver]] = 10, [[kptopt]] = 2 or 3 and [[useylm]] = 1",
+    added_in_version="v9",
+    text=r"""
+Used to run dynamical quadrupoles tensor calculation (e.g., needed to include dipole-quadrupole
+and/or quadrupole-quadrupole electrostatic interactions in the anaddb calculation of 
+phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]). 
+
+  * 0 --> No dynamical quadrupoles are calculated
+  * 1 --> Dynamical quadrupoles are calculated. Related quantities that can be derived from 
+          the dynamical quadrupoles are also printed: the first moment of the polarization 
+          response to an atomic displacement and the clamped-ion piezoelectric tensor. 
+
+At present ( |today| ), all the elements of the dynamical quadrupoles tensor are necessarily
+calculated. This **requires** the precalculation of the ground-state wave functions and
+denisty as well as response functions and densities to the following perturbations:
+ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need 
+to be explicictly computed, and the linear response calculations have to be performed with [[prepalw]] = 1. 
+""",
+),
+
+
+Variable(
     abivarname="macro_uj",
     varset="dev",
     vartype="integer",
@@ -12411,6 +12480,7 @@ The choice is among:
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH)
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 10 --> longwave response functions (LONGWAVE), routine *longwave*.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -14124,6 +14194,31 @@ Please note also that in the case of **ppmodel** 4, the plasmon energies are
 not simple mathematical parameters, but rather have a physical meaning (at
 least the lowest ones). Thus the calculated plasmon band structure (plasmon
 energy vs q vector) is reported in the output file for the lowest 10 bands.
+""",
+),
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave response calculation",
+    added_in_version="before_v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT 
+approach requires the first-order wavefunctions and densities obtained from 
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties. 
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
 """,
 ),
 
