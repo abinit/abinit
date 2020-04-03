@@ -278,6 +278,29 @@ P           mkmem3          8
         optforces2          2
         optforces3          0
         pawecutdg      5.00000000E+00 Hartree
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         21
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+     plowan_natom1          0
+     plowan_natom2          0
+     plowan_natom3          1
+        plowan_nt1          0
+        plowan_nt2          0
+        plowan_nt3          1
+ plowan_realspace1          0
+ plowan_realspace2          0
+ plowan_realspace3          1
+        plowan_it3       0    0    0
+     plowan_iatom3       1
+       plowan_nbl3       1
+     plowan_lcalc3       2
+  plowan_projcalc3      -2
           ppmodel           3
           spgroup1        221
           spgroup2          1
@@ -344,9 +367,6 @@ P           mkmem3          8
            tolvrs      1.00000000E-15
            tsmear      3.67490000E-03 Hartree
             typat      1  2  3  3  3
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
           usepawu           1
            useylm           1
               wtk1       0.12500    0.37500    0.37500    0.12500
@@ -1095,14 +1115,10 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 -inwffil : will read wavefunctions from disk file t23o_DS2_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
 
--       ( number of procs used in dmft ) =  1
-
 
  ******************************************
- DFT+DMFT Method is used
+ LDA+U Method used: FLL
  ******************************************
-
- DMFT uses the Hubbard one solver
 
 ================================================================================
 
@@ -1249,6 +1265,33 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 
 
+
+ ======================================================================================
+
+ == Start computation of Projected Local Orbitals Wannier functions ==  -1
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
+
+   (The band structure is shifted by fermie =      11.9976 eV )
+
+ Wannier band structure for atom  1
+ 1      -0.000       0.000       0.000       0.318       0.318
+ 2      -0.241      -0.000       0.000       0.630       2.002
+ 3      -0.241      -0.000       0.000       0.630       2.002
+ 4       0.644       2.243       3.560       3.888       3.888
+ 5      -0.241      -0.000       0.000       0.630       2.002
+ 6       0.644       2.243       3.560       3.888       3.888
+ 7       0.644       2.243       3.560       3.888       3.888
+ 8      -0.000       0.000       0.000       6.066       6.066
+
+ Print the psichi coefficients in data.plowann
 
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
@@ -1584,6 +1627,29 @@ P           mkmem3          8
         optforces2          2
         optforces3          0
         pawecutdg      5.00000000E+00 Hartree
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         21
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+     plowan_natom1          0
+     plowan_natom2          0
+     plowan_natom3          1
+        plowan_nt1          0
+        plowan_nt2          0
+        plowan_nt3          1
+ plowan_realspace1          0
+ plowan_realspace2          0
+ plowan_realspace3          1
+        plowan_it3       0    0    0
+     plowan_iatom3       1
+       plowan_nbl3       1
+     plowan_lcalc3       2
+  plowan_projcalc3      -2
           ppmodel           3
           spgroup1        221
           spgroup2          1
@@ -1656,9 +1722,6 @@ P           mkmem3          8
            tolvrs      1.00000000E-15
            tsmear      3.67490000E-03 Hartree
             typat      1  2  3  3  3
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
           usepawu           1
            useylm           1
               wtk1       0.12500    0.37500    0.37500    0.12500

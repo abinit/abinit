@@ -44,7 +44,8 @@ Issue:
 
 We now examine the files.
 
-{% dialog tests/tutorespfn/Input/toptic_1.files tests/tutorespfn/Input/toptic_1.in %}
+{% dialog tests/tutorespfn/Input/toptic_1.files %} 
+{% dialog tests/tutorespfn/Input/toptic_1.in %}
 
 The computation concerns a crystal of GaAs, in the zinc-blende structure (2 atoms per primitive cell).
 The *toptic_1.files* is a typical Abinit *files file* (nothing special).
@@ -248,7 +249,8 @@ Copy the files *toptic_3.files* and *toptic_3.in* in *Work_optic*:
     cp ../toptic_3.files .
     cp ../toptic_3.in .
 
-{% dialog tests/tutorespfn/Input/toptic_3.files tests/tutorespfn/Input/toptic_3.in %}
+{% dialog tests/tutorespfn/Input/toptic_3.files %}
+{% dialog tests/tutorespfn/Input/toptic_3.in %}
 
 Issue:
 
@@ -267,7 +269,8 @@ Copy the files *toptic_4.files* and *toptic_4.in* in *Work_optic*:
     cp ../toptic_4.files .
     cp ../toptic_4.in .
 
-{% dialog tests/tutorespfn/Input/toptic_4.files tests/tutorespfn/Input/toptic_4.in %}
+{% dialog tests/tutorespfn/Input/toptic_4.files ‰}
+{‰ dialog tests/tutorespfn/Input/toptic_4.in %}
 
 Examine *toptic_4.in* file: only the linear optic spectra will be built.
 
@@ -343,7 +346,8 @@ Copy the files *toptic_5.files* and *toptic_5.in* in *Work_optic*:
     cp ../toptic_5.files .
     cp ../toptic_5.in .
 
- {% dialog tests/tutorespfn/Input/toptic_5.files tests/tutorespfn/Input/toptic_5.in %}
+{% dialog tests/tutorespfn/Input/toptic_5.files %}
+{% dialog tests/tutorespfn/Input/toptic_5.in %}
 
 Note that *toptic_5.files* has not changed (we want to use the previously calculated wave functions). However, examine *toptic_5.in*,  only the linear electro-optic susceptibility will be calculated.
 

@@ -112,6 +112,9 @@ module m_sigma_driver
  use m_calc_ucrpa,    only : calc_ucrpa
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
+ use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
+                         &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
+                         destroy_operwan_realspace,destroy_plowannier,zero_operwan_realspace
 
  implicit none
 
@@ -219,7 +222,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: approx_type,b1gw,b2gw,choice,cplex,cplex_dij,cplex_rhoij !,band
  integer :: dim_kxcg,gwcalctyp,gnt_option,has_dijU,has_dijso,iab,bmin,bmax,irr_idx1,irr_idx2
  integer :: iat,ib,ib1,ib2,ic,id_required,ider,idir,ii,ik,ierr,ount
- integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus
+ integer :: ik_bz,ikcalc,ik_ibz,ikxc,ipert,npw_k,omp_ncpus,pwx,ibz
  integer :: isp,is_idx,istep,itypat,itypatcor,izero,jj,first_band,last_band
  integer :: ks_iv,lcor,lmn2_size_max,mband,my_nband
  integer :: mgfftf,mod10,moved_atm_inside,moved_rhor,n3xccc !,mgfft
@@ -300,7 +303,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:),QP_pawrhoij(:),prev_Pawrhoij(:),tmp_pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
-
+ type(plowannier_type) :: wanbz,wanibz,wanibz_in
+ type(operwan_realspace_type), allocatable :: rhot1(:,:)
 !************************************************************************
 
  DBG_ENTER('COLL')
@@ -474,7 +478,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(Dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
        Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
-       Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,0,Dtset%usepotzero)
+       Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%ixc,Dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values
@@ -2037,15 +2041,26 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! at the beginning of the execution (e.g. in setup_sigma) so that one can easily allocate the arrays in the type.
  if(Dtset%ucrpa>=1) then
    !Read the band
-   if (open_file("forlb.ovlp",msg,newunit=temp_unt,form="formatted", status="unknown") /= 0) then
-     MSG_ERROR(msg)
-   end if
-   rewind(temp_unt)
+   if (dtset%plowan_compute<10)then
+     if (open_file("forlb.ovlp",msg,newunit=temp_unt,form="formatted", status="unknown") /= 0) then
+       MSG_ERROR(msg)
+     end if
+     rewind(temp_unt)
+     read(temp_unt,*)
    read(temp_unt,*)
-   read(temp_unt,*)
-   read(temp_unt,*) msg, ib1, ib2
-   close(temp_unt)
- end if
+     read(temp_unt,*) msg, ib1, ib2
+     close(temp_unt)
+   else
+     if (open_file("data.plowann",msg,newunit=temp_unt,form="formatted", status="unknown") /= 0) then
+       MSG_ERROR(msg)
+     end if
+     rewind(temp_unt)
+     read(temp_unt,*)
+     read(temp_unt,*)
+     read(temp_unt,'(a7,2i4)') msg, ib1, ib2
+     close(temp_unt)
+ endif
+endif
 
  ABI_MALLOC(sigcme,(nomega_sigc,ib1:ib2,ib1:ib2,Sigp%nkptgw,Sigp%nsppol*Sigp%nsig_ab))
  sigcme=czero
@@ -2098,19 +2113,45 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    M1_q_m=czero
    rhot1_q_m=czero
+!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+!Initialization of wan objects and getting psichies
+!Allocation of rhot1
+!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   if (dtset%plowan_compute>=10)then
+     write(msg,'(a)')" cRPA calculations using wannier weights from data.plowann"
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
+       &dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,dtset%plowan_nbl,dtset%plowan_nt,&
+       &dtset%plowan_projcalc,dtset%acell_orig,dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,&
+       &dtset%nsppol,dtset%wtk,wanibz_in)
+     call get_plowannier(wanibz_in,wanibz,dtset)
+     call fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)
+     ABI_DATATYPE_ALLOCATE(rhot1,(sigp%npwx,Qmesh%nibz))
+     do pwx=1,sigp%npwx
+       do ibz=1,Qmesh%nibz
+         call init_operwan_realspace(wanbz,rhot1(pwx,ibz))
+         call zero_operwan_realspace(wanbz,rhot1(pwx,ibz))
+       enddo
+     enddo
+   endif
+
+
 
 !   do ikcalc=1,Sigp%nkptgw
 
 !   if(cryst%nsym==1) nkcalc=Kmesh%nbz
 !   if(cryst%nsym>1)  nkcalc=Kmesh%nibz
    nkcalc=Kmesh%nbz
+   !if(1==1)then!DEBUG
+   !open(67,file="test.rhot1",status="REPLACE")
    do ikcalc=1,nkcalc ! for the oscillator strengh, spins are identical without SOC
 !    if(Sigp%nkptgw/=Kmesh%nbz) then
 !      write(msg,'(6a)')ch10,&
 !&      ' nkptgw and nbz differs: this is not allowed to compute U in cRPA '
 !      MSG_ERROR(msg)
 !    endif
-     write(std_out,*) "ikcalc",ikcalc,size(Sigp%kptgw2bz),nkcalc
+     write(std_out,*) " ikcalc",ikcalc,size(Sigp%kptgw2bz),nkcalc
 
      if(mod(ikcalc-1,nprocs)==Wfd%my_rank) then
        if(cryst%nsym==1) ik_ibz=Kmesh%tab(ikcalc) ! Index of the irred k-point for GW
@@ -2119,24 +2160,190 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call prep_calc_ucrpa(ik_ibz,ikcalc,itypatcor,ib1,ib2,Cryst,QP_bst,Sigp,Gsph_x,Vcp,&
 &       Kmesh,Qmesh,lcor,M1_q_m,Pawtab,Pawang,Paw_pwff,&
 &       Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,gwx_ngfft,&
-&       ngfftf,Dtset%prtvol,Dtset%pawcross,rhot1_q_m)
+&       ngfftf,Dtset%prtvol,Dtset%pawcross,Dtset%plowan_compute,rhot1_q_m,wanbz,rhot1)
      end if
    end do
-
-   call xmpi_sum(rhot1_q_m,Wfd%comm,ierr)
-   call xmpi_sum(M1_q_m,Wfd%comm,ierr)
+   if (dtset%plowan_compute<10)then
+     call xmpi_sum(rhot1_q_m,Wfd%comm,ierr)
+     call xmpi_sum(M1_q_m,Wfd%comm,ierr)
+     M1_q_m=M1_q_m/Kmesh%nbz/Wfd%nsppol
+     rhot1_q_m=rhot1_q_m/Kmesh%nbz/Wfd%nsppol
+     ! do pwx=1,sigp%npwx
+     !   do ibz=1,Qmesh%nibz
+     !     do ispinor1=1,dtset%nspinor
+     !       do ispinor2=1,dtset%nspinor
+     !         do iatom1=1,cryst%nattyp(itypatcor)
+     !           do im1=1,2*lcor+1
+     !             do im2=1,2*lcor+1
+     !               write(67,*)ibz,im1,im2,rhot1_q_m(iatom1,ispinor1,ispinor2,im1,im2,pwx,ibz)
+     !             enddo
+     !           enddo
+     !         enddo
+     !       enddo
+     !     enddo
+     !   enddo
+     ! enddo
+   else
+     call reduce_operwan_realspace(wanbz,rhot1,sigp%npwx,Qmesh%nibz,Wfd%comm,Kmesh%nbz,Wfd%nsppol)
+     !call cwtime(cpu,wall,gflops,"start") !reduction of rhot1
+     ! dim=0
+     ! do pwx=1,sigp%npwx
+     ! do ibz=1,Qmesh%nibz
+     !   do spin=1,wanbz%nsppol
+     !   do ispinor1=1,wanbz%nspinor
+     !   do ispinor2=1,wanbz%nspinor
+     !     do iatom1=1,wanbz%natom_wan
+     !     do iatom2=1,wanbz%natom_wan
+     !       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+     !       do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     !         do il1=1,wanbz%nbl_atom_wan(iatom1)
+     !         do il2=1,wanbz%nbl_atom_wan(iatom2)
+     !           do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     !           do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     ! dim=dim+1
+     !           enddo!im2
+     !           enddo!im1
+     !         enddo!il2
+     !         enddo!il1
+     !       enddo!pos2
+     !       enddo!pos1
+     !     enddo!iatom2
+     !     enddo!iatom1
+     !   enddo!ispinor2
+     !   enddo!ispinor1
+     !   enddo!spin
+     ! enddo!ibz
+     ! enddo!pwx
+     ! ABI_ALLOCATE(buffer,(dim))
+     ! nnn=0
+     ! do pwx=1,sigp%npwx
+     ! do ibz=1,Qmesh%nibz
+     !     do spin=1,wanbz%nsppol
+     !     do ispinor1=1,wanbz%nspinor
+     !     do ispinor2=1,wanbz%nspinor
+     !       do iatom1=1,wanbz%natom_wan
+     !       do iatom2=1,wanbz%natom_wan
+     !         do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+     !         do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     !           do il1=1,wanbz%nbl_atom_wan(iatom1)
+     !           do il2=1,wanbz%nbl_atom_wan(iatom2)
+     !             do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     !             do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     ! nnn=nnn+1
+     ! buffer(nnn)=rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
+     !             enddo!im2
+     !             enddo!im1
+     !           enddo!il2
+     !           enddo!il1
+     !         enddo!pos2
+     !         enddo!pos1
+     !       enddo!iatom2
+     !       enddo!iatom1
+     !     enddo!ispinor2
+     !     enddo!ispinor1
+     !   enddo!spin
+     ! enddo!ibz  
+     ! enddo!pwx
+     ! call xmpi_barrier(Wfd%comm)
+     ! call xmpi_sum(buffer,Wfd%comm,ierr)
+     ! call xmpi_barrier(Wfd%comm)
+     ! buffer=buffer/Kmesh%nbz/Wfd%nsppol
+     ! nnn=0
+     ! do pwx=1,sigp%npwx
+     ! do ibz=1,Qmesh%nibz
+     !   do spin=1,wanbz%nsppol
+     !   do ispinor1=1,wanbz%nspinor
+     !   do ispinor2=1,wanbz%nspinor
+     !     do iatom1=1,wanbz%natom_wan
+     !     do iatom2=1,wanbz%natom_wan
+     !       do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+     !       do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+     !         do il1=1,wanbz%nbl_atom_wan(iatom1)
+     !         do il2=1,wanbz%nbl_atom_wan(iatom2)
+     !           do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+     !           do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+     !  nnn=nnn+1
+     !  rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=buffer(nnn)
+     !  !write(67,*)ibz,im1,im2,rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)
+     !           enddo!im2
+     !           enddo!im1
+     !         enddo!il2
+     !         enddo!il1
+     !       enddo!pos2
+     !       enddo!pos1
+     !     enddo!iatom2
+     !     enddo!iatom1
+     !   enddo!ispinor2
+     !   enddo!ispinor1
+     !   enddo!spin
+     ! enddo!ibz
+     ! enddo!pwx
+     ! ABI_DEALLOCATE(buffer)
+   endif
+   
+   !close(67)
+   ! call xmpi_barrier(Wfd%comm)
+   ! call cwtime(cpu,wall,gflops,"stop")!reduction of rhot1
+   ! write(6,*)cpu,wall,gflops
 !   if(Cryst%nsym==1) then
-   M1_q_m=M1_q_m/Kmesh%nbz/Wfd%nsppol
-   rhot1_q_m=rhot1_q_m/Kmesh%nbz/Wfd%nsppol
+!   M1_q_m=M1_q_m/Kmesh%nbz/Wfd%nsppol
+!   rhot1_q_m=rhot1_q_m/Kmesh%nbz/Wfd%nsppol
 !   endif
 !  Calculation of U in cRPA: need to treat with a different cutoff the
 !  bare coulomb and the screened coulomb interaction.
+   ! else !DEBUG
+   !   write(6,*)"DEBUGGING calc_ucrpa"
+   !   open(67,file="test.rhot1",status="OLD")
+   !   rewind(67)
+   !    do pwx=1,sigp%npwx
+   !     do ibz=1,Qmesh%nibz
+   !       do spin=1,wanbz%nsppol
+   !       do ispinor1=1,wanbz%nspinor
+   !         do ispinor2=1,wanbz%nspinor
+   !           do iatom1=1,wanbz%natom_wan
+   !             do iatom2=1,wanbz%natom_wan
+   !               do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+   !                 do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+   !                   do il1=1,wanbz%nbl_atom_wan(iatom1)
+   !                     do il2=1,wanbz%nbl_atom_wan(iatom2)
+   !                       do im1=1,2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+   !                         do im2=1,2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+   !    read(67,*)dummy,dummy,dummy,xx
+   !    rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,spin,ispinor1,ispinor2)=xx
+   !                         enddo!im2
+   !                       enddo!im1
+   !                     enddo!il2
+   !                   enddo!il1
+   !                 enddo!pos2
+   !               enddo!pos1
+   !             enddo!iatom2
+   !           enddo!iatom1
+   !         enddo!ispinor2
+   !       enddo!ispinor1
+   !       enddo!spin
+   !     enddo!ibz
+   !   enddo!pwx
+   !   close(67)
+   ! endif!DEBUG
    call calc_ucrpa(itypatcor,cryst,Kmesh,lcor,M1_q_m,Qmesh,Er%npwe,sigp%npwx,&
-&   Cryst%nsym,rhot1_q_m,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,'Gsum',Cryst%ucvol,Wfd,Er%fname)
+&   Cryst%nsym,Sigp%nomegasr,Sigp%minomega_r,Sigp%maxomega_r,ib1,ib2,&
+&'Gsum',Cryst%ucvol,Wfd,Er%fname,dtset%plowan_compute,rhot1,wanbz)
 
+!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+!Deallocation of wan and rhot1
+!^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   if (dtset%plowan_compute >=10) then
+     do pwx=1,sigp%npwx
+       do ibz=1,Qmesh%nibz
+         call destroy_operwan_realspace(wanbz,rhot1(pwx,ibz))
+       enddo
+     enddo
+     ABI_DATATYPE_DEALLOCATE(rhot1)
+     call destroy_plowannier(wanbz)
+   endif
    ABI_FREE(rhot1_q_m)
    ABI_FREE(M1_q_m)
-
+   
  else
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
@@ -3107,7 +3314,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  mqmem=0; if (Dtset%gwmem/10==1) mqmem=1
 
- if (dtset%getscr /=0 .or. dtset%irdscr/=0 .or. dtset%getscr_path /= ABI_NOFILE) then
+ if (dtset%getscr /=0 .or. dtset%irdscr/=0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
    fname=Dtfil%fnameabi_scr
  else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
    fname=Dtfil%fnameabi_sus
@@ -3174,17 +3381,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call wrtout(std_out, sjoin(' Optimal value for ng0sh ', ltoa(ng0sh_opt)), "COLL")
  Sigp%mG0=ng0sh_opt
 
- ! G-sphere for W and Sigma_c is initialized from the SCR file.
+! G-sphere for W and Sigma_c is initialized from the SCR file.
  call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
-
  Sigp%ecuteps = Gsph_c%ecut
  Dtset%ecuteps = Sigp%ecuteps
-
- ! === Make biggest G-sphere of Sigp%npwvec vectors ===
+ 
+! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
  call gsph_init(Gsph_Max,Cryst,Sigp%npwvec,gvec=gvec_kss)
-
 !BEGINDEBUG
  ! Make sure that the two G-spheres are equivalent.
  ierr=0

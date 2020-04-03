@@ -74,7 +74,7 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t55.out, tolnlines = 1, tolabs = 1.1e-9, tolrel = 1.0e-4
+#%%   t55.out, tolnlines = 2, tolabs = 1.1e-9, tolrel = 2.0e-4
 #%% psp_files = Mg-sp-gw.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1

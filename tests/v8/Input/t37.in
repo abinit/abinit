@@ -21,7 +21,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = tdep
-#%% need_cpp_vars = HAVE_NETCDF
 #%% md_hist = t37_HIST.nc
 #%% [files]
 #%% files_to_test = 

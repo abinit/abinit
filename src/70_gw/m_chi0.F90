@@ -62,6 +62,7 @@ module m_chi0
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init, paw_ihr, paw_cross_ihr_comm
  use m_read_plowannier, only : read_plowannier
+ use m_plowannier,      only : plowannier_type
 
  implicit none
 
@@ -183,7 +184,7 @@ contains
 
 subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
-&  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf)
+&  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -212,13 +213,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  type(Paw_ij_type),intent(in) :: Paw_ij(Cryst%natom*Psps%usepaw)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
+ type(plowannier_type),intent(inout) :: wan
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp=1,enough=10,two_poles=2,one_pole=1,ndat1=1
- integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft
- integer :: band1,band2,iat,ig,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k
+ integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
+ integer :: band1,band2,iat1,iat2,iat,ig,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
  integer :: my_nbbp,my_nbbpks,spin,nsppol !ig1,ig2,
  integer :: comm,ierr,my_wl,my_wr,iomegal,iomegar,gw_mgfft,dummy
@@ -286,12 +288,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
- if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.and.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
+ if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
    luwindow=.true.
  endif
 
  ! For cRPA calculation of U: read forlb.ovlp
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute<10) then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
 & nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
@@ -758,30 +760,63 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                if (       band1<=ucrpa_bands(2).AND.band1>=ucrpa_bands(1)&
 &                    .AND.band2<=ucrpa_bands(2).AND.band2>=ucrpa_bands(1)) then
 !               if(dtset%prtvol>=10)write(6,*)"calculation is in progress",band1,band2,ucrpa_bands(1),ucrpa_bands(2)
-                 do iat=1, cryst%nattyp(itypatcor)
-                   do ispinor1=1,nspinor
-                     do m1=1,2*lcor+1
-                       fac1=fac1+ real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                 conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)))
-                       fac2=fac2+ real(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)*&
-&                                 conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)))
-                       do ispinor2=1,nspinor
-                         do m2=1,2*lcor+1
-                           fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                    conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
-&                                    coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
-&                                    conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)))
-                           fac3=fac3 + real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                      conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
-&                                      coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
+                 if (dtset%plowan_compute>=10) then
+                   band1c=band1-wan%bandi_wan+1
+                   band2c=band2-wan%bandi_wan+1
+                   do iat1=1,wan%natom_wan
+                     do ispinor1=1,wan%nspinor
+                       do il1=1,wan%nbl_atom_wan(iat1)
+                         do m1=1,2*(wan%latom_wan(iat1)%lcalc(il1))+1
+                          fac1=fac1 + real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                      &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))
+                          fac2=fac2 + real(wan%psichi(ik_bz,band2c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                      &conjg(wan%psichi(ik_bz,band2c,iat1)%atom(il1)%matl(m1,spin,ispinor1))
+                          do iat2=1,wan%natom_wan 
+                            do ispinor2=1,wan%nspinor
+                              do il2=1,wan%nbl_atom_wan(iat2)
+                                do m2=1,2*(wan%latom_wan(iat2)%lcalc(il2))+1
+                                  fac=fac -  real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1)*&
+&                                           conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+&                                                 wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
+&                                           conjg(wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)))
+                                  fac3=fac3+ real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                             &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                             &wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
+                                             &conjg(wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2))
+                                enddo !m2
+                              enddo !il2
+                            enddo !ispinor2
+                          enddo !iat2
+                        enddo !m1
+                      enddo !il1
+                    enddo !ispinor1
+                  enddo !iat
+                else !plowan_compute
+                  do iat=1, cryst%nattyp(itypatcor)
+                     do ispinor1=1,nspinor
+                       do m1=1,2*lcor+1
+                         fac1=fac1+ real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+                                    &conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)))
+                         fac2=fac2+ real(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)*&
+&                                   conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)))
+                         do ispinor2=1,nspinor
+                           do m2=1,2*lcor+1
+                             fac=fac -  real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+&                                      conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))*&
+&                                            coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
 &                                      conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)))
+                             fac3=fac3 + real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+&                                        conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
+&                                        coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
+&                                        conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)))
 !                         if(dtset%prtvol>=10)write(6,*) fac,fac3
-                         enddo
-                       enddo
+                         enddo !m2
+                       enddo !ispinor2
 !                       if(dtset%prtvol>=10)write(6,*) fac,fac3,fac1,fac2,fac1*fac2
-                     enddo
-                   enddo
-                 enddo
+                     enddo !m1
+                   enddo !ispinor1
+                 enddo !iat
+               endif !plowan_compute>=10
                  fac4=fac
 !                 fac=zero
                  if(dtset%ucrpa==1) fac=zero
@@ -1031,7 +1066,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    end if
  end if
 
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute <10 ) then
    ABI_DEALLOCATE(coeffW_BZ)
  endif
 
@@ -1130,7 +1165,7 @@ end subroutine cchi0q0
 
 subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
-& chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf)
+& chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -1155,14 +1190,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Psps%usepaw)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
+ type(plowannier_type),intent(inout) :: wan
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp1=1,two_poles=2,one_pole=1,ndat1=1
- integer :: bandinf,bandsup,dim_rtwg,band1,band2,ierr
- integer :: ig1,ig2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
- integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft
+ integer :: bandinf,bandsup,dim_rtwg,band1,band2,ierr,band1c,band2c
+ integer :: ig1,ig2,iat1,iat2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
+ integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft,il1,il2
  integer :: isym_kmq,itim_k,itim_kmq,m1,m2,my_wl,my_wr,size_chi0
  integer :: nfound,nkpt_summed,nspinor,nsppol,mband
  integer :: comm,gw_mgfft,use_padfft,gw_fftalga,lcor,mgfftf,use_padfftf
@@ -1209,7 +1245,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
- if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.and.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
+ if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
    luwindow=.true.
  endif
 ! write(6,*)"ucrpa_bands",ucrpa_bands
@@ -1217,7 +1253,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 ! write(6,*)"luwindow",luwindow
 
 !  For cRPA calculation of U: read forlb.ovlp
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute <10) then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
 & nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
@@ -1677,20 +1713,45 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
              if(dtset%ucrpa<=2) then
                if (       band1<=ucrpa_bands(2).AND.band1>=ucrpa_bands(1)&
 &                    .AND.band2<=ucrpa_bands(2).AND.band2>=ucrpa_bands(1)) then
-                 do iat=1, cryst%nattyp(itypatcor)
-                   do ispinor1=1,nspinor
-                     do ispinor2=1,nspinor
-                       do m1=1,2*lcor+1
-                         do m2=1,2*lcor+1
-                           fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+                 if (dtset%plowan_compute >=10) then
+                   band1c=band1-wan%bandi_wan+1
+                   band2c=band2-wan%bandi_wan+1 
+                   do iat1=1, wan%natom_wan
+                     do iat2=1, wan%natom_wan
+                       do ispinor1=1,wan%nspinor
+                         do ispinor2=1,wan%nspinor
+                           do il1=1,wan%nbl_atom_wan(iat1)
+                             do il2=1,wan%nbl_atom_wan(iat2) 
+                               do m1=1,2*wan%latom_wan(iat1)%lcalc(il1)+1
+                                 do m2=1,2*wan%latom_wan(iat2)%lcalc(il2)+1
+                                   fac=fac - real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1)*&
+                                             &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                             &wan%psichi(ikmq_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
+                                             &conjg(wan%psichi(ikmq_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)))
+                                 enddo !m2
+                               enddo !m1
+                             enddo !il2
+                           enddo !il1
+                         enddo !ispinor2
+                       enddo !isspinor1
+                     enddo !iat2
+                   enddo !iat1
+                 else !plowan_compute>=10
+                  do iat=1, cryst%nattyp(itypatcor)
+                    do ispinor1=1,nspinor
+                      do ispinor2=1,nspinor
+                        do m1=1,2*lcor+1
+                          do m2=1,2*lcor+1
+                            fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
 &                                     conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
 &                                     coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)*&
 &                                     conjg(coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)))
-                         enddo
-                       enddo
-                     enddo
-                   enddo
-                 enddo
+                          enddo !m2
+                        enddo !m1
+                      enddo !ispinor2
+                    enddo !ispinor1
+                  enddo !iat
+                endif !plowan_compute>=10
                  if(dtset%ucrpa==1) fac=zero
                endif
              else if (dtset%ucrpa>=3) then
@@ -1891,7 +1952,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end if
  end if
 
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute<10) then
    ABI_DEALLOCATE(coeffW_BZ)
  endif
 

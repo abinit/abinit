@@ -26,7 +26,7 @@ spin_write_traj = 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% need_cpp_vars = HAVE_XML
 #%% exclude_hosts = nag@abiref
 #%% system_xml = t23.xml
 #%% [files]
