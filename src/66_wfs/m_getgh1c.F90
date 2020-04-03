@@ -1311,20 +1311,11 @@ print *, ' getdc1, after sum band_ band ierr ', band_, band, ierr
 
 ! save to my proc if it is my turn, and subtract Ntuple counted dcwavef
    if (band_ == band) then
-! dcwavef = <G|S^(1)|C_k> - Sum_{ALLj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
-     dcwavef = dcwavef_tmp - (mpi_enreg%nproc_band-1)*s1cwave0 !dcwavef
-
 !=== 2- COMPUTE: <G|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>] by substraction
-!$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,npw1,nspinor)
+! tested this is equivalent to previous coding to within 1.e-18 accumulated error (probably in favor of this coding)
+!$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,dcwavef_tmp,npw1,nspinor)
      do ipw=1,npw1*nspinor
-       dcwavef(1:2,ipw)=scal*(s1cwave0(1:2,ipw)-dcwavef(1:2,ipw))
-     end do
-! TODO : test:
-! the two previous operations should be equal to:
-!$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,npw1,nspinor)
-     do ipw=1,npw1*nspinor
-!       dcwavef(1:2,ipw)=
-print *, 'getdc1 : compare ', ipw, dcwavef(1:2,ipw) - (scal*(mpi_enreg%nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw)))
+       dcwavef(1:2,ipw)= scal*(mpi_enreg%nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw))
      end do
    end if
 
