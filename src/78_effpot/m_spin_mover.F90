@@ -808,11 +808,11 @@ contains
        call self%spin_ob%reset()
     endif
 
-    if (iam_master) then
-       msg="Measurement run:"
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-    end if
+    !if (iam_master) then
+    !   msg="Measurement run:"
+    !   call wrtout(std_out,msg,'COLL')
+    !   call wrtout(ab_out, msg, 'COLL')
+    !end if
 
     do while(t<self%total_time)
        counter=counter+1
