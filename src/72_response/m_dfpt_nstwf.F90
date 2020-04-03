@@ -1386,20 +1386,21 @@ print *, ' nstpaw done with d2nl_k 1379'
 
 !          Accumulate here 1st-order density change due to overlap operator changes (if any)
            if (has_drho) then
-             if (abs(occ_k(iband))>tol8) then
-!              Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
-!              (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
-               ABI_ALLOCATE(dcwavef,(2,npw1_k*nspinor))
-               ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,nspinor))
-               call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
+!            Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
+!            (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
+             ABI_ALLOCATE(dcwavef,(2,npw1_k*nspinor))
+             ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,nspinor))
+             call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
 #ifdef DEV_MJV
 print *, ' nstpaw calling getdc1 iband, idir1, mband_mem_rbz ', iband, idir1, mband_mem_rbz
 print *, ' nstpaw nband_me =? ', nband_me, size(cgq,2), ' / ', mcgq, '  ', size(cprjq,2), ' / ', mcprjq
 #endif
-               call getdc1(iband,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
-&                 ibgq,icgq,istwf_k,mcgq,&
-&                 mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,gs1)
+! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
+             call getdc1(iband,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
+&               ibgq,icgq,istwf_k,mcgq,&
+&               mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,gs1)
 
+             if (abs(occ_k(iband))>tol8) then
 !              Accumulate 1st-order density due to delta_u^(j1)
                option=1;wfcorr=0
 #ifdef DEV_MJV
@@ -1409,10 +1410,11 @@ print *, ' nstpaw calling accrho '
 &               lambda,gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
 &               mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
 &               pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
-               call pawcprj_free(dcwaveprj)
-               ABI_DATATYPE_DEALLOCATE(dcwaveprj)
-               ABI_DEALLOCATE(dcwavef)
              end if
+
+             call pawcprj_free(dcwaveprj)
+             ABI_DATATYPE_DEALLOCATE(dcwaveprj)
+             ABI_DEALLOCATE(dcwavef)
            end if
 
            if((usecprj==1).and..not.(associated(cwaveprj0_idir1,cwaveprj0)))then
