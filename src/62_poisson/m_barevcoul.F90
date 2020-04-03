@@ -88,10 +88,10 @@ subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter    :: cplex1=1,icutcoul=0
+ integer,parameter    :: icutcoul=0
  integer              :: i1,i2,i23,i3,id1,id2,id3
- integer              :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
- integer              :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
+ integer              :: ig,ig1min,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
+ integer              :: ii,ii1,ing,n1,n2,n3
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
  character(len=100)   :: cutoff_method
@@ -179,7 +179,7 @@ subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
      i23=n1*(i2-1 +(n2)*(i3-1))
      ! Do the test that eliminates the Gamma point outside of the inner loop
      ii1=1
-     if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
+     if (i23==0 .and. ig2==0 .and. ig3==0) then
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
        barev(1+i23)=divgq0
