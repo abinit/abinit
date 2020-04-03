@@ -79,7 +79,7 @@ subroutine barevcoul(qphon,gsqcut,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,barev)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)   :: izero,nfft,nkpt_bz,icutcoul
+ integer,intent(in)   :: izero,nfft,nkpt_bz
  real(dp),intent(in)  :: gsqcut,ucvol
 !arrays
  integer,intent(in)   :: ngfft(18)
@@ -88,7 +88,7 @@ subroutine barevcoul(qphon,gsqcut,gmet,izero,nfft,nkpt_bz,ngfft,ucvol,barev)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter    :: cplex1=1
+ integer,parameter    :: cplex1=1,icutcoul=0
  integer              :: i1,i2,i23,i3,id1,id2,id3
  integer              :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer              :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
