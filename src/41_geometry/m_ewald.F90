@@ -660,7 +660,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !scalars
  integer,parameter :: mr=10000,ny2_spline=1024*10
  integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj
- integer :: lwork,mu,n,newg,newr,ng,nr,nu,ng_expxq
+ integer :: info,lwork,mu,n,newg,newr,ng,nr,nu,ng_expxq
  integer :: ewald_option
  integer :: dipquad_,quadquad_
  logical :: do_quadrupole
@@ -705,7 +705,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    lwork=n*(3+n/2)
    ABI_ALLOCATE(work,(lwork))
    call dsyev('V','U',3, dielt, 3, eig_dielt, work, lwork,info)
-   write(100,*) eig_dielt
+   write(std_out,*) "Diagonalize", eig_dielt(:)
 
  end if 
 !#endif 
