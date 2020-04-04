@@ -659,7 +659,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !Local variables -------------------------
 !scalars
  integer,parameter :: mr=10000,ny2_spline=1024*10
- integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj
+ integer :: lwork,mu,n,newg,newr,ng,nr,nu,ng_expxq
  integer :: ewald_option
  integer :: dipquad_,quadquad_
  logical :: do_quadrupole
@@ -674,11 +675,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  character(len=500) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
- real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
+ real(dp) :: c3r(2*mr+1),cosqxred(natom),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3),tsec(2)
  real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
+ real(dp),allocatable :: work(:)
  complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 
@@ -692,6 +694,21 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  do_quadrupole = any(qdrp_cart /= zero)
  ewald_option = 0; if (present(option)) ewald_option = option
  if (do_quadrupole) ewald_option = 1
+
+!#ifdef MR_DEV
+ ! Compute a material-dependent width for the Gaussians that hopefully
+ ! will make the Ewald real-space summation innecessary.
+ if (ewald_option == 1) then 
+
+   !Diagonalize dielectric matrix
+   n=3
+   lwork=n*(3+n/2)
+   ABI_ALLOCATE(work,(lwork))
+   call dsyev('V','U',3, dielt, 3, eig_dielt, work, lwork,info)
+   write(100,*) eig_dielt
+
+ end if 
+!#endif 
 
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
