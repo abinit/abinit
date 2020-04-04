@@ -237,9 +237,9 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
 
  if(info==0) then
    if(iinfo==0) then       
-     write(msg,'(a51,3f10.5)') 'Occs. after updating with the exchange at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with Sx-Vxc corr. at k-point:',BSt%kptns(1:,kpoint)
    else
-     write(msg,'(a51,3f10.5)') 'Occs. after updating with the  ex+cor  at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with S_c correct. at k-point:',BSt%kptns(1:,kpoint)
    endif 
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')

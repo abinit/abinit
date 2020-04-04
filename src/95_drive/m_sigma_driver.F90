@@ -234,7 +234,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,verbose !MRM new gw1rdm
+ integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,verbose ! MRM new gw1rdm and verbose
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -245,7 +245,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc) :: max_degw,cdummy
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
- character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname !MRM
+ character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname ! MRM
  type(kmesh_t) :: Kmesh,Qmesh
  type(ebands_t) :: KS_BSt,QP_BSt
  type(vcoul_t) :: Vcp
@@ -345,7 +345,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  gwcalctyp=Dtset%gwcalctyp
  gw1rdm=Dtset%gw1rdm ! MRM input variable
- verbose=0           ! MRM change to verbose=1 for debug mode 
+ verbose=0           ! MRM change to verbose=1 for debug mode and recompile 
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -738,7 +738,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call wfd_init(Wfd_dm,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,xmpi_comm_self)!comm)  ! MPI_COMM_SELF 
-   call wfd_dm%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
+   call Wfd_dm%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
  endif
 
  if (Dtset%pawcross==1) then
@@ -2184,8 +2184,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
      ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
      ABI_MALLOC(occs,(b1gw:b2gw,Sigp%nkptgw))
-     dm1=0.0d0
-     nateigv=0.0d0
+     dm1=czero
+     nateigv=czero
      do ikcalc=1,Sigp%nkptgw
        do ib=b1gw,b2gw
          dm1(ib,ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)
@@ -2193,7 +2193,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      enddo
      do ikcalc=1,Wfd%nkibz
        do ib=1,Wfd%mband 
-         nateigv(ib,ib,ikcalc,1)=1.0d0
+         nateigv(ib,ib,ikcalc,1)=cone
        enddo  
      enddo
      if(gw1rdm>1) then   ! We also want Sigma_c correction
@@ -2209,16 +2209,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(weights,(order_int))
        !call get_frequencies_and_weights_legendre(order_int,freqs,weights) ! -> Calls cgqf
        gaussian_kind=1
-       gwalpha=0.0_dp
-       gwbeta=0.0_dp
-       wmin=0.0_dp
-       wmax=1.0_dp
+       gwalpha=zero
+       gwbeta=zero
+       wmin=zero
+       wmax=one
        call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
-       weights(:)=weights(:)/(1.0_dp-freqs(:))**2.0_dp  ! Cubature library scheme. Same freqs and weights as:
-       freqs(:)=freqs(:)/(1.0_dp-freqs(:))              ! get_frequencies_and_weights_legendre
+       weights(:)=weights(:)/(one-freqs(:))**two      ! Cubature library scheme. Same freqs and weights as:
+       freqs(:)=freqs(:)/(cone-freqs(:))              ! get_frequencies_and_weights_legendre
        !Form complex frequencies from 0 to iInf and print them in the log file
        do ifreqs=1,order_int
-         Sigp%omegasi(ifreqs)=cmplx(0.0d0,freqs(ifreqs))
+         Sigp%omegasi(ifreqs)=cmplx(zero,freqs(ifreqs))
          Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
          write(msg,'(3f10.5)') Sr%omega_i(ifreqs),weights(ifreqs)
          call wrtout(std_out,msg,'COLL')
@@ -2237,7 +2237,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
       if(gwcalctyp==21 .and. gw1rdm>0) then 
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
-        dm1k=0.0d0 
+        dm1k=czero
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange (k-point) one
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2287,7 +2287,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        ! MRM compute 1-RDM correction and update dm1
        if(gwcalctyp==21 .and. gw1rdm>0) then
-         dm1k=0.0d0 
+         dm1k=czero 
          if(gw1rdm>1) then
            call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
          endif
@@ -2303,7 +2303,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call xmpi_barrier(Wfd%comm)
    ! MRM print WFK and DEN files. 
-   if(gwcalctyp==21 .and. gw1rdm>2) then
+   if(gwcalctyp==21 .and. gw1rdm>0) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
      ! MRM only the master has bands on Wfd_dm so let it print everything
      if(my_rank==0) then
