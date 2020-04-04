@@ -2225,7 +2225,9 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
 ! ***********************************************************************
 
+! reinstate default just to be sure - can be switched inside a previous part of the same dtset!
  mpi_enreg%comm_band=xmpi_comm_self
+ mpi_enreg%nproc_band=1
 
  mband = maxval(nband)
 

@@ -1633,6 +1633,11 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
    MSG_BUG('Double-counting scheme not yet allowed!')
  end if
 
+#ifdef DEV_MJV
+print *, ' dfpt_etot : optene = ', optene
+print *, ' dfpt_etot : enes = , ek0,edocc,eeig0,eloc0,elpsp1,ehart1,exc1,enl0,enl1,epaw1,ek1 '
+print *, '        ',            ek0,edocc,eeig0,eloc0,elpsp1,ehart1,exc1,enl0,enl1,epaw1,ek1
+#endif
  if (optene>-1) then
 
 !  Compute 2nd-order variational energy by direct scheme
@@ -1640,25 +1645,25 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    Atomic displ. perturbation
      if ( ipert>=1 .and. ipert<=natom  ) then
-       evar=ek0+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+epaw1+elpsp1
 
      else if (ipert==natom+1) then
-       evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1
 
      else if (ipert==natom+10 .or. ipert==natom+11) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ek1 ! here ek1 contains a lot of contributions
+       evar=ek0+edocc+eeig0+eloc0+enl0                 +ek1 ! here ek1 contains a lot of contributions
 
-!      For ipert==natom+2, some contributions vanishes, noticeably ek1
+!      For ipert==natom+2, some contributions vanish, noticeably ek1
      else if (ipert==natom+2) then
-       evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1
 
 !      All terms enter for strain perturbation
      else if ( ipert==natom+3 .or. ipert==natom+4 ) then
-       evar=ek0+ek1+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1+elpsp1
 
 !    terms for Zeeman perturbation, SPr 2deb
      else if ( ipert==natom+5 ) then
-       evar=ek0+edocc+eeig0+eloc0+ehart1+exc1+enl0+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1
      end if
    end if
 

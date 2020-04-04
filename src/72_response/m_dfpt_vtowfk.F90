@@ -623,16 +623,14 @@ print *, 'vtowfk iband cg1 : ', iband, cwave1(:,1:5)
 !==================  END LOOP OVER BANDS ==============================
 !======================================================================
 
-!collect edocc_k from everyone
- call xmpi_sum(edocc_k,mpi_enreg%comm_band,ierr)
- call xmpi_sum(ek0_k,mpi_enreg%comm_band,ierr)
- call xmpi_sum(eeig0_k,mpi_enreg%comm_band,ierr)
- call xmpi_sum(ek1_k,mpi_enreg%comm_band,ierr)
- call xmpi_sum(eloc0_k,mpi_enreg%comm_band,ierr)
- call xmpi_sum(enl0_k,mpi_enreg%comm_band,ierr)
- call xmpi_sum(enl1_k,mpi_enreg%comm_band,ierr)
+! collect full eig1 matrix for all bands at present k-point
  call xmpi_sum(eig1_k,mpi_enreg%comm_band,ierr)
+
+! NB: no need to sum eXX_k over band communicator here, as it is a sub-comm of kpt, 
+!   and full mpi_sum will be done higher up.
+
 #ifdef DEV_MJV
+print *, 'vtowfk : partial energies for my k and bands:'
 print *, 'vtowfk : edocc_k ', edocc_k
 print *, 'vtowfk : eeig0_k ', eeig0_k
 print *, 'vtowfk : ek0_k ', ek0_k

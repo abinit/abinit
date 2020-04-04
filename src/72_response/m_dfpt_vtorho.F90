@@ -724,7 +724,7 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
      if (psps%usepaw==0) then
 #ifdef DEV_MJV
 print *, ' rhor1 726 ', rhor1(:,1:10)
-print *, ' rhoaug1 726 ', rhoaug1(:,1:10,1,1)
+print *, ' rhoaug1 my bands and k 726 ', rhoaug1(:,1:10,1,1)
 #endif
        call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rhor1,rhoaug1(:,:,:,1),1)
        if(nspden==4)then
@@ -735,7 +735,7 @@ print *, ' rhoaug1 726 ', rhoaug1(:,1:10,1,1)
      else
 #ifdef DEV_MJV
 print *, ' rho1wfr 737 ', rho1wfr(1:10,:)
-print *, ' rhoaug1 737 ', rhoaug1(:,1:10,1,1)
+print *, ' rhoaug1 my bands and k 737 ', rhoaug1(:,1:10,1,1)
 #endif
        call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rho1wfr,rhoaug1(:,:,:,1),1)
        if(nspden==4)then
@@ -929,6 +929,9 @@ print *, 'called pawmkrho ', rhor1(1:10,1)
    if (optres==1) then
      nvresid1=rhor1-nvresid1
      call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid1)
+#ifdef DEV_MJV
+print *, ' called sqnorm_v ', nres2, '   ', nvresid1(1:10,1)
+#endif
    end if
  end if ! iscf>0
 
