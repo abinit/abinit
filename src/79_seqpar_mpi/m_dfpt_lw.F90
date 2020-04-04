@@ -4474,7 +4474,7 @@ end subroutine dfpt_ciflexoout
  end if
 
  write(ab_out,'(a)')' '
- write(ab_out,'(a)')' q-gradient of piezoelectric force-response tensor, in cartesian coordinates,'
+ write(ab_out,'(a)')' First moment of piezoelectric force-response tensor, in cartesian coordinates,'
  write(ab_out,'(a)')'atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir

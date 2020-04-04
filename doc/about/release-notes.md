@@ -124,7 +124,7 @@ By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
 **B.2** Flexoelectricity and dynamical quadrupoles
 
 A new driver has been included in abinit that allows one to compute 
-4 spatial dispersion tensorial quantities: the clamped-ion flexoelectric tensor, the dynamic quadrupoles, 
+4 spatial dispersion tensorial quantities: the clamped-ion flexoelectric tensor, the dynamical quadrupoles, 
 the first moment of IFC matrix and the first moment of the piezoelectric force response tensor. 
 Precalculation of ground state, first and second (d2_dkdk) order response functions is required. 
 After execution, the driver creates a 3rd order energy derivative database file 
@@ -169,12 +169,11 @@ At the practical level, see [[cite:Romero2020]]:
 >   norm-conserving pseudopotentials without non-linear core corrections, and the LDA
 >   functional.
 
-A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]].
+A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]],
+as well as a specific topic.
 
 New input variables have been defined: [[lw_flexo]], [[lw_qdrpl]], [[prepalw]], [[flexoflag@anaddb]],
 [[dipquad@anaddb]], [[quadquad@anaddb]]. 
-At present (v9.0.2) they are not yet documented, although tested in the above-mentioned examples.
-A tutorial should be set up, as well as a specific topic.
 
 This capability is still under development and not completely stable.
 Interested users are strongly recommended to contact Miquel Royo (mroyo@icmab.es)
