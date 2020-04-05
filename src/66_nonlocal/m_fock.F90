@@ -2147,16 +2147,19 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
-         call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+ call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
-         ! Treat the Coulomb potential cut-off by selected method
-         if (abs(hyb_mixing)>tol8)then
-             vqg=vqg*hyb_mixing !*(one-cos(rcut*sqrt(four_pi/den)))
-          endif
+ ! Treat the Coulomb potential cut-off by selected method
+ if (abs(hyb_mixing)>tol8)then
+   vqg=vqg*hyb_mixing
+ endif
 
-         if (abs(hyb_mixing_sr)>tol8) then
-             vqg=vqg*hyb_mixing_sr !*den*(one-exp(-pi/(den*hyb_range_fock**2)))
-         endif
+! Huge problem because for different Hybrid XC different cut-offs have been applied 
+! And not one needs to circumvent this problem in the testing phase
+ vqg=zero
+!         if (abs(hyb_mixing_sr)>tol8) then
+!             vqg=vqg*hyb_mixing_sr!*(one-exp(-pi/(den*hyb_range_fock**2)))
+!         endif
 
 
  ! Triple loop on each dimension
@@ -2206,7 +2209,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
            ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
          end if
 
-!         den=piinv/gs
+         den=piinv/gs
 
 
          
@@ -2225,14 +2228,14 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 !            END SELECT  
 !          endif
 
-!         if (abs(hyb_mixing_sr)>tol8) then
+         if (abs(hyb_mixing_sr)>tol8) then
 !           SELECT CASE ( trim(method) )
 !           CASE ('SPHERE')
 !             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-cos(rcut*sqrt(four_pi/den)))
 !           CASE ('ERF')
 !             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*exp(-pi/(den*hyb_range_fock**2))
 !           CASE ('ERFC')
-!             vqg=vqg*hyb_mixing_sr !*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+             vqg=vqg*hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
 !          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
 !          if(divgq0<pi/(hyb_range_fock**2))then
 !            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
@@ -2242,8 +2245,8 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 !              msg = sjoin('Unknown cut-off method for hyb_mixing_sr: ',method)
 !              MSG_ERROR(msg)
 !            END SELECT  
-!         endif
-!
+         endif
+
        end if ! Cut-off
      end do ! End loop on i1
    end do ! End loop on i2
