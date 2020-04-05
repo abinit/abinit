@@ -33,7 +33,7 @@ slc_coupling = 1010 # Tijuv and Oiju
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF
-#%% exclude_hosts = nag@abiref
+#%% exclude_hosts = nag@abiref, higgs_intel_19.0_serial
 #%% system_xml = t83.nc
 #%% exec_args = --F03
 #%% [files]
@@ -47,6 +47,7 @@ slc_coupling = 1010 # Tijuv and Oiju
 #%% description = 
 #%%   read netcdf and run coupled spin lattice dynamics. Oiju terms and Tijuv terms are both activated.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
+#%% Temporarily disabled on higgs_intel_19.0_serial for strange segfault
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
 #%%<END TEST_INFO>
