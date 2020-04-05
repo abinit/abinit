@@ -2217,8 +2217,8 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 !Local variables-------------------------------
 !scalars
  integer :: ii,ikpt,iproc_min,iproc_max,irank,isppol
- integer :: me,nband_k,nproc,nbsteps,nrank,nstates,spacecomm
- integer :: nproc_eff, mband
+ integer :: me,nband_k,nproc,nb_per_proc,nrank,nstates,spacecomm
+ integer :: maxproc_bandpool, mband
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:)
@@ -2239,50 +2239,59 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 print *, 'enter initmpi_band'
 print *, ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
 print *,   mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
+call flush()
 #endif
 
-! make sure we have saturated kpt parallelization mkmem==1
- if (mpi_enreg%paralbd==1.and.xmpi_paral==1.and.mkmem==1 .and. nproc >= 2*nkpt*nsppol) then
+! make sure we have saturated kpt parallelization 
+ if (mpi_enreg%paralbd==1 .and. xmpi_paral==1 .and. nproc >= 2*nkpt*nsppol) then
 
 ! number of procs per kpt/spin, on which we can distribute bands
-   nproc_eff=nproc/nkpt*nsppol
+   maxproc_bandpool=nproc/(nkpt*nsppol)
    me=mpi_enreg%me_kpt
 #ifdef DEV_MJV
-print *, 'me, nproc, nproc_eff, mkmem = ', me, nproc, nproc_eff, mkmem
+print *, 'me, nproc, maxproc_bandpool, mkmem = ', me, nproc, maxproc_bandpool, mkmem
+call flush()
 #endif
 
 !! total number of states/bands, over all k and spin
    nstates=sum(nband(1:nkpt*nsppol))
 ! number of bands per proc in the band pool
-!   nbsteps=nstates/nproc_eff
-   nbsteps = mband / nproc_eff 
+!   nb_per_proc=nstates/maxproc_bandpool
+   
 #ifdef DEV_MJV
-print *, 'nbsteps ',nbsteps, ' vs old ', nstates/nproc
+print *, 'nb_per_proc ', mband / maxproc_bandpool, ' vs old version ', nstates/nproc
+call flush()
 #endif
-   if (mod(mband,nproc_eff)/=0) nbsteps=nbsteps+1
+   do nb_per_proc = mband / maxproc_bandpool, mband
+     if (mod(mband,nb_per_proc)==0) exit
+   end do 
 #ifdef DEV_MJV
-print *, 'nbsteps primed ',nbsteps
+print *, 'nb_per_proc primed ',nb_per_proc, ' is a divisor of mband = ', mband
+print *, 'only using ', mband/nb_per_proc*nkpt, ' procs out of ', nproc
+call flush()
 #endif
 
-   if (nbsteps<mband) then
 
-     nrank=0
+   nrank=0
+
+   if (nb_per_proc<mband .and. mkmem > 0) then
      do isppol=1,nsppol
        do ikpt=1,nkpt
          ii=ikpt+(isppol-1)*nkpt
          nband_k=nband(ii)
-         if (nbsteps<nband_k) then
+         if (nb_per_proc<nband_k) then
            iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
 #ifdef DEV_MJV
 print *, 'me, iproc_min, iproc_max ', me, iproc_min, iproc_max
+call flush()
 #endif
            if ((me>=iproc_min).and.(me<=iproc_max)) then
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
                ABI_ALLOCATE(ranks,(nrank))
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
-! TODO MJV: I believe we can lift this restriction now!
+! TODO MJV: still can not lift this restriction...
              else if (nrank/=size(ranks)) then
                msg='Number of bands per proc should be the same for all k-points!'
                MSG_BUG(msg)
@@ -2291,27 +2300,37 @@ print *, 'me, iproc_min, iproc_max ', me, iproc_min, iproc_max
          end if
        end do
      end do
-     if (.not.allocated(ranks)) then
+#ifdef DEV_MJV
+print *, ' probable rank = ', mod(me, nrank)
+call flush()
+#endif
+   end if
+
+   if (.not.allocated(ranks)) then
 #ifdef DEV_MJV
 print *, 'ranks not alloc'
+call flush()
 #endif
-       ABI_ALLOCATE(ranks,(0))
-     end if
-
-#ifdef DEV_MJV
-print *, 'call subcomm ',  spacecomm,nrank, ' ranks ', ranks, ' ', mpi_enreg%me_band
-#endif
-     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
-     mpi_enreg%nproc_band=nrank
-!     mpi_enreg%me_band=mod(me, nrank)
-#ifdef DEV_MJV
-print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks
-print *, ' mpi_enreg%comm_band me ', mpi_enreg%comm_band, mpi_enreg%me_band, &
-&        " mod(me, nrank) ", mod(me, nrank)
-#endif
-
-     ABI_DEALLOCATE(ranks)
+     ABI_ALLOCATE(ranks,(0))
    end if
+
+!     ABI_CHECK(nrank*nkpt==nproc, ' band and k-point distribution should be rectangular: make sure nproc=nkpt*integer')
+
+#ifdef DEV_MJV
+print *, 'call subcomm ',  spacecomm, nrank, ' ranks ', ranks
+call flush()
+#endif
+! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
+   mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
+   mpi_enreg%nproc_band=nrank
+!   mpi_enreg%me_band=mod(me, nrank)
+#ifdef DEV_MJV
+print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks, '    me_band ', mpi_enreg%me_band
+print *, ' mpi_enreg%comm_band me ', mpi_enreg%comm_band, mpi_enreg%me_band
+#endif
+
+   ABI_DEALLOCATE(ranks)
+
  end if
 
 end subroutine initmpi_band
@@ -2487,9 +2506,9 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
  type(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
- integer :: inb,inb1,ind,ind0,nband_k,proc_max,proc_min
+ integer :: maxproc_bandpool,inb1,ind,ind0,nband_k,proc_max,proc_min
  integer :: nband_k_sp2
- integer :: iiband,iikpt,iisppol,ikpt_this_proc,nbsteps,nproc_kpt,temp_unit
+ integer :: iiband,iikpt,iisppol,ikpt_this_proc,nb_per_proc,nproc_kpt,temp_unit
  integer :: kpt_distrb(nkpt)
  logical,save :: first=.true.,has_file
  character(len=500) :: msg
@@ -2622,7 +2641,8 @@ print *, 'no band paral now'
 !      Does not allow a processor to treat different spins
 !     NB: for odd nproc this will happen anyway for the middle proc - will this not unbalance things?
        ind0=0
-       inb1=(nkpt*nsppol)/nproc;if (mod((nkpt*nsppol),nproc)/=0) inb1=inb1+1
+       inb1=(nkpt*nsppol)/nproc
+       if (mod((nkpt*nsppol),nproc)/=0) inb1=inb1+1
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
          nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
@@ -2654,21 +2674,25 @@ print *, 'yes band paral now'
 #endif
 !      Does not allow a processor to treat different spins
        ind0=0
-       inb=nproc/(nkpt*nsppol)
+       maxproc_bandpool=nproc/(nkpt*nsppol)
 #ifdef DEV_MJV
-print *, ' inb = ', inb
+print *, ' maxproc_bandpool = ', maxproc_bandpool
 #endif
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
          nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
-         inb1=nband_k/inb
+         nb_per_proc=nband_k/maxproc_bandpool
 #ifdef DEV_MJV
-print *, ' inb1 = ', inb1
+print *, ' nb_per_proc = ', nb_per_proc
 #endif
-         if (mod(nband_k,inb)/=0) inb1=inb1+1
-         mband_mem_out = max(mband_mem_out,inb1)
+         if (mod(nband_k,maxproc_bandpool)/=0) nb_per_proc=nb_per_proc+1
+         do nb_per_proc = nband_k / maxproc_bandpool, nband_k
+           if (mod(nband_k,nb_per_proc)==0) exit
+         end do
+
+         mband_mem_out = max(mband_mem_out,nb_per_proc)
          do iiband=1,nband_k
-           ind=(iiband-1)/inb1+ind0
+           ind=(iiband-1)/nb_per_proc+ind0
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
 !TODO : could end up with 0 bands on certain procs with this configuration and nband(k) /= constant
            if (nsppol==2 .and. iiband <= nband_k_sp2) then
@@ -2680,12 +2704,12 @@ print *, ' inb1 = ', inb1
        end do
 
 !      MT130831 : OLD CODING
-!      ind0=0;inb=nproc/(nkpt*nsppol)
+!      ind0=0;maxproc_bandpool=nproc/(nkpt*nsppol)
 !      do iisppol=1,nsppol;do iikpt=1,nkpt
 !      nband_k=nband(iikpt+(iisppol-1)*nkpt)
-!      inb1=nband_k/inb;if (mod(nband_k,inb)/=0) inb1=inb1+1
+!      nb_per_proc=nband_k/maxproc_bandpool;if (mod(nband_k,maxproc_bandpool)/=0) nb_per_proc=nb_per_proc+1
 !      do iiband=1,nband_k
-!      ind=(iiband-1)/inb1+ind0
+!      ind=(iiband-1)/nb_per_proc+ind0
 !      mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind
 !      end do
 !      ind0=ind+1
@@ -2699,7 +2723,7 @@ print *, ' inb1 = ', inb1
 !    do iisppol=1,nsppol;do iikpt=1,nkpt
 !    nband_k=nband(iikpt+(iisppol-1)*nkpt)
 !    do iiband=1,nband_k
-!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nbsteps
+!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nb_per_proc
 !    ind=ind+1
 !    end do;end do;end do
 !    XG060807 : END OF OLD CODING
@@ -2708,11 +2732,11 @@ print *, ' inb1 = ', inb1
 
 !    Does not allow a processor to treat different spins
      ind0=0
-     nbsteps=(nsppol*nkpt)/nproc_kpt
-     if (mod((nsppol*nkpt),nproc_kpt)/=0) nbsteps=nbsteps+1
+     nb_per_proc=(nsppol*nkpt)/nproc_kpt
+     if (mod((nsppol*nkpt),nproc_kpt)/=0) nb_per_proc=nb_per_proc+1
      do iikpt=1,nkpt
        nband_k=nband(iikpt)
-       ind=ind0/nbsteps
+       ind=ind0/nb_per_proc
        do iiband=1,nband_k
          mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
          if (nsppol==2) then 
@@ -2730,7 +2754,7 @@ print *, ' inb1 = ', inb1
 !    do iiband=1,nband_k
 !    Distribute k-points homogeneously
 !    proc_distrb(iikpt,iiband,iisppol)=mod(iikpt-1,nproc_kpt)
-!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nbsteps
+!    mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=ind/nb_per_proc
 !    end do
 !    ind=ind + 1
 !    end do;end do

@@ -1033,6 +1033,7 @@ print *, 'paral_pert_inplace ', paral_pert_inplace
 print *, ' dtset%mkmem, mkmem_rbz, nkpt_rbz ', dtset%mkmem, mkmem_rbz, nkpt_rbz
 print *, 'mband_mem_rbz ', mband_mem_rbz
 print *, 'call initmpi_band ', mkmem_rbz, mk1mem_rbz
+call flush()
 #endif
    call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
 
