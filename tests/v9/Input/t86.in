@@ -46,8 +46,8 @@ slc_coupling = 0010 # activate only Oiju terms
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read netcdf and run coupled spin lattice dynamics. Only Oiju terms activated (slc_coupling=0010)
-#%%  Temporarily disabled on higgs_intel_19.0_serial for strange segfault
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
+#%%   Temporarily disabled on higgs_intel_19.0_serial for strange segfault
 #%%<END TEST_INFO>
