@@ -1058,7 +1058,7 @@ D.8 Continued development of the electron-phonon [[optdriver]] = 7 module of ABI
 D.9 Added netcdf output of phonons for full grid, not just band structure. Only in tetrahedron prtdos 2 case.
     By M. Verstraete
 
-D.10 On-going development: main executable `a-TDEP`, for the TDEP algorithm, by Hellman and coworkers.
+D.10 On-going development: main executable `atdep`, for the TDEP algorithm, by Hellman and coworkers.
      See [[src:98_main/tdep.F90]], as well as directory 80_tdep. 
      No automatic tests provided yet, no documentation as well ...
      By F. Bottin, J. Bouchet, J. Bieder.

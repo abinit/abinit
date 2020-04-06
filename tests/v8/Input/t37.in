@@ -20,7 +20,7 @@
 #   t37omega.dat, tolnlines = 2, tolabs = 2e-5, tolrel = 1.01, fld_options = -medium;
 #%%<BEGIN TEST_INFO>
 #%% [setup]
-#%% executable = a-TDEP
+#%% executable = atdep
 #%% md_hist = t37_HIST.nc
 #%% [files]
 #%% files_to_test = 

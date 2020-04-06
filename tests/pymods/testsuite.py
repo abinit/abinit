@@ -2834,7 +2834,7 @@ def exec2class(exec_name):
         "band2eps": Band2epsTest,
         "optic": OpticTest,
         "multibinit": MultibinitTest,
-        "a-TDEP": TdepTest,
+        "atdep": TdepTest,
     }.get(exec_name, BaseTest)
 
 

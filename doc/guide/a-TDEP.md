@@ -37,10 +37,10 @@ by concatenating in each one all the time steps or configurations (using `agrep`
 ## The |a-TDEP| computation
 
 In a same manner as performed for ABINIT, the use of |a-TDEP| is quite simple. 
-One has just to execute `a-TDEP` as follows:
+One has just to execute `atdep` as follows:
 
 ```sh
-    a-TDEP < input.files > log
+    atdep < input.files > log
 ```
 
 with the `input.files` file containing 3 lines. The first one defines the input
