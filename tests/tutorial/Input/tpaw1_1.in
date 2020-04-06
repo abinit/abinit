@@ -45,7 +45,6 @@ pseudos="6c.pspnc"
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_1.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
-#%% psp_files =  6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
@@ -55,3 +54,5 @@ pseudos="6c.pspnc"
 #%%   Input for PAW1 tutorial
 #%%   Diamond at experimental volume
 #%%<END TEST_INFO>
+
+

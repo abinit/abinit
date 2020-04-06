@@ -46,7 +46,6 @@ nshiftk   4
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw2_2.out, tolnlines= 15, tolabs=  9e-4,    tolrel=  3.0e-1, fld_options=-easy
-#%% psp_files =  Ni.GGA-PBE-paw.rrkj.xml 
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]
