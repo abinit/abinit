@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Apr 2020.
-- ( at 19h42 )
+.Starting date : Mon  6 Apr 2020.
+- ( at 12h34 )
   
 
 ================================================================================
@@ -224,10 +224,10 @@
    zx    0.270622    0.359056    0.422886    0.205409   -0.475066   -0.144838
    yx    0.328400    0.458742    0.075176    0.246257   -0.323697   -0.780093
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.044  and wall time      0.441 sec
++Total cpu time      0.048  and wall time      0.226 sec
 
  anaddb : the run completed succesfully.

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Apr 2020.
-- ( at 19h40 )
+.Starting date : Mon  6 Apr 2020.
+- ( at 12h32 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/TestBot_MPI1/tutorespfn_tlw_1-tlw_2-tlw_3/tlw_1.in
 - output file    -> tlw_1.out
@@ -3004,7 +3004,7 @@ meta: {optdriver: 10, }
  
 ================================================================================
  
- q-gradient of piezoelectric force-response tensor, in cartesian coordinates,
+ First moment of piezoelectric force-response tensor, in cartesian coordinates,
 atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part
     1       1       1       1       1            0.9049510626         0.0000000000
     1       2       1       1       1            0.1145944523         0.0000000000
@@ -3604,10 +3604,10 @@ P          mk1mem         128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         87.2  wall=        114.4
+- Proc.   0 individual time (sec): cpu=         88.8  wall=        104.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  11 WARNINGs and  35 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         87.2  wall=        114.4
++Overall time at end (sec) : cpu=         88.8  wall=        104.8
