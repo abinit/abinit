@@ -40,15 +40,16 @@ ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
  getwfk -1
 
 #Files
-pp_dirpath="../../../Psps_for_tests"
-pseudos="C.LDA_PW-JTH.xml"
+pp_dirpath="../../Psps_for_tests"
+pseudos = "C.LDA_PW-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw1_5.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%%   tpaw1_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%% output_file = "tpaw1_5.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

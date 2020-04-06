@@ -38,14 +38,16 @@ nshiftk   4
  getwfk -1
  prteig 0 prtden 0
 
- pseudos="Ni.GGA-PBE-paw.rrkj.xml"
+ pp_dirpath="../../Psps_for_tests"
+ pseudos = "Ni.GGA-PBE-paw.rrkj.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw2_2.out, tolnlines= 15, tolabs=  9e-4,    tolrel=  3.0e-1, fld_options=-easy
+#%%   tpaw2_2.abo, tolnlines= 15, tolabs=  9e-4,    tolrel=  3.0e-1, fld_options=-easy
+#%% output_file = "tpaw2_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

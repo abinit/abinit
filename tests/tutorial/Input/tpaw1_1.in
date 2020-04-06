@@ -36,15 +36,16 @@
  prtwf 0 prtden 0  prteig 0
 
 #Files
-pp_dirpath="../../../Psps_for_tests"
-pseudos="6c.pspnc"
+pp_dirpath="../../Psps_for_tests"
+pseudos = "6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw1_1.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%%   tpaw1_1.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%% output_file = "tpaw1_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

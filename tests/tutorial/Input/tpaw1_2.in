@@ -40,15 +40,16 @@ ndtset 9   ecut: 8. ecut+  2.
  getwfk -1
 
 #Files
-pp_dirpath="../../../Psps_for_tests"
-pseudos="6c.pspnc"
+pp_dirpath="../../Psps_for_tests"
+pseudos = "6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw1_2.out, tolnlines=  2, tolabs=  1.001e-08, tolrel=  2.000e-04
+#%%   tpaw1_2.abo, tolnlines=  2, tolabs=  1.001e-08, tolrel=  2.000e-04
+#%% output_file = "tpaw1_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
