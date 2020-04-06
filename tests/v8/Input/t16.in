@@ -24,7 +24,7 @@ spin_dt=1e-16 s
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% need_cpp_vars = HAVE_XML
 #%% exclude_hosts = nag@abiref
 #%% system_xml = t16.xml
 #%% [files]

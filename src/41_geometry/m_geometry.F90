@@ -1974,7 +1974,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !arrays
  integer,allocatable :: list_neighb(:,:,:)
  real(dp) :: bab(3),bac(3),dif(3),rmet(3,3)
- real(dp),allocatable :: sqrlength(:),xangst(:,:),xcart(:,:)
+ real(dp),allocatable :: sqrlength(:),xcart(:,:)
  character(len=8),allocatable :: iden(:)
 
 ! *************************************************************************
@@ -2045,10 +2045,8 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
 !Compute cartesian coordinates, and print reduced and cartesian coordinates
 !then print coordinates in angstrom, with the format neede for xmol
- ABI_ALLOCATE(xangst,(3,natom))
  ABI_ALLOCATE(xcart,(3,natom))
  call xred2xcart(natom,rprimd,xcart,xred)
- xangst(:,:)=xcart(:,:)*Bohr_Ang
 
  do ia=1,natom
    write(message, '(a,a,3f10.5,a,3f10.5)' ) &
@@ -2064,11 +2062,10 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
  do ia=1,natom
    call atomdata_from_znucl(atom,znucl(typat(ia)))
-   write(message, '(a,a,3f10.5)' )'   ',atom%symbol,xangst(1:3,ia)
+   write(message, '(a,a,3f10.5)' )'   ',atom%symbol,xcart(1:3,ia)*Bohr_Ang
    call wrtout(temp_unit,message,'COLL')
  end do
 
- ABI_DEALLOCATE(xangst)
  ABI_DEALLOCATE(xcart)
 
  ABI_ALLOCATE(list_neighb,(0:mneighb+1,4,2))

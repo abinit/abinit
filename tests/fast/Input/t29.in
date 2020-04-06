@@ -27,10 +27,6 @@
  znucl 14
 
 # Other variables
-
-# prtxangst 0 # Deprecated, use prtxtypat for large numbers of atoms
-# prtxred 0   # Deprecated, use prtxtypat for large numbers of atoms
-
  amu 28
  diemac 12.0d0
  ecut 2.99

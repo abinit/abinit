@@ -98,7 +98,6 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t52.in, t53.in
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [shell]
 #%% pre_commands = iw_cp test_EP.nc test_EP.nc
 #%% [files]

@@ -23,7 +23,6 @@
  -outvars_anaddb: echo values of input variables ----------------------
 
  Miscellaneous information :
-      chneut         1
  First list of wavevector (reduced coord.) :
        nph1l         2
        qph1l

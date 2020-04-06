@@ -220,6 +220,7 @@ contains
     ! It might be null if there is no lattice part.
     if (associated(self%lattice_mover)) then
        call self%lattice_mover%finalize()
+       ABI_FREE_SCALAR(self%lattice_mover)
        nullify(self%lattice_mover)
     end if
     if(.not. self%use_external_params) then
