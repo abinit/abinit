@@ -238,6 +238,7 @@ contains
     self%has_spin=.False.
     self%has_lwf=.False.
     call self%energy_table%free()
+    call self%slc_mover%finalize()
   end subroutine finalize
 
   !-------------------------------------------------------------------!
