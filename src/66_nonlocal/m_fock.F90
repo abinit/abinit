@@ -2182,15 +2182,15 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-!       vqg(1+i23)=hyb_mixing*divgq0
+       vqg(1+i23)=hyb_mixing*divgq0
 
 !      Note the combination of Spencer-Alavi and Erfc screening
-!       if (abs(hyb_range_fock)>tol8)then
-!         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+       if (abs(hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
 !        This would give a combination of Spencer-Alavi and Erfc screening,
 !        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
 !        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
-!       endif
+       endif
 
      end if
 
@@ -2211,40 +2211,8 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
          den=piinv/gs
 
-
-         
-         ! Treat the Coulomb potential cut-off by selected method
-!         if (abs(hyb_mixing)>tol8)then
-!            SELECT CASE ( trim(method) )
-!            CASE ('SPHERE')
-!             vqg=vqg*hyb_mixing !*(one-cos(rcut*sqrt(four_pi/den)))
-!            CASE ('ERF')
-!             vqg(ii)=vqg(ii)+hyb_mixing*den*exp(-pi/(den*hyb_mixing**2))
-!            CASE ('ERFC')
-!             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-exp(-pi/(den*hyb_mixing**2)))
-!            CASE DEFAULT
-!              msg = sjoin('Unknown cut-off method for hyb_mixing: ',method)
-!              MSG_ERROR(msg)
-!            END SELECT  
-!          endif
-
          if (abs(hyb_mixing_sr)>tol8) then
-!           SELECT CASE ( trim(method) )
-!           CASE ('SPHERE')
-!             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-cos(rcut*sqrt(four_pi/den)))
-!           CASE ('ERF')
-!             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*exp(-pi/(den*hyb_range_fock**2))
-!           CASE ('ERFC')
-             vqg=vqg*hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
-!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
-!          if(divgq0<pi/(hyb_range_fock**2))then
-!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
-!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
-!          endif
-!            CASE DEFAULT
-!              msg = sjoin('Unknown cut-off method for hyb_mixing_sr: ',method)
-!              MSG_ERROR(msg)
-!            END SELECT  
+             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
          endif
 
        end if ! Cut-off
