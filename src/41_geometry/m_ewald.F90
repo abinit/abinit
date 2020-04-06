@@ -707,6 +707,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    call dsyev('V','U',3, dielt, 3, eig_dielt, work, lwork,info)
    write(std_out,*) "Diagonalize", eig_dielt(:)
 
+   !this is just a tmp comment
+
  end if 
 !#endif 
 
