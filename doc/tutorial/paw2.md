@@ -567,6 +567,10 @@ wave basis_ needed to reach a given accuracy. If the _cut-off energy_ defining t
 _plane waves basis_ is too high (higher than 20 Hartree),
 some changes have to be made in the input file.
 
+!!! important
+
+    You may have to change the path to reach the Psps_for_tests repository. For this, modify the varaible `pp_dirpath` in the input file. 
+
 Copy *\$ABI_TESTS/tutorial/Input/tpaw2_1.in* in your working directory.
 Edit *tpaw2_1.in*, and activate the 8 datasets.
 Run ABINIT with them.

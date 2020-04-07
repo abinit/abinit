@@ -198,6 +198,10 @@ called `outputs/`. Make sure to create it before you start the abinit run by wri
 
     mkdir outputs
 
+!!! important
+
+    You may have to change the path to reach the Psps_for_tests repository. For this, modify the varaible `pp_dirpath` in the input file. 
+
 You can now run the abinit tests (maybe even in a separate new `xterm` window), by executing:
 
     abinit ab_C_test.in >& log_C_test &

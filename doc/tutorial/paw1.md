@@ -84,6 +84,9 @@ mkdir Work_paw1
 cd Work_paw1
 cp ../tpaw1_1.in .
 ```
+!!! important
+
+    You may have to change the path to reach the Psps_for_tests repository. For this, modify the varaible `pp_dirpath` in the input file. 
 
 and execute:
 
