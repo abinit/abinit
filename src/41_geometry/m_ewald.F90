@@ -709,10 +709,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  minexparg=log(tiny(0._dp))+five
  if (ewald_option == 1) minexparg=-20.0_dp
 
- ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
- ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
- ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
-
 ! initialize complex phase factors
  do ia = 1, natom
    arga = two_pi*( (qphon(1))*xred(1,ia)&
@@ -785,6 +781,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  end if 
 
  inv4eta = one / four / eta
+
+ ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
+ ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
+ ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
 
  dyddt = zero
  dydqt = zero
