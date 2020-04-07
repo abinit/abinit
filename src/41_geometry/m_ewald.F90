@@ -697,10 +697,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  call timab(1749, 1, tsec)
 
  ! Initialize dipquad and quadquad options
- if (do_quadrupole) then
-   dipquad_=0; if(present(dipquad)) dipquad_=dipquad
-   quadquad_=0; if(present(quadquad)) quadquad_=quadquad
- end if
+ dipquad_=0; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=0; if(present(quadquad)) quadquad_=quadquad
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
