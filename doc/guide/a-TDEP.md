@@ -71,21 +71,21 @@ The input file format is fixed. So:
 
 More details:
 
-* The section `# Unit cell definition` defines the bravais lattice [[brav@a-TDEP|brav]]
-  (here, a simple cubic), the number of atoms in the unit cell [[natom_unitcell@a-TDEP|natom_unitcell]]
-  (here, 5 atoms), their reduced coordinates in the unit cell [[xred_unitcell@a-TDEP|xred_unitcell]]
-  (here, a perovskite) and the type of atoms in the unit cell [[typat_unitcell@a-TDEP|typat_unitcell]]
+* The section `# Unit cell definition` defines the bravais lattice [[brav@atdep|brav]]
+  (here, a simple cubic), the number of atoms in the unit cell [[natom_unitcell@atdep|natom_unitcell]]
+  (here, 5 atoms), their reduced coordinates in the unit cell [[xred_unitcell@atdep|xred_unitcell]]
+  (here, a perovskite) and the type of atoms in the unit cell [[typat_unitcell@atdep|typat_unitcell]]
   (here, one atom A, one atom B and 3 atoms C).
 * The section `# Supercell definition` defines the multiplicity of the
   supercell with respect to the unit cell multiplicity (here, it is a simple
   2x2x2 multiplication of the unit cell) and the temperature of the system
   temperature(here, 495.05 K).
-* The section `# Computation details` defines the range [[nstep_max@a-TDEP|nstep_max]]...[[nstep_min@a-TDEP|nstep_min]]
+* The section `# Computation details` defines the range [[nstep_max@atdep|nstep_max]]...[[nstep_min@atdep|nstep_min]]
   of time steps or configurations (here, 100 time steps) and the
-  cutoff radius for the pair interactions [[rcut@a-TDEP|Rcut]] (here, all the interaction pairs
+  cutoff radius for the pair interactions [[rcut@atdep|Rcut]] (here, all the interaction pairs
   with a bond length larger than 7.426 bohr will not be considered).
 * The section `# Optional inputs` can define a large number of optional
-  keywords (here [[ngqpt2@a-TDEP|ngqpt2]] defining the q-point grid for the vDOS integration
+  keywords (here [[ngqpt2@atdep|ngqpt2]] defining the q-point grid for the vDOS integration
   is set to 2 2 2 in order to have a test sufficiently fast, which means that
   all the thermodynamic quantities have no sense.)
 All the input variables are defined in the `a-TDEP` section of the input variables description.

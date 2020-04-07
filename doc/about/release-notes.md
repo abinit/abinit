@@ -580,8 +580,8 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
 **D.13** a-TDEP utility:
-added [[guide:tdep|A-TDep user guide]],
-[[topic:Tdep|TDep topic]], and corresponding input variable documentation.
+added [[guide:a-TDEP|A-TDEP user guide]],
+[[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
 References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
 

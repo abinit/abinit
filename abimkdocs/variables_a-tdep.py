@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import print_function, division, unicode_literals, absolute_import
 
-executable = "a-TDEP"
+executable = "atdep"
 
 from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
 ValueWithConditions = dict
@@ -10,12 +10,12 @@ Variable=dict
 variables = [
 
 Variable(
-    abivarname="amu@a-TDEP",
-    varset="a-TDEP",
+    abivarname="amu@atdep",
+    varset="atdep",
     vartype="real",
     topics=['a-TDEP_basic'],
-    dimensions=['[[a-TDEP:ntypat]]'],
-    defaultval="[[a-TDEP:ntypat]]*0.d0",
+    dimensions=['[[atdep:ntypat]]'],
+    defaultval="[[atdep:ntypat]]*0.d0",
     mnemonics="Atomic masses in Mass Units",
     added_in_version="before_v9",
     text=r"""
@@ -24,8 +24,8 @@ Defines the masses in atomic mass units for each kind of atom. See the ABINIT va
 ),
 
 Variable(
-    abivarname="angle@a-TDEP",
-    varset="a-TDEP",
+    abivarname="angle@atdep",
+    varset="atdep",
     vartype="real",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -33,13 +33,13 @@ Variable(
     mnemonics="ANGLE alpha",
     added_in_version="before_v9",
     text=r"""
-This angle has to be defined if the bravais lattice is monoclinic. That is to say if [[a-TDEP:brav]](1)=2. 
+This angle has to be defined if the bravais lattice is monoclinic. That is to say if [[atdep:brav]](1)=2. 
 """,
 ),
 
 Variable(
-    abivarname="brav@a-TDEP",
-    varset="a-TDEP",
+    abivarname="brav@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
     dimensions=[2],
@@ -70,11 +70,11 @@ center=3        C-face centered
 ),
 
 Variable(
-    abivarname="bzpath@a-TDEP",
-    varset="a-TDEP",
+    abivarname="bzpath@atdep",
+    varset="atdep",
     vartype="integer+letter",
     topics=['a-TDEP_expert'],
-    dimensions="'[[a-TDEP:bzpath]](1)'+1",
+    dimensions="'[[atdep:bzpath]](1)'+1",
     defaultval="0",
     mnemonics="Brillouin Zone PATH",
     added_in_version="before_v9",
@@ -84,8 +84,8 @@ OPTIONAL: Defines the path in the Brillouin Zone for the phonon spectrum calcula
 ),
 
 Variable(
-    abivarname="dosdeltae@a-TDEP",
-    varset="a-TDEP",
+    abivarname="dosdeltae@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_expert'],
     dimensions="scalar",
@@ -98,8 +98,8 @@ OPTIONAL: Defines the smearing used for the phonon Density Of State calculation.
 ),
 
 Variable(
-    abivarname="enunit@a-TDEP",
-    varset="a-TDEP",
+    abivarname="enunit@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_expert'],
     dimensions="scalar",
@@ -112,8 +112,8 @@ OPTIONAL: Defines the energy unit used for the phonon spectrum (0 for meV, 1 for
 ),
 
 Variable(
-    abivarname="multiplicity@a-TDEP",
-    varset="a-TDEP",
+    abivarname="multiplicity@atdep",
+    varset="atdep",
     vartype="real",
     topics=['a-TDEP_basic'],
     dimensions=[3,3],
@@ -121,7 +121,7 @@ Variable(
     mnemonics="MULTIPLICITY",
     added_in_version="before_v9",
     text=r"""
-Defines the multiplicity of the SUPERCELL with respect to the primitive UNICELL. See the ABINIT variables [[rprimd]], [[acell]] and [[rprim]] for more details. The multiplicity [[a-TDEP:multiplicity]] and the SUPERCELL lattice parameters [[a-TDEP:rprimd]] are used to find the UNITCELL lattice parameters acell_unitcell such as:
+Defines the multiplicity of the SUPERCELL with respect to the primitive UNICELL. See the ABINIT variables [[rprimd]], [[acell]] and [[rprim]] for more details. The multiplicity [[atdep:multiplicity]] and the SUPERCELL lattice parameters [[atdep:rprimd]] are used to find the UNITCELL lattice parameters acell_unitcell such as:
 
 $$ \text{rprimd}_{i,j}=\sum_{k=1}^3 \text{acell_unitcell}_i * \text{multiplicity}_{i,k}*\text{rprim_tmp}_{k,j} $$
 
@@ -133,8 +133,8 @@ For example:
 ),
 
 Variable(
-    abivarname="natom@a-TDEP",
-    varset="a-TDEP",
+    abivarname="natom@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -147,8 +147,8 @@ Defines the number of atoms in the SUPERCELL. See the ABINIT variable [[natom]] 
 ),
 
 Variable(
-    abivarname="natom_unitcell@a-TDEP",
-    varset="a-TDEP",
+    abivarname="natom_unitcell@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -161,8 +161,8 @@ Defines the number of atoms in the UNITCELL.
 ),
 
 Variable(
-    abivarname="ngqpt1@a-TDEP",
-    varset="a-TDEP",
+    abivarname="ngqpt1@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_expert'],
     dimensions=[3],
@@ -175,8 +175,8 @@ OPTIONAL: Defines the COARSE grid of q-points for the dynamical matrix output (i
 ),
 
 Variable(
-    abivarname="ngqpt2@a-TDEP",
-    varset="a-TDEP",
+    abivarname="ngqpt2@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_expert'],
     dimensions=[3],
@@ -189,8 +189,8 @@ OPTIONAL: Defines the FINE grid of q-points for the DOS and thermodynamic quanti
 ),
 
 Variable(
-    abivarname="nstep_max@a-TDEP",
-    varset="a-TDEP",
+    abivarname="nstep_max@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -203,8 +203,8 @@ Defines the upper limit in the range of configurations that one wants to use. Th
 ),
 
 Variable(
-    abivarname="nstep_min@a-TDEP",
-    varset="a-TDEP",
+    abivarname="nstep_min@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -217,8 +217,8 @@ Defines the lower limit in the range of configurations that one wants to use. Th
 ),
 
 Variable(
-    abivarname="ntypat@a-TDEP",
-    varset="a-TDEP",
+    abivarname="ntypat@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -231,8 +231,8 @@ Defines the number of atom types. See the ABINIT variable [[ntypat]] for more de
 ),
 
 Variable(
-    abivarname="order@a-TDEP",
-    varset="a-TDEP",
+    abivarname="order@atdep",
+    varset="atdep",
     vartype="integer+real",
     topics=['a-TDEP_expert'],
     dimensions="2",
@@ -240,13 +240,13 @@ Variable(
     mnemonics="ORDER for the IFC",
     added_in_version="before_v9",
     text="""
-OPTIONAL: Defines at which order the calculation of the IFCs is performed. If the first value [[a-TDEP:order]](1)=3, that turns on a third order calculation and the second value [[a-TDEP:order]](2) defines the cutoff radius. 
+OPTIONAL: Defines at which order the calculation of the IFCs is performed. If the first value [[atdep:order]](1)=3, that turns on a third order calculation and the second value [[atdep:order]](2) defines the cutoff radius. 
 """,
 ),
 
 Variable(
-    abivarname="rcut@a-TDEP",
-    varset="a-TDEP",
+    abivarname="rcut@atdep",
+    varset="atdep",
     vartype="real",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -259,8 +259,8 @@ Defines the cutoff radius used when the second order IFCs are computed. This one
 ),
 
 Variable(
-    abivarname="rprimd@a-TDEP",
-    varset="a-TDEP",
+    abivarname="rprimd@atdep",
+    varset="atdep",
     vartype="real",
     topics=['a-TDEP_basic'],
     dimensions=[3,3],
@@ -273,8 +273,8 @@ Defines the dimensional real space primitive vectors of the SUPERCELL. See [[rpr
 ),
 
 Variable(
-    abivarname="slice@a-TDEP",
-    varset="a-TDEP",
+    abivarname="slice@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_expert'],
     dimensions="1",
@@ -282,14 +282,14 @@ Variable(
     mnemonics="SLICE",
     added_in_version="before_v9",
     text="""
-OPTIONAL: Defines the slice used to include some configurations in the calculations. Only the ([[a-TDEP:nstep_max]]-[[a-TDEP:nstep_min]])/[[a-TDEP:slice]] configurations will be considered in the calculations of the IFCs.
+OPTIONAL: Defines the slice used to include some configurations in the calculations. Only the ([[atdep:nstep_max]]-[[atdep:nstep_min]])/[[atdep:slice]] configurations will be considered in the calculations of the IFCs.
 """,
 ),
 
 
 Variable(
-    abivarname="temperature@a-TDEP",
-    varset="a-TDEP",
+    abivarname="temperature@atdep",
+    varset="atdep",
     vartype="real",
     topics=['a-TDEP_basic'],
     dimensions="scalar",
@@ -302,12 +302,12 @@ Defines the temperature of the system.
 ),
 
 Variable(
-    abivarname="typat@a-TDEP",
-    varset="a-TDEP",
+    abivarname="typat@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
-    dimensions=['[[a-TDEP:natom]]'],
-    defaultval="[[a-TDEP:natom]]*0",
+    dimensions=['[[atdep:natom]]'],
+    defaultval="[[atdep:natom]]*0",
     mnemonics="TYPAT",
     added_in_version="before_v9",
     text="""
@@ -316,12 +316,12 @@ Defines the type of atoms in the SUPERCELL. See [[typat]] for more details. (Onl
 ),
 
 Variable(
-    abivarname="typat_unitcell@a-TDEP",
-    varset="a-TDEP",
+    abivarname="typat_unitcell@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_basic'],
-    dimensions=['[[a-TDEP:natom_unitcell]]'],
-    defaultval="[[a-TDEP:natom_unitcell]]*0",
+    dimensions=['[[atdep:natom_unitcell]]'],
+    defaultval="[[atdep:natom_unitcell]]*0",
     mnemonics="TYPAT in the UNITCELL",
     added_in_version="before_v9",
     text="""
@@ -330,8 +330,8 @@ Defines the type of atoms in the UNITCELL.
 ),
 
 Variable(
-    abivarname="use_ideal_positions@a-TDEP",
-    varset="a-TDEP",
+    abivarname="use_ideal_positions@atdep",
+    varset="atdep",
     vartype="integer",
     topics=['a-TDEP_expert'],
     dimensions="scalar",
@@ -339,17 +339,17 @@ Variable(
     mnemonics="USE IDEAL POSITIONS",
     added_in_version="before_v9",
     text="""
-OPTIONAL: Defines if the ideal ([[a-TDEP:use_ideal_positions]]=1) or averaged ([[a-TDEP:use_ideal_positions]]=0) positions are used during the calculations. It can affect strongly the phonon spectrum (and other quantities) if the system is close to an instability (soft mode,...).
+OPTIONAL: Defines if the ideal ([[atdep:use_ideal_positions]]=1) or averaged ([[atdep:use_ideal_positions]]=0) positions are used during the calculations. It can affect strongly the phonon spectrum (and other quantities) if the system is close to an instability (soft mode,...).
 """,
 ),
 
 Variable(
-    abivarname="xred_unitcell@a-TDEP",
-    varset="a-TDEP",
+    abivarname="xred_unitcell@atdep",
+    varset="atdep",
     vartype="real",
     topics=['a-TDEP_basic'],
-    dimensions=[3, '[[a-TDEP:natom_unitcell]]'],
-    defaultval="(3*[[a-TDEP:natom_unitcell]])*0.d0",
+    dimensions=[3, '[[atdep:natom_unitcell]]'],
+    defaultval="(3*[[atdep:natom_unitcell]])*0.d0",
     mnemonics="XRED in the UNITCELL",
     added_in_version="before_v9",
     text="""

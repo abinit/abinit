@@ -30,8 +30,8 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Bieder
-#%% keywords = a-TDEP
+#%% keywords = atdep
 #%% description = 
-#%%   test TDEP 
-#%% topics = Tdep
+#%%   test a-TDEP 
+#%% topics = a-TDEP
 #%%<END TEST_INFO>
