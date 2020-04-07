@@ -660,10 +660,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !scalars
  integer,parameter :: mr=10000,ny2_spline=1024*10
  integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj
- integer :: info,lwork,mu,n,newg,newr,ng,nr,nu,ng_expxq
+ integer :: info,lwork,mu,newg,newr,ng,nr,nu,ng_expxq
  integer :: ewald_option
  integer :: dipquad_,quadquad_
  logical :: do_quadrupole
+ logical, save :: firstcall = .TRUE.
  real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
  real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
  real(dp),parameter :: y2max=64.0_dp, y2min=1.0d-24
@@ -672,10 +673,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
  real(dp) :: minexparg,sigma_max
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
- character(len=500) :: message
+ character(len=700) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
- real(dp) :: c3r(2*mr+1),cosqxred(natom),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
+ real(dp) :: c3r(2*mr+1),cosqxred(natom),wdielt(3,3),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3),tsec(2)
@@ -697,15 +698,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  call timab(1749, 1, tsec)
 
  ! Initialize dipquad and quadquad options
- dipquad_=1; if(present(dipquad)) dipquad_=dipquad
- quadquad_=1; if(present(quadquad)) quadquad_=quadquad
+ dipquad_=0; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=0; if(present(quadquad)) quadquad_=quadquad
 
  ! Deactivate real space sums for quadrupolar fileds or for dipdip=-1
  ewald_option = 0; if (present(option)) ewald_option = option
- write(std_out,*) 'ewald_option=', ewald_option
- write(std_out,*) dipquad_,quadquad_
  if (do_quadrupole.and.(dipquad_==1.or.quadquad_==1)) ewald_option = 1
- write(std_out,*) 'ewald_option=', ewald_option
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
@@ -746,16 +744,21 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
 
-!#ifdef MR_DEV
  ! Compute a material-dependent width for the Gaussians that hopefully
  ! will make the Ewald real-space summation innecessary.
  if (ewald_option == 1) then 
 
+   wdielt(:,:)=dielt(:,:)
+
    !Diagonalize dielectric matrix
-   n=3
-   lwork=n*(3+n/2)
+   lwork=-1
+   ABI_ALLOCATE(work,(10))
+   call dsyev('N','U',3, wdielt, 3, eig_dielt, work, lwork,info)
+   lwork=nint(work(1))
+   ABI_DEALLOCATE(work)
+
    ABI_ALLOCATE(work,(lwork))
-   call dsyev('V','U',3, dielt, 3, eig_dielt, work, lwork,info)
+   call dsyev('V','U',3, wdielt, 3, eig_dielt, work, lwork,info)
 
    !This is a tentative maximum value for the gaussian width in real space
    sigma_max=three
@@ -764,24 +767,22 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    !reciprocal space
    eta=sqrt(maxval(eig_dielt))/sigma_max
 
-!   write(message, '(2a,f9.4,6a)' ) &
-!  &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', & 
-!  &' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', &
-!  &' One should check whether this choice leads to correct results for the specific system under study', & 
-!  &' and q-point grid.',ch10, &
-!  &' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', &
-!  &' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.'
-!   call wrtout([ab_out,std_out],message,'COLL')
-   eta=one
-   write(message, * ) &
-   &' in ewald9 has been set to eta= ', eta,' max diel tens=', maxval(eig_dielt)
-   call wrtout([ab_out,std_out],message,'COLL')
+   if (firstcall) then
+     firstcall = .FALSE.
+     write(message, '(4a,f9.4,9a)' ) ch10,&
+    &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, & 
+    &' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', ch10, &
+    &' One should check whether this choice leads to correct results for the specific system under study', & 
+    &' and q-point grid.',ch10, &
+    &' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', ch10, &
+    &' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.', ch10
+     call wrtout([ab_out,std_out],message,'COLL')
+   end if
 
    !Internally eta is the square of the gaussians width
    eta=eta*eta
 
  end if 
-!#endif 
 
  inv4eta = one / four / eta
 
