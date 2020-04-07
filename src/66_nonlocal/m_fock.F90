@@ -2147,29 +2147,21 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
- call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+! call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
  ! Treat the Coulomb potential cut-off by selected method
- if (abs(hyb_mixing)>tol8)then
-   vqg=vqg*hyb_mixing
- endif
-
-! Huge problem because for different Hybrid XC different cut-offs have been applied 
-! And not one needs to circumvent this problem in the testing phase
- vqg=zero
-!         if (abs(hyb_mixing_sr)>tol8) then
-!             vqg=vqg*hyb_mixing_sr!*(one-exp(-pi/(den*hyb_range_fock**2)))
-!         endif
-
+! if (abs(hyb_mixing)>tol8)then
+!   vqg=vqg*hyb_mixing
+! endif
 
  ! Triple loop on each dimension
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1
-!   ! Precompute some products that do not depend on i2 and i1
+   ! Precompute some products that do not depend on i2 and i1
    gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
    gqgm23=gq(3,i3)*gmet(2,3)*2
    gqgm13=gq(3,i3)*gmet(1,3)*2
-!
+
    do i2=1,n2
      ig2=i2-(i2/id2)*n2-1
      gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
@@ -2211,8 +2203,25 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
          den=piinv/gs
 
+         ! Treat the Coulomb potential cut-off by selected method
+         if (abs(hyb_mixing)>tol8)then
+!           SELECT CASE ( trim(method) )
+!           CASE ('SPHERE')
+             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+             !& vqg(ii)=vqg(ii)+hyb_mixing*den
+!           CASE DEFAULT
+!             msg = sjoin('Cut-off method: ',method)
+!             MSG_ERROR(msg)
+!           END SELECT  
+         endif
+!        Erfc screening
          if (abs(hyb_mixing_sr)>tol8) then
-             vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
+!          if(divgq0<pi/(hyb_range_fock**2))then
+!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
+!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
+!          endif
          endif
 
        end if ! Cut-off
@@ -2220,7 +2229,6 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
    end do ! End loop on i2
  end do ! End loop on i3
 
-!  izero - flag to check PAW presence
  if (izero==1) then
    ! Set contribution of unbalanced components to zero
    if (qeq0==1) then !q=0
