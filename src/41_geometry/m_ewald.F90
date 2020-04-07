@@ -670,7 +670,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: cddi,cddr,cqdi,cqdr,cqqi,cqqr,g3,g4
  real(dp) :: arg1,arg2,arg3,arga,c123r,c123i,c23i,c23r,detdlt,inv_detdlt
  real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
- real(dp) :: minexparg
+ real(dp) :: minexparg,sigma_max
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
  character(len=500) :: message
 !arrays
@@ -692,25 +692,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    dyew = zero; return
  end if
  do_quadrupole = any(qdrp_cart /= zero)
- ewald_option = 0; if (present(option)) ewald_option = option
- if (do_quadrupole) ewald_option = 1
-
-!#ifdef MR_DEV
- ! Compute a material-dependent width for the Gaussians that hopefully
- ! will make the Ewald real-space summation innecessary.
- if (ewald_option == 1) then 
-
-   !Diagonalize dielectric matrix
-   n=3
-   lwork=n*(3+n/2)
-   ABI_ALLOCATE(work,(lwork))
-   call dsyev('V','U',3, dielt, 3, eig_dielt, work, lwork,info)
-   write(std_out,*) "Diagonalize", eig_dielt(:)
-
-   !this is just a tmp comment
-
- end if 
-!#endif 
 
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
@@ -718,6 +699,13 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ! Initialize dipquad and quadquad options
  dipquad_=1; if(present(dipquad)) dipquad_=dipquad
  quadquad_=1; if(present(quadquad)) quadquad_=quadquad
+
+ ! Deactivate real space sums for quadrupolar fileds or for dipdip=-1
+ ewald_option = 0; if (present(option)) ewald_option = option
+ write(std_out,*) 'ewald_option=', ewald_option
+ write(std_out,*) dipquad_,quadquad_
+ if (do_quadrupole.and.(dipquad_==1.or.quadquad_==1)) ewald_option = 1
+ write(std_out,*) 'ewald_option=', ewald_option
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
@@ -757,7 +745,44 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
- if (ewald_option == 1) eta = one
+
+!#ifdef MR_DEV
+ ! Compute a material-dependent width for the Gaussians that hopefully
+ ! will make the Ewald real-space summation innecessary.
+ if (ewald_option == 1) then 
+
+   !Diagonalize dielectric matrix
+   n=3
+   lwork=n*(3+n/2)
+   ABI_ALLOCATE(work,(lwork))
+   call dsyev('V','U',3, dielt, 3, eig_dielt, work, lwork,info)
+
+   !This is a tentative maximum value for the gaussian width in real space
+   sigma_max=three
+
+   !Set eta taking into account that the eps_inf is used as a metric in
+   !reciprocal space
+   eta=sqrt(maxval(eig_dielt))/sigma_max
+
+!   write(message, '(2a,f9.4,6a)' ) &
+!  &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', & 
+!  &' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', &
+!  &' One should check whether this choice leads to correct results for the specific system under study', & 
+!  &' and q-point grid.',ch10, &
+!  &' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', &
+!  &' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.'
+!   call wrtout([ab_out,std_out],message,'COLL')
+   eta=one
+   write(message, * ) &
+   &' in ewald9 has been set to eta= ', eta,' max diel tens=', maxval(eig_dielt)
+   call wrtout([ab_out,std_out],message,'COLL')
+
+   !Internally eta is the square of the gaussians width
+   eta=eta*eta
+
+ end if 
+!#endif 
+
  inv4eta = one / four / eta
 
  dyddt = zero
