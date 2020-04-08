@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  7 Apr 2020.
-- ( at 11h04 )
+.Starting date : Wed  8 Apr 2020.
+- ( at 15h23 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/jollet_develop/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.in
 - output file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/jollet_develop/tests/TestBot_MPI1/tutorial_tpaw2_2/tpaw2_2.abo
@@ -123,7 +123,7 @@ P           mkmem          60
              nkpt          60
            nspden           2
            nsppol           2
-            nstep          50
+            nstep          44
              nsym          48
            ntypat           1
               occ      1.000000  1.000000  1.000000  1.000000  1.000000  0.000000
@@ -362,7 +362,7 @@ P           mkmem          60
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolvrs      1.00000000E-12
+           tolvrs      1.00000000E-20
            tsmear      7.50000000E-03 Hartree
             typat      1
            useylm           1
@@ -456,8 +456,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     203.508     203.480
 
 --- !BeginCycle
 iteration_state: {dtset: 1, }
-solver: {iscf: 17, nstep: 50, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 1.00E-12, }
+solver: {iscf: 17, nstep: 44, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-20, }
 ...
 
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
@@ -506,12 +506,15 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT 43  -39.628080766381    -1.34E-12 5.52E-04 1.30E-12 0.601
  ETOT 44  -39.628080766381     5.68E-14 3.94E-04 6.73E-13 0.601
 
- At SCF step   44       nres2   =  6.73E-13 < tolvrs=  1.00E-12 =>converged.
-
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.46102882E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -4.46102882E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -4.46102882E-05  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=   44 was not enough SCF cycles to converge;
+  density residual=  6.732E-13 exceeds tolvrs=  1.000E-20
 
 
 --- !ResultsGS
@@ -782,7 +785,7 @@ P           mkmem          60
              nkpt          60
            nspden           2
            nsppol           2
-            nstep          50
+            nstep          44
              nsym          48
            ntypat           1
               occ      1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -1023,7 +1026,7 @@ P           mkmem          60
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-           tolvrs      1.00000000E-12
+           tolvrs      1.00000000E-20
            tsmear      7.50000000E-03 Hartree
             typat      1
            useylm           1
@@ -1120,10 +1123,10 @@ P           mkmem          60
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        108.4  wall=        121.8
+- Proc.   0 individual time (sec): cpu=        107.5  wall=        108.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        108.4  wall=        121.8
+.Delivered  15 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=        107.5  wall=        108.3
