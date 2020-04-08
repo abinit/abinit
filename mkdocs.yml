@@ -156,7 +156,7 @@ pages:
     - Anaddb: variables/anaddb.md
     - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
-    - a-TDEP: variables/a-TDEP.md
+    - a-TDEP: variables/atdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
