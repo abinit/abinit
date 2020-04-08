@@ -1,6 +1,6 @@
-!!****p* ABINIT/tdep
+!!****p* ABINIT/atdep
 !! NAME
-!! tdep
+!! atdep
 !!
 !! FUNCTION
 !! Calculations of phonons using molecular dynamic simulations
