@@ -97,7 +97,7 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier,&
-                             &fullbz_plowannier,destroy_plowannier 
+                             &fullbz_plowannier,destroy_plowannier
 
  implicit none
 
@@ -2057,9 +2057,9 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ABI_MALLOC(Ep%qcalc,(3,Ep%nqcalc))
  if (Ep%nqcalc/=Ep%nqibz) then
    write(msg,'(6a)')ch10,&
-&    ' Dielectric matrix will be calculated only for some ',ch10,&
-&    ' selected q points provided by the user through the input variables ',ch10,&
-&    ' nqptdm and qptdm'
+    ' Dielectric matrix will be calculated only for some ',ch10,&
+    ' selected q points provided by the user through the input variables ',ch10,&
+    ' nqptdm and qptdm'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    ltest= Ep%nqcalc <= Qmesh%nibz
@@ -2090,9 +2090,9 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  if (has_q0.and.normv(Ep%qcalc(:,1),gmet,'G')>=GW_TOLQ0) then
    write(msg,'(5a)')&
-&    'The list of q-points to be calculated contains the Gamma point, ',ch10,&
-&    'however Gamma is not the first point in the list. ' ,ch10,&
-&    'Please, change your input file accordingly. '
+    'The list of q-points to be calculated contains the Gamma point, ',ch10,&
+    'however Gamma is not the first point in the list. ' ,ch10,&
+    'Please, change your input file accordingly. '
    MSG_ERROR(msg)
  end if
 
@@ -2123,8 +2123,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! Make sure that Dtset%wtk==Kmesh%wt due to the dirty treatment of
  ! the symmetry operations in the old GW code (symmorphy and inversion)
- ltest=(ALL(ABS(Dtset%wtk(1:Kmesh%nibz)-Kmesh%wt(1:Kmesh%nibz))<tol6))
- ABI_CHECK(ltest,'Mismatch between Dtset%wtk and Kmesh%wt')
+ ltest = (ALL(ABS(Dtset%wtk(1:Kmesh%nibz)-Kmesh%wt(1:Kmesh%nibz)) < tol6))
+ if (.not. ltest) then
+   do jj=1,Kmesh%nibz
+     write(std_out, *)"wtk dtset vs kmesh:", dtset%wtk(jj), kmesh%wt(jj)
+   end do
+ end if
+ ABI_CHECK(ltest, 'Mismatch between Dtset%wtk and Kmesh%wt')
 
  ABI_MALLOC(npwarr,(Hdr_wfk%nkpt))
  npwarr(:)=Ep%npwwfn

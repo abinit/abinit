@@ -6290,7 +6290,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, method, symv1, dvdb_ngqpt, dvdb_add
      end if
      ABI_FREE(tmp_v1r)
 
-     ! Interpolate data at the same q-point using coarse Q-mesh
+     ! Interpolate data at the same q-point using the coarse Q-mesh
      call coarse_dvdb%ftinterp_qpt(dvdb%qpts(:,iq), nfft, ngfft, intp_v1r, dvdb%comm_rpt)
 
      write(std_out,"(a)")sjoin("=== For COARSE q-point:", ktoa(dvdb%qpts(:,iq)), "===")
