@@ -45,7 +45,7 @@ nshiftk   4
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw2_1.abo, tolnlines=  4, tolabs=  1.1e-4,    tolrel=  2.0e-3, fld_options=-medium
+#%%   tpaw2_1.abo, tolnlines=  6, tolabs=  1.1e-4,    tolrel=  2.0e-3, fld_options=-medium
 #%% output_file = "tpaw2_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 6
