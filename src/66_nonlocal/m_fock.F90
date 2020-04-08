@@ -2099,6 +2099,7 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
  character(len=100) :: msg,method
+ logical  :: shortrange
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
@@ -2111,14 +2112,14 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  end if
 
 ! Re-use variable defined initially in m_vcoul
-if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
-if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
+!if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
+!if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  divgq0= two_pi*rcut**two
-!divgq0=zero
+
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  cutoff=gsqcut*tolfix
@@ -2147,12 +2148,20 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
-! call barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+ if (abs(hyb_mixing)>tol8) then
+    shortrange=.false.
+    rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+    call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+    vqg=vqg*hyb_mixing
+ end if
 
- ! Treat the Coulomb potential cut-off by selected method
-! if (abs(hyb_mixing)>tol8)then
-!   vqg=vqg*hyb_mixing
-! endif
+ if (abs(hyb_mixing_sr)>tol8) then
+    shortrange=.true.
+    rcut=hyb_range_fock
+    call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+    vqg=vqg*hyb_mixing_sr
+ end if
+
 
  ! Triple loop on each dimension
  do i3=1,n3
@@ -2174,7 +2183,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-       vqg(1+i23)=hyb_mixing*divgq0
+!       vqg(1+i23)=hyb_mixing*divgq0
 
 !      Note the combination of Spencer-Alavi and Erfc screening
        if (abs(hyb_range_fock)>tol8)then
@@ -2201,28 +2210,28 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
            ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
          end if
 
-         den=piinv/gs
+!         den=piinv/gs
 
          ! Treat the Coulomb potential cut-off by selected method
-         if (abs(hyb_mixing)>tol8)then
+!         if (abs(hyb_mixing)>tol8)then
 !           SELECT CASE ( trim(method) )
 !           CASE ('SPHERE')
-             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+!             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
              !& vqg(ii)=vqg(ii)+hyb_mixing*den
 !           CASE DEFAULT
 !             msg = sjoin('Cut-off method: ',method)
 !             MSG_ERROR(msg)
 !           END SELECT  
-         endif
+!         endif
 !        Erfc screening
-         if (abs(hyb_mixing_sr)>tol8) then
-           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
+!         if (abs(hyb_mixing_sr)>tol8) then
+!           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
 !          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
 !          if(divgq0<pi/(hyb_range_fock**2))then
 !            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
 !&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
 !          endif
-         endif
+!         endif
 
        end if ! Cut-off
      end do ! End loop on i1

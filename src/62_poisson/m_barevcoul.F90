@@ -28,7 +28,6 @@ module m_barevcoul
  use defs_basis
  use m_errors
  use m_fstrings,        only : sjoin, itoa
- use m_fft,             only : zerosym
 
  implicit none
 
@@ -75,12 +74,12 @@ contains
 !!
 !! SOURCE
 
-subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
+subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)   :: nfft,nkpt_bz
- real(dp),intent(in)  :: gsqcut,ucvol
+ real(dp),intent(in)  :: rcut,gsqcut,ucvol
 !arrays
  integer,intent(in)   :: ngfft(18)
  real(dp),intent(in)  :: gmet(3,3),qphon(3)
@@ -93,8 +92,9 @@ subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
  integer              :: ig,ig1min,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer              :: ii,ii1,ing,n1,n2,n3
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
+ real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,divgq0
  character(len=100)   :: cutoff_method
+ logical              :: shortrange
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
@@ -114,37 +114,8 @@ subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
  cutoff_method="SPHERE"
 
  ! Spence&Alavi scheme 
- rcut  = (three*nkpt_bz*ucvol/four_pi)**(one/three)
+! rcut  = (three*nkpt_bz*ucvol/four_pi)**(one/three)
  divgq0= two_pi*rcut**two
-
- SELECT CASE (TRIM(cutoff_method))
-
- CASE ('SPHERE')
-    ! Spence&Alavi scheme 
-    rcut  = (three*nkpt_bz*ucvol/four_pi)**(one/three)
-    divgq0= two_pi*rcut**two
-   
- CASE ('CYLINDER')
-
- CASE ('SURFACE')
-    ! Rozzi et al. scheme 
-
-    ! Ismail-Beigi scheme   
-    
- CASE ('AUX_FUNCTION')
-
- CASE ('AUX_GB')
-
- CASE ('CRYSTAL')
- 
- CASE ('ERF')
- 
- CASE ('ERFC')
-
- CASE DEFAULT
-   MSG_BUG(sjoin('Unknown cutoff mode: ', cutoff_method))
-   MSG_BUG('Please refer to our documentation related to icutcoul variable.')
- END SELECT
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
@@ -198,8 +169,12 @@ subroutine barevcoul(qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev)
        if(gs<=cutoff)then
 
          den=piinv/gs
-
-         barev(ii)=barev(ii)+den*(one-cos(rcut*sqrt(four_pi/den)))
+         
+         if(shortrange) then
+            barev(ii)=barev(ii)+den*(one-exp(-pi/(den*rcut**2)))
+         else
+            barev(ii)=barev(ii)+den*(one-cos(rcut*sqrt(four_pi/den)))
+         end if
 
        end if ! Cut-off
      end do ! End loop on i1
