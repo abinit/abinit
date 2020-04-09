@@ -2087,7 +2087,8 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gmet(3,3),qphon(3)
+ real(dp),intent(in) :: qphon(3)
+ real(dp),intent(inout) :: gmet(3,3)
  real(dp),intent(out) ::  vqg(nfft)
 
 !Local variables-------------------------------
@@ -2182,15 +2183,10 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
      ii1=1
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
-       ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-!       vqg(1+i23)=hyb_mixing*divgq0
 
 !      Note the combination of Spencer-Alavi and Erfc screening
        if (abs(hyb_range_fock)>tol8)then
          vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
-!        This would give a combination of Spencer-Alavi and Erfc screening,
-!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
-!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
        endif
 
      end if
@@ -2209,29 +2205,6 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
            ig2max=max(ig2max,ig2); ig2min=min(ig2min,ig2)
            ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
          end if
-
-!         den=piinv/gs
-
-         ! Treat the Coulomb potential cut-off by selected method
-!         if (abs(hyb_mixing)>tol8)then
-!           SELECT CASE ( trim(method) )
-!           CASE ('SPHERE')
-!             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-             !& vqg(ii)=vqg(ii)+hyb_mixing*den
-!           CASE DEFAULT
-!             msg = sjoin('Cut-off method: ',method)
-!             MSG_ERROR(msg)
-!           END SELECT  
-!         endif
-!        Erfc screening
-!         if (abs(hyb_mixing_sr)>tol8) then
-!           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
-!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
-!          if(divgq0<pi/(hyb_range_fock**2))then
-!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
-!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
-!          endif
-!         endif
 
        end if ! Cut-off
      end do ! End loop on i1

@@ -28,6 +28,8 @@ module m_barevcoul
  use defs_basis
  use m_errors
  use m_fstrings,        only : sjoin, itoa
+ use m_gsphere,         only : gsphere_t
+ use m_qplusg,          only : cmod_qpg
 
  implicit none
 
@@ -82,40 +84,26 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  real(dp),intent(in)  :: rcut,gsqcut,ucvol
 !arrays
  integer,intent(in)   :: ngfft(18)
- real(dp),intent(in)  :: gmet(3,3),qphon(3)
+ real(dp),intent(in)  :: qphon(3)
+ real(dp),intent(inout)  :: gmet(3,3)
  real(dp),intent(out) :: barev(nfft)
-
 !Local variables-------------------------------
 !scalars
- integer,parameter    :: icutcoul=0
+ integer,parameter    :: icutcoul=0,empty(3,3)=0
  integer              :: i1,i2,i23,i3,id1,id2,id3
  integer              :: ig,ig1min,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer              :: ii,ii1,ing,n1,n2,n3
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,divgq0
+ real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,divgq0,rcut0
  character(len=100)   :: cutoff_method
  logical              :: shortrange
 !arrays
  integer :: id(3)
- real(dp),allocatable :: gq(:,:)
-
-! Re-use variable defined initially in m_vcoul
- if (icutcoul==0) cutoff_method='SPHERE'
- if (icutcoul==1) cutoff_method='CYLINDER'
- if (icutcoul==2) cutoff_method='SURFACE'
- if (icutcoul==3) cutoff_method='CRYSTAL'
- if (icutcoul==4) cutoff_method='ERF'
- if (icutcoul==5) cutoff_method='ERFC'
- if (icutcoul==6) cutoff_method='AUXILIARY_FUNCTION'
- if (icutcoul==7) cutoff_method='AUX_GB' 
+ real(dp),allocatable :: gq(:,:),gpq(:),gpq2(:)
 
 ! Treatment of the divergence at q+g=zero
-
- cutoff_method="SPHERE"
-
- ! Spence&Alavi scheme 
-! rcut  = (three*nkpt_bz*ucvol/four_pi)**(one/three)
- divgq0= two_pi*rcut**two
+ rcut0= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+ divgq0= two_pi*rcut0**two
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
@@ -124,7 +112,11 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
+ 
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
+ ABI_ALLOCATE(gpq,(nfft))
+ ABI_ALLOCATE(gpq2,(nfft))
+ 
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
@@ -137,51 +129,41 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
- ! Triple loop on each dimension
  do i3=1,n3
-   ig3=i3-(i3/id3)*n3-1
    ! Precompute some products that do not depend on i2 and i1
    gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
    gqgm23=gq(3,i3)*gmet(2,3)*2
    gqgm13=gq(3,i3)*gmet(1,3)*2
-
    do i2=1,n2
-     ig2=i2-(i2/id2)*n2-1
+     i23=n1*(i2-1 +(n2)*(i3-1))
      gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
      gqgm12=gq(2,i2)*gmet(1,2)*2
      gqg2p3=gqgm13+gqgm12
+     do i1=1,n1
+        ii=i1+i23
+        gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+        if(gpq(ii)<=cutoff) then
+            gpq2(ii) = piinv/gpq(ii)
+        end if 
+     end do
+   end do
+ end do
 
-     i23=n1*(i2-1 +(n2)*(i3-1))
-     ! Do the test that eliminates the Gamma point outside of the inner loop
-     ii1=1
-     if (i23==0 .and. ig2==0 .and. ig3==0) then
-       ii1=2
-       ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-       barev(1+i23)=divgq0
-
-     end if
-
-     ! Final inner loop on the first dimension (note the lower limit)
-     do i1=ii1,n1
-       gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-       ii=i1+i23
-
-       if(gs<=cutoff)then
-
-         den=piinv/gs
-         
-         if(shortrange) then
-            barev(ii)=barev(ii)+den*(one-exp(-pi/(den*rcut**2)))
-         else
-            barev(ii)=barev(ii)+den*(one-cos(rcut*sqrt(four_pi/den)))
-         end if
-
-       end if ! Cut-off
-     end do ! End loop on i1
-   end do ! End loop on i2
- end do ! End loop on i3
+ do ig=1,nfft 
+     if(gpq(ig)<tol4) then 
+        barev(ig)=divgq0
+     else if(gpq(ig)<=cutoff) then
+       if(shortrange) then
+         barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
+       else
+         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut0*sqrt(four_pi/gpq2(ig))))
+       end if
+    end if
+ end do
 
  ABI_DEALLOCATE(gq)
+ ABI_DEALLOCATE(gpq)
+ ABI_DEALLOCATE(gpq2)
 
 end subroutine barevcoul
 !!***
