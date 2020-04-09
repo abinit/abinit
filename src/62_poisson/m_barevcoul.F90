@@ -116,7 +116,6 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
  ABI_ALLOCATE(gpq,(nfft))
  ABI_ALLOCATE(gpq2,(nfft))
- ABI_ALLOCATE(barev(nfft))
  
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
@@ -165,7 +164,6 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  ABI_DEALLOCATE(gq)
  ABI_DEALLOCATE(gpq)
  ABI_DEALLOCATE(gpq2)
- ABI_DEALLOCATE(barev(nfft))
 
 end subroutine barevcoul
 !!***
