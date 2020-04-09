@@ -1,6 +1,6 @@
 
-.Version 9.0.1 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.2 of MULTIBINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  2 Mar 2020.
-- ( at 08h25 )
+.Starting date : Sat  4 Apr 2020.
+- ( at 14h24 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--t81.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_Multibinit-slc/tests/v9/Input/t81.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -108,6 +108,6 @@ reading spin terms.
 
 ================================================================================
 
-+Total cpu time      0.016  and wall time      0.020 sec
++Total cpu time      0.019  and wall time      0.019 sec
 
  multibinit : the run completed succesfully.
