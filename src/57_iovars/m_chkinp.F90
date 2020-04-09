@@ -2188,7 +2188,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   !Long wave needs all k-points
+   !Longwave needs all k-points
    if(dt%kptopt==1 .or. dt%kptopt==4) then
      cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
@@ -2272,8 +2272,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-
-   !Long-wave DFPT calculation not cmpatible with nonlinear core corrections  
+   !Longwave calculation not cmpatible with nonlinear core corrections  
    if(dt%optdriver==RUNL_LONGWAVE)then
      do ipsp=1,npsp
   !    Check that xccc is zero 
@@ -2287,14 +2286,32 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end do
    end if
-
+   !Longwave calculation function only for LDA 
    allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
    if(allow)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
    end if
+   !Longwave calculation function only for useylm=1 
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
+    write(msg, '(3a,i0,2a)' )&
+  & 'A longwave calculation requires the input variable "useylm" to be 1,',ch10 ,&
+  & 'while in your input useylm=',dt%useylm,ch10,&
+  & 'Action: change "useylm" value in your input file.'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
+   !Longwave calculation not compatible with PAW
+   if(dt%optdriver==RUNL_LONGWAVE)then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
+   endif 
+   !Longwave calculation not compatible with spin-dependent calculations
+   if(dt%nsppol/=1.or.dt%nspden/=1)then
+     cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
+     cond_string(2)='nspden' ; cond_values(2)=dt%nspden
+     call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+   end if
 
-   !Long-wave DFPT calculation function only for LDA 
 
 !  optforces
 !  When ionmov>0, optforces must be >0
