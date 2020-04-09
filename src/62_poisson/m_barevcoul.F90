@@ -83,19 +83,18 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  integer,intent(in)   :: nfft,nkpt_bz
  real(dp),intent(in)  :: rcut,gsqcut,ucvol
 !arrays
- integer,intent(in)   :: ngfft(18)
- real(dp),intent(in)  :: qphon(3)
+ integer,intent(in)      :: ngfft(18)
+ real(dp),intent(in)     :: qphon(3)
  real(dp),intent(inout)  :: gmet(3,3)
- real(dp),intent(out) :: barev(nfft)
+ real(dp),intent(out)    :: barev(nfft)
 !Local variables-------------------------------
 !scalars
  integer,parameter    :: icutcoul=0,empty(3,3)=0
  integer              :: i1,i2,i23,i3,id1,id2,id3
- integer              :: ig,ig1min,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
- integer              :: ii,ii1,ing,n1,n2,n3
+ integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
+ integer              :: ii,ing,n1,n2,n3
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp)             :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,divgq0,rcut0
- character(len=100)   :: cutoff_method
+ real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
  logical              :: shortrange
 !arrays
  integer :: id(3)

@@ -2098,8 +2098,8 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
- character(len=100) :: msg,method
+ real(dp) :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
+ character(len=100) :: msg
  logical  :: shortrange
 !arrays
  integer :: id(3)
@@ -2113,8 +2113,8 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  end if
 
 ! Re-use variable defined initially in m_vcoul
-!if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
-!if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
+if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
+if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
