@@ -141,7 +141,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
      do i1=1,n1
         ii=i1+i23
         gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-        if(gpq(ii)<=cutoff) then
+        if(gpq(ii)<=cutoff.and.gpq(ii)>=tol4) then
             gpq2(ii) = piinv/gpq(ii)
         end if 
      end do
