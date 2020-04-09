@@ -37,6 +37,7 @@ nshiftk   4
  
  getwfk -1
  prteig 0 prtden 0
+ fftalg 112
 
  pp_dirpath="../../Psps_for_tests"
  pseudos = "Ni.GGA-PBE-paw.rrkj.xml"
