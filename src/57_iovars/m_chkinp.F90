@@ -2273,12 +2273,28 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
 
-   !Long-wave DFPT calculation function only for LDA 
+   !Long-wave DFPT calculation not cmpatible with nonlinear core corrections  
+   if(dt%optdriver==RUNL_LONGWAVE)then
+     do ipsp=1,npsp
+  !    Check that xccc is zero 
+       if (pspheads(ipsp)%xccc/=0) then
+         write(msg, '(5a,i0,3a)' )&
+  &     'For a longwave calculation it is not possible to use norm-conserving pseudopotentials',ch10,&
+  &     'with a non-linear core correction.',ch10,&
+  &     'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
+  &     'Action: change this pseudopotential file.'
+         MSG_ERROR_NOSTOP(msg, ierr)
+       end if
+     end do
+   end if
+
    allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
    if(allow)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
    end if
+
+   !Long-wave DFPT calculation function only for LDA 
 
 !  optforces
 !  When ionmov>0, optforces must be >0
