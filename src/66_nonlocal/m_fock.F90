@@ -2079,11 +2079,11 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nfft,nkpt_bz,icutcoul
+ integer,intent(in) :: izero,nfft,nkpt_bz
  real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2113,8 +2113,8 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  end if
 
 ! Re-use variable defined initially in m_vcoul
-if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
-if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
+!if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
+!if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
