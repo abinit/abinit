@@ -1464,6 +1464,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 #endif
 
+! lw_flexo
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_flexo',dt%lw_flexo,5,(/0,1,2,3,4/),iout)
+  if(dt%lw_flexo/=0)then
+    cond_string(1)='lw_flexo' ; cond_values(1)=dt%lw_flexo
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
+
+! lw_qdrpl
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_qdrpl',dt%lw_qdrpl,2,(/0,1/),iout)
+  if(dt%lw_qdrpl/=0)then
+    cond_string(1)='lw_qdrpl' ; cond_values(1)=dt%lw_qdrpl
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
+
 !  magconon
    call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,3,(/0,1,2/),iout)
 !!  impose nspden 4 for the moment and spinors
@@ -2311,7 +2325,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(2)='nspden' ; cond_values(2)=dt%nspden
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
-
 
 !  optforces
 !  When ionmov>0, optforces must be >0
