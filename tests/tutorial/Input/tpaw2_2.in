@@ -10,8 +10,8 @@
 pawecutdg 40.
    ecutsm 0.5
 
-  nstep   44
- tolvrs   1.0d-20
+  nstep   50
+ tolvrs   1.0d-12
  occopt   7
  tsmear   0.0075
 
