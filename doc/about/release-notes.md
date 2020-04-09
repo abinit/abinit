@@ -66,7 +66,7 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
 
 **A.5** The input variable xangst has been disabled. Use xcart instead, and specify the unit, namely Angstrom.
 
-**A.6** The name of the t-DEP main executable has been changed from `tdep" to `atdep`, in line with [[Romero2020]].
+**A.6** The name of the t-DEP main executable has been changed from `tdep" to `atdep`, in line with [[cite:Romero2020]].
 
 * * *
 
