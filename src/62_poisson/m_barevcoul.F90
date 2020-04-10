@@ -28,8 +28,11 @@ module m_barevcoul
  use defs_basis
  use m_errors
  use m_fstrings,        only : sjoin, itoa
+ use m_profiling_abi,   only : abimem_record
+
  use m_gsphere,         only : gsphere_t
  use m_qplusg,          only : cmod_qpg
+ use m_cutoff_sphere
 
  implicit none
 
@@ -86,7 +89,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  integer,intent(in)      :: ngfft(18)
  real(dp),intent(in)     :: qphon(3)
  real(dp),intent(inout)  :: gmet(3,3)
- real(dp),intent(out)    :: barev(nfft)
+ real(dp),intent(inout)    :: barev(nfft)
 !Local variables-------------------------------
 !scalars
  integer,parameter    :: icutcoul=0,empty(3,3)=0
@@ -94,7 +97,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer              :: ii,ing,n1,n2,n3
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
+ real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0,testv(nfft)
  logical              :: shortrange
 !arrays
  integer :: id(3)
@@ -149,7 +152,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  end do
 
  do ig=1,nfft 
-     if(gpq(ig)<tol4) then 
+     if(ABS(gpq(ig))<tol4) then 
         barev(ig)=divgq0
      else if(gpq(ig)<=cutoff) then
        if(shortrange) then
@@ -159,6 +162,15 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
        end if
     end if
  end do
+
+ if(shortrange) then
+    continue
+ else
+    call cutoff_sphere(nfft,gq,1,empty,gmet,rcut0,testv)
+ end if
+ 
+ write(*,*)testv-barev
+  
 
  ABI_DEALLOCATE(gq)
  ABI_DEALLOCATE(gpq)

@@ -2185,9 +2185,10 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
        ii1=2
 
 !      Note the combination of Spencer-Alavi and Erfc screening
-       if (abs(hyb_range_fock)>tol8)then
-         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
-       endif
+
+!       if (abs(hyb_range_fock)>tol8)then
+!         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+!       endif
 
      end if
 

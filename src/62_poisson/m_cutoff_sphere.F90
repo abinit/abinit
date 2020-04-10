@@ -104,7 +104,7 @@ subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
 
  do iqpt=1,nqpt
    igs=1
-   if (ltest .and. normv(qpt(:,iqpt),gmet,'G')<tol4) then ! For small q and G=0, use the limit q-->0.
+   if (ltest .or. normv(qpt(:,iqpt),gmet,'G')<tol4) then ! For small q and G=0, use the limit q-->0.
      vc_cut(1,iqpt)=two_pi*rcut**2
      igs=2
    end if
