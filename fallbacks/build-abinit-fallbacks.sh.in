@@ -25,6 +25,7 @@ make clean
   --disable-atompaw \
   --disable-wannier90 \
   --disable-xmlf90 --disable-libpsml \
+  LIBS_NETCDF4_FORTRAN="-ldl -lm -lz" \
   CC="@CC@" \
   CXX="@CXX@" \
   FC="@FC@"
@@ -37,7 +38,7 @@ if test "$rc" = "0"; then
   echo "The fallbacks are now ready to use."; \
   echo "You can link these fallbacks with Abinit by copying the following options to your ac9 file.";
 
-  list_of_fbks=( libxc hdf5 netcdf4 netcdf4_fortran linalg )
+  list_of_fbks=( libxc hdf5 netcdf4 netcdf4_fortran linalg xml90 libpsml wannier90 )
   for i in "${list_of_fbks[@]}"; do
     if test "`${fallbacks_prefix}/bin/abinit-fallbacks-config --enabled ${i}`" = "yes"; then
       Prefix=`${fallbacks_prefix}/bin/abinit-fallbacks-config --incs ${i}`
