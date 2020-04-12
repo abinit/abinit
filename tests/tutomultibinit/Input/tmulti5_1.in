@@ -13,7 +13,7 @@ spin_ntime = 20000              ! time steps for measurement
 spin_nctime = 100               ! Number of time steps between two writes 
                                 ! into netcdf 
 spin_dt = 1e-16 s               ! Time step (seconds)  
-spin_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each 
+spin_init_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each 
                                 ! sublattice.
 
 spin_write_traj = 0             ! do not write spin trajectory to netcdf file
