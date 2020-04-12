@@ -2155,14 +2155,13 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
     call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
     vqg=vqg*hyb_mixing
  end if
-
+ 
  if (abs(hyb_mixing_sr)>tol8) then
     shortrange=.true.
     rcut=hyb_range_fock
     call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
     vqg=vqg*hyb_mixing_sr
  end if
-
 
  ! Triple loop on each dimension
  do i3=1,n3
@@ -2186,9 +2185,9 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
 !      Note the combination of Spencer-Alavi and Erfc screening
 
-!       if (abs(hyb_range_fock)>tol8)then
-!         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
-!       endif
+       if (abs(hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+       endif
 
      end if
 

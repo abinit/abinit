@@ -89,7 +89,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  integer,intent(in)      :: ngfft(18)
  real(dp),intent(in)     :: qphon(3)
  real(dp),intent(inout)  :: gmet(3,3)
- real(dp),intent(inout)    :: barev(nfft)
+ real(dp),intent(inout)  :: barev(nfft)
 !Local variables-------------------------------
 !scalars
  integer,parameter    :: icutcoul=0,empty(3,3)=0
@@ -144,33 +144,28 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
      do i1=1,n1
         ii=i1+i23
         gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-        if(gpq(ii)<=cutoff.and.gpq(ii)>=tol4) then
-            gpq2(ii) = piinv/gpq(ii)
-        end if 
+        gpq2(ii) = piinv/four/gpq(ii)
      end do
    end do
  end do
 
  do ig=1,nfft 
-     if(ABS(gpq(ig))<tol4) then 
-        barev(ig)=divgq0
+     if(abs(gpq(ig))<tol8) then 
+        barev(ig)=barev(ig)+divgq0
      else if(gpq(ig)<=cutoff) then
        if(shortrange) then
          barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
        else
-         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut0*sqrt(four_pi/gpq2(ig))))
+         barev(ig)=barev(ig)+gpq(ig)*(one-cos(rcut0*sqrt(four_pi/gpq(ig))))
        end if
     end if
  end do
 
- if(shortrange) then
-    continue
- else
-    call cutoff_sphere(nfft,gq,1,empty,gmet,rcut0,testv)
- end if
- 
- write(*,*)testv-barev
-  
+! if(shortrange) then
+!    continue
+! else
+!    call cutoff_sphere(nfft,gq,1,empty,gmet,rcut0,testv)
+! end if
 
  ABI_DEALLOCATE(gq)
  ABI_DEALLOCATE(gpq)
