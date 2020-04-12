@@ -381,10 +381,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%dieflag=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dieflag',tread,'INT')
  if(tread==1) anaddb_dtset%dieflag=intarr(1)
- if(anaddb_dtset%dieflag<0.or.anaddb_dtset%dieflag>5)then
+ if(anaddb_dtset%dieflag<0.or.anaddb_dtset%dieflag>4)then
    write(message, '(a,i0,5a)' )&
    'dieflag is ',anaddb_dtset%dieflag,', but the only allowed values',ch10,&
-   'are 0, 1, 2, 3, 4 or 5.',ch10,'Action: correct dieflag in your input file.'
+   'are 0, 1, 2, 3 or 4.',ch10,'Action: correct dieflag in your input file.'
    MSG_ERROR(message)
  end if
 

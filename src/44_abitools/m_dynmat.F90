@@ -5910,7 +5910,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
    end if
    call wrtout(std_out,message,'COLL')
  end do
- write(message,'(a,es17.9)')' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
+ write(message,'(a,a,es17.9)') ch10,' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
  call wrtout(std_out,message,'COLL')
 
 !Put the wavevector in nice format
