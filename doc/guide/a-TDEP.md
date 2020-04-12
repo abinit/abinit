@@ -1,22 +1,22 @@
-# The tdep utility  
+# The a-TDEP utility  
 
 The Temperature Dependent Effective Potential (TDEP) method
 has been developped by O. Hellman *et al.* [[cite:Hellman2011]],
-[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the |aTDEP| implementation
+[[cite:Hellman2013]], [[cite:Hellman2013a]] in 2011 and the |a-TDEP| implementation
 in ABINIT has been performed and used for the first time in 2015 by
 J. Bouchet and F. Bottin [[cite:Bouchet2015]], [[cite:Bouchet2017]].
 
-This manual can be found as a pdf file: [[pdf:TDEP_Guide| TDEP guide]]
+This manual can be found as a pdf file: [[pdf:a-TDEP_Guide| a-TDEP guide]]
 
 ## Prerequisite and theory
 
 The approach used in this code is detailed in a publication dedicated to the development
-of all formula (see [[pdf:TDEP_Paper|TDEP paper]]). We strongly encourage all the users to carefully read
+of all formula (see [[pdf:a-TDEP_Paper|a-TDEP paper]]). We strongly encourage all the users to carefully read
 this paper before beginning. All the vibrational, elastic and thermodynamic
-quantities computed by |aTDEP| are
-presented with the same writing conventions as the ones used in the output files of |aTDEP|.
+quantities computed by |a-TDEP| are
+presented with the same writing conventions as the ones used in the output files of |a-TDEP|.
 In the same manner, a comprehensive understanding of some ABINIT basic variables is also required
-in order to fill the input file and read the output file of |aTDEP|.
+in order to fill the input file and read the output file of |a-TDEP|.
 
 In addition, this paper is also useful to understand
 the limitations and convergences which are inherent to the present method.
@@ -25,7 +25,7 @@ article, with some references and illustrating examples.
 
 ## The ABINIT computation
 
-To run |aTDEP|, a preliminary
+To run |a-TDEP|, a preliminary
 ABINIT simulation is needed. This one could be a molecular dynamic trajectory
 or a set of "ground state" calculations on specific configurations (representative of a given thermodynamic state).
 After that, all the configurations have to be merged:
@@ -34,13 +34,13 @@ After that, all the configurations have to be merged:
 as they are written in the output file of ABINIT. In the later case, the 3 files can be built easily
 by concatenating in each one all the time steps or configurations (using `agrep` shell instruction, for example).
 
-## The |aTDEP| computation
+## The |a-TDEP| computation
 
-In a same manner as performed for ABINIT, the use of |aTDEP| is quite simple. 
-One has just to execute `tdep` as follows:
+In a same manner as performed for ABINIT, the use of |a-TDEP| is quite simple. 
+One has just to execute `atdep` as follows:
 
 ```sh
-    tdep < input.files > log
+    atdep < input.files > log
 ```
 
 with the `input.files` file containing 3 lines. The first one defines the input
@@ -56,7 +56,7 @@ one is absent, the code will automatically search the 3 `ASCII.dat` files.
 
 ## The input files
 
-An example of a |aTDEP|  calculation (in the special case where the *NetCDF* file `HIST.nc` is employed)
+An example of a |a-TDEP|  calculation (in the special case where the *NetCDF* file `HIST.nc` is employed)
 can be found in [[test:v8_37]]. The 2 input files are
 given in the `tests/v8/Input` directory.  
 Let us describe briefly this [[test:v8_37]] file:
@@ -71,24 +71,24 @@ The input file format is fixed. So:
 
 More details:
 
-* The section `# Unit cell definition` defines the bravais lattice [[brav@tdep|brav]]
-  (here, a simple cubic), the number of atoms in the unit cell [[natom_unitcell@tdep|natom_unitcell]]
-  (here, 5 atoms), their reduced coordinates in the unit cell [[xred_unitcell@tdep|xred_unitcell]]
-  (here, a perovskite) and the type of atoms in the unit cell [[typat_unitcell@tdep|typat_unitcell]]
+* The section `# Unit cell definition` defines the bravais lattice [[brav@atdep|brav]]
+  (here, a simple cubic), the number of atoms in the unit cell [[natom_unitcell@atdep|natom_unitcell]]
+  (here, 5 atoms), their reduced coordinates in the unit cell [[xred_unitcell@atdep|xred_unitcell]]
+  (here, a perovskite) and the type of atoms in the unit cell [[typat_unitcell@atdep|typat_unitcell]]
   (here, one atom A, one atom B and 3 atoms C).
 * The section `# Supercell definition` defines the multiplicity of the
   supercell with respect to the unit cell multiplicity (here, it is a simple
   2x2x2 multiplication of the unit cell) and the temperature of the system
   temperature(here, 495.05 K).
-* The section `# Computation details` defines the range [[nstep_max@tdep|nstep_max]]...[[nstep_min@tdep|nstep_min]]
+* The section `# Computation details` defines the range [[nstep_max@atdep|nstep_max]]...[[nstep_min@atdep|nstep_min]]
   of time steps or configurations (here, 100 time steps) and the
-  cutoff radius for the pair interactions [[rcut@tdep|Rcut]] (here, all the interaction pairs
+  cutoff radius for the pair interactions [[rcut@atdep|Rcut]] (here, all the interaction pairs
   with a bond length larger than 7.426 bohr will not be considered).
 * The section `# Optional inputs` can define a large number of optional
-  keywords (here [[ngqpt2@tdep|ngqpt2]] defining the q-point grid for the vDOS integration
+  keywords (here [[ngqpt2@atdep|ngqpt2]] defining the q-point grid for the vDOS integration
   is set to 2 2 2 in order to have a test sufficiently fast, which means that
   all the thermodynamic quantities have no sense.)
-All the input variables are defined in the `tdep` section of the input variables description.
+All the input variables are defined in the `a-TDEP` section of the input variables description.
 Note that some input variables, not defined in the `input.in` file, are obtained
 from the `HIST.nc` file. In particular, the features of the supercell.
 
@@ -96,7 +96,7 @@ from the `HIST.nc` file. In particular, the features of the supercell.
 
 ## The output files
 
-A large number of output files are obtained after an execution of |aTDEP|.
+A large number of output files are obtained after an execution of |a-TDEP|.
 
 {% dialog tests/v8/Refs/t37.out %}
 {% dialog tests/v8/Refs/t37omega.dat %}
