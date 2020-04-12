@@ -97,7 +97,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
  integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer              :: ii,ing,n1,n2,n3
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0,testv(nfft)
+ real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
  logical              :: shortrange
 !arrays
  integer :: id(3)
@@ -144,23 +144,30 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
      do i1=1,n1
         ii=i1+i23
         gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
-        gpq2(ii) = piinv/four/gpq(ii)
+        if(gpq(ii)>=tol4) then 
+          gpq2(ii) = piinv/four/gpq(ii)
+        end if 
      end do
    end do
  end do
 
+ open (unit = 10, file = "/home/guster/barevvv.txt") 
+
  do ig=1,nfft 
-     if(abs(gpq(ig))<tol8) then 
+     if(abs(gpq(ig))<tol4) then 
         barev(ig)=barev(ig)+divgq0
      else if(gpq(ig)<=cutoff) then
        if(shortrange) then
          barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
        else
-         barev(ig)=barev(ig)+gpq(ig)*(one-cos(rcut0*sqrt(four_pi/gpq(ig))))
+         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut0*sqrt(gpq(ig)*four/piinv)))
+         write(10,*)barev(ig)
        end if
     end if
  end do
 
+
+ close(10)
 ! if(shortrange) then
 !    continue
 ! else
