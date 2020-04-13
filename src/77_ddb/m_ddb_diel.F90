@@ -106,14 +106,14 @@ contains
 !! SOURCE
 
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-& iout,lst0,mpert,natom,nph2l,phfrq,comm,ncid)
+& iout,lst,mpert,natom,nph2l,phfrq,comm,ncid)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iout,mpert,natom,nph2l,comm,ncid
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
- real(dp),intent(in) :: lst0
+ real(dp),intent(in) :: lst(nph2l+1)
 
 !arrays
  real(dp),intent(in) :: amu(Crystal%ntypat),d2cart(2,3,mpert,3,mpert)
@@ -130,7 +130,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  character(len=500) :: message
  logical :: t_degenerate
 !arrays
- real(dp) :: qphon(3),refl(3),lst(nph2l)
+ real(dp) :: qphon(3),refl(3)
  real(dp),allocatable :: frdiel(:,:,:),modez(:,:,:),oscstr(:,:,:,:),dielt_modedecompo(:,:,:)
  character(len=1),allocatable :: metacharacter(:)
 
@@ -362,23 +362,14 @@ if(nph2l/=0 .and. dieflag/=2) then
 !  Examine every wavevector in the phonon list
    do iphl2=1,anaddb_dtset%nph2l
 
-     ! Prepare the evaluation of the Lyddane-Sachs-Teller relation
-     lst(iphl2)=zero
-     ! The fourth mode should have positive frequency, otherwise,
-     ! there is an instability, and the LST relationship should not be evaluated
-     if(phfrq(4)>tol6)then
-       do ii=4,3*natom
-         lst(iphl2)=lst(iphl2)+2*log(phfrq(ii))
-       end do
-     end if
-    
      qphon(1:3)=anaddb_dtset%qph2l(1:3,iphl2)
-     if( abs(qphon(1))>DDB_QTOL .or. abs(qphon(2))>DDB_QTOL .or. abs(qphon(3))>DDB_QTOL)then
+
+     if(abs(qphon(1))>DDB_QTOL .or. abs(qphon(2))>DDB_QTOL .or. abs(qphon(3))>DDB_QTOL)then
        q2=qphon(1)**2+qphon(2)**2+qphon(3)**2
        eps=qphon(1)**2*epsinf(1,1)+qphon(2)**2*epsinf(2,2)+&
 &      qphon(3)**2*epsinf(3,3)+ 2* ( qphon(1)*qphon(2)*epsinf(1,2)+&
 &      qphon(1)*qphon(3)*epsinf(1,3)+qphon(2)*qphon(3)*epsinf(2,3))
-       eps=eps/q2*exp(lst(iphl2)-lst0)
+       eps=eps/q2*exp(lst(iphl2)-lst(anaddb_dtset%nph2l+1))
        if (my_rank == master) then
          write(iout, '(3f10.5,f16.8)' )qphon,eps
          write(std_out,'(3f10.5,f16.8)' )qphon,eps

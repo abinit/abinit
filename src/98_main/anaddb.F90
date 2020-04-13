@@ -100,13 +100,13 @@ program anaddb
  integer :: count_wminmax(2)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli !,cpu, wall, gflops
- real(dp) :: epsinf(3,3),dielt_rlx(3,3),genafm(3),lst0=zero
+ real(dp) :: epsinf(3,3),dielt_rlx(3,3),genafm(3)
  real(dp) :: compl(6,6),compl_clamped(6,6),compl_stress(6,6)
  real(dp) :: elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: red_ptot(3),pel(3)
  real(dp) :: piezo(6,3),qphnrm(3),qphon(3,3),strten(6),tsec(2)
  real(dp) :: wminmax(2)
- real(dp),allocatable :: d2cart(:,:),dchide(:,:,:)
+ real(dp),allocatable :: d2cart(:,:),dchide(:,:,:),lst(:)
  real(dp),allocatable :: dchidt(:,:,:,:),displ(:),eigval(:,:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),fact_oscstr(:,:,:),instrain(:,:)
  real(dp),allocatable :: fred(:,:),phfrq(:)
@@ -306,7 +306,6 @@ program anaddb
  ABI_MALLOC(phfrq,(3*natom))
  ABI_MALLOC(zeff,(3,3,natom))
  ABI_MALLOC(qdrp_cart,(3,3,3,natom))
-! ABI_MALLOC(lst,(inp%nph2l))
 
 !**********************************************************************
 !**********************************************************************
@@ -628,8 +627,10 @@ program anaddb
 !**********************************************************************
 ! Dielectric constant calculations, diefalg options (EB)
 !**********************************************************************
-   write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
-   call wrtout([std_out, ab_out], msg)
+ write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
+ call wrtout([std_out, ab_out], msg)
+ 
+ ABI_MALLOC(fact_oscstr, (2,3,3*natom))
 
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
@@ -641,7 +642,6 @@ program anaddb
   ! already done before in this routine. (EB)
   ! The problem is that it is done through mkphbs, which has only printing and no out... (EB)
  
-  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
 
   qphon(:,1)=zero; qphnrm(1)=zero
   ! Generation of the dynamical matrix in cartesian coordinates
@@ -675,7 +675,7 @@ program anaddb
   ! relaxed dielectric tensor, frequency dependent dielectric tensor (dieflag=1,3,4)
   ! and mode by mode decomposition of epsilon if dieflag==3
   call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-    ab_out,lst0,mpert,natom,0,phfrq,comm,ana_ncid) 
+    ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid) 
 
 end if ! dieflag!=0
 
@@ -688,6 +688,9 @@ end if ! dieflag!=0
  end if
 
  if (inp%nph2l/=0) then
+
+   ABI_MALLOC(lst,(inp%nph2l+1))
+
    write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
    call wrtout([std_out, ab_out], msg)
 
@@ -701,10 +704,10 @@ end if ! dieflag!=0
 #endif
    end if
 !  Get the log of product of the square of the phonon frequencies without non-analyticities (q=0)
-!  For the Lyddane-Sachs-Teller relation
-   lst0=zero
+!  For the Lyddane-Sachs-Teller relation, it is stored in lst(nph2+1)
+   lst(inp%nph2l+1)=zero
    do ii=4,3*natom
-     lst0=lst0+2*log(phfrq(ii))
+     lst(inp%nph2l+1)=lst(inp%nph2l+1)+2*log(phfrq(ii))
    end do
 
    ! Examine every wavevector of this list
@@ -732,6 +735,15 @@ end if ! dieflag!=0
 #endif
      end if
 
+     !  Get the log of product of the square of the phonon frequencies with non-analyticities (q-->0)
+     !  For the Lyddane-Sachs-Teller relation
+     lst(iphl2)=zero
+     ! The fourth mode should have positive frequency, otherwise,
+     ! there is an instability, and the LST relationship should not be evaluated
+     do ii=4,3*natom
+       lst(iphl2)=lst(iphl2)+2*log(phfrq(ii))
+     end do
+
 
 ! EB I've commented the lines below, sounds useless in this loop?
 ! If it is used under some condtions, an if is necessary
@@ -756,8 +768,9 @@ end if ! dieflag!=0
   ! For the Lyddane-Sachs-Teller relation
     if (inp%nph2l/=0 .and. inp%dieflag/=2) then
       call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-        ab_out,lst0,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
+        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
     end if 
+   ABI_FREE(lst)
  end if ! nph2l/=0   
    
 
