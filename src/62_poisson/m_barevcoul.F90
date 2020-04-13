@@ -151,8 +151,6 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
    end do
  end do
 
- open (unit = 10, file = "/home/guster/barevvv.txt") 
-
  do ig=1,nfft 
      if(abs(gpq(ig))<tol4) then 
         barev(ig)=barev(ig)+divgq0
@@ -160,14 +158,11 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
        if(shortrange) then
          barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
        else
-         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut0*sqrt(gpq(ig)*four/piinv)))
-         write(10,*)barev(ig)
+         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut*sqrt(pi/gpq2(ig))))
        end if
     end if
  end do
 
-
- close(10)
 ! if(shortrange) then
 !    continue
 ! else

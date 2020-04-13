@@ -2112,10 +2112,6 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
    MSG_BUG(msg)
  end if
 
-! Re-use variable defined initially in m_vcoul
-!if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
-!if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
-
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
