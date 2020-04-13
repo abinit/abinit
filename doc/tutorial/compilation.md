@@ -8,7 +8,7 @@ This tutorial explains how to compile ABINIT and the required external dependenc
 without relying on pre-compiled libraries, package managers and root privileges.
 You will learn how to use the standard **configure** and **make** approach
 to build and install your own software stack including the MPI library and the associated wrappers 
-required to compile parallel code.
+required to compile parallel applications.
 
 It is assumed that you already have a standard Linux installation 
 providing the basic tools required to build software from source (Fortran/C compilers and *make*).
@@ -52,7 +52,19 @@ This very important case is covered in more details in the next sections.
 First of all, let's make sure **gfortran** is installed by issuing in the terminal:
 
 ```sh
+which gfortran
+/usr/bin/gfortran
+```
+
+The **which** command, returns the absolute path of the executable.
+Note that we will use the *which* command a lot in the rest of this tutorial.
+This tool is extremely useful to pin point possible problems.
+
+
+```sh
 gfortran --version
+GNU Fortran (GCC) 5.3.1 20160406 (Red Hat 5.3.1-6)
+Copyright (C) 2015 Free Software Foundation, Inc.
 ```
 
 At present, ABINIT requires version >= ??.
@@ -64,24 +76,16 @@ On Ubuntu, for instance, use:
 sudo apt-get install gfortran
 ```
 
-The **which** command, returns the absolute path of the executable.
-
-```sh
-which gfortran
-```
-
-Note that we will use the *which* command a lot in the rest of this tutorial.
-This tool is extremely useful to pin point possible problems.
-
 Now let's check whether **make** is already installed with:
 
 ```sh
 which make
+/usr/bin/make
 ```
 
 !!! tip
 
-    Things are more complicated if you are a Mac-OsX users since Apple does not officially 
+    Things are more complicated if you are a Mac-OsX user since Apple does not officially 
     support Fortran so you will need to install gfortran either via 
     [homebrew](https://brew.sh/) or [macport](https://www.macports.org/).
     Alternatively, one can install gfortran using one of the standalone DMG installers
@@ -161,9 +165,20 @@ tar -xvf v0.3.7.tar.gz
 then `cd` to the directory with:
 
 ```sh
-cd OpenBLAS-0.3.7/
+cd OpenBLAS-0.3.7
 ```
 
+and execute 
+
+```sh
+make -j2 USE_THREAD=0 USE_LOCKING=1 
+```
+
+to build the single thread version.
+By default, openblas activates threads (see [FAQ page](https://github.com/xianyi/OpenBLAS/wiki/Faq#multi-threaded))
+but here we prefer to have a sequential version
+
+<!--
 and execute the *configure* script with:
 
 ```sh
@@ -181,16 +196,11 @@ from to the libraries installed by your Linux distribution so that we can easily
 different versions without affecting the OS installation.
 
 Now issue:
-
-```sh
-make -j2
-```
-
-to build openblas. 
+-->
 The `-j2` option tells make to use 2 processes to build the package in order to speed up the compilation. 
 Adjust this value according to the number of (physical) cores available on your machine.
 
-At the end, you should get the following printout:
+At the end, you should get the following output:
 
 ```md
  OpenBLAS build complete. (BLAS CBLAS LAPACK LAPACKE)
@@ -200,17 +210,24 @@ At the end, you should get the following printout:
   BINARY           ... 64bit
   C compiler       ... GCC  (command line : cc)
   Fortran compiler ... GFORTRAN  (command line : gfortran)
-  Library Name     ... libopenblas_haswellp-r0.3.7.a (Multi threaded; Max num-threads is 12)
+  Library Name     ... libopenblas_haswell-r0.3.7.a (Single threaded)
 
 To install the library, you can run "make PREFIX=/path/to/your/installation install".
 ```
 
-Before installing the library, it is good common practice to run the test suite to **validate** the build.
-Many packages provide a `make check` option to run the test suite,
-other packages define a `make tests` target or more exotic options.
-If in doubt, use `make --help` to list the available options.
+A compilation with plain make would give:
 
-If all the tests are OK, install the library by issuing:
+```md
+  Library Name     ... libopenblas_haswellp-r0.3.7.a (Multi threaded; Max num-threads is 12)
+```
+
+that indicates the our library supports threads.
+
+You may have noticed that make in this case is not just build the library but is also 
+running unit tests to validate the build.
+This means that if `make` completes successfully, we can be confident that the build is OK and we can proceed 
+with the installation.
+Other packages use a different philosophy and provide a `make check` option to run the test suite.
 
 ```sh
 make PREFIX=$HOME/local/ install
@@ -219,10 +236,11 @@ make PREFIX=$HOME/local/ install
 At this point, you should have the following libraries installed in $HOME/local/lib:
 
 ```sh
-ls $HOME/local/lib/
+ls $HOME/local/lib/libopenblas*
 
-cmake          libopenblas.so    libopenblas_haswellp-r0.3.7.a   pkgconfig
-libopenblas.a  libopenblas.so.0  libopenblas_haswellp-r0.3.7.so
+/home/gmatteo/local/lib/libopenblas.a     /home/gmatteo/local/lib/libopenblas_haswell-r0.3.7.a
+/home/gmatteo/local/lib/libopenblas.so    /home/gmatteo/local/lib/libopenblas_haswell-r0.3.7.so
+/home/gmatteo/local/lib/libopenblas.so.0
 ```
 
 <!--
@@ -264,6 +282,14 @@ echo $LD_LIBRARY_PATH
 
 to print the value of these variables to the terminal.
 
+```sh
+echo $PATH
+/home/gmatteo/local/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+
+[echo $LD_LIBRARY_PATH
+/home/gmatteo/local/lib:
+```
+
 If this is the first time you hear about $PATH and $LD_LIBRARY_PATH, please take some time to learn
 about the meaning of this environment variables.
 More information about `$PATH` is available [here](http://www.linfo.org/path_env_var.html)
@@ -279,7 +305,8 @@ More information about `$PATH` is available [here](http://www.linfo.org/path_env
     env | grep LD_
     ```
 
-Just to recap: TODO
+Just to recap: 
+TODO
 
 
 ## How to compile libxc
@@ -288,53 +315,68 @@ At this point, it should not be that difficult to compile and install the libxc 
 Libxc is written in C and can be built using the standard `configure && make` approach.
 No external dependency is needed except for basic C libraries that are available
 on every decent Linux distribution.
-<!--
-The only thing worth noticing is that you will need to activate the Fortran interface
--->
+<!-- The only thing worth noticing is that you will need to activate the Fortran interface -->
 
 Also in this case, you are supposed to configure the package with the *--prefix* option, 
 run the tests to validate the build and finally execute `make install`.
 The required commands are given below:
 
 ```sh
-# Get the tarball
+# Get the tarball. Mind -O option.
 cd $HOME/local/src
-wget http://www.tddft.org/programs/libxc/down.php?file=4.3.4/libxc-4.3.4.tar.gz
-tar -zxvf libxc-4.3.4.tar.gz
+wget http://www.tddft.org/programs/libxc/down.php?file=4.3.4/libxc-4.3.4.tar.gz -O libxc.tar.gz
+tar -zxvf libxc.tar.gz
 
-# Configure the package.
-cd libxc-4.3.4
-./configure --prefix=$HOME/local
+Configure the package with:
 
-# Build + Run tests + Install
-make -j2
-make check
-make install
 ```
+cd libxc-4.3.4 && ./configure --prefix=$HOME/local
+```
+
+and then Build + Run tests + Install with:
+
+```
+make -j2
+make check && make install
+```
+
+<!--
+Before installing the library, it is good common practice to run the test suite to **validate** the build.
+Many packages provide a `make check` option to run the test suite,
+other project define a `make tests` target or more exotic options.
+If in doubt, use `make --help` to list the available options.
+If all the tests are OK, install the library by issuing:
+->
 
 Now let's have a look at the libraries we have just installed:
 
 ```sh
-[gmatteo@bob libxc-4.3.4]$ ls ~/local/lib/libxc*
+ls ~/local/lib/libxc*
 /home/gmatteo/local/lib/libxc.a   /home/gmatteo/local/lib/libxcf03.a   /home/gmatteo/local/lib/libxcf90.a
 /home/gmatteo/local/lib/libxc.la  /home/gmatteo/local/lib/libxcf03.la  /home/gmatteo/local/lib/libxcf90.la
 ```
+
+libxc is the C library.
+libxcf90 is the F90 library 
+libxcf03  is the F2003 library
+
+Disscu FCFLAGS and FCDFLAGS
 
 ## Installing FFTW
 
 FFTW is a C library for computing the Fast Fourier transform in one or more dimensions.
 ABINIT already provides an internal implementation of the FFT algorithm
 hence FFTW is an optional dependency although highly recommended if you care about **performance**. 
-It should be noted indeed that FFTW (or, even better, the DFTI library provided by intel MKL) 
+as FFTW (or, even better, the intel DFTI library provided by MKL) 
 is usually faster than the internal ABINIT version.
 
 The FFTW source code can be downloaded from [fftw.org](http://www.fftw.org/), 
 and the tarball of the latest version is available at <http://www.fftw.org/fftw-3.3.8.tar.gz>.
 
 ```
+cd $HOME/local/src
 wget http://www.fftw.org/fftw-3.3.8.tar.gz
-tar -zxvf fftw-3.3.8.tar.gz
-cd fftw-3.3.8/
+tar -zxvf fftw-3.3.8.tar.gz && cd fftw-3.3.8
 ```
 
 The compilation procedure is very similar to the one we used for libxc. 
@@ -343,26 +385,59 @@ This means that you need to configure, build and install the package twice:
 
 ```sh
 ./configure --prefix=$HOME/local --enable-single
-make && make check && make install
+make -j2 
+make check && make install
 ```
 
+Let's have a look at the libraries we've just installed with:
+
 ```sh
-./configure --prefix=$HOME/local --enable-long-double
-make && make check && make install
+ls $HOME/local/lib/libfftw3*
+/home/gmatteo/local/lib/libfftw3f.a  /home/gmatteo/local/lib/libfftw3f.la
 ```
 
-At the end, you should have the following libraries installed 
+the `f` at the end stands for `float` (C jargon for single precision)
+Now we configure for the double precision version (default)
 
 ```sh
-[gmatteo@bob fftw-3.3.8]$ ls $HOME/local/lib/libfftw3*
-/home/gmatteo/local/lib/libfftw3f.a   /home/gmatteo/local/lib/libfftw3l.a
-/home/gmatteo/local/lib/libfftw3f.la  /home/gmatteo/local/lib/libfftw3l.la
+./configure --prefix=$HOME/local
+make -j2 
+make check && make install
+```
+
+After this step, you should have both the single (`f`) and the double (`l`) version of the library:
+
+```sh
+ls $HOME/local/lib/libfftw3*
+/home/gmatteo/local/lib/libfftw3.a   /home/gmatteo/local/lib/libfftw3f.a 
+/home/gmatteo/local/lib/libfftw3.la  /home/gmatteo/local/lib/libfftw3f.la
+```
+
+To make sure we have the Fortran API bundled in the library, one can use the `nm` tool
+
+
+```sh
+[gmatteo@bob fftw-3.3.8]$ nm $HOME/local/lib/libfftw3f.a | grep sfftw_plan_many_dft
+0000000000000400 T sfftw_plan_many_dft_
+0000000000003570 T sfftw_plan_many_dft__
+0000000000001a90 T sfftw_plan_many_dft_c2r_
+0000000000004c00 T sfftw_plan_many_dft_c2r__
+0000000000000f60 T sfftw_plan_many_dft_r2c_
+00000000000040d0 T sfftw_plan_many_dft_r2c__
+
+[gmatteo@bob fftw-3.3.8]$ nm $HOME/local/lib/libfftw3.a | grep dfftw_plan_many_dft
+0000000000000400 T dfftw_plan_many_dft_
+0000000000003570 T dfftw_plan_many_dft__
+0000000000001a90 T dfftw_plan_many_dft_c2r_
+0000000000004c00 T dfftw_plan_many_dft_c2r__
+0000000000000f60 T dfftw_plan_many_dft_r2c_
+00000000000040d0 T dfftw_plan_many_dft_r2c__
 ```
 
 !!! note 
 
     At present, there's no need to compile FFTW with MPI support because ABINIT implements its own
-    version of the MPI-FFT algorithm using the sequential FFTW API.
+    version of the MPI-FFT algorithm using the sequential FFTW version.
     The MPI-algorithm implemented in ABINIT is rather advanced and optimized for plane-waves codes 
     as it supports zero-padding and composite transforms for the applications of the local part of the KS potential. 
 
@@ -372,13 +447,14 @@ At the end, you should have the following libraries installed
 In this section, we discuss how to compile and install the MPI library.
 This step is required if you need to compile MPI-based libraries such as
 Scalapack or HDF5 with support for parallel IO (MPI-IO)
-and/or you want to run ABINIT calculations with multiple processes.
+and/or you plan to run ABINIT with multiple processes.
 
-We will see that the MPI installation provides two scripts (**mpif90** and **mpicc**)
+It is worth to stress that the MPI installation provides two scripts (**mpif90** and **mpicc**)
 wrapping the Fortran and the C compiler, respectively.
-These scripts must be used to compile software using MPI instead of the "sequential" compilers `gfortran` and `gcc`. 
-The MPI library also provides launcher scripts (*mpirun* or *mpiexec*)
-to execute MPI applications with NUM_PROCS processes with the syntax:
+These scripts must be used to compile parallel software using MPI instead 
+of the "sequential" compilers `gfortran` and `gcc`. 
+The MPI library also provides launcher scripts installed in the *bin* directory (*mpirun* or *mpiexec*)
+to execute MPI applications with NUM_PROCS processes and the syntax:
 
 ```sh
 mpirun -n NUM_PROCS EXECUTABLE [ARGS]
@@ -402,42 +478,79 @@ from this [webpage](https://www.mpich.org/downloads/).
 In the terminal, issue:
 
 ```sh
+cd $HOME/local/src
 wget http://www.mpich.org/static/downloads/3.3.2/mpich-3.3.2.tar.gz
 tar -zxvf mpich-3.3.2.tar.gz
+cd mpich-3.3.2/
 ```
 
 to download and uncompress the tarball.
 Then one can configure/compile/test/install the library with:
 
 ```sh
-cd mpich-3.3.2/
 ./configure --prefix=$HOME/local
-
 make -j2
-make check
-make install
+make check && make install
 ```
 
-Let's have a look at the MPI executables we just installed:
+```sh
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /home/gmatteo/local/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the '-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+     during linking
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+```
+
+Let's have a look at the MPI executables we just installed in $HOME/local/bin:
 
 ```sh
-[gmatteo@bob mpich-3.3.2]$ ls $HOME/local/bin/mpi*
+ls $HOME/local/bin/mpi*
 /home/gmatteo/local/bin/mpic++        /home/gmatteo/local/bin/mpiexec        /home/gmatteo/local/bin/mpifort
 /home/gmatteo/local/bin/mpicc         /home/gmatteo/local/bin/mpiexec.hydra  /home/gmatteo/local/bin/mpirun
 /home/gmatteo/local/bin/mpichversion  /home/gmatteo/local/bin/mpif77         /home/gmatteo/local/bin/mpivars
 /home/gmatteo/local/bin/mpicxx        /home/gmatteo/local/bin/mpif90
 ```
 
+Since we added $HOME/local/bin to our $PATH, we should see that *mpi90* is actually 
+pointing to the version we have just installed:
+
 ```sh
 which mpif90
-$ mpif90 -v
+~/local/bin/mpif90
 ```
 
-The C include files (*.h*) and the Fortran modules (*.mod*) have been installed in `$HOME/local/include/`:
-
+As already mentioned, *mpif90* is a wrapper around the sequential Fortran compiler. 
+To get info on the Fortran compiler invoked by *mpif90*, one can use:
 
 ```sh
-[gmatteo@bob mpich-3.3.2]$ ls $HOME/local/include/mpi*
+mpif90 -v
+mpifort for MPICH version 3.3.2
+Using built-in specs.
+COLLECT_GCC=gfortran
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/5.3.1/lto-wrapper
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,objc,obj-c++,fortran,ada,go,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --disable-libgcj --with-isl --enable-libmpx --enable-gnu-indirect-function --with-tune=generic --with-arch_32=i686 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 5.3.1 20160406 (Red Hat 5.3.1-6) (GCC)
+```
+
+The C include files (*.h*) and the Fortran modules (*.mod*) have been installed in `$HOME/local/include`:
+
+```sh
+ls $HOME/local/include/mpi*
 /home/gmatteo/local/include/mpi.h              /home/gmatteo/local/include/mpicxx.h
 /home/gmatteo/local/include/mpi.mod            /home/gmatteo/local/include/mpif.h
 /home/gmatteo/local/include/mpi_base.mod       /home/gmatteo/local/include/mpio.h
@@ -448,7 +561,7 @@ The C include files (*.h*) and the Fortran modules (*.mod*) have been installed 
 !!! important
 
     The `.mod` files are Fortran modules produced by the Fortran compiler.
-    These modules will be "used" by other Fortran modules/programs during the compilation process.
+    These modules must be *visible* to the Fortran compiler when compiling other Fortran code e.g ABINIT.
     Note that these `.mod` files are **compiler-dependent** and the format may depend on the version of the compiler.
     In other words, one cannot use these module files to compile Fortran code with another compiler.
 
@@ -471,7 +584,7 @@ Uncompress the archive with *tar* as usual.
 To configure the package, use:
 
 ```sh
-./configure --prefix=$HOME/local/ CC=$HOME/local/bin/mpicc --enable-parallel
+./configure --prefix=$HOME/local/ CC=$HOME/local/bin/mpicc --enable-parallel --enable-shared
 ```
 
 where we've used *CC* variable to specify the C compiler.
@@ -521,8 +634,9 @@ Parallel HDF5: yes
 ```
 
 tells us that our HDF5 build will support parallel IO (because we used CC=mpicc during the configuration step).
-Also note that Fortran support is **optional** at this level because 
-ABINIT will be interfaced with HDF5 through the Fortran bindings provided by netcdf.
+Also note that, as far as ABINIT is concerned, Fortran support is **optional**
+as ABINIT will be interfaced with HDF5 through the Fortran bindings provided by netcdf.
+In other words, ABINIT requires netcdf-fortran and not the Fortran bindings for HDF5.
 
 Again, issue `make -j NUM` followed by 
 `make check` (**Warning: it may take some time!**) and finally `make install`.
@@ -541,7 +655,7 @@ and unpack the tarball files as usual.
 To compile the C library, use:
 
 ```sh
-cd netcdf-c-4.7.3/
+cd netcdf-c-4.7.3
 ./configure --prefix=$HOME/local/ CC=$HOME/local/bin/mpicc LDFLAGS=-L$HOME/local/lib CPPFLAGS=-I$HOME/local/include
 ```
 
@@ -597,8 +711,7 @@ Now use the standard sequence of commands to compile and install the package:
 
 ```sh
 make -j2
-make check
-make install
+make check && make install
 ```
 
 Once your are done with the installation, use the `nc-config` executable to 
@@ -633,8 +746,7 @@ Then issue:
 
 ```sh
 make -j2
-make check
-make install
+make check && make install
 ```
 
 To inspect the features activated in our Fortran library, we can use `nf-config` instead of **nc-config**:
@@ -649,7 +761,7 @@ To get a summary of the options used to build the Fortran bindings and of the av
 [gmatteo@bob netcdf-c-4.7.3]$ nf-config --all
 ```
 
-## How to compile Abinit
+## How to compile ABINIT
 
 In this section, we discuss how to compile and install ABINIT 
 using the (MPI) compilers and the libraries installed previously.
@@ -919,4 +1031,27 @@ Remember to attach the log file when asking for help on the ABINIT forum
 
 How to use gdb
 
+
+How to use LLDB
+
+$ lldb ../../../src/98_main/abinit
+(lldb) target create "../../../src/98_main/abinit"
+Current executable set to '../../../src/98_main/abinit' (x86_64).
+(lldb) settings set target.input-path t85.in
+(lldb) run
+
+
+
+
+	/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLAPACK.dylib (compatibility version 1.0.0, current version 1.0.0)
+	/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib (compatibility version 1.0.0, current version 1.0.0)
+
+```sh
+# Enable ZDOTC and ZDOTU bugfix (gmatteo)
+#
+enable_zdot_bugfix="yes"
+```
+
 ### Additional resources
+
+
