@@ -2152,7 +2152,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
     if (abs(hyb_range_fock)>tol8)then
        vqg(1)=hyb_mixing_sr*(pi/hyb_range_fock**2)
     endif
-    vqg=vqg!*hyb_mixing :BG: What did this do before? Seems it didn't change V?!
+    vqg=vqg*hyb_mixing 
  end if
  
  if (abs(hyb_mixing_sr)>=tol4) then
@@ -2162,7 +2162,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
     if (abs(hyb_range_fock)>tol8)then
        vqg(1)=hyb_mixing_sr*(pi/hyb_range_fock**2)
     endif
-    vqg=vqg!*hyb_mixing_sr :BG: What did this do before? Seems it didn't change V?!
+    vqg=vqg*hyb_mixing_sr 
  end if
 
  ! Triple loop on each dimension
