@@ -150,7 +150,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
      end do
    end do
  end do
-
+ 
  do ig=1,nfft 
      if(abs(gpq(ig))<tol4) then 
         barev(ig)=barev(ig)+divgq0
@@ -162,11 +162,13 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
        end if
     end if
  end do
-
+ 
+! barev=zero
+ 
 ! if(shortrange) then
 !    continue
 ! else
-!    call cutoff_sphere(nfft,gq,1,empty,gmet,rcut0,testv)
+!    call cutoff_sphere(nfft,gq,1,empty,gmet,rcut,barev)
 ! end if
 
  ABI_DEALLOCATE(gq)

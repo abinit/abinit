@@ -2145,56 +2145,39 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
- if (abs(hyb_mixing)>tol8) then
+ if (abs(hyb_mixing)>=tol4) then
     shortrange=.false.
     rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
     call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
-    vqg=vqg*hyb_mixing
+    if (abs(hyb_range_fock)>tol8)then
+       vqg(1)=hyb_mixing_sr*(pi/hyb_range_fock**2)
+    endif
+    vqg=vqg!*hyb_mixing :BG: What did this do before? Seems it didn't change V?!
  end if
  
- if (abs(hyb_mixing_sr)>tol8) then
+ if (abs(hyb_mixing_sr)>=tol4) then
     shortrange=.true.
     rcut=hyb_range_fock
     call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
-    vqg=vqg*hyb_mixing_sr
+    if (abs(hyb_range_fock)>tol8)then
+       vqg(1)=hyb_mixing_sr*(pi/hyb_range_fock**2)
+    endif
+    vqg=vqg!*hyb_mixing_sr :BG: What did this do before? Seems it didn't change V?!
  end if
 
  ! Triple loop on each dimension
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1
-   ! Precompute some products that do not depend on i2 and i1
-   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
-   gqgm23=gq(3,i3)*gmet(2,3)*2
-   gqgm13=gq(3,i3)*gmet(1,3)*2
-
    do i2=1,n2
      ig2=i2-(i2/id2)*n2-1
-     gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
-     gqgm12=gq(2,i2)*gmet(1,2)*2
-     gqg2p3=gqgm13+gqgm12
-
      i23=n1*(i2-1 +(n2)*(i3-1))
-     ! Do the test that eliminates the Gamma point outside of the inner loop
      ii1=1
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
-
-!      Note the combination of Spencer-Alavi and Erfc screening
-
-!       if (abs(hyb_range_fock)>tol8)then
-!         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
-!       endif
-
      end if
-
-     ! Final inner loop on the first dimension (note the lower limit)
      do i1=ii1,n1
-       gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
        ii=i1+i23
-
        if(gs<=cutoff)then
-         ! Identify min/max indexes (to cancel unbalanced contributions later)
-         ! Count (q+g)-vectors with similar norm
          if ((qeq05==1).and.(izero==1)) then
            ig1=i1-(i1/id1)*n1-1
            ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
