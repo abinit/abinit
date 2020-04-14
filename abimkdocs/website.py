@@ -887,15 +887,47 @@ The bibtex file is available [here](../abiref.bib).
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
 """
+        tutorial_readmev9 = """
 
+!!! note
+
+    Supposing you made your own install of ABINIT, the input files to run the examples
+    are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
+    If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
+
+    To execute the tutorials, create a working directory (`Work*`) and
+    copy there the input files of the lesson. 
+    
+    Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
+    However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
+
+    In case you work on your own PC or workstation, to make things easier, we suggest you define some handy environment variables by
+    executing the following lines in the terminal:
+
+    ```bash
+    export ABI_HOME=Replace_with_the_absolute_path_to_the_abinit_top_level_dir
+    export PATH=$ABI_HOME/src/98_main/:$PATH
+    export ABI_TESTS=$ABI_HOME/tests/
+    export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
+    ```
+
+    Examples in this tutorial use these shell variables: copy and paste
+    the code snippets into the terminal (**remember to set ABI_HOME first!**).
+    The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
+    so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
+
+"""
         new_lines = []
         for line in lines:
             if "[TUTORIAL_README]" in line:
                 new_lines.extend(tutorial_readme.splitlines())
+            elif "[TUTORIAL_READMEV9]" in line:
+                new_lines.extend(tutorial_readmev9.splitlines())
             else:
                 new_lines.append(line)
 
         return new_lines
+
 
     def _preprocess_aliases(self, lines):
         """
