@@ -1294,7 +1294,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        if(sum_token/=0 .and. sum_token/=2) then
          write(msg, '(a,a,a,a,a,i0,a,a,a,a,a,a,a)' )&
          'The keyword "',trim(cs),'" has been found to take part',ch10,&
-         'to series definition in the multi-dataset mode',sum_token,' times.',ch10,&
+         'to series definition in the multi-dataset mode  ',sum_token,' times.',ch10,&
          'This is not allowed, since it should be used once with ":",',ch10,&
          'and once with "+" or "*".',ch10,&
          'Action: change the number of occurences of this keyword.'
@@ -1945,7 +1945,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
- real(dp),allocatable :: xangst(:,:)
+ real(dp),allocatable :: xcart(:,:)
  integer, save :: atomspecies(200) = 0
  character(len=500), save :: znuclstring = ""
  character(len=2),allocatable :: elementtype(:)
@@ -1985,7 +1985,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  lenstr_new=lenstr_new+7+len_trim(dtset_char)+1+5
  string(lenstr_old+1:lenstr_new)=" _NATOM"//trim(dtset_char)//blank//string5
 
- ABI_ALLOCATE(xangst,(3,natom))
+ ABI_ALLOCATE(xcart,(3,natom))
  ABI_ALLOCATE(elementtype,(natom))
 
  ! read dummy line
@@ -1993,7 +1993,8 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
 
  ! read atomic types and positions
  do iatom = 1, natom
-   read(unitxyz,*) elementtype(iatom), xangst(:,iatom)
+   read(unitxyz,*) elementtype(iatom), xcart(:,iatom)
+   xcart(:,iatom)=xcart(:,iatom)/Bohr_Ang
    ! extract znucl for each atom type
    call atomdata_from_symbol(atom,elementtype(iatom))
    znucl = atom%znucl
@@ -2029,11 +2030,11 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  !Write the coordinates
  lenstr_old=lenstr_new
  lenstr_new=lenstr_new+8+len_trim(dtset_char)+1
- string(lenstr_old+1:lenstr_new)=" _XANGST"//trim(dtset_char)//blank
+ string(lenstr_old+1:lenstr_new)=" _XCART"//trim(dtset_char)//blank
 
  do iatom=1,natom
    do mu=1,3
-     write(string20,'(f20.12)')xangst(mu,iatom)
+     write(string20,'(f20.12)')xcart(mu,iatom)
      lenstr_old=lenstr_new
      lenstr_new=lenstr_new+20
      string(lenstr_old+1:lenstr_new)=string20
@@ -2041,7 +2042,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  end do
 
  ABI_FREE(elementtype)
- ABI_FREE(xangst)
+ ABI_FREE(xcart)
 
  !Check the length of the string
  if(lenstr_new>strln)then

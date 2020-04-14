@@ -220,6 +220,7 @@ contains
     ! It might be null if there is no lattice part.
     if (associated(self%lattice_mover)) then
        call self%lattice_mover%finalize()
+       ABI_FREE_SCALAR(self%lattice_mover)
        nullify(self%lattice_mover)
     end if
     if(.not. self%use_external_params) then
@@ -237,6 +238,7 @@ contains
     self%has_spin=.False.
     self%has_lwf=.False.
     call self%energy_table%free()
+    call self%slc_mover%finalize()
   end subroutine finalize
 
   !-------------------------------------------------------------------!

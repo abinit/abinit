@@ -711,7 +711,10 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmftqmc_seed=dtset%dmftqmc_seed
  paw_dmft%dmftqmc_therm=dtset%dmftqmc_therm
  paw_dmft%dmftqmc_t2g=dtset%dmft_t2g
- paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
+
+!paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
+ paw_dmft%dmftqmc_x2my2d=0
+
  paw_dmft%dmftctqmc_basis =dtset%dmftctqmc_basis
  paw_dmft%dmftctqmc_check =dtset%dmftctqmc_check
  paw_dmft%dmftctqmc_correl=dtset%dmftctqmc_correl

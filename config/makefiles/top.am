@@ -13,9 +13,6 @@ EXTRA_DIST += \
 CLEANFILES += \
 	config.fc_info.tmp
 
-# Files that should not be left in the source tree
-DISTCLEANFILES = fallbacks/Makefile
-
 # Files to install
 install-data-local: config.pc
 	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)/pkgconfig
@@ -89,7 +86,6 @@ multi_nprocs = 4
 # Special targets for parallel builds, in order to work around random
 # failures (e.g. LibXC, NetCDF) and make sure dependencies are met
 multi:
-	cd fallbacks && $(MAKE) @SET_MAKE@
 	$(MAKE) -j$(multi_nprocs) @SET_MAKE@
 
 multi_dual mj2:

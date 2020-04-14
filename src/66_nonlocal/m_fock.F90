@@ -27,6 +27,8 @@
 
 module m_fock
 
+ use m_vcoul 
+
  use defs_basis
  use m_abicore
  use m_errors

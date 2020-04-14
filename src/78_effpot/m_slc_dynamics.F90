@@ -168,11 +168,11 @@ module  m_slc_dynamics
    endif
 
     do while(t<self%spin_mover%total_time)
-     if (iam_master) then
-       msg="Measurement run:"
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-     end if
+     !if (iam_master) then
+     !  msg="Measurement run:"
+     !  call wrtout(std_out,msg,'COLL')
+     !  call wrtout(ab_out, msg, 'COLL')
+     !end if
 
       counter=counter+1
       !one step in coupled spin-lattice dynamics

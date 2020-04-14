@@ -10,9 +10,6 @@
   nqshft  1         ! number of q-points in repeated basic q-cell
   q1shft  3*0.0
 
-!Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-
 !Interatomic force constant info
   dipdip  0      ! Dipole-dipole interaction treatment
 

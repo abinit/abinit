@@ -25,6 +25,7 @@
  Miscellaneous information :
        eivec         4
          asr         4
+      chneut         0
  First list of wavevector (reduced coord.) :
        nph1l        11
        qph1l
@@ -87,6 +88,8 @@
 -  5.923907E+01
 
  Analysis of degeneracies and characters (maximum tolerance=2.00E-05 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
   1.0  0.5 -0.4  0.0  0.4 -0.0 -1.0 -0.5
  Symmetry characters of vibration mode #   2

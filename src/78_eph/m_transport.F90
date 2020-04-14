@@ -216,7 +216,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
- character(len=fnlen) :: path, sigeph_path
+ character(len=fnlen) :: path, sigeph_filepath
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -224,10 +224,10 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, ' Transport computation driver')
 
- sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
- sigmaph = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
+ sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigmaph = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
- ! if dtset%sigma_ngkpt /= sigeph_path
+ ! if dtset%sigma_ngkpt /= sigeph_filepath
 
  ! Initialize transport
  transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)

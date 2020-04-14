@@ -72,7 +72,7 @@ nfreqim3  0
 optdriver4 99
 getwfk4  2
 #getscr4  3
-getscr_path4 "t51o_DS3_SCR"
+getscr_filepath4 "t51o_DS3_SCR"
 getbsreso4 4
 #getbseig4 4
 
@@ -95,7 +95,6 @@ ixc 7
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [shell]
 #%% pre_commands = iw_cp test_EP.nc test_EP.nc
 #%% [files]

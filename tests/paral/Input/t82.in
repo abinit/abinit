@@ -21,7 +21,6 @@ fit_iatom = -1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t82.in
 #%% [files]
 #%% [paral_info]

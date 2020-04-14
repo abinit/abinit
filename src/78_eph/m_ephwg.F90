@@ -135,10 +135,6 @@ type, public :: ephwg_t
   ! (nibz, natom3)
   ! Phonon frequencies in the IBZ
 
-  real(dp),allocatable :: frohl_ibz(:,:)
-  ! (nibz, natom3)
-  ! Frohlich matrix elements in the IBZ
-
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
   ! Electron eigenvalues in the IBZ for nbcount states
@@ -234,15 +230,11 @@ type(ephwg_t) function ephwg_new( &
 !Local variables-------------------------------
 !scalars
  integer :: nprocs, my_rank, ik, ierr, out_nkibz
- integer :: nu, iatom
- real(dp) :: fqdamp, wqnu, inv_qepsq
- complex(dp) :: cnum, cdd(3)
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: rlatt(3,3)
  integer :: out_kptrlatt(3,3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), phfrq(3*cryst%natom)
- real(dp) :: gkq2_lr(3*cryst%natom), qpt(3), qpt_cart(3)
  real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
 
 !----------------------------------------------------------------------
@@ -281,41 +273,14 @@ type(ephwg_t) function ephwg_new( &
 
  ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
- if (frohl_model == 3) then
-   ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
- end if
 
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
    call ifc%fourq(cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
-
-   if (frohl_model /= 3) cycle
-   ! Compute Frohlich matrix elements
-   qpt = new%ibz(:,ik)
-   qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
-   if (sum(qpt_cart**2) < tol6) cycle
-   inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
-   fqdamp = (four_pi / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
-
-   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
-   gkq2_lr(:) = zero
-   do nu=1,new%natom3
-     wqnu = phfrq(nu); if (wqnu < tol8) cycle
-     cnum = zero
-     do iatom=1,cryst%natom
-       ! This is complex
-       cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
-             exp(-j_dpc * two_pi * dot_product(qpt, cryst%xred(:, iatom)))
-       cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
-     end do
-     gkq2_lr(nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
-   end do
-   new%frohl_ibz(ik,:) = gkq2_lr * fqdamp
  end do
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
- if (frohl_model == 3) call xmpi_sum(new%frohl_ibz, comm, ierr)
  call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
 end function ephwg_new
@@ -658,8 +623,6 @@ subroutine ephwg_report_stats(self)
  mem_tot = mem_tot + self%nq_k * 2 * 4
  ! phonon frequencies
  mem_tot = mem_tot + self%nibz * self%natom3 * dp
- ! Frolich matrix elements
- if (self%frohl_model == 3) mem_tot = mem_tot + self%nibz * self%natom3 * dp
  ! eigenvalues
  mem_tot = mem_tot + self%nibz * self%nbcount * self%nsppol * dp
 
@@ -1051,7 +1014,6 @@ subroutine ephwg_free(self)
  ABI_SFREE(self%bz)
  ABI_SFREE(self%lgk2ibz)
  ABI_SFREE(self%phfrq_ibz)
- ABI_SFREE(self%frohl_ibz)
  ABI_SFREE(self%eigkbs_ibz)
 
  ! types

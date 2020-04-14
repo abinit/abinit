@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.2 of MULTIBINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h36 )
+.Starting date : Sat  4 Apr 2020.
+- ( at 14h19 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t16.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_Multibinit-slc/tests/v8/Input/t16.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -86,7 +86,6 @@ reading spin terms.
 ================================================================================
     Iteration          time(s)         Avg_Mst/Ms      ETOT(Ha/uc)
 --------------------------------------------------------------------------------
-Measurement run:
 -           100      9.90000E-15      6.16231E-01     -1.96629E-03
 -           200      1.99000E-14      5.65490E-01     -1.88787E-03
 -           300      2.99000E-14      5.47008E-01     -1.84753E-03
@@ -115,6 +114,6 @@ Measurement run:
 
 ================================================================================
 
-+Total cpu time      0.121  and wall time      0.124 sec
++Total cpu time      0.124  and wall time      0.126 sec
 
  multibinit : the run completed succesfully.

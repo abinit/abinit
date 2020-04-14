@@ -113,7 +113,6 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t58.in, t59.in
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [shell] 
 #%% post_commands = 
 #%%   ww_mv t58o_DS3_DDB t59i_DS7_DDB;

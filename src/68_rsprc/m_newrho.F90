@@ -275,7 +275,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (dtset%usekden==1) then
    if ((.not.present(tauresid)).or.(.not.present(taug)).or. &
 &      (.not.present(taur)).or.(.not.present(mix_mgga))) then
-     message='Several arrays are mising!'
+     message='Several arrays are missing!'
      MSG_BUG(message)
    end if
    if (mix_mgga%iscf==AB7_MIXING_CG_ENERGY.or.mix_mgga%iscf==AB7_MIXING_CG_ENERGY_2.or.&
@@ -485,6 +485,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    call ab7_mixing_use_moving_atoms(mix, dtset%natom, xred, dtn_pc)
  end if
  call ab7_mixing_eval_allocate(mix, istep)
+
 !Copy current step arrays.
  if (moved_atm_inside == 1) then
    call ab7_mixing_copy_current_step(mix, nresid0, errid, message, arr_respc = nrespc, arr_atm = grhf)
@@ -494,6 +495,8 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (errid /= AB7_NO_ERROR) then
    MSG_ERROR(message)
  end if
+
+!Same treatment for the kinetic energy density
  if (dtset%usekden==1) then
    call ab7_mixing_eval_allocate(mix_mgga, istep)
    call ab7_mixing_copy_current_step(mix_mgga, tauresid0, errid, message, arr_respc = taurespc)
@@ -501,6 +504,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      MSG_ERROR(message)
    end if
  end if
+
  ABI_DEALLOCATE(nresid0)
  ABI_DEALLOCATE(nrespc)
  ABI_DEALLOCATE(tauresid0)
@@ -680,7 +684,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end if
    if (dtset%usekden==1) then
-     taur(:,1:dtset%nspden*dtset%usekden)=taumag(:,1:dtset%nspden*dtset%usekden)
+     taur(:,1:dtset%nspden)=taumag(:,1:dtset%nspden)
      if(dtset%usewvl==0) then
        call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end if

@@ -334,7 +334,8 @@ contains
            write(msg,*) "Initial spins set to random values."
            call wrtout(ab_out,msg,'COLL')
            call wrtout(std_out,msg,'COLL')
-           call random_number(self%Stmp)
+           !call random_number(self%Stmp)
+           call self%rng%rand_unif_01_array(self%Stmp, self%nspin*3 )
            self%Stmp=self%Stmp-0.5
            do i=1, self%nspin
              self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
@@ -807,11 +808,11 @@ contains
        call self%spin_ob%reset()
     endif
 
-    if (iam_master) then
-       msg="Measurement run:"
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-    end if
+    !if (iam_master) then
+    !   msg="Measurement run:"
+    !   call wrtout(std_out,msg,'COLL')
+    !   call wrtout(ab_out, msg, 'COLL')
+    !end if
 
     do while(t<self%total_time)
        counter=counter+1
