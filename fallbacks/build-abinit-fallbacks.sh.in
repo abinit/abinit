@@ -4,14 +4,11 @@
 fallbacks_prefix="@abinit_builddir@/fallbacks/install_fb/@abi_fc_vendor@/@abi_fc_version@"
 
 # Find and Unpack tarball
-cd @abinit_builddir@/fallbacks
-tarfile=$(ls *.tar.gz)
-source=$PWD/${tarfile%.tar.gz}
-if [ ! -d "$source" ]; then
-    mkdir -p $source && tar -xzf $tarfile -C $source --strip-components=1
-fi
+tarfile=`basename $(ls @abinit_srcdir@/fallbacks/*.tar.gz)`
+source=${tarfile%.tar.gz}
+
+mkdir -p $source && tar -xzf @abinit_srcdir@/fallbacks/$tarfile -C $source --strip-components=1
 cd $source
-make clean
 
 # Configure
 ./configure \
