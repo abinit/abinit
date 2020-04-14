@@ -145,7 +145,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
         ii=i1+i23
         gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
         if(gpq(ii)>=tol4) then 
-          gpq2(ii) = piinv/four/gpq(ii)
+          gpq2(ii) = piinv/gpq(ii)
         end if 
      end do
    end do
@@ -158,7 +158,7 @@ subroutine barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,
        if(shortrange) then
          barev(ig)=barev(ig)+gpq2(ig)*(one-exp(-pi/(gpq2(ig)*rcut**2)))
        else
-         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut*sqrt(pi/gpq2(ig))))
+         barev(ig)=barev(ig)+gpq2(ig)*(one-cos(rcut*sqrt(four_pi/gpq2(ig))))
        end if
     end if
  end do
