@@ -1,6 +1,6 @@
 
-.Version 9.1.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
+.Version 9.1.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 12 Mar 2020.
-- ( at 10h56 )
+.Starting date : Tue 14 Apr 2020.
+- ( at 15h43 )
   
-- input  file    -> tpaw1_2.in
-- output file    -> tpaw1_2.abo
-- root for input  files -> tpaw1_2.i
-- root for output files -> tpaw1_2.o
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__jollet/tests/TestBot_MPI1/tutorial_tpaw1_2/tpaw1_2.in
+- output file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__jollet/tests/TestBot_MPI1/tutorial_tpaw1_2/tpaw1_2.abo
+- root for input  files -> tpaw1_2i
+- root for output files -> tpaw1_2o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -183,7 +183,7 @@ _ WF disk file :      1.127 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      6.7406531160E+00  6.7406531160E+00  6.7406531160E+00 Bohr
@@ -342,7 +342,7 @@ P           mkmem          28
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -376,8 +376,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -405,12 +405,12 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.626386847149    -1.163E+01 3.918E-02 2.142E+00
- ETOT  2  -11.628873644453    -2.487E-03 8.641E-04 1.710E-02
- ETOT  3  -11.628880619604    -6.975E-06 2.098E-04 1.365E-04
- ETOT  4  -11.628880676900    -5.730E-08 3.360E-05 1.720E-07
- ETOT  5  -11.628880676965    -6.507E-11 1.603E-05 1.033E-10
- ETOT  6  -11.628880676966    -1.901E-13 2.088E-05 1.651E-13
+ ETOT  1  -11.626386847147    -1.163E+01 3.918E-02 2.142E+00
+ ETOT  2  -11.628873644450    -2.487E-03 8.641E-04 1.710E-02
+ ETOT  3  -11.628880619602    -6.975E-06 2.098E-04 1.365E-04
+ ETOT  4  -11.628880676898    -5.730E-08 3.360E-05 1.720E-07
+ ETOT  5  -11.628880676963    -6.504E-11 1.603E-05 1.033E-10
+ ETOT  6  -11.628880676963    -1.616E-13 2.088E-05 1.651E-13
 
  At SCF step    6       vres2   =  1.65E-13 < tolvrs=  1.00E-10 =>converged.
 
@@ -430,7 +430,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -1.901E-13, res2:  1.651E-13, residm:  2.088E-05, diffor: null, }
+convergence: {deltae: -1.616E-13, res2:  1.651E-13, residm:  2.088E-05, diffor: null, }
 etotal    :  -1.16288807E+01
 entropy   :   0.00000000E+00
 fermie    :   5.59932458E-01
@@ -443,9 +443,9 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+- [  7.80202246E-32,   7.80202246E-32,  -7.80202246E-32, ]
+- [ -7.80202246E-32,  -7.80202246E-32,   7.80202246E-32, ]
+force_length_stats: {min:   1.35134993E-31, max:   1.35134993E-31, mean:   1.35134993E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -461,7 +461,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+ rms dE/dt=  4.2940E-31; max dE/dt=  1.0518E-30; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
@@ -470,14 +470,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     2      0.89175000000000     0.89175000000000     0.89175000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 7.8020225E-32 7.8020225E-32   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+    1      0.00000000000000     0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000     0.00000000000000
+ frms,max,avg= 4.0119609E-30 4.0119609E-30   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740653116003  6.740653116003  6.740653116003 bohr
               =  3.567000000000  3.567000000000  3.567000000000 angstroms
  Fermi (or HOMO) energy (hartree) =   0.55993   Average Vxc (hartree)=  -0.50783
@@ -491,15 +491,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.23939141190236E+00
-hartree             :  8.12021356296058E-01
-xc                  : -4.25679909694520E+00
+hartree             :  8.12021356296061E-01
+xc                  : -4.25679909694519E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
+psp_core            :  1.93481648422943E-01
 local_psp           : -4.45380882644791E+00
 non_local_psp       :  1.62324495086044E+00
-total_energy        : -1.16288806769657E+01
-total_energy_eV     : -3.16437935963049E+02
-band_energy         :  1.33788278437067E+00
+total_energy        : -1.16288806769634E+01
+total_energy_eV     : -3.16437935962987E+02
+band_energy         :  1.33788278437066E+00
 ...
 
 
@@ -515,7 +515,7 @@ band_energy         :  1.33788278437067E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -544,8 +544,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.07387
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -561,7 +561,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS1_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS1_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     115.546     115.518
 
 ================================================================================
@@ -573,11 +573,11 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.827403459510    -1.183E+01 1.755E-03 7.403E-01
- ETOT  2  -11.828052039625    -6.486E-04 6.080E-05 6.502E-04
- ETOT  3  -11.828052465887    -4.263E-07 3.067E-06 9.196E-06
- ETOT  4  -11.828052470457    -4.570E-09 7.201E-06 2.188E-08
- ETOT  5  -11.828052470465    -7.903E-12 2.628E-06 5.188E-11
+ ETOT  1  -11.827403459507    -1.183E+01 1.755E-03 7.403E-01
+ ETOT  2  -11.828052039623    -6.486E-04 6.080E-05 6.502E-04
+ ETOT  3  -11.828052465885    -4.263E-07 3.067E-06 9.196E-06
+ ETOT  4  -11.828052470454    -4.570E-09 7.201E-06 2.188E-08
+ ETOT  5  -11.828052470462    -7.887E-12 2.628E-06 5.188E-11
 
  At SCF step    5       vres2   =  5.19E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -597,7 +597,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -7.903E-12, res2:  5.188E-11, residm:  2.628E-06, diffor: null, }
+convergence: {deltae: -7.887E-12, res2:  5.188E-11, residm:  2.628E-06, diffor: null, }
 etotal    :  -1.18280525E+01
 entropy   :   0.00000000E+00
 fermie    :   4.77640646E-01
@@ -657,16 +657,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.66020109085093E+00
-hartree             :  8.77180719606369E-01
-xc                  : -4.28761975597381E+00
+kinetic             :  7.66020109085099E+00
+hartree             :  8.77180719606401E-01
+xc                  : -4.28761975597382E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
-local_psp           : -4.96174514939808E+00
-non_local_psp       :  1.47686109708149E+00
-total_energy        : -1.18280524704645E+01
-total_energy_eV     : -3.21857676090031E+02
-band_energy         :  1.20332991647998E+00
+psp_core            :  1.93481648422943E-01
+local_psp           : -4.96174514939817E+00
+non_local_psp       :  1.47686109708153E+00
+total_energy        : -1.18280524704622E+01
+total_energy_eV     : -3.21857676089968E+02
+band_energy         :  1.20332991647985E+00
 ...
 
 
@@ -682,7 +682,7 @@ band_energy         :  1.20332991647998E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -711,8 +711,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -728,7 +728,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS2_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS2_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     151.667     151.650
 
 ================================================================================
@@ -740,11 +740,11 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.921673723814    -1.192E+01 1.309E-03 2.230E-01
- ETOT  2  -11.921833733624    -1.600E-04 1.490E-04 3.139E-04
- ETOT  3  -11.921833943948    -2.103E-07 4.429E-05 1.576E-06
- ETOT  4  -11.921833944658    -7.099E-10 1.596E-05 4.957E-09
- ETOT  5  -11.921833944659    -1.410E-12 6.210E-06 1.488E-11
+ ETOT  1  -11.921673723811    -1.192E+01 1.309E-03 2.230E-01
+ ETOT  2  -11.921833733621    -1.600E-04 1.490E-04 3.139E-04
+ ETOT  3  -11.921833943946    -2.103E-07 4.429E-05 1.576E-06
+ ETOT  4  -11.921833944656    -7.099E-10 1.596E-05 4.957E-09
+ ETOT  5  -11.921833944657    -1.430E-12 6.210E-06 1.488E-11
 
  At SCF step    5       vres2   =  1.49E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -764,7 +764,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -1.410E-12, res2:  1.488E-11, residm:  6.210E-06, diffor: null, }
+convergence: {deltae: -1.430E-12, res2:  1.488E-11, residm:  6.210E-06, diffor: null, }
 etotal    :  -1.19218339E+01
 entropy   :   0.00000000E+00
 fermie    :   4.71662742E-01
@@ -824,16 +824,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.88848567332514E+00
+kinetic             :  7.88848567332511E+00
 hartree             :  9.09910874809948E-01
-xc                  : -4.30379153707649E+00
+xc                  : -4.30379153707648E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
-local_psp           : -5.22074739940496E+00
-non_local_psp       :  1.39723891631849E+00
-total_energy        : -1.19218339446593E+01
-total_energy_eV     : -3.24409599783302E+02
-band_energy         :  1.14226749077062E+00
+psp_core            :  1.93481648422943E-01
+local_psp           : -5.22074739940489E+00
+non_local_psp       :  1.39723891631846E+00
+total_energy        : -1.19218339446570E+01
+total_energy_eV     : -3.24409599783239E+02
+band_energy         :  1.14226749077069E+00
 ...
 
 
@@ -849,7 +849,7 @@ band_energy         :  1.14226749077062E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -885,8 +885,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -902,7 +902,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS3_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS3_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     191.713     191.671
 
 ================================================================================
@@ -914,11 +914,11 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -11.976313818440    -1.198E+01 1.029E-04 1.236E-01
- ETOT  2  -11.976374503674    -6.069E-05 2.370E-06 2.570E-04
- ETOT  3  -11.976374632992    -1.293E-07 6.724E-07 5.763E-07
- ETOT  4  -11.976374633181    -1.892E-10 5.278E-07 5.656E-10
- ETOT  5  -11.976374633181    -7.105E-14 8.061E-08 4.302E-12
+ ETOT  1  -11.976313818438    -1.198E+01 1.029E-04 1.236E-01
+ ETOT  2  -11.976374503672    -6.069E-05 2.370E-06 2.570E-04
+ ETOT  3  -11.976374632990    -1.293E-07 6.724E-07 5.763E-07
+ ETOT  4  -11.976374633179    -1.892E-10 5.278E-07 5.656E-10
+ ETOT  5  -11.976374633179    -5.684E-14 8.061E-08 4.302E-12
 
  At SCF step    5       vres2   =  4.30E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -938,7 +938,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -7.105E-14, res2:  4.302E-12, residm:  8.061E-08, diffor: null, }
+convergence: {deltae: -5.684E-14, res2:  4.302E-12, residm:  8.061E-08, diffor: null, }
 etotal    :  -1.19763746E+01
 entropy   :   0.00000000E+00
 fermie    :   4.66618702E-01
@@ -998,15 +998,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.03787168512249E+00
+kinetic             :  8.03787168512250E+00
 hartree             :  9.28469132936233E-01
 xc                  : -4.31422842641449E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
+psp_core            :  1.93481648422943E-01
 local_psp           : -5.39451067264054E+00
 non_local_psp       :  1.35895412044647E+00
-total_energy        : -1.19763746331813E+01
-total_energy_eV     : -3.25893727394662E+02
+total_energy        : -1.19763746331790E+01
+total_energy_eV     : -3.25893727394599E+02
 band_energy         :  1.10723463591745E+00
 ...
 
@@ -1023,7 +1023,7 @@ band_energy         :  1.10723463591745E+00
 
 ================================================================================
 == DATASET  5 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1052,8 +1052,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     16.000   => boxcut(ratio)=   2.10376
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1069,7 +1069,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS4_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS4_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     234.139     234.120
 
 ================================================================================
@@ -1081,11 +1081,11 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -12.017560932672    -1.202E+01 2.234E-04 8.130E-02
- ETOT  2  -12.017601845440    -4.091E-05 4.685E-05 2.104E-04
- ETOT  3  -12.017601959700    -1.143E-07 2.950E-05 4.951E-07
- ETOT  4  -12.017601959881    -1.808E-10 4.255E-04 2.033E-09
- ETOT  5  -12.017601959881    -5.258E-13 6.388E-04 6.996E-12
+ ETOT  1  -12.017560932670    -1.202E+01 2.234E-04 8.130E-02
+ ETOT  2  -12.017601845437    -4.091E-05 4.685E-05 2.104E-04
+ ETOT  3  -12.017601959698    -1.143E-07 2.950E-05 4.951E-07
+ ETOT  4  -12.017601959879    -1.809E-10 4.255E-04 2.033E-09
+ ETOT  5  -12.017601959879    -5.613E-13 6.388E-04 6.996E-12
 
  At SCF step    5       vres2   =  7.00E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -1105,7 +1105,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -5.258E-13, res2:  6.996E-12, residm:  6.388E-04, diffor: null, }
+convergence: {deltae: -5.613E-13, res2:  6.996E-12, residm:  6.388E-04, diffor: null, }
 etotal    :  -1.20176020E+01
 entropy   :   0.00000000E+00
 fermie    :   4.53693620E-01
@@ -1165,16 +1165,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.15795558740012E+00
-hartree             :  9.42836740079971E-01
-xc                  : -4.32324004426054E+00
+kinetic             :  8.15795558740030E+00
+hartree             :  9.42836740080039E-01
+xc                  : -4.32324004426059E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
-local_psp           : -5.54286952844752E+00
-non_local_psp       :  1.34064575797804E+00
-total_energy        : -1.20176019598813E+01
-total_energy_eV     : -3.27015580007020E+02
-band_energy         :  1.08178051622519E+00
+psp_core            :  1.93481648422943E-01
+local_psp           : -5.54286952844776E+00
+non_local_psp       :  1.34064575797805E+00
+total_energy        : -1.20176019598791E+01
+total_energy_eV     : -3.27015580006958E+02
+band_energy         :  1.08178051622503E+00
 ...
 
 
@@ -1190,7 +1190,7 @@ band_energy         :  1.08178051622519E+00
 
 ================================================================================
 == DATASET  6 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1219,8 +1219,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.19706
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1236,7 +1236,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS5_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS5_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     279.481     279.445
 
 ================================================================================
@@ -1248,11 +1248,11 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -12.046833766890    -1.205E+01 2.432E-04 5.827E-02
- ETOT  2  -12.046855333137    -2.157E-05 3.773E-02 1.753E-04
- ETOT  3  -12.046855404180    -7.104E-08 1.683E-04 5.925E-07
- ETOT  4  -12.046855404323    -1.426E-10 1.349E-03 4.396E-09
- ETOT  5  -12.046855404323    -7.496E-13 1.316E-05 7.285E-12
+ ETOT  1  -12.046833766887    -1.205E+01 2.432E-04 5.827E-02
+ ETOT  2  -12.046855333135    -2.157E-05 3.773E-02 1.753E-04
+ ETOT  3  -12.046855404178    -7.104E-08 1.683E-04 5.925E-07
+ ETOT  4  -12.046855404320    -1.427E-10 1.349E-03 4.396E-09
+ ETOT  5  -12.046855404321    -7.265E-13 1.316E-05 7.285E-12
 
  At SCF step    5       vres2   =  7.29E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -1272,7 +1272,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -7.496E-13, res2:  7.285E-12, residm:  1.316E-05, diffor: null, }
+convergence: {deltae: -7.265E-13, res2:  7.285E-12, residm:  1.316E-05, diffor: null, }
 etotal    :  -1.20468554E+01
 entropy   :   0.00000000E+00
 fermie    :   4.51373927E-01
@@ -1299,7 +1299,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   95.416E-09; max=  13.163E-06
+ Mean square residual over all n,k,spin=   95.421E-09; max=  13.164E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1333,15 +1333,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.24917448291656E+00
-hartree             :  9.52627257559827E-01
-xc                  : -4.32996034245060E+00
+hartree             :  9.52627257559825E-01
+xc                  : -4.32996034245059E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
-local_psp           : -5.65318512794718E+00
-non_local_psp       :  1.32741879822941E+00
-total_energy        : -1.20468554043234E+01
-total_energy_eV     : -3.27811606712959E+02
-band_energy         :  1.06368012526080E+00
+psp_core            :  1.93481648422943E-01
+local_psp           : -5.65318512794717E+00
+non_local_psp       :  1.32741879822940E+00
+total_energy        : -1.20468554043211E+01
+total_energy_eV     : -3.27811606712897E+02
+band_energy         :  1.06368012526079E+00
 ...
 
 
@@ -1357,7 +1357,7 @@ band_energy         :  1.06368012526080E+00
 
 ================================================================================
 == DATASET  7 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1386,8 +1386,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.08431
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1403,7 +1403,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS6_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS6_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     327.250     327.242
 
 ================================================================================
@@ -1415,11 +1415,11 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -12.062166023867    -1.206E+01 3.157E-05 2.094E-02
- ETOT  2  -12.062173226463    -7.203E-06 1.177E-05 6.456E-05
- ETOT  3  -12.062173253183    -2.672E-08 2.177E-06 2.005E-07
- ETOT  4  -12.062173253241    -5.827E-11 2.450E-06 1.477E-09
- ETOT  5  -12.062173253241    -2.771E-13 5.037E-07 2.343E-12
+ ETOT  1  -12.062166023865    -1.206E+01 3.157E-05 2.094E-02
+ ETOT  2  -12.062173226461    -7.203E-06 1.177E-05 6.456E-05
+ ETOT  3  -12.062173253180    -2.672E-08 2.177E-06 2.005E-07
+ ETOT  4  -12.062173253239    -5.836E-11 2.450E-06 1.477E-09
+ ETOT  5  -12.062173253239    -3.144E-13 5.037E-07 2.343E-12
 
  At SCF step    5       vres2   =  2.34E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -1439,7 +1439,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -2.771E-13, res2:  2.343E-12, residm:  5.037E-07, diffor: null, }
+convergence: {deltae: -3.144E-13, res2:  2.343E-12, residm:  5.037E-07, diffor: null, }
 etotal    :  -1.20621733E+01
 entropy   :   0.00000000E+00
 fermie    :   4.47164730E-01
@@ -1466,7 +1466,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   40.534E-10; max=  50.373E-08
+ Mean square residual over all n,k,spin=   40.535E-10; max=  50.374E-08
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1499,16 +1499,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.30175999199868E+00
-hartree             :  9.58282794866235E-01
+kinetic             :  8.30175999199870E+00
+hartree             :  9.58282794866242E-01
 xc                  : -4.33393054406769E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
-local_psp           : -5.71473757142462E+00
+psp_core            :  1.93481648422943E-01
+local_psp           : -5.71473757142465E+00
 non_local_psp       :  1.31938254801758E+00
-total_energy        : -1.20621732532412E+01
-total_energy_eV     : -3.28228426579772E+02
-band_energy         :  1.05484778308813E+00
+total_energy        : -1.20621732532389E+01
+total_energy_eV     : -3.28228426579710E+02
+band_energy         :  1.05484778308812E+00
 ...
 
 
@@ -1524,7 +1524,7 @@ band_energy         :  1.05484778308813E+00
 
 ================================================================================
 == DATASET  8 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1560,8 +1560,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1577,7 +1577,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS7_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS7_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     377.398     377.368
 
 ================================================================================
@@ -1589,11 +1589,11 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -12.069640286687    -1.207E+01 7.860E-06 1.187E-02
- ETOT  2  -12.069642333891    -2.047E-06 1.703E-07 3.670E-05
- ETOT  3  -12.069642342366    -8.474E-09 1.634E-08 1.087E-07
- ETOT  4  -12.069642342389    -2.324E-11 5.858E-08 3.937E-10
- ETOT  5  -12.069642342389     7.105E-15 1.635E-03 1.019E-12
+ ETOT  1  -12.069640286685    -1.207E+01 7.860E-06 1.187E-02
+ ETOT  2  -12.069642333889    -2.047E-06 1.703E-07 3.670E-05
+ ETOT  3  -12.069642342363    -8.474E-09 1.634E-08 1.087E-07
+ ETOT  4  -12.069642342387    -2.323E-11 5.858E-08 3.937E-10
+ ETOT  5  -12.069642342387     0.000E+00 1.635E-03 1.019E-12
 
  At SCF step    5       vres2   =  1.02E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -1613,7 +1613,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae:  7.105E-15, res2:  1.019E-12, residm:  1.635E-03, diffor: null, }
+convergence: {deltae:  0.000E+00, res2:  1.019E-12, residm:  1.635E-03, diffor: null, }
 etotal    :  -1.20696423E+01
 entropy   :   0.00000000E+00
 fermie    :   4.47219803E-01
@@ -1674,14 +1674,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.32837623107870E+00
-hartree             :  9.61083467083604E-01
+hartree             :  9.61083467083605E-01
 xc                  : -4.33608573268687E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
-local_psp           : -5.74620660503474E+00
+psp_core            :  1.93481648422943E-01
+local_psp           : -5.74620660503475E+00
 non_local_psp       :  1.31612076980179E+00
-total_energy        : -1.20696423423889E+01
-total_energy_eV     : -3.28431670831655E+02
+total_energy        : -1.20696423423866E+01
+total_energy_eV     : -3.28431670831593E+02
 band_energy         :  1.05071150363700E+00
 ...
 
@@ -1692,13 +1692,13 @@ band_energy         :  1.05071150363700E+00
   sigma(3 3)=  2.41572647E-04  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.1073E+00 GPa]
-- sigma(1 1)=  7.10731147E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  7.10731147E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  7.10731147E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  7.10731146E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  7.10731146E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  7.10731146E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  9 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1734,8 +1734,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is ../../../Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    ../../../Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is ../../Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    ../../Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1751,7 +1751,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tpaw1_2.o_DS8_WFK
+-inwffil : will read wavefunctions from disk file tpaw1_2o_DS8_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     430.380     430.366
 
 ================================================================================
@@ -1763,10 +1763,10 @@ tolerances: {tolvrs: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -12.073328095745    -1.207E+01 4.177E-06 3.778E-03
- ETOT  2  -12.073328669461    -5.737E-07 3.144E-07 1.169E-05
- ETOT  3  -12.073328672091    -2.630E-09 4.446E-08 3.206E-08
- ETOT  4  -12.073328672098    -7.528E-12 9.149E-08 3.303E-11
+ ETOT  1  -12.073328095743    -1.207E+01 4.177E-06 3.778E-03
+ ETOT  2  -12.073328669459    -5.737E-07 3.144E-07 1.169E-05
+ ETOT  3  -12.073328672089    -2.630E-09 4.446E-08 3.206E-08
+ ETOT  4  -12.073328672096    -7.505E-12 9.149E-08 3.303E-11
 
  At SCF step    4       vres2   =  3.30E-11 < tolvrs=  1.00E-10 =>converged.
 
@@ -1786,7 +1786,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567760E+01
-convergence: {deltae: -7.528E-12, res2:  3.303E-11, residm:  9.149E-08, diffor: null, }
+convergence: {deltae: -7.505E-12, res2:  3.303E-11, residm:  9.149E-08, diffor: null, }
 etotal    :  -1.20733287E+01
 entropy   :   0.00000000E+00
 fermie    :   4.45852124E-01
@@ -1846,15 +1846,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 9, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.34159568401976E+00
+kinetic             :  8.34159568401975E+00
 hartree             :  9.62386859385533E-01
 xc                  : -4.33724959451409E+00
 Ewald energy        : -1.27864121210521E+01
-psp_core            :  1.93481648420656E-01
-local_psp           : -5.76209975636594E+00
+psp_core            :  1.93481648422943E-01
+local_psp           : -5.76209975636593E+00
 non_local_psp       :  1.31496860800784E+00
-total_energy        : -1.20733286720983E+01
-total_energy_eV     : -3.28531980964412E+02
+total_energy        : -1.20733286720960E+01
+total_energy_eV     : -3.28531980964349E+02
 band_energy         :  1.04867855276230E+00
 ...
 
@@ -1894,8 +1894,8 @@ band_energy         :  1.04867855276230E+00
            etotal7    -1.2062173253E+01
            etotal8    -1.2069642342E+01
            etotal9    -1.2073328672E+01
-            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart1     7.8020224613E-32  7.8020224613E-32 -7.8020224613E-32
+                      -7.8020224613E-32 -7.8020224613E-32  7.8020224613E-32
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -1975,19 +1975,19 @@ P           mkmem          28
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2    -1.5290791997E-03 -1.5290791997E-03 -1.5290791997E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     3.1288950319E-04  3.1288950319E-04  3.1288950319E-04
+           strten3     3.1288950316E-04  3.1288950316E-04  3.1288950316E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     2.6911478556E-04  2.6911478556E-04  2.6911478556E-04
+           strten4     2.6911478553E-04  2.6911478553E-04  2.6911478553E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten5    -7.2562138806E-05 -7.2562138806E-05 -7.2562138806E-05
+           strten5    -7.2562138838E-05 -7.2562138838E-05 -7.2562138838E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten6    -6.0869205779E-05 -6.0869205779E-05 -6.0869205779E-05
+           strten6    -6.0869205813E-05 -6.0869205813E-05 -6.0869205813E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten7     1.7865097212E-04  1.7865097212E-04  1.7865097212E-04
+           strten7     1.7865097209E-04  1.7865097209E-04  1.7865097209E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten8     2.4157264729E-04  2.4157264729E-04  2.4157264729E-04
+           strten8     2.4157264726E-04  2.4157264726E-04  2.4157264726E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten9     3.2170500135E-04  3.2170500135E-04  3.2170500135E-04
+           strten9     3.2170500131E-04  3.2170500131E-04  3.2170500131E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -2137,10 +2137,10 @@ P           mkmem          28
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         12.9  wall=         13.0
+- Proc.   0 individual time (sec): cpu=         19.1  wall=         26.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.9  wall=         13.0
+.Delivered   8 WARNINGs and  25 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.1  wall=         26.3
