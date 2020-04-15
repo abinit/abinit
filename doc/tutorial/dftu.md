@@ -16,7 +16,7 @@ Please follow the two tutorials on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), i
 
 This tutorial should take about 1 hour to complete.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 0 Short summary of the DFT+U method
 
@@ -56,17 +56,16 @@ However, the two methods generally give similar results.
 for the other tutorials. Why not Work_dftu?
 In what follows, the names of files will be mentioned as if you were in this subdirectory.*
 
-Copy the files *tdftu_1.in* and *tdftu_x.files* from *\$ABI_TESTS/tutorial/Input* to your *Work_dftu* directory with:
+Copy the file *tdftu_1.in* from *\$ABI_TESTS/tutorial/Input* to your *Work_dftu* directory with:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_dftu
 cd Work_dftu
-cp ../tdftu_x.files .  # You will need to edit this file.
 cp ../tdftu_1.in .
 ```
 
-{% dialog tests/tutorial/Input/tdftu_x.files tests/tutorial/Input/tdftu_1.in %}
+{% dialog tests/tutorial/Input/tdftu_1.in %}
 
 Now run the code as usual.
 The job should take less than 30 seconds on a PC 3 GHz. It calculates the LDA
