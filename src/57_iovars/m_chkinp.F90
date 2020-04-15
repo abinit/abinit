@@ -2273,7 +2273,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
 
-   !Long-wave DFPT calculation function only for LDA 
+   !Long-wave DFPT calculation function only for LDA
    allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
    if(allow)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
@@ -3293,8 +3293,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  Restriction when use together
    if(dt%useexexch/=0.and.dt%usepawu/=0)then
      do itypat=1,dt%ntypat
-       if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.&
-&       dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
+       if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
          write(msg, '(5a,i2,3a)' )&
 &         'When PAW+U (usepawu/=0) and local exact-exchange (useexexch/=0)',ch10,&
 &         'are selected together, they must apply on the same',ch10,&
@@ -3792,6 +3791,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     'Put iomode to 3 to use ETSF retart files.'
      MSG_WARNING(msg)
    end if
+ end if
+
+ ! ===========================================================
+ ! Write COMMENTs if some combination of input vars look weird
+ ! ===========================================================
+ if (dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
+   MSG_COMMENT("dipdip can be set to 0 in case of metals. The default value is required for polar materials.")
  end if
 
  ! If there was a problem, then stop.

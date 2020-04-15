@@ -3764,7 +3764,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  !call xmpi_barrier(comm)
 
- ! Now reopen the file inside ncwrite_comm to perform pararallel-IO (required for q-point parallelism).
+ ! Now reopen the file inside ncwrite_comm to perform parallel-IO (required for q-point parallelism).
  !if (self%ncwrite_comm%value /= xmpi_comm_null) then
  !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
  !  NCF_CHECK(nctk_set_datamode(self%ncid))
