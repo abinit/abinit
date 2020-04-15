@@ -23,11 +23,10 @@ variables/paw.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
-variables/aim.md
-variables/tdep.md
-variables/multibinit.md
-variables/anaddb.md
 variables/optic.md
+variables/a-tdep.md
+variables/aim.md
+variables/multibinit.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md

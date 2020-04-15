@@ -334,7 +334,8 @@ contains
            write(msg,*) "Initial spins set to random values."
            call wrtout(ab_out,msg,'COLL')
            call wrtout(std_out,msg,'COLL')
-           call random_number(self%Stmp)
+           !call random_number(self%Stmp)
+           call self%rng%rand_unif_01_array(self%Stmp, self%nspin*3 )
            self%Stmp=self%Stmp-0.5
            do i=1, self%nspin
              self%Stmp(:,i)=self%Stmp(:,i)/sqrt(sum(self%Stmp(:, i)**2))
@@ -736,12 +737,13 @@ contains
     !type(spin_ncfile_t), intent(inout) :: ncfile
     !type(spin_observable_t), intent(inout) :: ob
     !real(dp) ::  S(3, self%nspin)
-    real(dp):: t
+    real(dp):: t, etotal
     integer :: counter, i, ii
     character(len=80) :: msg, msg_empty
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
+
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
 
     t=0.0
@@ -784,9 +786,10 @@ contains
              if(mod(counter, self%hist%spin_nctime)==0) then
                 call self%spin_ob%get_observables( self%hist%S(:,:, self%hist%ihist_prev), &
                      self%hist%Snorm(:,self%hist%ihist_prev),self%hist%etot(self%hist%ihist_prev))
+                etotal = energy_table%sum_val()
                 write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                      & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &
-                     & self%hist%etot(self%hist%ihist_prev)/self%spin_ob%nscell
+                     & etotal/self%spin_ob%nscell
                 ! total : 13+4+...= 64 
                 call wrtout(std_out,msg,'COLL')
                 call wrtout(ab_out, msg, 'COLL')
@@ -799,14 +802,17 @@ contains
        counter=0
        if (iam_master) then
           call self%hist%reset(array_to_zero=.False.)
-          msg="Measurement run:"
-          call wrtout(std_out,msg,'COLL')
-          call wrtout(ab_out, msg, 'COLL')
        end if
     endif
     if(iam_master) then
        call self%spin_ob%reset()
     endif
+
+    !if (iam_master) then
+    !   msg="Measurement run:"
+    !   call wrtout(std_out,msg,'COLL')
+    !   call wrtout(ab_out, msg, 'COLL')
+    !end if
 
     do while(t<self%total_time)
        counter=counter+1
@@ -818,9 +824,10 @@ contains
                self%hist%Snorm(:,self%hist%ihist_prev), self%hist%etot(self%hist%ihist_prev))
           if(modulo(counter, self%hist%spin_nctime)==0) then
              call self%spin_ncfile%write_one_step(self%hist)
+             etotal = energy_table%sum_val()
              write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                   & self%spin_ob%Mst_norm_total/self%spin_ob%Snorm_total, &
-                  & self%hist%etot(self%hist%ihist_prev)/self%spin_ob%nscell
+                  & etotal/self%spin_ob%nscell
              call wrtout(std_out,msg,'COLL')
              call wrtout(ab_out, msg, 'COLL')
           endif

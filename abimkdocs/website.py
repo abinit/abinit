@@ -333,7 +333,7 @@ class Website(object):
             #"conducti",
             "mrgscr",
             #"macroave",
-            "mrgdv", "tdep"
+            "mrgdv", "atdep"
         ])
 
         for test in tests:

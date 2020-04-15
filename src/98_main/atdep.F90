@@ -1,6 +1,6 @@
-!!****p* ABINIT/tdep
+!!****p* ABINIT/atdep
 !! NAME
-!! tdep
+!! atdep
 !!
 !! FUNCTION
 !! Calculations of phonons using molecular dynamic simulations
@@ -48,7 +48,7 @@
 
 #include "abi_common.h"
 
-program tdep
+program atdep
 
   use defs_basis
   use m_abicore
@@ -383,5 +383,5 @@ program tdep
 
 100 call xmpi_end()
 
- end program tdep
+ end program atdep
 !!***
