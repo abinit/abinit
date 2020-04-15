@@ -2098,7 +2098,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp) :: cutoff,gs,rcut,divgq0
+ real(dp) :: cutoff,gs,rcut,divgq0,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
  character(len=100) :: msg
  logical  :: shortrange
 !arrays
@@ -2160,24 +2160,52 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
     rcut=hyb_range_fock
     call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
     vqg=vqg*hyb_mixing_sr
-    if (hyb_range_fock>tol8)then
-       vqg(1)=hyb_mixing*divgq0+hyb_mixing_sr*pi/hyb_range_fock**2
-    endif
+!    if (hyb_range_fock>tol8)then
+!       vqg(1)=hyb_mixing*divgq0+hyb_mixing_sr*pi/hyb_range_fock**2
+!    endif
  end if
 
  ! Triple loop on each dimension
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1
+   ! Precompute some products that do not depend on i2 and i1
+   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+   gqgm23=gq(3,i3)*gmet(2,3)*2
+   gqgm13=gq(3,i3)*gmet(1,3)*2
+
    do i2=1,n2
      ig2=i2-(i2/id2)*n2-1
+     gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+     gqgm12=gq(2,i2)*gmet(1,2)*2
+     gqg2p3=gqgm13+gqgm12
+
      i23=n1*(i2-1 +(n2)*(i3-1))
+     ! Do the test that eliminates the Gamma point outside of the inner loop
      ii1=1
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
+       ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
+       vqg(1+i23)=hyb_mixing*divgq0
+
+!      Note the combination of Spencer-Alavi and Erfc screening
+       if (abs(hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+!        This would give a combination of Spencer-Alavi and Erfc screening,
+!        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
+!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+       endif
+
      end if
+
+     ! Final inner loop on the first dimension (note the lower limit)
      do i1=ii1,n1
+       gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+
        ii=i1+i23
+
        if(gs<=cutoff)then
+         ! Identify min/max indexes (to cancel unbalanced contributions later)
+         ! Count (q+g)-vectors with similar norm
          if ((qeq05==1).and.(izero==1)) then
            ig1=i1-(i1/id1)*n1-1
            ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
@@ -2189,6 +2217,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
      end do ! End loop on i1
    end do ! End loop on i2
  end do ! End loop on i3
+
 
  if (izero==1) then
    ! Set contribution of unbalanced components to zero
