@@ -257,6 +257,7 @@ type, public :: paw_setup_t
   real(dpxml)                  :: rpaw
   real(dpxml)                  :: ex_cc
   character(len=4)             :: idgrid
+  character(len=12)            :: optortho
   type(atom_t)                 :: atom
   type(xc_functional_t)        :: xc_functional
   type(generator_t)            :: generator
@@ -1280,6 +1281,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%tread=paw_setupin%tread
  paw_setupout%ngrid=paw_setupin%ngrid
  paw_setupout%idgrid=paw_setupin%idgrid
+ paw_setupout%optortho=paw_setupin%optortho
  paw_setupout%rpaw=paw_setupin%rpaw
  paw_setupout%ex_cc=paw_setupin%ex_cc
  paw_setupout%atom%tread=paw_setupin%atom%tread
@@ -2662,6 +2664,18 @@ end subroutine paw_setup_copy
        read(unit=strg1,fmt=*) paw_setup%ex_cc
      else
        read(unit=strg,fmt=*) paw_setup%ex_cc
+     end if
+     cycle
+   end if
+
+!  --Read orthogonalisation scheme
+   if (line(1:18)=='<orthogonalisation') then
+     call paw_rdfromline(" scheme",line,strg,ierr)
+     if (len(trim(strg))<=30) then
+       strg1=trim(strg)
+       read(unit=strg1,fmt=*) paw_setup%optortho
+     else
+       read(unit=strg,fmt=*) paw_setup%optortho
      end if
      cycle
    end if
