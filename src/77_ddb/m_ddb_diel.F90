@@ -395,7 +395,7 @@ end subroutine ddb_diel
 !! ddb_diel_elec
 !!
 !! FUNCTION
-!! Print the electronic response of the dielectric constant
+!! Print the electronic dielectric constant (clamped ions)
 !!
 !! INPUTS
 !! iout=unit number for outputs
@@ -540,10 +540,6 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
          end do
        end do
      end do
-
-    !write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,' displ(:,:,imode)',displ(:,:,imode)
-    !write(std_out,'(a,i4,a,6es16.6)')'imode=',imode,' fact_oscstr(:,:,imode)=',fact_oscstr(:,:,imode)
-
    end do
 
 !  Examine the degeneracy of each mode. The portability of the echo of the mode effective

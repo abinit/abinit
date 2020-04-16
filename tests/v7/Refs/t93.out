@@ -221,9 +221,6 @@ Phonon band structure files, with atomic projections, will be output
   Mode number    3   Energy    9.414580E-04
 ;  1  0.00000000E+00  6.28628301E-03  6.28628301E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
-
-================================================================================
-
 -
 - Proc.   0 individual time (sec): cpu=         18.1  wall=         18.1
 

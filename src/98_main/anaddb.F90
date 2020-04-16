@@ -626,15 +626,14 @@ program anaddb
 
 !**********************************************************************
 ! Dielectric constant calculations, diefalg options (EB)
+! and related properties: mode effective charge, oscillator strength
 !**********************************************************************
- write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
- call wrtout([std_out, ab_out], msg)
  
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
 
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
- if (inp%dieflag/=0) then
+ if (inp%dieflag/=0 .or. inp%nph2l/=0 .or. inp%nlflag==1) then
  
   !***************************************************************
   ! Generates the dynamical matrix at Gamma
@@ -671,21 +670,43 @@ program anaddb
     mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,&
     Crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
-  ! calculation of the oscillator strengths, mode effective charge and 
-  ! relaxed dielectric tensor, frequency dependent dielectric tensor (dieflag=1,3,4)
-  ! and mode by mode decomposition of epsilon if dieflag==3
-  call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-    ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid) 
+  if (inp%dieflag/=0) then
+    write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
+    call wrtout([std_out, ab_out], msg)
+    ! calculation of the oscillator strengths, mode effective charge and 
+    ! relaxed dielectric tensor, frequency dependent dielectric tensor (dieflag=1,3,4)
+    ! and mode by mode decomposition of epsilon if dieflag==3
+    call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
+      ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid) 
+  end if
 
-end if ! dieflag!=0
+
+end if ! dieflag!=0 or inp%nph2l/=0
+
+
+!**********************************************************************
+! Non-linear response: electrooptic and Raman (for the 1st list of wv)
+!**********************************************************************
+
+ if (inp%nlflag == 1) then
+   ABI_MALLOC(rsus, (3*natom,3,3))
+   ! Raman susceptibilities for the 1st list (only TO  modes at q=Gamma)
+   call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
+
+#ifdef HAVE_NETCDF
+   if (my_rank == master) then
+     call nctk_defwrite_raman_terms(ana_ncid, natom, rsus, phfrq)
+   end if
+#endif
+
+   ! EO coef:
+   call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
+end if ! condition on nlflag
 
 !**********************************************************************
 ! Calculation of properties associated to the second list of wv (EB):
-! (can include non-analyticities)
-
- if (inp%nlflag > 0) then
-   ABI_MALLOC(rsus, (3*natom,3,3))
- end if
+! (can include non-analyticities in the DM)
+!**********************************************************************
 
  if (inp%nph2l/=0) then
 
@@ -727,6 +748,7 @@ end if ! dieflag!=0
 
      ! Write the phonon frequencies for the second list of wv (can include non-analyticities if q/=0)
      call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+     ! TODO: Mode effective charge could be printed here for LO modes (EB)
 
      if (my_rank == master) then
 #ifdef HAVE_NETCDF
@@ -738,23 +760,12 @@ end if ! dieflag!=0
      !  Get the log of product of the square of the phonon frequencies with non-analyticities (q-->0)
      !  For the Lyddane-Sachs-Teller relation
      lst(iphl2)=zero
-     ! The fourth mode should have positive frequency, otherwise,
-     ! there is an instability, and the LST relationship should not be evaluated
+     ! The fourth mode should have positive frequency otherwise there is an instability: LST relationship should not be evaluated
      do ii=4,3*natom
        lst(iphl2)=lst(iphl2)+2*log(phfrq(ii))
      end do
 
-
-! EB I've commented the lines below, sounds useless in this loop?
-! If it is used under some condtions, an if is necessary
-       ! Determine the symmetries of the phonon modes at Gamma
-       !if (sum(abs(qphon(:,1)))<DDB_QTOL) then
-       !  call symanal(bravais,0,genafm,nsym,nsym,ptgroupma,Crystal%rprimd,spgroup,&
-!&          Crystal%symafm,Crystal%symrel,Crystal%tnons,tol3,verbose=.TRUE.)
-       !  call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
-       !end if
-
-     ! Write Raman susceptibilities
+     ! Write Raman susceptibilities for the 2nd list (can includes LO modes)
      if (inp%nlflag == 1) then
        call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
 #ifdef HAVE_NETCDF
@@ -762,42 +773,17 @@ end if ! dieflag!=0
          call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
        end if
 #endif
-     end if !nlflag=1 (Raman suscep.)
+     end if !nlflag=1 (Raman suscep for the 2nd list of wv.)
 
    end do ! iphl2
   ! For the Lyddane-Sachs-Teller relation
-    if (inp%nph2l/=0 .and. inp%dieflag/=2) then
+    if (inp%dieflag==1 .or. inp%dieflag==3 .or. inp%dieflag==4) then
       call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
         ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
     end if 
    ABI_FREE(lst)
  end if ! nph2l/=0   
    
-
-!**********************************************************************
-! Non-linear/electrooptic calculations
-!**********************************************************************
-
- if (inp%nlflag == 1) then
-   ! Compute the electrooptic tensor
-   ! In case dieflag = 2, recompute phonon frequencies and eigenvectors without non-analyticity
-   if (inp%dieflag == 2) then
-     qphon(:,1)=zero; qphnrm(1)=zero
-     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
-       mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,&
-       Crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
-   end if
-
-   rsus = zero
-   call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq(1),qphon,qphnrm(1),rsus,Crystal%ucvol)
-#ifdef HAVE_NETCDF
-   if (my_rank == master) then
-     call nctk_defwrite_raman_terms(ana_ncid, natom, rsus, phfrq(1))
-   end if
-#endif
-
-   call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
- end if ! condition on nlflag
 
  ABI_FREE(fact_oscstr)
  if (inp%nlflag > 0) then
@@ -806,6 +792,8 @@ end if ! dieflag!=0
    ABI_FREE(dchidt)
  end if
 
+!**********************************************************************
+! Linear response with strain: elastic, piezo, etc
 !**********************************************************************
 
  if (inp%instrflag/=0) then
@@ -894,6 +882,8 @@ end if ! dieflag!=0
    end if
  end if
 
+!**********************************************************************
+! Flexoelectric response
 !**********************************************************************
 
  if (inp%flexoflag/=0 ) then
