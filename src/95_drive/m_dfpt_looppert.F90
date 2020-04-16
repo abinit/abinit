@@ -39,6 +39,7 @@ module m_dfpt_loopert
  use m_paral_pert
  use m_nctk
  use m_ddb
+ use m_ddb_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -48,7 +49,6 @@ module m_dfpt_loopert
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
- use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
  use m_time,       only : timab
  use m_fstrings,   only : strcat
@@ -314,7 +314,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den,hdr_tmp
- type(ddb_hdr_type) :: ddb_hdr
+ type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
  type(pawang_type) :: pawang1
  type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
@@ -622,15 +622,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_ALLOCATE(eigen0_copy,(dtset%mband*nkpt*dtset%nsppol))
  eigen0_copy(:)=zero
 
-! SP : Retreval of the DDB information and computing of effective charge and
-! dielectric tensor
+ ! SP : Retreval of the DDB information and computing of effective charge and
+ ! dielectric tensor
  ABI_ALLOCATE(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
-   filnam = dtfil%filddbsin  !'test_DDB'
+   filnam = dtfil%filddbsin
    ABI_ALLOCATE(dummy,(dtset%natom))
-   call ddb_from_file(ddb,filnam,1,dtset%natom,0,dummy,ddb_crystal,mpi_enreg%comm_world)
-!  Get Dielectric Tensor and Effective Charges
-!  (initialized to one_3D and zero if the derivatives are not available in the DDB file)
+   call ddb_from_file(ddb, filnam, 1, dtset%natom, 0, dummy, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call tmp_ddb_hdr%free()
+   ! Get Dielectric Tensor and Effective Charges
+   ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)
    call ddb_crystal%free()
    call ddb%free()
@@ -2314,19 +2315,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &         1,xred=xred,occ=occ_pert)
 
-         call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, dtfil%unddb)
+         call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, dtfil%unddb)
 
          call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
 !        print _EIGI2D file for this perturbation
          if(smdelta>0) then
 
            unitout = dtfil%unddb
-           call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
+           call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
 
            call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
          end if !smdelta
 
-         call ddb_hdr_free(ddb_hdr)
+         call ddb_hdr%free()
 
 !        Output of the EIGR2D.nc file.
          fname = strcat(dtfil%filnam_ds(4),"_EIGR2D.nc")

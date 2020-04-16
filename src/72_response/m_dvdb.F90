@@ -40,6 +40,7 @@ module m_dvdb
 #endif
  use m_hdr
  use m_ddb
+ use m_ddb_hdr
  use m_dtset
 
  use defs_abitypes,   only : mpi_type
@@ -6150,6 +6151,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, method, symv1, dvdb_ngqpt, dvdb_add
  type(dvdb_t) :: dvdb, coarse_dvdb
  type(vdiff_t) :: vd_max
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  character(len=fnlen) :: coarse_fname
 !arrays
  integer :: ngfft(18), qrefine(3)
@@ -6571,6 +6573,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  type(crystal_t) :: cryst_ddb
  type(ddb_type),pointer :: ddb_ptr
  type(ddb_type),target :: this_ddb
+ type(ddb_hdr_type) :: ddb_hdr
 !arrays
  integer,allocatable :: dummy_atifc(:)
  real(dp) :: dielt(3,3)
@@ -6584,7 +6587,9 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
    ! Build ddb object from file. Will release memory before returning.
    ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
    ABI_CALLOC(dummy_atifc, (dvdb%natom))
-   call ddb_from_file(this_ddb, ddb_filepath, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
+   call ddb_from_file(this_ddb, ddb_filepath, brav1, dvdb%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
+                      prtvol=prtvol)
+   call ddb_hdr%free()
    ABI_FREE(dummy_atifc)
    call cryst_ddb%free()
    ddb_ptr => this_ddb

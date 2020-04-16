@@ -37,6 +37,7 @@ module m_eph_driver
  use m_efmas_defs
  use m_dtfil
  use m_ddb
+ use m_ddb_hdr
  use m_dvdb
  use m_ifc
  use m_phonons
@@ -167,6 +168,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  type(dvdb_t) :: dvdb
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
@@ -427,13 +429,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ABI_CALLOC(dummy_atifc, (dtset%natom))
 
  if (use_wfk) then
-   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=dtset%prtvol)
+   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
+                     prtvol=dtset%prtvol)
    call cryst_ddb%free()
  else
    ! Get crystal from DDB.
    ! Warning: We may loose precision in rprimd and xred because DDB does not have enough significant digits.
-   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, cryst, comm, prtvol=dtset%prtvol)
+   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
+                     prtvol=dtset%prtvol)
  end if
+ call ddb_hdr%free()
  ABI_FREE(dummy_atifc)
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)

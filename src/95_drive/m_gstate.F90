@@ -53,7 +53,7 @@ module m_gstate
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init
  use m_fstrings,         only : strcat, sjoin
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
@@ -1485,9 +1485,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &   nblok,xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
+   call ddb_hdr%open_write(ddbnm,dtfil%unddb,fullinit=0)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
    choice=2
    mpert = dtset%natom + 6 ; msize = 3*mpert
