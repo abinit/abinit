@@ -407,6 +407,7 @@ end subroutine ddb_diel
 !!
 !! CHILDREN
 !!
+!! SOURCE
 
 subroutine ddb_diel_elec(iout,epsinf)
 
@@ -483,6 +484,7 @@ end subroutine ddb_diel_elec
 !!
 !! CHILDREN
 !!
+!! SOURCE
 
 subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid)
 
