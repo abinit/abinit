@@ -499,6 +499,9 @@ module m_dvdb
    procedure :: write_v1qavg => dvdb_write_v1qavg
    ! Debugging tool used to test the model for the long-range of the potential.
 
+   !procedure :: write_wrR => dvdb_write_wrR
+   ! Write W(r, R) to netcdf file
+
  end type dvdb_t
 
  public :: dvdb_new                ! Initialize the object.

@@ -2054,9 +2054,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 
 #ifdef HAVE_NETCDF
-  ! Output DDK file in netcdf format.
-  ! MG: Keep this feature for debugging purposes
-   if (me == master .and. ipert == dtset%natom + 1 .and. .False.) then
+   ! Output DDK file in netcdf format.
+   ! Can be used by optic instead of the 1WF file that is really huge.
+   if (me == master .and. ipert == dtset%natom + 1) then
      fname = strcat(dtfil%filnam_ds(4), "_EVK.nc")
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
      ! Have to build hdr on k-grid with info about perturbation.
