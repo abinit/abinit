@@ -124,15 +124,13 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: dieflag,i1,idir1,idir2,ifreq,ii,imode,ipert1,iphl2,nfreq
+ integer :: dieflag,idir1,idir2,ifreq,ii,imode,iphl2,nfreq
  integer :: nprocs,my_rank,ncerr
  real(dp) :: afreq,difffr,eps,q2,usquare,ucvol
  character(len=500) :: message
- logical :: t_degenerate
 !arrays
  real(dp) :: qphon(3),refl(3)
  real(dp),allocatable :: frdiel(:,:,:),modez(:,:,:),oscstr(:,:,:,:),dielt_modedecompo(:,:,:)
- character(len=1),allocatable :: metacharacter(:)
 
 ! *********************************************************************
 
@@ -399,10 +397,10 @@ end subroutine ddb_diel
 !!
 !! INPUTS
 !! iout=unit number for outputs
-!!
-!! OUTPUT
 !! epsinf(3,3)= epsilon^infty = electronic contribution to the
 !!  dielectric tensor
+!!
+!! OUTPUT
 !! 
 !! PARENTS
 !!      ddb_diel

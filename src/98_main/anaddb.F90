@@ -364,6 +364,7 @@ program anaddb
 
 !***************************************************************************
 ! Structural response at fixed polarization
+!***************************************************************************
  if (inp%polflag == 1) then
    ABI_MALLOC(d2flg, (msize))
 
@@ -438,6 +439,7 @@ program anaddb
 !***************************************************************************
 ! Compute non-linear optical susceptibilities and, if inp%nlflag < 3,
 ! First-order change in the linear dielectric susceptibility induced by an atomic displacement
+!***************************************************************************
  if (inp%nlflag > 0) then
    ABI_MALLOC(dchide, (3,3,3))
    ABI_MALLOC(dchidt, (natom,3,3,3))
@@ -625,8 +627,10 @@ program anaddb
 
 
 !**********************************************************************
-! Dielectric constant calculations, diefalg options (EB)
-! and related properties: mode effective charge, oscillator strength
+! q=Gamma quantities (without non-analycities):
+! - Dielectric constant calculations (diefalg options)
+! and related properties: mode effective charges, oscillator strength
+! - Raman tensor (at q=0 with only TO modes) and EO coef. (nlflag)
 !**********************************************************************
  
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
@@ -670,22 +674,21 @@ program anaddb
     mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,&
     Crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
+  ! calculation of the oscillator strengths, mode effective charge and 
+  ! dielectric tensor, frequency dependent dielectric tensor (dieflag)
+  ! and mode by mode decomposition of epsilon if dieflag==3
   if (inp%dieflag/=0) then
     write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
     call wrtout([std_out, ab_out], msg)
-    ! calculation of the oscillator strengths, mode effective charge and 
-    ! relaxed dielectric tensor, frequency dependent dielectric tensor (dieflag=1,3,4)
-    ! and mode by mode decomposition of epsilon if dieflag==3
     call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
       ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid) 
   end if
-
 
 end if ! dieflag!=0 or inp%nph2l/=0
 
 
 !**********************************************************************
-! Non-linear response: electrooptic and Raman (for the 1st list of wv)
+! Non-linear response: electrooptic and Raman (Gamma, TO only)
 !**********************************************************************
 
  if (inp%nlflag == 1) then
@@ -704,7 +707,7 @@ end if ! dieflag!=0 or inp%nph2l/=0
 end if ! condition on nlflag
 
 !**********************************************************************
-! Calculation of properties associated to the second list of wv (EB):
+! Calculation of properties associated to the second list of wv:
 ! (can include non-analyticities in the DM)
 !**********************************************************************
 
@@ -761,11 +764,12 @@ end if ! condition on nlflag
      !  For the Lyddane-Sachs-Teller relation
      lst(iphl2)=zero
      ! The fourth mode should have positive frequency otherwise there is an instability: LST relationship should not be evaluated
+     ! Isn't it tested somewhere elsei (i.e. stop of the code if there are imaginary freq.)? (EB)
      do ii=4,3*natom
        lst(iphl2)=lst(iphl2)+2*log(phfrq(ii))
      end do
 
-     ! Write Raman susceptibilities for the 2nd list (can includes LO modes)
+     ! Write Raman susceptibilities for the 2nd list (can includes LO modes if q/=0 0 0)
      if (inp%nlflag == 1) then
        call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
 #ifdef HAVE_NETCDF
