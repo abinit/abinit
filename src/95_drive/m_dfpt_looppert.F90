@@ -920,7 +920,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        if (dtset%kptopt==2) timrev_pert=1
        if (dtset%kptopt==3) timrev_pert=0
        timrev_kpt = timrev_pert
-       !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are 
+       !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are
        !implemented in the quadrupole and flexoelectrics routines
        nsym1=1
      end if
@@ -2051,12 +2051,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
    end if
 
+
 #ifdef HAVE_NETCDF
   ! Output DDK file in netcdf format.
-   if (me == master .and. ipert == dtset%natom + 1) then
+  ! MG: Keep this feature for debugging purposes
+   if (me == master .and. ipert == dtset%natom + 1 .and. .False.) then
      fname = strcat(dtfil%filnam_ds(4), "_EVK.nc")
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
-    ! Have to build hdr on k-grid with info about perturbation.
+     ! Have to build hdr on k-grid with info about perturbation.
      call hdr_copy(hdr0, hdr_tmp)
      hdr_tmp%kptopt = dtset%kptopt
      hdr_tmp%pertcase = pertcase
