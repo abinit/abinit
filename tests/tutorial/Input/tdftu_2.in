@@ -41,6 +41,8 @@ lpawu   2 -1
 upawu  8.0 0.0 eV
 jpawu  0.8 0.0 eV
 
+pseudos = "Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
+pp_dirpath = "../../Psps_for_tests"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -48,7 +50,7 @@ jpawu  0.8 0.0 eV
 #%% [files]
 #%% files_to_test = 
 #%%   tdftu_2.out, tolnlines=  7, tolabs=  1.010e-02, tolrel=  2.000e-03, fld_options = -easy
-#%% psp_files = 28ni.paw, 8o.2.paw 
+#%% psp_files = Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
