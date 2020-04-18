@@ -57,7 +57,7 @@ MODULE m_fft_mesh
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
- public :: mkgrid_fft          !  It sets the grid of fft (or real space) points to be treated.
+ public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -218,13 +218,8 @@ subroutine zpad_free(zpad)
 
 ! *************************************************************************
 
- if (allocated(zpad%zplane)) then
-   ABI_FREE(zpad%zplane)
- end if
-
- if (allocated(zpad%linex2ifft_yz)) then
-   ABI_FREE(zpad%linex2ifft_yz)
- end if
+ ABI_SFREE(zpad%zplane)
+ ABI_SFREE(zpad%linex2ifft_yz)
 
 end subroutine zpad_free
 !!***
@@ -1593,7 +1588,7 @@ end subroutine phase
 !!  mkgrid_fft
 !!
 !! FUNCTION
-!!  It sets the grid of fft (or real space) points to be treated.
+!!  Sets the grid of fft (or real space) points to be treated.
 !!
 !! INPUTS
 !!

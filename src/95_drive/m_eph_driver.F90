@@ -472,6 +472,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
+ ! TODO: Add support for dipquad and quadquad in abinit
+
 ! if (any(dtset%ddb_qrefine > 1)) then
 !   ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
 !   ! Build the IFCs using the coarse q-mesh.
@@ -681,19 +683,19 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (16)
    ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
-   call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+   !call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
 
    if (nprocs > 1) then
      MSG_WARNING("eph_task in [15, -15] does not support nprocs > 1. Running in sequential...")
    end if
 
-   !dvdb%comm = xmpi_comm_self
-   !if (my_rank == master) then
-   !  call dvdb%open_read(ngfftf, xmpi_comm_self)
-   !  !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
-   !  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
-   !  call dvdb%write_wrR(dtset, strcat(dtfil%filnam_ds(4), "_WrR.nc"))
-   !end if
+   dvdb%comm = xmpi_comm_self
+   if (my_rank == master) then
+     call dvdb%open_read(ngfftf, xmpi_comm_self)
+     !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
+     !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
+     call dvdb%write_wr(dtset, strcat(dtfil%filnam_ds(4), "_WR.nc"))
+   end if
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

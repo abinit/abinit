@@ -499,7 +499,7 @@ module m_dvdb
    procedure :: write_v1qavg => dvdb_write_v1qavg
    ! Debugging tool used to test the model for the long-range of the potential.
 
-   !procedure :: write_wrR => dvdb_write_wrR
+   procedure :: write_wr => dvdb_write_wr
    ! Write W(r, R) to netcdf file
 
  end type dvdb_t
@@ -2863,7 +2863,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
    return
  end if
 
- ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  call wrtout(std_out, sjoin(ch10, "Building W(R,r) using ngqpt: ", ltoa(ngqpt), &
@@ -2885,18 +2884,19 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
 
  ! Select my_rpoints.
+ ! Use REMALLOC so that we can call this routine multiple times i.e. for chaning add_lr
  db%my_nrpt = my_rstop - my_rstart + 1
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
- ABI_MALLOC(db%my_rpt, (3, db%my_nrpt))
+ ABI_REMALLOC(db%my_rpt, (3, db%my_nrpt))
  db%my_rpt = all_rpt(:, my_rstart:my_rstop)
- ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
+ ABI_REMALLOC(db%my_irpt2tot, (db%my_nrpt))
  do irpt=1,db%my_nrpt
    db%my_irpt2tot(irpt) = my_rstart + (irpt - 1)
  end do
 
  ! Copy weights for the atoms treated by this proc.
  ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
- ABI_MALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
+ ABI_REMALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
  db%my_wratm = one
  if (method == 1) then
    do iatom=1,db%cryst%natom
@@ -2920,6 +2920,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  ABI_MALLOC(emiqr, (2, db%my_nrpt))
  ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
  ABI_CALLOC(v1r_lr, (2, nfft, db%my_npert))
+
+ !ABI_CHECK(.not. allocated(db%v1scf_rpt), " v1scf_rpt is already allocated!")
+ ABI_SFREE(db%v1scf_rpt)
  ABI_MALLOC_OR_DIE(db%v1scf_rpt, (2, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
  db%v1scf_rpt = zero
 
@@ -3085,6 +3088,7 @@ end subroutine dvdb_ftinterp_setup
 !!  dvdb_get_maxw
 !!
 !! FUNCTION
+!!   Compute max_r |W(R,r)|
 !!
 !! INPUTS
 !!
@@ -6106,6 +6110,202 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  end if
 
 end subroutine dvdb_write_v1qavg
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_write_wr
+!! NAME
+!!  dvdb_write_wr
+!!
+!! FUNCTION
+!!  This routine ...
+!!
+!! INPUTS
+!!  dtset<dataset_type>= Input variables.
+!!  out_ncpath=Filename for output netcdf file.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_write_wr(dvdb, dtset, out_ncpath)
+
+!Arguments ------------------------------------
+ class(dvdb_t),target,intent(inout) :: dvdb
+ type(dataset_type),target,intent(in) :: dtset
+ character(len=*),intent(in) :: out_ncpath
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: nfft, iq,  ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
+ integer :: n1, n2, n3, method, i1, i2, i3, ifft, ii
+#ifdef HAVE_NETCDF
+ integer :: ncid, ncerr
+#endif
+ !real(dp) ::  g2
+ character(len=500) :: msg
+!arrays
+ integer :: ngfft(18)
+ !integer, allocatable :: ig2ifft(:), gsmall(:,:)
+ real(dp) :: vals2(2)
+ !real(dp),allocatable :: long_v1r(:,:,:,:)
+ real(dp),allocatable :: maxw(:,:), all_rpt(:,:), all_rmod(:) !, :,:), work_gsmall(:,:)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(dvdb%comm)
+
+ call wrtout([std_out, ab_out], " Computing W(r,R) and saving results to file... ", newlines=2)
+ call dvdb%print(unit=std_out)
+
+ ABI_CHECK(xmpi_comm_size(dvdb%comm) == 1, "Parallelism not supported")
+
+ ! Define FFT mesh
+ ngfft = dvdb%ngfft
+ nfft = product(ngfft(1:3))
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+
+ call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
+ !call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
+
+ !ABI_MALLOC(long_v1r, (2, nfft, dvdb%nspden, dvdb%my_npert))
+
+ comm_rpt = xmpi_comm_self
+ method = dtset%userid
+
+ call wrtout([std_out, ab_out], " Evaluating W_SR(r,R) and saving results to file... ")
+ dvdb%add_lr = 1  ! remove V_LR.
+ call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, method, comm_rpt)
+
+ ! Compute max_r |W(R,r)| and write data to file (sorted by |R|)
+ call dvdb%get_maxw(dtset%dvdb_ngqpt, all_rpt, all_rmod, maxw)
+
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   NCF_CHECK(nctk_open_create(ncid, out_ncpath, xmpi_comm_self))
+   NCF_CHECK(dvdb%cryst%ncwrite(ncid))
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nspden", dvdb%nspden), nctkdim_t("natom", dvdb%natom3 / 3), &
+     nctkdim_t("natom3", dvdb%natom3), & ! nctkdim_t("ngsmall", ngsmall), &
+     nctkdim_t("nfft", nfft), nctkdim_t("nrpt", dvdb%nrtot)], &
+     defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ! Define arrays for Max_r |W(R, r)|
+   ncerr = nctk_def_arrays(ncid, [ &
+      nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), &
+      nctkarr_t("ngfft", "int", "three"), &
+      nctkarr_t("rmod", "dp", "nrpt"), &
+      nctkarr_t("maxw_lr", "dp", "nrpt, natom3"), &
+      nctkarr_t("maxw_sr", "dp", "nrpt, natom3"), &
+      nctkarr_t("v1scf_rpt_lr", "dp", "two, nrpt, nfft, nspden, natom3"), &
+      nctkarr_t("v1scf_rpt_sr", "dp", "two, nrpt, nfft, nspden, natom3") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "symv1scf", "method"])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+     "has_dielt", "has_zeff", "has_quadrupoles", "has_efield", "dvdb_add_lr"])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"]))
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_datamode(ncid))
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+       "symv1scf", "method"], &
+       [dvdb%symv1, method])
+   NCF_CHECK(ncerr)
+   ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+     "has_dielt", "has_zeff", "has_quadrupoles", "has_efield"], &
+     l2int([dvdb%has_dielt, dvdb%has_zeff, dvdb%has_quadrupoles, dvdb%has_efield]))
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
+
+   ! Write W
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt_sr"), dvdb%v1scf_rpt))
+
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), dtset%dvdb_ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), dvdb%my_rpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw_sr"), maxw))
+ end if
+#endif
+
+ ABI_FREE(all_rpt)
+ ABI_FREE(all_rmod)
+ ABI_FREE(maxw)
+
+ call wrtout([std_out, ab_out], " Evaluating W_LR(r,R) and saving results to file...")
+ dvdb%add_lr = 0 ! Do not remove V_LR.
+ call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, method, comm_rpt)
+
+ ! Compute max_r |W(R,r)| and write data to file (sorted by |R|)
+ call dvdb%get_maxw(dtset%dvdb_ngqpt, all_rpt, all_rmod, maxw)
+
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1scf_rpt_lr"), dvdb%v1scf_rpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw_lr"), maxw))
+ end if
+#endif
+
+ ABI_FREE(all_rpt)
+ ABI_FREE(all_rmod)
+ ABI_FREE(maxw)
+
+ do iq=1,0 !
+   ! Compute the periodic part of the LR term (note add_qphase = 0 because we want the periodic part)
+   !do imyp=1,dvdb%my_npert
+   !  idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
+   !  do ispden=1,min(dvdb%nspden, 2)
+   !    call dvdb%get_v1r_long_range(this_qpts(:,iq), idir, ipert, nfft, ngfft, long_v1r(:,:,ispden,imyp), add_qphase=0)
+   !  end do
+   !end do
+
+   ! Compute average and write to file.
+   !if (my_rank /= master) cycle
+
+   do imyp=1,dvdb%my_npert
+     idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
+     do ispden=1,dvdb%nspden
+
+#ifdef HAVE_NETCDF
+       !vals2 = sum(file_v1r(:,:,ispden,imyp), dim=2) / nfft
+       !ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), vals2, &
+       !                     start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
+       !NCF_CHECK(ncerr)
+
+       !call fourdp(2, workg, long_v1r(:,:,ispden,imyp), -1, dvdb%mpi_enreg, nfft, 1, ngfft, 0)
+       !do ig=1,ngsmall
+       !  work_gsmall(:, ig) = workg(:, ig2ifft(ig))
+       !end do
+       !ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_gsmall"), work_gsmall, &
+       !                     start=[1,1,ispden,idir,ipert,iq], count=[2,ngsmall,1,1,1,1])
+       !NCF_CHECK(ncerr)
+#endif
+
+     end do
+   end do
+ end do ! iq
+
+ !ABI_FREE(long_v1r)
+
+ if (my_rank == master) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ end if
+
+end subroutine dvdb_write_wr
 !!***
 
 !----------------------------------------------------------------------
