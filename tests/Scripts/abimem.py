@@ -115,7 +115,7 @@ def ipython(options):
     # Start ipython shell with namespace
     # Use embed because I don't know how to show a header with start_ipython.
     import IPython
-    abifile == options.memfiles[0]
+    abifile = options.memfiles[0]
     IPython.embed(header="""
 The Abinit file is bound to the `parsers` variable.
 Use `abifile.<TAB>` to list available methods.
