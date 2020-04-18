@@ -634,6 +634,8 @@ program anaddb
 !**********************************************************************
  
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
+ ABI_MALLOC(lst,(inp%nph2l+1))
+ lst(:)=zero
 
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
@@ -641,10 +643,9 @@ program anaddb
  
   !***************************************************************
   ! Generates the dynamical matrix at Gamma
-  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla while it is
-  ! already done before in this routine. (EB)
+  ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue 
+  ! it is already done before in this routine. (EB)
   ! The problem is that it is done through mkphbs, which has only printing and no out... (EB)
- 
 
   qphon(:,1)=zero; qphnrm(1)=zero
   ! Generation of the dynamical matrix in cartesian coordinates
@@ -713,7 +714,6 @@ end if ! condition on nlflag
 
  if (inp%nph2l/=0) then
 
-   ABI_MALLOC(lst,(inp%nph2l+1))
 
    write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
    call wrtout([std_out, ab_out], msg)
@@ -785,10 +785,10 @@ end if ! condition on nlflag
       call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
         ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
     end if 
-   ABI_FREE(lst)
  end if ! nph2l/=0   
    
 
+ ABI_FREE(lst)
  ABI_FREE(fact_oscstr)
  if (inp%nlflag > 0) then
    ABI_FREE(dchide)
@@ -907,7 +907,6 @@ end if ! condition on nlflag
  ABI_FREE(d2cart)
  ABI_FREE(eigval)
  ABI_FREE(eigvec)
-! ABI_FREE(lst)
  ABI_FREE(phfrq)
  ABI_FREE(zeff)
  ABI_FREE(qdrp_cart)
