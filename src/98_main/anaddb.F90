@@ -692,7 +692,7 @@ end if ! dieflag!=0 or inp%nph2l/=0
 ! Non-linear response: electrooptic and Raman (q=Gamma, TO modes only)
 !**********************************************************************
 
- if (inp%nlflag == 1) then
+ if (inp%nlflag==1) then
    ABI_MALLOC(rsus, (3*natom,3,3))
    ! Raman susceptibilities for the 1st list (only TO  modes at q=Gamma)
    call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
@@ -705,6 +705,7 @@ end if ! dieflag!=0 or inp%nph2l/=0
 
    ! EO coef:
    call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
+   ABI_FREE(rsus)
 end if ! condition on nlflag
 
 !**********************************************************************
@@ -712,8 +713,11 @@ end if ! condition on nlflag
 ! (can include non-analyticities in the DM)
 !**********************************************************************
 
-
  if (inp%nph2l/=0) then
+
+   if (inp%nlflag > 0) then
+     ABI_MALLOC(rsus, (3*natom,3,3))
+   end if
 
    write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
    call wrtout([std_out, ab_out], msg)
@@ -729,7 +733,7 @@ end if ! condition on nlflag
    end if
 !  Get the log of product of the square of the phonon frequencies without non-analyticities (q=0)
 !  For the Lyddane-Sachs-Teller relation, it is stored in lst(nph2+1)
-   if (inp%dieflag/=2) then
+   if (inp%dieflag/=2 .and. inp%dieflag/=0) then
      do ii=4,3*natom
        lst(inp%nph2l+1)=lst(inp%nph2l+1)+2*log(phfrq(ii))
      end do
@@ -765,7 +769,7 @@ end if ! condition on nlflag
      !  For the Lyddane-Sachs-Teller relation
      ! The fourth mode should have positive frequency otherwise there is an instability: LST relationship should not be evaluated
      ! Isn't it tested somewhere else (i.e. stop of the code if there are imaginary freq.)? (EB)
-     if (inp%dieflag/=2) then
+     if (inp%dieflag/=2 .and. inp%dieflag/=0) then
        do ii=4,3*natom
          lst(iphl2)=lst(iphl2)+2*log(phfrq(ii))
        end do
@@ -779,12 +783,13 @@ end if ! condition on nlflag
          call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
        end if
 #endif
+       ABI_FREE(rsus)
      end if !nlflag=1 (Raman suscep for the 2nd list of wv.)
 
    end do ! iphl2
 
    ! Lyddane-Sachs-Teller relation:
-   if (inp%dieflag/=2) then
+   if (inp%dieflag/=2 .and. inp%dieflag/=0) then
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
    end if 
@@ -795,7 +800,6 @@ end if ! condition on nlflag
  ABI_FREE(fact_oscstr)
  if (inp%nlflag > 0) then
    ABI_FREE(dchide)
-   ABI_FREE(rsus)
    ABI_FREE(dchidt)
  end if
 
