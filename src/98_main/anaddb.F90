@@ -634,8 +634,6 @@ program anaddb
 !**********************************************************************
  
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
- ABI_MALLOC(lst,(inp%nph2l+1))
- lst(:)=zero
 
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
@@ -689,7 +687,7 @@ end if ! dieflag!=0 or inp%nph2l/=0
 
 
 !**********************************************************************
-! Non-linear response: electrooptic and Raman (Gamma, TO only)
+! Non-linear response: electrooptic and Raman (q=Gamma, TO modes only)
 !**********************************************************************
 
  if (inp%nlflag == 1) then
@@ -708,11 +706,15 @@ end if ! dieflag!=0 or inp%nph2l/=0
 end if ! condition on nlflag
 
 !**********************************************************************
-! Calculation of properties associated to the second list of wv:
+! Calculation of properties associated to the second list of wv: nph2l/=0
 ! (can include non-analyticities in the DM)
 !**********************************************************************
 
+
  if (inp%nph2l/=0) then
+
+   ABI_MALLOC(lst,(inp%nph2l+1))
+   lst(:)=zero
 
 
    write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
@@ -729,10 +731,11 @@ end if ! condition on nlflag
    end if
 !  Get the log of product of the square of the phonon frequencies without non-analyticities (q=0)
 !  For the Lyddane-Sachs-Teller relation, it is stored in lst(nph2+1)
-   lst(inp%nph2l+1)=zero
-   do ii=4,3*natom
-     lst(inp%nph2l+1)=lst(inp%nph2l+1)+2*log(phfrq(ii))
-   end do
+   if (inp%dieflag/=2) then
+     do ii=4,3*natom
+       lst(inp%nph2l+1)=lst(inp%nph2l+1)+2*log(phfrq(ii))
+     end do
+   end if
 
    ! Examine every wavevector of this list
    do iphl2=1,inp%nph2l
@@ -762,12 +765,13 @@ end if ! condition on nlflag
 
      !  Get the log of product of the square of the phonon frequencies with non-analyticities (q-->0)
      !  For the Lyddane-Sachs-Teller relation
-     lst(iphl2)=zero
      ! The fourth mode should have positive frequency otherwise there is an instability: LST relationship should not be evaluated
-     ! Isn't it tested somewhere elsei (i.e. stop of the code if there are imaginary freq.)? (EB)
-     do ii=4,3*natom
-       lst(iphl2)=lst(iphl2)+2*log(phfrq(ii))
-     end do
+     ! Isn't it tested somewhere else (i.e. stop of the code if there are imaginary freq.)? (EB)
+     if (inp%dieflag/=2) then
+       do ii=4,3*natom
+         lst(iphl2)=lst(iphl2)+2*log(phfrq(ii))
+       end do
+     end if
 
      ! Write Raman susceptibilities for the 2nd list (can includes LO modes if q/=0 0 0)
      if (inp%nlflag == 1) then
@@ -780,15 +784,16 @@ end if ! condition on nlflag
      end if !nlflag=1 (Raman suscep for the 2nd list of wv.)
 
    end do ! iphl2
-  ! For the Lyddane-Sachs-Teller relation
-    if (inp%dieflag==1 .or. inp%dieflag==3 .or. inp%dieflag==4) then
-      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
-    end if 
+
+   ! Lyddane-Sachs-Teller relation:
+   if (inp%dieflag/=2) then
+     call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
+       ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
+   end if 
+   ABI_FREE(lst)
  end if ! nph2l/=0   
    
 
- ABI_FREE(lst)
  ABI_FREE(fact_oscstr)
  if (inp%nlflag > 0) then
    ABI_FREE(dchide)

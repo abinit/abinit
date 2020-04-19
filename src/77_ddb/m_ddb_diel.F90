@@ -500,10 +500,9 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: i1,ii,idir1,idir2,imode,ipert1,iphl2,nfreq
+ integer :: i1,idir1,idir2,imode,ipert1
  integer :: my_rank,ncerr
  real(dp) :: usquare
- character(len=500) :: message
  logical :: t_degenerate
 !arrays
 ! real(dp),allocatable :: modez(:,:,:),oscstr(:,:,:,:)
