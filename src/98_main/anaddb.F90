@@ -634,6 +634,8 @@ program anaddb
 !**********************************************************************
  
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
+ ABI_MALLOC(lst,(inp%nph2l+1))
+ lst(:)=zero
 
  ! Print the electronic contribution to the dielectric tensor
  ! It can be extracted directly from the DDB if perturbation with E-field is present
@@ -712,10 +714,6 @@ end if ! condition on nlflag
 
 
  if (inp%nph2l/=0) then
-
-   ABI_MALLOC(lst,(inp%nph2l+1))
-   lst(:)=zero
-
 
    write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
    call wrtout([std_out, ab_out], msg)

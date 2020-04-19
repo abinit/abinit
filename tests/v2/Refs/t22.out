@@ -321,17 +321,6 @@
 
 ================================================================================
 
- Treat the second list of vectors 
-
-
-  Phonon at Gamma, with non-analyticity in the
-  direction (cartesian coordinates)  0.70711  0.00000  0.70711
- Phonon energies in Hartree :
-   0.000000E+00  0.000000E+00  0.000000E+00  1.227491E-03  1.227491E-03
-   2.674424E-03  2.674424E-03  2.674424E-03  3.050462E-03
- Phonon frequencies in cm-1    :
--  0.000000E+00  0.000000E+00  0.000000E+00  2.694031E+02  2.694031E+02
--  5.869683E+02  5.869683E+02  5.869683E+02  6.694990E+02
   
  Mode effective charges 
  Mode number.    x            y            z            length 
@@ -391,6 +380,19 @@
       0.00000000      0.00000000     35.51667060
  
 
+================================================================================
+
+ Treat the second list of vectors 
+
+
+  Phonon at Gamma, with non-analyticity in the
+  direction (cartesian coordinates)  0.70711  0.00000  0.70711
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  1.227491E-03  1.227491E-03
+   2.674424E-03  2.674424E-03  2.674424E-03  3.050462E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.694031E+02  2.694031E+02
+-  5.869683E+02  5.869683E+02  5.869683E+02  6.694990E+02
  Generalized Lyddane-Sachs-Teller relation at zero frequency :
  Direction                     Dielectric constant
    1.00000   0.00000   1.00000     35.51667060
