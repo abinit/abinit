@@ -6119,7 +6119,8 @@ end subroutine dvdb_write_v1qavg
 !!  dvdb_write_wr
 !!
 !! FUNCTION
-!!  This routine ...
+!!  This routine write W(r,R) to netcdf file.
+!!  Results can be analyzed with AbiPy.
 !!
 !! INPUTS
 !!  dtset<dataset_type>= Input variables.

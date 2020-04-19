@@ -42,6 +42,9 @@ except ImportError:
     raise
 
 
+from tests.pymods.termcolor import cprint
+
+
 def summarize(options):
     """Print basic info to terminal."""
     for memfile in options.memfiles:
@@ -107,6 +110,24 @@ def plot(options):
     """Plot data with matplotlib."""
     for memfile in options.memfiles:
         memfile.expose()
+    return 0
+
+
+def panel(options):
+    """
+    Open GUI in web browser, requires panel package
+    """
+    try:
+        import panel  # noqa: F401
+    except ImportError as exc:
+        cprint("Use `conda install panel` or `pip install panel` to install the python package.", "red")
+        raise exc
+
+    import matplotlib
+    matplotlib.use("Agg")
+
+    for memfile in options.memfiles:
+       memfile.get_panel().show()
     return 0
 
 
@@ -185,6 +206,9 @@ def get_parser(with_epilog=False):
 
     # Subparser for plot command.
     p_plot = subparsers.add_parser('plot', parents=[copts_parser], help=plot.__doc__)
+
+    # Subparser for panel command.
+    p_panel = subparsers.add_parser('panel', parents=[copts_parser], help=panel.__doc__)
 
     # Subparser for ipython command.
     p_ipython = subparsers.add_parser('ipython', parents=[copts_parser], help=ipython.__doc__)

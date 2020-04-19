@@ -89,7 +89,7 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
     def __hash__(self):
-        return hash(self.locus, self.size) 
+        return hash(self.locus, self.size)
 
     def __eq__(self, other):
         return self.locus == other.locus and self.size == other.size
@@ -116,7 +116,7 @@ class AbimemFile(object):
     def __str__(self):
         return self.to_string()
 
-    def to_string(self):
+    def to_string(self, verbose=0):
         lines = []
         app = lines.append
         df = self.get_intense_dataframe()
@@ -184,7 +184,7 @@ class AbimemFile(object):
 
     @lazy_property
     def all_entries(self):
-        """Parse file and create List of Entries."""
+        """Parse file and create list of Entries."""
         all_entries = []
         app = all_entries.append
         with open(self.path, "rt") as fh:
@@ -230,7 +230,7 @@ class AbimemFile(object):
     @lazy_property
     def dataframe(self):
         """
-        Return a |pandas-DataFrame| with all entries.
+        Return a |pandas-DataFrame| with **all** entries.
         """
         import pandas as pd
         rows, index = [], []
@@ -245,7 +245,7 @@ class AbimemFile(object):
                 ("tot_memory_mb", e.tot_memory_mb),
                 ("ptr", e.ptr),
             ]))
-            index.append(e.locus) 
+            index.append(e.locus)
 
         return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
 
@@ -258,11 +258,11 @@ class AbimemFile(object):
         ax, fig, plt = get_ax_fig_plt(ax=ax)
         ax.plot(memory)
         ax.grid(True)
-        ax.set_ylabel("Total Memory [Mb]")
+        ax.set_ylabel("Total Memory (Mb)")
         return fig
 
     @add_fig_kwargs
-    def plot_peaks(self, ax=None, maxlen=30, fontsize=6, **kwargs):
+    def plot_peaks(self, ax=None, maxlen=20, fontsize=6, **kwargs):
         """
         Args:
             fontsize: fontsize for legends and titles
@@ -277,13 +277,11 @@ class AbimemFile(object):
         ax.bar(xs, data)
         ax.grid(True)
         ax.set_xticks(xs)
-        ax.set_xticklabels(names, fontsize=fontsize, rotation=25) 
-        ax.set_ylabel("Memory [Mb]")
+        ax.set_xticklabels(names, fontsize=fontsize, rotation=25)
+        ax.set_ylabel("Memory (Mb)")
         return fig
 
-    #@add_fig_kwargs
-    def get_hotspots_dataframe(self, ax=None, fontsize=6, **kwargs):
-        ax, fig, plt = get_ax_fig_plt(ax=ax)
+    def get_hotspots_dataframe(self):
         index, rows = [], []
         for filename, g in self.dataframe.groupby(by="file"):
             malloc_mb = g[g["action"] == "A"].size_mb.sum()
@@ -341,7 +339,7 @@ class AbimemFile(object):
                 else:
                     # In principle this should never happen but there are exceptions:
                     #
-                    # 1) The compiler could decide to put the allocatable on the stack
+                    # 1) The compiler may decide to put the allocatable on the stack
                     #    In this case the ptr reported by gfortran is 0.
                     #
                     # 2) The allocatable variable is "reallocated" by the compiler (F2003).
@@ -417,6 +415,13 @@ class AbimemFile(object):
             pprint(reallocs)
 
         return len(heap) + len(stack) + len(reallocs)
+
+    def get_panel(self):
+        """
+        Build panel with widgets to interact with the memocc file either in a notebook or in panel app.
+        """
+        from .memprof_panel import MoccViewer
+        return MoccViewer(self).get_panel()
 
 
 class Heap(dict):
