@@ -3246,7 +3246,7 @@ print *, 'npwarr ',npwarr
  ecut_eff_disk = wfk_disk%hdr%ecut_eff    ! ecut * dilatmx**2
 
  ABI_MALLOC(kg_disk, (3, mpw_disk))
- ABI_MALLOC(cg_disk, (2, mpw_disk*nspinor*mband))
+ ABI_MALLOC(cg_disk, (2, mpw_disk*nspinor*mband_mem_in))
  ABI_MALLOC(eig_disk, ((2*mband)**wfk_disk%formeig*mband) )
  ABI_MALLOC(occ_disk, (mband))
 
