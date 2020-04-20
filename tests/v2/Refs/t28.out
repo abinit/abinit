@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ANADDB 
+.Version 9.0.0 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h15 )
   
 
 ================================================================================
@@ -27,8 +27,11 @@
  Miscellaneous information :
       enunit         2
          asr         1
+      chneut         0
  Interatomic Force Constants Inputs :
       dipdip         0
+      dipqua         0
+      quadqu         0
       ifcana         1
       ifcout        20
       natifc         1
@@ -76,7 +79,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.013  and twall      0.014 sec
+-begin at tcpu      0.033  and twall      0.034 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -447,6 +450,8 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -640,6 +645,8 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -719,6 +726,6 @@
 
 ================================================================================
 
-+Total cpu time      0.027  and wall time      0.028 sec
++Total cpu time      0.048  and wall time      0.049 sec
 
  anaddb : the run completed succesfully.

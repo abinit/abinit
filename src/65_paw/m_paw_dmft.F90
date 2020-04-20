@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_dmft
 !! NAME
 !!  m_paw_dmft
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -712,7 +711,10 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmftqmc_seed=dtset%dmftqmc_seed
  paw_dmft%dmftqmc_therm=dtset%dmftqmc_therm
  paw_dmft%dmftqmc_t2g=dtset%dmft_t2g
- paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
+
+!paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
+ paw_dmft%dmftqmc_x2my2d=0
+
  paw_dmft%dmftctqmc_basis =dtset%dmftctqmc_basis
  paw_dmft%dmftctqmc_check =dtset%dmftctqmc_check
  paw_dmft%dmftctqmc_correl=dtset%dmftctqmc_correl
@@ -777,6 +779,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
      tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
      inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    !  write(6,*) "inquire",lexist
+   grid_unt=2000
      if((.not.lexist)) then
        iexist2=0
        write(message,'(4x,a,i5,3a)') "File number",grid_unt,&

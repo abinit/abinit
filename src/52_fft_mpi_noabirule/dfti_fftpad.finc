@@ -1,4 +1,4 @@
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
  integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads
  character(len=500) :: msg
  type(zpad_t) :: zpad

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_hdr
 !! NAME
 !!  m_ddb_hdr
@@ -8,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
+!! Copyright (C) 2011-2020 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2250,6 +2249,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
        blktyp=4
      else if(blkname==' 2nd eigenvalue derivatives   - ' .or. blkname==' 2rd eigenvalue derivatives   - ')then
        blktyp=5
+     else if(blkname==' 3rd derivatives (long wave)  - ')then
+       blktyp=33
      else
        write(message, '(a,a,a,a,a,a,a,a,a)' )&
 &       'The following string appears in the DDB in place of',' the block type description :',ch10,blkname,ch10,&
@@ -2262,12 +2263,12 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      if(blktyp==1.or.blktyp==2)then
 !      Read the phonon wavevector
        read(unddb,*)
-     else if(blktyp==3)then
+     else if(blktyp==3.or.blktyp==33)then
 !      Read the perturbation wavevectors
        read(unddb,*)
        read(unddb,*)
        read(unddb,*)
-       mblktyp=3
+       mblktyp=blktyp
      else if(blktyp==5)then
        read(unddb,*)
        mblktyp=5
@@ -2378,7 +2379,7 @@ end subroutine ddb_chkname
 !! as well as psp information.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,MT,GA)
+!! Copyright (C) 1999-2020 ABINIT group (XG,MT,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

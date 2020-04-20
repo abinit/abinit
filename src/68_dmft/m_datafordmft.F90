@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_datafordmft
 !! NAME
 !!  m_datafordmft
@@ -7,7 +6,7 @@
 !! This module produces inputs for the DMFT calculation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1357,7 +1356,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 !Local variables ------------------------------
 !scalars
  integer :: diag,iatom,ib,ikpt1,im,im1,ispinor,ispinor1,isppol,isppol1,jc,jc1
- integer :: tndim
+ integer :: tndim,dum
  integer :: natom,mbandc,ndim,nspinor,nsppol,iortho,natomcor
  integer :: itot,itot1,dimoverlap,iatomcor
  real(dp) :: pawprtvol
@@ -1459,7 +1458,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
          !stop
          !call wrtout(std_out,message,'COLL')
          if(diag==0) then
-           call invsqrt_matrix(overlap(iatom)%value,tndim)
+           call invsqrt_matrix(overlap(iatom)%value,tndim,dum)
            sqrtmatinv=overlap(iatom)%value
          else
            sqrtmatinv(:,:)=czero
@@ -1617,7 +1616,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
        do itot=1,dimoverlap
          write(std_out,'(100f7.3)') (largeoverlap(itot,itot1),itot1=1,dimoverlap)
        enddo
-       call invsqrt_matrix(largeoverlap,dimoverlap)
+       call invsqrt_matrix(largeoverlap,dimoverlap,dum)
        sqrtmatinv=largeoverlap
        write(std_out,*)"jkpt=",jkpt
        do itot=1,dimoverlap

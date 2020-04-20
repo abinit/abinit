@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multibinit_manager
 !! NAME
 !! m_multibinit_manager
@@ -17,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -221,6 +220,7 @@ contains
     ! It might be null if there is no lattice part.
     if (associated(self%lattice_mover)) then
        call self%lattice_mover%finalize()
+       ABI_FREE_SCALAR(self%lattice_mover)
        nullify(self%lattice_mover)
     end if
     if(.not. self%use_external_params) then
@@ -238,6 +238,7 @@ contains
     self%has_spin=.False.
     self%has_lwf=.False.
     call self%energy_table%free()
+    call self%slc_mover%finalize()
   end subroutine finalize
 
   !-------------------------------------------------------------------!

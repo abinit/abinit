@@ -24,7 +24,7 @@ t09o
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = S. Mazevet, M. Torrent
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Tests a PAW conductivity calculation.
 #%%   It tests the following parts of the code:

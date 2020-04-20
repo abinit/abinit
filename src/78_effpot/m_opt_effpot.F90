@@ -8,7 +8,7 @@
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -127,9 +127,9 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  iam_master = (my_rank == master)
 
  !fit_on !TODO set up keyword opt_on
-  fit_on(1) = .FALSE. 
+  fit_on(1) = .TRUE. 
   fit_on(2) = .TRUE. 
-  fit_on(3) = .TRUE. 
+  fit_on(3) = .FALSE. 
 
  !Setting/Initializing Variables
   ntime = hist%mxhist
@@ -645,7 +645,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
  
-                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
                   write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
@@ -1336,7 +1336,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer ::  nterm_tot_tmp,icombi 
+ integer ::  nterm_tot_tmp 
  integer :: i,ii
  real(dp) :: coeff_ini 
 !reals 

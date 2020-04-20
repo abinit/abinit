@@ -41,7 +41,7 @@ znucl 26
 typat
  1
 #Definition of the atoms
-xangst
+xcart
 0.00000000000000 0.00000000000000 0.00000000000000
 ngkpt 4 4 4
 nshiftk 1
@@ -54,14 +54,14 @@ shiftk
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t04.out, tolnlines=   250,   tolabs=  0.20,   tolrel=  2.00
+#%% files_to_test = t04.out, tolnlines=   260,   tolabs=  0.20,   tolrel=  2.00
 #%% psp_files= Fe.GGA_PBE-JTH.xml
 #%% extra_inputs = t04o_w90_up.win, t04o_w90_down.win
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Wannier90
+#%% keywords = PAW, Wannier90
 #%% description = 
 #%%   Wannier function for bcc Fe. 
 #%%   To check whether wannier90 interface works properly with nsppol=2 and nspden=2.

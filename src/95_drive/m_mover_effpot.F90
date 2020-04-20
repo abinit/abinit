@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover_effpot
 !! NAME
 !!  m_mover_effpot
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (AM)
+!!  Copyright (C) 2008-2020 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,13 +137,13 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !integer,save :: paw_size_old=-1
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass,tolsym
 ! real(dp):: time_q,time_b
- logical :: iam_master,need_chksym,isVused,isARused,readOnlyLast
+ logical :: iam_master,isVused,isARused,readOnlyLast
  integer, parameter:: master=0
  logical :: verbose,writeHIST,file_opened
  !type 
  type(scup_dtset_type) :: scup_inp
  !real(dp) :: cpui
-!character(len=6) :: codvsn
+!character(len=8) :: codvsn
 
 !TEST_AM
 ! integer :: ia,mu,rand_seed = 5
@@ -285,9 +284,9 @@ ABI_DEALLOCATE(xcart)
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential
    dtset%strprecon = 1  ! STRess PRECONditioner
-   dtset%supercell_latt(:,:) = 0
+   dtset%supercell_latt(:) = 0
    do ii=1,3
-     dtset%supercell_latt(ii,ii) = sc_size(ii)
+     dtset%supercell_latt(ii) = sc_size(ii)
    end do
    dtset%tolmxf = inp%tolmxf
    dtset%tsmear = 0.009500446 !
@@ -1072,7 +1071,7 @@ ABI_DEALLOCATE(xcart)
 end subroutine mover_effpot
 !!***
 
-!!****f* ABINIT/mover_effpot
+!!****f* ABINIT/chksymmetrygroup
 !! NAME
 !! checksymmetrygroup
 !!
@@ -1164,6 +1163,7 @@ tnons_out  = tnons
 
 
 end subroutine checksymmetrygroup
+!!***
 
 end module m_mover_effpot
 !!***

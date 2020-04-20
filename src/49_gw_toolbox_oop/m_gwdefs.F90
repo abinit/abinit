@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwdefs
 !! NAME
 !! m_gwdefs
@@ -7,7 +6,7 @@
 !! This module contains definitions for a number of named constants used in the GW part of abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2020 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

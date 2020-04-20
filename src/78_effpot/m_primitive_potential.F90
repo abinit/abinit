@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_primitive_potential
 !! NAME
 !! m_primitive_potential
@@ -16,7 +15,7 @@
 !!  * save_to_file: save to file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

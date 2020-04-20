@@ -5,9 +5,6 @@
  ifcflag   1
  ifcout    0
 
-!Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-
 !Generate output files for band2eps
  eivec 4
 

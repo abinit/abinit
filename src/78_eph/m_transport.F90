@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_transport
 !! NAME
 !!  m_transport
@@ -8,7 +7,7 @@
 !!  Initially for electron mobility limited by electron-phonon scattering.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (HM)
+!!  Copyright (C) 2008-2020 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -217,7 +216,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
- character(len=fnlen) :: path, sigeph_path
+ character(len=fnlen) :: path, sigeph_filepath
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -225,10 +224,10 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, ' Transport computation driver')
 
- sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
- sigmaph = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
+ sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigmaph = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
- ! if dtset%sigma_ngkpt /= sigeph_path
+ ! if dtset%sigma_ngkpt /= sigeph_filepath
 
  ! Initialize transport
  transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
@@ -774,7 +773,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  ! Compute index of valence band
  max_occ = two/(self%nspinor*self%nsppol)
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
- nvalence = nint(self%ebands%nelect - self%eph_extrael)/max_occ
+ nvalence = nint((self%ebands%nelect - self%eph_extrael)/max_occ)
 
  ABI_CALLOC(self%ne,(self%ntemp))
  ABI_CALLOC(self%nh,(self%ntemp))

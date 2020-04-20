@@ -92,15 +92,18 @@ contains
   double precision :: rifcsph
   double precision :: dielt(3,3)
   double precision, allocatable :: zeff(:,:,:)
+  double precision, allocatable :: qdrp_cart(:,:,:,:)
   double precision, allocatable :: q1shft(:,:)
 
 ! Define matrices for LO-TO
 ! =========================
   ABI_MALLOC(zeff, (3,3,InVar%natom_unitcell)); zeff (:,:,:)=zero
+  ABI_MALLOC(qdrp_cart, (3,3,3,InVar%natom_unitcell))
   dielt(:,:)=    zero
   dielt(1,1)=    1.d0
   dielt(2,2)=    1.d0
   dielt(3,3)=    1.d0
+  qdrp_cart = zero
   if (InVar%loto) then
     dipdip=1
     do iatcell=1,InVar%natom_unitcell
@@ -130,11 +133,12 @@ contains
   ABI_MALLOC(q1shft,(3,nqshft)); q1shft(:,:)=0.0d0
 
   call ifc_init(Ifc,Crystal,DDB,Lattice%brav,asr,symdynmat,dipdip,&
-  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,nsphere,rifcsph,&
+  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit,XMPI_WORLD)
 
   ABI_FREE(q1shft)
   ABI_FREE(zeff)
+  ABI_FREE(qdrp_cart)
 
 ! Read an IFC from ifc.in input file, write it in the ifc.out file and copy to Phij
 ! =================================================================================
@@ -209,7 +213,7 @@ contains
 !! val(2,3*mpert*3*mpert,nblok)= all the dynamical matrices
 !!                   real(dp),intent(in) :: blkval(2,3*mpert*3*mpert,nblok)
 !! nblok=number of blocks in the DDB
-  mpert=InVar%natom_unitcell+6
+  mpert=InVar%natom_unitcell+MPERT_MAX
   msize=3*mpert*3*mpert
   nblok=nqbz
   ABI_MALLOC(DDB%flg,(msize,nblok))  ; DDB%flg(:,:)  =1

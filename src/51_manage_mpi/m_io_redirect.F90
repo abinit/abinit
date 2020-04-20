@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_redirect
 !! NAME
 !!  m_io_redirect
@@ -7,7 +6,7 @@
 !!  management of output and log files when parallelisation on cells is activated
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (FJ,MT)
+!!  Copyright (C) 2001-2020 ABINIT group (FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .

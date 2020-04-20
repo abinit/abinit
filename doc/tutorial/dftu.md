@@ -2,9 +2,9 @@
 authors: SPesant, MCote, XG, BAmadon
 ---
 
-# Tutorial on DFT+U  
+# Tutorial on DFT+U
 
-## The projected density of states of NiO.  
+## The projected density of states of NiO.
 
 This tutorial aims at showing how to perform a DFT+U calculation using Abinit (see also [[cite:Amadon2008a]])
 
@@ -19,7 +19,7 @@ This tutorial should take about 1 hour to complete.
 [TUTORIAL_README]
 
 ## 0 Short summary of the DFT+U method
-  
+
 The standard Local Density Approximation (LDA), where the exchange and
 correlation energy is fit to homogeneous electron gas results, is a functional
 that works well for a vast number of compounds. But, for some crystals, the
@@ -47,7 +47,7 @@ In Abinit, two double-counting corrections are currently implemented:
 
 -The Around Mean Field (AMF) [[cite:Czyzyk1994]]  ([[usepawu]]=2)
 
-For some systems, the result might depend on the choice of the double-counting method. 
+For some systems, the result might depend on the choice of the double-counting method.
 However, the two methods generally give similar results.
 
 ## 1 Ground state calculation of NiO using LDA
@@ -90,7 +90,7 @@ If you take a look at the output file (tdftu_1.out), you can see the
 integrated total density in the PAW spheres (see the [PAW1](paw1)
 and [PAW2](paw2) tutorials on PAW formalism). This value roughly
 estimate the magnetic moment of NiO:
-    
+
      Integrated total density in atomic spheres:
      -------------------------------------------
      Atom  Sphere radius  Integrated_up_density  Integrated_dn_density  Total(up+dn)   Diff(up-dn)
@@ -104,7 +104,7 @@ The atoms in the output file, are listed as in the [[typat]] variable (the
 first two are nickel atoms and the last two are oxygen atoms). The results
 indicate that spins are located in each nickel atom of the doubled primitive
 cell. Fortunately, the LDA succeeds to give an antiferromagnetic ground state
-for the NiO. But the result does not agree with the experimental data. 
+for the NiO. But the result does not agree with the experimental data.
 
 The magnetic moment (the difference between up and down spin on the nickel atom)
 range around 1.6-1.9 according to experiments  ([[cite:Cheetham1983]],[[cite:Neubeck1999]],[[cite:Sawatzky1984]],
@@ -124,7 +124,7 @@ correctly represent the interactions among d electrons of the Ni atom. That is
 why we want to improve our functional, and be able to manage the strong correlation in NiO.
 
 ## 2 DFT+U with the FLL double-counting
-  
+
 As seen previously, the LDA does not gives good results for the magnetization
 and band gap compared to experiments.
 At this stage, we will try to improve the correspondence between calculation
@@ -142,7 +142,7 @@ the rotationally invariant interaction is used.
 
 You should run abinit with the *tdftu_2.in* input file. This calculation takes
 less than 30 seconds on a PC 3.0 GHz
-During the calculation, you can take a look at the input file. 
+During the calculation, you can take a look at the input file.
 
 {% dialog tests/tutorial/Input/tdftu_2.in %}
 
@@ -165,10 +165,10 @@ indicating at the end of the line the unit abbreviation (e.g. eV or Ha). For
 NiO, we will use variables that are generally accepted for this type of compound:
 
     upawu 8.0 eV
-    jpawu 0.8 eV 
+    jpawu 0.8 eV
 
 You can take a look at the result of the calculation. The magnetic moment is now:
-    
+
      Integrated total density in atomic spheres:
      -------------------------------------------
      Atom  Sphere radius  Integrated_up_density  Integrated_dn_density  Total(up+dn)   Diff(up-dn)
@@ -207,14 +207,14 @@ where a U is present, in order to guide the SCF algorithm.
 The fact that [[spinat]] works for NiO comes from the relative simplicity of this system.
 
 ## 3 Initialization of the density matrix
-  
+
 *You should begin by running the tdftu_3.in file before continuing.*
 
 In order to help the LDA+U find the ground state, you can define the initial
 density matrix for correlated orbitals with [[dmatpawu]] To enable this
 feature, [[usedmatpu]] must be set to a non-zero value (default is 0). When
 positive, the density matrix is kept to the [[dmatpawu]] value for the
-[[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]] is 5, 
+[[usedmatpu]] value steps. For our calculation(tdftu_3.in) , [[usedmatpu]] is 5,
 thus the spin-density matrix is kept constant for 5 SCF steps.
 
 {% dialog tests/tutorial/Input/tdftu_3.in %}
@@ -223,47 +223,47 @@ In the log file (not the usual output file), you will find for each step, the
 calculated density matrix, followed by the imposed density matrix. After the
 first 5 SCF steps, the initial density matrix is no longer imposed. Here is a
 section of the log file, in which the imposed occupation matrices are echoed:
-    
+
     -------------------------------------------------------------------------
-    
+
     Occupation matrix for correlated orbitals is kept constant
     and equal to initial one !
     ----------------------------------------------------------
-    
+
     == Atom   1 == Imposed occupation matrix for spin 1 ==
          0.90036    0.00000   -0.00003    0.00000    0.00000
          0.00000    0.90036   -0.00001    0.00000    0.00002
         -0.00003   -0.00001    0.91309   -0.00001    0.00000
          0.00000    0.00000   -0.00001    0.90036   -0.00002
          0.00000    0.00002    0.00000   -0.00002    0.91309
-    
+
     == Atom   1 == Imposed occupation matrix for spin 2 ==
          0.89677   -0.00001    0.00011   -0.00001    0.00000
         -0.00001    0.89677    0.00006    0.00001   -0.00010
          0.00011    0.00006    0.11580    0.00006    0.00000
         -0.00001    0.00001    0.00006    0.89677    0.00010
          0.00000   -0.00010    0.00000    0.00010    0.11580
-    
+
     == Atom   2 == Imposed occupation matrix for spin 1 ==
          0.89677   -0.00001    0.00011   -0.00001    0.00000
         -0.00001    0.89677    0.00006    0.00001   -0.00010
          0.00011    0.00006    0.11580    0.00006    0.00000
         -0.00001    0.00001    0.00006    0.89677    0.00010
          0.00000   -0.00010    0.00000    0.00010    0.11580
-    
+
     == Atom   2 == Imposed occupation matrix for spin 2 ==
          0.90036    0.00000   -0.00003    0.00000    0.00000
          0.00000    0.90036   -0.00001    0.00000    0.00002
         -0.00003   -0.00001    0.91309   -0.00001    0.00000
          0.00000    0.00000   -0.00001    0.90036   -0.00002
          0.00000    0.00002    0.00000   -0.00002    0.91309
-    
+
 Generally, the LDA+U functional meets the problem of multiple local minima,
 much more than the usual LDA or GGA functionals. One often gets trapped in a
 local minimum. Trying different starting points might be important...
 
 ## 4 AMF double-counting method
-  
+
 Now we will use the other implementation for the double-counting term in LDA+U
 (in Abinit), known as AMF. As the FLL method, this method uses the number of
 electrons for each spin independently and the complete interactions $U(m_1,m_2,m_3,m_4)$ and $J(m_1,m_2,m_3,m_4)$.
@@ -271,7 +271,7 @@ electrons for each spin independently and the complete interactions $U(m_1,m_2,m
 As in the preceding run, we will start with a fixed density matrix for d
 orbitals. You might now start your calculation, with the *tdftu_4.in* and
 *tdftu_4.files*, or skip the calculation, and rely on the reference file
-provided in the *\$ABI_TESTS/tutorial/Refs* directory. Examine the *tdftu_4.in* file. 
+provided in the *\$ABI_TESTS/tutorial/Refs* directory. Examine the *tdftu_4.in* file.
 
 {% dialog tests/tutorial/Input/tdftu_4.in %}
 
@@ -279,7 +279,7 @@ The only difference in the input file compared to *tdftu_3.in* is the
 value of [[usepawu]] = 2. We obtain a band gap of 4.3 eV. The value of the
 band gap with AMF and FLL is different. However, we have to remember that
 these results are not well converged. By contrast, the magnetization,
-    
+
      Atom  Sphere radius  Integrated_up_density  Integrated_dn_density  Total(up+dn)   Diff(up-dn)
         1        2.30000             9.24026835             7.56013140   16.80039975    1.68013694
         2        2.30000             7.56013140             9.24026835   16.80039975   -1.68013694
@@ -293,6 +293,6 @@ to work well for crystal with diagonal occupation matrix with 0 or 1 for each
 spin. The AMF should be used when orbital occupations are near the average occupancies.
 
 ## 5 Projected density of states in LDA+U
-  
+
 Using [[prtdos]] 3, you can now compute the projected d and f density of states.
 For more information about projected density of states, for more details see the [PAW1](paw1) tutorial.

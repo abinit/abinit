@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mlwfovlp
 !! NAME
 !!  m_mlwfovlp
@@ -7,7 +6,7 @@
 !!  Interface with Wannier90
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2019 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
+!!  Copyright (C) 2005-2020 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

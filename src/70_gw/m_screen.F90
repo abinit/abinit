@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screen
 !! NAME
 !!  m_screen
@@ -7,7 +6,7 @@
 !!   Screening object used in the BSE code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (MG)
+!!  Copyright (C) 2014-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +41,7 @@ MODULE m_screen
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_BZ_item, has_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul,          only : vcoul_t
+ use m_vcoul,          only : vcoul_t 
  use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
 &                             hscr_copy, hscr_t, hscr_bcast, hscr_from_file, ncname_from_id, em1_ncname, chi0_ncname
  use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer

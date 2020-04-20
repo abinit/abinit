@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_slc_potential
 !! NAME
 !! m_slc_potential
@@ -9,7 +8,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (TO, hexu, NH)
+!! Copyright (C) 2001-2020 ABINIT group (TO, hexu, NH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +28,7 @@ module  m_slc_potential
 
   use m_hashtable_strval, only: hash_table_t
   use m_abstract_potential, only : abstract_potential_t
-  use m_dynamic_array, only: int2d_array_type
+  !use m_dynamic_array, only: int2d_array_type
   use m_mpi_scheduler, only: mb_mpi_info_t, init_mpi_info, mpi_scheduler_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
@@ -109,6 +108,7 @@ contains
   subroutine finalize(self)
 
     class(slc_potential_t), intent(inout):: self
+    ABI_SFREE(self%ms)
 
     if(self%has_bilin) then 
       call self%liu_sc%finalize()
@@ -366,10 +366,10 @@ contains
       bfield(:,:) = bfield(:,:) + btmp(:,:)
 
       ! TESTING: write magnetic fields to a file
-      write(201,*) 'Magnetic fields are'
-      do ii = 1, self%nspin
-        write(201,*) ii, btmp(:,ii)
-      enddo
+      !write(201,*) 'Magnetic fields are'
+      !do ii = 1, self%nspin
+      !  write(201,*) ii, btmp(:,ii)
+      !enddo
     endif
 
     ! Force and energy
@@ -445,10 +445,10 @@ contains
     if(present(force)) then
       force(:,:) = force(:,:) + reshape(fslc, (/3, self%natom /))
       !TESTING write forces to file
-      write(200,*) 'Forces are'
-      do ii = 1, self%natom
-        write(200,*) ii, force(:,ii)
-      enddo
+      !write(200,*) 'Forces are'
+      !do ii = 1, self%natom
+      !  write(200,*) ii, force(:,ii)
+      !enddo
     endif
 
     if(present(energy)) energy =  energy + eslc

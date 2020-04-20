@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfti
 !! NAME
 !! m_dfti
@@ -7,7 +6,7 @@
 !!  This module provides wrappers for the MKL DFTI routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG)
+!! Copyright (C) 2009-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +24,7 @@
 
 #include "abi_common.h"
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 ! Include and generate MKL_DFTI module
 #include "mkl_dfti.f90"
@@ -51,7 +50,7 @@ MODULE m_dfti
  use m_cplxtools
  use m_fftcore
  use iso_c_binding
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
  use MKL_DFTI
 #endif
 
@@ -141,7 +140,7 @@ MODULE m_dfti
 
  logical,private,save :: USE_LIB_THREADS = .FALSE.
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
  ! dfti_alloc_* allocates arrays aligned on DFTI_DEFAULT_ALIGNMENT boundaries.
  integer(C_INT),private,parameter :: DFTI_DEFAULT_ALIGNMENT_SP = 64
  integer(C_INT),private,parameter :: DFTI_DEFAULT_ALIGNMENT_DP = 64
@@ -607,7 +606,7 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 #undef FFT_PRECISION
 #undef MYKIND
@@ -729,7 +728,7 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -793,7 +792,7 @@ subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gbound
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -869,7 +868,7 @@ subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  real(dp),target,intent(in) :: ug(2*npw_k*ndat)
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
@@ -938,7 +937,7 @@ subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(spc),target,intent(in) :: ug(npw_k*ndat)
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1007,7 +1006,7 @@ subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(dpc),target,intent(in) :: ug(npw_k*ndat)
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1079,7 +1078,7 @@ subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
  real(dp),target,intent(inout) :: ug(2*npw_k*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
@@ -1153,7 +1152,7 @@ subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(spc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1226,7 +1225,7 @@ subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(dpc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1476,7 +1475,7 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
  real(dp),target,intent(in) :: fin(2*ldx*ldy*ldz*ndat)
  real(dp),target,intent(out) :: fout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: fin_cptr, fout_cptr
@@ -1542,7 +1541,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
 !arrays
  real(dp),target,intent(inout) :: finout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: finout_cptr
@@ -1610,7 +1609,7 @@ subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  real(dp),target,intent(inout) :: ff(2*ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !scalars
  type(C_ptr) :: cptr
 !arrays
@@ -1679,7 +1678,7 @@ subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 ! *************************************************************************
 
@@ -1739,7 +1738,7 @@ subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 ! *************************************************************************
 
@@ -1794,7 +1793,7 @@ subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  real(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer :: status,nhp,padx,i1,i2,i3,igp,igf,imgf,ii
@@ -1922,7 +1921,7 @@ subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  real(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
  real(dp),target,intent(out) :: gg(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: gg_cptr
@@ -1981,7 +1980,7 @@ subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer :: status,nhp,padx,i2,i3,igp,igf,idat,padatf,padatp,ii
@@ -2083,7 +2082,7 @@ subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
  real(dp),target,intent(in) :: ff(2*ldx*ldy*ldz*ndat)
  real(dp),intent(inout) :: gg(ldx*ldy*ldz*ndat)    !vz_i
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  type(C_ptr) :: ff_cptr
@@ -2127,7 +2126,7 @@ end subroutine dfti_c2r_op_dp
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_check_status(status,file,line)
 
@@ -2261,7 +2260,7 @@ end subroutine dfti_use_lib_threads
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_alloc_real_dp(size,cptr,fptr)
 
@@ -2305,7 +2304,7 @@ end subroutine dfti_alloc_real_dp
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_alloc_complex_spc(size,cptr,fptr)
 
@@ -2349,7 +2348,7 @@ end subroutine dfti_alloc_complex_spc
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 
 subroutine dfti_alloc_complex_dpc(size,cptr,fptr)
 

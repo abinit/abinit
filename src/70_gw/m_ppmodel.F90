@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ppmodel
 !! NAME
 !! m_ppmodel
@@ -8,7 +7,7 @@
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,7 +40,8 @@ MODULE m_ppmodel
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul,          only : vcoul_t, cmod_qpg
+ use m_vcoul,          only : vcoul_t
+ use m_qplusg,         only : cmod_qpg
  use m_fft_mesh,       only : g2ifft
  use m_fft,            only : fourdp
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq

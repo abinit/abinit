@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_harmonic_primitive_potential
 !! NAME
 !! m_lattice_harmonic_primitive_potential
@@ -14,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,6 +63,7 @@ module m_lattice_harmonic_primitive_potential
                                  !  The indices are (ind_R, i, j). Note that xyz is included in i and j.
      integer, allocatable :: Rlist(:,:) ! The list of R points (3, number of R-points)
                                         !. Rlist(:, ind_R) is a R-vector.
+     real(dp) :: ref_energy=0.0                  ! reference energy
    contains
      procedure:: initialize
      procedure:: finalize
@@ -132,6 +132,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: ncid, ierr
     integer :: iR, nR, natom, natom3
+    real(dp) :: ref_energy
     real(dp) :: cell(3,3)
     real(dp), allocatable :: xcart(:,:), masses(:)
     integer, allocatable :: zion(:)
@@ -154,6 +155,12 @@ contains
     ABI_ALLOCATE(self%Rlist,(3, nR))
 
 
+    ierr =nf90_inq_varid(ncid, "ref_energy", varid)
+    NCF_CHECK_MSG(ierr, "ref_energy")
+    ierr = nf90_get_var(ncid, varid, masses)
+    NCF_CHECK_MSG(ierr, "ref_energy")
+
+
     ierr =nf90_inq_varid(ncid, "ref_masses", varid)
     NCF_CHECK_MSG(ierr, "ref_masses")
     ierr = nf90_get_var(ncid, varid, masses)
@@ -174,11 +181,14 @@ contains
     ierr = nf90_get_var(ncid, varid, zion)
     NCF_CHECK_MSG(ierr, "ref_zion")
 
+    ! Unit conversions
+    ref_energy = ref_energy * eV_Ha
     masses(:)  = masses(:) * amu_emass
     cell(:,:) = cell(:,:) / Bohr_Ang
     xcart(:,:) = xcart(:,:) /Bohr_Ang
 
     self%natom=natom
+    self%ref_energy=ref_energy
     call self%primcell%set_lattice(natom, cell, xcart, masses, zion)
 
     call self%coeff%initialize([ nR, natom3, natom3 ])
@@ -283,6 +293,8 @@ contains
           end do
        end do
 
+       call scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
+
        ! Test the phonon energy
        !call COO_to_dense(scpot%coeff, real_sc_evecs)
        !sc_evecs(:,:) = real_sc_evecs(:,:)
@@ -330,6 +342,7 @@ contains
     real(dp), intent(inout) :: evals(:)
     complex(dp), intent(inout) :: evecs(:,:)
     call self%get_hamk(kpoint, evecs)
+    ! The evecs array is reused both as the matrix and eigenvectors.
     call eigensh(evals, evecs)
   end subroutine get_eigen
 

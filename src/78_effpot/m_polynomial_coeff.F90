@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_polynomial_coeff
 !!
 !! NAME
@@ -8,7 +7,7 @@
 !! Module with the datatype polynomial coefficients
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -827,7 +826,7 @@ end subroutine polynomial_coeff_MPIrecv
 !! This routine print the coefficents into XML format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
+!! Copyright (C) 2000-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3408,9 +3407,9 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
             enddo
          endif
          if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after
-	    possible = .FALSE.
+            possible = .FALSE.
          else   
-	    ncombi = ncombi + 1
+            ncombi = ncombi + 1
             possible = .TRUE. 
          endif
          if(need_compute .and. possible)then

@@ -12,7 +12,7 @@ znucl  8 1
 typat  8*1 16*2
 acell
      8.4891 14.7036 13.8627
-xangst
+xcart
      0.00000   5.18720   0.45849
      0.00000   2.59360   4.12639
      2.24612   1.29680   0.45849
@@ -36,7 +36,7 @@ xangst
      0.75695   2.11523  -0.12023
     -0.75695   2.11523  -0.12023
      0.75695   5.66557   3.54768
-    -0.75695   5.66557   3.54768
+    -0.75695   5.66557   3.54768    Angstrom
 
 # Definition of the planewave basis set
 ecut   20           # This cut-off is too low for real calculations

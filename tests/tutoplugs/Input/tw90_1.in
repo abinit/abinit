@@ -60,5 +60,5 @@ w90prtunk2 1   #Prints UNK files (for plotting the Wannier functions)
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 
-#%% description = Test interface with Wannier90 (NC pseudos)
+#%% description = Test interface with Wannier90 (NC pseudopotentials)
 #%%<END TEST_INFO>

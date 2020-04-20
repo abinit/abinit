@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_slc_primitive_potential
 !! NAME
 !! m_slc_primitive_potential
@@ -14,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu,nehelbig)
+!! Copyright (C) 2001-2020 ABINIT group (hexu,nehelbig)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,7 +122,10 @@ contains
     call self%oiju%finalize()
     call self%oRjlist%finalize()
     call self%oRulist%finalize()
-    !call self%tijuv%finalize()
+    call self%tijuv%finalize()
+    call self%tRjlist%finalize()
+    call self%tRulist%finalize()
+    call self%tRvlist%finalize()
     nullify(self%primcell)
     self%nspin=0
     self%natom=0
@@ -144,7 +146,7 @@ contains
     if (xmpi_comm_rank(xmpi_world)==0) then
        ncdf_fname=fnames(3)
        write(message,'(a,(81a, 80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-            &     'Reading spin-lattice coupling terms from ', trim(ncdf_fname)
+            &     '- Reading spin-lattice coupling terms from ', trim(ncdf_fname)
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
     endif
@@ -767,6 +769,8 @@ contains
     end do
     
     call scpot%liu_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_liu_sc
 
@@ -818,6 +822,8 @@ contains
     end do
     
     call scpot%niuv_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_niuv_sc
 
@@ -870,6 +876,8 @@ contains
     end do
     
     call scpot%oiju_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_oiju_sc
 
@@ -923,6 +931,8 @@ contains
     end do
     
     call scpot%tijuv_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_tijuv_sc
 

@@ -2,7 +2,7 @@
 .Version 8.11.12 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -36,6 +36,8 @@
        frmax         1.00000000E+01
  Interatomic Force Constants Inputs :
       dipdip         1
+      dipqua         0
+      quadqu         0
       ifcana         1
       ifcout        16
       natifc         2
@@ -1037,6 +1039,8 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  1.127830E+03  1.127830E+03
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-05 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
   1.0  1.0  1.0 -1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   2

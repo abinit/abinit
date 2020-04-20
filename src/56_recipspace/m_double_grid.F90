@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_double_grid
 !! NAME
 !!  m_double_grid
@@ -9,7 +8,7 @@
 !! and contains the mapping between the two meshes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (YG, SP, MJV)
+!! Copyright (C) 2008-2020 ABINIT group (YG, SP, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

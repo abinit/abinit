@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_isothermal
 !! NAME
 !!  m_pred_isothermal
@@ -11,7 +10,7 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

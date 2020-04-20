@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -79,7 +79,9 @@ def makefile_subdirs(filename,prefix):
 # Initial setup
 my_name    = "make-makefiles-inter"
 my_configs = {
-  "libs":"config/specs/corelibs.conf"}
+  "libs":"config/specs/corelibs.conf",
+  "bsys":"config/specs/buildsys.conf",
+}
 
 mf_sep = "\n# ---------------------------------------------------------------------------- #\n"
 
@@ -125,13 +127,11 @@ for parent in abinit_parents:
 
   # Extract information for each subdir
   lib_specs = {
-    "abiauty": [],
     "abirules": [],
     "optional": [],
     "subdirs": [],
   }
-  if ( parent != "libpaw" ):
-    lib_specs["subdirs"] += ["incs", "mods"]
+  lib_specs["subdirs"] += ["incs", "mods"]
   for lib in abinit_libs:
     if ( parent == "libpaw" ):
       subdir = "src"
@@ -139,15 +139,12 @@ for parent in abinit_parents:
       subdir = lib
     if ( cnf.get(lib, "abirules") == "yes" ):
       lib_specs["abirules"].append(subdir)
-      if ( cnf.get(lib, "abiauty") == "yes" ):
-        lib_specs["abiauty"].append(subdir)
     if ( cnf.get(lib, "optional") == "yes" ):
       lib_specs["optional"].append(subdir)
       lib_specs["subdirs"].append("$(%s_%s)" % (parent, subdir))
     else:
       lib_specs["subdirs"].append(subdir)
   if ( parent == "core" ):
-    #lib_specs["abiauty"].append("98_main")
     lib_specs["abirules"].append("98_main")
     lib_specs["subdirs"].append("98_main")
 
@@ -181,54 +178,6 @@ for parent in abinit_parents:
       makefile += "\t@$(PERL) ../developers/maintainers/abirules.pl -d %s >>tmp-abirules.log\n" % (subdir)
     makefile += "\t@grep 'Error' tmp-abirules.log\n"
 
-  # Add an abiauty target
-  if ( len(lib_specs["abiauty"]) > 0 ):
-    makefile += mf_sep
-    makefile += """
-# Beautify ABINIT sources (indentation)
-# Note : the _ext, _noabirule should not treated because they are not expected to follow the abirules
-# Note : 02_clib only includes C files
-# Note : 43_ptgroup should not be treated because the routines have been generated automatically
-# Note : 57_iopsp_parser should not be treated because it contains now routines from pwscf, not respecting abirules (XG20180623).
-# Note : 69_wfdesc, 70_gw and 71_bse  should not be treated due a special request of Matteo
-# Note : the "Warning" occurences have been eliminated on 10 May 2011.
-# Note : the "ERROR" occurences have been eliminated on 25 December 2011, also documenting the solution for each type of problem !!
-# Note : 26 Feb 2012 : error messages have been improved, recursive has been allowed.
-# Should write the documentation, so that to imitate the "make parents" treatment on shiva ...
-# The treatment of $omp is still incorrect !!
-#
-# 1) ERROR(41_geometry/prt_cif.F90): found end statement at line 273 for '' subroutine symrel2string '' before executable section
-#      The structuration between the declarations and the executable section was missing
-# 2) ERROR(67_common/mklocl_realspace.F90): found end statement at line 849 for '' subroutine createIonicPotential_new '' instead of '' if construct ''
-#      There was a (forbidden) on-line if ... call :
-#       if (condition)  call subroutine
-#      Solution : replace by
-#        if (condition) then
-#            call subroutine
-#        endif
-# 3) ERROR(67_common/rhotov.F90): found end statement at line 412 for '' subroutine rhotov '' instead of '' if construct ''
-#      There was a (forbidden) on-line secondary if construct
-#        command ; if( condition) command2
-#      Solution : replace by
-#        command
-#        if(condition) command2
-# 4) Similar message of error might be caused by sections of the code that start from the first column !! 
-#      Solution : by hand, insert a blank. Abiauty will do the rest ...
-# 
-# When happening in a module, ignore the problems (modules are not yet treated by abiauty).
-# 
-# 1) ERROR, executable section not found
-# 2) ERROR(10_defs/defs_datatypes.F90): found type at line 99 while expecting program/subroutine
-# 3) ERROR(10_defs/defs_datatypes.F90): end of file 10_defs/defs_datatypes.F90 hit prematurely while expecting:
-#  program/subroutine/function statement
-# 4) ERROR(10_defs/defs_wannier90.F90): found end statement at line 62 for '' subroutine wannier_setup '' before executable section
-abiauty:
-	@echo 'Reporting possible errors in the abiauty procedure' > tmp-abiauty.log
-"""
-    for subdir in lib_specs["abiauty"]:
-      makefile += "\t@$(PERL) $(top_srcdir)/developers/maintainers/abiauty.pl -d $(top_srcdir)/{}/{} >>tmp-abiauty.log\n".format(par_dir, subdir)
-    makefile += "\t@grep 'ERROR' tmp-abiauty.log >error_make_abiauty || /bin/true\n"
-
   # Add a help target
   makefile += mf_sep
   makefile += "\n# Help\n"
@@ -242,7 +191,7 @@ abiauty:
 
   # Add a local maintainer-clean target
   makefile += mf_sep
-  makefile += "\n# Thorough clean-up\nmaintainer-clean-local:\n\trm -f tmp-abiauty.log tmp-abirules.log\n"
+  makefile += "\n# Thorough clean-up\nmaintainer-clean-local:\n\trm -f tmp-abirules.log\n"
   for file_ext in ["old", "orig", "rej"]:
     makefile += "\tfind . -name '*.%s' -exec rm {} \\;\n" % file_ext
 
@@ -281,7 +230,29 @@ abiauty:
 # Write shared intermediate Makefile.am files
 with open("shared/Makefile.am", "w") as mf_shared:
   mf_shared.write(makefile_header(my_name, now))
-  mf_shared.write("SUBDIRS = common libpaw\n")
+  mf_shared.write("""\
+SUBDIRS = .
+if DO_BUILD_SHARED_COMMON
+  SUBDIRS += common
+endif
+if DO_BUILD_SHARED_LIBPAW
+  SUBDIRS += libpaw
+endif
+""")
 with open("shared/common/Makefile.am", "w") as mf_common:
   mf_common.write(makefile_header(my_name, now))
   mf_common.write("SUBDIRS = src\n")
+
+# Write makefiles for subsystems
+cnf_bsys = MyConfigParser()
+cnf_bsys.read(my_configs["bsys"])
+for subsys in cnf_bsys.sections():
+  if ( (cnf_bsys.get(subsys, "mode") == "detached") and \
+       (cnf_bsys.get(subsys, "type") == "data") ):
+    sub_path = os.path.join("config", "dist", "auto-%s.lst" % subsys)
+    if ( os.path.exists(sub_path) ):
+      sub_idx = len(subsys) + 1
+      sub_files = [item[sub_idx:].strip() for item in open(sub_path, "r").readlines()]
+      with open(os.path.join(subsys, "Makefile.am"), "w") as mf_sub:
+        mf_sub.write(makefile_header(my_name, now))
+        mf_sub.write("EXTRA_DIST = \\\n  " + " \\\n  ".join(sub_files) + "\n")
