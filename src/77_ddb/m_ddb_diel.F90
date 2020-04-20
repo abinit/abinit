@@ -266,7 +266,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      if(dieflag==1) then
        write(message,'(4a)') ch10,ch10,' Calculate the freq. dep. dielectric constant',ch10
        call wrtout(std_out,message,'COLL')
-       write(message,'(4a)') ch10,ch10,' Frequency dependent dielectric constant:',ch10
+       write(message,'(3a)') ch10,' Frequency dependent dielectric constant:',ch10
        call wrtout(iout,message,'COLL')
    
 !      Check the possibility of asking the frequency-dependent

@@ -783,9 +783,7 @@ end if ! condition on nlflag
          call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
        end if
 #endif
-       ABI_FREE(rsus)
      end if !nlflag=1 (Raman suscep for the 2nd list of wv.)
-
    end do ! iphl2
 
    ! Lyddane-Sachs-Teller relation:
@@ -799,6 +797,7 @@ end if ! condition on nlflag
 
  ABI_FREE(fact_oscstr)
  if (inp%nlflag > 0) then
+   ABI_FREE(rsus)
    ABI_FREE(dchide)
    ABI_FREE(dchidt)
  end if
