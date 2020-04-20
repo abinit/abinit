@@ -210,7 +210,7 @@ ABI_TOPICS = [
     "k-points",
     "LatticeModel",
     "LDAminushalf",
-    "Longwave" ,
+    "longwave" ,
     "LOTF",
     "MagField",
     "MagMom",
