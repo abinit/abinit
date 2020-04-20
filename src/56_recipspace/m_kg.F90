@@ -198,7 +198,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       ' getcut : WARNING -',ch10,&
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
-&       '  Be sure to test with larger ngfft(1:3) values.',ch10
+&       '  Be sure to test with larger ngfft(1:3) values.',ch10,&
 &       '  This situation might happen when optimizing the cell parameters.',ch10,&
 &       '  Your starting geometry might be crazy.',ch10,&
 &       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
