@@ -43,7 +43,7 @@ D.10 Update topics mirroring the most noticeable achievements.
 
 E. For the first release of a production version
 -----------------------------------------------
-E.1 Collect the stats, complete doc/main*/statistics.txt and doc/dev*/statistics.json
+E.1 Collect the stats, complete doc/main*/statistics.txt (and doc/dev*/statistics.json ? Not present in v9)
 
 F. For the first release and other merges of a production version
 -----------------------------------------------
