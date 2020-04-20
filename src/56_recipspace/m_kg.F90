@@ -120,7 +120,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 !scalars
  integer :: plane
  real(dp) :: boxsq,cutrad,ecut_pw,effcut,largesq,sphsq
- character(len=500) :: message
+ character(len=1000) :: message
 !arrays
  integer :: gbound(3)
 
