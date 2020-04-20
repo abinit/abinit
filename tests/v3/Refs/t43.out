@@ -706,7 +706,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   Note that boxcut < 1.5; this usually means
   that the forces are being fairly strongly affected by  the smallness of the fft box.
   Be sure to test with larger ngfft(1:3) values.
-  This situation might happen when optimizing the cell parameters.	n		
+  This situation might happen when optimizing the cell parameters.
   Your starting geometry might be crazy.			
   See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .
 
