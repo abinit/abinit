@@ -169,7 +169,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,f12.6)' )&
+       write(message, '(9a,f12.6,6a)' )&
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
@@ -194,7 +194,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      end if
 
      if (boxcut<1.5_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,a)' ) ch10,&
+       write(message, '(15a)' ) ch10,&
 &       ' getcut : WARNING -',ch10,&
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
