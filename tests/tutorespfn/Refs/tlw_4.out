@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  1 Apr 2020.
-- ( at 19h40 )
+.Starting date : Mon 20 Apr 2020.
+- ( at 23h48 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/TestBot_MPI1/tutorespfn_tlw_4-tlw_5-tlw_6-tlw_7/tlw_4.in
 - output file    -> tlw_4.out
@@ -7599,10 +7599,10 @@ P          mk1mem12       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        303.2  wall=        334.7
+- Proc.   0 individual time (sec): cpu=        303.7  wall=        343.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and 342 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        303.2  wall=        334.7
++Overall time at end (sec) : cpu=        303.7  wall=        343.0
