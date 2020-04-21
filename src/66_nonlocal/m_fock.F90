@@ -2091,8 +2091,6 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  real(dp),intent(inout) :: gmet(3,3)
  real(dp),intent(out) ::  vqg(nfft)
 
- type(dataset_type)         :: dtset                
-
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex1=1

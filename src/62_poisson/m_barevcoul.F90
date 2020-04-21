@@ -38,7 +38,6 @@ module m_barevcoul
 
  use m_crystal,         only : crystal_t
  use m_gsphere,         only : gsphere_t
- use m_qplusg,          only : cmod_qpg
 
 ! Cut-off methods modules 
  use m_cutoff_sphere,   only : cutoff_sphere
@@ -165,7 +164,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  real(dp),intent(inout)     :: gmet(3,3)
  real(dp),intent(inout)     :: barev(nfft)
  real(dp)                   :: a1(3),a2(3),a3(3)
- real(dp)                   :: bb(3),b1(3),b2(3),b3(3),gprimd(3,3),rmet(3,3)
+ real(dp)                   :: b1(3),b2(3),b3(3),gprimd(3,3),rmet(3,3)
  type(dataset_type)         :: dtset
  type(MPI_type)             :: mpi_enreg   !!!!
  type(crystal_t)            :: Cryst       !!!!
@@ -178,20 +177,19 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  integer              :: i1,i2,i23,i3,id1,id2,id3,icutcoul_local
  integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer              :: ii,ing,n1,n2,n3,npar,npt
- integer              :: opt_cylinder,opt_surface,test,rank,nprocs
+ integer              :: opt_cylinder,opt_surface,test,nprocs
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: check,step
  real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
- real(dp)             :: bz_geometry_factor,bz_plane,dx,integ,q0_vol,q0_volsph
+ real(dp)             :: bz_plane,dx,integ,q0_vol,q0_volsph
  character(len=500)   :: msg
 !arrays
  integer              :: id(3), gamma_pt(3,1)
- real(dp),allocatable :: gq(:,:),gpq(:),gpq2(:),qplusg(:)
+ real(dp),allocatable :: gq(:,:),gpq(:),gpq2(:)
  real(dp),allocatable :: vcfit(:,:),xx(:),yy(:)
  real(dp),allocatable :: cov(:,:),par(:),qfit(:,:),sigma(:),var(:),qcart(:,:)
 !
  comm=mpi_enreg%comm_world
- rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 !
 ! === Save dimension and other useful quantities in barev% ===
  vcut%nfft      = PRODUCT(ngfft(1:3))  ! Number of points in the FFT mesh.
@@ -205,7 +203,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  vcut%vcutgeo   = dtset%vcutgeo(:)     ! Info on the orientation and extension of the cutoff region.
 !
 ! === Define geometry and cutoff radius (if used) ===
-! vcut%mode='NONE'
+ vcut%mode='NONE'
  icutcoul_local=dtset%icutcoul
 
 ! BG: Temporary to circumvent the tests 
@@ -327,7 +325,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    end if
 
    call cutoff_cylinder(nfft,gq,ng,Gsph%gvec,vcut%rcut,vcut%hcyl,vcut%pdir,&
-&    vcut%boxcenter,Cryst%rprimd,barev,opt_cylinder,comm)
+&                       vcut%boxcenter,Cryst%rprimd,barev,opt_cylinder,comm)
 
    ! === If Beigi, treat the limit q--> 0 ===
    if (opt_cylinder==1) then
@@ -340,7 +338,8 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      qfit(:,:)=zero
      step=half/(npt*(nfft-1))              ; qfit(3,:)=arth(tol6,step,npt)
 
-     call cutoff_cylinder(npt,qfit,1,gamma_pt,vcut%rcut,vcut%hcyl,vcut%pdir,vcut%boxcenter,Cryst%rprimd,vcfit,opt_cylinder,comm)
+     call cutoff_cylinder(npt,qfit,1,gamma_pt,vcut%rcut,vcut%hcyl,vcut%pdir,&
+&                         vcut%boxcenter,Cryst%rprimd,vcfit,opt_cylinder,comm)
 
      ABI_MALLOC(xx,(npt))
      ABI_MALLOC(yy,(npt))
@@ -502,10 +501,10 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    end do
 
  CASE DEFAULT
-   write(msg,'(a,i3)')' Cut-off value not allowed. Please consult icutcoul variable.'
-   MSG_BUG(msg)
+   write(msg,'(a,i3)')'No cut-off applied to the Coulomb Potential.' //&
+&                     'Either icutcoul value not allowed or not defined.'
+   MSG_WARNING(msg)
  END SELECT
-
 
  ABI_DEALLOCATE(gq)
  ABI_DEALLOCATE(gpq)
