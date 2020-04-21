@@ -38,16 +38,13 @@ ndtset 10   pawecutdg: 12. pawecutdg+ 3.
  prtwf 1 prtden 0  prteig 0
  getwfk -1
 
-#Files
-pp_dirpath="../../Psps_for_tests"
-pseudos = "C.LDA_PW-JTH.xml"
-
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_3.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% psp_files =  6c.pspnc
 #%% output_file = "tpaw1_3.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
