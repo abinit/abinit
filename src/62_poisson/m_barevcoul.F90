@@ -177,7 +177,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  integer              :: i1,i2,i23,i3,id1,id2,id3,icutcoul_local
  integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer              :: ii,ing,n1,n2,n3,npar,npt
- integer              :: opt_cylinder,opt_surface,test,nprocs
+ integer              :: opt_cylinder,opt_surface,test
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: check,step
  real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
