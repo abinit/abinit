@@ -6,7 +6,6 @@ README_MacOSX.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
-variables/optic.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -24,10 +23,10 @@ variables/paw.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
+variables/optic.md
+variables/a-tdep.md
 variables/aim.md
 variables/multibinit.md
-variables/tdep.md
-variables/anaddb.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md

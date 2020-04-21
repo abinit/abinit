@@ -583,6 +583,7 @@ class AbinitProject(NotebookWriter):
         Return list of directory names containing source files.
         """
         l = []
+
         for src_dir in self.all_src_dirs:
             assert os.path.isdir(src_dir)
             #print("src_dir", src_dir) #, os.listdir(src_dir))

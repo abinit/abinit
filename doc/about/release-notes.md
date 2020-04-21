@@ -66,6 +66,8 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
 
 **A.5** The input variable xangst has been disabled. Use xcart instead, and specify the unit, namely Angstrom.
 
+**A.6** The name of the t-DEP main executable has been changed from `tdep" to `atdep`, in line with [[cite:Romero2020]].
+
 * * *
 
 ### **B.** Most noticeable achievements
@@ -253,7 +255,7 @@ New input variables tested and documented:
 [[spin_init_state@multibinit|spin_init_state]], 
 [[spin_ntime_pre@multibinit|spin_ntime_pre]], 
 [[spin_projection_qpoint@multibinit|spin_projection_qpoint]], 
-[[spin_sia_add@multibinit|spin_sia_add]], 
+[[spin_sia_add@multibinit|spin_sia_add]],
 [[spin_sia_k1amp@multibinit|spin_sia_k1amp]], 
 [[spin_sia_k1dir@multibinit|spin_sia_k1dir]], 
 [[spin_temperature_start@multibinit|spin_temperature_start]], 
@@ -267,7 +269,7 @@ spin_calc_correlation_obs (NT and not documented),
 spin_calc_traj_obs (NT and not documented), 
 [[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT). 
 
-By Xu He, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete
+By Xu He, N. Helbig, J. Bieder, E. Bousquet, Ph. Ghosez, M. Verstraete
 
 
 **B.4** Constrained DFT
@@ -291,6 +293,9 @@ By X. Gonze.
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
 Fully documented example files can be found in doc/build/config-examples.
+A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
+   to convert from the old `.ac`format to `.ac9`.
+
 The build system of ABINITv9 does not build anymore the (hard and soft) dependencies (Linalg, NetCDF4, HDF, LibXC, Wannier90, ...), as this was not sustainable.
 Three libraries are now mandatory: linalg, NetCDF4/HDF5 and LibXC. Failing to link to them will prevent building ABINIT.
 The other libraries are optional, there will only be a warning if they are not available.
@@ -579,10 +584,10 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - S Sec Second  for the ABINIT input file;
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
-**D.13** TDEP utility:
-added [[guide:tdep|A-TDep user guide]],
-[[topic:Tdep|TDep topic]], and corresponding input variable documentation.
-References: [[pdf:TDEP_Paper|TDEP paper]].
+**D.13** a-TDEP utility:
+added [[guide:a-TDEP|A-TDEP user guide]],
+[[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
+References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
 
 By F. Bottin, J. Bouchet, J. Bieder (MR491,422).
@@ -619,7 +624,7 @@ Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+.
 
 By M. Torrent, JM Beuken (MR 532, 470, 465, 441)
 
-**D.21** Write yaml file for fatbands (phonopy format) with TDEP
+**D.21** Write yaml file for fatbands (phonopy format) with a-TDEP
 
 By J. Bieder (MR510)
 
@@ -671,7 +676,11 @@ By R. Outerov and B. Amadon (MR622).
 
 By B. Guster, M. Giantomassi and X. Gonze (MR 627&633).
 
-**D.33** Miscellaneous additional bug fixes and improvements of documentation.
+**D.33** New TB2J python script to compute the superexchange (J) and the Dzyaloshinskii-Moriya (DMI) interactions. The script can be found in [http://gitlab.abinit.org/xuhe/TB2J](http://gitlab.abinit.org/xuhe/TB2J) with doc and tutorials. The script is interfaced with wannier90 and use the w90 output files. The J calculation works in production, the DMI is much more sensitive to disentanglement noise and have to be use with care. An article is under construction to describe the method and its implementation. The script can deliver input data file for the spin model of Multibinit.
+
+By He Xu, M. Verstraete and E. Bousquet
+
+**D.34** Miscellaneous additional bug fixes and improvements of documentation.
 L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
 
@@ -1054,7 +1063,7 @@ D.8 Continued development of the electron-phonon [[optdriver]] = 7 module of ABI
 D.9 Added netcdf output of phonons for full grid, not just band structure. Only in tetrahedron prtdos 2 case.
     By M. Verstraete
 
-D.10 On-going development: main executable `tdep`, for the TDEP algorithm, by Hellman and coworkers.
+D.10 On-going development: main executable `atdep`, for the TDEP algorithm, by Hellman and coworkers.
      See [[src:98_main/tdep.F90]], as well as directory 80_tdep. 
      No automatic tests provided yet, no documentation as well ...
      By F. Bottin, J. Bouchet, J. Bieder.

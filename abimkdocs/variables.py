@@ -244,7 +244,7 @@ ABI_TOPICS = [
     "STM",
     "Susceptibility",
     "TDDFT",
-    "Tdep",
+    "a-TDEP",
     "TDepES",
     "Temperature",
     "TransPath",

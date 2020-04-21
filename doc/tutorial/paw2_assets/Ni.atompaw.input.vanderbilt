@@ -23,14 +23,14 @@ n                                           ! Do we add an additional p partial 
 y                                           ! Do we add an additional d partial wave ? yes
 1.                                          ! Reference energy for this new d partial wave (Ryd)
 n                                           ! Do we add an additional s partial wave ? no
-custom rrkj                                  ! Scheme for PS partial waves and projectors
-3 0. ultrasoft                              ! Scheme for pseudopotential (l_loc=3, E_loc=0Ry)
+vanderbilt                                  ! Scheme for PS partial waves and projectors
+3 0. troulliermartins                       ! Scheme for pseudopotential (l_loc=3, E_loc=0Ry)
 2.2                                         ! r_c matching radius for first  s partial wave
 2.2                                         ! r_c matching radius for second s partial wave
 2.3                                         ! r_c matching radius for first  p partial wave
 2.3                                         ! r_c matching radius for second p partial wave
 2.3                                         ! r_c matching radius for first  d partial wave
 2.3                                         ! r_c matching radius for second d partial wave
-ABINITOUT                                   ! Option for ABINIT file creation
+XMLOUT                                   ! Option for ABINIT file creation
 default                                     ! All parameters set to default for ABINIT file
 0                                           ! End of file

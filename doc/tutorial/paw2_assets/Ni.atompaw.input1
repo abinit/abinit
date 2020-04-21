@@ -25,6 +25,6 @@ y                                           ! Do we add an additional d partial 
 n                                           ! Do we add an additional s partial wave ? no
 bloechl                                     ! Scheme for PS partial waves and projectors
 3 0. troulliermartins                       ! Scheme for pseudopotential (l_loc=3, E_loc=0Ry)
-ABINITOUT                                   ! Option for ABINIT file creation
+XMLOUT                                      ! Option for XML file creation
 default                                     ! All parameters set to default for ABINIT file
 0                                           ! End of file

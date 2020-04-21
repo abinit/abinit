@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.2 of MULTIBINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h37 )
+.Starting date : Sat  4 Apr 2020.
+- ( at 14h20 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t23.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_Multibinit-slc/tests/v8/Input/t23.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -97,7 +97,6 @@ Thermalization run:
 -           800      7.99000E-13      4.61386E-01     -1.71916E-03
 -           900      8.99000E-13      5.16411E-01     -1.91722E-03
 -          1000      9.99000E-13      5.28911E-01     -1.77537E-03
-Measurement run:
 -           100      9.90000E-14      5.03489E-01     -1.73310E-03
 -           200      1.99000E-13      4.98610E-01     -1.73943E-03
 -           300      2.99000E-13      4.74120E-01     -1.74836E-03
@@ -132,10 +131,10 @@ Measurement run:
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
-+Total cpu time      1.546  and wall time      1.568 sec
++Total cpu time      1.465  and wall time      1.475 sec
 
  multibinit : the run completed succesfully.
