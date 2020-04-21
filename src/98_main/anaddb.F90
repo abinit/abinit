@@ -691,9 +691,11 @@ end if ! dieflag!=0 or inp%nph2l/=0
 !**********************************************************************
 ! Non-linear response: electrooptic and Raman (q=Gamma, TO modes only)
 !**********************************************************************
+ if (inp%nlflag > 0) then
+   ABI_MALLOC(rsus, (3*natom,3,3))
+ end if
 
  if (inp%nlflag==1) then
-   ABI_MALLOC(rsus, (3*natom,3,3))
    ! Raman susceptibilities for the 1st list (only TO  modes at q=Gamma)
    call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
 
@@ -705,7 +707,6 @@ end if ! dieflag!=0 or inp%nph2l/=0
 
    ! EO coef:
    call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
-   !ABI_FREE(rsus)
 end if ! condition on nlflag
 
 !**********************************************************************
@@ -714,10 +715,6 @@ end if ! condition on nlflag
 !**********************************************************************
 
  if (inp%nph2l/=0) then
-
-   if (inp%nlflag > 0) then
-     ABI_MALLOC(rsus, (3*natom,3,3))
-   end if
 
    write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
    call wrtout([std_out, ab_out], msg)
