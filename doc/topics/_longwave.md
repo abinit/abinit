@@ -1,12 +1,11 @@
 ---
-description: How to compute spatial dispersion properties with the longwave
-DFPT approach. 
+description: How to compute spatial dispersion properties with the longwave DFPT approach. 
 authors: MR and MS
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute spatial dispersion properties 
-(e.g, flexoelectric tensor or dynamical quadrupoles) with the longwave DFPT
+(e.g. flexoelectric tensor or dynamical quadrupoles) with the longwave DFPT
 driver of the ABINIT package.
 
 ## Introduction
