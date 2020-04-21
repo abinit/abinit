@@ -126,7 +126,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  integer,parameter :: master=0
  integer :: dieflag,idir1,idir2,ifreq,ii,imode,iphl2,nfreq
  integer :: nprocs,my_rank,ncerr
- real(dp) :: afreq,difffr,eps,q2,usquare,ucvol
+ real(dp) :: afreq,difffr,eps,q2,ucvol
  character(len=500) :: message
 !arrays
  real(dp) :: qphon(3),refl(3)

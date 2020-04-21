@@ -705,7 +705,7 @@ end if ! dieflag!=0 or inp%nph2l/=0
 
    ! EO coef:
    call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
-   ABI_FREE(rsus)
+   !ABI_FREE(rsus)
 end if ! condition on nlflag
 
 !**********************************************************************
