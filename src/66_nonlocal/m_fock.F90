@@ -2091,6 +2091,8 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  real(dp),intent(inout) :: gmet(3,3)
  real(dp),intent(out) ::  vqg(nfft)
 
+ type(dataset_type)         :: dtset                
+
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex1=1
@@ -2148,7 +2150,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  if (abs(hyb_mixing)>tol8) then
     shortrange=.false.
     rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-    call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
     vqg=vqg*hyb_mixing
     if (hyb_range_fock>tol8)then
        vqg(1)=hyb_mixing*divgq0+hyb_mixing*(pi/hyb_range_fock**2)
@@ -2158,7 +2160,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  if (abs(hyb_mixing_sr)>tol8) then
     shortrange=.true.
     rcut=hyb_range_fock
-    call barevcoul(rcut,shortrange,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
+    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
     vqg=vqg*hyb_mixing_sr
 !    if (hyb_range_fock>tol8)then
 !       vqg(1)=hyb_mixing*divgq0+hyb_mixing_sr*pi/hyb_range_fock**2
