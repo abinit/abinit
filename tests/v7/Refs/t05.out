@@ -624,7 +624,7 @@ P           mkmem7          3
            toldfe1     1.00000000E-10 Hartree
            toldfe2     1.00000000E-10 Hartree
            toldfe3     1.00000000E-14 Hartree
-           toldfe4     1.00000000E-12 Hartree
+           toldfe4     1.00000000E-14 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
            toldfe7     1.00000000E-10 Hartree
@@ -1400,7 +1400,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     150.625     150.514
 --- !BeginCycle
 iteration_state: {dtset: 4, }
 solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
-tolerances: {toldfe: 1.00E-12, }
+tolerances: {toldfe: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
@@ -1423,7 +1423,7 @@ tolerances: {toldfe: 1.00E-12, }
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  maximum energy difference=  5.304E-10 exceeds toldfe=  1.000E-12
+  maximum energy difference=  5.304E-10 exceeds toldfe=  1.000E-14
 
 
 --- !ResultsGS
@@ -2741,7 +2741,7 @@ P           mkmem7          3
            toldfe1     1.00000000E-10 Hartree
            toldfe2     1.00000000E-10 Hartree
            toldfe3     1.00000000E-14 Hartree
-           toldfe4     1.00000000E-12 Hartree
+           toldfe4     1.00000000E-14 Hartree
            toldfe5     1.00000000E-10 Hartree
            toldfe6     1.00000000E-10 Hartree
            toldfe7     1.00000000E-10 Hartree

@@ -928,7 +928,7 @@ Gilbert damping factor in LLG equation for spin dynamics.
 #    (Not yet implemented.)
 #""",
 #),
-#
+
 Variable(
     abivarname="spin_dt@multibinit",
     varset="multibinit",

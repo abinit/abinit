@@ -37,7 +37,7 @@ epsengy
 ! 1 - Adaptive linear
 ! 2 - Pulay mixing
 mixtype
- 2
+ 3
 
 ! Exchange-correlation functional to use
 ! LDA (PW92) is 3 (default) (equiv. Abinit ixc 7)
@@ -92,7 +92,7 @@ vkloff
 stype
  0          : Smearing type 0 - Gaussian
 swidth
- 0.4109816517E-02      : Smearing width
+ 0.4109804423E-02      : Smearing width
 
 ! Set upper limit of |G+k|, the number below is
 ! (MT radius)*max(|G+k|)
