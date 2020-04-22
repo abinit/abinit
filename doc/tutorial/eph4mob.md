@@ -323,11 +323,12 @@ This variable should be subject to a convergence study, as explained in the next
 Different tricks have been implemented to accelerate the computation.
 The use of single precision in the FFT routines allows one to decrease the computational cost
 without losing precision. This trick is activated by setting [[mixprec]] = 1.
-Another trick to decrease the memory requirement is to decrease [[boxcutmin]].
+Another trick to decrease the memory requirement is to decrease [[boxcutmin]] 
+to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1.
 An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2, 
 but we found that using a value of 1.1 does not change the result (in the materials we tested; 
 this might not be true in general and requires testing from the user) but allows
-to decrease the memory by a factor close to 8. 
+to decrease the memory by a factor close to 8 and the cost of the calculation.
 These tricks **are not activated by default** because users are supposed to perform preliminary tests
 to make sure the quality of the results is not affected by these options.
 

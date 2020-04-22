@@ -78,9 +78,7 @@ def cd(path):
 
 @task
 def make(ctx, jobs="auto", touch=False, clean=False):
-    """
-    Touch all modified files and recompile the code with -jNUM.
-    """
+    """Touch all modified files and recompile the code with -jNUM."""
     if touch:
         with cd(ABINIT_ROOTDIR):
             cmd = "./abisrc.py touch"
@@ -115,10 +113,7 @@ def clean(ctx):
 
 @task
 def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=None):
-    """
-    Run all tests (sequential and parallel).
-    Exit immediately if errors
-    """
+    """Run all tests (sequential and parallel). Exit immediately if errors"""
     make(ctx, jobs=jobs, touch=touch, clean=clean)
 
     top = find_top_build_tree(".", with_abinit=True)
@@ -147,7 +142,7 @@ def makemake(ctx):
 
 @task
 def makedeep(ctx, jobs="auto"):
-    """makemake && make clean && make"""
+    """Execute `makemake && make clean && make`"""
     makemake(ctx)
     make(ctk, jobs=jobs, clean=True)
 
@@ -287,7 +282,7 @@ def vimt(ctx, tagname):
 
 @task
 def pull_trunk(ctx):
-    """"git stash && git pull trunk develop && git stash apply"""
+    """"Execute `git stash && git pull trunk develop && git stash apply`"""
     ctx.run("git stash")
     ctx.run("git pull trunk develop")
     ctx.run("git stash apply")
@@ -295,18 +290,20 @@ def pull_trunk(ctx):
 
 @task
 def branchoff(ctx, start_point):
-    """"
-    Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin.
-    """
+    """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""
     remote, branch = start_point.split("/")
-    ctx.run(f"git fetch {remote}")
+    def run(cmd):
+        cprint(f"Executing: `{cmd}`", "green")
+        ctx.run(cmd)
+
+    run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
     # git checkout [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
     my_branch = "my_" + branch
-    ctx.run(f"git checkout -b {my_branch} {start_point}")
+    run(f"git checkout -b {my_branch} {start_point}")
     # Change default upstream. If you forget this step, you will be pushing to trunk
-    ctx.run("git branch --set-upstream-to origin")
-    ctx.run("git push origin HEAD")
+    run("git branch --set-upstream-to origin")
+    run("git push origin HEAD")
 
 
 def which(cmd):

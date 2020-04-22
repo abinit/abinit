@@ -2585,7 +2585,7 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
  open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
  do ii=1,2
    read(quad_unt,*) msg
-   write(std_out, *)" msg", trim(msg)
+   write(std_out, *)" msg: ", trim(msg)
  end do
 
  do ii=1,3

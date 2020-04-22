@@ -561,10 +561,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 
    ! Set qdamp from frohl_params
+   !dvdb%qdamp = 0.1
+   !dvdb%qdamp = one
    if (dtset%frohl_params(4) /= 0) then
      dvdb%qdamp = dtset%frohl_params(4)
      !dvdb%qdamp = dtset%qdamp
    end if
+
+   ! Set quadrupoles
+   dvdb%qstar = qdrp_cart
+   if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.
    ! This activates automatically the treatment of the long-range term in the Fourier interpolation

@@ -20,6 +20,9 @@ except ImportError:
 import logging
 logger = logging.getLogger(__name__)
 
+
+from pprint import pprint
+
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 # TODO: Use Absolute imports and rename tests --> abitests to
 # avoid possible conflicts with the packages in PYTHONPATH
@@ -56,7 +59,7 @@ def leaks(options):
     """Find possible memory leaks."""
     retcode = 0
     for memfile in options.memfiles:
-        memfile.find_memleaks()
+        retcode += memfile.find_memleaks()
     return retcode
 
 
@@ -82,10 +85,12 @@ def intense(options):
 def peaks(options):
     """Find memory peaks."""
     retcode = 0
+    maxlen = 20
     for memfile in options.memfiles:
-        for i, peak in enumerate(memfile.get_peaks(maxlen=30)):
+        #print(memfile.get_peaks(maxlen=maxlen, as_dataframe=True))
+        for i, peak in enumerate(memfile.get_peaks(maxlen=maxlen)):
             print("[%d] %s" % (i, peak))
-        memfile.plot_peaks()
+        memfile.plot_peaks(maxlen=maxlen, title="Memory peaks")
 
     return retcode
 
@@ -102,7 +107,15 @@ def zerosized(options):
     """Find zero-sized allocations."""
     retcode = 0
     for memfile in options.memfiles:
-        memfile.find_zerosized()
+        elist = memfile.find_zerosized()
+
+        if elist:
+            print("Found %d zero-sized entries:" % len(elist))
+            pprint(elist)
+        else:
+            print("No zero-sized found")
+
+
     return retcode
 
 

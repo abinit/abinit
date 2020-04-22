@@ -44,30 +44,40 @@ class MoccViewer(param.Parameterized):
         tabs = pn.Tabs(); app = tabs.append
         mocc = self.mocc
 
-        gspec = pn.GridSpec() #sizing_mode='scale_width')
-        gspec[0, 0] = mocc.plot_memory_usage(show=False)
-        gspec[1, 0] = mocc.plot_peaks(maxlen=10, show=False)
-        app(("Plots", gspec))
+        gspec = pn.GridSpec(sizing_mode='scale_width')
+        gspec[0, 0] = mocc.plot_memory_usage(show=False, title="Memory usage")
+        gspec[0, 1] = mocc.plot_hist(show=False, title="Allocation histogram")
+        gspec[1, 0] = mocc.plot_peaks(maxlen=10, title="Memory peaks", show=False)
+
+        maxlen = 50
+        df = mocc.get_peaks(maxlen=maxlen, as_dataframe=True)
+        df.drop(columns=["locus", "line", "action", "ptr"], inplace=True)
+        col = pn.Column(gspec,
+                        f"## DataFrame with the first {maxlen} peaks",
+                        _df(df),
+                        sizing_mode="scale_width")
+        app(("Plots", col))
 
         #app(("DataFrame", _df(mocc.dataframe)))
-        #app(("Peaks", _df(mocc.get_peaks())))
-        app(("Hotspots", _df(mocc.get_hotspots_dataframe())))
-        app(("Intense", _df(mocc.get_intense_dataframe())))
-        #app(("Memleaks", _df(mocc.find_memleaks())))
+        hotdf = mocc.get_hotspots_dataframe()
+        ax = hotdf.plot.pie(y='malloc_mb')
+        import matplotlib
+        fig = matplotlib.pyplot.gcf()
+        app(("Hotspots",
+             pn.Column(
+                "### DataFrame with total memory allocated per Fortran file.",
+                fig,
+                _df(hotdf),
+                sizing_mode='scale_width',
+        )))
+        app(("Intense",
+             pn.Column(
+                "### DataFrame with variables that are allocated/freed many times.",
+                _df(mocc.get_intense_dataframe()),
+                sizing_mode='scale_width')
+        ))
 
-        row = pn.Row(bkw.PreText(text=mocc.to_string(verbose=0), sizing_mode="scale_both"))
-        app(("Summary", row))
-        #app(("Ph-bands", pn.Row(
-        #    pn.Column("# PH-bands options",
-        #              *[self.param[k] for k in ("nqsmall", "ndivsm", "asr", "chneut", "dipdip", "lo_to_splitting")],
-        #              self.temp_range, self.plot_phbands_btn),
-        #    self.plot_phbands_and_phdos)
-        #))
-        #app(("BECs", pn.Row(
-        #    pn.Column("# Born effective charges options",
-        #             *[self.param[k] for k in ("asr", "chneut", "dipdip", "gamma_ev")], self.get_epsinf_btn),
-        #    self.get_epsinf)
-        #))
-        #app(("Global", pn.Column("# Global parameters", *[self.param[k] for k in ("units", "mpi_procs", "verbose")])))
+        #retcode = memfile.find_memleaks()
+        #app(("Memleaks", _df(mocc.find_memleaks())))
 
         return tabs
