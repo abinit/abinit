@@ -755,6 +755,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
    ABI_ALLOCATE(work,(lwork))
    call dsyev('V','U',3, wdielt, 3, eig_dielt, work, lwork,info)
+   ABI_DEALLOCATE(work)
 
    !This is a tentative maximum value for the gaussian width in real space
    sigma_max=three
