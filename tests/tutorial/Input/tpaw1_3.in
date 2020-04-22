@@ -44,7 +44,7 @@ ndtset 10   pawecutdg: 12. pawecutdg+ 3.
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_3.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
-#%% psp_files =  6c.pspnc
+#%% psp_files =  C.LDA_PW-JTH.xml
 #%% output_file = "tpaw1_3.abo"
 #%% [paral_info]
 #%% max_nprocs = 4

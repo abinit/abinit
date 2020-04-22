@@ -45,7 +45,7 @@ ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw1_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
-#%% psp_files =  6c.pspnc
+#%% psp_files =  C.LDA_PW-JTH.xml
 #%% output_file = "tpaw1_5.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
