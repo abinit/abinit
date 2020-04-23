@@ -38,3 +38,8 @@ nstep  150
 nbdbuf 4
 nband  8
 
+pseudos="C.LDA-PW-paw.xml"
+pp_dirpath="../"
+outdata_prefix="outputs/ab_C_equi_o"
+tmpdata_prefix="outputs/ab_C_equi"
+

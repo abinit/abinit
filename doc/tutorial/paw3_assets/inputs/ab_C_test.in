@@ -72,3 +72,13 @@ tolwfr?2  1.0d-18
 enunit?2  0             # Will output the eigenenergies in Ha
 nstep?2 150
 
+pseudos="C.LDA-PW-paw.xml"
+pp_dirpath="../"
+outdata_prefix="outputs/ab_C_test_o"
+tmpdata_prefix="outputs/ab_C_test"
+
+
+
+
+
+
