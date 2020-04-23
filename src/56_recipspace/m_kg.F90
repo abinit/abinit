@@ -120,7 +120,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 !scalars
  integer :: plane
  real(dp) :: boxsq,cutrad,ecut_pw,effcut,largesq,sphsq
- character(len=500) :: message
+ character(len=1000) :: message
 !arrays
  integer :: gbound(3)
 
@@ -169,12 +169,15 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,f12.6)' )&
+       write(message, '(9a,f12.6,6a)' )&
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Actio: try larger ngfft or smaller ecut.',ch10,&
-&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
+&       '  Action: try larger ngfft or smaller ecut.',ch10,&
+&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        MSG_ERROR(message)
      end if
@@ -191,11 +194,14 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      end if
 
      if (boxcut<1.5_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,a)' ) ch10,&
+       write(message, '(15a)' ) ch10,&
 &       ' getcut : WARNING -',ch10,&
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
-&       '  Be sure to test with larger ngfft(1:3) values.',ch10
+&       '  Be sure to test with larger ngfft(1:3) values.',ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
