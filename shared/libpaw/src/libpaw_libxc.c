@@ -120,6 +120,63 @@ void libpaw_xc_func_type_free(XC(func_type) **xc_func)
  {free(*xc_func);*xc_func = NULL;}
 
 /* ===============================================================
+ * Wrappers to the LDA/GGA/MGGA functionals
+ * ===============================================================
+ */
+/* ---------------------------------------------------------------
+   ----- LDA ----- */
+void libpaw_xc_get_lda(const XC(func_type) *xc_func, int np, const double *rho, 
+        double *zk, double *vrho, double *v2rho2, double *v3rho3)
+#if ( XC_MAJOR_VERSION > 4 ) 
+/* ==== libXC v5.0 and later ==== */
+ {xc_lda(xc_func, np, rho, zk, vrho, v2rho2, v3rho3, NULL);}
+#else
+/* ==== Before libXC v5.0 ==== */
+ {xc_lda(xc_func, np, rho, zk, vrho, v2rho2, v3rho3);}
+#endif
+/* ---------------------------------------------------------------
+   ----- GGA ----- */
+void libpaw_xc_get_gga(const XC(func_type) *xc_func, int np,
+        const double *rho, const double *sigma,
+        double *zk, double *vrho, double *vsigma,
+        double *v2rho2, double *v2rhosigma, double *v2sigma2,
+        double *v3rho3, double *v3rho2sigma, double *v3rhosigma2, double *v3sigma3)
+#if ( XC_MAJOR_VERSION > 4 ) 
+/* ==== libXC v5.0 and later ==== */
+ {xc_gga(xc_func, np, rho, sigma, zk, vrho, vsigma, v2rho2, v2rhosigma, v2sigma2,
+         v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3,
+         NULL, NULL, NULL, NULL, NULL);}
+#else
+/* ==== Before libXC v5.0 ==== */
+ {xc_gga(xc_func, np, rho, sigma, zk, vrho, vsigma, v2rho2, v2rhosigma, v2sigma2,
+         v3rho3, v3rho2sigma, v3rhosigma2, v3sigma3);}
+#endif
+/* ---------------------------------------------------------------
+   ----- meta-GGA ----- */
+void libpaw_xc_get_mgga(const XC(func_type) *xc_func, int np,
+        const double *rho, const double *sigma, const double *lapl, const double *tau,
+        double *zk, double *vrho, double *vsigma, double *vlapl, double *vtau,
+        double *v2rho2, double *v2rhosigma, double *v2rholapl, double *v2rhotau,
+        double *v2sigma2, double *v2sigmalapl, double *v2sigmatau, double *v2lapl2,
+        double *v2lapltau, double *v2tau2) 
+#if ( XC_MAJOR_VERSION > 4 ) 
+/* ==== libXC v5.0 and later ==== */
+ {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau,
+          v2rho2, v2rhosigma, v2rholapl, v2rhotau, v2sigma2,
+          v2sigmalapl, v2sigmatau, v2lapl2, v2lapltau, v2tau2,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);}
+#else
+/* ==== Before libXC v5.0 ==== */
+ {xc_mgga(xc_func, np, rho, sigma, lapl, tau, zk, vrho, vsigma, vlapl, vtau, 
+		  v2rho2, v2sigma2, v2lapl2, v2tau2, v2rhosigma, v2rholapl, v2rhotau,
+		  v2sigmalapl, v2sigmatau, v2lapltau);}
+#endif
+
+/* ===============================================================
  * Get properties from a xc_func_info_type pointer
  *     These accessors where not provided before libXC v3
  * ===============================================================
@@ -173,8 +230,13 @@ char const *libpaw_xc_get_info_refs(XC(func_type) *xc_func, const int *number)
  * ===============================================================
  */
 void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_params)
+#if ( XC_MAJOR_VERSION > 4 ) 
+/* ==== libXC v5.0 and later ==== */
+ {XC(func_set_ext_params)(xc_func, ext_params);}
+#else
+
 #if ( XC_MAJOR_VERSION > 3 ) 
-/* ==== libXC v4.0 and later ==== */
+/* ==== libXC v4.0 ==== */
  {/* set_ext_params function is missing for PBE0 */  
   if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
    {xc_func->cam_alpha=ext_params[0];xc_func->mix_coef[0]=1.0-ext_params[0];}
@@ -209,6 +271,7 @@ void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n
   else
    {fprintf(stderr, "BUG: invalid entry in set_params!\n");abort();}
  }
+#endif
 
 /* ===============================================================
  * Wrapper to xc_func_set_dens_threshold for backward compatibility

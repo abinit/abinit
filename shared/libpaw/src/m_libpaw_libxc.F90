@@ -62,6 +62,7 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_needs_laplacian    ! Return TRUE if functional uses LAPLACIAN
  public :: libpaw_libxc_is_hybrid          ! Return TRUE if the XC functional is hybrid (GGA or meta-GGA)
  public :: libpaw_libxc_has_kxc            ! Return TRUE if Kxc (3rd der) is available for the XC functional
+ public :: libpaw_libxc_has_k3xc           ! Return TRUE if K3xc (4th der) is available for the XC functional
  public :: libpaw_libxc_nspin              ! The number of spin components for the XC functionals
  public :: libpaw_libxc_get_hybridparams   ! Retrieve parameter(s) of a hybrid functional
  public :: libpaw_libxc_set_hybridparams   ! Change parameter(s) of a hybrid functional
@@ -177,39 +178,39 @@ module m_libpaw_libxc_funcs
  end interface
 !
  interface
-   subroutine xc_lda(xc_func,np,rho,zk,vrho,v2rho2,v3rho3) &
-&             bind(C,name="xc_lda")
+   subroutine libpaw_xc_get_lda(xc_func,np,rho,zk,vrho,v2rho2,v3rho3) &
+&             bind(C,name="libpaw_xc_get_lda")
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,zk,vrho,v2rho2,v3rho3
      type(C_PTR) :: xc_func
-   end subroutine xc_lda
+   end subroutine libpaw_xc_get_lda
  end interface
 !
  interface
-   subroutine xc_gga(xc_func,np,rho,sigma,zk,vrho,vsigma, &
+   subroutine libpaw_xc_get_gga(xc_func,np,rho,sigma,zk,vrho,vsigma, &
 &             v2rho2,v2rhosigma,v2sigma2,v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3) &
-&             bind(C,name="xc_gga")
+&             bind(C,name="libpaw_xc_get_gga")
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
 &                         v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3
      type(C_PTR) :: xc_func
-   end subroutine xc_gga
+   end subroutine libpaw_xc_get_gga
  end interface
 !
  interface
-   subroutine xc_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
-&             v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
-&             v2sigmalapl,v2sigmatau,v2lapltau) &
-&             bind(C,name="xc_mgga")
+   subroutine libpaw_xc_get_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
+&             v2rho2,v2rhosigma,v2rholapl,v2rhotau,v2sigma2,v2sigmalapl, &
+&             v2sigmatau,v2lapl2,v2lapltau,v2tau2) &
+&             bind(C,name="libpaw_xc_get_mgga")
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
 &                         v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
 &                         v2sigmalapl,v2sigmatau,v2lapltau
      type(C_PTR) :: xc_func
-   end subroutine xc_mgga
+   end subroutine libpaw_xc_get_mgga
  end interface
 !
  interface
@@ -1079,7 +1080,7 @@ end function libpaw_libxc_is_hybrid
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     XC functionals
 !!
 !! SOURCE
 
@@ -1104,6 +1105,49 @@ function libpaw_libxc_has_kxc(xc_functionals)
  end do
 
 end function libpaw_libxc_has_kxc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_libpaw_libxc_funcs/libpaw_libxc_has_k3xc
+!! NAME
+!!  libpaw_libxc_has_k3xc
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  provides K3xc or not (kxc in the libXC convention)
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function libpaw_libxc_has_k3xc(xc_functionals)
+
+!Arguments ------------------------------------
+ logical :: libpaw_libxc_has_k3xc
+ type(libpaw_libxc_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables-------------------------------
+ integer :: ii
+
+! *************************************************************************
+
+ libpaw_libxc_has_k3xc=.true.
+
+ do ii=1,2
+   if (present(xc_functionals)) then
+     if (.not.xc_functionals(ii)%has_kxc) libpaw_libxc_has_k3xc=.false.
+   else
+     if (.not.paw_xc_global(ii)%has_kxc) libpaw_libxc_has_k3xc=.false.
+   end if
+ end do
+
+end function libpaw_libxc_has_k3xc
 !!***
 
 !----------------------------------------------------------------------
@@ -1352,24 +1396,24 @@ end function libpaw_libxc_nspin
 !    ===== LDA =====
      if (xc_funcs(ii)%family==LIBPAW_XC_FAMILY_LDA) then
        exctmp=zero ; vxctmp=zero ; v2rho2=zero ; v3rho3=zero
-       call xc_lda(xc_funcs(ii)%conf,1,rho_c, &
+       call libpaw_xc_get_lda(xc_funcs(ii)%conf,1,rho_c, &
 &                  exc_c(ii),vxc_c(ii),v2rho2_c(ii),v3rho3_c(ii))
 !    ===== GGA =====
      else if (xc_funcs(ii)%family==LIBPAW_XC_FAMILY_GGA.or. &
 &             xc_funcs(ii)%family==LIBPAW_XC_FAMILY_HYB_GGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero
        v2rho2=zero ; v2sigma2=zero ; v2rhosigma=zero
-       call xc_gga(xc_funcs(ii)%conf,1,rho_c,sigma_c, &
+       call libpaw_xc_get_gga(xc_funcs(ii)%conf,1,rho_c,sigma_c, &
 &                  exc_c(ii),vxc_c(ii),vsigma_c(ii), &
 &                  v2rho2_c(ii),v2rhosigma_c(ii),v2sigma2_c(ii), &
 &                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
 !    ===== mGGA =====
      else if (xc_funcs(ii)%family==LIBPAW_XC_FAMILY_MGGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero ; vlrho=zero ; vtau=zero
-       call xc_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
-&                   exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
-&                   C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
-&                   C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
+       call libpaw_xc_get_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
+&                  exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
+&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
+&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
      end if
 #endif
 

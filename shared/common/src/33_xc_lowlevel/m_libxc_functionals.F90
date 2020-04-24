@@ -78,6 +78,7 @@ module libxc_functionals
  public :: libxc_functionals_needs_laplacian    ! Return TRUE if functional uses LAPLACIAN
  public :: libxc_functionals_is_hybrid          ! Return TRUE if the XC functional is hybrid (GGA or meta-GGA)
  public :: libxc_functionals_has_kxc            ! Return TRUE if Kxc (3rd der) is available for the XC functional
+ public :: libxc_functionals_has_k3xc           ! Return TRUE if K3xc (4th der) is available for the XC functional
  public :: libxc_functionals_nspin              ! The number of spin components for the XC functionals
  public :: libxc_functionals_get_hybridparams   ! Retrieve parameter(s) for hybrid functionals
  public :: libxc_functionals_set_hybridparams   ! Change parameter(s) for a hybrid functionals
@@ -189,36 +190,36 @@ module libxc_functionals
  end interface
 !
  interface
-   subroutine xc_lda(xc_func,np,rho,zk,vrho,v2rho2,v3rho3) bind(C)
+   subroutine xc_get_lda(xc_func,np,rho,zk,vrho,v2rho2,v3rho3) bind(C)
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,zk,vrho,v2rho2,v3rho3
      type(C_PTR) :: xc_func
-   end subroutine xc_lda
+   end subroutine xc_get_lda
  end interface
 !
  interface
-   subroutine xc_gga(xc_func,np,rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
+   subroutine xc_get_gga(xc_func,np,rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
 &                    v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3) bind(C)
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
 &                         v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3
      type(C_PTR) :: xc_func
-   end subroutine xc_gga
+   end subroutine xc_get_gga
  end interface
 !
  interface
-   subroutine xc_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
-&                     v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
-&                     v2sigmalapl,v2sigmatau,v2lapltau) bind(C)
+   subroutine xc_get_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
+&                    v2rho2,v2rhosigma,v2rholapl,v2rhotau,v2sigma2,v2sigmalapl, &
+&                    v2sigmatau,v2lapl2,v2lapltau,v2tau2) bind(C)
      use iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
 &                         v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
 &                         v2sigmalapl,v2sigmatau,v2lapltau
      type(C_PTR) :: xc_func
-   end subroutine xc_mgga
+   end subroutine xc_get_mgga
  end interface
 !
  interface
@@ -1157,6 +1158,49 @@ end function libxc_functionals_has_kxc
 
 !----------------------------------------------------------------------
 
+!!****f* libxc_functionals/libxc_functionals_has_k3xc
+!! NAME
+!!  libxc_functionals_has_k3xc
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  provides K3xc or not (kxc in the libXC convention)
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function libxc_functionals_has_k3xc(xc_functionals)
+
+!Arguments ------------------------------------
+ logical :: libxc_functionals_has_k3xc
+ type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
+!Local variables-------------------------------
+ integer :: ii
+
+! *************************************************************************
+
+ libxc_functionals_has_k3xc=.true.
+
+ do ii=1,2
+   if (present(xc_functionals)) then
+     if (.not.xc_functionals(ii)%has_kxc) libxc_functionals_has_k3xc=.false.
+   else
+     if (.not.xc_global(ii)%has_kxc) libxc_functionals_has_k3xc=.false.
+   end if
+ end do
+
+end function libxc_functionals_has_k3xc
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* libxc_functionals/libxc_functionals_nspin
 !! NAME
 !!  libxc_functionals_nspin
@@ -1407,24 +1451,24 @@ end function libxc_functionals_nspin
 !    ===== LDA =====
      if (xc_funcs(ii)%family==XC_FAMILY_LDA) then
        exctmp=zero ; vxctmp=zero ; v2rho2=zero ; v3rho3=zero
-       call xc_lda(xc_funcs(ii)%conf,1,rho_c, &
+       call xc_get_lda(xc_funcs(ii)%conf,1,rho_c, &
 &                  exc_c(ii),vxc_c(ii),v2rho2_c(ii),v3rho3_c(ii))
 !    ===== GGA =====
      else if (xc_funcs(ii)%family==XC_FAMILY_GGA.or. &
 &             xc_funcs(ii)%family==XC_FAMILY_HYB_GGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero
        v2rho2=zero ; v2sigma2=zero ; v2rhosigma=zero
-       call xc_gga(xc_funcs(ii)%conf,1,rho_c,sigma_c, &
+       call xc_get_gga(xc_funcs(ii)%conf,1,rho_c,sigma_c, &
 &                  exc_c(ii),vxc_c(ii),vsigma_c(ii), &
 &                  v2rho2_c(ii),v2rhosigma_c(ii),v2sigma2_c(ii), &
 &                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
 !    ===== mGGA =====
      else if (xc_funcs(ii)%family==XC_FAMILY_MGGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero ; vlrho=zero ; vtau=zero
-       call xc_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
-&                   exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
-&                   C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
-&                   C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
+       call xc_get_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
+&                  exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
+&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
+&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
      end if
 #endif
 
