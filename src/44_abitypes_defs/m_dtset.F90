@@ -224,6 +224,7 @@ type, public :: dataset_type
  integer :: hmctt
  integer :: iboxcut
  integer :: icoulomb
+ integer :: icsing
  integer :: icutcoul
  integer :: ieig2rf
  integer :: imgmov
@@ -1514,6 +1515,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%hmctt              = dtin%hmctt
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
+ dtout%icsing             = dtin%icsing 
  dtout%icutcoul           = dtin%icutcoul
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
@@ -3126,7 +3128,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
- list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
+ list_vars=trim(list_vars)//' iboxcut icoulomb icsing icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'
