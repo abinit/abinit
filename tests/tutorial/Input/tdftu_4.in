@@ -66,7 +66,7 @@ pp_dirpath = "../../Psps_for_tests"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tdftu_4.out, tolnlines=  1, tolabs=  1.010e-04, tolrel=  4.000e-04, fld_options = -easy  
+#%%   tdftu_4.abo, tolnlines=  1, tolabs=  1.010e-04, tolrel=  4.000e-04, fld_options = -easy  
 #%% psp_files = Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml 
 #%% [paral_info]
 #%% max_nprocs = 1

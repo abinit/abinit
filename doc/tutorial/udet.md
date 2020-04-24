@@ -15,7 +15,7 @@ to generate PAW atomic data.
 
 This tutorial should take about 1/2 hour.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## Summary of linear response method to determine *U*
 
@@ -70,28 +70,26 @@ for the other tutorials. Why not Work_udet?*
     In what follows, the name of files are mentioned as if you were in this subdirectory.
     All the input files can be found in the $ABI_TESTS/tutorial/Input directory
      You can compare your results with reference output files located in
-     $ABI_TESTS/tutorial/Refs directory (for the present tutorial they are named tudet*.out).
+     $ABI_TESTS/tutorial/Refs directory (for the present tutorial they are named tudet*.abo).
 
 The input file *tudet_1.in* is an example of a file to prepare a wave function
-for further processing. You might use the file *tudet_1.files* as a "files"
-file, and get the corresponding output file ../Refs/tudet_1.out).
+for further processing. The corresponding output file is ../Refs/tudet_1.abo).
 
-Copy the files *tudet_1.in* and *tudet_1.files* in your work directory, and run ABINIT:
+Copy the files *tudet_1.in* in your work directory, and run ABINIT:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_udet
 cd Work_udet
-cp ../tudet_1.files .
 cp ../tudet_1.in .
 
-abinit < tudet_1.files > log 2> err &
+abinit  tudet_1.in > log 2> err &
 ```
 
 In the meantime, you can read the input file and see that this is a usual
 DFT+U calculation, with *U*=0.
 
-{% dialog tests/tutorial/Input/tudet_1.files tests/tutorial/Input/tudet_1.in %}
+{% dialog tests/tutorial/Input/tudet_1.in %}
 
 This setting allows us to read the occupations of
 the Fe 3d orbitals ([[lpawu]] 2). The cell contains 2 atoms. This is the
@@ -103,11 +101,11 @@ We do not suppress the writing of the *WFK* file, because this is the input for
 the calculations of U.
 
 Once this calculation has finished, run the second one:
-Copy the files *tudet_2.in and tudet_2.files* in your work directory, and run ABINIT:
+Copy the file *tudet_2.in* in your work directory, and run ABINIT:
 
-    abinit < tudet_2.files > tudet_1.log
+    abinit tudet_2.in > tudet_2.log
 
-{% dialog tests/tutorial/Input/tudet_2.files tests/tutorial/Input/tudet_2.in %}
+{% dialog tests/tutorial/Input/tudet_2.in %}
 
 As you can see from the *tudet_2.files* file, this run uses the *tudet_1o_WFK* as
 an input. In the *tudet_2.in* all the symmetry relations are specified
