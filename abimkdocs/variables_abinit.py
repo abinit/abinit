@@ -12378,7 +12378,7 @@ A few details require attention when performing unit cell optimisation:
 
 It is STRONGLY suggested first to optimize the ionic positions without cell
 shape and size optimization (**optcell** = 0), then start the cell shape and
-size optimization from the cell with relaxed ionic positions. Presently
+size optimization from the cell with relaxed ionic positions, possibly from the previous dataset, using [[getxred]] or [[getxcart]]. Presently
 (v3.1), one cannot restart ([[restartxf]]) a calculation with a non-zero
 **optcell** value from the (x,f) history of another run with a different non-
 zero **optcell** value. There are still a few problems at that level.
