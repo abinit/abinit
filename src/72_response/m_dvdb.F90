@@ -5808,6 +5808,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 #endif
  real(dp) :: gsq_max, g2
  !type(vdiff_t) :: vd_max
+ logical :: write_v1r
  character(len=500) :: msg
  character(len=fnlen) :: dump_path
 !arrays
@@ -5872,6 +5873,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  end if
 
  ! Select list of q-points depending on eph_task (either from DVDB file or interpolated)
+ write_v1r = .False.
  if (dtset%eph_task == -15) then
    call wrtout([std_out, ab_out], " Using list of q-points found in the DVDB file")
    this_nqpt = dvdb%nqpt
@@ -5888,6 +5890,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    method = dtset%userid
    call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, method, comm_rpt)
    interpolated = 1
+   write_v1r = dtset%prtpot > 0
  else
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
@@ -5909,6 +5912,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nrpt", dvdb%nrtot), nctkdim_t("nfft", nfft)]))
      ncerr = nctk_def_arrays(ncid, [ &
         nctkarr_t("ngqpt", "int", "three"), nctkarr_t("rpt", "dp", "three, nrpt"), nctkarr_t("rmod", "dp", "nrpt"), &
+        nctkarr_t("ngfft", "int", "three"), &
         nctkarr_t("maxw", "dp", "nrpt, natom3") &
      ])
      NCF_CHECK(ncerr)
@@ -5934,6 +5938,15 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      nctkarr_t("qpoints", "dp", "three, nqpt") &
    ])
    NCF_CHECK(ncerr)
+
+   if (write_v1r) then
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("v1r_interpolated", "dp", "two, nfft, nspden, natom3"), &
+       nctkarr_t("v1r_lrmodel", "dp", "two, nfft, nspden, natom3") &
+      ])
+     NCF_CHECK(ncerr)
+   end if
+
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoints"), this_qpts))
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
@@ -5986,6 +5999,13 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
    ! Compute average and write to file.
    if (my_rank /= master) cycle
+
+#ifdef HAVE_NETCDF
+   if (write_v1r .and. iq == 1) then
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_interpolated"), file_v1r))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_lrmodel"), long_v1r))
+   end if
+#endif
 
    do imyp=1,dvdb%my_npert
      idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
@@ -6105,6 +6125,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), dtset%dvdb_ngqpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
 #endif
    end if

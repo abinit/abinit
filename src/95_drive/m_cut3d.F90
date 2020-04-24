@@ -1014,6 +1014,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
    NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
    NCF_CHECK(nf90_inq_varid(unt, varname, varid))
    ! [cplex, n1, n2, n3, nspden]
+   ! WARNING: if POT/RHO is complex (e.g. DFPT) we only read the REAL part.
    NCF_CHECK(nf90_get_var(unt, varid, grid_full, start=[1,1,1,1,1], count=[1, nr1,nr2,nr3,nspden]))
    NCF_CHECK(nf90_close(unt))
 #else

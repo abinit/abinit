@@ -2578,7 +2578,8 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
 ! *********************************************************************
 
  ! Temporary hack to read the quadrupole tensor from a text file
- quadrupoles=zero
+ iblok = 0
+ quadrupoles = zero
  if (.not.file_exists("quadrupoles_cart.out")) return
  call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
  quad_unt = 71

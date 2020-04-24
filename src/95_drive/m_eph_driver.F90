@@ -562,7 +562,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ! Set qdamp from frohl_params
    !dvdb%qdamp = 0.1
-   !dvdb%qdamp = one
    if (dtset%frohl_params(4) /= 0) then
      dvdb%qdamp = dtset%frohl_params(4)
      !dvdb%qdamp = dtset%qdamp
@@ -688,19 +687,18 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (16)
-   ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
-   !call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
 
    if (nprocs > 1) then
-     MSG_WARNING("eph_task in [15, -15] does not support nprocs > 1. Running in sequential...")
+     MSG_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
    end if
 
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
-     call dvdb%open_read(ngfftf, xmpi_comm_self)
-     !call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, comm)
-     !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
-     call dvdb%write_wr(dtset, strcat(dtfil%filnam_ds(4), "_WR.nc"))
+     ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
+     !call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+
+     !call dvdb%open_read(ngfftf, xmpi_comm_self)
+     !call dvdb%write_wr(dtset, strcat(dtfil%filnam_ds(4), "_WR.nc"))
    end if
 
  case default

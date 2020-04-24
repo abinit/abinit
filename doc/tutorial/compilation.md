@@ -7,8 +7,8 @@ authors: MG
 This tutorial explains how to compile ABINIT and the required external dependencies
 without relying on pre-compiled libraries, package managers and root privileges.
 You will learn how to use the standard **configure** and **make** approach
-to build and install your own software stack including the MPI library and the associated wrappers 
-required to compile parallel applications.
+to build and install your own software stack including the MPI library and the associated 
+*mpif90* and *mpicc* wrappers  required to compile parallel applications.
 
 It is assumed that you already have a standard Linux installation 
 providing the basic tools required to build software from source (Fortran/C compilers and *make*).
@@ -45,7 +45,7 @@ such as the interface with the TRIQS library (not treated in this lesson).
 
 In what follows, we will be focusing on the GNU toolchain i.e. *gcc* for C and *gfortran* for Fortran.
 These "sequential" compilers are adequate if you don't need to compile parallel MPI applications.
-The compilation of MPI code indeed requires the installation of additional libraries 
+Indeed, the compilation of MPI code requires the installation of additional libraries 
 and specialized wrappers for the compilers (*mpif90* and *mpicc*).
 This very important case is covered in more details in the next sections.
 
@@ -60,6 +60,8 @@ The **which** command, returns the absolute path of the executable.
 Note that we will use the *which* command a lot in the rest of this tutorial.
 This tool is extremely useful to pin point possible problems.
 
+To get the version of the compiler, use:
+
 
 ```sh
 gfortran --version
@@ -69,7 +71,8 @@ Copyright (C) 2015 Free Software Foundation, Inc.
 
 At present, ABINIT requires version >= ??.
 
-If gfortran is not installed, use the package manager provided by your Linux distribution to install it.
+If gfortran is not installed, you may want to use the package manager 
+provided by your Linux distribution to install it.
 On Ubuntu, for instance, use:
 
 ```sh
@@ -94,8 +97,8 @@ which make
 
 ## How to compile BLAS and LAPACK 
 
-BLAS/LAPACK represents the workhorse of many scientific codes.
-An optimized implementation is therefore crucial for achieving good performance.
+BLAS/LAPACK represents the workhorse of many scientific codes and an optimized implementation 
+is crucial for achieving good performance.
 
 In principle this step can be skipped as any decent Linux distribution already provides
 pre-compiled versions but, as already mentioned in the introduction, we prefer 
@@ -143,17 +146,17 @@ wget https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 If *wget* is not available, use *curl* with the `-o` option to specify the name of the output file:
 
 ```sh
-curl https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz -o /v0.3.7.tar.gz 
+curl https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz -o v0.3.7.tar.gz 
 ```
 
 !!! tip
 
-    To get the URL associated to a HTML link inside the browser, hover the mouse over the link, 
+    To get the URL associated to a HTML link inside the browser, hover the mouse pointer over the link, 
     press the right mouse button and then select `Copy Link Address` to copy the link to the system clipboard. 
     Then paste the text in the terminal by selecting the `Copy` action in the menu
     activated by clicking on the right button.
     Alternatively, one can press the central button (mouse wheel) or use CMD + V on MacOsX.
-    This trick is quite handy to fetch tarballs from the web directly from the terminal.
+    This trick is quite handy to fetch tarballs from the web directly inside terminal.
 
 
 Now uncompress the tarball with:
@@ -176,7 +179,7 @@ make -j2 USE_THREAD=0 USE_LOCKING=1
 
 to build the single thread version.
 By default, openblas activates threads (see [FAQ page](https://github.com/xianyi/OpenBLAS/wiki/Faq#multi-threaded))
-but here we prefer to have a sequential version
+but here we prefer to use the sequential version
 
 <!--
 and execute the *configure* script with:
@@ -221,9 +224,9 @@ A compilation with plain make would give:
   Library Name     ... libopenblas_haswellp-r0.3.7.a (Multi threaded; Max num-threads is 12)
 ```
 
-that indicates the our library supports threads.
+that indicates that our library supports threads.
 
-You may have noticed that make in this case is not just build the library but is also 
+You may have noticed that make in this case is not just building the library but is also 
 running unit tests to validate the build.
 This means that if `make` completes successfully, we can be confident that the build is OK and we can proceed 
 with the installation.
@@ -322,7 +325,8 @@ run the tests to validate the build and finally execute `make install`.
 The required commands are given below:
 
 ```sh
-# Get the tarball. Mind -O option.
+# Get the tarball. 
+# Mind the -O option used in wget to specify the name of the output file
 cd $HOME/local/src
 wget http://www.tddft.org/programs/libxc/down.php?file=4.3.4/libxc-4.3.4.tar.gz -O libxc.tar.gz
 tar -zxvf libxc.tar.gz
@@ -333,7 +337,7 @@ Configure the package with:
 cd libxc-4.3.4 && ./configure --prefix=$HOME/local
 ```
 
-and then Build + Run tests + Install with:
+Finally, build, run the tests and install libxc with:
 
 ```
 make -j2
@@ -360,14 +364,15 @@ libxc is the C library.
 libxcf90 is the F90 library 
 libxcf03  is the F2003 library
 
-Disscu FCFLAGS and FCDFLAGS
+TODO: Discuss FCFLAGS and FCDFLAGS
 
 ## Installing FFTW
 
 FFTW is a C library for computing the Fast Fourier transform in one or more dimensions.
 ABINIT already provides an internal implementation of the FFT algorithm
-hence FFTW is an optional dependency although highly recommended if you care about **performance**. 
-as FFTW (or, even better, the intel DFTI library provided by MKL) 
+hence FFTW is considered an optional dependency although it is highly recommended 
+if you care about **performance**. 
+Indeed FFTW (or, even better, the intel DFTI library provided by MKL) 
 is usually faster than the internal ABINIT version.
 
 The FFTW source code can be downloaded from [fftw.org](http://www.fftw.org/), 
@@ -381,7 +386,10 @@ tar -zxvf fftw-3.3.8.tar.gz && cd fftw-3.3.8
 
 The compilation procedure is very similar to the one we used for libxc. 
 Note, however, that ABINIT needs both the **single-precision** and the **double-precision** version.
-This means that you need to configure, build and install the package twice:
+This means that you need to configure, build and install the package twice.
+
+To build the single precision version with, use:
+
 
 ```sh
 ./configure --prefix=$HOME/local --enable-single
@@ -485,7 +493,7 @@ cd mpich-3.3.2/
 ```
 
 to download and uncompress the tarball.
-Then one can configure/compile/test/install the library with:
+Then configure/compile/test/install the library with:
 
 ```sh
 ./configure --prefix=$HOME/local
@@ -561,7 +569,7 @@ ls $HOME/local/include/mpi*
 !!! important
 
     The `.mod` files are Fortran modules produced by the Fortran compiler.
-    These modules must be *visible* to the Fortran compiler when compiling other Fortran code e.g ABINIT.
+    These modules must be *passed* to the Fortran compiler when compiling e.g ABINIT.
     Note that these `.mod` files are **compiler-dependent** and the format may depend on the version of the compiler.
     In other words, one cannot use these module files to compile Fortran code with another compiler.
 
@@ -575,7 +583,7 @@ Netcdf4 is built on top of HDF5 and consists of two different parts:
   This is the high-level API used by ABINIT to perform all the IO operations on netcdf files.
 
 To build the libraries required by ABINIT, we will compile the different parts
-in a bottom-up fashion starting from the HDF5 package.
+in bottom-up fashion starting from the HDF5 package.
 Since we want to activate support for parallel IO, we need to compile the library using the wrappers
 provided by our MPI installation instead of using *gcc* or *gfortran* directly.
 
