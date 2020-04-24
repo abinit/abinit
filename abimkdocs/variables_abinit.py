@@ -6860,6 +6860,41 @@ equal to the volume of the solid.
 ),
 
 Variable(
+    abivarname="icutcoul_fock",
+    varset="gw",
+    vartype="integer",
+    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Integer that governs the CUT-off for COULomb interaction in the FOCK operator",
+    added_in_version="v9.0",
+    text=r"""
+SHOULD UPGRADE THE TEXT BELOW
+Many-body calculations for isolated systems, 1D and 2D systems present a slow convergence with
+respect to the size of the supercell due to the long ranged Coulomb
+interaction and the high degree of non-locality of the operators involved.
+Thus, restricting the range of the Coulomb interaction, in order to prevent
+supercell images to interact can significantly speed-up convergence, or even can make convergence happen.
+Also, even in the ground-state case, a cut-off Coulomb interaction might prove useful.
+
+[[icutcoul]] defines the particular expression to be used for the Coulomb term
+in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
+of the system. Possible values of [[icutcoul]] are from 0 to 6. The
+corresponding influential variables are [[vcutgeo]] and [[rcut]].
+Also, in the GW case, the related variable [[icsing]] allows one to treat the integration
+of the $\mathbf{G}=0$ Coulomb singularity.
+
+  * 0 --> sphere (molecules, 1D, 2D and 3D-crystals, as used in Spencer-Alavi [[cite:Spencer2008]] approach to unscreened Fock).
+  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
+
+If [[icutcoul_fock]]==0, the cutoff radius of the sphere ([[rcut]]<0),
+which is automatically calculated so that the volume enclosed in the sphere is
+equal to the volume of the solid.
+If [[icutcoul_fock]]==5, the cutoff radius is determined by the [[ixc]] value.
+""",
+),
+
+Variable(
     abivarname="ieig2rf",
     varset="dfpt",
     vartype="integer",
