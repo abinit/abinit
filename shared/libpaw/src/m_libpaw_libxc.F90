@@ -1390,7 +1390,7 @@ end function libpaw_libxc_nspin
    do ii = 1,2
      if (xc_funcs(ii)%id<=0) cycle
 
-!    Get the potential (and possibly the energy)
+!    Get the energy and the potential (and possibly the other derivatives)
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
      exctmp=zero ; vxctmp=zero
 !    ===== LDA =====
@@ -1868,8 +1868,8 @@ end function libpaw_libxc_gga_from_hybrid
  type(libpaw_libxc_type),pointer :: xc_funcs(:)
  real(dp),allocatable :: gnon(:)
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
- integer(C_INT) :: npar_c=int(1,kind=C_INT)
- real(C_DOUBLE) :: param_c(1)
+ integer(C_INT) :: npar_c=int(2,kind=C_INT)
+ real(C_DOUBLE) :: param_c(2)
 #endif
 
 ! *************************************************************************
@@ -1921,7 +1921,7 @@ end function libpaw_libxc_gga_from_hybrid
    do ii=1,2
      if (xc_funcs(ii)%id==libpaw_libxc_getid('XC_MGGA_X_TB09')) then
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
-     param_c(1)=real(cc,kind=C_DOUBLE)
+     param_c(1)=real(cc,kind=C_DOUBLE) ; param_c(2)=real(0._dp,kind=C_DOUBLE)
      call libpaw_xc_func_set_params(xc_funcs(ii)%conf,param_c,npar_c)
 #endif
      end if
