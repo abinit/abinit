@@ -1250,13 +1250,14 @@ end function libpaw_libxc_nspin
 #endif
 !arrays
  real(dp),target :: rhotmp(nspden),sigma(3),exctmp,vxctmp(nspden),vsigma(3)
- real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6),v3rho3(4)
+ real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6)
+ real(dp),target :: v3rho3(4),v3rho2sigma(9),v3rhosigma2(12),v3sigma3(10)
  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
  type(libpaw_libxc_type),pointer :: xc_funcs(:)
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
- type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2)
+ type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2),vlrho_c(2),vtau_c(2)
  type(C_PTR) :: v2rho2_c(2),v2rhosigma_c(2),v2sigma2_c(2)
- type(C_PTR) :: v3rho3_c(2),vlrho_c(2),vtau_c(2)
+ type(C_PTR) :: v3rho3_c(2),v3rho2sigma_c(2),v3rhosigma2_c(2),v3sigma3_c(2)
 #endif
 
 ! *************************************************************************
@@ -1318,7 +1319,7 @@ end function libpaw_libxc_nspin
      vtau_c(ii)=C_NULL_PTR
      vlrho_c(ii)=C_NULL_PTR
    end if
-   if ((xc_funcs(ii)%has_fxc).and.(order**2>1)) then
+   if ((xc_funcs(ii)%has_fxc).and.(abs(order)>1)) then
      v2rho2_c(ii)=c_loc(v2rho2)
      v2sigma2_c(ii)=c_loc(v2sigma2)
      v2rhosigma_c(ii)=c_loc(v2rhosigma)
@@ -1327,10 +1328,16 @@ end function libpaw_libxc_nspin
      v2sigma2_c(ii)=C_NULL_PTR
      v2rhosigma_c(ii)=C_NULL_PTR
    end if
-   if ((xc_funcs(ii)%has_kxc).and.(order**2>4)) then
+   if ((xc_funcs(ii)%has_kxc).and.(abs(order)>2)) then
      v3rho3_c(ii)=c_loc(v3rho3)
+     v3sigma3_c(ii)=c_loc(v3sigma3)
+     v3rho2sigma_c(ii)=c_loc(v3rho2sigma)
+     v3rhosigma2_c(ii)=c_loc(v3rhosigma2)
    else
      v3rho3_c(ii)=C_NULL_PTR
+     v3sigma3_c(ii)=C_NULL_PTR
+     v3rho2sigma_c(ii)=C_NULL_PTR
+     v3rhosigma2_c(ii)=C_NULL_PTR
    end if
  end do
 #endif
@@ -1406,7 +1413,7 @@ end function libpaw_libxc_nspin
        call libpaw_xc_get_gga(xc_funcs(ii)%conf,1,rho_c,sigma_c, &
 &                  exc_c(ii),vxc_c(ii),vsigma_c(ii), &
 &                  v2rho2_c(ii),v2rhosigma_c(ii),v2sigma2_c(ii), &
-&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
+&                  v3rho3_c(ii),v3rho2sigma_c(ii),v3rhosigma2_c(ii),v3sigma3_c(ii))
 !    ===== mGGA =====
      else if (xc_funcs(ii)%family==LIBPAW_XC_FAMILY_MGGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero ; vlrho=zero ; vtau=zero
@@ -1421,13 +1428,13 @@ end function libpaw_libxc_nspin
      vxc(ipts,1:nspden) = vxc(ipts,1:nspden) + vxctmp(1:nspden)
 
 !    Deal with fxc and kxc
-     if (order**2>1) then
+     if (abs(order)>1) then
 !      ----- LDA -----
        if (xc_funcs(ii)%family==LIBPAW_XC_FAMILY_LDA) then
          if (nspden==1) then
-           if(order>=2) then
+           if(abs(order)>=2) then
              dvxc(ipts,1)=dvxc(ipts,1)+v2rho2(1)
-             if(order==3) then
+             if(abs(order)>2) then
                d2vxc(ipts,1)=d2vxc(ipts,1)+v3rho3(1)
              endif
            else
@@ -1438,7 +1445,7 @@ end function libpaw_libxc_nspin
            dvxc(ipts,1)=dvxc(ipts,1)+v2rho2(1)
            dvxc(ipts,2)=dvxc(ipts,2)+v2rho2(2)
            dvxc(ipts,3)=dvxc(ipts,3)+v2rho2(3)
-           if(order==3) then
+           if(abs(order)>2) then
              d2vxc(ipts,1)=d2vxc(ipts,1)+v3rho3(1)
              d2vxc(ipts,2)=d2vxc(ipts,2)+v3rho3(2)
              d2vxc(ipts,3)=d2vxc(ipts,3)+v3rho3(3)
