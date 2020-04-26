@@ -70,8 +70,15 @@ void xc_get_family_constants(int *xc_cst_family_unknown,
  *xc_cst_family_mgga     = XC_FAMILY_MGGA;
  *xc_cst_family_lca      = XC_FAMILY_LCA;
  *xc_cst_family_oep      = XC_FAMILY_OEP;
+#if ( XC_MAJOR_VERSION > 5 ) 
+/* ==== libXC v6.0 and later ==== */
+ *xc_cst_family_hyb_gga  = -11;
+ *xc_cst_family_hyb_mgga = -11;
+#else
+/* ==== Before libXC v6.0 ==== */
  *xc_cst_family_hyb_gga  = XC_FAMILY_HYB_GGA;
  *xc_cst_family_hyb_mgga = XC_FAMILY_HYB_MGGA;
+#endif
 }
 
 /* ===============================================================
@@ -110,6 +117,51 @@ void xc_get_kind_constants(int *xc_cst_exchange,
  *xc_cst_correlation           = XC_CORRELATION;
  *xc_cst_exchange_correlation  = XC_EXCHANGE_CORRELATION;
  *xc_cst_kinetic               = XC_KINETIC;
+}
+
+/* ===============================================================
+ * Get the HYBRID constants
+ * ===============================================================
+ */
+void xc_get_hybrid_constants(int *xc_cst_hyb_none,
+							 int *xc_cst_hyb_fock,
+							 int *xc_cst_hyb_pt2,
+							 int *xc_cst_hyb_erf_sr,
+							 int *xc_cst_hyb_yukawa_sr,
+							 int *xc_cst_hyb_gaussian_sr,
+							 int *xc_cst_hyb_semilocal,
+							 int *xc_cst_hyb_hybrid,
+							 int *xc_cst_hyb_cam,
+							 int *xc_cst_hyb_camy,
+							 int *xc_cst_hyb_camg,
+							 int *xc_cst_hyb_double_hybrid,
+							 int *xc_cst_hyb_mixture)
+{
+#if ( XC_MAJOR_VERSION > 5 ) 
+/* ==== libXC v6.0 and later ==== */
+ *xc_cst_hyb_none          = XC_HYB_NONE;
+ *xc_cst_hyb_fock          = XC_HYB_FOCK;
+ *xc_cst_hyb_pt2           = XC_HYB_PT2;
+ *xc_cst_hyb_erf_sr        = XC_HYB_ERF_SR;
+ *xc_cst_hyb_yukawa_sr     = XC_HYB_YUKAWA_SR;
+ *xc_cst_hyb_gaussian_sr   = XC_HYB_GAUSSIAN_SR;
+ *xc_cst_hyb_semilocal     = XC_HYB_SEMILOCAL;
+ *xc_cst_hyb_hybrid        = XC_HYB_HYBRID;
+ *xc_cst_hyb_cam           = XC_HYB_CAM;
+ *xc_cst_hyb_camy          = XC_HYB_CAMY;
+ *xc_cst_hyb_camg          = XC_HYB_CAMG;
+ *xc_cst_hyb_double_hybrid = XC_HYB_DOUBLE_HYBRID;
+ *xc_cst_hyb_mixture       = XC_HYB_MIXTURE;
+#else
+/* ==== Before libXC v6.0 ==== */
+ *xc_cst_hyb_none      = -11; *xc_cst_hyb_fock          = -11;
+ *xc_cst_hyb_pt2       = -11; *xc_cst_hyb_erf_sr        = -11;
+ *xc_cst_hyb_yukawa_sr = -11; *xc_cst_hyb_gaussian_sr   = -11;
+ *xc_cst_hyb_semilocal = -11; *xc_cst_hyb_hybrid        = -11;
+ *xc_cst_hyb_cam       = -11; *xc_cst_hyb_camy          = -11;
+ *xc_cst_hyb_camg      = -11; *xc_cst_hyb_double_hybrid = -11;
+ *xc_cst_hyb_mixture   = -11;
+#endif
 }
 
 /* ===============================================================
@@ -290,5 +342,18 @@ void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshol
    {fprintf(stderr, "WARNING: setting density threshold not available for libXC<4.0!\n");}
 #endif
 
+/* ===============================================================
+ * Wrapper to xc_hyb_type for backward compatibility
+ *    Returns type of hybrid functional
+ * ===============================================================
+ */
+int xc_func_hybrid_type(XC(func_type) *xc_func)
+#if ( XC_MAJOR_VERSION > 5 ) 
+/* ==== libXC v6.0 and later ==== */
+ {return xc_hyb_type(xc_func);}
+#else
+/* ==== Before libXC v6.0 ==== */
+ {return -1;}
+#endif
 
 #endif
