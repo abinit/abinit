@@ -66,6 +66,8 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
 
 **A.5** The input variable xangst has been disabled. Use xcart instead, and specify the unit, namely Angstrom.
 
+**A.6** The name of the t-DEP main executable has been changed from `tdep" to `atdep`, in line with [[cite:Romero2020]].
+
 * * *
 
 ### **B.** Most noticeable achievements
@@ -579,10 +581,10 @@ By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 - S Sec Second  for the ABINIT input file;
 - nm (for nanometer)  for the ABINIT and ANADDB input files.
 
-**D.13** TDEP utility:
-added [[guide:tdep|A-TDep user guide]],
-[[topic:Tdep|TDep topic]], and corresponding input variable documentation.
-References: [[pdf:TDEP_Paper|TDEP paper]].
+**D.13** a-TDEP utility:
+added [[guide:a-TDEP|A-TDEP user guide]],
+[[topic:a-TDEP|a-TDEP topic]], and corresponding input variable documentation.
+References: [[pdf:a-TDEP_Paper|a-TDEP paper]].
 Also, see Sec. 4.2 of [[cite:Gonze2020]].
 
 By F. Bottin, J. Bouchet, J. Bieder (MR491,422).
@@ -619,7 +621,7 @@ Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+.
 
 By M. Torrent, JM Beuken (MR 532, 470, 465, 441)
 
-**D.21** Write yaml file for fatbands (phonopy format) with TDEP
+**D.21** Write yaml file for fatbands (phonopy format) with a-TDEP
 
 By J. Bieder (MR510)
 
@@ -1058,7 +1060,7 @@ D.8 Continued development of the electron-phonon [[optdriver]] = 7 module of ABI
 D.9 Added netcdf output of phonons for full grid, not just band structure. Only in tetrahedron prtdos 2 case.
     By M. Verstraete
 
-D.10 On-going development: main executable `tdep`, for the TDEP algorithm, by Hellman and coworkers.
+D.10 On-going development: main executable `atdep`, for the TDEP algorithm, by Hellman and coworkers.
      See [[src:98_main/tdep.F90]], as well as directory 80_tdep. 
      No automatic tests provided yet, no documentation as well ...
      By F. Bottin, J. Bouchet, J. Bieder.
