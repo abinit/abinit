@@ -522,9 +522,9 @@ end subroutine barevcoul
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/barevcoul
+!!****f* ABINIT/termcutoff
 !! NAME
-!! barevcoul
+!! termcutoff
 !!
 !! FUNCTION
 !! 
@@ -826,4 +826,3 @@ end function K0cos_dy
 
 end module m_barevcoul
 !!***
-
