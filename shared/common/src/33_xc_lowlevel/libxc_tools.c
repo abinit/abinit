@@ -352,7 +352,8 @@ int xc_func_is_hybrid_from_id(int func_id)
 /* ==== libXC v6.0 and later ==== */
  {xc_func_type func; int result=0;
   if(xc_func_init(&func,func_id,XC_UNPOLARIZED)==0)
-    {if (func.hyb_number_terms>0) {result=1;}}
+    {if (func.hyb_number_terms>0)
+      {if (func.hyb_type[0] != XC_HYB_NONE){result=1;}}}
   xc_func_end(&func);
   return result;
  }
