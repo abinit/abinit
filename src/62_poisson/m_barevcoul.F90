@@ -38,6 +38,7 @@ module m_barevcoul
 
  use m_crystal,         only : crystal_t
  use m_gsphere,         only : gsphere_t
+ use m_bz_mesh,         only : kmesh_t,kmesh_init
 
 ! Cut-off methods modules 
  use m_cutoff_sphere,   only : cutoff_sphere
@@ -109,7 +110,7 @@ module m_barevcoul
 
  end type vcut_t
 
- public :: barevcoul
+ public :: barevcoul,termcutoff
 !!***
 
 contains
@@ -281,13 +282,12 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 !    end if
 ! end do
 
- barev=zero
+ barev(:)=zero
 
  a1=Cryst%rprimd(:,1); b1=two_pi*gprimd(:,1)
  a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
  a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
 
-! write(*,*)'This ',icutcoul_local
  SELECT CASE (vcut%mode)
  CASE('SPHERE') ! Spencer-Alavi method
 
@@ -513,5 +513,246 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 end subroutine barevcoul
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/barevcoul
+!! NAME
+!! barevcoul
+!!
+!! FUNCTION
+!! 
+!! INPUTS
+!! 
+!! OUTPUT
+!!
+!! NOTES
+!!  In order to incur minimal changes in some portions of the code 
+!!  where a cut-off is needed to be applied, one can work only with 
+!! the cut-off part of the Coulomb potential.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ 
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)    :: nfft,ngfft(18)
+ real(dp),intent(in)   :: gsqcut
+ real(dp),intent(inout):: ucvol
+
+!arrays
+ real(dp),intent(inout):: gmet(3,3),gprimd(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer            :: icutc_loc,nkpt=1
+ integer            :: i1,i2,i23,i3,id1,id2,id3
+ integer            :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
+ integer            :: ii,iq,ing,n1,n2,n3,npar,npt,id(3)
+ integer            :: test,opt_cylinder,opt_surface
+ real(dp)           :: cutoff,divgq0,rcut,zcut,check
+ real(dp)           :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
+ real(dp)           :: gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
+ real(dp)           :: gcart2,gcart_para,gcart_perp
+ real(dp)           :: pdir(3),vcutgeo(3),alpha(3),rmet(3,3)
+ real(dp),parameter :: tolfix=1.0000001_dp
+ character(len=50)  :: mode
+ character(len=500) :: msg
+ type(dataset_type) :: dtset
+ type(kmesh_t)      :: Kmesh 
+ type(gsphere_t)    :: Gsph
+ type(crystal_t)    :: Cryst
+!arrays
+
+ real(dp),allocatable :: gq(:,:),gpq(:),gpq2(:),gcart(:)
+ real(dp),allocatable,intent(out) :: gcutoff(:)
+
+!Initialize a few quantities
+ cutoff=gsqcut*tolfix
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ call metric(gmet,gprimd,-1,rmet,Cryst%rprimd,ucvol)
+ 
+ ! Initialize container
+ ABI_ALLOCATE(gq,(3,max(n1,n2,n3))) 
+ ABI_ALLOCATE(gpq,(nfft))
+ ABI_ALLOCATE(gpq2,(nfft))
+ ABI_ALLOCATE(gcart,(nfft))  
+ ABI_ALLOCATE(gcutoff,(nfft))
+ gcutoff(:)=zero
+
+!In order to speed the routine, precompute the components of g+q
+!Also check if the booked space was large enough...
+ 
+ do ii=1,3
+   id(ii)=ngfft(ii)/2+2
+   do ing=1,ngfft(ii)
+     gq(ii,ing)=ing-(ing/id(ii))*ngfft(ii)-1
+   end do
+ end do
+
+ ! Get the cut-off method info from the input file
+ icutc_loc=0 !dtset%icutcoul
+ 
+ ! Assign method to one of the available cases
+ if (icutc_loc==0) mode='SPHERE'
+ if (icutc_loc==1) mode='CYLINDER'
+ if (icutc_loc==2) mode='SURFACE'
+ if (icutc_loc==4) mode='ERF'
+ if (icutc_loc==5) mode='ERFC'
+
+  do i3=1,n3
+   ! Precompute some products that do not depend on i2 and i1
+   gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
+   gqgm23=gq(3,i3)*gmet(2,3)*2
+   gqgm13=gq(3,i3)*gmet(1,3)*2
+   do i2=1,n2
+     i23=n1*(i2-1 +(n2)*(i3-1))
+     gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
+     gqgm12=gq(2,i2)*gmet(1,2)*2
+     gqg2p3=gqgm13+gqgm12
+     do i1=1,n1
+        ii=i1+i23
+        gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+        if(gpq(ii)>=tol4) then 
+          gpq2(ii) = piinv/gpq(ii)
+        end if 
+     end do
+   end do
+ end do
+
+
+ !Initialize geomtry type to help select CASE
+ vcutgeo=dtset%vcutgeo 
+  
+ SELECT CASE (TRIM(mode))
+
+ CASE('SPHERE') ! Spencer-Alavi method
+
+   ! Calculate rcut for each method 
+   rcut= (three*ucvol/four_pi)**(one/three)
+   do ig=1,nfft
+     if(abs(gpq(ig))<tol4) then
+        gcutoff(ig)=two_pi*rcut 
+     else if(gpq(ig)<=cutoff) then
+        gcutoff(ig)=one-cos(rcut*sqrt(four_pi/gpq2(ig)))
+    end if
+   end do
+
+ CASE('CYLINDER')
+
+   test=COUNT(ABS(vcutgeo)>tol6)
+   ABI_CHECK(test==1,'Wrong cutgeo for cylinder')   
+
+   !Calculate rcut for each method !
+   gcutoff(:)=1 ! Neutral cut-off
+
+ CASE('SURFACE')
+
+   test=COUNT(vcutgeo/=zero)
+   ABI_CHECK(test==2,"Wrong vcutgeo")
+
+   ! === From reduced to cartesian coordinates ===
+   a1=Cryst%rprimd(:,1); b1=two_pi*gprimd(:,1)
+   a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
+   a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
+
+   ! Calculate rcut for each method !
+   rcut = half*SQRT(DOT_PRODUCT(a3,a3))
+
+   !SURFACE Default - Beigi
+   opt_surface=1; alpha(:)=zero
+   ! Otherwsise use Rozzi's method
+   if (ANY(vcutgeo<zero)) opt_surface=2
+   pdir(:)=zero
+   do ii=1,3
+     check=vcutgeo(ii)
+     if (ABS(check)>zero) then ! Use Rozzi"s method with a finite surface along x-y
+       pdir(ii)=1
+       if (check<zero) alpha(ii)=normv(check*Cryst%rprimd(:,ii),rmet,'R')
+     end if
+   end do
+
+   SELECT CASE (opt_surface)
+
+   !CASE SURFACE 1 - Beigi
+   CASE(1)
+ 
+   do ig=1,nfft
+     gcart(:)=b1(:)*Gsph%gvec(1,ig)+b2(:)*Gsph%gvec(2,ig)+b3(:)*Gsph%gvec(3,ig)
+     gcart2=DOT_PRODUCT(gcart(:),gcart(:))
+     gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)  
+     gcutoff(ig)=one-EXP(-gcart_para*rcut)*COS(gcart_perp*rcut)
+   end do !ig
+    
+   !CASE SURFACE 2 - Rozzi
+   CASE(2)
+
+   !!BG: Trigger needed - use the available input value for this 
+   do ig=1,nfft
+     gcart(:)=b1(:)*Gsph%gvec(1,ig)+b2(:)*Gsph%gvec(2,ig)+b3(:)*Gsph%gvec(3,ig)
+     gcart2=DOT_PRODUCT(gcart(:),gcart(:))
+     gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
+     if (gcart_para>tol4) then
+       gcutoff(ig)=one+EXP(-gcart_para*rcut)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut)-COS(gcart_perp*rcut))
+     else
+     if (ABS(gcart_perp)>tol4) then
+       gcutoff(ig)=one-COS(gcart_perp*rcut)-gcart_perp*rcut*SIN(gcart_perp*rcut)
+     else
+       gcutoff(ig)=-two_pi*rcut**2
+     end if
+    end if
+   end do !ig
+   
+   CASE DEFAULT
+     write(msg,'(a,i3)')' Wrong value of surface method: ',opt_surface
+     MSG_BUG(msg)
+   END SELECT
+
+ CASE('ERF')
+
+ ! Calculate rcut for each method ! Same as SPHERE
+ rcut= (three*Kmesh%nbz*ucvol/four_pi)**(one/three)
+  
+   do ig=1,nfft
+     if(abs(gpq(ig))<tol4) then
+        gcutoff(ig)=zero ! @Gamma: initialize quantity in each requiered routine
+     else if(gpq(ig)<=cutoff) then
+         gcutoff(ig)=exp(-pi/(gpq2(ig)*rcut**2))
+     end if
+   end do
+ 
+ CASE('ERFC')
+
+ ! Calculate rcut for each method ! Same as SPHERE
+ rcut= (three*Kmesh%nbz*ucvol/four_pi)**(one/three)
+
+   do ig=1,nfft
+     if(abs(gpq(ig))<tol4) then
+        gcutoff(ig)=zero ! @Gamma: initialize quantity in each requiered routine
+     else if(gpq(ig)<=cutoff) then
+         gcutoff(ig)=one-exp(-pi/(gpq2(ig)*rcut**2))
+    end if
+   end do
+
+ CASE DEFAULT
+   gcutoff(:)=1 ! Neutral cut-off
+   write(msg,'(a)')'ATT: No cut-off applied to G**2!'
+   MSG_WARNING(msg)
+ END SELECT
+  
+ ABI_DEALLOCATE(gq) 
+ ABI_DEALLOCATE(gpq)
+ ABI_DEALLOCATE(gpq2)
+ ABI_DEALLOCATE(gcart)
+! ABI_DEALLOCATE(gcutoff)
+ 
+end subroutine termcutoff 
+!!***
+
 end module m_barevcoul
 !!***
+

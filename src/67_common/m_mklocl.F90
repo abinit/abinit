@@ -40,6 +40,7 @@ module m_mklocl
  use m_pawtab,   only : pawtab_type
  use m_mklocl_realspace, only : mklocl_realspace, mklocl_wavelets
  use m_fft,      only : fourdp
+ use m_barevcoul,only : termcutoff
 
  use m_splines,  only : splfit
 
@@ -307,7 +308,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig2,ig3,ii,itypat
  integer :: jj,me_fft,me_g0,n1,n2,n3,nproc_fft,shift1
- integer :: shift2,shift3
+ integer :: shift2,shift3,errstat
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
  real(dp) :: dqm1,ee,ff,gmag,gsquar,ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
@@ -318,7 +319,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gcart(3),tsec(2)
- real(dp),allocatable :: work1(:,:)
+ real(dp),allocatable :: work1(:,:),gcutoff(:)
 
 ! *************************************************************************
 
@@ -358,6 +359,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    ABI_ALLOCATE(work1,(2,nfft))
    work1(:,:)=zero
  end if
+
 !
  dq=(qgrid(mqgrid)-qgrid(1))/dble(mqgrid-1)
  dqm1=1.0_dp/dq
@@ -372,6 +374,12 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  dyfrlo(:,:,:)=zero
  me_g0=0
  ia1=1
+
+!Initialize Gcut-off array from m_barevcoul 
+ ABI_ALLOCATE(gcutoff,(nfft))
+ call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ !BG: Don't apply it just yet. Needs some testing before
+ gcutoff=one
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -413,7 +421,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
              dd = bb*(bb**2-1.0_dp)*dq2div6
 
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) +&
-&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar
+&             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) / gsquar * gcutoff(ii)
 
              if(option==1)then
 
@@ -589,6 +597,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    vpsp(:)=vpsp(:)*xnorm
 
    ABI_DEALLOCATE(work1)
+   IF(allocated(gcutoff)) DEALLOCATE(gcutoff,stat=errstat)
+   if (errstat /= 0) then
+     write (*,*) 'ERROR: could not dellocate data array'
+     stop
+   endif   
 
  end if
 
