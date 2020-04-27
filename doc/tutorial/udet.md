@@ -107,8 +107,8 @@ Copy the file *tudet_2.in* in your work directory, and run ABINIT:
 
 {% dialog tests/tutorial/Input/tudet_2.in %}
 
-As you can see from the *tudet_2.files* file, this run uses the *tudet_1o_WFK* as
-an input. In the *tudet_2.in* all the symmetry relations are specified
+As you can see from the *tudet_2.in* file, this run uses the *tudet_1o_WFK* as
+an input (as indata_prefix = "tudet_1.o"). In the *tudet_2.in* all the symmetry relations are specified
 explicitly. In the *tudet_2.log* you can verify that none of the symmetries
 connects atoms 1 with atom 2:
 
@@ -153,17 +153,18 @@ This means, that all the 10 3d spin-spin orbitals on the first Fe atom where
 shifted by 0.1 eV (=0.00367 Ha). On the second atom no shift was applied.
 Self-consistency was reached twice: Once for a positive shift, once for the negative shift:
 
-    grep SCF  tudet_2.out
+    grep SCF  tudet_2.abo
 
 The lines starting with URES
 
      URES      ii    nat       r_max    U(J)[eV]   U_ASA[eV]   U_inf[eV]
-     URES       1      2     4.69390     4.74555     3.67983     3.20150
-     URES       2     16     9.38770     8.77694     6.80588     5.92122
-     URES       3     54    14.08160     9.17082     7.11130     6.18694
-     URES       4    128    18.77540     9.25647     7.17772     6.24472
-     URES       5    250    23.46930     9.28509     7.19991     6.26403
+     URES       1      2     4.69390     3.86230     3.10778     2.71714
+     URES       2     16     9.38770     7.28001     5.85781     5.12150
+     URES       3     54    14.08160     7.60740     6.12125     5.35182
+     URES       4    128    18.77540     7.67626     6.17665     5.40026
+     URES       5    250    23.46930     7.69849     6.19454     5.41590
 
+    
 contain *U* for different supercells. The column "nat" indicates how many atoms
 were involved in the supercell, r_max indicates the maximal distance of the
 impurity atoms in that supercell. The column *U* indicates the actual *U* you
@@ -186,7 +187,7 @@ executable *ujdet* was created. The output of abinit is formatted so that you
 can easily "cut" the part with the ujdet input variables: you can generate
 the standard input file for the ujdet utility by typing:
 
-    sed -n "/MARK/,/MARK/p" tudet_2.out  > ujdet.in
+    sed -n "/MARK/,/MARK/p" tudet_2.abo  > ujdet.in
 
 Note that the input for the ujdet utility is always called *ujdet.in*
 
@@ -203,19 +204,19 @@ to specify a 6 6 6 supercell or
 
      scdim 700 0 0
 
-to specify the maximum total number of atoms in the supercell. Then, run *ujdet*:
+to specify the maximum total number of atoms in the supercell. Then, run *ujdet* (the executable is in the same directory as the abinit executable):
 
     rm ujdet.[ol]* ; ujdet > ujdet.log
 
     grep URES ujdet.out
 
      URES      ii    nat       r_max    U(J)[eV]   U_ASA[eV]   U_inf[eV]
-     URES       1      2     4.69390     4.74555     3.67983     3.20150
-     URES       2     16     9.38770     8.77694     6.80588     5.92122
-     URES       3     54    14.08160     9.17082     7.11130     6.18694
-     URES       4    128    18.77540     9.25647     7.17772     6.24472
-     URES       5    250    23.46930     9.28509     7.19991     6.26403
-     URES       6    432    28.16310     9.29738     7.20944     6.27232
+     URES       1      2     4.69390     3.86230     3.10778     2.71714
+     URES       2     16     9.38770     7.28001     5.85781     5.12150
+     URES       3     54    14.08160     7.60740     6.12125     5.35182
+     URES       4    128    18.77540     7.67626     6.17665     5.40026
+     URES       5    250    23.46930     7.69849     6.19454     5.41590
+     URES       6    432    28.16310     7.70781     6.20204     5.42246
 
 
 As you can see, *U* has now been extrapolated to a supercell containing 432 atoms.
@@ -231,5 +232,5 @@ Running
 
     rm ujdet.[ol]* ; ujdet > ujdet.log
 
-gives now higher values in the column U_ASA than in the runs before (8.07 eV
-compared to 7.21 eV): For more localized projectors the *U* value has to be bigger.
+gives now higher values in the column U_ASA than in the runs before (6.91 eV
+compared to 6.20 eV): For more localized projectors the *U* value has to be bigger.
