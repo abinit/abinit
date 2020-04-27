@@ -597,11 +597,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    vpsp(:)=vpsp(:)*xnorm
 
    ABI_DEALLOCATE(work1)
-   IF(allocated(gcutoff)) DEALLOCATE(gcutoff,stat=errstat)
-   if (errstat /= 0) then
-     write (*,*) 'ERROR: could not dellocate data array'
-     stop
-   endif   
+   ABI_DEALLOCATE(gcutoff) 
 
  end if
 

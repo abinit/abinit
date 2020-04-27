@@ -115,9 +115,9 @@ module m_barevcoul
 ! private variables used for the integration needed by the cylindrical case.
  integer,save  :: npts_,ntrial_,qopt_
  real(dp),save :: ha_,hb_,r0_
- real(dp),save :: qpg_perp_,gcart_para_,gcartx_,gcarty_
- real(dp),save :: zz_,xx_
- real(dp),save :: hcyl_,rcut_,accuracy_
+ real(dp),save :: gcart_para_,gcartx_,gcarty_
+ real(dp),save :: xx_
+ real(dp),save :: accuracy_
   
  
 contains
@@ -557,16 +557,15 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 !Local variables-------------------------------
 !scalars
  integer,parameter  :: N0=1000
- integer            :: icutc_loc,nkpt=1,ierr
- integer            :: i1,i2,i23,i3,id1,id2,id3
- integer            :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
- integer            :: ii,iq,ing,n1,n2,n3,npar,npt,id(3)
- integer            :: test,opt_cylinder,opt_surface
- real(dp)           :: cutoff,divgq0,rcut,zcut,check
+ integer            :: icutc_loc,ierr
+ integer            :: i1,i2,i23,i3
+ integer            :: ii,ig,ing,n1,n2,n3,id(3)
+ integer            :: test,opt_surface !opt_cylinder
+ real(dp)           :: cutoff,rcut,check
  real(dp)           :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)           :: gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
  real(dp)           :: gcart2,gcart_para,gcart_perp
- real(dp)           :: accuracy,ha,hb,r0,gcartx,gcarty,quad,tmp
+ real(dp)           :: quad,tmp
  real(dp)           :: pdir(3),vcutgeo(3),alpha(3),rmet(3,3)
  real(dp),parameter :: tolfix=1.0000001_dp
  character(len=50)  :: mode
@@ -672,6 +671,14 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
    ha_=half*SQRT(DOT_PRODUCT(Cryst%rprimd(:,1),Cryst%rprimd(:,1)))
    hb_=half*SQRT(DOT_PRODUCT(Cryst%rprimd(:,2),Cryst%rprimd(:,2)))
    r0_=MIN(ha_,hb_)/N0
+   !
+   ! ===================================================
+   ! === Setup for the quadrature of matrix elements ===
+   ! ===================================================
+   qopt_    =6         ! Quadrature method, see quadrature routine.
+   ntrial_  =30        ! Max number of attempts.
+   accuracy_=0.001     ! Fractional accuracy required.
+   npts_    =6         ! Initial number of point (only for Gauss-Legendre method).
 
    do ig=1,nfft
 
@@ -680,7 +687,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 
      tmp=zero
 
-     call quadrature(K0cos_dy,zero,ha,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+     call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
 
      if (ierr/=0) then
        MSG_ERROR("Accuracy not reached")
