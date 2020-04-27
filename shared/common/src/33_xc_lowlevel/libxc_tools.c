@@ -343,17 +343,27 @@ void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshol
 #endif
 
 /* ===============================================================
- * Wrapper to xc_hyb_type for backward compatibility
- *    Returns type of hybrid functional
+ * Missing function:
+ *  Return 1 if the functional is hybrid, from its id
  * ===============================================================
  */
-int xc_func_hybrid_type(XC(func_type) *xc_func)
+int xc_func_is_hybrid_from_id(int func_id)
 #if ( XC_MAJOR_VERSION > 5 ) 
 /* ==== libXC v6.0 and later ==== */
- {return xc_hyb_type(xc_func);}
+ {xc_func_type func; int result=0;
+  if(xc_func_init(&func,func_id,XC_UNPOLARIZED)==0)
+    {if (func.hyb_number_terms>0) {result=1;}}
+  xc_func_end(&func);
+  return result;
+ }
 #else
 /* ==== Before libXC v6.0 ==== */
- {return -1;}
+ {int family; family=xc_family_from_id(func_id, NULL, NULL);
+  if (family==XC_FAMILY_HYB_GGA || family==XC_FAMILY_HYB_MGGA)
+   {return 1;}
+  else
+   {return 0;}
+ }
 #endif
 
 #endif

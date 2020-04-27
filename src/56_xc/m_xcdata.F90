@@ -269,8 +269,8 @@ subroutine get_xclevel(ixc,xclevel,usefock)
      if (jj==XC_FAMILY_GGA    .or.jj==XC_FAMILY_MGGA) xclevel=2
      if (jj==XC_FAMILY_HYB_GGA.or.jj==XC_FAMILY_HYB_MGGA) xclevel=2
      if (present(usefock)) then
-       if (libxc_functionals_is_hybrid_from_id(ii)) then
-         usefock=1
+       usefock=libxc_functionals_is_hybrid_from_id(ii)
+       if (usefock==1) then
          if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
            write(message, '(a,i8,3a,2i8,2a)' )&
 &           'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&

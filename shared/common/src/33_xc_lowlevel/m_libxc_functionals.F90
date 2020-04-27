@@ -255,10 +255,10 @@ module libxc_functionals
  end interface
 !
  interface
-   integer(C_INT) function xc_func_hybrid_type(xc_func) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
-     type(C_PTR) :: xc_func
-   end function xc_func_hybrid_type
+   integer(C_INT) function xc_func_is_hybrid_from_id(func_id) bind(C)
+     use iso_c_binding, only : C_INT
+     integer(C_INT),value :: func_id
+   end function xc_func_is_hybrid_from_id
  end interface
 !
  interface
@@ -299,10 +299,10 @@ module libxc_functionals
 !
  interface
    subroutine xc_get_hybrid_constants(xc_cst_hyb_none, &
-	          xc_cst_hyb_fock,xc_cst_hyb_pt2,xc_cst_hyb_erf_sr,xc_cst_hyb_yukawa_sr, &
-			  xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, xc_cst_hyb_hybrid,xc_cst_hyb_cam, &
-			  xc_cst_hyb_camy,xc_cst_hyb_camg,xc_cst_hyb_double_hybrid, &
-			  xc_cst_hyb_mixture) bind(C)
+              xc_cst_hyb_fock,xc_cst_hyb_pt2,xc_cst_hyb_erf_sr,xc_cst_hyb_yukawa_sr, &
+              xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, xc_cst_hyb_hybrid,xc_cst_hyb_cam, &
+              xc_cst_hyb_camy,xc_cst_hyb_camg,xc_cst_hyb_double_hybrid, &
+              xc_cst_hyb_mixture) bind(C)
      use iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_hyb_none, xc_cst_hyb_fock,xc_cst_hyb_pt2, xc_cst_hyb_erf_sr, &
                        xc_cst_hyb_yukawa_sr,xc_cst_hyb_gaussian_sr,xc_cst_hyb_semilocal, &
@@ -637,9 +637,7 @@ contains
    end if
 
 !  Retrieve parameters for hybrid functionals
-   xc_func%is_hybrid=(xc_func_hybrid_type(xc_func%conf)/=XC_HYB_NONE .or. &
-                      xc_func%family==XC_FAMILY_HYB_GGA .or. &
-                      xc_func%family==XC_FAMILY_HYB_MGGA)
+   xc_func%is_hybrid=(xc_func_is_hybrid_from_id(xc_func%id)==1)
    if (xc_func%is_hybrid) then
      call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
      xc_func%hyb_mixing=real(alpha_c,kind=dp)
@@ -1189,37 +1187,19 @@ end function libxc_functionals_is_hybrid
  logical :: libxc_functionals_is_hybrid_from_id
  integer,intent(in) :: xcid
 !Local variables-------------------------------
- integer :: family
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- integer(C_INT) :: xcid_c,nspin_c,success_c
- type(C_PTR) :: conf_ptr_c
- type(C_PTR),pointer :: xc_conf
+ integer(C_INT) :: xcid_c
 #endif
 
 ! *************************************************************************
 
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ xcid_c=int(xcid,kind=C_INT)
+ libxc_functionals_is_hybrid_from_id =(xc_func_is_hybrid_from_id(xcid_c)==1)
+#else
  libxc_functionals_is_hybrid_from_id = .false.
-
- family=libxc_functionals_family_from_id(xcid)
- if (family==XC_FAMILY_UNKNOWN.or.family==XC_FAMILY_LDA) return
-  
- if (family==XC_FAMILY_HYB_GGA.or.family==XC_FAMILY_HYB_MGGA) then
-   libxc_functionals_is_hybrid_from_id = .true.
- else
-
-   !Is there another possible procedure to know
-   !  that a functional is hybrid from its id ?
-   xcid_c=int(xcid,kind=C_INT)
-   nspin_c=int(1,kind=C_INT)
-   conf_ptr_c=xc_func_type_malloc()
-   call c_f_pointer(conf_ptr_c,xc_conf)
-   success_c=xc_func_init(xc_conf,xcid_c,nspin_c)
-   if (success_c==0) then
-     libxc_functionals_is_hybrid_from_id = (xc_func_hybrid_type(xc_conf)/=XC_HYB_NONE)
-     call xc_func_end(xc_conf)
-     call xc_func_type_free(c_loc(xc_conf))
-   end if
- end if
+ if (.false.) write(std_out,*) xcid
+#endif
 
 end function libxc_functionals_is_hybrid_from_id
 !!***
