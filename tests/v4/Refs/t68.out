@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 19 Apr 2020.
-- ( at 19h05 )
+.Starting date : Tue 21 Apr 2020.
+- ( at 11h24 )
   
 
 ================================================================================
@@ -125,7 +125,7 @@
   1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  11
         degenerate with vibration mode #  12
-  2.0  0.0  1.0  0.0 -1.0 -0.0 -2.0 -0.0 -1.0 -0.0  1.0  0.0
+  2.0  0.0  1.0  0.0 -1.0 -0.0 -2.0 -0.0 -1.0  0.0  1.0  0.0
 
 ================================================================================
 
@@ -285,7 +285,7 @@
   Acoustic sum rule violation met : the eigenvalues of accoustic mode
   are too large at Gamma point
   Increase cutoff energy or k-points sampling.
-  The three eigenvalues are:   -2.451779E-05   -2.098452E-06    3.154381E-05
+  The three eigenvalues are:   -2.451766E-05    1.296465E-06   -2.451766E-05
 
  Proper piezoelectric constants (relaxed ion) (unit:c/m^2)
 
@@ -329,7 +329,7 @@
 
      46.08554999     -0.00000000      0.00000086
      -0.00000000     46.08555076      0.00000067
-      0.00000082      0.00000064     19.31634330
+      0.00000082      0.00000064     10.31634330
 
 ************************************************
 
@@ -357,6 +357,7 @@
 
 ================================================================================
 
-+Total cpu time      0.052  and wall time      0.261 sec
++Total cpu time      0.055  and wall time      0.305 sec
 
  anaddb : the run completed succesfully.
+

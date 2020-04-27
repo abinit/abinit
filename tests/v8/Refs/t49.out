@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.2 of ANADDB 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h32 )
+.Starting date : Tue 21 Apr 2020.
+- ( at 11h42 )
   
 
 ================================================================================
@@ -218,11 +218,11 @@
   
  Mode effective charges 
  Mode number.    x            y            z            length 
--     1         -0.000000    -0.000000    -0.000000     0.000000
--     2          0.000000     0.000000     0.000000     0.000000
--     3         -0.000000    -0.000000    -0.000000     0.000000
--     4          0.000000    -0.000000     2.549253     2.549253
--     5          0.000000     2.549253     0.000000     2.549253
+-     1         -0.000000     0.000000    -0.000000     0.000000
+-     2          0.000000     0.000000    -0.000000     0.000000
+-     3         -0.000000     0.000000    -0.000000     0.000000
+-     4          0.000000     0.000000     2.549253     2.549253
+-     5          0.000000     2.549253    -0.000000     2.549253
 -     6          2.549253    -0.000000    -0.000000     2.549253
   
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
@@ -241,9 +241,9 @@
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 
  Electronic dielectric tensor
-     14.90775986     -0.00000000     -0.00000000
-      0.00000000     14.90775986     -0.00000000
-      0.00000000     -0.00000000     14.90775986
+     14.90775987      0.00000000      0.00000000
+      0.00000000     14.90775987      0.00000000
+      0.00000000      0.00000000     14.90775987
 
 
  Relaxed ion dielectric tensor
@@ -520,12 +520,13 @@
  Direction                     Dielectric constant
    1.00000   0.00000   0.00000     16.66342787
    0.00000   1.00000   0.00000     16.66342787
-   0.00000   0.00000   1.00000     19.66342787
+   0.00000   0.00000   1.00000     16.66342787
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
 
 ================================================================================
 
-+Total cpu time      0.134  and wall time      0.136 sec
++Total cpu time      0.222  and wall time      0.280 sec
 
  anaddb : the run completed succesfully.
+
