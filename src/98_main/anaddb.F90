@@ -333,13 +333,14 @@ program anaddb
    iblok_tmp = ddb%get_dielt(inp%rfmeth,epsinf)
  end if
 
- !if (iblok == 0) then
- !  iblok_Efield=0
- !  call wrtout(std_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", filnam(3)))
- !  call wrtout(std_out, "Values initialized with zeros")
- !else
- !  call wrtout(std_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", filnam(3)))
- !end if
+ !if (iblok_tmp == 0) then
+ if (epsinf(1,1)==one .and. epsinf(2,2)==one .and. epsinf(3,3)==one) then
+   write(msg,'(5a)') ch10,&
+     ' The DDB file does not contain the derivatives w.r.t. electric field perturbation. ',ch10,&
+     ' The program will continue by setting the electronic dielectric tensor to 1. ',ch10
+  ! call wrtout([ab_out], msg)
+   MSG_WARNING(msg)
+ end if
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF
@@ -679,6 +680,15 @@ program anaddb
   ! dielectric tensor, frequency dependent dielectric tensor (dieflag)
   ! and mode by mode decomposition of epsilon if dieflag==3
   if (inp%dieflag/=0) then
+    !if (iblok_tmp == 0) then
+    if (epsinf(1,1)==one .and. epsinf(2,2)==one .and. epsinf(3,3)==one) then
+      write(msg,'(7a)') ch10,&
+       ' The DDB file does not contain the derivatives w.r.t. electric field perturbation. ',ch10,&
+       ' This is mandatory if you want to calculate the dielectric constant,',ch10,&
+       ' Please check your DDB file or do not use dieflag.',ch10
+      MSG_ERROR(msg)
+    end if
+
     write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
     call wrtout([std_out, ab_out], msg)
     call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
@@ -790,6 +800,7 @@ end if ! condition on nlflag
    end if 
    ABI_FREE(lst)
  end if ! nph2l/=0   
+ ! End of second list of wv stuff (nph2l/=0)
    
 
  ABI_FREE(fact_oscstr)

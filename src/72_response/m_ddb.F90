@@ -2482,6 +2482,7 @@ integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp),allocatable :: tmpval(:,:,:,:)
 
+ character(len=500) :: msg
 ! *********************************************************************
 
  ! Look for the Gamma Block in the DDB
