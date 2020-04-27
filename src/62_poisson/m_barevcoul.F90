@@ -32,7 +32,7 @@ module m_barevcoul
  use m_fstrings,        only : sjoin, itoa
  use m_profiling_abi,   only : abimem_record
  use defs_abitypes,     only : MPI_type
- use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.)
+ use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.),quadrature
 
  use m_geometry,        only : normv, metric
 
@@ -112,7 +112,14 @@ module m_barevcoul
 
  public :: barevcoul,termcutoff
 !!***
-
+! private variables used for the integration needed by the cylindrical case.
+ integer,save  :: npts_,ntrial_,qopt_
+ real(dp),save :: ha_,hb_,r0_
+ real(dp),save :: qpg_perp_,gcart_para_,gcartx_,gcarty_
+ real(dp),save :: zz_,xx_
+ real(dp),save :: hcyl_,rcut_,accuracy_
+  
+ 
 contains
 !!***
 
@@ -542,14 +549,15 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 !scalars
  integer,intent(in)    :: nfft,ngfft(18)
  real(dp),intent(in)   :: gsqcut
- real(dp),intent(inout):: ucvol
+ real(dp),intent(in)   :: ucvol
 
 !arrays
- real(dp),intent(inout):: gmet(3,3),gprimd(3,3)
+ real(dp),intent(in):: gmet(3,3),gprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
- integer            :: icutc_loc,nkpt=1
+ integer,parameter  :: N0=1000
+ integer            :: icutc_loc,nkpt=1,ierr
  integer            :: i1,i2,i23,i3,id1,id2,id3
  integer            :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer            :: ii,iq,ing,n1,n2,n3,npar,npt,id(3)
@@ -558,6 +566,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  real(dp)           :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)           :: gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
  real(dp)           :: gcart2,gcart_para,gcart_perp
+ real(dp)           :: accuracy,ha,hb,r0,gcartx,gcarty,quad,tmp
  real(dp)           :: pdir(3),vcutgeo(3),alpha(3),rmet(3,3)
  real(dp),parameter :: tolfix=1.0000001_dp
  character(len=50)  :: mode
@@ -574,7 +583,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 !Initialize a few quantities
  cutoff=gsqcut*tolfix
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
- call metric(gmet,gprimd,-1,rmet,Cryst%rprimd,ucvol)
+! call metric(gmet,gprimd,-1,rmet,Cryst%rprimd,ucvol)
  
  ! Initialize container
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3))) 
@@ -649,6 +658,37 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 
    !Calculate rcut for each method !
    gcutoff(:)=1 ! Neutral cut-off
+
+   ! * Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
+   !   In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
+   if ( (ANY(ABS(Cryst%rprimd(2:3,  1))>tol6)).or.&
+&       (ANY(ABS(Cryst%rprimd(1:3:2,2))>tol6)).or.&
+&       (ANY(ABS(Cryst%rprimd(1:2,  3))>tol6))    &
+&     ) then
+     msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
+     MSG_ERROR(msg)
+   end if
+
+   ha_=half*SQRT(DOT_PRODUCT(Cryst%rprimd(:,1),Cryst%rprimd(:,1)))
+   hb_=half*SQRT(DOT_PRODUCT(Cryst%rprimd(:,2),Cryst%rprimd(:,2)))
+   r0_=MIN(ha_,hb_)/N0
+
+   do ig=1,nfft
+
+     gcart(:)=b1(:)*Gsph%gvec(1,ig)+b2(:)*Gsph%gvec(2,ig)+b3(:)*Gsph%gvec(3,ig)
+     gcartx_=gcart(1) ; gcarty_=gcart(2) ; gcart_para_=ABS(gcart(3))
+
+     tmp=zero
+
+     call quadrature(K0cos_dy,zero,ha,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+
+     if (ierr/=0) then
+       MSG_ERROR("Accuracy not reached")
+     end if
+     tmp=tmp+quad
+     gcutoff(ig)=two*(tmp*two)
+   end do !ig
+
 
  CASE('SURFACE')
 
@@ -751,6 +791,30 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 ! ABI_DEALLOCATE(gcutoff)
  
 end subroutine termcutoff 
+!!***
+
+!----------------------------------------------------------------------
+
+function K0cos_dy(xx)
+
+ real(dp),intent(in) :: xx
+ real(dp) :: K0cos_dy
+!Local variables-------------------------------
+!scalars
+ integer :: ierr
+ real(dp) :: quad
+!************************************************************************
+
+ !! K0cos_dy(x)=\int_{-b/2}^{b/2} K0(|qpg_z|\rho)cos(x.qpg_x+y.qpg_y)dy$
+ xx_=xx
+ call quadrature(K0cos,-hb_,+hb_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+ if (ierr/=0) then
+   MSG_ERROR("Accuracy not reached")
+ end if
+
+ K0cos_dy=quad
+
+end function K0cos_dy
 !!***
 
 end module m_barevcoul
