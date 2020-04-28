@@ -269,7 +269,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
      if (jj==XC_FAMILY_GGA    .or.jj==XC_FAMILY_MGGA) xclevel=2
      if (jj==XC_FAMILY_HYB_GGA.or.jj==XC_FAMILY_HYB_MGGA) xclevel=2
      if (present(usefock)) then
-       usefock=libxc_functionals_is_hybrid_from_id(ii)
+       if (libxc_functionals_is_hybrid_from_id(ii)) usefock=1
        if (usefock==1) then
          if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
            write(message, '(a,i8,3a,2i8,2a)' )&
