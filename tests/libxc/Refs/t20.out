@@ -1,6 +1,6 @@
 
 .Version 9.1.3 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin19.3.0_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 28 Apr 2020.
-- ( at 00h10 )
+- ( at 02h05 )
   
-- input  file    -> t20.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/TestBot_MPI1/libxc_t20/t20.in
 - output file    -> t20.out
 - root for input  files -> t20i
 - root for output files -> t20o
@@ -608,7 +608,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    8
+-  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
             acell      5.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
@@ -772,7 +772,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -794,8 +794,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -828,7 +828,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7830473667467    -2.783E+00 5.057E-01 2.494E+01
+ ETOT  1  -2.7830473667466    -2.783E+00 5.057E-01 2.494E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.63985280E-04  sigma(3 2)=  0.00000000E+00
@@ -901,15 +901,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.74415277450396E+00
-hartree             :  1.00570712527286E+00
-xc                  : -1.03718546269879E+00
+kinetic             :  2.74415277450395E+00
+hartree             :  1.00570712527288E+00
+xc                  : -1.03718546269878E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.36080301309441E+00
+local_psp           : -4.36080301309435E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.78304736674671E+00
-total_energy_eV     : -7.57305701971069E+01
+total_energy        : -2.78304736674663E+00
+total_energy_eV     : -7.57305701971048E+01
 band_energy         : -1.02475850191678E+00
 ...
 
@@ -926,7 +926,7 @@ band_energy         : -1.02475850191678E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -948,8 +948,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -981,7 +981,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7287862692460    -2.729E+00 5.022E-01 2.154E+01
+ ETOT  1  -2.7287862692458    -2.729E+00 5.022E-01 2.154E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.70989116E-04  sigma(3 2)=  0.00000000E+00
@@ -1055,14 +1055,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.73548434186821E+00
-hartree             :  1.00160107214108E+00
-xc                  : -9.80804663652786E-01
+hartree             :  1.00160107214105E+00
+xc                  : -9.80804663652788E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35014822887216E+00
+local_psp           : -4.35014822887194E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.72878626924599E+00
-total_energy_eV     : -7.42540506443499E+01
+total_energy        : -2.72878626924579E+00
+total_energy_eV     : -7.42540506443446E+01
 band_energy         : -9.67094028298119E-01
 ...
 
@@ -1079,7 +1079,7 @@ band_energy         : -9.67094028298119E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1101,8 +1101,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1134,7 +1134,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7466409368170    -2.747E+00 5.036E-01 2.257E+01
+ ETOT  1  -2.7466409368168    -2.747E+00 5.036E-01 2.257E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65280332E-04  sigma(3 2)=  0.00000000E+00
@@ -1208,15 +1208,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.74005182923027E+00
-hartree             :  1.00358150086600E+00
-xc                  : -9.99691023307309E-01
+hartree             :  1.00358150086598E+00
+xc                  : -9.99691023307310E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35566445287560E+00
+local_psp           : -4.35566445287541E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.74664093681697E+00
-total_energy_eV     : -7.47399008573167E+01
-band_energy         : -9.86827064396071E-01
+total_energy        : -2.74664093681681E+00
+total_energy_eV     : -7.47399008573122E+01
+band_energy         : -9.86827064396070E-01
 ...
 
 
@@ -1232,7 +1232,7 @@ band_energy         : -9.86827064396071E-01
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1254,8 +1254,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1287,7 +1287,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7466409368170    -2.747E+00 5.036E-01 2.257E+01
+ ETOT  1  -2.7466409368168    -2.747E+00 5.036E-01 2.257E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65280332E-04  sigma(3 2)=  0.00000000E+00
@@ -1361,15 +1361,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.74005182923027E+00
-hartree             :  1.00358150086600E+00
-xc                  : -9.99691023307309E-01
+hartree             :  1.00358150086598E+00
+xc                  : -9.99691023307310E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35566445287560E+00
+local_psp           : -4.35566445287541E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.74664093681697E+00
-total_energy_eV     : -7.47399008573167E+01
-band_energy         : -9.86827064396071E-01
+total_energy        : -2.74664093681681E+00
+total_energy_eV     : -7.47399008573122E+01
+band_energy         : -9.86827064396070E-01
 ...
 
 
@@ -1385,7 +1385,7 @@ band_energy         : -9.86827064396071E-01
 
 ================================================================================
 == DATASET  5 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1407,8 +1407,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1440,7 +1440,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7466409368170    -2.747E+00 5.036E-01 2.257E+01
+ ETOT  1  -2.7466409368168    -2.747E+00 5.036E-01 2.257E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65280332E-04  sigma(3 2)=  0.00000000E+00
@@ -1514,15 +1514,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.74005182923027E+00
-hartree             :  1.00358150086600E+00
-xc                  : -9.99691023307309E-01
+hartree             :  1.00358150086598E+00
+xc                  : -9.99691023307310E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35566445287560E+00
+local_psp           : -4.35566445287541E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.74664093681697E+00
-total_energy_eV     : -7.47399008573167E+01
-band_energy         : -9.86827064396071E-01
+total_energy        : -2.74664093681681E+00
+total_energy_eV     : -7.47399008573122E+01
+band_energy         : -9.86827064396070E-01
 ...
 
 
@@ -1538,7 +1538,7 @@ band_energy         : -9.86827064396071E-01
 
 ================================================================================
 == DATASET  6 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1560,8 +1560,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1593,7 +1593,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7466409368170    -2.747E+00 5.036E-01 2.257E+01
+ ETOT  1  -2.7466409368168    -2.747E+00 5.036E-01 2.257E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.65280332E-04  sigma(3 2)=  0.00000000E+00
@@ -1667,15 +1667,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.74005182923027E+00
-hartree             :  1.00358150086600E+00
-xc                  : -9.99691023307309E-01
+hartree             :  1.00358150086598E+00
+xc                  : -9.99691023307310E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35566445287560E+00
+local_psp           : -4.35566445287541E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.74664093681697E+00
-total_energy_eV     : -7.47399008573167E+01
-band_energy         : -9.86827064396071E-01
+total_energy        : -2.74664093681681E+00
+total_energy_eV     : -7.47399008573122E+01
+band_energy         : -9.86827064396070E-01
 ...
 
 
@@ -1691,7 +1691,7 @@ band_energy         : -9.86827064396071E-01
 
 ================================================================================
 == DATASET  7 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1713,8 +1713,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1746,7 +1746,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8028130631968    -2.803E+00 4.989E-01 4.619E+02
+ ETOT  1  -2.8028130631970    -2.803E+00 4.989E-01 4.619E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  6.18418418E-05  sigma(3 2)=  0.00000000E+00
@@ -1820,14 +1820,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.74585126199694E+00
-hartree             :  1.00182494096455E+00
+hartree             :  1.00182494096457E+00
 xc                  : -1.05665329602658E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35891717940140E+00
+local_psp           : -4.35891717940160E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.80281306319682E+00
-total_energy_eV     : -7.62684221504712E+01
+total_energy        : -2.80281306319700E+00
+total_energy_eV     : -7.62684221504761E+01
 band_energy         : -1.04485902505271E+00
 ...
 
@@ -1844,7 +1844,7 @@ band_energy         : -1.04485902505271E+00
 
 ================================================================================
 == DATASET  8 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1866,8 +1866,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1899,7 +1899,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8208507955900    -2.821E+00 4.941E-01 4.339E+02
+ ETOT  1  -2.8208507955899    -2.821E+00 4.941E-01 4.339E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.21172672E-04  sigma(3 2)=  0.00000000E+00
@@ -1973,14 +1973,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76968799336007E+00
-hartree             :  1.01442094055562E+00
-xc                  : -1.08218920921554E+00
+hartree             :  1.01442094055566E+00
+xc                  : -1.08218920921553E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.38785172955983E+00
+local_psp           : -4.38785172955974E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.82085079559001E+00
-total_energy_eV     : -7.67592538105863E+01
+total_energy        : -2.82085079558988E+00
+total_energy_eV     : -7.67592538105826E+01
 band_energy         : -1.06469684930923E+00
 ...
 
@@ -1997,7 +1997,7 @@ band_energy         : -1.06469684930923E+00
 
 ================================================================================
 == DATASET  9 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2019,8 +2019,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2125,15 +2125,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 9, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.77376656094439E+00
-hartree             :  1.01641085132543E+00
+kinetic             :  2.77376656094440E+00
+hartree             :  1.01641085132544E+00
 xc                  : -1.10322672561152E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.39261170866972E+00
+local_psp           : -4.39261170866971E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.84057981274175E+00
-total_energy_eV     : -7.72961076694827E+01
+total_energy        : -2.84057981274172E+00
+total_energy_eV     : -7.72961076694820E+01
 band_energy         : -1.08179281312113E+00
 ...
 
@@ -2150,7 +2150,7 @@ band_energy         : -1.08179281312113E+00
 
 ================================================================================
 == DATASET 10 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2172,8 +2172,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2278,16 +2278,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.76905092866575E+00
-hartree             :  1.00680493303712E+00
+kinetic             :  2.76905092866574E+00
+hartree             :  1.00680493303716E+00
 xc                  : -1.06905651977862E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
 local_psp           : -4.38452876700867E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81264821581475E+00
-total_energy_eV     : -7.65360502636792E+01
-band_energy         : -1.04854448509410E+00
+total_energy        : -2.81264821581472E+00
+total_energy_eV     : -7.65360502636784E+01
+band_energy         : -1.04854448509409E+00
 ...
 
 
@@ -2303,7 +2303,7 @@ band_energy         : -1.04854448509410E+00
 
 ================================================================================
 == DATASET 11 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2325,8 +2325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2358,7 +2358,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7561543446577    -2.756E+00 5.012E-01 3.559E+02
+ ETOT  1  -2.7561543446579    -2.756E+00 5.012E-01 3.559E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.34652275E-05  sigma(3 2)=  0.00000000E+00
@@ -2431,16 +2431,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.73876615996477E+00
-hartree             :  9.95325441175937E-01
+kinetic             :  2.73876615996478E+00
+hartree             :  9.95325441175956E-01
 xc                  : -1.00604546116645E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.34928169390163E+00
+local_psp           : -4.34928169390186E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.75615434465771E+00
-total_energy_eV     : -7.49987738498876E+01
-band_energy         : -9.98385444718201E-01
+total_energy        : -2.75615434465791E+00
+total_energy_eV     : -7.49987738498933E+01
+band_energy         : -9.98385444718203E-01
 ...
 
 
@@ -2456,7 +2456,7 @@ band_energy         : -9.98385444718201E-01
 
 ================================================================================
 == DATASET 12 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2478,8 +2478,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2511,7 +2511,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7019610594089    -2.702E+00 6.185E-01 1.337E+05
+ ETOT  1  -2.7019610594088    -2.702E+00 6.185E-01 1.337E+05
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.20529705E-04  sigma(3 2)=  0.00000000E+00
@@ -2585,15 +2585,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.75078157847863E+00
-hartree             :  9.95821266278390E-01
-xc                  : -9.55553122885814E-01
+hartree             :  9.95821266278380E-01
+xc                  : -9.55553122885815E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.35809199054973E+00
+local_psp           : -4.35809199054963E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.70196105940886E+00
-total_energy_eV     : -7.35240995623468E+01
-band_energy         : -9.76527863123877E-01
+total_energy        : -2.70196105940877E+00
+total_energy_eV     : -7.35240995623443E+01
+band_energy         : -9.76527863123875E-01
 ...
 
 
@@ -2609,7 +2609,7 @@ band_energy         : -9.76527863123877E-01
 
 ================================================================================
 == DATASET 13 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2631,8 +2631,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2737,15 +2737,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.72707599628479E+00
-hartree             :  9.90747310561669E-01
-xc                  : -9.98260100250334E-01
+kinetic             :  2.72707599628478E+00
+hartree             :  9.90747310561685E-01
+xc                  : -9.98260100250333E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.33514922578613E+00
+local_psp           : -4.33514922578610E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.75050480992034E+00
-total_energy_eV     : -7.48450421915188E+01
+total_energy        : -2.75050480992030E+00
+total_energy_eV     : -7.48450421915175E+01
 band_energy         : -9.90507793640075E-01
 ...
 
@@ -2762,7 +2762,7 @@ band_energy         : -9.90507793640075E-01
 
 ================================================================================
 == DATASET 14 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2784,8 +2784,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2817,12 +2817,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7935150482613    -2.794E+00 5.077E-01 8.831E+02
+ ETOT  1  -2.7935150482614    -2.794E+00 5.077E-01 8.831E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.37778169E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.37778169E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.37778169E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.37778166E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.37778166E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.37778166E-06  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -2845,9 +2845,9 @@ etotal    :  -2.79351505E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.16496614E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.37778169E-06,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.37778169E-06,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.37778169E-06, ]
+- [  3.37778166E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.37778166E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.37778166E-06, ]
 pressure_GPa:  -9.9378E-02
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -2890,32 +2890,32 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.75853398664397E+00
-hartree             :  1.00247022770928E+00
-xc                  : -1.04740387726101E+00
+kinetic             :  2.75853398665263E+00
+hartree             :  1.00247022771507E+00
+xc                  : -1.04740387726397E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.37219659462325E+00
+local_psp           : -4.37219659463477E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.79351504826135E+00
-total_energy_eV     : -7.60154102969259E+01
-band_energy         : -1.03299322758030E+00
+total_energy        : -2.79351504826137E+00
+total_energy_eV     : -7.60154102969265E+01
+band_energy         : -1.03299322757965E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.37778169E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.37778169E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.37778169E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.37778166E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.37778166E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.37778166E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -9.9378E-02 GPa]
-- sigma(1 1)=  9.93777515E-02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.93777515E-02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.93777515E-02  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  9.93777508E-02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.93777508E-02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.93777508E-02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 15 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2937,8 +2937,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2970,7 +2970,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7175557854535    -2.718E+00 4.882E-01 2.508E+02
+ ETOT  1  -2.7175557854536    -2.718E+00 4.882E-01 2.508E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.67187797E-05  sigma(3 2)=  0.00000000E+00
@@ -3044,15 +3044,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.70146401749094E+00
-hartree             :  9.83793752874710E-01
-xc                  : -9.61583929153823E-01
+hartree             :  9.83793752874742E-01
+xc                  : -9.61583929153824E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.30631083593500E+00
+local_psp           : -4.30631083593512E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.71755578545350E+00
-total_energy_eV     : -7.39484536389390E+01
-band_energy         : -9.50815831702086E-01
+total_energy        : -2.71755578545359E+00
+total_energy_eV     : -7.39484536389414E+01
+band_energy         : -9.50815831702085E-01
 ...
 
 
@@ -3068,7 +3068,7 @@ band_energy         : -9.50815831702086E-01
 
 ================================================================================
 == DATASET 16 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -3090,8 +3090,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3123,7 +3123,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.8760619690984    -1.876E+00 3.995E-01 3.182E+02
+ ETOT  1  -1.8760619690983    -1.876E+00 3.995E-01 3.182E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.16541444E-04  sigma(3 2)=  0.00000000E+00
@@ -3196,16 +3196,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.04062915968748E+00
-hartree             :  6.55350269967941E-01
-xc                  : -7.07944225506962E-02
+kinetic             :  2.04062915968747E+00
+hartree             :  6.55350269967938E-01
+xc                  : -7.07944225506956E-02
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -3.36632818547282E+00
+local_psp           : -3.36632818547267E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.87606196909843E+00
-total_energy_eV     : -5.10502423862848E+01
-band_energy         :  1.15146512323324E-01
+total_energy        : -1.87606196909828E+00
+total_energy_eV     : -5.10502423862808E+01
+band_energy         :  1.15146512323323E-01
 ...
 
 
@@ -3221,7 +3221,7 @@ band_energy         :  1.15146512323324E-01
 
 ================================================================================
 == DATASET 17 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -3243,8 +3243,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3276,12 +3276,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8036450681381    -2.804E+00 5.047E-01 4.566E+02
+ ETOT  1  -2.8036450681704    -2.804E+00 5.047E-01 4.566E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  9.26025169E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  9.26025169E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  9.26025169E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  9.26025162E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  9.26025162E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  9.26025162E-06  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -3304,9 +3304,9 @@ etotal    :  -2.80364507E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.19265714E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  9.26025169E-06,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   9.26025169E-06,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   9.26025169E-06, ]
+- [  9.26025162E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.26025162E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   9.26025162E-06, ]
 pressure_GPa:  -2.7245E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -3349,32 +3349,32 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.76638981640774E+00
-hartree             :  1.00617924706050E+00
-xc                  : -1.05961866288180E+00
+kinetic             :  2.76638981646809E+00
+hartree             :  1.00617924707958E+00
+xc                  : -1.05961866292349E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.38167667799419E+00
+local_psp           : -4.38167667806425E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.80364506813809E+00
-total_energy_eV     : -7.62910621563013E+01
-band_energy         : -1.03853142768428E+00
+total_energy        : -2.80364506817040E+00
+total_energy_eV     : -7.62910621571808E+01
+band_energy         : -1.03853142771594E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  9.26025169E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  9.26025169E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  9.26025169E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  9.26025162E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  9.26025162E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  9.26025162E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.7245E-01 GPa]
-- sigma(1 1)=  2.72445965E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.72445965E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.72445965E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  2.72445963E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  2.72445963E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  2.72445963E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 23 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -3396,8 +3396,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3429,7 +3429,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8313661244082    -2.831E+00 5.147E-01 2.795E+02
+ ETOT  1  -2.8313661244083    -2.831E+00 5.147E-01 2.795E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.10158757E-05  sigma(3 2)=  0.00000000E+00
@@ -3503,14 +3503,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 23, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.80605365073658E+00
-hartree             :  1.02982392998965E+00
+hartree             :  1.02982392998964E+00
 xc                  : -1.09907386761599E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.43325104678810E+00
+local_psp           : -4.43325104678816E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.83136612440819E+00
-total_energy_eV     : -7.70453904594718E+01
+total_energy        : -2.83136612440825E+00
+total_energy_eV     : -7.70453904594734E+01
 band_energy         : -1.04451756516698E+00
 ...
 
@@ -3527,7 +3527,7 @@ band_energy         : -1.04451756516698E+00
 
 ================================================================================
 == DATASET 24 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -3549,8 +3549,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3582,7 +3582,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8219720280527    -2.822E+00 5.127E-01 2.003E+02
+ ETOT  1  -2.8219720280526    -2.822E+00 5.127E-01 2.003E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.28713995E-05  sigma(3 2)=  0.00000000E+00
@@ -3655,15 +3655,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 24, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.80055515999700E+00
-hartree             :  1.02872820971526E+00
-xc                  : -1.08907531961571E+00
+kinetic             :  2.80055515999701E+00
+hartree             :  1.02872820971524E+00
+xc                  : -1.08907531961572E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.42726128741895E+00
+local_psp           : -4.42726128741878E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.82197202805273E+00
-total_energy_eV     : -7.67897640975255E+01
+total_energy        : -2.82197202805258E+00
+total_energy_eV     : -7.67897640975215E+01
 band_energy         : -1.04022566389648E+00
 ...
 
@@ -3680,7 +3680,7 @@ band_energy         : -1.04022566389648E+00
 
 ================================================================================
 == DATASET 25 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -3702,8 +3702,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3735,7 +3735,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8221956745956    -2.822E+00 5.133E-01 2.134E+02
+ ETOT  1  -2.8221956745959    -2.822E+00 5.133E-01 2.134E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.37908417E-05  sigma(3 2)=  0.00000000E+00
@@ -3809,14 +3809,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 25, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.80115072396415E+00
-hartree             :  1.02877380377434E+00
+hartree             :  1.02877380377432E+00
 xc                  : -1.08928010277820E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.42792130882560E+00
+local_psp           : -4.42792130882586E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.82219567459564E+00
-total_energy_eV     : -7.67958498294536E+01
+total_energy        : -2.82219567459591E+00
+total_energy_eV     : -7.67958498294610E+01
 band_energy         : -1.04093715337776E+00
 ...
 
@@ -3833,7 +3833,7 @@ band_energy         : -1.04093715337776E+00
 
 ================================================================================
 == DATASET 26 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -3855,8 +3855,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3888,7 +3888,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8217467629122    -2.822E+00 5.131E-01 2.046E+02
+ ETOT  1  -2.8217467629121    -2.822E+00 5.131E-01 2.046E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.32113014E-05  sigma(3 2)=  0.00000000E+00
@@ -3962,14 +3962,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 26, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.80060498197340E+00
-hartree             :  1.02869236224720E+00
+hartree             :  1.02869236224719E+00
 xc                  : -1.08880343404481E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.42732188235763E+00
+local_psp           : -4.42732188235753E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.82174676291217E+00
-total_energy_eV     : -7.67836343213153E+01
+total_energy        : -2.82174676291209E+00
+total_energy_eV     : -7.67836343213132E+01
 band_energy         : -1.04048880272737E+00
 ...
 
@@ -3986,7 +3986,7 @@ band_energy         : -1.04048880272737E+00
 
 ================================================================================
 == DATASET 28 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -4008,8 +4008,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4041,12 +4041,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8221768398286    -2.822E+00 5.069E-01 1.229E+02
+ ETOT  1  -2.8221768398324    -2.822E+00 5.069E-01 1.229E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.52059652E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.52059652E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.52059652E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.52059661E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.52059661E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.52059661E-05  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -4069,9 +4069,9 @@ etotal    :  -2.82217684E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.21312015E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.52059652E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -1.52059652E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -1.52059652E-05, ]
+- [ -1.52059661E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.52059661E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.52059661E-05, ]
 pressure_GPa:   4.4737E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -4114,32 +4114,32 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 28, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.78243421074646E+00
-hartree             :  1.02375038344038E+00
-xc                  : -1.08670883815697E+00
+kinetic             :  2.78243421107497E+00
+hartree             :  1.02375038365378E+00
+xc                  : -1.08670883826713E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.40673380512810E+00
+local_psp           : -4.40673380556369E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.82217683982858E+00
-total_energy_eV     : -7.67953373093771E+01
-band_energy         : -1.04262402964749E+00
+total_energy        : -2.82217683983239E+00
+total_energy_eV     : -7.67953373094810E+01
+band_energy         : -1.04262402964503E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.52059652E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.52059652E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.52059652E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.52059661E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.52059661E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.52059661E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  4.4737E-01 GPa]
-- sigma(1 1)= -4.47374867E-01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -4.47374867E-01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -4.47374867E-01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -4.47374893E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.47374893E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.47374893E-01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 29 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -4161,8 +4161,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4194,7 +4194,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8157054674357    -2.816E+00 5.117E-01 1.835E+02
+ ETOT  1  -2.8157054674358    -2.816E+00 5.117E-01 1.835E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.41165184E-05  sigma(3 2)=  0.00000000E+00
@@ -4267,15 +4267,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 29, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.79375658153817E+00
-hartree             :  1.02704238689704E+00
+kinetic             :  2.79375658153816E+00
+hartree             :  1.02704238689705E+00
 xc                  : -1.08183273660645E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.41975290853415E+00
+local_psp           : -4.41975290853421E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81570546743573E+00
-total_energy_eV     : -7.66192423110945E+01
+total_energy        : -2.81570546743579E+00
+total_energy_eV     : -7.66192423110960E+01
 band_energy         : -1.03980773481861E+00
 ...
 
@@ -4292,7 +4292,7 @@ band_energy         : -1.03980773481861E+00
 
 ================================================================================
 == DATASET 30 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -4314,8 +4314,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4347,7 +4347,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8157054674357    -2.816E+00 5.117E-01 1.835E+02
+ ETOT  1  -2.8157054674358    -2.816E+00 5.117E-01 1.835E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.41165184E-05  sigma(3 2)=  0.00000000E+00
@@ -4420,15 +4420,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 30, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.79375658153817E+00
-hartree             :  1.02704238689704E+00
-xc                  : -1.08183273660646E+00
+kinetic             :  2.79375658153816E+00
+hartree             :  1.02704238689705E+00
+xc                  : -1.08183273660645E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.41975290853415E+00
+local_psp           : -4.41975290853421E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81570546743573E+00
-total_energy_eV     : -7.66192423110945E+01
+total_energy        : -2.81570546743579E+00
+total_energy_eV     : -7.66192423110961E+01
 band_energy         : -1.03980773481861E+00
 ...
 
@@ -4445,7 +4445,7 @@ band_energy         : -1.03980773481861E+00
 
 ================================================================================
 == DATASET 31 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -4467,8 +4467,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4500,7 +4500,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.9073433879385    -2.907E+00 5.110E-01 3.209E+03
+ ETOT  1  -2.9073433879386    -2.907E+00 5.110E-01 3.209E+03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.99776074E-04  sigma(3 2)=  0.00000000E+00
@@ -4574,14 +4574,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 31, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.79955201751090E+00
-hartree             :  1.02700540397933E+00
+hartree             :  1.02700540397935E+00
 xc                  : -1.17441839200987E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.42456362668858E+00
+local_psp           : -4.42456362668867E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.90734338793855E+00
-total_energy_eV     : -7.91128369420287E+01
+total_energy        : -2.90734338793862E+00
+total_energy_eV     : -7.91128369420307E+01
 band_energy         : -1.11211784409498E+00
 ...
 
@@ -4598,7 +4598,7 @@ band_energy         : -1.11211784409498E+00
 
 ================================================================================
 == DATASET 32 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -4620,8 +4620,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4653,12 +4653,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8135566618675    -2.814E+00 5.141E-01 5.013E+02
+ ETOT  1  -2.8135566618749    -2.814E+00 5.141E-01 5.013E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.24077739E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.24077739E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.24077739E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.24077748E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.24077748E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.24077748E-05  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
@@ -4681,9 +4681,9 @@ etotal    :  -2.81355666E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.19215802E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -4.24077739E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -4.24077739E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -4.24077739E-05, ]
+- [ -4.24077748E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -4.24077748E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -4.24077748E-05, ]
 pressure_GPa:   1.2477E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
@@ -4726,32 +4726,32 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 32, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.79693915835940E+00
-hartree             :  1.02736661837024E+00
-xc                  : -1.07959497587164E+00
+kinetic             :  2.79693915869368E+00
+hartree             :  1.02736661859298E+00
+xc                  : -1.07959497598761E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.42334867199517E+00
+local_psp           : -4.42334867244366E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.81355666186750E+00
-total_energy_eV     : -7.65607703379368E+01
-band_energy         : -1.03843160453909E+00
+total_energy        : -2.81355666187494E+00
+total_energy_eV     : -7.65607703381393E+01
+band_energy         : -1.03843160453715E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -4.24077739E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -4.24077739E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -4.24077739E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -4.24077748E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -4.24077748E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -4.24077748E-05  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.2477E+00 GPa]
-- sigma(1 1)= -1.24767958E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -1.24767958E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -1.24767958E+00  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)= -1.24767960E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -1.24767960E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -1.24767960E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 33 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -4773,8 +4773,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4879,12 +4879,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 33, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.78750700847520E+00
-hartree             :  1.02471494212442E+00
+kinetic             :  2.78750700847519E+00
+hartree             :  1.02471494212439E+00
 xc                  : -1.16081829300487E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.41098098707559E+00
+local_psp           : -4.41098098707555E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -2.89449612021117E+00
 total_energy_eV     : -7.87632450083469E+01
@@ -4904,7 +4904,7 @@ band_energy         : -1.09541220736336E+00
 
 ================================================================================
 == DATASET 35 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -4926,8 +4926,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5032,15 +5032,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 35, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.76056912375454E+00
-hartree             :  1.01904029658994E+00
-xc                  : -1.09571680636152E+00
+kinetic             :  2.76056912375453E+00
+hartree             :  1.01904029658995E+00
+xc                  : -1.09571680636151E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.38139593212720E+00
+local_psp           : -4.38139593212723E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.83242210887458E+00
-total_energy_eV     : -7.70741252581369E+01
+total_energy        : -2.83242210887460E+00
+total_energy_eV     : -7.70741252581374E+01
 band_energy         : -1.05577608575345E+00
 ...
 
@@ -5057,7 +5057,7 @@ band_energy         : -1.05577608575345E+00
 
 ================================================================================
 == DATASET 36 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -5079,8 +5079,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5112,7 +5112,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.9204225834670    -1.920E+00 6.119E-01 1.538E+05
+ ETOT  1  -1.9204225834671    -1.920E+00 6.119E-01 1.538E+05
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.95653785E-03  sigma(3 2)=  0.00000000E+00
@@ -5186,14 +5186,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 36, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.46014110459896E+00
-hartree             :  3.24401146231767E-01
-xc                  : -1.07614894447776E+00
+hartree             :  3.24401146231751E-01
+xc                  : -1.07614894447775E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -2.49389709908965E+00
+local_psp           : -2.49389709908969E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.92042258346702E+00
-total_energy_eV     : -5.22573560921339E+01
+total_energy        : -1.92042258346707E+00
+total_energy_eV     : -5.22573560921352E+01
 band_energy         : -1.60304416255589E+00
 ...
 
@@ -5210,7 +5210,7 @@ band_energy         : -1.60304416255589E+00
 
 ================================================================================
 == DATASET 37 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -5232,8 +5232,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5265,7 +5265,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8571150190988    -2.857E+00 5.016E-01 1.476E+02
+ ETOT  1  -2.8571150190986    -2.857E+00 5.016E-01 1.476E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.01025250E-05  sigma(3 2)=  0.00000000E+00
@@ -5338,15 +5338,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 37, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.76163356238361E+00
+kinetic             :  2.76163356238360E+00
 hartree             :  1.01589396671645E+00
 xc                  : -1.11771183020445E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.38201192726409E+00
+local_psp           : -4.38201192726386E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.85711501909882E+00
-total_energy_eV     : -7.77460535168691E+01
+total_energy        : -2.85711501909860E+00
+total_energy_eV     : -7.77460535168631E+01
 band_energy         : -1.09090232597754E+00
 ...
 
@@ -5363,7 +5363,7 @@ band_energy         : -1.09090232597754E+00
 
 ================================================================================
 == DATASET 38 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -5385,8 +5385,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5491,15 +5491,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 38, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.76246776444118E+00
-hartree             :  1.01905971775930E+00
+kinetic             :  2.76246776444119E+00
+hartree             :  1.01905971775926E+00
 xc                  : -1.09748317339609E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.38316171437751E+00
+local_psp           : -4.38316171437744E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.83403619630345E+00
-total_energy_eV     : -7.71180468107475E+01
+total_energy        : -2.83403619630341E+00
+total_energy_eV     : -7.71180468107465E+01
 band_energy         : -1.06085490319113E+00
 ...
 
@@ -5516,7 +5516,7 @@ band_energy         : -1.06085490319113E+00
 
 ================================================================================
 == DATASET 44 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -5538,8 +5538,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5571,7 +5571,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.7966344729145    -2.797E+00 4.940E-01 7.429E+02
+ ETOT  1  -2.7966344729146    -2.797E+00 4.940E-01 7.429E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.13784794E-05  sigma(3 2)=  0.00000000E+00
@@ -5645,14 +5645,14 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 44, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.73004964828201E+00
-hartree             :  9.96969986558039E-01
+hartree             :  9.96969986558036E-01
 xc                  : -1.04767433968805E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.34106097733614E+00
+local_psp           : -4.34106097733623E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.79663447291448E+00
-total_energy_eV     : -7.61002941585846E+01
+total_energy        : -2.79663447291457E+00
+total_energy_eV     : -7.61002941585871E+01
 band_energy         : -1.01666181766761E+00
 ...
 
@@ -5669,7 +5669,7 @@ band_energy         : -1.01666181766761E+00
 
 ================================================================================
 == DATASET 45 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -5691,8 +5691,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5724,7 +5724,7 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.8219827005082    -2.822E+00 4.938E-01 1.423E+03
+ ETOT  1  -2.8219827005080    -2.822E+00 4.938E-01 1.423E+03
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.52276202E-04  sigma(3 2)=  0.00000000E+00
@@ -5797,15 +5797,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 45, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.74797760074414E+00
-hartree             :  1.00466510420772E+00
+kinetic             :  2.74797760074412E+00
+hartree             :  1.00466510420774E+00
 xc                  : -1.07787202289847E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.36183459183121E+00
+local_psp           : -4.36183459183103E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -2.82198270050816E+00
-total_energy_eV     : -7.67900545098069E+01
+total_energy        : -2.82198270050798E+00
+total_energy_eV     : -7.67900545098020E+01
 band_energy         : -1.03674225738573E+00
 ...
 
@@ -5822,7 +5822,7 @@ band_energy         : -1.03674225738573E+00
 
 ================================================================================
 == DATASET 46 ==================================================================
--   mpi_nproc: 1, omp_nthreads: 8 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -5844,8 +5844,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /Users/torrentm/WORK/ABINIT/GIT/libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5951,15 +5951,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 46, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.75699029803863E+00
-hartree             :  1.01233058847127E+00
+hartree             :  1.01233058847129E+00
 xc                  : -1.35826807309527E+00
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -4.37701126083149E+00
+local_psp           : -4.37701126083151E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -3.10087723814718E+00
 total_energy_eV     : -8.43791608299596E+01
-band_energy         : -1.34143905467916E+00
+band_energy         : -1.34143905467915E+00
 ...
 
 
@@ -5998,7 +5998,7 @@ band_energy         : -1.34143905467916E+00
            etotal14   -2.7935150483E+00
            etotal15   -2.7175557855E+00
            etotal16   -1.8760619691E+00
-           etotal17   -2.8036450681E+00
+           etotal17   -2.8036450682E+00
            etotal23   -2.8313661244E+00
            etotal24   -2.8219720281E+00
            etotal25   -2.8221956746E+00
@@ -6110,45 +6110,45 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2    -1.7098911551E-04 -1.7098911551E-04 -1.7098911551E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3    -1.6528033195E-04 -1.6528033195E-04 -1.6528033195E-04
+           strten3    -1.6528033196E-04 -1.6528033196E-04 -1.6528033196E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4    -1.6528033195E-04 -1.6528033195E-04 -1.6528033195E-04
+           strten4    -1.6528033196E-04 -1.6528033196E-04 -1.6528033196E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten5    -1.6528033195E-04 -1.6528033195E-04 -1.6528033195E-04
+           strten5    -1.6528033196E-04 -1.6528033196E-04 -1.6528033196E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten6    -1.6528033195E-04 -1.6528033195E-04 -1.6528033195E-04
+           strten6    -1.6528033196E-04 -1.6528033196E-04 -1.6528033196E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten7     6.1841841840E-05  6.1841841840E-05  6.1841841840E-05
+           strten7     6.1841841841E-05  6.1841841841E-05  6.1841841841E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten8     2.2117267164E-04  2.2117267164E-04  2.2117267164E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten9     2.3722250429E-04  2.3722250429E-04  2.3722250429E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten10    2.6196643882E-05  2.6196643882E-05  2.6196643882E-05
+           strten10    2.6196643881E-05  2.6196643881E-05  2.6196643881E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten11   -4.3465227474E-05 -4.3465227474E-05 -4.3465227474E-05
+           strten11   -4.3465227472E-05 -4.3465227472E-05 -4.3465227472E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten12   -2.2052970533E-04 -2.2052970533E-04 -2.2052970533E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten13   -2.7144633347E-05 -2.7144633347E-05 -2.7144633347E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten14    3.3777816870E-06  3.3777816870E-06  3.3777816870E-06
+           strten14    3.3777816641E-06  3.3777816641E-06  3.3777816641E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten15   -4.6718779690E-05 -4.6718779690E-05 -4.6718779690E-05
+           strten15   -4.6718779689E-05 -4.6718779689E-05 -4.6718779689E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten16   -5.1654144376E-04 -5.1654144376E-04 -5.1654144376E-04
+           strten16   -5.1654144377E-04 -5.1654144377E-04 -5.1654144377E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten17    9.2602516935E-06  9.2602516935E-06  9.2602516935E-06
+           strten17    9.2602516181E-06  9.2602516181E-06  9.2602516181E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten23   -3.1015875678E-05 -3.1015875678E-05 -3.1015875678E-05
+           strten23   -3.1015875677E-05 -3.1015875677E-05 -3.1015875677E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten24   -3.2871399537E-05 -3.2871399537E-05 -3.2871399537E-05
+           strten24   -3.2871399538E-05 -3.2871399538E-05 -3.2871399538E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten25   -3.3790841746E-05 -3.3790841746E-05 -3.3790841746E-05
+           strten25   -3.3790841744E-05 -3.3790841744E-05 -3.3790841744E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten26   -3.3211301421E-05 -3.3211301421E-05 -3.3211301421E-05
+           strten26   -3.3211301422E-05 -3.3211301422E-05 -3.3211301422E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten28   -1.5205965223E-05 -1.5205965223E-05 -1.5205965223E-05
+           strten28   -1.5205966097E-05 -1.5205966097E-05 -1.5205966097E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten29   -2.4116518399E-05 -2.4116518399E-05 -2.4116518399E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6156,19 +6156,19 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten31    1.9977607362E-04  1.9977607362E-04  1.9977607362E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten32   -4.2407773936E-05 -4.2407773936E-05 -4.2407773936E-05
+           strten32   -4.2407774824E-05 -4.2407774824E-05 -4.2407774824E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten33    1.6566575144E-04  1.6566575144E-04  1.6566575144E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten35    4.8822701558E-05  4.8822701558E-05  4.8822701558E-05
+           strten35    4.8822701559E-05  4.8822701559E-05  4.8822701559E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten36   -1.9565378509E-03 -1.9565378509E-03 -1.9565378509E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten37   -2.0102525005E-05 -2.0102525005E-05 -2.0102525005E-05
+           strten37   -2.0102525007E-05 -2.0102525007E-05 -2.0102525007E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten38    7.2074880596E-05  7.2074880596E-05  7.2074880596E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten44    4.1378479397E-05  4.1378479397E-05  4.1378479397E-05
+           strten44    4.1378479398E-05  4.1378479398E-05  4.1378479398E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten45    1.5227620239E-04  1.5227620239E-04  1.5227620239E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6293,10 +6293,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         14.4  wall=         13.8
+- Proc.   0 individual time (sec): cpu=         17.5  wall=         33.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  79 WARNINGs and 136 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.4  wall=         13.8
+.Delivered  77 WARNINGs and 136 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.5  wall=         33.6
