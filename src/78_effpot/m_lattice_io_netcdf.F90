@@ -63,6 +63,7 @@ module m_lattice_harmonic_primitive_potential
                                  !  The indices are (ind_R, i, j). Note that xyz is included in i and j.
      integer, allocatable :: Rlist(:,:) ! The list of R points (3, number of R-points)
                                         !. Rlist(:, ind_R) is a R-vector.
+     real(dp) :: ref_energy=0.0                  ! reference energy
    contains
      procedure:: initialize
      procedure:: finalize
@@ -131,6 +132,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: ncid, ierr
     integer :: iR, nR, natom, natom3
+    real(dp) :: ref_energy
     real(dp) :: cell(3,3)
     real(dp), allocatable :: xcart(:,:), masses(:)
     integer, allocatable :: zion(:)
@@ -153,6 +155,12 @@ contains
     ABI_ALLOCATE(self%Rlist,(3, nR))
 
 
+    ierr =nf90_inq_varid(ncid, "ref_energy", varid)
+    NCF_CHECK_MSG(ierr, "ref_energy")
+    ierr = nf90_get_var(ncid, varid, masses)
+    NCF_CHECK_MSG(ierr, "ref_energy")
+
+
     ierr =nf90_inq_varid(ncid, "ref_masses", varid)
     NCF_CHECK_MSG(ierr, "ref_masses")
     ierr = nf90_get_var(ncid, varid, masses)
@@ -173,11 +181,14 @@ contains
     ierr = nf90_get_var(ncid, varid, zion)
     NCF_CHECK_MSG(ierr, "ref_zion")
 
+    ! Unit conversions
+    ref_energy = ref_energy * eV_Ha
     masses(:)  = masses(:) * amu_emass
     cell(:,:) = cell(:,:) / Bohr_Ang
     xcart(:,:) = xcart(:,:) /Bohr_Ang
 
     self%natom=natom
+    self%ref_energy=ref_energy
     call self%primcell%set_lattice(natom, cell, xcart, masses, zion)
 
     call self%coeff%initialize([ nR, natom3, natom3 ])
@@ -281,6 +292,8 @@ contains
              call scpot%add_term(ilist_sc(icell), jlist_sc(icell), val )
           end do
        end do
+
+       call scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
 
        ! Test the phonon energy
        !call COO_to_dense(scpot%coeff, real_sc_evecs)

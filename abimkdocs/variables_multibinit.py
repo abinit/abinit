@@ -1369,13 +1369,13 @@ Variable(
     abivarname="slc_coupling@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['SpinLatticeCoupling'],
+    topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="SpinLatticeCoupling_Coupling",
-    added_in_version="v9",
+    added_in_version="9.0.0",
     text=r"""
-Which coupling terms are used in the calculation, different terms can be combined in a binary fashion, i.e. 1010 turns on all terms quadratic in spin.
+Which spin-lattice coupling terms are used in the calculation, different terms can be combined in a binary fashion, i.e. 1010 turns on all terms quadratic in spin.
 
 * 0    --> No coupling.
 

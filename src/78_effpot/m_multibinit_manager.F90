@@ -518,6 +518,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
 
     character(len=90) :: msg
+
+    real(dp), allocatable :: Htmp(:,:)
     real(dp) :: etotal
     integer :: i
 
@@ -529,6 +531,13 @@ contains
 
     ! calculate various quantities for reference spin structure
     do i =1, self%pots%size
+      select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for spin_potential are used
+      type is (spin_potential_t) 
+        ABI_ALLOCATE(Htmp, (3,scpot%nspin))
+        call scpot%get_Heff(scpot%supercell%spin%Sref, Htmp, scpot%eref)
+        ABI_DEALLOCATE(Htmp)
+      end select
+
       select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for slc_potential are used
       type is (slc_potential_t) 
         call scpot%calculate_ref()

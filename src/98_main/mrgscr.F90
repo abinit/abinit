@@ -78,8 +78,7 @@ program mrgscr
  use m_geometry,            only : normv, metric
  use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
  use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
- use m_vcoul_dt
- use m_vcoul,               only : vcoul_init, vcoul_free
+ use m_vcoul,               only : vcoul_t, vcoul_init, vcoul_free
  use m_ioarr,               only : read_rhor
  use m_io_screening,        only : hscr_print, read_screening, hscr_free, hscr_t, hscr_from_file,&
                                    ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove

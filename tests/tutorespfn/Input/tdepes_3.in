@@ -61,7 +61,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [files]
 #%% files_to_test = 
 #%%   tdepes_3.out,  tolnlines= 30, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium

@@ -40,7 +40,7 @@ MODULE m_ppmodel
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul_dt
+ use m_vcoul,          only : vcoul_t
  use m_qplusg,         only : cmod_qpg
  use m_fft_mesh,       only : g2ifft
  use m_fft,            only : fourdp
