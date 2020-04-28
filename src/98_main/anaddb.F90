@@ -94,13 +94,13 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
- integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr,ptgroupma,spgroup
+ integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
- integer :: bravais(11),rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
+ integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer :: count_wminmax(2)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli !,cpu, wall, gflops
- real(dp) :: epsinf(3,3),dielt_rlx(3,3),genafm(3)
+ real(dp) :: epsinf(3,3),dielt_rlx(3,3)
  real(dp) :: compl(6,6),compl_clamped(6,6),compl_stress(6,6)
  real(dp) :: elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: red_ptot(3),pel(3)

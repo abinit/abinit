@@ -169,7 +169,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      end if ! alignment of the phonon eigenvectors
 
 !    Compute the mode effective charge and oscillator strength
-     call ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid)
+     call ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid,my_rank)
 
 !      Calculation of epsilon_r (Eq.55 PRB 55, 10355)
 !      Check the acousticity of the three lowest modes, assuming
@@ -486,11 +486,11 @@ end subroutine ddb_diel_elec
 !!
 !! SOURCE
 
-subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid)
+subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid,my_rank)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iout,mpert,natom,ncid
+ integer,intent(in) :: iout,mpert,natom,ncid,my_rank
 !arrays
  real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
  real(dp),intent(in) :: phfrq(3*natom)
@@ -501,7 +501,7 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
 !scalars
  integer,parameter :: master=0
  integer :: i1,idir1,idir2,imode,ipert1
- integer :: my_rank,ncerr
+ integer :: ncerr
  real(dp) :: usquare
  logical :: t_degenerate
 !arrays
