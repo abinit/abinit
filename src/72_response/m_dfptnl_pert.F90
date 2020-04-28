@@ -70,6 +70,7 @@ module m_dfptnl_pert
 !!***
 
  public :: dfptnl_pert
+ public :: dfptnl_exc3
 !!***
 
 contains
@@ -957,8 +958,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 ! **************************************************************************************************
 !      Compute E_xc^(3) (NOTE : E_H^(3) = 0)
 ! **************************************************************************************************
-! This term is equal to the term "exc3" in pead_nl_loop.F90. However, we treat the nonlinear xc core correction in
-! a slightly different way, in order to keep the symmetry between pert1,pert2 and pert3. It helps for debugging.
 
  call dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfftf,nfftotf,nspden,rho1r1,rho2r1,rho3r1,ucvol,xccc3d1,xccc3d2,xccc3d3)
 
@@ -1136,17 +1135,51 @@ end subroutine dfptnl_pert
 !! dfptnl_exc3
 !!
 !! FUNCTION
+!!   Compute the third-order xc energy.
+!!
+!!   Take into account the contribution of the term
+!!$
+!!   \frac{d}{d \lambda}
+!!   \frac{\delta^2 E_{Hxc}}{\delta n(r) \delta n(r\prim)}
+!!$
+!!   (seventh term of Eq. (110) of X. Gonze, PRA 52, 1096 (1995) [[cite:Gonze1995]]).
+!! 
+!!   The following is essentially the 4th and the 3rd terms of PRB 71,125107 [[cite:Veithen2005]].
+!!
+!!   However, we treat the nonlinear xc core correction in a slightly different way, 
+!!   in order to keep the symmetry between pert1,pert2 and pert3. It helps for debugging.
+!!
+!!   Namely, here we consider Exc as a functional depending on the TOTAL density (core+valence), 
+!!   so it does not depend explicitely on the perturbation, and the term given above is always zero.
+!!   The "lost" terms are recovered adding the derivative of the core densities for EVERY perturbations,
+!!   and not only to 'pert2', as in the first case.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2020 ABINIT group (LB)
+!! Copyright (C) 2020-2020 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
+!!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
+!!          if 2, COMPLEX
+!!  k3xc(nfftf,nk3xc)=third-order exchange-correlation kernel
+!!  mpi_enreg=MPI-parallelisation information
+!!  nk3xc=second dimension of the array k3xc
+!!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
+!!  nfftotf=total number of real space fine grid points
+!!  nspden = number of spin-density components
+!!  rho1r1(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3 (i1pert)
+!!  rho1r2(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3 (i2pert)
+!!  rho1r3(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3 (i3pert)
+!!  ucvol=volume of the unit cell
+!!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc (i1pert)
+!!  xccc3d2(cplex*n3xccc)=3D change in core charge density, see n3xccc (i2pert)
+!!  xccc3d3(cplex*n3xccc)=3D change in core charge density, see n3xccc (i3pert)
 !!
 !! OUTPUT
+!!  exc3(2)=real and imaginray part of the exchange correlation energy term
 !!
 !! SIDE EFFECTS
 !!
@@ -1226,11 +1259,11 @@ subroutine dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfftf,nfftotf,nspden,rho1
 !                      uuu                          uud
        xc_tmp(ifft,1)= k3xc(ifft,1)*rho2ur*rho3ur + k3xc(ifft,2)*rho2ur*rho3dr + &
 !                      udu                          udd
-&       k3xc(ifft,2)*rho2dr*rho3ur + k3xc(ifft,3)*rho2dr*rho3dr
+&                      k3xc(ifft,2)*rho2dr*rho3ur + k3xc(ifft,3)*rho2dr*rho3dr
 !                      duu                          dud
        xc_tmp(ifft,2)= k3xc(ifft,2)*rho2ur*rho3ur + k3xc(ifft,3)*rho2ur*rho3dr + &
 !                      ddu                          ddd
-&       k3xc(ifft,3)*rho2dr*rho3ur + k3xc(ifft,4)*rho2dr*rho3dr
+&                      k3xc(ifft,3)*rho2dr*rho3ur + k3xc(ifft,4)*rho2dr*rho3dr
      end do
 
    else ! cplex = 2
@@ -1254,20 +1287,20 @@ subroutine dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfftf,nfftotf,nspden,rho1
 !                         uuu                                          uud
        xc_tmp(ifft_re,1)= k3xc(ifft,1)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,2)*(rho2ur*rho3dr-rho2ui*rho3di) + &
 !                         udu                                          udd
-&       k3xc(ifft,2)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,3)*(rho2dr*rho3dr-rho2di*rho3di)
+&                         k3xc(ifft,2)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,3)*(rho2dr*rho3dr-rho2di*rho3di)
 !                         duu                                          dud
        xc_tmp(ifft_re,2)= k3xc(ifft,2)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,3)*(rho2ur*rho3dr-rho2ui*rho3di) + &
 !                         ddu                                          ddd
-&       k3xc(ifft,3)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,4)*(rho2dr*rho3dr-rho2di*rho3di)
+&                         k3xc(ifft,3)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,4)*(rho2dr*rho3dr-rho2di*rho3di)
 !      Imaginary part:
 !                         uuu                                          uud
        xc_tmp(ifft_im,1)= k3xc(ifft,1)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,2)*(rho2ur*rho3di+rho2ui*rho3dr) + &
 !                         udu                                          udd
-&       k3xc(ifft,2)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,3)*(rho2dr*rho3di+rho2di*rho3dr)
+&                         k3xc(ifft,2)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,3)*(rho2dr*rho3di+rho2di*rho3dr)
 !                         duu                                          dud
        xc_tmp(ifft_im,2)= k3xc(ifft,2)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,3)*(rho2ur*rho3di+rho2ui*rho3dr) + &
 !                         ddu                                          ddd
-&       k3xc(ifft,3)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,4)*(rho2dr*rho3di+rho2di*rho3dr)
+&                         k3xc(ifft,3)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,4)*(rho2dr*rho3di+rho2di*rho3dr)
      end do
 
    end if
