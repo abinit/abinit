@@ -1094,6 +1094,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,1,(/0/),iout)
    end if
 
+   ! icsing
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icsing,6,(/3,6,7,14,15,16/),iout)
+
+   ! icutcoul
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,8,(/0,1,2,3,4,5,6,7/),iout)
+
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1
