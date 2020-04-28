@@ -1582,12 +1582,12 @@ end function libxc_functionals_nspin
 !      ----- LDA -----
        if (xc_funcs(ii)%family==XC_FAMILY_LDA) then
          if (nspden==1) then
-           if(abs(order)>=2) then
+           if(order>=2) then
              dvxc(ipts,1)=dvxc(ipts,1)+v2rho2(1)
-             if(abs(order)>2) then
+             if(order>2) then
                d2vxc(ipts,1)=d2vxc(ipts,1)+v3rho3(1)
              endif
-           else
+           else if (order==-2) then
              dvxc(ipts,1)=dvxc(ipts,1)+v2rho2(1)
              dvxc(ipts,2)=dvxc(ipts,2)+v2rho2(1)
            endif
