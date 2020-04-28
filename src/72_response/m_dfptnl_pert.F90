@@ -255,12 +255,11 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  integer,parameter :: level=52,tim_nonlop=0
  integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,iband,icg0,ider,ierr
  integer :: idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,ipert_elfd
- integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ifft,ifft_re,ifft_im,ilm,isppol,istwf_k,jband
+ integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ilm,isppol,istwf_k,jband
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
  integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,qphase_rhoij,debug_mode
  integer :: signs,size_wf,size_cprj,spaceComm,typat_ipert_phon,usepaw,useylmgr1
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,e3tot,lagi,lagi_paw,lagr,lagr_paw
- real(dp) :: rho2ur,rho2ui,rho2dr,rho2di,rho3ur,rho3ui,rho3dr,rho3di
  real(dp) :: sumi,sum_psi1H1psi1,sum_psi1H1psi1_i
  real(dp) :: sum_lambda1psi1psi1,sum_lambda1psi1psi1_i
  real(dp) :: sum_psi0H2psi1a,sum_psi0H2psi1a_i,sum_psi0H2psi1b,sum_psi0H2psi1b_i
@@ -276,11 +275,10 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  real(dp),allocatable :: chi_ij(:,:,:,:),cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),allocatable :: h_cwave(:,:),iddk(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:),nhat21(:,:),occ_k(:)
- real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),rho1r1_tot(:,:),s_cwave(:,:)
+ real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),s_cwave(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal1_i2pert(:,:,:,:),v_i2pert(:,:),wfraug(:,:,:,:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:)
- real(dp),allocatable :: xc_tmp(:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:),cwaveprj1(:,:)
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),allocatable,target :: cprj_jband(:,:)
@@ -962,103 +960,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 ! This term is equal to the term "exc3" in pead_nl_loop.F90. However, we treat the nonlinear xc core correction in
 ! a slightly different way, in order to keep the symmetry between pert1,pert2 and pert3. It helps for debugging.
 
- ABI_ALLOCATE(xc_tmp,(cplex*nfftf,nspden))
- ABI_ALLOCATE(rho1r1_tot,(cplex*nfftf,nspden))
- if (nspden==1)then
-
-   if (cplex==1) then
-     do ifft=1,nfftf
-       rho1r1_tot(ifft,1) = rho1r1(ifft,1) + xccc3d1(ifft)
-       rho2ur = rho2r1(ifft,1)+xccc3d2(ifft)
-       rho3ur = rho3r1(ifft,1)+xccc3d3(ifft)
-       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2ur*rho3ur
-     end do
-   else
-     do ifft=1,nfftf
-       ifft_re = 2*ifft-1 ! Real part
-       ifft_im = 2*ifft   ! Imaginary part
-       rho1r1_tot(ifft_re,1) = rho1r1(ifft_re,1) + xccc3d1(ifft_re)
-       rho1r1_tot(ifft_im,1) = rho1r1(ifft_im,1) + xccc3d1(ifft_im)
-       rho2ur = rho2r1(ifft_re,1)+xccc3d2(ifft_re)
-       rho2ui = rho2r1(ifft_im,1)+xccc3d2(ifft_im)
-       rho3ur = rho3r1(ifft_re,1)+xccc3d3(ifft_re)
-       rho3ui = rho3r1(ifft_im,1)+xccc3d3(ifft_im)
-       xc_tmp(ifft_re,1)= k3xc(ifft,1)*(rho2ur*rho3ur-rho2ui*rho3ui)
-       xc_tmp(ifft_im,1)= k3xc(ifft,1)*(rho2ur*rho3ui+rho2ui*rho3ur)
-     end do
-   end if
-
- else if (nspden==2) then
-
-!  Remember : rhor(...,1) = total density  ( n_up(r) + n_down(r) )
-!             rhor(...,2) =    up density  ( n_up(r) )
-!       But :  pot(...,1) =   up potential ( v_up(r) )
-!              pot(...,2) = down potential ( v_down(r) )
-
-   if (cplex==1) then
-     do ifft=1,nfftf
-       rho1r1_tot(ifft,1) = rho1r1(ifft,1)    + xccc3d1(ifft)      ! 1 tot
-       rho1r1_tot(ifft,2) = rho1r1(ifft,2)    + xccc3d1(ifft)*half ! 1 up
-       rho2ur = rho2r1(ifft,2)                + xccc3d2(ifft)*half ! 2 up
-       rho2dr = rho2r1(ifft,1)-rho2r1(ifft,2) + xccc3d2(ifft)*half ! 2 down
-       rho3ur = rho3r1(ifft,2)                + xccc3d3(ifft)*half ! 3 up
-       rho3dr = rho3r1(ifft,1)-rho3r1(ifft,2) + xccc3d3(ifft)*half ! 3 down
-!                      uuu                          uud
-       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2ur*rho3ur + k3xc(ifft,2)*rho2ur*rho3dr + &
-!                      udu                          udd
-&       k3xc(ifft,2)*rho2dr*rho3ur + k3xc(ifft,3)*rho2dr*rho3dr
-!                      duu                          dud
-       xc_tmp(ifft,2)= k3xc(ifft,2)*rho2ur*rho3ur + k3xc(ifft,3)*rho2ur*rho3dr + &
-!                      ddu                          ddd
-&       k3xc(ifft,3)*rho2dr*rho3ur + k3xc(ifft,4)*rho2dr*rho3dr
-     end do
-
-   else ! cplex = 2
-
-     do ifft=1,nfftf
-       ifft_re = 2*ifft-1 ! Real part
-       ifft_im = 2*ifft   ! Imaginary part
-       rho1r1_tot(ifft_re,1) = rho1r1(ifft_re,1)    + xccc3d1(ifft_re)      ! 1 tot re
-       rho1r1_tot(ifft_im,1) = rho1r1(ifft_im,1)    + xccc3d1(ifft_im)      ! 1 tot im
-       rho1r1_tot(ifft_re,2) = rho1r1(ifft_re,2)    + xccc3d1(ifft_re)*half ! 1 up re
-       rho1r1_tot(ifft_im,2) = rho1r1(ifft_im,2)    + xccc3d1(ifft_im)*half ! 1 up im
-       rho2ur = rho2r1(ifft_re,2)                   + xccc3d2(ifft_re)*half ! 2 up re
-       rho2ur = rho2r1(ifft_im,2)                   + xccc3d2(ifft_im)*half ! 2 up im
-       rho2dr = rho2r1(ifft_re,1)-rho2r1(ifft_re,2) + xccc3d2(ifft_re)*half ! 2 down re
-       rho2dr = rho2r1(ifft_im,1)-rho2r1(ifft_im,2) + xccc3d2(ifft_im)*half ! 2 down im
-       rho3ur = rho3r1(ifft_re,2)                   + xccc3d3(ifft_re)*half ! 3 up re
-       rho3ur = rho3r1(ifft_im,2)                   + xccc3d3(ifft_im)*half ! 3 up im
-       rho3dr = rho3r1(ifft_re,1)-rho3r1(ifft_re,2) + xccc3d3(ifft_re)*half ! 3 down re
-       rho3dr = rho3r1(ifft_im,1)-rho3r1(ifft_im,2) + xccc3d3(ifft_im)*half ! 3 down im
-!      Real part:
-!                         uuu                                          uud
-       xc_tmp(ifft_re,1)= k3xc(ifft,1)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,2)*(rho2ur*rho3dr-rho2ui*rho3di) + &
-!                         udu                                          udd
-&       k3xc(ifft,2)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,3)*(rho2dr*rho3dr-rho2di*rho3di)
-!                         duu                                          dud
-       xc_tmp(ifft_re,2)= k3xc(ifft,2)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,3)*(rho2ur*rho3dr-rho2ui*rho3di) + &
-!                         ddu                                          ddd
-&       k3xc(ifft,3)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,4)*(rho2dr*rho3dr-rho2di*rho3di)
-!      Imaginary part:
-!                         uuu                                          uud
-       xc_tmp(ifft_im,1)= k3xc(ifft,1)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,2)*(rho2ur*rho3di+rho2ui*rho3dr) + &
-!                         udu                                          udd
-&       k3xc(ifft,2)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,3)*(rho2dr*rho3di+rho2di*rho3dr)
-!                         duu                                          dud
-       xc_tmp(ifft_im,2)= k3xc(ifft,2)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,3)*(rho2ur*rho3di+rho2ui*rho3dr) + &
-!                         ddu                                          ddd
-&       k3xc(ifft,3)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,4)*(rho2dr*rho3di+rho2di*rho3dr)
-     end do
-
-   end if
-
- else
-   MSG_BUG('DFPTNL_PERT is implemented only for nspden=1 or 2')
- end if
-
- call dotprod_vn(cplex,rho1r1_tot,exc3(1),exc3(2),nfftf,nfftotf,nspden,2,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
- ABI_DEALLOCATE(xc_tmp)
- ABI_DEALLOCATE(rho1r1_tot)
+ call dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfftf,nfftotf,nspden,rho1r1,rho2r1,rho3r1,ucvol,xccc3d1,xccc3d2,xccc3d3)
 
  exc3_paw = zero
  if (usepaw==1) then
@@ -1227,6 +1129,160 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  DBG_EXIT("COLL")
 
 end subroutine dfptnl_pert
+!!***
+
+!!****f* ABINIT/dfptnl_exc3
+!! NAME
+!! dfptnl_exc3
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2018-2020 ABINIT group (LB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfftf,nfftotf,nspden,rho1r1,rho2r1,rho3r1,ucvol,xccc3d1,xccc3d2,xccc3d3)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nk3xc,nfftf,nfftotf,nspden
+ real(dp),intent(in) :: ucvol
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+!arrays
+ real(dp),intent(in) :: k3xc(nfftf,nk3xc)
+ real(dp),intent(in) :: rho1r1(cplex*nfftf,nspden),rho2r1(cplex*nfftf,nspden),rho3r1(cplex*nfftf,nspden)
+ real(dp),intent(in) :: xccc3d1(cplex*nfftf),xccc3d2(cplex*nfftf),xccc3d3(cplex*nfftf)
+ real(dp),intent(out) :: exc3(2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ifft,ifft_im,ifft_re
+ real(dp) :: rho2ur,rho2ui,rho2dr,rho2di,rho3ur,rho3ui,rho3dr,rho3di
+! character(len=1000) :: msg
+!arrays
+ real(dp),allocatable :: rho1r1_tot(:,:),xc_tmp(:,:)
+
+!***********************************************************************
+
+ DBG_ENTER("COLL")
+
+ ABI_ALLOCATE(xc_tmp,(cplex*nfftf,nspden))
+ ABI_ALLOCATE(rho1r1_tot,(cplex*nfftf,nspden))
+ if (nspden==1)then
+
+   if (cplex==1) then
+     do ifft=1,nfftf
+       rho1r1_tot(ifft,1) = rho1r1(ifft,1) + xccc3d1(ifft)
+       rho2ur = rho2r1(ifft,1)+xccc3d2(ifft)
+       rho3ur = rho3r1(ifft,1)+xccc3d3(ifft)
+       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2ur*rho3ur
+     end do
+   else
+     do ifft=1,nfftf
+       ifft_re = 2*ifft-1 ! Real part
+       ifft_im = 2*ifft   ! Imaginary part
+       rho1r1_tot(ifft_re,1) = rho1r1(ifft_re,1) + xccc3d1(ifft_re)
+       rho1r1_tot(ifft_im,1) = rho1r1(ifft_im,1) + xccc3d1(ifft_im)
+       rho2ur = rho2r1(ifft_re,1)+xccc3d2(ifft_re)
+       rho2ui = rho2r1(ifft_im,1)+xccc3d2(ifft_im)
+       rho3ur = rho3r1(ifft_re,1)+xccc3d3(ifft_re)
+       rho3ui = rho3r1(ifft_im,1)+xccc3d3(ifft_im)
+       xc_tmp(ifft_re,1)= k3xc(ifft,1)*(rho2ur*rho3ur-rho2ui*rho3ui)
+       xc_tmp(ifft_im,1)= k3xc(ifft,1)*(rho2ur*rho3ui+rho2ui*rho3ur)
+     end do
+   end if
+
+ else if (nspden==2) then
+
+!  Remember : rhor(...,1) = total density  ( n_up(r) + n_down(r) )
+!             rhor(...,2) =    up density  ( n_up(r) )
+!       But :  pot(...,1) =   up potential ( v_up(r) )
+!              pot(...,2) = down potential ( v_down(r) )
+
+   if (cplex==1) then
+     do ifft=1,nfftf
+       rho1r1_tot(ifft,1) = rho1r1(ifft,1)    + xccc3d1(ifft)      ! 1 tot
+       rho1r1_tot(ifft,2) = rho1r1(ifft,2)    + xccc3d1(ifft)*half ! 1 up
+       rho2ur = rho2r1(ifft,2)                + xccc3d2(ifft)*half ! 2 up
+       rho2dr = rho2r1(ifft,1)-rho2r1(ifft,2) + xccc3d2(ifft)*half ! 2 down
+       rho3ur = rho3r1(ifft,2)                + xccc3d3(ifft)*half ! 3 up
+       rho3dr = rho3r1(ifft,1)-rho3r1(ifft,2) + xccc3d3(ifft)*half ! 3 down
+!                      uuu                          uud
+       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2ur*rho3ur + k3xc(ifft,2)*rho2ur*rho3dr + &
+!                      udu                          udd
+&       k3xc(ifft,2)*rho2dr*rho3ur + k3xc(ifft,3)*rho2dr*rho3dr
+!                      duu                          dud
+       xc_tmp(ifft,2)= k3xc(ifft,2)*rho2ur*rho3ur + k3xc(ifft,3)*rho2ur*rho3dr + &
+!                      ddu                          ddd
+&       k3xc(ifft,3)*rho2dr*rho3ur + k3xc(ifft,4)*rho2dr*rho3dr
+     end do
+
+   else ! cplex = 2
+
+     do ifft=1,nfftf
+       ifft_re = 2*ifft-1 ! Real part
+       ifft_im = 2*ifft   ! Imaginary part
+       rho1r1_tot(ifft_re,1) = rho1r1(ifft_re,1)    + xccc3d1(ifft_re)      ! 1 tot re
+       rho1r1_tot(ifft_im,1) = rho1r1(ifft_im,1)    + xccc3d1(ifft_im)      ! 1 tot im
+       rho1r1_tot(ifft_re,2) = rho1r1(ifft_re,2)    + xccc3d1(ifft_re)*half ! 1 up re
+       rho1r1_tot(ifft_im,2) = rho1r1(ifft_im,2)    + xccc3d1(ifft_im)*half ! 1 up im
+       rho2ur = rho2r1(ifft_re,2)                   + xccc3d2(ifft_re)*half ! 2 up re
+       rho2ur = rho2r1(ifft_im,2)                   + xccc3d2(ifft_im)*half ! 2 up im
+       rho2dr = rho2r1(ifft_re,1)-rho2r1(ifft_re,2) + xccc3d2(ifft_re)*half ! 2 down re
+       rho2dr = rho2r1(ifft_im,1)-rho2r1(ifft_im,2) + xccc3d2(ifft_im)*half ! 2 down im
+       rho3ur = rho3r1(ifft_re,2)                   + xccc3d3(ifft_re)*half ! 3 up re
+       rho3ur = rho3r1(ifft_im,2)                   + xccc3d3(ifft_im)*half ! 3 up im
+       rho3dr = rho3r1(ifft_re,1)-rho3r1(ifft_re,2) + xccc3d3(ifft_re)*half ! 3 down re
+       rho3dr = rho3r1(ifft_im,1)-rho3r1(ifft_im,2) + xccc3d3(ifft_im)*half ! 3 down im
+!      Real part:
+!                         uuu                                          uud
+       xc_tmp(ifft_re,1)= k3xc(ifft,1)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,2)*(rho2ur*rho3dr-rho2ui*rho3di) + &
+!                         udu                                          udd
+&       k3xc(ifft,2)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,3)*(rho2dr*rho3dr-rho2di*rho3di)
+!                         duu                                          dud
+       xc_tmp(ifft_re,2)= k3xc(ifft,2)*(rho2ur*rho3ur-rho2ui*rho3ui) + k3xc(ifft,3)*(rho2ur*rho3dr-rho2ui*rho3di) + &
+!                         ddu                                          ddd
+&       k3xc(ifft,3)*(rho2dr*rho3ur-rho2di*rho3ui) + k3xc(ifft,4)*(rho2dr*rho3dr-rho2di*rho3di)
+!      Imaginary part:
+!                         uuu                                          uud
+       xc_tmp(ifft_im,1)= k3xc(ifft,1)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,2)*(rho2ur*rho3di+rho2ui*rho3dr) + &
+!                         udu                                          udd
+&       k3xc(ifft,2)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,3)*(rho2dr*rho3di+rho2di*rho3dr)
+!                         duu                                          dud
+       xc_tmp(ifft_im,2)= k3xc(ifft,2)*(rho2ur*rho3ui+rho2ui*rho3ur) + k3xc(ifft,3)*(rho2ur*rho3di+rho2ui*rho3dr) + &
+!                         ddu                                          ddd
+&       k3xc(ifft,3)*(rho2dr*rho3ui+rho2di*rho3ur) + k3xc(ifft,4)*(rho2dr*rho3di+rho2di*rho3dr)
+     end do
+
+   end if
+
+ else
+   MSG_BUG('DFPTNL_PERT is implemented only for nspden=1 or 2')
+ end if
+
+ call dotprod_vn(cplex,rho1r1_tot,exc3(1),exc3(2),nfftf,nfftotf,nspden,2,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+ ABI_DEALLOCATE(xc_tmp)
+ ABI_DEALLOCATE(rho1r1_tot)
+
+ DBG_EXIT("COLL")
+
+end subroutine  dfptnl_exc3  
 !!***
 
 end module m_dfptnl_pert
