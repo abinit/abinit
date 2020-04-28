@@ -416,8 +416,9 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(ndvxc)) then
    ndvxc=0
    if (abs(order)>=2) then
-     if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
-       ndvxc=min(nspden,2);if (order==-2) ndvxc=2
+     if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
+&        ixc==21.or.ixc==22) then
+       ndvxc=min(nspden,2)+1  
      else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
