@@ -185,7 +185,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !scalars
  integer,parameter :: level=51
  integer :: ask_accurate,counter,cplex,formeig,i1dir
- integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,ifft,index,ir
+ integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,index,ir
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftot,nspden,option,optorth
  integer :: pert1case,pert2case,pert3case,rdwrpaw,timrev,comm_cell
  logical :: nmxc
@@ -479,7 +479,8 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    end if
 
 !                  Compute the third-order xc energy
-                   call dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfft,nfftot,dtset%nspden,rho1r1,rho2r1,rho3r1,ucvol,xccc3d1,xccc3d2,xccc3d3)
+                   call dfptnl_exc3(cplex,exc3,k3xc,mpi_enreg,nk3xc,nfft,nfftot,dtset%nspden,&
+&                   rho1r1,rho2r1,rho3r1,ucvol,xccc3d1,xccc3d2,xccc3d3)
 
 !                  Perform DFPT part of the 3dte calculation
 
