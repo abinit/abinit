@@ -1538,8 +1538,6 @@ end function libxc_functionals_nspin
        if (needs_laplacian) lrhotmp(1:nspden) = lrho(ipts,1:nspden)
      end if
    end if
-!TEST
- write(100,*) ipts,rhotmp,sigma
 
 !  Loop over functionals
    do ii = 1,2
