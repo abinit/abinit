@@ -42,32 +42,32 @@ pawecutdg  40
 
 # Dataset2: Calculation of the 1st PBE0-1/3 iteration
 optdriver2  4 
- icutcoul2 0   # Will use the spherical average
+ icsing2 0   # Will use the spherical average
      rcut2 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
 # Dataset3: Calculation of the 2nd PBE0-1/3 iteration
 optdriver3  4
    getqps3 -1
- icutcoul3 0   # Will use the spherical average
+ icsing3 0   # Will use the spherical average
      rcut3 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset4: Calculation of the 3rd PBE0-1/3 iteration
 optdriver4  4
    getqps4 -1
- icutcoul4 0   # Will use the spherical average
+ icsing4 0   # Will use the spherical average
      rcut4 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset5: Calculation of the 4th PBE0-1/3 iteration
 optdriver5  4
    getqps5 -1
- icutcoul5 0   # Will use the spherical average
+ icsing5 0   # Will use the spherical average
      rcut5 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset6: Calculation of the 5th PBE0-1/3 iteration
 optdriver6  4
    getqps6 -1
- icutcoul6 0   # Will use the spherical average
+ icsing6 0   # Will use the spherical average
      rcut6 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
@@ -84,7 +84,7 @@ optdriver9  4
 gwcalctyp9  0
    getscr9 -1
 gw_qprange9 0
- icutcoul9 0   # Will use the spherical average
+ icsing9 0   # Will use the spherical average
      rcut9 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 
@@ -99,7 +99,7 @@ optdriver11  4
 gwcalctyp11  20
    getqps11  6
    getscr11 -1
- icutcoul11 0   # Will use the spherical average
+ icsing11 0   # Will use the spherical average
      rcut11 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 # Dataset12: Computation of the dielectric matrix on top of scPBE0-1/3 in the planewave basis
@@ -116,7 +116,7 @@ gwcalctyp13  0
    getqps13  0
    getscr13 -1
 gw_qprange13 0
- icutcoul13 0   # Will use the spherical average
+ icsing13 0   # Will use the spherical average
      rcut13 -1.0d0  # A negative number actually activates the computation of rcut using the Spencer-Alavi value
 
 

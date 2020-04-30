@@ -339,7 +339,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  real(dp),intent(in) :: gsqcut
 ! REMEMBER to define the V_Coulomb type first before you uncomment this
 ! For the moment we will leave optional the choice of cut-off technique 
-! type(vcoul_type), intent(in), optional :: icutcoul 
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)

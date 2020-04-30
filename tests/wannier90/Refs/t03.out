@@ -229,13 +229,13 @@ _ WF disk file :      1.955 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
         gwcalctyp6         28
         gwcalctyp7          0
 -          gwpara           1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          6
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
-         icutcoul7          6
+         icsing1          6
+         icsing2          6
+         icsing3          6
+         icsing4          3
+         icsing5          6
+         icsing6          3
+         icsing7          6
              iscf1          7
              iscf2         -2
              iscf3          7
@@ -2375,13 +2375,13 @@ force_length_stats: {min: null, max: null, mean: null, }
         gwcalctyp6         28
         gwcalctyp7          0
 -          gwpara           1
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          6
-         icutcoul4          3
-         icutcoul5          6
-         icutcoul6          3
-         icutcoul7          6
+         icsing1          6
+         icsing2          6
+         icsing3          6
+         icsing4          3
+         icsing5          6
+         icsing6          3
+         icsing7          6
              iscf1          7
              iscf2         -2
              iscf3          7

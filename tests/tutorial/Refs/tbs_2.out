@@ -62,7 +62,7 @@ _ WF disk file :      2.174 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
           ecuteps      1.51277013E+00 Hartree
           ecutwfn      7.56385066E+00 Hartree
 -          fftalg         312
-         icutcoul           3
+         icsing           3
            irdscr           1
            irdwfk           1
               kpt      2.75000000E-02  5.25000000E-02  7.75000000E-02
@@ -437,7 +437,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-         icutcoul           3
+         icsing           3
            irdscr           1
            irdwfk           1
               kpt      2.75000000E-02  5.25000000E-02  7.75000000E-02

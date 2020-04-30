@@ -179,12 +179,12 @@ _ WF disk file :      0.023 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
            getwfk4         -3
            getwfk5         -4
            getwfk6         -5
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          3
-         icutcoul6          3
+         icsing1          6
+         icsing2          6
+         icsing3          3
+         icsing4          3
+         icsing5          3
+         icsing6          3
            jdtset        1    2    3    4    5    6
               kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00
@@ -1366,12 +1366,12 @@ data: !SigmaeeData |
            getwfk4         -3
            getwfk5         -4
            getwfk6         -5
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          3
-         icutcoul4          3
-         icutcoul5          3
-         icutcoul6          3
+         icsing1          6
+         icsing2          6
+         icsing3          3
+         icsing4          3
+         icsing5          3
+         icsing6          3
            jdtset        1    2    3    4    5    6
               kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00
                       -2.50000000E-01  0.00000000E+00  0.00000000E+00

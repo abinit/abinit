@@ -11,14 +11,14 @@ tolwfr1       1.0d-6
 optdriver2  4
 gwcalctyp2 25
 getwfk2     1
-icutcoul2   6
+icsing2   6
 
 
 # Dataset 3: Sigma calculation with a cutoff in Vcoul (Beigi's method)
 optdriver3  4
 gwcalctyp3 25
 getwfk3     1
-icutcoul3   0            # Spherical cutoff
+icsing3   0            # Spherical cutoff
 rcut3      -1.0
 
 # The following GW variable are meaningful only during the sigma run.

@@ -6809,7 +6809,12 @@ convergence can be accelerated by integrating accurately the zone in the neighbo
 [[icsing]] defines the particular expression to be used for such integration,
 in case [[icutcoul]]==3 (3-dimensional system).
   
-  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
+  * 1 --> cylinder (nanowires, nanotubes).
+  * 2 --> surface.
+  * 3 --> 3D crystal (Coulomb interaction without cut-off).
+  * 4 --> ERF, long-range only Coulomb interaction.
+  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
   * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
   * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]]. 
   * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.

@@ -64,7 +64,7 @@ bdgw
        1  2
        1  2
 
-icutcoul   3            # old deprecated value of icutcoul, only used for legacy
+icsing   3            # old deprecated value of icsing, only used for legacy
 
 
 ############################################################

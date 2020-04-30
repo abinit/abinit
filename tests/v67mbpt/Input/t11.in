@@ -31,7 +31,7 @@ symmorphi 0
 istwfk *1
 nstep  50      # Maximal number of SCF cycles
 diemac 12.0
-icutcoul 3      # For legacy reasons
+icsing 3      # For legacy reasons
 
 # Dataset1: self-consistent calculation
 # Definition of the k-point grid

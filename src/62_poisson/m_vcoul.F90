@@ -190,7 +190,7 @@ CONTAINS  !=====================================================================
 !!    %gprimd(3,3)=Dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!    %gvec=G vectors
 !!  rcut=Cutoff radius for the cylinder.
-!!  icutcoul=Option of the cutoff technique.
+!!  icsing=Option of the cutoff technique.
 !!  vcutgeo(3)= Info on the orientation and extension of the cutoff region.
 !!  ng=Number of G-vectors to be used to describe the Coulomb interaction
 !!  nqlwl=Number of point around Gamma for treatment of long-wavelength limit
@@ -211,11 +211,11 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,nqlwl,qlwl,ngfft,comm)
+subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icsing,vcutgeo,ecut,ng,nqlwl,qlwl,ngfft,comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ng,nqlwl,icutcoul,comm
+ integer,intent(in) :: ng,nqlwl,icsing,comm
  real(dp),intent(in) :: rcut, ecut
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(gsphere_t),intent(in) :: Gsph
@@ -280,17 +280,17 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
  !
  ! === Define geometry and cutoff radius (if used) ===
  Vcp%mode='NONE'
- if (icutcoul==14) Vcp%mode='MINIBZ-ERF'
- if (icutcoul==15) Vcp%mode='MINIBZ-ERFC'
- if (icutcoul==16) Vcp%mode='MINIBZ'
- if (icutcoul==0) Vcp%mode='SPHERE'
- if (icutcoul==1) Vcp%mode='CYLINDER'
- if (icutcoul==2) Vcp%mode='SURFACE'
- if (icutcoul==3) Vcp%mode='CRYSTAL'
- if (icutcoul==4) Vcp%mode='ERF'
- if (icutcoul==5) Vcp%mode='ERFC'
- if (icutcoul==6) Vcp%mode='AUXILIARY_FUNCTION'
- if (icutcoul==7) Vcp%mode='AUX_GB'
+ if (icsing==14) Vcp%mode='MINIBZ-ERF'
+ if (icsing==15) Vcp%mode='MINIBZ-ERFC'
+ if (icsing==16) Vcp%mode='MINIBZ'
+ if (icsing==0) Vcp%mode='SPHERE'
+ if (icsing==1) Vcp%mode='CYLINDER'
+ if (icsing==2) Vcp%mode='SURFACE'
+ if (icsing==3) Vcp%mode='CRYSTAL'
+ if (icsing==4) Vcp%mode='ERF'
+ if (icsing==5) Vcp%mode='ERFC'
+ if (icsing==6) Vcp%mode='AUXILIARY_FUNCTION'
+ if (icsing==7) Vcp%mode='AUX_GB'
  !
  ! === Calculate Fourier coefficient of Coulomb interaction ===
  ! * For the limit q-->0 we consider ng vectors due to a possible anisotropy in case of a cutoff interaction

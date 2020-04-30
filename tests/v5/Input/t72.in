@@ -44,7 +44,7 @@ optdriver4 4        # Sigma calculation
    nkptgw4 1        # apply correction to the Gamma point
     kptgw4 0.0000  0.0000  0.0000
      bdgw4 1 10     # States with same character have to be included if symsigma=1
- icutcoul4   3            # old deprecated value of icutcoul, only used for legacy
+ icsing4   3            # old deprecated value of icsing, only used for legacy
 
 
 # Closure-trick

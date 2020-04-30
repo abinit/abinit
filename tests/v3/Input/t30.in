@@ -48,7 +48,7 @@
  bdgw3    4  5
  ppmfrq3  16.5 eV
  zcut3      0.1 eV
-icutcoul3   3            # old deprecated value of icutcoul, only used for legacy
+icsing3   3            # old deprecated value of icsing, only used for legacy
 
 
 # sigma calculation
@@ -60,7 +60,7 @@ icutcoul3   3            # old deprecated value of icutcoul, only used for legac
  kptgw4   0.250  0.750  0.250
  bdgw4    4  5
  zcut4      0.1 eV
- icutcoul4   3            # old deprecated value of icutcoul, only used for legacy
+ icsing4   3            # old deprecated value of icsing, only used for legacy
 
 # sigma calculation
  optdriver5 4
@@ -71,7 +71,7 @@ icutcoul3   3            # old deprecated value of icutcoul, only used for legac
  kptgw5   0.250  0.750  0.250
  bdgw5    4  5
  zcut5      0.1 eV
- icutcoul5   3            # old deprecated value of icutcoul, only used for legacy
+ icsing5   3            # old deprecated value of icsing, only used for legacy
 
 # sigma calculation
  optdriver6 4
@@ -82,7 +82,7 @@ icutcoul3   3            # old deprecated value of icutcoul, only used for legac
  kptgw6   0.250  0.750  0.250
  bdgw6    4  5
  zcut6      0.1 eV
- icutcoul6   3            # old deprecated value of icutcoul, only used for legacy
+ icsing6   3            # old deprecated value of icsing, only used for legacy
 
 # valid for all datasets
  nband     10

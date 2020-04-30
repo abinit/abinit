@@ -34,7 +34,7 @@ kptgw3   0.0  0.0  1/4
 bdgw3    24  25
 zcut3     0.1 eV
 
-icutcoul3  3  # old deprecated value of icutcoul, only used for legacy
+icsing3  3  # old deprecated value of icsing, only used for legacy
 
 #################### COMMON PART #########################
 

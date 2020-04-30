@@ -609,6 +609,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  if (icutc_loc==0) mode='SPHERE'
  if (icutc_loc==1) mode='CYLINDER'
  if (icutc_loc==2) mode='SURFACE'
+ if (icutc_loc==3) mode='CRYSTAL'
  if (icutc_loc==4) mode='ERF'
  if (icutc_loc==5) mode='ERFC'
 
@@ -785,6 +786,10 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
     end if
    end do
 
+ CASE('CRYSTAL')
+   gcutoff(:)=1 ! Neutral cut-off
+   write(msg,'(a)')'ATT: No cut-off applied to G**2!'
+   MSG_WARNING(msg) 
  CASE DEFAULT
    gcutoff(:)=1 ! Neutral cut-off
    write(msg,'(a)')'ATT: No cut-off applied to G**2!'

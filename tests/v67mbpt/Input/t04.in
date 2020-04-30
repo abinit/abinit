@@ -62,7 +62,7 @@ shiftk4   0.0 0.0 0.0  # This grid contains the Gamma point
           0.5 0.5 0.0
 istwfk4    *1           # Option needed for Gamma
 
- icutcoul4  3  # old deprecated value of icutcoul, only used for legacy
+ icsing4  3  # old deprecated value of icsing, only used for legacy
 
 
 nband4     20     # Bands to be used in the Self-Energy calculation

@@ -61,7 +61,7 @@ _ WF disk file :      0.159 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
         freqspmax      2.00000000E+00 Hartree
         freqspmin     -2.00000000E+00 Hartree
         gwcalctyp           2
-         icutcoul           3
+         icsing           3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -321,7 +321,7 @@ data: !SigmaeeData |
         freqspmax      2.00000000E+00 Hartree
         freqspmin     -2.00000000E+00 Hartree
         gwcalctyp           2
-         icutcoul           3
+         icsing           3
            istwfk        1    0    1    0    0    0    1    0
               ixc           7
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00

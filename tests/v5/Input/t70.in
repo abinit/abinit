@@ -46,7 +46,7 @@
  kptgw3   -0.250  0.500  0.000
  bdgw3    2  6
  ppmfrq3  16.5 eV
-icutcoul3   3            # old deprecated value of icutcoul, only used for legacy
+icsing3   3            # old deprecated value of icsing, only used for legacy
 
 # sigma calculation starting from the SUSC file (in-core solution)
  optdriver4 4
@@ -61,7 +61,7 @@ icutcoul3   3            # old deprecated value of icutcoul, only used for legac
  kptgw4   -0.250  0.500  0.000
  bdgw4    2  6
  ppmfrq4  16.5 eV
-icutcoul4   3            # old deprecated value of icutcoul, only used for legacy
+icsing4   3            # old deprecated value of icsing, only used for legacy
 
 # sigma calculation starting from the SUSC file (out-of-core solution)
  optdriver5 4
@@ -77,7 +77,7 @@ icutcoul4   3            # old deprecated value of icutcoul, only used for legac
  kptgw5   -0.250  0.500  0.000
  bdgw5    2  6
  ppmfrq5  16.5 eV
-icutcoul5   3            # old deprecated value of icutcoul, only used for legacy
+icsing5   3            # old deprecated value of icsing, only used for legacy
 
 # valid for all datasets
  ngkpt     2 2 2

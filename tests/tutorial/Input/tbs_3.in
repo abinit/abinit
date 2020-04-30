@@ -45,7 +45,7 @@ zcut               0.15 eV # complex shift to avoid divergences in the continued
 ecutwfn 8.0               # Cutoff for the wavefunction.
 ecuteps 2.0               # Cutoff for W and /bare v used to calculate the BS matrix elements.
 inclvkb 2
-icutcoul 3                # Legacy value
+icsing 3                # Legacy value
 
 # VARIABLES COMMON TO THE DIFFERENT DATASETS
 

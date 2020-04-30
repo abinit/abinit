@@ -163,12 +163,12 @@ _ WF disk file :      0.041 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
         gw_freqsp4      -0.55582 Hartree
         gw_freqsp5       0.00000 Hartree
         gw_freqsp6      -0.55582 Hartree
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          0
-         icutcoul4          0
-         icutcoul5          0
-         icutcoul6          0
+         icsing1          6
+         icsing2          6
+         icsing3          0
+         icsing4          0
+         icsing5          0
+         icsing6          0
              iscf1          7
              iscf2         -2
              iscf3         -2
@@ -1162,12 +1162,12 @@ force_length_stats: {min: null, max: null, mean: null, }
         gw_freqsp4      -0.55582 Hartree
         gw_freqsp5       0.00000 Hartree
         gw_freqsp6      -0.55582 Hartree
-         icutcoul1          6
-         icutcoul2          6
-         icutcoul3          0
-         icutcoul4          0
-         icutcoul5          0
-         icutcoul6          0
+         icsing1          6
+         icsing2          6
+         icsing3          0
+         icsing4          0
+         icsing5          0
+         icsing6          0
              iscf1          7
              iscf2         -2
              iscf3         -2

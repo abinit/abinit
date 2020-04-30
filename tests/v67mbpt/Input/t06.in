@@ -27,7 +27,7 @@ kptgw?3   0.0  0.0  1/4
 bdgw?3    24  25
 zcut?3     0.1 eV
 
- icutcoul?3  3  # old deprecated value of icutcoul, only used for legacy
+ icsing?3  3  # old deprecated value of icsing, only used for legacy
 
 # Chose the order of atoms
 typat1? 3*1 6*2

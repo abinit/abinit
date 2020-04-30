@@ -65,7 +65,7 @@ kptgw4               # k-points
 bdgw4       1  6             # calculate GW corrections for bands from 4 to 6 (initial guess)
             1  6             # it will be changed in setup_sigma such that
             1  6             # all the degenerate states are included.
-icutcoul4   3            # old deprecated value of icutcoul, only used for legacy
+icsing4   3            # old deprecated value of icsing, only used for legacy
 
 # Dataset5: Calculation of the Self-Energy matrix elements
 # (core contribution to Sigma is treated at the Hartree-Fock level)
@@ -87,7 +87,7 @@ kptgw5               # k-points
 bdgw5       1  6             # calculate GW corrections for bands from 4 to 6 (initial guess)
             1  6             # it will be changed in setup_sigma such that
             1  6             # all the degenerate states are included.
-icutcoul5   3            # old deprecated value of icutcoul, only used for legacy
+icsing5   3            # old deprecated value of icsing, only used for legacy
 
 # Definition of the unit cell: fcc
 acell  3*10.217        # This is equivalent to   10.217 10.217 10.217

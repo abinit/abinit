@@ -1095,10 +1095,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    ! icsing
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icsing,6,(/3,6,7,14,15,16/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icsing',dt%icsing,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
 
    ! icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,8,(/0,1,2,3,4,5,6,7/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,6,(/0,1,2,3,4,5/),iout)
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then

@@ -69,7 +69,7 @@ inclvkb5    0
 gwcomp5     1        # Extrapolar trick to accelerate convergence vs. empty bands
 gwencomp5   1.00
 
-icutcoul5   4        # long-range only electron-electron interaction
+icsing5   4        # long-range only electron-electron interaction
 rcut5       1.00
 
 ###############################################
