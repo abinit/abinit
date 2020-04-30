@@ -142,10 +142,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  ucvol = Crystal%ucvol
 
 
-!frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
-!fact_oscstr(2,3,3*natom)=factors of the oscillator strengths
-!for the different eigenmodes,
-!for different direction of the electric field
+! frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
+! modez=mode effective charge
  ABI_ALLOCATE(frdiel,(3,3,nfreq))
  ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
  ABI_ALLOCATE(modez,(2,3,3*natom))
@@ -505,16 +503,9 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
  real(dp) :: usquare
  logical :: t_degenerate
 !arrays
-! real(dp),allocatable :: modez(:,:,:),oscstr(:,:,:,:)
  character(len=1),allocatable :: metacharacter(:)
 
 ! *********************************************************************
-
-! ABI_ALLOCATE(modez,(2,3,3*natom))
-!oscstr(2,3,3,3*natom)=oscillator strengths, following
-!the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
-! ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
-
 
 !  Get the factors of the oscillator strength, and the mode effective charge for each mode
    do imode=1,3*natom

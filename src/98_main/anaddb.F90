@@ -92,7 +92,7 @@ program anaddb
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
- integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
+ integer :: comm,iatom,iblok,iblok_stress,iblok_epsinf,idir,ii,index
  integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
  integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
@@ -324,16 +324,16 @@ program anaddb
    end if
  end if
 
- ! Get Dielectric Tensor and Effective Charges
+ ! Get the electronic dielectric tensor (epsinf) and Born effective charges (zeff)
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,epsinf,zeff)
 
  ! Try to get epsinf, in case just the DDE are present
- if (iblok == 0) then
-   iblok_tmp = ddb%get_dielt(inp%rfmeth,epsinf)
+ if (iblok_epsinf == 0) then
+   iblok_epsinf = ddb%get_dielt(inp%rfmeth,epsinf)
  end if
 
- !if (iblok_tmp == 0) then
+ !if (iblok_epsinf==0) then
  if (epsinf(1,1)==one .and. epsinf(2,2)==one .and. epsinf(3,3)==one) then
    write(msg,'(5a)') ch10,&
      ' The DDB file does not contain the derivatives w.r.t. electric field perturbation. ',ch10,&
@@ -444,6 +444,7 @@ program anaddb
  if (inp%nlflag > 0) then
    ABI_MALLOC(dchide, (3,3,3))
    ABI_MALLOC(dchidt, (natom,3,3,3))
+   ABI_MALLOC(rsus, (3*natom,3,3))
 
    if (ddb%get_dchidet(inp%ramansr,inp%nlflag,dchide,dchidt) == 0) then
      MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
@@ -646,7 +647,7 @@ program anaddb
   ! Generates the dynamical matrix at Gamma
   ! TODO: Check if we can avoid recomputing the phonon freq and eigendispla at Gamma becasue 
   ! it is already done before in this routine. (EB)
-  ! The problem is that it is done through mkphbs, which has only printing and no out... (EB)
+  ! The problem is that it is done through mkphbs, which has only printing and does not retrun anything as out... (EB)
 
   qphon(:,1)=zero; qphnrm(1)=zero
   ! Generation of the dynamical matrix in cartesian coordinates
@@ -680,17 +681,18 @@ program anaddb
   ! dielectric tensor, frequency dependent dielectric tensor (dieflag)
   ! and mode by mode decomposition of epsilon if dieflag==3
   if (inp%dieflag/=0) then
-    !if (iblok_tmp == 0) then
+    !if (iblok_epsinf==0) then
     if (epsinf(1,1)==one .and. epsinf(2,2)==one .and. epsinf(3,3)==one) then
       write(msg,'(7a)') ch10,&
        ' The DDB file does not contain the derivatives w.r.t. electric field perturbation. ',ch10,&
-       ' This is mandatory if you want to calculate the dielectric constant,',ch10,&
-       ' Please check your DDB file or do not use dieflag.',ch10
+       ' This is mandatory to calculate the dielectric constant,',ch10,&
+       ' Please check your DDB file or use dieflag=0.',ch10
       MSG_ERROR(msg)
     end if
 
     write(msg, '(a,(80a),a)' ) ch10,('=',ii=1,80),ch10
     call wrtout([std_out, ab_out], msg)
+
     call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
       ab_out,lst,mpert,natom,0,phfrq,comm,ana_ncid) 
   end if
@@ -701,9 +703,9 @@ end if ! dieflag!=0 or inp%nph2l/=0
 !**********************************************************************
 ! Non-linear response: electrooptic and Raman (q=Gamma, TO modes only)
 !**********************************************************************
- if (inp%nlflag > 0) then
-   ABI_MALLOC(rsus, (3*natom,3,3))
- end if
+! if (inp%nlflag > 0) then
+!   ABI_MALLOC(rsus, (3*natom,3,3))
+! end if
 
  if (inp%nlflag==1) then
    ! Raman susceptibilities for the 1st list (only TO  modes at q=Gamma)
@@ -798,12 +800,12 @@ end if ! condition on nlflag
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
    end if 
-   ABI_FREE(lst)
  end if ! nph2l/=0   
  ! End of second list of wv stuff (nph2l/=0)
    
 
  ABI_FREE(fact_oscstr)
+ ABI_FREE(lst)
  if (inp%nlflag > 0) then
    ABI_FREE(rsus)
    ABI_FREE(dchide)
