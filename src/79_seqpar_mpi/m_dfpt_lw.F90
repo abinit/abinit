@@ -1488,7 +1488,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  end do
 
 !Write the q-gradient of the Polarization response
- write(ab_out,*)' q-gradient of the polarization response '
+ write(ab_out,*)' First real-space moment of the polarization response '
  write(ab_out,*)' to an atomic displacementatom, in cartesian coordinates,'
  write(ab_out,*)' (1/ucvol factor not included),'
  write(ab_out,*)' efidir   atom   atddir   qgrdir          real part        imaginary part'
@@ -4474,7 +4474,7 @@ end subroutine dfpt_ciflexoout
  end if
 
  write(ab_out,'(a)')' '
- write(ab_out,'(a)')' First moment of piezoelectric force-response tensor, in cartesian coordinates,'
+ write(ab_out,'(a)')' First real-space moment of piezoelectric force-response tensor, in cartesian coordinates,'
  write(ab_out,'(a)')'atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir
