@@ -1,7 +1,7 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
 README_gpu.md
-README_MacOSX.md
 README_xlf.md
+README_MacOSX.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
@@ -74,6 +74,7 @@ topics/Hybrids.md
 topics/k-points.md
 topics/LatticeModel.md
 topics/LDAminushalf.md
+topics/longwave.md
 topics/LOTF.md
 topics/MagField.md
 topics/MagMom.md

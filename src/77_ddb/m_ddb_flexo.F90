@@ -101,7 +101,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  character(len=500) :: msg
 
 !arrays
- integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -374,7 +374,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  character(len=500) :: msg
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
 !arrays
- integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
 
@@ -492,7 +492,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
  character(len=500) :: msg
 !arrays
- integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  real(dp) :: redforces(3,natom),forces(3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
@@ -724,7 +724,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
  character(len=500) :: msg
 !arrays
- integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  real(dp) :: frcelast_t2(3,3,3,3)
  real(dp) :: Csupkap(3,natom,3,3,3)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
@@ -1007,7 +1007,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
 
-   write(msg,'(3a)')ch10,' Displacement-response flexoelectric force response tensor (units: eV)',ch10
+   write(msg,'(3a)')ch10,' Flexoelectric force response tensor (units: eV)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
    call wrtout([ab_out,std_out],msg,'COLL')
