@@ -232,7 +232,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dvdb_filepath == ABI_NOFILE) then
    dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
- use_wfk = all(dtset%eph_task /= [5, -5, 6, +15, -15, 16])
+ use_wfk = all(dtset%eph_task /= [5, -5, 6, +15, -15, -16, 16])
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
  ! If eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
@@ -561,7 +561,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 
    ! Set qdamp from frohl_params
-   !dvdb%qdamp = 0.1
+   dvdb%qdamp = 0.1
    if (dtset%frohl_params(4) /= 0) then
      dvdb%qdamp = dtset%frohl_params(4)
      !dvdb%qdamp = dtset%qdamp
@@ -572,7 +572,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.
-   ! This activates automatically the treatment of the long-range term in the Fourier interpolation
+   ! This flag activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
    dvdb%add_lr = dtset%dvdb_add_lr
    if (iblock_dielt /= 0) then
@@ -686,19 +686,19 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
    end if
 
- case (16)
-
+ case (-16, 16)
    if (nprocs > 1) then
      MSG_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
    end if
 
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
-     ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
-     !call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+     call dvdb%open_read(ngfftf, xmpi_comm_self)
 
-     !call dvdb%open_read(ngfftf, xmpi_comm_self)
-     !call dvdb%write_wr(dtset, strcat(dtfil%filnam_ds(4), "_WR.nc"))
+     ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
+     !call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+
+     call dvdb%write_wr(dtset, strcat(dtfil%filnam_ds(4), "_WR.nc"))
    end if
 
  case default

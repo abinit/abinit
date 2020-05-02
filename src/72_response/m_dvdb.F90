@@ -459,6 +459,7 @@ module m_dvdb
    ! Prepare the internal tables for Fourier interpolation.
 
    procedure :: get_maxw => dvdb_get_maxw
+   !  Compute max_r |W(R,r)|
 
    procedure :: ftinterp_qpt => dvdb_ftinterp_qpt
    ! Fourier interpolation of potentials for given q-point
@@ -497,9 +498,11 @@ module m_dvdb
    ! Downsample the q-mesh. Produce new DVDB file
 
    procedure :: write_v1qavg => dvdb_write_v1qavg
-   ! Debugging tool used to test the model for the long-range of the potential.
+   ! Computes the average over the unit cell of the periodic part of the DFPT potentials
+   ! as a function of the q-point and the corresponding quantity obtained with the model for the LR part.
 
    procedure :: write_wr => dvdb_write_wr
+   ! TODO: Remove
    ! Write W(r, R) to netcdf file
 
  end type dvdb_t
@@ -1036,11 +1039,19 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
    write(my_unt, '(a)') ' Dynamical Quadrupoles in Cartesian Coordinates: '
    do iatom=1,db%natom
      do idir=1,3
-       write(my_unt,'(2(a,i0),3(/,3es16.6))')' iatom: ', iatom, ' idir: ', idir, &
+       write(my_unt,'(2(a,i0),3(/,3es16.6))')' Q* for iatom: ', iatom, ' idir: ', idir, &
          db%qstar(1,1,idir,iatom), db%qstar(1,2,idir,iatom), db%qstar(1,3,idir,iatom), &
          db%qstar(2,1,idir,iatom), db%qstar(2,2,idir,iatom), db%qstar(2,3,idir,iatom), &
          db%qstar(3,1,idir,iatom), db%qstar(3,2,idir,iatom), db%qstar(3,3,idir,iatom)
      end do
+   end do
+
+   write(my_unt,"(a)")" Acoustic sum rule: \sum_\iatom Q_{beta,gamma}{iatom,idir} = 0 for nonpolar materials"
+   do idir=1,3
+     write(my_unt,'(a,i0,/,3(/,3es16.6))')" Sum rule for idir: ", idir, &
+       sum(db%qstar(1,1,idir,:)), sum(db%qstar(1,2,idir,:)), sum(db%qstar(1,3,idir,:)), &
+       sum(db%qstar(2,1,idir,:)), sum(db%qstar(2,2,idir,:)), sum(db%qstar(2,3,idir,:)), &
+       sum(db%qstar(3,1,idir,:)), sum(db%qstar(3,2,idir,:)), sum(db%qstar(3,3,idir,:))
    end do
  end if
 
@@ -1052,12 +1063,12 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
      idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
      write(my_unt,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
    end do
-   write(my_unt, "(a)")"q-point, idir, ipert, rhog1(q,G=0)"
-   do iv1=1,db%numv1
-     idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
-     write(my_unt,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &
-       ftoa(db%rhog1_g0(1, iv1)), ftoa(db%rhog1_g0(2, iv1)))
-   end do
+   !write(my_unt, "(a)")"q-point, idir, ipert, rhog1(q,G=0)"
+   !do iv1=1,db%numv1
+   !  idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
+   !  write(my_unt,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &
+   !    ftoa(db%rhog1_g0(1, iv1)), ftoa(db%rhog1_g0(2, iv1)))
+   !end do
  end if
 
 contains
@@ -3101,7 +3112,6 @@ end subroutine dvdb_ftinterp_setup
 !! INPUTS
 !!
 !! FUNCTION
-!!
 
 subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
 
@@ -5765,7 +5775,7 @@ end subroutine dvdb_test_v1complete
 !!  dvdb_write_v1qavg
 !!
 !! FUNCTION
-!!  This routine computes the average over the unit cell of the periodic part of the DFPT potentials
+!!  Computes the average over the unit cell of the periodic part of the DFPT potentials
 !!  as a function of the q-point and the corresponding quantity obtained with the model for the LR part.
 !!  Results are stored in the V1QAVG netcdf file. Two options are available:
 !!
@@ -6185,7 +6195,6 @@ subroutine dvdb_write_wr(dvdb, dtset, out_ncpath)
  character(len=500) :: msg
 !arrays
  integer :: ngfft(18)
- !integer, allocatable :: ig2ifft(:), gsmall(:,:)
  integer :: qptrlatt(3,3)
  real(dp) :: vals2(2)
  real(dp),allocatable :: v1r_qbz(:,:,:,:)

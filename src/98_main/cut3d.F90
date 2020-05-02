@@ -69,9 +69,11 @@ program cut3d
  use m_geometry,        only : xred2xcart, metric
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : ngfft_seq
+ use m_fft_mesh,        only : denpot_project
  use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
+
  implicit none
 
 !Local variables-------------------------------
@@ -95,7 +97,7 @@ program cut3d
  integer :: ngfft(18)
  real(dp) :: rprimd(3,3),shift_tau(3),tsec(2)
  real(dp) :: xcart2(3),gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: grid(:,:,:),grid_full(:,:,:,:),grid_full_stored(:,:,:,:,:),gridtt(:,:,:)
+ real(dp),allocatable :: grid(:,:,:),grid_full(:,:,:,:),grid_full_stored(:,:,:,:,:),gridtt(:,:,:) !, grid_rot(:,:,:,:)
  real(dp),allocatable :: tau2(:,:),xcart(:,:),xred(:,:),rhomacu(:,:),gridmz(:,:,:),gridmy(:,:,:),gridmx(:,:,:)
  character(len=fnlen),allocatable :: filrho_stored(:)
  character(len=500) :: message
@@ -275,6 +277,14 @@ program cut3d
      end if
 
      call cut3d_rrho(filrho,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
+
+     !MSG_WARNING("Computing (rhor(r) + rho(-r)) / 2")
+     !ABI_MALLOC(grid_rot, (nr1,nr2,nr3,nspden))
+     !call ngfft_seq(ngfft, [nr1, nr2, nr3])
+     !ngfft(4:6) = ngfft(1:3)
+     !call denpot_project(1, ngfft, nspden, grid_full, inversion_3d, [zero, zero, zero], grid_rot)
+     !grid_full = grid_rot
+     !ABI_FREE(grid_rot)
 
 !    Do not forget that the first sub-array of a density file is the total density,
 !    while the first sub-array of a potential file is the spin-up potential

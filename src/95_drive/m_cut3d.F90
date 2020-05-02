@@ -2648,6 +2648,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          write(unout,'(3(ES17.10,2X))') (Bohr_Ang*rprimd(ir2,ir1), ir2=1,3)
        end do
 
+       !subroutine fftpac(ispden, mpi_enreg, nspden, n1, n2, n3, n4, n5, n6, ngfft, aa, fofr, option)
+
        do ir3=gridshift3+1,nr3+1
          ii3=mod(ir3-1,nr3) + 1
          do ir2=gridshift2+1,nr2+1
