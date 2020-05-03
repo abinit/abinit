@@ -4400,15 +4400,19 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
      do elfd = 1,3
        do qvecd = 1,elfd-1
          if (lwsym==1) then
-           lwtens(qvecd,elfd,iatd,iatom) = -two* &
+           lwtens(elfd,qvecd,iatd,iatom) = -two* &
          (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
-           lwtens(elfd,qvecd,iatd,iatom) = lwtens(qvecd,elfd,iatd,iatom) 
+           lwtens(qvecd,elfd,iatd,iatom) = lwtens(elfd,qvecd,iatd,iatom) 
          else if (lwsym==0) then
-           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
-           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
+           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
+           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
          end if
        end do
-       lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+       if (lwsym==1) then
+         lwtens(elfd,elfd,iatd,iatom) = -four*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+       else if (lwsym==0) then
+         lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+       end if
      end do
    end do
  end do
