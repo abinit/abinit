@@ -91,11 +91,13 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% test_chain = tudet_1.in, tudet_2.in, tudet_3.in
 #%% [files]
 #%% files_to_test = 
 #%%   tudet_2.abo, tolnlines=  4, tolabs=  8.000e-03, tolrel=  6.500e-01, fld_options = -easy
 #%% psp_files =  Fe.GGA_PBE-JTH.xml
+#%% output_file = "tudet_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

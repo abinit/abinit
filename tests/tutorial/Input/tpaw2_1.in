@@ -37,9 +37,13 @@ nshiftk   4
  getwfk -1
  prteig 0 prtden 0
 
+ pseudos = "Ni.GGA-PBE-paw.bloechl.xml"
+ pp_dirpath = "../../Psps"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
 #%%   tpaw2_1.abo, tolnlines=  6, tolabs=  1.1e-4,    tolrel=  2.0e-3, fld_options=-medium
