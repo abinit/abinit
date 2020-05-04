@@ -25,6 +25,7 @@
    nshiftk      1
     shiftk      0.00   0.00   0.00
     enunit      2
+    icsing      6 # To preserve the results of older tests: current default icsing=3
 
     ndtset      7
     gwpara      1

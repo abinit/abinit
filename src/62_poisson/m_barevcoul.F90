@@ -586,7 +586,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  
  ! Initialize container
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3))) 
- ABI_ALLOCATE(gpq,(nfft))
+ ABI_ALLOCATE(gpq,(n1*n2*n3))
  ABI_ALLOCATE(gpq2,(nfft))
  ABI_ALLOCATE(gcart,(nfft))  
  ABI_ALLOCATE(gcutoff,(nfft))
@@ -603,7 +603,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  end do
 
  ! Get the cut-off method info from the input file
- icutc_loc=0 !dtset%icutcoul
+ icutc_loc=dtset%icutcoul
  
  ! Assign method to one of the available cases
  if (icutc_loc==0) mode='SPHERE'
@@ -618,14 +618,15 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
    gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
    gqgm23=gq(3,i3)*gmet(2,3)*2
    gqgm13=gq(3,i3)*gmet(1,3)*2
+
    do i2=1,n2
-     i23=n1*(i2-1 +(n2)*(i3-1))
+     i23=n1*(i2-1 + n2*(i3-1))
      gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
      gqgm12=gq(2,i2)*gmet(1,2)*2
      gqg2p3=gqgm13+gqgm12
      do i1=1,n1
         ii=i1+i23
-        gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+        gpq(ii)=gs2+gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
         if(gpq(ii)>=tol4) then 
           gpq2(ii) = piinv/gpq(ii)
         end if 
@@ -787,11 +788,11 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
    end do
 
  CASE('CRYSTAL')
-   gcutoff(:)=1 ! Neutral cut-off
+   gcutoff(:)=one ! Neutral cut-off
    write(msg,'(a)')'ATT: No cut-off applied to G**2!'
    MSG_WARNING(msg) 
  CASE DEFAULT
-   gcutoff(:)=1 ! Neutral cut-off
+   gcutoff=one ! Neutral cut-off
    write(msg,'(a)')'ATT: No cut-off applied to G**2!'
    MSG_WARNING(msg)
  END SELECT

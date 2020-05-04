@@ -11,7 +11,7 @@ irdscr     1
 awtr       1
 symsigma   0
 inclvkb    2
-icsing   3   #  old deprecated value of icsing, only used for legacy
+icsing     3   #  old deprecated value of icsing, only used for legacy
 
 ecutsigx   4.0
 nband      16

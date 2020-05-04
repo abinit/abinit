@@ -1100,6 +1100,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! icutcoul
    call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,6,(/0,1,2,3,4,5/),iout)
 
+   ! icutcoul&icsing relation 
+   !if (dt%icutcoul >= 0 .and. dt%icutcoul <= 5) then
+   !  cond_string(1)='icutcoul' ; cond_values(1)=dt%icutcoul
+   !  cond_string(2)='icsing'   ; cond_values(2)=dt%icsing
+   !  call chkint_eq(1,2,cond_string,cond_values,ierr,'icsing',dt%icsing,6,(/0,1,2,3,4,5/),iout) 
+   !end if     
+
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1

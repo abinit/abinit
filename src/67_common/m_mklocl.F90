@@ -378,8 +378,9 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !Initialize Gcut-off array from m_barevcoul 
  ABI_ALLOCATE(gcutoff,(nfft))
  call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ !write(*,*)gcutoff
  !BG: Don't apply it just yet. Needs some testing before
- gcutoff=one
+  gcutoff=one
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -597,9 +598,10 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    vpsp(:)=vpsp(:)*xnorm
 
    ABI_DEALLOCATE(work1)
-   ABI_DEALLOCATE(gcutoff) 
 
  end if
+
+ ABI_DEALLOCATE(gcutoff) 
 
  if(option==2)then
 !  Init mpi_comm
