@@ -40,7 +40,7 @@ ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
  getwfk -1
 
  pseudos = "C.LDA_PW-JTH.xml"
- pp_dirpath = "../../Psps"
+ pp_dirpath = "../../Psps_for_tests"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -57,6 +57,7 @@
 #PAW atomic data
      pseudos = "Fe.GGA_PBE-JTH.xml"
      pp_dirpath = "../../Psps_for_tests"
+     outdata_prefix = "tudet_1.o"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

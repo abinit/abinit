@@ -40,7 +40,7 @@ ndtset 9   ecut: 8. ecut+  2.
  getwfk -1
 
  pseudos = "6c.pspnc"
- pp_dirpath = "../../Psps"
+ pp_dirpath = "../../Psps_for_tests"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

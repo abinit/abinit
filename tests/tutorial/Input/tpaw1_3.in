@@ -39,7 +39,7 @@ ndtset 10   pawecutdg: 12. pawecutdg+ 3.
  getwfk -1
 
  pseudos = "C.LDA_PW-JTH.xml"
- pp_dirpath = "../../Psps"
+ pp_dirpath = "../../Psps_for_tests"
 
 
 #%%<BEGIN TEST_INFO>

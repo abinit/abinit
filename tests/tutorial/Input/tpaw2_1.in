@@ -38,7 +38,7 @@ nshiftk   4
  prteig 0 prtden 0
 
  pseudos = "Ni.GGA-PBE-paw.bloechl.xml"
- pp_dirpath = "../../Psps"
+ pp_dirpath = "../../Psps_for_tests"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

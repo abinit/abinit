@@ -36,7 +36,7 @@
  prtwf 0 prtden 0  prteig 0
 
  pseudos = "6c.pspnc"
- pp_dirpath = "../../Psps"
+ pp_dirpath = "../../Psps_for_tests"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
