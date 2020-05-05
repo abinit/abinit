@@ -587,9 +587,9 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  ! Initialize container
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3))) 
  ABI_ALLOCATE(gpq,(n1*n2*n3))
- ABI_ALLOCATE(gpq2,(nfft))
- ABI_ALLOCATE(gcart,(nfft))  
- ABI_ALLOCATE(gcutoff,(nfft))
+ ABI_ALLOCATE(gpq2,(n1*n2*n3))
+ ABI_ALLOCATE(gcart,(n1*n2*n3))  
+ ABI_ALLOCATE(gcutoff,(n1*n2*n3))
  gcutoff(:)=zero
 
 !In order to speed the routine, precompute the components of g+q
