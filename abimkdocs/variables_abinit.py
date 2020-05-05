@@ -6792,6 +6792,36 @@ pseudo-potential and ion-ion interaction:
 ),
 
 Variable(
+    abivarname="icsing",
+    varset="gw",
+    vartype="integer",
+    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=6,
+    mnemonics="Integration technique for Coulomb SINGularity",
+    requires="[[optdriver]] in [3,4]",
+    added_in_version="v9.1",
+    text=r"""
+TO BE CHECKED ! (Also the information above)
+Many-body calculations
+for fully periodic systems are problematic due to the presence of the
+integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
+respect to the number of q-points used to sample the Brillouin zone. The
+convergence can be accelerated by integrating accurately the zone in the neighborhood of $\mathbf{G}=0$.
+
+[[icsing]] defines the particular expression to be used for such integration,
+in case [[icutcoul]]==3 (3-dimensional system).
+
+  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
+  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
+  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+""",
+),
+
+Variable(
     abivarname="icutcoul",
     varset="gw",
     vartype="integer",
@@ -6799,34 +6829,30 @@ Variable(
     dimensions="scalar",
     defaultval=6,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
-    requires="[[optdriver]] in [3,4]",
     added_in_version="before_v9",
     text=r"""
-Many-body calculations for isolated systems present a slow convergence with
+SHOULD REPLACE THE DEFAULT VALUE BY icutcoul=3 !
+Many-body calculations for isolated systems, 1D and 2D systems present a slow convergence with
 respect to the size of the supercell due to the long ranged Coulomb
-interaction and the high degree of non-locality of the operators involved. A
-similar issue also occurs in fully periodic systems due to the presence of the
-integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
-respect to the number of q-points used to sample the Brillouin zone. The
-convergence can be accelerated by replacing the true bare Coulomb interaction
-with other expressions.
+interaction and the high degree of non-locality of the operators involved.
+Thus, restricting the range of the Coulomb interaction, in order to prevent
+supercell images to interact can significantly speed-up convergence, or even can make convergence happen.
+Also, even in the ground-state case, a cut-off Coulomb interaction might prove useful.
 
 [[icutcoul]] defines the particular expression to be used for the Coulomb term
 in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 6. The
 corresponding influential variables are [[vcutgeo]] and [[rcut]].
+Also, in the GW case, the related variable [[icsing]] allows one to treat the integration
+of the $\mathbf{G}=0$ Coulomb singularity.
 
-  * 0 --> sphere (molecules but also 3D-crystals).
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
   * 1 --> cylinder (nanowires, nanotubes).
   * 2 --> surface.
-  * 3 --> 3D crystal (no cut-off, integration in a spherical mini-Brillouin Zone, legacy value).
+  * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
-  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
-  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
-  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
-  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
-  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+  * 6 TO BE SUPPRESSED !
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
@@ -9226,6 +9252,80 @@ are allowed)  on which to apply the LDA+U correction.
 ),
 
 Variable(
+    abivarname="lw_flexo",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of FLEXOelectricity related spatial dispersion tensors",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run the calculation of spatial dispersion tensorial quantities needed to
+build the bulk flexoelectric tensor (the clamped-ion contribution is alread calculated by
+abinit whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation,
+see [[flexoflag@anaddb]]).
+
+At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
+calculated. This **requires** the precalculation of the ground-state wave-functions and
+density as well as response functions and densities to a set of perturbations as specified below.
+All perturbations and directions need to be explicitly computed, and the linear response calculations
+have to be performed with [[prepalw]] = 1.
+
+  * 0 --> No flexoelectric spatial dispersion tensors are calculated.
+  * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
+          are calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field, atomic displacement and strain.
+  * 2 --> Clamped-ion flexoelectric tensor is calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field and strain.
+  * 3 --> Two tensors required to build the mixed flexoelectric tensor are calculated:
+          the first moment of polarization response to an atomic displacement and the first
+          moment of the IFCs. Related quantities that can be derived from these two tensors
+          are also printed: dynamical quadrupoles, clamped-ion piezoelectric tensor and
+          piezoelectric force response tensor. Requires precomputed linear response functions and densities:
+          ddk, d2_dkdk, electric field and atomic displacement.
+  * 4 --> Two tensors required to build the lattice-mediated flexoelectric tensor are calculated:
+          the first moment of the IFCs and the first moment of the piezoelectric force response
+          tensor. Related quantities that can be derived from these two tensors
+          are also printed: piezoelectric force response tensor and clamped-ion elastic tensor.
+          Requires precomputed linear response functions and densities:
+          ddk, atomic displacement and strain.
+""",
+),
+
+Variable(
+    abivarname="lw_qdrpl",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of dynamical QuaDRuPoLes tensor",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run dynamical quadrupoles tensor calculation (e.g., needed to include dipole-quadrupole
+and/or quadrupole-quadrupole electrostatic interactions in the anaddb calculation of
+phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
+
+  * 0 --> No dynamical quadrupoles are calculated
+  * 1 --> Dynamical quadrupoles are calculated. Related quantities that can be derived from
+          the dynamical quadrupoles are also printed: the first moment of the polarization
+          response to an atomic displacement and the clamped-ion piezoelectric tensor.
+
+At present ( |today| ), all the elements of the dynamical quadrupoles tensor are necessarily
+calculated. This **requires** the precalculation of the ground-state wave functions and
+density as well as response functions and densities to the following perturbations:
+ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need
+to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] = 1.
+""",
+),
+
+
+Variable(
     abivarname="macro_uj",
     varset="dev",
     vartype="integer",
@@ -10597,7 +10697,7 @@ Variable(
     requires="[[nqpt]] == 1 and [[kptopt]] >= 0",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done,
 and the default value of [[ngqpt]] is kept.
 
 Similar to [[ngkpt]], but for the q-wavevector. At variance with [[ngkpt]], note that only one q point is selected per dataset
@@ -11534,7 +11634,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done,
 and the default value of [[nshiftq]] is kept.
 
 This parameter gives the number of shifted grids to be used concurrently to
@@ -12414,6 +12514,7 @@ The choice is among:
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH)
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 10 --> longwave response functions (LONGWAVE), routine *longwave*.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -14130,6 +14231,62 @@ energy vs q vector) is reported in the output file for the lowest 10 bands.
 """,
 ),
 
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT
+approach requires the first-order wavefunctions and densities obtained from
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties.
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+""",
+),
+
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT
+approach requires the first-order wavefunctions and densities obtained from
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties.
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+""",
+),
+
 Variable(
     abivarname="prepanl",
     varset="dfpt",
@@ -15640,7 +15797,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done,
 and the default value of [[qpt]], namely the null vector, is kept.
 
 Combined with [[qptnrm]], define the q vector [[qptn]](1:3) in the case
@@ -15731,7 +15888,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done,
 and the default value of [[qptopt]] is kept.
 
 Controls the set up to generate the Q point [[qptn]](1:3) to be used for the
@@ -15783,7 +15940,7 @@ Variable(
     excludes="[[ngqpt]]",
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done,
 and the default value of [[qptrlatt]] is kept.
 
 This input variable is used only when [[qptopt]] is positive. It partially
@@ -16314,6 +16471,9 @@ eigenfrequencies output).
 The treatment of the acoustic sum rule and charge neutrality sum rule is finer
 at the level of the ANADDB utility, with the two independent input variables
 [[anaddb:asr]] and [[anaddb:chneut]].
+Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
+Running different DFPT calculations from scrarch just to change [[rfasr]] is indeed a waste of time as
+you can compute the DDB only once and then use anaddb.
 """,
 ),
 
@@ -16837,7 +16997,7 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done, 
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done,
 and the default value of [[shiftq]] is kept.
 
 It is used only when [[qptopt]] >= 0, and must be defined if [[nshiftq]] is larger than 1.
@@ -20180,7 +20340,7 @@ redundant with that supplied by array [[xred]]. By default,
 although Angstrom can be specified, if preferred, since [[xcart]] has the [[LENGTH]] characteristics.
 If [[xred]] are ABSENT from the input file and [[xcart]] is
 provided, then the values of [[xred]] will be computed from the provided
-[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]] 
+[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]]
 to provide starting coordinates).
 One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
@@ -20234,7 +20394,7 @@ must be absent from the input file.
 One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
 
-The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom, 
+The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom,
 named `xangst`.
 """,
 ),
@@ -21169,10 +21329,10 @@ Variable(
     added_in_version="before v9",
     text=r"""
 Factor that multiplies the three primitive vectors to generate a supercell.
-The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]] 
+The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]]
 are simply replicated in the different images of the original primitive cell.
 If present, [[spinat]] and [[chrgat]] are also replicated without change.
-Note that [[supercell_latt]] is not echoed. It is immediately used to change 
+Note that [[supercell_latt]] is not echoed. It is immediately used to change
 [[natom]], [[typat]], and all input variables that depend on [[natom]] and [[typat]].
 
 This input variable cannot be used jointly with non-default values of [[natrd]] and [[nobj]].

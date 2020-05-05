@@ -108,5 +108,6 @@ diemac 13.0
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
 #%% description = Linear response function and long-wave magnitudes calculation for Silicon
+#%% topics = longwave
 #%%<END TEST_INFO>
 

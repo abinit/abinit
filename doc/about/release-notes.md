@@ -123,16 +123,16 @@ For further details about the implementation, please consult this [preprint](htt
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
 
-<!--
 **B.2** Flexoelectricity and dynamical quadrupoles
 
 A new driver has been included in abinit that allows one to compute 
-4 new spatial dispersion tensors: clamped-ion FxE tensor, dynamic quadrupoles, 
-first moment of IFC matrix and square bracket tensor of Born and Huang. 
+4 spatial dispersion tensorial quantities: the clamped-ion flexoelectric tensor, the dynamical quadrupoles, 
+the first moment of IFC matrix and the first moment of the piezoelectric force response tensor. 
 Precalculation of ground state, first and second (d2_dkdk) order response functions is required. 
 After execution, the driver creates a 3rd order energy derivative database file 
-that will be used by anaddb to compute the lattice-mediated FxE components 
-or to include the dipole-quadrupole and quadrupole-quadrupole electrostatic interactions in the calculation of the dynamical matrix.
+that is used by anaddb to compute the mixed and lattice-mediated flexoelectric tensors 
+or to include the dipole-quadrupole and quadrupole-quadrupole electrostatic interactions 
+in the calculation of the dynamical matrix.
 
 See the complementary description
 in the Sec. V. D of [[cite:Romero2020]], with underlying theory and test calculations
@@ -160,7 +160,7 @@ At the practical level, see [[cite:Romero2020]]:
 >   to improve the prevalent dipole-dipole treatment of the
 >   long-range interactions. The ANADDB routines that carry
 >   out the process of interpolating the dynamical matrix following
->   Ref. 34 have been adapted to incorporate the dipolequadrupole
+>   Ref. 34 have been adapted to incorporate the dipole-quadrupole
 >   and quadrupole-quadrupole electrostatic interactions
 >   derived in Ref. 102. This new functionality results in a
 >   faster convergence of the phonon bands calculation with respect
@@ -171,14 +171,17 @@ At the practical level, see [[cite:Romero2020]]:
 >   norm-conserving pseudopotentials without non-linear core corrections, and the LDA
 >   functional.
 
-A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]].
+A tutorial is in preparation, with tests [[test:lw_1]] to [[test:lw_7]],
+as well as a specific topic.
 
-New input variables have been defined: lw_flexo, lwqdvpl, prepalw, and d3e_pert2_strs. 
-At present (v9.0.2) they are not yet documented, although tested in the above-mentioned examples.
-A tutorial should be set up, as well as a specific topic.
+New input variables have been defined: [[lw_flexo]], [[lw_qdrpl]], [[prepalw]], [[flexoflag@anaddb]],
+[[dipquad@anaddb]], [[quadquad@anaddb]]. 
 
-M. Royo, M. Stengel, M. Giantomassi (MR 618).
--->
+This capability is still under development and not completely stable.
+Interested users are strongly recommended to contact Miquel Royo (mroyo@icmab.es)
+or Massimiliano Stengel (mstengel@icmab.es) before start using it.   
+
+By M. Royo, M. Stengel, M. Giantomassi.
 
 
 **B.2** DFT+DMFT

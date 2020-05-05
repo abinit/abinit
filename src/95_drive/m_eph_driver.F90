@@ -555,13 +555,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_filepath, comm)
    if (dtset%prtvol > 10) dvdb%debug = .True.
+
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf
+
+   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   !dvdb%rspace_method = dtset%dvdb_rspace_method
 
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 
    ! Set qdamp from frohl_params
-   dvdb%qdamp = 0.1
+   !dvdb%qdamp = 0.1
    if (dtset%frohl_params(4) /= 0) then
      dvdb%qdamp = dtset%frohl_params(4)
      !dvdb%qdamp = dtset%qdamp
@@ -569,7 +573,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ! Set quadrupoles
    dvdb%qstar = qdrp_cart
-   if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
+   if (iblock_quadrupoles /= 0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.
    ! This flag activates automatically the treatment of the long-range term in the Fourier interpolation

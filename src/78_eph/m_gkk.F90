@@ -132,7 +132,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: my_rank,nproc,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band,ik,ikq,timerev_q
- integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq, comm_rpt, method
+ integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq, comm_rpt
  integer :: mpw,mpw_k,mpw_kq,ierr,my_kstart,my_kstop,ncid
  integer :: n1,n2,n3,n4,n5,n6,nspden,ncerr
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
@@ -314,9 +314,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  if (dtset%eph_use_ftinterp /= 0) then
    MSG_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
-   method = dtset%userid
-   !method = 0
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
@@ -646,7 +644,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt, method
+ integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt
  logical :: with_lr_model
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -741,8 +739,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  else if (dtset%eph_task == +16) then
    call wrtout([std_out, ab_out], " Using Fourier interpolation.")
     comm_rpt = xmpi_comm_self
-    method = dtset%userid
-    call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, method, comm_rpt)
+    call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
     interpolated = 1
  else
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
