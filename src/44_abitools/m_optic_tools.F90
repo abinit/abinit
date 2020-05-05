@@ -458,7 +458,7 @@ character(len=fnlen) :: fnam1
 character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
-complex(dpc), allocatable :: chi(:)
+complex(dpc), allocatable :: chi(:,:)
 complex(dpc), allocatable :: eps(:)
 
 ! *********************************************************************
@@ -536,7 +536,7 @@ complex(dpc), allocatable :: eps(:)
 ! end if
 
 !allocate local arrays
- ABI_ALLOCATE(chi,(nmesh))
+ ABI_ALLOCATE(chi,(nmesh,nspin))
  ABI_ALLOCATE(eps,(nmesh))
  ieta=(0._dp,1._dp)*brod
  renorm_factor=1._dp/(omega*dble(nsymcrys))
@@ -570,10 +570,8 @@ complex(dpc), allocatable :: eps(:)
  call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 !start calculating linear optical response
- chi(:)=0._dp
-! TODO: this loop should be outside the ik one, for speed and cache.
+ chi(:,:)=0._dp
  do isp=1,nspin
-   !do ik=1,nkpt
    do ik=my_k1,my_k2
      write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
      do ist1=1,nstval
@@ -584,15 +582,12 @@ complex(dpc), allocatable :: eps(:)
        if(do_linewidth) then
          e1_ep = e1_ep + EPBSt%linewidth(1,ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
-!      if (e1.lt.efermi) then
-!      do ist2=ist1,nstval
        do ist2=1,nstval
          e2=KSBSt%eig(ist2,ik,isp)
          e2_ep=EPBSt%eig(ist2,ik,isp)
          if(do_linewidth) then
            e2_ep = e2_ep - EPBSt%linewidth(1,ist2,ik,isp)*(0.0_dp,1.0_dp)
          end if
-!        if (e2.gt.efermi) then
          if (ist1.ne.ist2) then
 !          scissors correction of momentum matrix
            if(REAL(e1) > REAL(e2)) then
@@ -618,15 +613,15 @@ complex(dpc), allocatable :: eps(:)
 !          calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
-             chi(iw)=chi(iw)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
+             chi(iw,isp)=chi(iw,isp)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
              (b12/(-e12_ep-w)))
            end do
          end if
        end do ! states
 !      end if
      end do
-   end do ! spin
- end do ! k-points
+   end do ! k points
+ end do ! spin
 
  call xmpi_sum(chi,comm,ierr)
 
@@ -636,7 +631,7 @@ complex(dpc), allocatable :: eps(:)
  do iw=2,nmesh
    ene=(iw-1)*de
    ene=ene*ha2ev
-   eps(iw)=deltav1v2+4._dp*pi*chi(iw)
+   eps(iw)=deltav1v2+4._dp*pi*sum(chi(iw,:))
  end do
 
  if (my_rank == master) then
@@ -654,19 +649,24 @@ complex(dpc), allocatable :: eps(:)
    write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
    write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
    write(fout1,*)
-   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
+   if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
+   if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))         Spin up       Spin down '
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
+     if(nspin==1)write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
+     if(nspin==2)write(fout1, '(4es16.6)' ) ene,aimag(eps(iw)),4._dp*pi*aimag(chi(iw,1)),4._dp*pi*aimag(chi(iw,2))
      write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
    end do
    write(fout1,*)
    write(fout1,*)
-   write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
+   if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
+   if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))         Spin up       Spin down    +1 '
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
+     if(nspin==1)write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
+     if(nspin==2)write(fout1, '(5es16.6)' ) ene,dble(eps(iw)),4._dp*pi*dble(chi(iw,1)),4._dp*pi*dble(chi(iw,2)),one
    end do
    write(fout1,*)
    write(fout1,*)
