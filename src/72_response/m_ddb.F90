@@ -2578,9 +2578,9 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
  rfphon(:)=0
  rfelfd(:)=0
  rfqvec(:)=0
- rfphon(3)=1
- rfelfd(3)=1
  rfstrs(:)=0
+ rfelfd(1)=2
+ rfphon(2)=1
  rfqvec(3)=1
 
  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec=rfqvec)

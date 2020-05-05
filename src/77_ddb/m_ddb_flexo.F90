@@ -130,9 +130,9 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Look for the Gamma Block in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one
-   rfphon(3)=0
-   rfelfd(3)=1
-   rfstrs(3)=3
+   rfphon(:)=0
+   rfelfd(1)=2
+   rfstrs(2)=3
    rfqvec(3)=1
   
    write(msg, '(2a)' ) ch10," Extract the electronic flexoelectric coeficients from 3DTE"
@@ -144,9 +144,9 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find clamped ion FxE tensor in DDB file:", filnamddb))
      call wrtout(std_out, "  flexoflag=1 or 2 requires the DDB file to include the corresponding long wave 3rd derivatives")
+   else
+     call dtciflexo(ddb_lw%val(:,:,iblok),ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
    end if
-
-   call dtciflexo(ddb_lw%val(:,:,iblok),ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
 
  end if
 
@@ -170,9 +170,8 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Look for the Gamma Block of the Phi^(1) tensor in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one
-   rfphon(3)=1
-   rfelfd(3)=0
-   rfstrs(3)=0
+   rfphon(1)=1
+   rfphon(2)=1
    rfqvec(3)=1
   
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
@@ -189,9 +188,8 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Look for th block that contains the forces 
    qphon(:,:)=zero
    qphnrm(:)=one
+   rfphon(:)=0
    rfphon(4)=1
-   rfelfd(4)=0
-   rfstrs(4)=0
 
    write(msg, '(2a)' ) ch10," Extract the forces from 1DTE"
    call wrtout(std_out,msg,'COLL') 
@@ -209,9 +207,8 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Look for the Gamma Block of the dynamical matrix in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one
+   rfphon(:)=0
    rfphon(1:2)=1
-   rfelfd(1:2)=0
-   rfstrs(1:2)=0
   
    write(msg, '(2a)' ) ch10," Extract the Dynamical Matrix from 2DTE"
    call wrtout(std_out,msg,'COLL') 
@@ -224,8 +221,10 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
      call wrtout(std_out, "  flexoflag=1 or 3 requires the DDB file to include the corresponding 2nd derivatives")
    end if
 
-   call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),crystal%gprimd,&
-  & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
+   if (iblok/=0.and.jblok/=0) then
+     call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),crystal%gprimd,&
+   & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
+   end if
 
  end if
 
@@ -241,9 +240,8 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Look for the Gamma Block of the Phi^(1) tensor in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one
-   rfphon(3)=1
-   rfelfd(3)=0
-   rfstrs(3)=0
+   rfphon(1)=1
+   rfphon(2)=1
    rfqvec(3)=1
 
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
@@ -260,9 +258,9 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Look for the Gamma Block of the flexoelectric force response tensor in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one
-   rfphon(3)=1
-   rfelfd(3)=0
-   rfstrs(3)=3
+   rfphon(:)=0
+   rfphon(1)=1
+   rfstrs(2)=3
    rfqvec(3)=1
 
    write(msg, '(2a)' ) ch10," Extract the FxE force response coeficients from 3DTE"
@@ -279,8 +277,9 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Look for the stress tensor in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one
-   rfphon(4)=0
-   rfelfd(4)=0
+   rfphon(:)=0
+   rfstrs(:)=0
+   rfqvec(:)=0
    rfstrs(4)=3
 
    write(msg, '(2a)' ) ch10," Extract the stress tensor from 1DTE"
@@ -295,9 +294,10 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
      call wrtout(std_out, "  to compute the Lagrange Elastic Tensor ")
    end if
 
-   call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
-  & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,psinvdm,crystal%typat,crystal%ucvol,zeff)
-
+   if (iblok/=0.and.jblok/=0) then
+     call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
+   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,psinvdm,crystal%typat,crystal%ucvol,zeff)
+   end if
  end if
 
 !Merge the three contributions and print the total FxE tensor
