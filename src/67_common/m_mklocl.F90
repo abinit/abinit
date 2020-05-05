@@ -380,7 +380,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  !write(*,*)gcutoff
  !BG: Don't apply it just yet. Needs some testing before
-  gcutoff=one
+ !gcutoff=one
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:

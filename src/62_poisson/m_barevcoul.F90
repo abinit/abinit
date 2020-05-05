@@ -638,7 +638,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  !Initialize geomtry type to help select CASE
  vcutgeo=dtset%vcutgeo 
   
- SELECT CASE (TRIM(mode))
+ SELECT CASE ('CRYSTAL')
 
  CASE('SPHERE') ! Spencer-Alavi method
 
