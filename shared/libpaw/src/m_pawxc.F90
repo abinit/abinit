@@ -370,9 +370,10 @@ subroutine pawxc_size_dvxc_local()
 !Second derivative(s) of XC functional wrt density
  ndvxc_=0
  if (abs(order)>=2) then
-   if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
-     ndvxc_=min(nspden,2)+1
-   else if ((ixc>=2.and.ixc<=6).or.ixc==50) then
+   if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
+&      ixc==21.or.ixc==22) then
+     ndvxc_=min(nspden,2)+1  
+   else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
      ndvxc_=1
    else if (ixc==12.or.ixc==24) then
      ndvxc_=8
@@ -380,7 +381,8 @@ subroutine pawxc_size_dvxc_local()
 &           ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
      ndvxc_=15
    else if (ixc<0) then
-     ndvxc_=3 ; if (need_gradient) ndvxc_=15
+     ndvxc_=2*min(nspden,2)+1 ; if (order==-2) ndvxc_=2
+     if (need_gradient) ndvxc_=15
    end if
  end if
 
