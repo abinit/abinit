@@ -656,7 +656,6 @@ complex(dpc), allocatable :: eps(:)
      ene=ene*ha2ev
      if(nspin==1)write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
      if(nspin==2)write(fout1, '(4es16.6)' ) ene,aimag(eps(iw)),4._dp*pi*aimag(chi(iw,1)),4._dp*pi*aimag(chi(iw,2))
-     write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
    end do
    write(fout1,*)
    write(fout1,*)
