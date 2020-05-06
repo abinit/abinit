@@ -660,12 +660,12 @@ complex(dpc), allocatable :: eps(:)
    write(fout1,*)
    write(fout1,*)
    if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
-   if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))         Spin up       Spin down    +1 '
+   if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))         Spin up       Spin down    +delta(diag) '
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
      if(nspin==1)write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
-     if(nspin==2)write(fout1, '(5es16.6)' ) ene,dble(eps(iw)),4._dp*pi*dble(chi(iw,1)),4._dp*pi*dble(chi(iw,2)),one
+     if(nspin==2)write(fout1, '(5es16.6)' ) ene,dble(eps(iw)),4._dp*pi*dble(chi(iw,1)),4._dp*pi*dble(chi(iw,2)),deltav1v2
    end do
    write(fout1,*)
    write(fout1,*)
