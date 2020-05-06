@@ -6829,11 +6829,10 @@ Variable(
     vartype="integer",
     topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
     dimensions="scalar",
-    defaultval=6,
+    defaultval=3,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
     added_in_version="before_v9",
     text=r"""
-SHOULD REPLACE THE DEFAULT VALUE BY icutcoul=3 !
 Many-body calculations for isolated systems, 1D and 2D systems present a slow convergence with
 respect to the size of the supercell due to the long ranged Coulomb
 interaction and the high degree of non-locality of the operators involved. 
@@ -6843,7 +6842,7 @@ Also, even in the ground-state case, a cut-off Coulomb interaction might prove u
 
 [[icutcoul]] defines the particular expression to be used for the Coulomb term
 in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
-of the system. Possible values of [[icutcoul]] are from 0 to 6. The
+of the system. Possible values of [[icutcoul]] are from 0 to 5. The
 corresponding influential variables are [[vcutgeo]] and [[rcut]].
 Also, in the GW case, the related variable [[icsing]] allows one to treat the integration
 of the $\mathbf{G}=0$ Coulomb singularity.
@@ -6854,7 +6853,6 @@ of the $\mathbf{G}=0$ Coulomb singularity.
   * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
-  * 6 TO BE SUPPRESSED ! 
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].

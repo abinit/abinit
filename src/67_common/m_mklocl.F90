@@ -319,7 +319,8 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gcart(3),tsec(2)
- real(dp),allocatable :: work1(:,:),gcutoff(:)
+ real(dp),allocatable :: gcutoff(:)
+ real(dp),allocatable :: work1(:,:)
 
 ! *************************************************************************
 
@@ -378,9 +379,8 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !Initialize Gcut-off array from m_barevcoul 
  ABI_ALLOCATE(gcutoff,(nfft))
  call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
- !write(*,*)gcutoff
  !BG: Don't apply it just yet. Needs some testing before
- !gcutoff=one
+ gcutoff=one
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:

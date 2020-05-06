@@ -34,6 +34,7 @@ module m_atm2fft
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
+ use m_barevcoul,   only : termcutoff
  use m_pawtab,      only : pawtab_type
  use m_distribfft,  only : distribfft_type
  use m_fft,         only : zerosym, fourdp
@@ -243,6 +244,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
  real(dp),allocatable :: dyfrn_indx(:,:,:),dyfrv_indx(:,:,:),grn_indx(:,:)
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: workv(:,:)
 
 ! *************************************************************************
@@ -357,6 +359,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  ABI_ALLOCATE(phre_igia,(natom))
  ABI_ALLOCATE(phim_igia,(natom))
 
+ !Initialize Gcut-off array from m_barevcoul 
+ ABI_ALLOCATE(gcutoff,(nfft))
+ !call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ !BG: Don't apply it just yet. Needs some testing before
+ gcutoff=one
+
  ia1=1
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -440,7 +448,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  v_at=(aa*vspl(jj,1,itypat)+bb*vspl(jj+1,1,itypat)+&
 &                 cc*vspl(jj,2,itypat)+dd*vspl(jj+1,2,itypat)) &
-&                 /gsquar
+&                 /gsquar * gcutoff(jj)
                end if
              end if
              if (optn==1) then
@@ -722,6 +730,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  ABI_DEALLOCATE(phre_igia)
  ABI_DEALLOCATE(phim_igia)
+ ABI_DEALLOCATE(gcutoff)
 
 !Get local potential or density back to real space
  if(optatm==1)then

@@ -212,7 +212,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 !
 ! === Define geometry and cutoff radius (if used) ===
  vcut%mode='NONE'
- icutcoul_local=dtset%icutcoul
+ !icutcoul_local=dtset%icutcoul
 
 ! BG: Temporary to circumvent the tests 
  if(shortrange) then 
@@ -557,7 +557,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 !Local variables-------------------------------
 !scalars
  integer,parameter  :: N0=1000
- integer            :: icutc_loc,ierr
+ integer            :: ierr,icutc_loc
  integer            :: i1,i2,i23,i3
  integer            :: ii,ig,ing,n1,n2,n3,id(3)
  integer            :: test,opt_surface !opt_cylinder
@@ -590,7 +590,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  ABI_ALLOCATE(gpq2,(n1*n2*n3))
  ABI_ALLOCATE(gcart,(n1*n2*n3))  
  ABI_ALLOCATE(gcutoff,(n1*n2*n3))
- gcutoff(:)=zero
+ gpq = zero ; gpq2 = zero ; gcutoff=zero
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
@@ -638,7 +638,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  !Initialize geomtry type to help select CASE
  vcutgeo=dtset%vcutgeo 
   
- SELECT CASE ('CRYSTAL')
+ SELECT CASE (TRIM(mode))
 
  CASE('SPHERE') ! Spencer-Alavi method
 
@@ -789,11 +789,11 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 
  CASE('CRYSTAL')
    gcutoff(:)=one ! Neutral cut-off
-   write(msg,'(a)')'ATT: No cut-off applied to G**2!'
+   write(msg,'(a)')'CRYSTAL method: no cut-off applied to G**2 while CRYSTAL method is implied!'
    MSG_WARNING(msg) 
  CASE DEFAULT
    gcutoff=one ! Neutral cut-off
-   write(msg,'(a)')'ATT: No cut-off applied to G**2!'
+   write(msg,'(a)')'No cut-off applied to G**2!'
    MSG_WARNING(msg)
  END SELECT
   
