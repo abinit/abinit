@@ -16,6 +16,9 @@ inp_files = [
 "t03.in",
 # Structure variable
 "t04.in",
+# Optic
+"t05.in",
+"t06.in",
 # Electron-phonon
 "t50.in",
 "t51.in",
