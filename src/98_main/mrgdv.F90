@@ -56,7 +56,7 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, method, dvdb_qdamp, symv1scf
+ integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, rspace_cell, dvdb_qdamp, symv1scf
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
@@ -180,12 +180,12 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
      ABI_CHECK(get_arg("ddb-path", ddb_filepath, msg, default="") == 0, msg)
-     ABI_CHECK(get_arg("method", method, msg, default=0) == 0, msg)
+     ABI_CHECK(get_arg("rspace_cell", rspace_cell, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
      ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=-1) == 0, msg)
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
-     call dvdb_test_ftinterp(dvdb_filepath, method, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
+     call dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
                              ddb_filepath, prtvol, coarse_ngqpt, comm)
 
    case ("downsample")

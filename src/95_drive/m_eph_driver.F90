@@ -560,7 +560,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb%symv1 = dtset%symv1scf
 
    ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
-   !dvdb%rspace_method = dtset%dvdb_rspace_method
+   dvdb%rspace_cell = dtset%dvdb_rspace_cell
 
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 

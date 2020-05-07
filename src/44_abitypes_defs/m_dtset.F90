@@ -881,6 +881,7 @@ type, public :: dataset_type
  integer :: mixprec = 0
  integer :: symv1scf = 0
  integer :: dvdb_add_lr = 1
+ integer :: dvdb_rspace_cell = 0
 
  integer :: sigma_bsum_range(2) = 0
 
@@ -1405,6 +1406,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
  dtout%dvdb_add_lr       = dtin%dvdb_add_lr
+ dtout%dvdb_rspace_cell  = dtin%dvdb_rspace_cell
 
  dtout%sigma_bsum_range = dtin%sigma_bsum_range
  dtout%sigma_erange = dtin%sigma_erange
@@ -1515,7 +1517,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%hmctt              = dtin%hmctt
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
- dtout%icsing             = dtin%icsing 
+ dtout%icsing             = dtin%icsing
  dtout%icutcoul           = dtin%icutcoul
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
@@ -3075,7 +3077,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
 !list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g'
- list_vars=trim(list_vars)//' dosdeltae dtion dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dynamics dynimage'
+ list_vars=trim(list_vars)//' dosdeltae dtion dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_rspace_cell dynamics dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
  list_vars=trim(list_vars)//' d3e_pert2_strs'
@@ -3086,7 +3088,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
-!list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_np_pqbks'  ! XG20200321, please provide testing for eph_np_pqbks 
+!list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_np_pqbks'  ! XG20200321, please provide testing for eph_np_pqbks
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
@@ -3212,8 +3214,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
 !MS Variables for SCALE-UP
-!This is only for the developer version, not for the production version. So, was commented. 
-! @Marcus: simply uncomment these lines in v9.1 (not v9.0 !), and continue to develop without worrying. 
+!This is only for the developer version, not for the production version. So, was commented.
+! @Marcus: simply uncomment these lines in v9.1 (not v9.0 !), and continue to develop without worrying.
 !list_vars=trim(list_vars)//' scup_elec_model scup_ksamp scup_tcharge scup_initorbocc scup_ismagnetic'
 !list_vars=trim(list_vars)//' scup_istddft scup_printbands scup_printgeom scup_printeigv scup_printeltic '
 !list_vars=trim(list_vars)//' scup_printorbocc scup_printniter scup_nspeck scup_speck scup_ndivsm'
@@ -3240,7 +3242,7 @@ subroutine chkvars(string)
 !T
  list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature test_effpot tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
- list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat' ! XG20200321, please do not reintroduce transport_ngkpt without documenting it, and testing it 
+ list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat' ! XG20200321, please do not reintroduce transport_ngkpt without documenting it, and testing it
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '

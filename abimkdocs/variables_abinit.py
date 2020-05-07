@@ -21533,4 +21533,24 @@ one has to resort to the **standard approach** to define the list of atoms and t
 """
 ),
 
+Variable(
+    abivarname="dvdb_rspace_cell",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0
+    mnemonics="DVDB R-SPACE CELL",
+    added_in_version="9.1.0",
+    text=r"""
+This **advanced** variable sets the list of supercell $\RR$-points used to construct the scattering potential
+in the real-space representation with the associated weights for the Fourier transform
+to go from $W(\rr,\RR)$ to $v1scf(\rr,\qq)$.
+Possible values are:
+
+    0 --> Use unit super cell for $\RR$ space. All weights set to 1.
+    1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algo as for the dynamical matrix)
+""",
+),
+
 ]

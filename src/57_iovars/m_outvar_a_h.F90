@@ -677,6 +677,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dvdb_qcache_mb
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_qcache_mb','DPR',0)
 
+ intarr(1,:)=dtsets(:)%dvdb_rspace_cell
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_rspace_cell','INT',0)
+
 !dynimage
  intarr(1:marr,0)=1                 ! default value
  narr=nimage                        ! default size for all datasets

@@ -281,6 +281,7 @@ module m_dvdb
    ! Verbosity level
 
   real(dp) :: qdamp = -one
+  !real(dp) :: qdamp = 0.1_dp
    ! Exponential damping used in the Fourier transform of the long-range potentials
    ! Use negative value to deactivate damping.
 
@@ -314,10 +315,10 @@ module m_dvdb
    ! 1 --> Symmetrization in real space
    ! 2 --> Call v1phq_complete after interpolation of the potentials in ftinterp_qpt
 
-  integer :: rspace_method = 0
-   ! Flag defining the algorithm for generating the list of R-points and the weigths used to compute W(r,R)
-   ! 0 --> Use (big) ngqpt unit cell for R. all weights set to 1.
-   ! 1 --> Use Wigner-Seitz super cell and atom dependent weights
+  integer :: rspace_cell = 0
+   ! Flag defining the algorithm for generating the list of R-points and the weigths used to go from W(r,R) to v1scf(r,q)
+   ! 0 --> Use unit supercell for R space. All weights set to 1.
+   ! 1 --> Use Wigner-Seitz super cell and atom dependent weights (same algo as for dynmat)
 
   type(qcache_t) :: qcache
     ! Cache used to store potentials if Fourier interpolation is not used
@@ -2917,13 +2918,13 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
  ABI_REMALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
  db%my_wratm = one
- if (db%rspace_method == 1) then
+ if (db%rspace_cell == 1) then
    do iatom=1,db%cryst%natom
      if (iatom >= ii .and. iatom <= jj) db%my_wratm(:, iatom) = all_wghatm(iatom, iatom, my_rstart:my_rstop)
    end do
  end if
 
- write(std_out, "(a, i0)")" Using method for integration weights: ", db%rspace_method
+ write(std_out, "(a, i0)")" Using rspace_cell method for integration weights: ", db%rspace_cell
  write(std_out, "(a, i0)")" Total number of R-points in real-space big box: ", db%nrtot
  write(std_out, "(a, i0)")" Number of R-points treated by this MPI rank: ", db%my_nrpt
  write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
@@ -3084,7 +3085,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
- !if (db%rspace_method == 1) db%v1scf_rpt(2,:,:,:,:) = zero
+ !if (db%rspace_cell == 1) db%v1scf_rpt(2,:,:,:,:) = zero
  !call dvdb_enforce_asr(db)
 
  !do irpt=1,db%my_nrpt
@@ -3340,7 +3341,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
- if (db%rspace_method == 0) then
+ if (db%rspace_cell == 0) then
 #if 1
    ! We want a gamma centered q-mesh for the FFT.
    ! TODO: This is not needed anymore because we are gonna use slow FFT to handle a possible distribution of rpts
@@ -3377,7 +3378,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
      end do
    end do
 
- else if (db%rspace_method == 1) then
+ else if (db%rspace_cell == 1) then
    ! Compute rprim, and gprim
    call mkradim(acell, rprim, cryst%rprimd)
    call canat9(brav1, cryst%natom, rcan, rprim, trans, cryst%xred)
@@ -3393,7 +3394,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    call xcart2xred(nrtot, cryst%rprimd, all_rcart, all_rpt)
    ABI_FREE(all_rcart)
  else
-   MSG_ERROR(sjoin("Wrong rspace_method:", itoa(db%rspace_method)))
+   MSG_ERROR(sjoin("Wrong rspace_cell:", itoa(db%rspace_cell)))
  end if
 
  ! Find correspondence BZ --> IBZ. Note:
@@ -6259,7 +6260,7 @@ subroutine dvdb_write_wr(dvdb, dtset, out_ncpath)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "symv1scf", "rspace_method"])
+     "symv1scf", "rspace_cell"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "has_dielt", "has_zeff", "has_quadrupoles", "has_efield", "dvdb_add_lr"])
@@ -6268,8 +6269,8 @@ subroutine dvdb_write_wr(dvdb, dtset, out_ncpath)
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_set_datamode(ncid))
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-       "symv1scf", "rspace_method"], &
-       [dvdb%symv1, dvdb%rspace_method])
+       "symv1scf", "rspace_cell"], &
+       [dvdb%symv1, dvdb%rspace_cell])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
      "has_dielt", "has_zeff", "has_quadrupoles", "has_efield"], &
@@ -6442,12 +6443,12 @@ end subroutine dvdb_write_wr
 !!
 !! SOURCE
 
-subroutine dvdb_test_ftinterp(dvdb_filepath, method, symv1, dvdb_ngqpt, dvdb_add_lr, qdamp, &
+subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvdb_add_lr, qdamp, &
                               ddb_filepath, prtvol, coarse_ngqpt, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: dvdb_filepath, ddb_filepath
- integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, method, symv1
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, rspace_cell, symv1
  integer,intent(in) :: dvdb_ngqpt(3), coarse_ngqpt(3)
 
 !Local variables-------------------------------
@@ -6481,7 +6482,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, method, symv1, dvdb_ngqpt, dvdb_add
  dvdb%symv1 = symv1
  dvdb%add_lr = dvdb_add_lr
  dvdb%qdamp = qdamp
- dvdb%rspace_method = method
+ dvdb%rspace_cell = rspace_cell
 
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
