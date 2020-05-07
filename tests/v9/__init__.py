@@ -21,6 +21,8 @@ inp_files = [
 "t06.in", # optic
 "t07.in", # GGA-PBE nsppol=2
 "t08.in", # optic
+"t09.in", # GGA-PBE PAW nsppol=1
+"t10.in", # optic
 # Electron-phonon
 "t50.in",
 "t51.in",
