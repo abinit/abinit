@@ -13,39 +13,21 @@
  do_antiresonant = .FALSE.,
 /
 &COMPUTATIONS
- num_lin_comp = 3,
- lin_comp = 11,33,23,
- num_nonlin_comp = 2,
- nonlin_comp = 123,222,
- num_linel_comp = 2,
- linel_comp = 123,222,
- num_nonlin2_comp = 2,
- nonlin2_comp = 123,222,
+ num_lin_comp = 2,
+ lin_comp = 11,23,
+ num_nonlin_comp = 0,
+ num_linel_comp = 0,
+ num_nonlin2_comp = 0,
 /
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = optic
-#%% test_chain = t47.in, t48.in, t49.in
+#%% test_chain = t05.in, t06.in
 #%% [files]
 #%% files_to_test = 
 #%%   t06_0001_0001-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
 #%%   t06_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
-#%%   t06_0001_0002_0003-ChiRe.out      , tolnlines = 2,   tolabs = 1.1e-06, tolrel = 4.0e-07; 
-#%%   t06_0001_0002_0003-ChiIm.out      , tolnlines = 115, tolabs = 1.1e-04, tolrel = 3.0e-06; 
-#%%   t06_0001_0002_0003-ChiAbs.out     , tolnlines = 4,   tolabs = 1.1e-05, tolrel = 2.2e-07;
-#%%   t06_0001_0002_0003-ChiTotRe.out   , tolnlines = 5,   tolabs = 1.1e-03, tolrel = 2.0e-07;
-#%%   t06_0002_0002_0002-ChiRe.out      , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
-#%%   t06_0001_0002_0003-ChiEORe.out    , tolnlines = 1,   tolabs = 1.1e-05, tolrel = 2.0e-07;
-#%%   t06_0001_0002_0003-ChiEOIm.out    , tolnlines = 84,  tolabs = 1.1e-06, tolrel = 2.0e-06;
-#%%   t06_0001_0002_0003-ChiEOAbs.out   , tolnlines = 1,   tolabs = 1.1e-06, tolrel = 5.5e-08;
-#%%   t06_0001_0002_0003-ChiEOTotRe.out , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
-#%%   t06_0002_0002_0002-ChiEORe.out    , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
-#%%   t06_0001_0002_0003-ChiSHGRe.out   , tolnlines = 1,   tolabs = 1.1e-05, tolrel = 2.0e-07;
-#%%   t06_0001_0002_0003-ChiSHGIm.out   , tolnlines = 119,  tolabs = 1.1e-05, tolrel = 5.0e-05;
-#%%   t06_0001_0002_0003-ChiSHGAbs.out  , tolnlines = 5,   tolabs = 1.1e-04, tolrel = 4.0e-07;
-#%%   t06_0001_0002_0003-ChiSHGTotRe.out, tolnlines = 1,   tolabs = 1.1e-07, tolrel = 1.1e-07;
-#%%   t06_0002_0002_0002-ChiSHGRe.out   , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -53,6 +35,6 @@
 #%% authors = M. Giantomassi
 #%% keywords = 
 #%% description = 
-#%%  GaAs, zinc-blende structure. nsppol=2. Code optic. Use DDK files in netcdf format. Should produce same results as v7#49
+#%%  GaAs, zinc-blende structure. GGA-PBE. nsppol=1. Code optic. Use DDK files in netcdf format. 
 #%% topics = Optic
 #%%<END TEST_INFO>

@@ -8,20 +8,21 @@
  prtden1  1     
   nband1  4     
  kptopt1  1
+ tolwfr1  1.0d-12
 
 #Second dataset : NSCF run with kptopt 1 (more bands)
    iscf2 -2  
  getwfk2  1   
  getden2  1
-  nband2  20
  kptopt2  1
+ tolwfr2  1.0d-12
 
 #Third dataset : NSCF run with kptopt 3
    iscf3 -2  
  getwfk3  2   
  getden3  1
-  nband3  20
  kptopt3  3
+ tolwfr3  1.0d-12
 
 # ddk response function
    iscf4 -3
@@ -30,7 +31,6 @@
   rfdir4  1 0 0
  rfelfd4  2
  getwfk4  3
-  nband4  20
 
 # ddk response function
    iscf5 -3
@@ -39,7 +39,6 @@
   rfdir5  0 1 0
  rfelfd5  2
  getwfk5  3
-  nband5  20
 
 
 # ddk response function
@@ -49,7 +48,6 @@
   rfdir6  0 0 1
  rfelfd6  2
  getwfk6  3
-  nband6  20
 
 
 #Common data
@@ -61,18 +59,17 @@
  ngkpt 2 2 2  # too small !
  kptopt 3 # for optic
 
- nsppol 2
-
  acell   3*10.60
  diemac 10.0
- ecut 4.00   # too small !
+ ecut 6.00   # too small !
  natom  2 
- nbdbuf 0
+ nband 20
+ nbdbuf 2
  nstep 100
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 3*0.00d0 3*0.25d0
- typat  1 2  tolwfr  1.e-16 # too small !
+ typat  1 2  tolwfr  1.e-8
  znucl  31 33
 
 #%%<BEGIN TEST_INFO>
@@ -82,7 +79,7 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 31ga.SGS_mod, 33as.SGS_mod
+#%% psp_files = Ga-low_r.psp8, As_r.psp8
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
@@ -90,6 +87,7 @@
 #%% keywords = NC, DFPT 
 #%% description = 
 #%%   GaAs, zinc-blende structure. Treated with nsppol=2.
+#%%   Use accurate pseudodojo pseudopotentials, including the d states. So 10 more bands than without.
 #%%   Generate the data for optic (linear and non-linear coefficients).
 #%%   to be analysed in test 06 (netcdf files with h1 matrix elements).
 #%% topics = Optic
