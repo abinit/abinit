@@ -701,12 +701,12 @@ complex(dpc), allocatable :: eps(:)
    end do
    write(fout1,*)
    write(fout1,*)
-   write(fout1, '(a)' )' # Energy(eV)         absorption coeff (in m-1) = omega Im(eps) / c n(eps)'
+   write(fout1, '(a)' )' # Energy(eV)         absorption coeff (in 10^6 m-1) = omega Im(eps) / c n(eps)'
    do iw=2,nmesh
      ene=(iw-1)*de
      tmpabs=zero
      if (abs(eps(iw)) + dble(eps(iw)) > zero) then
-       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter
+       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter * 1.0d-6
      end if
      write(fout1, '(2es16.6)' ) ha2ev*ene, tmpabs
    end do
