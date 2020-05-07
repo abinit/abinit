@@ -915,7 +915,7 @@
     8.108992E+00    0.000000E+00
 
 
- # Energy(eV)         absorption coeff (in m-1) = omega Im(eps) / c n(eps)
+ # Energy(eV)         absorption coeff (in 10^6 m-1) = omega Im(eps) / c n(eps)
     5.442277E-02    0.000000E+00
     1.088455E-01    0.000000E+00
     1.632683E-01    0.000000E+00
