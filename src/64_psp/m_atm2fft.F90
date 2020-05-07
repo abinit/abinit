@@ -361,9 +361,9 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  !Initialize Gcut-off array from m_barevcoul 
  ABI_ALLOCATE(gcutoff,(nfft))
- !call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  !BG: Don't apply it just yet. Needs some testing before
- gcutoff=one
+ !gcutoff=one
 
  ia1=1
  do itypat=1,ntypat
@@ -448,7 +448,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  v_at=(aa*vspl(jj,1,itypat)+bb*vspl(jj+1,1,itypat)+&
 &                 cc*vspl(jj,2,itypat)+dd*vspl(jj+1,2,itypat)) &
-&                 /gsquar * gcutoff(jj)
+&                 /gsquar * gcutoff(ii)
                end if
              end if
              if (optn==1) then

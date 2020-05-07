@@ -295,7 +295,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
  a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
 
- SELECT CASE (vcut%mode)
+ SELECT CASE (TRIM(vcut%mode))
  CASE('SPHERE') ! Spencer-Alavi method
 
    do ig=1,nfft
@@ -603,15 +603,14 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  end do
 
  ! Get the cut-off method info from the input file
- icutc_loc=dtset%icutcoul
- 
  ! Assign method to one of the available cases
- if (icutc_loc==0) mode='SPHERE'
- if (icutc_loc==1) mode='CYLINDER'
- if (icutc_loc==2) mode='SURFACE'
- if (icutc_loc==3) mode='CRYSTAL'
- if (icutc_loc==4) mode='ERF'
- if (icutc_loc==5) mode='ERFC'
+ mode='NONE' 
+ if (dtset%icutcoul==0) mode='SPHERE'
+ if (dtset%icutcoul==1) mode='CYLINDER'
+ if (dtset%icutcoul==2) mode='SURFACE'
+ if (dtset%icutcoul==3) mode='CRYSTAL'
+ if (dtset%icutcoul==4) mode='ERF'
+ if (dtset%icutcoul==5) mode='ERFC'
 
   do i3=1,n3
    ! Precompute some products that do not depend on i2 and i1
@@ -797,6 +796,8 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
    MSG_WARNING(msg)
  END SELECT
   
+ write(*,*)'This is mode ', mode, Dtset%icutcoul
+
  ABI_DEALLOCATE(gq) 
  ABI_DEALLOCATE(gpq)
  ABI_DEALLOCATE(gpq2)
