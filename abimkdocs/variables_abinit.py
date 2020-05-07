@@ -21549,8 +21549,44 @@ to go from $W(\rr,\RR)$ to $v1scf(\rr,\qq)$.
 Possible values are:
 
     0 --> Use unit super cell for $\RR$ space. All weights set to 1.
-    1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algo as for the dynamical matrix)
+    1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix)
 """,
+),
+
+Variable(
+    abivarname="dvdb_qdamp",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0
+    mnemonics="DVDB Q-DAMPing",
+    added_in_version="9.1.0",
+    text=r"""
+""",
+# In the actual implementation, following previous approaches~\cite{Sjakste2015,Giustino2017},
+# each component is multiplied
+# by the Gaussian  filter $e^{-\frac{|\qG|^2}{4\alpha}}$~\footnote{
+# The $\alpha$ parameter determines the separation between the long-range and the short-range parts
+# of the interaction and is used
+# to express Ewald sums~\cite{Pickett1989,Gonze1997}
+# in terms of a sum in $\GG$-space (long-range part) and a sum in real space that, being short ranged,
+# is not relevant for the definition of the LR model.
+
+),
+
+Variable(
+    abivarname="eph_mrta",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=1
+    mnemonics="activate Momentum Relaxation Time Approximation",
+    added_in_version="9.1.0",
+    text=r"""
+""",
+
 ),
 
 ]

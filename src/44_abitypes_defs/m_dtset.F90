@@ -145,6 +145,7 @@ type, public :: dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
+ integer :: eph_mrta = 0
  integer :: eph_restart = 0
  integer :: eph_task
  integer :: exchn2n3d
@@ -617,6 +618,7 @@ type, public :: dataset_type
  real(dp) :: dosdeltae
  real(dp) :: dtion
  real(dp) :: dvdb_qcache_mb = 1024.0_dp
+ real(dp) :: dvdb_qdamp = 0.1_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
  real(dp) :: ecutsigx
@@ -1388,6 +1390,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  !dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
+ dtout%eph_mrta           = dtin%eph_mrta
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -1405,6 +1408,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dvdb_ngqpt        = dtin%dvdb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
+ dtout%dvdb_qdamp        = dtin%dvdb_qdamp
  dtout%dvdb_add_lr       = dtin%dvdb_add_lr
  dtout%dvdb_rspace_cell  = dtin%dvdb_rspace_cell
 
@@ -3077,7 +3081,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
 !list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g'
- list_vars=trim(list_vars)//' dosdeltae dtion dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_rspace_cell dynamics dynimage'
+ list_vars=trim(list_vars)//' dosdeltae dtion'
+ list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
+ list_vars=trim(list_vars)//' dynamics dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
  list_vars=trim(list_vars)//' d3e_pert2_strs'
@@ -3088,10 +3094,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
-!list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_np_pqbks'  ! XG20200321, please provide testing for eph_np_pqbks
+!list_vars=trim(list_vars)//' eph_np_pqbks'
+  ! XG20200321, please provide testing for eph_np_pqbks
+  ! Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
+  ! and all the tests in the paral and mpiio directory are done with a single input file
+  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
- list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_mrta eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'

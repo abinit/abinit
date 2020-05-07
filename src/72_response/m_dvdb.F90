@@ -2824,7 +2824,6 @@ end subroutine rotate_fqg
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
-!!  qrefine(3)=Defines intial coarse q-mesh if qrefine /= [1, 1, 1]
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
@@ -2837,7 +2836,7 @@ end subroutine rotate_fqg
 !!
 !! SOURCE
 
-subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft, comm_rpt, &
+subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt, &
                                only_alloc) ! optional
 
 !Arguments ------------------------------------
@@ -2846,7 +2845,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  class(dvdb_t),target,intent(inout) :: db
  logical,optional,intent(in) :: only_alloc
 !arrays
- integer,intent(in) :: ngqpt(3), qrefine(3), ngfft(18)
+ integer,intent(in) :: ngqpt(3), ngfft(18)
  real(dp),intent(in) :: qshift(3,nqshift)
 
 !Local variables-------------------------------
@@ -2868,8 +2867,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  real(dp),allocatable :: v1r_qibz(:,:,:,:), v1r_qbz(:,:,:,:), v1r_lr(:,:,:)
 
 ! *************************************************************************
-
- ABI_CHECK(all(qrefine == 1), "qrefine not coded")
 
  ! Set communicator for R-point parallelism.
  ! Note that client code is responsible for calling the interpolation routine dvdb_get_ftqbz (R -> q)
@@ -5902,7 +5899,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    this_nqpt = dtset%ph_nqpath
    this_qpts => dtset%ph_qpath(:, 1:this_nqpt)
    comm_rpt = xmpi_comm_self
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
    interpolated = 1
    write_v1r = dtset%prtpot > 0
  else
@@ -6228,7 +6225,7 @@ subroutine dvdb_write_wr(dvdb, dtset, out_ncpath)
  call wrtout([std_out, ab_out], " Evaluating W_SR(r,R) and saving results to file... ")
  dvdb%add_lr = 1  ! remove V_LR.
 #ifdef DEV_MG
- call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+ call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
 
  ! Compute max_r |W(R,r)| and write data to file (sorted by |R|)
  call dvdb%get_maxw(dtset%dvdb_ngqpt, all_rpt, all_rmod, maxw)
@@ -6297,7 +6294,7 @@ subroutine dvdb_write_wr(dvdb, dtset, out_ncpath)
 #ifdef DEV_MG
  call wrtout([std_out, ab_out], " Evaluating W_LR(r,R) and saving results to file...")
  dvdb%add_lr = 0 ! Do not remove V_LR.
- call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+ call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
 
  ! Compute max_r |W(R,r)| and write data to file (sorted by |R|)
  call dvdb%get_maxw(dtset%dvdb_ngqpt, all_rpt, all_rmod, maxw)
@@ -6318,7 +6315,7 @@ subroutine dvdb_write_wr(dvdb, dtset, out_ncpath)
 
 #ifndef DEV_MG
  call wrtout(std_out, sjoin(" Compute W_LR with LR model and q-mesh:", ltoa(dtset%eph_ngqpt_fine)))
- call dvdb%ftinterp_setup(dtset%eph_ngqpt_fine, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt, &
+ call dvdb%ftinterp_setup(dtset%eph_ngqpt_fine, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt, &
                           only_alloc=.True.)
 
  qptrlatt = 0
@@ -6461,13 +6458,12 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
  type(ddb_hdr_type) :: ddb_hdr
  character(len=fnlen) :: coarse_fname
 !arrays
- integer :: ngfft(18), qrefine(3)
+ integer :: ngfft(18)
  real(dp),allocatable :: file_v1r(:,:,:,:),intp_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
- qrefine = 1
 
  write(std_out,"(a)")sjoin(" Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(dvdb_ngqpt))
  if (len_trim(ddb_filepath) > 0) then
@@ -6508,7 +6504,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
 
  autotest = .True.
  if (autotest) then
-   call dvdb%ftinterp_setup(dvdb_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
+   call dvdb%ftinterp_setup(dvdb_ngqpt, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
 
    ! First step: Use FT interpolation to get q-points in the initial ab-initio mesh.
    ! We should get the same result...
@@ -6586,7 +6582,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
    !call coarse_dvdb%print()
 
    ! Prepare FT interpolation using coarse q-mesh.
-   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, qrefine, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
+   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
 
    do iq=1,dvdb%nqpt
      ! Read data from DVDB file and store it in file_v1r
@@ -6702,6 +6698,9 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 
 ! *************************************************************************
 
+ ! Return immediately if metals by
+ !if (db%has_zeff .or. db%has_quadrupoles) then
+
  iphase = 1; if (present(add_qphase)) iphase = add_qphase
 
  ! Make sure FFT parallelism is not used
@@ -6749,6 +6748,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! Get the set of G vectors
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
+ !if (db%has_zeff .or. db%has_quadrupoles) then
  ! Compute the long-range potential in G-space due to Z* and Q* (if present)
  v1G_lr = zero
  do ig=1,nfft

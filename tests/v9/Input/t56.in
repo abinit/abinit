@@ -25,6 +25,8 @@ ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with 
 ############
 symsigma  1
 dvdb_rspace_cell 1
+dvdb_qdamp 0.1
+eph_mrta 0
 
 optdriver  7
 nband      8

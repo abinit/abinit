@@ -306,6 +306,59 @@ def branchoff(ctx, start_point):
     run("git push origin HEAD")
 
 
+@task
+def watchdog(ctx, jobs="auto"):
+    """
+    Start watchdog service to watch F90 files and execute make when changes are detected.
+    """
+    top = find_top_build_tree(".", with_abinit=True)
+    jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
+
+    # http://thepythoncorner.com/dev/how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/
+    # https://stackoverflow.com/questions/19991033/generating-multiple-observers-with-python-watchdog
+    import time
+    from watchdog.observers import Observer
+    from watchdog.events import PatternMatchingEventHandler
+    my_event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
+                                                   ignore_directories=False, case_sensitive=True)
+
+    def on_created(event):
+        print(f"hey, {event.src_path} has been created!")
+
+    def on_deleted(event):
+        print(f"what the f**k! Someone deleted {event.src_path}!")
+
+    def on_modified(event):
+        print(f"hey buddy, {event.src_path} has been modified")
+        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
+        cprint("Executing: %s" % cmd, "yellow")
+        with cd(top):
+            retcode = ctx.run(cmd, pty=True)
+
+    def on_moved(event):
+        print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
+
+    my_event_handler.on_created = on_created
+    my_event_handler.on_deleted = on_deleted
+    my_event_handler.on_modified = on_modified
+    my_event_handler.on_moved = on_moved
+
+    #path = "."
+    #path = ABINIT_ROOTDIR
+    path = ABINIT_SRCDIR
+
+    my_observer = Observer()
+    my_observer.schedule(my_event_handler, path, recursive=True)
+    my_observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        my_observer.stop()
+        my_observer.join()
+
+
 def which(cmd):
     """
     Returns full path to a executable.

@@ -255,6 +255,7 @@ module m_sigmaph
    !   3
 
   integer :: mrta = 0
+   ! 0 to disable MRTA.
    ! > 0 if the self-energy in the energy-momentum relaxation time approximation should be computed
 
   logical :: use_doublegrid = .False.
@@ -845,8 +846,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
 
  osc_ecut = dtset%eph_ecutosc
- !osc_ecut = dtset%ecut
- !osc_ecut = one
  if (osc_ecut > zero) then
    call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
    ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
@@ -854,8 +853,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (osc_ecut < zero) then
    call wrtout(std_out, sjoin("Including G vectors inside a sphere with ecut.", ftoa(osc_ecut)))
  end if
- !nsheps = 0
- !call setshells(ecut, npw, nsh, cryst%nsym, cryst%gmet, cryst%gprimd, cryst%symrel, "eps", cryst%ucvol)
 
  !if (sigma%calc_velocity == 1) then
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
@@ -1025,7 +1022,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    !if (sigma%imag_only) comm_rpt = xmpi_comm_self
    !comm_rpt = sigma%bsum_comm%value
    comm_rpt = xmpi_comm_self
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
    ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
    ABI_MALLOC(qselect, (sigma%nqibz))
@@ -2241,11 +2238,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
 
- ! TODO: Activate by default?
- ! Compute lifetimes in the MRTA approximation
- new%mrta = 0; if (dtset%userib == 11) new%mrta = 1
- !if (dtset%eph_mrta /= 0) new%mrta = 1
- !new%mrta = 1
+ ! Compute lifetimes in the MRTA approximation?
+ new%mrta = dtset%eph_mrta
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)

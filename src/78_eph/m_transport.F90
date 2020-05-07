@@ -43,7 +43,7 @@ module m_transport
  use defs_datatypes,   only : ebands_t
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : bisect, simpson_int, safe_div !polyn_interp,
+ use m_numeric_tools,  only : bisect, simpson_int, safe_div
  use m_fstrings,       only : strcat, sjoin, ltoa
  use m_kpts,           only : listkk
  use m_occ,            only : occ_fd, occ_dfd
@@ -370,17 +370,17 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
    ! linewidths serta
    if (allocated(new%linewidth_serta)) then
-     call downsample_array(new%linewidth_serta,indkk,tmp_ebands%nkpt)
+     call downsample_array(new%linewidth_serta, indkk, tmp_ebands%nkpt)
    end if
 
    ! linewidths mrta
    if (allocated(new%linewidth_mrta)) then
-     call downsample_array(new%linewidth_mrta,indkk,tmp_ebands%nkpt)
+     call downsample_array(new%linewidth_mrta, indkk, tmp_ebands%nkpt)
    end if
 
    ! velocities
    if (allocated(new%linewidth_serta)) then
-     call downsample_array(new%velocity,indkk,tmp_ebands%nkpt)
+     call downsample_array(new%velocity, indkk, tmp_ebands%nkpt)
    end if
 
    ABI_SFREE(indkk)
@@ -518,7 +518,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  ! Allocate vv tensors with and without the lifetimes
- ntens = 1+self%ntemp
+ ntens = 1 + self%ntemp
  ABI_MALLOC(vv_tens, (3, 3, ntens, mband, nkpt, nsppol))
  do ispin=1,nsppol
    do ik=1,nkpt
@@ -763,7 +763,6 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  ABI_MALLOC(self%mobility_mu,(2,self%nsppol,3,3,self%ntemp+1))
 
  call cwtime(cpu, wall, gflops, "start")
-
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol

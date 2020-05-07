@@ -473,27 +473,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  ! TODO: Add support for dipquad and quadquad in abinit
-
-! if (any(dtset%ddb_qrefine > 1)) then
-!   ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-!   ! Build the IFCs using the coarse q-mesh.
-!   ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
-!   call ifc_init(ifc_coarse, cryst, ddb, &
-!     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-!     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
-!
-!   ! Now use the coarse q-mesh to fill the entries in dynmat(q)
-!   ! on the dense q-mesh that cannot be obtained from the DDB file.
-!   call ifc_init(ifc, cryst, ddb, &
-!     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-!     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
-!   call ifc_coarse%free()
-
-! else
-   call ifc_init(ifc, cryst, ddb, &
-     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
-! end if
+ call ifc_init(ifc, cryst, ddb, &
+   brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+   qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
 
  ABI_FREE(ddb_qshifts)
  call ifc%print(unit=std_out)
@@ -565,11 +547,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 
    ! Set qdamp from frohl_params
-   !dvdb%qdamp = 0.1
-   if (dtset%frohl_params(4) /= 0) then
-     dvdb%qdamp = dtset%frohl_params(4)
-     !dvdb%qdamp = dtset%qdamp
-   end if
+   dvdb%qdamp = dtset%dvdb_qdamp
 
    ! Set quadrupoles
    dvdb%qstar = qdrp_cart
