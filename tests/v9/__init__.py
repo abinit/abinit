@@ -17,8 +17,10 @@ inp_files = [
 # Structure variable
 "t04.in",
 # Optic
-"t05.in",
-"t06.in",
+"t05.in", # GGA-PBE nsppol=1
+"t06.in", # optic
+"t07.in", # GGA-PBE nsppol=2
+"t08.in", # optic
 # Electron-phonon
 "t50.in",
 "t51.in",

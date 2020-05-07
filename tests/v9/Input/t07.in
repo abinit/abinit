@@ -1,4 +1,4 @@
-#Compute GaAs crystal, with nsppol=1 : ground-state with few bands,
+#Compute GaAs crystal, with nsppol=2 : ground-state with few bands,
 #then large number of bands, then ddk for different directions
 #
 
@@ -65,9 +65,11 @@
  natom  2 
  nband 20
  nbdbuf 2
+ nsppol 2
  nstep 100
  ntypat  2
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ spinmagntarget 0.0
  xred 3*0.00d0 3*0.25d0
  typat  1 2  tolwfr  1.e-8
  znucl  31 33
@@ -75,10 +77,10 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t05.in, t06.in
+#%% test_chain = t07.in, t08.in
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t07.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% psp_files = Ga-low_r.psp8, As_r.psp8
 #%% [paral_info]
 #%% max_nprocs = 2
@@ -86,8 +88,8 @@
 #%% authors = Y. Gillet, X. Gonze
 #%% keywords = NC, DFPT 
 #%% description = 
-#%%   GaAs, zinc-blende structure. GGA-PBE. Treated with nsppol=1.
+#%%   GaAs, zinc-blende structure. GGA-PBE. Treated with nsppol=2.
 #%%   Generate the data for optic (linear coefficients).
-#%%   to be analysed in test 06 (netcdf files with h1 matrix elements).
+#%%   to be analysed in test 08 (netcdf files with h1 matrix elements).
 #%% topics = Optic
 #%%<END TEST_INFO>
