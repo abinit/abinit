@@ -280,8 +280,7 @@ module m_dvdb
   integer :: prtvol = 0
    ! Verbosity level
 
-  real(dp) :: qdamp = -one
-  !real(dp) :: qdamp = 0.1_dp
+  real(dp) :: qdamp = 0.1_dp
    ! Exponential damping used in the Fourier transform of the long-range potentials
    ! Use negative value to deactivate damping.
 

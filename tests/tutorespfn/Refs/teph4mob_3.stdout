@@ -131,7 +131,7 @@ Merged successfully 29 files
  Have quadrupoles: no
  Have electric field: no
  Treatment of long-range part in V1scf: 1
- qdamp:  -1.0
+ qdamp:   0.1
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
