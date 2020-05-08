@@ -3980,6 +3980,12 @@ The choice is among:
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
               An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
+
+
+!!! important
+
+    At the time of writing ( |today| ), PAW or norm-conserving pseudos with SOC are not supported by the EPH code.
+    Also [[useylm]] must be set to 0 (default for NC pseudos).
 """,
 ),
 
@@ -21559,20 +21565,19 @@ Variable(
     vartype="real",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval=0
+    defaultval=0.1,
     mnemonics="DVDB Q-DAMPing",
     added_in_version="9.1.0",
     text=r"""
-""",
-# In the actual implementation, following previous approaches~\cite{Sjakste2015,Giustino2017},
-# each component is multiplied
-# by the Gaussian  filter $e^{-\frac{|\qG|^2}{4\alpha}}$~\footnote{
-# The $\alpha$ parameter determines the separation between the long-range and the short-range parts
-# of the interaction and is used
-# to express Ewald sums~\cite{Pickett1989,Gonze1997}
-# in terms of a sum in $\GG$-space (long-range part) and a sum in real space that, being short ranged,
-# is not relevant for the definition of the LR model.
+This **advanced** variable defines the $\alpha$ parameter in the Gaussian filter $e^{-\frac{|\qG|^2}{4\alpha}}$
+that multiplies the Fourier components of the model potential in the long wavelength limit (Eq 24 of Brunin2020 PRB
+see also [[cite:Sjakste2015]] and [[cite:Giustino2017]]).
 
+The $\alpha$ parameter determines the separation between the long-range and the short-range parts
+of the interaction and is used to express Ewald sums [[cite:Gonze1997]].
+in terms of a sum in $\GG$-space (long-range part) and a sum in real space that, being short ranged,
+is not relevant for the definition of the LR model.
+""",
 ),
 
 Variable(
@@ -21581,12 +21586,17 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval=1
+    defaultval=1,
     mnemonics="activate Momentum Relaxation Time Approximation",
     added_in_version="9.1.0",
     text=r"""
-""",
+This **advanced** variable can be used to deactivate the computation of the electron linewidths with the
+Momentum Relaxation Time (MRTA) when [[eph_task]] == -4
+By default, the code computes linewidths both with the SERTA and MRTA and results are stored to netcdf file.
+The calculation of the MRTA is relatively fast but if performance is critical and only SERTA is needed, one can use
+eph_mrta 0.
 
+""",
 ),
 
 ]

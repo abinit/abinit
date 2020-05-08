@@ -678,9 +678,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call dvdb%open_read(ngfftf, xmpi_comm_self)
 
      ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
-     !call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
-
-     call dvdb%write_wr(dtset, strcat(dtfil%filnam_ds(4), "_WR.nc"))
+     call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
    end if
 
  case default

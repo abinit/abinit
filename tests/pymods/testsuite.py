@@ -32,7 +32,7 @@ else:
 
 from collections import OrderedDict
 from .jobrunner import TimeBomb
-from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor)
+from .tools import RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor
 from .xyaptu import xcopier
 from .devtools import NoErrorFileLock, makeunique
 from .memprof import AbimemFile
@@ -296,7 +296,6 @@ class FileToTest(object):
         ("diff_fname", "", str),
         ("use_yaml", "no", str),
         ("verbose_report", "no", str),
-        # ("pydiff_fname","",str),
     ]
 
     def __init__(self, dic):
@@ -310,8 +309,7 @@ class FileToTest(object):
                 raise ValueError("%s must be defined" % atr_name)
 
             value = f(value)
-            if hasattr(value, "strip"):
-                value = value.strip()
+            if hasattr(value, "strip"): value = value.strip()
             self.__dict__[atr_name] = value
 
         # Postprocess fld_options
@@ -322,6 +320,11 @@ class FileToTest(object):
 
         self.has_line_count_error = False
         self.do_html_diff = False
+
+        # Initialize variables that will be set by fldiff to be on the safe side.
+        self.fld_isok = False
+        self.fld_status = "failed"
+        self.fld_msg = "Initialized in __init__"
 
     @lazy__str__
     def __str__(self): pass
@@ -3920,13 +3923,15 @@ class Results(object):
     def outref_files(self, status):
         """
         Return (out_files, ref_files)
-        where out and ref are list with the output files and the reference
+        where out_files and ref_files are lists with the output files and the reference
         files of the tests with the given status.
         """
         out_files, ref_files = [], []
-        for test in (self.tests_with_status(status)):
+        for test in self.tests_with_status(status):
             for f in test.files_to_test:
-                # if status != "all" and f.status != status: continue
+                #print(f)
+                #print(f"status: {status}, f.fld_status: {f.fld_status}")
+                if status != "all" and f.fld_status != status: continue
 
                 out_files.append(os.path.join(test.workdir, f.name))
                 ref_fname = os.path.join(test.ref_dir, f.name)

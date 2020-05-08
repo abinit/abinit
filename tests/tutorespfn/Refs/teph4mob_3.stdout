@@ -108,6 +108,10 @@
 - Merging file [29]: teph4mob_1o_DS10_POT5
 Merged successfully 29 files
 - Analyzing DVDB file: teph4mob_3_DVDB ...
+ symatm: atom number 1 is reached starting at atom
+   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ symatm: atom number 2 is reached starting at atom
+   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
 - dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
  ==== Info on the dvdb% object ====
  DVDB version: 2
@@ -130,8 +134,8 @@ Merged successfully 29 files
  Have Born effective charges: no
  Have quadrupoles: no
  Have electric field: no
- Treatment of long-range part in V1scf: 1
- qdamp:   0.1
+ Treatment of long-range part in V1scf (add_lr): 1
+ Damping factor for Gaussian filter (qdamp):   0.1
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes

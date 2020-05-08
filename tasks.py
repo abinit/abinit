@@ -97,7 +97,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
             ctx.run("cd shared && make clean && cd ..", pty=True)
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, "yellow")
-        retcode = ctx.run(cmd, pty=True)
+        results = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
@@ -307,10 +307,14 @@ def branchoff(ctx, start_point):
 
 
 @task
-def watchdog(ctx, jobs="auto"):
+def watchdog(ctx, jobs="auto", sleep_time = 5):
     """
-    Start watchdog service to watch F90 files and execute make when changes are detected.
+    Start watchdog service to watch F90 files and execute `make` when changes are detected.
     """
+    cprint("Starting watchdog service to watch F90 files and execute `make` when changes are detected", "green")
+    cprint("Enter <CTRL + C> in the terminal to kill the service.", "green")
+
+    cprint(f"Start watching F90 files with sleep_time {sleep_time} s ....", "green")
     top = find_top_build_tree(".", with_abinit=True)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
@@ -319,7 +323,7 @@ def watchdog(ctx, jobs="auto"):
     import time
     from watchdog.observers import Observer
     from watchdog.events import PatternMatchingEventHandler
-    my_event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
+    event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
                                                    ignore_directories=False, case_sensitive=True)
 
     def on_created(event):
@@ -333,30 +337,34 @@ def watchdog(ctx, jobs="auto"):
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, "yellow")
         with cd(top):
-            retcode = ctx.run(cmd, pty=True)
+            try:
+                result = ctx.run(cmd, pty=True)
+                if result.ok:
+                    cprint("Make completed successfully", "green")
+                    cprint("Watching for changes ...", "green")
+            except Exception:
+                cprint(f"Make returned non-zero exit status", "red")
+                cprint(f"Keep on watching for changes hoping you get it right ...", "red")
 
     def on_moved(event):
         print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
 
-    my_event_handler.on_created = on_created
-    my_event_handler.on_deleted = on_deleted
-    my_event_handler.on_modified = on_modified
-    my_event_handler.on_moved = on_moved
+    event_handler.on_created = on_created
+    event_handler.on_deleted = on_deleted
+    event_handler.on_modified = on_modified
+    event_handler.on_moved = on_moved
 
-    #path = "."
-    #path = ABINIT_ROOTDIR
+    observer = Observer()
     path = ABINIT_SRCDIR
-
-    my_observer = Observer()
-    my_observer.schedule(my_event_handler, path, recursive=True)
-    my_observer.start()
+    observer.schedule(event_handler, path, recursive=True)
+    observer.start()
 
     try:
         while True:
-            time.sleep(1)
+            time.sleep(sleep_time)
     except KeyboardInterrupt:
-        my_observer.stop()
-        my_observer.join()
+        observer.stop()
+        observer.join()
 
 
 def which(cmd):
