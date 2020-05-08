@@ -81,7 +81,7 @@
 #%% test_chain = t11.in, t12.in
 #%% [files]
 #%% files_to_test = 
-#%%   t11.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium;
+#%%   t11.out, tolnlines = 61, tolabs = 4.000e-04, tolrel = 1.000e+00, fld_options = -medium;
 #%% psp_files = Pseudodojo_PAW_GGA_standard/Ga.xml, Pseudodojo_PAW_GGA_standard/As.xml
 #%% [paral_info]
 #%% max_nprocs = 2
