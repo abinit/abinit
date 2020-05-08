@@ -25,6 +25,8 @@ inp_files = [
 "t10.in", # optic
 "t11.in", # GGA-PBE PAW nsppol=2
 "t12.in", # optic
+"t13.in", # metallinc iron GGA-PBE PAW nsppol=2
+"t14.in", # optic
 # Electron-phonon
 "t50.in",
 "t51.in",
