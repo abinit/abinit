@@ -333,6 +333,9 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
      MSG_WARNING(msg)
  END SELECT
 
+ !write(*,*)'This is mode', mode
+ !write(*,*)'This is mode', gcutoff
+
  ABI_DEALLOCATE(gq) 
  ABI_DEALLOCATE(gpq)
  ABI_DEALLOCATE(gpq2)

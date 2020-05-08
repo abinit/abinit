@@ -361,9 +361,9 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  !Initialize Gcut-off array from m_barevcoul 
  ABI_ALLOCATE(gcutoff,(nfft))
- !call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  !BG: Don't apply it just yet. Needs some testing before
- gcutoff=one
+ !gcutoff=one
 
  ia1=1
  do itypat=1,ntypat
