@@ -85,7 +85,7 @@
 #%% test_chain = t13.in, t14.in
 #%% [files]
 #%% files_to_test = 
-#%%   t13.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -medium;
+#%%   t13.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
 #%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 28

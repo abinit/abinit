@@ -78,7 +78,7 @@
 #%% test_chain = t05.in, t06.in
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out, tolnlines = 12, tolabs = 1.0e-09, tolrel = 2.0e-10
+#%%   t05.out, tolnlines = 12, tolabs = 1.1e-09, tolrel = 2.0e-10
 #%% psp_files = Ga-low_r.psp8, As_r.psp8
 #%% [paral_info]
 #%% max_nprocs = 2
