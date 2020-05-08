@@ -40,7 +40,7 @@ module m_mklocl
  use m_pawtab,   only : pawtab_type
  use m_mklocl_realspace, only : mklocl_realspace, mklocl_wavelets
  use m_fft,      only : fourdp
- use m_barevcoul,only : termcutoff
+ use m_gtermcutoff,only : termcutoff
 
  use m_splines,  only : splfit
 

@@ -25,6 +25,7 @@ sources = [
  "m_psolver.F90",
  "m_qplusg.F90",
  "m_barevcoul.F90",
+ "m_gtermcutoff.F90",
  "m_vcoul.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
