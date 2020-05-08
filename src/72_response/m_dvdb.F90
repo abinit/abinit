@@ -378,7 +378,7 @@ module m_dvdb
 
   real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
   ! DFPT potential in the real space supercell representation.
-  ! v1scf_rpt(2, my_nrpt, nfft, nspden, my_npert)
+  ! v1scf_rpt(1, my_nrpt, nfft, nspden, my_npert)
 
   real(dp),allocatable :: my_wratm(:,:)
   ! my_wratm(my_nrpt, minatom:maxatom)
@@ -2926,7 +2926,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_CALLOC(v1r_lr, (2, nfft, db%my_npert))
 
  ABI_SFREE(db%v1scf_rpt)
- ABI_MALLOC_OR_DIE(db%v1scf_rpt, (2, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
+ ABI_MALLOC_OR_DIE(db%v1scf_rpt, (1, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
  db%v1scf_rpt = zero
 
  ! TODO: Parallelize this part over q-points using comm_rpt. For the time being only pert parallelism.
@@ -3031,9 +3031,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
                 + emiqr(1, :) * v1r_qbz(1, ifft, ispden, ipc) &
                 - emiqr(2, :) * v1r_qbz(2, ifft, ispden, ipc)
 
-             db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) &
-                + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
-                + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
+             !db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) &
+             !   + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
+             !   + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
            end do
            !call zgerc(db%my_nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, &
            !           db%v1scf_rpt(:,:,:,ispden,imyp), db%my_nrpt)
@@ -3064,7 +3064,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
- !if (db%rspace_cell == 1) db%v1scf_rpt(2,:,:,:,:) = zero
  !call dvdb_enforce_asr(db)
 
  !do imyp=1,db%my_npert
@@ -3132,7 +3131,7 @@ subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
      phre = zero
      do ispden=1,db%nspden
        do ifft=1,nfft
-         phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2 + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
+         phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2) ! + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
        end do
      end do
      maxw(irpt_tot, ipc) = sqrt(phre)
@@ -3183,7 +3182,7 @@ subroutine dvdb_enforce_asr1(db)
 !scalars
 integer :: imyp, idir, ipert, ifft, nfft, ierr, irpt, ispden
 !arrays
- real(dp) :: sumr(2)
+ real(dp) :: sumr(1)
  real(dp),allocatable :: asr_work(:,:,:,:)
 
 ! *************************************************************************
@@ -3223,7 +3222,7 @@ integer :: imyp, idir, ipert, ifft, nfft, ierr, irpt, ispden
    do ispden=1,db%nspden
      do ifft=1,nfft
        db%v1scf_rpt(1, :, ifft, ispden, imyp) = db%v1scf_rpt(1, :, ifft, ispden, imyp) - asr_work(1, ifft, ispden, idir)
-       db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) - asr_work(2, ifft, ispden, idir)
+       !db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) - asr_work(2, ifft, ispden, idir)
      end do
    end do
  end do
@@ -3491,7 +3490,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !scalars
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr, my_add_lr
- real(dp) :: wr, wi, qmod
+ real(dp) :: wr, qmod !wi,
  !complex(dpc) :: beta
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
@@ -3550,9 +3549,9 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      do ifft=1,nfft
        do ir=1,db%my_nrpt
          wr = db%v1scf_rpt(1, ir, ifft, ispden, imyp)
-         wi = db%v1scf_rpt(2, ir, ifft, ispden, imyp)
-         ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr(1, ir) - wi * weiqr(2, ir)
-         ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) + wi * weiqr(1, ir)
+         !wi = db%v1scf_rpt(2, ir, ifft, ispden, imyp)
+         ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr(1, ir) ! - wi * weiqr(2, ir)
+         ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) ! + wi * weiqr(1, ir)
        end do
        ! Add the long-range part of the potential
        if (my_add_lr > 0) then
@@ -3848,12 +3847,12 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz, cplex, ierr, my_cplex, db_iqpt, imyp
+ integer :: iq_ibz, cplex, ierr, my_cplex !, db_iqpt, imyp
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, my_mbsize, max_mbsize
  character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
- real(dp),allocatable :: v1scf(:,:,:,:), all_v1scf(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:) !, all_v1scf(:,:,:,:)
 
 ! *************************************************************************
 
@@ -6149,7 +6148,6 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
  type(dvdb_t) :: dvdb, coarse_dvdb
  type(vdiff_t) :: vd_max
  type(ddb_type) :: ddb
- type(ddb_hdr_type) :: ddb_hdr
  character(len=fnlen) :: coarse_fname
 !arrays
  integer :: ngfft(18)
