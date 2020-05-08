@@ -53,7 +53,7 @@ The interested user must be likewise aware of the physical ambiguities existing 
 flexoelectric tensor which inherently affect the longwave driver. One of them precludes its usage to obtain the 
 flexoelectric tensor of non-centrosymmetric (i.e., piezoelectric) materials (see section VII.c of [[cite:Stengel2013]]). 
 The other one is related with the dependence of the bulk flexoelectric coefficients on the choice of an arbitrary 
-reference energy. As customary in ABINIT, the average electrostatic potential has been taken as the energy reference 
+reference energy. The average electrostatic potential has been taken as the energy reference 
 within the longwave driver. Nonetheless, as illustrated in section IV.d of [[cite:Stengel2016a]], other choices might 
 lead to quantitatively and qualitatively different outcomes. On the other hand, such ambiguity is well known to disappear
 when the surface-specific part is accounted for, as done e.g. in [[cite:Stengel2014]].
