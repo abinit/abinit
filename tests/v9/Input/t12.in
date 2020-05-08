@@ -26,7 +26,7 @@
 #%% test_chain = t11.in, t12.in
 #%% [files]
 #%% files_to_test = 
-#%%   t12_0001_0001-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
+#%%   t12_0001_0001-linopt.out          , tolnlines = 3,   tolabs = 3.0e-03, tolrel = 2.0e-04, fld_options = -easy;
 #%%   t12_0002_0003-linopt.out          , tolnlines = 1,   tolabs = 3.0e-03, tolrel = 3.0e-05; 
 #%%
 #%% [paral_info]
