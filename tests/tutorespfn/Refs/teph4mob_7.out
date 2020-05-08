@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 30 Mar 2020.
-- ( at 23h41 )
+.Starting date : Sat  9 May 2020.
+- ( at 00h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.in
 - output file    -> teph4mob_7.out
@@ -562,7 +562,7 @@ Notations:
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000   5000.1    0.000
+   5   3.573    0.000   5088.0    0.000
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
@@ -578,11 +578,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.18E+18        0.00E+00            0.00            0.00
-           64.00        0.15E+18        0.00E+00            4.65            0.00
-          123.00        0.77E+17        0.00E+00           73.93            0.00
-          182.00        0.45E+17        0.00E+00          138.44            0.00
-          241.00        0.33E+17        0.00E+00          163.28            0.00
-          300.00        0.28E+17        0.00E+00          156.74            0.00
+           64.00        0.15E+18        0.00E+00            4.71            0.00
+          123.00        0.77E+17        0.00E+00           74.59            0.00
+          182.00        0.45E+17        0.00E+00          139.22            0.00
+          241.00        0.33E+17        0.00E+00          163.96            0.00
+          300.00        0.28E+17        0.00E+00          157.29            0.00
 
 == END DATASET(S) ==============================================================
 ================================================================================
