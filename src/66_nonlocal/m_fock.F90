@@ -27,8 +27,6 @@
 
 module m_fock
 
- use m_barevcoul
-
  use defs_basis
  use m_abicore
  use m_errors
@@ -43,7 +41,7 @@ module m_fock
  use m_cgtools
  use m_dtset
 
- use defs_abitypes, only : MPI_type
+ use defs_abitypes,     only : MPI_type
  use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_symtk,           only : mati3inv, matr3inv
@@ -51,6 +49,8 @@ module m_fock
  use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
+
+ use m_barevcoul,       only : barevcoul
 
  implicit none
 

@@ -111,14 +111,7 @@ module m_barevcoul
  end type vcut_t
 
  public :: barevcoul
-!!***
-! private variables used for the integration needed by the cylindrical case.
- integer,save  :: npts_,ntrial_,qopt_
- real(dp),save :: ha_,hb_,r0_
- real(dp),save :: gcart_para_,gcartx_,gcarty_
- real(dp),save :: xx_
- real(dp),save :: accuracy_
-  
+!!*** 
  
 contains
 !!***

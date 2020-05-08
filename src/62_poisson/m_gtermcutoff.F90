@@ -96,8 +96,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 !Local variables-------------------------------
 !scalars
  integer,parameter  :: N0=1000
- integer            :: ierr,icutc_loc
- integer            :: i1,i2,i23,i3
+ integer            :: i1,i2,i23,i3,ierr
  integer            :: ii,ig,ing,n1,n2,n3,id(3)
  integer            :: test,opt_surface !opt_cylinder
  real(dp)           :: cutoff,rcut,check
@@ -174,9 +173,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 
  !Initialize geomtry type to help select CASE
  vcutgeo=dtset%vcutgeo 
-
- write(*,*)'This is active cutoff',TRIM(mode)
-  
+ 
  SELECT CASE (TRIM(mode))
 
    CASE('SPHERE') ! Spencer-Alavi method
@@ -335,8 +332,6 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
      write(msg,'(a)')'No cut-off applied to G**2!'
      MSG_WARNING(msg)
  END SELECT
-  
- write(*,*)'This is mode ', mode, Dtset%icutcoul
 
  ABI_DEALLOCATE(gq) 
  ABI_DEALLOCATE(gpq)
