@@ -104,6 +104,8 @@ type, public :: ephwg_t
   ! defined by the operations of the little group of k.
 
   integer :: frohl_model
+  ! FIMXE: THIS FLAG IS STILL UNDER DEVELOPMENT. ACTUALLY IT IS NOT USED IN THE PRESENT VERSION
+
   ! Integer controling whether to compute and store the electron-phonon matrix elements
   ! computed from generalized Frohlich model
   ! C. Verdi and F. Giustino, Phys. Rev. Lett. 115, 176401 (2015).

@@ -6,7 +6,6 @@ authors: GB, MG
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
 the relaxation time approximation.
-
 It is assumed the user has already completed the Tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties, 
 in particular phonons, Born effective charges and dielectric tensor.
@@ -21,7 +20,7 @@ For a more detailed description of the ABINIT implementation, please consult [[c
 If what follows, we will be working within the 
 self-energy relaxation time approximation (SERTA) [[cite:Giustino2017]].
 In the $\eta \rightarrow 0^+$ limit, 
-The imaginary part of the electron-phonon (eph) self-energy evaluated at the KS energy is given by 
+the imaginary part of the electron-phonon (eph) self-energy evaluated at the KS energy is given by 
 
 \begin{equation}
 \begin{split}
@@ -93,25 +92,29 @@ At zero total carrier concentration, the Fermi level $\ef$ is located inside the
 
 A typical computation requires different steps:
 
-  * ground state computation to obtain the DEN and the WFK files
+  * Ground state computation to obtain the DEN and the WFK files
   * DFPT calculation for a set of $\qq$-points in the IBZ associated to a homogeneous mesh
-  * merging of the partial DDB and POT files
-  * computation of the GS wavefunctions on a dense $\kk$-mesh
-  * interpolation of the e-ph scattering potentials and computation of the electron lifetimes
+  * Merging of the partial DDB and POT files
+  * Computation of the GS wavefunctions on a dense $\kk$-mesh
+  * Interpolation of the e-ph scattering potentials and computation of the electron lifetimes
     for the relevant $\kk$-points contributing to the mobility
-  * computation of transport properties
+  * Computation of transport properties
 
 These steps can be summarized by the following graph:
 
-![](eph4mob_assets/workflow.png)
+![](eph4mob_assets/workflow.png )
+
 
 !!! important
 
     Note that all these capabilities are integrated directly in ABINIT.
-    This implementation differs from the one available in ANADDB: 
+    This implementation (henceforth refered to as the **EPH code**) differs from the one available in ANADDB: 
     the anaddb version acts as a direct post-processing of the e-ph matrix elements computed in the DFPT part 
-    whereas the EPH code integrated in ABINIT computes the e-ph matrix elements directly using 
-    the GS wavefunctions and the DFPT potentials.
+    whereas the EPH code interfaced with ABINIT computes the e-ph matrix elements directly using 
+    the GS WFK and the DFPT potentials stored in the DVDB file.
+    In a nutshell, the EPH code is more scalable and flexible as the $\qq$-sampling can be easily changed 
+    at run time while the anaddb implementation easily supports advanced features such as PAW.
+    For further information about the difference between the two approaches, see [[cite:Gonze2019]]
 
 Note also that in order to analyze the results, you will need ABINIT compiled with netCDF support.
 All the results of the calculation are indeed saved in netcdf format,
@@ -148,25 +151,31 @@ cp ../teph4mob_1.in .
     This variable gives the different paths to the pseudopotentials. 
     Use, for instance, 
 
-         pseudos "../../../Psps_for_tests/13al.981214.fhi, ../../../Psps_for_tests/33as.pspnc"
+    ```sh
+    pseudos "../../../Psps_for_tests/13al.981214.fhi, ../../../Psps_for_tests/33as.pspnc"
+    ```
 
-    to specify the relative path to the pseudos if you are following the conventions employed in this tutorials
+    to specify the relative path to the pseudos if you are following the conventions employed in this tutorials.
     You may need to adapt the paths depending on your *$ABI_PSPDIR*.
 
-This tutorial starts with the DFPT calculation for all the $\qq$-points that might be quite time-consuming.
+This tutorial starts with the DFPT calculation for all the $\qq$-points in the IBZ that might be quite time-consuming.
 You can immediately start the job in background with:
 
-    abinit teph4mob_1.in > teph4mob_1.log 2> err &
+```sh
+abinit teph4mob_1.in > teph4mob_1.log 2> err &
+```
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
 Many input parameters are also quite similar. 
 For more details about this first step, please refer to the first and second tutorials on DFPT.
-Since AlAs is a polar semiconductor, we need to compute with DFPT the Born effective charges 
+
+Note this very important point.
+Since AlAs is a **polar semiconductor**, we need to compute with DFPT the Born effective charges 
 and the static dielectric tensor
-These quantities are then used to treat the long-range part of the dynamical matrix in the Fourier interpolation 
-of the phonon frequencies. 
+These quantities are then used to treat the long-range part of the dynamical matrix in 
+the Fourier interpolation of the phonon frequencies. 
 We will see that these quantities are also needed in the Fourier interpolation of the DFPT potential.
-TODO: Discuss [[dipdip], [[asr]], [[chneut]]
+TODO: Discuss [[dipdip]], [[asr]], [[chneut]]
 
 ## Merging the derivative databases and potentials
 
@@ -182,7 +191,9 @@ File *\$ABI_TUTORESPFN/Input/teph4mob_2.in* is an example of input file for *mrg
 
 You can copy it in the *Work_eph4mob* directory, and run *mrgddb* using:
 
-    mrgddb < teph4mob_2.in
+```sh
+mrgddb < teph4mob_2.in
+```
 
 !!! tip
 
@@ -190,9 +201,11 @@ You can copy it in the *Work_eph4mob* directory, and run *mrgddb* using:
     to be merged via command line arguments.
     This approach is quite handy especially if used in conjuction with shell globbing and the "star" syntax:
 
-        mrgddb teph4mob_2_DDB teph4mob_1o_DS*_DDB
+    ```sh
+    mrgddb teph4mob_2_DDB teph4mob_1o_DS*_DDB
+    ```
 
-    Use *mrgddb --help* to access the documentation.
+    Use **mrgddb --help** to access the documentation.
 
 Now use the *mrgdv* tool to merge the 29 DFPT POT files corresponding to datasets 3-10 of *teph4mob_1*. 
 Name the new file *teph4mob_3_DVDB*.
@@ -203,16 +216,20 @@ File *\$ABI_TUTORESPFN/Input/teph4mob_3.in* is an example of input file for *mrg
 
 You can copy it in the *Work_eph4mob* directory, and then merge the files with:
 
-    mrgdv < teph4mob_3.in
+```sh
+mrgdv < teph4mob_3.in
+```
 
 
 !!! tip
 
     Alternatively, one can the command line. 
 
-        mrgdv merge teph4mob_3_DVDB teph4mob_1o_DS*_POT*
+    ```sh
+    mrgdv merge teph4mob_3_DVDB teph4mob_1o_DS*_POT*
+    ```
 
-    Use *mrgdv --help* to access the documentation.
+    Use **mrgdv --help** to access the documentation.
 
 We now have all the phonon-related files needed to compute the mobility.
 The DDB will be used to Fourier interpolate the phonon frequencies on an **arbitrarily** dense $\qq$-mesh while
@@ -223,7 +240,7 @@ The only ingredient left is the set of GS wavefunctions on the dense $\kk$-mesh.
 
 In order to compute transport properties, we need to solve the Boltzmann
 Transport Equation (BTE) in the SERTA on a relatively dense $\kk$-mesh. 
-You will compute the electron lifetimes and velocities on this dense mesh. 
+You will compute the electron lifetimes and group velocities on this dense mesh. 
 We will therefore need the wavefunctions on this dense mesh. 
 Note that in this tutorial, a single dense $\kk$-mesh will be used. 
 However, the value for the mobility strongly depends on this
@@ -249,7 +266,9 @@ we need to consider conduction bands in the computation of the WFK ([[nband]] = 
 
 Copy the file in the *Work_eph4mob* directory, and run ABINIT:
 
-    abinit teph4mob_4.in > teph4mob_4.log 2> err &
+```sh
+abinit teph4mob_4.in > teph4mob_4.log 2> err &
+```
 
 *Note: do not forget to add the [[pseudos]] variable to this input file !*
 
@@ -273,7 +292,9 @@ getdvdb_filepath "teph4mob_3_DVDB"
 
 Now copy the input file in the *Work_eph4mob* directory, and run the code with:
 
-    abinit teph4mob_5.in > teph4mob_5.log 2> err &
+```sh
+abinit teph4mob_5.in > teph4mob_5.log 2> err &
+```
 
 The job should take $\sim$15 seconds on a recent CPU. 
 
@@ -296,6 +317,9 @@ Note that [[eph_ngqpt_fine]] and [[ngkpt]] should be commensurated.
 In this tutorial, we will use the same dense $\kk$- and $\qq$-meshes.
 As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh, 
 is needed to achieve fast convergence of the integrals.
+Possible exceptions are systems with very small effective masses (e.g. GaAs) in which 
+a very dense $\kk$-sampling is needed to to sample the electron (hole) pocket.
+In this case, using the same sampling for electrons and phonons may be enough.
 
 We will use the tetrahedron integration method to obtain the lifetimes (integration
 over the $\qq$-mesh). This allows to efficiently filter out the $\qq$-points that do not contribute
@@ -303,7 +327,7 @@ to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to
 ensure energy and momentum conservation for a given $\kk$-point. 
 All the other $\qq$-points do not need to be considered and can be filtered out.
 The use of the tetrahedron method is automatically activated when only 
-the imaginary part is wanted (see [[eph_intmeth]]).  
+the imaginary part is wanted. It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
 The carrier concentration is deduced from the number of extra electrons in the unit cell,
@@ -326,11 +350,16 @@ without losing precision. This trick is activated by setting [[mixprec]] = 1.
 Another trick to decrease the memory requirement is to decrease [[boxcutmin]] 
 to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1.
 An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2, 
-but we found that using a value of 1.1 does not change the result (in the materials we tested; 
-this might not be true in general and requires testing from the user) but allows
-to decrease the memory by a factor close to 8 and the cost of the calculation.
+but we found that using a value of 1.1 does not change the result 
+but allows one to decrease the cost of the calculation and the memory by a factor ~8.
 These tricks **are not activated by default** because users are supposed to perform preliminary tests
 to make sure the quality of the results is not affected by these options.
+
+If performance is really of concern, you can also try to set [[eph_mrta]] to 0.
+By default, the code compute computes transport linewidths with the SERTA and the MRTA.
+The MRTA requires the computation of the group velocities at $\kk$ and $\kk+\qq$. 
+This part is relatively fast yet it does not come for free.
+If you know in advance that you don't need MRTA results, it is possible to gain some speedup by disabling this part.
 
 We can now examine the log file in detail.
 After the standard output of the input variables,
@@ -399,7 +428,9 @@ Only the first temperature is printed in the output file, but all the informatio
     With |AbiPy|, one can easily have access to all the data of the computation. For instance, one can plot the
     electron linewidths:
 
-        abiopen.py teph4mob_5o_SIGEPH.nc --expose
+    ```sh
+    abiopen.py teph4mob_5o_SIGEPH.nc --expose
+    ```
 
 ![](eph4mob_assets/linewidths.png)
 
@@ -415,19 +446,20 @@ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
          300.00        0.23E+17        0.00E+00          363.11            0.00
 ```
 
-The temperature is first given then the electron and hole densities, and electron and hole mobilities. 
-In this computation, we consider only the electrons, so the values for the holes are zero. 
+The temperature is first given then the electron and hole densities followed by electron and hole mobilities. 
+In this computation, we consider only electrons, so the values for holes are zero. 
 Note that the transport driver is automatically executed after the e-ph calculation.
-You can also run only the transport driver, if you have the lifetimes in a SIGEPH.nc file, by setting
-[[eph_task]] = 7. This task can be performed only in serial and is very fast.
+You can also run only the transport driver, provided you already have the lifetimes in a SIGEPH.nc file, by setting
+[[eph_task]] = 7. 
+This task can be performed only in serial and is very fast.
 
-Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes, we can
-give more details about convergence and additional tricks that can be used to decrease the computational cost.
+Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes, 
+we can give more details about convergence and additional tricks that can be used 
+to decrease the computational cost.
 
 ### Convergence w.r.t. the energy range
 
-The first convergence study to be performed is to determine the energy range to be used
-for our computations. 
+The first convergence study to be performed is to determine the energy range to be used for our computations. 
 We can do that by performing the same mobility computation (same k- and q-meshes)
 for an increasing energy window. 
 
@@ -437,7 +469,9 @@ The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.in* is an example of such computati
 
 Copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
-    abinit teph4mob_6.in > teph4mob_6.log 2> err &
+```sh
+abinit teph4mob_6.in > teph4mob_6.log 2> err &
+```
 
 This run should take a few minutes.
 
@@ -448,8 +482,8 @@ Note that you should perform this convergence study with a $\kk$-mesh that is al
 capture the band dispersion correctly. 
 In this case, we are using a 24x24x24 mesh, which is not very dense for such computations. 
 This means that, when increasing [[sigma_erange]], sometimes
-no additional $\kk$-points are considered. It is the case here for the first 3 datasets (3 k-points),
-and the last two datasets (6 k-points). 
+no additional $\kk$-points are considered. 
+It is the case here for the first 3 datasets (3 k-points), and the last two datasets (6 k-points). 
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
 
 ### Convergence w.r.t. the k- and q-meshes
@@ -481,7 +515,7 @@ You should obtain something like this, for T = 300 K:
 Note that in order to get sensible results, one should use a denser DFPT $\qq$-mesh (around 9x9x9), 
 and a larger energy cutoff for the planewave basis set ([[ecut]]). 
 The inputs of this tutorial have been tuned so that the computations are quite fast,
-but they are not converged. 
+but they are quite far from convergence. 
 In real life, you should perform convergence studies to find suitable parameters.
 
 ### Double-grid technique
@@ -499,7 +533,9 @@ the coarse $\qq$-mesh for the e-ph matrix elements will have to be dense.
 The double-grid technique requires a second WFK file, containing the eigenvalues on the dense mesh. 
 You can specify the path to the dense WFK file using [[getwfkfine_filepath]]:
 
-     getwfkfine_filepath "teph4mob_4o_DS3_WFK"
+```sh
+getwfkfine_filepath "teph4mob_4o_DS3_WFK"
+```
 
 The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.in* is an example of such computation.
 
@@ -507,7 +543,9 @@ The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.in* is an example of such computati
 
 Copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
-    abinit teph4mob_7.in > teph4mob_7.log 2> err &
+```sh
+abinit teph4mob_7.in > teph4mob_7.log 2> err &
+```
 
 In the log file, you will now find information about the double-grid method:
 
@@ -540,22 +578,21 @@ A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015
 There are five different MPI levels that can be used to distribute the workload 
 and the most memory-demanding data structures.
 By default, the code tries to reach some compromise between memory requirements and time to solution. 
-by activating the parallelism over $\qq$-points if no other input from the user is provided.
+by activating the parallelism over $\qq$-points if no other input is provided from the user.
 You can however specify manually the MPI distribution across the five different levels
-using [[eph_np_pqbks]], a list of 5 integers. 
-
-The product of these five numbers must be equal to the total number of MPI processes.
+by using [[eph_np_pqbks]], a list of 5 integers. 
+The product of these five numbers **must be equal** to the total number of MPI processes.
 The first number gives the number of processes for the parallelization over perturbations. 
 The allowed value range between 1 and 3 x [[natom]], and should be a divisor 
 of 3 x [[natom]] to distribute the work equally.
-The higher this number, the lower the memory requirements at the price of increased communication.
-The second number determines the parallelization over the $\qq$-p oints in the IBZ.
+The higher this number, the lower the memory requirements at the price of increased MPI communication.
+The second number determines the parallelization over the $\qq$-points in the IBZ.
 This parallelization level allows one to decrease both the computational time as well as memory although
 it's not always possible to distribute the load equally among the processes.
 The parallelization over bands is usually not relevant for mobility computations 
-as only states close to the VBM or CBM are considered. 
+as only a few states close to the VBM or CBM are considered. 
 It is however useful when the real part of the self-energy is needed.
-The MPI parallelism over $\kk$-points and spins is efficient
+The MPI parallelism over $\kk$-points and spins is very efficient
 but it requires HDF5 with MPI-IO support and memory does not scale. 
 Use these additional levels if the memory requirements are under control 
 and you want to boost the calculation. 

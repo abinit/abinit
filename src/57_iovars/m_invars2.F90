@@ -480,9 +480,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmax',tread,'ENE')
  if(tread==1) dtset%freqspmax=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,4,string(1:lenstr),'frohl_params',tread,'DPR')
- if(tread==1) dtset%frohl_params=dprarr(1:4)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmin',tread,'ENE')
  if(tread==1) then
    ! If found, set it

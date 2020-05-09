@@ -955,11 +955,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%freqspmax
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqspmax','ENE',0)
 
- do ii=1,4
-   dprarr(ii,:)=dtsets(:)%frohl_params(ii)
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,4,narrm,ncid,ndtset_alloc,'frohl_params','DPR',0)
-
  dprarr(1,:)=dtsets(:)%freqspmin
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqspmin','ENE',0)
 

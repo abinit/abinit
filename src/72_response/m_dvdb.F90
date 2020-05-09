@@ -379,6 +379,7 @@ module m_dvdb
   real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
   ! DFPT potential in the real space supercell representation.
   ! v1scf_rpt(1, my_nrpt, nfft, nspden, my_npert)
+  ! TODO: Could be made single precision to save memory
 
   real(dp),allocatable :: my_wratm(:,:)
   ! my_wratm(my_nrpt, minatom:maxatom)
@@ -3315,8 +3316,10 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
- if (db%rspace_cell == 0) then
+ select case (db%rspace_cell)
+ case (0)
    ! Generate q-mesh
+#if 1
    ABI_FREE(qbz)
    ABI_MALLOC(qbz, (3, nqbz))
    ii = 0
@@ -3329,6 +3332,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
        end do
      end do
    end do
+#endif
 
    ! Compute real-space points in big unit cell
    ! Use the following indexing (N means ngfft of the adequate direction)
@@ -3349,7 +3353,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
      end do
    end do
 
- else if (db%rspace_cell == 1) then
+ case (1)
    ! Use Wigner-Seitz cell.
    !
    ! Compute rprim, and gprim
@@ -3366,9 +3370,10 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    ABI_MALLOC(all_rpt, (3, nrtot))
    call xcart2xred(nrtot, cryst%rprimd, all_rcart, all_rpt)
    ABI_FREE(all_rcart)
- else
+
+ case default
    MSG_ERROR(sjoin("Wrong rspace_cell:", itoa(db%rspace_cell)))
- end if
+ end select
 
  ! Find correspondence BZ --> IBZ. Note:
  ! q --> -q symmetry is always used for phonons.
@@ -3483,7 +3488,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
- ! SHOULD BE v1scf(cplex, nfft, nspden, db%my_npert)= v1scf potentials on the real-space FFT mesh
  real(dp),intent(out) :: ov1r(2, nfft, db%nspden, db%my_npert)
 
 !Local variables-------------------------------
@@ -3506,6 +3510,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  qmod = sqrt(dot_product(qcart, qcart))
 
  if (my_add_lr == 4) then
+   ! Use LR part only and return immediately.
    ov1r = zero
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3847,12 +3852,12 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz, cplex, ierr, my_cplex !, db_iqpt, imyp
+ integer :: iq_ibz, cplex, ierr
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, my_mbsize, max_mbsize
  character(len=500) :: msg
 !arrays
  real(dp) :: tsec(2)
- real(dp),allocatable :: v1scf(:,:,:,:) !, all_v1scf(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:)
 
 ! *************************************************************************
 
@@ -4357,7 +4362,7 @@ end subroutine dvdb_get_v1scf_rpt
 !! SOURCE
 
 subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
-&                             ipert, v1scf_rpt, v1scf_qpt, comm)
+                              ipert, v1scf_rpt, v1scf_qpt, comm)
 
 !Arguments ------------------------------------
 !scalars

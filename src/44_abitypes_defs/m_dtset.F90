@@ -145,7 +145,7 @@ type, public :: dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
- integer :: eph_mrta = 0
+ integer :: eph_mrta = 1
  integer :: eph_restart = 0
  integer :: eph_task
  integer :: exchn2n3d
@@ -869,13 +869,13 @@ type, public :: dataset_type
 
  integer :: eph_stern = 0
  integer :: eph_transport = 0
- !integer :: eph_mrta = 1
  integer :: eph_use_ftinterp = 0
 
  integer :: ph_intmeth
  integer :: prteliash = 0
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
+ ! MG: I don't remember why Henrique introduced this variable!
  integer :: dvdb_ngqpt(3)
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
@@ -897,8 +897,6 @@ type, public :: dataset_type
 
  integer :: sigma_nshiftk = 1
  ! Number of shifts in k-mesh for Sigma_{nk}.
-
- real(dp) :: frohl_params(4) = zero
 
  real(dp),allocatable :: sigma_shiftk(:,:)
  ! sigma_shiftk(3, sigma_nshiftk)
@@ -1438,7 +1436,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%freqremax          = dtin%freqremax
  dtout%freqspmin          = dtin%freqspmin
  dtout%freqspmax          = dtin%freqspmax
- dtout%frohl_params       = dtin%frohl_params
  dtout%frzfermi           = dtin%frzfermi
  dtout%ga_algor           = dtin%ga_algor
  dtout%ga_fitness         = dtin%ga_fitness
@@ -3111,7 +3108,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
- list_vars=trim(list_vars)//' freqspmin friction frohl_params frzfermi fxcartfactor'  ! XG20200321, please do not reintroduce frohl_params without documenting it, and testing it
+ list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G

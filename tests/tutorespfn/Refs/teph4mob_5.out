@@ -60,8 +60,6 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
    eph_ngqpt_fine       24   24   24
          eph_task          -4
 -          fftalg         312
-     frohl_params      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       1.00000000E-01
            istwfk        2    0    0    0    0    0    0    0    0    0
                          0    0    3    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -596,8 +594,6 @@ Transport calculation results
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-     frohl_params      0.00000000E+00  0.00000000E+00  0.00000000E+00
-                       1.00000000E-01
               ixc           7
          kptrlatt       24    0    0      0   24    0      0    0   24
           kptrlen      1.80057671E+02

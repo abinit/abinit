@@ -345,7 +345,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  end if
 
  ! Perform further downsampling (usefull for debugging purposes)
- ! TODO: introduce transport_ngkpt variable
+ ! TODO: Add test for transport_ngkpt variable
  if (any(dtset%transport_ngkpt/=0)) then
 
    call wrtout(std_out, sjoin(" Downsampling the k-point mesh before computing transport:", ltoa(dtset%transport_ngkpt)))
@@ -898,7 +898,6 @@ subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
-
 
 #ifdef HAVE_NETCDF
  ! Write to netcdf file

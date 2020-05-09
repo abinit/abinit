@@ -156,6 +156,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
       eph_intmeth           1
+         eph_mrta           0
          eph_task          -4
 -          fftalg         312
            getddb          20
@@ -364,7 +365,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -538,7 +539,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -701,7 +702,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -863,7 +864,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -1027,7 +1028,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -1323,6 +1324,7 @@ Transport calculation results
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
       eph_intmeth           1
+         eph_mrta           0
          eph_task          -4
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00

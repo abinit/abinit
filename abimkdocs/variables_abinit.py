@@ -20694,21 +20694,6 @@ that takes into account the maximum phonon frequency.
 """,
 ),
 
-# TODO: Remove
-#Variable(
-#    abivarname="frohl_params",
-#    varset="gw",
-#    topics=['SelfEnergy_expert'],
-#    vartype="real",
-#    defaultval=[0, 0, 0, 0],
-#    dimensions=[4],
-#    requires="[[optdriver]] in [7]",
-#    mnemonics="FROHLich PARAMeterS",
-#    text=r"""
-#This variable is still under development. User interface will change
-#""",
-#),
-
 Variable(
     abivarname="prteliash",
     varset="eph",
@@ -21020,21 +21005,6 @@ will be used to generate the real-space representation of the DFPT potentials an
 at the input [[qpt]].
 """,
 ),
-
-#Variable(
-#    abivarname="eph_alpha_gmin",
-#    varset="eph",
-#    vartype="real",
-#    topics=['ElPhonInt_expert'],
-#    dimensions="scalar",
-#    defaultval=0,
-#    mnemonics="EPH ALPHA times norm of GMIN.",
-#    added_in_version="9.0.0",
-#    text=r"""
-#This is an *advanced option* used to compute the long-range part of the DFTP potential.
-#TO BE DESCRIBED WHEN WE ENTER PRODUCTION
-#""",
-#),
 
 Variable(
     abivarname="getpot_filepath",
@@ -21429,7 +21399,8 @@ To read the structure from an external file with the structure in Abinit format,
     structure "abivars:my_text_file"
 
 where *my_text_file* specifies the lattice in terms [[acell], ([[rprimd]] or [[angdeg]])
-while the atomic positions are specified with [[natom]] and [[xred_symbols]].
+while the atomic positions are specified with [[natom]] and the special variable **xred_symbols** that
+can only be used inside this external file.
 
 ```
 # MgB2 lattice structure
@@ -21545,7 +21516,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval=0
+    defaultval=0,
     mnemonics="DVDB R-SPACE CELL",
     added_in_version="9.1.0",
     text=r"""

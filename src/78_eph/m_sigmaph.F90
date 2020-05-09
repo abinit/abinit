@@ -514,7 +514,7 @@ module m_sigmaph
     procedure :: write => sigmaph_write
      ! Write main dimensions and header of sigmaph on a netcdf file.
 
-    procedure :: comp => sigmaph_comp
+    procedure :: compare => sigmaph_compare
      ! Compare two instances of sigmaph raise error if different
 
     procedure :: setup_kcalc => sigmaph_setup_kcalc
@@ -712,7 +712,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (my_rank == master .and. dtset%eph_restart == 1) then
    if (ierr == 0) then
      if (any(sigma_restart%qp_done /= 1)) then
-       call sigma%comp(sigma_restart)
+       call sigma%compare(sigma_restart)
        sigma%qp_done = sigma_restart%qp_done
        restart = 1
        call wrtout([std_out, ab_out], "- Restarting from previous SIGEPH.nc file")
@@ -1581,7 +1581,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (isqzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
-
          if (osc_ecut > zero) then
            workq_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
            call fft_ug(npw_kq, wfd%nfft, wfd%nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
@@ -1909,7 +1908,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (.not. sigma%imag_only) then
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term...")
        ! Collect gkq0_atm inside qpt_comm
-       ! In principle i't sufficient to broadcast from itreated_q0 inside qpt_comm
+       ! In principle it's sufficient to broadcast from itreated_q0 inside qpt_comm
        ! Yet, q-points are not equally distributed so this synch is detrimental.
        call xmpi_sum(gkq0_atm, sigma%qpt_comm%value, ierr)
        if (dtset%eph_stern == 1) call xmpi_sum(stern_dw, sigma%qpt_comm%value, ierr)
@@ -2604,7 +2603,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    !  new%qpt_comm%nproc = nprocs
    !end if
 
-   !
    ! Handle parallelism over perturbations first.
    ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements for DFPT potentials.
    ! Ideally, perturbations are equally distributed --> total number of CPUs should be divisible by 3 * natom.
@@ -2877,7 +2875,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !  1) Should recheck the case bstart > 1 with star functions as I got weird results.
  !  2) Should refactor ephwg so that only my_npert phonons are stored in the datatype.
  bstart = new%bsum_start
- new%frohl_model = nint(dtset%frohl_params(1))
+ ! TODO: Reintegrate at least frohl_model 1 for the full self-energy
+ new%frohl_model = 0 ! nint(dtset%frohl_params(1))
  if (new%qint_method > 0) then
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
@@ -2960,13 +2959,15 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
      new%qrad = min(new%qrad, sqrt(dot_product(cryst%gprimd(:, ii), cryst%gprimd(:, ii))))
    end do
    ! Set angular mesh.
-   new%ntheta = int(dtset%frohl_params(2))
+   !new%ntheta = int(dtset%frohl_params(2))
+   new%ntheta = 100
    if (new%ntheta <= 0) new%ntheta = 10
    new%nphi = 2 * new%ntheta
    new%nqr = 10  !int(dtset%frohl_params(3))
    new%qrad = new%qrad !/ 2.0_dp  dtset%frohl_params(2)
-   new%qdamp = new%qrad !/ four
-   new%qdamp = dtset%frohl_params(4)
+   !new%qdamp = new%qrad !/ four
+   !new%qdamp = dtset%frohl_params(4)
+   new%qdamp = 0.1_dp
    write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
    write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
    write(std_out,"((a,i0,1x,a,f6.3,1x,a))")" nqr points: ", new%nqr, "qrad: ", new%qrad, " [Bohr^-1]"
@@ -3093,7 +3094,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
      "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
-     "imag_only", "frohl_model", "symv1scf", "dvdb_add_lr", "mrta"])
+     "imag_only", "symv1scf", "dvdb_add_lr", "mrta"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
      "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"])
@@ -3109,7 +3110,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t("sigma_ngkpt", "int", "three"), &
      nctkarr_t("sigma_erange", "dp", "two"), &
-     nctkarr_t("frohl_params", "dp", "four"), &
+     !nctkarr_t("frohl_params", "dp", "four"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      !nctkarr_t("bstop_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
@@ -3139,14 +3140,14 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      NCF_CHECK(ncerr)
    end if
 
-   if (self%frohl_model == 1) then
-     if (self%imag_only) then
-       ncerr = nctk_def_arrays(ncid, [ &
-         nctkarr_t("frohl_deltas_sphcorr", "dp", "two, ntemp, max_nbcalc, natom3, nkcalc, nsppol") &
-       ])
-       NCF_CHECK(ncerr)
-     end if
-   end if
+   !if (self%frohl_model == 1) then
+   !  if (self%imag_only) then
+   !    ncerr = nctk_def_arrays(ncid, [ &
+   !      nctkarr_t("frohl_deltas_sphcorr", "dp", "two, ntemp, max_nbcalc, natom3, nkcalc, nsppol") &
+   !    ])
+   !    NCF_CHECK(ncerr)
+   !  end if
+   !end if
 
    if (self%nwr > 0) then
      ! Make room for the spectral function. These arrays get two extra dimensions on file (nkcalc, nsppol).
@@ -3181,10 +3182,10 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
      "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
      "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
-     "eph_transport", "imag_only", "frohl_model", "symv1scf", "dvdb_add_lr", "mrta"], &
+     "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta"], &
      [dtset%eph_task, self%symsigma, self%nbsum, self%bsum_start, self%bsum_stop, &
      dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, &
-     dtset%eph_transport, ii, self%frohl_model, dtset%symv1scf, dtset%dvdb_add_lr, self%mrta])
+     dtset%eph_transport, ii, dtset%symv1scf, dtset%dvdb_add_lr, self%mrta])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
      "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
@@ -3199,7 +3200,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_params))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_params))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_phrange"), dtset%eph_phrange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), self%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), self%nbcalc_ks))
@@ -3278,7 +3279,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  character(len=fnlen) :: path
 !arrays
  integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
- integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3), frohl_params(4)
+ integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3) !, frohl_params(4)
  real(dp) :: sigma_erange(2)
 
 ! *************************************************************************
@@ -3320,7 +3321,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("bsum_stop"), new%bsum_stop))
 
  NCF_CHECK(nf90_get_var(ncid, vid("qint_method"), new%qint_method))
- NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
+ !NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
  NCF_CHECK(nf90_get_var(ncid, vid("imag_only"), imag_only))
  new%imag_only = (imag_only == 1)
 
@@ -3385,7 +3386,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("ddb_ngqpt"), ddb_ngqpt))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_ngqpt"), ph_ngqpt))
  NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
- NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
+ !NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
  NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
 
  if (present(keep_open)) then
@@ -3564,9 +3565,9 @@ end function sigmaph_get_ebands
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/sigmaph_comp
+!!****f* m_sigmaph/sigmaph_compare
 !! NAME
-!!  sigmaph_comp
+!!  sigmaph_compare
 !!
 !! FUNCTION
 !!  Compare the headers of two sigmaph_t instances
@@ -3580,43 +3581,43 @@ end function sigmaph_get_ebands
 !!
 !! SOURCE
 
-subroutine sigmaph_comp(self,comp)
+subroutine sigmaph_compare(self, other)
 
 !Arguments ------------------------------------
- class(sigmaph_t),intent(in) :: self, comp
+ class(sigmaph_t),intent(in) :: self, other
 
 ! *************************************************************************
 
- ABI_CHECK(self%nkcalc == comp%nkcalc, "Difference found in nkcalc.")
- ABI_CHECK(self%max_nbcalc == comp%max_nbcalc, "Difference found in max_nbcalc.")
- ABI_CHECK(self%nsppol == comp%nsppol, "Difference found in nsppol.")
- ABI_CHECK(self%ntemp == comp%ntemp, "Difference found in ntemp.")
+ ABI_CHECK(self%nkcalc == other%nkcalc, "Difference found in nkcalc.")
+ ABI_CHECK(self%max_nbcalc == other%max_nbcalc, "Difference found in max_nbcalc.")
+ ABI_CHECK(self%nsppol == other%nsppol, "Difference found in nsppol.")
+ ABI_CHECK(self%ntemp == other%ntemp, "Difference found in ntemp.")
  !ABI_CHECK(natom3 == natom3, "")
- ABI_CHECK(self%nqibz == comp%nqibz, "Difference found in nqibz.")
- ABI_CHECK(self%nqbz == comp%nqbz, "Difference found in nqbz.")
+ ABI_CHECK(self%nqibz == other%nqibz, "Difference found in nqibz.")
+ ABI_CHECK(self%nqbz == other%nqbz, "Difference found in nqbz.")
 
  ! ======================================================
  ! Read data that does not depend on the (kpt, spin) loop.
  ! ======================================================
- ABI_CHECK(self%symsigma == comp%symsigma, "Different value found for symsigma.")
- ABI_CHECK(self%nbsum == comp%nbsum, "Different value found for nbsum.")
- ABI_CHECK(self%bsum_start == comp%bsum_start, "Different value found for bsum_start.")
- ABI_CHECK(self%bsum_stop == comp%bsum_stop, "Different value found for bsum_stop.")
- ABI_CHECK(self%qint_method == comp%qint_method, "Different value found for qint_method.")
- ABI_CHECK(self%frohl_model == comp%frohl_model, "Different value found for frohl_model.")
- ABI_CHECK(self%imag_only .eqv. comp%imag_only, "Difference found in imag_only")
- ABI_CHECK(self%wr_step==comp%wr_step, "Different value found for wr_step")
- ABI_CHECK(self%ieta == comp%ieta, "Different value found for zcut.")
+ ABI_CHECK(self%symsigma == other%symsigma, "Different value found for symsigma.")
+ ABI_CHECK(self%nbsum == other%nbsum, "Different value found for nbsum.")
+ ABI_CHECK(self%bsum_start == other%bsum_start, "Different value found for bsum_start.")
+ ABI_CHECK(self%bsum_stop == other%bsum_stop, "Different value found for bsum_stop.")
+ ABI_CHECK(self%qint_method == other%qint_method, "Different value found for qint_method.")
+ !ABI_CHECK(self%frohl_model == other%frohl_model, "Different value found for frohl_model.")
+ ABI_CHECK(self%imag_only .eqv. other%imag_only, "Difference found in imag_only")
+ ABI_CHECK(self%wr_step == other%wr_step, "Different value found for wr_step")
+ ABI_CHECK(self%ieta == other%ieta, "Different value found for zcut.")
 
- ABI_CHECK(all(self%ngqpt == comp%ngqpt), "Different value found for ngqpt")
- ABI_CHECK(all(self%bstart_ks == comp%bstart_ks), "Different value found for bstart_ks")
- ABI_CHECK(all(self%nbcalc_ks == comp%nbcalc_ks), "Different value found for bstop_ks")
- ABI_CHECK(all(self%kcalc == comp%kcalc), "Different value found for kcalc")
- ABI_CHECK(all(self%kcalc2ibz == comp%kcalc2ibz), "Different value found for kcalc2ibz")
- ABI_CHECK(all(self%kTmesh == comp%kTmesh), "Different value found for kTmesh")
- ABI_CHECK(all(self%mu_e == comp%mu_e), "Different value found for mu_e")
+ ABI_CHECK(all(self%ngqpt == other%ngqpt), "Different value found for ngqpt")
+ ABI_CHECK(all(self%bstart_ks == other%bstart_ks), "Different value found for bstart_ks")
+ ABI_CHECK(all(self%nbcalc_ks == other%nbcalc_ks), "Different value found for bstop_ks")
+ ABI_CHECK(all(self%kcalc == other%kcalc), "Different value found for kcalc")
+ ABI_CHECK(all(self%kcalc2ibz == other%kcalc2ibz), "Different value found for kcalc2ibz")
+ ABI_CHECK(all(self%kTmesh == other%kTmesh), "Different value found for kTmesh")
+ ABI_CHECK(all(self%mu_e == other%mu_e), "Different value found for mu_e")
 
-end subroutine sigmaph_comp
+end subroutine sigmaph_compare
 !!***
 
 !!****f* m_sigmaph/sigmaph_free
@@ -4497,11 +4498,11 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), self%linewidth_mrta, start=[1,1,ikcalc,spin]))
  end if
 
- if (self%frohl_model == 1 .and. self%imag_only) then
-   ncerr = nf90_put_var(self%ncid, nctk_idname(self%ncid, "frohl_deltas_sphcorr"), &
-      self%frohl_deltas_sphcorr, start=[1,1,1,1, ikcalc, spin])
-   NCF_CHECK(ncerr)
- end if
+ !if (self%frohl_model == 1 .and. self%imag_only) then
+ !  ncerr = nf90_put_var(self%ncid, nctk_idname(self%ncid, "frohl_deltas_sphcorr"), &
+ !     self%frohl_deltas_sphcorr, start=[1,1,1,1, ikcalc, spin])
+ !  NCF_CHECK(ncerr)
+ !end if
 
  ! Write frequency dependent data.
  if (self%nwr > 0) then
