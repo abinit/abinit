@@ -14,40 +14,40 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 30 Mar 2020.
-- ( at 23h37 )
+.Starting date : Sun 10 May 2020.
+- ( at 23h49 )
   
->>> Enter name of output file: 
->>> Enter total number of DFPT POT files: 
->>> Enter name of POT file 1 : 
->>> Enter name of POT file 2 : 
->>> Enter name of POT file 3 : 
->>> Enter name of POT file 4 : 
->>> Enter name of POT file 5 : 
->>> Enter name of POT file 6 : 
->>> Enter name of POT file 7 : 
->>> Enter name of POT file 8 : 
->>> Enter name of POT file 9 : 
->>> Enter name of POT file 10 : 
->>> Enter name of POT file 11 : 
->>> Enter name of POT file 12 : 
->>> Enter name of POT file 13 : 
->>> Enter name of POT file 14 : 
->>> Enter name of POT file 15 : 
->>> Enter name of POT file 16 : 
->>> Enter name of POT file 17 : 
->>> Enter name of POT file 18 : 
->>> Enter name of POT file 19 : 
->>> Enter name of POT file 20 : 
->>> Enter name of POT file 21 : 
->>> Enter name of POT file 22 : 
->>> Enter name of POT file 23 : 
->>> Enter name of POT file 24 : 
->>> Enter name of POT file 25 : 
->>> Enter name of POT file 26 : 
->>> Enter name of POT file 27 : 
->>> Enter name of POT file 28 : 
->>> Enter name of POT file 29 : 
+->> Enter name of output file: 
+->> Enter total number of DFPT POT files: 
+->> Enter name of POT file 1 : 
+->> Enter name of POT file 2 : 
+->> Enter name of POT file 3 : 
+->> Enter name of POT file 4 : 
+->> Enter name of POT file 5 : 
+->> Enter name of POT file 6 : 
+->> Enter name of POT file 7 : 
+->> Enter name of POT file 8 : 
+->> Enter name of POT file 9 : 
+->> Enter name of POT file 10 : 
+->> Enter name of POT file 11 : 
+->> Enter name of POT file 12 : 
+->> Enter name of POT file 13 : 
+->> Enter name of POT file 14 : 
+->> Enter name of POT file 15 : 
+->> Enter name of POT file 16 : 
+->> Enter name of POT file 17 : 
+->> Enter name of POT file 18 : 
+->> Enter name of POT file 19 : 
+->> Enter name of POT file 20 : 
+->> Enter name of POT file 21 : 
+->> Enter name of POT file 22 : 
+->> Enter name of POT file 23 : 
+->> Enter name of POT file 24 : 
+->> Enter name of POT file 25 : 
+->> Enter name of POT file 26 : 
+->> Enter name of POT file 27 : 
+->> Enter name of POT file 28 : 
+->> Enter name of POT file 29 : 
 - Reading header of file [1]: teph4mob_1o_DS3_POT1
 - Merging file [1]: teph4mob_1o_DS3_POT1
 - Reading header of file [2]: teph4mob_1o_DS3_POT4

@@ -17,12 +17,12 @@
 .Starting date : Mon 24 Feb 2020.
 - ( at 16h32 )
   
->>> Enter name of output file: 
->>> Enter total number of DFPT POT files: 
->>> Enter name of POT file 1 : 
->>> Enter name of POT file 2 : 
->>> Enter name of POT file 3 : 
->>> Enter name of POT file 4 : 
+->> Enter name of output file: 
+->> Enter total number of DFPT POT files: 
+->> Enter name of POT file 1 : 
+->> Enter name of POT file 2 : 
+->> Enter name of POT file 3 : 
+->> Enter name of POT file 4 : 
 - Reading header of file [1]: t41o_DS3_POT1
 - Merging file [1]: t41o_DS3_POT1
 - Reading header of file [2]: t41o_DS4_POT1

@@ -8,11 +8,11 @@ This tutorial explains how to compile ABINIT and the required external dependenc
 without relying on pre-compiled libraries, package managers and root privileges.
 You will learn how to use the standard **configure** and **make** approach
 to build and install your own software stack including the MPI library and the associated 
-*mpif90* and *mpicc* wrappers  required to compile parallel applications.
+*mpif90* and *mpicc* wrapper that are required to compile parallel applications.
 
 It is assumed that you already have a standard Linux installation 
 providing the basic tools required to build software from source (Fortran/C compilers and *make*).
-The changes required for MacOsX are briefly mentioned when needed.
+The changes required for MacOsX are briefly mentioned if needed.
 Windows users should install [cygwin](https://cygwin.com/index.html) that 
 provides a POSIX-compatible environment 
 or alternatively use a [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about).
@@ -39,17 +39,17 @@ For users who are already familiar with these tools, the present tutorial may be
 ## Getting started
 
 Since ABINIT is written in Fortran, we need a **recent** Fortran compiler 
-supporting the **F2003 specifications** and a C compiler.
+that supports the **F2003 specifications** as well as a C compiler.
 At the time of writing ( |today| ) the C++ compiler is optional and required only for advanced features 
 such as the interface with the TRIQS library (not treated in this lesson).
 
 In what follows, we will be focusing on the GNU toolchain i.e. *gcc* for C and *gfortran* for Fortran.
 These "sequential" compilers are adequate if you don't need to compile parallel MPI applications.
-Indeed, the compilation of MPI code requires the installation of additional libraries 
+Rhe compilation of MPI code, indeed, requires the installation of additional libraries 
 and specialized wrappers for the compilers (*mpif90* and *mpicc*).
-This very important case is covered in more details in the next sections.
+This very important case scenario is covered in more details in the next sections.
 
-First of all, let's make sure **gfortran** is installed by issuing in the terminal:
+First of all, let's make sure **gfortran** is installed by issuing in the terminal the command:
 
 ```sh
 which gfortran
@@ -57,8 +57,8 @@ which gfortran
 ```
 
 The **which** command, returns the absolute path of the executable.
-Note that we will use the *which* command a lot in the rest of this tutorial.
-This tool is extremely useful to pin point possible problems.
+This tool is extremely useful to pin point possible problems and we will use it 
+a lot in the rest of this tutorial.
 
 To get the version of the compiler, use:
 
@@ -99,7 +99,6 @@ which make
 
 BLAS/LAPACK represents the workhorse of many scientific codes and an optimized implementation 
 is crucial for achieving good performance.
-
 In principle this step can be skipped as any decent Linux distribution already provides
 pre-compiled versions but, as already mentioned in the introduction, we prefer 
 to compile everything from source.
@@ -757,17 +756,19 @@ make -j2
 make check && make install
 ```
 
-To inspect the features activated in our Fortran library, we can use `nf-config` instead of **nc-config**:
+To inspect the features activated in our Fortran library, use `nf-config` instead of **nc-config**:
 
 ```sh
 which nf-config
 ```
 
-To get a summary of the options used to build the Fortran bindings and of the available features, use
+To get a summary of the options used to build the Fortran bindings and the list of available features, use
 
 ```sh
 [gmatteo@bob netcdf-c-4.7.3]$ nf-config --all
 ```
+
+See also <https://www.unidata.ucar.edu/software/netcdf/docs/building_netcdf_fortran.html>
 
 ## How to compile ABINIT
 
@@ -824,6 +825,11 @@ and have a configuration file that can be reused in other contexts.
 
 https://www.cprogramming.com/tutorial/shared-libraries-linux-gcc.html
 
+In this example, we will be taking advantage of the high-level interface provided by the *with_XXX* options
+to tell the build system where external dependencies are located instead of passing options explicitly.
+This is the easiest approach but if configure cannot detect the dependency properly, you may need to set some options 
+manually.
+
 ```sh
 # -------------------------------------------------------------------------- #
 # MPI support                                                                #
@@ -861,7 +867,7 @@ FFTW3_LIBS="-L$HOME/local/lib -lfftw3f -lfftw3"
 
 # Trigger and install prefix for LibXC (default is unset)
 #
-#with_libxc="yes"
+#with_libxc="$HOME/local/lib"
 LIBXC_LIBS="-L$HOME/local/lib -lxcf90 -lxc"
 LIBXC_FCFLAGS="-L$HOME/local/include"
 
@@ -870,8 +876,10 @@ LIBXC_FCFLAGS="-L$HOME/local/include"
 
 # Trigger and install prefix for NetCDF (default is unset)
 #
+#with_netcdf=$(nc-config --prefix)
 with_netcdf="yes"
 
+#with_netcdf_fortran=$(nf-config --prefix)
 NETCDF_FORTRAN_LIBS=`nf-config --flibs`
 NETCDF_FORTRAN_FCFLAGS=`nf-config --fflags`
 
@@ -879,7 +887,6 @@ HDF5_LIBS=`nf-config --flibs`
 HDF5_FCFLAGS=`nf-config --fflags`
 
 # Enable OpenMP (gmatteo, torrent)
-#
 enable_openmp="no"
 ```
 
@@ -894,6 +901,11 @@ Save all these options in the *myconf.ac9* file and pass it to the *configure* s
 
 ```sh
 ./configure --with-config-file="myconf.ac9"
+```
+
+Please check the summary produced by the configure script:
+
+```sh
 ```
 
 The configure script has generated several files required by make and the *config.h* include file 
@@ -918,7 +930,7 @@ Let's have a look at this file.
 To get the summary of options activated during the build, run *abinit* with the `-b` option 
 (or `--build` if you prefer the verbose version)
 
-```
+```sh
 ./src/98_main/abinit -b
 ```
 
@@ -932,7 +944,7 @@ So far so good, we managed
 ldd abinit
 ```
 
-On MacOsX, replace *ldd* with *otool*
+On MacOsX, replace *ldd* with *otool* and the syntax:
 
 ```sh
 otool -L abinit
@@ -978,6 +990,12 @@ In the cluster used for this tutorial
 module load
 ```
 
+To list the modules currently loaded use:
+
+```sh
+module list
+```
+
 At this point, you should decide the toolchain to be used to compile ABINIT:
 the compiler e.g. intel ifort, GNU gfortran
 This step is strongly cluster-dependent
@@ -988,7 +1006,7 @@ To see what libraries are recommended for a particular use case, specify the par
 
 ### How to compile ABINIT with support for OpenMP threads
 
-For a gentle introduction to threads, please consult this tutorial.
+For a gentle introduction to OpenMP threads, please consult this tutorial.
 
 Compiling ABINIT with OpenMP is not that difficult as everything boils down to:
 
@@ -1004,11 +1022,10 @@ is way more difficult because there are several factors that should be taken int
 
 To keep a long story short, one should use OpenMP threads 
 when one starts to trigger limitations or bottlenecks in the MPI implementation, 
-especially at the level of the memory requirements or the parallel scalability.
-These problems are usually observed in large calculations (large [[natom]], [[mpw]], [[nband]])  
+especially at the level of the memory requirements or of the parallel scalability.
+These problems are usually observed in large calculations that is large [[natom]], [[mpw]], [[nband]])  
 <!--
-hence note that it does not make any sense to 
-compile ABINIT with OpenMP if your calculations are relatively small.
+hence it does not make any sense to compile ABINIT with OpenMP if your calculations are relatively small.
 ABINIT, indeed, is mainly designed with MPI-parallelism in mind.
 Calculations with a relatively large number of $\kk$-points are 
 -->
@@ -1017,7 +1034,7 @@ Calculations with a relatively large number of $\kk$-points are
 
     When using threaded libraries remember to set explicitly the number of threads with e.g.
 
-    ```
+    ```sh
     export OMP_NUM_THREADS=1
     ```
 

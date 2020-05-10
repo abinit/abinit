@@ -80,7 +80,6 @@ module m_gstate
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
- use m_dtfil,            only : dtfil_init_time
  use m_jellium,          only : jellium
  use m_iowf,             only : outwf
  use m_outqmc,           only : outqmc

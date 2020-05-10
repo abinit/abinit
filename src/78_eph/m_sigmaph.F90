@@ -625,7 +625,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
- integer :: comm_rpt, method, osc_npw
+ integer :: comm_rpt, osc_npw
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
@@ -4227,9 +4227,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
  !character(len=500) :: msg
-#ifdef HAVE_NETCDF
- integer :: ncerr
-#endif
+!#ifdef HAVE_NETCDF
+! integer :: ncerr
+!#endif
 !arrays
  !integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
@@ -4611,6 +4611,8 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
  write(unt,"(a)")sjoin(" Number of q-points in the IBZ:", itoa(self%nqibz))
  write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
+ !write(unt,"(a)")sjoin(" chneut:", itoa(dtset%chneut))
+
  if (self%frohl_model == 0) then
    write(unt,"(a)")" No special treatment of Frohlich divergence in gkq for q --> 0"
  else if (self%frohl_model == 1) then
@@ -4621,6 +4623,7 @@ subroutine sigmaph_print(self, dtset, unt)
  else
    MSG_ERROR(sjoin("Invalid frohl_mode:", itoa(self%frohl_model)))
  end if
+
  write(unt,"(a, i0)")" Number of k-points for self-energy corrections: ", self%nkcalc
  if (all(dtset%sigma_erange /= -one)) then
    write(unt, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"

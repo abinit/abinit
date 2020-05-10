@@ -116,8 +116,7 @@ These steps can be summarized by the following graph:
     at run time while the anaddb implementation easily supports advanced features such as PAW.
     For further information about the difference between the two approaches, see [[cite:Gonze2019]]
 
-Note also that in order to analyze the results, you will need ABINIT compiled with netCDF support.
-All the results of the calculation are indeed saved in netcdf format,
+Note that all the results of the calculation are saved in netcdf format,
 while the log and output files are used to report selected quantities mainly for testing purposes.
 Post-processing and visualisation tools are NOT covered in this tutorial.
 Powerful tools based on python and matplotlib are provided by Abipy
@@ -169,13 +168,21 @@ The calculation is done for AlAs, the same crystalline material as in the first 
 Many input parameters are also quite similar. 
 For more details about this first step, please refer to the first and second tutorials on DFPT.
 
-Note this very important point.
+Note this additional important points.
 Since AlAs is a **polar semiconductor**, we need to compute with DFPT the Born effective charges 
-and the static dielectric tensor
+as well and the static dielectric tensor
 These quantities are then used to treat the long-range part of the dynamical matrix in 
 the Fourier interpolation of the phonon frequencies. 
 We will see that these quantities are also needed in the Fourier interpolation of the DFPT potential.
 TODO: Discuss [[dipdip]], [[asr]], [[chneut]]
+
+Only the (partial) DDB and POT files produced at the end of the DFPT run
+are needed to perform e-ph calculation.
+The files containing the first order wavefunctions (*1WF*) due to an atomic perturbatio are not needed.
+As these files are quite larger and the overall space on disk scales as nq * 3 * natom, we suggest
+to avoid the output of the DFPT wavefunctions by using [[prtwf]] = -1
+In this case, the DFPT code writens the 1WF only if the DFPT SCF cycle is not converged so that one can restart
+from it if needed.
 
 ## Merging the derivative databases and potentials
 
@@ -239,15 +246,20 @@ The only ingredient left is the set of GS wavefunctions on the dense $\kk$-mesh.
 ## Calculation of the dense WFK file
 
 In order to compute transport properties, we need to solve the Boltzmann
-Transport Equation (BTE) in the SERTA on a relatively dense $\kk$-mesh. 
+Transport Equation (BTE) in the SERTA on a relatively dense $\kk$-mesh to have enough wavevectors
+inside the electron (hole) pockets.
+<!--
 You will compute the electron lifetimes and group velocities on this dense mesh. 
+-->
 We will therefore need the wavefunctions on this dense mesh. 
 Note that in this tutorial, a single dense $\kk$-mesh will be used. 
 However, the value for the mobility strongly depends on this
 mesh and a convergence study should be performed by increasing the $\kk$-mesh density,
 as well as the $\qq$-mesh used for the integration of the self-energy whose imaginary part
 defines the electron lifetime.
-This study is explained later and left to the user.
+This study is explained later and left to the user
+but it should be clear even at this point that systems with small effective masses (e.g GaAs) will 
+require denser $\kk$-meshes and will be more difficult to converge.
 
 The computation of the dense WFK file is similar to a NSCF band structure computation.
 The main difference is that we need wavefunctions on a $\kk$-mesh instead of a $\kk$-path
@@ -327,7 +339,8 @@ to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to
 ensure energy and momentum conservation for a given $\kk$-point. 
 All the other $\qq$-points do not need to be considered and can be filtered out.
 The use of the tetrahedron method is automatically activated when only 
-the imaginary part is wanted. It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended.
+the imaginary part is wanted. 
+It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
 The carrier concentration is deduced from the number of extra electrons in the unit cell,
@@ -356,7 +369,7 @@ These tricks **are not activated by default** because users are supposed to perf
 to make sure the quality of the results is not affected by these options.
 
 If performance is really of concern, you can also try to set [[eph_mrta]] to 0.
-By default, the code compute computes transport linewidths with the SERTA and the MRTA.
+By default, the code computes transport lifetimes both with the SERTA and the MRTA.
 The MRTA requires the computation of the group velocities at $\kk$ and $\kk+\qq$. 
 This part is relatively fast yet it does not come for free.
 If you know in advance that you don't need MRTA results, it is possible to gain some speedup by disabling this part.
@@ -491,7 +504,7 @@ If a finer mesh was used, the number of $\kk$-points would have increased in a m
 Once the energy window has been set, we can start to converge the mobility with respect to the 
 dense $\kk$- and $\qq$-meshes. 
 The previous computations used 24x24x24 meshes. This is far from convergence.
-For instance, in silicon, a 45x45x45 $\kk$-mesh and 90x90x90 $\qq$-mesh are needed 
+In silicon, for instance, a 45x45x45 $\kk$-mesh and 90x90x90 $\qq$-mesh are needed 
 to have results converged within 5%. 
 
 In order to compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh, there are two possibilities. 
@@ -500,6 +513,7 @@ Let us take the previous example of silicon.
   * Run a computation with [[ngkpt]] = 90 90 90, [[eph_ngqpt_fine]] = 90 90 90, and [[sigma_ngkpt]] = 45 45 45.
 Using [[sigma_ngkpt]] will select the $\kk$-points belonging to the 45x45x45 mesh, but each lifetime will be computed
 with a 90x90x90 q-mesh.
+
   * Run a computation with [[ngkpt]] = 90 90 90, [[eph_ngqpt_fine]] = 90 90 90 and [[sigma_ngkpt]] = 90 90 90.
 In this way, you have the mobility with 90x90x90 $\kk$- and $\qq$-meshes. You can then run again the transport driver only,
 by setting [[eph_task]] = 7, and setting [[transport_ngkpt]] = 45 45 45. This will downsample the $\kk$-mesh used
@@ -524,13 +538,12 @@ Another possibility to improve the results without increasing the computation ti
 the double-grid technique.
 In this case, a coarse mesh is used for the $\kk$-mesh and the $\qq$-mesh for the e-ph matrix elements,
 but a finer mesh is used for the phonon absorption-emission terms. 
-This technique helps to better capture
-these processes, while computing the matrix elements on a coarser mesh. 
+This technique allows one to better capture these processes, while computing the matrix elements on a coarser mesh. 
 The efficiency of this method depends
 on the polar divergence of the matrix elements: if this divergence is very difficult to capture numerically,
 the coarse $\qq$-mesh for the e-ph matrix elements will have to be dense.
 
-The double-grid technique requires a second WFK file, containing the eigenvalues on the dense mesh. 
+The double-grid technique requires a second WFK file, containing the KS eigenvalues on the dense mesh. 
 You can specify the path to the dense WFK file using [[getwfkfine_filepath]]:
 
 ```sh
@@ -605,7 +618,7 @@ All the results of the calculation are stored in a single SIGEPH.nc file
 for all the $\kk$-points (and spins) considered.
 The list of $\kk$-points is initialized at the beginning of the run and an internal table 
 stores the status of the k-point (computed or not).
-This means that calculations that are killed by the resource manager due to time limit can use 
+This means that calculations that get killed by the resource manager due to time limit can use 
 the netcdf file to perform an automatic in-place restart.
 Just set [[eph_restart]] to 1 in the input file and rerun the job.
 

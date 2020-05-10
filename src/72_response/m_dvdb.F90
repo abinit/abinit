@@ -6137,12 +6137,13 @@ end subroutine dvdb_write_v1qavg
 !!
 !! SOURCE
 
-subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvdb_add_lr, qdamp, &
+subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvdb_add_lr, dvdb_qdamp, &
                               ddb_filepath, prtvol, coarse_ngqpt, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: dvdb_filepath, ddb_filepath
- integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, rspace_cell, symv1
+ integer,intent(in) :: comm, prtvol, dvdb_add_lr, rspace_cell, symv1
+ real(dp),intent(in) :: dvdb_qdamp
  integer,intent(in) :: dvdb_ngqpt(3), coarse_ngqpt(3)
 
 !Local variables-------------------------------
@@ -6173,7 +6174,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
  ABI_CHECK(any(symv1 == [0, 1, 2]), sjoin("invalid value of symv1:", itoa(symv1)))
  dvdb%symv1 = symv1
  dvdb%add_lr = dvdb_add_lr
- dvdb%qdamp = qdamp
+ dvdb%qdamp = dvdb_qdamp
  dvdb%rspace_cell = rspace_cell
 
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
