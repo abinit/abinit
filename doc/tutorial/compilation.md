@@ -8,10 +8,10 @@ This tutorial explains how to compile ABINIT and the required external dependenc
 without relying on pre-compiled libraries, package managers and root privileges.
 You will learn how to use the standard **configure** and **make** approach
 to build and install your own software stack including the MPI library and the associated 
-*mpif90* and *mpicc* wrapper that are required to compile parallel applications.
+*mpif90* and *mpicc* wrappers required to compile parallel applications.
 
 It is assumed that you already have a standard Linux installation 
-providing the basic tools required to build software from source (Fortran/C compilers and *make*).
+providing the basic tools needed to build software from source (Fortran/C compilers and *make*).
 The changes required for MacOsX are briefly mentioned if needed.
 Windows users should install [cygwin](https://cygwin.com/index.html) that 
 provides a POSIX-compatible environment 
@@ -26,6 +26,13 @@ If this is the first time you use **configure && make** to build software,
 we strongly recommended to read this 
 [introduction](https://www.codecoffee.com/software-installation-configure-make-install/)
 before proceeding with the next steps.
+
+!!! important 
+
+    Unfortunately, in this tutorial we cannot cover all possible cases.
+    The aim is to teach you how to compile code from source but we cannot guarantee
+    that these recipes will work out of the box on every possible machine.
+    Fortunately, the internet provides lots of resources and google is your best friend!
 
 <!--
 A list of useful commands and options is also available 
@@ -45,9 +52,9 @@ such as the interface with the TRIQS library (not treated in this lesson).
 
 In what follows, we will be focusing on the GNU toolchain i.e. *gcc* for C and *gfortran* for Fortran.
 These "sequential" compilers are adequate if you don't need to compile parallel MPI applications.
-Rhe compilation of MPI code, indeed, requires the installation of additional libraries 
+The compilation of MPI code, indeed, requires the installation of additional libraries 
 and specialized wrappers for the compilers (*mpif90* and *mpicc*).
-This very important case scenario is covered in more details in the next sections.
+This very important scenario is covered in more details in the next sections.
 
 First of all, let's make sure **gfortran** is installed by issuing in the terminal the command:
 
@@ -57,11 +64,10 @@ which gfortran
 ```
 
 The **which** command, returns the absolute path of the executable.
-This tool is extremely useful to pin point possible problems and we will use it 
+This tool is extremely useful to pinpoint possible problems and we will use it 
 a lot in the rest of this tutorial.
 
 To get the version of the compiler, use:
-
 
 ```sh
 gfortran --version
@@ -98,7 +104,7 @@ which make
 ## How to compile BLAS and LAPACK 
 
 BLAS/LAPACK represents the workhorse of many scientific codes and an optimized implementation 
-is crucial for achieving good performance.
+is crucial for achieving **good performance**.
 In principle this step can be skipped as any decent Linux distribution already provides
 pre-compiled versions but, as already mentioned in the introduction, we prefer 
 to compile everything from source.
@@ -106,7 +112,7 @@ Moreover the compilation of BLAS/LAPACK represents an excellent exercise
 that gives us the opportunity to discuss some basic concepts that 
 will reveal useful in other parts of this tutorial.
 
-First of all, create a new directory inside your `$HOME` (let's call it **local**):
+First of all, let's create a new directory inside your `$HOME` (let's call it **local**):
 
 ```sh    
 cd $HOME && mkdir local
@@ -245,6 +251,11 @@ ls $HOME/local/lib/libopenblas*
 /home/gmatteo/local/lib/libopenblas.so.0
 ```
 
+Files ending with `.so` are shared libraries (*so* stands for *shared object*) whereas 
+*.a* are static libraries.
+In this tutorial, we will mainly use dynamic linking but this means that we have to set the 
+value of LD_LIBRARY_PATH.
+
 <!--
 So far so good, we managed to compile and install our version of BLAS/LAPACK.
 Now use
@@ -326,19 +337,20 @@ The required commands are given below:
 ```sh
 # Get the tarball. 
 # Mind the -O option used in wget to specify the name of the output file
+
 cd $HOME/local/src
 wget http://www.tddft.org/programs/libxc/down.php?file=4.3.4/libxc-4.3.4.tar.gz -O libxc.tar.gz
 tar -zxvf libxc.tar.gz
 
 Configure the package with:
 
-```
+```sh
 cd libxc-4.3.4 && ./configure --prefix=$HOME/local
 ```
 
 Finally, build, run the tests and install libxc with:
 
-```
+```sh
 make -j2
 make check && make install
 ```
@@ -362,6 +374,15 @@ ls ~/local/lib/libxc*
 libxc is the C library.
 libxcf90 is the F90 library 
 libxcf03  is the F2003 library
+
+At present, the Fortran interface is not required by Abinit, only the C library.
+We made this choice, because one can easily use the C library with Abinit compiled with different Fortran compilers/version
+without having to rebuild libxc with a different Fortran compiler.
+Note, however, that for other libraries (fftw3, netcdf) we will use Fortran bindings, in this case it is important that
+the bindings are built with the same compiler as the one used for Abinit. 
+In principle, one can reuse libraries as long as the major version of the Fortran compiler is the same but experience has 
+shown that it's always a good idea to require strict matching.
+
 
 TODO: Discuss FCFLAGS and FCDFLAGS
 
