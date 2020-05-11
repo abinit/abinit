@@ -175,7 +175,6 @@ getdvdb_filepath10  "t60o_DS20_DVDB"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 
