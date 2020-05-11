@@ -1,7 +1,7 @@
  #calculated the component:  2  3  of dielectric function
  #broadening:    0.000000E+00    1.000000E-03
  #scissors shift:    0.000000E+00
- #energy window:    3.764934E+01eV    1.383588E+00Ha
+ #energy window:    6.589948E+01eV    2.421761E+00Ha
 
  # Energy(eV)         Im(eps(w))
     5.442277E-02    0.000000E+00
