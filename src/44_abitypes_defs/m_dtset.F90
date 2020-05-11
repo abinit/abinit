@@ -3091,7 +3091,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
-!list_vars=trim(list_vars)//' eph_np_pqbks'
+ list_vars=trim(list_vars)//' eph_np_pqbks'
   ! XG20200321, please provide testing for eph_np_pqbks
   ! Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
   ! and all the tests in the paral and mpiio directory are done with a single input file

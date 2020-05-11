@@ -4196,21 +4196,15 @@ Variable(
     vartype="integer",
     topics=['TuningSpeed_useful'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[FFTW3]] and [[usedmft]] == 0': 312,
- '[[paral_kgb]] == 1': 401,
- 'defaultval': 112}),
+    defaultval=ValueWithConditions({'[[FFTW3]] and [[usedmft]] == 0': 312, '[[paral_kgb]] == 1': 401, 'defaultval': 112}),
     mnemonics="Fast Fourier Transform ALGorithm",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-This keyword is **irrelevant** when Fast Fourier Transforms are done using
-**Graphics Processing Units** (GPU), i.e. when [[use_gpu_cuda]] = 1
-(in that case, it is ignored).
-
-Allows to choose the algorithm for Fast Fourier Transforms. These have to be
-used when applied to wavefunctions (routine `fourwf`), as well as when
-applied to densities and potentials (routine `fourdp.F90`). Presently, it is the
-concatenation of three digits, labelled (A), (B) and (C).
+Allows to choose the implementation for performing Fast Fourier Transforms.
+These have to be used when applied to wavefunctions (routine `fourwf`), as well as when
+applied to densities and potentials (routine `fourdp.F90`).
+Presently, it is the concatenation of three digits, labelled (A), (B) and (C).
 
 The first digit (A) is to be chosen among 1, 2, 3, 4 or 5:
 
@@ -4235,6 +4229,15 @@ The third digit (C) is related to `fourwf`:
     This is very efficient for cache architectures. (coded for A==1 and A==4, but A==4 is not yet sufficiently tested)
 
 Internal representation as [[ngfft]](7).
+
+FFTW and DFTI are usually faster than the internal implementation and are therefore recommended.
+These libraries, however, must be activated at configure time with e.g. the *with_fft_flavor* option.
+In this case, the default value of [[fftalg]] is changed accordingly.
+
+!!! important
+
+    This keyword is **ignored** when Fast Fourier Transforms are done using
+    **Graphics Processing Units** (GPU), i.e. when [[use_gpu_cuda]] = 1
 """,
 ),
 

@@ -33,6 +33,8 @@ before proceeding with the next steps.
     The aim is to teach you how to compile code from source but we cannot guarantee
     that these recipes will work out of the box on every possible machine.
     Fortunately, the internet provides lots of resources and google is your best friend!
+    In several cases, one can find the solution to a problem by just copying the
+    error message in the search bar.
 
 <!--
 A list of useful commands and options is also available 
@@ -131,6 +133,8 @@ cd $HOME && mkdir local
 
     The **&&** syntax is used to chain commands together, such that the next command is executed if and only 
     if the preceding command exited without errors (or, more accurately, exits with a return code of 0).
+    We wil use this trick a lot in the other examples to save lines in the terminal so that one can also easily cut and 
+    paste the examples.
 
 
 Now create the `src` subdirectory inside $HOME/local with:
@@ -251,8 +255,8 @@ ls $HOME/local/lib/libopenblas*
 /home/gmatteo/local/lib/libopenblas.so.0
 ```
 
-Files ending with `.so` are shared libraries (*so* stands for *shared object*) whereas 
-*.a* are static libraries.
+Files ending with `.so` are shared libraries (`.so` stands for *shared object*) whereas 
+`.a` files are static libraries.
 In this tutorial, we will mainly use dynamic linking but this means that we have to set the 
 value of LD_LIBRARY_PATH.
 
@@ -299,7 +303,7 @@ to print the value of these variables to the terminal.
 echo $PATH
 /home/gmatteo/local/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
 
-[echo $LD_LIBRARY_PATH
+echo $LD_LIBRARY_PATH
 /home/gmatteo/local/lib:
 ```
 
@@ -317,6 +321,8 @@ More information about `$PATH` is available [here](http://www.linfo.org/path_env
     ```sh
     env | grep LD_
     ```
+
+    to print only the variables starting with **_LD**
 
 Just to recap: 
 TODO
@@ -341,6 +347,7 @@ The required commands are given below:
 cd $HOME/local/src
 wget http://www.tddft.org/programs/libxc/down.php?file=4.3.4/libxc-4.3.4.tar.gz -O libxc.tar.gz
 tar -zxvf libxc.tar.gz
+```
 
 Configure the package with:
 
@@ -383,17 +390,17 @@ the bindings are built with the same compiler as the one used for Abinit.
 In principle, one can reuse libraries as long as the major version of the Fortran compiler is the same but experience has 
 shown that it's always a good idea to require strict matching.
 
-
 TODO: Discuss FCFLAGS and FCDFLAGS
 
-## Installing FFTW
+## Compiling and installing FFTW
 
 FFTW is a C library for computing the Fast Fourier transform in one or more dimensions.
 ABINIT already provides an internal implementation of the FFT algorithm
 hence FFTW is considered an optional dependency although it is highly recommended 
 if you care about **performance**. 
-Indeed FFTW (or, even better, the intel DFTI library provided by MKL) 
+Indeed, FFTW (or, even better, the intel DFTI library provided by MKL) 
 is usually faster than the internal ABINIT version.
+The [[fftalg]] variable defines the implementation to be used and 312 corresponds to FFTW.
 
 The FFTW source code can be downloaded from [fftw.org](http://www.fftw.org/), 
 and the tarball of the latest version is available at <http://www.fftw.org/fftw-3.3.8.tar.gz>.
@@ -408,7 +415,7 @@ The compilation procedure is very similar to the one we used for libxc.
 Note, however, that ABINIT needs both the **single-precision** and the **double-precision** version.
 This means that you need to configure, build and install the package twice.
 
-To build the single precision version with, use:
+To build the single precision version, use:
 
 
 ```sh
@@ -425,7 +432,7 @@ ls $HOME/local/lib/libfftw3*
 ```
 
 the `f` at the end stands for `float` (C jargon for single precision)
-Now we configure for the double precision version (default)
+Now we configure for the double precision version (default behaviour)
 
 ```sh
 ./configure --prefix=$HOME/local
@@ -442,6 +449,7 @@ ls $HOME/local/lib/libfftw3*
 ```
 
 To make sure we have the Fortran API bundled in the library, one can use the `nm` tool
+to get the list of symbols provided by the library and then use *grep* to search for the relevant API:
 
 
 ```sh
@@ -497,9 +505,6 @@ Don't try to link a library compiled with e.g. *mpich* if you are building the c
 the *mpif90* wrapper provided by e.g. *openmpi*.
 By the same token, don't try to run executables compiled with e.g. *intel mpi* with the 
 *mpirun* launcher provided by *openmpi*!
-<!--
-If in doubt, use the `which` command comes to rescue to pin point possible incompatibilities.
--->
 
 In this tutorial, we employ the *mpich* implementation whose source code can be downloaded 
 from this [webpage](https://www.mpich.org/downloads/).
@@ -812,14 +817,13 @@ wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.2.tar.gz
 
 In this case, we are using version "9.0.2" but you may want to download 
 latest production version to take advantage of new features and benefit from bug fixes.
-
 Once you got the tarball, uncompress it by typing:
 
 ```sh
 tar -xvzf abinit-9.0.2.tar.gz
 ```
 
-Then go into the newly-created *abinit-9.0.2* directory and take some time to read the `INSTALL` file.
+Then go into the newly created *abinit-9.0.2* directory and take some time to read the `INSTALL` file.
 
 Now let's try to build ABINIT. 
 Before actually starting the compilation, type:
@@ -924,7 +928,8 @@ Save all these options in the *myconf.ac9* file and pass it to the *configure* s
 ./configure --with-config-file="myconf.ac9"
 ```
 
-Please check the summary produced by the configure script:
+Remember to crosscheck the summary produced by the configure script to make sure you are 
+getting what you expect.
 
 ```sh
 ```
@@ -1005,7 +1010,11 @@ To list the available modules, use:
 module avail
 ```
 
-In the cluster used for this tutorial
+Hopefully, the sysadmin has already installed for you all the dependencies required by ABINIT using a consistent tool chain 
+i.e. same compiler version, same MPI version. 
+If this is not the case, ask the sysadmin to add the missing modules.
+If, on the other hand, the sysadmin does not respond to your mails because is busy watching kittens videos on youtube, you can 
+always compile the library from source and install it using the `make && make install` procedure discussed in this tutorial.
 
 ```sh
 module load
@@ -1045,11 +1054,13 @@ To keep a long story short, one should use OpenMP threads
 when one starts to trigger limitations or bottlenecks in the MPI implementation, 
 especially at the level of the memory requirements or of the parallel scalability.
 These problems are usually observed in large calculations that is large [[natom]], [[mpw]], [[nband]])  
-<!--
-hence it does not make any sense to compile ABINIT with OpenMP if your calculations are relatively small.
+Note that it does not make any sense to compile ABINIT with OpenMP if your calculations are relatively small.
 ABINIT, indeed, is mainly designed with MPI-parallelism in mind.
-Calculations with a relatively large number of $\kk$-points are 
--->
+Calculations with a relatively large number of $\kk$-points will benefit more of MPI than OpenMP, 
+especially if the number of MPI processes divides exactly the number of $\kk$-points.
+Even worse, do not compile the code with OpenMP support if you do not plan to use threads because the OpenMP
+version will have an additional overhead associate to the creation of threaded sections.
+
 
 !!! Important
 
@@ -1072,8 +1083,13 @@ Calculations with a relatively large number of $\kk$-points are
 
 Remember to use *which*
 
-Inspect *config.log* for possible errors messages at the end.
-Remember to attach the log file when asking for help on the ABINIT forum
+Inspect *config.log* for possible errors messages, especially the error messages 
+associated to the feature you are trying to activate.
+Note, indeed, there configure is trying to detect your architecture at runtime.
+Tests performed at the begining may fail so not all the
+error messages reported in *config.log* are necessarily relevant.
+
+Last but not least, remember to attach the log file when asking for help on the ABINIT forum
 
 How to use gdb
 
@@ -1086,8 +1102,7 @@ Current executable set to '../../../src/98_main/abinit' (x86_64).
 (lldb) settings set target.input-path t85.in
 (lldb) run
 
-
-
+Avoid VECLIB on MacOsx
 
 	/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLAPACK.dylib (compatibility version 1.0.0, current version 1.0.0)
 	/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib (compatibility version 1.0.0, current version 1.0.0)

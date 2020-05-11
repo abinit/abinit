@@ -509,7 +509,7 @@ module m_dvdb
 
  end type dvdb_t
 
- public :: dvdb_new                ! Initialize the object.
+ public :: dvdb_new                ! Create new object.
 
  ! Utilities
  public :: dvdb_merge_files        ! Merge a list of POT1 files.

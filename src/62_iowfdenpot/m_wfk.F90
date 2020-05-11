@@ -2824,7 +2824,7 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
  my_rank = xmpi_comm_rank(comm)
  iomode = iomode_from_fname(fname)
 
- call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname,", with iomode: ", iomode2str(iomode)))
+ call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname, ", with iomode:", iomode2str(iomode)))
 
  if (my_rank == master) then
    ! Open the file.
