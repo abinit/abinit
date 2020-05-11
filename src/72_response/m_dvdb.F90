@@ -1743,7 +1743,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex,  imyp, ipc !, ii
+ integer :: db_iqpt, cplex,  imyp, ipc, ierr !, ii
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -1784,7 +1784,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
 
    ! Transfer to cache taking into account my_npert. Note that IBZ may be distributed.
    if (db%qcache%itreatq(db_iqpt) /= 0) then
-     ABI_MALLOC(db%qcache%key(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     ABI_MALLOC_OR_DIE(db%qcache%key(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
      do imyp=1,db%my_npert
        ipc = db%my_pinfo(3, imyp)
        db%qcache%key(db_iqpt)%v1scf(:,:,:,imyp) = real(v1scf(:,:,:,ipc), kind=QCACHE_KIND)
@@ -1875,7 +1875,7 @@ subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
 
    ! Transfer to cache taking into account my_npert.
    if (ineed_qpt(db_iqpt) /= 0) then
-     ABI_MALLOC(db%qcache%key(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     ABI_MALLOC_OR_DIE(db%qcache%key(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
      do imyp=1,db%my_npert
        ipc = db%my_pinfo(3, imyp)
        db%qcache%key(db_iqpt)%v1scf(:,:,:,imyp) = real(v1scf(:,:,:,ipc), kind=QCACHE_KIND)
@@ -3884,7 +3884,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
    ! Points in the IBZ may be distributed to reduce memory.
    if (db%ft_qcache%itreatq(iq_ibz) /= 0) then
-     ABI_MALLOC(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     ABI_MALLOC_OR_DIE(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
      db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
    end if
 
@@ -3976,7 +3976,7 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
      call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
      ! Transfer to cache.
      if (ineed_qpt(iq_ibz) /= 0) then
-       ABI_MALLOC(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
+       ABI_MALLOC_OR_DIE(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
        db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
      end if
    end do

@@ -17,6 +17,9 @@ This lesson should take about 1 hour.
 Before starting, it is worth summarizing the most important equations implemented in the code.
 For a more detailed description of the ABINIT implementation, please consult [[cite:Brunin2020]].
 
+In this article, we focus on the solution of the linearized Boltzmann transport formulation [[Ashcroft1976]]
+within the relaxation time approximation (RTA).
+
 If what follows, we will be working within the 
 self-energy relaxation time approximation (SERTA) [[cite:Giustino2017]].
 In the $\eta \rightarrow 0^+$ limit, 
@@ -43,9 +46,7 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 \label{eq:fanlifetime}
 \end{align}
 
-In this article, we focus on the solution of the linearized Boltzmann transport formulation~\cite{Ashcroft1976}
-within the relaxation time approximation (RTA).
-The generalized transport coefficients are given by~\cite{Madsen2018}
+The generalized transport coefficients are given by [[cite:Madsen2018]]
 
 \begin{equation}
     \begin{split}
@@ -61,7 +62,8 @@ where $\vnka$ is the $\alpha$-th component of the matrix element $\vnk$ of the e
 
 The generalized transport coefficients can be used to obtain different transport properties such as
 the electrical conductivity, Peltier and Seebeck coefficients, and charge carrier contribution to the
-thermal conductivity tensors~\cite{Madsen2018}. The electrical conductivity tensor is given by
+thermal conductivity tensors [[cite:Madsen2018]]
+The electrical conductivity tensor is given by
 
 \begin{equation}
     \sigma_{\alpha\beta} =
@@ -174,7 +176,7 @@ as well and the static dielectric tensor
 These quantities are then used to treat the long-range part of the dynamical matrix in 
 the Fourier interpolation of the phonon frequencies. 
 We will see that these quantities are also needed in the Fourier interpolation of the DFPT potential.
-TODO: Discuss [[dipdip]], [[asr]], [[chneut]]
+
 
 Only the (partial) DDB and POT files produced at the end of the DFPT run
 are needed to perform e-ph calculation.
@@ -585,6 +587,8 @@ in turns defines the size of the Born-von-Karman supercell.
 A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015]] and [[cite:Sjakste2015]].
 
 ## Additional tricks
+
+TODO: Discuss [[dipdip]], [[asr]], [[chneut]]
 
 ### MPI parallelism and memory requirements
 
