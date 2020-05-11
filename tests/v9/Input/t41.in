@@ -1,3 +1,11 @@
+# Added by runtests.py
+output_file = "t41.out"
+pseudos = "/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml"
+indata_prefix = "t41i"
+outdata_prefix = "t41o"
+tmpdata_prefix = "t41t"
+# end runtests.py section
+
 #   Test  iron BCC metallic spin-polarized DFPT q/=0
 
 ndtset 2
@@ -14,7 +22,7 @@ spinat 0 0 4
     nqpt2   1            # One wavevector is to be considered
      qpt2  0    0    0.5
   getwfk2  1
-   nstep2  5
+   nstep2  4
 
 
 kptopt 3
@@ -26,14 +34,14 @@ nband 12
 # PAW
 pawecutdg 20
 pawnphi   8
-pawntheta 6
+pawntheta 5
 pawxcdev 0
 
 nstep 20
 tolwfr    1.0d-12
 
 #Definition of the k-point grid
-ngkpt 2 2 2   # Much too coarse. Only for testing purposes.
+ngkpt 4 4 4   # Much too coarse. Only for testing purposes.
 
 #Definition of the atoms
 natom 1
