@@ -39,7 +39,7 @@ Merged successfully 4 files
  symatm: atom number 2 is reached starting at atom
    2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1
    2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1
-- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
+- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: t44o_DS20_DVDB

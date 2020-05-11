@@ -112,7 +112,7 @@ Merged successfully 29 files
    1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
  symatm: atom number 2 is reached starting at atom
    2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
-- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
+- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: teph4mob_3_DVDB

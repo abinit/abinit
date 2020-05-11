@@ -440,7 +440,8 @@ All the independent perturbations are available
  Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -599,7 +600,8 @@ All the independent perturbations are available
  Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -759,7 +761,8 @@ All the independent perturbations are available
  Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -924,7 +927,8 @@ All the independent perturbations are available
  Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -1085,7 +1089,8 @@ All the independent perturbations are available
  Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -1239,7 +1244,8 @@ All the independent perturbations are available
  Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:

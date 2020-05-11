@@ -17,7 +17,7 @@ This lesson should take about 1 hour.
 Before starting, it is worth summarizing the most important equations implemented in the code.
 For a more detailed description of the ABINIT implementation, please consult [[cite:Brunin2020]].
 
-In this article, we focus on the solution of the linearized Boltzmann transport formulation [[Ashcroft1976]]
+In this article, we focus on the solution of the linearized Boltzmann transport formulation [[cite:Ashcroft1976]]
 within the relaxation time approximation (RTA).
 
 If what follows, we will be working within the 

@@ -4133,7 +4133,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
        write(msg, "(a,i0,2a,f7.3,a)") &
         " Number of q-points in IBZ(k) treated by this proc: ", self%my_nqibz_k, ch10, &
-        " Load balance inside qpt_comm: ", (one * self%nqibz_k) / (self%my_nqibz_k * self%qpt_comm%nproc), " (should be ~1)"
+        " Load balance inside qpt_comm: ", (self%my_nqibz_k * self%qpt_comm%nproc) / (one * self%nqibz_k), " (should be ~1)"
        call wrtout(std_out, msg)
        MSG_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
 
@@ -4610,8 +4610,8 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" Ab-initio q-mesh from DVDB file:", ltoa(dtset%dvdb_ngqpt))
  write(unt,"(a)")sjoin(" Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
  write(unt,"(a)")sjoin(" Number of q-points in the IBZ:", itoa(self%nqibz))
- write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
- !write(unt,"(a)")sjoin(" chneut:", itoa(dtset%chneut))
+ write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "chneut:", itoa(dtset%chneut))
+ write(unt,"(a)")sjoin(" dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
 
  if (self%frohl_model == 0) then
    write(unt,"(a)")" No special treatment of Frohlich divergence in gkq for q --> 0"

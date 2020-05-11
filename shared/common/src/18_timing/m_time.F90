@@ -591,12 +591,13 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
 
  if (present(comm)) then
    call cwtime(cpu, wall, gflops, "stop", comm=comm)
-   avg_type = "(MPI average)"
+   avg_type = "(MPI average) <<< TIME"
  else
    call cwtime(cpu, wall, gflops, "stop")
-   avg_type = ""
+   avg_type = "<<< TIME"
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
+
  call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
      do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)

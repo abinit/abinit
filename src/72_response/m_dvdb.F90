@@ -2869,15 +2869,15 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
- call wrtout(std_out, sjoin(ch10, "Building W(R,r) using ngqpt: ", ltoa(ngqpt), &
+ call wrtout(std_out, sjoin(ch10, "Building W(R,r) using q-mesh ngqpt: ", ltoa(ngqpt), &
    ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
- call wrtout(std_out, sjoin(" Qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
- call wrtout(std_out, " Q-mesh qshift:")
- do ii=1,nqshift
-   call wrtout(std_out, ltoa(qshift(:, ii)))
- end do
+ call wrtout(std_out, sjoin(" Gaussian filter with qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
+ !call wrtout(std_out, " Q-mesh shifts:")
+ !do ii=1,nqshift
+ !  call wrtout(std_out, ltoa(qshift(:, ii)))
+ !end do
  call wrtout(std_out, "")
- call wrtout(std_out, " It may take some time depending on the number of MPI procs, ngqpt and nfft points.")
+ call wrtout(std_out, " Note: this part may take some time depending on the number of MPI procs, ngqpt and nfft points.")
  call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
 
  call prepare_ftinterp(db, ngqpt, qptopt1, nqshift, qshift, &
@@ -3899,7 +3899,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
  ! Compute final cache size.
  my_mbsize = db%ft_qcache%get_mbsize()
- call wrtout(std_out, sjoin(" Memory allocated for cache: ", ftoa(my_mbsize, fmt="f8.1"), " [Mb] <<< MEM"))
+ call wrtout(std_out, sjoin(" Memory allocated for Q-cache: ", ftoa(my_mbsize, fmt="f8.1"), " [Mb] <<< MEM"))
  call xmpi_max(my_mbsize, max_mbsize, comm, ierr)
  call wrtout(std_out, sjoin(" Max memory inside MPI comm: ", ftoa(max_mbsize, fmt="f8.1"), " [Mb] <<< MEM"))
  call cwtime_report(" Qcache from W(R,r) + symmetrization", cpu_all, wall_all, gflops_all, end_str=ch10)
