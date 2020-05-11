@@ -1,0 +1,73 @@
+#   Test  iron BCC metallic spin-polarized DFPT q/=0
+
+ndtset 2
+
+prtvol 2
+
+nsppol 2
+spinat 0 0 4
+
+#Response-function calculation, with q=0.5
+  rfphon2   1            # Will consider phonon-type perturbation
+ rfatpol2   1 1          # Only the first atom is displaced
+   rfdir2   1 1 1        # Along all
+    nqpt2   1            # One wavevector is to be considered
+     qpt2  0    0    0.5
+  getwfk2  1
+   nstep2  5
+
+
+kptopt 3
+ecut 10.0
+
+occopt 7
+nband 12
+
+# PAW
+pawecutdg 20
+pawnphi   8
+pawntheta 6
+pawxcdev 0
+
+nstep 20
+tolwfr    1.0d-12
+
+#Definition of the k-point grid
+ngkpt 2 2 2   # Much too coarse. Only for testing purposes.
+
+#Definition of the atoms
+natom 1
+typat 1           # This atom is of type 1, that is, Fe
+xred              # This keyword indicate that the location of the atoms
+   0.0  0.0  0.0  # will follow, one triplet of number for each atom
+ # Triplet giving the REDUCED coordinate of atom 1.
+
+  # Triplet giving the REDUCED coordinate of atom 1.
+ntypat 1
+znucl 26
+
+#Definition of the unit cell
+acell   3*4.8
+rprim     -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t41.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0;
+#%% psp_files = Fe.GGA_PBE-JTH.xml
+#%% [paral_info]
+#%% max_nprocs = 28
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW, DFPT
+#%% description =
+#%%   BCC iron, ferromagnetic, GGA, PAW.
+#%%   Test DFPT phonon q/=0.5 . 
+#%%   Works with pseudo Fe.GGA_PBE-JTH.xml , but not with 26fe.paw (as of v9.0.4). Except if one switch to usexcnhat=0 . 
+#%% topics = PAW
+#%%<END TEST_INFO>
+
