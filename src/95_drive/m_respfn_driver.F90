@@ -220,7 +220,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),intent(inout) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
  integer,intent(in) :: mkmems(3)
@@ -1000,7 +1000,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  Compute the local of the dynamical matrix
 !  dyfrnl has not yet been symmetrized, but will be in the next routine
    call dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrx2,dyfr_cplex,dyfr_nondiag,&
-&   gmet,gprimd,gsqcut,indsym,mgfftf,mpi_enreg,psps%mqgrid_vl,&
+&   dtset,gmet,gprimd,gsqcut,indsym,mgfftf,mpi_enreg,psps%mqgrid_vl,&
 &   natom,nattyp, nfftf,ngfftf,dtset%nspden,dtset%nsym,ntypat,&
 &   psps%n1xccc,n3xccc,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qptn,rhog,rprimd,symq,symrec,dtset%typat,ucvol,&
@@ -3945,7 +3945,7 @@ end subroutine dfpt_gatherdy
 !! SOURCE
 
 subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondiag,&
-&  gmet,gprimd,gsqcut,indsym,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
+&  dtset,gmet,gprimd,gsqcut,indsym,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
 &  nfft,ngfft,nspden,nsym,ntypat,n1xccc,n3xccc,psps,pawtab,ph1d,qgrid,&
 &  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
 &  xcccrc,xccc1d,xccc3d,xred)
@@ -3955,6 +3955,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
  integer,intent(in) :: nsym,ntypat,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
+ type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -4024,7 +4025,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    ABI_ALLOCATE(dyfrlo_tmp1,(3,3,natom))
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
+   call mklocl_recipspace(dyfrlo_tmp1,eei,dtset%icutcoul,gmet,gprimd,&
 &   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
 &   ntypat,option,ph1d,qgrid,qprtrb,rhog,ucvol,vlspl,vprtrb,v_dum)
    do iatom=1,natom

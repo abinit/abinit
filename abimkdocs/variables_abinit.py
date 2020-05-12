@@ -19133,9 +19133,9 @@ Variable(
     requires="[[icutcoul]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
-[[vcutgeo]] is used in conjunction with [[icutcoul]] to specify the geometry
-used to truncate the Coulomb interaction, as well as the particular approach
-to be used. It has a meaning only for the cylindrical symmetry
+[[vcutgeo]] is used in conjunction with [[icutcoul]](and [[icsing]]) to specify
+the geometry used to truncate the Coulomb interaction, as well as the particular
+approach to be used. It has a meaning only for the cylindrical symmetry
 ([[icutcoul]] = 1) or in the case of surfaces ([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
 Phys. Rev. B 73, 233103 and Phys. Rev. B 73, 205119 for a complete description

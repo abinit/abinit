@@ -26,7 +26,6 @@
 module m_gtermcutoff
 
  use defs_basis
- use m_dtset
  use m_errors
  use m_xmpi
  use m_fstrings,        only : sjoin, itoa
@@ -82,11 +81,11 @@ contains
 !!
 !! SOURCE
 
-subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+subroutine termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)    :: nfft,ngfft(18)
+ integer,intent(in)    :: icutcoul,nfft,ngfft(18)
  real(dp),intent(in)   :: gsqcut
  real(dp),intent(in)   :: ucvol
 
@@ -97,7 +96,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 !scalars
  integer,parameter  :: N0=1000
  integer            :: i1,i2,i23,i3,ierr
- integer            :: ii,ig,ing,n1,n2,n3,id(3)
+ integer            :: ii,ig,ing,n1,n2,n3,ng,id(3)
  integer            :: test,opt_surface !opt_cylinder
  real(dp)           :: cutoff,rcut,check
  real(dp)           :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
@@ -108,18 +107,18 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  real(dp),parameter :: tolfix=1.0000001_dp
  character(len=50)  :: mode
  character(len=500) :: msg
- type(dataset_type) :: dtset
  type(kmesh_t)      :: Kmesh 
  type(gsphere_t)    :: Gsph
  type(crystal_t)    :: Cryst
 !arrays
 
  real(dp),allocatable :: gq(:,:),gpq(:),gpq2(:),gcart(:)
- real(dp),allocatable,intent(out) :: gcutoff(:)
+ real(dp),allocatable :: gcutoff(:)
 
 !Initialize a few quantities
  cutoff=gsqcut*tolfix
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ ng=Gsph%ng
 ! call metric(gmet,gprimd,-1,rmet,Cryst%rprimd,ucvol)
  
  ! Initialize container
@@ -128,7 +127,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  ABI_ALLOCATE(gpq2,(n1*n2*n3))
  ABI_ALLOCATE(gcart,(n1*n2*n3))  
  ABI_ALLOCATE(gcutoff,(n1*n2*n3))
- gpq = zero ; gpq2 = zero ; gcutoff=zero
+ gcart(:) = zero ; gpq = zero ; gpq2 = zero ; gcutoff=zero
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
@@ -143,12 +142,13 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  ! Get the cut-off method info from the input file
  ! Assign method to one of the available cases
  mode='NONE' 
- if (dtset%icutcoul==0) mode='SPHERE'
- if (dtset%icutcoul==1) mode='CYLINDER'
- if (dtset%icutcoul==2) mode='SURFACE'
- if (dtset%icutcoul==3) mode='CRYSTAL'
- if (dtset%icutcoul==4) mode='ERF'
- if (dtset%icutcoul==5) mode='ERFC'
+
+ if (icutcoul==0) mode='SPHERE'
+ if (icutcoul==1) mode='CYLINDER'
+ if (icutcoul==2) mode='SURFACE'
+ if (icutcoul==3) mode='CRYSTAL'
+ if (icutcoul==4) mode='ERF'
+ if (icutcoul==5) mode='ERFC'
 
   do i3=1,n3
    ! Precompute some products that do not depend on i2 and i1
@@ -172,7 +172,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  end do
 
  !Initialize geomtry type to help select CASE
- vcutgeo=dtset%vcutgeo 
+ !vcutgeo=(0,0,0) !dtset%vcutgeo 
  
  SELECT CASE (TRIM(mode))
 
@@ -190,7 +190,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 
    CASE('CYLINDER')
 
-     test=COUNT(ABS(vcutgeo)>tol6)
+     test=COUNT(vcutgeo/=zero)
      ABI_CHECK(test==1,'Wrong cutgeo for cylinder')   
 
      !Calculate rcut for each method !
@@ -266,7 +266,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
      !CASE SURFACE 1 - Beigi
      CASE(1)
    
-     do ig=1,nfft
+     do ig=1,ng
        gcart(:)=b1(:)*Gsph%gvec(1,ig)+b2(:)*Gsph%gvec(2,ig)+b3(:)*Gsph%gvec(3,ig)
        gcart2=DOT_PRODUCT(gcart(:),gcart(:))
        gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)  
@@ -277,7 +277,7 @@ subroutine termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
      CASE(2)
 
      !!BG: Trigger needed - use the available input value for this 
-     do ig=1,nfft
+     do ig=1,ng
        gcart(:)=b1(:)*Gsph%gvec(1,ig)+b2(:)*Gsph%gvec(2,ig)+b3(:)*Gsph%gvec(3,ig)
        gcart2=DOT_PRODUCT(gcart(:),gcart(:))
        gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)

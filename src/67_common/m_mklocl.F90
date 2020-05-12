@@ -194,7 +194,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  if (dtset%usewvl == 0) then
 !  Plane wave case
    if (psps%vlspl_recipSpace) then
-     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
+     call mklocl_recipspace(dyfrlo,eei,dtset%icutcoul,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
 &     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
 &     ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
 &     psps%vlspl,vprtrb,vpsp)
@@ -286,13 +286,13 @@ end subroutine mklocl
 !!
 !! SOURCE
 
-subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
+subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,qprtrb,&
 &  rhog,ucvol,vlspl,vprtrb,vpsp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option
+ integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option,icutcoul
  real(dp),intent(in) :: eei,gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -376,9 +376,8 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  me_g0=0
  ia1=1
 
-!Initialize Gcut-off array from m_barevcoul 
- ABI_ALLOCATE(gcutoff,(nfft))
- call termcutoff(gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ !Initialize Gcut-off array from m_barevcoul 
+ call termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  !BG: Don't apply it just yet. Needs some testing before
  gcutoff=one
 
