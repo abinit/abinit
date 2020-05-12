@@ -1,11 +1,3 @@
-# Added by runtests.py
-output_file = "t41.out"
-pseudos = "/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml"
-indata_prefix = "t41i"
-outdata_prefix = "t41o"
-tmpdata_prefix = "t41t"
-# end runtests.py section
-
 #   Test  iron BCC metallic spin-polarized DFPT q/=0
 
 ndtset 2
@@ -39,6 +31,8 @@ pawxcdev 0
 
 nstep 20
 tolwfr    1.0d-12
+nline 6
+tolrde 0.001
 
 #Definition of the k-point grid
 ngkpt 4 4 4   # Much too coarse. Only for testing purposes.
