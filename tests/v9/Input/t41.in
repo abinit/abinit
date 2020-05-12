@@ -2,19 +2,17 @@
 
 ndtset 2
 
-prtvol 2
-
 nsppol 2
 spinat 0 0 4
 
 #Response-function calculation, with q=0.5
   rfphon2   1            # Will consider phonon-type perturbation
  rfatpol2   1 1          # Only the first atom is displaced
-   rfdir2   1 1 1        # Along all
+   rfdir2   1 1 1        # Along all directions
     nqpt2   1            # One wavevector is to be considered
      qpt2  0    0    0.5
   getwfk2  1
-   nstep2  4
+   nstep2  3    # Much too small, only for testing purposes
 
 
 kptopt 3
@@ -29,10 +27,10 @@ pawnphi   8
 pawntheta 5
 pawxcdev 0
 
-nstep 20
+nstep 12
 tolwfr    1.0d-12
-nline 6
-tolrde 0.001
+nline 6   # For testing purposes
+tolrde 0.001   # For testing purposes
 
 #Definition of the k-point grid
 ngkpt 4 4 4   # Much too coarse. Only for testing purposes.
