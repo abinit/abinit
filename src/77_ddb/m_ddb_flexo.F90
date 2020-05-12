@@ -726,7 +726,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  real(dp) :: frcelast_t2(3,3,3,3)
- real(dp) :: Csupkap(3,natom,3,3,3)
+ real(dp) :: Csupkap(3,natom,3,3,3),Csupkapsum(3,3,3,3)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  real(dp) :: flexois(3,natom,3,3,3)
  real(dp) :: flexofr(3,natom,3,3,3)
@@ -906,6 +906,8 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 
 !In last place compute the lattice contribution to the FxE tensor
 !First obtain the C^{\kappa} tensor of Eq. 59 of PRB 88,174106 (2013) 
+!and its sublattice summation
+ Csupkapsum(:,:,:,:)=zero
  do strsd2=1,3
    do strsd1=1,3
      do qvecd=1,3
@@ -913,6 +915,8 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
          do iat=1,natom
            Csupkap(iatd,iat,qvecd,strsd1,strsd2)=flexofr(iatd,iat,qvecd,strsd1,strsd2) + &
          & roundbkt_k(iatd,qvecd,strsd1,strsd2,iat) 
+           Csupkapsum(iatd,qvecd,strsd1,strsd2)=Csupkapsum(iatd,qvecd,strsd1,strsd2) + &
+         & Csupkap(iatd,iat,qvecd,strsd1,strsd2)          
          end do
        end do
      end do
@@ -931,7 +935,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
        do iatd=1,3
          do iat=1,natom
            hatCsupkap(iatd,iat,qvecd,strsd1,strsd2)=Csupkap(iatd,iat,qvecd,strsd1,strsd2) - &
-         & amu(typat(iat))/mtot*ucvol*ricelast_t2(iatd,qvecd,strsd1,strsd2)
+         & amu(typat(iat))/mtot*ucvol*Csupkapsum(iatd,qvecd,strsd1,strsd2)
          end do
        end do
      end do
