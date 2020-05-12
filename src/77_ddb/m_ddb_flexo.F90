@@ -935,7 +935,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
        do iatd=1,3
          do iat=1,natom
            hatCsupkap(iatd,iat,qvecd,strsd1,strsd2)=Csupkap(iatd,iat,qvecd,strsd1,strsd2) - &
-         & amu(typat(iat))/mtot*ucvol*Csupkapsum(iatd,qvecd,strsd1,strsd2)
+         & amu(typat(iat))/mtot*Csupkapsum(iatd,qvecd,strsd1,strsd2)
          end do
        end do
      end do
