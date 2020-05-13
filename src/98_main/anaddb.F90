@@ -321,7 +321,7 @@ program anaddb
    if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
      call wrtout(std_out, "--- !WARNING")
      call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
-     call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding long wave 3rd derivatives")
+     call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding longwave 3rd derivatives")
    end if
  end if
 

@@ -280,6 +280,46 @@ The abinit input variable [[dipdip]] has a similar meaning.
 ),
 
 Variable(
+    abivarname="dipquad@anaddb",
+    varset="anaddb",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="DIPole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+  * 0 --> the dipole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
+  * 1 --> the dipole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
+    so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
+    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1 
+    or a [[lw_flexo]] = 1 or 2 run.
+
+""",
+),
+
+Variable(
+    abivarname="quadquad@anaddb",
+    varset="anaddb",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="QUADdrupole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+  * 0 --> the quadrupole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
+  * 1 --> the quadrupole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
+    so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
+    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1
+    or a [[lw_flexo]] = 1 or 2 run.
+
+""",
+),
+
+Variable(
     abivarname="dosdeltae@anaddb",
     varset="anaddb",
     vartype="real",
@@ -629,6 +669,33 @@ as the interpolated phonons and gkk are not diagonalized in the same basis.
 Doing so afterwards ( **ep_scalprod** 0) eliminates the diagonalization error,
 but sometimes gives small spikes in the phonon linewidths near band crossings
 or high symmetry points. I do not know why...
+""",
+),
+
+Variable(
+    abivarname="flexoflag@anaddb",
+    varset="anaddb",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FLEXOelectric tensor FLAG",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Flag for calculation of bulk flexoelectrics tensors
+
+  * 0 --> No flexoelectric tensor is calculated.
+  * 1 --> All the contributions to the bulk flexoelectric tensor (clamped-ion, mixed and lattice-mediated) and 
+          related quantities (piezoelectric and flexoelectric internal strain tensors and Lagrange elastic tensors)
+          are calculated. Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 run. 
+  * 2 --> The clamped-ion flexoelectric tensor is printed. Requires a preceding generation of 2nd and 3rd order 
+          DDB with a [[lw_flexo]] = 1 or 2 run.
+  * 3 --> The mixed flexoelectric tensor is calculated and printed along with the piezoelectric internal strain tensors. 
+          Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 or 3 run.
+  * 4 --> The lattice-mediated flexoelectric tensor is calculated and printed along with the piezoelectric and flexoelectric 
+          internal strain tensors and the Lagrange elastic tensors. 
+          Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 or 4 run.
 """,
 ),
 
