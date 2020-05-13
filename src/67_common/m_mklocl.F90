@@ -376,10 +376,8 @@ subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,gmet,gprimd,grtn,gsqcut,lpsstr,
  me_g0=0
  ia1=1
 
- !Initialize Gcut-off array from m_barevcoul 
+ !Initialize Gcut-off array from m_gtermcutoff
  call termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
- !BG: Don't apply it just yet. Needs some testing before
- gcutoff=one
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:

@@ -65,19 +65,32 @@ contains
 !! termcutoff
 !!
 !! FUNCTION
-!! 
+!!   Apply a cut-off term to the 1/G**2-like terms that appears throughout
+!!   the code at the ground-state level as follows: Ewald, NC-PSP, Hartee.
+!!   
 !! INPUTS
-!! 
+!!   icutcoul = Information about the cut-off
+!!   gmet     = Metric in reciprocal space
+!!   gprimd   = Dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
+!!   nfft     = Total number of FFT grid points.
+!!   ngfft(18)= Information on the (fine) FFT grid used for the density.
+!!   gsqcut   = Cut-off value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))   
+!!   ucvol    = Volume of the unit cell
+!!    
 !! OUTPUT
+!!   gcutoff  = Cut-off term applied to 1/G**2 terms
 !!
 !! NOTES
-!!  In order to incur minimal changes in some portions of the code 
+!!  1. In order to incur minimal changes in some portions of the code 
 !!  where a cut-off is needed to be applied, one can work only with 
-!! the cut-off part of the Coulomb potential.
+!!  the cut-off part of the Coulomb potential, unlike what is done
+!!  in barevcoul module.
+!!  2. Fock term has its own legacy cut-off for the moment.
 !!
 !! PARENTS
-!!
+!!     atm2fft,mklocl
 !! CHILDREN
+!!     calck0,paw_jbessel,quadrature
 !!
 !! SOURCE
 
@@ -194,7 +207,7 @@ subroutine termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
      ABI_CHECK(test==1,'Wrong cutgeo for cylinder')   
 
      !Calculate rcut for each method !
-     gcutoff(:)=1 ! Neutral cut-off
+     !
 
      ! * Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
      !   In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_

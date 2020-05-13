@@ -30,6 +30,7 @@ module m_atm2fft
  use m_errors
  use m_xmpi
  use m_distribfft
+ use m_dtset
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
@@ -223,7 +224,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: im=2,re=1
+ integer,parameter :: im=2,re=1,icutcoul=3
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig1_,ig2,ig2_,ig3,ig3_,ii,is1,is2
  integer :: itypat,jj,js,ka,kb,kd,kg,me_fft,my_comm_fft,ndir,n1,n2,n3,nproc_fft,paral_kgb_fft
  integer :: shift1,shift2,shift3
@@ -359,12 +360,9 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  ABI_ALLOCATE(phre_igia,(natom))
  ABI_ALLOCATE(phim_igia,(natom))
 
- !Initialize Gcut-off array from m_barevcoul 
- !!! Use alternatively the following two lines when testing!!!
- ABI_ALLOCATE(gcutoff,(nfft))
- !call termcutoff(dtset%icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
- !BG: Don't apply it just yet. Needs some testing before
- gcutoff=one
+ !Initialize Gcut-off array from m_termcutoff
+ !ABI_ALLOCATE(gcutoff,(nfft))
+ call termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 
  ia1=1
  do itypat=1,ntypat
