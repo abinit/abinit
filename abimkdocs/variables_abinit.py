@@ -6789,6 +6789,36 @@ pseudo-potential and ion-ion interaction:
 ),
 
 Variable(
+    abivarname="icsing",
+    varset="gw",
+    vartype="integer",
+    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=6,
+    mnemonics="Integration technique for Coulomb SINGularity",
+    requires="[[optdriver]] in [3,4]",
+    added_in_version="v9.1",
+    text=r"""
+TO BE CHECKED ! (Also the information above)
+Many-body calculations 
+for fully periodic systems are problematic due to the presence of the
+integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
+respect to the number of q-points used to sample the Brillouin zone. The
+convergence can be accelerated by integrating accurately the zone in the neighborhood of $\mathbf{G}=0$.
+
+[[icsing]] defines the particular expression to be used for such integration,
+in case [[icutcoul]]==3 (3-dimensional system).
+  
+  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
+  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
+  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]]. 
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+""",
+),
+
+Variable(
     abivarname="icutcoul",
     varset="gw",
     vartype="integer",
@@ -6796,34 +6826,30 @@ Variable(
     dimensions="scalar",
     defaultval=6,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
-    requires="[[optdriver]] in [3,4]",
     added_in_version="before_v9",
     text=r"""
-Many-body calculations for isolated systems present a slow convergence with
+SHOULD REPLACE THE DEFAULT VALUE BY icutcoul=3 !
+Many-body calculations for isolated systems, 1D and 2D systems present a slow convergence with
 respect to the size of the supercell due to the long ranged Coulomb
-interaction and the high degree of non-locality of the operators involved. A
-similar issue also occurs in fully periodic systems due to the presence of the
-integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
-respect to the number of q-points used to sample the Brillouin zone. The
-convergence can be accelerated by replacing the true bare Coulomb interaction
-with other expressions.
+interaction and the high degree of non-locality of the operators involved. 
+Thus, restricting the range of the Coulomb interaction, in order to prevent 
+supercell images to interact can significantly speed-up convergence, or even can make convergence happen.
+Also, even in the ground-state case, a cut-off Coulomb interaction might prove useful.
 
 [[icutcoul]] defines the particular expression to be used for the Coulomb term
 in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 6. The
 corresponding influential variables are [[vcutgeo]] and [[rcut]].
+Also, in the GW case, the related variable [[icsing]] allows one to treat the integration
+of the $\mathbf{G}=0$ Coulomb singularity.
 
-  * 0 --> sphere (molecules but also 3D-crystals).
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
   * 1 --> cylinder (nanowires, nanotubes).
   * 2 --> surface.
-  * 3 --> 3D crystal (no cut-off, integration in a spherical mini-Brillouin Zone, legacy value).
+  * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
-  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
-  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
-  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
-  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
-  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+  * 6 TO BE SUPPRESSED ! 
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
@@ -9236,13 +9262,13 @@ Variable(
     text=r"""
 Used to run the calculation of spatial dispersion tensorial quantities needed to
 build the bulk flexoelectric tensor (the clamped-ion contribution is alread calculated by
-abint whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation,
+abinit whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation,
 see [[flexoflag@anaddb]]).
 
 At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
 calculated. This **requires** the precalculation of the ground-state wave-functions and
 density as well as response functions and densities to a set of perturbations as specified below.
-All perturbations and directions need to be explicictly computed, and the linear response calculations
+All perturbations and directions need to be explicitly computed, and the linear response calculations
 have to be performed with [[prepalw]] = 1.
 
   * 0 --> No flexoelectric spatial dispersion tensors are calculated.
@@ -9263,7 +9289,6 @@ have to be performed with [[prepalw]] = 1.
           are also printed: piezoelectric force response tensor and clamped-ion elastic tensor.
           Requires precomputed linear response functions and densities:
           ddk, atomic displacement and strain.
-
 """,
 ),
 
@@ -9292,7 +9317,7 @@ At present ( |today| ), all the elements of the dynamical quadrupoles tensor are
 calculated. This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
 ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need
-to be explicictly computed, and the linear response calculations have to be performed with [[prepalw]] = 1.
+to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] = 1.
 """,
 ),
 
@@ -12486,6 +12511,7 @@ The choice is among:
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH)
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 10 --> longwave response functions (LONGWAVE), routine *longwave*.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -14230,6 +14256,33 @@ in half the BZ (kptopt=2), or the full BZ (kptopt=3).
 """,
 ),
 
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT 
+approach requires the first-order wavefunctions and densities obtained from 
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties. 
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+""",
+),
 
 Variable(
     abivarname="prepanl",

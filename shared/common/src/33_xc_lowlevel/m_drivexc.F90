@@ -416,8 +416,9 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(ndvxc)) then
    ndvxc=0
    if (abs(order)>=2) then
-     if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
-       ndvxc=min(nspden,2)+1
+     if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
+&        ixc==21.or.ixc==22) then
+       ndvxc=min(nspden,2)+1  
      else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
@@ -426,7 +427,8 @@ subroutine size_dvxc(ixc,order,nspden,&
 &             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
      else if (ixc<0) then
-       ndvxc=3 ; if (need_gradient) ndvxc=15
+       ndvxc=2*min(nspden,2)+1 ; if (order==-2) ndvxc=2
+       if (need_gradient) ndvxc=15
      end if
    end if
  end if
@@ -886,7 +888,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !Check value of order
  if( (order<1.and.order/=-2).or.order>4)then
    write(message, '(a,i0)' )&
-&   'The only allowed values for order are 1,2,-2 or 3, while it is found to be ',order
+&   'The only allowed values for order are 1, 2, -2 or 3, while it is found to be ',order
    MSG_BUG(message)
  end if
 

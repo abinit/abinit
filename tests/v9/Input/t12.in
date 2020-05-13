@@ -1,0 +1,40 @@
+&FILES
+ ddkfile_1 = 't11o_DS4_EVK.nc',
+ ddkfile_2 = 't11o_DS5_EVK.nc',
+ ddkfile_3 = 't11o_DS6_EVK.nc',
+ wfkfile = 't11o_DS3_WFK'
+/
+&PARAMETERS
+ broadening = 0.001,
+ domega = 0.002,
+ maxomega = 0.3,
+ scissor = 0.000,
+ tolerance = 0.001,
+ do_antiresonant = .FALSE.,
+/
+&COMPUTATIONS
+ num_lin_comp = 2,
+ lin_comp = 11,23,
+ num_nonlin_comp = 0,
+ num_linel_comp = 0,
+ num_nonlin2_comp = 0,
+/
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = optic
+#%% test_chain = t11.in, t12.in
+#%% [files]
+#%% files_to_test = 
+#%%   t12_0001_0001-linopt.out          , tolnlines = 3,   tolabs = 3.0e-03, tolrel = 2.0e-04, fld_options = -easy;
+#%%   t12_0002_0003-linopt.out          , tolnlines = 1,   tolabs = 3.0e-03, tolrel = 3.0e-05; 
+#%%
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = 
+#%% description = 
+#%%  GaAs, zinc-blende structure. PAW. GGA-PBE. nsppol=2. Code optic. Use DDK files in netcdf format. 
+#%% topics = Optic
+#%%<END TEST_INFO>

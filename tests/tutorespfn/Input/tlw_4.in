@@ -129,5 +129,6 @@ diemac 12.0
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
 #%% description = Dynamic Quadrupoles Calculation for GaP
+#%% topics = longwave
 #%%<END TEST_INFO>
 
