@@ -169,9 +169,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
 #ifndef HAVE_CRPA_OPTIM
 #ifdef FC_INTEL
-#if  __INTEL_COMPILER<=1700
+#warning "optimization of m_prec_calc_ucrpa is deactivated on intel fortran"
 !DEC$ NOOPTIMIZE
-#endif
 #endif
 #endif
 
@@ -284,7 +283,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  dumint=0
  luwindow=.true.
 ! write(6,*) "cc",allocated(coeffW_BZ)
- if (plowan_compute <10)then 
+ if (plowan_compute <10)then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor_read,Kmesh,lcor,luwindow,&
      & nspinor,nsppol,pawang,prtvol,dumint)
    if(lcor/=lpawu) then
@@ -620,7 +619,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
       if (.NOT.has_IBZ_item(Qmesh,qbz,iq_ibz_dump,g0_dump)) then
         cycle
       end if
-      
+
       write(msg,'(2(a,i4),a,i3)')' prep_calc_ucrpa : ik_bz ',ik_bz,'/',Kmesh%nbz,' done'
       call wrtout(std_out,msg,'PERS')
 !      write(6,*) "kkk1p",ik_bz,jk_bz,iq_ibz
