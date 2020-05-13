@@ -6,7 +6,7 @@ authors: GB, MG
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
 the relaxation time approximation.
-It is assumed the user has already completed the Tutorials [RF1](rf1) and [RF2](rf2),
+It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties, 
 in particular phonons, Born effective charges and dielectric tensor.
 
@@ -17,13 +17,19 @@ This lesson should take about 1 hour.
 Before starting, it is worth summarizing the most important equations implemented in the code.
 For a more detailed description of the ABINIT implementation, please consult [[cite:Brunin2020]].
 
-In this article, we focus on the solution of the linearized Boltzmann transport formulation [[cite:Ashcroft1976]]
-within the relaxation time approximation (RTA).
-
-If what follows, we will be working within the 
+Our goal is to find an approximated solution to the linearized 
+Boltzmann transport equation (BTE) [[cite:Ashcroft1976]] within the relaxation time approximation.
+If what follows, we will be working within the so-called
 self-energy relaxation time approximation (SERTA) [[cite:Giustino2017]].
-In the $\eta \rightarrow 0^+$ limit, 
-the imaginary part of the electron-phonon (eph) self-energy evaluated at the KS energy is given by 
+SERTA is more accurate that the constant relaxation time approximation (CRTA) as the 
+microsopic e-ph scattering is now included leading to linewidths that depend on the band index and the $\kk$ wavevector.
+Keep in mind, however, that also the SERTA is an approximation and a more rigorous analysis would require 
+the iterative solution of the BTE and/or the inclusion of many-body effects at different levels.
+For a review  of the different approaches see [[cite:Ponce2020]].
+
+In the SERTA, the linewidth is given by 
+the imaginary part of the electron-phonon (eph) self-energy evaluated at the KS energy.
+In the $\eta \rightarrow 0^+$ limit, one obtains:
 
 \begin{equation}
 \begin{split}
@@ -46,6 +52,10 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 \label{eq:fanlifetime}
 \end{align}
 
+Obviously this description does not take into contributions to the lifetimes given by 
+scattering with defects and ionized impurities in doped semiconductors as well grain boundary scattering.
+These effects may be relevant depending on the system under investigation but they are not treated in this tutorial.
+
 The generalized transport coefficients are given by [[cite:Madsen2018]]
 
 \begin{equation}
@@ -58,7 +68,7 @@ The generalized transport coefficients are given by [[cite:Madsen2018]]
     \end{split}
 \end{equation}
 
-where $\vnka$ is the $\alpha$-th component of the matrix element $\vnk$ of the electron velocity operator. 
+where $\vnka$ is the $\alpha$-th Cartesian component of the matrix element $\vnk$ of the electron velocity operator. 
 
 The generalized transport coefficients can be used to obtain different transport properties such as
 the electrical conductivity, Peltier and Seebeck coefficients, and charge carrier contribution to the
@@ -96,7 +106,7 @@ A typical computation requires different steps:
 
   * Ground state computation to obtain the DEN and the WFK files
   * DFPT calculation for a set of $\qq$-points in the IBZ associated to a homogeneous mesh
-  * Merging of the partial DDB and POT files
+  * Merging of the partial DDB and POT files with *mrgddb* and *mrgdv*, respectively
   * Computation of the GS wavefunctions on a dense $\kk$-mesh
   * Interpolation of the e-ph scattering potentials and computation of the electron lifetimes
     for the relevant $\kk$-points contributing to the mobility
@@ -110,20 +120,20 @@ These steps can be summarized by the following graph:
 !!! important
 
     Note that all these capabilities are integrated directly in ABINIT.
-    This implementation (henceforth refered to as the **EPH code**) differs from the one available in ANADDB: 
+    This implementation (henceforth refered to as the **EPH code**) significantly differs from the one available in ANADDB: 
     the anaddb version acts as a direct post-processing of the e-ph matrix elements computed in the DFPT part 
     whereas the EPH code interfaced with ABINIT computes the e-ph matrix elements directly using 
     the GS WFK and the DFPT potentials stored in the DVDB file.
     In a nutshell, the EPH code is more scalable and flexible as the $\qq$-sampling can be easily changed 
-    at run time while the anaddb implementation easily supports advanced features such as PAW.
+    at runtime while the anaddb implementation easily supports advanced features such as PAW.
     For further information about the difference between the two approaches, see [[cite:Gonze2019]]
 
 Note that all the results of the calculation are saved in netcdf format,
 while the log and output files are used to report selected quantities mainly for testing purposes.
 Post-processing and visualisation tools are NOT covered in this tutorial.
-Powerful tools based on python and matplotlib are provided by Abipy
-See the README of [Abipy](https://github.com/abinit/abipy)
-and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+Powerful tools based on python and matplotlib are provided by AbiPy
+See the README of [AbiPy](https://github.com/abinit/abipy)
+and the [AbiPy tutorials](https://github.com/abinit/abitutorials).
 
 [TUTORIAL_README]
 
@@ -133,7 +143,7 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 Why not create Work_eph4mob ?*
 
 The file *teph4mob_1.in* is the input file for the first step (GS + DFPT perturbations).
-You can copy it to the working directory with:
+Copy it to the working directory with:
 
 ```sh
 cd $ABI_TUTORESPFN/Input
@@ -167,20 +177,20 @@ abinit teph4mob_1.in > teph4mob_1.log 2> err &
 ```
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
-Many input parameters are also quite similar. 
+Many input parameters are also quite similar and symmetries can be used to reduce the number of atomic 
+perturbations.
 For more details about this first step, please refer to the first and second tutorials on DFPT.
 
-Note this additional important points.
+Note these additional important points.
 Since AlAs is a **polar semiconductor**, we need to compute with DFPT the Born effective charges 
 as well and the static dielectric tensor
-These quantities are then used to treat the long-range part of the dynamical matrix in 
+These quantities are then used to treat the long-range (LR) part of the dynamical matrix in 
 the Fourier interpolation of the phonon frequencies. 
 We will see that these quantities are also needed in the Fourier interpolation of the DFPT potential.
 
-
 Only the (partial) DDB and POT files produced at the end of the DFPT run
 are needed to perform e-ph calculation.
-The files containing the first order wavefunctions (*1WF*) due to an atomic perturbatio are not needed.
+The files containing the first order wavefunctions (*1WF*) due to an atomic perturbation are not needed.
 As these files are quite larger and the overall space on disk scales as nq * 3 * natom, we suggest
 to avoid the output of the DFPT wavefunctions by using [[prtwf]] = -1
 In this case, the DFPT code writens the 1WF only if the DFPT SCF cycle is not converged so that one can restart
@@ -229,7 +239,6 @@ You can copy it in the *Work_eph4mob* directory, and then merge the files with:
 mrgdv < teph4mob_3.in
 ```
 
-
 !!! tip
 
     Alternatively, one can the command line. 
@@ -243,17 +252,34 @@ mrgdv < teph4mob_3.in
 We now have all the phonon-related files needed to compute the mobility.
 The DDB will be used to Fourier interpolate the phonon frequencies on an **arbitrarily** dense $\qq$-mesh while
 the DVDB will be used to Fourier interpolate the DFPT scattering potentials [[cite:Brunin2020]].
-The only ingredient left is the set of GS wavefunctions on the dense $\kk$-mesh.
+The only ingredient left is the WFK file with the GS wavefunctions on the dense $\kk$-mesh.
+
+!!! important
+
+    In real life, you should always compute the electronic band structure along a $\kk$-path 
+    to have a qualitative understanding of the band dispersion, the position of the band edges, 
+    the value of the band gaps.
+    Note also that there are several parts of the EPH code in which it is assumed that no vibrational instability
+    is present so you should always look at the phonon spectrum computed by the code.
+    Don't expect to get meaningful results if imaginary phonon frequencies are present.
+
+<!--
+In principle, the code can deal with small instabilties for the acoustic modes around $\Gamma$ 
+but this does not mean you should blindly trust your results.
+-->
+
 
 ## Calculation of the dense WFK file
 
-In order to compute transport properties, we need to solve the Boltzmann
+In order to compute transport properties, we need a $\kk$-mesh that is dense enough to 
+sample the electron (hole) pockets.
+<!--
+to solve the Boltzmann
 Transport Equation (BTE) in the SERTA on a relatively dense $\kk$-mesh to have enough wavevectors
 inside the electron (hole) pockets.
-<!--
 You will compute the electron lifetimes and group velocities on this dense mesh. 
--->
 We will therefore need the wavefunctions on this dense mesh. 
+-->
 Note that in this tutorial, a single dense $\kk$-mesh will be used. 
 However, the value for the mobility strongly depends on this
 mesh and a convergence study should be performed by increasing the $\kk$-mesh density,
@@ -464,8 +490,8 @@ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
 The temperature is first given then the electron and hole densities followed by electron and hole mobilities. 
 In this computation, we consider only electrons, so the values for holes are zero. 
 Note that the transport driver is automatically executed after the e-ph calculation.
-You can also run only the transport driver, provided you already have the lifetimes in a SIGEPH.nc file, by setting
-[[eph_task]] = 7. 
+You can also run only the transport driver, provided you already have the lifetimes in a SIGEPH.nc file, 
+by setting [[eph_task]] = 7. 
 This task can be performed only in serial and is very fast.
 
 Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes, 
@@ -474,9 +500,15 @@ to decrease the computational cost.
 
 ### Convergence w.r.t. the energy range
 
-The first convergence study to be performed is to determine the energy range to be used for our computations. 
+The first convergence study to be performed is to determine the energy range around the band edges 
+to be used for the computation of $\tau_{n\kk}$.
 We can do that by performing the same mobility computation (same k- and q-meshes)
-for an increasing energy window. 
+for an increasing energy window specified by [[sigma_erange]].
+<!--
+once you have decided whether you are interested in electron or hole mobility.  
+The code can compute both in a single run but this is not the recommended procedure as the $\qq$-point 
+filtering is expected to be less efficient.
+-->
 
 The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.in* is an example of such computation.
 
@@ -497,7 +529,7 @@ Note that you should perform this convergence study with a $\kk$-mesh that is al
 capture the band dispersion correctly. 
 In this case, we are using a 24x24x24 mesh, which is not very dense for such computations. 
 This means that, when increasing [[sigma_erange]], sometimes
-no additional $\kk$-points are considered. 
+no additional $\kk$-point is considered. 
 It is the case here for the first 3 datasets (3 k-points), and the last two datasets (6 k-points). 
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
 
@@ -536,9 +568,9 @@ In real life, you should perform convergence studies to find suitable parameters
 
 ### Double-grid technique
 
-Another possibility to improve the results without increasing the computation time significantly is to use
-the double-grid technique.
-In this case, a coarse mesh is used for the $\kk$-mesh and the $\qq$-mesh for the e-ph matrix elements,
+Another possibility to improve the results without increasing the computation time significantly 
+is the double-grid technique.
+In this case, a coarse sampling is used for the $\kk$-mesh and the $\qq$-mesh for the e-ph matrix elements,
 but a finer mesh is used for the phonon absorption-emission terms. 
 This technique allows one to better capture these processes, while computing the matrix elements on a coarser mesh. 
 The efficiency of this method depends
@@ -564,8 +596,10 @@ abinit teph4mob_7.in > teph4mob_7.log 2> err &
 
 In the log file, you will now find information about the double-grid method:
 
+```sh
 	 coarse:                24          24          24
 	 dense:                 48          48          48
+```
 
 The mobility obtained, at 300 K, is 158.01 cm$^2$/V/s. 
 Using a 48x48x48 $\qq$-mesh for the matrix elements as well would give 96.09. 
@@ -583,12 +617,23 @@ The Fourier interpolation implicitly assumes that the signal in $\RR$-space deca
 the quality of the *interpolated* phonon frequencies and of the *interpolated* DFPT potentials, 
 between the ab-initio points depends on the spacing of the initial $\qq$-mesh that 
 in turns defines the size of the Born-von-Karman supercell.
-
+In semiconductors the atomic displacement induces dynamical dipoles and quadrupoles at the level of the density 
+that will generate long-range scattering potentials.
+These potentials affect the behaviour of the e-ph matrix elements for $\qq \rightarrow 0$ and the 
+$\qq$-mesh must be dense enough to capture the full strenght of the coupling.
 A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015]] and [[cite:Sjakste2015]].
 
-## Additional tricks
+From a more practical point of view, this implies that one should always monitor the convergence of the
+physical properties with respect to the initial DFPT $\qq$-mesh.
+The LR model implemented in ABINIT facilitates the convergence as the non-analytic behaviour for
+$\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduced oscillations
+between the *ab-initio* $\qq$-points and these oscillations may affec the quality of the physical results.
+
+## Phonon band structure
 
 TODO: Discuss [[dipdip]], [[asr]], [[chneut]]
+
+## Additional tricks
 
 ### MPI parallelism and memory requirements
 
@@ -614,22 +659,26 @@ but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if the memory requirements are under control 
 and you want to boost the calculation. 
 
-TODO: Discuss [[dvdb_qcache_mb]]
+TODO: Discuss [[dvdb_qcache_mb]] and enable_gw_dpc="no" to reduce memory requirements.
 
 ### In-place restart
 
 All the results of the calculation are stored in a single SIGEPH.nc file
 for all the $\kk$-points (and spins) considered.
 The list of $\kk$-points is initialized at the beginning of the run and an internal table 
-stores the status of the k-point (computed or not).
+stores the status of each k-point (computed or not).
 This means that calculations that get killed by the resource manager due to time limit can use 
 the netcdf file to perform an automatic in-place restart.
 Just set [[eph_restart]] to 1 in the input file and rerun the job.
+
+### How to compute only the k-points close to the CBM/VBM
+
+TODO: [[getkerange_filepath]]
 
 ### Transport calculation from SIGEPH.nc 
 
 TODO: [[transport_ngkpt]]
 
-### How to compute only the k-points close to the CBM/VBM
 
-TODO: [[getkerange_filepath]]
+
+

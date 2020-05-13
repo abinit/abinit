@@ -987,6 +987,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
  write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
+ call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve the memory requirements for the WFs')
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
@@ -998,7 +999,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
- ABI_DT_MALLOC(Wfd%Wave,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
+ ABI_MALLOC(Wfd%Wave,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
 
  ! Allocate the wavefunctions in reciprocal space according to bks_mask.
  do spin=1,Wfd%nsppol
@@ -1031,7 +1032,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  ABI_MALLOC(Wfd%ph1d,(2,3*(2*Wfd%mgfft+1)*Wfd%natom))
  call getph(Cryst%atindx,Wfd%natom,Wfd%ngfft(1),Wfd%ngfft(2),Wfd%ngfft(3),Wfd%ph1d,Cryst%xred)
 
- ABI_DT_MALLOC(Wfd%Kdata,(Wfd%nkibz))
+ ABI_MALLOC(Wfd%Kdata,(Wfd%nkibz))
 
  do ik_ibz=1,Wfd%nkibz
    kpoint  = Wfd%kibz(:,ik_ibz)
@@ -1098,12 +1099,12 @@ subroutine wfd_free(Wfd)
  ! datatypes.
  if (allocated(Wfd%Kdata)) then
    call kdata_free(Wfd%Kdata)
-   ABI_DT_FREE(Wfd%Kdata)
+   ABI_FREE(Wfd%Kdata)
  end if
 
  if (allocated(Wfd%Wave)) then
    call wave_free(Wfd%Wave)
-   ABI_DT_FREE(Wfd%Wave)
+   ABI_FREE(Wfd%Wave)
  end if
 
  call destroy_mpi_enreg(Wfd%MPI_enreg)
@@ -1188,18 +1189,18 @@ subroutine wfd_copy(Wfd_in, Wfd_out)
 ! types
  if (size(Wfd_in%Kdata,DIM=1) .ne. size(Wfd_out%Kdata,DIM=1)) then
   if (allocated(Wfd_out%Kdata))  then
-    ABI_DT_FREE(Wfd_out%Kdata)
+    ABI_FREE(Wfd_out%Kdata)
   end if
-  ABI_DT_MALLOC(Wfd_out%Kdata,(Wfd_out%nkibz))
+  ABI_MALLOC(Wfd_out%Kdata,(Wfd_out%nkibz))
  end if
 
  call kdata_copy(Wfd_in%Kdata,Wfd_out%Kdata)
 
  if (size(Wfd_in%Wave) .ne. size(Wfd_out%Wave)) then
   if (allocated(Wfd_out%Wave))  then
-    ABI_DT_FREE(Wfd_out%Wave)
+    ABI_FREE(Wfd_out%Wave)
   end if
-  ABI_DT_MALLOC(Wfd_out%Wave,(Wfd_out%mband,Wfd_out%nkibz,Wfd_out%nsppol))
+  ABI_MALLOC(Wfd_out%Wave,(Wfd_out%mband,Wfd_out%nkibz,Wfd_out%nsppol))
  end if
  do spin = LBOUND(Wfd_in%Wave,DIM=3), UBOUND(Wfd_in%Wave,DIM=3)
    do ik_ibz = LBOUND(Wfd_in%Wave,DIM=2), UBOUND(Wfd_in%Wave,DIM=2)
@@ -1283,7 +1284,7 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
 
    else
      ! Compute Cproj
-     ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
+     ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
      call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
 
      call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
@@ -1291,7 +1292,7 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
      cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
 
      call pawcprj_free(Cp1)
-     ABI_DT_FREE(Cp1)
+     ABI_FREE(Cp1)
    end if
  end if
 
@@ -1370,9 +1371,9 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
 
    else
      ! Compute Cprj
-     ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
+     ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
      call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-     ABI_DT_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
+     ABI_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
      call pawcprj_alloc(Cp2,0,Wfd%nlmn_atm)
 
      call wfd%get_cprj(band1,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
@@ -1382,9 +1383,9 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
      wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwpc)
 
      call pawcprj_free(Cp1)
-     ABI_DT_FREE(Cp1)
+     ABI_FREE(Cp1)
      call pawcprj_free(Cp2)
-     ABI_DT_FREE(Cp2)
+     ABI_FREE(Cp2)
    end if
  end if
 
@@ -1937,7 +1938,7 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
      ia=ia+Cryst%nattyp(itypat)
    end do
 
-   ABI_DT_MALLOC(Cprj_srt,(natom,Wfd%nspinor))
+   ABI_MALLOC(Cprj_srt,(natom,Wfd%nspinor))
    call pawcprj_alloc(Cprj_srt,0,dimcprj_srt)
    ABI_FREE(dimcprj_srt)
 
@@ -1956,7 +1957,7 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
    end do
 
    call pawcprj_free(Cprj_srt)
-   ABI_DT_FREE(Cprj_srt)
+   ABI_FREE(Cprj_srt)
  end if
 
  ABI_FREE(cwavef)
@@ -2020,7 +2021,7 @@ subroutine wave_init_0D(Wave,usepaw,npw,nfft,nspinor,natom,nlmn_size,cprj_order)
    Wave%ug=huge(one_gw)
    !Wave%ug=czero_gw
    if (usepaw==1) then
-     ABI_DT_MALLOC(Wave%Cprj,(natom,nspinor))
+     ABI_MALLOC(Wave%Cprj,(natom,nspinor))
      call pawcprj_alloc(Wave%Cprj,ncpgr0,nlmn_size)
      Wave%has_cprj=WFD_ALLOCATED
      Wave%cprj_order=cprj_order
@@ -2100,7 +2101,7 @@ subroutine wave_free_0D(Wave,what)
  if (firstchar(my_what,["A", "C"])) then
    if (allocated(Wave%Cprj)) then
      call pawcprj_free(Wave%Cprj)
-     ABI_DT_FREE(Wave%Cprj)
+     ABI_FREE(Wave%Cprj)
    end if
    Wave%has_cprj=WFD_NOWAVE
  end if
@@ -2236,9 +2237,9 @@ subroutine wave_copy_0D(Wave_in,Wave_out)
  nspinor = size(Wave_in%Cprj,dim=2)
  if ((size(Wave_out%Cprj,dim=1) .ne. natom) .or. (size(Wave_out%Cprj,dim=2) .ne. nspinor)) then
    if (allocated(Wave_out%Cprj))  then
-     ABI_DT_FREE(Wave_out%Cprj)
+     ABI_FREE(Wave_out%Cprj)
    end if
-   ABI_DT_MALLOC(Wave_out%Cprj,(natom,nspinor))
+   ABI_MALLOC(Wave_out%Cprj,(natom,nspinor))
  end if
 
  do ispinor=1,nspinor
@@ -4425,9 +4426,9 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp2,0,Wfd%nlmn_atm)
  end if
 
@@ -4530,9 +4531,9 @@ subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cp1)
-   ABI_DT_FREE(Cp1)
+   ABI_FREE(Cp1)
    call pawcprj_free(Cp2)
-   ABI_DT_FREE(Cp2)
+   ABI_FREE(Cp2)
  end if
 
 end subroutine wfd_test_ortho
@@ -5395,7 +5396,7 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  call calc_ceikr(kpoint,Wfd%nfftot,Wfd%ngfft,ceikr)
  ur_ae = ur_ae * ceikr
 
- ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
+ ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
  call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
 
  call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
@@ -5449,7 +5450,7 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  if (PRESENT(ur_ps_onsite)) ur_ps_onsite = ur_ps_onsite * CONJG(ceikr)
 
  call pawcprj_free(Cp1)
- ABI_DT_FREE(Cp1)
+ ABI_FREE(Cp1)
  ABI_FREE(ceikr)
 
 end subroutine wfd_paw_get_aeur
@@ -5551,7 +5552,7 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
    ! the usual pawfgrtab uses r_shape which may not be the same as r_paw.
    cplex=1
    call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
-   ABI_DT_MALLOC(Pawfgrtab,(Cryst%natom))
+   ABI_MALLOC(Pawfgrtab,(Cryst%natom))
    call pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,Wfd%nspden,Cryst%typat)
    ABI_FREE(l_size_atm)
 
@@ -5569,7 +5570,7 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 &                         prtvol=Wfd%pawprtvol,mode_paral="COLL")
    end if
 
-   ABI_DT_MALLOC(Paw_onsite,(Cryst%natom))
+   ABI_MALLOC(Paw_onsite,(Cryst%natom))
    call paw_pwaves_lmn_init(Paw_onsite,Cryst%natom,Cryst%natom,Cryst%ntypat,&
 &                           Cryst%rprimd,Cryst%xcart,Pawtab,Pawrad,Pawfgrtab)
 
@@ -5602,9 +5603,9 @@ subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
    ABI_FREE(data_plot)
 
    call pawfgrtab_free(Pawfgrtab)
-   ABI_DT_FREE(Pawfgrtab)
+   ABI_FREE(Pawfgrtab)
    call paw_pwaves_lmn_free(Paw_onsite)
-   ABI_DT_FREE(Paw_onsite)
+   ABI_FREE(Paw_onsite)
 
  else
    ! NC case. Just a simple FFT G-->R and then dump the results.
@@ -5719,7 +5720,7 @@ end subroutine wfd_plot_ur
 !!!     cpopt=3   ! <p_lmn|in> are already in memory
 !!!
 !!!     cp_dim = ((cpopt+5) / 5)
-!!!     ABI_DT_MALLOC(cprj, (natom, nspinor2*cp_dim))
+!!!     ABI_MALLOC(cprj, (natom, nspinor2*cp_dim))
 !!!     call pawcprj_alloc(cprj, 0, wfd%nlmn_sort)
 !!!   end if
 !!!
@@ -5832,7 +5833,7 @@ end subroutine wfd_plot_ur
 !!!
 !!!   if (wfd%usepaw == 1) then
 !!!     call pawcprj_free(cprj)
-!!!     ABI_DT_FREE(cprj)
+!!!     ABI_FREE(cprj)
 !!!   end if
 !!!
 !!!   DBG_EXIT("COLL")

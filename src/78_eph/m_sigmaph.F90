@@ -214,6 +214,7 @@ module m_sigmaph
 
   integer :: nqr = 0
    ! Number of points on the radial mesh for spherical integration of the Frohlich self-energy
+   ! TODO: Under developers
 
   integer :: angl_size = 0
    ! Dimension of angular mesh for spherical integration of the Frohlich self-energy
@@ -236,9 +237,11 @@ module m_sigmaph
 
   real(dp) :: qrad = zero
    ! Radius of the sphere for the numerical integration of the Frohlich self-energy
+   ! TODO: Under developers
 
   real(dp) :: qdamp = one
    ! Exponential damping e-(qmod**2/qdamp**2) added to the Frohlich matrix elements in q-space.
+   ! TODO: Under developers
 
   real(dp) :: wmax
    ! Max phonon energy + buffer. Used to select the bands to sum for the imaginary part
@@ -249,7 +252,7 @@ module m_sigmaph
    ! 0 -> Standard quadrature (one point per micro zone).
    ! 1 -> Use tetrahedron method.
 
-  integer :: frohl_model
+  integer :: frohl_model = 0
    ! > 0 to treat the q --> 0 divergence and accelerate convergence in polar semiconductors.
    !   1: Use spherical integration inside the micro zone around the Gamma point
    !   3
@@ -708,7 +711,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    sigma_restart = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr)
  end if
 
- sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+ sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfil, comm)
 
  if (my_rank == master .and. dtset%eph_restart == 1) then
    if (ierr == 0) then
@@ -930,15 +933,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    frohl_sphcorr = frohl_sphcorr * eight * pi / cryst%ucvol * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
    if (my_rank == master) then
-     write(std_out, "(/,a)")" Frohlich model integrated inside the small q-sphere around Gamma: "
-     write(std_out, "(a)")" This correction is used to accelerate the convergence of the ZPR with the q-point sampling "
-     write(std_out, "(a)")" Note that this term tends to zero for N_q --> oo "
-     write(std_out, "(a,/)")" so it's different from the integral of the Frohlich potential in the full BZ."
+     write(ab_out, "(/,a)")" Frohlich model integrated inside the small q-sphere around Gamma: "
+     write(ab_out, "(a)")" This correction is used to accelerate the convergence of the ZPR with the q-point sampling "
+     write(ab_out, "(a)")" Note that this term tends to zero for N_q --> oo "
+     write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
+     write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
      do nu=1,natom3
-       write(std_out, "(a,f8.1,a,i0,a,f8.1,a)")&
-         " Sphcorr:", frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", nu, "wqnu:", phfrq(nu) * Ha_meV, " (meV)"
+       write(ab_out, "(a,f8.1,a,i0,a,f8.1,a)")&
+         " Spherical correction:", frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", &
+         nu, ", w_qnu:", phfrq(nu) * Ha_meV, " (meV)"
      end do
-     write(std_out, "(a)")ch10
+     write(ab_out, "(a)")ch10
    end if
  end if
 
@@ -2184,7 +2189,7 @@ end subroutine sigmaph
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
+type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfil, comm) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2193,6 +2198,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
  type(ifc_type),intent(in) :: ifc
+ type(dvdb_t),intent(in) :: dvdb
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables ------------------------------
@@ -2646,6 +2652,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
 #ifdef HAVE_MPI
  ! Create 5d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum, kpoints in Sigma_k, spins
+ ! TODO: Fix spin
  ndims = 5
  ABI_MALLOC(dims, (ndims))
  ABI_MALLOC(periods, (ndims))
@@ -2876,8 +2883,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !  1) Should recheck the case bstart > 1 with star functions as I got weird results.
  !  2) Should refactor ephwg so that only my_npert phonons are stored in the datatype.
  bstart = new%bsum_start
- ! TODO: Reintegrate at least frohl_model 1 for the full self-energy
- new%frohl_model = 0 ! nint(dtset%frohl_params(1))
+
  if (new%qint_method > 0) then
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
@@ -2951,6 +2957,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  call ebands_free(ebands_dense)
 
  ! Prepare computation of Frohlich self-energy
+ ! TODO: Reintegrate at least frohl_model 1 for the full self-energy
+ new%frohl_model = 0 ! nint(dtset%frohl_params(1))
+ if (.not. new%imag_only .and. dtset%useria == 1) then
+   if (dvdb%has_zeff) new%frohl_model = 1
+ end if
+
  if (new%frohl_model /= 0) then
    ! Init parameters for numerical integration inside sphere.
    ! Set sphere radius to a fraction of the smallest reciprocal lattice vector.
@@ -2962,7 +2974,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    ! Set angular mesh.
    !new%ntheta = int(dtset%frohl_params(2))
    new%ntheta = 100
-   if (new%ntheta <= 0) new%ntheta = 10
    new%nphi = 2 * new%ntheta
    new%nqr = 10  !int(dtset%frohl_params(3))
    new%qrad = new%qrad !/ 2.0_dp  dtset%frohl_params(2)

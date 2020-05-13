@@ -1962,7 +1962,7 @@ subroutine qcache_report_stats(qcache)
    write(std_out, "(a)")" qcache deactivated with maxnq == 0"
  else if (qcache%maxnq > 0 .and. qcache%stats(1) /= 0) then
    write(std_out, "(2a)")ch10, " Qcache stats:"
-   write(std_out, "(4x,a,i0)")" Total Number of calls: ", qcache%stats(1)
+   write(std_out, "(4x,a,i0)")" Total number of calls: ", qcache%stats(1)
    write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), "(", (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%)"
    write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
@@ -1970,6 +1970,8 @@ subroutine qcache_report_stats(qcache)
    write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache miss: ", qcache%stats(4), "(", (100.0_dp * qcache%stats(4)) / qcache%stats(1), "%)"
    write(std_out, "(a)")sjoin("     Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
+   write(std_out, "(a)")sjoin("max_mbsize:", ftoa(qcache%max_mbsize, fmt="f8.1"), &
+                              "(Decrease this value if calculation goes out of memory)")
  end if
  write(std_out, "(a)")
  qcache%stats = 0

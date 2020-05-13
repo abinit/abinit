@@ -869,6 +869,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%eph_task == [-5, -14])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5, -14]")
      end if
+     !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
+     !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
+     !end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
