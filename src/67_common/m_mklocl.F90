@@ -194,7 +194,8 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  if (dtset%usewvl == 0) then
 !  Plane wave case
    if (psps%vlspl_recipSpace) then
-     call mklocl_recipspace(dyfrlo,eei,dtset%icutcoul,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
+     call mklocl_recipspace(dyfrlo,eei,dtset%icutcoul,dtset%vcutgeo,&
+&      gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
 &     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
 &     ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
 &     psps%vlspl,vprtrb,vpsp)
@@ -286,14 +287,14 @@ end subroutine mklocl
 !!
 !! SOURCE
 
-subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
+subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,vcutgeo,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,qprtrb,&
 &  rhog,ucvol,vlspl,vprtrb,vpsp)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option,icutcoul
- real(dp),intent(in) :: eei,gsqcut,ucvol
+ real(dp),intent(in) :: eei,gsqcut,ucvol,vcutgeo(3)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
@@ -377,7 +378,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,gmet,gprimd,grtn,gsqcut,lpsstr,
  ia1=1
 
  !Initialize Gcut-off array from m_gtermcutoff
- call termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ call termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:

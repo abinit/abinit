@@ -217,7 +217,7 @@ contains
  logical :: calc_epaw3_stress, efield_flag
 !arrays
  integer :: qprtrb_dum(3),icutcoul=3
- real(dp) :: corstr(6),dumstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3)
+ real(dp) :: corstr(6),dumstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3),vcutgeo(3)
  real(dp) :: gprimd(3,3),harstr(6),lpsstr(6),rmet(3,3),taustr(6),tsec(2),uncorr(3)
  real(dp) :: vdwstr(6),vprtrb_dum(2)
  real(dp) :: Maxstr(6),ModE !Maxwell-stress constribution, and magnitude of efield
@@ -316,7 +316,7 @@ contains
    ABI_ALLOCATE(dyfr_dum,(3,3,natom))
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl_recipspace(dyfr_dum,eei,icutcoul,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
+   call mklocl_recipspace(dyfr_dum,eei,icutcoul,vcutgeo,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
 &   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,&
 &   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
    ABI_DEALLOCATE(dyfr_dum)

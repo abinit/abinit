@@ -94,13 +94,12 @@ contains
 !!
 !! SOURCE
 
-subroutine termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+subroutine termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)    :: icutcoul,nfft,ngfft(18)
- real(dp),intent(in)   :: gsqcut
- real(dp),intent(in)   :: ucvol
+ real(dp),intent(in)   :: gsqcut,vcutgeo(3),ucvol
 
 !arrays
  real(dp),intent(in):: gmet(3,3),gprimd(3,3)
@@ -116,7 +115,7 @@ subroutine termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
  real(dp)           :: gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
  real(dp)           :: gcart2,gcart_para,gcart_perp
  real(dp)           :: quad,tmp
- real(dp)           :: pdir(3),vcutgeo(3),alpha(3),rmet(3,3)
+ real(dp)           :: pdir(3),alpha(3),rmet(3,3)
  real(dp),parameter :: tolfix=1.0000001_dp
  character(len=50)  :: mode
  character(len=500) :: msg
@@ -184,9 +183,6 @@ subroutine termcutoff(icutcoul,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
    end do
  end do
 
- !Initialize geomtry type to help select CASE
- !vcutgeo=(0,0,0) !dtset%vcutgeo 
- 
  SELECT CASE (TRIM(mode))
 
    CASE('SPHERE') ! Spencer-Alavi method
