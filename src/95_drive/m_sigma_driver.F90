@@ -112,8 +112,8 @@ module m_sigma_driver
  use m_calc_ucrpa,    only : calc_ucrpa
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
-! MRM density matrix module and Gaussian quadrature one
- use m_spacepar,          only : hartre
+! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
+! use m_spacepar,          only : hartre
  use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
@@ -2324,10 +2324,18 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast it 
      if(gw1rdm>=4) then                                                       ! Here ks_vtrial, ks_vhartr and ks_vxc are overwriten
        ks_vhartr(:)=0.0_dp
-       call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog
-       call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,ks_vhartr) ! Build Vhartree => ks_vhartr
+       ks_vxc(:,:)=0.0_dp
+       call setvtr(Cryst%atindx1,Dtset,KS_energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
+       & istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
+       & Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
+       & optene,pawrad,Pawtab,ph1df,Psps,gw_rhog,gw_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
+       & Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
 
-       call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&
+!       ks_vhartr(:)=0.0_dp
+!       call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog
+!       call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,ks_vhartr) ! Build Vhartree => ks_vhartr
+
+       call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&                                 ! Build matrix elements
        & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
        & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
      endif
