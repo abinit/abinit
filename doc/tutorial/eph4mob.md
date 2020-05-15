@@ -597,8 +597,8 @@ abinit teph4mob_7.in > teph4mob_7.log 2> err &
 In the log file, you will now find information about the double-grid method:
 
 ```sh
-	 coarse:                24          24          24
-	 dense:                 48          48          48
+coarse:                24          24          24
+dense:                 48          48          48
 ```
 
 The mobility obtained, at 300 K, is 158.01 cm$^2$/V/s. 
@@ -626,8 +626,8 @@ A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015
 From a more practical point of view, this implies that one should always monitor the convergence of the
 physical properties with respect to the initial DFPT $\qq$-mesh.
 The LR model implemented in ABINIT facilitates the convergence as the non-analytic behaviour for
-$\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduced oscillations
-between the *ab-initio* $\qq$-points and these oscillations may affec the quality of the physical results.
+$\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduce oscillations
+between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the physical results.
 
 ## Phonon band structure
 
@@ -660,6 +660,11 @@ Use these additional levels if the memory requirements are under control
 and you want to boost the calculation. 
 
 TODO: Discuss [[dvdb_qcache_mb]] and enable_gw_dpc="no" to reduce memory requirements.
+
+Datasets are bad, large arrays allocated for k-points and the size depends on ndtset.
+OpemMP may be beneficial for large calculations.
+As a rule of thumb, calculations with meshes denser than e.g 200x200x200 become memory demanding
+
 
 ### In-place restart
 

@@ -1970,7 +1970,7 @@ subroutine qcache_report_stats(qcache)
    write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache miss: ", qcache%stats(4), "(", (100.0_dp * qcache%stats(4)) / qcache%stats(1), "%)"
    write(std_out, "(a)")sjoin("     Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
-   write(std_out, "(a)")sjoin("max_mbsize:", ftoa(qcache%max_mbsize, fmt="f8.1"), &
+   write(std_out, "(a)")sjoin(" max_mbsize:", ftoa(qcache%max_mbsize, fmt="f8.1"), &
                               "(Decrease this value if calculation goes out of memory)")
  end if
  write(std_out, "(a)")

@@ -34,6 +34,11 @@
 ! Reference files should be updated
 !#define DEV_NEW_HDR
 
+! Uncomment this line to read Abinit9 WFK file with intel ifort
+! In principle, there's a section to maintaing backward compatibility but intel does not return ierr != 0
+! if we try to read beyond the record. This is a hack as we won't be able to read WFK produced by Abinit9
+!#define DEV_READ_ABINIT8
+
 module m_hdr
 
  use defs_basis
@@ -1061,7 +1066,7 @@ subroutine hdr_free(hdr)
 
  if (hdr%usepaw==1 .and. allocated(hdr%pawrhoij) ) then
    call pawrhoij_free(hdr%pawrhoij)
-   ABI_DT_FREE(hdr%pawrhoij)
+   ABI_FREE(hdr%pawrhoij)
  end if
 
  DBG_EXIT("COLL")
@@ -1201,7 +1206,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
    cplex_rhoij  = Hdr_in%Pawrhoij(1)%cplex_rhoij
    qphase_rhoij = Hdr_in%Pawrhoij(1)%qphase
    nspden_rhoij = Hdr_in%Pawrhoij(1)%nspden
-   ABI_DT_MALLOC(Hdr_cp%Pawrhoij,(Hdr_in%natom))
+   ABI_MALLOC(Hdr_cp%Pawrhoij,(Hdr_in%natom))
    call pawrhoij_alloc(Hdr_cp%Pawrhoij,cplex_rhoij,nspden_rhoij,Hdr_in%nspinor,Hdr_in%nsppol,Hdr_in%typat,&
                        lmnsize=Hdr_in%lmn_size(1:Hdr_in%ntypat),qphase=qphase_rhoij)
    call pawrhoij_copy(Hdr_in%Pawrhoij,Hdr_cp%Pawrhoij)
@@ -1422,7 +1427,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  if (psps%usepaw==1)then
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
                              nspden=nspden,spnorb=pawspnorb,cpxocc=pawcpxocc,qpt=qptn)
-   ABI_DT_MALLOC(hdr%pawrhoij,(natom))
+   ABI_MALLOC(hdr%pawrhoij,(natom))
    ! Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
    if (present(comm_atom)) then
      if (present(mpi_atmtab)) then
@@ -2306,14 +2311,21 @@ subroutine hdr_skip_wfftype(wff,ierr)
 
    rewind(unit, err=10, iomsg=errmsg)
 
-!  Pick off headform from WF file. Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
+#ifdef DEV_READ_ABINIT8
+   read(unit, err=10, iomsg=errmsg) codvsn6,headform ! fform
+   codvsn=""
+   codvsn(1:6)=codvsn6
+#else
+
+   ! Pick off headform from WF file. Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
    read(unit, err=20, iomsg=errmsg) codvsn,headform ! fform
    goto 30
 20 backspace(unit)
    read(unit, err=10, iomsg=errmsg) codvsn6,headform ! fform
-   codvsn='        '
+   codvsn=""
    codvsn(1:6)=codvsn6
 30 continue
+#endif
 
    if (headform==1   .or. headform==2   .or. &
        headform==51  .or. headform==52  .or. &
@@ -2795,7 +2807,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
 
    if(master/=me)then
      index=0;index2=0
-     ABI_DT_MALLOC(hdr%pawrhoij,(natom))
+     ABI_MALLOC(hdr%pawrhoij,(natom))
      call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,&
                          lmnsize=hdr%lmn_size,qphase=qphase)
      do iatom=1,natom
@@ -2877,6 +2889,11 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
    if (rewind) rewind(unit, err=10, iomsg=errmsg)
  end if
 
+#ifdef DEV_READ_ABINIT8
+ read(unit, err=10, iomsg=errmsg) codvsn6, hdr%headform, fform
+ hdr%codvsn(1:6) = codvsn6
+#else
+
  ! Reading the first record of the file ------------------------------------
  ! fform is not a record of hdr_type
  read(unit, iostat=ierr) hdr%codvsn,hdr%headform,fform
@@ -2884,8 +2901,10 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
    ! Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
    backspace(unit)
    read(unit, err=10, iomsg=errmsg) codvsn6, hdr%headform, fform
+   hdr%codvsn = ""
    hdr%codvsn(1:6) = codvsn6
  end if
+#endif
 
  if (hdr%headform < 80) then
    write(msg,'(3a,i0,4a)') &
@@ -2909,7 +2928,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
                  hdr%nsym, hdr%nshiftk_orig, hdr%nshiftk)
 
  if (hdr%usepaw==1)  then
-   ABI_DT_MALLOC(hdr%pawrhoij,(hdr%natom))
+   ABI_MALLOC(hdr%pawrhoij,(hdr%natom))
  end if
 
 ! Reading the third record of the file ------------------------------------
@@ -2923,7 +2942,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
    hdr%so_psp(:), hdr%symafm(:), hdr%symrel(:,:,:), &
    hdr%typat(:), hdr%kptns(:,:), occ3d, &
    hdr%tnons(:,:), hdr%znucltypat(:), hdr%wtk(:)
- ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != maxval(hdr_in%nband)")
+ ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != max(hdr%nband). Are you reading an Abinit8 file with Abinit9?")
 
  call hdr_set_occ(hdr, occ3d)
  ABI_FREE(occ3d)
@@ -3066,10 +3085,10 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  NCF_CHECK(nf90_get_var(ncid, vid("number_of_states"), nband2d))
  hdr%nband(:) = reshape(nband2d, [hdr%nkpt*hdr%nsppol])
  ABI_FREE(nband2d)
- ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != maxval(hdr_in%nband)")
+ ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != maxval(hdr%nband)")
 
  if (hdr%usepaw==1) then
-   ABI_DT_MALLOC(hdr%pawrhoij,(hdr%natom))
+   ABI_MALLOC(hdr%pawrhoij,(hdr%natom))
  end if
 
 !We get then all variables included in ETSF
@@ -3220,7 +3239,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
    hdr%nkpt, hdr%nspden, hdr%nspinor, hdr%nsppol, hdr%nsym, hdr%npsp, hdr%ntypat, hdr%occopt, hdr%pertcase,&
    hdr%usepaw, hdr%ecut, hdr%ecutdg, hdr%ecutsm, hdr%ecut_eff, hdr%qptn, hdr%rprimd, &
    hdr%stmbias, hdr%tphysel, hdr%tsmear, hdr%usewvl, hdr%nshiftk_orig, hdr%nshiftk, hdr%mband
- ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != maxval(hdr_in%nband)")
+ ABI_CHECK(hdr%mband == maxval(hdr%nband), "mband != maxval(hdr%nband)")
 
  ABI_MALLOC(occ3d, (hdr%mband,hdr%nkpt,hdr%nsppol))
  call hdr_get_occ3d(hdr, occ3d)
