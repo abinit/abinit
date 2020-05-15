@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
 ! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
-! use m_spacepar,          only : hartre
+ use m_spacepar,          only : hartre
  use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
@@ -121,6 +121,10 @@ module m_sigma_driver
 
  private
 !!***
+
+#ifdef HAVE_MPI
+ include 'mpif.h'
+#endif
 
  public :: sigma
 !!***
@@ -235,7 +239,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,verbose ! MRM new gw1rdm and verbose
+ integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,verbose,dimbc ! MRM new gw1rdm and verbose
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -256,7 +260,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(gsphere_t) :: Gsph_Max,Gsph_x,Gsph_c
  type(hdr_type) :: Hdr_wfk,Hdr_sigma,Hdr_rhor
  type(melflags_t) :: KS_mflags,QP_mflags
- type(melements_t) :: KS_me,QP_me
+ type(melements_t) :: KS_me,QP_me,GW1RDM_me ! MRM
  type(MPI_type) :: MPI_enreg_seq
  type(paw_dmft_type) :: Paw_dmft
  type(pawfgr_type) :: Pawfgr
@@ -272,7 +276,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:) ! MRM
+ real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -969,8 +973,21 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 & optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
 & Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
 
+!MAU print initial KS values 
+if(my_rank==0) then
+write(*,*) 'ZERO'        
+write(*,*) 'Vh'        
 write(*,*) ks_vhartr(1:20)
-write(*,*) ks_vxc(1:20,1)
+write(*,*) 'rho(r)'        
+write(*,*) ks_rhor(1:20,1)
+endif
+if(my_rank==1) then
+write(*,*) 'ONE'        
+write(*,*) 'Vh'        
+write(*,*) ks_vhartr(1:20)
+write(*,*) 'rho(r)'        
+write(*,*) ks_rhor(1:20,1)
+endif
 
 !============================
 !==== Compute KS PAW Dij ====
@@ -2307,11 +2324,13 @@ write(*,*) ks_vxc(1:20,1)
 
    call xmpi_barrier(Wfd%comm)
    ! MRM print WFK and DEN files.
-   comm=xmpi_world 
    if(gwcalctyp==21 .and. gw1rdm>0) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
      ABI_MALLOC(gw_rhog,(2,nfftf))
-     ! MRM only the master has bands on Wfd_dm so let it print everything
+     ABI_MALLOC(gw_vhartr,(nfftf))
+     gw_rhor=0.0_dp
+     gw_rhog=0.0_dp
+     ! MRM only the master has bands on Wfd_dm so let it print everything and prepare gw_rhor
      if(my_rank==0) then
        call update_hdr_bst(Wfd_dm,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
        call Wfd_dm%rotate(Cryst,nateigv,bdm_mask)                             ! Let it generate the bmask and build NOs 
@@ -2321,33 +2340,53 @@ write(*,*) ks_vxc(1:20,1)
        call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
-       call xmpi_bcast(gw_rhor,master,comm,ierr)                              ! Send gw_rhor to all nodes
      endif
-!MAU HERE 
-     call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast it 
-     if(gw1rdm>=4) then                                                       ! Here ks_vtrial, ks_vhartr and ks_vxc are overwriten
+     ! MRM broadcast gw_rhor 
+      dimbc=2*nfftf
+#ifdef HAVE_MPI
+     call MPI_BCAST(gw_rhor,dimbc,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
+#endif
+     call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast
+     if(gw1rdm>3) then                                                        
        ks_vhartr(:)=0.0_dp
-       ks_vxc(:,:)=0.0_dp
-       call setvtr(Cryst%atindx1,Dtset,KS_energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&   ! Overwrite ks_vhartr and ks_vxc
-       & istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
-       & Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
-       & optene,pawrad,Pawtab,ph1df,Psps,gw_rhog,gw_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
-       & Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
+       call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog 
+       call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,gw_vhartr) ! Build Vhartree -> gw_vhartr
+       ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
+       ! MRM compute matrix elements
+       tmp_kstab=0
+       do spin=1,Sigp%nsppol
+         do ikcalc=1,Sigp%nkptgw ! No spin dependent!
+           ik_ibz = Kmesh%tab(Sigp%kptgw2bz(ikcalc))
+           tmp_kstab(1,ik_ibz,spin)=Sigp%minbnd(ikcalc,spin)
+           tmp_kstab(2,ik_ibz,spin)=Sigp%maxbnd(ikcalc,spin)
+         end do
+       end do
+       call calc_vhxc_me(Wfd,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&                  ! Build matrix elements from gw_vhartr -> GW1RDM_me
+       & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
+       & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur) 
+       ABI_FREE(tmp_kstab)
+!MAU exchange K
 
-!       ks_vhartr(:)=0.0_dp
-!       call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog
-!       call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,ks_vhartr) ! Build Vhartree => ks_vhartr
+if(my_rank==0) then
+write(*,*) 'ZERO'
+write(*,*) 'Vh'        
+write(*,*) gw_vhartr(1:20)
+write(*,*) 'rho(r)'        
+write(*,*) gw_rhor(1:20,1)
+endif
+if(my_rank==1) then
+write(*,*) 'ONE'
+write(*,*) 'Vh'        
+write(*,*) gw_vhartr(1:20)
+write(*,*) 'rho(r)'        
+write(*,*) gw_rhor(1:20,1)
+endif
 
-       call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&                                 ! Build matrix elements from ks_vhartr ks_vxc -> KS_me
-       & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
-       & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
-
-write(*,*) ks_vhartr(1:20)
-write(*,*) ks_vxc(1:20,1)
-
+       call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
      endif
      ABI_FREE(gw_rhor)
      ABI_FREE(gw_rhog)
+     ABI_FREE(gw_vhartr)
    endif  
    call xmpi_barrier(Wfd%comm)
    ! MRM Finally, deallocate all arrays used for 1-RDM update
