@@ -969,6 +969,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 & optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
 & Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
 
+write(*,*) ks_vhartr(1:20)
+write(*,*) ks_vxc(1:20,1)
+
 !============================
 !==== Compute KS PAW Dij ====
 !============================
@@ -2335,9 +2338,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !       call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog
 !       call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,ks_vhartr) ! Build Vhartree => ks_vhartr
 
-       call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&                                 ! Build matrix elements from ks_vhartr ks_vxc
+       call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,nfftf,ngfftf,&                                 ! Build matrix elements from ks_vhartr ks_vxc -> KS_me
        & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
        & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
+
+write(*,*) ks_vhartr(1:20)
+write(*,*) ks_vxc(1:20,1)
+
      endif
      ABI_FREE(gw_rhor)
      ABI_FREE(gw_rhog)
