@@ -48,7 +48,7 @@ MODULE m_paw_correlations
  public :: pawpuxinit   ! Initialize some data for PAW+U/PAW+LocalExactExchange/PAW+DMFT
  public :: pawuenergy   ! Compute contributions to energy for PAW+U
  public :: pawxenergy   ! Compute contributions to energy for PAW+[local exact exchange]
- public :: setnoccmmp   ! Compute LDA+U density matrix nocc_{m,m_prime} or impose it
+ public :: setnoccmmp   ! Compute DFT+U density matrix nocc_{m,m_prime} or impose it
  public :: setrhoijpbe0 ! Impose value of rhoij for using an auxiliairy file (PBE0 only)
  public :: calc_ubare   ! Calculate the bare interaction on atomic orbitals
 
@@ -65,7 +65,7 @@ CONTAINS  !=====================================================================
 !! Initialize some starting values of several arrays used in
 !! PAW+U/+DMFT or local exact-exchange calculations
 !!
-!! A-define useful indices for LDA+U/local exact-exchange
+!! A-define useful indices for DFT+U/local exact-exchange
 !! B-Compute overlap between atomic wavefunction
 !! C-Compute matrix elements of coulomb interaction (see PRB vol.52 5467) [[cite:Liechenstein1995]]
 !!    (angular part computed from Gaunt coefficients)
@@ -76,7 +76,7 @@ CONTAINS  !=====================================================================
 !!  is_dfpt=true if we are running a DFPT calculation
 !!  jpawu(ntypat)= value of J
 !!  llexexch(ntypat)= value of l on which local exact-exchange applies
-!!  llpawu(ntypat)= value of l on which LDA+U applies
+!!  llpawu(ntypat)= value of l on which DFT+U applies
 !!  ntypat=number of types of atoms in unit cell.
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!     %lmax=Maximum value of angular momentum l+1
@@ -88,17 +88,17 @@ CONTAINS  !=====================================================================
 !!  upawu(ntypat)= value of U
 !!  use_dmft = 0 no PAW+DMFT, =1 PAW+DMFT
 !!  useexexch= 0 if no local exact-exchange; 1 if local exact-exchange
-!!  usepawu= 0 if no LDA+U; /=0 if LDA+U
+!!  usepawu= 0 if no DFT+U; /=0 if DFT+U
 !!
 !! OUTPUT
 !!  pawtab <type(pawtab_type)>=paw tabulated data read at start:
-!!     %euijkl=(2,2,lmn2_size,lmn2_size)= array for computing LDA+U terms without occupancies
+!!     %euijkl=(2,2,lmn2_size,lmn2_size)= array for computing DFT+U terms without occupancies
 !!     %ij_proj= nproj*(nproju+1)/2
 !!     %klmntomn(4,lmn2_size)= Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
 !!     %lnproju(nproj)= value of ln for projectors on which paw+u/local exact-exchange acts.
 !!     %nproju=number of projectors for orbitals on which paw+u/local exact-exchange acts.
 !!     %phiphjint(pawtabitypat%ij_proj)=Integral of Phi(:,i)*Phi(:,j) for correlated orbitals.
-!!     %usepawu=0 if no LDA+U; /=0 if LDA+U
+!!     %usepawu=0 if no DFT+U; /=0 if DFT+U
 !!     %useexexch=0 if no local exact-exchange; 1 if local exact-exchange
 !!     === if usepawu/=0
 !!     %jpawu= value of J
@@ -179,17 +179,17 @@ CONTAINS  !=====================================================================
  if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
 &  write(message, '(3a)' ) ch10,ch10," ******************************************"
  if(usepawu==1) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL"
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL"
  else if(usepawu==2) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF"
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: AMF"
  else if(usepawu==3) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (alternative)"
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: AMF (alternative)"
  else if(usepawu==4) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL with no spin polarization in the xc functional"
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL with no spin polarization in the xc functional"
  else if(usepawu==-1) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: FLL (no use of occupation matrix) - experimental"
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL (no use of occupation matrix) - experimental"
  else if(usepawu==-2) then
-   write(message, '(3a)' ) trim(message),ch10," LDA+U Method used: AMF (no use of occupation matrix) - experimental"
+   write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: AMF (no use of occupation matrix) - experimental"
  end if
  if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
  if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
@@ -243,7 +243,7 @@ CONTAINS  !=====================================================================
 !  Select only atoms with +U
    if(lcur/=-1) then
 
-!    Compute number of projectors for LDA+U/local exact-exchange/LDA+DMFT
+!    Compute number of projectors for DFT+U/local exact-exchange/DFT+DMFT
      icount=count(indlmn(1,1:lmn_size)==lcur)
      pawtab(itypat)%nproju=icount/(2*lcur+1)
      if(useexexch/=0.and.pawtab(itypat)%nproju>2)  then
@@ -940,7 +940,7 @@ CONTAINS  !=====================================================================
  jpawu=pawtab%jpawu;if(present(j_dmft)) jpawu=j_dmft
 
 !======================================================
-!Compute LDA+U Energy
+!Compute DFT+U Energy
 !-----------------------------------------------------
 
  eldautemp=zero
@@ -1157,10 +1157,10 @@ CONTAINS  !=====================================================================
 !if(pawtab%usepawu/=10.or.pawprtvol>=3) then
  if(abs(pawprtvol)>=3) then
    if(pawtab%usepawu<10) then
-     write(message, '(5a,i4)')ch10,'======= LDA+U Energy terms (in Hartree) ====',ch10,&
+     write(message, '(5a,i4)')ch10,'======= DFT+U Energy terms (in Hartree) ====',ch10,&
 &     ch10,' For Atom ',iatom
    else if (pawtab%usepawu >= 10) then
-     write(message, '(5a,i4)')ch10,'  ===   LDA+U Energy terms for the DMFT occupation matrix ==',ch10,&
+     write(message, '(5a,i4)')ch10,'  ===   DFT+U Energy terms for the DMFT occupation matrix ==',ch10,&
 &     ch10,' For Atom ',iatom
    end if
 
@@ -1171,13 +1171,13 @@ CONTAINS  !=====================================================================
    call wrtout(std_out,  message,'COLL')
    write(message,fmt=11) "     Interaction energy            =",eldautemp
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     Total LDA+U Contribution      =",eldautemp-edctemp
+   write(message,fmt=11) "     Total DFT+U Contribution      =",eldautemp-edctemp
    call wrtout(std_out,  message,'COLL')
    write(message, '(a)' )' '
    call wrtout(std_out,  message,'COLL')
    write(message, '(a)' )"   For the ""Double-counting"" decomposition:"
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     LDA+U Contribution            =",-eldautemp-edcdctemp
+   write(message,fmt=11) "     DFT+U Contribution            =",-eldautemp-edcdctemp
    call wrtout(std_out,  message,'COLL')
    11 format(a,e20.10)
    if(abs(pawprtvol)>=2) then
@@ -1756,7 +1756,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !      Printing of new nocc_mmp
        if ((usepawu/=0.and.abs(usepawu)<10).or.(usepawu>=10.and.pawprtvol>=3)) then
          write(message, '(2a)' )  ch10, &
-&         '========== LDA+U DATA =================================================== '
+&         '========== DFT+U DATA =================================================== '
        end if
        if (useexexch/=0) then
          write(message, '(2a)' ) ch10, &
@@ -1767,7 +1767,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
        end if
        if (usepawu>=10.and.pawprtvol>=3) then
          write(message, '(6a)' )  ch10,'    ( A DFT+DMFT calculation is carried out                              ',&
-         ch10,'      Thus, the following LDA+U occupation matrices are not physical     ',&
+         ch10,'      Thus, the following DFT+U occupation matrices are not physical     ',&
          ch10,'      and just informative )'
          call wrtout(std_out,message,wrt_mode)
        end if

@@ -532,7 +532,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    do i_unitfi=1,2
      unitfi=ab_out;if (i_unitfi==2) unitfi=std_out
      write(msg,'(3a)') &
-&     ' ---------- LDA+U DATA --------------------------------------------------- ',ch10
+&     ' ---------- DFT+U DATA --------------------------------------------------- ',ch10
      call wrtout(unitfi,msg,'COLL')
      do iatom=1,dtset%natom
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lpawu

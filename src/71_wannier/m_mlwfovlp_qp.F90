@@ -65,9 +65,9 @@ contains
 !! mlwfovlp_qp
 !!
 !! FUNCTION
-!! Routine which computes replaces LDA wave functions and eigenvalues with
+!! Routine which computes replaces DFT wave functions and eigenvalues with
 !! GW quasiparticle ones using previously computed qp wave functions in
-!! LDA bloch function representation for Wannier code (www.wannier.org f90 version).
+!! DFT bloch function representation for Wannier code (www.wannier.org f90 version).
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -98,7 +98,7 @@ contains
 !!  Number of bands for wannier calculation must be identical to number used
 !!   for gw calculation.  Bands not wanted for wannier calculation must be
 !!   excluded in exclude_band statement in wannier90.win file.
-!!  Full plane-wave basis for LDA wavefunctions must be used in GW calculation,
+!!  Full plane-wave basis for DFT wavefunctions must be used in GW calculation,
 !!   or inaccuracies may result.
 !!  This is at best a beta version of this code, with little consistency
 !!   checking, so the user must be very careful or the results may be invalid.
@@ -172,7 +172,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  write(msg,'(17a)')ch10,&
   ' mlwfovlp_qp: WARNING',ch10,&
-  '  The input *_WFK file of LDA wavefunctions to be  converted',ch10,&
+  '  The input *_WFK file of DFT wavefunctions to be  converted',ch10,&
   '  to GW quasiparticle wavefunctions MUST have been written in',ch10,&
   '  the run that produced the GW *_KSS file using kssform 3,',ch10,&
   '  the ONLY value of kssform permitted for GW Wannier functions.',ch10,&

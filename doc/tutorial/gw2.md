@@ -48,7 +48,7 @@ reading of [[cite:Bruneval2006]] and [[cite:Lebegue2003]].
 for the other tutorials. Why not Work_gw2?*
 
 In [tutorial 4](base4), we have computed different properties of
-Aluminum within the LDA. Unlike for silicon, in this approximation, there is
+Aluminum within the DFT(LDA). Unlike for silicon, in this approximation, there is
 no outstanding problem in the computed band structure. Nevertheless, as you
 will see, the agreement of the band structure with experiment can be improved
 significantly if one relies on the GW approximation.
@@ -166,11 +166,11 @@ points and bands for which a quasiparticle correction will be computed:
 [[nkptgw]], [[kptgw]], and [[bdgw]]. The number and list of **k**-points is simply
 the same as [[nkpt]] and [[kpt]]. One might have specified less **k**-points,
 though (only those needing an update). The list of band ranges [[bdgw]] has
-been generated on the basis of the LDA eigenenergies. We considered only the
+been generated on the basis of the DFT(LDA) eigenenergies. We considered only the
 bands in the vicinity of the Fermi level: bands much below or much above are
 likely to remain much or much above the Fermi region. In the present run, we
 are just interested in the states that may cross the Fermi level, when going
-from LDA to GW. Of course, it would have been easier to select an homogeneous range
+from DFT to GW. Of course, it would have been easier to select an homogeneous range
 for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more time-consuming.
 
 In the output file, one finds the quasiparticle energy at $\Gamma$, for the lowest band:
@@ -183,7 +183,7 @@ KS_gap     :    0.000
 QP_gap     :    0.000
 Delta_QP_KS:    0.000
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.762    -9.451    -3.762     5.689   -15.617     5.940     0.761    -0.313    -9.623    -0.173    -3.934    -3.988
 ...
 ```

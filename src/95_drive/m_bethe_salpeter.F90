@@ -406,13 +406,13 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
-   ! Initialize and compute data for LDA+U
+   ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
 &     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu)
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     msg='BS equation with LDA+U not completely coded!'
+     msg='BS equation with DFT+U not completely coded!'
      MSG_ERROR(msg)
    end if
    if (my_rank == master) call pawtab_print(Pawtab)
@@ -927,7 +927,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  call timab(659,1,tsec) ! bse(make_pawhur_t)
  if (Bsp%inclvkb/=0 .and. Wfd%usepaw==1 .and. Dtset%usepawu/=0) then !TODO here I need KS_Paw_ij
-   MSG_WARNING("Commutator for LDA+U not tested")
+   MSG_WARNING("Commutator for DFT+U not tested")
    call pawhur_init(hur,Wfd%nsppol,Wfd%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,KS_Paw_ij)
  end if
  call timab(659,2,tsec) ! bse(make_pawhur_t)

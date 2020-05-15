@@ -79,7 +79,7 @@ MODULE m_sigma
   integer :: nomega4sd      ! No. of real frequencies to evaluate the derivative of $\Sigma(E)$.
   integer :: nsig_ab        ! 1 if nspinor=1,4 for noncollinear case.
   integer :: nsppol         ! No. of spin polarizations.
-  integer :: usepawu        ! 1 if we are using LDA+U as starting point (only for PAW)
+  integer :: usepawu        ! 1 if we are using DFT+U as starting point (only for PAW)
 
   real(dp) :: deltae       ! Frequency step for the calculation of d\Sigma/dE
   real(dp) :: maxomega4sd  ! Max frequency around E_ks for d\Sigma/dE.
@@ -142,7 +142,7 @@ MODULE m_sigma
 
   real(dp),allocatable :: vUme(:,:,:)
   ! vUme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
-  ! $\<nks|v_{U}|nks\>$ for LDA+U.
+  ! $\<nks|v_{U}|nks\>$ for DFT+U.
 
   complex(dpc),allocatable :: degw(:,:,:)
   ! degw(b1gw:b2gw,nkibz,nsppol))
@@ -446,9 +446,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    call wrtout(std_out,msg,'COLL')
    !call wrtout(ab_out,msg,'COLL')
 
-   msg = ' Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
+   msg = ' Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
    if (Sr%usepawu/=0) then
-     msg = ' Band     E0 <VxcLDA>   <H_U>  SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
+     msg = ' Band     E0 <VxcDFT>   <H_U>  SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
    end if
 
    if (gwcalctyp>=10) then
@@ -640,7 +640,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 
  if (PRESENT(witheader)) then
    if (witheader) then
-     call wrtout(my_unt,' Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E ',my_mode)
+     call wrtout(my_unt,' Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E ',my_mode)
    end if
  end if
 
@@ -709,7 +709,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 
  else
    ! PAW+U+GW calculation.
-   ABI_CHECK(Sr%nsig_ab==1,'LDA+U with spinor not implemented')
+   ABI_CHECK(Sr%nsig_ab==1,'DFT+U with spinor not implemented')
    write(msg,'(i5,10f8.3)')                   &
          iband,                               &
          Sr%e0      (iband,ik_ibz,isp)*Ha_eV, &
@@ -887,7 +887,7 @@ end subroutine print_Sigma_QPSC
 !! Main creation method for the sigma_t data type.
 !!
 !! INPUTS
-!! usepawu= /=0 if we used LDA+U as starting point (only for PAW)
+!! usepawu= /=0 if we used DFT+U as starting point (only for PAW)
 !!
 !! OUTPUT
 !!

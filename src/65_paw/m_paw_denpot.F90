@@ -860,7 +860,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
          end if
        end if
 
-     end if ! LDA+U algo
+     end if ! DFT+U algo
    end if ! Dij Hartree
 
 !  ========= Compute nuclear dipole moment energy contribution  ========

@@ -496,7 +496,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
-   ! Initialize and compute data for LDA+U
+   ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
       is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
@@ -974,7 +974,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s>  for all the states included in GW ===
  !  * ks_vxcvalme is calculated without NLCC, ks_vxcme contains NLCC (if any)
  !  * This part is parallelized within MPI_COMM_WORD since each node has all GW wavefunctions.
- !  * ks_vUme is zero unless we are using LDA+U as starting point, see calc_vHxc_braket
+ !  * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  !  * Note that vH matrix elements are calculated using the true uncutted interaction.
  call timab(407,1,tsec) ! vHxc_me
 
@@ -1432,14 +1432,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ! Setup of the bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
  ! * The representation depends wheter we are updating the wfs or not.
- ! * ks_vUme is zero unless we are using LDA+U as starting point, see calc_vHxc_braket
+ ! * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  ! * Note that vH matrix elements are calculated using the true uncutted interaction.
 
  if (gwcalctyp<10) then
    ! For one-shot GW use the KS representation.
    Sr%hhartree=hlda-KS_me%vxcval
    ! Additional goodies for PAW
-   !  * LDA +U Hamiltonian
+   !  * DFT +U Hamiltonian
    !  * LEXX.
    !  * Core contribution estimated using Fock exchange.
    if (Dtset%usepaw==1) then
@@ -1628,7 +1628,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ! Store <n,k,s|V_xc[n_val]|n,k,s> and <n,k,s|V_U|n,k,s> ===
  ! Note that we store the matrix elements of V_xc in the KS basis set, not in the QP basis set
- ! Matrix elements of V_U are zero unless we are using LDA+U as starting point
+ ! Matrix elements of V_U are zero unless we are using DFT+U as starting point
  do ib=b1gw,b2gw
    Sr%vxcme(ib,:,:)=KS_me%vxcval(ib,ib,:,:)
    if (Dtset%usepawu/=0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
