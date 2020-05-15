@@ -2486,7 +2486,7 @@ endif
    ! Note that in the first iteration qp_rhor contains KS rhor, then the mixed rhor.
    if (gwcalctyp>=10) then
      ! Calculate the new m_ks_to_qp
-     call updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_lda_to_qp)
+     call updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_ks_to_qp)
 
      if (wfd%iam_master()) then
        call wrqps(Dtfil%fnameabo_qps,Sigp,Cryst,Kmesh,Psps,Pawtab,QP_Pawrhoij,&

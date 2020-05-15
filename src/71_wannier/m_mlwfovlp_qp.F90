@@ -159,7 +159,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  real(dp),allocatable :: kibz(:,:),wtk_ibz(:)
  real(dp),allocatable :: doccde_ibz(:),occfact_ibz(:),eigen_ibz(:)
  real(dp),allocatable ::  igwene(:,:,:)
- complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:),m_lda_to_qp_BZ(:,:,:,:) !,ortho(:)
+ complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:),m_ks_to_qp_BZ(:,:,:,:) !,ortho(:)
  complex(dpc),allocatable :: m_tmp(:,:),cg_k(:,:),cg_qpk(:,:)
  type(Pawrhoij_type),allocatable :: prev_Pawrhoij(:)
  !type(pawcprj_type),pointer :: Cp1(:,:),Cp2(:,:)
@@ -491,9 +491,9 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
        itimrev=indkk(ikibz+(sppoldbl-1)*(isppol-1)*nkbz,6)
        select case (itimrev)
        case (0)
-         m_ks_to_qp_BZ(:,:,ikbz,isppol)=m_lda_to_qp(:,:,ikibz,isppol)
+         m_ks_to_qp_BZ(:,:,ikbz,isppol)=m_ks_to_qp(:,:,ikibz,isppol)
        case (1)
-         m_ks_to_qp_BZ(:,:,ikbz,isppol)=CONJG(m_lda_to_qp(:,:,ikibz,isppol))
+         m_ks_to_qp_BZ(:,:,ikbz,isppol)=CONJG(m_ks_to_qp(:,:,ikibz,isppol))
        case default
          write(msg,'(a,i3)')"Wrong itimrev= ",itimrev
          MSG_BUG(msg)

@@ -914,7 +914,7 @@ end subroutine rdgw
 !!
 !! SOURCE
 
-subroutine updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp)
+subroutine updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,m_ks_to_qp)
 
 !Arguments ------------------------------------
 !scalars
