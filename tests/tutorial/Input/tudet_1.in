@@ -54,15 +54,21 @@
      prteig  0
      prtden  1                    # This is the default value    
 
+#PAW atomic data
+     pseudos = "Fe.GGA_PBE-JTH.xml"
+     pp_dirpath = "../../Psps_for_tests"
+     outdata_prefix = "tudet_1.o"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% test_chain = tudet_1.in, tudet_2.in, tudet_3.in
 #%% [files]
 #%% files_to_test = 
-#%%   tudet_1.out, tolnlines=  2, tolabs=  7.000e-09, tolrel=  2.000e-10
-#%% psp_files =  26fe.paw
+#%%   tudet_1.abo, tolnlines=  2, tolabs=  7.000e-09, tolrel=  2.000e-10
+#%% psp_files =  Fe.GGA_PBE-JTH.xml
+#%% output_file = "tudet_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

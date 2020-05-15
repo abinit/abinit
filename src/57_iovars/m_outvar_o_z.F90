@@ -341,6 +341,29 @@ contains
  intarr(1,:)=dtsets(:)%pawxcdev
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pawxcdev','INT',0)
 
+ intarr(1,:)=dtsets(:)%ph_intmeth
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_intmeth','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_ndivsm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_ndivsm','INT',0)
+
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%ph_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ph_ngqpt','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_nqpath
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_nqpath','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_nqshift
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_nqshift','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ph_smear
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_smear','ENE',0)
+
+ dprarr(1,:)=dtsets(:)%ph_wstep
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_wstep','ENE',0)
+
 !pimass
  icount=0
  do idtset=0, ndtset_alloc
@@ -358,11 +381,6 @@ contains
 
  intarr(1,:)=dtsets(:)%pitransform
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pitransform','INT',0)
-
- dprarr(1,:)=dtsets(:)%polcen(1)
- dprarr(2,:)=dtsets(:)%polcen(2)
- dprarr(3,:)=dtsets(:)%polcen(3)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'polcen','DPR',0)
 
  intarr(1,:)=dtsets(:)%plowan_bandi
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_bandi','INT',0)
@@ -439,6 +457,10 @@ contains
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_projcalc','INT',1)
 
+ dprarr(1,:)=dtsets(:)%polcen(1)
+ dprarr(2,:)=dtsets(:)%polcen(2)
+ dprarr(3,:)=dtsets(:)%polcen(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'polcen','DPR',0)
 
  intarr(1,:)=dtsets(:)%posdoppler
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'posdoppler','INT',0)

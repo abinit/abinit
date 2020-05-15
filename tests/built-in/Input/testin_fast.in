@@ -40,7 +40,7 @@
  tolmxf 5.0d-5
  typat  2*1 
  wtk  1
- xangst -0.385 0 0   0.385  0 0
+ xcart  -0.385 0 0   0.385  0 0   Angstrom
  znucl  1.0
 
 

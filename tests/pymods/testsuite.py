@@ -2636,22 +2636,22 @@ class AnaddbTest(BaseTest):
         extra = ["# Added by runtests.py"]
         app = extra.append
 
-        # Add extra variables for ddb_path, output_file if not already present.
+        # Add extra variables for ddb_filepath, output_file if not already present.
         # Note that the code checks for the presence of `varname = "`
-        if 'ddb_path = "' not in line:
-            app('ddb_path = "%s"' % (self.get_ddb_path()))
+        if 'ddb_filepath = "' not in line:
+            app('ddb_filepath = "%s"' % (self.get_ddb_path()))
 
         if 'output_file = "' not in line:
             app('output_file = "%s"' % (self.id + ".out"))
 
         # EPH stuff
         gkk_path = self.get_gkk_path()
-        if gkk_path and 'gkk_path = "' not in line:
-            app('gkk_path = "%s"' % gkk_path)
+        if gkk_path and 'gkk_filepath = "' not in line:
+            app('gkk_filepath = "%s"' % gkk_path)
 
         ddk_path = self.get_ddk_path()
-        if ddk_path and 'ddk_path = "' not in line:
-            app('ddk_path = "%s"' % ddk_path)
+        if ddk_path and 'ddk_filepath = "' not in line:
+            app('ddk_filepath = "%s"' % ddk_path)
 
         if (gkk_path or ddk_path) and 'eph_prefix = "' not in line:
             # EPH calculation
@@ -2723,7 +2723,7 @@ class MultibinitTest(BaseTest):
 
 class TdepTest(BaseTest):
     """
-    Class for TDEP tests. Redefine the make_stdin method of BaseTest
+    Class for a-TDEP tests. Redefine the make_stdin method of BaseTest
     """
     def make_stdin(self):
         t_stdin = StringIO()
@@ -2834,7 +2834,7 @@ def exec2class(exec_name):
         "band2eps": Band2epsTest,
         "optic": OpticTest,
         "multibinit": MultibinitTest,
-        "tdep": TdepTest,
+        "atdep": TdepTest,
     }.get(exec_name, BaseTest)
 
 

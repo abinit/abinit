@@ -37,4 +37,5 @@ blue 0 0
 #%% authors = M. Royo
 #%% keywords = 
 #%% description = Input file for 'band2eps.' This data layout must be used, line-by-line.
+#%% topics = longwave
 #%%<END TEST_INFO>

@@ -602,7 +602,7 @@ thermostats ([[qmass]]).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]).
+([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run. 
 
 
 * 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] . 
@@ -610,6 +610,7 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the friction [[multibinit:latt_friction]].
+The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term. 
 
 
 * 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.  However, it approches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
@@ -618,15 +619,18 @@ thermostats ([[qmass]]).
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]].
 
-* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled. 
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]]=0 only)
-**Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]], the pressure relaxation time [[multibinit:latt_taup]].
-
-
 * 120 --> Dummy mover. Atoms does not move. For testing only.
 """,
+
+# Not yet fully implemented. Need to be properly documented and tested. Disactivated temporarily. 
+#* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled. 
+#**Purpose:** Molecular dynamics
+#**Cell optimization:** No (Use [[optcell]]=0 only)
+#**Related variables:** The time step ([[dtion]]), the temperatures
+#([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]], the pressure relaxation time [[multibinit:latt_taup]].
+
+
+
 
 ),
 
@@ -654,7 +658,7 @@ Variable(
     mnemonics="LATTice dynamics FRICTION parameter",
     added_in_version="before_v9",
     text=r"""
-    Parameter of the friction used in Langevin dynamcis [[multibinit:dynamics]] =101.
+    Parameter of the friction coefficient used in Langevin dynamcis [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2. 
 """,
 ),
 
@@ -701,7 +705,7 @@ Variable(
     mnemonics="Number of TIME step",
     added_in_version="before_v9",
     text=r"""
-Number of step for the dynamics
+Number of step for the dynamics.
 """,
 ),
 
@@ -831,43 +835,43 @@ See [[abinit:restartxf]]
 """,
 ),
 
-Variable(
-    abivarname="spin_calc_correlation_obs@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN CALCulate CORRELATION OBServables",
-    added_in_version="before_v9",
-    text=r"""
-Flag to calculate spin correlation function based observables.
-
-* 0 --> do not calculate.
-
-* 1 --> calculate.
-""",
-),
-
-
-Variable(
-    abivarname="spin_calc_traj_obs@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN CALCulate TRAJectory based OBServables",
-    added_in_version="before_v9",
-    text=r"""
-Flag to calculate spin trajectory based observables. (Nothing included yet.)
-
-* 0 --> do not calculate.
-
-* 1 --> calculate.
-""",
-),
-
+# The below are not yet functioning, comment out temporarily. 
+#Variable(
+#    abivarname="spin_calc_correlation_obs@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN CALCulate CORRELATION OBServables",
+#    added_in_version="before_v9",
+#    text=r"""
+#Flag to calculate spin correlation function based observables.
+#
+#* 0 --> do not calculate.
+#
+#* 1 --> calculate.
+#""",
+#),
+#
+#
+#Variable(
+#    abivarname="spin_calc_traj_obs@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN CALCulate TRAJectory based OBServables",
+#    added_in_version="before_v9",
+#    text=r"""
+#Flag to calculate spin trajectory based observables. (Nothing included yet.)
+#
+#* 0 --> do not calculate.
+#
+#* 1 --> calculate.
+#""",
+#),
 
 Variable(
     abivarname="spin_calc_thermo_obs@multibinit",
@@ -908,22 +912,22 @@ Gilbert damping factor in LLG equation for spin dynamics.
 """,
 ),
 
-Variable(
-    abivarname="spin_dipdip@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN DIPole DIPole interaction",
-    added_in_version="before_v9",
-    text=r"""
-* 0 --> Switch off spin dipole-dipole interaction.
-
-* 1 --> Switch on spin dipole-dipole interaction.
-    (Not yet implemented.)
-""",
-),
+#Variable(
+#    abivarname="spin_dipdip@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN DIPole DIPole interaction",
+#    added_in_version="before_v9",
+#    text=r"""
+#* 0 --> Switch off spin dipole-dipole interaction.
+#
+#* 1 --> Switch on spin dipole-dipole interaction.
+#    (Not yet implemented.)
+#""",
+#),
 
 Variable(
     abivarname="spin_dt@multibinit",
@@ -1361,6 +1365,29 @@ Indices of the terms to refit in the effective potential.
 """,
 ),
 
+Variable(
+    abivarname="slc_coupling@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SpinLatticeCoupling_Coupling",
+    added_in_version="9.0.0",
+    text=r"""
+Which spin-lattice coupling terms are used in the calculation, different terms can be combined in a binary fashion, i.e. 1010 turns on all terms quadratic in spin.
+
+* 0    --> No coupling.
+
+* 0001 --> Coupling term linear in spin and lattice coordinate
+
+* 0010 --> Coupling term quadratic in spin and linear in lattice coordinate
+
+* 0100 --> Coupling term linear in spin and quadratic in lattice coordinate
+
+* 1000 --> Coupling term quadratic in spin and lattice coordinate
+""",
+),
 
 ]
 

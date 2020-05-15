@@ -29,7 +29,7 @@ pawecutdg 110.0
 ecutsm 0.5
 
 # Parameters for metals
-tsmear 0.4109816517E-02
+tsmear 0.4109804423E-02
 occopt 7
 
 # Dataset 1
@@ -73,4 +73,9 @@ kptbounds?2
 tolwfr?2  1.0d-18
 enunit?2  0             # Will output the eigenenergies in Ha
 nstep?2   150
+
+pseudos="Mg.LDA-PW-paw.xml"
+pp_dirpath="../"
+outdata_prefix="outputs/ab_Mg_test_o"
+tmpdata_prefix="outputs/ab_Mg_test"
 

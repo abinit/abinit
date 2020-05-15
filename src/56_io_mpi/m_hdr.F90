@@ -2309,7 +2309,8 @@ subroutine hdr_skip_wfftype(wff,ierr)
 !  Pick off headform from WF file. Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
    read(unit, err=20, iomsg=errmsg) codvsn,headform ! fform
    goto 30
-20 read(unit, err=10, iomsg=errmsg) codvsn6,headform ! fform
+20 backspace(unit)
+   read(unit, err=10, iomsg=errmsg) codvsn6,headform ! fform
    codvsn='        '
    codvsn(1:6)=codvsn6
 30 continue
@@ -2881,6 +2882,7 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  read(unit, iostat=ierr) hdr%codvsn,hdr%headform,fform
  if (ierr /= 0) then
    ! Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
+   backspace(unit)
    read(unit, err=10, iomsg=errmsg) codvsn6, hdr%headform, fform
    hdr%codvsn(1:6) = codvsn6
  end if

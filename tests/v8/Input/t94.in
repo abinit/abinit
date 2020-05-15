@@ -21,10 +21,7 @@ rprim 1.0 0.0 0.0    #Real space PRIMitive translations
 
 ngkpt   1 1 1 
 
-supercell_latt 
-2 0 0 
-0 2 0
-0 0 2
+supercell_latt 2 2 2
 
 prtebands 0
 

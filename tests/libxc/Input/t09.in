@@ -1,5 +1,11 @@
-ixc -012208
-usekden 1
+ndtset 2
+
+#1st dataset: generate GGA-PBE wave functions
+ixc1 -101130   nstep1 5   prtwf1 1
+
+#2nd dataset: Tran-Blaha mGGA
+ixc2 -012208   usekden2 1   getwfk2 -1
+
 
 # Definition of the k-point grid
 ngkpt    4 4 4
@@ -37,7 +43,7 @@ xred # Reduced coordinate of atoms
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t09.out, tolnlines = 1, tolabs = 1.1e-7, tolrel = 4.0e-4, fld_options = -medium
+#%%   t09.out, tolnlines = 1, tolabs = 1.1e-6, tolrel = 4.0e-4, fld_options = -medium
 #%% psp_files = 6-C.fhi 
 #%% [paral_info]
 #%% max_nprocs = 10
@@ -46,4 +52,5 @@ xred # Reduced coordinate of atoms
 #%% keywords = 
 #%% description = 
 #%%   Diamond. Test the mGGA functional from Tran and Blaha (correction to Becke-Johnson).
+#%%   To make the test more poratble, we generate GGA-PBE wave functions as starting point.
 #%%<END TEST_INFO>

@@ -33,6 +33,12 @@
 - Merging file [4]: t50o_DS5_POT1
 Merged successfully 4 files
 - Analyzing DVDB file: t53o_DS20_DVDB ...
+ symatm: atom number 1 is reached starting at atom
+   1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2
+   1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2
+ symatm: atom number 2 is reached starting at atom
+   2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1
+   2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1  2  1
 - dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
  ==== Info on the dvdb% object ====
  DVDB version: 2

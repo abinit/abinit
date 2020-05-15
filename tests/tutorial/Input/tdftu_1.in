@@ -35,14 +35,18 @@ rprim 0.0 1/2 1/2
 ngkpt 2 2 2
 chksymbreak 0  # The k point grid is not symmetric, but the calculations being for the ground-state, this is not a problem.
 
+pseudos = "Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
+pp_dirpath = "../../Psps_for_tests"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
-#%%   tdftu_1.out, tolnlines=  4, tolabs=  2.000e-06, tolrel=  2.000e-03, fld_options = -medium
-#%% psp_files = 28ni.paw, 8o.2.paw 
+#%%   tdftu_1.abo, tolnlines=  4, tolabs=  2.000e-06, tolrel=  2.000e-03, fld_options = -medium
+#%% psp_files = Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml 
+#%% output_file = "tdftu_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

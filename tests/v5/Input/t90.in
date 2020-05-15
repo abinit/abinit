@@ -28,6 +28,7 @@ ngqpt 2 2 2
 #  impose acoustic sum rule in a symmetric way
 asr 2
 dipdip 0
+chneut 0
 
 #  bravais lattice necessary
 brav 1

@@ -16,7 +16,7 @@ Please follow the two tutorials on PAW in ABINIT ([PAW1](paw1), [PAW2](paw2)), i
 
 This tutorial should take about 1 hour to complete.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 0 Short summary of the DFT+U method
 
@@ -56,17 +56,16 @@ However, the two methods generally give similar results.
 for the other tutorials. Why not Work_dftu?
 In what follows, the names of files will be mentioned as if you were in this subdirectory.*
 
-Copy the files *tdftu_1.in* and *tdftu_x.files* from *\$ABI_TESTS/tutorial/Input* to your *Work_dftu* directory with:
+Copy the file *tdftu_1.in* from *\$ABI_TESTS/tutorial/Input* to your *Work_dftu* directory with:
 
 ```sh
 cd $ABI_TESTS/tutorial/Input
 mkdir Work_dftu
 cd Work_dftu
-cp ../tdftu_x.files .  # You will need to edit this file.
 cp ../tdftu_1.in .
 ```
 
-{% dialog tests/tutorial/Input/tdftu_x.files tests/tutorial/Input/tdftu_1.in %}
+{% dialog tests/tutorial/Input/tdftu_1.in %}
 
 Now run the code as usual.
 The job should take less than 30 seconds on a PC 3 GHz. It calculates the LDA
@@ -91,14 +90,15 @@ integrated total density in the PAW spheres (see the [PAW1](paw1)
 and [PAW2](paw2) tutorials on PAW formalism). This value roughly
 estimate the magnetic moment of NiO:
 
-     Integrated total density in atomic spheres:
-     -------------------------------------------
-     Atom  Sphere radius  Integrated_up_density  Integrated_dn_density  Total(up+dn)   Diff(up-dn)
-        1        2.30000             9.05536980             7.85243738   16.90780718    1.20293241
-        2        2.30000             7.85243738             9.05536980   16.90780718   -1.20293241
-        3        1.21105             1.82716080             1.82716080    3.65432159   -0.00000000
-        4        1.21105             1.82716080             1.82716080    3.65432159    0.00000000
-     Note: Diff(up-dn) can be considered as a rough approximation of a local magnetic moment.
+     Integrated electronic and magnetization densities in atomic spheres:
+     ---------------------------------------------------------------------
+     Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+     Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+        1   1.81432     8.564385     7.187993     15.752379     1.376392
+        2   1.81432     7.187993     8.564385     15.752379    -1.376392
+        3   1.41465     2.260909     2.260909      4.521817     0.000000
+        4   1.41465     2.260909     2.260909      4.521817     0.000000
+     
 
 The atoms in the output file, are listed as in the [[typat]] variable (the
 first two are nickel atoms and the last two are oxygen atoms). The results
@@ -109,10 +109,10 @@ for the NiO. But the result does not agree with the experimental data.
 The magnetic moment (the difference between up and down spin on the nickel atom)
 range around 1.6-1.9 according to experiments  ([[cite:Cheetham1983]],[[cite:Neubeck1999]],[[cite:Sawatzky1984]],
 [[cite:Hufner1984]])
-Also, as the Fermi level is at 0.22347 Ha, one
-can see that the band gap obtained between the last occupied (0.20672 Ha, at k
-point 2) and the first unoccupied band (0.23642 Ha, at kpoint 3) is
-approximately 0.8 eV which is lower than the measured value of 4.0-4.3 eV
+Also, as the Fermi level is at 0.33748 Ha (see the *tdftu_1.abo* file), one
+can see (in the *tdftu_1.o_EIG* file) that the band gap obtained between the last occupied (0.31537 Ha, at k
+point 1) and the first unoccupied band (0.35671 Ha, at kpoint 3) is
+approximately 1.1 eV which is lower than the measured value of 4.0-4.3 eV
 (This value could be modified using well-converged parameters but would still
 be much lower than what is expected).
 
@@ -164,25 +164,28 @@ interaction, with [[jpawu]]. Note that you can choose the energy unit by
 indicating at the end of the line the unit abbreviation (e.g. eV or Ha). For
 NiO, we will use variables that are generally accepted for this type of compound:
 
-    upawu 8.0 eV
-    jpawu 0.8 eV
+    upawu  8.0 0.0 eV
+    jpawu  0.8 0.0 eV
+
 
 You can take a look at the result of the calculation. The magnetic moment is now:
 
      Integrated total density in atomic spheres:
      -------------------------------------------
-     Atom  Sphere radius  Integrated_up_density  Integrated_dn_density  Total(up+dn)   Diff(up-dn)
-        1        2.30000             9.28514439             7.53721910   16.82236349    1.74792528
-        2        2.30000             7.53721910             9.28514439   16.82236349   -1.74792528
-        3        1.21105             1.84896670             1.84896670    3.69793339    0.00000000
-        4        1.21105             1.84896670             1.84896670    3.69793339    0.00000000
-     Note: Diff(up-dn) can be considered as a rough approximation of a local magnetic moment.
+      Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+      Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+         1   1.81432     8.749918     6.987372     15.737289     1.762546
+         2   1.81432     6.987372     8.749918     15.737289    -1.762546
+         3   1.41465     2.290407     2.290407      4.580814     0.000000
+         4   1.41465     2.290407     2.290407      4.580814     0.000000
+
+
 
 NiO is found antiferromagnetic, with a moment that is in reasonable agreement
 with experimental results. Moreover, the system is a large gap insulator with
-about 5.0 eV band gap (the 24th band at k point 3 has an eigenenergy of
-0.15896 Ha, much lower than the eigenenergy of the 25th band at k point 1,
-namely 0.24296 Ha). This number is very approximative, since the very rough
+about 5.3 eV band gap (the 24th band at k point 3 has an eigenenergy of
+0.26699 Ha, much lower than the eigenenergy of the 25th band at k point 1,
+namely 0.46243 Ha, see the *tdftu_2.o_EIG* file). This number is very approximative, since the very rough
 sampling of k points is not really appropriate to evaluate a band gap, still
 one obtains the right physics.
 
@@ -227,7 +230,7 @@ section of the log file, in which the imposed occupation matrices are echoed:
     -------------------------------------------------------------------------
 
     Occupation matrix for correlated orbitals is kept constant
-    and equal to initial one !
+    and equal to dmatpawu from input file !
     ----------------------------------------------------------
 
     == Atom   1 == Imposed occupation matrix for spin 1 ==
@@ -269,23 +272,23 @@ Now we will use the other implementation for the double-counting term in LDA+U
 electrons for each spin independently and the complete interactions $U(m_1,m_2,m_3,m_4)$ and $J(m_1,m_2,m_3,m_4)$.
 
 As in the preceding run, we will start with a fixed density matrix for d
-orbitals. You might now start your calculation, with the *tdftu_4.in* and
-*tdftu_4.files*, or skip the calculation, and rely on the reference file
+orbitals. You might now start your calculation, with the *tdftu_4.in*, or skip the calculation, and rely on the reference file
 provided in the *\$ABI_TESTS/tutorial/Refs* directory. Examine the *tdftu_4.in* file.
 
 {% dialog tests/tutorial/Input/tdftu_4.in %}
 
 The only difference in the input file compared to *tdftu_3.in* is the
-value of [[usepawu]] = 2. We obtain a band gap of 4.3 eV. The value of the
+value of [[usepawu]] = 2. We obtain a band gap of 4.75 eV. The value of the
 band gap with AMF and FLL is different. However, we have to remember that
 these results are not well converged. By contrast, the magnetization,
 
-     Atom  Sphere radius  Integrated_up_density  Integrated_dn_density  Total(up+dn)   Diff(up-dn)
-        1        2.30000             9.24026835             7.56013140   16.80039975    1.68013694
-        2        2.30000             7.56013140             9.24026835   16.80039975   -1.68013694
-        3        1.21105             1.84683993             1.84683993    3.69367986   -0.00000000
-        4        1.21105             1.84683993             1.84683993    3.69367986    0.00000000
-     Note: Diff(up-dn) can be considered as a rough approximation of a local magnetic moment.
+      Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
+      Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
+         1   1.81432     8.675720     6.993816     15.669536     1.681904
+         2   1.81432     6.993816     8.675720     15.669536    -1.681904
+         3   1.41465     2.288685     2.288685      4.577371    -0.000000
+         4   1.41465     2.288685     2.288685      4.577371    -0.000000
+
 
 is very similar to the LDA+U FLL. In fact, this system is not very complex.
 But for other systems, the difference can be more important. FLL is designed

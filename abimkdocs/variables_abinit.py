@@ -743,7 +743,7 @@ then reduce the unit cell to a primitive unit cell. The echo of [[acell]] and
 [[rprim]] might thus differ from those derived directly from the input
 variables. Also, the input variable [[xred]] will refer to the CONVENTIONAL
 unit cell, but its echo will refer to the preprocessed PRIMITIVE unit cell.
-There is of course no problem with [[xangst]] and [[xcart]], as they are
+There is of course no problem with [[xcart]], as it is
 independent of the unit cell.
 
 The echo of *brvltt* in the output file will be one of the following Bravais lattices:
@@ -2033,7 +2033,7 @@ Variable(
     text=r"""
 This variable is mandatory when [[optdriver]] == 7. It defines the number of
 divisions in the (homogeneous) q-mesh used to generate the DDB file. See also
-the description of the [[getddb]], [[getddb_path]] input variables.
+the description of the [[getddb]], [[getddb_filepath]] input variables.
 """,
 ),
 
@@ -4834,7 +4834,7 @@ dataset to find the proper dataset. As an example:
 
 refers to dataset 2 when dataset 4 is initialized.
 
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the file directly.
 """,
 ),
 
@@ -5097,7 +5097,7 @@ to read a DVDB file produced in a previous dataset.
 For example, one can concatenate a dataset in which an initial set of DFPT potentials
 on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
 
-Note also that, starting Abinit v9, one can also use [[getdvdb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getdvdb_filepath]] to specify the path of the file directly.
 """
 ),
 
@@ -5241,7 +5241,7 @@ a GW calculation), to indicate that the dielectric matrix (_SCR file) is to be
 taken from the output of a previous dataset. It is used to chain the
 calculations, since it describes from which dataset the OUTPUT dielectric
 matrix is to be taken, as INPUT of the present dataset.
-Note also that, starting Abinit v9, one can also use [[getscr_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getscr_filepath]] to specify the path of the file directly.
 
 If [[getscr]] == 0, no such use of previously computed output _SCR file is done.
 If [[getscr]] is positive, its value gives the index of the dataset from which
@@ -5346,7 +5346,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfk]],.
-Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfk_filepath]] to specify the path of the file directly.
 
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -5446,7 +5446,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfq]].
-Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfq_filepath]] to specify the path of the file directly.
 
 The **getwfk**, [[getwfq]], **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -6789,6 +6789,36 @@ pseudo-potential and ion-ion interaction:
 ),
 
 Variable(
+    abivarname="icsing",
+    varset="gw",
+    vartype="integer",
+    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=6,
+    mnemonics="Integration technique for Coulomb SINGularity",
+    requires="[[optdriver]] in [3,4]",
+    added_in_version="v9.1",
+    text=r"""
+TO BE CHECKED ! (Also the information above)
+Many-body calculations 
+for fully periodic systems are problematic due to the presence of the
+integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
+respect to the number of q-points used to sample the Brillouin zone. The
+convergence can be accelerated by integrating accurately the zone in the neighborhood of $\mathbf{G}=0$.
+
+[[icsing]] defines the particular expression to be used for such integration,
+in case [[icutcoul]]==3 (3-dimensional system).
+  
+  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
+  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
+  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]]. 
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+""",
+),
+
+Variable(
     abivarname="icutcoul",
     varset="gw",
     vartype="integer",
@@ -6796,34 +6826,30 @@ Variable(
     dimensions="scalar",
     defaultval=6,
     mnemonics="Integer that governs the CUT-off for COULomb interaction",
-    requires="[[optdriver]] in [3,4]",
     added_in_version="before_v9",
     text=r"""
-Many-body calculations for isolated systems present a slow convergence with
+SHOULD REPLACE THE DEFAULT VALUE BY icutcoul=3 !
+Many-body calculations for isolated systems, 1D and 2D systems present a slow convergence with
 respect to the size of the supercell due to the long ranged Coulomb
-interaction and the high degree of non-locality of the operators involved. A
-similar issue also occurs in fully periodic systems due to the presence of the
-integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
-respect to the number of q-points used to sample the Brillouin zone. The
-convergence can be accelerated by replacing the true bare Coulomb interaction
-with other expressions.
+interaction and the high degree of non-locality of the operators involved. 
+Thus, restricting the range of the Coulomb interaction, in order to prevent 
+supercell images to interact can significantly speed-up convergence, or even can make convergence happen.
+Also, even in the ground-state case, a cut-off Coulomb interaction might prove useful.
 
 [[icutcoul]] defines the particular expression to be used for the Coulomb term
 in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 6. The
 corresponding influential variables are [[vcutgeo]] and [[rcut]].
+Also, in the GW case, the related variable [[icsing]] allows one to treat the integration
+of the $\mathbf{G}=0$ Coulomb singularity.
 
-  * 0 --> sphere (molecules but also 3D-crystals).
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
   * 1 --> cylinder (nanowires, nanotubes).
   * 2 --> surface.
-  * 3 --> 3D crystal (no cut-off, integration in a spherical mini-Brillouin Zone, legacy value).
+  * 3 --> 3D crystal (Coulomb interaction without cut-off).
   * 4 --> ERF, long-range only Coulomb interaction.
   * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
-  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
-  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
-  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
-  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
-  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+  * 6 TO BE SUPPRESSED ! 
 
 Note that Spencer and Alavi showed that the
 spherical cutoff can efficiently be used also for 3D systems [[cite:Spencer2008]].
@@ -7503,7 +7529,7 @@ the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the DDB file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the DDB file directly.
 """,
 
 ),
@@ -8654,7 +8680,7 @@ abs([[kptopt]])+1. They form a circuit starting at
 [[kptbounds]](1:3,1)/[[kptnrm]] and ending at
 [[kptbounds]](1:3,abs([[kptopt]])+1)/[[kptnrm]]. The number of divisions of
 each segment can be defined either using the array [[ndivk]] or the variable
-[[ndivsm]] that just defines the number of divisions for the smallest segment
+[[ndivsm]] (preferred) that just defines the number of divisions for the smallest segment.
 
 As for [[kpt]], [[kptbounds]] is specified using the primitive vectors in
 reciprocal space. If your Bravais lattice is simple, then it should be quite
@@ -8975,7 +9001,7 @@ The use of symmetries (spatial and/or time-reversal) is crucial to determine the
    in the Irreducible Brillouin Zone, with the appropriate weights.
    This has to be used when performing calculations with non-collinear magnetism allowed ([[nspden]] = 4)
 
-  * A negative value  --> rely on [[kptbounds]], and [[ndivk]] ([[ndivsm]]) to set up a band structure calculation
+  * A negative value  --> rely on [[kptbounds]], and [[ndivsm]] (or [[ndivk]]) to set up a band structure calculation
     along different lines (allowed only for [[iscf]] == -2). The absolute value of [[kptopt]] gives
     the number of segments of the band structure. Weights are usually irrelevant with this option,
     and will be left to their default value.
@@ -9221,6 +9247,80 @@ are allowed)  on which to apply the LDA+U correction.
   * If equal to -1: do not apply LDA+U correction on the species.
 """,
 ),
+
+Variable(
+    abivarname="lw_flexo",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of FLEXOelectricity related spatial dispersion tensors",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run the calculation of spatial dispersion tensorial quantities needed to
+build the bulk flexoelectric tensor (the clamped-ion contribution is alread calculated by
+abinit whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation,
+see [[flexoflag@anaddb]]).
+
+At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
+calculated. This **requires** the precalculation of the ground-state wave-functions and
+density as well as response functions and densities to a set of perturbations as specified below.
+All perturbations and directions need to be explicitly computed, and the linear response calculations
+have to be performed with [[prepalw]] = 1.
+
+  * 0 --> No flexoelectric spatial dispersion tensors are calculated.
+  * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
+          are calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field, atomic displacement and strain.
+  * 2 --> Clamped-ion flexoelectric tensor is calculated. Requires precomputed linear response functions
+          and densities: ddk, d2_dkdk, electric field and strain.
+  * 3 --> Two tensors required to build the mixed flexoelectric tensor are calculated:
+          the first moment of polarization response to an atomic displacement and the first
+          moment of the IFCs. Related quantities that can be derived from these two tensors
+          are also printed: dynamical quadrupoles, clamped-ion piezoelectric tensor and
+          piezoelectric force response tensor. Requires precomputed linear response functions and densities:
+          ddk, d2_dkdk, electric field and atomic displacement.
+  * 4 --> Two tensors required to build the lattice-mediated flexoelectric tensor are calculated:
+          the first moment of the IFCs and the first moment of the piezoelectric force response
+          tensor. Related quantities that can be derived from these two tensors
+          are also printed: piezoelectric force response tensor and clamped-ion elastic tensor.
+          Requires precomputed linear response functions and densities:
+          ddk, atomic displacement and strain.
+""",
+),
+
+Variable(
+    abivarname="lw_qdrpl",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of dynamical QuaDRuPoLes tensor",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run dynamical quadrupoles tensor calculation (e.g., needed to include dipole-quadrupole
+and/or quadrupole-quadrupole electrostatic interactions in the anaddb calculation of
+phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
+
+  * 0 --> No dynamical quadrupoles are calculated
+  * 1 --> Dynamical quadrupoles are calculated. Related quantities that can be derived from
+          the dynamical quadrupoles are also printed: the first moment of the polarization
+          response to an atomic displacement and the clamped-ion piezoelectric tensor.
+
+At present ( |today| ), all the elements of the dynamical quadrupoles tensor are necessarily
+calculated. This **requires** the precalculation of the ground-state wave functions and
+density as well as response functions and densities to the following perturbations:
+ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need
+to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] = 1.
+""",
+),
+
 
 Variable(
     abivarname="macro_uj",
@@ -9845,7 +9945,7 @@ Variable(
     text=r"""
 Gives the number of atoms to be read from the input file, in the case the atom
 manipulator or the smart symmetriser is used. In this case, [[natrd]] is also
-used to dimension the array [[typat]], and the arrays [[xred]], [[xangst]] and [[xcart]].
+used to dimension the array [[typat]], and the arrays [[xred]] and [[xcart]].
 Must take into account the vacancies (see [[vacnum]] and [[vaclst]]).
 Despite possible vacancies, cannot be bigger than [[natom]].
 """,
@@ -10186,7 +10286,7 @@ Variable(
     dimensions=['abs([[kptopt]])'],
     mnemonics="Number of DIVisions of K lines",
     characteristics=['[[INPUT_ONLY]]'],
-    commentdefault="Will be generated automatically from [[ndivsm]] if the latter is defined.",
+    commentdefault="Will be generated automatically from [[ndivsm]] if the latter is defined, which is much more convenient.",
     excludes="[[ndivsm]]",
     requires="[[kptopt]] < 0",
     added_in_version="before_v9",
@@ -10213,7 +10313,7 @@ segment connecting the end of one circuit with the beginning of the next one
 
 Alternatively it is possible to generate automatically the array [[ndivk]] by
 just specifying the number of divisions for the smallest segment. See the
-related input variable [[ndivsm]].
+related input variable [[ndivsm]]. This is much more convenient than using [[ndivk]].
 """,
 ),
 
@@ -10594,7 +10694,10 @@ Variable(
     requires="[[nqpt]] == 1 and [[kptopt]] >= 0",
     added_in_version="before_v9",
     text=r"""
-At variance with [[ngkpt]], note that only one q point is selected per dataset
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[ngqpt]] is done, 
+and the default value of [[ngqpt]] is kept.
+
+Similar to [[ngkpt]], but for the q-wavevector. At variance with [[ngkpt]], note that only one q point is selected per dataset
 (see [[iqpt]]).
 Its three positive components give the number of q points of Monkhorst-Pack
 grids (defined with respect to primitive axis in reciprocal space) in each of
@@ -10635,7 +10738,6 @@ to define the images:
   * [[upawu]]
   * [[vel]]
   * [[vel_cell]]
-  * [[xangst]]
   * [[xcart]]
   * [[xred]]
 
@@ -11262,14 +11364,13 @@ Variable(
     topics=['AtomTypes_useful', 'PseudosPAW_expert'],
     dimensions="scalar",
     defaultval="[[ntypat]]",
-    mnemonics="Number of PSeudoPotentials",
+    mnemonics="Number of PSeudoPotentials to be read",
     characteristics=['[[NO_MULTI]]'],
     added_in_version="before_v9",
     text=r"""
-Usually, the number of pseudopotentials to be read is equal to the number of
-type of atoms. However, in the case an alchemical mixing of pseudopotential is
-to be used, often the number of pseudopotentials to be read will not equal the
-number of types of atoms.
+Usually, the number of pseudopotentials to be read, [[npsp]], is equal to the number of
+type of atoms, [[ntypat]]. However, in the case an alchemical mixing of pseudopotential is
+used, [[npsp]] will be bigger than [[ntypat]].
 
 Alchemical pseudopotentials will be present when [[ntypalch]] is non-zero. See
 [[ntypalch]] to understand how to use alchemical potentials in ABINIT. The
@@ -11290,12 +11391,14 @@ Variable(
     defaultval="[[npsp]]-[[ntyppure]]",
     mnemonics='Number of PSeudoPotentials that are "ALCHemical"',
     characteristics=['[[INTERNAL_ONLY]]'],
-    requires="[[ntypalch]]/=0",
+    requires="[[ntypalch]]>0",
     added_in_version="before_v9",
     text=r"""
 Gives the number of pseudopotentials that are used for alchemical mixing (when [[ntypalch]] is non-zero):
 
 [[npspalch]] = [[npsp]]-[[ntyppure]]
+
+When alchemical mixing of potentials is used (that is, when [[ntypalch]]>0), then [[npspalch]] must be greater than 0.
 """,
 ),
 
@@ -11528,6 +11631,9 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[nshiftq]] is done, 
+and the default value of [[nshiftq]] is kept.
+
 This parameter gives the number of shifted grids to be used concurrently to
 generate the full grid of q points. It can be used with primitive grids
 defined either from [[ngqpt]] or [[qptrlatt]]. The maximum allowed value of
@@ -11800,8 +11906,9 @@ E.g. for a homopolar system (e.g. pure Si) **ntypat** is 1.
 The code tries to read the same number of pseudopotential files. The first
 pseudopotential is assigned type number 1, and so on...
 
-There is an exception in the case of alchemical mixing of potentials, for
-which there is a different number of pseudopotentials atomic types. See [[mixalch]].
+There is an exception in the case of alchemical mixing of potentials. In this case,
+the number of atomic types will differ from the number of pseudopotentials.
+See [[mixalch]], [[npsp]], [[ntypalch]] and [[npspalch]].
 """,
 ),
 
@@ -11892,7 +11999,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the list of atoms in object a. This list is specified by giving, for
-each atom, its index in the list of coordinates ([[xred]], [[xangst]] or
+each atom, its index in the list of coordinates ([[xred]] or
 [[xcart]]), that also corresponds to a type of atom (given by the array type).
 These objects can be thought as molecules, or groups of atoms, or parts of
 molecules, to be repeated, rotated and translated to generate the full set of atoms.
@@ -12041,7 +12148,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the list of atoms in object b. This list is specified by giving, for
-each atom, its index in the list of coordinates ([[xred]], [[xangst]] or
+each atom, its index in the list of coordinates ([[xred]] or
 [[xcart]]), that also corresponds to a type of atom (given by the array type).
 These objects can be thought as molecules, or groups of atoms, or parts of
 molecules, to be repeated, rotated and translated to generate the full set of
@@ -12368,7 +12475,7 @@ A few details require attention when performing unit cell optimisation:
 
 It is STRONGLY suggested first to optimize the ionic positions without cell
 shape and size optimization (**optcell** = 0), then start the cell shape and
-size optimization from the cell with relaxed ionic positions. Presently
+size optimization from the cell with relaxed ionic positions, possibly from the previous dataset, using [[getxred]] or [[getxcart]]. Presently
 (v3.1), one cannot restart ([[restartxf]]) a calculation with a non-zero
 **optcell** value from the (x,f) history of another run with a different non-
 zero **optcell** value. There are still a few problems at that level.
@@ -12404,6 +12511,7 @@ The choice is among:
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH)
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 10 --> longwave response functions (LONGWAVE), routine *longwave*.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -14120,6 +14228,62 @@ energy vs q vector) is reported in the output file for the lowest 10 bands.
 """,
 ),
 
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT
+approach requires the first-order wavefunctions and densities obtained from
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties.
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+""",
+),
+
+
+Variable(
+    abivarname="prepalw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PREPAre LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+The computation of spatial dispersion quantities from the longwave DFPT 
+approach requires the first-order wavefunctions and densities obtained from 
+a linear response calculation. The standard approach in a linear response calculation is:
+
+  * compute only the irreducible perturbations;
+  * use symmetries to reduce the number of k-points for the k-point integration.
+
+This approach cannot be applied, presently (v9.0), if the first-order
+wavefunctions are to be used to compute spatial dispersion properties. 
+During the linear response calculation, in order to prepare a longwave
+calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
+compute all the perturbations explicitly, and to keep the full number of k-points
+in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+""",
+),
+
 Variable(
     abivarname="prepanl",
     varset="dfpt",
@@ -14702,7 +14866,7 @@ Variable(
     mnemonics="PRinT the GEOmetry analysis",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of geometrical analysis (bond
+If set to 1 or a larger value, provide output of geometry analysis (bond
 lengths and bond angles). The value of [[prtgeo]] is taken by the code to be
 the maximum coordination number of atoms in the system.
 It will deduce a maximum number of "nearest" and "next-nearest" neighbors
@@ -14966,6 +15130,26 @@ the name being made of
 
 The file structure of this unformatted output file is described in [[help:abinit#localpotfile|this section]].
 No output is provided by a negative value of this variable.
+""",
+),
+
+Variable(
+    abivarname="prtprocar",
+    varset="dev",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT PROCAR file",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="before_v9",
+    text=r"""
+Print out VASP-style PROCAR files, to generate "fat band" structures, where the
+thickness is proportional to the atomic and angular momentum character. Used in
+particular with the [pyprocar](https://github.com/romerogroup/pyprocar)
+package. The same fractions are used as with [[prtdos]] 3, but output in the
+VASP format. Attempts have been made to support spin polarized and spinor
+calculations, but there may be subtle inconsistencies.
 """,
 ),
 
@@ -15610,7 +15794,8 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-Only used if [[nqpt]] = 1.
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qpt]] is done, 
+and the default value of [[qpt]], namely the null vector, is kept.
 
 Combined with [[qptnrm]], define the q vector [[qptn]](1:3) in the case
 [[qptopt]] = 0.
@@ -15700,7 +15885,8 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
-Only used if [[nqpt]] = 1.
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptopt]] is done, 
+and the default value of [[qptopt]] is kept.
 
 Controls the set up to generate the Q point [[qptn]](1:3) to be used for the
 specific dataset, either as a shift of k-point grid in ground-state
@@ -15751,6 +15937,9 @@ Variable(
     excludes="[[ngqpt]]",
     added_in_version="before_v9",
     text=r"""
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[qptrlatt]] is done, 
+and the default value of [[qptrlatt]] is kept.
+
 This input variable is used only when [[qptopt]] is positive. It partially
 defines the q point grid. The other piece of information is contained in
 [[shiftq]]. [[qptrlatt]] cannot be used together with [[ngqpt]].
@@ -16802,6 +16991,9 @@ Variable(
     characteristics=['[[INPUT_ONLY]]'],
     added_in_version="before_v9",
     text=r"""
+WARNING : Only used if [[nqpt]] = 1. If [[nqpt]]=0 (which is the default value of [[nqpt]]), no reading of [[shiftq]] is done, 
+and the default value of [[shiftq]] is kept.
+
 It is used only when [[qptopt]] >= 0, and must be defined if [[nshiftq]] is larger than 1.
 [[shiftq]](1:3,1:[[nshiftq]]) defines [[nshiftq]] shifts of the homogeneous
 grid of q points based on [[ngqpt]] or [[qptrlatt]].
@@ -18206,7 +18398,7 @@ one of Ti is number 2, and the one of O is number 3, the actual value of the
       typat 1 2 3 3 3
 
 The array [[typat]] has to agree with the actual locations of atoms given in
-[[xred]], [[xcart]] or [[xangst]], and the input of pseudopotentials has to
+[[xred]] or [[xcart]], and the input of pseudopotentials has to
 be ordered to agree with the atoms identified in [[typat]].
 The nuclear charge of the elements, given by the array [[znucl]], also must
 agree with the type of atoms designated in "[[typat]]".
@@ -20062,30 +20254,6 @@ conjugate gradient iterations on each wavefunction convergence step.
 ),
 
 Variable(
-    abivarname="xangst",
-    varset="basic",
-    vartype="real",
-    topics=['crystal_compulsory'],
-    dimensions=[3, 'min([[natom]],[[natrd]])'],
-    mnemonics="vectors (X) of atom positions in cartesian coordinates -length in ANGSTrom-",
-    characteristics=['[[INPUT_ONLY]]'],
-    added_in_version="before_v9",
-    text=r"""
-Gives the cartesian coordinates of atoms within unit cell, in angstrom. This
-information is redundant with that supplied by array [[xred]] or [[xcart]].
-If [[xred]] and [[xangst]] are ABSENT from the input file and [[xcart]] is
-provided, then the values of [[xred]] will be computed from the provided
-[[xcart]] (i.e. the user may use xangst instead of [[xred]] or [[xcart]] to
-provide starting coordinates).
-One and only one of [[xred]], [[xcart]] and [[xangst]] must be provided.
-The conversion factor between Bohr and Angstrom is 1 Bohr=0.5291772108
-Angstrom, see the [NIST site](http://physics.nist.gov/cuu/Constants/index.html).
-Atomic positions evolve if [[ionmov]]/=0. In constrast with [[xred]] and
-[[xcart]], [[xangst]] is not internal.
-""",
-),
-
-Variable(
     abivarname="xc_denpos",
     varset="dev",
     vartype="real",
@@ -20161,14 +20329,14 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the cartesian coordinates of atoms within unit cell. This information is
-redundant with that supplied by array [[xred]] or [[xangst]]. By default,
+redundant with that supplied by array [[xred]]. By default,
 [[xcart]] is given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms),
 although Angstrom can be specified, if preferred, since [[xcart]] has the [[LENGTH]] characteristics.
-If [[xred]] and [[xangst]] are ABSENT from the input file and [[xcart]] is
+If [[xred]] are ABSENT from the input file and [[xcart]] is
 provided, then the values of [[xred]] will be computed from the provided
-[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]] or [[xangst]]
+[[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]] 
 to provide starting coordinates).
-One and only one of [[xred]], [[xcart]] and **xangst** must be provided.
+One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
 """,
 ),
@@ -20215,10 +20383,13 @@ where (xred1,xred2,xred3) are the "reduced coordinates" given in columns of
 array "[[rprimd]]" in Bohr.
 
 If you prefer to work only with cartesian coordinates, you may work entirely
-with "[[xcart]]" or "[[xangst]]" and ignore [[xred]], in which case [[xred]]
+with "[[xcart]]" and ignore [[xred]], in which case [[xred]]
 must be absent from the input file.
-One and only one of [[xred]], [[xcart]] and [[xangst]] must be provided.
+One and only one of [[xred]] or [[xcart]] must be provided.
 Atomic positions evolve if [[ionmov]]/=0.
+
+The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom, 
+named `xangst`.
 """,
 ),
 
@@ -20249,7 +20420,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the name of a xyz format file, to take [[natom]], [[ntypat]], [[typat]],
-[[znucl]], and [[xangst]] from. This input can not be mixed with normal atom
+[[znucl]], and [[xcart]] (in Angstrom) from it. This input can not be mixed with normal atom
 specifications for other datasets.
 
 Notes: do not quote the file name in the abinit input file, simply leave a
@@ -20662,7 +20833,7 @@ the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1
 during the GS run and the specification of [[tolwfr]] in the EPH input file.
-The path to the POT file used in the EPH calculation is specified via [[getpot_path]].
+The path to the POT file used in the EPH calculation is specified via [[getpot_filepath]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
@@ -20678,7 +20849,7 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
 ),
 
 Variable(
-    abivarname="getkerange_path",
+    abivarname="getkerange_filepath",
     varset="eph",
     vartype="string",
     topics=['ElPhonInt_expert'],
@@ -20688,7 +20859,7 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable defines the path of the external KERANGE.nc file with the list of k-points in the electron/hole pockets.
-The tables stored in the file are used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4)
+The tables stored in the file are used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4).
 This file is generated by running a preliminary step with [[wfk_task]] = "wfk_einterp".
 """,
 ),
@@ -20751,7 +20922,7 @@ Variable(
     dimensions=[5],
     defaultval=0,
     mnemonics="EPH Number of Processors for Perturbations, Q-points, Bands, K-points, Spin.",
-    added_in_version="9.0.0",
+    added_in_version="9.1.0",
     text=r"""
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors
@@ -20852,7 +21023,7 @@ at the input [[qpt]].
 #),
 
 Variable(
-    abivarname="getpot_path",
+    abivarname="getpot_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20870,7 +21041,7 @@ Note also that relative paths are interpreted according to the working directory
 ),
 
 Variable(
-    abivarname="getwfk_path",
+    abivarname="getwfk_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20882,13 +21053,13 @@ Variable(
 Specify the path of the WFK file using a string instead of the dataset index.
 Alternative to [[getwfk]] and [[irdwfk]]. The string must be enclosed between quotation marks:
 
-    getwfk_path "../outdata/out_WFK"
+    getwfk_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfkfine_path",
+    abivarname="getwfkfine_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20900,13 +21071,13 @@ Variable(
 Specify the path of the fine WFK file using a string instead of the dataset index.
 Alternative to [[getwfkfine]] and [[irdwfkfine]]. The string must be enclosed between quotation marks:
 
-    getwfkfine_path "../outdata/out_WFK"
+    getwfkfine_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfq_path",
+    abivarname="getwfq_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20918,12 +21089,12 @@ Variable(
 Specify the path of the WFQ file using a string instead of the dataset index.
 Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
 
-    getwfq_path "../outdata/out_WFQ"
+    getwfq_filepath "../outdata/out_WFQ"
 """
 ),
 
 Variable(
-    abivarname="getddb_path",
+    abivarname="getddb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20935,12 +21106,12 @@ Variable(
 Specify the path of the DDB file using a string instead of the dataset index.
 Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between quotation marks:
 
-    getddb_path "../outdata/out_DDB"
+    getddb_filepath "../outdata/out_DDB"
 """
 ),
 
 Variable(
-    abivarname="getdvdb_path",
+    abivarname="getdvdb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20952,12 +21123,12 @@ Variable(
 Specify the path of the DVDB file using a string instead of the dataset index.
 Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
 
-    getdvdb_path "../outdata/out_DVDB"
+    getdvdb_filepath "../outdata/out_DVDB"
 """
 ),
 
 Variable(
-    abivarname="getden_path",
+    abivarname="getden_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20969,12 +21140,12 @@ Variable(
 Specify the path of the DEN file using a string instead of the dataset index.
 Alternative to [[getden]] and [[irdden]]. The string must be enclosed between quotation marks:
 
-    getden_path "../outdata/out_DEN"
+    getden_filepath "../outdata/out_DEN"
 """
 ),
 
 Variable(
-    abivarname="getscr_path",
+    abivarname="getscr_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20986,7 +21157,7 @@ Variable(
 Specify the path of the SCR file using a string instead of the dataset index.
 Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between quotation marks:
 
-    getscr_path "../outdata/out_SCR"
+    getscr_filepath "../outdata/out_SCR"
 """
 ),
 
@@ -21063,8 +21234,8 @@ This variable is used when Abinit is executed with the new syntax:
     abinit run.abi > run.log 2> run.err &
 
 If this option is not specified, a prefix is automatically constructed from the input file name
-provided the file ends with e.g. `.ext`. (`.abi` is recommended)
-If the input file does not have a file extension, a default is provided.
+provided the filename ends with an extension, e.g. `.ext`. (`.abi` is recommended)
+If the input filename does not have a file extension, a default is provided.
 """
 ),
 
@@ -21084,8 +21255,8 @@ This variable is used when Abinit is executed with the new syntax:
     abinit run.abi > run.log 2> run.err &
 
 If this option is not specified, a prefix is automatically constructed from the input file name
-provided the file ends with e.g. `.ext`. (`.abi` is recommended)
-If the input file does not have a file extension, a default is provided.
+provided the filename ends with an extension, e.g. `.ext`. (`.abi` is recommended)
+If the input filename does not have a file extension, a default is provided.
 """
 ),
 
@@ -21105,9 +21276,9 @@ This variable is used when Abinit is executed with the new syntax:
     abinit run.abi > run.log 2> run.err &
 
 If this option is not specified, a prefix is automatically constructed from the input file name
-provided the file ends with `.ext`.
+provided the filename ends with an extension, e.g. `.ext`.
 
-If the input file does not have a file extension, a default is provided.
+If the input filename does not have a file extension, a default is provided.
 """
 ),
 
@@ -21135,9 +21306,34 @@ The string must be quoted in double quotation marks:
     pp_dirpath "/home/user/my_pseudos/"
     pseudos "al.psp8, as.psp8"
 
-If not present, the filenames specified in [[pseudos]] are used directly.
+If [[pp_dirpath]] is not present, the filenames specified in [[pseudos]] are used directly.
 """
 ),
+
+Variable(
+    abivarname="supercell_latt",
+    varset="gstate",
+    vartype="integer",
+    topics=['UnitCell_useful'],
+    dimensions=[3],
+    defaultval=[1, 1, 1],
+    mnemonics="SUPERCELL LATTice",
+    added_in_version="before v9",
+    text=r"""
+Factor that multiplies the three primitive vectors to generate a supercell.
+The starting nuclei types [[typat]] and coordinates [[xred]] and [[xcart]] 
+are simply replicated in the different images of the original primitive cell.
+If present, [[spinat]] and [[chrgat]] are also replicated without change.
+Note that [[supercell_latt]] is not echoed. It is immediately used to change 
+[[natom]], [[typat]], and all input variables that depend on [[natom]] and [[typat]].
+
+This input variable cannot be used jointly with non-default values of [[natrd]] and [[nobj]].
+Also, [[nsym]] is set to 1. Also note that [[vel]], if defined, must have the dimensions of the
+number of atoms in the supercell, not the initial [[natom]], because it is not replicated.
+[[supercell_latt]] is typically used to initialize molecular dynamics runs.
+"""
+),
+
 
 Variable(
     abivarname="pseudos",
@@ -21177,7 +21373,7 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable provides a simplified interface to build the crystalline structure from an external file.
-The idea is to keep the **geometrical information** separated from the input file so that one
+The idea is to keep the **geometry information** separated from the input file so that one
 can perform multiple calculations in different input files sharing the same structure
 without having to copy & paste the description of the unit cell inside the input.
 The single source of truth is now given by an external file that can be easily shared.

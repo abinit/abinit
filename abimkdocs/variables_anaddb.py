@@ -280,6 +280,46 @@ The abinit input variable [[dipdip]] has a similar meaning.
 ),
 
 Variable(
+    abivarname="dipquad@anaddb",
+    varset="anaddb",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="DIPole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+  * 0 --> the dipole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
+  * 1 --> the dipole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
+    so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
+    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1 
+    or a [[lw_flexo]] = 1 or 2 run.
+
+""",
+),
+
+Variable(
+    abivarname="quadquad@anaddb",
+    varset="anaddb",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="QUADdrupole-QUADdrupole interaction",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+  * 0 --> the quadrupole-quadrupole interaction is not handled separately in the treatment of the interatomic forces.
+  * 1 --> the quadrupole-quadrupole interaction is subtracted from the dynamical matrices before Fourier transform,
+    so that only the short-range part is handled in real space. Of course, it is reintroduced analytically
+    when the phonon spectrum is interpolated. Requires a preceding generation of 3rd order DDB with a [[lw_qdrpl]] = 1
+    or a [[lw_flexo]] = 1 or 2 run.
+
+""",
+),
+
+Variable(
     abivarname="dosdeltae@anaddb",
     varset="anaddb",
     vartype="real",
@@ -629,6 +669,33 @@ as the interpolated phonons and gkk are not diagonalized in the same basis.
 Doing so afterwards ( **ep_scalprod** 0) eliminates the diagonalization error,
 but sometimes gives small spikes in the phonon linewidths near band crossings
 or high symmetry points. I do not know why...
+""",
+),
+
+Variable(
+    abivarname="flexoflag@anaddb",
+    varset="anaddb",
+    vartype="integer",
+    topics=['longwave_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FLEXOelectric tensor FLAG",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Flag for calculation of bulk flexoelectrics tensors
+
+  * 0 --> No flexoelectric tensor is calculated.
+  * 1 --> All the contributions to the bulk flexoelectric tensor (clamped-ion, mixed and lattice-mediated) and 
+          related quantities (piezoelectric and flexoelectric internal strain tensors and Lagrange elastic tensors)
+          are calculated. Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 run. 
+  * 2 --> The clamped-ion flexoelectric tensor is printed. Requires a preceding generation of 2nd and 3rd order 
+          DDB with a [[lw_flexo]] = 1 or 2 run.
+  * 3 --> The mixed flexoelectric tensor is calculated and printed along with the piezoelectric internal strain tensors. 
+          Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 or 3 run.
+  * 4 --> The lattice-mediated flexoelectric tensor is calculated and printed along with the piezoelectric and flexoelectric 
+          internal strain tensors and the Lagrange elastic tensors. 
+          Requires a preceding generation of 2nd and 3rd order DDB with a [[lw_flexo]] = 1 or 4 run.
 """,
 ),
 
@@ -2158,7 +2225,7 @@ The default values will not work.
 
 # ABINIT 9
 Variable(
-    abivarname="ddb_path@anaddb",
+    abivarname="ddb_filepath@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
@@ -2173,7 +2240,7 @@ This variable specifies the input DDB file when anaddb is invoked with the new s
 
 instead of the legacy mode based on the files file. Example:
 
-    ddb_path = "out_DDB"
+    ddb_filepath = "out_DDB"
 
 !!! important
 
@@ -2182,13 +2249,13 @@ instead of the legacy mode based on the files file. Example:
 ),
 
 Variable(
-    abivarname="output@anaddb",
+    abivarname="output_file@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
     dimensions="scalar",
     defaultval="",
-    mnemonics="OUTPUT file",
+    mnemonics="OUTPUT FILE",
     added_in_version="9.0.0",
     text=r"""
 This variable specifies the name of the output file when anaddb is invoked with the new syntax:
@@ -2220,7 +2287,7 @@ instead of the legacy mode based on the files file. Example:
 #),
 
 Variable(
-    abivarname="gkk_path@anaddb",
+    abivarname="gkk_filepath@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
@@ -2258,7 +2325,7 @@ This variable is optional and used for performing EPH calculation with [[elphfla
 ),
 
 Variable(
-    abivarname="ddk_path@anaddb",
+    abivarname="ddk_filepath@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
@@ -2279,7 +2346,7 @@ This variable is optional and used for performing transport calculations with [[
 
 Example:
 
-    ddk_path = "t94.ddk"
+    ddk_filepath = "t94.ddk"
 
 where t94.ddk contains the list of file names.
 

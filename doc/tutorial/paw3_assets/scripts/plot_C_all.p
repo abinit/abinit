@@ -30,15 +30,8 @@ set size 0.33, 0.33
 set origin 0.00, 0.0
 set xrange[0:10]
 set yrange[-3:5]
-set title "vloc & ftvloc"
-plot 'vloc' u 1:2 w l lc 1,'ftvloc' u 1:2 w l lc 2,'ftvloc' u 1:3 w l lc 3,'ftvloc' u 1:4 w l lc 4
-set size 0.33, 0.33
-set origin 0.33, 0.0
-set xrange[0:50]
-set yrange[-1:10]
-set title "ftkin and fthatpot"
-plot 'ftkin.1' u ($1*$1*0.5):2 w l lc 1, 'ftkin.2' u ($1*$1*0.5):2 w l lc 3
-replot 'fthatpot.0' u ($1*$1*0.5):2 w l lc 1, 'fthatpot.1' u ($1*$1*0.5):2 w l lc 2, 'fthatpot.2' u ($1*$1*0.5):2 w l lc 3
+set title "vloc"
+plot 'vloc' u 1:2 w l lc 1
 set size 0.33, 0.33
 set origin 0.66, 0.0
 set xrange[0:10]
