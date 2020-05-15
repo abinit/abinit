@@ -302,7 +302,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_fermie
- type(oper_type) :: lda_occup
+ type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
@@ -1105,10 +1105,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi
-     call init_oper(paw_dmft,lda_occup)
+     call init_oper(paw_dmft,dft_occup)
 
      call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie &
-&     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
+&     ,dft_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
 
@@ -1168,7 +1168,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call destroy_self(self)
      endif
      call destroy_dmft(paw_dmft)
-     call destroy_oper(lda_occup)
+     call destroy_oper(dft_occup)
    end if
 
    call timab(964,1,tsec) ! outscfcv(outkss)
