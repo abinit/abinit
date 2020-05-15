@@ -17542,9 +17542,12 @@ Variable(
     mnemonics="STRess TARGET",
     added_in_version="before_v9",
     text=r"""
+Define the target stress to be obtained by optimization of the cell.
 The components of the stress tensor must be stored according to: (1,1) -->1;
 (2,2) --> 2; (3,3) --> 3; (2,3) --> 4; (3,1) --> 5; (1,2) -->6. The conversion factor
-between Ha/Bohr**3 and GPa is: 1 Ha/Bohr**3 = 29421.033 GPa.
+between Ha/Bohr**3 (the atomic unit for stress) and GPa is: 1 Ha/Bohr**3 = 29421.033 GPa.
+If a hydrostatic stress (so, a pressure P) is wanted, define [[strtarget]] as
+-P -P -P 0 0 0 .
 Not used if [[optcell]] == 0.
 """,
 ),
