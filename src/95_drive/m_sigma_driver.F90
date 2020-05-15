@@ -70,7 +70,7 @@ module m_sigma_driver
  use m_kg,            only : getph
  use m_xcdata,        only : get_xclevel
  use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
- use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_lda_to_qp
+ use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
@@ -193,7 +193,7 @@ contains
 !!      prep_calc_ucrpa,print_ngfft,prtrhomxmn,pspini,rdgw,rdqps,read_rhor
 !!      setsym_ylm,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
 !!      sigma_free,sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij
-!!      symdij_all,test_charge,timab,updt_m_lda_to_qp,vcoul_free
+!!      symdij_all,test_charge,timab,updt_m_ks_to_qp,vcoul_free
 !!      wfd_change_ngfft,wfd_copy,wfd_distribute_bands,wfd_free,wfd_get_cprj
 !!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
 !!      wfd_test_ortho,write_sigma_header,write_sigma_results,wrqps,wrtout
@@ -1101,22 +1101,22 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call energies_init(QP_energies)
    QP_energies%e_corepsp=ecore/Cryst%ucvol
 
-   !  m_lda_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
+   !  m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
    ! Initialize the QP amplitudes with KS wavefunctions.
-   ABI_MALLOC(Sr%m_lda_to_qp,(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol))
-   Sr%m_lda_to_qp=czero
+   ABI_MALLOC(Sr%m_ks_to_qp,(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol))
+   Sr%m_ks_to_qp=czero
    do ib=1,Sigp%nbnds
-     Sr%m_lda_to_qp(ib,ib,:,:)=cone
+     Sr%m_ks_to_qp(ib,ib,:,:)=cone
    end do
 
-   ! Now read m_lda_to_qp and update the energies in QP_BSt.
+   ! Now read m_ks_to_qp and update the energies in QP_BSt.
    ! TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Dtset%nspden))
    ABI_MALLOC(prev_taur,(nfftf,Dtset%nspden*Dtset%usekden))
    ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-              nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_lda_to_qp,prev_rhor,prev_Pawrhoij)
+              nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_ks_to_qp,prev_rhor,prev_Pawrhoij)
 
 !  Find the irreps associated to the QP amplitudes starting from the analogous table for the KS states.
 !  bmin=Sigp%minbdgw; bmax=Sigp%maxbdgw
@@ -1126,7 +1126,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !  do jb_qp=bmin,bmax
 !  do ib_ks=bmin,bmax
-!  if (ABS(Sr%m_lda_to_qp(ib_ks,jb_qp,ik_ibz,spin)) > tol12) then ! jb_qp has same the same character as ib_ks.
+!  if (ABS(Sr%m_ks_to_qp(ib_ks,jb_qp,ik_ibz,spin)) > tol12) then ! jb_qp has same the same character as ib_ks.
 !  ks_irr = ks_irreptab(ib_ks,ib_ks,ik_ibz,spin)
 !  qp_irreptab(jb_qp,jb_qp,ik_ibz,spin) = ks_irr
 !  do ii=bmin,bmax
@@ -1143,7 +1143,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    if (nscf>0.and.gwcalctyp>=20.and.wfd%iam_master()) then
      ! Print the unitary transformation on std_out.
-     call show_QP(QP_BSt,Sr%m_lda_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
+     call show_QP(QP_BSt,Sr%m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    end if
 
    ! Compute QP wfg as linear combination of KS states ===
@@ -1152,7 +1152,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
    !  TODO here we should use nbsc instead of nbnds
 
-   call wfd%rotate(Cryst,Sr%m_lda_to_qp)
+   call wfd%rotate(Cryst,Sr%m_ks_to_qp)
 
    ! Reinit the storage mode of Wfd as ug have been changed ===
    ! Update also the wavefunctions for GW corrections on each processor
@@ -1470,7 +1470,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
      do spin=1,Sigp%nsppol
        do ik=1,Kmesh%nibz
-         uks2qp(:,:) = Sr%m_lda_to_qp(b1gw:b2gw,b1gw:b2gw,ik,spin)
+         uks2qp(:,:) = Sr%m_ks_to_qp(b1gw:b2gw,b1gw:b2gw,ik,spin)
          do iab=1,Sigp%nsig_ab
            is_idx=spin; if (Sigp%nsig_ab>1) is_idx=iab
            ctmp(:,:)=MATMUL(htmp(:,:,ik,is_idx),uks2qp(:,:))
@@ -2482,15 +2482,15 @@ endif
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
    ! Write SCF data in case of self-consistent calculation ===
-   ! Save Sr%en_qp_diago, Sr%eigvec_qp and m_lda_to_qp in the _QPS file.
+   ! Save Sr%en_qp_diago, Sr%eigvec_qp and m_ks_to_qp in the _QPS file.
    ! Note that in the first iteration qp_rhor contains KS rhor, then the mixed rhor.
    if (gwcalctyp>=10) then
-     ! Calculate the new m_lda_to_qp
-     call updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_lda_to_qp)
+     ! Calculate the new m_ks_to_qp
+     call updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_lda_to_qp)
 
      if (wfd%iam_master()) then
        call wrqps(Dtfil%fnameabo_qps,Sigp,Cryst,Kmesh,Psps,Pawtab,QP_Pawrhoij,&
-&       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_lda_to_qp,qp_rhor)
+&       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_ks_to_qp,qp_rhor)
      end if
 
      ! Report the MAX variation for each kptgw and spin

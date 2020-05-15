@@ -160,9 +160,9 @@ MODULE m_sigma
   ! eigvec_qp(nbnds,nbnds,nkibz,nsppol))
   ! Expansion of the QP amplitudes in the QP basis set of the previous iteration.
 
-  complex(dpc),allocatable :: m_lda_to_qp(:,:,:,:)
+  complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
   ! (%nbnds,%nbnds,%nibz,%nsppol))
-  !  m_lda_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
+  !  m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
 
   complex(dpc),allocatable :: hhartree(:,:,:,:)
   ! hhartree(b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab)
@@ -1061,7 +1061,7 @@ subroutine sigma_free(Sr)
  ABI_SFREE(Sr%dsigmee0)
  ABI_SFREE(Sr%egw)
  ABI_SFREE(Sr%eigvec_qp)
- ABI_SFREE(Sr%m_lda_to_qp)
+ ABI_SFREE(Sr%m_ks_to_qp)
  ABI_SFREE(Sr%hhartree)
  ABI_SFREE(Sr%sigcme)
  ABI_SFREE(Sr%sigmee)
@@ -1361,8 +1361,8 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    NCF_CHECK(ncerr)
  end if
 
- if (allocated(sr%m_lda_to_qp)) then
-   ncerr = nctk_def_arrays(ncid, [nctkarr_t('m_lda_to_qp', "dp", &
+ if (allocated(sr%m_ks_to_qp)) then
+   ncerr = nctk_def_arrays(ncid, [nctkarr_t('m_ks_to_qp', "dp", &
 &       "cplex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")])
    NCF_CHECK(ncerr)
  end if
@@ -1470,10 +1470,10 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    ABI_FREE(rdata5)
  end if
 
- if (allocated(sr%m_lda_to_qp)) then
+ if (allocated(sr%m_ks_to_qp)) then
    ABI_MALLOC(rdata5,(cplex,Sr%nbnds,Sr%nbnds,Sr%nkibz,Sr%nsppol))
-   rdata5=c2r(Sr%m_lda_to_qp)
-   NCF_CHECK(nf90_put_var(ncid, vid('m_lda_to_qp'), rdata5))
+   rdata5=c2r(Sr%m_ks_to_qp)
+   NCF_CHECK(nf90_put_var(ncid, vid('m_ks_to_qp'), rdata5))
    ABI_FREE(rdata5)
  end if
 

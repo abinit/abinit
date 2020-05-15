@@ -248,7 +248,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
- complex(dpc),allocatable :: m_lda_to_qp(:,:,:,:)
+ complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
  complex(dpc),allocatable :: chi0_lwing(:,:,:),chi0_uwing(:,:,:),chi0_head(:,:,:)
  complex(dpc),allocatable :: chi0intra_lwing(:,:,:),chi0intra_uwing(:,:,:),chi0intra_head(:,:,:)
  complex(gwpc),allocatable,target :: chi0(:,:,:),chi0intra(:,:,:)
@@ -732,12 +732,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call timab(304,1,tsec) ! KS => QP; [wfrg]
 
    ! Initialize with KS eigenvalues and eigenfunctions.
-   ABI_MALLOC(m_lda_to_qp,(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol))
-   m_lda_to_qp = czero
+   ABI_MALLOC(m_ks_to_qp,(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol))
+   m_ks_to_qp = czero
    do spin=1,Wfd%nsppol
      do ik_ibz=1,Wfd%nkibz
        do band=1,Wfd%nband(ik_ibz,spin)
-         m_lda_to_qp(band,band,:,:) = cone
+         m_ks_to_qp(band,band,:,:) = cone
        end do
      end do
    end do
@@ -748,7 +748,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-   nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
+   nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_ks_to_qp,rhor_p,prev_Pawrhoij)
 
    ABI_FREE(rhor_p)
    ABI_FREE(prev_Pawrhoij)
@@ -763,9 +763,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! === Update only the wfg treated with GW ===
    ! For PAW update and re-symmetrize cprj in the full BZ, TODO add rotation in spinor space
-   if (nscf/=0) call wfd%rotate(Cryst,m_lda_to_qp)
+   if (nscf/=0) call wfd%rotate(Cryst,m_ks_to_qp)
 
-   ABI_FREE(m_lda_to_qp)
+   ABI_FREE(m_ks_to_qp)
    call timab(304,2,tsec)
  end if ! gwcalctyp>=10
 
