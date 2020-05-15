@@ -52,7 +52,7 @@
   nband  20      # This number of bands might be too low for non-linear optics and real part of linear optics
 
 # Data common to datasets 3-6
- kptopt   2      # Need points in the half BZ (use time-reversal symmetry)
+ kptopt   3      # Need points in the full BZ for non-linear optical properties
 
 # Data common to datasets 4-6
   getwfk  3
