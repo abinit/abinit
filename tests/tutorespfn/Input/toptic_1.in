@@ -18,7 +18,7 @@
   kptopt2  1
   getwfk2  1   getden2 1   # Usual file handling data
 
-#Third dataset : NSC run with large number of bands, and points in the half BZ (use time-reversal symmetry)
+#Third dataset : NSC run with large number of bands, and points in the full BZ 
     iscf3 -2  
    nstep3 25
   getwfk3  2   getden3 1   # Usual file handling data
@@ -64,7 +64,7 @@
          0.0 0.5 0.0
          0.0 0.0 0.5
  ngkpt  4  4  4        # This is much too low : should be at least 24x24x24
-   qpt  0.0 0.0 00     # Not really , because it is the defaults, but mentioned here to keep track of its importance for datasets 4-6
+   qpt  0.0 0.0 0.0     # Not really needed, because it is the defaults, but mentioned here to keep track of its importance for datasets 4-6
 
  acell   3*10.60
  amu 69.72  74.9216
