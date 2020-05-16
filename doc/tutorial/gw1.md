@@ -1005,7 +1005,7 @@ In the case of a self-consistent calculation, the output is slightly more comple
 **For instance, iteration 2**
 
      k =    0.500   0.250   0.000
-     Band     E_dft  <Vxcdft>    E(N-1) <Hhartree>    SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT  <VxcDFT>    E(N-1) <Hhartree>    SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.422   -10.273    -3.761     6.847   -15.232     4.034     1.000     0.000   -11.198    -0.590    -4.351    -4.351
         2    -0.574   -10.245    -0.850     9.666   -13.806     2.998     1.000     0.000   -10.807    -0.291    -1.141    -1.141
         3     2.242    -9.606     2.513    11.841   -11.452     1.931     1.000     0.000    -9.521    -0.193     2.320     2.320
@@ -1022,10 +1022,10 @@ In the case of a self-consistent calculation, the output is slightly more comple
 The columns are
 
   * **Band**: index of the band
-  * **E_dft**: DFT eigenvalue
-  * **Vxcdft**: diagonal expectation value of the xc potential in between DFT bra and ket
+  * **E_DFT**: DFT eigenvalue
+  * **VxcDFT**: diagonal expectation value of the xc potential in between DFT bra and ket
   * **E(N-1)**: quasiparticle energy of the previous iteration (equal to DFT for the first iteration)
-  * **Hhartree**: diagonal expectation value of the Hartree Hamiltonian (equal to E_dft - Vxcdft for the first iteration only)
+  * **Hhartree**: diagonal expectation value of the Hartree Hamiltonian (equal to E_DFT - VxcDFT for the first iteration only)
   * **SigX**: diagonal expectation value of the exchange self-energy
   * **SigC[E(N-1)]**: diagonal expectation value of the correlation self-energy
     (evaluated for the energy of the preceeding iteration)
