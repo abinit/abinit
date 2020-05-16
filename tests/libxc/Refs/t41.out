@@ -759,7 +759,7 @@ KS_gap     :    5.568
 QP_gap     :    6.973
 Delta_QP_KS:    1.405
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.965   -14.841    -8.965    -5.988    -5.580     0.000     1.000     0.000    -5.580    -2.602   -11.567   -11.567
         2    12.951   -16.710    12.951    16.267    -3.993     0.000     1.000     0.000    -3.993    -0.677    12.274    12.274
         3    12.951   -16.710    12.951    16.267    -3.993     0.000     1.000     0.000    -3.993    -0.677    12.274    12.274
@@ -937,7 +937,7 @@ KS_gap     :    5.568
 QP_gap     :    7.710
 Delta_QP_KS:    2.143
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.965   -14.841    -8.965    -5.623    -6.420     0.000     1.000     0.000    -6.420    -3.077   -12.042   -12.042
         2    12.951   -16.710    12.951    16.678    -4.785     0.000     1.000     0.000    -4.785    -1.057    11.894    11.894
         3    12.951   -16.710    12.951    16.678    -4.785     0.000     1.000     0.000    -4.785    -1.057    11.894    11.894
@@ -1115,7 +1115,7 @@ KS_gap     :    5.568
 QP_gap     :    7.473
 Delta_QP_KS:    1.906
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.965   -14.841    -8.965    -5.995    -5.136     0.000     1.000     0.000    -5.136    -2.166   -11.131   -11.131
         2    12.951   -16.710    12.951    15.885    -3.828     0.000     1.000     0.000    -3.828    -0.894    12.057    12.057
         3    12.951   -16.710    12.951    15.885    -3.828     0.000     1.000     0.000    -3.828    -0.894    12.057    12.057
