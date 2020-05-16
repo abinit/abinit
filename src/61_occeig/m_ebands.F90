@@ -98,7 +98,6 @@ MODULE m_ebands
  public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
  public :: ebands_ncwrite          ! Write object to NETCDF file (use ncid)
  public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
- !public :: ebands_ncread          ! Read object from NETCDF file handle
  !public :: ebands_ncread          ! Read object from NETCDF file (use filepath, assume nc file with header)
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
@@ -3761,10 +3760,10 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
 
 ! *********************************************************************
 
-! First copy the bands
- call ebands_copy(self,new)
+ ! First copy the bands
+ call ebands_copy(self, new)
 
-! Now chop them
+ ! Now chop them
  ABI_FREE(new%eig)
  ABI_FREE(new%occ)
  ABI_FREE(new%doccde)

@@ -1257,6 +1257,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpot_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getpot_filepath = key_value
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getsigeph_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getsigeph_filepath = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getcell',tread,'INT')
  if(tread==1) dtset%getcell=intarr(1)
 

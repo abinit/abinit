@@ -214,7 +214,7 @@ module m_sigmaph
 
   integer :: nqr = 0
    ! Number of points on the radial mesh for spherical integration of the Frohlich self-energy
-   ! TODO: Under developers
+   ! TODO: Under development
 
   integer :: angl_size = 0
    ! Dimension of angular mesh for spherical integration of the Frohlich self-energy
@@ -237,11 +237,11 @@ module m_sigmaph
 
   real(dp) :: qrad = zero
    ! Radius of the sphere for the numerical integration of the Frohlich self-energy
-   ! TODO: Under developers
+   ! TODO: Under development
 
   real(dp) :: qdamp = one
    ! Exponential damping e-(qmod**2/qdamp**2) added to the Frohlich matrix elements in q-space.
-   ! TODO: Under developers
+   ! TODO: Under development
 
   real(dp) :: wmax
    ! Max phonon energy + buffer. Used to select the bands to sum for the imaginary part
@@ -3302,6 +3302,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  ierr = 0
 
  if (.not. file_exists(path)) then
+   msg = sjoin("Cannot find file", path)
    ierr = 1; return
  end if
 
@@ -4624,16 +4625,17 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "chneut:", itoa(dtset%chneut))
  write(unt,"(a)")sjoin(" dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
 
- if (self%frohl_model == 0) then
+ select case (self%frohl_model)
+ case (0)
    write(unt,"(a)")" No special treatment of Frohlich divergence in gkq for q --> 0"
- else if (self%frohl_model == 1) then
+ case (1)
    write(unt,"(a)")" Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
    write(unt,"(2(a,i0,1x))")" Sperical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
- else if (self%frohl_model == 3) then
+ !case (3)
    !write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
- else
-   MSG_ERROR(sjoin("Invalid frohl_mode:", itoa(self%frohl_model)))
- end if
+ case default
+   MSG_ERROR(sjoin("Invalid value of frohl_mode:", itoa(self%frohl_model)))
+ end select
 
  write(unt,"(a, i0)")" Number of k-points for self-energy corrections: ", self%nkcalc
  if (all(dtset%sigma_erange /= -one)) then

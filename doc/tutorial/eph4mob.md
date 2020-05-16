@@ -23,9 +23,9 @@ If what follows, we will be working within the so-called
 self-energy relaxation time approximation (SERTA) [[cite:Giustino2017]].
 SERTA is more accurate that the constant relaxation time approximation (CRTA) as the 
 microsopic e-ph scattering is now included leading to linewidths that depend on the band index and the $\kk$ wavevector.
-Keep in mind, however, that also the SERTA is an approximation and a more rigorous analysis would require 
+Keep in mind, however, that also the SERTA is an approximation and a more rigorous approach would require 
 the iterative solution of the BTE and/or the inclusion of many-body effects at different levels.
-For a review  of the different approaches see [[cite:Ponce2020]].
+For a review of the different possible approaches see [[cite:Ponce2020]].
 
 In the SERTA, the linewidth is given by 
 the imaginary part of the electron-phonon (eph) self-energy evaluated at the KS energy.
@@ -43,7 +43,7 @@ In the $\eta \rightarrow 0^+$ limit, one obtains:
 \label{eq:imagfanks_selfen}
 \end{equation}
 
-and corresponds to the linewidth of the electron state $n\kk$ due to the scattering with phonons.
+that corresponds to the linewidth of the electron state $n\kk$ due to the scattering with phonons.
 The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the linewidth:
 
 \begin{align}
@@ -53,8 +53,9 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 \end{align}
 
 Obviously this description does not take into contributions to the lifetimes given by 
-scattering with defects and ionized impurities in doped semiconductors as well grain boundary scattering.
-These effects may be relevant depending on the system under investigation but they are not treated in this tutorial.
+other scattering processe such as defects, ionized impurities in doped semiconductors, grain boundary scattering.
+These effects may be relevant depending on the system and the temperature under investigation 
+but they are not treated in this tutorial.
 
 The generalized transport coefficients are given by [[cite:Madsen2018]]
 
@@ -122,15 +123,16 @@ These steps can be summarized by the following graph:
     Note that all these capabilities are integrated directly in ABINIT.
     This implementation (henceforth refered to as the **EPH code**) significantly differs from the one available in ANADDB: 
     the anaddb version acts as a direct post-processing of the e-ph matrix elements computed in the DFPT part 
-    whereas the EPH code interfaced with ABINIT computes the e-ph matrix elements directly using 
+    whereas the EPH code interfaced with ABINIT computes the e-ph matrix elements on the fly using 
     the GS WFK and the DFPT potentials stored in the DVDB file.
     In a nutshell, the EPH code is more scalable and flexible as the $\qq$-sampling can be easily changed 
-    at runtime while the anaddb implementation easily supports advanced features such as PAW.
+    at runtime while the anaddb implementation can easily support advanced features such as PAW as most of the 
+    work is already done at the end of the DFPT calculation.
     For further information about the difference between the two approaches, see [[cite:Gonze2019]]
 
 Note that all the results of the calculation are saved in netcdf format,
-while the log and output files are used to report selected quantities mainly for testing purposes.
-Post-processing and visualisation tools are NOT covered in this tutorial.
+while the log and output files are used to report selected quantities, mainly for testing purposes.
+Post-processing and visualisation tools are **not covered** in this tutorial.
 Powerful tools based on python and matplotlib are provided by AbiPy
 See the README of [AbiPy](https://github.com/abinit/abipy)
 and the [AbiPy tutorials](https://github.com/abinit/abitutorials).
@@ -169,16 +171,17 @@ cp ../teph4mob_1.in .
     to specify the relative path to the pseudos if you are following the conventions employed in this tutorials.
     You may need to adapt the paths depending on your *$ABI_PSPDIR*.
 
-This tutorial starts with the DFPT calculation for all the $\qq$-points in the IBZ that might be quite time-consuming.
-You can immediately start the job in background with:
+This tutorial starts with the DFPT calculation for all the $\qq$-points in the IBZ. 
+This step might be quite time-consuming so you can immediately start the job in background with:
 
 ```sh
 abinit teph4mob_1.in > teph4mob_1.log 2> err &
 ```
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
-Many input parameters are also quite similar and symmetries can be used to reduce the number of atomic 
-perturbations.
+Many input parameters are also quite similar. 
+<!-- as the EPH code can use symmetries can be used to reduce the number of atomic 
+perturbations. -->
 For more details about this first step, please refer to the first and second tutorials on DFPT.
 
 Note these additional important points.
@@ -191,10 +194,6 @@ We will see that these quantities are also needed in the Fourier interpolation o
 Only the (partial) DDB and POT files produced at the end of the DFPT run
 are needed to perform e-ph calculation.
 The files containing the first order wavefunctions (*1WF*) due to an atomic perturbation are not needed.
-As these files are quite larger and the overall space on disk scales as nq * 3 * natom, we suggest
-to avoid the output of the DFPT wavefunctions by using [[prtwf]] = -1
-In this case, the DFPT code writens the 1WF only if the DFPT SCF cycle is not converged so that one can restart
-from it if needed.
 
 ## Merging the derivative databases and potentials
 
@@ -208,7 +207,7 @@ File *\$ABI_TUTORESPFN/Input/teph4mob_2.in* is an example of input file for *mrg
 
 {% dialog tests/tutorespfn/Input/teph4mob_2.in %}
 
-You can copy it in the *Work_eph4mob* directory, and run *mrgddb* using:
+Copy the file in the *Work_eph4mob* directory, and run *mrgddb* using:
 
 ```sh
 mrgddb < teph4mob_2.in
@@ -400,7 +399,8 @@ If performance is really of concern, you can also try to set [[eph_mrta]] to 0.
 By default, the code computes transport lifetimes both with the SERTA and the MRTA.
 The MRTA requires the computation of the group velocities at $\kk$ and $\kk+\qq$. 
 This part is relatively fast yet it does not come for free.
-If you know in advance that you don't need MRTA results, it is possible to gain some speedup by disabling this part.
+If you know in advance that you don't need MRTA results, it is possible to gain some speedup 
+by avoiding the computation of $v_{m\kq}$
 
 We can now examine the log file in detail.
 After the standard output of the input variables,
@@ -635,6 +635,11 @@ TODO: Discuss [[dipdip]], [[asr]], [[chneut]]
 
 ## Additional tricks
 
+As these files are quite larger and the overall space on disk scales as nq * 3 * natom, we suggest
+to avoid the output of the DFPT wavefunctions by using [[prtwf]] = -1
+In this case, the DFPT code writens the 1WF only if the DFPT SCF cycle is not converged so that one can restart
+from it if needed.
+
 ### MPI parallelism and memory requirements
 
 There are five different MPI levels that can be used to distribute the workload 
@@ -659,11 +664,30 @@ but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if the memory requirements are under control 
 and you want to boost the calculation. 
 
-TODO: Discuss [[dvdb_qcache_mb]] and enable_gw_dpc="no" to reduce memory requirements.
+### How to reduce memory
 
+As mentioned above, the memory should scale with the number of processors used for the q-point and
+the perturbation MPI parallelism.
+Decreasing [[boxcutmin]] is also very beneficial.
+
+However, there might be tricky systems in which you start to experience memory shortage that prevents you 
+from scaling.
+This problems should start to show up when you have dense k/q meshes and/or large cutoff energies.
+In this case, one can activate additional tricks to reduce memory even further.
+As a rule of thumb, calculations with meshes denser than e.g 200x200x200 become memory demanding
+
+TODO: 
+Discuss [[dvdb_qcache_mb]] and to reduce memory requirements.
 Datasets are bad, large arrays allocated for k-points and the size depends on ndtset.
 OpemMP may be beneficial for large calculations.
-As a rule of thumb, calculations with meshes denser than e.g 200x200x200 become memory demanding
+
+
+The code allocates a relatively small buffer to store the Bloch states involved in transport but unfortunately
+the $\kk$-points are not easy to distribute with MPI.
+To reduce the size of this part, one may opt for an internal buffer in single precision. 
+This option is enable by using `enable_gw_dpc="no"` at configure time and is activated by default.
+
+Last but not least, for large calculations consider using OpenMP threads.
 
 
 ### In-place restart
@@ -671,7 +695,7 @@ As a rule of thumb, calculations with meshes denser than e.g 200x200x200 become 
 All the results of the calculation are stored in a single SIGEPH.nc file
 for all the $\kk$-points (and spins) considered.
 The list of $\kk$-points is initialized at the beginning of the run and an internal table 
-stores the status of each k-point (computed or not).
+stores the status of each k-point (whether it has been computed or not).
 This means that calculations that get killed by the resource manager due to time limit can use 
 the netcdf file to perform an automatic in-place restart.
 Just set [[eph_restart]] to 1 in the input file and rerun the job.
@@ -682,8 +706,6 @@ TODO: [[getkerange_filepath]]
 
 ### Transport calculation from SIGEPH.nc 
 
-TODO: [[transport_ngkpt]]
-
-
-
-
+TODO: 
+[[transport_ngkpt]]
+[[getsigeph_filepath]]

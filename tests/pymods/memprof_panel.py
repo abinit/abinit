@@ -47,7 +47,7 @@ class MoccViewer(param.Parameterized):
         gspec = pn.GridSpec(sizing_mode='scale_width')
         gspec[0, 0] = mocc.plot_memory_usage(show=False, title="Memory usage")
         gspec[0, 1] = mocc.plot_hist(show=False, title="Allocation histogram")
-        gspec[1, 0] = mocc.plot_peaks(maxlen=10, title="Memory peaks", show=False)
+        gspec[1, :] = mocc.plot_peaks(maxlen=10, title="Memory peaks", show=False)
 
         maxlen = 50
         df = mocc.get_peaks(maxlen=maxlen, as_dataframe=True)

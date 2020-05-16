@@ -224,10 +224,12 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, ' Transport computation driver')
 
- sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ !sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigeph_filepath = dtfil%filsigephin
+ call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", sigeph_filepath))
+
  sigmaph = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
- ! if dtset%sigma_ngkpt /= sigeph_filepath
 
  ! Initialize transport
  transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
@@ -311,7 +313,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = sigmaph%kTmesh
 
- ! Information about the Gaps
+ ! Information about the gaps
  new%nsppol = ebands%nsppol
  new%nspinor = ebands%nspinor
  ABI_MALLOC(new%eminmax_spin, (2,ebands%nsppol))
@@ -346,8 +348,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
  ! Perform further downsampling (usefull for debugging purposes)
  ! TODO: Add test for transport_ngkpt variable
- if (any(dtset%transport_ngkpt/=0)) then
-
+ if (any(dtset%transport_ngkpt /= 0)) then
    call wrtout(std_out, sjoin(" Downsampling the k-point mesh before computing transport:", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%transport_ngkpt(1)
@@ -356,7 +357,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero,zero,zero])
 
    ! Map the points of downsampled bands to dense ebands
-   ABI_MALLOC(indkk,(tmp_ebands%nkpt, 6))
+   ABI_MALLOC(indkk, (tmp_ebands%nkpt, 6))
    call listkk(dksqmax, cryst%gmet, indkk, new%ebands%kptns, tmp_ebands%kptns, &
                new%ebands%nkpt, tmp_ebands%nkpt, cryst%nsym, &
                sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
@@ -384,6 +385,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    end if
 
    ABI_SFREE(indkk)
+   call ebands_free(new%ebands)
    call ebands_copy(tmp_ebands, new%ebands)
    call ebands_free(tmp_ebands)
  end if
@@ -449,10 +451,10 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  call cwtime_report(" transport_rta_new", cpu, wall, gflops)
 
  contains
- subroutine downsample_array(array,indkk,nkpt)
+ subroutine downsample_array(array, indkk, nkpt)
 
    real(dp),allocatable,intent(inout) :: array(:,:,:,:)
-   integer,allocatable,intent(in) :: indkk(:,:)
+   integer,intent(in) :: indkk(:,:)
 
    real(dp),allocatable :: tmp_array(:,:,:,:)
    integer :: ikpt,nkpt
@@ -461,7 +463,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    ABI_MOVE_ALLOC(array, tmp_array)
    tmp_shape = shape(array)
    tmp_shape(3) = nkpt
-   ABI_MALLOC(array,(tmp_shape(1),tmp_shape(2),tmp_shape(3),tmp_shape(4)))
+   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4)))
    do ikpt=1,nkpt
      array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt,1),:)
    end do

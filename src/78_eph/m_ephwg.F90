@@ -622,7 +622,7 @@ subroutine ephwg_report_stats(self)
  ! eigenvalues
  mem_tot = mem_tot + self%nibz * self%nbcount * self%nsppol * dp
 
- write(std_out,"(a,f8.1,a)") " Memory allocated for ephwg:", mem_tot * b2Mb, " [Mb] <<< MEM"
+ write(std_out,"(a,f8.1,a)") " Memory allocated for ephwg weights:", mem_tot * b2Mb, " [Mb] <<< MEM"
 
 end subroutine ephwg_report_stats
 !!***

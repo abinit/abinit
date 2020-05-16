@@ -23,9 +23,26 @@
 - root for output files -> teph4mob_7o
 
 
- Symmetries : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+ DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
- Values of the parameters that define the memory need of the present run
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =         413
+       mpw =          79          nfft =         512          nkpt =         413
+================================================================================
+P This job should need less than                       6.683 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       3
      lnmax =       3     mgfft =       8  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
@@ -58,7 +75,8 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
              ecut      3.00000000E+00 Hartree
       eph_extrael      1.00000000E-06
    eph_ngqpt_fine       24   24   24
-         eph_task          -4
+         eph_task1         -4
+         eph_task2          7
 -          fftalg         312
            istwfk        2    0    0    0    0    0    0    0    0    0
                          0    0    3    0    0    0    0    0    0    0
@@ -67,6 +85,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
                          0    0    0    0    0    0    0    0    0    0
                        outvar_i_n : Printing only first  50 k-points.
               ixc           7
+           jdtset        1    2
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        4.16666667E-02  0.00000000E+00  0.00000000E+00
                        8.33333333E-02  0.00000000E+00  0.00000000E+00
@@ -124,6 +143,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 P           mkmem         413
             natom           2
             nband           8
+           ndtset           2
             ngfft           8       8       8
              nkpt         413
              nsym          24
@@ -235,6 +255,8 @@ P           mkmem         413
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
      sigma_erange      0.00000000E+00  5.51239881E-03 Hartree
+  transport_ngkpt1       0    0    0
+  transport_ngkpt2      12   12   12
           spgroup         216
            symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
                       -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
@@ -269,7 +291,9 @@ P           mkmem         413
 
 ================================================================================
 
- chkinp: Checking input parameters for consistency.
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -428,7 +452,7 @@ Values initialized with zeros
 -                                 =     0.6419999190E+01 (THz)
 -Debye temperature from partial sums:     0.3081110007E+03 (K)
 
-- Writing phonon DOS to netcdf file: teph4mob_7o_PHDOS.nc
+- Writing phonon DOS to netcdf file: teph4mob_7o_DS1_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -574,14 +598,186 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.525    0.000 999999.0    0.000
 ============================================================================================
+- Reading carrier lifetimes from: teph4mob_7o_DS1_SIGEPH.nc
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.18E+18        0.00E+00            0.00            0.00
-           64.00        0.15E+18        0.00E+00            4.71            0.00
-          123.00        0.77E+17        0.00E+00           74.59            0.00
-          182.00        0.45E+17        0.00E+00          139.22            0.00
-          241.00        0.33E+17        0.00E+00          163.96            0.00
-          300.00        0.28E+17        0.00E+00          157.29            0.00
+           64.00        0.15E+18        0.00E+00            4.81            0.00
+          123.00        0.77E+17        0.00E+00           75.97            0.00
+          182.00        0.45E+17        0.00E+00          140.79            0.00
+          241.00        0.33E+17        0.00E+00          165.09            0.00
+          300.00        0.28E+17        0.00E+00          158.04            0.00
+
+================================================================================
+== DATASET  2 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: 7, }
+...
+
+ mkfilename: getwfk from: teph4mob_4o_DS2_WFK
+
+ mkfilename: getddb from: teph4mob_2_DDB
+
+ mkfilename: getdvdb from: teph4mob_3_DVDB
+
+ mkfilename: getsigeph from: teph4mob_7o_DS1_SIGEPH.nc
+
+ mkfilename: getwfkfine from: teph4mob_4o_DS3_WFK
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+- Reading GS states from WFK file: teph4mob_4o_DS2_WFK
+- Reading DDB from file: teph4mob_2_DDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
+ New fermi level:     1.134760E-01, with nelect:     8.000001E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
+ R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
+ R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
+ Unit cell volume ucvol=  2.9859750E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.022872        0.000000
+       1               2       -0.000000        0.000000
+       1               3       -0.000000        0.000000
+       2               1       -0.000000        0.000000
+       2               2       -0.022872        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
+       3               3       -0.022872        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.115792E+00    2.738444E-18    2.337499E-18
+         1         2    2.738444E-18    2.115792E+00   -3.139388E-18
+         1         3   -2.738444E-18   -2.738444E-18    2.115792E+00
+         2         1   -2.115792E+00   -2.738444E-18   -2.337499E-18
+         2         2   -2.738444E-18   -2.115792E+00    3.139388E-18
+         2         3    2.738444E-18    2.738444E-18   -2.115792E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+Values initialized with zeros
+       Homogeneous q point set in the B.Z.
+ Grid q points  :       64
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   2.50000000E-01  0.00000000E+00  0.00000000E+00
+  3)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  4)  -2.50000000E-01  0.00000000E+00  0.00000000E+00
+  5)   0.00000000E+00  2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01  2.50000000E-01  0.00000000E+00
+  7)   5.00000000E-01  2.50000000E-01  0.00000000E+00
+  8)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+ 10)   2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 11)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+ 12)  -2.50000000E-01  5.00000000E-01  0.00000000E+00
+ 13)   0.00000000E+00 -2.50000000E-01  0.00000000E+00
+ 14)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 15)   5.00000000E-01 -2.50000000E-01  0.00000000E+00
+ 16)  -2.50000000E-01 -2.50000000E-01  0.00000000E+00
+ 17)   0.00000000E+00  0.00000000E+00  2.50000000E-01
+ 18)   2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 19)   5.00000000E-01  0.00000000E+00  2.50000000E-01
+ 20)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 21)   0.00000000E+00  2.50000000E-01  2.50000000E-01
+ 22)   2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 23)   5.00000000E-01  2.50000000E-01  2.50000000E-01
+ 24)  -2.50000000E-01  2.50000000E-01  2.50000000E-01
+ 25)   0.00000000E+00  5.00000000E-01  2.50000000E-01
+ 26)   2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 27)   5.00000000E-01  5.00000000E-01  2.50000000E-01
+ 28)  -2.50000000E-01  5.00000000E-01  2.50000000E-01
+ 29)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
+ 30)   2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 31)   5.00000000E-01 -2.50000000E-01  2.50000000E-01
+ 32)  -2.50000000E-01 -2.50000000E-01  2.50000000E-01
+ 33)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+ 34)   2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 35)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+ 36)  -2.50000000E-01  0.00000000E+00  5.00000000E-01
+ 37)   0.00000000E+00  2.50000000E-01  5.00000000E-01
+ 38)   2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 39)   5.00000000E-01  2.50000000E-01  5.00000000E-01
+ 40)  -2.50000000E-01  2.50000000E-01  5.00000000E-01
+ 41)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+ 42)   2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 43)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+ 44)  -2.50000000E-01  5.00000000E-01  5.00000000E-01
+ 45)   0.00000000E+00 -2.50000000E-01  5.00000000E-01
+ 46)   2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 47)   5.00000000E-01 -2.50000000E-01  5.00000000E-01
+ 48)  -2.50000000E-01 -2.50000000E-01  5.00000000E-01
+ 49)   0.00000000E+00  0.00000000E+00 -2.50000000E-01
+ 50)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 51)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
+ 52)  -2.50000000E-01  0.00000000E+00 -2.50000000E-01
+ 53)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
+ 54)   2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 55)   5.00000000E-01  2.50000000E-01 -2.50000000E-01
+ 56)  -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+ 57)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
+ 58)   2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 59)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
+ 60)  -2.50000000E-01  5.00000000E-01 -2.50000000E-01
+ 61)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
+ 62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+ 63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
+ 64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+
+ The interatomic forces have been obtained
+ Average speed of sound partial sums:     0.1673176170E-02 (at units)
+-                                   =           3.6604 [km/s]
+
+ Debye frequency from partial sums:     0.9757306381E-03 (Ha)
+-                                 =     0.6419999191E+01 (THz)
+-Debye temperature from partial sums:     0.3081110007E+03 (K)
+
+- Writing phonon DOS to netcdf file: teph4mob_7o_DS2_PHDOS.nc
+--------------------------------------------------------------------------------
+
+- Reading carrier lifetimes from: teph4mob_7o_DS1_SIGEPH.nc
+Transport calculation results
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.14E+19        0.00E+00            0.00            0.00
+           64.00        0.12E+19        0.00E+00            0.00            0.00
+          123.00        0.60E+18        0.00E+00            0.00            0.00
+          182.00        0.32E+18        0.00E+00            0.00            0.00
+          241.00        0.19E+18        0.00E+00            0.00            0.00
+          300.00        0.13E+18        0.00E+00            0.00            0.00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -595,18 +791,24 @@ Transport calculation results
              ecut      3.00000000E+00 Hartree
       eph_extrael      1.00000000E-06
    eph_ngqpt_fine       24   24   24
-         eph_task          -4
-           etotal      0.0000000000E+00
-            fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+         eph_task1         -4
+         eph_task2          7
+           etotal1     0.0000000000E+00
+           etotal2     0.0000000000E+00
+            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
               ixc           7
+           jdtset        1    2
          kptrlatt       24    0    0      0   24    0      0    0   24
           kptrlen      1.80057671E+02
           mixprec        1
 P           mkmem         413
             natom           2
             nband           8
+           ndtset           2
             ngfft           8       8       8
              nkpt         413
              nsym          24
@@ -718,8 +920,12 @@ P           mkmem         413
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
      sigma_erange      0.00000000E+00  5.51239881E-03 Hartree
+  transport_ngkpt1       0    0    0
+  transport_ngkpt2      12   12   12
           spgroup         216
-           strten      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
                       -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1

@@ -913,6 +913,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
     if (dt%eph_np_pqbks(1) /= 0 .and. dt%eph_np_pqbks(1) > 3 * dt%natom ) then
       MSG_ERROR_NOSTOP("Number of procs for perturbation parallelism  cannot be greater than 3 * natom", ierr)
     end if
+
+#ifndef HAVE_NETCDF_MPI
+    if (abs(dt%eph_task) == 4 .and. (dt%eph_np_pqbks(4) /= 1 .or. dt%eph_np_pqbks(5) /= 1)) then
+      MSG_ERROR_NOSTOP("k-point and/or spin parallelism in EPH code requires Netcdf4 with MPI-IO support!", ierr)
+    end if
+#endif
    end if
 
    ! exchmix
@@ -996,7 +1002,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (optdriver==RUNL_SCREENING .and. (dt%awtr /=1 .or. dt%spmeth /=0)) then
        write(msg,'(3a)' )&
         'When gwcomp /= 0, the Adler-Wiser formula with time-reversal should be used',ch10,&
-         'Action: set awtr to 1 or/and spmeth to 0'
+        'Action: set awtr to 1 or/and spmeth to 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
@@ -1202,19 +1208,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='wvl_bigdft_comp' ; cond_values(1)=dt%wvl_bigdft_comp
      if(wvlbigdft) then
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
+        'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
      else
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+        'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
 !    If wvl+metal, iscf cannot be 0
      if (dt%occopt>2) then
        cond_string(1)='occopt' ; cond_values(1)=dt%occopt
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+        'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
    end if
-!  If ionmov==4, iscf must be 2, 12, 5 or 6.
+
+   ! If ionmov==4, iscf must be 2, 12, 5 or 6.
    if(dt%ionmov==4)then
      cond_string(1)='ionmov' ; cond_values(1)=4
      call chkint_eq(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,4,(/2,12,5,6/),iout)

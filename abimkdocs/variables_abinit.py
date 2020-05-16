@@ -21573,4 +21573,22 @@ eph_mrta 0.
 """,
 ),
 
+Variable(
+    abivarname="getsigeph_filepath",
+    varset="files",
+    vartype="string",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="GET the SIGEPH from PATH",
+    added_in_version="9.1.0",
+    text=r"""
+This variable defines the path of the SIGEPH file with the e-ph self-energy results
+that should be used in input for further analysis.
+
+At present, it is used by the transport driver ([[eph_task]]  = 7) to read the lifetimes needed
+to compute carrier mobilities with the RTA.
+""",
+),
+
 ]

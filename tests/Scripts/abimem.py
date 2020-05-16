@@ -276,6 +276,12 @@ def main():
         raise ValueError('Invalid log level: %s' % options.loglevel)
     logging.basicConfig(level=numeric_level)
 
+    if options.seaborn:
+        # Use seaborn settings.
+        import seaborn as sns
+        sns.set(context=options.seaborn, style='darkgrid', palette='deep',
+                font='sans-serif', font_scale=1, color_codes=False, rc=None)
+
     if os.path.isfile(options.paths[0]):
         options.memfiles = [AbimemFile(path) for path in options.paths]
 

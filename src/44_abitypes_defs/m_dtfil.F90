@@ -164,8 +164,9 @@ module m_dtfil
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'PAWDEN'
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'PAWDEN'
 
-! character(len=fnlen) :: filpsp(ntypat)
-   ! the filenames of the pseudopotential files, from the standard input.
+  character(len=fnlen) :: filsigephin
+   ! Filename used to read SIGEPH file.
+   ! Initialize via getsigeph_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -602,6 +603,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
                   getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
+
+ ! According to getsigeph_filepath, build _SIGEPH file name
+ stringfile='_SIGEPH.nc'; stringvar='sigeph'
+ call mkfilename(filnam, dtfil%filsigephin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                  getpath=dtset%getsigeph_filepath)
+ ! If getsigeph_filepath is not used, will read the output as assumed in the transport driver when called after sigeph
+ if (will_read == 0) dtfil%filsigephin = strcat(filnam_ds(4), "_SIGEPH.nc")
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0

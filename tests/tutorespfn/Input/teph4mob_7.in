@@ -1,8 +1,29 @@
 # Crystalline AlAs: computation of the intrinsic mobility
 
+ndtset 2
+
+###############
+# First dataset
+###############
+# Compute only the imaginary part of the self-energy
+# Followed by mobility computation.
+eph_task1 -4  
+
+###############
+# Second dataset
+###############
+# This just to show how to compute mobility from SIGEPH.nc file with a k submesh
+eph_task2  7  
+getsigeph_filepath2 "teph4mob_7o_DS1_SIGEPH.nc"
+transport_ngkpt2 12 12 12 
+
+#########################
+# Commen to all datasets
+#########################
+
 # General input for e-ph computations
 optdriver 7 # Enter EPH code
-eph_task -4 # Compute only the imaginary part of the self-energy
+
 occopt 3    # Fermi-Dirac occupation function (physical T)
 
 # Definition of the meshes
@@ -33,8 +54,6 @@ mixprec 1     # We use single precision in some parts.
 boxcutmin 1.1 # Use boxcutmin 1.1 to decrease the memory
               # requirements. Check that it does not affect
               # your results by increasing this (up to 2 max).
-
-#eph_intmeth 2 # Use of the tetrahedron method
 
 #######################################################################
 #Common input variables

@@ -160,7 +160,7 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
 
      dvdb = dvdb_new(dvdb_filepath, comm)
-     call dvdb%print(prtvol=prtvol)
+     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
      call dvdb%list_perts([-1, -1, -1])
      call dvdb%free()
 
@@ -193,13 +193,13 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
      call get_command_argument(3, dump_file)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, want_len=3) == 0, msg)
-     write(std_out,"(a)")sjoin(" Downsampling Q-mesh with ngqpt:", ltoa(ngqpt))
+     write(std_out,"(a)")sjoin(" Downsampling q-mesh with ngqpt:", ltoa(ngqpt))
      write(std_out,"(a)")trim(dvdb_filepath), " --> ", trim(dump_file)
 
      dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
      call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-     call dvdb%print()
+     if (prtvol > 0) call dvdb%print(prtvol=prtvol)
      call dvdb%list_perts([-1,-1,-1], unit=std_out)
      call dvdb%qdownsample(dump_file, ngqpt, comm)
      call dvdb%free()
