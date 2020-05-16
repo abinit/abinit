@@ -72,7 +72,7 @@ prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 #%% max_nprocs = 3
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%   Simple test for DFT+U features.
 #%%   2 Ni and 2 O atoms in an fcc supercell.

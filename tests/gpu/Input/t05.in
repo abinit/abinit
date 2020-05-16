@@ -86,7 +86,7 @@ prtden 0  prteig 0  prtwf 0
 #%% files_to_test = t05_MPI4.out, tolnlines = 50, tolabs = 5.e-4, tolrel = 8.e-2
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%   NiO - DFT+U - fcc structure - anitferro - PAW
 #%%   Test the use of MPI+GPU

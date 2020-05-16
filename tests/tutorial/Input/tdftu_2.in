@@ -53,6 +53,6 @@ jpawu  0.8 0.0 eV
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = LDAU, PAW
+#%% keywords = DFTU, PAW
 #%% description = second run of the DFT+U tutorial
 #%%<END TEST_INFO>

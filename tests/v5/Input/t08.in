@@ -62,7 +62,7 @@ jpawu  0.0350 0.0  # values in Hartree
 #%% max_nprocs = 6
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%   Simple test for DFT+U implementation.
 #%%   no forces, 2 Ni and 2 O atoms in an fcc supercell.

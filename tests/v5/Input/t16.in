@@ -256,7 +256,7 @@ pawprtvol 3
 #%% max_nprocs = 3
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, LDAU 
+#%% keywords = PAW, DFTU 
 #%% description = 
 #%%   NiO: 2 Ni and 2 O atoms in an fcc supercell.
 #%%   Different combinations of nsppol/nspden/nspinor/pawspnorb are tested in the PAW+U formalism:

@@ -97,7 +97,7 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = D.J. Adams
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%  Fe bcc structure - ferromagnetic PAW 
 #%%  determine U from change of occupation on atoms upon potential

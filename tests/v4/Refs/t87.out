@@ -1018,7 +1018,7 @@ KS_gap     :    2.521
 QP_gap     :    8.179
 Delta_QP_KS:    5.658
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -6.162   -10.403    -6.162     4.241   -16.975     0.000     1.000     0.000   -16.975    -6.571   -12.734   -12.739
         2     5.850   -11.213     5.850    17.062   -12.500     0.000     1.000     0.000   -12.500    -1.287     4.562     4.562
         3     5.850   -11.213     5.850    17.062   -12.500     0.000     1.000     0.000   -12.500    -1.287     4.562     4.562
@@ -1042,7 +1042,7 @@ KS_gap     :    2.662
 QP_gap     :    8.485
 Delta_QP_KS:    5.823
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -5.353   -10.474    -5.353     5.120   -16.715     0.000     1.000     0.000   -16.715    -6.241   -11.595   -11.599
         2     1.876   -10.593     1.876    12.469   -13.266     0.000     1.000     0.000   -13.266    -2.673    -0.797    -0.846
         3     5.070   -10.991     5.070    16.060   -12.463     0.000     1.000     0.000   -12.463    -1.473     3.597     3.566
@@ -1066,7 +1066,7 @@ KS_gap     :    2.634
 QP_gap     :    8.609
 Delta_QP_KS:    5.975
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.787   -10.756    -3.787     6.969   -16.362     0.000     1.000     0.000   -16.362    -5.606    -9.393    -9.395
         2    -1.195   -10.164    -1.195     8.969   -14.370     0.000     1.000     0.000   -14.370    -4.206    -5.401    -5.420
         3     4.621   -10.966     4.621    15.587   -12.716     0.000     1.000     0.000   -12.716    -1.751     2.871     2.860
@@ -1090,7 +1090,7 @@ KS_gap     :    2.980
 QP_gap     :    8.845
 Delta_QP_KS:    5.865
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -5.067   -10.487    -5.067     5.420   -16.606     0.000     1.000     0.000   -16.606    -6.119   -11.186   -11.190
         2     2.327   -11.068     2.327    13.395   -13.606     0.000     1.000     0.000   -13.606    -2.539    -0.211    -0.257
         3     3.915   -10.655     3.915    14.570   -12.522     0.000     1.000     0.000   -12.522    -1.867     2.048     2.010
@@ -1114,7 +1114,7 @@ KS_gap     :    3.683
 QP_gap     :    9.937
 Delta_QP_KS:    6.254
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.421   -10.699    -3.421     7.277   -16.115     0.000     1.000     0.000   -16.115    -5.416    -8.838    -8.842
         2    -0.573   -10.672    -0.573    10.098   -14.675     0.000     1.000     0.000   -14.675    -4.003    -4.576    -4.598
         3     2.242   -10.190     2.242    12.432   -12.497     0.000     1.000     0.000   -12.497    -2.307    -0.065    -0.133
@@ -1138,7 +1138,7 @@ KS_gap     :    3.721
 QP_gap     :    9.894
 Delta_QP_KS:    6.173
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -4.104   -10.611    -4.104     6.507   -16.322     0.000     1.000     0.000   -16.322    -5.711    -9.815    -9.820
         2     0.328   -10.801     0.328    11.129   -14.367     0.000     1.000     0.000   -14.367    -3.566    -3.238    -3.261
         3     2.018   -10.037     2.018    12.054   -12.423     0.000     1.000     0.000   -12.423    -2.387    -0.369    -0.440
@@ -1162,7 +1162,7 @@ KS_gap     :    3.519
 QP_gap     :    9.889
 Delta_QP_KS:    6.369
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.997   -10.756    -1.997     8.759   -15.499     0.000     1.000     0.000   -15.499    -4.743    -6.740    -6.749
         2    -1.997   -10.756    -1.997     8.759   -15.499     0.000     1.000     0.000   -15.499    -4.743    -6.740    -6.749
         3     2.939   -10.534     2.939    13.473   -12.918     0.000     1.000     0.000   -12.918    -2.384     0.555     0.540
@@ -1186,7 +1186,7 @@ KS_gap     :    8.176
 QP_gap     :   15.284
 Delta_QP_KS:    7.108
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.837   -10.874    -1.837     9.038   -15.563     0.000     1.000     0.000   -15.563    -4.688    -6.525    -6.534
         2    -1.837   -10.874    -1.837     9.038   -15.563     0.000     1.000     0.000   -15.563    -4.688    -6.525    -6.533
         3     1.909    -9.965     1.909    11.874   -12.397     0.000     1.000     0.000   -12.397    -2.432    -0.523    -0.594
@@ -1362,7 +1362,7 @@ KS_gap     :    8.179
 QP_gap     :    8.580
 Delta_QP_KS:    0.401
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -6.162   -10.403   -12.739     4.421   -17.029     0.000     1.000     0.000   -17.029     0.131   -12.608   -12.608
         2     5.850   -11.213     4.562    17.282   -12.884     0.000     1.000     0.000   -12.884    -0.164     4.398     4.398
         3     5.850   -11.213     4.562    17.287   -12.889     0.000     1.000     0.000   -12.889    -0.163     4.399     4.399
@@ -1386,7 +1386,7 @@ KS_gap     :    8.511
 QP_gap     :    8.876
 Delta_QP_KS:    0.365
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -5.353   -10.474   -11.599     5.302   -16.776     0.000     1.000     0.000   -16.776     0.125   -11.474   -11.474
         2     1.876   -10.593    -0.846    12.720   -13.524     0.000     1.000     0.000   -13.524     0.043    -0.803    -0.809
         3     5.070   -10.991     3.566    16.321   -12.869     0.000     1.000     0.000   -12.869    -0.113     3.452     3.448
@@ -1410,7 +1410,7 @@ KS_gap     :    8.613
 QP_gap     :    8.976
 Delta_QP_KS:    0.363
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.787   -10.756    -9.395     7.151   -16.440     0.000     1.000     0.000   -16.440     0.107    -9.289    -9.289
         2    -1.195   -10.164    -5.420     9.189   -14.491     0.000     1.000     0.000   -14.491     0.119    -5.301    -5.303
         3     4.621   -10.966     2.860    15.820   -13.054     0.000     1.000     0.000   -13.054    -0.094     2.766     2.765
@@ -1434,7 +1434,7 @@ KS_gap     :    8.880
 QP_gap     :    9.151
 Delta_QP_KS:    0.271
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -5.067   -10.487   -11.190     5.603   -16.669     0.000     1.000     0.000   -16.669     0.124   -11.067   -11.067
         2     2.327   -11.068    -0.257    13.634   -13.883     0.000     1.000     0.000   -13.883     0.007    -0.249    -0.254
         3     3.915   -10.655     2.010    14.819   -12.857     0.000     1.000     0.000   -12.857    -0.048     1.962     1.957
@@ -1458,7 +1458,7 @@ KS_gap     :    9.961
 QP_gap     :   10.198
 Delta_QP_KS:    0.237
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.421   -10.699    -8.842     7.457   -16.193     0.000     1.000     0.000   -16.193     0.107    -8.736    -8.736
         2    -0.573   -10.672    -4.598    10.320   -14.836     0.000     1.000     0.000   -14.836     0.083    -4.516    -4.517
         3     2.242   -10.190    -0.133    12.721   -12.821     0.000     1.000     0.000   -12.821     0.033    -0.101    -0.108
@@ -1482,7 +1482,7 @@ KS_gap     :    9.913
 QP_gap     :   10.201
 Delta_QP_KS:    0.288
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -4.104   -10.611    -9.820     6.687   -16.392     0.000     1.000     0.000   -16.392     0.114    -9.705    -9.706
         2     0.328   -10.801    -3.261    11.321   -14.517     0.000     1.000     0.000   -14.517     0.065    -3.196    -3.198
         3     2.018   -10.037    -0.440    12.355   -12.737     0.000     1.000     0.000   -12.737     0.058    -0.381    -0.388
@@ -1506,7 +1506,7 @@ KS_gap     :    9.896
 QP_gap     :   10.126
 Delta_QP_KS:    0.229
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.997   -10.756    -6.749     8.956   -15.612     0.000     1.000     0.000   -15.612     0.093    -6.656    -6.657
         2    -1.997   -10.756    -6.749     8.956   -15.612     0.000     1.000     0.000   -15.612     0.093    -6.656    -6.656
         3     2.939   -10.534     0.540    13.690   -13.177     0.000     1.000     0.000   -13.177    -0.027     0.513     0.511
@@ -1530,7 +1530,7 @@ KS_gap     :   15.407
 QP_gap     :   15.416
 Delta_QP_KS:    0.009
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.837   -10.874    -6.534     9.217   -15.664     0.000     1.000     0.000   -15.664     0.088    -6.446    -6.447
         2    -1.837   -10.874    -6.533     9.218   -15.663     0.000     1.000     0.000   -15.663     0.088    -6.445    -6.446
         3     1.909    -9.965    -0.594    12.198   -12.751     0.000     1.000     0.000   -12.751     0.041    -0.553    -0.559
@@ -1706,7 +1706,7 @@ KS_gap     :    8.579
 QP_gap     :    8.714
 Delta_QP_KS:    0.134
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -6.162   -10.403   -12.608     4.469   -17.034     0.000     1.000     0.000   -17.034     0.043   -12.565   -12.565
         2     5.850   -11.213     4.398    17.348   -13.006     0.000     1.000     0.000   -13.006    -0.056     4.342     4.342
         3     5.850   -11.213     4.399    17.356   -13.013     0.000     1.000     0.000   -13.013    -0.055     4.343     4.343
@@ -1730,7 +1730,7 @@ KS_gap     :    8.879
 QP_gap     :    8.992
 Delta_QP_KS:    0.113
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -5.353   -10.474   -11.474     5.352   -16.784     0.000     1.000     0.000   -16.784     0.042   -11.432   -11.432
         2     1.876   -10.593    -0.809    12.812   -13.606     0.000     1.000     0.000   -13.606     0.015    -0.794    -0.794
         3     5.070   -10.991     3.448    16.412   -13.001     0.000     1.000     0.000   -13.001    -0.036     3.412     3.411
@@ -1754,7 +1754,7 @@ KS_gap     :    8.976
 QP_gap     :    9.086
 Delta_QP_KS:    0.109
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.787   -10.756    -9.289     7.205   -16.457     0.000     1.000     0.000   -16.457     0.037    -9.252    -9.252
         2    -1.195   -10.164    -5.303     9.263   -14.527     0.000     1.000     0.000   -14.527     0.040    -5.263    -5.263
         3     4.621   -10.966     2.765    15.898   -13.161     0.000     1.000     0.000   -13.161    -0.028     2.737     2.736
@@ -1778,7 +1778,7 @@ KS_gap     :    9.155
 QP_gap     :    9.238
 Delta_QP_KS:    0.083
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -5.067   -10.487   -11.067     5.653   -16.679     0.000     1.000     0.000   -16.679     0.041   -11.025   -11.025
         2     2.327   -11.068    -0.254    13.719   -13.972     0.000     1.000     0.000   -13.972     0.001    -0.253    -0.254
         3     3.915   -10.655     1.957    14.911   -12.967     0.000     1.000     0.000   -12.967    -0.013     1.944     1.944
@@ -1802,7 +1802,7 @@ KS_gap     :   10.201
 QP_gap     :   10.270
 Delta_QP_KS:    0.069
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.421   -10.699    -8.736     7.512   -16.211     0.000     1.000     0.000   -16.211     0.037    -8.699    -8.699
         2    -0.573   -10.672    -4.517    10.390   -14.879     0.000     1.000     0.000   -14.879     0.028    -4.489    -4.489
         3     2.242   -10.190    -0.108    12.835   -12.929     0.000     1.000     0.000   -12.929     0.013    -0.094    -0.095
@@ -1826,7 +1826,7 @@ KS_gap     :   10.202
 QP_gap     :   10.291
 Delta_QP_KS:    0.088
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -4.104   -10.611    -9.706     6.737   -16.404     0.000     1.000     0.000   -16.404     0.039    -9.667    -9.667
         2     0.328   -10.801    -3.198    11.382   -14.558     0.000     1.000     0.000   -14.558     0.022    -3.176    -3.176
         3     2.018   -10.037    -0.388    12.473   -12.840     0.000     1.000     0.000   -12.840     0.022    -0.367    -0.367
@@ -1850,7 +1850,7 @@ KS_gap     :   10.127
 QP_gap     :   10.191
 Delta_QP_KS:    0.065
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.997   -10.756    -6.657     9.019   -15.644     0.000     1.000     0.000   -15.644     0.032    -6.625    -6.625
         2    -1.997   -10.756    -6.656     9.019   -15.644     0.000     1.000     0.000   -15.644     0.032    -6.625    -6.625
         3     2.939   -10.534     0.511    13.766   -13.259     0.000     1.000     0.000   -13.259    -0.004     0.507     0.507
@@ -1874,7 +1874,7 @@ KS_gap     :   15.427
 QP_gap     :   15.422
 Delta_QP_KS:   -0.005
 data: !SigmaeeData |
-     Band     E_dft   <Vxcdft>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -1.837   -10.874    -6.447     9.274   -15.690     0.000     1.000     0.000   -15.690     0.031    -6.416    -6.416
         2    -1.837   -10.874    -6.446     9.274   -15.690     0.000     1.000     0.000   -15.690     0.031    -6.416    -6.416
         3     1.909    -9.965    -0.559    12.318   -12.860     0.000     1.000     0.000   -12.860     0.017    -0.542    -0.543

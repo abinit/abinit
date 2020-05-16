@@ -67,7 +67,7 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%   Fe bcc 2 atomic supercell - ferromag.- PAW DJA 2010 & MT 2009
 #%%   Prelimirary step for test v5#39 (macro_uj) 

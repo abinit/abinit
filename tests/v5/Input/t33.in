@@ -72,7 +72,7 @@ nstep 50               # Maximal number of SCF cycles
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%   Crystalline Cu2O
 #%%   Computation of the total energy and EFG tensors in DFT+U formalism
