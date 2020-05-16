@@ -1269,7 +1269,7 @@ Result for kinetic energy density :
  Perturbative Calculation
 
  k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+ Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
     2   6.658 -12.341 -13.847   3.038   0.813  -0.230 -11.096   1.245   7.903
     3   6.658 -12.341 -13.847   3.038   0.813  -0.230 -11.096   1.245   7.903
     4   6.658 -12.341 -13.847   3.038   0.813  -0.230 -11.096   1.245   7.903
