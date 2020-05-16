@@ -190,7 +190,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  logical :: non_magnetic_xc,paral_atom,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
- real(dp) :: eldaumdc,eldaumdcdc,eldaufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
+ real(dp) :: edftumdc,edftumdcdc,edftufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
  character(len=3) :: pertstrg
  character(len=500) :: msg
@@ -307,7 +307,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    e1xc=zero     ; e1xcdc=zero
    etild1xc=zero ; etild1xcdc=zero
    exccore=zero  ; eh2=zero ; e1t10=zero
-   eldaumdc=zero ; eldaumdcdc=zero ; eldaufll=zero
+   edftumdc=zero ; edftumdcdc=zero ; edftufll=zero
    eexex=zero    ; eexexdc=zero
    eextemp=zero  ; eexdctemp=zero
    espnorb=zero  ; enucdip=zero
@@ -838,7 +838,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      if (pawu_algo==PAWU_ALGO_1) then
 
 !      PAW+U Dij computation from nocc_m_mp
-       call pawuenergy(iatom_tot,eldaumdc,eldaumdcdc,paw_ij(iatom)%noccmmp, &
+       call pawuenergy(iatom_tot,edftumdc,edftumdcdc,paw_ij(iatom)%noccmmp, &
 &                      paw_ij(iatom)%nocctot,pawprtvol,pawtab(itypat))
      else
 
@@ -852,11 +852,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        if (option/=1) then
          etmp=zero
          call pawaccenergy(etmp,pawrhoij(iatom),paw_ij(iatom)%dijU,cplex_dij,qphase,ndij,pawtab(itypat))
-         eldaumdc=eldaumdc+half*etmp ; eldaumdcdc=eldaumdcdc-half*etmp
+         edftumdc=edftumdc+half*etmp ; edftumdcdc=edftumdcdc-half*etmp
          !Add FLL double-counting part
          if (pawu_dblec==PAWU_FLL.and.ipert==0) then
            ABI_CHECK(qphase==1,'BUG in pawdenpot: qphase should be 1 for Dble-C FLL term!')
-           call pawaccenergy_nospin(eldaufll,pawrhoij(iatom),pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
+           call pawaccenergy_nospin(edftufll,pawrhoij(iatom),pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
          end if
        end if
 
@@ -1031,10 +1031,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
  if (option/=1) then
    if (ipert==0) then
-     epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+eldaumdc+eldaufll+eexex+espnorb+efock+enucdip
-     epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+eldaumdcdc-eexex-efockdc
+     epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+edftumdc+edftufll+eexex+espnorb+efock+enucdip
+     epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+edftumdcdc-eexex-efockdc
    else
-     epaw=e1xc-etild1xc+eh2+two*eldaumdc
+     epaw=e1xc-etild1xc+eh2+two*edftumdc
      epawdc=zero
    end if
  end if

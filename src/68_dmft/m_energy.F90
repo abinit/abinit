@@ -803,7 +803,7 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  integer :: iatom,idijeff,im,im1,ispinor,ispinor1,isppol,ldim,lpawu
  integer :: nocc,nsploop,prt_pawuenergy
  real(dp) :: upawu,jpawu
- real(dp) :: eldaumdcdc,eldaumdc,e_ee,e_dc,e_dcdc,xe1,xe2
+ real(dp) :: edftumdcdc,edftumdc,e_ee,e_dc,e_dcdc,xe1,xe2
  character(len=500) :: message
 ! arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
@@ -820,8 +820,8 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  e_ee=zero
  e_dc=zero
  e_dcdc=zero
- eldaumdc=zero
- eldaumdcdc=zero
+ edftumdc=zero
+ edftumdcdc=zero
  isppol=0
  ispinor=0
  ispinor1=0
@@ -899,8 +899,8 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
      xe1=e_dc
      xe2=e_ee
     ! write(std_out,*)" nocctot(1)",nocctot(1),green%charge_matlu_solver(iatom,1)
-     eldaumdc = zero
-     eldaumdcdc = zero
+     edftumdc = zero
+     edftumdcdc = zero
      if ( present(renorm) ) then
        upawu = one
        jpawu = renorm(iatom)
@@ -911,7 +911,7 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
        prt_pawuenergy=3
      end if
 
-     call pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
+     call pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
 &                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,&
 &                    u_dmft=upawu,j_dmft=jpawu)
 

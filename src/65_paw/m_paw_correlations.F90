@@ -864,13 +864,13 @@ CONTAINS  !=====================================================================
 !!  nocctot(nspden)=number of electrons in the correlated subspace
 !!  pawprtvol=control print volume and debugging output for PAW
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data:
-!!     %lpawu=l used for lda+u
+!!     %lpawu=l used for dft+u
 !!     %vee(2*lpawu+1*4)=screened coulomb matrix
 !!  dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft= optional arguments for DMFT
 !!
 !! OUTPUT
-!!  eldaumdc= PAW+U contribution to total energy
-!!  eldaumdcdc= PAW+U contribution to double-counting total energy
+!!  edftumdc= PAW+U contribution to total energy
+!!  edftumdcdc= PAW+U contribution to double-counting total energy
 !!
 !! PARENTS
 !!      m_energy,pawdenpot
@@ -880,7 +880,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
+ subroutine pawuenergy(iatom,edftumdc,edftumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
  &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
 
 !Arguments ---------------------------------------------
@@ -888,7 +888,7 @@ CONTAINS  !=====================================================================
  integer,intent(in) :: iatom,pawprtvol
  integer,optional,intent(in) :: dmft_dc
  real(dp),intent(in) :: noccmmp(:,:,:,:),nocctot(:)
- real(dp),intent(inout) :: eldaumdc,eldaumdcdc
+ real(dp),intent(inout) :: edftumdc,edftumdcdc
  real(dp),optional,intent(inout) :: e_ee,e_dc,e_dcdc
  real(dp),optional,intent(in) :: j_dmft,u_dmft
  type(pawtab_type),intent(in) :: pawtab
@@ -900,7 +900,7 @@ CONTAINS  !=====================================================================
 !           2: E_int=-U/2.(Nup.(Nup-1)+Ndn.(Ndn-1))
  integer,parameter :: option_interaction=1
  integer :: cplex_occ,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden
- real(dp) :: eks_opt3,edcdc_opt3,edcdctemp,edctemp,eldautemp,jpawu,jpawu_dc,mnorm,mx,my,mz
+ real(dp) :: eks_opt3,edcdc_opt3,edcdctemp,edctemp,edftutemp,jpawu,jpawu_dc,mnorm,mx,my,mz
  real(dp) :: n_sig,n_sigs,n_msig,n_msigs,n_dndn,n_tot,n_upup
  real(dp) :: n12_ud_im,n12_du_im
  real(dp) :: n12_ud_re,n12_du_re
@@ -943,7 +943,7 @@ CONTAINS  !=====================================================================
 !Compute DFT+U Energy
 !-----------------------------------------------------
 
- eldautemp=zero
+ edftutemp=zero
  edcdc_opt3=zero
  eks_opt3=zero
 
@@ -1011,11 +1011,11 @@ CONTAINS  !=====================================================================
              n34_sig(1)= n34_sig(1) - n_sigs
              n34_msig(1)= n34_msig(1) - n_msigs
            end if
-           eldautemp=eldautemp &
+           edftutemp=edftutemp &
 &           + n12_sig(1)*n34_msig(1)*pawtab%vee(m11,m31,m21,m41) &
 &           + n12_sig(1)*n34_sig(1) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
            if(cplex_occ==2) then
-             eldautemp=eldautemp &
+             edftutemp=edftutemp &
 &             - n12_sig(2)*n34_msig(2)*pawtab%vee(m11,m31,m21,m41) &
 &             - n12_sig(2)*n34_sig(2) *(pawtab%vee(m11,m31,m21,m41)-pawtab%vee(m11,m31,m41,m21))
            end if
@@ -1038,7 +1038,7 @@ CONTAINS  !=====================================================================
    end do ! m1
 
  end do ! ispden
- if (nspden==1) eldautemp=two*eldautemp ! Non-magn. system: sum up and dn energies
+ if (nspden==1) edftutemp=two*edftutemp ! Non-magn. system: sum up and dn energies
  ABI_DEALLOCATE(n12_sig)
  ABI_DEALLOCATE(n34_msig)
  ABI_DEALLOCATE(n34_sig)
@@ -1061,7 +1061,7 @@ CONTAINS  !=====================================================================
            n34_ud_im=noccmmp(2,m31,m41,3)  ! updn
            n34_du_re=noccmmp(1,m31,m41,4)  ! dnup
            n34_du_im=noccmmp(2,m31,m41,4)  ! dnup
-           eldautemp=eldautemp-pawtab%vee(m11,m31,m41,m21) &
+           edftutemp=edftutemp-pawtab%vee(m11,m31,m41,m21) &
 &           *(n12_ud_re*n34_du_re-n12_ud_im*n34_du_im &
 &           +n12_du_re*n34_ud_re-n12_du_im*n34_ud_im)
            if (pawtab%usepawu==3.or.dmftdc==3) then
@@ -1075,8 +1075,8 @@ CONTAINS  !=====================================================================
    end do ! m1
  end if
 
-!Divide eldautemp by 2; see (Eq 1) in PRB 77, 155104 (2008) [[cite:Amadon2008a]]
- eldautemp=half*eldautemp
+!Divide edftutemp by 2; see (Eq 1) in PRB 77, 155104 (2008) [[cite:Amadon2008a]]
+ edftutemp=half*edftutemp
 
 !if (nspden==1) then
 !n_tot=two*nocctot(1)
@@ -1151,8 +1151,8 @@ CONTAINS  !=====================================================================
    end if
  end if
 
- eldaumdc  =eldaumdc  +eldautemp-edctemp
- eldaumdcdc=eldaumdcdc-eldautemp-edcdctemp
+ edftumdc  =edftumdc  +edftutemp-edctemp
+ edftumdcdc=edftumdcdc-edftutemp-edcdctemp
 
 !if(pawtab%usepawu/=10.or.pawprtvol>=3) then
  if(abs(pawprtvol)>=3) then
@@ -1169,25 +1169,25 @@ CONTAINS  !=====================================================================
    call wrtout(std_out,  message,'COLL')
    write(message,fmt=11) "     Double counting  correction   =",edctemp
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     Interaction energy            =",eldautemp
+   write(message,fmt=11) "     Interaction energy            =",edftutemp
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     Total DFT+U Contribution      =",eldautemp-edctemp
+   write(message,fmt=11) "     Total DFT+U Contribution      =",edftutemp-edctemp
    call wrtout(std_out,  message,'COLL')
    write(message, '(a)' )' '
    call wrtout(std_out,  message,'COLL')
    write(message, '(a)' )"   For the ""Double-counting"" decomposition:"
    call wrtout(std_out,  message,'COLL')
-   write(message,fmt=11) "     DFT+U Contribution            =",-eldautemp-edcdctemp
+   write(message,fmt=11) "     DFT+U Contribution            =",-edftutemp-edcdctemp
    call wrtout(std_out,  message,'COLL')
    11 format(a,e20.10)
    if(abs(pawprtvol)>=2) then
      write(message,fmt=11)"     edcdctemp                     =",edcdctemp
      call wrtout(std_out,  message,'COLL')
-     write(message,fmt=11)"     eldaumdcdc for current atom   =",-eldautemp-edcdctemp
+     write(message,fmt=11)"     edftumdcdc for current atom   =",-edftutemp-edcdctemp
      call wrtout(std_out,  message,'COLL')
      write(message, '(a)' )' '
      call wrtout(std_out,  message,'COLL')
-     write(message,fmt=11)"   pawuenergy: -VUKS pred          =",eldaumdcdc-eldaumdc
+     write(message,fmt=11)"   pawuenergy: -VUKS pred          =",edftumdcdc-edftumdc
      call wrtout(std_out,  message,'COLL')
    end if
    write(message, '(a)' )' '
@@ -1195,7 +1195,7 @@ CONTAINS  !=====================================================================
  end if
 
 !For DMFT calculation
- if(present(e_ee))   e_ee=e_ee+eldautemp
+ if(present(e_ee))   e_ee=e_ee+edftutemp
  if(present(e_dc))   e_dc=e_dc+edctemp
  if(present(e_dcdc)) e_dcdc=e_dcdc+edcdctemp
 

@@ -285,7 +285,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc) :: ovlp(2)
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
- complex(dpc),allocatable :: hlda(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
+ complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
 !complex(dpc),pointer :: sigcme_p(:,:,:,:)
@@ -1363,15 +1363,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !  in case of self-consistency we might calculate here the ppm coefficients using qp_rhor
  end if ! gwcalctyp>=10
 !
-!=== KS hamiltonian hlda(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s> ===
- ABI_MALLOC(hlda,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
- hlda = czero
+!=== KS hamiltonian hdft(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s> ===
+ ABI_MALLOC(hdft,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
+ hdft = czero
 
  if (Dtset%nspinor==1) then
    do spin=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
        do ib=b1gw,b2gw
-         hlda(ib,ib,ik,spin) = KS_BSt%eig(ib,ik,spin)
+         hdft(ib,ib,ik,spin) = KS_BSt%eig(ib,ik,spin)
        end do
      end do
    end do
@@ -1408,15 +1408,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !        write(std_out,*)ovlp(1),ovlp(2)
          norm=DBLE(ovlp(1)+ovlp(2))
          ovlp(1)=DBLE(ovlp(1)/norm); ovlp(2)=DBLE(ovlp(2)/norm) ! ovlp(2)=cone-ovlp(1)
-         hlda(ib,ib,ik_ibz,1) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(1)-KS_me%vxc(ib,ib,ik_ibz,3)
-         hlda(ib,ib,ik_ibz,2) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(2)-KS_me%vxc(ib,ib,ik_ibz,4)
-         hlda(ib,ib,ik_ibz,3) = KS_me%vxc(ib,ib,ik_ibz,3)
-         hlda(ib,ib,ik_ibz,4) = KS_me%vxc(ib,ib,ik_ibz,4)
+         hdft(ib,ib,ik_ibz,1) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(1)-KS_me%vxc(ib,ib,ik_ibz,3)
+         hdft(ib,ib,ik_ibz,2) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(2)-KS_me%vxc(ib,ib,ik_ibz,4)
+         hdft(ib,ib,ik_ibz,3) = KS_me%vxc(ib,ib,ik_ibz,3)
+         hdft(ib,ib,ik_ibz,4) = KS_me%vxc(ib,ib,ik_ibz,4)
        end do
      end do
    end do
 
-   call xmpi_sum(hlda, wfd%comm, ierr)
+   call xmpi_sum(hdft, wfd%comm, ierr)
 
    ABI_FREE(my_band_list)
    ABI_FREE(bmask)
@@ -1437,13 +1437,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  if (gwcalctyp<10) then
    ! For one-shot GW use the KS representation.
-   Sr%hhartree=hlda-KS_me%vxcval
+   Sr%hhartree=hdft-KS_me%vxcval
    ! Additional goodies for PAW
    !  * DFT +U Hamiltonian
    !  * LEXX.
    !  * Core contribution estimated using Fock exchange.
    if (Dtset%usepaw==1) then
-     if (Sigp%use_sigxcore==1) Sr%hhartree=hlda - (KS_me%vxc - KS_me%sxcore)
+     if (Sigp%use_sigxcore==1) Sr%hhartree=hdft - (KS_me%vxc - KS_me%sxcore)
      if (Dtset%usepawu/=0) Sr%hhartree=Sr%hhartree-KS_me%vu
      if (Dtset%useexexch/=0) then
        MSG_ERROR("useexexch > 0 not implemented")
@@ -1459,7 +1459,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !     In the above expression tn, tnhat are QP quantities.
    if (Dtset%usepaw==0) then
      ABI_MALLOC(hbare,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
-     hbare=hlda-KS_me%vhartree-KS_me%vxcval
+     hbare=hdft-KS_me%vhartree-KS_me%vxcval
 
      ! Change basis from KS to QP, hbare is overwritten: A_{QP} = U^\dagger A_{KS} U
      ABI_MALLOC(htmp,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
@@ -1614,8 +1614,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  if (allocated(hbare)) then
    ABI_FREE(hbare)
  end if
- if (allocated(hlda )) then
-   ABI_FREE(hlda)
+ if (allocated(hdft )) then
+   ABI_FREE(hdft)
  end if
 
  ! Prepare the storage of QP amplitudes and energies ===

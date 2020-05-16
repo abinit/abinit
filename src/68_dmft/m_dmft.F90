@@ -56,7 +56,7 @@ MODULE m_dmft
  use m_datafordmft, only : psichi_renormalization
  use m_io_tools, only : flush_unit
  use m_hubbard_one, only : hubbard_one
- use m_dftu_self, only : ldau_self
+ use m_dftu_self, only : dftu_self
  use m_forctqmc, only : qmc_prep_ctqmc
 
  implicit none
@@ -585,7 +585,7 @@ end subroutine dmft_solve
 !!
 !! CHILDREN
 !!      copy_green,destroy_green_tau,flush_unit,fourier_green,m_hubbard_one
-!!      init_green_tau,integrate_green,ldau_self,print_green,print_matlu
+!!      init_green_tau,integrate_green,dftu_self,print_green,print_matlu
 !!      printocc_green,qmc_prep_ctqmc,timab,trace_oper,wrtout
 !!
 !! SOURCE
@@ -683,7 +683,7 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
 
 !  == DFT+U for test -> self
 !  -------------------
-   call ldau_self(cryst_struc,green,paw_dmft,&
+   call dftu_self(cryst_struc,green,paw_dmft,&
 &   pawtab,self_new,opt_dftu=1,prtopt=pawprtvol)
  else if(abs(paw_dmft%dmft_solv)==2) then
 
@@ -970,7 +970,7 @@ end subroutine dyson
 !!
 !! CHILDREN
 !!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dyson,hubbard_one,init_green,initialize_self,ldau_self,print_green
+!!      dyson,hubbard_one,init_green,initialize_self,dftu_self,print_green
 !!      rw_self,wrtout
 !!
 !! SOURCE
@@ -1014,7 +1014,7 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
 
 !  == DFT+U for test
 !  -------------------
-   call ldau_self(cryst_struc,greenr,paw_dmft,&
+   call dftu_self(cryst_struc,greenr,paw_dmft,&
 &   pawtab,selfr,opt_dftu=1,prtopt=prtopt)
  else if(abs(paw_dmft%dmft_solv)==2) then
 

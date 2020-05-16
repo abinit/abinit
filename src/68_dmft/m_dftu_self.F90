@@ -47,14 +47,14 @@ MODULE m_dftu_self
 
  private
 
- public :: ldau_self
+ public :: dftu_self
 !!***
 
 contains
 
-!!****f* m_dftu_self/ldau_self
+!!****f* m_dftu_self/dftu_self
 !! NAME
-!! ldau_self
+!! dftu_self
 !!
 !! FUNCTION
 !! Use DFT+U to compute self-energy
@@ -86,7 +86,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
+subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
 
 !Arguments ------------------------------------
 !scalars
@@ -160,7 +160,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
          ispinor=1
          ispinor1=1
        else
-         write(message,'(2a)') " BUG in ldau_self: nsploop should be equal to 1, 2 or 4"
+         write(message,'(2a)') " BUG in dftu_self: nsploop should be equal to 1, 2 or 4"
          call wrtout(std_out,message,'COLL')
        end if
 !      ===============================
@@ -234,7 +234,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
          ispinor=1
          ispinor1=1
        else
-         write(message,'(2a)') " BUG in ldau_self: nsploop should be equal to 1, 2 or 4"
+         write(message,'(2a)') " BUG in dftu_self: nsploop should be equal to 1, 2 or 4"
          call wrtout(std_out,message,'COLL')
        end if
 
@@ -269,7 +269,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
  if(abs(prtopt)>0) then
  end if
 
-end subroutine ldau_self
+end subroutine dftu_self
 !!***
 
 END MODULE m_dftu_self
