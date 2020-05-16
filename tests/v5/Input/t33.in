@@ -1,19 +1,19 @@
 # Crystalline Cu2O : computation of the total energy
-# and EFG tensors in LDA+U formalism
+# and EFG tensors in DFT+U formalism
 # Note: Cu2O is a nonmagnetic insulator
 #
 
 #Specific to ground state calculation
 
 
-usepawu 1 # LDA+U with PAW data
-lpawu 2 -1 # d electrons of copper treated with LDA+U, oxygen not treated
+usepawu 1 # DFT+U with PAW data
+lpawu 2 -1 # d electrons of copper treated with DFT+U, oxygen not treated
 upawu 0.30 0.0 # U for copper is 0.30 Ha
 jpawu 0.03 0.0 # J for copper is 0.03 Ha
 dmatpuopt  1   # choose expression of the density matrix
-nspden 2 # must use nspden = 2 for LDA+U currently
+nspden 2 # must use nspden = 2 for DFT+U currently
 nsppol 2    spinmagntarget 0.0d0
-ixc 1 # PAW data was made with ixc = 2 but have to change to ixc 1 for LDA+U
+ixc 1 # PAW data was made with ixc = 2 but have to change to ixc 1 for DFT+U
 
 
 ecut 10 # use 20 for converged answer
@@ -75,8 +75,8 @@ nstep 50               # Maximal number of SCF cycles
 #%% keywords = PAW, LDAU
 #%% description = 
 #%%   Crystalline Cu2O
-#%%   Computation of the total energy and EFG tensors in LDA+U formalism
-#%%   Note: Cu2O is a nonmagnetic insulator. However, LDA+U
+#%%   Computation of the total energy and EFG tensors in DFT+U formalism
+#%%   Note: Cu2O is a nonmagnetic insulator. However, DFT+U
 #%%   as implemented requires nspden=2 in all cases.
 #%% topics = DFT+U, EFG
 #%%<END TEST_INFO>

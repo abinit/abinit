@@ -29,7 +29,7 @@ occopt 7 tsmear 5.0d-3
 kptrlatt 2 0 0 0 2 0 0 0 2
 nsym 0
 
-# === LDA+U options
+# === DFT+U options
 
 usepawu  1          # Activate PAW+U
 lpawu   2 -1        # Applied on d electrons of Nickel
@@ -74,7 +74,7 @@ prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 #%% authors = M. Torrent
 #%% keywords = PAW, LDAU
 #%% description = 
-#%%   Simple test for LDA+U features.
+#%%   Simple test for DFT+U features.
 #%%   2 Ni and 2 O atoms in an fcc supercell.
 #%%   The cut-offs are unrealistic.
 #%%   The aim of this test is to verify:

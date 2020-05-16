@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!m_lda_to_qp!m_ks_to_qp!' $file > tmp.file
+ sed -e 's!LDA+U!DFT+U!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

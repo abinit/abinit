@@ -1034,7 +1034,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -1689,7 +1689,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -1986,7 +1986,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0

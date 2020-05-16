@@ -56,7 +56,7 @@ natsph2 4
 iatsph2 1 2 3 4
 
 
-# === LDA+U options
+# === DFT+U options
 
 usepawu  1          # Activate PAW+U
 lpawu   2 -1        # Applied on d electrons of Nickel

@@ -84,7 +84,7 @@ dmftbandi3 12       # Precise the definition of Wannier functions (also used for
 dmftbandf3 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
 
 # -- LDAU: 1st dataset and definition of correlated angular momentum
-usepawu    1        # LDA+U is used just for printing usefull quantities.
+usepawu    1        # DFT+U is used just for printing usefull quantities.
 dmatpuopt  1        # choose expression of the density matrix
 lpawu      2 -1 -1
 jpawu      0.0 0.0 0.0 eV

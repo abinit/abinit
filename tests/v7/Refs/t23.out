@@ -505,7 +505,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -654,7 +654,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.11746   0.00000   0.00000   0.00000   0.00000   0.08793   0.00000
    0.00000   0.00000   0.00000   0.00000   0.17778   0.00000   0.00000   0.00000   0.00000   0.27708
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -812,7 +812,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -958,7 +958,7 @@ force_length_stats: {min:   2.07006046E-10, max:   9.29024528E-10, mean:   5.922
    0.00000   0.00000   0.00000   0.11746   0.00000   0.00000   0.00000   0.00000   0.08793   0.00000
    0.00000   0.00000   0.00000   0.00000   0.17778   0.00000   0.00000   0.00000   0.00000   0.27708
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1117,7 +1117,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     148.625     148.536
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -1249,7 +1249,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.11746   0.00000   0.00000   0.00000   0.00000   0.08793   0.00000
    0.00000   0.00000   0.00000   0.00000   0.17778   0.00000   0.00000   0.00000   0.00000   0.27708
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1776,9 +1776,9 @@ P           mkmem3          8
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
-- [2] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [2] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
