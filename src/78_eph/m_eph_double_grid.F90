@@ -546,9 +546,9 @@ end subroutine eph_double_grid_bz2ibz
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/eph_double_grid_mapping
+!!****f* m_sigmaph/eph_double_grid_get_mapping
 !! NAME
-!!  eph_double_grid_mapping
+!!  eph_double_grid_get_mapping
 !!
 !! FUNCTION
 !!  Campute mapping of k, k+q and q to the indexes in the double grid structure

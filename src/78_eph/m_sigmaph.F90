@@ -4442,7 +4442,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
        end if
      end if
 
-   write(ab_out, "(a)")repeat("=", 92)
+     write(ab_out, "(a)")repeat("=", 92)
    end if
 
  end do ! it
@@ -4719,6 +4719,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ kk = sigma%kcalc(:, ikcalc)
  ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
  nbcalc_ks = sigma%nbcalc_ks(ikcalc,spin)
  bstart_ks = sigma%bstart_ks(ikcalc,spin)
@@ -4765,6 +4766,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
             ! For all the q-points in the microzone
             ! This is done again in the main sigmaph routine
             qpt = sigma%qibz_k(:,iq_ibz)
+            kq = kk + qpt
             call sigma%eph_doublegrid%get_mapping(kk, kq, qpt)
             do jj=1,sigma%eph_doublegrid%ndiv
               iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)

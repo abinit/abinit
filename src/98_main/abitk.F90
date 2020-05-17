@@ -46,6 +46,7 @@ program abitk
  use m_fstrings,       only : sjoin, strcat, basename
  use m_specialmsg,     only : herald
  use m_symtk,          only : matr3inv
+ use m_bz_mesh,        only : kpath_new, kpath_t
  use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
@@ -59,18 +60,21 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
+ integer :: ndivsm
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: path !, prefix
  type(hdr_type) :: hdr
- type(ebands_t) :: ebands !, ebands_kpath
+ type(ebands_t) :: ebands, ebands_kpath
  type(edos_t) :: edos
  type(crystal_t) :: cryst
  type(geo_t) :: geo
+ type(kpath_t) :: kpath
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
- !real(dp):: params(4)
+ real(dp) :: params(4)
+ real(dp),allocatable :: bounds(:,:)
  !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
@@ -111,15 +115,16 @@ program abitk
      write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
      write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
      write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
+     write(std_out,"(a)")"from_poscar POSCAR_FILE              Read POSCAR file, print abint variables."
      write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
      write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
-     write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with bands."
-     write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with bands."
+     write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with electron bands."
+     write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with electron bands."
      write(std_out,"(a)")"ebands_dos FILE --intmeth, --step, --broad  Compute electron DOS."
-     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
-     !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
+     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
+     !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
      write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
      write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
@@ -130,11 +135,16 @@ program abitk
  call get_command_argument(1, command)
 
  select case (command)
- case ("poscar")
+ case ("from_poscar")
    call get_command_argument(2, path)
    geo = geo_from_poscar_path(path, comm)
    call geo%print_abivars(std_out)
    call geo%free()
+
+ !case ("to_poscar")
+ !  call get_command_argument(2, path)
+ !  call get_path_cryst(path, cryst, comm)
+ !  call prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
 
  !case ("wfk_downsample")
  ! e.g. go from a 8x8x8 WFK to a 4x4x4
@@ -221,27 +231,25 @@ program abitk
  case ("ebands_skw_kpath")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    ! Generate k-path
-   !ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
-   !nbounds = dtset%nkpath
-   !if (nbounds <= 0) then
-   !  MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
-   !  nbounds = 5
-   !  ABI_MALLOC(bounds, (3, 5))
-   !  bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
-   !else
-   !  call alloc_copy(dtset%kptbounds, bounds)
-   !end if
-   !kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
-   !call kpath_print(kpath, header="Interpolating energies on k-path", unit=std_out)
+   ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
+   !MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
+   !nbounds = 5
+   ABI_MALLOC(bounds, (3, 5))
+   bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
+   !ABI_CHECK(get_args_from_string("bounds", bounds, msg, default="[0,0,0,1/2,0,0,0,1/2]") == 0, msg)
+   kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+   ABI_FREE(bounds)
+   call kpath%print(header="Interpolating energies on k-path", unit=std_out)
    ! Interpolate band energies with star-functions
-   !params = 0; params(1) = 1; params(2) = 5
+   params = 0; params(1) = 1; params(2) = 5
    !if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
-   !ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, params, [1, ebands%mband], comm)
-   !call kpath%free()
-   !call ebands_free(ebands_kpath)
-   !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=1) == 0, msg)
-   !call ebands_write(ebands_kpath, prtebands, basename(path))
-   !call ebands_kpath(ebands_kpath)
+   ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, params, [1, ebands%mband], comm)
+
+   call kpath%free()
+   !call wrtout(std_out, sjoin(" Writing interpolated bands to:",  path)
+   ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
+   call ebands_write(ebands_kpath, prtebands, path)
+   call ebands_free(ebands_kpath)
 
    !ebands_kmesh = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
    !     band_block, comm, out_prefix)

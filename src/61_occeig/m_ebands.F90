@@ -5228,12 +5228,14 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
  case (0)
     return
  case (1)
+   !call wrtout(std_out, sjoin(" Writing interpolated bands to:",  path)
    if (present(kptbounds)) then
      call ebands_write_xmgrace(ebands, strcat(prefix, "_EBANDS.agr"), kptbounds=kptbounds)
    else
      call ebands_write_xmgrace(ebands, strcat(prefix, "_EBANDS.agr"))
    end if
  case (2)
+   !call wrtout(std_out, sjoin(" Writing interpolated bands to:",  path)
    if (present(kptbounds)) then
      call ebands_write_gnuplot(ebands, prefix, kptbounds=kptbounds)
    else
