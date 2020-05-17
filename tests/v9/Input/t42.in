@@ -57,8 +57,8 @@ rprim     -0.5  0.5  0.5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t41.out, tolnlines = 51, tolabs = 3.1, tolrel = 2.0e-1, fld_options= -easy ;
-#%% psp_files = Fe.GGA_PBE-JTH.xml
+#%%   t42.out, tolnlines = 51, tolabs = 8.0e+2, tolrel = 2.0e-1, fld_options= -easy ;
+#%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]
@@ -67,7 +67,9 @@ rprim     -0.5  0.5  0.5
 #%% description =
 #%%   BCC iron, ferromagnetic, GGA, PAW.
 #%%   Test DFPT phonon q/=0.5 . 
-#%%   Works with pseudo Fe.GGA_PBE-JTH.xml , where usexcnhat=0 . See test v9#42 for the usexcnhat==1 case.
+#%%   Works with 26fe.paw, where usexcnhat/=0 . See test v9#41 for the usexcnhat==0 case.
+#%%   The portability is very low (see tolabs). There is a suspicion of initializing problem.
+#%%   The convergence seems OK though.
 #%% topics = PAW
 #%%<END TEST_INFO>
 

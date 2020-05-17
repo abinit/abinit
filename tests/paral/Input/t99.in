@@ -68,7 +68,7 @@ dmftqmc_l 201
 dmftqmc_n 1.d6
 dmftqmc_therm 10000
 
-# == LDA+U
+# == DFT+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1

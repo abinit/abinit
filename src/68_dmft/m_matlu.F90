@@ -99,7 +99,7 @@ MODULE m_matlu
 !  integer :: nkpt
 !  ! Number of k-point in the IBZ.
   character(len=12) :: whichmatlu
-  ! describe the type of local matrix computed (greenLDA, etc..)
+  ! describe the type of local matrix computed (greenDFT, etc..)
 !
   integer :: nspinor
   ! Number of spinorial component

@@ -899,7 +899,7 @@ KNOWN_KEYWORDS = {
     "BSE": "Bethe-Salpeter calculations",
     "DDK": "DDK calculations",
     "EPH": "Electron-phonon calculations",
-    "LDAU": "LDA+U calculations",
+    "DFTU": "DFT+U calculations",
     "LEXX": "Local exact exchange calculations",
     "DMFT": "Dynamical mean-field theory",
     "TDDFT": "Time-dependent Density Functional Theory",

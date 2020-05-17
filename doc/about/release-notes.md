@@ -1275,11 +1275,11 @@ D.7 On-going work on the implementation of the TDEP algorithm (temperature depen
 D.8 Replacements of http:// by https:// in many documentation files.
     By J.M. Beuken.
 
-D.9 Test of non-magnetic LDA+U and LDA+U+SO.
+D.9 Test of non-magnetic DFT+U and DFT+U+SO.
     See the new test v5#16
     By M. Torrent.
 
-D.10 Make LDA+U and local EX-exchange compatible with nspden=1/nspinor=2
+D.10 Make DFT+U and local EX-exchange compatible with nspden=1/nspinor=2
      By M. Torrent.
 
 D.11 Test of the Velocity Verlet algorithm ionmov=24

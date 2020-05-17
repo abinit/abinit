@@ -51,6 +51,6 @@ pp_dirpath = "../../Psps_for_tests"
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = LDAU, PAW
+#%% keywords = DFTU, PAW
 #%% description =  first run of the DFT+U tutorial
 #%%<END TEST_INFO>

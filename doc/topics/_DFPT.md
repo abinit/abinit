@@ -30,7 +30,7 @@ numerical effect may be to break the translational invariance.
 
 Thanks to the locality provided by PAW partial wave basis, it is possible to
 perform response function calculations for correlated electron materials. The
-LDA+U formalism is usable without any restriction for the PAW+DFPT
+DFT+U formalism is usable without any restriction for the PAW+DFPT
 calculations.
 
 All the tutorials dedicated to response functions can be followed both with

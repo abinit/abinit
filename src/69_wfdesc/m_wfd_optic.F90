@@ -63,14 +63,14 @@ contains
 !! lomo_min,max_band=minimum and max band index to be calculated.
 !! nkbz=Number of points in the full Brillouin zone.
 !! inclvkb=if different from 0, [Vnl,r] is included in the calculation of the
-!!   matrix element of the velocity operator. No meaning for PAW (except for LDA+U)
+!!   matrix element of the velocity operator. No meaning for PAW (except for DFT+U)
 !! qpt(3)
 !! Kmesh<kmesh_t>=Info on the k-point sampling for wave functions.
 !! Cryst<crystal_t>=Structure defining the crystalline structure.
 !! KS_Bst<ebands_t>
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
 !! Psps <pseudopotential_type>=variables related to pseudopotentials.
-!! Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
+!! Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
 !! Wfd<wfd_t>=Handler for the wavefunctions.
 !!
 !! OUTPUT

@@ -67,7 +67,7 @@ dmftctqmc_order 50
 dmft_solv 2 # H1
 dmft_charge_prec 1e-10
 
-# == LDA+U
+# == DFT+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1

@@ -2453,7 +2453,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%usepawu/=0.and.nspinor==2.and.dt%pawcpxocc==1) then
        write(msg, '(5a)' )&
 &       'When non-collinear magnetism is activated ,',ch10,&
-&       'and LDA+U activated ',ch10,&
+&       'and DFT+U activated ',ch10,&
 &       'PAW occupancies must be complex !'
        MSG_ERROR_NOSTOP(msg, ierr)
      else if (dt%pawspnorb==1.and.(dt%kptopt==0.or.dt%kptopt>=3).and.dt%pawcpxocc==1) then
@@ -3242,7 +3242,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)/=-1.and.dt%lpawu(itypat)/=maxval(dt%lpawu(:))) then
            write(msg, '(3a)' )&
-&           'When usedmatpu/=0 (use of an initial density matrix for LDA+U),',ch10,&
+&           'When usedmatpu/=0 (use of an initial density matrix for DFT+U),',ch10,&
 &           'lpawu must be equal for all types of atoms on which +U is applied !'
            MSG_ERROR_NOSTOP(msg,ierr)
          end if
@@ -3333,7 +3333,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
      if(dt%pawspnorb>0) then
        write(msg,'(3a)' ) &
-&       '  LDA+U+SpinOrbit is still on test ',ch10,&
+&       '  DFT+U+SpinOrbit is still on test ',ch10,&
 &       '  (not yet in production)'
        MSG_WARNING(msg)
      end if

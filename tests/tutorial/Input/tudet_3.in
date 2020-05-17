@@ -57,7 +57,7 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = D.J. Adams
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%  input for ujdet, cut it using 'sed -n "/MARK/,/MARK/p" abi.out > ujdet.in '------- 
 #%%<END TEST_INFO>

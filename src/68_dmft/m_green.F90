@@ -69,7 +69,7 @@
  public :: spline_fct
  private :: occupfd
  private :: distrib_paral
- public :: greenldacompute_green
+ public :: greendftcompute_green
  public :: fermi_green
  public :: newton
  public :: local_ks_green
@@ -93,7 +93,7 @@
   ! type of frequencies used
 
   character(len=12) :: whichgreen
-  ! describe the type of green function computed (LDA, DMFT, KS..)
+  ! describe the type of green function computed (DFT, DMFT, ..)
 
   integer :: nw
   ! dmft frequencies
@@ -980,7 +980,7 @@ end subroutine print_green
 !! compute_green
 !!
 !! FUNCTION
-!! compute green function from LDA and self-energy
+!! compute green function from DFT and self-energy
 !!
 !! INPUTS
 !!  pawang <type(pawang)>=paw angular mesh and related data
@@ -1176,7 +1176,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
                green_temp%ks(is,ikpt,ib,ib1)=       &
 &               ( omega_current     &
 &               + fermilevel                               &
-&               - paw_dmft%eigen_lda(is,ikpt,ib)) * Id(ib,ib1) &
+&               - paw_dmft%eigen_dft(is,ikpt,ib)) * Id(ib,ib1) &
 &               - self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
           !if(ikpt==2.and.ib==ib1) then
           !  write(6,*) "self",ib1,ib,ikpt,is,ifreq,self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
@@ -1186,14 +1186,14 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 !               if(ikpt==1.and.(ifreq==1.or.ifreq==3).and.ib==16.and.ib1==16) then
 !                write(std_out,*) 'omega_current                         ',omega_current
 !                write(std_out,*) 'fermilevel                            ',fermilevel
-!                write(std_out,*) ' paw_dmft%eigen_lda(is,ikpt,ib)       ', paw_dmft%eigen_lda(is,ikpt,ib),Id(ib,ib1)
+!                write(std_out,*) ' paw_dmft%eigen_dft(is,ikpt,ib)       ', paw_dmft%eigen_dft(is,ikpt,ib),Id(ib,ib1)
 !                write(std_out,*) 'self_minus_hdc_oper%ks(is,ikpt,ib,ib1)',self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
 !                write(std_out,*) 'green                                 ',green%oper(ifreq)%ks(is,ikpt,ib,ib1)
 !               endif
 !               if(ib==1.and.ib1==3) then
 !                 write(std_out,*) "ff compute",ikpt,ifreq,is,ikpt,ib,ib1
 !                 write(std_out,*) "ff compute",ikpt,ifreq, green_temp%ks(is,ikpt,ib,ib1)
-!                 write(std_out,*) "ff details",paw_dmft%eigen_lda(is,ikpt,ib)
+!                 write(std_out,*) "ff details",paw_dmft%eigen_dft(is,ikpt,ib)
 !                 write(std_out,*) "ff details2",fermilevel
 !                 write(std_out,*) "ff details3",Id(ib,ib1)
 !        !        write(std_out,*) "ff details4",self_minus_hdc_oper%ks(is,ikpt,ib,ib1)
@@ -1856,7 +1856,7 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
  integer :: option,optself,optlocks,prtopt_for_integrate_green,opt_nonxsum_icip
  character(len=500) :: message
 ! *********************************************************************
- green%whichgreen="LDA"
+ green%whichgreen="DFT"
  prtopt_for_integrate_green=2
 
  if(present(opt_self)) then
@@ -1892,13 +1892,13 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
  call integrate_green(cryst_struc,green,paw_dmft,pawang,prtopt_for_integrate_green,opt_ksloc=3)!,opt_nonxsum=opt_nonxsum_icip)
 !== Print green%oper(:)%ks
 !== Print green%oper(:)%matlu(:)%mat
- if(char1=="LDA") then
+ if(char1=="DFT") then
    option=1
    if(self%oper(1)%matlu(1)%lpawu/=-1) then
      if(abs(real(self%oper(1)%matlu(1)%mat(1,1,1,1,1)))>tol7) then
 ! todo_ab: generalise this
        write(message,'(a,a,2(e15.4))') ch10,&
-&        "Warning:  a LDA calculation is carried out and self is not zero"
+&        "Warning:  a DFT calculation is carried out and self is not zero"
        call wrtout(std_out,message,'COLL')
 !       call abi_abort('COLL')
      endif
@@ -2314,7 +2314,7 @@ subroutine compa_occup_ks(green,paw_dmft)
  do isppol=1,paw_dmft%nsppol
    do ikpt=1,paw_dmft%nkpt
      do ib=1,paw_dmft%mbandc
-       occ1=occupfd(paw_dmft%eigen_lda(isppol,ikpt,ib),paw_dmft%fermie,paw_dmft%temp)
+       occ1=occupfd(paw_dmft%eigen_dft(isppol,ikpt,ib),paw_dmft%fermie,paw_dmft%temp)
        occ2=real(green%occup%ks(isppol,ikpt,ib,ib))
        if(abs(occ1-occ2)>diffmax) then
          diffmax=abs(occ1-occ2)
@@ -2993,9 +2993,9 @@ end subroutine occup_green_tau
  end subroutine distrib_paral
 !!***
 
-!!****f* ABINIT/greenldacompute_green
+!!****f* ABINIT/greendftcompute_green
 !! NAME
-!! greenldacompute_green
+!! greendftcompute_green
 !!
 !! FUNCTION
 !! Compute levels for ctqmc
@@ -3018,7 +3018,7 @@ end subroutine occup_green_tau
 !!
 !! SOURCE
 
- subroutine greenldacompute_green(cryst_struc,green,pawang,paw_dmft)
+ subroutine greendftcompute_green(cryst_struc,green,pawang,paw_dmft)
 
 !Arguments ------------------------------------
 !scalars
@@ -3043,7 +3043,7 @@ end subroutine occup_green_tau
 
      !  write(6,*) green%oper(1)%ks(1,1,1,1)
  if(green%oper(1)%has_operks==0) then
-  MSG_ERROR("greenlda%oper(1)%ks not allocated")
+  MSG_ERROR("greendft%oper(1)%ks not allocated")
  endif
 
 !======================================
@@ -3057,9 +3057,9 @@ end subroutine occup_green_tau
      !  write(6,*) ifreq,iband,ikpt,isppol
      !  write(6,*) cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)
      !  write(6,*) paw_dmft%fermie
-     !  write(6,*) paw_dmft%eigen_lda(isppol,ikpt,iband)
+     !  write(6,*) paw_dmft%eigen_dft(isppol,ikpt,iband)
          green%oper(ifreq)%ks(isppol,ikpt,iband,iband)=&
-         cone/(cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)+paw_dmft%fermie-paw_dmft%eigen_lda(isppol,ikpt,iband))
+         cone/(cmplx(0.d0,paw_dmft%omega_lo(ifreq),kind=dp)+paw_dmft%fermie-paw_dmft%eigen_dft(isppol,ikpt,iband))
        end do
      end do
    end do
@@ -3075,11 +3075,11 @@ end subroutine occup_green_tau
 !======================================================================
    call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang,paw_dmft)
  enddo
- write(message,'(a,2x,a,f13.5)') ch10," == Print LDA Green's function for last frequency"
+ write(message,'(a,2x,a,f13.5)') ch10," == Print DFT Green's function for last frequency"
  call wrtout(std_out,message,'COLL')
  call print_matlu(green%oper(paw_dmft%dmft_nwlo)%matlu,natom,1)
 
- end subroutine greenldacompute_green
+ end subroutine greendftcompute_green
 !!***
 
 
@@ -3088,7 +3088,7 @@ end subroutine occup_green_tau
 !! fermi_green
 !!
 !! FUNCTION
-!!  Compute Fermi level for DMFT or LDA.
+!!  Compute Fermi level for DMFT or DFT.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2006-2020 ABINIT group (BAmadon)
@@ -3100,7 +3100,7 @@ end subroutine occup_green_tau
 !! fermie: current value
 !! f_precision: precision of f required
 !! ITRLST: =1 if last iteration of DMFT
-!! opt_noninter   : if one wants the LDA fermi level
+!! opt_noninter   : if one wants the DFT fermi level
 !! max_iter : max number of iterations.
 !!
 !! OUTPUT
@@ -3613,13 +3613,13 @@ end subroutine newton
 !!
 !! INPUTS
 !!  cryst_struc
-!!  istep    =  step of iteration for LDA.
-!!  lda_occup
+!!  istep    =  step of iteration for DFT.
+!!  dft_occup
 !!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! PARENTS
 !!      m_dmft
