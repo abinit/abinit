@@ -3931,7 +3931,7 @@ class Results(object):
             for f in test.files_to_test:
                 #print(f"status: {status}, f.fld_status: {f.fld_status}")
                 #print(f)
-                if status != "all" and f.fld_status != status: continue
+                #if status != "all" and f.fld_status != status: continue
 
                 out_files.append(os.path.join(test.workdir, f.name))
                 ref_fname = os.path.join(test.ref_dir, f.name)

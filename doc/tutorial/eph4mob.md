@@ -664,30 +664,37 @@ but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if the memory requirements are under control 
 and you want to boost the calculation. 
 
-### How to reduce memory
+### How to reduce memory requirements further
 
 As mentioned above, the memory should scale with the number of processors used for the q-point and
 the perturbation MPI parallelism.
-Decreasing [[boxcutmin]] is also very beneficial.
-
-However, there might be tricky systems in which you start to experience memory shortage that prevents you 
-from scaling.
-This problems should start to show up when you have dense k/q meshes and/or large cutoff energies.
-In this case, one can activate additional tricks to reduce memory even further.
+However, there might be tricky systems in which you start to experience memory shortage that 
+prevents you from running with several MPI processes.
+This problems should begin to show up for very dense k/q meshes.
 As a rule of thumb, calculations with meshes denser than e.g 200x200x200 become memory demanding
+and much slower because several algorithm and tables related to the BZ sampling have bad scaling.
 
-TODO: 
-Discuss [[dvdb_qcache_mb]] and to reduce memory requirements.
-Datasets are bad, large arrays allocated for k-points and the size depends on ndtset.
+As already mentioned, decreasing [[boxcutmin]] is very beneficial and this the first thing one should try.
+Remember however that using values smaller than 1.1 is risky.
+If decreasing [[boxcutmin]] does not solve the problem, one can activate additional tricks.
+
+The code uses an internal cache to store the DFPT potentials in the dense IBZ.
+The size of the cache is defined by [[dvdb_qcache_mb]] whose default value is 1024 Mb.
+The size of this buffer decreases with the number of MPI processese used for the qpt-level.
+You can save some space by decreasing this value at the price of a global slow down of the calculation.
+
 OpemMP may be beneficial for large calculations.
-
 
 The code allocates a relatively small buffer to store the Bloch states involved in transport but unfortunately
 the $\kk$-points are not easy to distribute with MPI.
 To reduce the size of this part, one may opt for an internal buffer in single precision. 
-This option is enable by using `enable_gw_dpc="no"` at configure time and is activated by default.
+This option is enabled by using `enable_gw_dpc="no"` at configure time (default value).
 
-Last but not least, for large calculations consider using OpenMP threads.
+If these tricks do not solve your problem, consider using OpenMP threads.
+The code is not optimized for OpenMP but a few threads can be useful to avoid replicating memory at the MPI level.
+As a rule of thumb 2-4 OpenMP threads should be OK provided you link with threaded FFT and BLAS libraries.
+
+Last but not least, datasets are bad, large arrays allocated for k-points and the size depends on ndtset.
 
 
 ### In-place restart
@@ -706,6 +713,9 @@ TODO: [[getkerange_filepath]]
 
 ### Transport calculation from SIGEPH.nc 
 
-TODO: 
-[[transport_ngkpt]]
-[[getsigeph_filepath]]
+The routine that computes carrier mobilites is automatically invoked when [[eph_task]] = -4 is used 
+and a *TRANSPORT.nc* file with the final results is produced.
+There are however cases in which one would like to compute mobilities from an already existing 
+SIGEPH.nc file without performing a full self-energy calculation.
+In this case, one can use [[eph_task]] = 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
+The advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evalute the mobility integral.

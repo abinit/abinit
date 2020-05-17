@@ -21016,7 +21016,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the KS POTential from PATH",
+    mnemonics="GET the KS POTential from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 This variable defines the path of the POT file containing the KS ground-state potential
@@ -21052,7 +21052,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the fine wavefunctions from PATH",
+    mnemonics="GET the fine wavefunctions from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the fine WFK file using a string instead of the dataset index.
@@ -21087,7 +21087,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval="None",
-    mnemonics="GET the DDB from PATH",
+    mnemonics="GET the DDB from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the DDB file using a string instead of the dataset index.
@@ -21104,7 +21104,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the DVDB file from PATH",
+    mnemonics="GET the DVDB file from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the DVDB file using a string instead of the dataset index.
@@ -21121,7 +21121,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the DEN file from PATH",
+    mnemonics="GET the DEN file from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the DEN file using a string instead of the dataset index.
@@ -21138,7 +21138,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=None,
-    mnemonics="GET the SCR file from PATH",
+    mnemonics="GET the SCR file from FILEPATH",
     added_in_version="9.0.0",
     text=r"""
 Specify the path of the SCR file using a string instead of the dataset index.
@@ -21579,15 +21579,14 @@ Variable(
     vartype="string",
     topics=['multidtset_useful'],
     dimensions="scalar",
-    defaultval=None,
-    mnemonics="GET the SIGEPH from PATH",
+    defaultval="Output filename of the present dataset",
+    mnemonics="GET the SIGEPH from FILEPATH",
     added_in_version="9.1.0",
     text=r"""
 This variable defines the path of the SIGEPH file with the e-ph self-energy results
-that should be used in input for further analysis.
-
+that should be used as input for further analysis.
 At present, it is used by the transport driver ([[eph_task]]  = 7) to read the lifetimes needed
-to compute carrier mobilities with the RTA.
+to compute carrier mobilities within the RTA.
 """,
 ),
 
