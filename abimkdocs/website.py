@@ -896,8 +896,8 @@ The bibtex file is available [here](../abiref.bib).
     If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
 
     To execute the tutorials, create a working directory (`Work*`) and
-    copy there the input files of the lesson. 
-    
+    copy there the input files of the lesson.
+
     Most of the tutorials do not rely on parallelism (except specific [[tutorial:basepar|tutorials on parallelism]]).
     However you can run most of the tutorial examples in parallel, see the [[topic:parallelism|topic on parallelism]].
 
@@ -1194,7 +1194,7 @@ The bibtex file is available [here](../abiref.bib).
                     add_popover(a, content=self.howto_topic[name])
 
             elif namespace == "cite":
-                # Handle [[bib:biblio|bibliography]]
+                # Handle [[cite:biblio]]
                 if name == "biblio":
                     url = "/theory/bibliography/"
                     if a.text is None: a.text = "bibliography"

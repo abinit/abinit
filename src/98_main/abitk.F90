@@ -161,6 +161,7 @@ program abitk
  case ("ibz")
    ! Print list of kpoints in the IBZ with the corresponding weights
    call get_path_cryst(path, cryst, comm)
+
    call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
    ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
@@ -180,7 +181,11 @@ program abitk
        write(std_out, "((a, 3(f3.1, 1x)), a)")" [", shiftk(:, ii), "]      ......"
      end if
    end do
-   write(std_out, "(/, a, i0)")" nkibz: ", nkibz
+   write(std_out,"(a)")"#  List of kpoints in the IBZ with the corresponding weights:"
+   write(std_out,"(/,a,i0,/,a)")" nkpt ", nkibz, "kpt"
+   do ii=1,nkibz
+     write(std_out, "(3(es11.4,a),a,es11.4)") kibz(:, ii), " # ", wtk(ii)
+   end do
 
  !case ("testkgrid")
    !call get_path_cryst(path, cryst, comm)
@@ -242,6 +247,7 @@ program abitk
    call kpath%print(header="Interpolating energies on k-path", unit=std_out)
    ! Interpolate band energies with star-functions
    params = 0; params(1) = 1; params(2) = 5
+   !ABI_CHECK(get_arg_list("einterp", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
    !if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
    ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, params, [1, ebands%mband], comm)
 
