@@ -739,7 +739,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  else if (dtset%eph_task == +16) then
    call wrtout([std_out, ab_out], " Using Fourier interpolation.")
     comm_rpt = xmpi_comm_self
-    call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
     interpolated = 1
  else
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))

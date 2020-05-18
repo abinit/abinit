@@ -139,7 +139,6 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
               amu      2.69815390E+01  7.49215900E+01
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
-       dvdb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
       eph_extrael      1.00000000E-06
    eph_ngqpt_fine       24   24   24
@@ -620,7 +619,6 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4,4,4]
- Ab-initio q-mesh from DVDB file: [4,4,4]
  Q-mesh used for self-energy integration [ngqpt]: [24,24,24]
  Number of q-points in the IBZ: 413
  asr: 1 chneut: 1
@@ -896,7 +894,6 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4,4,4]
- Ab-initio q-mesh from DVDB file: [4,4,4]
  Q-mesh used for self-energy integration [ngqpt]: [24,24,24]
  Number of q-points in the IBZ: 413
  asr: 1 chneut: 1
@@ -1172,7 +1169,6 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4,4,4]
- Ab-initio q-mesh from DVDB file: [4,4,4]
  Q-mesh used for self-energy integration [ngqpt]: [24,24,24]
  Number of q-points in the IBZ: 413
  asr: 1 chneut: 1
@@ -1448,7 +1444,6 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4,4,4]
- Ab-initio q-mesh from DVDB file: [4,4,4]
  Q-mesh used for self-energy integration [ngqpt]: [24,24,24]
  Number of q-points in the IBZ: 413
  asr: 1 chneut: 1
@@ -1734,7 +1729,6 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4,4,4]
- Ab-initio q-mesh from DVDB file: [4,4,4]
  Q-mesh used for self-energy integration [ngqpt]: [24,24,24]
  Number of q-points in the IBZ: 413
  asr: 1 chneut: 1
@@ -2025,7 +2019,6 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4,4,4]
- Ab-initio q-mesh from DVDB file: [4,4,4]
  Q-mesh used for self-energy integration [ngqpt]: [24,24,24]
  Number of q-points in the IBZ: 413
  asr: 1 chneut: 1
@@ -2108,7 +2101,6 @@ Transport calculation results
               amu      2.69815390E+01  7.49215900E+01
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
-       dvdb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
       eph_extrael      1.00000000E-06
    eph_ngqpt_fine       24   24   24

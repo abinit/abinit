@@ -88,7 +88,6 @@ _ WF disk file :      5.095 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       8    8    8
@@ -702,7 +701,6 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [8,8,8]
  Number of q-points in the IBZ: 29
  asr: 1 chneut: 1
@@ -790,7 +788,6 @@ Transport calculation results
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       8    8    8
