@@ -2571,32 +2571,37 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3)
- !integer :: ii, jj, iatdir, iatom, iq1dir, iq2dir, quad_unt
+
+#if 1
+ integer :: ii, jj, iatdir, iatom, iq1dir, iq2dir, quad_unt
 
 ! *********************************************************************
 
- ! Temporary hack to read the quadrupole tensor from a text file
- !iblok = 0
- !quadrupoles = zero
- !if (.not.file_exists("quadrupoles_cart.out")) return
- !call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
- !quad_unt = 71
- !open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
- !do ii=1,2
- !  read(quad_unt,*) msg
- !  write(std_out, *)" msg: ", trim(msg)
- !end do
+ ! MG: Temporary hack to read the quadrupole tensor from a text file
+ ! Will be removed when the EPH code will be able to read Q* from the DDB.
+ iblok = 0
+ quadrupoles = zero
+ if (file_exists("quadrupoles_cart.out")) then
+   call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
+   quad_unt = 71
+   open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
+   do ii=1,2
+     read(quad_unt,*) msg
+     write(std_out, *)" msg: ", trim(msg)
+   end do
 
- !do ii=1,3
- !  do jj=1,3*3*ddb%natom
- !    read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
- !    write(*,*) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
- !  end do
- !  read(quad_unt,'(a)') msg
- !end do
- !close(quad_unt)
- !iblok = 1
- !return
+   do ii=1,3
+     do jj=1,3*3*ddb%natom
+       read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+       write(*,*) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+     end do
+     read(quad_unt,'(a)') msg
+   end do
+   close(quad_unt)
+   iblok = 1
+   return
+ end if
+#endif
 
  ! Look for the Gamma Block in the DDB
  qphon(:,:)=zero
