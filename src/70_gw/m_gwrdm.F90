@@ -225,15 +225,16 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
 
+ !call printdm1(1,ndim,dm1_tmp)
  !Order from highest occ to lowest occ
  eigenvect=dm1_tmp
  occs_tmp=occs
- !do ib1dm=1,ndim
- ! occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
- ! do ib2dm=1,ndim
- !  eigenvect(ib2dm,ib1dm)=dm1_tmp(ndim-(ib2dm-1),ib1dm)
- ! enddo
- !enddo
+ do ib1dm=1,ndim
+  occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
+  do ib2dm=1,ndim
+   eigenvect(ib2dm,ib1dm)=dm1_tmp(ib2dm,(ndim-(ib1dm-1)))
+  enddo
+ enddo
 
  if(info==0) then
    if(iinfo==0) then       
@@ -268,6 +269,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
    occs_ks(ib1+(ib1dm-1),kpoint)=occs_tmp(ib1dm)
    toccs_k=toccs_k+occs_tmp(ib1dm)
  enddo
+ !call printdm1(1,ndim,eigenvect)
 
  write(msg,'(a22,i5,a3,i5,a21,f10.5)') ' Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
  call wrtout(std_out,msg,'COLL')

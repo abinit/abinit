@@ -535,7 +535,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        if (proc_distrb(ib_sum,ik_bz,spin)/=Wfd%my_rank) CYCLE
 
        ! Skip empty states.
-       if (qp_occ(ib_sum,ik_ibz,spin)<tol_empty) CYCLE
+       if (dabs(qp_occ(ib_sum,ik_ibz,spin))<tol_empty) CYCLE  ! MRM allow negative occ numbers
 
        call wfd%get_ur(ib_sum,ik_ibz,spin,ur_ibz)
 
@@ -774,7 +774,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Save full exchange matrix in Sr%
  Sr%x_mat(minbnd:maxbnd,minbnd:maxbnd,jk_ibz,:) = sigxme_tmp(minbnd:maxbnd,minbnd:maxbnd,:)
-
  ABI_FREE(sigxme_tmp)
 
  ! ===========================

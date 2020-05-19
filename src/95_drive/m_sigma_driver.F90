@@ -2354,7 +2354,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog 
        call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,gw_vhartr) ! Build Vhartree -> gw_vhartr
        ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
-       ! MRM compute matrix elements Vhartree -> GW1RDM_me
+       ! Compute matrix elements Vhartree -> GW1RDM_me
        tmp_kstab=0
        do spin=1,Sigp%nsppol
          do ikcalc=1,Sigp%nkptgw ! No spin dependent
@@ -2372,7 +2372,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
          Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                       ! Build new Wfd_natorb
        call Wfd_natorb%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))        ! Read WFK and store it in Wfd_natorb
-       call Wfd_natorb%rotate(Cryst,nateigv)                                   ! Let rotate build NOs in Wfd_natorb
+       ! MRM for testing without rotation (KS orbs in Wfd_natorbs) uncomment the following 6 lines
+       !nateigv=czero
+       !do ikcalc=1,Wfd%nkibz
+       !  do ib=1,Wfd%mband 
+       !    nateigv(ib,ib,ikcalc,1)=cone
+       !  enddo  
+       !enddo
+       call Wfd_natorb%rotate(Cryst,nateigv)                                   ! Let rotate build the NOs using Wfd_natorb
        do ikcalc=1,Sigp%nkptgw                                                 ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
@@ -2387,20 +2394,21 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_FREE(bdm2_mask)
        ABI_FREE(nband_dm)
        ! Transform <NO_i|Sigma_x[NO]|NO_j> NOs->MOs, at this point all mat. elements are stored in Sr%x_mat 
-       
        ! MAU ROTATE
        ! call rotate_exchange(Sigp%nkptgw,b1gw,b2gw,Sr,nateigv) -> send to 70/m_gwrdm.F90
 
-       write(msg,'(a62)')' Band corrections Delta ei = <KS_i|K[NO]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
+       write(msg,'(a68)')' Band corrections Delta ei = <KS_i|K[NO]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ikcalc=1,Sigp%nkptgw
-         write(msg,'(a26)')' k-point  band   Delta_eik'
+         write(msg,'(a74)')' k-point  band    Delta_eik       K[NO]         Vxc[NO]        DVhartree'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          do ib=b1gw,b2gw
            delta_band=(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)
-           write(msg,'(i5,2x,i5,4x,f10.5)') ikcalc,ib,delta_band
+           write(msg,'(i5,4x,i5,3x,f10.5,5x,f10.5,5x,f10.5,6x,f10.5)') ikcalc,ib,delta_band,real(Sr%x_mat(ib,ib,ikcalc,1)),&
+           & real(KS_me%vxcval(ib,ib,ikcalc,1)), &
+           & real(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          enddo
