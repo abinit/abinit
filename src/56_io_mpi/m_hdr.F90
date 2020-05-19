@@ -2914,7 +2914,8 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  type(hdr_type),intent(out) :: hdr
 
 !Local variables-------------------------------
-!integer :: ipsp, ierr
+!integer :: ierr
+!integer :: ipsp
  character(len=500) :: msg,errmsg
  real(dp),allocatable :: occ3d(:,:,:)
 
