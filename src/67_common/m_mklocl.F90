@@ -379,6 +379,13 @@ subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,vcutgeo,gmet,gprimd,grtn,gsqcut
 
  !Initialize Gcut-off array from m_gtermcutoff
  call termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ !Print out the method used for cut-off
+ !if (icutcoul==0) mode='SPHERE'
+ !if (icutcoul==1) mode='CYLINDER'
+ !if (icutcoul==2) mode='SURFACE'
+ !if (icutcoul==3) mode='CRYSTAL'
+ !if (icutcoul==4) mode='ERF'
+ !if (icutcoul==5) mode='ERFC'
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:

@@ -26,6 +26,7 @@
 module m_gtermcutoff
 
  use defs_basis
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_fstrings,        only : sjoin, itoa
@@ -161,6 +162,11 @@ subroutine termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcuto
  if (icutcoul==3) mode='CRYSTAL'
  if (icutcoul==4) mode='ERF'
  if (icutcoul==5) mode='ERFC'
+ 
+ !Print in log info about the cut-off method at every call: 
+ write(msg,'(3a)')ch10,' 1/G**2 cut-off applied in the following step : cutoff-mode = ',TRIM(mode)
+ call wrtout(std_out,msg)
+ !!!
 
   do i3=1,n3
    ! Precompute some products that do not depend on i2 and i1
@@ -201,7 +207,7 @@ subroutine termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcuto
 
      test=COUNT(vcutgeo/=zero)
      ABI_CHECK(test==1,'Wrong cutgeo for cylinder')   
-
+        
      !Calculate rcut for each method !
      !
 
@@ -274,7 +280,7 @@ subroutine termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcuto
 
      !CASE SURFACE 1 - Beigi
      CASE(1)
-   
+  
      do ig=1,ng
        gcart(:)=b1(:)*Gsph%gvec(1,ig)+b2(:)*Gsph%gvec(2,ig)+b3(:)*Gsph%gvec(3,ig)
        gcart2=DOT_PRODUCT(gcart(:),gcart(:))
@@ -341,9 +347,6 @@ subroutine termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcuto
      write(msg,'(a)')'No cut-off applied to G**2!'
      MSG_WARNING(msg)
  END SELECT
-
- !write(*,*)'This is mode', mode
- !write(*,*)'This is mode', gcutoff
 
  ABI_DEALLOCATE(gq) 
  ABI_DEALLOCATE(gpq)
