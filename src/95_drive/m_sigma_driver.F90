@@ -246,7 +246,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax ! MRM
+ real(dp):: gwalpha,gwbeta,wmin,wmax,delta_band ! MRM
  complex(dpc) :: max_degw,cdummy
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
@@ -267,7 +267,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(ppmodel_t) :: PPm
  type(sigparams_t) :: Sigp
  type(sigma_t) :: Sr
- type(wfd_t),target :: Wfd,Wfdf,Wfd_dm ! MRM use Wfd_dm 
+ type(wfd_t),target :: Wfd,Wfdf,Wfd_dm,Wfd_natorb ! MRM use Wfd_dm 
  type(wvl_data) :: Wvl
 !arrays
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)  
@@ -744,6 +744,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,xmpi_comm_self)!comm)  ! MPI_COMM_SELF 
    call Wfd_dm%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
+   if(gw1rdm>3) then
+     call wfd_init(Wfd_natorb,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+       Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
+       Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
+     call Wfd_natorb%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
+   endif
  endif
 
  if (Dtset%pawcross==1) then
@@ -973,21 +979,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 & optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
 & Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
 
-!MAU print initial KS values 
-if(my_rank==0) then
-write(*,*) 'ZERO'        
-write(*,*) 'Vh'        
-write(*,*) ks_vhartr(1:20)
-write(*,*) 'rho(r)'        
-write(*,*) ks_rhor(1:20,1)
-endif
-if(my_rank==1) then
-write(*,*) 'ONE'        
-write(*,*) 'Vh'        
-write(*,*) ks_vhartr(1:20)
-write(*,*) 'rho(r)'        
-write(*,*) ks_rhor(1:20,1)
-endif
 
 !============================
 !==== Compute KS PAW Dij ====
@@ -2323,6 +2314,7 @@ endif
    end if
 
    call xmpi_barrier(Wfd%comm)
+
    ! MRM print WFK and DEN files.
    if(gwcalctyp==21 .and. gw1rdm>0) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
@@ -2346,13 +2338,16 @@ endif
 #ifdef HAVE_MPI
      call MPI_BCAST(gw_rhor,dimbc,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
 #endif
-     call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast
-     if(gw1rdm>3) then                                                        
+     call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast it
+     if(gw1rdm>3) then                                    
+       ! We need RAM memory so lets remove Wfd_dm              
+       Wfd_dm%bks_comm = xmpi_comm_null
+       call Wfd_dm%free()
        ks_vhartr(:)=0.0_dp
        call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog 
        call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,gw_vhartr) ! Build Vhartree -> gw_vhartr
        ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
-       ! MRM compute matrix elements
+       ! MRM compute matrix elements Vhartree -> GW1RDM_me
        tmp_kstab=0
        do spin=1,Sigp%nsppol
          do ikcalc=1,Sigp%nkptgw ! No spin dependent!
@@ -2361,27 +2356,43 @@ endif
            tmp_kstab(2,ik_ibz,spin)=Sigp%maxbnd(ikcalc,spin)
          end do
        end do
-       call calc_vhxc_me(Wfd,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&                  ! Build matrix elements from gw_vhartr -> GW1RDM_me
+       call calc_vhxc_me(Wfd,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&    ! Build matrix elements from gw_vhartr -> GW1RDM_me
        & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
        & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur) 
        ABI_FREE(tmp_kstab)
-!MAU exchange K
+       !MAU exchange K
+       !Allocate it here
+       call Wfd_natorb%rotate(Cryst,nateigv)                                   ! Let it build NOs in Wfd_natorb
 
-if(my_rank==0) then
-write(*,*) 'ZERO'
-write(*,*) 'Vh'        
-write(*,*) gw_vhartr(1:20)
-write(*,*) 'rho(r)'        
-write(*,*) gw_rhor(1:20,1)
-endif
-if(my_rank==1) then
-write(*,*) 'ONE'
-write(*,*) 'Vh'        
-write(*,*) gw_vhartr(1:20)
-write(*,*) 'rho(r)'        
-write(*,*) gw_rhor(1:20,1)
-endif
 
+       do ikcalc=1,Sigp%nkptgw
+         ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
+         ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
+         ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
+         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_natorb,Wfdf,QP_sym,&
+         & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+       end do
+       Wfd_natorb%bks_comm = xmpi_comm_null
+       call Wfd_natorb%free()
+   
+       ! MAU transform <i|Sigma_x|i> NOs->MOs is in Sr%x_mat the <i|Sigma_x|i>
+
+
+       write(msg,'(a62)')' Band corrections Delta ei = <i|K[NO]+vH[NO]-vH[KS]-Vxc[KS]|i>'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       do ikcalc=1,Sigp%nkptgw
+         write(msg,'(a26)')' k-point  band   Delta_eik'
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+         do ib=b1gw,b2gw
+           delta_band=(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)
+           write(msg,'(i5,2x,i5,4x,f10.5)') ikcalc,ib,delta_band
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(ab_out,msg,'COLL')
+         enddo
+       enddo
        call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
      endif
      ABI_FREE(gw_rhor)
@@ -2393,8 +2404,10 @@ endif
    if(gwcalctyp==21 .and. gw1rdm>0) then
      ABI_FREE(keep_ur_dm)
      ABI_FREE(bdm_mask)
-     Wfd_dm%bks_comm = xmpi_comm_null
-     call Wfd_dm%free()
+     if(gw1rdm<4) then
+       Wfd_dm%bks_comm = xmpi_comm_null
+       call Wfd_dm%free()
+     endif
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 
      ABI_FREE(potk)     

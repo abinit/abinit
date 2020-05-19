@@ -317,7 +317,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    do ik_bz=1,Kmesh%nbz
      ik_ibz = Kmesh%tab(ik_bz)
      do ib_sum=1,Sigp%nbnds
-       bks_mask(ib_sum,ik_bz,spin) = qp_occ(ib_sum,ik_ibz,spin) >= tol_empty
+       bks_mask(ib_sum,ik_bz,spin) = (dabs(qp_occ(ib_sum,ik_ibz,spin)) >= tol_empty)  ! MRM allow negative occ
      end do
    end do
  end do
