@@ -3118,7 +3118,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
      nctkarr_t("eph_phrange", "int", "two"), &
      nctkarr_t("ddb_ngqpt", "int", "three"), &
-     !nctkarr_t("dvdb_ngqpt", "int", "three"), &
      nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t("sigma_ngkpt", "int", "three"), &
      nctkarr_t("sigma_erange", "dp", "two"), &
@@ -3208,7 +3207,6 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), self%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "dvdb_ngqpt"), dtset%dvdb_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
@@ -4619,7 +4617,6 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin(" Number of temperatures:", itoa(self%ntemp), &
    "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
  write(unt,"(a)")sjoin(" Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
- !write(unt,"(a)")sjoin(" Ab-initio q-mesh from DVDB file:", ltoa(dtset%dvdb_ngqpt))
  write(unt,"(a)")sjoin(" Q-mesh used for self-energy integration [ngqpt]:", ltoa(self%ngqpt))
  write(unt,"(a)")sjoin(" Number of q-points in the IBZ:", itoa(self%nqibz))
  write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "chneut:", itoa(dtset%chneut))
@@ -5126,14 +5123,14 @@ end subroutine qpoints_oracle
 !! ephwg_from_ebands
 !!
 !! FUNCTION
-!!  Compute the frohlich matrix elements Convenience constructor to initialize the object from an ebands_t object
+!!  Compute the frohlich matrix elements
 !!
 !! INPUTS
 !!  iqpt=index of the qpoint in the IBZ
 !!  oscillator=oscillator matrix elements for the wavefunction to be used
 !!
 
-function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,ngvecs,gvecs) result(gkqg_lr)
+function get_frohlich(cryst, ifc, qpt, nu, phfrq, displ_cart, ngvecs, gvecs) result(gkqg_lr)
 
 !Arguments ------------------------------------
 !scalars

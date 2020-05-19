@@ -1,5 +1,7 @@
 from __future__ import print_function, division, unicode_literals
 
+import time
+
 from pprint import pprint
 from itertools import groupby
 from collections import namedtuple, deque
@@ -344,7 +346,7 @@ class AbimemFile(object):
         """
         Shows a predefined list of matplotlib figures with minimal input from the user.
         """
-        from abipy.tools.plotting import MplExpose
+        #from abipy.tools.plotting import MplExpose
         with MplExpose(slide_mode=slide_mode, slide_timeout=slide_mode, verbose=1) as e:
             e(self.plot_memory_usage(show=False))
             e(self.plot_peaks(show=False))
@@ -490,3 +492,84 @@ class Stack(dict):
         if not self: return
         pprint(self)
         print("")
+
+
+# Copied  from abipy.tools.plotting
+class MplExpose(object): # pragma: no cover
+    """
+    Example:
+
+        with MplExpose() as e:
+            e(obj.plot1(show=False))
+            e(obj.plot2(show=False))
+    """
+    def __init__(self, slide_mode=False, slide_timeout=None, verbose=1):
+        """
+        Args:
+            slide_mode: If true, iterate over figures. Default: Expose all figures at once.
+            slide_timeout: Close figure after slide-timeout seconds Block if None.
+            verbose: verbosity level
+        """
+        self.figures = []
+        self.slide_mode = bool(slide_mode)
+        self.timeout_ms = slide_timeout
+        self.verbose = verbose
+        if self.timeout_ms is not None:
+            self.timeout_ms = int(self.timeout_ms * 1000)
+            assert self.timeout_ms >= 0
+
+        if self.verbose:
+            if self.slide_mode:
+                print("\nSliding matplotlib figures with slide timeout: %s [s]" % slide_timeout)
+            else:
+                print("\nLoading all matplotlib figures before showing them. It may take some time...")
+
+        self.start_time = time.time()
+
+    def __call__(self, obj):
+        """
+        Add an object to MplExpose. Support mpl figure, list of figures or
+        generator yielding figures.
+        """
+        import types
+        if isinstance(obj, (types.GeneratorType, list, tuple)):
+            for fig in obj:
+                self.add_fig(fig)
+        else:
+            self.add_fig(obj)
+
+    def add_fig(self, fig):
+        """Add a matplotlib figure."""
+        if fig is None: return
+
+        if not self.slide_mode:
+            self.figures.append(fig)
+        else:
+            #print("Printing and closing", fig)
+            import matplotlib.pyplot as plt
+            if self.timeout_ms is not None:
+                # Creating a timer object
+                # timer calls plt.close after interval milliseconds to close the window.
+                timer = fig.canvas.new_timer(interval=self.timeout_ms)
+                timer.add_callback(plt.close, fig)
+                timer.start()
+
+            plt.show()
+            fig.clear()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Activated at the end of the with statement. """
+        self.expose()
+
+    def expose(self):
+        """Show all figures. Clear figures if needed."""
+        if not self.slide_mode:
+            print("All figures in memory, elapsed time: %.3f s" % (time.time() - self.start_time))
+            import matplotlib.pyplot as plt
+            plt.show()
+            for fig in self.figures:
+                fig.clear()
+
