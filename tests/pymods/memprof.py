@@ -123,15 +123,25 @@ class AbimemFile(object):
         app(df.to_string())
         return "\n".join(lines)
 
-    def find_small_allocs(self, nbytes=160):
+    def find_small_allocs(self, nbits=160*8):
         """Zero sized allocations are not counted."""
         smalles = []
         for e in self.all_entries:
             if not e.isalloc: continue
-            if 0 < e.size <= nbytes: smalles.append(e)
+            if 0 < e.size <= nbits: smalles.append(e)
 
         pprint(smalles)
         return smalles
+
+    def find_large_allocs(self, nbits=10 *8*1024*1024):
+        """Allocations below 10 Mbytes are not counted."""
+        larges = []
+        for e in self.all_entries:
+            if not e.isalloc: continue
+            if e.size > nbits: larges.append(e)
+
+        pprint(larges)
+        return larges
 
     def get_intense_dataframe(self):
         """

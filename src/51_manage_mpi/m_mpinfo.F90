@@ -2507,7 +2507,7 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !Local variables-------------------------------
  integer :: maxproc_bandpool,inb1,ind,ind0,nband_k,proc_max,proc_min
- integer :: nband_k_sp2
+ integer :: nband_k_sp2,minb_per_proc
  integer :: iiband,iikpt,iisppol,ikpt_this_proc,nb_per_proc,nproc_kpt,temp_unit
  integer :: kpt_distrb(nkpt)
  logical,save :: first=.true.,has_file
@@ -2681,12 +2681,12 @@ print *, ' maxproc_bandpool = ', maxproc_bandpool
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
          nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
-         nb_per_proc=nband_k/maxproc_bandpool
+         minb_per_proc=nband_k/maxproc_bandpool
 #ifdef DEV_MJV
-print *, ' nb_per_proc = ', nb_per_proc
+print *, ' minb_per_proc = ', minb_per_proc
 #endif
-         if (mod(nband_k,maxproc_bandpool)/=0) nb_per_proc=nb_per_proc+1
-         do nb_per_proc = nband_k / maxproc_bandpool, nband_k
+         if (mod(nband_k,maxproc_bandpool)/=0) minb_per_proc=minb_per_proc+1
+         do nb_per_proc = minb_per_proc, nband_k
            if (mod(nband_k,nb_per_proc)==0) exit
          end do
 

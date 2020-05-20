@@ -1254,6 +1254,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 #ifdef DEV_MJV
 print *, ' getdc1 bands_treated_now ', bands_treated_now
 print *, ' getdc1 band_procs ', band_procs
+print *, ' getdc1 check ', band, ibgq,icgq, ' s1cwave0 ', any(isnan(s1cwave0))
 #endif
 
  ABI_ALLOCATE(dummy,(0,0))
@@ -1288,6 +1289,7 @@ print *, ' getdc1, band_ ', band_, ' optcprj ', optcprj
    call xmpi_bcast(dcwavef_tmp,band_procs(band_),mpi_enreg%comm_band,ierr)
 #ifdef DEV_MJV
 print *, ' getdc1, after bcast band_ band ', band_, band, ' band_procs(band_) ', band_procs(band_)
+print *, ' getdc1 check before proj ', band, ibgq,icgq, ' dcwavef_tmp ', any(isnan(dcwavef_tmp))
 #endif
 
 ! get the projbd onto my processor's bands dcwavef = dcwavef - <cgq|dcwavef>|cgq>
@@ -1298,8 +1300,9 @@ print *, ' getdc1, after bcast band_ band ', band_, band, ' band_procs(band_) ',
 
 #ifdef DEV_MJV
 print *, ' getdc1, after proj band_ band, mpi_enreg%comm_band ', band_, band, mpi_enreg%comm_band
-write(100+10*mpi_enreg%me_kpt+band,*) 'band shape, dcwavef_tmp ', band, shape(dcwavef_tmp)
-write(100+10*mpi_enreg%me_kpt+band,*) dcwavef_tmp
+write(1000+100*mpi_enreg%me_kpt+band,*) 'band shape, dcwavef_tmp ', band, shape(dcwavef_tmp)
+write(1000+100*mpi_enreg%me_kpt+band,*) dcwavef_tmp
+print *, ' getdc1 check after proj ', band, ibgq,icgq, ' dcwavef_tmp ', any(isnan(dcwavef_tmp))
 #endif
 
 ! sum all of the corrections 
