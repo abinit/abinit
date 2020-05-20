@@ -37,7 +37,7 @@ module m_gwrdm
  private
 !!***
 
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst! ,update_wfd_bst
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange ! ,update_wfd_bst ! -> The commented one only works on serial mode
 !!***
 
 contains
@@ -183,10 +183,10 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
 end subroutine calc_rdmc
 !!***
 
-subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
+subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,kpoint,iinfo
+ integer,intent(in) :: ib1,ib2,ikpoint,iinfo
  type(ebands_t),target,intent(in) :: BSt
 !arrays
  real(dp),intent(inout) :: occs_ks(:,:)
@@ -225,7 +225,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
 
- !call printdm1(1,ndim,dm1_tmp)
+ !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
  !Order from highest occ to lowest occ
  eigenvect=dm1_tmp
  occs_tmp=occs
@@ -238,9 +238,9 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
 
  if(info==0) then
    if(iinfo==0) then       
-     write(msg,'(a51,3f10.5)') 'Occs. after updating with Sx-Vxc corr. at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with Sx-Vxc corr. at k-point:',BSt%kptns(1:,ikpoint)
    else
-     write(msg,'(a51,3f10.5)') 'Occs. after updating with S_c correct. at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with S_c correct. at k-point:',BSt%kptns(1:,ikpoint)
    endif 
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
@@ -255,7 +255,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  else
-   write(msg,'(a36,3f10.5)') 'Error computing occs. for k-point: ',BSt%kptns(1:,kpoint)
+   write(msg,'(a36,3f10.5)') 'Error computing occs. for k-point: ',BSt%kptns(1:,ikpoint)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  endif
@@ -264,12 +264,12 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  toccs_k=0.0d0
  do ib1dm=1,ndim
    do ib2dm=1,ndim
-     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint,1)=eigenvect(ib1dm,ib2dm)
+     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=eigenvect(ib1dm,ib2dm)
    enddo
-   occs_ks(ib1+(ib1dm-1),kpoint)=occs_tmp(ib1dm)
+   occs_ks(ib1+(ib1dm-1),ikpoint)=occs_tmp(ib1dm)
    toccs_k=toccs_k+occs_tmp(ib1dm)
  enddo
- !call printdm1(1,ndim,eigenvect)
+ !call printdm1(1,ndim,eigenvect) ! Uncomment for debug 
 
  write(msg,'(a22,i5,a3,i5,a21,f10.5)') ' Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
  call wrtout(std_out,msg,'COLL')
@@ -355,6 +355,57 @@ subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use 
    call wrtout(ab_out,msg,'COLL')
  enddo
 end subroutine printdm1
+!!***
+
+subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of this file, do not use it with large arrays
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ib1,ib2,ikpoint 
+ type(sigma_t) :: Sr
+!arrays
+ complex(dpc),intent(in) :: nateigv(:,:,:,:)
+!Local variables ------------------------------
+!scalars
+ integer::ib1dm,ib2dm,ndim
+ character(len=500) :: msg
+!arrays
+ complex(dpc),allocatable :: res(:,:),Umat(:,:),Kex_tmp(:,:)
+!************************************************************************
+ ndim=ib2-ib1+1
+ ABI_MALLOC(res,(ndim,ndim))
+ ABI_MALLOC(Umat,(ndim,ndim))
+ ABI_MALLOC(Kex_tmp,(ndim,ndim))
+ res=czero
+ do ib1dm=1,ndim
+   do ib2dm=1,ndim
+     Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+     Kex_tmp(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+   enddo
+ enddo
+ ! Print for debug
+ !do ib1dm=ib1,ib2
+ !  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1:ib2,ikpoint,1))
+ !  call wrtout(std_out,msg,'COLL')
+ !  call wrtout(ab_out,msg,'COLL')
+ !enddo
+ res=matmul(Umat,Kex_tmp)
+ Kex_tmp=matmul(res,transpose(Umat))
+ do ib1dm=1,ndim
+   do ib2dm=1,ndim
+     Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Kex_tmp(ib1dm,ib2dm)
+   enddo
+ enddo
+ ! Print for debug
+ !do ib1dm=ib1,ib2
+ !  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1:ib2,ikpoint,1))
+ !  call wrtout(std_out,msg,'COLL')
+ !  call wrtout(ab_out,msg,'COLL')
+ !enddo
+
+ ABI_FREE(res)
+ ABI_FREE(Umat)
+ ABI_FREE(Kex_tmp)
+end subroutine rotate_exchange
 !!***
 
 end module m_gwrdm

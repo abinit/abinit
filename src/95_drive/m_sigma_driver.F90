@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
  use m_spacepar,          only : hartre
- use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst
+ use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst,rotate_exchange
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
  implicit none
@@ -246,8 +246,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax,delta_band ! MRM
- complex(dpc) :: max_degw,cdummy
+ real(dp):: gwalpha,gwbeta,wmin,wmax ! MRM
+ complex(dpc) :: max_degw,cdummy,delta_band ! MRM
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname ! MRM
@@ -2202,6 +2202,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
      ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
      ABI_MALLOC(occs,(b1gw:b2gw,Sigp%nkptgw))
+     write(msg,'(a26,2i9)')' Bands used for the arrays',b1gw,b2gw
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
      dm1=czero
      nateigv=czero
      do ikcalc=1,Sigp%nkptgw
@@ -2387,30 +2390,35 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
          & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_natorb,Wfdf,QP_sym,&
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+         ! Transform <NO_i|Sigma_x[NO]|NO_j> NOs->MOs, at this point all mat. elements are stored in Sr%x_mat 
+         call rotate_exchange(ikcalc,ib1,ib2,Sr,nateigv) ! -> sent to 70_gw/m_gwrdm.F90
        end do
        Wfd_natorb%bks_comm = xmpi_comm_null
        call Wfd_natorb%free()
        ABI_FREE(keep_ur_dm2)
        ABI_FREE(bdm2_mask)
        ABI_FREE(nband_dm)
-       ! Transform <NO_i|Sigma_x[NO]|NO_j> NOs->MOs, at this point all mat. elements are stored in Sr%x_mat 
-       ! MAU ROTATE
-       ! call rotate_exchange(Sigp%nkptgw,b1gw,b2gw,Sr,nateigv) -> send to 70/m_gwrdm.F90
-
        write(msg,'(a68)')' Band corrections Delta ei = <KS_i|K[NO]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ikcalc=1,Sigp%nkptgw
+         write(msg,'(a74)')'------------------------------------------------------------------------'
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
          write(msg,'(a74)')' k-point  band    Delta_eik       K[NO]         Vxc[NO]        DVhartree'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          do ib=b1gw,b2gw
            delta_band=(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)
-           write(msg,'(i5,4x,i5,3x,f10.5,5x,f10.5,5x,f10.5,6x,f10.5)') ikcalc,ib,delta_band,real(Sr%x_mat(ib,ib,ikcalc,1)),&
+           write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,5x,f10.5,6x,f10.5)') ikcalc,ib,Real(delta_band),real(Sr%x_mat(ib,ib,ikcalc,1)),&
            & real(KS_me%vxcval(ib,ib,ikcalc,1)), &
            & real(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
+           if(aimag(delta_band)>10.0e-6) then
+             write(msg,'(a26,i5,4x,i5,3x,f10.5)') 'Large imaginary(k,i,Deik)=',ikcalc,ib,aimag(delta_band)
+             call wrtout(std_out,msg,'COLL')
+           endif
          enddo
        enddo
        call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
