@@ -10,42 +10,55 @@ The drawbacks/advantages with respect to the ANADDB implementation are also disc
 
 ## Why a new EPH code?
 
-First of all, let's try to answer the question "why did we decide to implement a new code for electron-phonon calculations?" .
+First of all, let's try to answer the question: 
+*why did we decide to implement a new code for electron-phonon calculations?*
 
-As you may know, e-ph calculations has been available through the ANADDB executable for a long time.
-The ANADDB-based implementation is essentially a post-processing of the e-ph matrix elements
-computed at the end of the DFPT run and this approach presents advantages as  well as drawbacks.
+As you may know, e-ph calculations have been available through the ANADDB executable for a long time.
+This ANADDB-based implementation is essentially a post-processing of the e-ph matrix elements
+computed at the end of the DFPT run. This approach, however, presents advantages as well as drawbacks.
 On the one hand, most of the work required to compute e-ph matrix elements is implemented directly by the DFPT code.
-and this means that advanced features such as PAW, SOC, non-collinear magnetism are readily supported by the ANADDB interface.
+This means that advanced features such as PAW, SOC, non-collinear magnetism etc are readily available in the ANADDB
+version once support in the DFPT code is implemented.
 On the other hand, this post-processing approach implies that the number of $\kk/\qq$-points in the e-ph matrix elements
-is automatically fixed at the level of the DFPT calculation.
+is automatically fixed at the level of the DFPT run.
 
-In other words, if you want to compute phonon-limited mobilities with e.g. a 100x100x100 $\kk$- and $\qq$-mesh,
+In other words, if you want to compute phonon-limited mobilities with e.g. a 90x90x90 $\kk$- and $\qq$-mesh,
 you need to perform DFPT calculations with the same sampling thus rendering the computation quite heavy.
-Perhaps it is possible to use tricks such as an interpolation for the e-ph matrix elements to densify the sampling
+In principle, it is possible to use tricks such as a linear interpolation to densify the sampling
 inside ANADDB, yet in order to get a decent interpolation we usually need initial BZ meshes that are significantly 
 denser than the ones needed to converge the DFPT part alone.
 
-As a matter of fact, electrons, phonons and e-ph properties present a completely different convergence rate.
-In silicon, for instance, a 9x9x9 mesh both for phonons and electrons is already good-enough to converge
+Electrons, phonons and e-ph properties, indeed, present completely different convergence rates.
+In silicon, for instance, a 9x9x9 mesh both for phonons and electrons is enough to converge
 the electron density and the vibrational spectrum.
-On the contrary, phonon-limited mobilities require a 45×45×45 k-grid and a 90×90×90 q-grid
-to reach an error lower than 5% [[cite:Brunin2020]].
+On the contrary, phonon-limited mobilities require e.g. a 45×45×45 k-grid and a 90×90×90 q-grid
+to reach a 5% relative error [[cite:Brunin2020]].
 Roughly speaking, an explicit computation of phonons with a 90×90×90 $\qq$-mesh in Si
 requires ~20000 x 3 * [[natom]] DFPT calculations
-so you can easily get an idea of the cost of a fully ab-initio evaluation.
+so you can easily get an idea of the cost of a fully ab-initio DFPT evaluation.
 
-The EPH code bypasses this bottleneck by employing the Fourier interpolation for the DFPT potentials in $\qq$-space.
+The EPH code bypasses this bottleneck by interpolating the DFPT potentials in $\qq$-space
+while Bloch states are computed explicitly on arbitrarily dense $\kk$-meshes with a NSCF run.
 As a net result, the phonon and electron problems are now partly decoupled and can be converged separately.
-For further information about the difference between the two approaches, see [[cite:Gonze2019]] and [[cite:Brunin2020]].
+For further information about the difference between the two approaches, see also [[cite:Gonze2019]] and [[cite:Brunin2020]].
 
 <!--
 Features available in anaddb that are not yet supported by EPH.
 
-At the time of writing, the following features are not supported by EPH
+At the time of writing (today), the following features are not supported by EPH:
 
-* PAW
-* [[useyml]] = 1
+* PAW calculations
+* Non-local part applied with [[useyml]] = 1
+* Spin-orbit coupling
+* Non-collinear magnetism ([[nspinor]] 2 with [[nspden]] 4
+
+Crystalline symmetries are used throughout the code in order to reduce the number of $\kk$- and $\qq$-points
+that must be explicitly included in the integrals.
+To achieve good parallel efficiently, the most CPU demanding parts are parallelized with MPI employing 
+a distribution schemes over $\qq$-points, perturbations
+and bands (the band level is available only when computing the full self-energy).
+
+[[istwfk]]
 
 
 Note that all these capabilities are integrated directly in ABINIT.
@@ -56,7 +69,6 @@ the GS WFK and the DFPT potentials stored in the DVDB file.
 In a nutshell, the EPH code is more scalable and flexible as the $\qq$-sampling can be easily changed
 at runtime while the anaddb implementation can easily support advanced features such as PAW as most of the
 work is already done at the end of the DFPT calculation.
-
 Electron-phonon (EPH) calculations have been available in ABINIT for a long time with the help
 provided by the ANADDB tool designed as a post-processing step of the EPH matrix elements
 computed at the end of the DFPT calculation.
@@ -81,86 +93,94 @@ This means that important ANADDB variables related to the computation and diagon
 of the dynamical matrix such as [[asr]] and [[dipdip]] have been added to the ABINIT input file as well.
 -->
 
-A typical calculation with the new EPH driver is schematically depicted in the below figure:
+A typical EPH workflow with arrows denoting dependencies between the different steps
+is schematically represented in the below figure:
 
 ![](eph_intro_assets/eph_workflow.png){: style="height:400px;width:400px"}
 
-Each box type represents a different kind of calculation performed with ABINIT:
+<!--
+Each box type represents a different kind of calculation.
 self-consistent and non-self-consistent calculations to obtain wavefunctions, atomic perturbations
 with respect to specific atoms and directions.
-The DFPT potentials and the blocks of the dynamical matrix are merged and stored in two distinct files
-at the end of the DFPT part.
-Arrows indicates dependencies between the different steps of the calculation.
+The DFPT potentials and the blocks of the dynamical matrix are merged and stored 
+in two distinct files at the end of the DFPT part.
+-->
+
 The brown boxes represent standard DFPT calculations done with relatively coarse $\kk$- and $\qq$-meshes.
-These calculations produce Derivative DataBase (DDB) files with dynamical matrix elements,
+These calculations produce DDB files with dynamical matrix elements,
 and POT files with the local part % (H + XC + vloc)
 of the first-order change of the KS potential (referred to as the DFPT potential below).
 
 A new utility, *mrgdv*, has been added to merge the DFPT potentials
 in a single ``Derivative of V($\rr$) DataBase'' **DVDB** file, while
 the partial DDB files can be merged, as in previous versions, with **mrgddb**.
-The EPH driver (blue box) receives as input the two databases and a ground-state WFK file that may
+The EPH driver (blue box) receives as input the total DDB and the DBDB as well as a GS WFK file that may
 have been produced with a different $\kk$-mesh (or even with a different number of bands)
-and uses these ingredients to compute the EPH matrix elements and associated physical properties.
+These ingredients are then used to compute the EPH matrix elements and associated physical properties.
 %The $\kk$-mesh in the WFK file and the $\qq$-mesh in the DVDB file must be commensurate
 
 The EPH calculation is activated by [[optdriver]] = 7 while
 [[eph_task]] defines the physical properties to be computed.
-Internally, the code starts by reading the DDB file and construct the interatomic force constants in $\RR$-space.
-This part is very similar to what is done in ANADDB
+Internally, the code starts by reading the DDB file to construct the interatomic force constants (IFCs) in $\RR$-space.
+<!--
+This part is very similar to what is done in ANADDB.
+-->
 Other external files (WFK, DVDB) may be read depending on the value of [[eph_task]].
 At this point, the code computes phonon bands and phonon DOS.
 Finally a specialized routine is invoked depending on [[eph_task]].
 
-In this section, we mainy focus on the parts that are common to the different subdrivers:
-computation of vibrational properties and interpolation of the DFPT potentials.
+In this section, we mainy focus on the parts common to the different subdrivers:
+
+* computation of vibrational properties via Fourier interpolation of the dynamical matrix
+* Fourier interpolation of the DFPT potentials.
+
 The usage of the different subdrivers is discussed in more detail in the specialized lessons.
 
 ## Phonon bands and DOS with EPH
 
+<!--
 ABINIT users know that in order to interpolate a phonon band structure,
 one should first merge the partial DDB files with *mrgddb* and then use ANADDB.
+-->
 Since phonon frequencies and displacements are needed for e-ph calculations, it's not surprising to see
 that some of the ANADDB features are now integrated in the EPH code as well.
-In many cases, EPH uses the same variables as in ANADDB especially for important parameters
+In many cases, EPH uses the same name as in ANADDB especially for important variables
 such as [[dipdip]], [[asr]], and [[chneut]]
 There are however some differences with respect to the ANADDB interface.
 More specifically, the name of the DDB file is specified by
 [[getddb_filepath]] whereas the $\qq$-mesh associated to the DDB file
 is given by [[ddb_ngqpt]].
-<!--
-list of IBZ $\qq$-points for which the DFPT calculations have been performed
--->
+<!-- list of IBZ $\qq$-points for which the DFPT calculations have been performed -->
 These two variables are mandatory when performing EPH calculations.
 
-Note also that in Abinit9 the default values of [[dipdip]], [[asr]], and [[chneut]] have been changed.
+!!! importat
+
+    Note that in Abinit9 the default values of [[dipdip]], [[asr]], and [[chneut]] have been changed.
 
 ### Variables for phonon DOS
 
-By default, the EPH code computes the phonon DOS by interpolating the IFCs on the the *dense* $\qq$-mesh
+By default, the EPH code computes the phonon DOS by interpolating the IFCs on the *dense* $\qq$-mesh
 specified by [[ph_ngqpt]].
-The step of the (linear) frequency mesh is governed by [[ph_wstep]].
-The linear tetrahedron method is used by default.
-The Gaussian method can be activated via [[prtphdos]] and [[ph_smear]] defines the Gaussian smearing.
+The step of the (linear) frequency mesh is governed by [[ph_wstep]],
+and the linear tetrahedron method is used by default.
+The Gaussian method can be activated via [[prtphdos]] with [[ph_smear]] defining the Gaussian smearing.
 The final results are stored in the PHDOS.nc file (same format at the one produced by ANADDB).
 The computation of the PHDOS can be disabled by setting [[prtphdos]] = 0
 
 ### Variables for phonon band structure
 
-In the EPH workflow, the computation of the phonon band structure is activated by default
-The $\qq$-path is specified in terms of [[ph_nqpath]] vertices listed in [[ph_qpath]]
+In a typical EPH run, the computation of the phonon band structure is activated by default.
+The $\qq$-path is specified in terms of [[ph_nqpath]] vertices listed in the [[ph_qpath]] array
 while [[ph_ndivsm]] defines the number of divisions used to sample the smallest segment.
 The computation of the phonon band structure can be deactivated by setting [[prtphbands]] = 0.
 The final results are stored in the PHBST.nc file (same format at the one produced by ANADDB).
 
-## Interpolation of the DFPT potential
+## Fourier interpolation of the DFPT potential
 
+<!--
 E-PH properties are rather sensitive to the BZ sampling and some sort of interpolation scheme
 is needed to avoid explicit computations on very dense k/q meshes.
 The approach used in the EPH code consists in interpolating the DFPT potentials in $\qq$-space
-while Bloch states are computed explicitly on the dense $\kk$-mesh with a NSCF run.
-
-<!--
 The advantage of such approach is that the interpolation in $\qq$-space in relatively easy
 to implement without any use inte
 
@@ -199,11 +219,15 @@ where the sum is over the lattice vectors inside the Born-von Karman supercell.
 Note that the accuracy of the interpolation depends on the localization in $\RR$-space of $W$.
 This means that the Born-von Karman supercell corresponding to [[ddb_ngqpt]] grid should be large
 enough to capture the spatial decay of $W_{\kappa\alpha}(\rr,\RR)$ as a function of $\RR$.
+It is worth stressing that the same consideration holds for Wannier-based approaches indipendently on the degree of localization
+of the (maximally localized) Wannier functions.
 
 In metals, $W$ is expected to be short-ranged provided we ignore Friedel oscilations associated to Kohn anomalies.
-On the contrary,
+On the contrary, a special numerical treatment is needed in semiconductors and insulators.
+<!--
 the long-range behaviour of the DFPT potential in polar semiconductors and insulators is therefore problematic
-and a special numerical treatment is needed to enforce localization.
+and  is needed to enforce localization.
+-->
 To handle the long-range part, we use an approach that is similar in spirit to the one employed
 for the Fourier interpolation of the dynamical matrix [[cite:Gonze1997]]
 As discussed in [[cite:Verdi2015]], and [[cite:Giustino2017]],
@@ -228,7 +252,7 @@ we subtract the long-range part from the DFPT potentials before computing Eq.~\e
 The e-ph matrix elements $\gkkp$ are given by
 
 \begin{equation}
-\gkkp = \braket{\psi_{m\kk+\qq}|\Delta_\qnu V^\KS|\psi_{n\kk}},
+\gkkp = \langle \psi_{m\kk+\qq}|\Delta_\qnu V^\KS|\psi_{n\kk} \rangle,
 \label{eq:elphon_mel}
 \end{equation}
 
@@ -239,5 +263,4 @@ $\Delta_\qnu V^\KS$ the first-order variation of the self-consistent KS potentia
 [[ddb_ngqpt]]
 [[dvdb_add_lr]]
 [[dvdb_qdamp]]
-
 [[getdvdb_filepath]]

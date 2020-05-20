@@ -359,13 +359,12 @@ Possible exceptions are systems with very small effective masses (e.g. GaAs) in 
 a very dense $\kk$-sampling is needed to to sample the electron (hole) pocket.
 In this case, using the same sampling for electrons and phonons may be enough.
 
-We will use the tetrahedron integration method to obtain the lifetimes (integration
+We will use the tetrahedron integration method [[cite:Bloechl1994]] to obtain the lifetimes (integration
 over the $\qq$-mesh). This allows to efficiently filter out the $\qq$-points that do not contribute
 to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
 ensure energy and momentum conservation for a given $\kk$-point.
 All the other $\qq$-points do not need to be considered and can be filtered out.
-The use of the tetrahedron method is automatically activated when only
-the imaginary part is wanted.
+The use of the tetrahedron method is automatically activated when only the imaginary part is wanted.
 It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
