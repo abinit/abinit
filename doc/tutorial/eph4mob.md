@@ -54,10 +54,12 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 \label{eq:fanlifetime}
 \end{align}
 
-Note that this formalism does not take into account possibile contributions to the lifetime given by
-other scattering processes such as defects, ionized impurities in doped semiconductors, grain boundary scattering.
-These effects may be relevant depending on the system and/or the temperature under investigation
-but they are not treated in this tutorial.
+!!! important
+
+    Note that this formalism does not take into account possibile contributions to the lifetime given by
+    other scattering processes such as defects, ionized impurities in doped semiconductors, grain boundary scattering.
+    These effects may be relevant depending on the system and/or the temperature under investigation
+    but they are not treated in this tutorial.
 
 The generalized transport coefficients are given by [[cite:Madsen2018]]
 
@@ -124,9 +126,7 @@ A typical computation of mobilities requires different steps:
 
 These steps can be summarized by the following graph:
 
-<!-- ![](eph4mob_assets/workflow.png ) -->
-
-<img src="../eph4mob_assets/workflow.png" width="400" height="500">
+![](eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
 
 All the results of the calculation are saved in netcdf format,
 while the log and output files are used to report selected quantities, mainly for testing purposes.
@@ -134,19 +134,6 @@ Post-processing and visualisation tools are **not covered** in this tutorial.
 Powerful tools based on python and matplotlib are provided by AbiPy.
 See e.g. the README of [AbiPy](https://github.com/abinit/abipy)
 and the [AbiPy tutorials](https://github.com/abinit/abitutorials).
-
-
-!!! important
-
-    Note that all these capabilities are integrated directly in ABINIT.
-    This implementation (henceforth refered to as the **EPH code**) significantly differs from the one available in ANADDB:
-    the anaddb version acts as a direct post-processing of the e-ph matrix elements computed in the DFPT part
-    whereas the EPH code interfaced with ABINIT computes the e-ph matrix elements on the fly using
-    the GS WFK and the DFPT potentials stored in the DVDB file.
-    In a nutshell, the EPH code is more scalable and flexible as the $\qq$-sampling can be easily changed
-    at runtime while the anaddb implementation can easily support advanced features such as PAW as most of the
-    work is already done at the end of the DFPT calculation.
-    For further information about the difference between the two approaches, see [[cite:Gonze2019]]
 
 [TUTORIAL_README]
 
@@ -191,8 +178,7 @@ abinit teph4mob_1.in > teph4mob_1.log 2> err &
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
 Many input parameters are also quite similar.
-<!-- as the EPH code can use symmetries can be used to reduce the number of atomic
-perturbations. -->
+<!-- as the EPH code can use symmetries can be used to reduce the number of atomic perturbations. -->
 For more details about this first step, please refer to the first and second tutorials on DFPT.
 
 !!! important
@@ -278,7 +264,7 @@ The only ingredient left is the WFK file with the GS wavefunctions on the dense 
 
 <!--
 In principle, the code can deal with small instabilties for the acoustic modes around $\Gamma$
-but this does not mean you should blindly trust your results.
+but this does not mean you should trust your results.
 -->
 
 
@@ -287,8 +273,7 @@ but this does not mean you should blindly trust your results.
 In order to compute transport properties, we need a $\kk$-mesh that is dense enough to
 sample the electron (hole) pockets.
 <!--
-to solve the Boltzmann
-Transport Equation (BTE) in the SERTA on a relatively dense $\kk$-mesh to have enough wavevectors
+to solve the Boltzmann Transport Equation (BTE) in the SERTA on a relatively dense $\kk$-mesh to have enough wavevectors
 inside the electron (hole) pockets.
 You will compute the electron lifetimes and group velocities on this dense mesh.
 We will therefore need the wavefunctions on this dense mesh.

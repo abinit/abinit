@@ -368,7 +368,7 @@ Many packages provide a `make check` option to run the test suite,
 other project define a `make tests` target or more exotic options.
 If in doubt, use `make --help` to list the available options.
 If all the tests are OK, install the library by issuing:
-->
+-->
 
 Now let's have a look at the libraries we have just installed:
 

@@ -200,6 +200,17 @@ The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks
     [here](https://mor10.com/html-basics-hyperlink-syntax-absolute-relative-and-root-relative/).
 -->
 
+If you need to customize the height and width of the image, use
+
+```md
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+```
+
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+
+Note that this is not standard markdown but an extension provided by 
+[Attribute Lists extension](https://python-markdown.github.io/extensions/attr_list/)
+that adds a syntax to define attributes on the various HTML elements in markdown’s output.
 
 ### Pdf Files
 

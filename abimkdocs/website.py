@@ -720,6 +720,8 @@ in order of number of occurrence in the input files provided with the package.
         self.analyze_pages()
 
         # Now generate page with bibliography.
+        # TODO: Should profile this part, I believe that most of the time in mkdocs in spent to convert
+        # this huge md file to html.
         cprint("Generating Markdown file with bibliographic entries ...", "green")
         citation2pages = defaultdict(list)
         for page in self.md_pages:
