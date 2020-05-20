@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_ldau_self
+!!****m* ABINIT/m_dftu_self
 !! NAME
-!!  m_ldau_self
+!!  m_dftu_self
 !!
 !! FUNCTION
 !! Compute DFT+U self energy for DMFT
@@ -27,7 +27,7 @@
 
 #include "abi_common.h"
 
-MODULE m_ldau_self
+MODULE m_dftu_self
 
  use defs_basis
  use m_abicore
@@ -47,17 +47,17 @@ MODULE m_ldau_self
 
  private
 
- public :: ldau_self
+ public :: dftu_self
 !!***
 
 contains
 
-!!****f* m_ldau_self/ldau_self
+!!****f* m_dftu_self/dftu_self
 !! NAME
-!! ldau_self
+!! dftu_self
 !!
 !! FUNCTION
-!! Use LDA+U to compute self-energy
+!! Use DFT+U to compute self-energy
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2020 ABINIT group (BAmadon)
@@ -68,9 +68,9 @@ contains
 !!
 !! INPUTS
 !!  cryst_struc
-!!  istep    =  step of iteration for LDA.
+!!  istep    =  step of iteration for DFT.
 !!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab <type(pawtab)>
 !!
@@ -86,7 +86,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
+subroutine dftu_self(cryst_struc,green,paw_dmft,pawtab,self,opt_dftu,prtopt)
 
 !Arguments ------------------------------------
 !scalars
@@ -96,7 +96,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  type(paw_dmft_type), intent(in)  :: paw_dmft
  type(pawtab_type),target,intent(in)  :: pawtab(cryst_struc%ntypat)
  type(self_type), intent(inout) :: self !vz_i
- integer, intent(in) :: opt_ldau,prtopt
+ integer, intent(in) :: opt_dftu,prtopt
 
 !Local variables ------------------------------
 !scalars
@@ -111,7 +111,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 
 !************************************************************************
 
- ABI_UNUSED(opt_ldau)
+ ABI_UNUSED(opt_dftu)
 
  natom=cryst_struc%natom
  nsppol=paw_dmft%nsppol
@@ -160,7 +160,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
          ispinor=1
          ispinor1=1
        else
-         write(message,'(2a)') " BUG in ldau_self: nsploop should be equal to 1, 2 or 4"
+         write(message,'(2a)') " BUG in dftu_self: nsploop should be equal to 1, 2 or 4"
          call wrtout(std_out,message,'COLL')
        end if
 !      ===============================
@@ -203,7 +203,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
 !    warning  dmft works here if nspden=nsppol (this is checked elsewhere)
 
 !    ===============================
-!    Compute LDA+U vpawu from noccmmp
+!    Compute DFT+U vpawu from noccmmp
 !    ===============================
      call pawpupot(2,nocc,noccmmp,nocctot,2,pawtab_,vpawu)
 !    do idijeff=1,size(vpawu,4)
@@ -234,7 +234,7 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
          ispinor=1
          ispinor1=1
        else
-         write(message,'(2a)') " BUG in ldau_self: nsploop should be equal to 1, 2 or 4"
+         write(message,'(2a)') " BUG in dftu_self: nsploop should be equal to 1, 2 or 4"
          call wrtout(std_out,message,'COLL')
        end if
 
@@ -269,8 +269,8 @@ subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
  if(abs(prtopt)>0) then
  end if
 
-end subroutine ldau_self
+end subroutine dftu_self
 !!***
 
-END MODULE m_ldau_self
+END MODULE m_dftu_self
 !!***

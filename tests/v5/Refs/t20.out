@@ -338,7 +338,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     374.500     374.467
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -585,7 +585,7 @@ force_length_stats: {min:   2.87530970E-32, max:   8.62592909E-32, mean:   4.312
   -0.00034   0.00034   0.00004   0.98640   0.00006
    0.00000  -0.00006   0.00000   0.00006   1.01207
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -772,7 +772,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -1148,7 +1148,7 @@ force_length_stats: {min: null, max: null, mean: null, }
   -0.00034   0.00034   0.00004   0.98640   0.00006
    0.00000  -0.00006   0.00000   0.00006   1.01207
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1504,9 +1504,9 @@ P           mkmem2         16
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [1] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [2] Implementation of the Projector Augmented-Wave Method in the ABINIT code.

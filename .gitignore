@@ -216,6 +216,7 @@ mkdocs_plugins/dist
 /src/98_main/abinit
 /src/98_main/aim
 /src/98_main/anaddb
+/src/98_main/atdep
 /src/98_main/band2eps
 /src/98_main/abitk
 /src/98_main/conducti
@@ -230,7 +231,6 @@ mkdocs_plugins/dist
 /src/98_main/mrgscr
 /src/98_main/multibinit
 /src/98_main/testtransposer
-/src/98_main/tdep
 /src/98_main/dummy_tests
 /src/98_main/optic
 /src/98_main/ujdet

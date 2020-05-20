@@ -289,7 +289,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     108.000     108.000
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -548,7 +548,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00163   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00287   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00078   0.00000   0.00061   0.00000   0.00000   0.00000   0.00000   0.00138   0.00000   0.00109
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   3
 
@@ -1049,7 +1049,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00191   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00336   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00092   0.00000   0.00072   0.00000   0.00000   0.00000   0.00000   0.00156   0.00000   0.00134
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   3
 
@@ -1391,9 +1391,9 @@ P           mkmem           1
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
-- [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.

@@ -2513,7 +2513,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 For Ground state calculations only.
-Gives the value of an initial density matrix used in LDA+U and kept fixed
+Gives the value of an initial density matrix used in DFT+U and kept fixed
 during the first abs([[usedmatpu]]) SCF iterations.
 Only components corresponding to [[lpawu]] angular momentum are requested.
 Restriction: In order to use dmatpawu, [[lpawu]] must be identical for all atom types (or -1).
@@ -2842,7 +2842,7 @@ Variable(
 Choice of solver for the Impurity model.
 
   * 0 --> No solver and U=0, J=0 (see [[upawu]] and [[jpawu]]).
-  * 1 --> LDA+U self-energy is used (for testing purpose)
+  * 1 --> DFT+U self-energy is used (for testing purpose)
   * 2 --> Hubbard one solver in the density density approximation of the Coulomb interaction. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
   * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density approximation of the Coulomb interaction. The calculation is fully parallelised over MPI processes.
   * 6 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS in the density density representation.
@@ -2896,8 +2896,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-The LDA occupation matrix for correlated electrons can be computed directly.
-It can be compared to the calculation of the same quantity using LDA Green's
+The DFT occupation matrix for correlated electrons can be computed directly.
+It can be compared to the calculation of the same quantity using DFT Green's
 function, a sum over Matsubara frequencies and a projection over correlated
 orbitals. Because the Matsubara grid is finite, the two quantities differ. If
 this difference is larger than dmft_tolfreq, then the code stops and an error
@@ -2951,7 +2951,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 [[dmftbandi]] is the first band taken into account in the Projected Local
-Orbitals scheme of LDA+DMFT. With [[dmftbandf]], they define the energy window
+Orbitals scheme of DFT+DMFT. With [[dmftbandf]], they define the energy window
 used to define Wannier Functions (see [[cite:Amadon2008]]).
 """,
 ),
@@ -5214,7 +5214,7 @@ Variable(
 Used when [[ndtset]] > 0 (multi-dataset mode) and [[optdriver]] = 3, or 4
 (screening or sigma step of a GW calculation), to indicate that the
 eigenvalues and possibly the wavefunctions have to be taken from a previous
-quasi-particle calculation (instead of the usual LDA starting point). This is
+quasi-particle calculation (instead of the usual DFT starting point). This is
 to achieve quasi-particle self-consistency. See also [[irdqps]]
 NOTE: a negative value of a "get" variable indicates the number of datasets
 to go backwards; it is not the number to be subtracted from the current
@@ -9241,10 +9241,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give for each species the value of the angular momentum (only values 2 or 3
-are allowed)  on which to apply the LDA+U correction.
+are allowed)  on which to apply the DFT+U correction.
 
   * If equal to 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
-  * If equal to -1: do not apply LDA+U correction on the species.
+  * If equal to -1: do not apply DFT+U correction on the species.
 """,
 ),
 
@@ -9928,7 +9928,7 @@ Variable(
     requires="[[usepawu]] == 1",
     added_in_version="before_v9",
     text=r"""
-This internal variable gives the number of atoms on which the LDA/GGA+U method
+This internal variable gives the number of atoms on which the DFT+U method
 is applied. This value is determined from [[lpawu]].
 """,
 ),
@@ -14663,11 +14663,11 @@ Relevant only when [[prtdos]] = 3.
 If set to 1, the m-decomposed LDOS is delivered in DOS file.
 Note that [[prtdosm]] computes the M-resolved partial dos for complex
 spherical harmonics,giving e.g. DOS(L,M) == DOS(L,-M) (without spin-orbit). In
-the contrary, the LDA+U occupation matrix, see [[dmatpawu]] is in the real
+the contrary, the DFT+U occupation matrix, see [[dmatpawu]] is in the real
 spherical harmonics basis.
 If set to 2, the m-decomposed LDOS is delivered in DOS file.
 In this case, [[prtdosm]] computes the M-resolved partial dos for real
-spherical harmonics in the same basis as the LDA+U occupation matrix.
+spherical harmonics in the same basis as the DFT+U occupation matrix.
 """,
 ),
 
@@ -14712,7 +14712,7 @@ If prtefg=3, then in addition to the prtefg=2 output, the EFGs are computed usin
 This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
 Use of prtefg=3 requires that the variable [[ptcharge]] be set as well.
 The option prtefg is compatible with spin polarized calculations (see
-[[nspden]]) and also LDA+U (see [[usepawu]]).
+[[nspden]]) and also DFT+U (see [[usepawu]]).
 """,
 ),
 
@@ -15521,7 +15521,7 @@ http://www.wannier.org ](http://www.wannier.org) ).
 
 !!! Notes
 
-    * An input file of LDA wave functions is required which is completely consistent with the _KSS file used in the self-consistent GW calculation. This means that [[kssform]] 3 must be used to create the _KSS file and the output _WFK file from the same run must be used as input here.
+    * An input file of DFT wave functions is required which is completely consistent with the _KSS file used in the self-consistent GW calculation. This means that [[kssform]] 3 must be used to create the _KSS file and the output _WFK file from the same run must be used as input here.
     * Wannier90 requires [[nshiftk]] = 1, and [[shiftk]] =  0 0 0 is recommended. The k-point set used for the GW calculation, typically the irreducible BZ set created using [[kptopt]] = 1, and that for the Abinit- Wannier90 interface must be consistent.
     * Full-BZ wavefunctions should be generated in the run calling the interface by setting [[kptopt]] = 3, [[iscf]] = -2, and [[nstep]] = 3. This will simply use symmetry to transform the input IBZ wavefunctions to the full BZ set, still consistent with the GW _KSS input.
     * The final _QPS file created by the self-consistent GW run is required as input.
@@ -17595,9 +17595,12 @@ Variable(
     mnemonics="STRess TARGET",
     added_in_version="before_v9",
     text=r"""
+Define the target stress to be obtained by optimization of the cell.
 The components of the stress tensor must be stored according to: (1,1) -->1;
 (2,2) --> 2; (3,3) --> 3; (2,3) --> 4; (3,1) --> 5; (1,2) -->6. The conversion factor
-between Ha/Bohr**3 and GPa is: 1 Ha/Bohr**3 = 29421.033 GPa.
+between Ha/Bohr**3 (the atomic unit for stress) and GPa is: 1 Ha/Bohr**3 = 29421.033 GPa.
+If a hydrostatic stress (so, a pressure P) is wanted, define [[strtarget]] as
+-P -P -P 0 0 0 .
 Not used if [[optcell]] == 0.
 """,
 ),
@@ -18676,7 +18679,7 @@ Variable(
 When [[usedmatpu]]/=0, an initial density matrix (given by [[dmatpawu]]
 keyword) is used and kept fixed during the first ABS([[usedmatpu]]) SCF steps.
 This starting value of the density matrix can be useful to find the correct
-ground state. Within LDA+U formalism, finding the minimal energy of the system
+ground state. Within DFT+U formalism, finding the minimal energy of the system
 is tricky; thus it is advised to test several values of the initial density
 matrix.
 Note also that the density matrix has to respect some symmetry rules
@@ -18840,9 +18843,9 @@ Variable(
 Must be non-zero if a DFT+U calculation is done, or if a GW calculation
 following a DFT+U calculation is done (important!).
 
-  * If set to 0, the LDA+U method is not used.
+  * If set to 0, the DFT+U method is not used.
 
-  * If set to 1, 2 or 4, the LDA+U method (cf [[cite:Anisimov1991a]]) is used.
+  * If set to 1, 2 or 4, the DFT+U method (cf [[cite:Anisimov1991a]]) is used.
 The full rotationally invariant formulation is used (see Eq. (3) of [[cite:Liechtenstein1995]]) for the interaction term of the energy.
 Three choices are allowed concerning the double counting term:
 
@@ -18853,7 +18856,7 @@ Three choices are allowed concerning the double counting term:
     * If [[usepawu]] = 4, the FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without
     polarization in the exchange correlation functional (cf [[cite:Park2015]] and [[cite:Chen2016a]]). In this case, one must use [[iscf]]<10.
 
-If LDA+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
+If DFT+U is activated ([[usepawu]] = 1 or 2), the [[lpawu]], [[upawu]] and
 [[jpawu]] input variables are read.
 The implementation is done inside PAW augmentation regions only (cf [[cite:Bengone2000]]).
 The initial density matrix can be given in the input file (see [[usedmatpu]]).
