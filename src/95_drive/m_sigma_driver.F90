@@ -122,9 +122,6 @@ module m_sigma_driver
  private
 !!***
 
-#ifdef HAVE_MPI
- include 'mpif.h'
-#endif
 
  public :: sigma
 !!***
@@ -2344,9 +2341,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      endif
      ! MRM broadcast gw_rhor 
       dimbc=2*nfftf
-#ifdef HAVE_MPI
-     call MPI_BCAST(gw_rhor,dimbc,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierr)
-#endif
+     call xmpi_barrier(Wfd%comm)
+     ierr=0
+     call xmpi_bcast(gw_rhor(:,:),master,Wfd%comm,ierr)
+     if(ierr/=0) then
+       MSG_ERROR("Error distributing the GW density")
+     endif
      call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast it
      if(gw1rdm>3) then                                    
        ! We need RAM memory, so lets deallocate Wfd_dm
