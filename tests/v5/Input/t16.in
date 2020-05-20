@@ -8,13 +8,13 @@
 # === Datasets
 ndtset 8
 nsppol1 1  nspden1 1  nspinor1 1               ! non-magnetic
-nsppol2 1  nspden2 1  nspinor2 1               ! non-magnetic LDA+U
-nsppol3 2  nspden3 2  nspinor3 1               ! ferro-magnetic LDA+U
-nsppol4 1  nspden4 2  nspinor4 1               ! antiferro-magnetic LDA+U
+nsppol2 1  nspden2 1  nspinor2 1               ! non-magnetic DFT+U
+nsppol3 2  nspden3 2  nspinor3 1               ! ferro-magnetic DFT+U
+nsppol4 1  nspden4 2  nspinor4 1               ! antiferro-magnetic DFT+U
 nsppol5 1  nspden5 4  nspinor5 2  pawspnorb5 0 ! non-collinear magnetism LDA
-nsppol6 1  nspden6 4  nspinor6 2  pawspnorb6 0 ! non-collinear magnetism LDA+U
-nsppol7 1  nspden7 4  nspinor7 2               ! non-collinear magnetism LDA+U+SO
-nsppol8 1  nspden8 1  nspinor8 2               ! non-magnetic LDA+U+SO
+nsppol6 1  nspden6 4  nspinor6 2  pawspnorb6 0 ! non-collinear magnetism DFT+U
+nsppol7 1  nspden7 4  nspinor7 2               ! non-collinear magnetism DFT+U+SO
+nsppol8 1  nspden8 1  nspinor8 2               ! non-magnetic DFT+U+SO
 
 # === Structure and cell
 natom 4 ntypat 2 typat 1 1 2 2
@@ -46,7 +46,7 @@ kptopt5 4  kptopt6 4  kptopt7 4  kptopt8 4
 kptrlatt 2 0 0 0 2 0 0 0 2
 chksymbreak 0
 
-# === LDA+U options
+# === DFT+U options
 usepawu 1 usepawu1 0
 lpawu   2 -1        # Applied on d electrons of Nickel
 upawu  0.30   0.0   # Value of U parameter
@@ -256,18 +256,18 @@ pawprtvol 3
 #%% max_nprocs = 3
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, LDAU 
+#%% keywords = PAW, DFTU 
 #%% description = 
 #%%   NiO: 2 Ni and 2 O atoms in an fcc supercell.
 #%%   Different combinations of nsppol/nspden/nspinor/pawspnorb are tested in the PAW+U formalism:
 #%%   1- non-magnetic                     nsppol/nspden/nspinor=1/1/1
-#%%   2- non-magnetic LDA+U               nsppol/nspden/nspinor=1/1/1
-#%%   3- ferro-magnetic LDA+U             nsppol/nspden/nspinor=2/2/1
-#%%   4- antiferro-magnetic LDA+U         nsppol/nspden/nspinor=1/2/1
+#%%   2- non-magnetic DFT+U               nsppol/nspden/nspinor=1/1/1
+#%%   3- ferro-magnetic DFT+U             nsppol/nspden/nspinor=2/2/1
+#%%   4- antiferro-magnetic DFT+U         nsppol/nspden/nspinor=1/2/1
 #%%   5- non-collinear magnetism          nsppol/nspden/nspinor=1/4/2
-#%%   6- non-collinear magnetism LDA+U    nsppol/nspden/nspinor=1/4/2
-#%%   7- non-collinear magnetism LDA+U+SO nsppol/nspden/nspinor=1/4/2
-#%%   8- non-magnetic LDA+U+SO            nsppol/nspden/nspinor=1/1/2
+#%%   6- non-collinear magnetism DFT+U    nsppol/nspden/nspinor=1/4/2
+#%%   7- non-collinear magnetism DFT+U+SO nsppol/nspden/nspinor=1/4/2
+#%%   8- non-magnetic DFT+U+SO            nsppol/nspden/nspinor=1/1/2
 #%%   Cut-off and k-points are unrealistic.
 #%% topics = DFT+U, spinpolarisation
 #%%<END TEST_INFO>

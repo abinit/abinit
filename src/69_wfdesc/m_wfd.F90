@@ -3522,7 +3522,7 @@ end subroutine wfd_distribute_bands
 !!
 !! INPUTS
 !!  Cryst<crystal_t>=Object defining the unit cell and its symmetries.
-!!  m_lda_to_qp(mband,mband,nkibz,nsppol)= expansion of the QP amplitudes in terms of KS wavefunctions.
+!!  m_ks_to_qp(mband,mband,nkibz,nsppol)= expansion of the QP amplitudes in terms of KS wavefunctions.
 !!  [bmask(mband,nkibz,nsppol)]=The routine will raise an error if one band index
 !!    is not treated by any processor. bmask can be used to select the subset of
 !!    indices that are expected to be available.
@@ -3538,14 +3538,14 @@ end subroutine wfd_distribute_bands
 !! SOURCE
 !!
 
-subroutine wfd_rotate(Wfd,Cryst,m_lda_to_qp,bmask)
+subroutine wfd_rotate(Wfd,Cryst,m_ks_to_qp,bmask)
 
 !Arguments ------------------------------------
 !scalars
  class(wfd_t),intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
- complex(dpc),target,intent(in) :: m_lda_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
+ complex(dpc),target,intent(in) :: m_ks_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
  logical,optional,intent(in) :: bmask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
 
 !Local variables-------------------------------
@@ -3573,12 +3573,12 @@ subroutine wfd_rotate(Wfd,Cryst,m_lda_to_qp,bmask)
      if (istwf_k /= 1) then
        MSG_WARNING("wfd_rotate with istwfk /= 1")
      end if
-     umat_sk => m_lda_to_qp(:,:,ik_ibz,spin)
+     umat_sk => m_ks_to_qp(:,:,ik_ibz,spin)
 
-     ! Select only those states that are mixed by the (sparse) m_lda_to_qp.
+     ! Select only those states that are mixed by the (sparse) m_ks_to_qp.
      nnew=0; new_list=0
      do icol=1,Wfd%nband(ik_ibz,spin)
-       mcol = m_lda_to_qp(:,icol,ik_ibz,spin)
+       mcol = m_ks_to_qp(:,icol,ik_ibz,spin)
        mcol(icol) = mcol(icol) - cone
        if (ANY(ABS(mcol)>tol12)) then  ! Avoid a simple copy.
          nnew=nnew+1

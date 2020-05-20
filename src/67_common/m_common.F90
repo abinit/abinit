@@ -115,9 +115,9 @@ contains
 !!   | prteig=
 !!   | prtstm=print STM input variable
 !!   | prtvol= control print volume
-!!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
+!!   | usedmatpu=DFT+U: number of SCF steps keeping occ. matrix fixed
 !!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
-!!   | usepawu=0 if no LDA+U; /=0 if LDA+U
+!!   | usepawu=0 if no DFT+U; /=0 if DFT+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  etotal=total energy (hartree)

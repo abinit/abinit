@@ -78,7 +78,7 @@ dmftctqmc_order   050   # perturbation
 
 
 
-# == LDA+U
+# == DFT+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1

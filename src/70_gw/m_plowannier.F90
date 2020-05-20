@@ -1993,7 +1993,7 @@ endif
      ABI_ALLOCATE(operks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
      operks = czero
 
-     ! Fill diagonal elements to have LDA Green's function.
+     ! Fill diagonal elements to have DFT Green's function.
      !------------------------------------------------------
      do isppol = 1,wan%nsppol
        do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1

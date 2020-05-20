@@ -8,7 +8,7 @@ This page gives hints on how to calculate the effective Coulomb interaction with
 
 ## Introduction
 
-LDA+U as well as DFT+DMFT requires as input values the effective Coulomb
+DFT+U as well as DFT+DMFT requires as input values the effective Coulomb
 interaction. Two ways to compute them are available in ABINIT.
 
 Firstly, the constrained Random Phase Approximation [[cite:Aryasetiawan2004]]

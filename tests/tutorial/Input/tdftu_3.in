@@ -34,7 +34,7 @@ rprim 0.0 1/2 1/2
 ngkpt 2 2 2
 chksymbreak 0  # The k point grid is not symmetric, but the calculations being for the ground-state, this is not a problem.
 
-# LDA+U
+# DFT+U
 usepawu   1
 lpawu   2 -1
 upawu  8.0 0.0 eV
@@ -73,6 +73,6 @@ pp_dirpath = "../../Psps_for_tests"
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = LDAU, PAW
+#%% keywords = DFTU, PAW
 #%% description = third run of the DFT+U tutorial
 #%%<END TEST_INFO>

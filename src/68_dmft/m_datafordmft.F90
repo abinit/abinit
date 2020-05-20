@@ -82,7 +82,7 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fermie= Fermi energy
-!!  lda_occup <type(oper_type)> = occupations in the correlated orbitals in LDA
+!!  dft_occup <type(oper_type)> = occupations in the correlated orbitals in DFT
 !!  mband=maximum number of bands
 !!  mkmem =number of k points treated by this node
 !!  mpi_enreg=information about MPI parallelization
@@ -114,7 +114,7 @@ contains
 !! SOURCE
 
 subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
-& lda_occup,mband,mband_cprj,mkmem,mpi_enreg,nkpt,my_nspinor,nsppol,occ,&
+& dft_occup,mband,mband_cprj,mkmem,mpi_enreg,nkpt,my_nspinor,nsppol,occ,&
 & paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,unpaw,nbandkss)
 
 !Arguments ------------------------------------
@@ -126,7 +126,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  real(dp),intent(in) :: fermie
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
- type(oper_type), intent(inout) :: lda_occup !vz_i
+ type(oper_type), intent(inout) :: dft_occup !vz_i
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(crystal_t),intent(in) :: cryst_struc
@@ -282,7 +282,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
    close(unt)
  end if ! proc=me
 
-!==   put eigen into eigen_lda
+!==   put eigen into eigen_dft
  band_index=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
@@ -291,8 +291,8 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
      do iband=1,mband
        if(paw_dmft%band_in(iband)) then
          ibandc=ibandc+1
-         paw_dmft%eigen_lda(isppol,ikpt,ibandc)=eigen(iband+band_index) ! in Ha
-        ! paw_dmft%eigen_lda(isppol,ikpt,ibandc)=fermie
+         paw_dmft%eigen_dft(isppol,ikpt,ibandc)=eigen(iband+band_index) ! in Ha
+        ! paw_dmft%eigen_dft(isppol,ikpt,ibandc)=fermie
        end if
      end do
      band_index=band_index+nband_k
@@ -647,10 +647,10 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 
 !  deallocations
    do iatom=1,natom
-     lda_occup%matlu(iatom)%mat=loc_occ_check(iatom)%mat
+     dft_occup%matlu(iatom)%mat=loc_occ_check(iatom)%mat
    end do
 
-!  Tests density matrix LDA+U and density matrix computed here.
+!  Tests density matrix DFT+U and density matrix computed here.
    if(paw_dmft%dmftcheck==2.or.(paw_dmft%dmftbandi==1)) then
      ABI_DATATYPE_ALLOCATE(matlu_temp,(natom))
      call init_matlu(natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu_temp)
@@ -690,9 +690,9 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
      end do
      if(paw_dmft%dmftcheck==2) option=1
      if(paw_dmft%dmftcheck<=1) option=0
-     call diff_matlu("LDA+U density matrix from INPUT wfk",&
+     call diff_matlu("DFT+U density matrix from INPUT wfk",&
 &     "Direct calculation of density matrix with psichi from DIAGONALIZED wfk",&
-&     matlu_temp,lda_occup%matlu,natom,option,tol3,ierrr) !tol1 tol2 tol3
+&     matlu_temp,dft_occup%matlu,natom,option,tol3,ierrr) !tol1 tol2 tol3
      if(ierrr==-1) then
        write(message,'(10a)') ch10,&
 &       '    -> These two quantities should agree if three conditions are fulfilled',ch10,&
@@ -703,7 +703,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
        call wrtout(std_out,message,'COLL')
      end if
 !    write(message,'(2a)') ch10,&
-!    &   '  ***** => Calculations of density matrices with projections and in LDA+U are coherent****'
+!    &   '  ***** => Calculations of density matrices with projections and in DFT+U are coherent****'
 !    call wrtout(std_out,message,'COLL')
 
      call destroy_matlu(matlu_temp,natom)
@@ -748,7 +748,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  maxnproju = maximum number of projector for LDA+U species
+!!  maxnproju = maximum number of projector for DFT+U species
 !!  nattyp(ntypat)= # atoms of each type
 !!  mband= number of bands
 !!  nkpt=number of k points
@@ -913,7 +913,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  maxnproju = maximum number of projector for LDA+U species
+!!  maxnproju = maximum number of projector for DFT+U species
 !!  nattyp(ntypat)= # atoms of each type
 !!  mband= number of bands
 !!  nkpt=number of k points
@@ -1088,7 +1088,7 @@ end subroutine datafordmft
      do isppol=1,nsppol
 !      Take \epsilon_{nks}
 !      ========================
-       energy_level%ks(isppol,ikpt,iband,iband)=paw_dmft%eigen_lda(isppol,ikpt,iband)
+       energy_level%ks(isppol,ikpt,iband,iband)=paw_dmft%eigen_dft(isppol,ikpt,iband)
      end do
    end do
  end do
@@ -1098,7 +1098,7 @@ end subroutine datafordmft
 !Compute atomic levels from projection of \epsilon_{nks} and symetrize
 !======================================================================
  call loc_oper(energy_level,paw_dmft,1)
-! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only LDA"
+! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only DFT"
 ! call wrtout(std_out,message,'COLL')
 ! call print_matlu(energy_level%matlu,natom,1)
  do iatom = 1 , natom
@@ -1139,7 +1139,7 @@ end subroutine datafordmft
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>= crystal structure data.
-!!  paw_dmft =  data for LDA+DMFT calculations.
+!!  paw_dmft =  data for DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
@@ -1714,13 +1714,13 @@ end subroutine psichi_renormalization
 !!
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  lda_occup
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  dft_occup
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawtab <type(pawtab)>
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
 !!
@@ -1777,7 +1777,7 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
      do ikpt=1,paw_dmft%nkpt
        do isppol=1,paw_dmft%nsppol
          if(iband1==iband2) then
-           ham_a%ks(isppol,ikpt,iband1,iband2) = cmplx(paw_dmft%eigen_lda(isppol,ikpt,iband1),0.d0,kind=dp)
+           ham_a%ks(isppol,ikpt,iband1,iband2) = cmplx(paw_dmft%eigen_dft(isppol,ikpt,iband1),0.d0,kind=dp)
          else
            ham_a%ks(isppol,ikpt,iband1,iband2) = czero
          end if

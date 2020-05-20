@@ -33,7 +33,7 @@ feels an average of the Coulombic potential. For highly correlated materials,
 the large Coulombic repulsion between localized electrons might not be well
 represented by a functional such as the LDA. A way to avoid this problem is to
 add a Hubbard-like, localised term, to the LDA density functional. This
-approach is known as LDA+U (actually DFT+U). In the actual implementation, we
+approach is known as DFT+U (formerly referred to as LDA+U). In the actual implementation, we
 separate localized d or f electrons, on which the Hubbard term will act, from
 the delocalized ones (*s* and *p* electrons). The latter are correctly described
 by the usual LDA calculation. In order to avoid the double counting of the
@@ -137,7 +137,7 @@ the rotationally invariant interaction is used.
 
 !!! note
 
-    It is important to notice that in order to use LDA+U in Abinit, you must
+    It is important to notice that in order to use DFT+U in Abinit, you must
     employ PAW pseudopotentials.
 
 You should run abinit with the *tdftu_2.in* input file. This calculation takes
@@ -146,20 +146,20 @@ During the calculation, you can take a look at the input file.
 
 {% dialog tests/tutorial/Input/tdftu_2.in %}
 
-Some variable describing the LDA+U parameters have been added to the previous file. All
+Some variable describing the DFT+U parameters have been added to the previous file. All
 other parameters were kept constant from the preceding calculation. First, you
 must set the variable [[usepawu]] to one (for the FLL method) and two (for the
-AMT method) in order to enable the LDA+U calculation. Then, with [[lpawu]] you
+AMT method) in order to enable the DFT+U calculation. Then, with [[lpawu]] you
 give for each atomic species ([[znucl]]) the values of angular momentum (l) for
-which the LDA+U correction will be applied. The choices are 2 for d-orbitals
-and 3 for *f*-orbitals. You cannot treat s and p orbitals with LDA+U in the
-present version of ABINIT. Also, if you do not want to apply LDA+U correction
+which the DFT+U correction will be applied. The choices are 2 for d-orbitals
+and 3 for *f*-orbitals. You cannot treat s and p orbitals with DFT+U in the
+present version of ABINIT. Also, if you do not want to apply DFT+U correction
 on a species, you can set the variable to -1. For the case of NiO, we put
 [[lpawu]] to 2 for Ni and -1 for O.
 
 Finally, as described in the article cited above for FLL and AMF, we must
 define the screened Coulomb interaction between electrons that are treated in
-LDA+U, with the help of the variable [[upawu]] and the screened exchange
+DFT+U, with the help of the variable [[upawu]] and the screened exchange
 interaction, with [[jpawu]]. Note that you can choose the energy unit by
 indicating at the end of the line the unit abbreviation (e.g. eV or Ha). For
 NiO, we will use variables that are generally accepted for this type of compound:
@@ -190,11 +190,11 @@ sampling of k points is not really appropriate to evaluate a band gap, still
 one obtains the right physics.
 
 A word of caution is in order here. It is NOT the case that one obtain
-systematically a good result with the LDA+U method at the first trial. Indeed,
+systematically a good result with the DFT+U method at the first trial. Indeed,
 due to the nature of the modification of the energy functional, the landscape
 of this energy functional might present numerous local minima.
 
-Unlike LDA+U, for the simple LDA (without U), in the non-spin-polarized case,
+Unlike DFT+U, for the simple LDA (without U), in the non-spin-polarized case,
 there is usually only one minimum, that is the global minimum. So, if it
 converges, the self-consistency algorithm always find the same solution,
 namely, the global minimum. This is already not true in the case of spin-
@@ -213,7 +213,7 @@ The fact that [[spinat]] works for NiO comes from the relative simplicity of thi
 
 *You should begin by running the tdftu_3.in file before continuing.*
 
-In order to help the LDA+U find the ground state, you can define the initial
+In order to help the DFT+U find the ground state, you can define the initial
 density matrix for correlated orbitals with [[dmatpawu]] To enable this
 feature, [[usedmatpu]] must be set to a non-zero value (default is 0). When
 positive, the density matrix is kept to the [[dmatpawu]] value for the
@@ -261,13 +261,13 @@ section of the log file, in which the imposed occupation matrices are echoed:
          0.00000    0.00000   -0.00001    0.90036   -0.00002
          0.00000    0.00002    0.00000   -0.00002    0.91309
 
-Generally, the LDA+U functional meets the problem of multiple local minima,
+Generally, the DFT+U functional meets the problem of multiple local minima,
 much more than the usual LDA or GGA functionals. One often gets trapped in a
 local minimum. Trying different starting points might be important...
 
 ## 4 AMF double-counting method
 
-Now we will use the other implementation for the double-counting term in LDA+U
+Now we will use the other implementation for the double-counting term in DFT+U
 (in Abinit), known as AMF. As the FLL method, this method uses the number of
 electrons for each spin independently and the complete interactions $U(m_1,m_2,m_3,m_4)$ and $J(m_1,m_2,m_3,m_4)$.
 
@@ -290,12 +290,12 @@ these results are not well converged. By contrast, the magnetization,
          4   1.41465     2.288685     2.288685      4.577371    -0.000000
 
 
-is very similar to the LDA+U FLL. In fact, this system is not very complex.
+is very similar to the DFT+U FLL. In fact, this system is not very complex.
 But for other systems, the difference can be more important. FLL is designed
 to work well for crystal with diagonal occupation matrix with 0 or 1 for each
 spin. The AMF should be used when orbital occupations are near the average occupancies.
 
-## 5 Projected density of states in LDA+U
+## 5 Projected density of states in DFT+U
 
 Using [[prtdos]] 3, you can now compute the projected d and f density of states.
 For more information about projected density of states, for more details see the [PAW1](paw1) tutorial.

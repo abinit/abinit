@@ -475,8 +475,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !            -i.q_i * [n^hat(r).exp(-i.q.r)]
              ro(1:2)=pawnhat_atm(jc:jc+1)
              do ii=1,3
-               pawgrnhat_atm(jc  ,ii)=pawgrnhat_atm(kc  ,ii)+qphon(ii)*ro(2)
-               pawgrnhat_atm(jc+1,ii)=pawgrnhat_atm(kc+1,ii)-qphon(ii)*ro(1)
+               pawgrnhat_atm(jc  ,ii)=pawgrnhat_atm(jc  ,ii)+qphon(ii)*ro(2)
+               pawgrnhat_atm(jc+1,ii)=pawgrnhat_atm(jc+1,ii)-qphon(ii)*ro(1)
              end do
            end do
          end if
