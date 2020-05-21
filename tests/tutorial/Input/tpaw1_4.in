@@ -1,4 +1,4 @@
-# =======================================
+
 # Input for PAW1 tutorial
 # Diamond at experimental volume
 # =======================================
@@ -8,7 +8,7 @@
 
 #Output of the projected DOS (with PAW contribs)
 # prtdos 3  pawprtdos 1
-# natsph 1 iatsph 1 ratsph 1.5
+# natsph 1 iatsph 1 ratsph 1.51
 
 
 #Cell and atoms definition
@@ -43,14 +43,18 @@
 #I/O parameters
  prtwf 0 prtden 0 prteig 0
 
+ pseudos = "C.LDA_PW-JTH.xml"
+ pp_dirpath = "../../Psps_for_tests"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw1_4.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
-#%% psp_files =  6c.lda.atompaw
+#%%   tpaw1_4.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%% psp_files =  C.LDA_PW-JTH.xml
+#%% output_file = "tpaw1_4.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

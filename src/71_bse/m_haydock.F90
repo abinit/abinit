@@ -54,7 +54,7 @@ MODULE m_haydock
  use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_write_optme
  use m_pawtab,            only : pawtab_type
- use m_vcoul_dt
+ use m_vcoul,             only : vcoul_t
  use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
 &                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
@@ -90,7 +90,7 @@ CONTAINS  !=====================================================================
 !! Wfd<wfd_t>=Wavefunction descriptor (input k-mesh)
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials.
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data.
-!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
+!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
 !!
 !! OUTPUT
 !!  The imaginary part of the macroscopic dielectric function is written on the external file _EXC_MDF

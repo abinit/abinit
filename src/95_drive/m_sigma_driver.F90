@@ -69,9 +69,8 @@ module m_sigma_driver
  use m_gsphere,       only : gsphere_t, gsph_init, gsph_free, merge_and_sort_kg, gsph_extend, setshells
  use m_kg,            only : getph
  use m_xcdata,        only : get_xclevel
- use m_vcoul_dt
- use m_vcoul,         only : vcoul_init, vcoul_free
- use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_lda_to_qp
+ use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
+ use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
@@ -194,7 +193,7 @@ contains
 !!      prep_calc_ucrpa,print_ngfft,prtrhomxmn,pspini,rdgw,rdqps,read_rhor
 !!      setsym_ylm,setup_ppmodel,setup_sigma,setvtr,show_qp,sigma_bksmask
 !!      sigma_free,sigma_init,sigma_tables,sigparams_free,solve_dyson,symdij
-!!      symdij_all,test_charge,timab,updt_m_lda_to_qp,vcoul_free
+!!      symdij_all,test_charge,timab,updt_m_ks_to_qp,vcoul_free
 !!      wfd_change_ngfft,wfd_copy,wfd_distribute_bands,wfd_free,wfd_get_cprj
 !!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
 !!      wfd_test_ortho,write_sigma_header,write_sigma_results,wrqps,wrtout
@@ -286,7 +285,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc) :: ovlp(2)
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
- complex(dpc),allocatable :: hlda(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
+ complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
 !complex(dpc),pointer :: sigcme_p(:,:,:,:)
@@ -497,7 +496,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
-   ! Initialize and compute data for LDA+U
+   ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
       is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
@@ -975,7 +974,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  !=== Calculate Vxc(b1,b2,k,s)=<b1,k,s|v_{xc}|b2,k,s>  for all the states included in GW ===
  !  * ks_vxcvalme is calculated without NLCC, ks_vxcme contains NLCC (if any)
  !  * This part is parallelized within MPI_COMM_WORD since each node has all GW wavefunctions.
- !  * ks_vUme is zero unless we are using LDA+U as starting point, see calc_vHxc_braket
+ !  * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  !  * Note that vH matrix elements are calculated using the true uncutted interaction.
  call timab(407,1,tsec) ! vHxc_me
 
@@ -1102,22 +1101,22 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    call energies_init(QP_energies)
    QP_energies%e_corepsp=ecore/Cryst%ucvol
 
-   !  m_lda_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
+   !  m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
    ! Initialize the QP amplitudes with KS wavefunctions.
-   ABI_MALLOC(Sr%m_lda_to_qp,(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol))
-   Sr%m_lda_to_qp=czero
+   ABI_MALLOC(Sr%m_ks_to_qp,(Sigp%nbnds,Sigp%nbnds,Kmesh%nibz,Sigp%nsppol))
+   Sr%m_ks_to_qp=czero
    do ib=1,Sigp%nbnds
-     Sr%m_lda_to_qp(ib,ib,:,:)=cone
+     Sr%m_ks_to_qp(ib,ib,:,:)=cone
    end do
 
-   ! Now read m_lda_to_qp and update the energies in QP_BSt.
+   ! Now read m_ks_to_qp and update the energies in QP_BSt.
    ! TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Dtset%nspden))
    ABI_MALLOC(prev_taur,(nfftf,Dtset%nspden*Dtset%usekden))
    ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-              nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_lda_to_qp,prev_rhor,prev_Pawrhoij)
+              nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,Sr%m_ks_to_qp,prev_rhor,prev_Pawrhoij)
 
 !  Find the irreps associated to the QP amplitudes starting from the analogous table for the KS states.
 !  bmin=Sigp%minbdgw; bmax=Sigp%maxbdgw
@@ -1127,7 +1126,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
 !  do jb_qp=bmin,bmax
 !  do ib_ks=bmin,bmax
-!  if (ABS(Sr%m_lda_to_qp(ib_ks,jb_qp,ik_ibz,spin)) > tol12) then ! jb_qp has same the same character as ib_ks.
+!  if (ABS(Sr%m_ks_to_qp(ib_ks,jb_qp,ik_ibz,spin)) > tol12) then ! jb_qp has same the same character as ib_ks.
 !  ks_irr = ks_irreptab(ib_ks,ib_ks,ik_ibz,spin)
 !  qp_irreptab(jb_qp,jb_qp,ik_ibz,spin) = ks_irr
 !  do ii=bmin,bmax
@@ -1144,7 +1143,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    if (nscf>0.and.gwcalctyp>=20.and.wfd%iam_master()) then
      ! Print the unitary transformation on std_out.
-     call show_QP(QP_BSt,Sr%m_lda_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
+     call show_QP(QP_BSt,Sr%m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    end if
 
    ! Compute QP wfg as linear combination of KS states ===
@@ -1153,7 +1152,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
    !  TODO here we should use nbsc instead of nbnds
 
-   call wfd%rotate(Cryst,Sr%m_lda_to_qp)
+   call wfd%rotate(Cryst,Sr%m_ks_to_qp)
 
    ! Reinit the storage mode of Wfd as ug have been changed ===
    ! Update also the wavefunctions for GW corrections on each processor
@@ -1364,15 +1363,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !  in case of self-consistency we might calculate here the ppm coefficients using qp_rhor
  end if ! gwcalctyp>=10
 !
-!=== KS hamiltonian hlda(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s> ===
- ABI_MALLOC(hlda,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
- hlda = czero
+!=== KS hamiltonian hdft(b1,b1,k,s)= <b1,k,s|H_s|b1,k,s> ===
+ ABI_MALLOC(hdft,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
+ hdft = czero
 
  if (Dtset%nspinor==1) then
    do spin=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
        do ib=b1gw,b2gw
-         hlda(ib,ib,ik,spin) = KS_BSt%eig(ib,ik,spin)
+         hdft(ib,ib,ik,spin) = KS_BSt%eig(ib,ik,spin)
        end do
      end do
    end do
@@ -1409,15 +1408,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !        write(std_out,*)ovlp(1),ovlp(2)
          norm=DBLE(ovlp(1)+ovlp(2))
          ovlp(1)=DBLE(ovlp(1)/norm); ovlp(2)=DBLE(ovlp(2)/norm) ! ovlp(2)=cone-ovlp(1)
-         hlda(ib,ib,ik_ibz,1) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(1)-KS_me%vxc(ib,ib,ik_ibz,3)
-         hlda(ib,ib,ik_ibz,2) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(2)-KS_me%vxc(ib,ib,ik_ibz,4)
-         hlda(ib,ib,ik_ibz,3) = KS_me%vxc(ib,ib,ik_ibz,3)
-         hlda(ib,ib,ik_ibz,4) = KS_me%vxc(ib,ib,ik_ibz,4)
+         hdft(ib,ib,ik_ibz,1) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(1)-KS_me%vxc(ib,ib,ik_ibz,3)
+         hdft(ib,ib,ik_ibz,2) = KS_BSt%eig(ib,ik_ibz,1)*ovlp(2)-KS_me%vxc(ib,ib,ik_ibz,4)
+         hdft(ib,ib,ik_ibz,3) = KS_me%vxc(ib,ib,ik_ibz,3)
+         hdft(ib,ib,ik_ibz,4) = KS_me%vxc(ib,ib,ik_ibz,4)
        end do
      end do
    end do
 
-   call xmpi_sum(hlda, wfd%comm, ierr)
+   call xmpi_sum(hdft, wfd%comm, ierr)
 
    ABI_FREE(my_band_list)
    ABI_FREE(bmask)
@@ -1433,18 +1432,18 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ! Setup of the bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
  ! * The representation depends wheter we are updating the wfs or not.
- ! * ks_vUme is zero unless we are using LDA+U as starting point, see calc_vHxc_braket
+ ! * ks_vUme is zero unless we are using DFT+U as starting point, see calc_vHxc_braket
  ! * Note that vH matrix elements are calculated using the true uncutted interaction.
 
  if (gwcalctyp<10) then
    ! For one-shot GW use the KS representation.
-   Sr%hhartree=hlda-KS_me%vxcval
+   Sr%hhartree=hdft-KS_me%vxcval
    ! Additional goodies for PAW
-   !  * LDA +U Hamiltonian
+   !  * DFT +U Hamiltonian
    !  * LEXX.
    !  * Core contribution estimated using Fock exchange.
    if (Dtset%usepaw==1) then
-     if (Sigp%use_sigxcore==1) Sr%hhartree=hlda - (KS_me%vxc - KS_me%sxcore)
+     if (Sigp%use_sigxcore==1) Sr%hhartree=hdft - (KS_me%vxc - KS_me%sxcore)
      if (Dtset%usepawu/=0) Sr%hhartree=Sr%hhartree-KS_me%vu
      if (Dtset%useexexch/=0) then
        MSG_ERROR("useexexch > 0 not implemented")
@@ -1460,7 +1459,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !     In the above expression tn, tnhat are QP quantities.
    if (Dtset%usepaw==0) then
      ABI_MALLOC(hbare,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
-     hbare=hlda-KS_me%vhartree-KS_me%vxcval
+     hbare=hdft-KS_me%vhartree-KS_me%vxcval
 
      ! Change basis from KS to QP, hbare is overwritten: A_{QP} = U^\dagger A_{KS} U
      ABI_MALLOC(htmp,(b1gw:b2gw,b1gw:b2gw,Kmesh%nibz,Sigp%nsppol*Sigp%nsig_ab))
@@ -1471,7 +1470,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
      do spin=1,Sigp%nsppol
        do ik=1,Kmesh%nibz
-         uks2qp(:,:) = Sr%m_lda_to_qp(b1gw:b2gw,b1gw:b2gw,ik,spin)
+         uks2qp(:,:) = Sr%m_ks_to_qp(b1gw:b2gw,b1gw:b2gw,ik,spin)
          do iab=1,Sigp%nsig_ab
            is_idx=spin; if (Sigp%nsig_ab>1) is_idx=iab
            ctmp(:,:)=MATMUL(htmp(:,:,ik,is_idx),uks2qp(:,:))
@@ -1615,8 +1614,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  if (allocated(hbare)) then
    ABI_FREE(hbare)
  end if
- if (allocated(hlda )) then
-   ABI_FREE(hlda)
+ if (allocated(hdft )) then
+   ABI_FREE(hdft)
  end if
 
  ! Prepare the storage of QP amplitudes and energies ===
@@ -1629,7 +1628,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ! Store <n,k,s|V_xc[n_val]|n,k,s> and <n,k,s|V_U|n,k,s> ===
  ! Note that we store the matrix elements of V_xc in the KS basis set, not in the QP basis set
- ! Matrix elements of V_U are zero unless we are using LDA+U as starting point
+ ! Matrix elements of V_U are zero unless we are using DFT+U as starting point
  do ib=b1gw,b2gw
    Sr%vxcme(ib,:,:)=KS_me%vxcval(ib,ib,:,:)
    if (Dtset%usepawu/=0) Sr%vUme (ib,:,:)=KS_me%vu(ib,ib,:,:)
@@ -2483,15 +2482,15 @@ endif
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
    ! Write SCF data in case of self-consistent calculation ===
-   ! Save Sr%en_qp_diago, Sr%eigvec_qp and m_lda_to_qp in the _QPS file.
+   ! Save Sr%en_qp_diago, Sr%eigvec_qp and m_ks_to_qp in the _QPS file.
    ! Note that in the first iteration qp_rhor contains KS rhor, then the mixed rhor.
    if (gwcalctyp>=10) then
-     ! Calculate the new m_lda_to_qp
-     call updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_lda_to_qp)
+     ! Calculate the new m_ks_to_qp
+     call updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_ks_to_qp)
 
      if (wfd%iam_master()) then
        call wrqps(Dtfil%fnameabo_qps,Sigp,Cryst,Kmesh,Psps,Pawtab,QP_Pawrhoij,&
-&       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_lda_to_qp,qp_rhor)
+&       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_ks_to_qp,qp_rhor)
      end if
 
      ! Report the MAX variation for each kptgw and spin

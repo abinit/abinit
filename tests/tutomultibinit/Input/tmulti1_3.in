@@ -12,7 +12,6 @@ optcell =  2  # Relaxation of the cell
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% system_xml = tmulti1_2_model.xml
 #%% [files]
 #%% files_to_test = 

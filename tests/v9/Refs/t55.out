@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.0.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h34 )
+.Starting date : Fri 20 Mar 2020.
+- ( at 07h55 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t55.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t55.in
 - output file    -> t55.out
 - root for input  files -> t55i
 - root for output files -> t55o
@@ -107,16 +107,16 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
   bs_interp_kmult2       0    0    0
   bs_interp_kmult3       2    2    2
   bs_interp_kmult4       2    2    2
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
+      eph_extrael      1.00000000E-06
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
       eph_intmeth4          2
-      eph_extrael      1.00000000E-06
          eph_task          -4
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
 -          fftalg         312
            getddb          20
            getwfk          20
@@ -324,8 +324,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1221,16 +1221,16 @@ Transport calculation results
   bs_interp_kmult2       0    0    0
   bs_interp_kmult3       2    2    2
   bs_interp_kmult4       2    2    2
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
+      eph_extrael      1.00000000E-06
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
       eph_intmeth4          2
-      eph_extrael      1.00000000E-06
          eph_task          -4
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -1433,10 +1433,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         15.3  wall=         15.3
+- Proc.   0 individual time (sec): cpu=         15.6  wall=         17.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.3  wall=         15.3
++Overall time at end (sec) : cpu=         15.6  wall=         17.1

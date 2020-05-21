@@ -268,25 +268,22 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! call expand_supercell_input(jdtset, lenstr, string)
    !  find supercell, else exit
    !  determinant = ncells
-   !  copy rprim,    acell,    xred,    xcart,    xangst,    vel,    typat,   to
-   !       rprim_uc, acell_uc, xred_uc, xcart_uc, xangst_uc, vel_uc, typat_uc
+   !  copy rprim,    acell,    xred,    xcart,    vel,    typat,   to
+   !       rprim_uc, acell_uc, xred_uc, xcart_uc, vel_uc, typat_uc
    !     NB: also rprim and angdeg need to be updated in non diagonal case!!!
    !  generate supercell info for each of these copying out with translation vectors etc...
    !  set chkprim to 0
    !  done!
 
    !  Generate the supercell if supercell_latt is specified and update string
-   dtsets(idtset)%supercell_latt(:,:) = 0
+   dtsets(idtset)%supercell_latt(:) = 0
    do ii=1,3
-     dtsets(idtset)%supercell_latt(ii,ii) = 1
+     dtsets(idtset)%supercell_latt(ii) = 1
    end do
-   call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),"supercell_latt",tread,'INT')
-   if (tread==1) dtsets(idtset)%supercell_latt(:,:)=reshape(intarr(1:marr),(/3,3/))
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),"supercell_latt",tread,'INT')
+   if (tread==1) dtsets(idtset)%supercell_latt(:)=intarr(1:3)
    !This test should be update if in the future we allow non-diagonal supercell
-   if (any(dtsets(idtset)%supercell_latt(:,:) < zero).or.&
-          (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
-           dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
-           dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
+   if (any(dtsets(idtset)%supercell_latt(:) < tol10 )) then
      write(msg, '(5a)' )&
       'supercell_latt must have positive parameters and diagonal part',ch10,&
       'This is not allowed.  ',ch10,&
@@ -294,7 +291,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      MSG_ERROR(msg)
    end if
    ! Compute the multiplicity of the supercell
-   call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
+   multiplicity=dtsets(idtset)%supercell_latt(1)  &
+&   *dtsets(idtset)%supercell_latt(2)  & 
+&   *dtsets(idtset)%supercell_latt(3)  
+!  call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
 
    ! Read natom from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
@@ -412,7 +412,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    if(tread==1) dtsets(idtset)%usewvl=intarr(1)
 
    call geo%free()
- end do
+ end do ! idtset
 
 !mxnatom =maxval(dtsets(1:ndtset_alloc)%natom)
 !mxntypat =maxval(dtsets(1:ndtset_alloc)%ntypat)
@@ -455,13 +455,21 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%ntypat/=mxntypat)then
          write(msg, '(5a,i0,a,i0,2a,i0,2a)' )&
-         'When npsp is not defined, the input variable ntypat must be',ch10,&
-         'the same for all datasets. However, it has been found that for',ch10,&
-         'jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
-         'differs from the maximum value of ntypat= ',mxntypat,ch10,&
-         'Action: check the input variables npsp and ntypat.'
+          ' When npsp is not defined, the input variable ntypat must be',ch10,&
+          ' the same for all datasets. However, it has been found that for',ch10,&
+          ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
+          ' differs from the maximum value of ntypat= ',mxntypat,ch10,&
+          ' Action: check the input variables npsp and ntypat.'
          MSG_ERROR(msg)
        end if
+       if(dtsets(idtset)%ntypat>npsp)then
+         write(msg, '(5a,i0,a,i0,a,i0,2a)' )&
+          ' The number of pseudopotentials, npsp, must never be smaller than ntypat.',ch10,&
+          ' However, it has been found that for',ch10,&
+          ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,' and npsp=',npsp,ch10,&
+          ' Action: check the input variables npsp and ntypat.'
+         MSG_ERROR(msg)
+       endif
      end do
    end if
  end if
@@ -1627,11 +1635,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
    ! Find the q-point, if any.
-   if(nqpt==1)then
+   if(nqpt/=0)then
      call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
        dtset%rprimd_orig(1:3,1:3,intimage),dtset%spinat,string,dtset%typat,&
        vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
-   end if
+   endif
 
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
@@ -2156,7 +2164,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_x2my2d=0
+!  dtsets(idtset)%dmft_x2my2d=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_charge_prec=tol6
@@ -2317,6 +2325,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
      dtsets(idtset)%iatsph(:)=0
    end if
    dtsets(idtset)%iboxcut=0
+   dtsets(idtset)%icsing=6
    dtsets(idtset)%icutcoul=6
    dtsets(idtset)%ieig2rf=0
    dtsets(idtset)%imgwfstor=0
@@ -2794,10 +2803,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%chneut = 1
    dtsets(idtset)%symdynmat = 1
 
-   dtsets(idtset)%ph_freez_disp_addStrain = 0
-   dtsets(idtset)%ph_freez_disp_option = 0
-   dtsets(idtset)%ph_freez_disp_nampl = 0
-   if(dtsets(idtset)%ph_freez_disp_nampl>0)dtsets(idtset)%ph_freez_disp_ampl = zero
    dtsets(idtset)%ph_ndivsm = 20
    dtsets(idtset)%ph_nqpath = 0
    dtsets(idtset)%ph_ngqpt = [20, 20, 20]

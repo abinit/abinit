@@ -588,8 +588,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,iqpt,iscf_fake,marr,nptsym,nqpt,nqpt_computed,nshiftq,nsym_new,qptopt
- integer :: tread,tread_qptrlatt,tread_ngqpt,use_inversion
+ integer :: ii,iqpt,iscf_fake,marr,nptsym,nqpt_max,nqpt_computed,nshiftq,nsym_new,qptopt
+ integer :: tread,tread_q_sum,tread_qptrlatt,tread_ngqpt,use_inversion
  real(dp) :: qptnrm,qptrlen,tolsym,ucvol
  character(len=500) :: msg
 !arrays
@@ -604,20 +604,24 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
  marr=630
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
+ tread_q_sum=0
 
  ! Find the method to generate the q-points
  qptopt=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
+ tread_q_sum=tread_q_sum+tread
  if(tread==1)qptopt=intarr(1)
 
  if(qptopt==0)then
    ! Read qpt and qptnrm
    qpt=zero
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'qpt',tread,'DPR')
+   tread_q_sum=tread_q_sum+tread
    if(tread==1) qpt(1:3)=dprarr(1:3)
 
    qptnrm=1.0_dp
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptnrm',tread,'DPR')
+   tread_q_sum=tread_q_sum+tread
 
    if(tread==1) qptnrm=dprarr(1)
    if(qptnrm<tol10)then
@@ -633,11 +637,13 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    ! DBSP: one could want ot define wtq in order to reproduce what is obtained
    ! with ngqpt but without having to do initialize the qgrid (extremly slow in case of large grid > 50x50x50
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wtq',tread,'DPR')
+   tread_q_sum=tread_q_sum+tread
    if(tread==1) wtqc=dprarr(1)
 
  else if (qptopt>=1 .and. qptopt<=4) then
    ngqpt(:)=0
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ngqpt',tread_ngqpt,'INT')
+   tread_q_sum=tread_q_sum+tread_ngqpt
 
    if(tread_ngqpt==1)then
      ngqpt(1:3)=intarr(1:3)
@@ -654,6 +660,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
    call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'qptrlatt',tread_qptrlatt,'INT')
    if(tread_qptrlatt==1) qptrlatt(:,:)=reshape(intarr(1:9), (/3,3/) )
+   tread_q_sum=tread_q_sum+tread_qptrlatt
 
    if(tread_ngqpt==1 .and. tread_qptrlatt==1)then
      write(msg, '(5a)' ) &
@@ -670,6 +677,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
    nshiftq=1
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nshiftq',tread,'INT')
+   tread_q_sum=tread_q_sum+tread
    if(tread==1)nshiftq=intarr(1)
 
    if (nshiftq<1 .or. nshiftq>MAX_NSHIFTK) then
@@ -682,6 +690,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
 
    shiftq=zero
    call intagm(dprarr,intarr,jdtset,marr,3*nshiftq,string(1:lenstr),'shiftq',tread,'DPR')
+   tread_q_sum=tread_q_sum+tread
 
    if(tread==1)then
      shiftq(:,1:nshiftq)=reshape( dprarr(1:3*nshiftq), (/3,nshiftq/) )
@@ -712,20 +721,21 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    iscf_fake=0 ! Do not need the weights
 
    ! Compute the maximum number of q points
-   nqpt=0
-   ABI_ALLOCATE(qpts,(3,nqpt))
-   ABI_ALLOCATE(wtq,(nqpt))
+   nqpt_max=0
+   ABI_ALLOCATE(qpts,(3,nqpt_max))
+   ABI_ALLOCATE(wtq,(nqpt_max))
    call getkgrid(chksymbreak,0,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
-     msym,nqpt,nqpt_computed,nshiftq,nsym_new,rprimd,&
+     msym,nqpt_max,nqpt_computed,nshiftq,nsym_new,rprimd,&
      shiftq,symafm_new,symrel_new,vacuum,wtq)
 
-   nqpt=nqpt_computed
+   nqpt_max=nqpt_computed
    ABI_DEALLOCATE(qpts)
    ABI_DEALLOCATE(wtq)
 
    ! Find the index of the q point within the set of q points that will be generated
    iqpt=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iqpt',tread,'INT')
+   tread_q_sum=tread_q_sum+tread
    if(tread==1)iqpt=intarr(1)
 
    ! Checks that iqpt is among the computed q points
@@ -739,7 +749,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    if (iqpt > nqpt_computed) then
      write(msg, '(a,i0,3a,i0,7a)' )&
       'The input variable iqpt,',iqpt,' is bigger than the computed number of q-points in the grid,',ch10,&
-      'which is ',nqpt,'.',ch10,&
+      'which is ',nqpt_max,'.',ch10,&
       'The latter has been computed from the input variables qptrlatt, ngqpt, nshiftq,',ch10,&
       'shiftq, as well as qptopt, the symmetries of the lattice, and spinat.',ch10,&
       'Action: correct iqpt in the input file, or correct the computed q-point grid.'
@@ -747,11 +757,11 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    end if
 
    ! Compute the q-point grid in the BZ or the IBZ
-   ABI_ALLOCATE(qpts,(3,nqpt))
-   ABI_ALLOCATE(wtq,(nqpt))
+   ABI_ALLOCATE(qpts,(3,nqpt_max))
+   ABI_ALLOCATE(wtq,(nqpt_max))
 
    call getkgrid(chksymbreak,iout,iscf_fake,qpts,qptopt,qptrlatt,qptrlen,&
-    msym,nqpt,nqpt_computed,nshiftq,nsym_new,rprimd,&
+    msym,nqpt_max,nqpt_computed,nshiftq,nsym_new,rprimd,&
     shiftq,symafm_new,symrel_new,vacuum,wtq)
 
    ! Transfer to qptn, and deallocate
@@ -775,6 +785,15 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
     'Action: change qptopt in your input file.'
    MSG_ERROR(msg)
  end if
+
+! See issue #31 on gitlab. Not really a good idea.
+!if(nqpt==0 .and. tread_q_sum/=0)then
+!  write(msg, '(5a)' ) &
+!   'When nqpt is zero, the following input variables cannot be defined :',ch10, &
+!   ' iqpt, ngqpt, nshiftq, qptopt, qpt, qptnrm, qptrlatt, shiftq, wtq . ',ch10, &
+!   'Action: change nqpt to 1, or un-define all the variables above.'
+!  MSG_ERROR(msg)
+!endif
 
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)

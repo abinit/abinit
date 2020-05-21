@@ -561,8 +561,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
-       cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
+!      cond_string(1)='usedmft' ; cond_values(1)=1
+!      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
        if (dt%dmft_solv>=4.and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
@@ -1094,6 +1094,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,1,(/0/),iout)
    end if
 
+   ! icsing
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icsing,6,(/3,6,7,14,15,16/),iout)
+
+   ! icutcoul
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,8,(/0,1,2,3,4,5,6,7/),iout)
+
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1
@@ -1145,7 +1151,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-     dt%ionmov,24,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27/),iout)
+     dt%ionmov,23,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26/),iout)
 
    ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25 (except if imgmov>0)
    if(dt%optcell/=0)then
@@ -1463,6 +1469,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'lotf_version',dt%lotf_version,1,(/2/),iout)
    end if
 #endif
+
+! lw_flexo
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_flexo',dt%lw_flexo,5,(/0,1,2,3,4/),iout)
+  if(dt%lw_flexo/=0)then
+    cond_string(1)='lw_flexo' ; cond_values(1)=dt%lw_flexo
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
+
+! lw_qdrpl
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_qdrpl',dt%lw_qdrpl,2,(/0,1/),iout)
+  if(dt%lw_qdrpl/=0)then
+    cond_string(1)='lw_qdrpl' ; cond_values(1)=dt%lw_qdrpl
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
 
 !  magconon
    call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,3,(/0,1,2/),iout)
@@ -2174,13 +2194,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !Non-linear response not compatible with spinors
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
    !Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
    !Non-linear response not compatible with mkmem=0
@@ -2188,7 +2206,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   !Long wave needs all k-points
+   !Longwave needs all k-points
    if(dt%kptopt==1 .or. dt%kptopt==4) then
      cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
@@ -2272,12 +2290,44 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-
-   !Long-wave DFPT calculation function only for LDA 
+   !Longwave calculation not cmpatible with nonlinear core corrections  
+   if(dt%optdriver==RUNL_LONGWAVE)then
+     do ipsp=1,npsp
+  !    Check that xccc is zero 
+       if (pspheads(ipsp)%xccc/=0) then
+         write(msg, '(5a,i0,3a)' )&
+  &     'For a longwave calculation it is not possible to use norm-conserving pseudopotentials',ch10,&
+  &     'with a non-linear core correction.',ch10,&
+  &     'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
+  &     'Action: change this pseudopotential file.'
+         MSG_ERROR_NOSTOP(msg, ierr)
+       end if
+     end do
+   end if
+   !Longwave calculation function only for LDA 
    allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
    if(allow)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
+   end if
+   !Longwave calculation function only for useylm=1 
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
+    write(msg, '(3a,i0,2a)' )&
+  & 'A longwave calculation requires the input variable "useylm" to be 1,',ch10 ,&
+  & 'while in your input useylm=',dt%useylm,ch10,&
+  & 'Action: change "useylm" value in your input file.'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
+   !Longwave calculation not compatible with PAW
+   if(dt%optdriver==RUNL_LONGWAVE)then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
+   endif 
+   !Longwave calculation not compatible with spin-dependent calculations
+   if(dt%nsppol/=1.or.dt%nspden/=1)then
+     cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
+     cond_string(2)='nspden' ; cond_values(2)=dt%nspden
+     call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
 !  optforces
@@ -2403,7 +2453,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%usepawu/=0.and.nspinor==2.and.dt%pawcpxocc==1) then
        write(msg, '(5a)' )&
 &       'When non-collinear magnetism is activated ,',ch10,&
-&       'and LDA+U activated ',ch10,&
+&       'and DFT+U activated ',ch10,&
 &       'PAW occupancies must be complex !'
        MSG_ERROR_NOSTOP(msg, ierr)
      else if (dt%pawspnorb==1.and.(dt%kptopt==0.or.dt%kptopt>=3).and.dt%pawcpxocc==1) then
@@ -3192,7 +3242,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)/=-1.and.dt%lpawu(itypat)/=maxval(dt%lpawu(:))) then
            write(msg, '(3a)' )&
-&           'When usedmatpu/=0 (use of an initial density matrix for LDA+U),',ch10,&
+&           'When usedmatpu/=0 (use of an initial density matrix for DFT+U),',ch10,&
 &           'lpawu must be equal for all types of atoms on which +U is applied !'
            MSG_ERROR_NOSTOP(msg,ierr)
          end if
@@ -3283,7 +3333,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
      if(dt%pawspnorb>0) then
        write(msg,'(3a)' ) &
-&       '  LDA+U+SpinOrbit is still on test ',ch10,&
+&       '  DFT+U+SpinOrbit is still on test ',ch10,&
 &       '  (not yet in production)'
        MSG_WARNING(msg)
      end if

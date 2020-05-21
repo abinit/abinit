@@ -1403,25 +1403,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_add_lr',tread,'INT')
  if(tread==1) dtset%dvdb_add_lr = intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_addStrain',tread,'INT')
- if(tread==1) dtset%ph_freez_disp_addStrain=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_option',tread,'INT')
- if(tread==1) dtset%ph_freez_disp_option=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_nampl',tread,'INT')
- if(tread==1) dtset%ph_freez_disp_nampl=intarr(1)
-
- if(dtset%ph_freez_disp_nampl > 0)then
-   ABI_MALLOC(dtset%ph_freez_disp_ampl, (5, dtset%ph_freez_disp_nampl))
-   ABI_CHECK(5 * dtset%ph_freez_disp_nampl <= marr, "5 * dtset%ph_nampl > marr!")
-   call intagm(dprarr,intarr,jdtset,marr,5*dtset%ph_freez_disp_nampl,string(1:lenstr),'ph_freez_disp_ampl',tread,'DPR')
-   if (tread==0) then
-     MSG_ERROR("When ph_freez_disp_nampl > 0, ph_freez_disp_ampl should be specified")
-   end if
-   dtset%ph_freez_disp_ampl=reshape(dprarr(1:5*dtset%ph_freez_disp_nampl),[5,dtset%ph_freez_disp_nampl])
- end if
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_ndivsm',tread,'INT')
  if(tread==1) dtset%ph_ndivsm=intarr(1)
 
@@ -1467,6 +1448,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iboxcut',tread,'INT')
  if(tread==1) dtset%iboxcut=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'icsing',tread,'INT')
+ if(tread==1) dtset%icsing=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'icutcoul',tread,'INT')
  if(tread==1) dtset%icutcoul=intarr(1)
@@ -2113,8 +2097,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
-   if(tread==1) dtset%dmft_x2my2d=intarr(1)
+!  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_x2my2d',tread,'INT')
+!  if(tread==1) dtset%dmft_x2my2d=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')
    if(tread==1) dtset%dmft_tolfreq=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tollc',tread,'DPR')
@@ -2126,7 +2110,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandf',tread,'INT')
    if(tread==1) dtset%dmftbandf=intarr(1)
    if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.&
-      ((dtset%dmft_t2g==0).and.(dtset%dmft_x2my2d==0))) then
+!     ((dtset%dmft_t2g==0).and.(dtset%dmft_x2my2d==0))) then
+      (dtset%dmft_t2g==0) ) then
      write(msg, '(4a,i2,2a)' )&
      '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
      '   Number of bands to construct Wannier functions is not', &

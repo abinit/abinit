@@ -1,5 +1,5 @@
 As you have problems with __mandatory librairies__,
-we can create them for you.
+we can create them for you. Please issue:
 
 __cd fallbacks__
 __./build-abinit-fallbacks.sh__

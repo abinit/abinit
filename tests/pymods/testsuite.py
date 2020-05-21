@@ -2723,7 +2723,7 @@ class MultibinitTest(BaseTest):
 
 class TdepTest(BaseTest):
     """
-    Class for TDEP tests. Redefine the make_stdin method of BaseTest
+    Class for a-TDEP tests. Redefine the make_stdin method of BaseTest
     """
     def make_stdin(self):
         t_stdin = StringIO()
@@ -2834,7 +2834,7 @@ def exec2class(exec_name):
         "band2eps": Band2epsTest,
         "optic": OpticTest,
         "multibinit": MultibinitTest,
-        "tdep": TdepTest,
+        "atdep": TdepTest,
     }.get(exec_name, BaseTest)
 
 

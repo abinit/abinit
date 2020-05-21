@@ -22,7 +22,7 @@ The recommended tables (GGA-PBE, GGA-PBEsol and LDA) come from the |pseudodojo| 
 with ONCVPSP pseudopotentials ([[cite:Hamann2013]]) 
 both in scalar-relativistic format and fully-relativistic version with spin-orbit coupling. 
 For PAW calculation,the recommended one (GGA-PBE and LDA) is the JTH
-table in the PAW XML format (([cite:Jollet2014]]). 
+table in the PAW XML format ([[cite:Jollet2014]]). 
 
 The choice between norm-conserving
 pseudopotentials or PAW is deduced automatically by the choice of the

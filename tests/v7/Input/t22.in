@@ -67,7 +67,7 @@
 pawecutdg  30
  pawxcdev   0  # Test this value within DFPT
 
-#LDA+U
+#DFT+U
    ixc 7
 usepawu   1
 lpawu   3  -1
