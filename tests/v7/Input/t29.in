@@ -74,8 +74,8 @@ dmft_mxsf 0.3
 dmft_dc 1
 
 
-# == LDA+U
-usepawu     1   # LDA+U is used.
+# == DFT+U
+usepawu     1   # DFT+U is used.
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   3   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00     # values in Hartree

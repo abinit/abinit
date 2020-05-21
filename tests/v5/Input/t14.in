@@ -52,7 +52,7 @@ znucl 28
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = X. Gonze
-#%% keywords = PAW, LDAU 
+#%% keywords = PAW, DFTU 
 #%% description = 
 #%%   Ni atom in a big box.
 #%%   Test the use of the atvshift variable :

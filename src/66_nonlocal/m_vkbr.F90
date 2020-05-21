@@ -593,7 +593,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
 
  ! [H, r] = -\nabla + [V_{nl}, r]
  ! V_nl is present only in the case of NC pseudos but
- ! not in PAW unless even the AE Hamiltonian in non-local e.g. LDA+U or LEXX.
+ ! not in PAW unless even the AE Hamiltonian in non-local e.g. DFT+U or LEXX.
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates is always included.
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)

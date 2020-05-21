@@ -109,9 +109,9 @@ contains
 !!
 !! NOTES
 !!  *) Version for K_V = K_C (q=0), thus KP_V = KP_C
-!!  *) No exchange limit: use LDA energies in case.
+!!  *) No exchange limit: use DFT energies in case.
 !!  *) Symmetry of H(-k-k') = H*(k k') not used.
-!!  *) Coulomb term can be approssimateed as diagonal in G.
+!!  *) Coulomb term can be approximated as diagonal in G.
 !!  *) Valence bands treated from lomo on.
 !!  *) Symmetries of the sub-blocks are used to reduce the number of elements to calculate.
 !!
@@ -1682,9 +1682,9 @@ end subroutine exc_build_block
 !!
 !! NOTES
 !!  *) Version for K_V = K_C (q=0), thus KP_V = KP_C
-!!  *) No exchange limit: use LDA energies in case.
+!!  *) No exchange limit: use DFT energies in case.
 !!  *) Symmetry of H(-k-k') = H*(k k') not used.
-!!  *) Coulomb term can be approssimateed as diagonal in G.
+!!  *) Coulomb term can be approximated as diagonal in G.
 !!  *) Valence bands treated from lomo on.
 !!  *) Symmetries of the sub-blocks are used to reduce the number of elements to calculate.
 !!

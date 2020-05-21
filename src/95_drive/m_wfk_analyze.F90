@@ -346,7 +346,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    call setsym_ylm(cryst%gprimd,pawang%l_max-1,cryst%nsym,dtset%pawprtvol,cryst%rprimd,cryst%symrec,pawang%zarot)
 
-   ! Initialize and compute data for LDA+U
+   ! Initialize and compute data for DFT+U
    !paw_dmft%use_dmft=dtset%usedmft
    !call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
    !    .false.,dtset%jpawu,dtset%lexexch,dtset%lpawu,cryst%ntypat,pawang,dtset%pawprtvol,&

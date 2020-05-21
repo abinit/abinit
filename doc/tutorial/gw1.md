@@ -362,7 +362,7 @@ KS_gap     :    2.505
 QP_gap     :    3.120
 Delta_QP_KS:    0.614
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   5.967 -11.268 -13.253   1.814   0.770  -0.299 -11.400  -0.132   5.835
         5   8.472 -10.056  -5.573  -3.856   0.770  -0.298  -9.573   0.483   8.955
 ...
@@ -371,7 +371,7 @@ data: !SigmaeeData |
 For the desired **k**-point ($\Gamma$ point), for state 4, then state 5, one finds different information:
 
   * E0 is the KS eigenenergy
-  * VxcLDA gives the average KS exchange-correlation potential
+  * VxcDFT gives the average KS exchange-correlation potential
   * SigX gives the exchange contribution to the self-energy
   * SigC(E0) gives the correlation contribution to the self-energy, evaluated at the KS eigenenergy
   * Z is the renormalisation factor
@@ -843,20 +843,21 @@ KS_gap     :    2.513
 QP_gap     :    3.140
 Delta_QP_KS:    0.627
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         4   5.951 -11.271 -13.260   1.449   0.766  -0.305 -11.685  -0.414   5.537
         5   8.464 -10.056  -5.572  -4.207   0.767  -0.304  -9.843   0.213   8.677
 ...
 ```
 
 
-So that the LDA energy gap in $\Gamma$ is about 2.51 eV, while the GW correction is
+So that the DFT energy gap in $\Gamma$ is about 2.51 eV, while the GW correction is
 about 0.63 eV, so that the GW band gap found is 3.14 eV.
 
 One can compare now what have been obtained to what one can get from the literature.
 
      EXP         3.40 eV   Landolt-Boernstein
 
+     DFT (LDA)
      LDA         2.57 eV   L. Hedin, Phys. Rev. 139, A796 (1965)
      LDA         2.57 eV   M.S. Hybertsen and S. Louie, PRL 55, 1418 (1985)
      LDA (FLAPW) 2.55 eV   N. Hamada, M. Hwang and A.J. Freeman, PRB 41, 3620 (1990)
@@ -867,7 +868,6 @@ One can compare now what have been obtained to what one can get from the literat
      GW          3.35 eV   M.S. Hybertsen and S. Louie, PRB 34, 5390 (1986)
      GW          3.30 eV   R.W. Godby, M. Schlueter, L.J. Sham, PRB 37, 10159 (1988)
      GW  (FLAPW) 3.30 eV   N. Hamada, M. Hwang and A.J. Freeman, PRB 41, 3620 (1990)
-     GW  (PAW)   3.15 eV   B. Arnaud and M. Alouani, PRB 62, 4464 (2000)
      GW  (FLAPW) 3.12 eV   W. Ku and A.G. Eguiluz, PRL 89, 126401 (2002)
      GW          3.17 eV   present work
 
@@ -1005,7 +1005,7 @@ In the case of a self-consistent calculation, the output is slightly more comple
 **For instance, iteration 2**
 
      k =    0.500   0.250   0.000
-     Band     E_lda  <Vxclda>    E(N-1) <Hhartree>    SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT  <VxcDFT>    E(N-1) <Hhartree>    SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.422   -10.273    -3.761     6.847   -15.232     4.034     1.000     0.000   -11.198    -0.590    -4.351    -4.351
         2    -0.574   -10.245    -0.850     9.666   -13.806     2.998     1.000     0.000   -10.807    -0.291    -1.141    -1.141
         3     2.242    -9.606     2.513    11.841   -11.452     1.931     1.000     0.000    -9.521    -0.193     2.320     2.320
@@ -1022,10 +1022,10 @@ In the case of a self-consistent calculation, the output is slightly more comple
 The columns are
 
   * **Band**: index of the band
-  * **E_lda**: LDA eigenvalue
-  * **Vxclda**: diagonal expectation value of the xc potential in between LDA bra and ket
-  * **E(N-1)**: quasiparticle energy of the previous iteration (equal to LDA for the first iteration)
-  * **Hhartree**: diagonal expectation value of the Hartree Hamiltonian (equal to E_lda - Vxclda for the first iteration only)
+  * **E_DFT**: DFT eigenvalue
+  * **VxcDFT**: diagonal expectation value of the xc potential in between DFT bra and ket
+  * **E(N-1)**: quasiparticle energy of the previous iteration (equal to DFT for the first iteration)
+  * **Hhartree**: diagonal expectation value of the Hartree Hamiltonian (equal to E_DFT - VxcDFT for the first iteration only)
   * **SigX**: diagonal expectation value of the exchange self-energy
   * **SigC[E(N-1)]**: diagonal expectation value of the correlation self-energy
     (evaluated for the energy of the preceeding iteration)
