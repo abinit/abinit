@@ -343,7 +343,7 @@ end function ephwg_from_ebands
 !!
 !! SOURCE
 
-subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
+subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
 !Arguments ------------------------------------
 !scalars
@@ -436,6 +436,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping )
                   self%lgk%ibz, self%nq_k, ierr, errorstring, comm)
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
+ if (xmpi_comm_rank(comm) == 0) call self%tetra_k%print(std_out)
  ABI_FREE(indkk)
 
  call cwtime_report(" init_tetra", cpu, wall, gflops)

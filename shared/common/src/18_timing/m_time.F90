@@ -603,6 +603,9 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
  if (present(end_str)) call wrtout(std_out, end_str)
  call cwtime(cpu, wall, gflops, "start")
 
+ ! Activate this line to get mallinfo section for each checkpoint
+ call clib_print_mallinfo(std_out)
+
 end subroutine cwtime_report
 !!***
 

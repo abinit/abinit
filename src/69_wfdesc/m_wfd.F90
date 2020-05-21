@@ -867,7 +867,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  logical :: iscompatibleFFT
  character(len=500) :: msg
 !arrays
- integer :: dum_kg(3,0)
+ integer :: dum_kg(3,0) !, bounds(2)
  real(dp) :: kpoint(3)
  !integer :: my_band_list(Wfd%mband)
 
@@ -1004,14 +1004,28 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
- ABI_MALLOC(Wfd%Wave,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
+ ABI_MALLOC(Wfd%Wave, (Wfd%mband, Wfd%nkibz, Wfd%nsppol))
+
+ !bounds = [wfd%mband+1, 1]
+ !do spin=1,Wfd%nsppol
+ !  do ik_ibz=1,Wfd%nkibz
+ !    do band=1,Wfd%nband(ik_ibz, spin)
+ !      if (bks_mask(band,ik_ibz, spin)) then
+ !          bounds(1) = min(bounds(1), band)
+ !          bounds(2) = max(bounds(2), band)
+ !      end if
+ !    end do
+ !  end do
+ !end do
+ !ABI_MALLOC(Wfd%Wave, (bounds(1):bounds(2), Wfd%nkibz, Wfd%nsppol))
+
 
  ! Allocate the wavefunctions in reciprocal space according to bks_mask.
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
      npw_k = Wfd%npwarr(ik_ibz)
-     do band=1,Wfd%nband(ik_ibz,spin)
-       if (bks_mask(band,ik_ibz,spin)) then
+     do band=1,Wfd%nband(ik_ibz, spin)
+       if (bks_mask(band,ik_ibz, spin)) then
          call wave_init(Wfd%Wave(band,ik_ibz,spin),Wfd%usepaw,npw_k,nfft0,Wfd%nspinor,Wfd%natom,Wfd%nlmn_atm,CPR_RANDOM)
        end if
      end do

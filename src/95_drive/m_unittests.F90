@@ -379,7 +379,7 @@ subroutine tetra_unittests(comm)
  write(std_out,*) "dos_int", dos_int, idos(nw)
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
  call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
- call htetraq%print()
+ call htetraq%print(std_out)
 
  !
  ! 2. Compute energies for a flat band

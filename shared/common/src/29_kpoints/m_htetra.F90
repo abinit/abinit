@@ -949,6 +949,7 @@ end subroutine htetra_init_mapping_ibz
 !! SOURCE
 
 pure subroutine htetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
+
  class(htetra_t), intent(in) :: tetra
  integer,intent(in) :: ikibz, itetra
  integer,intent(out) :: tetra_mibz(0:4)
@@ -975,22 +976,26 @@ end subroutine htetra_get_ibz
 !!
 !! SOURCE
 
-subroutine htetra_print(self)
+subroutine htetra_print(self, unit)
 
  class(htetra_t), intent(in) :: self
+ integer,intent(in) :: unit
+
  real(dp) :: total_size, unique_tetra_size, ibz_pointer_size
+
+ if (unit == dev_null) return
 
  unique_tetra_size = self%nunique_tetra*5*four/1024/1024
  total_size        = unique_tetra_size
- write(std_out,'(a,i12)')     'unique_tetra      ', self%nunique_tetra
- write(std_out,'(a,f12.1,a)') 'unique_tetra_size ', unique_tetra_size, ' [Mb]'
+ write(unit,'(a,i12)')     'unique_tetra      ', self%nunique_tetra
+ write(unit,'(a,f12.1,a)') 'unique_tetra_size ', unique_tetra_size, ' [Mb] <<< MEM'
  if (allocated(self%ibz)) then
    ibz_pointer_size  = self%nibz_tetra*2*four/1024/1024
-   write(std_out,'(a,i12)')     'ibz_tetra         ', self%nibz_tetra
-   write(std_out,'(a,f12.1,a)') 'ibz_tetra_size    ', ibz_pointer_size, ' [Mb]'
+   write(unit,'(a,i12)')     'ibz_tetra         ', self%nibz_tetra
+   write(unit,'(a,f12.1,a)') 'ibz_tetra_size    ', ibz_pointer_size, ' [Mb] <<< MEM'
    total_size = total_size + ibz_pointer_size
  end if
- write(std_out,'(a,f12.1,a)') 'total size        ', total_size, ' [Mb]'
+ write(unit,'(a,f12.1,a)') 'total size        ', total_size, ' [Mb] <<< MEM'
 
 end subroutine htetra_print
 !!***
