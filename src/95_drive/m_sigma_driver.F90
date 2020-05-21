@@ -243,8 +243,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax ! MRM
- complex(dpc) :: max_degw,cdummy,delta_band ! MRM
+ real(dp):: gwalpha,gwbeta,wmin,wmax,coef_hyb_tmp  ! MRM
+ complex(dpc) :: max_degw,cdummy,delta_band_ibik   ! MRM
+ logical :: hyb_tmp                                ! MRM
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname ! MRM
@@ -292,7 +293,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hlda(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:,:) ! MRM
+ complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:,:),delta_band(:,:)  ! MRM
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
 !complex(dpc),pointer :: sigcme_p(:,:,:,:)
@@ -418,10 +419,24 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! ===============================================
  ! * Sigp is completetly initialized here.
  ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in mkdump_Er
- call timab(403,1,tsec) ! setup_sigma
+ call timab(403,1,tsec) ! ,hyb_tmpsetup_sigma
 
- call setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
-& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
+ ! MRM only used for Hybrids (not local hybrids)
+ if(gwcalctyp==21 .and. gw1rdm>3) then
+   hyb_tmp=.TRUE.
+   coef_hyb_tmp=0.0_dp
+   if(abs(Dtset%hyb_mixing--999.000)<tol8) then
+     coef_hyb_tmp=0.0_dp
+   else
+     coef_hyb_tmp=Dtset%hyb_mixing
+   endif
+   call setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
+   & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm,hyb_tmp)
+ else
+   coef_hyb_tmp=0.0_dp
+   call setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
+   & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
+ endif
 
  call timab(403,2,tsec) ! setup_sigma
  call timab(402,1,tsec) ! Init1
@@ -2254,7 +2269,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
       ! MRM compute 1-RDM correction?
       if(gwcalctyp==21 .and. gw1rdm>0) then 
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
-        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
+        potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange (k-point) one
@@ -2323,12 +2338,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    ! MRM print WFK and DEN files.
    if(gwcalctyp==21 .and. gw1rdm>0) then
+     ABI_MALLOC(delta_band,(b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
      ABI_MALLOC(gw_rhog,(2,nfftf))
      ABI_MALLOC(gw_vhartr,(nfftf))
      gw_rhor=0.0_dp
      gw_rhog=0.0_dp
      gw_vhartr(:)=0.0_dp
+     delta_band(:,:)=czero
      !
      ! MRM only the master has bands on Wfd_dm so let it print everything and prepare gw_rhor 
      !
@@ -2353,6 +2370,18 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast it
      ! MRM end broadcast gw_rhor 
      if(gw1rdm>3) then                                    
+       write(msg,'(a1)')  ' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a37)')  ' Computing band corrections Delta eik'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a37)')  ' ------------------------------------'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a1)')  ' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
        ! We need RAM memory, so lets deallocate Wfd_dm
        Wfd_dm%bks_comm = xmpi_comm_null
        call Wfd_dm%free()
@@ -2386,6 +2415,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+         do ib=b1gw,b2gw
+           delta_band(ib,ikcalc)=coef_hyb_tmp*Sr%x_mat(ib,ib,ikcalc,1)
+         enddo
          call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),& 
          & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_natorb,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
@@ -2400,25 +2432,32 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        !
        ! Delta eik
        !
-       write(msg,'(a69)')  ' Band corrections Delta eik = <KS_i|K[NO]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
+       write(msg,'(a1)')  ' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a75)')  ' Band corrections Delta eik = <KS_i|K[NO]-K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a1)')  ' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ikcalc=1,Sigp%nkptgw
-         write(msg,'(a74)')'------------------------------------------------------------------------'
+         write(msg,'(a85)')'-------------------------------------------------------------------------------------'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
-         write(msg,'(a74)')' k-point  band    Delta_eik       K[NO]         Vxc[NO]        DVhartree'
+         write(msg,'(a85)')' k-point  band     Delta eik        K[NO]         Vxc[NO]       DVhartree       K[KS]'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          do ib=b1gw,b2gw
-           delta_band=(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)
-           write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,5x,f10.5,6x,f10.5)') ikcalc,ib,Real(delta_band),real(Sr%x_mat(ib,ib,ikcalc,1)),&
+           delta_band_ibik=(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)&
+                          &-delta_band(ib,ikcalc)
+           write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,5x,f10.5,6x,f10.5,2x,f10.5)') ikcalc,ib,real(delta_band_ibik),real(Sr%x_mat(ib,ib,ikcalc,1)),&
            & real(KS_me%vxcval(ib,ib,ikcalc,1)), &
-           & real(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))
+           & real(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1)),real(delta_band(ib,ikcalc))
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
-           if(aimag(delta_band)>10.0e-6) then
-             write(msg,'(a26,i5,4x,i5,3x,f10.5)') 'Large imaginary(k,i,Deik)=',ikcalc,ib,aimag(delta_band)
+           if(aimag(delta_band_ibik)>10.0e-6) then
+             write(msg,'(a26,i5,4x,i5,3x,f10.5)') 'Large imaginary(k,i,Deik)=',ikcalc,ib,aimag(delta_band_ibik)
              call wrtout(std_out,msg,'COLL')
            endif
          enddo
@@ -2428,6 +2467,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        !
        call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
      endif
+     ABI_FREE(delta_band)
      ABI_FREE(gw_rhor)
      ABI_FREE(gw_rhog)
      ABI_FREE(gw_vhartr)
@@ -2750,13 +2790,14 @@ end subroutine sigma
 !! SOURCE
 
 subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
-& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
+& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm,hyb_tmp)
 
  !use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
+ logical,intent(in),optional :: hyb_tmp
  character(len=8),intent(in) :: codvsn
  character(len=*),intent(in) :: wfk_fname
  type(Datafiles_type),intent(in) :: Dtfil
@@ -3519,7 +3560,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      MSG_ERROR(msg)
    endif
  endif
- 
  do ivcoul_init=1,nvcoul_init
    rcut = Dtset%rcut
    icutcoul_eff=Dtset%icutcoul
@@ -3558,8 +3598,13 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      end if
 
 !    Now compute the residual Coulomb interaction
-     Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
-     Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
+     if(present(hyb_tmp)) then
+       Vcp%vc_sqrt_resid=Vcp%vc_sqrt
+       Vcp%i_sz_resid=Vcp%i_sz
+     else
+       Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
+       Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
+     endif
 !    The mixing factor has already been accounted for, so set it back to one
      Sigp%sigma_mixing=one
      call vcoul_free(Vcp_ks)
