@@ -16500,8 +16500,7 @@ Control the range of atoms for which displacements will be considered in
 phonon calculations (atomic polarizations).
 These values are only relevant to phonon response function calculations.
 May take values from 1 to [[natom]], with [[rfatpol]](1)<=[[rfatpol]](2).
-The atoms to be moved will be defined by the
-do-loop variable iatpol:
+The atoms to be moved will be defined by the do-loop variable iatpol:
 
   - do iatpol=[[rfatpol]](1),[[rfatpol]](2)
 
@@ -21530,10 +21529,17 @@ Variable(
 This **advanced** variable sets the list of supercell $\RR$-points used to construct the scattering potential
 in the real-space representation with the associated weights for the Fourier transform
 to go from $W(\rr,\RR)$ to $v1scf(\rr,\qq)$.
+
 Possible values are:
 
     0 --> Use unit super cell for $\RR$ space. All weights set to 1.
-    1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix)
+    1 --> Use Wigner-Seitz super cell and atom-dependent weights (same algorithm as for the dynamical matrix).
+          Note that this option leads to more $\RR$-points with a non-neglibigle increase of the memory allocated.
+
+!!! tip
+
+    Reducing the value of [[boxcutmin]] to e.g. 1.1 allows one to reduce the number, [[nfft]], of $\rr$-points
+    with a considerable memory saving for $W(\rr,\RR)$.
 """,
 ),
 

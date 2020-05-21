@@ -340,7 +340,7 @@ Let's discuss the meaning of the e-ph variables in more details.
 
 [[optdriver]] 7 is required to activate the e-ph driver while
 [[eph_task]] -4 tells ABINIT that we only need the imaginary part
-of the e-ph self-energy, which directly gives the electron lifetimes, see [[cite:Brunin2020]].
+of the e-ph self-energy, which directly gives the electron lifetimes.
 
 The dense $\kk$-mesh is specified by [[ngkpt]] = 24 24 24.
 It should be the same mesh as the one used for the dense WFK computation.
@@ -381,6 +381,9 @@ the lifetimes for these $\kk$-points only. Indeed, the value of the derivative d
 as we go further from the Fermi level. Only the states close to the band edges contribute.
 This additional filtering technique allows one to compute only a few percents of all the lifetimes.
 This variable should be subject to a convergence study, as explained in the next section.
+<!--
+A value of 0.2 eV represents a good starting point for further analysis 
+-->
 
 Different tricks have been implemented to accelerate the computation.
 The use of single precision in the FFT routines allows one to decrease the computational cost
@@ -542,19 +545,19 @@ to reach convergence within 5%.
 In order to compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh, there are two possibilities.
 Let us take the previous example of silicon.
 
-1. Run a computation with: 
+1. Run a computation with:
 
-       * [[ngkpt]] = 90 90 90, 
-       * [[eph_ngqpt_fine]] = 90 90 90, 
+       * [[ngkpt]] = 90 90 90,
+       * [[eph_ngqpt_fine]] = 90 90 90,
        * [[sigma_ngkpt]] = 45 45 45.
 
    Using [[sigma_ngkpt]] will select the $\kk$-points belonging to the 45x45x45 mesh, but each lifetime will be computed
    with a 90x90x90 q-mesh.
 
-2. Run a computation with: 
+2. Run a computation with:
 
-      * [[ngkpt]] = 90 90 90, 
-      * [[eph_ngqpt_fine]] = 90 90 90, 
+      * [[ngkpt]] = 90 90 90,
+      * [[eph_ngqpt_fine]] = 90 90 90,
       * [[sigma_ngkpt]] = 90 90 90.
 
    In this way, you have the mobility with 90x90x90 $\kk$- and $\qq$-meshes. You can then run again the transport driver only,
@@ -734,7 +737,7 @@ the idea is relatively simple and goes as follows:
 
 1. Compute the KS eigenvalues on a relatively coarse $\kk$-mesh in the IBZ
 2. Use this *coarse* WFK file to interpolate the eigenvalues on a much denser $\kk$-mesh specified by the user.
-3. Find the wavevectors of the dense mesh inside an energy window specified by the user and 
+3. Find the wavevectors of the dense mesh inside an energy window specified by the user and
    store the list of $\kk$-points in a external file.
 4. Use this file to run a NSCF calculation only for these $\kk$-points.
    At the end of the run, ABINIT will produce a **customized** WFK file on the dense mesh that
@@ -774,7 +777,7 @@ getwfk_filepath "161616_WFK"    # Init GS wavefunctions from this file (optional
 iscf  -2
 kptopt 0                        # Important
 
-# These variables must be consistent with the values of 
+# These variables must be consistent with the values of
 # sigma_ngkpt, sigma_shiftk settings used in the previous step
 ngkpt    64 64 64
 nshiftk  1
