@@ -181,8 +181,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
  cutoff=gsqcut*tolfix
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
- write(*,*)'This is ', rprimd(:,:), gprimd(:,:)
  
  ! Initialize container
  ABI_ALLOCATE(gvec,(3,max(n1,n2,n3))) 
@@ -309,8 +307,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      a2=rprimd(:,2); b2=two_pi*gprimd(:,2)
      a3=rprimd(:,3); b3=two_pi*gprimd(:,3)
 
-     write(*,*)'This is a1',a1, a2, a3
- 
      ! Calculate rcut for each method !
      rcut = half*SQRT(DOT_PRODUCT(a3,a3))
 
@@ -398,8 +394,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      write(msg,'(a)')'No cut-off applied to G**2!'
      MSG_WARNING(msg)
  END SELECT
-  
- write(*,*)'This is rcut', rcut
 
  ABI_DEALLOCATE(gvec) 
  ABI_DEALLOCATE(gpq)
