@@ -194,11 +194,10 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
  if (dtset%usewvl == 0) then
 !  Plane wave case
    if (psps%vlspl_recipSpace) then
-     call mklocl_recipspace(dyfrlo,eei,dtset%icutcoul,dtset%vcutgeo,&
-&      gmet,gprimd,grtn,gsqcut,lpsstr,mgfft, &
-&     mpi_enreg,psps%mqgrid_vl,natom,nattyp,nfft,ngfft, &
-&     ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,ucvol, &
-&     psps%vlspl,vprtrb,vpsp)
+     call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,&
+&     dtset%icutcoul,lpsstr,mgfft,mpi_enreg,psps%mqgrid_vl,natom,nattyp, &
+&     nfft,ngfft,dtset%nkpt,ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,rprimd,&
+&     ucvol,dtset%vcutgeo,psps%vlspl,vprtrb,vpsp)
    else
      call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
 &     ngfft,dtset%nscforder,nspden,ntypat,option,pawtab,psps,rhog,rhor, &
@@ -287,14 +286,14 @@ end subroutine mklocl
 !!
 !! SOURCE
 
-subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,vcutgeo,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
-&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,qprtrb,&
-&  rhog,ucvol,vlspl,vprtrb,vpsp)
+subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,mgfft,&
+&  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,qprtrb,&
+&  rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb,vpsp)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,option,icutcoul
- real(dp),intent(in) :: eei,gsqcut,ucvol,vcutgeo(3)
+ integer,intent(in) :: mgfft,mqgrid,natom,nfft,nkpt,ntypat,option,icutcoul
+ real(dp),intent(in) :: eei,gsqcut,rprimd(3,3),ucvol,vcutgeo(3)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
@@ -378,7 +377,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,icutcoul,vcutgeo,gmet,gprimd,grtn,gsqcut
  ia1=1
 
  !Initialize Gcut-off array from m_gtermcutoff
- call termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
  !Print out the method used for cut-off
  !if (icutcoul==0) mode='SPHERE'
  !if (icutcoul==1) mode='CYLINDER'

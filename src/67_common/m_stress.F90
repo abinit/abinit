@@ -209,7 +209,7 @@ contains
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,coretau_method,iatom,icoulomb,idir,ii,ipositron,mu
+ integer :: coredens_method,coretau_method,iatom,icoulomb,idir,ii,ipositron,mu,nkpt=1
  integer :: optatm,optdyfr,opteltfr,opt_hybr,optgr,option,optn,optn2,optstr,optv,sdir,vloc_method
  real(dp),parameter :: tol=1.0d-15
  real(dp) :: e_dum,strsii,ucvol,vol_element
@@ -316,9 +316,9 @@ contains
    ABI_ALLOCATE(dyfr_dum,(3,3,natom))
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl_recipspace(dyfr_dum,eei,icutcoul,vcutgeo,gmet,gprimd,gr_dum,gsqcut,lpsstr,mgfft,&
-&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,ntypat,option,ph1d,qgrid,&
-&   qprtrb_dum,rhog,ucvol,vlspl,vprtrb_dum,v_dum)
+   call mklocl_recipspace(dyfr_dum,eei,gmet,gprimd,gr_dum,gsqcut,icutcoul,lpsstr,mgfft,&
+&   mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,&
+&   qprtrb_dum,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb_dum,v_dum)
    ABI_DEALLOCATE(dyfr_dum)
    ABI_DEALLOCATE(gr_dum)
    ABI_DEALLOCATE(v_dum)

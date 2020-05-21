@@ -2714,7 +2714,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%useylm=0
 !  V
    dtsets(idtset)%vacnum = -1
-   dtsets(idtset)%vcutgeo(:)=zero
+   dtsets(idtset)%vcutgeo(3)=zero
    dtsets(idtset)%vdw_nfrag = 1
 #if defined DEV_YP_VDWXC
    dtsets(idtset)%vdw_df_acutmin = vdw_defaults%acutmin

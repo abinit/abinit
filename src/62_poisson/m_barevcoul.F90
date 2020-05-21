@@ -192,7 +192,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 !
  comm=mpi_enreg%comm_world
 !
-! === Save dimension and other useful quantities in barev% ===
+! === Save dimension and other useful quantities in vcut% ===
  vcut%nfft      = PRODUCT(ngfft(1:3))  ! Number of points in the FFT mesh.
  vcut%ng        = ng                   ! Number of G-vectors in the Coulomb matrix elements.
  vcut%rcut      = rcut                 ! Cutoff radius for cylinder.

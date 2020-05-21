@@ -321,7 +321,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
   !(nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise)
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc)
- real(dp), intent(in) :: rprimd(3,3)
+ real(dp), intent(inout) :: rprimd(3,3)
  real(dp), pointer :: rhog(:,:),rhor(:,:)
  real(dp), pointer :: taug(:,:),taur(:,:)
  real(dp), intent(inout) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)

@@ -4025,9 +4025,9 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    ABI_ALLOCATE(dyfrlo_tmp1,(3,3,natom))
    ABI_ALLOCATE(gr_dum,(3,natom))
    ABI_ALLOCATE(v_dum,(nfft))
-   call mklocl_recipspace(dyfrlo_tmp1,eei,dtset%icutcoul,dtset%vcutgeo,gmet,gprimd,&
-&   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-&   ntypat,option,ph1d,qgrid,qprtrb,rhog,ucvol,vlspl,vprtrb,v_dum)
+   call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
+&   gr_dum,gsqcut,dtset%icutcoul,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,dtset%nkpt,&
+&   ntypat,option,ph1d,qgrid,qprtrb,rhog,rprimd,ucvol,dtset%vcutgeo,vlspl,vprtrb,v_dum)
    do iatom=1,natom
 !    Reestablish correct order of atoms
      dyfrlo(1:3,1:3,atindx1(iatom))=dyfrlo_tmp1(1:3,1:3,iatom)

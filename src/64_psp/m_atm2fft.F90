@@ -362,7 +362,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  !Initialize Gcut-off array from m_termcutoff
  !ABI_ALLOCATE(gcutoff,(nfft))
- call termcutoff(icutcoul,vcutgeo,gmet,gprimd,nfft,ngfft,gsqcut,ucvol,gcutoff)
+ !call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,rprimd,vcutgeo)
 
  ia1=1
  do itypat=1,ntypat
@@ -447,7 +447,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  v_at=(aa*vspl(jj,1,itypat)+bb*vspl(jj+1,1,itypat)+&
 &                 cc*vspl(jj,2,itypat)+dd*vspl(jj+1,2,itypat)) &
-&                 /gsquar * gcutoff(ii)
+&                 /gsquar !* gcutoff(ii)
                end if
              end if
              if (optn==1) then
@@ -729,7 +729,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  ABI_DEALLOCATE(phre_igia)
  ABI_DEALLOCATE(phim_igia)
- ABI_DEALLOCATE(gcutoff)
+ !ABI_DEALLOCATE(gcutoff)
 
 !Get local potential or density back to real space
  if(optatm==1)then

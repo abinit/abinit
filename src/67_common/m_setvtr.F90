@@ -222,7 +222,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(in) :: nhat(nfft,dtset%nspden*psps%usepaw)
  real(dp),intent(in) :: nhatgr(:,:,:) !(nfft,dtset%nspden,3*nhatgrdim)
  real(dp),intent(in) :: rhog(2,nfft)
- real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
+ real(dp),intent(inout) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(inout) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft),vpsp(nfft)
  real(dp),intent(inout),optional :: taur(nfft,dtset%nspden*dtset%usekden)
