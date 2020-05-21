@@ -2328,7 +2328,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(gw_vhartr,(nfftf))
      gw_rhor=0.0_dp
      gw_rhog=0.0_dp
-     ! MRM only the master has bands on Wfd_dm so let it print everything and prepare gw_rhor
+     gw_vhartr(:)=0.0_dp
+     !
+     ! MRM only the master has bands on Wfd_dm so let it print everything and prepare gw_rhor 
+     !
      if(my_rank==0) then
        call update_hdr_bst(Wfd_dm,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
        call Wfd_dm%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs 
@@ -2339,8 +2342,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
      endif
-     ! MRM broadcast gw_rhor 
-      dimbc=2*nfftf
+     ! MRM start broadcast gw_rhor 
+     dimbc=2*nfftf
      call xmpi_barrier(Wfd%comm)
      ierr=0
      call xmpi_bcast(gw_rhor(:,:),master,Wfd%comm,ierr)
@@ -2348,16 +2351,17 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        MSG_ERROR("Error distributing the GW density")
      endif
      call xmpi_barrier(Wfd%comm)                                              ! Wait for master to prepare gw_rhor and broadcast it
+     ! MRM end broadcast gw_rhor 
      if(gw1rdm>3) then                                    
        ! We need RAM memory, so lets deallocate Wfd_dm
        Wfd_dm%bks_comm = xmpi_comm_null
        call Wfd_dm%free()
-       ! Coulomb <KS_i|Vhartree[NO]|KS_j>
-       ks_vhartr(:)=0.0_dp
+       !
+       ! Coulomb <KS_i|Vh[NO]|KS_j>
+       !
        call fourdp(1,gw_rhog,gw_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)                  ! FFT to build gw_rhog 
        call hartre(1,gsqcutf_eff,Psps%usepaw,MPI_enreg_seq,nfftf,ngfftf,gw_rhog,Cryst%rprimd,gw_vhartr) ! Build Vhartree -> gw_vhartr
        ABI_MALLOC(tmp_kstab,(2,Wfd%nkibz,Wfd%nsppol))
-       ! Compute matrix elements Vhartree -> GW1RDM_me
        tmp_kstab=0
        do spin=1,Sigp%nsppol
          do ikcalc=1,Sigp%nkptgw ! No spin dependent
@@ -2370,35 +2374,33 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
        & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur) 
        ABI_FREE(tmp_kstab)
+       !
        ! Exchange <KS_i|K[NO]|KS_i>
+       !
        call wfd_init(Wfd_natorb,Cryst,Pawtab,Psps,keep_ur_dm2,mband,nband_dm,Kmesh%nibz,Sigp%nsppol,bdm2_mask,&
          Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
          Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                       ! Build new Wfd_natorb
        call Wfd_natorb%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))        ! Read WFK and store it in Wfd_natorb
-       ! MRM for testing without rotation (KS orbs in Wfd_natorbs) uncomment the following 6 lines
-       !nateigv=czero
-       !do ikcalc=1,Wfd%nkibz
-       !  do ib=1,Wfd%mband 
-       !    nateigv(ib,ib,ikcalc,1)=cone
-       !  enddo  
-       !enddo
-       call Wfd_natorb%rotate(Cryst,nateigv)                                   ! Let rotate build the NOs using Wfd_natorb
-       do ikcalc=1,Sigp%nkptgw                                                 ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
+       call Wfd_natorb%rotate(Cryst,nateigv)                                   ! Let rotate build the NOs in Wfd_natorb (KS->NO)
+       do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
-         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_natorb,Wfdf,QP_sym,&
+         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),& 
+         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_natorb,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-         ! Transform <NO_i|Sigma_x[NO]|NO_j> NOs->MOs, at this point all mat. elements are stored in Sr%x_mat 
-         call rotate_exchange(ikcalc,ib1,ib2,Sr,nateigv) ! -> sent to 70_gw/m_gwrdm.F90
+         ! Transform in <NO_i|Sigma_x[NO]|NO_j> the outer NOs->KSs (at this point all mat. elements are stored in Sr%x_mat)
+         call rotate_exchange(ikcalc,ib1,ib2,Sr,nateigv) ! <KS_i|K[NO]|KS_j>
        end do
        Wfd_natorb%bks_comm = xmpi_comm_null
        call Wfd_natorb%free()
        ABI_FREE(keep_ur_dm2)
        ABI_FREE(bdm2_mask)
        ABI_FREE(nband_dm)
-       write(msg,'(a68)')' Band corrections Delta ei = <KS_i|K[NO]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
+       !
+       ! Delta eik
+       !
+       write(msg,'(a69)')  ' Band corrections Delta eik = <KS_i|K[NO]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ikcalc=1,Sigp%nkptgw
@@ -2421,6 +2423,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
            endif
          enddo
        enddo
+       !
+       ! Clean GW1RDM_me
+       !
        call melements_free(GW1RDM_me) ! Deallocate GW1RD_me
      endif
      ABI_FREE(gw_rhor)
@@ -3514,7 +3519,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      MSG_ERROR(msg)
    endif
  endif
-
+ 
  do ivcoul_init=1,nvcoul_init
    rcut = Dtset%rcut
    icutcoul_eff=Dtset%icutcoul
