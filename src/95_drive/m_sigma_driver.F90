@@ -2459,6 +2459,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
            if(aimag(delta_band_ibik)>10.0e-6) then
              write(msg,'(a26,i5,4x,i5,3x,f10.5)') 'Large imaginary(k,i,Deik)=',ikcalc,ib,aimag(delta_band_ibik)
              call wrtout(std_out,msg,'COLL')
+             write(msg,'(a26,i5,4x,i5,3x,f10.5)') '          Imag(k,i,K[NO])=',ikcalc,ib,aimag(Sr%x_mat(ib,ib,ikcalc,1))
+             call wrtout(std_out,msg,'COLL')
+             write(msg,'(a26,i5,4x,i5,3x,f10.5)') '          Imag(k,i,K[KS])=',ikcalc,ib,aimag(delta_band(ib,ikcalc))
+             call wrtout(std_out,msg,'COLL')
+             write(msg,'(a26,i5,4x,i5,3x,f10.5)') '        Imag(k,i,Vxc[NO])=',ikcalc,ib,aimag(KS_me%vxcval(ib,ib,ikcalc,1))
+             call wrtout(std_out,msg,'COLL')
+             write(msg,'(a26,i5,4x,i5,3x,f10.5)') '      Imag(k,i,DVhartree)=',ikcalc,ib,aimag(GW1RDM_me%vhartree(ib,ib,ikcalc,1)&
+                     &-KS_me%vhartree(ib,ib,ikcalc,1))
+             call wrtout(std_out,msg,'COLL')
            endif
          enddo
        enddo
