@@ -60,8 +60,8 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
- integer :: ndivsm
- real(dp) :: spinmagntarget, tsmear, extrael, step, broad
+ integer :: ndivsm, abimem_level
+ real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: path !, prefix
  type(hdr_type) :: hdr
@@ -90,13 +90,15 @@ program abitk
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
- !call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  nargs = command_argument_count()
  ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
+
 
  ! Command line options.
  do ii=1,command_argument_count()

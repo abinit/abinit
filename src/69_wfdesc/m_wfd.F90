@@ -867,7 +867,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  logical :: iscompatibleFFT
  character(len=500) :: msg
 !arrays
- integer :: dum_kg(3,0) !, bounds(2)
+ integer :: dum_kg(3,0), bounds(2)
  real(dp) :: kpoint(3)
  !integer :: my_band_list(Wfd%mband)
 
@@ -991,7 +991,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  call wrtout(std_out, " Storing wavefunctions in double precision array")
  call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve the memory requirements for the WFs')
 #else
- call wrtout(std_out, 'Storing wavefunctions in single precision array `enable_gw_dpc="yes"`')
+ call wrtout(std_out, 'Storing wavefunctions in single precision array `enable_gw_dpc="no"`')
 #endif
 
  if (Wfd%usepaw==1) then
@@ -1018,7 +1018,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  !  end do
  !end do
  !ABI_MALLOC(Wfd%Wave, (bounds(1):bounds(2), Wfd%nkibz, Wfd%nsppol))
-
 
  ! Allocate the wavefunctions in reciprocal space according to bks_mask.
  do spin=1,Wfd%nsppol

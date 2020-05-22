@@ -99,12 +99,15 @@ type, public :: htetra_t
   ! Number of ibz tetrahedron
 
   integer,allocatable :: tetra_total(:)
+  ! (%nbkibz)
   ! Equivalent tetrahedra per kpoint (number of irred tetra times multiplicity)
 
   integer,allocatable :: tetra_count(:)
+  ! (%nbkibz)
   ! Inequivalent tetrahedra per kpoint (number of irred tetra)
 
   integer,allocatable :: ibz_multiplicity(:)
+  ! (%nbkibz)
   ! Multiplicity of each k-point
 
   real(dp)  :: vv
@@ -696,6 +699,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    ABI_CALLOC(tetra%unique_tetra(ihash)%indexes,(0:4,TETRA_SIZE))
  end do
  tetra%opt = 2; if (present(opt)) tetra%opt = opt
+
  select case(tetra%opt)
  case(1)
    ! For each k-point in the IBZ store 24 tetrahedra each refering to 4 k-points
@@ -755,6 +759,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
      ikibz = bz2ibz(ikbz)
      tetra%ibz_multiplicity(ikibz) = tetra%ibz_multiplicity(ikibz) + 1
    end do
+
  case(2)
    min_idiag = 1
    ! For each k-point in the BZ generate the 6 tetrahedra that tesselate a microzone
@@ -826,7 +831,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
    ! Allocate array with right size
    ABI_MALLOC(indexes,(0:4,ntetra))
    indexes = tetra%unique_tetra(ihash)%indexes(:,:ntetra)
-   ABI_MOVE_ALLOC(indexes,tetra%unique_tetra(ihash)%indexes)
+   ABI_MOVE_ALLOC(indexes, tetra%unique_tetra(ihash)%indexes)
  end do
 
  ! Sum the multiplicity
@@ -891,7 +896,7 @@ end subroutine htetra_init
 !! htetra_init_mapping_ibz
 !!
 !! FUNCTION
-!!  The mapping to th IBZ is has its own allocation routine.
+!!  The mapping to the IBZ is has its own allocation routine.
 !!  I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
 !!
 !! PARENTS
@@ -987,15 +992,17 @@ subroutine htetra_print(self, unit)
 
  unique_tetra_size = self%nunique_tetra*5*four/1024/1024
  total_size        = unique_tetra_size
- write(unit,'(a,i12)')     'unique_tetra      ', self%nunique_tetra
- write(unit,'(a,f12.1,a)') 'unique_tetra_size ', unique_tetra_size, ' [Mb] <<< MEM'
+ write(unit,'(a,i12)')     ' unique_tetra      ', self%nunique_tetra
+ write(unit,'(a,f12.1,a)') ' unique_tetra_size ', unique_tetra_size, ' [Mb] <<< MEM'
  if (allocated(self%ibz)) then
-   ibz_pointer_size  = self%nibz_tetra*2*four/1024/1024
-   write(unit,'(a,i12)')     'ibz_tetra         ', self%nibz_tetra
-   write(unit,'(a,f12.1,a)') 'ibz_tetra_size    ', ibz_pointer_size, ' [Mb] <<< MEM'
+   ibz_pointer_size  = self%nibz_tetra*2*four / 1024 ** 2
+   write(unit,'(a,i12)')     ' ibz_tetra         ', self%nibz_tetra
+   write(unit,'(a,f12.1,a)') ' ibz_tetra_size    ', ibz_pointer_size, ' [Mb] <<< MEM'
    total_size = total_size + ibz_pointer_size
  end if
- write(unit,'(a,f12.1,a)') 'total size        ', total_size, ' [Mb] <<< MEM'
+ ! integer arrays
+ total_size = total_size + 3 * (self%nkibz * 4) / 1024**2
+ write(unit,'(a,f12.1,a)') ' total size        ', total_size, ' [Mb] <<< MEM'
 
 end subroutine htetra_print
 !!***
