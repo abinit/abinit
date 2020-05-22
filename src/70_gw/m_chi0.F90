@@ -311,7 +311,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      MSG_WARNING('Neglecting <n,k|[Vnl,iqr]|m,k>')
    end if
  else
-   ! For PAW+LDA+U, precalculate <\phi_i|[Hu,r]|phi_j\>
+   ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>
    ABI_DT_MALLOC(HUr,(Cryst%natom))
    if (Dtset%usepawu/=0) then
      call pawhur_init(hur,nsppol,Dtset%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
@@ -2124,7 +2124,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
    ABI_DT_MALLOC(Cp_bks,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cp_bks,0,Wfd%nlmn_atm)
    ABI_DT_MALLOC(HUr,(Cryst%natom))
-   if (usepawu/=0) then ! For PAW+LDA+U, precalculate <\phi_i|[Hu,r]|phi_j\>.
+   if (usepawu/=0) then ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>.
      call pawhur_init(hur,nsppol,Wfd%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
  end if

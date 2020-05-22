@@ -23,7 +23,7 @@ In both the output and log files, we can find:
 - The DFT+U contribution of energy which is contained inside the PAW
   Spherical terms in the output file.
 
-- The Decomposition of the LDA+U energy is given (Interaction energy, Double
+- The Decomposition of the DFT+U energy is given (Interaction energy, Double
   counting term, and sum of the two) in the log file.
 
 - The orbital density matrix ($n_{m,m'}^{\sigma}$), also called occupation

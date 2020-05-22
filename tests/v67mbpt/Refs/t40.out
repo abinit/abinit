@@ -819,7 +819,7 @@ KS_gap     :    4.791
 QP_gap     :    7.708
 Delta_QP_KS:    2.917
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
        24   0.607 -18.410 -23.311   3.454   0.845  -0.183 -19.633  -1.223  -0.616
        25   5.398 -10.696  -6.175  -2.593   0.879  -0.138  -9.002   1.694   7.092
 ...
@@ -833,7 +833,7 @@ KS_gap     :    7.341
 QP_gap     :   10.678
 Delta_QP_KS:    3.338
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
        24   0.831 -19.026 -23.766   3.477   0.846  -0.182 -20.094  -1.068  -0.236
        25   8.172 -12.239  -7.002  -2.633   0.872  -0.147  -9.969   2.270  10.442
 ...

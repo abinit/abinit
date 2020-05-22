@@ -6,6 +6,9 @@ README_xlf.md
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
+variables/multibinit.md
+variables/aim.md
+variables/atdep.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -24,9 +27,7 @@ variables/rlx.md
 variables/vdw.md
 variables/w90.md
 variables/optic.md
-variables/a-tdep.md
-variables/aim.md
-variables/multibinit.md
+variables/anaddb.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
@@ -74,6 +75,7 @@ topics/Hybrids.md
 topics/k-points.md
 topics/LatticeModel.md
 topics/LDAminushalf.md
+topics/longwave.md
 topics/LOTF.md
 topics/MagField.md
 topics/MagMom.md
@@ -107,7 +109,7 @@ topics/SpinDynamicsMultibinit.md
 topics/STM.md
 topics/Susceptibility.md
 topics/TDDFT.md
-topics/Tdep.md
+topics/a-TDEP.md
 topics/TDepES.md
 topics/Temperature.md
 topics/TransPath.md

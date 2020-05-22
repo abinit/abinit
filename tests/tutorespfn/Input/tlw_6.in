@@ -118,4 +118,5 @@
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
 #%% description = Input file for the anaddb code with dipole-quadrupole and quadrupole-quadrupole interactions.
+#%% topics = longwave
 #%%<END TEST_INFO>

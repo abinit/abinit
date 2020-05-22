@@ -938,7 +938,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !write(std_out,*) "paw_dmft%use_dmft",paw_dmft%use_dmft
 
 !PAW: 1- Initialize values for several arrays unchanged during iterations
-!2- Initialize data for LDA+U
+!2- Initialize data for DFT+U
 !3- Eventually open temporary storage file
  if(psps%usepaw==1) then
 !  1-
@@ -971,7 +971,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
-!  2-Initialize and compute data for LDA+U, EXX, or LDA+DMFT
+!  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
