@@ -32,6 +32,7 @@ module m_wfd
  use m_wfk
  use m_hdr
  use m_distribfft
+ use iso_c_binding
 
  use defs_datatypes,   only : pseudopotential_type, ebands_t
  use defs_abitypes,    only : mpi_type
@@ -72,9 +73,9 @@ module m_wfd
 !!***
 
  ! Flags giving the status of the local %ug, %ur %cprj buffers.
- integer,public,parameter :: WFD_NOWAVE   =0
- integer,public,parameter :: WFD_ALLOCATED=1
- integer,public,parameter :: WFD_STORED   =2
+ integer(c_int8_t),public,parameter :: WFD_NOWAVE   =0
+ integer(c_int8_t),public,parameter :: WFD_ALLOCATED=1
+ integer(c_int8_t),public,parameter :: WFD_STORED   =2
 
  integer,public,parameter :: CPR_RANDOM   =1
  integer,public,parameter :: CPR_SORTED   =2
@@ -183,16 +184,16 @@ module m_wfd
   ! In systems with both time-reversal and spatial inversion, wavefunctions can be chosen to be real.
   ! One might use this to reduce memory in wave_t.
 
-  integer :: has_ug=WFD_NOWAVE
+  integer(c_int8_t) :: has_ug=WFD_NOWAVE
   ! Flag giving the status of ug.
 
-  integer :: has_ur=WFD_NOWAVE
+  integer(c_int8_t) :: has_ur=WFD_NOWAVE
   ! Flag giving the status of ur.
 
-  integer :: has_cprj=WFD_NOWAVE
+  integer(c_int8_t) :: has_cprj=WFD_NOWAVE
   ! Flag giving the status of cprj.
 
-  integer :: cprj_order=CPR_RANDOM
+  integer(c_int8_t) :: cprj_order=CPR_RANDOM
   ! Flag defining whether cprj are sorted by atom type or ordered according
   ! to the typat variable used in the input file.
 
@@ -317,7 +318,7 @@ module m_wfd
    ! npwarr(nkibz)
    ! Number of plane waves for this k-point.
 
-  integer,allocatable :: bks_tab(:,:,:,:)
+  integer(c_int8_t), private, allocatable :: bks_tab(:,:,:,:)
    ! bks_tab(mband,nkibz,nsppol,0:nproc-1)
    ! Global table used to keep trace of the distribution of the (b,k,s) states on each node inside Wfd%comm.
    ! 1 if the node has this state. 0 otherwise.
@@ -2237,10 +2238,10 @@ subroutine wave_copy_0D(Wave_in,Wave_out)
  !@wave_t
  !@pawcprj_type
 
- call deep_copy(Wave_in%has_ug,Wave_out%has_ug)
- call deep_copy(Wave_in%has_ur,Wave_out%has_ur)
- call deep_copy(Wave_in%has_cprj,Wave_out%has_cprj)
- call deep_copy(Wave_in%cprj_order,Wave_out%cprj_order)
+ Wave_out%has_ug = Wave_in%has_ug
+ Wave_out%has_ur = Wave_in%has_ur
+ Wave_out%has_cprj = Wave_in%has_cprj
+ Wave_out%cprj_order = Wave_in%cprj_order
 
  ABI_MALLOC(Wave_out%ug, (SIZE(Wave_in%ug)))
  ABI_MALLOC(Wave_out%ur, (SIZE(Wave_in%ur)))
@@ -2516,7 +2517,8 @@ function wfd_rank_has_ug(Wfd,rank,band,ik_ibz,spin)
 
 !Local variables ------------------------------
 !scalars
- integer :: nzeros,bks_flag
+ integer :: nzeros
+ integer(c_int8_t) :: bks_flag
 !arrays
  integer :: indices(3)
 
@@ -2787,7 +2789,7 @@ function wfd_ihave(Wfd,what,band,ik_ibz,spin,how)
  integer :: nzeros
 !arrays
  integer :: indices(3),check(2)
- integer,pointer :: has_flags(:,:,:)
+ integer(c_int8_t),pointer :: has_flags(:,:,:)
 
 !************************************************************************
 
@@ -3347,7 +3349,7 @@ subroutine wfd_update_bkstab(Wfd,show)
 !Local variables ------------------------------
 !scalars
  integer :: ierr,nelem
- integer,allocatable :: my_vtab(:),gather_vtabs(:)
+ integer(c_int8_t),allocatable :: my_vtab(:),gather_vtabs(:)
 
 !************************************************************************
 
@@ -3355,11 +3357,11 @@ subroutine wfd_update_bkstab(Wfd,show)
  Wfd%bks_tab(:,:,:,Wfd%my_rank) = Wfd%Wave(:,:,:)%has_ug
 
  ! Gather flags on each node.
- nelem=Wfd%mband*Wfd%nkibz*Wfd%nsppol
- ABI_MALLOC(my_vtab,(nelem))
+ nelem = Wfd%mband*Wfd%nkibz*Wfd%nsppol
+ ABI_MALLOC(my_vtab, (nelem))
  my_vtab(:) = reshape(Wfd%bks_tab(:,:,:,Wfd%my_rank), [nelem])
 
- ABI_MALLOC(gather_vtabs,(nelem*Wfd%nproc))
+ ABI_MALLOC(gather_vtabs, (nelem*Wfd%nproc))
 
  call xmpi_allgather(my_vtab,nelem,gather_vtabs,Wfd%comm,ierr)
 
