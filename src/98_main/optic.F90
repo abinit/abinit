@@ -192,22 +192,22 @@ program optic
    !Read data file name
    write(std_out,'(a)')' Please, give the name of the data file ...'
    read(5, '(a)')filnam
-   write(std_out,'(a)')' The name of the data file is :',filnam
+   write(std_out,'(a,a,1x,a,a)')' The name of the data file is :',ch10,trim(filnam),ch10
    write(std_out,'(a)')' Please, give the name of the output file ...'
    read(5, '(a)')filnam_out
-   write(std_out,'(a)')' The name of the output file is :',filnam_out
+   write(std_out,'(a,a,1x,a,a)')' The name of the output file is :',ch10,trim(filnam_out),ch10
    write(std_out,'(a)')' Please, give the root name for the (non)linear optical data output file ...'
    read(5, '(a)')prefix
-   write(std_out,'(a)')' The root name of the output files is :',trim(prefix)
+   write(std_out,'(a,a,1x,a)')' The root name of the output files is :',ch10,trim(prefix)
 
    ! Read data file
    if (open_file(filnam,msg,newunit=finunt,form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if
 
-   write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
-     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
-   MSG_COMMENT(msg)
+!   write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
+!     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
+!   MSG_COMMENT(msg)
 
    ! Setup some default values:
    broadening = 1e-3_dp ! Ha
