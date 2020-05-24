@@ -118,9 +118,9 @@ subroutine xmpi_allgather_char(charval,recvbuf,spaceComm,ier)
 end subroutine xmpi_allgather_char
 !!***
 
-!!****f* ABINIT/xmpi_allgather_int1d
+!!****f* ABINIT/xmpi_allgather_int1d_1b
 !! NAME
-!!  xmpi_allgather_int1d
+!!  xmpi_allgather_int1d_1b
 !!
 !! FUNCTION
 !!  Gathers data from all tasks and distributes it to all.

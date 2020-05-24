@@ -2593,7 +2593,7 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
    do ii=1,3
      do jj=1,3*3*ddb%natom
        read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
-       write(*,*) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+       write(std_out, *) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
      end do
      read(quad_unt,'(a)') msg
    end do

@@ -7,33 +7,32 @@ authors: MG
 This tutorial explains how to compute the electron self-energy due to phonons, evaluate the zero-point
 renormalization (ZPR) of the band gap, obtain spectral functions and temperature-dependent band structures.
 We start with a very brief overview of the many-body formalism in the context of the e-ph interaction, 
-then we discuss how to compute the ZPR in ...
+then we discuss how to compute the ZPR, temperature-dependent band gaps and spectral functions.
 
 ## Formalism
 
-The electron-phonon self-energy, $\Sigma^{\text{e-ph}}$, describes the renormalization of the single-particle
-energy as well as the lifetime of the charged excitation due to the e-ph interaction.
-Note that this term should be added to the electron-electron self-energy, $\Sigma^{\text{e-e}}$, that describes
+The electron-phonon (e-ph) self-energy, $\Sigma^{\text{e-ph}}$, describes the renormalization of the single-particle
+energy as well as the lifetime of the charged excitation due to the interaction with phonons.
+This term should be added to the electron-electron (e-e) self-energy, $\Sigma^{\text{e-e}}$, that describes
 many-body effects induced by the Coulomb interaction.
 The e-e contribution can be estimated using, for instance, the $GW$ approximation but
-in this tutorial we mainly focus on the e-ph self-energy (SE) and its temperature dependence.
-In semiconductors and insulators most of temperature dependence at low T originates from the e-ph interaction 
+in this tutorial we mainly focus on the e-ph self-energy ($\Sigma$ for brevity) and its temperature dependence.
+Indeed, in semiconductors and insulators most of temperature dependence at low T originates from the e-ph interaction 
 (and the thermal expansion).
 Corrections due to $\Sigma^{\text{e-e}}$ are obviously important but their temperature dependence is rather small 
 provided the system has an energy gap much larger than $kT$.
-<!--
+
 In state-of-the-art \abinitio methods, the e-ph coupling is described
-within density functional theory (DFT) by expanding the Kohn-Sham (KS) effective potential~\cite{Kohn1965}
-in the nuclear displacements,
-and the vibrational properties are obtained with density-functional perturbation theory
-(DFPT)~\cite{Gonze1997,Baroni2001}.
--->
+within DFT by expanding the KS effective potential in the nuclear displacements,
+and the vibrational properties are obtained with  (DFPT) [[cite:Gonze1997]], [[cite:Baroni2001]].
+The e-ph self-energy consists of two terms: the Fan-Migdal (FM) self-energy 
+and the Debye-Waller (DW) part [[cite:Giustino2017]]:
 
-In the standard approach based on KS mean-field theory [[cite:Giustino2017]]
+\begin{equation}
+\Sigma^\eph = \Sigma^\FM(\ww) + \Sigma_^{\DW}
+\end{equation}
 
-$$ \Sigma^\eph = \Sigma^\FM(\ww) + \Sigma_^{\DW} $$
-
-The diagonal matrix elements of the SE in the KS basis set are given by
+The diagonal matrix elements of the (retarded) FM part in the KS basis set are given by
 
 \begin{equation}
 \begin{split}
@@ -55,7 +54,9 @@ with $T$ the temperature and $\ef$ the Fermi energy.
 For the sake of simplicity, the temperature and Fermi level are considered as parameters, and the dependence on $T$ and $\ef$ will be omitted in the following.
 -->
 The integral is performed over the $\qq$-points in the BZ of volume $\Omega_\BZ$ and $\eta$
-is a positive real infinitesimal whose value can be specificied via the [[zcut]] variable.
+is a positive real infinitesimal.
+From a mathematical point of view, one should take the limit $\eta \rightarrow 0^+$.
+At the level of the implementation, $\eta$ is set to a (small) finite value given by the [[zcut]] variable.
 
 !!! tips
 
@@ -74,7 +75,7 @@ When computing the full self-energy, it is possible to reduce the number of empt
 by using the first-order wavefunctions obtained by solving the relevant Sternheimer equation.
 -->
 
-The static Debye-Waller (DW) term involves the second order derivative of
+The **static** DW term involves the second order derivative of
 the KS potential with respect to the nuclear displacements.
 State-of-the-art implementations approximate the DW contribution with
 
@@ -101,8 +102,10 @@ in the $\qq \rightarrow 0$ limit [[cite:Vogl1976]].
 
 In principle, the quasi-particle (QP) excitations are defined by the solution(s)
 in the complex plane of the equation $$ z = \ee_\nk + \Sigma_\nk^{\text{e-ph}}(z) $$.
-provided that the non-diagonal components of the self-energy can be neglected [[cite:Eiguren2009]].
-In practice, the problem is usually simplified by seeking approximated solutions along the real axis following two different approaches.
+provided that the non-diagonal components of the self-energy can be neglected
+In practice, the problem is usually simplified by seeking approximated solutions along the real axis 
+following two different approaches.
+
 In the on-the-mass-shell approximation, the QP energy is given by the real part
 of the self-energy evaluated at the bare KS eigenvalue
 
@@ -123,19 +126,11 @@ with the renormalization factor $Z$ given by
   Z_\nk= \left(1 - \Re\left[ \frac{\partial\Sigma^\text{e-ph}_{\nk}}{\partial\ee}\right]\Bigg|_{\ee=\ee_\nk} \right)^{-1}.
 \end{equation}
 
-Both approaches are implemented in ABINIT although it should be noted that, according to recent works, the on-the-mass-shell approach provides results that are closer to those obtained with more advanced techniques
+Both approaches are implemented in ABINIT although it should be noted that, according to recent works, 
+the on-the-mass-shell approach provides results that are closer to those obtained with more advanced techniques
 based on the cumulant expansion [[cite:Nery2018]]
-or self-energy calculations employing an eigenvalue–self-consistent cycle [[cite:Brown-Altvater2020]].
 
 <!--
-Accurate calculations of e-ph renormalization are still challenging even by present standards,
-because the e-ph self-energy is quite sensitive to the $\qq$-point sampling.
-Moreover a large number of empty states $m$ is usually required to converge the real part of the self-energy.
-In order to avoid the explicit computation of the DFPT scattering potentials on dense $\qq$-grids,
-ABINIT generalizes the Fourier-based interpolation scheme proposed by Eiguren {\it et al.}~\cite{Eiguren2008}
-to account for the non-analytical behaviour associated to the long-range interactions present in semiconductors [[cite:Vogl1976]].
-The dipolar potentials generated by the Born effective charges in polar materials are treated
-using a generalized Fr\"ohlich model [[cite:Verdi2015]], [[cite:Sjakste2015]].
 Further details concerning the implementation are given in Ref.[[cite:Gonze2019]].
 In order to accelerate the convergence with the number of empty states, ABINIT replaces the contributions
 given by the high-energy states above a certain band index $M$ with the solution
@@ -150,34 +145,97 @@ The code can compute the spectral functions
 
 ## Typical workflow for ZPR and T-dep calculations 
 
-A typical workflow requires several different steps:
+A typical workflow requires the following steps:
 
-1. GS calculation to get the WFK and the DEN file.
+1. GS calculation to obtain the WFK and the DEN file.
    Remember to set [[prtpot]] to 1 to write the file with the KS potential required for the Sternheimer trick.
+
 2. DFPT calculations for all the IBZ $\qq$-points corresponding to the *ab-initio* [[ddb_ngqpt]]
    used to perform the Fourier interpolation of the dynamical matrix and of the DFPT potentials.
    Remember to compute BECS and Q*
+
 3. NSCF computation of a WFK file on a dense $\kk$-mesh containing the wavevectors 
    for which phonon-induced QP corrections are wanted. Use the DEN file from step #1. 
    Remember to include enough empty states so that it is possible to perform convergence studies wrt [[nband]]
-4. Merge the partial DDB and POT files
+
+4. Merge the partial DDB and POT files with *mrgddb* and *mrgdvdb*, respectively
+
 5. Use the full DDB file, the DVDB file and the WFK file obtained in step 3 to start a ZPR calculation.
 
-## Calculation of the ZPR 
+## Calculation of the ZPR for XXX
 
-In this tutorial, we prefer to focus on the EPH calculation so we skip completely the DFPT part and provide
-pre-computed DDB and POT files obtained with a xxx $\qq$-mesh.
-We can also use the DEN.nc file to perform a NSCF calculation including empty states.
+In this tutorial, we prefer to focus on the EPH part so we skip completely the DFPT computation 
+and provide pre-computed DDB and POT1 files obtained with a xxx $\qq$-mesh.
+We also provide a DEN.nc file that can be used to perform a NSCF calculation including empty states.
+
+First of all, let's merge the DDB files using the following input file:
+
+Now we can merge the DFPT potential with *mrgdv* and the input file:
+
+For our first NSCF calculation, we use a xxx $\kk$-mesh and XXX bands.
+The number of bands is sufficiently large so that we can perform initial convergence studies.
+We also perform a NSCF calculation on a high-symmetry $\kk$-path to locate the position of the KS band edges
+as these are the states we want to correct.
+The input file is ...
+We use [[getden_path]] to read the DEN.nc file instead of [[getden]] or [[irdden]] variables.
+
+TODO: Mention ncdump and the input_string
+
+In this particular case the CBM and the VMB ...
+
+!!! important
+
+  Note that the EPH code can compute QP corrections only for $\kk$-points belonging to the $\kk$-mesh
+  associated to WFK file.
+  In some cases, it is not possible to generate a $\kk$-mesh containing the band edges.
+  In this case, you will have to select the closest wavevectors in the grid.
+
+### Our first ZPR calculation
+
+TODO: use and explaine [[structure]]
+
+For our first ZPR we decided to use a rather simple input file that allows us to 
+discuss the basic input variables.
+
+[[optdriver]] [[eph_task]] is set to 4
+[[dvdb_ngqpt]] is set to XXX
+We use [[getddb_filepath]], [[getwfk_filepath]], [[getdvdb_filepath]] to specify the paths to the external files.
+[[ngkpt]] 
+
+[[nkptgw]]
+[[kptgw]]
 
 ### Convergence wrt nband
 
-### Convergence wrt the q-mesh
+At this point it should be not so difficult to write an input file to perform ZPR calculations for different
+values of [[nband]].
+An example of input file is given in 
+
+grep something gives
+
+So XXX bands are needed to convergece the ZPR
+
+### How to reduce the number of bands with the Sternheimer approach
+
+In this section, we discuss how to take advantange of the Sternheimer equation 
+to accelerate the convergence with [[nband]].
+To activate the Sternheimer method, use [[eph_stern]] = 1 
+and pass the file to the GS KS potential file via [[getpot_filepath]].
+The non-self-consistent Sternheimer equation is solved on-the-fly
+using max [[nline]] iterations. 
+The NSCF iteration stops when the solution is convergenced within [[tolwfr]].
+In this example, we use the default values. You might need to adjust the values for more complicaed systems.
+
+Note that the [[nband]]
 
 ### How to compute the spectral function
+
+### Convergence of the ZPR wrt the q-mesh
 
 ### Estimating the ZPR with a generalized Fr\"ohlich model 
 
 Last but not least, one can estimate the correction to the zero-point renormalization
 of the band gap in polar materials using a generalized Fr\"ohlich model based on
-*ab initio** effective masses [[cite:Laflamme2016]]
+*ab initio** effective masses computed with DFPT [[cite:Laflamme2016]]
+For formalism is detailed in XXX.
 An example input file is available in [[test:v7_88]].

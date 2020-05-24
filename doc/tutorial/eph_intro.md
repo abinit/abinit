@@ -15,9 +15,9 @@ First of all, let's try to answer the question:
 
 As you may know, e-ph calculations have been available through the ANADDB executable for a long time.
 This ANADDB-based implementation is essentially a post-processing of the e-ph matrix elements
-computed by the DFPT code. This approach, however, presents advantages as well as drawbacks.
+computed by the DFPT code. This approach presents advantages as well as drawbacks.
 On the one hand, most of the work required to compute e-ph matrix elements is implemented directly by the DFPT routines.
-This means that e-ph calculations with advanced features such as PAW, SOC, non-collinear magnetism etc
+This means that e-ph calculations with advanced features such as PAW, SOC, non-collinear magnetism *etc*
 are readily available in the ANADDB version once support in the DFPT part is implemented.
 On the other hand, this post-processing approach implies that the list of $\kk/\qq$-points in the e-ph matrix elements
 is automatically fixed at the level of the DFPT run.
@@ -27,77 +27,22 @@ In principle, it is possible to use tricks such as a linear interpolation to den
 inside ANADDB, but in order to get a decent interpolation one usually needs initial BZ meshes
 that are significantly denser than the ones needed to converge the DFPT part alone.
 
-Electrons, phonons and e-ph properties, indeed, present completely different convergence rates.
+As a matter of fact, electrons, phonons and e-ph properties present completely different convergence rates.
 In silicon, for instance, a 9x9x9 mesh both for phonons and electrons is enough to converge
-the electron density and the vibrational spectrum.
-On the contrary, phonon-limited mobilities require e.g. a 45×45×45 k-grid and a 90×90×90 q-grid
+the electron density and the vibrational spectrum [[cite:Petretto2018]].
+On the contrary, phonon-limited mobilities require a 45×45×45 k-grid and a 90×90×90 q-grid
 to reach a 5% relative error [[cite:Brunin2020]].
 Roughly speaking, an explicit computation of phonons with a 90×90×90 $\qq$-mesh in Si
 requires around 20000 x 3 * [[natom]] DFPT calculations
-so you can easily get an idea of the cost of a fully ab-initio DFPT evaluation with all these wavevectors.
+so you can easily get an idea of the cost of a fully ab-initio evaluation of the e-ph matrix elements
+for all these wavevectors.
 
-The EPH code bypasses this bottleneck by interpolating the DFPT potentials in $\qq$-space
+The EPH code bypasses this bottleneck by **interpolating the DFPT potentials** in $\qq$-space
 while Bloch states are computed non-self-consistently on arbitrarily dense $\kk$-meshes.
-As a net result, the phonon and electron problems are now partly decoupled and can be converged separately.
-For further information about the difference between the two approaches, see also [[cite:Gonze2019]] and [[cite:Brunin2020]].
-
-<!--
-### Features
-
-Phonon-limited carrier mobility, electrical conductivity and Seebeck coefficient
-Phonon-limited carrier mean free path and relaxation times
-Imaginary part of e-ph self-energy and e-ph scattering rates
-All the calculations above can be done as a function of temperature and doping, for nonpolar and polar materials.
-
-Features available in anaddb that are not yet supported by EPH.
-
-At the time of writing (today), the following features are not supported by EPH:
-
-* PAW calculations
-* Non-local part applied with [[useyml]] = 1
-* Spin-orbit coupling
-* Non-collinear magnetism ([[nspinor]] 2 with [[nspden]] 4
-
-Crystalline symmetries are used throughout the code in order to reduce the number of $\kk$- and $\qq$-points
-that must be explicitly included in the integrals.
-To achieve good parallel efficiently, the most CPU demanding parts are parallelized with MPI employing
-a distribution schemes over $\qq$-points, perturbations
-and bands (the band level is available only when computing the full self-energy).
-
-[[istwfk]]
-
-
-Note that all these capabilities are integrated directly in ABINIT.
-This implementation (henceforth refered to as the **EPH code**) significantly differs from the one available in ANADDB:
-the anaddb version acts as a direct post-processing of the e-ph matrix elements computed in the DFPT part
-whereas the EPH code interfaced with ABINIT computes the e-ph matrix elements on the fly using
-the GS WFK and the DFPT potentials stored in the DVDB file.
-In a nutshell, the EPH code is more scalable and flexible as the $\qq$-sampling can be easily changed
-at runtime while the anaddb implementation can easily support advanced features such as PAW as most of the
-work is already done at the end of the DFPT calculation.
-Electron-phonon (EPH) calculations have been available in ABINIT for a long time with the help
-provided by the ANADDB tool designed as a post-processing step of the EPH matrix elements
-computed at the end of the DFPT calculation.
-On the one hand, this approach was relatively easy to implement as most of the work,
-in particular the computation of the EPH matrix elements, was already performed by the DFPT code.
-On the other hand, the resulting implementation was too rigid
-as several important dimensions such as the number of $\kk$-points, $\qq$-points and bands
-in the EPH matrix elements had to be fixed at the level of the DFPT calculation.
-Performing convergence studies with respect to the $\kk$-point sampling, for instance,
-required performing new (and more expensive) DFPT calculations with denser $\kk$-meshes.
-Similarly, convergence studies for the $\qq$-points required additional DFPT computations, possibly
-on meshes that were multiples of the initial sampling so to reuse the $\qq$-points computed previously.
-To address these limitations, ABINIT v8 provides a new driver
-explicitly designed to compute the EPH matrix elements and related physical properties.
-A different philosophy is used, in which EPH matrix elements are computed directly starting from the basic ingredients, namely,
-the GS wavefunctions stored in the WFK file, and the first-order change of the Kohn-Sham (KS) potential produced by the DFPT code.
-This approach allows for more flexibility because electron and phonon calculations are now partly decoupled:
-the $\kk$-mesh can be densified by performing non-self-consistent calculations,
-thus bypassing the DFPT part, and interpolation schemes for the linear-response in $\qq$-space can be readily implemented.
-Unlike the previous algorithms implemented in ANADDB, the new driver is directly interfaced with  the ABINIT executable.
-This means that important ANADDB variables related to the computation and diagonalization
-of the dynamical matrix such as [[asr]] and [[dipdip]] have been added to the ABINIT input file as well.
--->
+As a net result, the three problems (electrons, phonons and electron-phonon) are now partly
+decoupled and can be converged separately.
+For further information about the difference between EPH and ANADDB, see also [[cite:Gonze2019]].
+Further details about the EPH implementation are available in [[cite:Brunin2020]].
 
 A typical EPH workflow with arrows denoting dependencies between the different steps
 is schematically represented in the below figure:
@@ -113,58 +58,58 @@ in two distinct files at the end of the DFPT part.
 -->
 
 The brown boxes are standard DFPT calculations done with relatively coarse $\kk$- and $\qq$-meshes.
-These calculations produce (partial) DDB files with dynamical matrix elements,
-and POT files with the local part % (H + XC + vloc)
-of the first-order change of the KS potential (referred to as the DFPT potential below).
+Each DFPT run produces (partial) DDB files with a portion of the full dynamical matrix
+as well as POT1 files with the first-order derivative of the KS potential (referred to as the DFPT potential below).
+The partial POT1 files are merged with the **mrgdv** utility to produce a
+single **DVDB file** (Derivative of V($\rr$) DataBase).
+As usual, the partial DDB files are merged with **mrgddb**.
 
-A new utility, *mrgdv*, has been added to merge the DFPT potentials
-in a single ``Derivative of V($\rr$) DataBase'' **DVDB** file, while
-the partial DDB files can be merged, as in previous versions, with **mrgddb**.
-The EPH driver (blue box) receives as input the total DDB and the DBDB as well as a GS WFK file that may
-have been produced with a different $\kk$-mesh (or even with a different number of bands)
+The EPH driver (blue box) receives as input the total DDB and the DVDB as well as a GS WFK file that is usually
+produced with a different $\kk$-mesh (in some cases, even with a different number of bands).
 These ingredients are then used to compute the EPH matrix elements and associated physical properties.
-%The $\kk$-mesh in the WFK file and the $\qq$-mesh in the DVDB file must be commensurate
+<!--
+The $\kk$-mesh in the WFK file must be commensurate with the $\qq$-mesh in the DVDB file
+-->
 
 The EPH calculation is activated by [[optdriver]] = 7 while
 [[eph_task]] defines the physical properties to be computed.
-Internally, the code starts by reading the DDB file to construct the interatomic force constants (IFCs) in $\RR$-space.
-<!--
-This part is very similar to what is done in ANADDB.
--->
+To read the external files, one specifies the path on the file system with the three variables:
+[[getwfk_filepath]], [[getddb_filepath]] and [[getdvdb_filepath]].
+
+Internally, the code starts by reading the DDB file to construct the interatomic
+force constants (IFCs) in the real-space supercell ($\RR$-space).
+<!-- This part is very similar to what is done in ANADDB.
 Other external files (WFK, DVDB) may be read depending on the value of [[eph_task]].
-At this point, the code computes phonon bands and phonon DOS.
-Finally a specialized routine is invoked depending on [[eph_task]].
+-->
+At this point, EPH computes phonon bands and phonon DOS.
+Finally a specialized routine is invoked depending on the value of [[eph_task]].
 
-In this introduction, we mainy focus on the parts common to the different subdrivers:
+In this introduction, we mainly focus on the parts common to the different sub-drivers:
 
-* computation of vibrational properties via Fourier interpolation of the dynamical matrix
-* Fourier interpolation of the DFPT potentials.
+1. Computation of vibrational properties via Fourier interpolation of the dynamical matrix.
+2. Fourier interpolation of the DFPT potentials.
 
-The usage of the different subdrivers is discussed in more detail in the specialized lessons.
+The usage of the different sub-drivers is discussed in more detail in the specialized lessons.
 
 ## Phonon bands and DOS with EPH
 
-<!--
-ABINIT users know that in order to interpolate a phonon band structure,
-one should first merge the partial DDB files with *mrgddb* and then use ANADDB.
--->
-Since phonon frequencies and displacements are needed for e-ph calculations, it's not surprising to see
-that some of the ANADDB features are now integrated in the EPH code as well.
+Since phonon frequencies and displacements are needed for e-ph calculations, it is not surprising to see
+that some of the ANADDB features related to the treatment of the dynamical matrix
+are integrated in the EPH code as well.
 In many cases, EPH uses the same name as in ANADDB especially for important variables
-such as [[dipdip]], [[asr]], and [[chneut]]
+such as [[dipdip]], [[asr]], and [[chneut]].
 There are however some differences with respect to the ANADDB interface.
-More specifically, the name of the DDB file is specified by
-[[getddb_filepath]] whereas the $\qq$-mesh associated to the DDB file
-is given by [[ddb_ngqpt]].
+More specifically, in EPH the name of the DDB file is specified by
+[[getddb_filepath]] whereas the $\qq$-mesh associated to the DDB file is given by [[ddb_ngqpt]].
 <!-- list of IBZ $\qq$-points for which the DFPT calculations have been performed -->
-These two variables are mandatory when performing EPH calculations.
+These two variables are **mandatory** when performing EPH calculations.
 
 !!! importat
 
     Note that in Abinit9 the default values of [[dipdip]], [[asr]], and [[chneut]] have been changed.
     In particular, the acoustic sum rule and charge neutrality are always enforced by the EPH code.
-    It is responsability of the user to check whether the breaking of these sum rules that is always
-    present due to numerical inaccuracies can be considered reasonable.
+    It is responsability of the user to check whether the breaking of these sum rules (always
+    present due to numerical inaccuracies) are reasonable.
     By the same token, make sure that no vibrational instabilty is present in the phonon spectrum before
     embarking on EPH calculations.
 
@@ -173,10 +118,10 @@ These two variables are mandatory when performing EPH calculations.
 By default, the EPH code computes the phonon DOS by interpolating the IFCs on the *dense* $\qq$-mesh
 specified by [[ph_ngqpt]].
 The step of the (linear) frequency mesh is governed by [[ph_wstep]],
-and the linear tetrahedron method [[cite:Bloechl1994]] is used by default.
+the linear tetrahedron method [[cite:Bloechl1994]] is used by default.
 The Gaussian method can be activated via [[prtphdos]] with [[ph_smear]] defining the Gaussian smearing in Hartree units.
 The final results are stored in the PHDOS.nc file (same format at the one produced by ANADDB).
-The computation of the PHDOS can be disabled by setting [[prtphdos]] = 0. 
+The computation of the PHDOS can be disabled by setting [[prtphdos]] = 0.
 
 ### Variables for phonon band structure
 
@@ -205,9 +150,10 @@ The scattering potential can be expresses as:
 \end{equation}
 
 where $\Delta_{\qq\nu} v^\KS(\rr)$ is a lattice periodic function [[cite:Giustino2017]].
-Note that ABINIT computes the response to an atomic perturbation defined by 
+Note that ABINIT computes the response to an atomic perturbation defined by
 the three variables [[qpt]], [[rfdir]] and [[rfatpol]] when [[rfphon]] is set to 1.
-The connection between the phonon representation and the atomic perturbation is given by
+The connection between the phonon representation and the atomic perturbation employed by ABNIIT is given by
+the equation
 
 \begin{equation}
     \Delta_{\qq\nu} v^\KS(\rr) =
@@ -216,15 +162,16 @@ The connection between the phonon representation and the atomic perturbation is 
 \end{equation}
 
 where ${e}_{\kappa\alpha,\nu}(\qq)$ is the $\alpha$-th Cartesian component of the phonon eigenvector
-for the atom $\kappa$ in the unit cell, $M_\kappa$ its atomic mass and 
-$\partial_{\kappa\alpha,\qq} v^\KS(\rr)$ is the first-order derivative of the KS potential 
+for the atom $\kappa$ in the unit cell, $M_\kappa$ its atomic mass and
+$\partial_{\kappa\alpha,\qq} v^\KS(\rr)$ is the first-order derivative of the KS potential
 that can be obtained with DFPT by solving **self-consistently** a system of Sternheimer equations for a given
 $(\kappa\alpha, \qq)$ perturbation [[cite:Gonze1997]] [[cite:Baroni2001]].
 
-The DVDB file stores $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$ 
+The DVDB file stores $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$
 for all the $\qq$-points in the IBZ and all the irreducible atomic perturbations.
-In a more rigorous way, we should say that the DVDB file stores the local part of the DFPT potential 
-but this is a rather technical point, discussed in more detail in [[cite:Brunin2020]], that is not relevant 
+In a more rigorous way, we should say that the DVDB file stores the local part of the DFPT potential
+(variation of the Hartree + XC + local part of the pseudo)
+but this is a rather technical point, discussed in more detail in [[cite:Brunin2020]], that is not relevant
 for the present discussion so we do not elaborate more on this.
 
 <!--
@@ -237,16 +184,16 @@ In a pseudopotential-based implementation the KS potential is given by
     \end{split}
 \end{equation}
 
-and consists of contributions from the Hartree part ($\VH$), the exchange-correlation (XC) potential ($\Vxc$), 
+and consists of contributions from the Hartree part ($\VH$), the exchange-correlation (XC) potential ($\Vxc$),
 and the bare pseudopotential term that, in turn, consists of the local ($\Vloc$) and non-local ($\Vnl$) parts~\cite{Payne1992}.
-Following the internal \abinit convention, we group the Hartree, XC 
+Following the internal \abinit convention, we group the Hartree, XC
 and local terms in a single potential, $\Vscf$, although only the first two terms are computed self-consistently.
 The lattice-periodic part of the first-order derivative of the KS potential thus reads
 
 \begin{equation}
     \begin{split}
-    \partial_{\kappa\alpha,\qq} v^\KS = \underbrace{ \Bigl [ 
-        \partial_{\kappa\alpha,\qq} \vH + 
+    \partial_{\kappa\alpha,\qq} v^\KS = \underbrace{ \Bigl [
+        \partial_{\kappa\alpha,\qq} \vH +
         \partial_{\kappa\alpha,\qq} \vxc +
         \partial_{\kappa\alpha,\qq} \vloc \Bigr ]}_{\partial_{\kappa\alpha,\qq} \vscf} & \\
     +\, \partial_{\kappa\alpha,\qq} \vnl.
@@ -258,11 +205,12 @@ The lattice-periodic part of the first-order derivative of the KS potential thus
 !!! important
 
     The number of irreducible atomic perturbations depends on the $\qq$-point and the number of symmetries [[nsym]].
-    Actually only a particular subset of the point group symmetries of the unperturbed crystal can be 
+    Actually only a particular subset of the point group symmetries of the unperturbed crystal can be
     exploited at the DFPT level.
     Fortunately, you don't have to worry about these technical details as symmetries are fully supported in EPH.
-    Just run the DFPT calculation for the irreducible perturbations as usual.
-    EPH will reconstruct the missing terms at runtime.
+    Just run the DFPT calculation for the irreducible perturbations in the IBZ as usual.
+    Also the computation of the WFK can be limited to the IBZ.
+    EPH will employ symmetries to reconstruct the missing terms at runtime.
 
 ## Fourier interpolation of the DFPT potential
 
@@ -283,8 +231,8 @@ the new EPH driver allows the user to densify the $\qq$-mesh for phonons using
 
 The EPH code employs the Fourier interpolation proposed in [[cite:Eiguren2008]]
 to obtain the scattering potentials at arbitrary $\qq$-points.
-In this interpolation technique, one uses the DFPT potential stored in the DVDB
-to compute the Fourier transform $\qq \rightarrow \RR$
+In this interpolation technique, one uses the DFPT potential stored in the DVDB file
+to compute the $\qq \rightarrow \RR$ Fourier transform
 
 \begin{equation}
 	\label{eq:dfpt_pot_realspace}
@@ -297,8 +245,8 @@ where the sum is over the BZ $\qq$-points belonging to the ab-initio [[ddb_ngqpt
 and $\partial_{\kappa\alpha\qq}{v^{\text{scf}}}$ represents the (lattice-periodic) first order derivative
 of the local part of the KS potential associated to atom $\kappa$ along the Cartesian direction $\alpha$.
 -->
-Once $W_{\kappa\alpha}(\rr,\RR)$ is known, one can interpolate the potential at an arbitrary point $\tilde{\qq}$
-using the inverse transform
+Once $W_{\kappa\alpha}(\rr,\RR)$ is known, it is possible to interpolate the potential
+at an arbitrary point $\tilde{\qq}$ using the inverse transform
 
 \begin{equation}
 	\label{eq:dfpt_pot_interpolation}
@@ -317,17 +265,25 @@ It is also worth stressing that the same consideration holds for Wannier-based a
 indipendently on the degree of localization of the (maximally localized) Wannier functions.
 -->
 
-In metals, $W_{\kappa\alpha}$ is expected to be short-ranged provided we ignore Friedel oscilations associated to Kohn anomalies.
+In metals, $W_{\kappa\alpha}$ is expected to be short-ranged provided we ignore possible Kohn anomalies.
 On the contrary, a special numerical treatment is needed in semiconductors and insulators due to the presence of
-long-ranged (LR) dipolar and quadrupolar fields.
+long-ranged (LR) **dipolar** and **quadrupolar** fields in $\RR$-space
+This LR terms determine a non-analytic behaviour of the scattering potentials
+in the long-wavelength limit $\qq \rightarrow 0$ [[cite:Vogl1976]].
+To handle the LR part, EPH uses an approach that is similar in spirit to the one employed
+for the Fourier interpolation of the dynamical matrix [[cite:Gonze1997]].
+The idea is relatively simple.
+One subtracts the LR part from the DFPT potentials before computing Eq.\eqref{eq:dfpt_pot_realspace}.
+thus making the real-space representation amenable to Fourier interpolation.
+The non-analytical part
+<!-- (Eq.\eqref{eq:v1_long_range}) -->
+is then restored back to Eq.\eqref{eq:dfpt_pot_interpolation} when interpolating the potential at $\tilde{\qq}$.
+
 <!--
-the long-range behaviour of the DFPT potential in polar semiconductors and insulators is therefore problematic
-and  is needed to enforce localization.
--->
-To handle the long-range part, we use an approach that is similar in spirit to the one employed
-for the Fourier interpolation of the dynamical matrix [[cite:Gonze1997]]
-As discussed in [[cite:Verdi2015]], and [[cite:Giustino2017]],
+As discussed in
 the long-range part associated to the displacement of atom $\kappa$ along the cartesian direction $\alpha$ can be modeled with
+-->
+In polar materials, the leading term is given by the dipolar field [[cite:Verdi2015]], [[cite:Sjakste2015]], [[cite:Giustino2017]],
 
 \begin{equation}
    \label{eq:v1_long_range}
@@ -337,20 +293,18 @@ the long-range part associated to the displacement of atom $\kappa$ along the ca
 \end{equation}
 
 where ${\bm{\tau}}_\kappa$ is the atom position, $\Omega$ is the volume of the unit cell,
-$\bm{Z}^*$ and ${\bm{\varepsilon}}^\infty$ are the Born effective charge tensor and the dielectric tensor, respectively, and summation over the cartesian directions $\beta$ is implied.
+$\bm{Z}^*$ and ${\bm{\varepsilon}}^\infty$ are the Born effective charge tensor
+and the dielectric tensor, respectively, and summation over the cartesian directions $\beta$ is implied.
+This term diverges as $1/q$ for $\qq \rightarrow 0$ but the singularity is integrable in 3D systems.
+$\bm{Z}^*$ and ${\bm{\varepsilon}}^\infty$ are read automatically from the DDB file (if present) so we
+**strongly recommend** to compute these quantities with DFPT in order to prepare an EPH calculation
+in semiconductors.
 
-Inspired by the approach used for the Fourier interpolation of the dynamical matrix in polar materials~\cite{Gonze1997},
-we subtract the long-range part from the DFPT potentials before computing Eq.~\eqref{eq:dfpt_pot_realspace}.
-%thus making the real-space representation amenable to Fourier interpolation.
-%The non-analytical part (Eq.~\eqref{eq:v1_long_range}) is then restored back to Eq.~\eqref{eq:dfpt_pot_interpolation}
-%when interpolating the potential at $\tilde{\qq}$.
-
-[[dvdb_add_lr]]
-[[dvdb_qdamp]]
-[[getdvdb_filepath]]
-
-
-The expression for the LR model finally reads:
+In non-polar materials, the Born effective charges are zero but the scattering potentials are still non-analytic
+due to presence of jump discontinuities.
+In this case the leading term is associated to the dynamical quadrupoles [[cite:Royo2019]].
+As discussed in [[cite:Brunin2020]] the non-analytic behaviour is fully captured by using:
+<!-- The expression for the LR model including both dipole and quadrupole terms reads: -->
 
 \begin{equation}
     V^{\Lc}_{\kappa\alpha,\qq}(\rr) =
@@ -368,3 +322,73 @@ The expression for the LR model finally reads:
     %e^{-i (q_\eta + G_\eta) \tau_{\kappa\eta}}.
 \label{eq:LRpot}
 \end{equation}
+
+TODO: Discuss more the integration with the DFPT part.
+
+For testing purposes, it is possible to deactivate the treatment of the LR part by setting [[dvdb_add_lr]] to 0.
+
+Note that, in the implementation, each Fourier component is multiplied by the Gaussian $e^{-\frac{|\qG|^2}{4\alpha}}$
+in order to damp the short range components that are not relevant for the definition of the LR model.
+The $\alpha$ parameter can be specified via the [[dvdb_qdamp]] input variable.
+The default value worked well in the majority of the systems investigated so far yet
+this parameter should be subject to convergence tests.
+
+## Features and limitations
+
+The following physical properties can be computed with EPH depending on the value of [[eph_task]]
+
+* e-ph self-energy
+
+    * Zero-point renormalization of the band gap
+    * Correction of the QP energies due to e-ph scattering
+    * Spectral function
+    * Eliashberg functions
+
+* Imaginary part of e-ph self-energy
+
+    * e-ph scattering rates
+    * phonon-limited carrier mobility, electrical conductivity and Seebeck coefficient
+    * phonon-limited carrier mean free path and relaxation times
+    * all the calculations above can be done as a function of temperature and doping, for nonpolar and polar materials.
+
+* Imaginary part of ph-e self-energy
+
+    * Phonon linewidths induced by e-ph
+    * Eliashberg function
+    * Superconducting properties within the isotropic Migdal-Eliashberg formalism
+    * Transport properties in metals with the LOVA approximation.
+
+<!--
+Crystalline symmetries are used throughout the code in order to reduce the number
+of $\kk$- and $\qq$-points that must be explicitly treated.
+To achieve good parallel efficiently, the most CPU demanding parts are parallelized with MPI employing
+a distribution schemes over $\qq$-points, perturbations
+and bands (the band level is available only when computing the full self-energy).
+[[istwfk]] [[kptopt]]
+Features available in ANADDB that are not yet supported by EPH
+-->
+
+At the time of writing (|today|), the following features are not supported by EPH:
+
+* PAW calculations
+* Spin-orbit coupling
+* Non-collinear magnetism ([[nspinor]] = 2 and [[nspden]] = 4)
+* Non-local part of the pseudopotential applied with [[useylm]] = 1
+
+<!--
+On the one hand, this approach was relatively easy to implement as most of the work,
+in particular the computation of the EPH matrix elements, was already performed by the DFPT code.
+On the other hand, the resulting implementation was too rigid
+as several important dimensions such as the number of $\kk$-points, $\qq$-points and bands
+in the EPH matrix elements had to be fixed at the level of the DFPT calculation.
+Performing convergence studies with respect to the $\kk$-point sampling, for instance,
+required performing new (and more expensive) DFPT calculations with denser $\kk$-meshes.
+Similarly, convergence studies for the $\qq$-points required additional DFPT computations, possibly
+on meshes that were multiples of the initial sampling so to reuse the $\qq$-points computed previously.
+A different philosophy is used, in which EPH matrix elements are computed directly starting from the basic ingredients, namely,
+the GS wavefunctions stored in the WFK file, and the first-order change of the Kohn-Sham (KS) potential produced by the DFPT code.
+This approach allows for more flexibility because electron and phonon calculations are now partly decoupled:
+the $\kk$-mesh can be densified by performing non-self-consistent calculations,
+thus bypassing the DFPT part, and interpolation schemes for the linear-response in $\qq$-space can be readily implemented.
+Unlike the previous algorithms implemented in ANADDB, the new driver is directly interfaced with  the ABINIT executable.
+-->

@@ -92,11 +92,13 @@
         //displayAlign: "center",
         TeX: {
             equationNumbers: { autoNumber: "AMS" },
-            extensions: ["AMSmath.js"],
+            extensions: ["AMSmath.js", "boldsymbol.js"],
             Macros: {
                 "*": "{\\dagger}",
                 "ra": "{\\rangle}",
                 "la": "{\\langle}",
+                // Workaround for bm package. See https://github.com/mathjax/MathJax/issues/1219
+                bm: ["{\\boldsymbol #1}",1],
                 // Mathcal symbols
                 mcL: "{\\mathcal{L}}",
                 mcG: "{\\mathcal{G}}",
@@ -107,6 +109,7 @@
                 // Acronyms
                 KS: "{\\text{KS}}",
                 FM: "{\\text{FM}}",
+                DW: "{\\text{DW}}",
                 QP: "{\\text{QP}}",
                 BZ: "{\\text{BZ}}",
                 sign: "{\\text{sign}}",

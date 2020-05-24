@@ -78,7 +78,14 @@ def cd(path):
 
 @task
 def make(ctx, jobs="auto", touch=False, clean=False):
-    """Touch all modified files and recompile the code with -jNUM."""
+    """
+    Touch all modified files and recompile the code
+
+    Args:
+        jobs: Use `jobs` threads for make -jNUM
+        touch: Touch all changed files
+        clean: Issue `make clean` before `make`.
+    """
     if touch:
         with cd(ABINIT_ROOTDIR):
             cmd = "./abisrc.py touch"

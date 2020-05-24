@@ -641,10 +641,6 @@ The LR model implemented in ABINIT facilitates the convergence as the non-analyt
 $\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduce oscillations
 between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the physical results.
 
-## Phonon band structure
-
-TODO: Discuss [[dipdip]], [[asr]], [[chneut]]
-
 ## Additional tricks
 
 As these files are quite larger and the overall space on disk scales as nq * 3 * natom, we suggest

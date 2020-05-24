@@ -107,11 +107,6 @@ module m_wfd
    ! 1 if ylm is allocated.
    ! 2 if ylm is already computed.
 
-   integer :: gbnds(3,2)
-   ! gbnds(:,1)=Minval of kg_k.
-   ! gbnds(:,2)=Maxval of kg_k.
-   ! TODO: TO BE REMOVED when k-centered basis sets will be used.
-
    integer,allocatable :: kg_k(:,:)
    ! kg_k(3,npw)
    ! G vector coordinates in reduced cordinates.
@@ -325,8 +320,8 @@ module m_wfd
    ! A node owns a wavefunction if the corresponding ug is allocated AND computed.
    ! If a node owns ur but not ug, or ug is just allocated then its entry in the table is zero.
 
-  ! TODO: To be removed
-  integer,allocatable :: bks_comm(:,:,:)
+  integer, allocatable :: bks_comm(:,:,:)
+   ! TODO: To be removed
    ! spin_comm(0:mband,0:nkibz,0:nsppol)
    ! MPI communicators.
    ! bks_comm(0,0,spin) MPI communicator for spin
@@ -340,7 +335,8 @@ module m_wfd
    ! ph1d(2,3*(2*mgfft+1)*natom)
    ! 1-dim structure factor phase information.
 
-  logical,allocatable :: keep_ur(:,:,:)
+  logical,private, allocatable :: keep_ur(:,:,:)
+   ! TODO: To be removed
    ! keep(mband,nkibz,nsppol)
    ! Storage strategy: keep or not keep calculated u(r) in memory.
 
@@ -350,7 +346,7 @@ module m_wfd
    ! datatype storing k-dependent quantities.
 
   type(wave_t),allocatable :: Wave(:,:,:)
-   ! Wave(mband,nkibz,nsppol)
+   ! Wave(mband, nkibz, nsppol)
    ! Array of structures storing the periodic part of the wavefunctions in reciprocal- and real-space.
 
   type(MPI_type) :: MPI_enreg
@@ -535,7 +531,7 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 !scalars
  integer,parameter :: ider0=0,idir0=0
  integer :: mpw_,npw_k,dimffnl,useylmgr,nkpg,iatom, mkmem_,nkpt_,optder,mgfft
- integer :: iatm,matblk,ng1,ng2,ng3
+ integer :: iatm,matblk
  real(dp) :: arg
  logical :: ltest
 !arrays
@@ -630,17 +626,6 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 
  ABI_FREE(kpg_k)
  ABI_FREE(ylmgr_k)
-
- ! Setup of tables used to symmetrize u(g)
- ! TODO: Be careful here as FFT parallelism won't work.
- ! Remove these tables.
- Kdata%gbnds(:,1) = MINVAL(Kdata%kg_k(:,:),DIM=2)
- Kdata%gbnds(:,2) = MAXVAL(Kdata%kg_k(:,:),DIM=2)
-
- ng1 = Kdata%gbnds(1,2) + ABS(Kdata%gbnds(1,1)) + 1
- ng2 = Kdata%gbnds(2,2) + ABS(Kdata%gbnds(2,1)) + 1
- ng3 = Kdata%gbnds(3,2) + ABS(Kdata%gbnds(3,1)) + 1
- !write(std_out,*)"ng1,ng2,ng3: ",ng1,ng2,ng3
 
 end subroutine kdata_init
 !!***
@@ -753,8 +738,6 @@ subroutine copy_kdata_0D(Kdata_in,Kdata_out)
  call alloc_copy(Kdata_in%phkxred,Kdata_out%phkxred)
  call alloc_copy(Kdata_in%fnl_dir0der0,Kdata_out%fnl_dir0der0)
  call alloc_copy(Kdata_in%ylm,Kdata_out%ylm)
-
- Kdata_out%gbnds=Kdata_in%gbnds
 
 end subroutine copy_kdata_0D
 !!***
@@ -986,9 +969,9 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
- write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
+ write(msg,'(a,f12.1,a)')' Memory needed for Fourier components u(G) : ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
-#if defined HAVE_GW_DPC
+#ifdef HAVE_GW_DPC
  call wrtout(std_out, " Storing wavefunctions in double precision array")
  call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve the memory requirements for the WFs')
 #else
@@ -997,15 +980,16 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
-   write(msg,'(a,f12.1,a)')' Memory needed for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
+   write(msg,'(a,f12.1,a)')' Memory needed for PAW projections Cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
  ur_size = one*nspinor*Wfd%nfft*COUNT(Wfd%keep_ur)
- write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
+ write(msg,'(a,f12.1,a)')' Memory needed for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ABI_MALLOC(Wfd%Wave, (Wfd%mband, Wfd%nkibz, Wfd%nsppol))
+ write(msg,'(a,f12.1,a)')' Memory needed for %Wave array: ',ABI_MEM_MB(Wfd%Wave),' [Mb] <<< MEM'
 
  !bounds = [wfd%mband+1, 1]
  !do spin=1,Wfd%nsppol
@@ -1620,6 +1604,7 @@ subroutine wfd_get_ur(Wfd,band,ik_ibz,spin,ur)
      MSG_ERROR(msg)
    end if
 
+   !wave_ug => Wfd%s(spin)%k(ik_ibz)%b(band)%ug
    wave_ug => Wfd%Wave(band,ik_ibz,spin)%ug
    kg_k    => Wfd%Kdata(ik_ibz)%kg_k
    gbound  => Wfd%Kdata(ik_ibz)%gbound(:,:)
@@ -1758,7 +1743,7 @@ subroutine wfd_print(Wfd,header,unit,prtvol,mode_paral)
  end if
 
  !TODO
- ! Add addition info
+ ! Add additionanl info
  !kdata_bsize = nkibz * (four * (3 * mpw) + dp * two * mpw * natom)
  !write(msg,'(a,f12.1,a)')' Memory allocated for Kdata = ',kdata_bsize * b2Mb,' [Mb] <<< MEM'
 
@@ -2235,9 +2220,6 @@ subroutine wave_copy_0D(Wave_in,Wave_out)
 
 !************************************************************************
 
- !@wave_t
- !@pawcprj_type
-
  Wave_out%has_ug = Wave_in%has_ug
  Wave_out%has_ur = Wave_in%has_ur
  Wave_out%has_cprj = Wave_in%has_cprj
@@ -2371,7 +2353,7 @@ subroutine wfd_push_ug(Wfd,band,ik_ibz,spin,Cryst,ug,update_ur,update_cprj)
 
  if (Wfd%debug_level>0) then
    if (.not. wfd%ihave_ug(band,ik_ibz,spin)) then
-     write(msg,'(a,i0,a,3(i0,1x))')" Node ",Wfd%my_rank," doesn't have ug for (band, ik_ibz, spin): ",band,ik_ibz,spin
+     write(msg,'(a,i0,a,3(i0,1x))')" MPI rank ",Wfd%my_rank," doesn't have ug for (band, ik_ibz, spin): ",band,ik_ibz,spin
      MSG_ERROR(msg)
    end if
  end if
@@ -3227,93 +3209,6 @@ subroutine wfd_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
  end if
 
 end subroutine wfd_who_has_ug
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_wfd/wfd_everybody_has_ug
-!! NAME
-!!  wfd_everybody_has_ug
-!!
-!! FUNCTION
-!!  Return .TRUE. if all the nodes inside comm own the specified ug state.
-!!
-!! INPUTS
-!!  band=the index of the band.
-!!  ik_ibz=Index of the k-point in the IBZ
-!!  spin=spin index
-!!
-!! PARENTS
-!!
-!! SOURCE
-
-function wfd_everybody_has_ug(Wfd,band,ik_ibz,spin) result(answer)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: band,ik_ibz,spin
- logical :: answer
- class(wfd_t),intent(in) :: Wfd
-
-!Local variables ------------------------------
-!scalars
- integer :: how_many,nzeros,ib
-!arrays
- integer :: proc_ranks(Wfd%nproc),indices(3)
-
-!************************************************************************
-
- indices = (/band,ik_ibz,spin/)
-
- if ( ALL(indices/=(/0,0,0/)) ) then
-   call wfd_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
-   answer = (how_many==Wfd%nproc); RETURN
- else
-   nzeros = COUNT(indices==0)
-   if (nzeros==3) MSG_ERROR("All indices are zero!")
-
-   answer=.TRUE.
-   MSG_WARNING("Some cases are not coded!") ! TODO
-
-   if (band==0) then
-
-     if (nzeros==1)  then     ! All the bands for the given k-point and spin?
-       ib=0
-       do while(answer.and.ib<Wfd%nband(ik_ibz,spin))
-         ib=ib+1
-         call wfd_who_has_ug(Wfd,ib,ik_ibz,spin,how_many,proc_ranks)
-         answer = (how_many==Wfd%nproc)
-       end do; RETURN
-
-     else if (ik_ibz==0) then ! All the bands and all the k-points for the the given spin?
-
-     else if (spin==0) then   ! All the bands and all the spins for the given k-point?
-
-     end if
-
-   else if (ik_ibz==0) then
-     if (nzeros==1) then     ! All the k-points for the the given band and spin?
-
-     else if (band==0) then  ! All the k-points and all the bands for the the given spin?
-
-     else if (spin==0) then  ! All the k-points and all the spins for the the given band?
-
-     end if
-
-   else
-     if (nzeros==1) then      ! All the spins for the the given band and k-point?
-
-     else if (ik_ibz==0) then ! All the spins and all the k-points for the the given band?
-
-     else if (band==0) then   ! All the spins and all the bands for the the given k-point?
-
-     end if
-   end if
-
-   MSG_ERROR("Not implemented error")
- end if
-
-end function wfd_everybody_has_ug
 !!***
 
 !----------------------------------------------------------------------
@@ -6171,11 +6066,9 @@ end if
        write(msg,'(3a,f22.15)')TRIM(msg),ch10,' Compensation charge over fft grid         = ',compch_fft
      end if
    end if
-   call wrtout(ab_out, msg)
-   call wrtout(std_out, msg)
+   call wrtout([std_out, ab_out], msg)
    write(msg,'(a)')ch10
-   call wrtout(ab_out, msg)
-   call wrtout(std_out, msg)
+   call wrtout([std_out, ab_out], msg)
  end if !PAW
 
  nelectron_pw =SUM(rhor(:,1))*ucvol/nfftf
@@ -6192,27 +6085,23 @@ end if
  rhoav=nelectron_tot/ucvol ; rs=(three/(four_pi*rhoav))**third
  if (usepaw==0) then
   write(msg,'(2(a,f9.4))')&
-&   ' Number of electrons calculated from density = ',nelectron_tot,'; Expected = ',nelectron_exp
+   ' Number of electrons calculated from density = ',nelectron_tot,'; Expected = ',nelectron_exp
  else
    write(msg,'(2(a,f9.4),a)')&
-&   ' Total number of electrons per unit cell = ',nelectron_sph,' (Spherical mesh), ',nelectron_fft,' (FFT mesh)'
+   ' Total number of electrons per unit cell = ',nelectron_sph,' (Spherical mesh), ',nelectron_fft,' (FFT mesh)'
  end if
- call wrtout(std_out, msg)
- call wrtout(ab_out, msg)
+ call wrtout([std_out, ab_out], msg)
 
 !$write(msg,'(a,f9.4)')' Renormalizing smooth charge density using nratio = ',nratio
 !! rhor(:,:)=nratio*rhor(:,:)
 
  write(msg,'(a,f9.6)')' average of density, n = ',rhoav
- call wrtout(std_out, msg)
- call wrtout(ab_out, msg)
+ call wrtout([std_out, ab_out], msg)
  write(msg,'(a,f9.4)')' r_s = ',rs
- call wrtout(std_out, msg)
- call wrtout(ab_out, msg)
+ call wrtout([std_out, ab_out], msg)
  omegaplasma=SQRT(four_pi*rhoav)
  write(msg,'(a,f9.4,2a)')' omega_plasma = ',omegaplasma*Ha_eV,' [eV]',ch10
- call wrtout(std_out, msg)
- call wrtout(ab_out, msg)
+ call wrtout([std_out, ab_out], msg)
 
 end subroutine test_charge
 !!***
@@ -6342,7 +6231,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  !
  ! Free temporary cwaveprj storage.
  call pawcprj_free(cwaveprj)
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ ABI_FREE(cwaveprj)
  !
  !==========================================
  ! MPI: need to exchange arrays between procs
