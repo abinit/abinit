@@ -28,6 +28,7 @@
 #%% files_to_test = 
 #%%   t14_0001_0001-linopt.out          , tolnlines = 34,  tolabs = 7.0e-03, tolrel = 2.0e-02, fld_options = -easy;
 #%%   t14_0002_0003-linopt.out          , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
+#%%   t14.stdout                        , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
 #%%
 #%% [paral_info]
 #%% max_nprocs = 4
