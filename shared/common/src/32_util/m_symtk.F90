@@ -1840,7 +1840,7 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
    end do !iatom
  end do !isym
 
- if (.FALSE.) then
+ if (natom<=50) then
    do iatom=1,natom
      write(message, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
      call wrtout(std_out,message,'COLL')

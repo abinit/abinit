@@ -659,26 +659,29 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !Local variables -------------------------
 !scalars
  integer,parameter :: mr=10000,ny2_spline=1024*10
- integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj
+ integer :: info,lwork,mu,newg,newr,ng,nr,nu,ng_expxq
  integer :: ewald_option
  integer :: dipquad_,quadquad_
  logical :: do_quadrupole
+ logical, save :: firstcall = .TRUE.
  real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
  real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
  real(dp),parameter :: y2max=64.0_dp, y2min=1.0d-24
  real(dp) :: cddi,cddr,cqdi,cqdr,cqqi,cqqr,g3,g4
  real(dp) :: arg1,arg2,arg3,arga,c123r,c123i,c23i,c23r,detdlt,inv_detdlt
  real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
- real(dp) :: minexparg
+ real(dp) :: minexparg,sigma_max
  real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
- character(len=500) :: message
+ character(len=700) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
- real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
+ real(dp) :: c3r(2*mr+1),cosqxred(natom),wdielt(3,3),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3),tsec(2)
  real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
+ real(dp),allocatable :: work(:)
  complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 
@@ -690,23 +693,21 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    dyew = zero; return
  end if
  do_quadrupole = any(qdrp_cart /= zero)
- ewald_option = 0; if (present(option)) ewald_option = option
- if (do_quadrupole) ewald_option = 1
 
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
 
  ! Initialize dipquad and quadquad options
- dipquad_=1; if(present(dipquad)) dipquad_=dipquad
- quadquad_=1; if(present(quadquad)) quadquad_=quadquad
+ dipquad_=0; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=0; if(present(quadquad)) quadquad_=quadquad
+
+ ! Deactivate real space sums for quadrupolar fileds or for dipdip=-1
+ ewald_option = 0; if (present(option)) ewald_option = option
+ if (do_quadrupole.and.(dipquad_==1.or.quadquad_==1)) ewald_option = 1
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
  if (ewald_option == 1) minexparg=-20.0_dp
-
- ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
- ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
- ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
 
 ! initialize complex phase factors
  do ia = 1, natom
@@ -738,8 +739,53 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  recip=gmet(1,1)+gmet(1,2)+gmet(1,3)+gmet(2,1)+&
 & gmet(2,2)+gmet(2,3)+gmet(3,1)+gmet(3,2)+gmet(3,3)
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
- if (ewald_option == 1) eta = one
+
+ ! Compute a material-dependent width for the Gaussians that hopefully
+ ! will make the Ewald real-space summation innecessary.
+ if (ewald_option == 1) then 
+
+   wdielt(:,:)=dielt(:,:)
+
+   !Diagonalize dielectric matrix
+   lwork=-1
+   ABI_ALLOCATE(work,(10))
+   call dsyev('N','U',3, wdielt, 3, eig_dielt, work, lwork,info)
+   lwork=nint(work(1))
+   ABI_DEALLOCATE(work)
+
+   ABI_ALLOCATE(work,(lwork))
+   call dsyev('V','U',3, wdielt, 3, eig_dielt, work, lwork,info)
+   ABI_DEALLOCATE(work)
+
+   !This is a tentative maximum value for the gaussian width in real space
+   sigma_max=three
+
+   !Set eta taking into account that the eps_inf is used as a metric in
+   !reciprocal space
+   eta=sqrt(maxval(eig_dielt))/sigma_max
+
+   if (firstcall) then
+     firstcall = .FALSE.
+     write(message, '(4a,f9.4,9a)' ) ch10,&
+    &' Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians', ch10, & 
+    &' in ewald9 has been set to eta= ', eta, ' 1/bohr and the real-space sums have been neglected.', ch10, &
+    &' One should check whether this choice leads to correct results for the specific system under study', & 
+    &' and q-point grid.',ch10, &
+    &' It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)', ch10, &
+    &' lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.', ch10
+     call wrtout([ab_out,std_out],message,'COLL')
+   end if
+
+   !Internally eta is the square of the gaussians width
+   eta=eta*eta
+
+ end if 
+
  inv4eta = one / four / eta
+
+ ABI_ALLOCATE(dyddt,(2,3,natom,3,natom))
+ ABI_ALLOCATE(dydqt,(2,3,natom,3,natom,3))
+ ABI_ALLOCATE(dyqqt,(2,3,natom,3,natom,3,3))
 
  dyddt = zero
  dydqt = zero
