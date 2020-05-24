@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_orbmag
+!****m* ABINIT/m_orbmag
 !! NAME
 !!  m_orbmag
 !!
@@ -1329,12 +1329,13 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
   !Local variables -------------------------
   !scalars
   integer :: cplex,dimffnl,exchn2n3d,getcprj_choice,getcprj_cpopt,getcprj_idir
-  integer :: i4,i5,i6,ia,iband,ib1,ib2,ider,idir,ii,ikg,ikpt,ilm,ipw,istwf_k,itrs
-  integer :: jb1,jb2,jband,jj,kk
+  integer :: i4,i5,i6,ia,iatom,iband,ib1,ib2,ider,idir,ii,ikg,ikpt,ilm,ilmn,ipw,istwf_k,itrs
+  integer :: itypat,jb1,jb2,jband,jj,jlmn,kk,klmn
   integer :: n1dimx,n2dimx,n1dimy,n2dimy
   integer :: ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nlmn,npw_k_
   integer :: option,shiftbd,smatrix_ddkflag,smatrix_job,tim_fourwf
-  real(dp) :: arg,doti,dotr,ecut_eff,phase,weight_fourwf
+  real(dp) :: arg,doti,dotig,dotr,dotrg,ecut_eff,phase,weight_fourwf
+  complex(dpc) :: cpb,cpk,consite
   
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
@@ -1455,7 +1456,8 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
            rvec(2) = (i5 - 1)/(one*ngfft5)
            do i6 = 1, ngfft6
               rvec(3) = (i6 - 1)/(one*ngfft6)
-              phase = -two_pi*DOT_PRODUCT(rvec,gvec)
+              ! phase = -two_pi*DOT_PRODUCT(rvec,gvec)
+              phase=zero
               denpot(2*i4-1,i5,i6) = cos(phase)
               denpot(2*i4,i5,i6) = sin(phase)
            end do
@@ -1502,7 +1504,7 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
           &           mcg,mcg,mcg,1,dtset%mpw,nband_k,nband_k,npw_k,npw_k,dtset%nspinor,&
           &           pwind_k,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
 
-     cgg1(1:2,1:mcg,idir) = cggsmat(1:2,1:mcg)
+     cgg1(1:2,1:mcg,idir) = cggsmat(1:2,1:mcg) 
      
      ! cprj1_kb will hold cprj for cg1_kb
      call covar_cprj(cprjg,cprjg1(idir,:,:),dtset,nband_k,pawtab,smat_inv)
@@ -1511,16 +1513,36 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
      call overlap_k1k2_paw(cprj,cprjg1(idir,:,:),gvec,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
           &           dtset%natom,dtset%nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
-     do iband = 1, nband_k
-        do jband = 1, nband_k
-           ib1=(iband-1)*npw_k+1; ib2=iband*npw_k
-           jb1=(jband-1)*npw_k+1; jb2=jband*npw_k
-           dotr=DOT_PRODUCT(cg(1,ib1:ib2),cgg1(1,jb1:jb2,idir))+DOT_PRODUCT(cg(2,ib1:ib2),cgg1(2,jb1:jb2,idir))
-           doti=DOT_PRODUCT(cg(1,ib1:ib2),cgg1(2,jb1:jb2,idir))-DOT_PRODUCT(cg(2,ib1:ib2),cgg1(1,jb1:jb2,idir))
-           write(std_out,'(a,2i4,2es16.8)')'JWZ debug covar_gamma iband jband ',iband,jband,&
-                & dotr+kk_paw(1,iband,jband),doti+kk_paw(2,iband,jband)
-        end do
-     end do
+     ! the following tests that cg(n).cgg1(m) = delta(n,m)
+     ! and that cg(n).[cgg1(m) - cg(m)] = 0
+     ! the covariant derivative will be [cgg1 - cg]/h
+     ! do iband = 1, nband_k
+     !    do jband = 1, nband_k
+     !       ib1=(iband-1)*npw_k+1; ib2=iband*npw_k
+     !       jb1=(jband-1)*npw_k+1; jb2=jband*npw_k
+     !       dotr=DOT_PRODUCT(cg(1,ib1:ib2),cgg1(1,jb1:jb2,idir))+DOT_PRODUCT(cg(2,ib1:ib2),cgg1(2,jb1:jb2,idir))
+     !       doti=DOT_PRODUCT(cg(1,ib1:ib2),cgg1(2,jb1:jb2,idir))-DOT_PRODUCT(cg(2,ib1:ib2),cgg1(1,jb1:jb2,idir))
+
+     !       dotrg=DOT_PRODUCT(cg(1,ib1:ib2),cg(1,jb1:jb2))+DOT_PRODUCT(cg(2,ib1:ib2),cg(2,jb1:jb2))
+     !       dotig=DOT_PRODUCT(cg(1,ib1:ib2),cg(2,jb1:jb2))-DOT_PRODUCT(cg(2,ib1:ib2),cg(1,jb1:jb2))
+
+     !       do iatom=1,dtset%natom
+     !          itypat=dtset%typat(iatom)
+     !          do klmn=1,pawtab(itypat)%lmn2_size
+     !             ilmn=pawtab(itypat)%indklmn(7,klmn)
+     !             jlmn=pawtab(itypat)%indklmn(8,klmn)
+     !             cpb=cmplx(cprj(iatom,iband)%cp(1,ilmn),cprj(iatom,iband)%cp(2,ilmn),KIND=dpc)
+     !             cpk=cmplx(cprj(iatom,jband)%cp(1,jlmn),cprj(iatom,jband)%cp(2,jlmn),KIND=dpc)
+     !             consite=conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk*pawtab(itypat)%dltij(klmn)
+     !             dotrg=dotrg+real(consite)
+     !             dotig=dotig+aimag(consite)
+     !          end do
+     !       end do
+
+     !       write(std_out,'(a,2i4,2es16.8)')'JWZ debug covar_gamma iband jband ',iband,jband,&
+     !            & dotr+kk_paw(1,iband,jband)-dotrg,doti+kk_paw(2,iband,jband)-dotig
+     !    end do
+     ! end do
 
      ABI_DEALLOCATE(cggsmat)
      ABI_DEALLOCATE(kk_paw)
@@ -1681,7 +1703,7 @@ subroutine duqdu_gamma(atindx1,cgg1,cprjg1,dtorbmag,dtset,duqduchern,duqdumag,&
                 & DOT_PRODUCT(cgg1(2,ish1:ish2,bdir),cgg1(1,ish1:ish2,gdir))
            
            ! accumulate i*epsabg*ENK*\sum_occ [<d_bdir u|Q|d_gdir u>]
-           duqduchern_term = cprefac*cmplx((dotr+kk_paw(1,iband,iband)),(doti+kk_paw(2,iband,iband)),KIND=dpc)
+           duqduchern_term = cprefac*cmplx((dotr+kk_paw(1,iband,iband)-one),(doti+kk_paw(2,iband,iband)),KIND=dpc)
            ! duqduchern_term = cprefac*cmplx(kk_paw(1,iband,iband),kk_paw(2,iband,iband),KIND=dpc)
            ! duqduchern_term = cprefac*cmplx(dotr,doti,KIND=dpc)
            duqdumag_term = duqduchern_term*ENK
