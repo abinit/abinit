@@ -257,6 +257,9 @@ module m_hdr
   procedure :: bcast => hdr_bcast
    ! Broadcast the header.
 
+  procedure :: compare => hdr_compare
+   ! Compare two headers
+
   procedure :: update => hdr_update
    ! Update the header.
 
@@ -287,6 +290,7 @@ module m_hdr
  public :: hdr_fort_read           ! Reads the header from a logical unit associated to an unformatted file.
  public :: hdr_ncread              ! Reads the header from a Netcdf file.
  public :: hdr_check               ! Compare two headers.
+ public :: hdr_compare             ! Check the consistency of two headers.
 
  public :: abifile_from_varname
  public :: abifile_from_fform
@@ -4626,7 +4630,95 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  call wrtout(std_out,msg,mode_paral)
 
 end subroutine hdr_check
+
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_wfk/hdr_compare
+!! NAME
+!!  hdr_compare
+!!
+!! FUNCTION
+!!  Test two hdr_t objects for consistency. Return non-zero value if test fails.
+!!
+!! INPUTS
+!!  hdr1, hdr2 <class(hdr_t)> = hdr handlers to be compared
+!!
+!! OUTPUT
+!!  ierr
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function hdr_compare(hdr1, hdr2) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(hdr_type),intent(in) :: hdr1, hdr2
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+
+!************************************************************************
+
+ ierr = 0
+
+ ! Test basic dimensions
+ if (hdr1%nsppol /= hdr2%nsppol) then
+   write(msg,'(a,i0,a,i0)')'Different nsppol : ',hdr1%nsppol,' and ',hdr2%nsppol
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (hdr1%nspinor /= hdr2%nspinor) then
+   write(msg,'(a,i0,a,i0)')'Different nspinor : ',hdr1%nspinor,' and ',hdr2%nspinor
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (hdr1%nspden /= hdr2%nspden) then
+   write(msg,'(a,i0,a,i0)')'Different nspden : ',hdr1%nspden,' and ',hdr2%nspden
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (hdr1%nkpt /= hdr2%nkpt) then
+   write(msg,'(a,i0,a,i0)')'Different nkpt : ',hdr1%nkpt,' and ',hdr2%nkpt
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (hdr1%usepaw /= hdr2%usepaw) then
+   write(msg,'(a,i0,a,i0)')'Different usepaw : ',hdr1%usepaw,' and ',hdr2%usepaw
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (hdr1%ntypat /= hdr2%ntypat) then
+   write(msg,'(a,i0,a,i0)')'Different ntypat : ',hdr1%ntypat,' and ',hdr2%ntypat
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (hdr1%natom /= hdr2%natom) then
+   write(msg,'(a,i0,a,i0)')'Different natom  : ',hdr1%natom,' and ',hdr2%natom
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+
+ ! Return immediately if important dimensions are not equal.
+ if (ierr /= 0) return
+
+ ! Test important arrays (rprimd is not tested)
+ if (any(hdr1%typat /= hdr2%typat)) then
+   write(msg,'(a,i0,a,i0)')'Different ntypat array : ',hdr1%typat(1),' ... and ',hdr2%typat(1)
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (any(hdr1%npwarr /= hdr2%npwarr)) then
+   write(msg,'(a,i0,a,i0)')'Different npwarr array : ',hdr1%npwarr(1),' ... and ',hdr2%npwarr(1)
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+ if (any(abs(hdr1%kptns - hdr2%kptns) > tol6)) then
+   write(msg,'(a,i0,a,i0)')'Different kptns array '
+   ierr = ierr + 1; MSG_WARNING(msg)
+ end if
+
+end function hdr_compare
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_hdr/hdr_vs_dtset
 !! NAME
