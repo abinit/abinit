@@ -113,8 +113,7 @@ contains
 !!   the code at the ground-state level as follows: Ewald, NC-PSP, Hartee.
 !!   
 !! INPUTS
-!!   gsqcut     = cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential)
- (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!   gsqcut     = cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential) (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
 !!   icutcoul   = Information about the cut-off
 !!   ngfft(18)  = Information on the (fine) FFT grid used for the density.
 !!   nkpt       = Number of k-points in the Brillouin zone 
@@ -167,8 +166,8 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 
 !arrays
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
- real(dp)             :: gmet(3,3),gprimd(3,3)
- real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:),gcart(:)
+ real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
+ real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
  real(dp),allocatable :: gcutoff(:)
 
 ! === Save dimension and other useful quantities in vcut% ===
@@ -180,15 +179,15 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 !Initialize a few quantities
  cutoff=gsqcut*tolfix
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nfft=n1*n2*n3
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  
  ! Initialize container
- ABI_ALLOCATE(gvec,(3,max(n1,n2,n3))) 
- ABI_ALLOCATE(gpq,(n1*n2*n3))
- ABI_ALLOCATE(gpq2,(n1*n2*n3))
- ABI_ALLOCATE(gcart,(n1*n2*n3))  
- ABI_ALLOCATE(gcutoff,(n1*n2*n3))
- gcart(:) = zero ; gpq = zero ; gpq2 = zero ; gcutoff=zero
+ ABI_ALLOCATE(gvec,(3,MAX(n1,n2,n3))) 
+ ABI_ALLOCATE(gpq,(nfft))
+ ABI_ALLOCATE(gpq2,(nfft))
+ ABI_ALLOCATE(gcutoff,(nfft))
+ gcart(:) = zero ; gpq = zero ; gpq2 = zero ; gcutoff = zero
 
  !In order to speed the routine, precompute the components of gvectors
  !Also check if the booked space was large enough...
@@ -244,7 +243,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      rcut= (three*ucvol/four_pi)**(one/three)
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
-          gcutoff(ig)=two_pi*rcut 
+          gcutoff(ig)=zero ! two_pi*rcut - value for the V_coul
        else if(gpq(ig)<=cutoff) then
           gcutoff(ig)=one-cos(rcut*sqrt(four_pi/gpq2(ig)))
       end if
@@ -280,7 +279,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      accuracy_=0.001     ! Fractional accuracy required.
      npts_    =6         ! Initial number of point (only for Gauss-Legendre method).
 
-     do ig=1,nfft
+     do ig=1,n1
 
        gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
        gcartx_=gcart(1) ; gcarty_=gcart(2) ; gcart_para_=ABS(gcart(3))
@@ -327,32 +326,44 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 
      !CASE SURFACE 1 - Beigi
        CASE(1)
-  
-       do ig=1,nfft
-!         gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-         gcart2=DOT_PRODUCT(gcart(:),gcart(:))
-         gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)  
-         gcutoff(ig)=one-EXP(-gcart_para*rcut)*COS(gcart_perp*rcut)
-       end do !ig
-    
+
+       do i3=1,n3
+        do i2=1,n2
+         i23=n1*(i2-1 + n2*(i3-1))
+         do i1=1,n1
+           ii=i1+i23
+           gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+           gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
+           if(ABS(gcart_para)>tol4.and.ABS(gcart_perp)>tol4) then
+             gcutoff(ii)=one-EXP(-gcart_para*rcut)*COS(gcart_perp*rcut)
+           else 
+             gcutoff(ii)=zero
+           end if
+         end do !i1
+        end do !i2
+       end do !i3
+        
        !CASE SURFACE 2 - Rozzi
        CASE(2)
 
        !!BG: Trigger needed - use the available input value for this 
-       do ig=1,nfft
-         gcart(:)=b1(1)*gvec(1,ig)+b2(2)*gvec(2,ig)+b3(3)*gvec(3,ig)
-         gcart2=DOT_PRODUCT(gcart(:),gcart(:))
-         gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-         if (gcart_para>tol4) then
-           gcutoff(ig)=one+EXP(-gcart_para*rcut)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut)-COS(gcart_perp*rcut))
-         else
-         if (ABS(gcart_perp)>tol4) then
-           gcutoff(ig)=one-COS(gcart_perp*rcut)-gcart_perp*rcut*SIN(gcart_perp*rcut)
-         else
-           gcutoff(ig)=-two_pi*rcut**2
-         end if
-        end if
-       end do !ig
+       do i3=1,n3
+        do i2=1,n2
+         i23=n1*(i2-1 + n2*(i3-1))
+         do i1=1,n1
+           ii=i1+i23
+           gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+           gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
+           if(ABS(gcart_para)>tol4) then
+             gcutoff(ii)=one+EXP(-gcart_para*rcut)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut)-COS(gcart_perp*rcut))
+           else if (ABS(gcart_perp)>tol4) then
+             gcutoff(ii)=one-COS(gcart_perp*rcut)-gcart_perp/rcut*SIN(gcart_perp*rcut)
+           else
+             gcutoff(ii)=zero
+           end if
+         end do !i1
+        end do !i2
+       end do !i3
    
        CASE DEFAULT
          write(msg,'(a,i3)')' Wrong value of surface method: ',opt_surface
@@ -398,7 +409,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
  ABI_DEALLOCATE(gvec) 
  ABI_DEALLOCATE(gpq)
  ABI_DEALLOCATE(gpq2)
- ABI_DEALLOCATE(gcart)
 ! ABI_DEALLOCATE(gcutoff)
  
 end subroutine termcutoff 
