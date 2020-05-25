@@ -923,7 +923,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
    end do
  end do
 
-!Then separate the mass-dependent part using the ion relaxed Lagrange elastic tensor
+!Then separate the mass-dependent part 
  mtot=zero
  do iat=1,natom
    mtot=mtot + amu(typat(iat))
