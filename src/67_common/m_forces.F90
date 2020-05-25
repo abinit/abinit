@@ -450,7 +450,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  else if (dtset%usewvl==0.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) then
    call fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,&
 &   mpi_enreg,psps%mqgrid_vl,nattyp,nfft,ngfft,ntypat,psps,pawtab,ph1d,&
-&   psps%qgrid_vl,ucvol,psps%usepaw,vresid,psps%zionpsp,psps%znuclpsp)
+&   psps%qgrid_vl,rprimd,ucvol,psps%usepaw,vresid,psps%zionpsp,psps%znuclpsp)
  else
    gresid(:,:)=zero
  end if
@@ -771,7 +771,7 @@ end subroutine sygrad
 !! SOURCE
 
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
-&          ngfft,ntypat,psps,pawtab,ph1d,qgrid,ucvol,usepaw,vresid,zion,znucl)
+&          ngfft,ntypat,psps,pawtab,ph1d,qgrid,rprimd,ucvol,usepaw,vresid,zion,znucl)
 
 !Arguments ------------------------------------
 !scalars
@@ -784,6 +784,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  integer,intent(in) :: atindx1(dtset%natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: qgrid(mqgrid),vresid(nfft,dtset%nspden),zion(ntypat)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: znucl(ntypat)
  real(dp),intent(out) :: gresid(3,dtset%natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
@@ -836,7 +837,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 & dummy_out5,gauss,gmet,gprimd,gresid,dummy_out6,gsqcut,mgfft,&
 & mqgrid,dtset%natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-& psps,pawtab,ph1d,qgrid,dummy3,dummy_in1,dummy_rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,vresg,vresg,vresg,dummy2,dummy_in2,&
+& psps,pawtab,ph1d,qgrid,dummy3,dummy_in1,rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,vresg,vresg,vresg,dummy2,dummy_in2,&
 & comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 & paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 

@@ -528,7 +528,8 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_tmp2,dummy_in,gmet,gprimd,&
 &       dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
 &       optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&       dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2,&
+&       dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,&
+&       vxc_coreg,vxc10_coreg,vxc1is_coreg,dtset%vprtrb,psps%vlspl,is2_in=is2,&
 &       comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 
