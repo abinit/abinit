@@ -798,7 +798,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  real(dp) :: dummy2(2)
  real(dp) :: dummy_in1(0),dummy_in2(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
- real(dp) :: strn_dummy6(6),strv_dummy6(6),dummy_rprimd(3,3)
+ real(dp) :: strn_dummy6(6),strv_dummy6(6)
  real(dp),allocatable :: gauss(:,:),vresg(:,:),work(:)
 
 ! *************************************************************************
