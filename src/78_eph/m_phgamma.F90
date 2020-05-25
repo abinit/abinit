@@ -2057,8 +2057,12 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
        write(msg,'(3a)') ch10,'Warning: some of the following quantities should be integrated over spin', ch10
        call wrtout(ount, msg)
      end if
-
-     write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling.'
+     
+     if (do_qintp) then
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated).'
+     else
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid).'
+     endif
      write(ount,'(a,es16.6)')' isotropic lambda = ',lambda_iso
      write(ount,'(a,es16.6,a,es16.6,a)' )' omegalog  = ',omega_log,' (Ha) ', omega_log * Ha_K, ' (Kelvin) '
      write(ount,'(a,es16.6,a,es16.6,a)')' MacMillan Tc = ',tc_macmill,' (Ha) ', tc_macmill * Ha_K, ' (Kelvin) '
@@ -3232,7 +3236,11 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
 
    ! TODO: make output only for irred values xx yy zz and top half of matrix
    if (my_rank == master) then
-     write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions '
+     if (do_qintp) then
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (interpolated) '
+     else
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (coarse grid) '
+     endif
      write(ount,'(a,3(3es10.3,2x))') ' lambda = ',lambda_iso
      write(ount,'(a,3(3es10.3,2x),a)' )' omegalog  = ',omega_log,' (Ha) '
      write(ount,'(a,3(3es10.3,2x),a)' )'             ',omega_log*Ha_K, ' (Kelvin) '
