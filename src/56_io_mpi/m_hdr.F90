@@ -4318,7 +4318,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    istop = min(nkpt,nkpt_max)
    do ii = 1, istop, 5
      mu = min(5, istop - ii + 1)
-     wtkfmt = strcat('(2x,',itoa(mu),'f7.3,t41,a,6x,',itoa(mu),'f7.3)')
+     wtkfmt = strcat('(2x,',itoa(mu),'f7.3,t41,a,2x,',itoa(mu),'f7.3)')
      write(msg, wtkfmt)hdr%wtk(ii:min(istop, ii + 5 - 1)),'    |',hdr0%wtk(ii:min(istop, ii + 5 - 1))
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4435,7 +4435,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      call wrtout(std_out,msg,mode_paral)
 
      if (hdr%usepaw==1 .and. hdr0%usepaw==1) then
-       write(msg,'(a,i3,a,i3,a,i3,5x,a,a,i3,a,i3,a,i3)')&
+       write(msg,'(a,i3,a,i7,a,i3,5x,a,a,i3,a,i7,a,i3)')&
         '  pspso ',hdr %pspso(ipsp),' pspxc ',hdr %pspxc(ipsp),&
         '  lmn_size ',hdr%lmn_size(ipsp),'    |',&
         '  pspso ',hdr0%pspso(ipsp),' pspxc ',hdr0%pspxc(ipsp),&
