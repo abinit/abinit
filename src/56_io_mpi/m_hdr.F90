@@ -4437,7 +4437,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      if (hdr%usepaw==1 .and. hdr0%usepaw==1) then
        write(msg,'(a,i3,a,i7,a,i3,5x,a,a,i3,a,i7,a,i3)')&
         '  pspso ',hdr %pspso(ipsp),' pspxc ',hdr %pspxc(ipsp),&
-        '  lmn_size ',hdr%lmn_size(ipsp),'    |',&
+        '  lmn_size ',hdr%lmn_size(ipsp),'|',&
         '  pspso ',hdr0%pspso(ipsp),' pspxc ',hdr0%pspxc(ipsp),&
         '  lmn_size ',hdr0%lmn_size(ipsp)
        call wrtout(std_out,msg,mode_paral)
