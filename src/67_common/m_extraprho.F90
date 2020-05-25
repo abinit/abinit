@@ -140,11 +140,11 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),npwarr(dtset%nkpt)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*dtset%natom)
- real(dp),intent(in) :: qgrid(mqgrid),rprimd(3,3)
+ real(dp),intent(in) :: qgrid(mqgrid)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) ::  zion(ntypat),znucl(ntypat)
  real(dp), intent(inout) :: cg(2,mcg)
- real(dp),intent(inout) :: rhor(nfft,dtset%nspden),xred_new(3,dtset%natom)
+ real(dp),intent(inout) :: rhor(nfft,dtset%nspden),rprimd(3,3),xred_new(3,dtset%natom)
  real(dp),intent(in) :: xred_old(3,dtset%natom)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
@@ -339,7 +339,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
  call atm2fft(atindx1,scf_history%atmrho_last,dummy_out1,dummy_out2,dummy_out3,&
 & dummy_out4,gauss,gmet,gprimd,dummy_out5,dummy_out6,gsqcut,mgfft,mqgrid,dtset%natom,nattyp,&
 & nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,&
-& dummy3,dummy_in,strn_dummy6,strv_dummy6,ucvol,usepaw,dummy_in,dummy_in,dummy_in,dummy2,dummy_in,&
+& dummy3,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,dummy_in,dummy_in,dummy_in,dummy2,dummy_in,&
 & comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 & paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
  ABI_DEALLOCATE(gauss)

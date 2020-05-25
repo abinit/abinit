@@ -197,12 +197,12 @@ contains
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: efield(3),kinstr(6),nlstr(6)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
- real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),rprimd(3,3),strsxc(6)
+ real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),strsxc(6)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usekden)
  real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
- real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*usekden)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*usekden),rprimd(3,3)
  real(dp),intent(out) :: strten(6)
  type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
@@ -283,7 +283,7 @@ contains
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,rprimd,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
@@ -302,7 +302,7 @@ contains
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,rprimd,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      corstr(1:6)=corstr(1:6)+taustr(1:6)

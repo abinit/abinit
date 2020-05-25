@@ -194,7 +194,7 @@ contains
 subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &                  grn,grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
 &                  optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
+&                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,rprimd,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
 &                  is2_in,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
 
 !Arguments ------------------------------------
@@ -210,6 +210,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp),intent(in) :: gauss(2,ntypat*(optn2/3)),gmet(3,3),gprimd(3,3)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: rhog(2,nfft*optv*max(optgr,optstr,optdyfr,opteltfr))
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: vg(2,nfft*optn*max(optgr,optstr,optdyfr,opteltfr))
  real(dp),intent(in) :: vg1(2,nfft*optn*opteltfr),vg1_core(2,nfft*optn*opteltfr)
  real(dp),intent(in) :: vprtrb(2),vspl(mqgrid,2,ntypat*optv)
@@ -362,7 +363,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  !Initialize Gcut-off array from m_termcutoff
  !ABI_ALLOCATE(gcutoff,(nfft))
- !call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,rprimd,vcutgeo)
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,1,rprimd,vcutgeo)
 
  ia1=1
  do itypat=1,ntypat
@@ -447,7 +448,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  v_at=(aa*vspl(jj,1,itypat)+bb*vspl(jj+1,1,itypat)+&
 &                 cc*vspl(jj,2,itypat)+dd*vspl(jj+1,2,itypat)) &
-&                 /gsquar !* gcutoff(ii)
+&                 /gsquar * gcutoff(ii)
                end if
              end if
              if (optn==1) then
@@ -729,7 +730,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  ABI_DEALLOCATE(phre_igia)
  ABI_DEALLOCATE(phim_igia)
- !ABI_DEALLOCATE(gcutoff)
+ ABI_DEALLOCATE(gcutoff)
 
 !Get local potential or density back to real space
  if(optatm==1)then

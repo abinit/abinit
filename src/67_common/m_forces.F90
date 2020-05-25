@@ -201,12 +201,12 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  real(dp),intent(in) :: grchempottn(3,dtset%natom),grcondft(3,dtset%natom),grewtn(3,dtset%natom)
  real(dp),intent(in) :: grvdw(3,ngrvdw),grnl(3*dtset%natom)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: fcart(3,dtset%natom),forold(3,dtset%natom)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(out) :: favg(3),fred(3,dtset%natom),gresid(3,dtset%natom)
- real(dp),intent(out) :: grhf(3,dtset%natom)
+ real(dp),intent(out) :: grhf(3,dtset%natom),rprimd(3,3)
  real(dp),intent(inout) :: grxc(3,dtset%natom)
  real(dp),intent(out) :: synlgr(3,dtset%natom)
  type(pawrad_type),intent(in) :: pawrad(ntypat*psps%usepaw)
@@ -305,7 +305,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &     eltfrn_dum,gauss_dum,gmet,gprimd,&
 &     grxc,grl,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
-&     rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
@@ -327,7 +327,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &     eltfrn_dum,gauss_dum,gmet,gprimd,&
 &     grxctau,grl_dum,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
-&     rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      grxc(:,:)=grxc(:,:)+grxctau(:,:)
@@ -797,7 +797,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  real(dp) :: dummy2(2)
  real(dp) :: dummy_in1(0),dummy_in2(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
- real(dp) :: strn_dummy6(6),strv_dummy6(6)
+ real(dp) :: strn_dummy6(6),strv_dummy6(6),dummy_rprimd(3,3)
  real(dp),allocatable :: gauss(:,:),vresg(:,:),work(:)
 
 ! *************************************************************************
@@ -836,7 +836,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 & dummy_out5,gauss,gmet,gprimd,gresid,dummy_out6,gsqcut,mgfft,&
 & mqgrid,dtset%natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-& psps,pawtab,ph1d,qgrid,dummy3,dummy_in1,strn_dummy6,strv_dummy6,ucvol,usepaw,vresg,vresg,vresg,dummy2,dummy_in2,&
+& psps,pawtab,ph1d,qgrid,dummy3,dummy_in1,dummy_rprimd,strn_dummy6,strv_dummy6,ucvol,usepaw,vresg,vresg,vresg,dummy2,dummy_in2,&
 & comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 & paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 

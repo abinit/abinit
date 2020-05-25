@@ -840,7 +840,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
-&   dtset%qprtrb,dum_rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+&   dtset%qprtrb,dum_rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
  end if
 
@@ -3962,9 +3962,10 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  integer,intent(in) :: atindx1(natom),indsym(4,nsym,natom),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),symq(4,2,nsym),symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rprimd(3,3)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft)
  real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden)
  real(dp),intent(in) :: xccc1d(n1xccc,6,ntypat),xcccrc(ntypat),xred(3,natom)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(inout) :: dyfrnl(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag),xccc3d(n3xccc)
  real(dp),intent(out) :: dyfrlo(3,3,natom),dyfrwf(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)
  real(dp),intent(inout) :: dyfrxc(3,3,natom) !vz_i
@@ -4013,7 +4014,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    call atm2fft(atindx1,dum_atmrho,dum_atmvloc,dyfrxc,dyfrlo,dum_eltfrxc,&
 &   dum_gauss,gmet,gprimd,dum_grn,dum_grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,qprtrb,rhog,&
-&   dum_strn,dum_strv,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb,vlspl)
+&   rprimd,dum_strn,dum_strv,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb,vlspl)
    ABI_DEALLOCATE(vxctotg)
    if (n3xccc==0) dyfrxc=zero
  else

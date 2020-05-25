@@ -376,7 +376,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call atm2fft(atindx1,xccc3d,vpsp,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
 &   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&   dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&   dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    call timab(552,2,tsec)
@@ -388,7 +388,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call atm2fft(atindx1,xcctau3d,dummy_out6,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
 &   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&   dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&   dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    call timab(552,2,tsec)
@@ -486,7 +486,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      call atm2fft(atindx1,dummy_out1,vpsp,dummy_out2,dummy_out3,dummy_out4,dummy_in,&
 &     gmet,gprimd,dummy_out5,grtn,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&     rhojellg,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&     rhojellg,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 

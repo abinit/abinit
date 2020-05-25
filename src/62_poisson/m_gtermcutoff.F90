@@ -152,11 +152,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 !scalars
  integer,parameter  :: N0=1000
  integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing
- integer            :: n1,n2,n3,ng,nfft,nbz
+ integer            :: n1,n2,n3,nfft
  integer            :: test,opt_surface !opt_cylinder
  real(dp)           :: cutoff,rcut,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
- real(dp)           :: gcart2,gcart_para,gcart_perp
+ real(dp)           :: gcart_para,gcart_perp
  real(dp)           :: quad,tmp,ucvol
  real(dp)           :: pdir(3),alpha(3)
  real(dp),parameter :: tolfix=1.0000001_dp
