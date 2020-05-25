@@ -9,6 +9,8 @@ the relaxation time approximation.
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
+It goes without saying that you should have read the [introduction page for the EPH code](eph_intro) 
+before running these examples.
 
 This lesson should take about 1 hour.
 
@@ -46,7 +48,7 @@ In the $\eta \rightarrow 0^+$ limit, one obtains:
 \end{equation}
 
 that corresponds to the linewidth of the electron state $n\kk$ due to the scattering with phonons.
-The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the linewidth:
+The lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the linewidth:
 
 \begin{align}
 \frac{1}{\tau_{n\kk}} =
@@ -69,14 +71,13 @@ The generalized transport coefficients are given by [[cite:Madsen2018]]
     - \sum_n \int \frac{d\kk}{\Omega_\BZ} \vnka \vnkb\, \tau_{n\kk} & \\
     \times (\enk-\ef)^m
     \left.\frac{\partial f}{\partial\varepsilon}\right|_{\enk}
-    \label{eq:transport_lc}
     \end{split}
+    \label{eq:transport_lc}
 \end{equation}
 
-where $\vnka$ is the $\alpha$-th Cartesian component of the matrix element
-the velocity operator
+where $\vnka$ is the $\alpha$-th Cartesian component of the matrix element the velocity operator
 
-$$\vnk = \langle \nk | \dfrac{\partial{H}}{\partial{\kk}} | \nk \rangle.$$
+$$\vnk = \PDER{\enk}{\kk} = \langle \nk | \dfrac{\partial{H}}{\partial{\kk}} | \nk \rangle.$$
 
 that can be computed with DFPT.
 
@@ -98,7 +99,7 @@ and can be divided into hole and electron contributions
 
 where $n_e$ and $n_h$ are the electron and hole concentrations in the conduction and valence bands respectively,
 and $\mu_e$ and $\mu_h$ are the electron and hole mobilities,
-which can be obtained by selecting the conduction or valences states $n$ in Eq.~\eqref{eq:transport_lc}.
+which can be obtained by selecting the conduction or valences states $n$ in Eq.\eqref{eq:transport_lc}.
 
 For electrons,
 
@@ -116,10 +117,10 @@ A typical computation of mobilities requires different steps:
 
   * Ground state computation to obtain the DEN and the WFK file
   * DFPT calculation for a set of $\qq$-points in the IBZ associated to a homogeneous mesh.
-    The DFPT run uses the WFK file produced in the previous step to produce **partial** DDB and POT1 files.
+    Each DFPT run reads the WFK file produced in the previous step and produces **partial** DDB and POT1 files.
   * Merging of the partial DDB and POT1 files with *mrgddb* and *mrgdv*, respectively
   * Computation of the GS wavefunctions on a $\kk$-mesh that is much denser than the one
-    used for the DFPT part as e-ph properties converge way slower than phonons.
+    used for the DFPT part as e-ph properties converge much slower than phonons.
   * Interpolation of the e-ph scattering potentials in $\qq$-space and computation of the lifetimes
     for the relevant $\kk$-points contributing to the mobility
   * Computation of transport properties
@@ -187,7 +188,8 @@ For more details about this first step, please refer to the first and second tut
     as well and the static dielectric tensor
     These quantities are then used to treat the long-range (LR) part of the dynamical matrix in
     the Fourier interpolation of the phonon frequencies.
-    We will see that these quantities are also needed in the Fourier interpolation of the DFPT potential.
+    As discussed in the EPH introduction. these quantities are also needed for the Fourier 
+    interpolation of the DFPT potential.
 
 <!--
 Only the (partial) DDB and POT files produced at the end of the DFPT run
@@ -240,7 +242,7 @@ mrgdv < teph4mob_3.in
 
 !!! tip
 
-    Alternatively, one can the command line.
+    Alternatively, one can use the command line.
 
     ```sh
     mrgdv merge teph4mob_3_DVDB teph4mob_1o_DS*_POT*
@@ -336,35 +338,43 @@ abinit teph4mob_5.in > teph4mob_5.log 2> err &
 
 The job should take $\sim$15 seconds on a recent CPU.
 
-Let's discuss the meaning of the e-ph variables in more details.
+Let's discuss the meaning of the e-ph variables in more details:
 
-[[optdriver]] 7 is required to activate the e-ph driver while
-[[eph_task]] -4 tells ABINIT that we only need the imaginary part
-of the e-ph self-energy, which directly gives the electron lifetimes.
+* [[optdriver]] 7 is required to activate the e-ph driver
 
-The dense $\kk$-mesh is specified by [[ngkpt]] = 24 24 24.
-It should be the same mesh as the one used for the dense WFK computation.
-[[occopt]] 3 is required to correctly compute the
-location of the Fermi level, using the Fermi-Dirac occupation function.
-The initial grid used for the phonons (used in the DFPT computation) was a 4x4x4.
-These are the values that we need to specify for [[ddb_ngqpt]].
-The dense $\qq$-mesh onto which the scattering potentials are interpolated and the
-e-ph matrix elements are computed is given by [[eph_ngqpt_fine]].
-Note that [[eph_ngqpt_fine]] and [[ngkpt]] should be commensurated.
+* [[eph_task]] -4 tells ABINIT that we only need the imaginary part
+  of the e-ph self-energy, which directly gives the electron lifetimes.
+
+* The dense $\kk$-mesh is specified by [[ngkpt]] = 24 24 24.
+  It should be the same mesh as the one used for the dense WFK computation.
+
+* [[occopt]] 3 is required to correctly compute the
+  location of the Fermi level, using the Fermi-Dirac occupation function.
+
+* [[ddb_ngqpt]] defined the initial grid used for the DFPT computation (4x4x4 in this example)
+
+* [[eph_ngqpt_fine]] defines the dense $\qq$-mesh onto which the scattering potentials are interpolated
+  and the e-ph matrix elements are computed is given by 
+
+
+!!! warning
+
+    [[ngkpt]] and [[eph_ngqpt_fine]] should be commensurated.
+    More specifically, the $\kk$-mesh must must be a multiple of the $\qq$-mesh.
 
 In this tutorial, we will use the same dense $\kk$- and $\qq$-meshes.
 As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh,
-is needed to achieve fast convergence of the integrals.
+is needed to achieve fast convergence of the integrals [[cite:Brunin2020]].
 Possible exceptions are systems with very small effective masses (e.g. GaAs) in which
 a very dense $\kk$-sampling is needed to to sample the electron (hole) pocket.
-In this case, using the same sampling for electrons and phonons may be enough.
+In this case, using the same sampling for electrons and phonons may be enough to converge.
 
 We will use the tetrahedron integration method [[cite:Bloechl1994]] to obtain the lifetimes (integration
 over the $\qq$-mesh). This allows to efficiently filter out the $\qq$-points that do not contribute
 to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
 ensure energy and momentum conservation for a given $\kk$-point.
 All the other $\qq$-points do not need to be considered and can be filtered out.
-The use of the tetrahedron method is automatically activated when only the imaginary part is wanted.
+The use of the tetrahedron method is automatically activated when [[eph_task]] is set to -4.
 It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
@@ -373,7 +383,14 @@ specified by [[eph_extrael]].
 To obtain results that are representative of the intrinsic mobility,
 we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
 
-The [[sigma_erange]] variable describes the energy window, below the VBM and above the
+!!! tip
+
+    The computational cost increases with the number of temperatures.
+    For the initial convergence studies, we suggest to start from a relatively small number
+    of temperatures covering the region of interest. The T-mesh can be densified aftwerwards when 
+    converged parameters are found.
+
+The [[sigma_erange]] variable defines the energy window, below the VBM and above the
 CBM where the lifetimes will be computed.
 Since the BTE contains a derivative of the Fermi-Dirac occupation function centered on the Fermi level,
 it is possible to filter the $\kk$-points that will contribute to the mobility and compute
@@ -382,26 +399,9 @@ as we go further from the Fermi level. Only the states close to the band edges c
 This additional filtering technique allows one to compute only a few percents of all the lifetimes.
 This variable should be subject to a convergence study, as explained in the next section.
 <!--
-A value of 0.2 eV represents a good starting point for further analysis 
+A value of 0.2 eV represents a good starting point for further analysis.
+Hopefully, in the next version this parameter will be automatically computed by the code.
 -->
-
-Different tricks have been implemented to accelerate the computation.
-The use of single precision in the FFT routines allows one to decrease the computational cost
-without losing precision. This trick is activated by setting [[mixprec]] = 1.
-Another trick to decrease the memory requirement is to decrease [[boxcutmin]]
-to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1.
-An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2,
-but we found that using a value of 1.1 does not change the result
-but allows one to decrease the cost of the calculation and the memory by a factor ~8.
-These tricks **are not activated by default** because users are supposed to perform preliminary tests
-to make sure the quality of the results is not affected by these options.
-
-If performance is really of concern, you can also try to set [[eph_mrta]] to 0.
-By default, the code computes transport lifetimes both with the SERTA and the MRTA.
-The MRTA requires the computation of the group velocities at $\kk$ and $\kk+\qq$.
-This part is relatively fast yet it does not come for free.
-If you know in advance that you don't need MRTA results, it is possible to gain some speedup
-by avoiding the computation of $v_{m\kq}$
 
 We can now examine the log file in detail.
 After the standard output of the input variables,
@@ -421,7 +421,7 @@ Have quadrupoles: no
 
 The code then outputs different information. The first of them is the location of the Fermi level
 that will be used to compute the lifetimes. You can check that it is far enough from the band
-edges so that the computed mobility will be intrinsic.
+edges so that the computed mobility can be considered as intrinsic.
 
 ```sh
 Valence Maximum:   2.3564 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -439,7 +439,7 @@ min(nbcalc_ks): 1 MAX(nbcalc_ks): 1
 
 Over the initial 413 $\kk$-points in the IBZ, only 3 will be computed!
 ABINIT then reads the WFK file and interpolates the potentials to compute the e-ph matrix elements.
-The use of the tetrahedron method allows for the filtering of the $\qq-points:
+The use of the tetrahedron method allows for the filtering of the $\qq$-points:
 
 ```sh
 qpoints_oracle: calculation of tau_nk will need: 39 q-points in the IBZ. (nqibz_eff / nqibz):   9.4 [%]
@@ -452,9 +452,12 @@ Once this is done, the code starts looping over the 3 $\kk$-points for which the
 Computing self-energy matrix elements for k-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00] [ 1 / 3 ]
 ```
 
-You can find various information for each $\kk$-point, such as the number of $\qq$-points
-belonging to the little group of $\kk$ (called IBZ(k) in the code),
-the number of $\qq$-point contributing to the imaginary part, the wall-time each step takes etc.
+You can find various information for each $\kk$-point, such as:
+
+* the number of $\qq$-points belonging to the little group of $\kk$ (called IBZ(k) in the code)
+* the number of $\qq$-point in the IBZ(k) contributing to the imaginary part of $\Sigma_\nk$
+* the wall-time each step takes.
+
 Finally, we have the results for the lifetimes (TAU) in the *teph4mob_5.out* file:
 
 ```sh
@@ -491,9 +494,9 @@ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
 The temperature is first given then the electron and hole densities followed by electron and hole mobilities.
 In this computation, we consider only electrons, so the values for holes are zero.
 Note that the transport driver is automatically executed after the e-ph calculation.
-You can also run only the transport driver, provided you already have the lifetimes in a SIGEPH.nc file,
-by setting [[eph_task]] = 7.
-This task can be performed only in serial and is very fast.
+You can run the transport driver in standalone mode by setting [[eph_task]] = 7, 
+provided you already have the lifetimes in a SIGEPH.nc file,
+<!-- This task can be performed only in serial and is very fast. -->
 
 Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes,
 we can give more details about convergence and additional tricks that can be used
@@ -505,11 +508,13 @@ The first convergence study to be performed is to determine the energy range aro
 to be used for the computation of $\tau_{n\kk}$.
 We can do that by performing the same mobility computation (same k- and q-mesh)
 for an increasing energy window specified by [[sigma_erange]].
-<!--
-once you have decided whether you are interested in electron or hole mobility.
-The code can compute both in a single run but this is not the recommended procedure as the $\qq$-point
-filtering is expected to be less efficient.
--->
+
+!!! important
+
+    The code can compute both electron and hole mobilities in a single run 
+    but this is not the recommended procedure as the $\qq$-point filtering is expected to be less efficient.
+    Moreover electrons and holes may require a different $\kk$-sampling to convergence depending on the dispersion
+    of the bands. So we suggest to run the calculations with different input files.
 
 The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.in* is an example of such computation.
 
@@ -622,40 +627,38 @@ However, we found that there is very little use to go beyond a mesh three times 
 Using a 72x72x72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
 and a 96x96x96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
 
-### On the importance of the initial DFPT mesh
 
-At this point it is worth commenting about the importance of the initial DFPT $\qq$-mesh.
-The Fourier interpolation implicitly assumes that the signal in $\RR$-space decays quickly hence
-the quality of the *interpolated* phonon frequencies and of the *interpolated* DFPT potentials,
-between the ab-initio points depends on the spacing of the initial $\qq$-mesh that
-in turns defines the size of the Born-von-Karman supercell.
-In semiconductors the atomic displacement induces dynamical dipoles and quadrupoles at the level of the density
-that will generate long-range scattering potentials.
-These potentials affect the behaviour of the e-ph matrix elements for $\qq \rightarrow 0$ and the
-$\qq$-mesh must be dense enough to capture the full strenght of the coupling.
-A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015]] and [[cite:Sjakste2015]].
+### In-place restart
 
-From a more practical point of view, this implies that one should always monitor the convergence of the
-physical properties with respect to the initial DFPT $\qq$-mesh.
-The LR model implemented in ABINIT facilitates the convergence as the non-analytic behaviour for
-$\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduce oscillations
-between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the physical results.
+All the results of the calculation are stored in a single SIGEPH.nc file
+for all the $\kk$-points (and spins) considered.
+The list of $\kk$-points is initialized at the beginning of the calculation and an internal table
+in the netcdf file stores the status of each k-point (whether it has been computed or not).
+This means that calculations that get killed by the resource manager due to time limit can use
+the SIGEPH file to perform an automatic in-place restart.
+Just set [[eph_restart]] to 1 in the input file and rerun the job.
 
-## Additional tricks
+!!! important
 
-As these files are quite larger and the overall space on disk scales as nq * 3 * natom, we suggest
-to avoid the output of the DFPT wavefunctions by using [[prtwf]] = -1
-In this case, the DFPT code writens the 1WF only if the DFPT SCF cycle is not converged so that one can restart
-from it if needed.
+    Restart capabilities are not supported in multi-dataset mode!
+
+### Transport calculation from SIGEPH.nc
+
+The routine that computes carrier mobilites is automatically invoked when [[eph_task]] = -4 is used
+and a *TRANSPORT.nc* file with the final results is produced.
+There are however cases in which one would like to compute mobilities from an already existing
+SIGEPH.nc file without performing a full self-energy calculation.
+In this case, one can use [[eph_task]] = 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
+The advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evalute the mobility integral.
 
 ### MPI parallelism and memory requirements
 
 There are five different MPI levels that can be used to distribute the workload
 and the most memory-demanding data structures.
-By default, the code tries to reach some compromise between memory requirements and time to solution.
+By default, the code tries to reach some compromise between memory requirements and time to solution
 by activating the parallelism over $\qq$-points if no other input is provided from the user.
 You can however specify manually the MPI distribution across the five different levels
-by using [[eph_np_pqbks]], a list of 5 integers.
+by using [[eph_np_pqbks]] (a list of 5 integers).
 The product of these five numbers **must be equal** to the total number of MPI processes.
 The first number gives the number of processes for the parallelization over perturbations.
 The allowed value range between 1 and 3 x [[natom]], and should be a divisor
@@ -671,6 +674,13 @@ The MPI parallelism over $\kk$-points and spins is very efficient
 but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if the memory requirements are under control
 and you want to boost the calculation.
+
+If performance is really of concern, you can also try to set [[eph_mrta]] to 0.
+By default, the code computes transport lifetimes both with the SERTA and the MRTA.
+The MRTA requires the computation of the group velocities at $\kk$ and $\kk+\qq$.
+This part is relatively fast yet it does not come for free.
+If you know in advance that you don't need MRTA results, it is possible to gain some speedup
+by avoiding the computation of $v_{m\kq}$
 
 ### How to reduce memory requirements
 
@@ -703,16 +713,6 @@ As a rule of thumb 2-4 OpenMP threads should be OK provided you link with thread
 OpemMP may be beneficial for large calculations.
 
 Last but not least, datasets are bad, large arrays allocated for k-points and the size depends on ndtset.
-
-### In-place restart
-
-All the results of the calculation are stored in a single SIGEPH.nc file
-for all the $\kk$-points (and spins) considered.
-The list of $\kk$-points is initialized at the beginning of the calculation and an internal table
-in the netcdf file stores the status of each k-point (whether it has been computed or not).
-This means that calculations that get killed by the resource manager due to time limit can use
-the SIGEPH file to perform an automatic in-place restart.
-Just set [[eph_restart]] to 1 in the input file and rerun the job.
 
 ### How to compute only the k-points close to the band edges
 
@@ -853,12 +853,3 @@ An example can be found in this
 %Therefore it is possible to employ the star-function interpolation by Shankland, Koelling and Wood in the improved version proposed by Pickett to fit the {\it ab initio} results. This interpolation technique, by construction, passes through the initial points and satisfies the basic symmetry property of the band energies.
 %It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings that may cause unphysical oscillations between the {\it ab initio} points. To reduce this spurious effect, we prefer to interpolate the QP corrections instead of the QP energies. The corrections, indeed, are usually smoother in k-space and the resulting fit is more stable.
 -->
-
-### Transport calculation from SIGEPH.nc
-
-The routine that computes carrier mobilites is automatically invoked when [[eph_task]] = -4 is used
-and a *TRANSPORT.nc* file with the final results is produced.
-There are however cases in which one would like to compute mobilities from an already existing
-SIGEPH.nc file without performing a full self-energy calculation.
-In this case, one can use [[eph_task]] = 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
-The advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evalute the mobility integral.

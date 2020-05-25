@@ -103,7 +103,7 @@ module m_wfd
    ! 1 if nonlocal part is applied using real spherical Harmonics. 0 for Legendre polynomial.
 
    integer :: has_ylm
-   ! 0 if ylm is allocated.
+   ! 0 if ylm is not used.
    ! 1 if ylm is allocated.
    ! 2 if ylm is already computed.
 
@@ -506,7 +506,7 @@ CONTAINS  !=====================================================================
 !!  Main creation method for the kdata_t datatype.
 !!
 !! PARENTS
-!!      debug_tools,m_shirley,m_wfd
+!!      debug_tools,m_wfd
 !!
 !! CHILDREN
 !!
@@ -817,7 +817,7 @@ end subroutine copy_kdata_1D
 !!    %ur in real space only if keep_ur.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,m_wfd
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,m_wfd
 !!      screening,sigma,wfk_analyze
 !!
 !! CHILDREN
@@ -1061,7 +1061,7 @@ end subroutine wfd_init
 !!  Free the memory allocated in the wfd_t data type.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,screening
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,screening
 !!      sigma,wfk_analyze
 !!
 !! CHILDREN
@@ -1405,7 +1405,7 @@ end function wfd_xdotc
 !!  Reinitialize the storage mode of the ur treated by this node.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_shirley,sigma
+!!      bethe_salpeter,sigma
 !!
 !! CHILDREN
 !!
@@ -1564,7 +1564,7 @@ end subroutine wfd_copy_cg
 !! PARENTS
 !!      calc_sigc_me,calc_sigx_me,calc_vhxc_me,cchi0,cchi0q0,cchi0q0_intraband
 !!      classify_bands,cohsex_me,exc_build_block,exc_build_ham,exc_den
-!!      m_shirley,m_wfd,prep_calc_ucrpa,wfd_mkrho
+!!      m_wfd,prep_calc_ucrpa,wfd_mkrho
 !!
 !! CHILDREN
 !!
@@ -1679,7 +1679,7 @@ end subroutine wfd_nullify
 !!  Only printing
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,screening
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,screening
 !!      sigma
 !!
 !! CHILDREN
@@ -2325,7 +2325,7 @@ end subroutine copy_wave_3D
 !!   Wfd<wfd_t>=See above.
 !!
 !! PARENTS
-!!      m_shirley,m_wfd
+!!      m_wfd
 !!
 !! CHILDREN
 !!
@@ -3280,7 +3280,7 @@ end subroutine wfd_update_bkstab
 !! FUNCTION
 !!
 !! PARENTS
-!!      m_shirley,m_wfd
+!!      m_wfd
 !!
 !! CHILDREN
 !!
@@ -4053,7 +4053,7 @@ end subroutine wfd_distribute_kb_kpbp
 !! PARENTS
 !!      calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me,cchi0,cchi0q0
 !!      cchi0q0_intraband,cohsex_me,debug_tools,exc_build_block,exc_build_ham
-!!      m_shirley,m_wfd,prep_calc_ucrpa,sigma,wfd_pawrhoij,wfd_vnlpsi
+!!      m_wfd,prep_calc_ucrpa,sigma,wfd_pawrhoij,wfd_vnlpsi
 !!
 !! CHILDREN
 !!
@@ -4164,7 +4164,7 @@ end subroutine wfd_get_cprj
 !! PARENTS
 !!      calc_sigc_me,calc_sigx_me,calc_vhxc_me,cchi0,cchi0q0,cchi0q0_intraband
 !!      classify_bands,cohsex_me,exc_build_block,exc_build_ham,exc_plot
-!!      m_bseinterp,m_shirley,m_wfd,prep_calc_ucrpa,screening,sigma,wfd_mkrho
+!!      m_bseinterp,m_wfd,prep_calc_ucrpa,screening,sigma,wfd_mkrho
 !!      wfk_analyze
 !!
 !! CHILDREN
@@ -4299,7 +4299,7 @@ end function wfd_iam_master
 !!   Only writing.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,screening
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,screening
 !!      sigma,wfk_analyze
 !!
 !! CHILDREN
@@ -4483,7 +4483,7 @@ end subroutine wfd_test_ortho
 !!  [ur_kibz(Wfd%nfft*Wfd%nspinor)]= Optional output: u(r) in the IBZ.
 !!
 !! PARENTS
-!!      debug_tools,exc_plot,m_bseinterp,m_shirley
+!!      debug_tools,exc_plot,m_bseinterp
 !!
 !! CHILDREN
 !!

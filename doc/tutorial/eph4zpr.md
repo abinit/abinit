@@ -9,6 +9,14 @@ renormalization (ZPR) of the band gap, obtain spectral functions and temperature
 We start with a very brief overview of the many-body formalism in the context of the e-ph interaction, 
 then we discuss how to compute the ZPR, temperature-dependent band gaps and spectral functions.
 
+It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
+and that he/she is familiar with the calculation of ground state and response properties,
+in particular phonons, Born effective charges and dielectric tensor.
+It goes without saying that you should have read the [introduction page for the EPH code](eph_intro) 
+before running these examples.
+
+This lesson should take about 1 hour.
+
 ## Formalism
 
 The electron-phonon (e-ph) self-energy, $\Sigma^{\text{e-ph}}$, describes the renormalization of the single-particle
@@ -22,11 +30,11 @@ Indeed, in semiconductors and insulators most of temperature dependence at low T
 Corrections due to $\Sigma^{\text{e-e}}$ are obviously important but their temperature dependence is rather small 
 provided the system has an energy gap much larger than $kT$.
 
-In state-of-the-art \abinitio methods, the e-ph coupling is described
+In state-of-the-art *ab-initio* methods, the e-ph coupling is described
 within DFT by expanding the KS effective potential in the nuclear displacements,
 and the vibrational properties are obtained with  (DFPT) [[cite:Gonze1997]], [[cite:Baroni2001]].
-The e-ph self-energy consists of two terms: the Fan-Migdal (FM) self-energy 
-and the Debye-Waller (DW) part [[cite:Giustino2017]]:
+The e-ph self-energy consists of two terms: the Fan-Migdal (FM)  
+and the Debye-Waller (DW) contribution [[cite:Giustino2017]]:
 
 \begin{equation}
 \Sigma^\eph = \Sigma^\FM(\ww) + \Sigma_^{\DW}
@@ -60,9 +68,13 @@ At the level of the implementation, $\eta$ is set to a (small) finite value give
 
 !!! tips
 
-    In practice, one can use symmetries to reduce the integration to an appropriate irreducible zone defined by the
-    operations of the little group of the $\kk$-point.
-    This symmetrization trick is activated by default and can be deactivated by setting [[symsigma]] to zero.
+    In practice, one can use symmetries to reduce the BZ integration to an appropriate irreducible zone defined by the
+    little group of the $\kk$-point.
+    This symmetrization trick is activated by default and can be deactivated by setting [[symsigma]] to zero for debugging
+    purposes.
+    When [[symsigma]] is set to 1, indeed, the code performs a final average of the QP results within the degenerate subspace.
+    As a consequence, accidental degeneracies won't be removed by the e-ph self-energy when this symmetrization trick is
+    activated.
 
 <!--
 First-principles calculations of the EPH self-energy are therefore crucial to understand the temperature-dependence
@@ -84,7 +96,7 @@ State-of-the-art implementations approximate the DW contribution with
 \Sigma_{n\kk}^{\DW} = \sum_{\qq\nu m} (2 n_{\qq\nu} + 1) \dfrac{g_{mn\nu}^{2,DW}(\kk, \qq)}{\ee_{n\kk} - \ee_{m\kk}},
 \end{equation}
 
-where $g_{mn\nu}^{2,\DW}(\kk,\qq)$ is an effective matrix element that, within the rigid-ion approximation,
+where $g_{mn\nu}^{2,\DW}(\kk,\qq)$ is an effective matrix element that, within the **rigid-ion approximation**,
 can be expressed in terms of the $\gkq$ matrix elements [[cite:Giustino2017]].
 
 Both the FM and the DW term converge slowly with respect to the number of bands [[nband]] and the $\qq$-sampling.
@@ -95,14 +107,14 @@ QP energy differences usually converge faster than absolute QP energies (the sam
 The EPH code implements numerical tricks to accelerate the convergence with respect to [[nband]] that are discussed 
 in more detail in the next sections.
 Also the convergence with the $\qq$-sampling is rather slow and delicate.
-This is especially true in polar materials due the divergence of the e-ph matrix elements 
+This is especially true in polar materials due to the divergence of the polar e-ph matrix elements 
 in the $\qq \rightarrow 0$ limit [[cite:Vogl1976]].
 
 ### QP equation and spectral function
 
 In principle, the quasi-particle (QP) excitations are defined by the solution(s)
-in the complex plane of the equation $$ z = \ee_\nk + \Sigma_\nk^{\text{e-ph}}(z) $$.
-provided that the non-diagonal components of the self-energy can be neglected
+in the complex plane of the equation $$ z = \ee_\nk + \Sigma_\nk^{\text{e-ph}}(z) $$
+provided that the non-diagonal components of the self-energy can be neglected.
 In practice, the problem is usually simplified by seeking approximated solutions along the real axis 
 following two different approaches.
 
@@ -128,7 +140,7 @@ with the renormalization factor $Z$ given by
 
 Both approaches are implemented in ABINIT although it should be noted that, according to recent works, 
 the on-the-mass-shell approach provides results that are closer to those obtained with more advanced techniques
-based on the cumulant expansion [[cite:Nery2018]]
+based on the cumulant expansion [[cite:Nery2018]].
 
 <!--
 Further details concerning the implementation are given in Ref.[[cite:Gonze2019]].
@@ -177,7 +189,7 @@ The number of bands is sufficiently large so that we can perform initial converg
 We also perform a NSCF calculation on a high-symmetry $\kk$-path to locate the position of the KS band edges
 as these are the states we want to correct.
 The input file is ...
-We use [[getden_path]] to read the DEN.nc file instead of [[getden]] or [[irdden]] variables.
+We use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]] variables.
 
 TODO: Mention ncdump and the input_string
 
@@ -185,20 +197,20 @@ In this particular case the CBM and the VMB ...
 
 !!! important
 
-  Note that the EPH code can compute QP corrections only for $\kk$-points belonging to the $\kk$-mesh
-  associated to WFK file.
-  In some cases, it is not possible to generate a $\kk$-mesh containing the band edges.
-  In this case, you will have to select the closest wavevectors in the grid.
+    Note that the EPH code can compute QP corrections only for $\kk$-points belonging to the $\kk$-mesh
+    associated to WFK file.
+    In some cases, it is not possible to generate a $\kk$-mesh containing the band edges.
+    In this case, you will have to select the closest wavevectors in the grid.
 
 ### Our first ZPR calculation
 
-TODO: use and explaine [[structure]]
+TODO: use and explain [[structure]]
 
 For our first ZPR we decided to use a rather simple input file that allows us to 
 discuss the basic input variables.
 
 [[optdriver]] [[eph_task]] is set to 4
-[[dvdb_ngqpt]] is set to XXX
+[[ddb_ngqpt]] is set to XXX
 We use [[getddb_filepath]], [[getwfk_filepath]], [[getdvdb_filepath]] to specify the paths to the external files.
 [[ngkpt]] 
 

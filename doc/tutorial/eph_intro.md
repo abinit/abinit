@@ -1,5 +1,5 @@
 ---
-authors: MG
+authors: MG, GB
 ---
 
 # An overview of the EPH code
@@ -19,7 +19,7 @@ computed by the DFPT code. This approach presents advantages as well as drawback
 On the one hand, most of the work required to compute e-ph matrix elements is implemented directly by the DFPT routines.
 This means that e-ph calculations with advanced features such as PAW, SOC, non-collinear magnetism *etc*
 are readily available in the ANADDB version once support in the DFPT part is implemented.
-On the other hand, this post-processing approach implies that the list of $\kk/\qq$-points in the e-ph matrix elements
+On the other hand, this post-processing approach implies that the number of $\kk/\qq$-points in the e-ph matrix elements
 is automatically fixed at the level of the DFPT run.
 In other words, if you want to compute phonon-limited mobilities with e.g. a 90x90x90 $\kk$- and $\qq$-mesh,
 you need to perform DFPT calculations with the same sampling thus rendering the computation quite heavy.
@@ -41,6 +41,9 @@ The EPH code bypasses this bottleneck by **interpolating the DFPT potentials** i
 while Bloch states are computed non-self-consistently on arbitrarily dense $\kk$-meshes.
 As a net result, the three problems (electrons, phonons and electron-phonon) are now partly
 decoupled and can be converged separately.
+Keep in mind, however, that the fact that one can easily densify the sampling in the EPW code does not 
+mean one can use under-converged values for the GS/DFPT part. 
+Indeed, the quality of the ingredients used for the interpolation depends on the initial $\kk\qq$ mesh.
 For further information about the difference between EPH and ANADDB, see also [[cite:Gonze2019]].
 Further details about the EPH implementation are available in [[cite:Brunin2020]].
 
@@ -48,14 +51,6 @@ A typical EPH workflow with arrows denoting dependencies between the different s
 is schematically represented in the below figure:
 
 ![](eph_intro_assets/eph_workflow.png){: style="height:400px;width:400px"}
-
-<!--
-Each box type represents a different kind of calculation.
-self-consistent and non-self-consistent calculations to obtain wavefunctions, atomic perturbations
-with respect to specific atoms and directions.
-The DFPT potentials and the blocks of the dynamical matrix are merged and stored
-in two distinct files at the end of the DFPT part.
--->
 
 The brown boxes are standard DFPT calculations done with relatively coarse $\kk$- and $\qq$-meshes.
 Each DFPT run produces (partial) DDB files with a portion of the full dynamical matrix
@@ -78,11 +73,53 @@ To read the external files, one specifies the path on the file system with the t
 
 Internally, the code starts by reading the DDB file to construct the interatomic
 force constants (IFCs) in the real-space supercell ($\RR$-space).
-<!-- This part is very similar to what is done in ANADDB.
-Other external files (WFK, DVDB) may be read depending on the value of [[eph_task]].
--->
+<!-- Other external files (WFK, DVDB) may be read depending on the value of [[eph_task]]. -->
 At this point, EPH computes phonon bands and phonon DOS.
 Finally a specialized routine is invoked depending on the value of [[eph_task]].
+
+The following physical properties can be computed
+
+* Imaginary part of ph-e self-energy in metals ([[eph_task]] 1)
+
+    * phonon linewidths induced by e-ph
+    * Eliashberg function
+    * superconducting properties within the isotropic Migdal-Eliashberg formalism
+<!--
+    * transport properties in metals with the LOVA approximation.
+-->
+
+* e-ph self-energy ([[eph_task]] 4)
+
+    * zero-point renormalization of the band gap
+    * correction of the QP energies due to e-ph scattering
+    * spectral function
+    * Eliashberg functions
+
+* Imaginary part of e-ph self-energy ([[eph_task]] -4)
+
+    * e-ph scattering rates
+    * phonon-limited carrier mobility, electrical conductivity and Seebeck coefficient
+    * phonon-limited carrier mean free path and relaxation times
+    * all the calculations above can be done as a function of temperature and doping, for nonpolar and polar materials.
+
+Other more advanced options are available...
+
+<!--
+Crystalline symmetries are used throughout the code in order to reduce the number
+of $\kk$- and $\qq$-points that must be explicitly treated.
+To achieve good parallel efficiently, the most CPU demanding parts are parallelized with MPI employing
+a distribution schemes over $\qq$-points, perturbations
+and bands (the band level is available only when computing the full self-energy).
+[[istwfk]] [[kptopt]]
+Features available in ANADDB that are not yet supported by EPH
+-->
+
+At the time of writing (|today|), the following features are not supported by EPH:
+
+* PAW calculations
+* Spin-orbit coupling
+* Non-collinear magnetism ([[nspinor]] = 2 and [[nspden]] = 4)
+* Non-local part of the pseudopotential applied with [[useylm]] = 1
 
 In this introduction, we mainly focus on the parts common to the different sub-drivers:
 
@@ -117,6 +154,7 @@ These two variables are **mandatory** when performing EPH calculations.
 
 By default, the EPH code computes the phonon DOS by interpolating the IFCs on the *dense* $\qq$-mesh
 specified by [[ph_ngqpt]].
+The default $\qq$ grid is 20x20x20, you may want to increase this value for more accurate results 
 The step of the (linear) frequency mesh is governed by [[ph_wstep]],
 the linear tetrahedron method [[cite:Bloechl1994]] is used by default.
 The Gaussian method can be activated via [[prtphdos]] with [[ph_smear]] defining the Gaussian smearing in Hartree units.
@@ -125,9 +163,9 @@ The computation of the PHDOS can be disabled by setting [[prtphdos]] = 0.
 
 ### Variables for phonon band structure
 
-In a typical EPH run, the computation of the phonon band structure is activated by default.
-The $\qq$-path is specified in terms of [[ph_nqpath]] vertices listed in the [[ph_qpath]] array
-while [[ph_ndivsm]] defines the number of divisions used to sample the smallest segment.
+The computation of the phonon band structure is activated automatically, provided the input file
+defines the high-symmetry $\qq$-path in terms of [[ph_nqpath]] vertices listed in the [[ph_qpath]] array.
+[[ph_ndivsm]] defines the number of divisions used to sample the smallest segment.
 The computation of the phonon band structure can be deactivated by setting [[prtphbands]] = 0.
 The final results are stored in the PHBST.nc file (same format at the one produced by ANADDB).
 
@@ -171,7 +209,7 @@ The DVDB file stores $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$
 for all the $\qq$-points in the IBZ and all the irreducible atomic perturbations.
 In a more rigorous way, we should say that the DVDB file stores the local part of the DFPT potential
 (variation of the Hartree + XC + local part of the pseudo)
-but this is a rather technical point, discussed in more detail in [[cite:Brunin2020]], that is not relevant
+but this is a rather technical point discussed in more detail in [[cite:Brunin2020]] that is not relevant
 for the present discussion so we do not elaborate more on this.
 
 <!--
@@ -214,21 +252,6 @@ The lattice-periodic part of the first-order derivative of the KS potential thus
 
 ## Fourier interpolation of the DFPT potential
 
-<!--
-E-PH properties are rather sensitive to the BZ sampling and some sort of interpolation scheme
-is needed to avoid explicit computations on very dense k/q meshes.
-The approach used in the EPH code consists in interpolating the DFPT potentials in $\qq$-space
-The advantage of such approach is that the interpolation in $\qq$-space in relatively easy
-to implement without any use inte
-
-In this document, we mainly focus on the input variables governing the interpolation of the DPFT potentials $\qq$-space.
-In the other EPH tutorials, we discuss how to use smart tricks to reduce the number
-of $\kk$-points that must be treated explicitly.
-As the calculation of the DFPT potentials represents a significant fraction of the overall computational time,
-especially when compared with the non-self-consistent computation of the WFK file,
-the new EPH driver allows the user to densify the $\qq$-mesh for phonons using
--->
-
 The EPH code employs the Fourier interpolation proposed in [[cite:Eiguren2008]]
 to obtain the scattering potentials at arbitrary $\qq$-points.
 In this interpolation technique, one uses the DFPT potential stored in the DVDB file
@@ -260,10 +283,9 @@ corresponding weights is specified by [[dvdb_rspace_cell]].
 The accuracy of the interpolation depends on the localization in $\RR$-space of $W_{\kappa\alpha}$.
 This means that the Born-von Karman supercell corresponding to the [[ddb_ngqpt]] grid should be large
 enough to capture the spatial decay of $W_{\kappa\alpha}(\rr,\RR)$ as a function of $\RR$.
-<!--
-It is also worth stressing that the same consideration holds for Wannier-based approaches
-indipendently on the degree of localization of the (maximally localized) Wannier functions.
--->
+As a consequence, [[ddb_ngqpt]] should be subject to convergence studies.
+
+
 
 In metals, $W_{\kappa\alpha}$ is expected to be short-ranged provided we ignore possible Kohn anomalies.
 On the contrary, a special numerical treatment is needed in semiconductors and insulators due to the presence of
@@ -280,7 +302,6 @@ The non-analytical part
 is then restored back to Eq.\eqref{eq:dfpt_pot_interpolation} when interpolating the potential at $\tilde{\qq}$.
 
 <!--
-As discussed in
 the long-range part associated to the displacement of atom $\kappa$ along the cartesian direction $\alpha$ can be modeled with
 -->
 In polar materials, the leading term is given by the dipolar field [[cite:Verdi2015]], [[cite:Sjakste2015]], [[cite:Giustino2017]],
@@ -302,9 +323,11 @@ in semiconductors.
 
 In non-polar materials, the Born effective charges are zero but the scattering potentials are still non-analytic
 due to presence of jump discontinuities.
-In this case the leading term is associated to the dynamical quadrupoles [[cite:Royo2019]].
 As discussed in [[cite:Brunin2020]] the non-analytic behaviour is fully captured by using:
-<!-- The expression for the LR model including both dipole and quadrupole terms reads: -->
+<!-- 
+In this case the leading term is associated to the dynamical quadrupoles [[cite:Royo2019]].
+The expression for the LR model including both dipole and quadrupole terms reads:
+-->
 
 \begin{equation}
     V^{\Lc}_{\kappa\alpha,\qq}(\rr) =
@@ -325,55 +348,76 @@ As discussed in [[cite:Brunin2020]] the non-analytic behaviour is fully captured
 
 TODO: Discuss more the integration with the DFPT part.
 
-For testing purposes, it is possible to deactivate the treatment of the LR part by setting [[dvdb_add_lr]] to 0.
-
-Note that, in the implementation, each Fourier component is multiplied by the Gaussian $e^{-\frac{|\qG|^2}{4\alpha}}$
+In the practical implementation, each Fourier component is multiplied by the Gaussian $e^{-\frac{|\qG|^2}{4\alpha}}$
 in order to damp the short range components that are not relevant for the definition of the LR model.
 The $\alpha$ parameter can be specified via the [[dvdb_qdamp]] input variable.
 The default value worked well in the majority of the systems investigated so far yet
 this parameter should be subject to convergence tests.
+For testing purposes, it is possible to deactivate the treatment of the LR part by setting [[dvdb_add_lr]] to 0.
 
-## Features and limitations
+### On the importance of the initial DFPT mesh
 
-The following physical properties can be computed with EPH depending on the value of [[eph_task]]
-
-* e-ph self-energy
-
-    * Zero-point renormalization of the band gap
-    * Correction of the QP energies due to e-ph scattering
-    * Spectral function
-    * Eliashberg functions
-
-* Imaginary part of e-ph self-energy
-
-    * e-ph scattering rates
-    * phonon-limited carrier mobility, electrical conductivity and Seebeck coefficient
-    * phonon-limited carrier mean free path and relaxation times
-    * all the calculations above can be done as a function of temperature and doping, for nonpolar and polar materials.
-
-* Imaginary part of ph-e self-energy
-
-    * Phonon linewidths induced by e-ph
-    * Eliashberg function
-    * Superconducting properties within the isotropic Migdal-Eliashberg formalism
-    * Transport properties in metals with the LOVA approximation.
-
+At this point it is worth commenting about the importance of the initial DFPT $\qq$-mesh.
+The Fourier interpolation implicitly assumes that the signal in $\RR$-space decays quickly hence
+the quality of the *interpolated* phonon frequencies and of the *interpolated* DFPT potentials,
+between the ab-initio points depends on the spacing of the initial $\qq$-mesh that
+in turns defines the size of the Born-von-Karman supercell.
 <!--
-Crystalline symmetries are used throughout the code in order to reduce the number
-of $\kk$- and $\qq$-points that must be explicitly treated.
-To achieve good parallel efficiently, the most CPU demanding parts are parallelized with MPI employing
-a distribution schemes over $\qq$-points, perturbations
-and bands (the band level is available only when computing the full self-energy).
-[[istwfk]] [[kptopt]]
-Features available in ANADDB that are not yet supported by EPH
+In semiconductors the atomic displacement induces dynamical dipoles and quadrupoles at the level of the density
+that will generate long-range scattering potentials.
+These potentials affect the behaviour of the e-ph matrix elements for $\qq \rightarrow 0$ and the
+$\qq$-mesh must be dense enough to capture the full strenght of the coupling.
+A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015]] and [[cite:Sjakste2015]].
 -->
 
-At the time of writing (|today|), the following features are not supported by EPH:
+From a more practical point of view, this implies that one should always monitor the convergence of the
+physical properties with respect to the initial DFPT $\qq$-mesh.
+The LR model implemented in ABINIT facilitates the convergence as the non-analytic behaviour for
+$\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduce oscillations
+between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the physical results.
+Note that the same consideration holds for Wannier-based approaches
+independently on the degree of localization of the (maximally localized) Wannier functions.
 
-* PAW calculations
-* Spin-orbit coupling
-* Non-collinear magnetism ([[nspinor]] = 2 and [[nspden]] = 4)
-* Non-local part of the pseudopotential applied with [[useylm]] = 1
+## Tricks to accelerate the computation and reduce the memory requirements
+
+Each sub-driver implements tricks to accelerate the calculation and reduce the memory requirements.
+Here we focus on the techniques that are common to the different EPH sub-drivers.
+Additional tricks specific to [[eph_task]] are discussed in more detail in the associated lesson.
+
+First of all, note that the memory requirements for the $W_{\kappa\alpha}(\rr,\RR)$ array 
+scales as [[nfft]] x product([[ddb_ngqpt]]). 
+This quantity should be multiplied by 3 * [[natom]] if each MPI process stores all the perturbations in memory.
+The MPI parallelism over perturbations (see [[eph_np_pqbks]]) allows one to decrease this prefactor from 
+*3 x natom* to *3 x natom / nprocs_pert*.
+
+Also, the total number of $\rr$-points ([[nfft]]) plays an important role both at the level of memory 
+as well as the level of wall-time.
+To optimize this part, one can decrease the value [[boxcutmin]] in the EPH calculation
+to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1.
+You are not obliged to run the GS/DFPT part with the same [[boxcutmin]]
+An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2,
+but we found that using a value of 1.1 does not change the result
+but allows one to decrease the cost of the calculation and the memory by a factor ~8.
+
+A significant fraction of the wall-time in EPH is spent for performing the FFTs required to apply $H^1$.
+The use of single precision in the FFT routines allows one to decrease the computational cost without losing precision. 
+This trick is activated by setting [[mixprec]] = 1 (support for FFTW3 or DFPT-MKL is required to take advantage 
+of mixed precision FFTs).
+
+!!! important
+
+    The [[boxcutmin]] and [[mixprec]] tricks **are not activated by default** 
+    because users are supposed to perform preliminary tests
+    to make sure the quality of the results is not affected by these options.
+
+We terminate the discussion with another trick that is not directly related to the EPH code but 
+to the DFPT computation.
+Since EPH does not need the first order change of the wavefunctions (1WF files)
+we suggest to avoid the output of these files by using [[prtwf]] = -1 in the DFPT part.
+As these files are quite large and the overall space on disk scales as **nqpt x 3 x natom**.
+When [[prtwf]] is set to -1, the DFPT code writes the 1WF only if the DFPT SCF cycle is not converged 
+so that one can still restart from these wavefunctions if really needed 
+(restarting a DFPT run from the 1WF file is more effective than restarting from the first order density).
 
 <!--
 On the one hand, this approach was relatively easy to implement as most of the work,
