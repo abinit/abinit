@@ -699,6 +699,14 @@ program optic
  call pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
  call pmat_renorm(fermie, eigen0, mband, nkpt, nsppol, pmat, scissor)
 
+
+!---------------------------------------------------------------------------------
+! Perform calculations
+!---------------------------------------------------------------------------------
+
+! XG_2020_05_25 : All these subroutines should be rationalized. There are numerous
+! similar sections, e.g. at the level of the checking, and set up ...
+
 !IN CALLED ROUTINE
 !call linopt(nspin,,nkpt,wkpt,nsymcrys,symcrys,nstval,occv,evalv,efermi,pmat,v1,v2,nmesh,de,scissor,brod)
 !
@@ -772,7 +780,7 @@ program optic
 &   linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
- ! onlinear electro-optical susceptibility for semiconductors
+ ! nonlinear electro-optical susceptibility for semiconductors
  call wrtout(std_out," optic : Call nonlinopt","COLL")
  do ii=1,num_nonlin2_comp
    nonlin1 = int( nonlin2_comp(ii)/100.0_dp)
@@ -788,6 +796,8 @@ program optic
    call nonlinopt(ii,itemp,nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,eigen0,occ,fermie,pmat,&
 &   nonlin1,nonlin2,nonlin3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
+
+!---------------------------------------------------------------------------------
 
  ABI_DEALLOCATE(nband)
  ABI_DEALLOCATE(occ)

@@ -147,6 +147,18 @@ serves two purposes: it is a way to initially break the spin symmetry (up/down),
 to start with a reasonable magnetic moment, close enough to the final one (in spin DFT,
 as opposed to the original flavor, there can be several local minima for the total energy).
 
+The self-consistent loop is affecting both the density (like in the non-magnetic case) as
+well as the spin-magnetization. For this reason, it might be more difficult to reach
+than in the non-magnetic case. 
+Not only starting with a reasonable magnetic moment might help in this respect, but also,
+modified (tighter) calculation parameters might be needed. For example, in the case of
+Chromium, in order to obtain the correct (non-zero) magnetic moment, a rather
+dense sampling of wavevectors in the Brillouin zone must be used (e.g.e 16x16x16), with a 
+rather small value of [[tsmear]]. The solution of the Kohn-Sham equation
+will benefit of using a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
+and a larger value of [[nline]] (e.g. 6 instead of the default 4).
+
+
 ## 2 An antiferromagnetic example: *fcc* Fe
 
 Well sort of....
@@ -341,6 +353,11 @@ corner atom and the face atom possess opposite magnetizations, which roughly
 cancel each other. The density of states computed with the tetrahedron method
 is not as smooth as by the smearing method, and a running average allows for a better view.
 
+As mentioned earlier, the solution of the Kohn-Sham equation
+might benefit of using a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
+and a larger value of [[nline]] (e.g. 6 instead of the default 4).
+
+
 ## 4 Ferrimagnetic (not yet)
 
 Some materials can display a particular form of ferromagnetism, which also can
@@ -352,7 +369,7 @@ in rather complicated structures such as magnetite.
 ## 5 The spin-orbit coupling
 
 For heavy atoms a relativistic description of the electronic structure becomes
-necessary, and this can be accomplished through the relativistic LDA approximation.
+necessary, and this can be accomplished through the relativistic DFT approach.
 
 ### 5.1 Norm-conserving pseudo-potentials
 
@@ -516,6 +533,10 @@ splittings, which are mainly a kinetic energy effect.
 The most spectacular manifestation of the spin-orbit coupling is the energy
 associated with a rotation of the magnetisation with respect with the crystal axis.
 It is at the origin of the magneto crystalline anisotropy of paramount technological importance.
+
+As mentioned earlier, the solution of the Kohn-Sham equation
+might benefit of using a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
+and a larger value of [[nline]] (e.g. 6 instead of the default 4).
 
 * * *
 GZ would like to thank B. Siberchicot for useful comments.
