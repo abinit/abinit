@@ -2181,9 +2181,9 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  ABI_FREE(qlwl)
 
  bantot_dense=SUM(Hdr_wfk_dense%nband(1:Hdr_wfk_dense%nkpt*Hdr_wfk_dense%nsppol))
- ABI_ALLOCATE(doccde,(bantot_dense))
- ABI_ALLOCATE(eigen,(bantot_dense))
- ABI_ALLOCATE(occfact,(bantot_dense))
+ ABI_MALLOC(doccde,(bantot_dense))
+ ABI_MALLOC(eigen,(bantot_dense))
+ ABI_MALLOC(occfact,(bantot_dense))
  doccde=zero; eigen=zero; occfact=zero
 
  jj=0; ibtot=0
@@ -2211,9 +2211,9 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 &  hdr_wfk_dense%charge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
 &  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
 
- ABI_DEALLOCATE(doccde)
- ABI_DEALLOCATE(eigen)
- ABI_DEALLOCATE(npwarr)
+ ABI_FREE(doccde)
+ ABI_FREE(eigen)
+ ABI_FREE(npwarr)
 
  ABI_FREE(nbands_temp)
 
@@ -2255,17 +2255,17 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  ! Transitions are ALWAYS ordered in c-v-k mode with k being the slowest index.
  ! FIXME: linewidths not coded.
- ABI_ALLOCATE(gw_energy,(BSp%nbnds,Kmesh_dense%nibz,Dtset%nsppol))
+ ABI_MALLOC(gw_energy, (BSp%nbnds,Kmesh_dense%nibz,Dtset%nsppol))
  gw_energy = QP_BSt_dense%eig
 
- ABI_ALLOCATE(Bsp%nreh_interp,(Hdr_wfk_dense%nsppol))
+ ABI_MALLOC(Bsp%nreh_interp,(Hdr_wfk_dense%nsppol))
  Bsp%nreh_interp=zero
 
  call init_transitions(BSp%Trans_interp,BSp%lomo_spin,BSp%humo_spin,BSp%ircut,Bsp%uvcut,BSp%nkbz_interp,Bsp%nbnds,&
 &  Bsp%nkibz_interp,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,gw_energy,QP_BSt_dense%occ,Kmesh_dense%tab,minmax_tene,&
 &  Bsp%nreh_interp)
 
- ABI_DEALLOCATE(gw_energy)
+ ABI_FREE(gw_energy)
 
  do spin=1,Dtset%nsppol
    write(msg,'(a,i2,a,i0)')" For spin: ",spin,' the number of resonant e-h transitions is: ',BSp%nreh_interp(spin)
@@ -2279,7 +2279,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  !
  ! Create transition table vcks2t
  is1=BSp%lomo_min;is2=BSp%homo_max;is3=BSp%lumo_min;is4=BSp%humo_max
- ABI_ALLOCATE(Bsp%vcks2t_interp,(is1:is2,is3:is4,BSp%nkbz_interp,Dtset%nsppol))
+ ABI_MALLOC(Bsp%vcks2t_interp, (is1:is2,is3:is4,BSp%nkbz_interp,Dtset%nsppol))
  Bsp%vcks2t_interp = 0
 
  do spin=1,Dtset%nsppol

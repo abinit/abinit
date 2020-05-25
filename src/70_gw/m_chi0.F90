@@ -312,7 +312,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    end if
  else
    ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>
-   ABI_DT_MALLOC(HUr,(Cryst%natom))
+   ABI_MALLOC(HUr,(Cryst%natom))
    if (Dtset%usepawu/=0) then
      call pawhur_init(hur,nsppol,Dtset%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
@@ -344,7 +344,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      ABI_MALLOC(gw_gfft,(3,nfft))
      q0=zero
      call get_gftt(ngfft_gw,q0,Cryst%gmet,gw_gsq,gw_gfft) ! The set of plane waves in the FFT Box.
-     ABI_DT_MALLOC(Pwij_fft,(Psps%ntypat))
+     ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,nfft,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if
@@ -401,17 +401,17 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Pwij,(Psps%ntypat))
+   ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0,(/zero,zero,zero/),Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
 
-   ABI_DT_MALLOC(Cprj1_bz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_bz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_bz,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj2_bz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj2_bz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj2_bz,0,Wfd%nlmn_atm)
 
-   ABI_DT_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_ibz,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj2_ibz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj2_ibz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj2_ibz,0,Wfd%nlmn_atm)
    if (Dtset%pawcross==1) then
      ABI_MALLOC(ur_ae1,(nfftf_tot*nspinor))
@@ -537,7 +537,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,'COLL')
  end if
 
- ABI_DT_MALLOC(vkbr,(Kmesh%nibz))
+ ABI_MALLOC(vkbr,(Kmesh%nibz))
  gradk_not_done=.TRUE.
 
  write(msg,'(a,i6,a)')' Calculation status ( ',nkpt_summed,' to be completed):'
@@ -771,7 +771,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                                       &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))
                           fac2=fac2 + real(wan%psichi(ik_bz,band2c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
                                       &conjg(wan%psichi(ik_bz,band2c,iat1)%atom(il1)%matl(m1,spin,ispinor1))
-                          do iat2=1,wan%natom_wan 
+                          do iat2=1,wan%natom_wan
                             do ispinor2=1,wan%nspinor
                               do il2=1,wan%nbl_atom_wan(iat2)
                                 do m2=1,2*(wan%latom_wan(iat2)%lcalc(il2))+1
@@ -895,7 +895,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ABI_FREE(igffteps0)
 
  call vkbr_free(vkbr)
- ABI_DT_FREE(vkbr)
+ ABI_FREE(vkbr)
 
  ! === After big fat loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of (metallic|spin) polarized systems.
@@ -1038,21 +1038,21 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  if (Psps%usepaw==1) then ! deallocation for PAW.
    call pawcprj_free(Cprj1_bz )
-   ABI_DT_FREE(Cprj1_bz)
+   ABI_FREE(Cprj1_bz)
    call pawcprj_free(Cprj2_bz )
-   ABI_DT_FREE(Cprj2_bz)
+   ABI_FREE(Cprj2_bz)
    call pawcprj_free(Cprj1_ibz )
-   ABI_DT_FREE(Cprj1_ibz)
+   ABI_FREE(Cprj1_ibz)
    call pawcprj_free(Cprj2_ibz )
-   ABI_DT_FREE(Cprj2_ibz)
+   ABI_FREE(Cprj2_ibz)
    call pawpwij_free(Pwij)
-   ABI_DT_FREE(Pwij)
+   ABI_FREE(Pwij)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
    call pawhur_free(Hur)
-   ABI_DT_FREE(Hur)
+   ABI_FREE(Hur)
    if (Dtset%pawcross==1) then
      ABI_FREE(ur_ae1)
      ABI_FREE(ur_ae_onsite1)
@@ -1299,7 +1299,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ABI_MALLOC(gw_gfft,(3,nfft))
      q0=zero
      call get_gftt(ngfft_gw,q0,Cryst%gmet,gw_gsq,gw_gfft) ! Get the set of plane waves in the FFT Box.
-     ABI_DT_MALLOC(Pwij_fft,(Psps%ntypat))
+     ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,nfft,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if
@@ -1378,7 +1378,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  call wrtout(std_out,msg,'PERS')
 
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Pwij,(Psps%ntypat))
+   ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0,qpoint,Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    ! Allocate statements moved to inside openmp loop
  end if
@@ -1451,9 +1451,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ABI_MALLOC(green_w,(Ep%nomega))
    end if
    if (Psps%usepaw==1) then
-     ABI_DT_MALLOC(Cprj2_k  ,(Cryst%natom,nspinor))
+     ABI_MALLOC(Cprj2_k  ,(Cryst%natom,nspinor))
      call pawcprj_alloc(Cprj2_k,  0,Wfd%nlmn_atm)
-     ABI_DT_MALLOC(Cprj1_kmq,(Cryst%natom,nspinor))
+     ABI_MALLOC(Cprj1_kmq,(Cryst%natom,nspinor))
      call pawcprj_alloc(Cprj1_kmq,0,Wfd%nlmn_atm)
      if (Dtset%pawcross==1) then
        ABI_MALLOC(ur_ae1,(nfftf_tot*nspinor))
@@ -1715,13 +1715,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &                    .AND.band2<=ucrpa_bands(2).AND.band2>=ucrpa_bands(1)) then
                  if (dtset%plowan_compute >=10) then
                    band1c=band1-wan%bandi_wan+1
-                   band2c=band2-wan%bandi_wan+1 
+                   band2c=band2-wan%bandi_wan+1
                    do iat1=1, wan%natom_wan
                      do iat2=1, wan%natom_wan
                        do ispinor1=1,wan%nspinor
                          do ispinor2=1,wan%nspinor
                            do il1=1,wan%nbl_atom_wan(iat1)
-                             do il2=1,wan%nbl_atom_wan(iat2) 
+                             do il2=1,wan%nbl_atom_wan(iat2)
                                do m1=1,2*wan%latom_wan(iat1)%lcalc(il1)+1
                                  do m2=1,2*wan%latom_wan(iat2)%lcalc(il2)+1
                                    fac=fac - real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1)*&
@@ -1843,9 +1843,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end if
    if (Psps%usepaw==1) then
      call pawcprj_free(Cprj2_k)
-     ABI_DT_FREE(Cprj2_k)
+     ABI_FREE(Cprj2_k)
      call pawcprj_free(Cprj1_kmq)
-     ABI_DT_FREE(Cprj1_kmq)
+     ABI_FREE(Cprj1_kmq)
      if (Dtset%pawcross==1) then
        ABI_FREE(ur_ae1)
        ABI_FREE(ur_ae_onsite1)
@@ -1945,10 +1945,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! deallocation for PAW.
  if (Psps%usepaw==1) then
    call pawpwij_free(Pwij)
-   ABI_DT_FREE(Pwij)
+   ABI_FREE(Pwij)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
  end if
 
@@ -2121,9 +2121,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ihr_comm = czero
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp_bks,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cp_bks,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cp_bks,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(HUr,(Cryst%natom))
+   ABI_MALLOC(HUr,(Cryst%natom))
    if (usepawu/=0) then ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>.
      call pawhur_init(hur,nsppol,Wfd%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
@@ -2172,9 +2172,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cp_bks)
-   ABI_DT_FREE(Cp_bks)
+   ABI_FREE(Cp_bks)
    call pawhur_free(Hur)
-   ABI_DT_FREE(Hur)
+   ABI_FREE(Hur)
  end if
 
  nqlwl=1
@@ -2301,12 +2301,12 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  !
  ! === Evaluate oscillator matrix elements btw partial waves. Note that q=Gamma is used.
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Pwij,(Psps%ntypat))
+   ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0, [zero,zero,zero], Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
 
-   ABI_DT_MALLOC(Cprj1_bz ,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_bz ,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_bz, 0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_ibz,0,Wfd%nlmn_atm)
  end if
 
@@ -2486,11 +2486,11 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ! deallocation for PAW.
  if (Psps%usepaw==1) then
    call pawcprj_free(Cprj1_bz)
-   ABI_DT_FREE(Cprj1_bz)
+   ABI_FREE(Cprj1_bz)
    call pawcprj_free(Cprj1_ibz)
-   ABI_DT_FREE(Cprj1_ibz)
+   ABI_FREE(Cprj1_ibz)
    call pawpwij_free(Pwij)
-   ABI_DT_FREE(Pwij)
+   ABI_FREE(Pwij)
  end if
 
  call littlegroup_free(Ltg_q)
