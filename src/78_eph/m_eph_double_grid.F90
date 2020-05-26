@@ -223,10 +223,10 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
 
 
  write(std_out,*) 'coarse:      ', nkpt_coarse
- write(std_out,*) 'dense:       ', nkpt_dense
+ write(std_out,*) 'fine:        ', nkpt_dense
  write(std_out,*) 'interp_kmult:', interp_kmult
  write(std_out,*) 'ndiv:        ', eph_dg%ndiv
- ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'dense mesh is smaller than coarse mesh.')
+ ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'fine mesh is smaller than coarse mesh.')
 
  ABI_MALLOC(eph_dg%coarse_to_dense,(eph_dg%coarse_nbz,eph_dg%ndiv))
 
@@ -240,7 +240,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  ABI_MALLOC(eph_dg%mapping,(6,eph_dg%ndiv))
  ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
 
- write(std_out,*) 'create dense to coarse mapping'
+ write(std_out,*) 'create fine to coarse mapping'
  ! generate mapping of points in dense bz to the dense bz
  ! coarse loop
  i_dense = 0
@@ -319,7 +319,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
    enddo
  enddo
 
- ABI_CHECK(i_dense == eph_dg%dense_nbz, 'dense mesh mapping is incomplete')
+ ABI_CHECK(i_dense == eph_dg%dense_nbz, 'fine mesh mapping is incomplete')
 
  !calculate the weights of each fine point
  !different methods to distribute the weights might lead to better convergence
