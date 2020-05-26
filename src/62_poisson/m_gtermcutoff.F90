@@ -151,14 +151,14 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 !Local variables-------------------------------
 !scalars
  integer,parameter  :: N0=1000
- integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing
+ integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing,opt_cylinder
  integer            :: n1,n2,n3,nfft
  integer            :: test,opt_surface !opt_cylinder
  real(dp)           :: cutoff,rcut,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
  real(dp)           :: gcart_para,gcart_perp
  real(dp)           :: quad,tmp,ucvol
- real(dp)           :: pdir(3),alpha(3)
+ real(dp)           :: hcyl
  real(dp),parameter :: tolfix=1.0000001_dp
  character(len=50)  :: mode
  character(len=500) :: msg
@@ -167,6 +167,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 !arrays
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
+ real(dp)             :: pdir(3),alpha(3)
  real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
  real(dp),allocatable :: gcutoff(:)
 
@@ -267,6 +268,20 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
        MSG_ERROR(msg)
      end if
 
+     ! === Beigi method is the default one, i.e infinite cylinder of radius rcut ===
+     ! * Negative values to use Rozzi method with finite cylinder of extent hcyl.
+     opt_cylinder=1; hcyl=zero; pdir(:)=0
+     do ii=1,3
+       check=vcutgeo(ii)
+       if (ABS(check)>tol6) then
+         pdir(ii)=1
+         if (check<zero) then  ! use Rozzi's method.
+           hcyl=ABS(check)*SQRT(SUM(rprimd(:,ii)**2))
+           opt_cylinder=2
+         end if
+       end if
+     end do
+
      ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
      hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
      r0_=MIN(ha_,hb_)/N0
@@ -279,21 +294,50 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      accuracy_=0.001     ! Fractional accuracy required.
      npts_    =6         ! Initial number of point (only for Gauss-Legendre method).
 
-     do ig=1,n1
+     write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
+&      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
+&      '  Quadrature scheme      = ',qopt_,ch10,&
+&      '  Max number of attempts = ',ntrial_,ch10,&
+&      '  Fractional accuracy    = ',accuracy_
+     call wrtout(std_out,msg,'COLL')
 
-       gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-       gcartx_=gcart(1) ; gcarty_=gcart(2) ; gcart_para_=ABS(gcart(3))
+     ! === From reduced to Cartesian coordinates ===
+     call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+     b1(:)=two_pi*gprimd(:,1)
+     b2(:)=two_pi*gprimd(:,2)
+     b3(:)=two_pi*gprimd(:,3)
 
-       tmp=zero
+     do i3=1,n3
+      do i2=1,n2
+       i23=n1*(i2-1 + n2*(i3-1))
+       do i1=1,n1
+         ii=i1+i23
 
-       call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+         gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+         gcartx_=gcart(1) ; gcarty_=gcart(2) ; gcart_para_=ABS(gcart(3))
 
-       if (ierr/=0) then
-         MSG_ERROR("Accuracy not reached")
-       end if
-       tmp=tmp+quad
-       gcutoff(ig)=two*(tmp*two)
-     end do !ig
+         if (gcart_para_<tol6) then
+           gcart_para_ = tol6
+!           write(std_out,*)"setting qpg_para to=",gcart_para_
+         end if
+
+         tmp=zero
+
+         call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+
+         if (ierr/=0) then
+           MSG_ERROR("Accuracy not reached")
+         end if
+
+         tmp=tmp+quad
+
+!         write(*,*)tmp
+
+         gcutoff(ii)=two*(quad*two)
+
+       end do !i1
+      end do !i2
+     end do !i3
 
 
    CASE('SURFACE')
