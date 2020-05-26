@@ -66,6 +66,7 @@ contains
 !!             2 -> Computes electronic (clamped ion) contribution to FxE
 !!             3 -> Computes mixed contribution to FxE
 !!             4 -> Computes lattice contribution to FxE
+!!  prtvol= if > 1 print all individual quantities of the lattice contribution FxE
 !!  zeff(3,3,natom)= Born Effective charges
 !!
 !! OUTPUT
@@ -81,13 +82,13 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
+subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff)
     
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer , intent(in)  :: asr,flexoflg
+ integer , intent(in)  :: asr,flexoflg,prtvol
  class(ddb_type),intent(in) :: ddb,ddb_lw
  type(crystal_t),intent(in) :: crystal
  character(len=fnlen) :: filnamddb
@@ -296,7 +297,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
 
    if (iblok/=0.and.jblok/=0) then
      call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
-   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,psinvdm,crystal%typat,crystal%ucvol,zeff)
+   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,prtvol,psinvdm,crystal%typat,crystal%ucvol,zeff)
    end if
  end if
 
@@ -679,9 +680,10 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt atom displacements and electric field (at least)
 !! blkvalA(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for FxE force response tensor
 !! blkvalB(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for Phi^(1) tensor
-!! intstrn(3,3,3,natom) = relaxed-ion internal strain tensor
-!! mpert =maximum number of ipert
+!! intstrn(3,3,3,natom)= relaxed-ion internal strain tensor
+!! mpert= maximum number of ipert
 !! natom= number of atoms in unit cell
+!! prtvol= if >1 print all tensors entering the structure of lattflexo
 !! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix 
 !! typat(natom)= Type of each atom in the unit cell
 !! ucvol= unit cell volume
@@ -697,11 +699,11 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! SOURCE
 
 subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,&
-                     & ntypat,psinvdm,typat,ucvol,zeff)
+                     & ntypat,prtvol,psinvdm,typat,ucvol,zeff)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,ntypat
+ integer,intent(in) :: mpert,natom,ntypat,prtvol
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -1010,8 +1012,61 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
+   if (prtvol > 1) then
+     write(msg,'(3a)')ch10,' (...)^kappa contribution to the flexoelectric force-response tensor (units: eV)',ch10
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     roundbkt_k(:,:,:,:,:)=roundbkt_k(:,:,:,:,:)*Ha_eV
+     do iat=1,natom
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xx', roundbkt_k(1,1,1,1,iat), roundbkt_k(1,1,2,2,iat), &
+               & roundbkt_k(1,1,3,3,iat),roundbkt_k(1,1,2,3,iat),roundbkt_k(1,1,1,3,iat),roundbkt_k(1,1,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yy', roundbkt_k(2,2,1,1,iat), roundbkt_k(2,2,2,2,iat), &
+               & roundbkt_k(2,2,3,3,iat),roundbkt_k(2,2,2,3,iat),roundbkt_k(2,2,1,3,iat),roundbkt_k(2,2,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zz', roundbkt_k(3,3,1,1,iat), roundbkt_k(3,3,2,2,iat), &
+               & roundbkt_k(3,3,3,3,iat),roundbkt_k(3,3,2,3,iat),roundbkt_k(3,3,1,3,iat),roundbkt_k(3,3,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yz', roundbkt_k(2,3,1,1,iat), roundbkt_k(2,3,2,2,iat), &
+               & roundbkt_k(2,3,3,3,iat),roundbkt_k(2,3,2,3,iat),roundbkt_k(2,3,1,3,iat),roundbkt_k(2,3,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xz', roundbkt_k(1,3,1,1,iat), roundbkt_k(1,3,2,2,iat), &
+               & roundbkt_k(1,3,3,3,iat),roundbkt_k(1,3,2,3,iat),roundbkt_k(1,3,1,3,iat),roundbkt_k(1,3,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', roundbkt_k(1,2,1,1,iat), roundbkt_k(1,2,2,2,iat), &
+               & roundbkt_k(1,2,3,3,iat),roundbkt_k(1,2,2,3,iat),roundbkt_k(1,2,1,3,iat),roundbkt_k(1,2,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+     end do
 
-   write(msg,'(3a)')ch10,' Flexoelectric force response tensor (units: eV)',ch10
+     write(msg,'(3a)')ch10,' [...]^kappa contribution to the flexoelectric force-response tensor (units: eV)',ch10
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     flexofr(:,:,:,:,:)=flexofr(:,:,:,:,:)*Ha_eV
+     do iat=1,natom
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xx', flexofr(1,iat,1,1,1),flexofr(1,iat,1,2,2),flexofr(1,iat,1,3,3),&
+                                                     & flexofr(1,iat,1,2,3),flexofr(1,iat,1,1,3),flexofr(1,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yy', flexofr(2,iat,2,1,1),flexofr(2,iat,2,2,2),flexofr(2,iat,2,3,3),&
+                                                     & flexofr(2,iat,2,2,3),flexofr(2,iat,2,1,3),flexofr(2,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zz', flexofr(3,iat,3,1,1),flexofr(3,iat,3,2,2),flexofr(3,iat,3,3,3),&
+                                                     & flexofr(3,iat,3,2,3),flexofr(3,iat,3,1,3),flexofr(3,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yz', flexofr(2,iat,3,1,1),flexofr(2,iat,3,2,2),flexofr(2,iat,3,3,3),&
+                                                     & flexofr(2,iat,3,2,3),flexofr(2,iat,3,1,3),flexofr(2,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xz', flexofr(1,iat,3,1,1),flexofr(1,iat,3,2,2),flexofr(1,iat,3,3,3),&
+                                                     & flexofr(1,iat,3,2,3),flexofr(1,iat,3,1,3),flexofr(1,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', flexofr(1,iat,2,1,1),flexofr(1,iat,2,2,2),flexofr(1,iat,2,3,3),&
+                                                     & flexofr(1,iat,2,2,3),flexofr(1,iat,2,1,3),flexofr(1,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       end do
+   end if
+
+   write(msg,'(3a)')ch10,' Flexoelectric force-response tensor (units: eV)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -1036,7 +1091,33 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
                                                    & Csupkap(1,iat,2,2,3),Csupkap(1,iat,2,1,3),Csupkap(1,iat,2,1,2)  
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
-
+   if (prtvol > 1) then 
+     write(msg,'(3a)')ch10,' Flexoelectric force-response tensor minus mass dependent part (units: eV)',ch10
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     hatCsupkap(:,:,:,:,:)=hatCsupkap(:,:,:,:,:)*Ha_eV
+     do iat=1,natom
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xx', hatCsupkap(1,iat,1,1,1),hatCsupkap(1,iat,1,2,2),hatCsupkap(1,iat,1,3,3),&
+                                                     & hatCsupkap(1,iat,1,2,3),hatCsupkap(1,iat,1,1,3),hatCsupkap(1,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yy', hatCsupkap(2,iat,2,1,1),hatCsupkap(2,iat,2,2,2),hatCsupkap(2,iat,2,3,3),&
+                                                     & hatCsupkap(2,iat,2,2,3),hatCsupkap(2,iat,2,1,3),hatCsupkap(2,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zz', hatCsupkap(3,iat,3,1,1),hatCsupkap(3,iat,3,2,2),hatCsupkap(3,iat,3,3,3),&
+                                                     & hatCsupkap(3,iat,3,2,3),hatCsupkap(3,iat,3,1,3),hatCsupkap(3,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yz', hatCsupkap(2,iat,3,1,1),hatCsupkap(2,iat,3,2,2),hatCsupkap(2,iat,3,3,3),&
+                                                     & hatCsupkap(2,iat,3,2,3),hatCsupkap(2,iat,3,1,3),hatCsupkap(2,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xz', hatCsupkap(1,iat,3,1,1),hatCsupkap(1,iat,3,2,2),hatCsupkap(1,iat,3,3,3),&
+                                                     & hatCsupkap(1,iat,3,2,3),hatCsupkap(1,iat,3,1,3),hatCsupkap(1,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', hatCsupkap(1,iat,2,1,1),hatCsupkap(1,iat,2,2,2),hatCsupkap(1,iat,2,3,3),&
+                                                     & hatCsupkap(1,iat,2,2,3),hatCsupkap(1,iat,2,1,3),hatCsupkap(1,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+     end do
+   end if
 
    write(msg,'(3a)')ch10,' Displacement-response flexoelectric internal strain tensor (units: Bohr^2)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
