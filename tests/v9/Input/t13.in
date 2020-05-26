@@ -1,0 +1,101 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    Prepare test for Optics                                    #
+#              BCC iron, ferromagnetic, GGA, PAW                #
+#################################################################
+
+ ndtset 6
+
+#First dataset : SCF run
+ prtden1  1
+  nband1  14
+ kptopt1  1
+ tolwfr1  1.0d-12
+
+#Second dataset : NSCF run with kptopt 1 (more bands)
+   iscf2 -2
+ getwfk2  1
+ getden2  1
+ kptopt2  1
+ tolwfr2  1.0d-12
+
+#Third dataset : NSCF run with kptopt 2 (nonlinear optics not possible)
+   iscf3 -2
+ getwfk3  2
+ getden3  1
+ tolwfr3  1.0d-12
+
+# ddk response function
+   iscf4 -3
+  nstep4  1  nline4 0  prtwf4 3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
+   nqpt4  1
+  rfdir4  1 0 0
+ rfelfd4  2
+ getwfk4  3
+
+# ddk response function
+   iscf5 -3
+  nstep5  1  nline5 0  prtwf5 3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
+   nqpt5  1
+  rfdir5  0 1 0
+ rfelfd5  2
+ getwfk5  3
+
+
+# ddk response function
+   iscf6 -3
+  nstep6  1  nline6 0  prtwf6 3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
+   nqpt6  1
+  rfdir6  0 0 1
+ rfelfd6  2
+ getwfk6  3
+
+
+# Data common to datasets 3-6
+ kptopt   2      # Need points in the half BZ (use time-reversal symmetry - nonlinear optics not possible)
+
+#########################
+# Common input parameters
+  ! Unit cell
+    acell   3*5.42
+    rprim   -0.5  0.5  0.5
+             0.5 -0.5  0.5
+             0.5  0.5 -0.5
+    ntypat 1  natom 1  typat 1
+    znucl 26
+    xred 0   0   0
+
+  ! K-points and occupations
+    ngkpt 4 4 4
+    nshiftk 1
+    shiftk 1/2 1/2 1/2
+    occopt 7
+    tsmear 0.008
+    nband 30
+    nbdbuf 2
+    spinat 0 0 5
+    nsppol 2
+
+  ! Convergence parameters
+    ecut 7. pawecutdg 12.  pawxcdev 0
+    tolvrs 1.d-9
+    nstep 20
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t13.in, t14.in
+#%% [files]
+#%% files_to_test = 
+#%%   t13.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00, fld_options = -easy;
+#%% psp_files = 26fe.paw
+#%% [paral_info]
+#%% max_nprocs = 28
+#%% [extra_info]
+#%% authors = M. Torrent, X. Gonze
+#%% keywords = PAW
+#%% description = 
+#%%   PAW: prepare optic for magnetic metallic Iron
+#%%   BCC iron, ferromagnetic, GGA, PAW. 
+#%% topics = PAW
+#%%<END TEST_INFO>

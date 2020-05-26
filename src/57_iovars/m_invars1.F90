@@ -2325,6 +2325,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
      dtsets(idtset)%iatsph(:)=0
    end if
    dtsets(idtset)%iboxcut=0
+   dtsets(idtset)%icsing=6
    dtsets(idtset)%icutcoul=6
    dtsets(idtset)%ieig2rf=0
    dtsets(idtset)%imgwfstor=0

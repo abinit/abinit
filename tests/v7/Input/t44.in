@@ -93,7 +93,7 @@
 #PAW parameters
 pawecutdg  120
 
-#LDA+U
+#DFT+U
 usepawu   1
 lpawu   3  -1
 upawu   7.5   0.0  eV

@@ -16,7 +16,7 @@ re_cppdef  = re.compile("^([ ]?)+#([ ]?)+define [0-9A-Z_]*")
 re_cppline = re.compile("^#")
 re_cppcont = re.compile("\\$")
 #re_cppskip = re.compile("^#(include|define|undef|if 0|if 1|endif|error)")
-re_cppskip = re.compile("(^#(include|define|undef|if 0|if 1|endif|error))|(__\w+)")
+re_cppskip = re.compile("(^#(include|define|undef|if 0|if 1|endif|error|warning))|(__\w+)")
 re_cppdev  = re.compile("DEV_")
 
 # Init CPP options

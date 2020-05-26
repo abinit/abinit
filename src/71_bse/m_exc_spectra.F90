@@ -84,7 +84,7 @@ contains
 !!  QP_BSt=The QP energies.
 !!  Psps <pseudopotential_type>=variables related to pseudopotentials.
 !!  Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
-!!  Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
+!!  Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
 !!  Wfd<wfd_t>=Handler for the wavefunctions.
 !!    nsppol=Number of independent spin polarizations.
 !!    nspinor=Number of spinorial components.

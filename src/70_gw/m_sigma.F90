@@ -79,7 +79,7 @@ MODULE m_sigma
   integer :: nomega4sd      ! No. of real frequencies to evaluate the derivative of $\Sigma(E)$.
   integer :: nsig_ab        ! 1 if nspinor=1,4 for noncollinear case.
   integer :: nsppol         ! No. of spin polarizations.
-  integer :: usepawu        ! 1 if we are using LDA+U as starting point (only for PAW)
+  integer :: usepawu        ! 1 if we are using DFT+U as starting point (only for PAW)
 
   real(dp) :: deltae       ! Frequency step for the calculation of d\Sigma/dE
   real(dp) :: maxomega4sd  ! Max frequency around E_ks for d\Sigma/dE.
@@ -142,7 +142,7 @@ MODULE m_sigma
 
   real(dp),allocatable :: vUme(:,:,:)
   ! vUme(b1gw:b2gw,nkibz,nsppol*nsig_ab))
-  ! $\<nks|v_{U}|nks\>$ for LDA+U.
+  ! $\<nks|v_{U}|nks\>$ for DFT+U.
 
   complex(dpc),allocatable :: degw(:,:,:)
   ! degw(b1gw:b2gw,nkibz,nsppol))
@@ -160,9 +160,9 @@ MODULE m_sigma
   ! eigvec_qp(nbnds,nbnds,nkibz,nsppol))
   ! Expansion of the QP amplitudes in the QP basis set of the previous iteration.
 
-  complex(dpc),allocatable :: m_lda_to_qp(:,:,:,:)
+  complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
   ! (%nbnds,%nbnds,%nibz,%nsppol))
-  !  m_lda_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
+  !  m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}>
 
   complex(dpc),allocatable :: hhartree(:,:,:,:)
   ! hhartree(b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab)
@@ -446,14 +446,14 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    call wrtout(std_out,msg,'COLL')
    !call wrtout(ab_out,msg,'COLL')
 
-   msg = ' Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
+   msg = ' Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
    if (Sr%usepawu/=0) then
-     msg = ' Band     E0 <VxcLDA>   <H_U>  SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
+     msg = ' Band     E0 <VxcDFT>   <H_U>  SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
    end if
 
    if (gwcalctyp>=10) then
      write(msg,'(2a)')&
-     ' Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
+     ' Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
      '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
    end if
    call wrtout(std_out,msg,'COLL')
@@ -640,7 +640,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 
  if (PRESENT(witheader)) then
    if (witheader) then
-     call wrtout(my_unt,' Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E ',my_mode)
+     call wrtout(my_unt,' Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E ',my_mode)
    end if
  end if
 
@@ -709,7 +709,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 
  else
    ! PAW+U+GW calculation.
-   ABI_CHECK(Sr%nsig_ab==1,'LDA+U with spinor not implemented')
+   ABI_CHECK(Sr%nsig_ab==1,'DFT+U with spinor not implemented')
    write(msg,'(i5,10f8.3)')                   &
          iband,                               &
          Sr%e0      (iband,ik_ibz,isp)*Ha_eV, &
@@ -791,7 +791,7 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,yd
  my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
 
 ! write(msg,'(a)')&
-!&   ' Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
+!&   ' Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]',&
 !&   '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
 
  if (Sr%usepawu==0 .or. .TRUE.) then
@@ -887,7 +887,7 @@ end subroutine print_Sigma_QPSC
 !! Main creation method for the sigma_t data type.
 !!
 !! INPUTS
-!! usepawu= /=0 if we used LDA+U as starting point (only for PAW)
+!! usepawu= /=0 if we used DFT+U as starting point (only for PAW)
 !!
 !! OUTPUT
 !!
@@ -1061,7 +1061,7 @@ subroutine sigma_free(Sr)
  ABI_SFREE(Sr%dsigmee0)
  ABI_SFREE(Sr%egw)
  ABI_SFREE(Sr%eigvec_qp)
- ABI_SFREE(Sr%m_lda_to_qp)
+ ABI_SFREE(Sr%m_ks_to_qp)
  ABI_SFREE(Sr%hhartree)
  ABI_SFREE(Sr%sigcme)
  ABI_SFREE(Sr%sigmee)
@@ -1361,8 +1361,8 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    NCF_CHECK(ncerr)
  end if
 
- if (allocated(sr%m_lda_to_qp)) then
-   ncerr = nctk_def_arrays(ncid, [nctkarr_t('m_lda_to_qp', "dp", &
+ if (allocated(sr%m_ks_to_qp)) then
+   ncerr = nctk_def_arrays(ncid, [nctkarr_t('m_ks_to_qp', "dp", &
 &       "cplex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")])
    NCF_CHECK(ncerr)
  end if
@@ -1470,10 +1470,10 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    ABI_FREE(rdata5)
  end if
 
- if (allocated(sr%m_lda_to_qp)) then
+ if (allocated(sr%m_ks_to_qp)) then
    ABI_MALLOC(rdata5,(cplex,Sr%nbnds,Sr%nbnds,Sr%nkibz,Sr%nsppol))
-   rdata5=c2r(Sr%m_lda_to_qp)
-   NCF_CHECK(nf90_put_var(ncid, vid('m_lda_to_qp'), rdata5))
+   rdata5=c2r(Sr%m_ks_to_qp)
+   NCF_CHECK(nf90_put_var(ncid, vid('m_ks_to_qp'), rdata5))
    ABI_FREE(rdata5)
  end if
 

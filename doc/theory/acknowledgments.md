@@ -109,7 +109,7 @@ of bands in a GW calculation (input variables [[gwcomp]] and [[gwencomp]]), cite
 cite [[cite:Bottin2008]] ([available on Arxiv.org](https://arxiv.org/abs/0707.3405)). 
 
 <a id="s9"></a>
-- **Spe.9.** If the LDA+U method as implemented in ABINIT is used, cite [[cite:Amadon2008]]. 
+- **Spe.9.** If the DFT+U method as implemented in ABINIT is used, cite [[cite:Amadon2008]]. 
 
 <a id="s10"></a>
 - **Spe.10.** If the ONCVPSP pseudopotentials are used, cite [[cite:Hamann2013]]. 

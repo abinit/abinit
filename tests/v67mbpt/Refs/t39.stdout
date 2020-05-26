@@ -85,6 +85,12 @@
 
  Checking if the list of q-points is complete. 
 
+ symatm: atom number 1 is reached starting at atom
+   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ symatm: atom number 2 is reached starting at atom
+   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
+   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
  ==== K-mesh for the wavefunctions ====
  Number of points in the irreducible wedge :     8
  Reduced coordinates and weights : 

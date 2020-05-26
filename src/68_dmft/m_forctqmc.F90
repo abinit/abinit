@@ -43,7 +43,7 @@ MODULE m_forctqmc
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
  use m_green, only : green_type,occup_green_tau,print_green,printocc_green,spline_fct,copy_green,init_green,destroy_green,&
-& int_fct,greenldacompute_green,fourier_green
+& int_fct,greendftcompute_green,fourier_green
  use m_paw_dmft, only : paw_dmft_type
  use m_hide_lapack,         only : xginv
  use m_oper, only : oper_type,destroy_oper,init_oper,inverse_oper
@@ -164,7 +164,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! type(green_type) :: gw_loc
  type(CtqmcInterface) :: hybrid   !!! WARNING THIS IS A BACKUP PLAN
  type(CtqmcoffdiagInterface) :: hybridoffdiag   !!! WARNING THIS IS A BACKUP PLAN
- type(green_type) :: greenlda
+ type(green_type) :: greendft
  type(matlu_type), allocatable  :: hybri_coeff(:)
  integer :: unt,unt2
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
@@ -175,7 +175,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  nsppol=paw_dmft%nsppol
  natom=paw_dmft%natom
  nspinor=paw_dmft%nspinor
- greenlda%whichgreen="LDA"
+ greendft%whichgreen="DFT"
 
  call init_green(weiss_for_rot,paw_dmft,opt_oper_ksloc=2)
 ! weiss_for_rot=>weiss
@@ -266,11 +266,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  if(hu(1)%jpawu_zero.and.nsppol==2) nsppol_imp=2 ! J=0 and nsppol=2
  if(.not.hu(1)%jpawu_zero.or.nsppol/=2) nsppol_imp=1  ! J/=0 ou nsppol=1
 ! =================================================================
-! Compute LDA Green's function to compare to weiss_for_rot (check)
+! Compute DFT Green's function to compare to weiss_for_rot (check)
 ! =================================================================
-! call init_green(greenlda,paw_dmft,opt_oper_ksloc=3)
-! call greenldacompute_green(cryst_struc,greenlda,pawang,paw_dmft)
-!! call copy_green(greenlda,weiss_for_rot,2)
+! call init_green(greendft,paw_dmft,opt_oper_ksloc=3)
+! call greendftcompute_green(cryst_struc,greendft,pawang,paw_dmft)
+!! call copy_green(greendft,weiss_for_rot,2)
 
 ! =================================================================
 ! Compute atomic levels
@@ -555,12 +555,12 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
   ! Rotate Weiss function first in Ylm basis
   ! -------------------------------------------------------------------
  if(useylm==1) then
-   write(message,'(a,2x,a)') ch10, " == Rotation of weiss and greenlda in the Ylm Basis="
+   write(message,'(a,2x,a)') ch10, " == Rotation of weiss and greendft in the Ylm Basis="
    call wrtout(std_out,message,'COLL')
    do ifreq=1,paw_dmft%dmft_nwlo
      call slm2ylm_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,1,0)
      call slm2ylm_matlu(weiss%oper(ifreq)%matlu,natom,1,0)
-     ! call slm2ylm_matlu(greenlda%oper(ifreq)%matlu,natom,1,0)
+     ! call slm2ylm_matlu(greendft%oper(ifreq)%matlu,natom,1,0)
    end do
  end if
 
@@ -581,13 +581,13 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
    call wrtout(std_out,message,'COLL') ! debug
    call print_matlu(weiss_for_rot%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1) !  debug
 !    write(message,'(a,2x,a,f13.5)') ch10,& ! debug
-!&   " == Print LDA G for 1st freq before rot" ! debug
+!&   " == Print DFT G for 1st freq before rot" ! debug
 !    call wrtout(std_out,message,'COLL') ! debug
-!    call print_matlu(greenlda%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
+!    call print_matlu(greendft%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
 !    write(message,'(a,2x,a,f13.5)') ch10,& ! debug
-!&   " == Print LDA G for last freq before rot" ! debug
+!&   " == Print DFT G for last freq before rot" ! debug
 !    call wrtout(std_out,message,'COLL') ! debug
-!    call print_matlu(greenlda%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) !  debug
+!    call print_matlu(greendft%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) !  debug
  end if
 
  if(opt_diag/=0) then
@@ -625,24 +625,24 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      call print_matlu(weiss_for_rot%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1) ! debug
    end if
 
-!   ! Rotate LDA Green's function first in Ylm basis then in the rotated basis and compare to weiss_for_rot
+!   ! Rotate DFT Green's function first in Ylm basis then in the rotated basis and compare to weiss_for_rot
 !   ! -----------------------------------------------------------------------------------------------------
-!   write(message,'(a,2x,a)') ch10, " == Rotation of greenlda ="
+!   write(message,'(a,2x,a)') ch10, " == Rotation of greendft ="
 !   call wrtout(std_out,message,'COLL')
 !   do ifreq=1,paw_dmft%dmft_nwlo
-!     if(opt_rot==1) call rotate_matlu(greenlda%oper(ifreq)%matlu,eigvectmatlu,natom,3,1)
-!     call diff_matlu("Weiss_for_rot","greenlda",weiss_for_rot%oper(ifreq)%matlu,greenlda%oper(ifreq)%matlu,natom,1,tol14)
+!     if(opt_rot==1) call rotate_matlu(greendft%oper(ifreq)%matlu,eigvectmatlu,natom,3,1)
+!     call diff_matlu("Weiss_for_rot","greendft",weiss_for_rot%oper(ifreq)%matlu,greendft%oper(ifreq)%matlu,natom,1,tol14)
 !!    call checkdiag_matlu(weiss_for_rot%oper(ifreq)%matlu,natom,tol6)
 !   end do
 !   if(pawprtvol>=3) then
 !     write(message,'(a,2x,a,f13.5)') ch10,& ! debug
-!&    " == Print greenlda for small freq 1 after rot" ! debug
+!&    " == Print greendft for small freq 1 after rot" ! debug
 !     call wrtout(std_out,message,'COLL') ! debug
-!     call print_matlu(greenlda%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
+!     call print_matlu(greendft%oper(1)%matlu,natom,1,compl=1,opt_exp=2) !  debug
 !     write(message,'(a,2x,a,f13.5)') ch10,&   ! debug
-!&    " == Print greenlda for last freq after rot"   ! debug
+!&    " == Print greendft for last freq after rot"   ! debug
 !     call wrtout(std_out,message,'COLL')   ! debug
-!     call print_matlu(greenlda%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) ! debug
+!     call print_matlu(greendft%oper(paw_dmft%dmft_nwlo)%matlu,natom,1,compl=1,opt_exp=2) ! debug
 !   end if
 !   call flush_unit(std_out)
  end if
@@ -1682,7 +1682,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  ABI_DATATYPE_DEALLOCATE(eigvectmatlu)
  call destroy_green(weiss_for_rot)
 ! call destroy_green(gw_loc)
-! call destroy_green(greenlda)
+! call destroy_green(greendft)
 
 !  destroy limit of hybridization
  call destroy_matlu(hybri_coeff,paw_dmft%natom)
