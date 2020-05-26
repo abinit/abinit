@@ -1,7 +1,6 @@
 !****m* ABINIT/m_orbmag
 !! NAME
 !!  m_orbmag
-!! git test line jwzrp
 !!
 !! FUNCTION
 !!  This module contains the declaration of data types and methods
