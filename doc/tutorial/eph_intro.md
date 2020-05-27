@@ -192,7 +192,7 @@ The scattering potential can be expresses as:
 where $\Delta_{\qq\nu} v^\KS(\rr)$ is a lattice periodic function [[cite:Giustino2017]].
 Note that ABINIT computes the response to an atomic perturbation defined by
 the three variables [[qpt]], [[rfdir]] and [[rfatpol]] when [[rfphon]] is set to 1.
-The connection between the phonon representation and the atomic perturbation employed by ABNIIT is given by
+The connection between the phonon representation and the atomic perturbation employed by ABINIT is given by
 the equation
 
 \begin{equation}
@@ -364,6 +364,7 @@ the quality of the *interpolated* phonon frequencies and of the *interpolated* D
 between the ab-initio points depends on the spacing of the initial $\qq$-mesh that
 in turns defines the size of the Born-von-Karman supercell.
 In other words, the denser the DFPT mesh, the bigger the real-space supercell and the better the interpolation.
+especially for $\qq$-points far from $\Gamma$.
 <!--
 In semiconductors the atomic displacement induces dynamical dipoles and quadrupoles at the level of the density
 that will generate long-range scattering potentials.
@@ -376,7 +377,9 @@ From a more practical point of view, this implies that one should always monitor
 physical properties with respect to the initial DFPT $\qq$-mesh.
 The LR model implemented in ABINIT facilitates the convergence as the non-analytic behaviour for
 $\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduce oscillations
-between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the physical results.
+between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the 
+physical results [[cite:Brunin2020]].
+
 <!--
 Note that the same consideration holds for Wannier-based approaches
 independently on the degree of localization of the (maximally-localized) Wannier functions.
