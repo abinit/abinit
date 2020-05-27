@@ -190,9 +190,6 @@ module m_linked_list
        do while(associated(self%iter))
           ! at the begining i<i0
           ! before the end,
-          if (i>self%iter%i .and. associated(self%iter%next) .and. i<self%iter%next%i) then
-             call llist_insert_after(self,self%iter,i,val)
-             return
           if (i>self%iter%i) then
              if (associated(self%iter%next)) then
                  if (i<self%iter%next%i) then
