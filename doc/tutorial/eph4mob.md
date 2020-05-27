@@ -23,17 +23,17 @@ Our goal is to find an approximated solution to the linearized
 Boltzmann transport equation (BTE) [[cite:Ashcroft1976]] within the relaxation time approximation.
 If what follows, we will be working within the so-called
 self-energy relaxation time approximation (SERTA) [[cite:Giustino2017]].
-SERTA is more accurate that the constant relaxation time approximation (CRTA) as the
+The SERTA is more accurate than the constant relaxation time approximation (CRTA) as the
 microscopic e-ph scattering is now included thus leading to linewidths that depend on the band index $n$
 and the wavevector $\kk$.
-Keep in mind, however, that also SERTA is an approximation and that a more rigorous approach would require
-the iterative solution of the BTE and/or the inclusion of many-body effects at different levels.
+Keep in mind, however, that the SERTA is still an approximation and that a more rigorous approach would require
+to find the iterative solution of the BTE and/or the inclusion of many-body effects at different levels.
 For a review of the different possible approaches see [[cite:Ponce2020]].
 
 In the SERTA, the transport linewidth is given by
-the imaginary part of the electron-phonon (eph) self-energy evaluated at the KS energy.
+the imaginary part of the electron-phonon (e-ph) self-energy evaluated at the KS energy.
 Only the Fan-Migdal (FM) part contributes to the linewidth as the Debye-Waller is Hermitian.
-In the $\eta \rightarrow 0^+$ limit, one obtains:
+The linewidth of the electron state $n\kk$ due to the scattering with phonons are obtained as
 
 \begin{equation}
 \begin{split}
@@ -47,8 +47,11 @@ In the $\eta \rightarrow 0^+$ limit, one obtains:
 \label{eq:imagfanks_selfen}
 \end{equation}
 
-that corresponds to the linewidth of the electron state $n\kk$ due to the scattering with phonons.
-The lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the linewidth:
+In this equation, $\nu$ is the phonon mode, $m$ the final electron state (after the scattering),
+$n_\qnu$ is the Bose-Einstein occupation number, $f_{m\kk+\qq}$ is the Fermi-Dirac occupation function,
+$\enk$ is the energy of the electron state, $\wqnu$ is the phonon frequency for the phonon wavevector $\qq$.
+The integration is performed over the BZ for the phonon wavectors and $\gkkp$ is the e-ph matrix element.
+The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the linewidth:
 
 \begin{align}
 \frac{1}{\tau_{n\kk}} =
@@ -66,12 +69,10 @@ The lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the linewidth:
 The generalized transport coefficients are given by [[cite:Madsen2018]]
 
 \begin{equation}
-    \begin{split}
     \mcL^{(m)}_{\alpha\beta} =
-    - \sum_n \int \frac{d\kk}{\Omega_\BZ} \vnka \vnkb\, \tau_{n\kk} & \\
-    \times (\enk-\ef)^m
+    - \sum_n \int \frac{d\kk}{\Omega_\BZ} \vnka \vnkb\, \tau_{n\kk} 
+    (\enk-\ef)^m
     \left.\frac{\partial f}{\partial\varepsilon}\right|_{\enk}
-    \end{split}
     \label{eq:transport_lc}
 \end{equation}
 
@@ -80,7 +81,6 @@ where $\vnka$ is the $\alpha$-th Cartesian component of the matrix element the v
 $$\vnk = \PDER{\enk}{\kk} = \langle \nk | \dfrac{\partial{H}}{\partial{\kk}} | \nk \rangle.$$
 
 that can be computed with DFPT.
-
 The generalized transport coefficients can be used to obtain different transport properties such as
 the electrical conductivity, Peltier and Seebeck coefficients, and charge carrier contribution to the
 thermal conductivity tensors [[cite:Madsen2018]].
@@ -99,7 +99,7 @@ and can be divided into hole and electron contributions
 
 where $n_e$ and $n_h$ are the electron and hole concentrations in the conduction and valence bands respectively,
 and $\mu_e$ and $\mu_h$ are the electron and hole mobilities,
-which can be obtained by selecting the conduction or valences states $n$ in Eq.\eqref{eq:transport_lc}.
+which can be obtained by selecting the conduction or valences states $n$ in Eq. \eqref{eq:transport_lc}.
 
 For electrons,
 
@@ -113,8 +113,12 @@ For electrons,
 where $n\in\text{CB}$ denotes states in the conduction bands. Similar expressions hold for holes.
 At zero total carrier concentration, the Fermi level $\ef$ is located inside the band gap so that $n_e = n_h$.
 
-A typical computation of mobilities requires different steps:
+A typical computation of mobilities requires different steps that are summarized in the [introduction page for the EPH code](eph_intro).
+Here we only describe the e-ph related part, i.e the blue-box in the workflow presented in the previous page.
+For this purpose, we use [[eph_task]] -4 to obtain only the imaginary part of the SE and explain other important
+aspects in this tutorial.
 
+<!--
   * Ground state computation to obtain the DEN and the WFK file
   * DFPT calculation for a set of $\qq$-points in the IBZ associated to a homogeneous mesh.
     Each DFPT run reads the WFK file produced in the previous step and produces **partial** DDB and POT1 files.
@@ -128,6 +132,7 @@ A typical computation of mobilities requires different steps:
 These steps can be summarized by the following graph:
 
 ![](eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+-->
 
 All the results of the calculation are saved in netcdf format,
 while the log and output files are used to report selected quantities, mainly for testing purposes.
@@ -178,18 +183,18 @@ abinit teph4mob_1.in > teph4mob_1.log 2> err &
 ```
 
 The calculation is done for AlAs, the same crystalline material as in the first two DFPT tutorials.
-Many input parameters are also quite similar.
+<!-- Many input parameters are also quite similar. -->
 <!-- as the EPH code can use symmetries can be used to reduce the number of atomic perturbations. -->
 For more details about this first step, please refer to the first and second tutorials on DFPT.
 
 !!! important
 
     Since AlAs is a **polar semiconductor**, we need to compute with DFPT the Born effective charges
-    as well and the static dielectric tensor
+    as well and the static dielectric tensor.
     These quantities are then used to treat the long-range (LR) part of the dynamical matrix in
     the Fourier interpolation of the phonon frequencies.
     As discussed in the EPH introduction. these quantities are also needed for the Fourier 
-    interpolation of the DFPT potential.
+    interpolation of the DFPT potentials.
 
 <!--
 Only the (partial) DDB and POT files produced at the end of the DFPT run
@@ -257,9 +262,9 @@ The only ingredient left is the WFK file with the GS wavefunctions on the dense 
 
 !!! important
 
-    In real life, you should always compute the electronic band structure along a $\kk$-path
+    In real computations, you should always compute the electronic band structure along a $\kk$-path
     to have a qualitative understanding of the band dispersion, the position of the band edges,
-    and the value of the band gaps.
+    and the value of the band gap(s).
     Note also that there are several parts of the EPH code in which it is assumed that no vibrational instability
     is present so you should always look at the phonon spectrum computed by the code.
     Don't expect to get meaningful results if imaginary phonon frequencies (a.k.a **negative frequencies**) are present.
@@ -286,7 +291,7 @@ mesh and a convergence study should be performed by increasing the $\kk$-mesh de
 as well as the $\qq$-mesh used for the integration of the imaginary part of the self-energy.
 This study is explained later and left to the user
 but it should be clear even at this point that systems with small effective masses (e.g GaAs)
-require denser $\kk$-meshes and are more difficult to converge.
+require denser homogeneous $\kk$-meshes and are more difficult to converge.
 
 The computation of the dense WFK file is similar to a NSCF band structure computation.
 The main difference is that we need wavefunctions on a $\kk$-mesh instead of a $\kk$-path
@@ -308,8 +313,6 @@ Copy the file in the *Work_eph4mob* directory, and run ABINIT:
 ```sh
 abinit teph4mob_4.in > teph4mob_4.log 2> err &
 ```
-
-*Note: do not forget to add the [[pseudos]] variable to this input file !*
 
 ## Calculation of the mobility
 
@@ -340,36 +343,46 @@ The job should take $\sim$15 seconds on a recent CPU.
 
 Let's discuss the meaning of the e-ph variables in more details:
 
-* [[optdriver]] 7 is required to activate the e-ph driver
+* [[optdriver]] 7 is required to activate the EPH driver
 
 * [[eph_task]] -4 tells ABINIT that we only need the imaginary part
   of the e-ph self-energy, which directly gives the electron lifetimes.
 
-* The dense $\kk$-mesh is specified by [[ngkpt]] = 24 24 24.
-  It should be the same mesh as the one used for the dense WFK computation.
+* The homogeneous mesh corresponding to the WFK file is specified by [[ngkpt]] 24 24 24.
+  The code will stop with an error if [[ngkpt]] is not the same as the one corresponding to the 
+  dense WFK file.
 
 * [[occopt]] 3 is required to correctly compute the
   location of the Fermi level, using the Fermi-Dirac occupation function.
 
-* [[ddb_ngqpt]] defined the initial grid used for the DFPT computation (4x4x4 in this example)
+* [[ddb_ngqpt]] defined the initial grid used for the DFPT computation (4×4×4 in this example)
 
 * [[eph_ngqpt_fine]] defines the dense $\qq$-mesh onto which the scattering potentials are interpolated
-  and the e-ph matrix elements are computed is given by 
+  and the e-ph matrix elements are computed. 
 
 
 !!! warning
 
-    [[ngkpt]] and [[eph_ngqpt_fine]] should be commensurated.
-    More specifically, the $\kk$-mesh must must be a multiple of the $\qq$-mesh.
-
-In this tutorial, we will use the same dense $\kk$- and $\qq$-meshes.
+    [[ngkpt]] and [[eph_ngqpt_fine]] should be commensurate.
+    More specifically, [[ngkpt]] must be a multiple of the $\qq$-mesh ([[eph_ngqpt_fine]])
+    because the WFK should contain all the $\kk$- and $\qq$-points.
+    In most cases, [[ngkpt]] = [[eph_ngqpt_fine]]. 
+    It is however possible to use fewer $\qq$-points.
+    Note that [[ngkpt]] does not necessarily correspond to the $\kk$-mesh used for the computation of
+    transport quantities, see the following discussion.
+    
+<!--In this tutorial, we will use the same dense $\kk$- and $\qq$-meshes.
 As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh,
 is needed to achieve fast convergence of the integrals [[cite:Brunin2020]].
+In this case, [[ngkpt]] = [[eph_ngqpt_fine]], but the use of [[sigma_ngkpt]]
+allows to downsample the $\kk$-mesh used for the integration and it should be set to half
+the values of [[ngkpt]].
+An example will be given in this tutorial.
 Possible exceptions are systems with very small effective masses (e.g. GaAs) in which
-a very dense $\kk$-sampling is needed to to sample the electron (hole) pocket.
-In this case, using the same sampling for electrons and phonons may be enough to converge.
+a very dense $\kk$-sampling is needed to sample the electron (hole) pocket.
+In this case, using the same sampling for electrons and phonons may be enough to converge.-->
 
-We will use the tetrahedron integration method [[cite:Bloechl1994]] to obtain the lifetimes (integration
+We will use the tetrahedron integration method [[cite:Blochl1994]] to obtain the lifetimes (integration
 over the $\qq$-mesh). This allows to efficiently filter out the $\qq$-points that do not contribute
 to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
 ensure energy and momentum conservation for a given $\kk$-point.
@@ -389,6 +402,7 @@ we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ elect
     For the initial convergence studies, we suggest to start from a relatively small number
     of temperatures covering the region of interest. The T-mesh can be densified aftwerwards when 
     converged parameters are found.
+    Note that the convergence might be different depending on the temperature.
 
 The [[sigma_erange]] variable defines the energy window, below the VBM and above the
 CBM where the lifetimes will be computed.
@@ -410,7 +424,7 @@ the dielectric constant, and the quadrupolar tensor.
 Make sure to have all of them in order to have an
 accurate interpolation of the scattering potentials, see discussion in [[cite:Brunin2020]].
 
-*Note: for the moment, the computation of the quadrupole is not available in the public version,
+*Note: for the moment (|today|), the computation of the quadrupole is not available in the public version,
 and you should have the following in the log file:*
 
 ```sh
@@ -454,8 +468,10 @@ Computing self-energy matrix elements for k-point: [ 4.5833E-01,  4.5833E-01,  0
 
 You can find various information for each $\kk$-point, such as:
 
-* the number of $\qq$-points belonging to the little group of $\kk$ (called IBZ(k) in the code)
-* the number of $\qq$-point in the IBZ(k) contributing to the imaginary part of $\Sigma_\nk$
+* the total number of $\qq$-points belonging to the little group of $\kk$ (called IBZ(k) in the code),
+  i.e. the irreducible $\qq$-points for this specific $\kk$-point
+* the number of $\qq$-point in the IBZ(k) contributing to the imaginary part of $\Sigma_\nk$ 
+  (in most cases, this number will be much smaller than the total number of $\qq$-points in the IBZ(k))
 * the wall-time each step takes.
 
 Finally, we have the results for the lifetimes (TAU) in the *teph4mob_5.out* file:
@@ -493,8 +509,8 @@ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
 
 The temperature is first given then the electron and hole densities followed by electron and hole mobilities.
 In this computation, we consider only electrons, so the values for holes are zero.
-Note that the transport driver is automatically executed after the e-ph calculation.
-You can run the transport driver in standalone mode by setting [[eph_task]] = 7, 
+Note that the transport driver is automatically executed after the EPH run.
+You can run the transport driver in standalone mode by setting [[eph_task]] 7, 
 provided you already have the lifetimes in a SIGEPH.nc file,
 <!-- This task can be performed only in serial and is very fast. -->
 
@@ -506,7 +522,7 @@ to decrease the computational cost.
 
 The first convergence study to be performed is to determine the energy range around the band edges
 to be used for the computation of $\tau_{n\kk}$.
-We can do that by performing the same mobility computation (same k- and q-mesh)
+We can do that by performing the same mobility computation (same $\kk$- and $\qq$-mesh)
 for an increasing energy window specified by [[sigma_erange]].
 
 !!! important
@@ -529,22 +545,31 @@ abinit teph4mob_6.in > teph4mob_6.log 2> err &
 This run should take a few minutes.
 
 We can now analyze the variation of the mobility with respect to [[sigma_erange]].
-Once enough $\kk$-points are included, the mobility should not vary, and computing more $\kk$-points will
+Once enough $\kk$-points are included, the mobility should not vary, and computing $\kk$-points further in the bands will
 only increase the computation time.
 Note that you should perform this convergence study with a $\kk$-mesh that is already dense enough to
 capture the band dispersion correctly.
-In this case, we are using a 24x24x24 mesh, which is not very dense for such computations.
+In this case, we are using a 24×24×24 mesh, which is not very dense for such computations.
 This means that, when increasing [[sigma_erange]], sometimes
 no additional $\kk$-point is considered.
-It is the case here for the first 3 datasets (3 k-points), and the last two datasets (6 k-points).
+It is the case here for the first 3 datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
 
 ### Convergence w.r.t. the k- and q-meshes
 
 Once the energy window has been set, we can start to converge the mobility with respect to the
 dense $\kk$- and $\qq$-meshes.
-The previous computations used 24x24x24 meshes. This is far from convergence.
-In silicon, for instance, a 45x45x45 $\kk$-mesh and 90x90x90 $\qq$-mesh are needed
+As a rule of thumb, a $\qq$-mesh twice as dense in each direction as the $\kk$-mesh,
+is needed to achieve fast convergence of the integrals [[cite:Brunin2020]].
+In this case, [[ngkpt]] = [[eph_ngqpt_fine]], but the use of [[sigma_ngkpt]]
+allows to downsample the $\kk$-mesh used for the integration and it should be set to half
+the values of [[ngkpt]].
+Possible exceptions are systems with very small effective masses (e.g. GaAs) in which
+a very dense $\kk$-sampling is needed to sample the electron (hole) pocket.
+In this case, using the same sampling for electrons and phonons may be enough to converge.
+
+The previous computations used 24×24×24 $\kk$- and $\qq$-meshes. This is far from convergence.
+In silicon, for instance, a 45×45×45 $\kk$-mesh and 90×90×90 $\qq$-mesh are needed
 to reach convergence within 5%.
 
 In order to compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh, there are two possibilities.
@@ -552,36 +577,36 @@ Let us take the previous example of silicon.
 
 1. Run a computation with:
 
-       * [[ngkpt]] = 90 90 90,
-       * [[eph_ngqpt_fine]] = 90 90 90,
-       * [[sigma_ngkpt]] = 45 45 45.
+       * [[ngkpt]] 90 90 90,
+       * [[eph_ngqpt_fine]] 90 90 90,
+       * [[sigma_ngkpt]] 45 45 45.
 
-   Using [[sigma_ngkpt]] will select the $\kk$-points belonging to the 45x45x45 mesh, but each lifetime will be computed
-   with a 90x90x90 q-mesh.
+   Using [[sigma_ngkpt]] will select the $\kk$-points belonging to the 45×45×45 mesh, but each lifetime will be computed
+   with a 90×90×90 $\qq$-mesh.
 
 2. Run a computation with:
 
-      * [[ngkpt]] = 90 90 90,
-      * [[eph_ngqpt_fine]] = 90 90 90,
-      * [[sigma_ngkpt]] = 90 90 90.
+      * [[ngkpt]] 90 90 90,
+      * [[eph_ngqpt_fine]] 90 90 90,
+      * [[sigma_ngkpt]] 90 90 90.
 
-   In this way, you have the mobility with 90x90x90 $\kk$- and $\qq$-meshes. You can then run again the transport driver only,
-   by setting [[eph_task]] = 7, and setting [[transport_ngkpt]] = 45 45 45. This will downsample the $\kk$-mesh used
+   In this way, you have the mobility with 90×90×90 $\kk$- and $\qq$-meshes. You can then run again the transport driver only,
+   by setting [[eph_task]] 7, and setting [[transport_ngkpt]] 45 45 45. This will downsample the $\kk$-mesh used
    in the computation of the mobility. This second option has the advantage that it delivers two mobilities
-   (useful for convergence studies), but it requires more computational time.
+   (useful for convergence studies), but it requires more computational time if only the 45×45×45/90×90×90 results are needed.
 
 You can run again the previous input files by densifying the different meshes.
 For the densest grids, you might need to run with multiple MPI processes.
-You should obtain something like this, for T = 300 K:
+You should obtain something like this, for $T$ = 300 K:
 
 ![](eph4mob_assets/teph4mob_conv.png)
 
 
-Note that in order to get sensible results, one should use a denser DFPT $\qq$-mesh (around 9x9x9),
+Note that in order to get sensible results, one should use a denser DFPT $\qq$-mesh (around 9×9×9),
 and a larger energy cutoff for the planewave basis set ([[ecut]]).
 The inputs of this tutorial have been tuned so that the computations are quite fast,
 but they are quite far from convergence.
-In real life, you should perform convergence studies to find suitable parameters.
+In real studies, you should perform convergence tests to find suitable parameters.
 
 ### Double-grid technique
 
@@ -592,10 +617,10 @@ but a finer mesh is used for the phonon absorption-emission terms.
 This technique allows one to better capture these processes, while computing the matrix elements on a coarser mesh.
 The efficiency of this method depends
 on the polar divergence of the matrix elements: if this divergence is very difficult to capture numerically,
-the coarse $\qq$-mesh for the e-ph matrix elements will have to be dense.
+the coarse $\qq$-mesh for the e-ph matrix elements will have to be denser.
 
-The double-grid technique requires a second WFK file, containing the KS eigenvalues on the dense mesh.
-You can specify the path to the dense WFK file using [[getwfkfine_filepath]]:
+The double-grid technique requires a second WFK file, containing the KS eigenvalues on the fine mesh.
+You can specify the path to the fine WFK file using [[getwfkfine_filepath]]:
 
 ```sh
 getwfkfine_filepath "teph4mob_4o_DS3_WFK"
@@ -615,17 +640,17 @@ In the log file, you will now find information about the double-grid method:
 
 ```sh
 coarse:                24          24          24
-dense:                 48          48          48
+fine:                  48          48          48
 ```
 
 The mobility obtained, at 300 K, is 158.01 cm$^2$/V/s.
-Using a 48x48x48 $\qq$-mesh for the matrix elements as well would give 96.09.
-The result is indeed improved, since using a 24x24x24 mesh for everything gives 363.11.
-You can also use a denser fine mesh, but always a multiple of the initial coarse mesh
-(in this case, 72x72x72, 96x96x96, etc).
+Using a 48×48×48 $\qq$-mesh for the matrix elements as well would give 96.09.
+The result is indeed improved, since using a 24×24×24 mesh for everything gives 363.11.
+You can also use a finer mesh, but always a multiple of the initial coarse mesh
+(in this case, 72×72×72, 96×96×96, etc).
 However, we found that there is very little use to go beyond a mesh three times as dense as the coarse one.
-Using a 72x72x72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
-and a 96x96x96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
+Using a 72×72×72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
+and a 96×96×96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
 
 
 ### In-place restart
@@ -633,10 +658,11 @@ and a 96x96x96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather
 All the results of the calculation are stored in a single SIGEPH.nc file
 for all the $\kk$-points (and spins) considered.
 The list of $\kk$-points is initialized at the beginning of the calculation and an internal table
-in the netcdf file stores the status of each k-point (whether it has been computed or not).
+in the netcdf file stores the status of each $\kk$-point (whether it has been computed or not).
 This means that calculations that get killed by the resource manager due to time limit can use
 the SIGEPH file to perform an automatic in-place restart.
-Just set [[eph_restart]] to 1 in the input file and rerun the job.
+Just set [[eph_restart]] to 1 in the input file and rerun the job (there is no harm in setting it 
+from the start).
 
 !!! important
 
@@ -644,12 +670,12 @@ Just set [[eph_restart]] to 1 in the input file and rerun the job.
 
 ### Transport calculation from SIGEPH.nc
 
-The routine that computes carrier mobilites is automatically invoked when [[eph_task]] = -4 is used
+The routine that computes carrier mobilites is automatically invoked when [[eph_task]] -4 is used
 and a *TRANSPORT.nc* file with the final results is produced.
 There are however cases in which one would like to compute mobilities from an already existing
 SIGEPH.nc file without performing a full self-energy calculation.
-In this case, one can use [[eph_task]] = 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
-The advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evalute the mobility integral.
+In this case, one can use [[eph_task]] 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
+The advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evaluate the mobility integral.
 
 ### MPI parallelism and memory requirements
 
@@ -661,8 +687,8 @@ You can however specify manually the MPI distribution across the five different 
 by using [[eph_np_pqbks]] (a list of 5 integers).
 The product of these five numbers **must be equal** to the total number of MPI processes.
 The first number gives the number of processes for the parallelization over perturbations.
-The allowed value range between 1 and 3 x [[natom]], and should be a divisor
-of 3 x [[natom]] to distribute the work equally.
+The allowed value range between 1 and 3 × [[natom]], and should be a divisor
+of 3 × [[natom]] to distribute the work equally.
 The higher this number, the lower the memory requirements at the price of increased MPI communication.
 The second number determines the parallelization over the $\qq$-points in the IBZ.
 This parallelization level allows one to decrease both the computational time as well as memory although
@@ -684,11 +710,11 @@ by avoiding the computation of $v_{m\kq}$
 
 ### How to reduce memory requirements
 
-As mentioned above, the memory should scale with the number of MPI processors used for the q-point and
-the perturbation level.
+As mentioned above, the memory should scale with the number of MPI processors used for the $\qq$-point and
+the perturbation distribution.
 However, there might be tricky systems in which you start to experience memory shortage that
 prevents you from running with several MPI processes.
-This problems should show up for very dense k/q meshes.
+This problems should show up for very dense $\kk$/$\qq$ meshes.
 As a rule of thumb, calculations with meshes denser than e.g 200x200x200 are memory demanding
 and become much slower because several algorithms and tables related to the BZ sampling will start to dominate.
 <!--
@@ -712,9 +738,9 @@ The code is not optimized for OpenMP but a few threads can be useful to avoid re
 As a rule of thumb 2-4 OpenMP threads should be OK provided you link with threaded FFT and BLAS libraries.
 OpemMP may be beneficial for large calculations.
 
-Last but not least, datasets are bad, large arrays allocated for k-points and the size depends on ndtset.
+Last but not least, do not use datasets: large arrays allocated for $\kk$-points and the size depends on ndtset.
 
-### How to compute only the k-points close to the band edges
+### How to compute only the $\kk$-points close to the band edges
 
 As we have already seen in the previous sections, a relatively small number of $\kk$-points
 close to the band edges is usually sufficient to converge mobilities.
@@ -741,7 +767,7 @@ the idea is relatively simple and goes as follows:
 
 
 An example will help clarify.
-Suppose we have computed a WKF file with a NSCF run using a 16x16x16 $\kk$-mesh (let's call it *161616_WFK*)
+Suppose we have computed a WFK file with a NSCF run using a 16x16x16 $\kk$-mesh (let's call it *161616_WFK*)
 and we want to compute mobilites with the much denser 64x64x64 $\kk$-mesh.
 In this case, use [[optdriver]] = 8 with [[wfk_task]] = "wfk_kpts_erange" to read
 the WFK file specified by [[getwfk_filepath]], find the wavevectors belonging to the [[sigma_ngkpt]] $\kk$-mesh
@@ -790,7 +816,7 @@ Also note that the two tests cannot be executed in multidataset mode with a sing
 Note, however, that the quality of the interpolation depends on the initial coarse $\kk$-mesh.
 So we recommended, to look at the interpolant.
 It is also a good idea to use an energy window that is larger than the one employed for the mobility.
-as well as the position of the band edges
+<!--as well as the position of the band edges-->
 
 <!--
 In the SKW method, the single-particle energies are expressed in terms of the (symmetrized) Fourier sum
