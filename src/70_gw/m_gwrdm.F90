@@ -227,7 +227,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
 
  !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
  !Order from highest occ to lowest occ
- eigenvect=dm1_tmp
+ !eigenvect=dm1_tmp
  occs_tmp=occs
  do ib1dm=1,ndim
   occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
@@ -389,7 +389,7 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  !  call wrtout(ab_out,msg,'COLL')
  !enddo
  res=matmul(Umat,Kex_tmp)
- Kex_tmp=matmul(res,transpose(Umat))
+ Kex_tmp=matmul(res,conjg(transpose(Umat)))
  do ib1dm=1,ndim
    do ib2dm=1,ndim
      Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Kex_tmp(ib1dm,ib2dm)
@@ -401,7 +401,6 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  !  call wrtout(std_out,msg,'COLL')
  !  call wrtout(ab_out,msg,'COLL')
  !enddo
-
  ABI_FREE(res)
  ABI_FREE(Umat)
  ABI_FREE(Kex_tmp)
