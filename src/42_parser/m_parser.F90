@@ -549,7 +549,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  lenstr=1
 
  ! Set maximum number lines to be read to some large number
- mline=50000
+ mline=500000
  do iline=1,mline
 
    ! Keeps reading lines until end of input file

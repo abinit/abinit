@@ -13,6 +13,7 @@ ncell = 2 2 2
 
 # Test the effective potential 
 test_effpot = 1
+test_prt_ph = 0
 # Print the anharmonic part 
 analyze_anh_pot = 1
 

@@ -2923,6 +2923,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  character (len=XML_RECL) :: strg,strg1
 #endif
  character(len=500) :: message
+ character(len=264) :: filename_tmp
  character(len=5),allocatable :: symbols(:)
  integer,parameter :: master=0
  logical :: iam_master
@@ -2936,9 +2937,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 ! *************************************************************************
 
-
+ filename_tmp = trim(filename)  
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')'-Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',filename_tmp
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -3432,7 +3433,7 @@ end subroutine effective_potential_file_readMDfile
 !!
 !! SOURCE
 
-subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose)
 
 !Arguments ------------------------------------
 !scalars
@@ -3441,15 +3442,16 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
+ integer,optional,allocatable,intent(inout) :: iatfix(:,:)
 !Local variables-------------------------------
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
  real(dp):: factor
- logical :: revelant_factor,need_map,need_verbose
+ logical :: revelant_factor,need_map,need_verbose,need_fixmap
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
  integer :: ncell(3),scale_cell(3)
- integer,allocatable  :: shift(:,:)
+ integer,allocatable  :: shift(:,:),iatfix_tmp(:,:)
  integer,allocatable  :: list_map(:) !blkval(:),
  real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
  real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
@@ -3459,7 +3461,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 !Set optional values
  need_verbose = .false.
+ need_fixmap = .FALSE.
  if (present(verbose)) need_verbose = verbose
+ if (present(iatfix)) need_fixmap = .TRUE.
 
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
@@ -3527,7 +3531,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  ABI_ALLOCATE(list_absdist,(3,natom_hist))
  ABI_ALLOCATE(list_dist,(natom_hist))
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
-
+ 
  !Putting maping list to zero
  list_map = 0
 
@@ -3637,7 +3641,7 @@ end do  ! ia
      hist_tmp%fcart(:,ia,:) = hist%fcart(:,list_map(ia),:)
      hist_tmp%vel(:,ia,:)   = hist%vel(:,list_map(ia),:)
    end do
-
+  
 ! free the old hist and reinit
    call abihist_free(hist)
    call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
@@ -3649,6 +3653,16 @@ end do  ! ia
    end do
    hist_tmp%mxhist = nstep_hist
    call abihist_free(hist_tmp)
+
+   !map also fixes if present
+   if(need_fixmap)then  
+     ABI_ALLOCATE(iatfix_tmp,(3,natom_hist))
+     do ia=1,natom_hist
+        iatfix_tmp(:,ia) = iatfix(:,list_map(ia))
+     end do
+     iatfix = iatfix_tmp 
+     ABI_DEALLOCATE(iatfix_tmp)  
+   end if
  end if !need map
 
 !deallocation
