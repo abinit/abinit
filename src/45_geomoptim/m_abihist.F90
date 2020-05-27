@@ -1186,7 +1186,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 
  need_to_write = .FALSE.
  if(nctime==0 .or. ifirst==1) need_to_write = .TRUE.
- if (itime > nctime .and. nctimei /= 0) then
+ if (itime > nctime .and. nctime /= 0) then
      if (mod(itime,nctime) == 0) need_to_write = .TRUE.
  end if
 !Return if we don't need to write the HIST file at this step
