@@ -851,7 +851,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  logical :: iscompatibleFFT
  character(len=500) :: msg
 !arrays
- integer :: dum_kg(3,0), bounds(2)
+ integer :: dum_kg(3,0)
  real(dp) :: kpoint(3)
  !integer :: my_band_list(Wfd%mband)
 
