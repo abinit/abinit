@@ -32,8 +32,9 @@ module m_gtermcutoff
  use m_fstrings,        only : sjoin, itoa
  use m_profiling_abi,   only : abimem_record
  use defs_abitypes,     only : MPI_type
- use m_bessel,          only : CALCK0
+ use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
  use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.),quadrature
+ use m_paw_numeric,     only : paw_jbessel
 
  use m_geometry,        only : normv, metric
 
@@ -93,9 +94,9 @@ module m_gtermcutoff
 !!***
 ! private variables used for the integration needed by the cylindrical case.
  integer,save  :: npts_,ntrial_,qopt_
- real(dp),save :: ha_,hb_,r0_
- real(dp),save :: gcart_para_,gcartx_,gcarty_
- real(dp),save :: xx_
+ real(dp),save :: ha_,hb_,hcyl_,r0_
+ real(dp),save :: gcart_para_,gcart_perp_,gcartx_,gcarty_
+ real(dp),save :: xx_,zz_,rcut_
  real(dp),save :: accuracy_
   
  
@@ -151,14 +152,17 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 !Local variables-------------------------------
 !scalars
  integer,parameter  :: N0=1000
- integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing,opt_cylinder
- integer            :: n1,n2,n3,nfft
+ integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing,icount
+ integer            :: c1,c2,opt_cylinder
+ integer            :: my_start,my_stop
+ integer            :: n1,n2,n3,nfft,npt
  integer            :: test,opt_surface !opt_cylinder
- real(dp)           :: cutoff,rcut,check,rmet(3,3)
+ real(dp)           :: cutoff,rcut,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
- real(dp)           :: gcart_para,gcart_perp
+ real(dp)           :: gcart_para,gcart_perp,gcart_xy,gcart_z
+ real(dp)           :: j0,j1,k0,k1
  real(dp)           :: quad,tmp,ucvol
- real(dp)           :: hcyl
+ real(dp)           :: hcyl,hcyl2
  real(dp),parameter :: tolfix=1.0000001_dp
  character(len=50)  :: mode
  character(len=500) :: msg
@@ -168,7 +172,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
  real(dp)             :: pdir(3),alpha(3)
- real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
+ real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:),xx(:)
  real(dp),allocatable :: gcutoff(:)
 
 ! === Save dimension and other useful quantities in vcut% ===
@@ -254,6 +258,13 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 
      test=COUNT(vcutgeo/=zero)
      ABI_CHECK(test==1,'Wrong cutgeo for cylinder')   
+
+     ! === From reduced to Cartesian coordinates ===
+     call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+     a1=rprimd(:,1); b1=two_pi*gprimd(:,1)
+     a2=rprimd(:,2); b2=two_pi*gprimd(:,2)
+     a3=rprimd(:,3); b3=two_pi*gprimd(:,3)
         
      !Calculate rcut for each method !
      !
@@ -282,6 +293,13 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
        end if
      end do
 
+!     if (opt_surface==1) then
+!       ABI_CHECK(ALL(pdir == (/1,1,0/)),"Surface must be in the x-y plane")
+       rcut = half*SQRT(DOT_PRODUCT(a3,a3))
+!     end if
+
+     rcut_= rcut
+
      ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
      hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
      r0_=MIN(ha_,hb_)/N0
@@ -292,7 +310,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      qopt_    =6         ! Quadrature method, see quadrature routine.
      ntrial_  =30        ! Max number of attempts.
      accuracy_=0.001     ! Fractional accuracy required.
-     npts_    =6         ! Initial number of point (only for Gauss-Legendre method).
+     npts_    =100       ! Initial number of point (only for Gauss-Legendre method).
 
      write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
 &      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
@@ -301,12 +319,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 &      '  Fractional accuracy    = ',accuracy_
      call wrtout(std_out,msg,'COLL')
 
-     ! === From reduced to Cartesian coordinates ===
-     call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-     b1(:)=two_pi*gprimd(:,1)
-     b2(:)=two_pi*gprimd(:,2)
-     b3(:)=two_pi*gprimd(:,3)
-
+     SELECT CASE (opt_cylinder)
+     
+     CASE(1)
+   
      do i3=1,n3
       do i2=1,n2
        i23=n1*(i2-1 + n2*(i3-1))
@@ -338,6 +354,115 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
        end do !i1
       end do !i2
      end do !i3
+
+     CASE(2)
+
+     ! === Finite cylinder of length hcyl, from Rozzi et al ===
+     ! TODO add check on hcyl value that should be smaller that 1/deltaq
+     if (hcyl<zero) then
+       write(msg,'(a,f8.4)')' Negative value for cylinder length hcyl=',hcyl
+       MSG_BUG(msg)
+     end if
+      
+     npt=6
+     ABI_MALLOC(xx,(npt))
+
+     if (ABS(hcyl)>tol12) then
+       write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut
+       call wrtout(std_out,msg,'COLL')
+       hcyl2=hcyl**2
+       rcut2=rcut**2
+
+       do i3=1,n3
+        do i2=1,n2
+         do i1=1,n1
+
+           gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+           gcart_para_=ABS(gcart(3)) ; gcart_perp_=SQRT(gcart(1)**2+gcart(2)**2)
+
+           if (gcart_perp_/=zero.and.gcart_para_/=zero) then
+             ! $ 4\pi\int_0^{R_c} d\rho\rho j_o(qpg_perp_.\rho)\int_0^hcyl dz\cos(qpg_para_*z)/sqrt(\rho^2+z^2) $
+             call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             if (ierr/=0) then
+               MSG_ERROR("Accuracy not reached")
+             end if
+
+!             vccut(ig,iq)=four_pi*quad
+
+           else if (gcart_perp_==zero.and.gcart_para_/=zero) then
+             ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
+             call quadrature(F3,zero,hcyl,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             if (ierr/=0) then
+               MSG_ERROR("Accuracy not reached")
+             end if
+
+             c1=one/gcart_para_**2-COS(gcart_para_*hcyl_)/gcart_para_**2-hcyl*SIN(gcart_para_*hcyl)/gcart_para_
+             c2=SIN(gcart_para_*hcyl)*SQRT(hcyl2+rcut2)
+!             vccut(ig,iq)=four_pi*c1+four_pi*(c2-quad)/qpg_para_
+             gcutoff(ii)=one
+
+           else if (gcart_perp_/=zero.and.gcart_para_==zero) then
+             ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
+             call quadrature(F4,zero,rcut,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             if (ierr/=0) then
+               MSG_ERROR("Accuracy not reached")
+             end if
+
+!             vccut(ig,iq)=four_pi*quad
+             gcutoff(ii)=one
+
+           else if (gcart_perp_==zero.and.gcart_para_==zero) then
+             ! Use lim q+G --> 0
+!             vccut(ig,iq)=two_pi*(-hcyl2+hcyl_*SQRT(hcyl2+rcut2)+rcut2*LOG((hcyl_+SQRT(hcyl_+SQRT(hcyl2+rcut2)))/rcut_))
+
+           else
+             MSG_BUG('You should not be here!')
+           end if
+
+         end do !i1
+        end do !i2
+       end do !i3
+
+     else
+      ! === Infinite cylinder ===
+      call wrtout(std_out,' cutoff_cylinder: using Rozzi''s method with infinite cylinder ','COLL')
+      do i3=1,n3
+       do i2=1,n2
+        do i1=1,n1
+          icount=ig ; if (icount<my_start.or.icount>my_stop) CYCLE
+          gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
+          gcart_z =ABS(gcart(3)) ; gcart_xy=SQRT(gcart(1)**2+gcart(2)**2)
+          if (gcart_z>tol4) then
+            ! === Analytic expression ===
+            call CALCK0(gcart_z *rcut_,k0,1)
+            call CALJY1(gcart_xy*rcut_,j1,0)
+            call CALJY0(gcart_xy*rcut_,j0,0)
+            call CALCK1(gcart_z *rcut_,k1,1)
+            gcutoff(ii)=one+rcut*gcart_xy*j1*k0-gcart_z*rcut*j0*k1
+          else
+            if (gcart_xy>tol4) then
+              ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
+              call quadrature(F5,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+              if (ierr/=0) then
+                MSG_ERROR("Accuracy not reached")
+              end if
+                gcutoff(ii)=-four_pi*quad
+              else
+                ! === Analytic expression ===
+                gcutoff(ii)=-pi*rcut**2*(two*LOG(rcut)-one)
+            end if
+          end if
+        end do !i1
+       end do !i2
+      end do !i3
+
+     end if !finite/infinite
+
+     ABI_FREE(xx)
+
+     CASE DEFAULT
+      MSG_BUG(sjoin('Wrong value for cylinder method:',itoa(opt_cylinder)))
+     END SELECT
 
 
    CASE('SURFACE')
@@ -500,6 +625,120 @@ function K0cos_dy(xx)
  K0cos_dy=quad
 
 end function K0cos_dy
+!!***
+
+!----------------------------------------------------------------------
+
+function F1(rho)
+
+ real(dp),intent(in) :: rho
+ real(dp) :: F1
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: order=0,ll=0
+ real(dp) :: arg,bes,besp,bespp
+!************************************************************************
+
+ !F1(\rho;z)= \rho*j_o(qpg_perp_*\rho)/sqrt(\rho**2+z**2)
+ arg=rho*gcart_perp_
+ call paw_jbessel(bes,besp,bespp,ll,order,arg)
+
+ if (zz_==zero) then
+   F1=bes
+ else
+   F1=bes*rho/SQRT(rho**2+zz_**2)
+ end if
+
+end function F1
+!!***
+
+!----------------------------------------------------------------------
+
+function F2(xx)
+
+ real(dp),intent(in) :: xx
+ real(dp) :: F2
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr
+ real(dp) :: intr
+!************************************************************************
+
+ zz_=xx
+ call quadrature(F1,zero,rcut_,qopt_,intr,ierr,ntrial_,accuracy_,npts_)
+ if (ierr/=0) then
+   MSG_ERROR("Accuracy not reached")
+ end if
+
+ F2=intr*COS(gcart_para_*xx)
+
+end function F2
+!!***
+
+!----------------------------------------------------------------------
+
+pure function F3(xx)
+
+ real(dp),intent(in) :: xx
+ real(dp) :: F3
+!************************************************************************
+
+ ! F3(z)=z*\sin(qpg_para_*z)/\sqrt(rcut^2+z^2)
+ F3=xx*SIN(gcart_para_*xx)/SQRT(rcut_**2+xx**2)
+
+end function F3
+!!***
+
+!----------------------------------------------------------------------
+
+function F4(rho)
+
+ real(dp),intent(in) :: rho
+ real(dp) :: F4
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: order=0,ll=0
+ real(dp) :: arg,bes,besp,bespp
+!************************************************************************
+
+ ! $F4(rho)=\rho*j_o(qpg_perp_.\rho) \ln((hcyl+\sqrt(rho^2+hcyl^2))/\rho)$
+ if (ABS(rho)<tol12) then
+   F4=zero
+ else
+   arg=rho*gcart_perp_
+   call paw_jbessel(bes,besp,bespp,ll,order,arg)
+   F4=bes*rho*LOG((hcyl_+SQRT(rho**2+hcyl_**2))/rho)
+ end if
+
+end function F4
+!!***
+
+!----------------------------------------------------------------------
+
+function F5(rho)
+
+ real(dp),intent(in) :: rho
+ real(dp) :: F5
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: order=0,ll=0
+ real(dp) :: arg,bes,besp,bespp
+!************************************************************************
+
+ ! $F5(\rho)=\rho*j_o(G_perp\rho)log(\rho)$
+ if (rho==0) then
+   F5=zero
+ else
+   arg=rho*gcart_perp_
+   call paw_jbessel(bes,besp,bespp,ll,order,arg)
+   F5=bes*rho*LOG(rho)
+ end if
+
+end function F5
 !!***
 
 end module m_gtermcutoff
