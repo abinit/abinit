@@ -1,5 +1,5 @@
 # 1/G**2 Cut-off term capabilities test 
-# Here there are test 3 methods in 3 DATASETS applied to a layer of Al layer
+# Here there are test 3 methods in 3 DATASETS applied to a layer of Al
 # In order to keep the computation time to a minimum, parameters are 
 # kept to a minimum reasonable value.
 ndtset 3               # THREE DATASET : 1) CRYSTAL Cut-off - Neutral effect 
@@ -54,7 +54,7 @@ vcutgeo3   -1 1 0  # At least one negative component
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t101.out, tolnlines = 27, tolabs = 4.0e+4, tolrel = 1.0e+1;
+#%%    t_gcut1.out, tolnlines = 27, tolabs = 4.0e+4, tolrel = 1.0e+1;
 #%% psp_files = 13_Al_psml.psp8
 #%% [paral_info]
 #%% max_nprocs = 1

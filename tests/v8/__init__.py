@@ -114,5 +114,5 @@ inp_files = [
 "t99.in",
 "t100.in",
 #Additional Ground-state tests
-"t_gcut1",
+"t101.in",
 ]

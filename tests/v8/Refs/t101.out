@@ -15,12 +15,12 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu 28 May 2020.
-- ( at 15h32 )
+- ( at 16h58 )
   
-- input  file    -> t_gcut1.in
-- output file    -> t_gcut1.out
-- root for input  files -> t_gcut1_xi
-- root for output files -> t_gcut1_xo
+- input  file    -> t101.in
+- output file    -> t101.out
+- root for input  files -> t101_xi
+- root for output files -> t101_xo
 
 
  DATASET    1 : space group P6/m m m (#191); Bravais hP (primitive hexag.)
@@ -284,7 +284,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.437000000000  5.437000000000 25.000000000000 bohr
               =  2.877136483104  2.877136483104 13.229430214750 angstroms
- prteigrs : about to open file t_gcut1_xo_DS1_EIG
+ prteigrs : about to open file t101_xo_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.00119   Average Vxc (hartree)=  -0.11682
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband=  3, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -448,7 +448,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.437000000000  5.437000000000 25.000000000000 bohr
               =  2.877136483104  2.877136483104 13.229430214750 angstroms
- prteigrs : about to open file t_gcut1_xo_DS2_EIG
+ prteigrs : about to open file t101_xo_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.04392   Average Vxc (hartree)=  -0.20620
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband=  3, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -616,7 +616,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.437000000000  5.437000000000 25.000000000000 bohr
               =  2.877136483104  2.877136483104 13.229430214750 angstroms
- prteigrs : about to open file t_gcut1_xo_DS3_EIG
+ prteigrs : about to open file t101_xo_DS3_EIG
  Fermi (or HOMO) energy (hartree) =  -1.39816   Average Vxc (hartree)=  -0.09802
  Eigenvalues (hartree) for nkpt=   4  k points:
  kpt#   1, nband=  3, wtk=  0.06250, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -718,51 +718,53 @@ P           mkmem           4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          7.2        0.12      0.002
-- Total wall clock time (s,m,h):          7.3        0.12      0.002
+- Total cpu        time (s,m,h):         13.4        0.22      0.004
+- Total wall clock time (s,m,h):         13.4        0.22      0.004
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            7.2, wall_time =            7.3
+- cpu_time =           13.4, wall_time =           13.4
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- stress                         2.964  41.0      2.965  40.8              3      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             2.963  41.0      2.964  40.8              3      -1.00        1.00       1.00
-- ewald                          2.949  40.8      2.949  40.6              3      -1.00        1.00       1.00
-- fourwf%(pot)                   0.298   4.1      0.296   4.1           4691      -1.00        1.01       1.01
-- pspini                         0.205   2.8      0.206   2.8              3      -1.00        0.99       0.99
-- timing timab                   0.111   1.5      0.111   1.5             10      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.104   1.4      0.108   1.5             88      -1.00        0.96       0.96
-- nonlop(apply)                  0.092   1.3      0.090   1.2           4691      -1.00        1.02       1.02
-- fourdp                         0.063   0.9      0.068   0.9           1132      -1.00        0.92       0.92
-- others (117)                   0.192   2.6      0.214   2.9             -1      -1.00        0.89       0.89
+- stress                         5.696  42.6      5.705  42.6              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             5.693  42.6      5.702  42.5              3      -1.00        1.00       1.00
+- ewald                          5.347  40.0      5.364  40.0              3      -1.00        1.00       1.00
+- fourwf%(pot)                   0.496   3.7      0.500   3.7           4691      -1.00        0.99       0.99
+- pspini                         0.459   3.4      0.463   3.5              3      -1.00        0.99       0.99
+- xc:pot/=fourdp                 0.174   1.3      0.165   1.2             88      -1.00        1.06       1.06
+- nonlop(apply)                  0.156   1.2      0.152   1.1           4691      -1.00        1.03       1.03
+- timing timab                   0.128   1.0      0.135   1.0              8      -1.00        0.94       0.94
+- fourdp                         0.107   0.8      0.114   0.9           1132      -1.00        0.94       0.94
+- invars2                        0.068   0.5      0.070   0.5              3      -1.00        0.97       0.97
+- others (116)                   0.267   2.0      0.269   2.0             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                       9.939 137.4      9.971 137.2                                  1.00       1.00
+- subtotal                      18.590 139.2     18.639 139.1                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           7.2, wall_time =           7.3
+- cpu_time =          13.4, wall_time =          13.4
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- stress                         2.964  41.0      2.965  40.8              3      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             2.963  41.0      2.964  40.8              3      -1.00        1.00       1.00
-- ewald                          2.949  40.8      2.949  40.6              3      -1.00        1.00       1.00
-- fourwf%(pot)                   0.298   4.1      0.296   4.1           4691      -1.00        1.01       1.01
-- pspini                         0.205   2.8      0.206   2.8              3      -1.00        0.99       0.99
-- timing timab                   0.111   1.5      0.111   1.5             10      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.104   1.4      0.108   1.5             88      -1.00        0.96       0.96
-- nonlop(apply)                  0.092   1.3      0.090   1.2           4691      -1.00        1.02       1.02
-- fourdp                         0.063   0.9      0.068   0.9           1132      -1.00        0.92       0.92
-- others (117)                   0.192   2.6      0.214   2.9             -1      -1.00        0.89       0.89
+- stress                         5.696  42.6      5.705  42.6              3      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             5.693  42.6      5.702  42.5              3      -1.00        1.00       1.00
+- ewald                          5.347  40.0      5.364  40.0              3      -1.00        1.00       1.00
+- fourwf%(pot)                   0.496   3.7      0.500   3.7           4691      -1.00        0.99       0.99
+- pspini                         0.459   3.4      0.463   3.5              3      -1.00        0.99       0.99
+- xc:pot/=fourdp                 0.174   1.3      0.165   1.2             88      -1.00        1.06       1.06
+- nonlop(apply)                  0.156   1.2      0.152   1.1           4691      -1.00        1.03       1.03
+- timing timab                   0.128   1.0      0.135   1.0              8      -1.00        0.94       0.94
+- fourdp                         0.107   0.8      0.114   0.9           1132      -1.00        0.94       0.94
+- invars2                        0.068   0.5      0.070   0.5              3      -1.00        0.97       0.97
+- others (116)                   0.267   2.0      0.269   2.0             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                       9.939 137.4      9.971 137.2                                  1.00       1.00
+- subtotal                      18.590 139.2     18.639 139.1                                  1.00       1.00
 
 ================================================================================
 
@@ -847,10 +849,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.2  wall=          7.3
+- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.2  wall=          7.3
++Overall time at end (sec) : cpu=         13.4  wall=         13.4
