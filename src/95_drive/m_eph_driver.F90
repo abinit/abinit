@@ -362,7 +362,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        ! Apply the scissor operator
        if (abs(dtset%mbpt_sciss) > tol6) then
          call wrtout(std_out, sjoin(" Apply the scissor operator to the shifted CB with:",ftoa(dtset%mbpt_sciss)))
-         call apply_scissor(ebands,dtset%mbpt_sciss)
+         call apply_scissor(ebands_kq,dtset%mbpt_sciss)
        end if
      end if
    end if
