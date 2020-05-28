@@ -2424,6 +2424,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          ! Transform in <NO_i|Sigma_x[NO]|NO_j> the outer NOs->KSs (at this point all mat. elements are stored in Sr%x_mat)
          call rotate_exchange(ikcalc,ib1,ib2,Sr,nateigv) ! <KS_i|K[NO]|KS_j>
        end do
+       call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating Wfd_natorb
        Wfd_natorb%bks_comm = xmpi_comm_null
        call Wfd_natorb%free()
        ABI_FREE(keep_ur_dm2)
