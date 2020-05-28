@@ -2057,7 +2057,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
 
    ! MRM
-   if (open_file(Dtfil%fnameabo_sigc,msg,unit=unt_sigc,status='unknown',form='formatted') /= 0) then
+   if (open_file(trim(Dtfil%fnameabo_sgr)//'_SIGC',msg,unit=unt_sigc,status='unknown',form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if
 
