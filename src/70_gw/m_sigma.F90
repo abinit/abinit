@@ -41,7 +41,7 @@ MODULE m_sigma
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
- use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w
+ use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc ! MRM
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsilonm1_results
@@ -443,6 +443,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
  !unt_gw  File with GW corrections.
  !unt_sig Self-energy as a function of frequency.
  !unt_sgr Derivative wrt omega of the Self-energy.
+ !unt_sigc Sigma_c(eik) MRM
  !unt_sgm Sigma on the Matsubara axis.
 
  tag_spin=(/'            ','            '/); if (Sr%nsppol==2) tag_spin=(/',  SPIN UP  ',',  SPIN DOWN'/)
@@ -487,6 +488,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
 
    write(unt_sgr,'("# k = ",3f10.6)')Sigp%kptgw(:,ikcalc)
    write(unt_sgr,'("# b = ",2i10)')Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
+
+   write(unt_sigc,'("# k = ",3f10.6)')Sigp%kptgw(:,ikcalc)
+   write(unt_sigc,'("# b = ",2i10)')Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp>=10) then
@@ -550,6 +554,16 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
          REAL (Sr%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
          REAL (Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV,&
          AIMAG(Sr%sigxcme4sd(ib,ikibz,io,is)) *Ha_eV
+     end do
+   end do
+   !MRM
+   do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
+     write(unt_sigc,'("# ik, ib",2i5)')ikibz,ib
+     do io=1,Sr%nomega4sd
+       write(unt_sigc,'(100(e12.5,2x))')              &
+         REAL (Sr%omega4sd  (ib,ikibz,io,is)) *Ha_eV,&
+         REAL (Sr%sigcme4sd(ib,ikibz,io,is)) *Ha_eV,&
+         AIMAG(Sr%sigcme4sd(ib,ikibz,io,is)) *Ha_eV
      end do
    end do
    !

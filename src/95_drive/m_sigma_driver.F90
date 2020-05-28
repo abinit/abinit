@@ -2056,6 +2056,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      MSG_ERROR(msg)
    end if
 
+   ! MRM
+   if (open_file(Dtfil%fnameabo_sigc,msg,unit=unt_sigc,status='unknown',form='formatted') /= 0) then
+     MSG_ERROR(msg)
+   end if
+
    if (mod10==SIG_GW_AC) then
      ! Sigma along the imaginary axis.
      if (open_file(Dtfil%fnameabo_sgm,msg,unit=unt_sgm,status='unknown',form='formatted') /= 0) then
@@ -2642,6 +2647,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    close(unt_gwdiag)
    close(unt_sig)
    close(unt_sgr)
+   close(unt_sigc) ! MRM
    if (mod10==SIG_GW_AC) close(unt_sgm)
  end if
  !

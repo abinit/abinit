@@ -317,6 +317,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_scr
   character(len=fnlen) :: fnameabo_sgm
   character(len=fnlen) :: fnameabo_sgr
+  character(len=fnlen) :: fnameabo_sigc           ! MRM
   character(len=fnlen) :: fnameabo_sig
   character(len=fnlen) :: fnameabo_spcur
   character(len=fnlen) :: fnameabo_sus
@@ -786,6 +787,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_scr=trim(dtfil%filnam_ds(4))//'_SCR'
  dtfil%fnameabo_sgm=trim(dtfil%filnam_ds(4))//'_SGM'
  dtfil%fnameabo_sgr=trim(dtfil%filnam_ds(4))//'_SGR'
+ dtfil%fnameabo_sigc=trim(dtfil%filnam_ds(4))//'_SIGC' ! MRM
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
  dtfil%fnameabo_spcur=trim(dtfil%filnam_ds(4))//'_SPCUR'
  dtfil%fnameabo_sus=trim(dtfil%filnam_ds(4))//'_SUS'
