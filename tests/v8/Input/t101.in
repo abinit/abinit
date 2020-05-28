@@ -54,7 +54,7 @@ vcutgeo3   -1 1 0  # At least one negative component
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%    t_gcut1.out, tolnlines = 27, tolabs = 4.0e+4, tolrel = 1.0e+1;
+#%%    t101.out, tolnlines = 27, tolabs = 4.0e+4, tolrel = 1.0e+1;
 #%% psp_files = 13_Al_psml.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
