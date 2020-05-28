@@ -243,7 +243,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax,coef_hyb_tmp  ! MRM
+ real(dp):: gwalpha,gwbeta,wmin,wmax,coef_hyb_tmp,eik_new  ! MRM
  complex(dpc) :: max_degw,cdummy,delta_band_ibik   ! MRM
  logical :: hyb_tmp                                ! MRM
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
@@ -2436,25 +2436,26 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        write(msg,'(a1)')  ' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a75)')  ' Band corrections Delta eik = <KS_i|K[NO]-K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i>'
+       write(msg,'(a105)')  ' Band corrections Delta eik = <KS_i|K[NO]-K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik + Delta eik'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        write(msg,'(a1)')  ' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        do ikcalc=1,Sigp%nkptgw
-         write(msg,'(a85)')'-------------------------------------------------------------------------------------'
+         write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
-         write(msg,'(a85)')' k-point  band     Delta eik        K[NO]         Vxc[NO]       DVhartree       K[KS]'
+         write(msg,'(a98)')' k-point  band      eik^new     Delta eik        K[NO]         K[KS]         Vxc[NO]    DVhartree'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          do ib=b1gw,b2gw
            delta_band_ibik=(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))+Sr%x_mat(ib,ib,ikcalc,1)-KS_me%vxcval(ib,ib,ikcalc,1)&
                           &-delta_band(ib,ikcalc)
-           write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,5x,f10.5,6x,f10.5,2x,f10.5)') ikcalc,ib,real(delta_band_ibik),real(Sr%x_mat(ib,ib,ikcalc,1)),&
-           & real(KS_me%vxcval(ib,ib,ikcalc,1)), &
-           & real(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1)),real(delta_band(ib,ikcalc))
+           eik_new=real(KS_BSt%eig(ib,ikcalc,1))+real(delta_band_ibik)
+           write(msg,'(i5,4x,i5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5,4x,f10.5)') ikcalc,ib,eik_new,real(delta_band_ibik),& 
+           & real(Sr%x_mat(ib,ib,ikcalc,1)),real(delta_band(ib,ikcalc)),real(KS_me%vxcval(ib,ib,ikcalc,1)), &
+           & real(GW1RDM_me%vhartree(ib,ib,ikcalc,1)-KS_me%vhartree(ib,ib,ikcalc,1))
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          enddo
