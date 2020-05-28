@@ -1685,13 +1685,14 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
      fname = basename(input_path)
      i1 = index(fname, ".")
-     if (i1 /= 0) then
+     !if (i1 /= 0) then
+     if (i1 > 1) then
        ! file ext is present --> use prefix to initialize filnam
        i2 = index(input_path, ".", back=.True.)
        filnam(2) = input_path(:i2) // "abo"
-       filnam(3) = fname(:i1) // "i"
-       filnam(4) = fname(:i1) // "o"
-       filnam(5) = fname(:i1) // "t"
+       filnam(3) = fname(:i1-1) // "i"
+       filnam(4) = fname(:i1-1) // "o"
+       filnam(5) = fname(:i1-1) // "t"
      end if
 
      ! Read the file, stringify it and return the number of datasets.
