@@ -352,8 +352,18 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
      call wrtout(ab_out, msg)
      call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+     ! Apply the scissor operator
+     if (abs(dtset%mbpt_sciss) > tol6) then
+       call wrtout(std_out, sjoin(" Apply the scissor operator to the CB with:",ftoa(dtset%mbpt_sciss)))
+       call apply_scissor(ebands,dtset%mbpt_sciss)
+     end if
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+       ! Apply the scissor operator
+       if (abs(dtset%mbpt_sciss) > tol6) then
+         call wrtout(std_out, sjoin(" Apply the scissor operator to the shifted CB with:",ftoa(dtset%mbpt_sciss)))
+         call apply_scissor(ebands,dtset%mbpt_sciss)
+       end if
      end if
    end if
 

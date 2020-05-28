@@ -2876,6 +2876,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    new%use_doublegrid = .True.
  end if
 
+ ! Apply the scissor operator to the dense mesh
+ if ((new%use_doublegrid) .and. (abs(dtset%mbpt_sciss) > tol6)) then
+   call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
+   call apply_scissor(ebands_dense,dtset%mbpt_sciss)
+ end if
+
  ! Build object used to compute integration weights taking into account double-grid.
  ! Note that we compute the weights only for the states included in the sum
  ! bstart and new%bsum select the band range.
