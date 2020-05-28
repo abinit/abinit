@@ -1,0 +1,68 @@
+# 1/G**2 Cut-off term capabilities test 
+# Here there are test 3 methods in 3 DATASETS applied to a layer of Al layer
+# In order to keep the computation time to a minimum, parameters are 
+# kept to a minimum reasonable value.
+ndtset 3               # THREE DATASET : 1) CRYSTAL Cut-off - Neutral effect 
+                       #                 2) SURFACE Cut-off: Beigi
+                       #                 3) SURFACE Cut-off: Rozzi
+
+#Definition of the unit cell
+# Here vacuum level is set arbitarily
+acell    2*5.437  25.000    
+angdeg   90 90 120
+
+#Definition of the atom types
+ntypat 1           # There is only one type of atom - Al
+znucl  13          # The keyword "znucl" refers to the atomic number of the 
+
+#Definition of the atoms
+natom 1           # There is one atom per unit cell
+typat 1*1         # That is Aluminium.
+xred              # This keyword indicate that the location of the atoms
+   0.0  0.0  0.0  # Triplet giving the REDUCED coordinate of atom 1.
+
+#Definition of the planewave basis set
+ecut  5.0         # Maximal kinetic energy cut-off, in Hartree
+
+#Definition of the k-point grid
+kptopt  1  
+ngkpt   4 4 1       # This is a 4x4x1 grid based on the primitive vectors
+nshiftk 1           # of the reciprocal space 
+shiftk  0.0 0.0 0.0
+
+#Definition of the SCF procedure
+nstep    1000        # Maximal number of SCF cycles
+tolwfr   1.0d-12
+
+#Definition of the XC treatment
+ixc 11
+
+#Definition of the cut-off method DATASET 1
+icutcoul1  3    # Neutral cut-off for the ground-state - CRYSTAL cut-off
+
+#Definition of the cut-off method DATASET 2
+icutcoul2  2      # Surface cut-off for the ground-state: Beigi's method
+vcutgeo2   1 1 0  # Positive defined vcutgeo in xy-plane - Required 
+
+#Definition of the cut-off method DATASET 3
+icutcoul3   2      # Surface cut-off for the ground-state: Rozzi's method
+vcutgeo3   -1 1 0  # At least one negative component
+                   # of vcutgeo in xy-plane - Required 
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%    t101.out, tolnlines = 27, tolabs = 4.0e+4, tolrel = 1.0e+1;
+#%% psp_files = 13_Al_psml.psp8
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B. Guster
+#%% keywords = Ground-state
+#%% description = 
+#%%    Al (GGA - PBE, Ground-state calculation) - single-layer fictious system,
+#%%    check the cut-off methods applied to 1/G**2 terms in the ground state terms.
+#%%    Three methods are tested: CRYSTAL, SURFACE 1) Beigi's and 2) Rozzi's
+#%%<END TEST_INFO>
