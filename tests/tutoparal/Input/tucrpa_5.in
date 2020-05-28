@@ -43,6 +43,7 @@ istwfk *1
 nsym     0
 icutcoul 6
 symchi   0
+symsigma 0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets
