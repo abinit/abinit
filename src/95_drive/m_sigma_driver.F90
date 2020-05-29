@@ -2451,7 +2451,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
-         write(msg,'(a98)')' k-point  band      eik^new     Delta eik        K[NO]         K[KS]         Vxc[NO]    DVhartree'
+         write(msg,'(a98)')' k-point  band      eik^new     Delta eik        K[NO]         K[KS]         Vxc[KS]    DVhartree'
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
          do ib=b1gw,b2gw
