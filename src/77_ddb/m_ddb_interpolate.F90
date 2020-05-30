@@ -274,7 +274,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    unddb = get_unit()
 
    ! Write the DDB header
-   call ddb_hdr_open_write(ddb_hdr, ddb_out_filename, unddb)
+   call ddb_hdr%open_write(ddb_out_filename, unddb)
 
    ! Write the whole database
    call wrtout(std_out,' write the DDB ','COLL')

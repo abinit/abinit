@@ -2759,12 +2759,12 @@ subroutine wfk_read_eigk(Wfk,ik_ibz,spin,sc_mode,eig_k,occ_k)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: band_block00(2)=[0,0]
+ integer,parameter :: band_block00(2) = [0, 0]
 
 !************************************************************************
 
  if (present(occ_k)) then
-   ABI_CHECK(Wfk%formeig==0,"formeig !=0")
+   ABI_CHECK(Wfk%formeig == 0, "formeig !=0")
    call wfk%read_band_block(band_block00,ik_ibz,spin,sc_mode,eig_k=eig_k,occ_k=occ_k)
  else
    call wfk%read_band_block(band_block00,ik_ibz,spin,sc_mode,eig_k=eig_k)
@@ -2799,7 +2799,7 @@ end subroutine wfk_read_eigk
 !!
 !! SOURCE
 
-subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
+subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 
 !Arguments ------------------------------------
 !scalars
@@ -2807,7 +2807,7 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
  character(len=*),intent(in) :: fname
  type(hdr_type),intent(out) :: Hdr_out
 !arrays
-!MGTODO: Replace pointers with allocatable.
+!TODO: Replace pointers with allocatable.
  real(dp),pointer :: eigen(:,:,:)
  real(dp),pointer,optional :: occ(:,:,:)
 
@@ -2823,8 +2823,9 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
  call cwtime(cpu, wall, gflops, "start")
  my_rank = xmpi_comm_rank(comm)
  iomode = iomode_from_fname(fname)
+ !iomode = IO_MODE_FORTRAN
 
- call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname,", with iomode: ", iomode2str(iomode)))
+ call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname, ", with iomode:", iomode2str(iomode)))
 
  if (my_rank == master) then
    ! Open the file.

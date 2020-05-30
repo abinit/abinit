@@ -292,8 +292,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end if
    ! Compute the multiplicity of the supercell
    multiplicity=dtsets(idtset)%supercell_latt(1)  &
-&   *dtsets(idtset)%supercell_latt(2)  & 
-&   *dtsets(idtset)%supercell_latt(3)  
+&   *dtsets(idtset)%supercell_latt(2)  &
+&   *dtsets(idtset)%supercell_latt(3)
 !  call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
 
    ! Read natom from string
@@ -383,7 +383,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
-   
+
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -2823,7 +2823,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ph_nqshift = 1
    dtsets(idtset)%ph_smear = 0.00002_dp
    dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
-   dtsets(idtset)%dvdb_ngqpt = [0, 0, 0]
    dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)

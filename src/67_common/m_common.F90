@@ -63,6 +63,7 @@ module m_common
  use defs_abitypes,       only : MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
  use m_pspheads,          only : inpspheads, pspheads_comm
+ use m_kpts,              only : kpts_timrev_from_kptopt
 
  implicit none
 
@@ -1981,7 +1982,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform, timrev
+ integer :: fform, gw_timrev
  type(hdr_type) :: hdr
 
 ! *************************************************************************
@@ -1989,8 +1990,8 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
  ! Assume file with Abinit header
  call hdr_read_from_fname(hdr, path, fform, comm)
  ABI_CHECK(fform /= 0, "fform == 0")
- timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
- new = hdr%get_crystal(timrev)
+ gw_timrev = kpts_timrev_from_kptopt(hdr%kptopt) + 1
+ new = hdr%get_crystal(gw_timrev)
  call hdr%free()
 
 end function crystal_from_file

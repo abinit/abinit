@@ -348,7 +348,7 @@ program abinit
  call timab(45,3,tsec)
  call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
-!Check whether the string only contains valid keywords
+ ! Check whether the string only contains valid keywords
  call chkvars(string)
 
 !At this stage, all the information from the "files" file and "input" file have been read and checked.

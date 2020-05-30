@@ -370,7 +370,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Additional allocations for PAW.
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
 
    nhat12_grdim=0
@@ -428,7 +428,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
      dimcprj_gw=nspinor*(ib2-ib1+1)
-     ABI_DT_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
+     ABI_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
@@ -516,7 +516,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ! Evaluate oscillator matrix elements
        ! $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form
        q0 = qbz !;if (q_is_gamma) q0 = (/0.00001_dp,0.00001_dp,0.00001_dp/) ! GW_Q0_DEFAULT
-       ABI_DT_MALLOC(Pwij_qg,(Psps%ntypat))
+       ABI_MALLOC(Pwij_qg,(Psps%ntypat))
        call pawpwij_init(Pwij_qg, npwx, q0, Gsph_x%gvec, Cryst%rprimd, Psps, Pawtab, Paw_pwff)
      end if
 
@@ -667,14 +667,14 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
      if (Psps%usepaw==1.and.use_pawnhat==0) then
        call pawpwij_free(Pwij_qg)
-       ABI_DT_FREE(Pwij_qg)
+       ABI_FREE(Pwij_qg)
      end if
    end do ! ik_bz Got all diagonal (off-diagonal) matrix elements.
 
    ABI_FREE(wfr_bdgw)
    if (Wfd%usepaw==1) then
      call pawcprj_free(Cprj_kgw)
-     ABI_DT_FREE(Cprj_kgw)
+     ABI_FREE(Cprj_kgw)
      if (pawcross==1) then
        ABI_FREE(ur_ae_bdgw)
        ABI_FREE(ur_ae_onsite_bdgw)
@@ -788,10 +788,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      ABI_FREE(gwx_gfft)
    end if
    call pawcprj_free(Cprj_ksum)
-   ABI_DT_FREE(Cprj_ksum)
+   ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
    if (use_pawnhat==1) then
      ABI_FREE(nhat12)
