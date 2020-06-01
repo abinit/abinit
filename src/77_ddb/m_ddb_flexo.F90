@@ -1037,6 +1037,15 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
        write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', roundbkt_k(1,2,1,1,iat), roundbkt_k(1,2,2,2,iat), &
                & roundbkt_k(1,2,3,3,iat),roundbkt_k(1,2,2,3,iat),roundbkt_k(1,2,1,3,iat),roundbkt_k(1,2,1,2,iat)
        call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', roundbkt_k(3,2,1,1,iat), roundbkt_k(3,2,2,2,iat), &
+               & roundbkt_k(3,2,3,3,iat),roundbkt_k(3,2,2,3,iat),roundbkt_k(3,2,1,3,iat),roundbkt_k(3,2,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', roundbkt_k(3,1,1,1,iat), roundbkt_k(3,1,2,2,iat), &
+               & roundbkt_k(3,1,3,3,iat),roundbkt_k(3,1,2,3,iat),roundbkt_k(3,1,1,3,iat),roundbkt_k(3,1,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', roundbkt_k(2,1,1,1,iat), roundbkt_k(2,1,2,2,iat), &
+               & roundbkt_k(2,1,3,3,iat),roundbkt_k(2,1,2,3,iat),roundbkt_k(2,1,1,3,iat),roundbkt_k(2,1,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
      end do
 
      write(msg,'(3a)')ch10,' [...]^kappa contribution to the flexoelectric force-response tensor (units: eV)',ch10
@@ -1062,6 +1071,15 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
        call wrtout([ab_out,std_out],msg,'COLL')
        write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', flexofr(1,iat,2,1,1),flexofr(1,iat,2,2,2),flexofr(1,iat,2,3,3),&
                                                      & flexofr(1,iat,2,2,3),flexofr(1,iat,2,1,3),flexofr(1,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', flexofr(3,iat,2,1,1),flexofr(3,iat,2,2,2),flexofr(3,iat,2,3,3),&
+                                                     & flexofr(3,iat,2,2,3),flexofr(3,iat,2,1,3),flexofr(3,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', flexofr(3,iat,1,1,1),flexofr(3,iat,1,2,2),flexofr(3,iat,1,3,3),&
+                                                     & flexofr(3,iat,1,2,3),flexofr(3,iat,1,1,3),flexofr(3,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', flexofr(2,iat,1,1,1),flexofr(2,iat,1,2,2),flexofr(2,iat,1,3,3),&
+                                                     & flexofr(2,iat,1,2,3),flexofr(2,iat,1,1,3),flexofr(2,iat,1,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
        end do
    end if
@@ -1090,6 +1108,15 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', Csupkap(1,iat,2,1,1),Csupkap(1,iat,2,2,2),Csupkap(1,iat,2,3,3),&
                                                    & Csupkap(1,iat,2,2,3),Csupkap(1,iat,2,1,3),Csupkap(1,iat,2,1,2)  
      call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', Csupkap(3,iat,2,1,1),Csupkap(3,iat,2,2,2),Csupkap(3,iat,2,3,3),&
+                                                   & Csupkap(3,iat,2,2,3),Csupkap(3,iat,2,1,3),Csupkap(3,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', Csupkap(3,iat,1,1,1),Csupkap(3,iat,1,2,2),Csupkap(3,iat,1,3,3),&
+                                                   & Csupkap(3,iat,1,2,3),Csupkap(3,iat,1,1,3),Csupkap(3,iat,1,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', Csupkap(2,iat,1,1,1),Csupkap(2,iat,1,2,2),Csupkap(2,iat,1,3,3),&
+                                                   & Csupkap(2,iat,1,2,3),Csupkap(2,iat,1,1,3),Csupkap(2,iat,1,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
    end do
    if (prtvol > 1) then 
      write(msg,'(3a)')ch10,' Flexoelectric force-response tensor minus mass dependent part (units: eV)',ch10
@@ -1116,6 +1143,15 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
        write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', hatCsupkap(1,iat,2,1,1),hatCsupkap(1,iat,2,2,2),hatCsupkap(1,iat,2,3,3),&
                                                      & hatCsupkap(1,iat,2,2,3),hatCsupkap(1,iat,2,1,3),hatCsupkap(1,iat,2,1,2)  
        call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', hatCsupkap(3,iat,2,1,1),hatCsupkap(3,iat,2,2,2),hatCsupkap(3,iat,2,3,3),&
+                                                     & hatCsupkap(3,iat,2,2,3),hatCsupkap(3,iat,2,1,3),hatCsupkap(3,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', hatCsupkap(3,iat,1,1,1),hatCsupkap(3,iat,1,2,2),hatCsupkap(3,iat,1,3,3),&
+                                                     & hatCsupkap(3,iat,1,2,3),hatCsupkap(3,iat,1,1,3),hatCsupkap(3,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', hatCsupkap(2,iat,1,1,1),hatCsupkap(2,iat,1,2,2),hatCsupkap(2,iat,1,3,3),&
+                                                     & hatCsupkap(2,iat,1,2,3),hatCsupkap(2,iat,1,1,3),hatCsupkap(2,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
      end do
    end if
 
@@ -1141,6 +1177,15 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      call wrtout([ab_out,std_out],msg,'COLL')
      write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', flexois(1,iat,2,1,1),flexois(1,iat,2,2,2),flexois(1,iat,2,3,3),&
                                                    & flexois(1,iat,2,2,3),flexois(1,iat,2,1,3),flexois(1,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', flexois(3,iat,2,1,1),flexois(3,iat,2,2,2),flexois(3,iat,2,3,3),&
+                                                   & flexois(3,iat,2,2,3),flexois(3,iat,2,1,3),flexois(3,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', flexois(3,iat,1,1,1),flexois(3,iat,1,2,2),flexois(3,iat,1,3,3),&
+                                                   & flexois(3,iat,1,2,3),flexois(3,iat,1,1,3),flexois(3,iat,1,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', flexois(2,iat,1,1,1),flexois(2,iat,1,2,2),flexois(2,iat,1,3,3),&
+                                                   & flexois(2,iat,1,2,3),flexois(2,iat,1,1,3),flexois(2,iat,1,1,2)  
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
 
