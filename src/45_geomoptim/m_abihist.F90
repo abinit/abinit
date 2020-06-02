@@ -1192,7 +1192,7 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
  if (ifirst==1) then
 !##### First access: Create NetCDF file and write defs
 
-   write(std_out,*) 'Write iteration in HIST netCDF file'
+   write(std_out,*) 'Write iteration in HIST netCDF file (also create it)'
    npsp=size(znucl)
 
 !  Create netCDF file
