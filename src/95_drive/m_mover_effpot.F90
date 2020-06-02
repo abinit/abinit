@@ -404,6 +404,7 @@ ABI_DEALLOCATE(xcart)
      dtset%restartxf = inp%restartxf  ! RESTART from (X,F) history
      dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures
      dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures
+     dtset%strfact = inp%strfact ! STRess FACTor
      dtset%strtarget(1:6) = -1 * inp%strtarget(1:6) / 29421.033d0 ! STRess TARGET
    else if(option == -1.or.option == -2) then
 !    Set default for the fit
@@ -416,6 +417,7 @@ ABI_DEALLOCATE(xcart)
      dtset%optcell = 2    ! OPTimize the CELL shape and dimensions Characteristic
      dtset%mdtemp(1) = inp%bound_temp   !Molecular Dynamics Temperatures
      dtset%mdtemp(2) = inp%bound_temp !Molecular Dynamics Temperatures
+     dtset%strfact = 100.0d0
      dtset%strtarget(1:6) = zero
    end if
 
