@@ -2693,6 +2693,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
      energies%edc_kin_freeel=hightemp%edc_kin_freeel
      if(optene==0) etotal=etotal+energies%e_kin_freeel
      if(optene==1) etotal=etotal+energies%e_kin_freeel+energies%edc_kin_freeel
+     etotal=etotal+dtset%tsmear*hightemp%e_ent_freeel
    end if
 
 !  Compute energy residual
