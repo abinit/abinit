@@ -250,7 +250,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key
  integer :: itol, itol_gen, ds_input, ifreq,ncerr
- real(dp) :: areaxy,charge,fband,kptrlen,nelectjell
+ real(dp) :: areaxy,charge,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
@@ -1172,15 +1172,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%fband=fband
      call wrtout(std_out,msg,'COLL')
      ! First compute the total valence charge
-     zval=0.0_dp
+     zval=zero
+     sum_spinat=zero
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
+       sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
      zelect=zval-charge
-     ! Then select the minimum number of bands, and add the required number
+     ! Then select the minimum number of bands, and add the required number. 
      ! Note that this number might be smaller than the one computed
-     ! by a slightly different formula in invars1
-     nband1=dtset%nspinor * ((ceiling(zelect-1.0d-10)+1)/2 + ceiling( fband*natom - 1.0d-10 ))
+     ! by a slightly different formula in invars1 (difference in fband).
+     nband1=dtset%nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
+     nband1=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
+&     + (nsppol-1)*(ceiling(half*(sum_spinat -tol10)))
    end if
 
    ! Set nband to same input number for each k point and spin
