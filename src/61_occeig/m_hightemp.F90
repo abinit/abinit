@@ -53,6 +53,7 @@ module m_hightemp
 
   ! type(hightemp_type),save,pointer :: hightemp=>null()
   public :: dip12,djp12,dip32,djp32
+  public :: hightemp_gaussian_jintegral,hightemp_gaussian_kintegral
   public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
   public :: hightemp_get_nfreeel_approx,hightemp_prt_eigocc
 contains
@@ -104,6 +105,9 @@ contains
     this%nfreeel=zero
     this%e_shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
+
+    write(0,*) hightemp_gaussian_jintegral(3.08642000000_dp,833.33333_dp)
+    write(0,*) hightemp_gaussian_kintegral(3.08642000000_dp,833.33333_dp)
   end subroutine init
 
   subroutine destroy(this)
@@ -849,6 +853,72 @@ contains
 
     hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
   end function hightemp_dosfreeel
+
+  !!****f* ABINIT/m_hightemp/hightemp_gaussian_jintegral
+  !! NAME
+  !! hightemp_dosfreeel
+  !!
+  !! FUNCTION
+  !! Returns the value of the first integral J(\sigma,\rho_{0_n}) =
+  !! \int_0^\infty \rho^2 e^{-(\rho_{0_n}- \rho)^2/(2\sigma^2)}d\rho
+  !!
+  !! INPUTS
+  !! sigma=standard deviation
+  !! alpha=center of the gaussian
+  !!
+  !! OUTPUT
+  !! hightemp_gaussian_jintegral=value of the integral
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function hightemp_gaussian_jintegral(sigma,alpha)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: sigma,alpha
+    real(dp) :: hightemp_gaussian_jintegral
+
+    ! *********************************************************************
+
+    hightemp_gaussian_jintegral=alpha*sigma**2*exp(-alpha**2/(2*sigma**2))+.5*sigma*sqrt(2*PI)&
+    & *(alpha**2+sigma**2)*(1+erf(alpha/(sigma*sqrt(2.))))
+  end function hightemp_gaussian_jintegral
+
+  !!****f* ABINIT/m_hightemp/hightemp_gaussian_kintegral
+  !! NAME
+  !! hightemp_dosfreeel
+  !!
+  !! FUNCTION
+  !! Returns the value of the first integral J(\sigma,\rho_{0_n}) =
+  !! \int_0^\infty \rho^4 e^{-(\rho_{0_n}- \rho)^2/(2\sigma^2)}d\rho
+  !!
+  !! INPUTS
+  !! sigma=standard deviation
+  !! alpha=center of the gaussian
+  !!
+  !! OUTPUT
+  !! hightemp_gaussian_kintegral=value of the integral
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function hightemp_gaussian_kintegral(sigma,alpha)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: sigma,alpha
+    real(dp) :: hightemp_gaussian_kintegral
+
+    ! *********************************************************************
+
+    hightemp_gaussian_kintegral=sigma**2*(alpha**3+5*alpha*sigma**2)*exp(-alpha**2/(2*sigma**2))&
+    & +.5*sigma*sqrt(2*PI)*(alpha**4+6*alpha**2*sigma**2+3*sigma**4)*(1+erf(alpha/(sigma*sqrt(2.))))
+  end function hightemp_gaussian_kintegral
 
   !!****f* ABINIT/m_hightemp/hightemp_get_e_shiftfactor
   !! NAME
