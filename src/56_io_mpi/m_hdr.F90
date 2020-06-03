@@ -4706,10 +4706,11 @@ integer function hdr_compare(hdr1, hdr2) result(ierr)
    write(msg,'(a,i0,a,i0)')'Different ntypat array : ',hdr1%typat(1),' ... and ',hdr2%typat(1)
    ierr = ierr + 1; MSG_WARNING(msg)
  end if
- if (any(hdr1%npwarr /= hdr2%npwarr)) then
-   write(msg,'(a,i0,a,i0)')'Different npwarr array : ',hdr1%npwarr(1),' ... and ',hdr2%npwarr(1)
-   ierr = ierr + 1; MSG_WARNING(msg)
- end if
+!Should test npwarr, however taking into account differences due to istwfk !
+!if (any(hdr1%npwarr /= hdr2%npwarr)) then
+!  write(msg,'(a,i0,a,i0)')'Different npwarr array : ',hdr1%npwarr(1),' ... and ',hdr2%npwarr(1)
+!  ierr = ierr + 1; MSG_WARNING(msg)
+!end if
  if (any(abs(hdr1%kptns - hdr2%kptns) > tol6)) then
    write(msg,'(a,i0,a,i0)')'Different kptns array '
    ierr = ierr + 1; MSG_WARNING(msg)
