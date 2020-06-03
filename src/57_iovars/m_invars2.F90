@@ -1183,7 +1183,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      ! Note that this number might be smaller than the one computed
      ! by a slightly different formula in invars1 (difference in fband).
      nband1=dtset%nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
-     nband1=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
 &     + (nsppol-1)*(ceiling(half*(sum_spinat -tol10)))
    end if
 
