@@ -499,12 +499,12 @@ At the end of the *.out* and *.log* files, the mobility is printed:
 
 ```sh
 Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-           5.00        0.23E+17        0.00E+00            0.00            0.00
-          64.00        0.23E+17        0.00E+00           38.37            0.00
-         123.00        0.23E+17        0.00E+00          345.31            0.00
-         182.00        0.23E+17        0.00E+00          423.32            0.00
-         241.00        0.23E+17        0.00E+00          418.67            0.00
-         300.00        0.23E+17        0.00E+00          363.11            0.00
+            5.00        0.23E+17        0.00E+00            0.00            0.00
+           64.00        0.23E+17        0.00E+00           38.72            0.00
+          123.00        0.23E+17        0.00E+00          346.73            0.00
+          182.00        0.23E+17        0.00E+00          424.55            0.00
+          241.00        0.23E+17        0.00E+00          420.01            0.00
+          300.00        0.23E+17        0.00E+00          364.31            0.00
 ```
 
 The temperature is first given then the electron and hole densities followed by electron and hole mobilities.
@@ -643,9 +643,9 @@ coarse:                24          24          24
 fine:                  48          48          48
 ```
 
-The mobility obtained, at 300 K, is 158.01 cm$^2$/V/s.
-Using a 48×48×48 $\qq$-mesh for the matrix elements as well would give 96.09.
-The result is indeed improved, since using a 24×24×24 mesh for everything gives 363.11.
+The mobility obtained, at 300 K, is 157.59 cm$^2$/V/s.
+Using a 48×48×48 $\qq$-mesh for the matrix elements as well would give 96.38.
+The result is indeed improved, since using a 24×24×24 mesh for everything gives 364.31.
 You can also use a finer mesh, but always a multiple of the initial coarse mesh
 (in this case, 72×72×72, 96×96×96, etc).
 However, we found that there is very little use to go beyond a mesh three times as dense as the coarse one.
