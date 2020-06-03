@@ -283,13 +283,13 @@ program optic
      end if
    end do
 
-   if(any(iomode_ddk(:)/=iomode0))then
-     write(msg, "(5a)")&
-&      ' The ground-state and ddk files should have the same format,',ch10,&
-&      ' either FORTRAN binary or NetCDF, which is not the case.',ch10,&
-&      ' Action : see input variable iomode.'
-     MSG_ERROR(msg)
-   endif
+!   if(any(iomode_ddk(:)/=iomode0))then
+!     write(msg, "(5a)")&
+!&      ' The ground-state and ddk files should have the same format,',ch10,&
+!&      ' either FORTRAN binary or NetCDF, which is not the case.',ch10,&
+!&      ' Action : see input variable iomode.'
+!     MSG_ERROR(msg)
+!   endif
 
    ! Perform basic consistency tests for the GS WFK and the DDK files, e.g.
    ! k-points and their order, spins, number of bands could differ in the four files.
