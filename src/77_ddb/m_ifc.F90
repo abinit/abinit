@@ -297,7 +297,7 @@ end subroutine ifc_free
 !!
 !! FUNCTION
 !!  Initialize the dynamical matrix as well as the IFCs.
-!!  taking into account the dipole-dipole, dipole-quadrupole and quadrupole-quadrupole 
+!!  taking into account the dipole-dipole, dipole-quadrupole and quadrupole-quadrupole
 !!  interaction.
 !!
 !! INPUTS
@@ -778,23 +778,26 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    do i=1,ddb_hdr%natom
      atifc(i)=i
    end do
+   call ddb_hdr%free()
 
-   call ddb_from_file(ddb,filename,1,ddb_hdr%natom,ddb_hdr%natom,atifc,ucell_ddb,comm)
+   call ddb_from_file(ddb,filename,1,natom,natom,atifc, ddb_hdr, ucell_ddb,comm)
 
  else
    MSG_ERROR(sjoin("File:", filename, "is not present in the directory"))
  end if
 
  ! Get Dielectric Tensor and Effective Charges
+ ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  ABI_ALLOCATE(zeff,(3,3,natom))
- ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
  iblok = ddb%get_dielt_zeff(ucell_ddb,1,1,0,dielt,zeff)
- iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
 
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then
    iblok_tmp = ddb%get_dielt(1,dielt)
  end if
+
+ ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
+ iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
 
  ! ifc to be calculated for interpolation
  write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,' Calculation of the interatomic forces ',ch10
@@ -810,7 +813,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  ! Free them all
  ABI_DEALLOCATE(atifc)
  call ddb%free()
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
  end subroutine ifc_init_fromFile
 !!***

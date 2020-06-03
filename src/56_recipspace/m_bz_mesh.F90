@@ -257,6 +257,7 @@ MODULE m_bz_mesh
  end type kpath_t
 
  public :: kpath_new        ! Construct a new path
+ !public :: kpath_from_cryst ! High-level API to construct a path from a crystal_t
  public :: make_path        ! Construct a normalized path. TODO: Remove
 !!***
 
@@ -3115,8 +3116,8 @@ subroutine kpath_print(kpath, header, unit, prtvol, pre)
  if (unt <= 0) return
 
  if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
- write(unt, "(a)") sjoin(my_pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
- write(unt, "(a)") sjoin(my_pre, "Boundaries and corresponding index in the k-points array:")
+ write(unt, "(a)") sjoin(my_pre, " Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
+ write(unt, "(a)") sjoin(my_pre, " Boundaries and corresponding index in the k-points array:")
  do ii=1,kpath%nbounds
    write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
  end do

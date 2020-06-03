@@ -79,8 +79,10 @@ MODULE m_nctk
 #endif
 
 #ifdef HAVE_NETCDF
- ! netcdf4-hdf5
+ ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
+ ! netcdf4 classic
+ !integer,save,private :: def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
 #endif
 
  character(len=5),private,parameter :: NCTK_IMPLICIT_DIMS(10) = [ &

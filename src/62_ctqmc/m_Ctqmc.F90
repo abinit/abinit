@@ -1647,9 +1647,13 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
     
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       CALL ImpurityOperator_measDE(this%Impurity,this%measDE)
-      IF ( this%opt_spectra .GE. 1 .AND. MOD(isweep,measurements*this%opt_spectra) .EQ. 0 ) THEN
-        this%density(1:flavors,indDensity) = this%measN(3,1:flavors)
-        indDensity = indDensity+1
+      IF ( this%opt_spectra .GE. 1) THEN
+        IF ( measurements*this%opt_spectra /= 0) THEN
+          IF ( MOD(isweep,measurements*this%opt_spectra) .EQ. 0 ) THEN
+             this%density(1:flavors,indDensity) = this%measN(3,1:flavors)
+             indDensity = indDensity+1
+          END IF
+        END IF
       END IF
     END IF
 

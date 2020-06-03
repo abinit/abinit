@@ -167,6 +167,7 @@ module m_multibinit_dataset
   real(dp) :: fit_tolMSDS
   real(dp) :: fit_tolMSDE
   real(dp) :: fit_tolMSDFS
+  real(dp) :: strfact
   real(dp) :: temperature
   real(dp) :: rifcsph
   real(dp) :: conf
@@ -387,6 +388,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%restartxf=0
  multibinit_dtset%rfmeth=1
  multibinit_dtset%rifcsph=zero
+ multibinit_dtset%strfact=100.0d0
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0 
@@ -1647,10 +1649,20 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
+ multibinit_dtset%strfact=100.0d0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strfact',tread,'DPR')
+ if(tread==1) multibinit_dtset%strfact=dprarr(1)
+ if(multibinit_dtset%strfact<-tol12)then
+   write(message, '(a,f10.1,a,a,a,a,a)' )&
+&   'strfact is ',multibinit_dtset%strfact,'. The only allowed values',ch10,&
+&   'are positives values.',ch10,&
+&   'Action: correct strfact in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !T
 
- multibinit_dtset%temperature=325
+ multibinit_dtset%temperature=325.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%temperature=dprarr(1)
  if(multibinit_dtset%temperature<=0)then

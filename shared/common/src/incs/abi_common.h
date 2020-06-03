@@ -84,7 +84,7 @@
  * so that one can locate the problematic call. Use it wisely since it may cause memory leaks.
  * #define ABI_HANDLE_MPIERR(mpierr) ABI_CHECK_MPI(mpierr,"ABI_HANDLE: Fatal error")
  */
-#define ABI_HANDLE_MPIERR(mpierr) if (mpierr/=MPI_SUCCESS) RETURN
+#define ABI_HANDLE_MPIERR(mpierr) if (mpierr /= MPI_SUCCESS) RETURN
 
 /* Macros for memory checking and profiling
  * TODO
@@ -105,8 +105,10 @@
  *  ABI_MALLOC_SCALAR
  *  ABI_FREE_SCALAR
  *
- #define HAVE_MEM_PROFILING
 */
+
+#define ABI_MEM_BITS(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)
+#define ABI_MEM_MB(arr) ABI_MEM_BITS(arr) / (8.0_dp * 1024 ** 2)
 
 #ifdef HAVE_MEM_PROFILING
 
@@ -118,15 +120,14 @@
 
  Both loc and storage_size are polymorphic so one can use it with intrinsic types as well 
  as user-defined datatypes. scalar types require a special treatment (MALLOC_SCALAR, FREE_SCALAR)
- because shape == 0 thus it's not possible to discern with _MEM between zero-sized arrays and scalar
+ because shape == 0 thus it's not possible to discern with ABI_MEM between zero-sized arrays and scalar
 */
 #  define _LOC(x)  int(loc(x), kind=8) 
-#  define _MEM(arr) product(int(shape(arr), kind=8)) * storage_size(arr, kind=8)
 
 /* and now the debugging macros */
 #  define ABI_ALLOCATE(ARR, SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
 #  define ABI_MALLOC_SCALAR(scalar) \
    allocate(scalar) NEWLINE \
@@ -137,31 +138,31 @@
    deallocate(scalar)
 
 #  define ABI_DEALLOCATE(ARR) \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__,  __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__,  __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #  define ABI_STAT_ALLOCATE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
 #  define ABI_DATATYPE_ALLOCATE(ARR,SIZE) \
    allocate(ARR SIZE) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__)
 
 #  define ABI_DATATYPE_DEALLOCATE(ARR)  \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - _MEM(ARR), __FILE__, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__, __LINE__) NEWLINE \
    deallocate(ARR) 
 
 #  define ABI_MALLOC_OR_DIE(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
-   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", _MEM(ARR),  __FILE__, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(ARR), _LOC(ARR), "A", ABI_MEM_BITS(ARR),  __FILE__, __LINE__) NEWLINE \
    ABI_CHECK(ierr == 0, "out-of-memory")
 
 #  define ABI_MOVE_ALLOC(from, to) \
-   call abimem_record(0, QUOTE(from), _LOC(from), "D", -_MEM(from),  __FILE__, __LINE__) NEWLINE \
-   if (allocated(to)) call abimem_record(0, QUOTE(to), _LOC(to), "D", -_MEM(to),  __FILE__, __LINE__) NEWLINE \
+   call abimem_record(0, QUOTE(from), _LOC(from), "D", -ABI_MEM_BITS(from),  __FILE__, __LINE__) NEWLINE \
+   if (allocated(to)) call abimem_record(0, QUOTE(to), _LOC(to), "D", - ABI_MEM_BITS(to),  __FILE__, __LINE__) NEWLINE \
    call move_alloc(from, to) NEWLINE \
-   call abimem_record(0, QUOTE(to), _LOC(to), "A", _MEM(to),  __FILE__, __LINE__)
+   call abimem_record(0, QUOTE(to), _LOC(to), "A", ABI_MEM_BITS(to),  __FILE__, __LINE__)
 
 
 /* Allocate a polymophic scalar 

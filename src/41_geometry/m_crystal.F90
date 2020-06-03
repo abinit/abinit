@@ -619,7 +619,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
  end if
 
- call wrtout(my_unt,"Reduced atomic positions [iatom, xred, symbol]:",my_mode)
+ call wrtout(my_unt, " Reduced atomic positions [iatom, xred, symbol]:", my_mode)
  do iatom=1,cryst%natom
    write(msg,"(i5,a,2x,3f11.7,2x,a)")iatom,")",cryst%xred(:,iatom),symbol_type(cryst,cryst%typat(iatom))
    call wrtout(my_unt,msg,my_mode)

@@ -172,7 +172,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
    ! Use a local pawfgrtab to make sure we use the correction in the paw spheres
    ! the usual pawfgrtab uses r_shape which may not be the same as r_paw.
    call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
-   ABI_DT_MALLOC(Pawfgrtab,(Cryst%natom))
+   ABI_MALLOC(Pawfgrtab,(Cryst%natom))
    call pawfgrtab_init(Pawfgrtab,cplex1,l_size_atm,Wfd%nspden,Cryst%typat)
    ABI_FREE(l_size_atm)
 
@@ -189,7 +189,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
 &                         prtvol=Wfd%pawprtvol,mode_paral="COLL")
    end if
 
-   ABI_DT_MALLOC(Paw_onsite,(Cryst%natom))
+   ABI_MALLOC(Paw_onsite,(Cryst%natom))
    call paw_pwaves_lmn_init(Paw_onsite,Cryst%natom,Cryst%natom,Cryst%ntypat,Cryst%rprimd,Cryst%xcart,&
 &                           Pawtab,Pawrad,Pawfgrtab)
  end if
@@ -256,9 +256,9 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  ABI_MALLOC(ur_c,(Wfd%nfft*nspinor))
 
  if (usepaw==1) then
-   ABI_DT_MALLOC(Cp_v,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_v,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_v,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_c,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_c,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_c,0,Wfd%nlmn_atm)
  end if
  !
@@ -346,14 +346,14 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  !
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cp_v)
-   ABI_DT_FREE(Cp_v)
+   ABI_FREE(Cp_v)
    call pawcprj_free(Cp_c)
-   ABI_DT_FREE(Cp_c)
+   ABI_FREE(Cp_c)
    if (paw_add_onsite) then
      call pawfgrtab_free(Pawfgrtab)
-     ABI_DT_FREE(Pawfgrtab)
+     ABI_FREE(Pawfgrtab)
      call paw_pwaves_lmn_free(Paw_onsite)
-     ABI_DT_FREE(Paw_onsite)
+     ABI_FREE(Paw_onsite)
    end if
  end if
  !

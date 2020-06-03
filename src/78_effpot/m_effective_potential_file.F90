@@ -34,6 +34,8 @@ module m_effective_potential_file
  use m_anharmonics_terms
  use m_effective_potential
  use m_ifc
+ use m_ddb
+ use m_ddb_hdr
 #if defined HAVE_NETCDF
  use netcdf
 #endif
@@ -237,9 +239,7 @@ CONTAINS  !=====================================================================
 
 subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
-  use m_effective_potential
   use m_multibinit_dataset
-  use m_ddb, only : ddb_from_file
   use m_strain
   use m_crystal, only : crystal_t
   use m_dynmat, only : bigbx9
@@ -258,6 +258,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !scalars
   integer :: ii,filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
+  type(ddb_hdr_type) :: ddb_hdr
 !array
   integer,allocatable :: atifc(:)
 
@@ -291,7 +292,8 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       ABI_ALLOCATE(atifc,(inp%natom))
       atifc = inp%atifc
 
-      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc,Crystal,comm)
+      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc, ddb_hdr, Crystal,comm)
+      call ddb_hdr%free()
 
 !     And finaly, we can check if the value of atifc is not change...
       if (.not.all(atifc.EQ.inp%atifc)) then
@@ -578,9 +580,6 @@ end subroutine effective_potential_file_getType
 
 subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)
 
- use m_ddb
- use m_ddb_hdr
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
@@ -619,7 +618,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    natom = ddb_hdr%natom
    ntypat = ddb_hdr%ntypat
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Must read some value to initialze  array (nprt for ifc)
 !   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
@@ -1274,7 +1273,6 @@ end subroutine system_getDimFromXML
  subroutine system_xml2effpot(eff_pot,filename,comm,strcpling)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
 
@@ -2214,18 +2212,11 @@ end subroutine system_xml2effpot
 
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
- use defs_basis
- use m_errors
- use m_abicore
  use m_dynmat
- use m_xmpi
 
- use m_ddb
- use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t
  use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !Arguments ------------------------------------
 !scalars
@@ -2901,7 +2892,6 @@ end subroutine system_ddb2effpot
 subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_polynomial_coeff
  use m_polynomial_term
  use m_crystal, only : symbols_crystal

@@ -153,12 +153,6 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
            diemac      6.00000000E+00
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       0    0    0
-       dvdb_ngqpt4       0    0    0
-       dvdb_ngqpt5       0    0    0
-       dvdb_ngqpt6       1    1    1
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
     eph_frohlichm2          0
@@ -2090,12 +2084,6 @@ Values initialized with zeros
         ddb_ngqpt5       0    0    0
         ddb_ngqpt6       1    1    1
            diemac      6.00000000E+00
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       0    0    0
-       dvdb_ngqpt4       0    0    0
-       dvdb_ngqpt5       0    0    0
-       dvdb_ngqpt6       1    1    1
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
     eph_frohlichm2          0

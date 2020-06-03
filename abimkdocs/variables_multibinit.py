@@ -919,6 +919,20 @@ Give the size of the supercell for the dynamics
 ),
 
 Variable(
+    abivarname="strfact@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=100.0,
+    mnemonics="STRess FACTor",
+    added_in_version="v9.1",
+    text=r"""
+See [[abinit:strfact]]
+""",
+),
+
+Variable(
     abivarname="strtarget@multibinit",
     varset="multibinit",
     vartype="real",

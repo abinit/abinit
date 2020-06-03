@@ -78,7 +78,14 @@ def cd(path):
 
 @task
 def make(ctx, jobs="auto", touch=False, clean=False):
-    """Touch all modified files and recompile the code with -jNUM."""
+    """
+    Touch all modified files and recompile the code
+
+    Args:
+        jobs: Use `jobs` threads for make -jNUM
+        touch: Touch all changed files
+        clean: Issue `make clean` before `make`.
+    """
     if touch:
         with cd(ABINIT_ROOTDIR):
             cmd = "./abisrc.py touch"
@@ -97,7 +104,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
             ctx.run("cd shared && make clean && cd ..", pty=True)
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, "yellow")
-        retcode = ctx.run(cmd, pty=True)
+        results = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
@@ -308,6 +315,67 @@ def branchoff(ctx, start_point):
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")
     run("git push origin HEAD")
+
+
+@task
+def watchdog(ctx, jobs="auto", sleep_time = 5):
+    """
+    Start watchdog service to watch F90 files and execute `make` when changes are detected.
+    """
+    cprint("Starting watchdog service to watch F90 files and execute `make` when changes are detected", "green")
+    cprint("Enter <CTRL + C> in the terminal to kill the service.", "green")
+
+    cprint(f"Start watching F90 files with sleep_time {sleep_time} s ....", "green")
+    top = find_top_build_tree(".", with_abinit=True)
+    jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
+
+    # http://thepythoncorner.com/dev/how-to-create-a-watchdog-in-python-to-look-for-filesystem-changes/
+    # https://stackoverflow.com/questions/19991033/generating-multiple-observers-with-python-watchdog
+    import time
+    from watchdog.observers import Observer
+    from watchdog.events import PatternMatchingEventHandler
+    event_handler = PatternMatchingEventHandler(patterns="*.F90", ignore_patterns="",
+                                                   ignore_directories=False, case_sensitive=True)
+
+    def on_created(event):
+        print(f"hey, {event.src_path} has been created!")
+
+    def on_deleted(event):
+        print(f"what the f**k! Someone deleted {event.src_path}!")
+
+    def on_modified(event):
+        print(f"hey buddy, {event.src_path} has been modified")
+        cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
+        cprint("Executing: %s" % cmd, "yellow")
+        with cd(top):
+            try:
+                result = ctx.run(cmd, pty=True)
+                if result.ok:
+                    cprint("Make completed successfully", "green")
+                    cprint("Watching for changes ...", "green")
+            except Exception:
+                cprint(f"Make returned non-zero exit status", "red")
+                cprint(f"Keep on watching for changes hoping you get it right ...", "red")
+
+    def on_moved(event):
+        print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
+
+    event_handler.on_created = on_created
+    event_handler.on_deleted = on_deleted
+    event_handler.on_modified = on_modified
+    event_handler.on_moved = on_moved
+
+    observer = Observer()
+    path = ABINIT_SRCDIR
+    observer.schedule(event_handler, path, recursive=True)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(sleep_time)
+    except KeyboardInterrupt:
+        observer.stop()
+        observer.join()
 
 
 def which(cmd):
