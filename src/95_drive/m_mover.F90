@@ -781,15 +781,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
        if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5).or.mod(itime,2)==1)then
          if (scfcv_args%dtset%tolmxf/=0)then
 
-!DEBUG
-           write(std_out,'(a)')' m_mover : before fconv '
-           write(std_out,'(a,i4)')' natom = ',ab_mover%natom
-           write(std_out,'(a,12es12.4)')' fcart=',hist%fcart(:,1:4,hist%ihist)
-           write(std_out,'(a,12es12.4)')'       ',hist%fcart(:,5:8,hist%ihist)
-           write(std_out,'(a,12es12.4)')'       ',hist%fcart(:,9:12,hist%ihist)
-           write(std_out,'(a,12es12.4)')'       ',hist%fcart(:,13:16,hist%ihist)
-           write(std_out,'(a,12es12.4)')'       ',hist%fcart(:,17:20,hist%ihist)
-!ENDDEBUG
            call fconv(hist%fcart(:,:,hist%ihist),&
 &           scfcv_args%dtset%iatfix, &
 &           iexit,itime,&
@@ -1081,16 +1072,6 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
  end do
 
  dstr(:)=strten(:)-strtarget(:)
-
-!DEBUG
- write(std_out,'(a)')' fconv : before taking into account the stress'
- write(std_out,'(a,es14.8)')' fmax=',fmax
- write(std_out,'(a,i0)')' optcell=',optcell
- write(std_out,'(a,6es14.6)')' strfact ',strfact
- write(std_out,'(a,6es14.6)')' strtarget ',strtarget(:)
- write(std_out,'(a,6es14.6)')' strten ',strten(:)
- write(std_out,'(a,6es14.6)')' dstr ',dstr(:)
-!ENDDEBUG
 
 !Eventually take into account the stress
  if(optcell==1)then
