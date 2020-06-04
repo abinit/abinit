@@ -3,7 +3,8 @@
 !!  m_transport
 !!
 !! FUNCTION
-!!  Module to compute transport properties using the Boltzmann transport equation (BTE).
+!!  Module to compute transport properties using the
+!!  Boltzmann transport equation (BTE) in the relaxation-time approximation.
 !!  Initially for electron mobility limited by electron-phonon scattering.
 !!
 !! COPYRIGHT
@@ -108,7 +109,7 @@ type,public :: transport_rta_t
    ! Chemical potential at this carrier concentration and temperature
 
    real(dp),allocatable :: eminmax_spin(:,:)
-   ! min max energy of the of the original ebands object
+   ! min/max energy of the of the original ebands object
 
    real(dp),allocatable :: linewidth_serta(:,:,:,:)
    ! Linewidth computed in the self-energy relaxation time aproximation
@@ -171,6 +172,13 @@ type,public :: transport_rta_t
    ! (2, nsppol, 3, 3, ntemp)
    ! mobility for electrons and holes (first dimension) at transport_mu_e(ntemp)
 
+ contains
+
+    procedure :: compute => transport_rta_compute
+    procedure :: compute_mobility => transport_rta_compute_mobility
+    procedure :: write => transport_rta_write
+    procedure :: free => transport_rta_free
+
  end type transport_rta_t
 !!***
 
@@ -224,26 +232,25 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, ' Transport computation driver')
 
- !sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  sigeph_filepath = dtfil%filsigephin
  call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", sigeph_filepath))
 
  sigmaph = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
 
- ! Initialize transport
+ ! Initialize transport object
  transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
  sigmaph%ncid = nctk_noid
  call sigmaph%free()
 
  ! Compute transport
- call transport_rta_compute(transport_rta, cryst, dtset, comm)
+ call transport_rta%compute(cryst, dtset, comm)
 
  ! Compute mobility
- call transport_rta_compute_mobility(transport_rta, cryst, dtset, comm)
+ call transport_rta%compute_mobility(cryst, dtset, comm)
 
  ! Write transport to stdout (for the test suite)
- call transport_rta_write(transport_rta, cryst)
+ call transport_rta%write(cryst)
 
  ! Master creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
@@ -256,7 +263,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 #endif
 
  ! Free memory
- call transport_rta_free(transport_rta)
+ call transport_rta%free()
 
 end subroutine transport
 !!***
@@ -337,17 +344,16 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    kptrlatt(1,1) = dtset%sigma_ngkpt(1)
    kptrlatt(2,2) = dtset%sigma_ngkpt(2)
    kptrlatt(3,3) = dtset%sigma_ngkpt(3)
-   tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, 1, [zero,zero,zero])
+   tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, 1, [zero, zero, zero])
    new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, new%linewidth_serta, new%linewidth_mrta, &
-                               new%velocity, xmpi_comm_self, ierr)
+                                   new%velocity, xmpi_comm_self, ierr)
    call ebands_free(tmp_ebands)
  else
    new%ebands = sigmaph%get_ebands(cryst, ebands, new%linewidth_serta, new%linewidth_mrta, &
-                                  new%velocity, xmpi_comm_self, ierr)
+                                   new%velocity, xmpi_comm_self, ierr)
  end if
 
  ! Perform further downsampling (usefull for debugging purposes)
- ! TODO: Add test for transport_ngkpt variable
  if (any(dtset%transport_ngkpt /= 0)) then
    call wrtout(std_out, sjoin(" Downsampling the k-point mesh before computing transport:", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
@@ -493,7 +499,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- type(transport_rta_t),intent(inout) :: self
+ class(transport_rta_t),intent(inout) :: self
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
 
@@ -641,15 +647,15 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
      ! Compute mobility
      do iel=1,2
-     do ii=1,3
-       do jj=1,3
-         do iw=1,self%nw
-           call safe_div( self%sigma(iw,ispin,ii,jj,itemp) * 100**2, &
-                          e_Cb * self%n(iw,itemp,iel), &
-                          zero, self%mobility(iw,ispin,ii,jj,itemp,iel) )
+       do ii=1,3
+         do jj=1,3
+           do iw=1,self%nw
+             call safe_div( self%sigma(iw,ispin,ii,jj,itemp) * 100**2, &
+                            e_Cb * self%n(iw,itemp,iel), &
+                            zero, self%mobility(iw,ispin,ii,jj,itemp,iel) )
+           end do
          end do
        end do
-     end do
      end do
    end do !itemp
  end do !spin
@@ -745,7 +751,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- type(transport_rta_t),intent(inout) :: self
+ class(transport_rta_t),intent(inout) :: self
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
 
@@ -776,8 +782,9 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
  nvalence = nint((self%ebands%nelect - self%eph_extrael)/max_occ)
 
- ABI_CALLOC(self%ne,(self%ntemp))
- ABI_CALLOC(self%nh,(self%ntemp))
+ ABI_CALLOC(self%ne, (self%ntemp))
+ ABI_CALLOC(self%nh, (self%ntemp))
+
  do ispin=1,nsppol
    do ik=1,nkpt
      wtk = self%ebands%wtk(ik)
@@ -979,7 +986,7 @@ end subroutine transport_rta_ncwrite
 subroutine transport_rta_write(self, cryst)
 
 !Arguments --------------------------------------
- type(transport_rta_t),intent(in) :: self
+ class(transport_rta_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
 
 !Local variables --------------------------------
@@ -1026,7 +1033,7 @@ end subroutine transport_rta_write
 subroutine transport_rta_free(self)
 
 !Arguments --------------------------------------
- type(transport_rta_t),intent(inout) :: self
+ class(transport_rta_t),intent(inout) :: self
 
  call ebands_free(self%ebands)
  call self%gaps%free()

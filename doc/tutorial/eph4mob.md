@@ -742,6 +742,8 @@ Last but not least, do not use datasets: large arrays allocated for $\kk$-points
 
 ### How to compute only the $\kk$-points close to the band edges
 
+<!-- part of the discussion can be moved to the eph_intro as SKW will be used also in phgamma -->
+
 As we have already seen in the previous sections, a relatively small number of $\kk$-points
 close to the band edges is usually sufficient to converge mobilities.
 Yet, in the NSCF run, we computed a WFK file for all the $\kk$-points of the dense IBZ
@@ -797,6 +799,7 @@ getkerange_filepath "out_KERANGE.nc"
 getden_filepath "161616_DEN"
 getwfk_filepath "161616_WFK"    # Init GS wavefunctions from this file (optional)
 iscf  -2
+tolwfr 1e-18
 kptopt 0                        # Important
 
 # These variables must be consistent with the values of

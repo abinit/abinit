@@ -3735,7 +3735,7 @@ In the case of star-function interpolation:
   * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[cite:Uehara2000]].
     In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of
     the lattice vectors included in the star expansion
-  * einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9
+  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq 9
 
 """,
 ),
@@ -21579,7 +21579,6 @@ Momentum Relaxation Time (MRTA) when [[eph_task]] == -4
 By default, the code computes linewidths both with the SERTA and MRTA and results are stored to netcdf file.
 The calculation of the MRTA is relatively fast but if performance is critical and only SERTA is needed, one can use
 eph_mrta 0.
-
 """,
 ),
 

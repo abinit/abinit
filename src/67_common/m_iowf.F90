@@ -406,10 +406,8 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
      !crystal = hdr%get_crystal(2)
-     !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
+     !NCF_CHECK(ebands_ncwrite_path(gs_ebands, cryst, filname)
      !call crystal%free()
-     !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
-     !NCF_CHECK(ncerr)
 #else
      MSG_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)

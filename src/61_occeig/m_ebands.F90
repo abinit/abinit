@@ -2669,7 +2669,7 @@ end subroutine ebands_report_gap
 !!
 !! SOURCE
 
-integer function ebands_ncwrite(ebands,ncid) result(ncerr)
+integer function ebands_ncwrite(ebands, ncid) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
@@ -2835,6 +2835,7 @@ end function ebands_ncwrite
 !!  Writes the content of an ebands_t object to a NETCDF file
 !!
 !! INPUTS
+!!  cryst=Crystal structure
 !!  path=File name
 !!
 !! OUTPUT
@@ -2845,12 +2846,13 @@ end function ebands_ncwrite
 !!
 !! SOURCE
 
-integer function ebands_ncwrite_path(ebands,path) result(ncerr)
+integer function ebands_ncwrite_path(ebands, cryst, path) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: path
  class(ebands_t),intent(in) :: ebands
+ type(crystal_t),intent(in) :: cryst
+ character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
 !scalars
@@ -2865,9 +2867,10 @@ integer function ebands_ncwrite_path(ebands,path) result(ncerr)
     NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
  else
    ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
-   NCF_CHECK_MSG(ncerr, sjoin("creating", path))
+   NCF_CHECK_MSG(ncerr, sjoin("Creating", path))
  end if
 
+ NCF_CHECK(cryst%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
  NCF_CHECK(nf90_close(ncid))
 #endif
@@ -2887,7 +2890,7 @@ end function ebands_ncwrite_path
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
+!!  intmeth= 1 for Gaussian, 2 or 3 for tetrahedra (3 if Blochl corrections must be included).
 !!    If nkpt == 1 (Gamma only), the routine fallbacks to gaussian method.
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
@@ -2932,8 +2935,9 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
  edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol
  edos%intmeth = intmeth
+
  if (ebands%nkpt == 1) then
-   MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
+   MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
    edos%intmeth = 1
  end if
 
@@ -2961,6 +2965,9 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
  select case (edos%intmeth)
  case (1)
+   !call wrtout(std_out, " Computing electron-DOS with Gaussian method")
+   !call wrtout(std_out, sjoin(" broadening: ", ftoa(edos%broad * Ha_eV), " (eV), step: ", ftoa(edos%step * Ha_eV), "(eV), npts: ",
+   !itoa(nw)))
    ! Gaussian
    ABI_MALLOC(wme0, (nw))
    cnt = 0
@@ -2978,8 +2985,9 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    call xmpi_sum(edos%dos, comm, mpierr)
 
  case (2, 3)
+   !call wrtout(std_out, " Computing electron-DOS with tetrahedron method")
    ! Consistency test
-   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedrons, nband(:) must be constant')
+   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedra, nband(:) must be constant')
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
@@ -5469,23 +5477,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
    write(unt,'(a)') ' '
  end do
 
- ! gnuplot script file
-!set terminal postscript eps enhanced color font 'Times-Roman,26' lw 2
-!set output "Mos2_band.eps"
-!# set line style and point type
-!set style line 1 lt 1 ps 2 pt 1 lc rgb "black"
-!set style line 2 lt 1 ps 2 pt 1 lc rgb "red"
-!# set axes labels
-!set xtics("{/Symbol G}" 0, "M" 100, "K" 200, "H" 250,"A" 350,"{/Symbol G}" 400)
-!set yrange [-10:5]
-!set ytics -10,5,5
-!set xrange [0:400]
-!set ylabel "Energy -{/Symbol m} (eV)"
-!set xlabel "Momentum"
-!shift =-1.8
-!#Determine plot parameters
-!plot 'Mos2_band' using 1:($2 + shift) ls 1 w lines notitle,\
-
+  ! gnuplot script file
   write(gpl_unt,'(a)') '# File to plot phonon bandstructure with gnuplot'
   write(gpl_unt,'(a)') "#set terminal postscript eps enhanced color font 'Times-Roman,26' lw 2"
   write(gpl_unt,'(a)') '#use the next lines to make a nice figure for a paper'

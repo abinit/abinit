@@ -234,6 +234,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  logical :: qzero,luwindow
  character(len=500) :: msg_tmp,msg,allup
  type(gsphere_t) :: Gsph_FFT
+ type(wave_t),pointer :: wave1, wave2
 !arrays
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
  integer :: ucrpa_bands(2)
@@ -387,8 +388,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  call wrtout(std_out,msg,'COLL')
 
  write(msg,'(a,i2,2a,i2)')&
-&  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
-&  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
+  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
+  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
  call wrtout(std_out,msg,'COLL')
 
  if (use_tr) then
@@ -583,7 +584,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      do band1=1,Ep%nbnds
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-       ug1 => Wfd%Wave(band1,ik_ibz,spin)%ug
+       ABI_CHECK(wfd%get_wave_ptr(band1, ik_ibz, spin, wave1, msg) == 0, msg)
+       ug1 => wave1%ug
+
        call wfd%get_ur(band1,ik_ibz,spin,ur1_kibz)
 
        if (Psps%usepaw==1) then
@@ -622,7 +625,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            if (qp_occ(band2,ik_ibz,spin) < GW_TOL_DOCC .and. ( ABS(deltaf_b1b2)< GW_TOL_DOCC .or. band1<band2)) CYCLE
          end if
 
-         ug2 => Wfd%Wave(band2,ik_ibz,spin)%ug
+         ABI_CHECK(wfd%get_wave_ptr(band2, ik_ibz, spin, wave2, msg) == 0, msg)
+         ug2 => wave2%ug
          call wfd%get_ur(band2,ik_ibz,spin,ur2_kibz)
 
          if (Psps%usepaw==1) then
@@ -2076,6 +2080,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q
  type(vkbr_t) :: vkbr
+ type(wave_t),pointer :: wave
 !arrays
  integer :: my_band_list(Wfd%mband)
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
@@ -2149,7 +2154,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
      do lbidx=1,my_nband
        band=my_band_list(lbidx)
-       ug => Wfd%Wave(band,ik_ibz,spin)%ug
+
+       ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
+       ug => wave%ug
 
        if (Wfd%usepaw==0) then
          ! Matrix elements of i[H,r] for NC pseudopotentials.

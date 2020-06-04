@@ -22,8 +22,8 @@ We also explain how to link ABINIT with the intel MKL library and how to activat
 We will make extensive use of the bash shell hence familiarity with the terminal is assumed.
 For a quick guide to the command line, please consult 
 this [Ubuntu tutorial](https://ubuntu.com/tutorials/command-line-for-beginners#1-overview).
-If this is the first time you use **configure && make** to build software, 
-we strongly recommended to read this 
+If this is the first time you use the **configure && make** approach to build software, 
+we **strongly** recommended to read this 
 [introduction](https://www.codecoffee.com/software-installation-configure-make-install/)
 before proceeding with the next steps.
 
@@ -32,8 +32,8 @@ before proceeding with the next steps.
     Unfortunately, in this tutorial we cannot cover all possible cases.
     The aim is to teach you how to compile code from source but we cannot guarantee
     that these recipes will work out of the box on every possible machine.
-    Fortunately, the internet provides lots of resources and google is your best friend!
-    In several cases, one can find the solution to a problem by just copying the
+    Fortunately, the internet provides lots of resources and remember that search engines are your best friend!
+    In several cases, one can find the solution by just copying the
     error message in the search bar.
 
 <!--
@@ -45,6 +45,14 @@ For users who are already familiar with these tools, the present tutorial may be
 ### Dynamic linkage
 -->
 
+If you are not interested in compiling ABINIT from source, consider the following alternatives:
+
+* Precompiled versions provided by conda-forge for Linux and MacOsX users
+
+* Homebrew bottles for MacOsX users
+
+* Compilation with external libraries provided by apt-get
+
 ## Getting started
 
 Since ABINIT is written in Fortran, we need a **recent** Fortran compiler 
@@ -55,10 +63,11 @@ such as the interface with the TRIQS library (not treated in this lesson).
 In what follows, we will be focusing on the GNU toolchain i.e. *gcc* for C and *gfortran* for Fortran.
 These "sequential" compilers are adequate if you don't need to compile parallel MPI applications.
 The compilation of MPI code, indeed, requires the installation of additional libraries 
-and specialized wrappers for the compilers (*mpif90* and *mpicc*).
+and ispecialized wrappers for the compilers (*mpif90* and *mpicc*).
 This very important scenario is covered in more details in the next sections.
 
-First of all, let's make sure **gfortran** is installed by issuing in the terminal the command:
+First of all, let's make sure the **gfortran** compiler is installed on your machine
+by issuing in the terminal the command:
 
 ```sh
 which gfortran
@@ -96,20 +105,20 @@ which make
 
 !!! tip
 
-    Things are more complicated if you are a Mac-OsX user since Apple does not officially 
+    Things get more complicated if you are a Mac-OsX user as Apple does not officially 
     support Fortran so you will need to install gfortran either via 
     [homebrew](https://brew.sh/) or [macport](https://www.macports.org/).
     Alternatively, one can install gfortran using one of the standalone DMG installers
     provided by the [gfortran-for-macOS project](https://github.com/fxcoudert/gfortran-for-macOS/releases).
-    MaxOsX users need to install **make** via [Xcode](https://developer.apple.com/xcode/).
+    Note also that MaxOsX users will need to install **make** via [Xcode](https://developer.apple.com/xcode/).
 
 ## How to compile BLAS and LAPACK 
 
 BLAS/LAPACK represents the workhorse of many scientific codes and an optimized implementation 
 is crucial for achieving **good performance**.
 In principle this step can be skipped as any decent Linux distribution already provides
-pre-compiled versions but, as already mentioned in the introduction, we prefer 
-to compile everything from source.
+pre-compiled versions but, as already mentioned in the introduction, we are geeks and we 
+prefer to compile everything from source.
 Moreover the compilation of BLAS/LAPACK represents an excellent exercise 
 that gives us the opportunity to discuss some basic concepts that 
 will reveal useful in other parts of this tutorial.
@@ -165,7 +174,7 @@ curl https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz -o v0.3.7.tar.gz
     Then paste the text in the terminal by selecting the `Copy` action in the menu
     activated by clicking on the right button.
     Alternatively, one can press the central button (mouse wheel) or use CMD + V on MacOsX.
-    This trick is quite handy to fetch tarballs from the web directly inside terminal.
+    This trick is quite handy to fetch tarballs from the web inside the terminal.
 
 
 Now uncompress the tarball with:
@@ -188,7 +197,7 @@ make -j2 USE_THREAD=0 USE_LOCKING=1
 
 to build the single thread version.
 By default, openblas activates threads (see [FAQ page](https://github.com/xianyi/OpenBLAS/wiki/Faq#multi-threaded))
-but here we prefer to use the sequential version
+but here we prefer to use the sequential version as Abinit is optimized for MPI.
 
 <!--
 and execute the *configure* script with:
@@ -235,11 +244,12 @@ A compilation with plain make would give:
 
 that indicates that our library supports threads.
 
-You may have noticed that make in this case is not just building the library but is also 
+You may have noticed that, in this case, make is not just building the library but is also 
 running unit tests to validate the build.
 This means that if `make` completes successfully, we can be confident that the build is OK and we can proceed 
 with the installation.
-Other packages use a different philosophy and provide a `make check` option to run the test suite.
+Other packages use a different philosophy and provide a `make check` option to be executed after `make` 
+in order to run the test suite before instaling the package.
 
 ```sh
 make PREFIX=$HOME/local/ install
@@ -257,8 +267,8 @@ ls $HOME/local/lib/libopenblas*
 
 Files ending with `.so` are shared libraries (`.so` stands for *shared object*) whereas 
 `.a` files are static libraries.
-In this tutorial, we will mainly use dynamic linking but this means that we have to set the 
-value of LD_LIBRARY_PATH.
+In this tutorial, we will mainly use dynamic linking as this is the most common scenario 
+but this also means that we need to set the value of the LD_LIBRARY_PATH environment variable.
 
 <!--
 So far so good, we managed to compile and install our version of BLAS/LAPACK.
@@ -338,7 +348,7 @@ on every decent Linux distribution.
 
 Also in this case, you are supposed to configure the package with the *--prefix* option, 
 run the tests to validate the build and finally execute `make install`.
-The required commands are given below:
+The required commands are reported below:
 
 ```sh
 # Get the tarball. 
@@ -362,14 +372,6 @@ make -j2
 make check && make install
 ```
 
-<!--
-Before installing the library, it is good common practice to run the test suite to **validate** the build.
-Many packages provide a `make check` option to run the test suite,
-other project define a `make tests` target or more exotic options.
-If in doubt, use `make --help` to list the available options.
-If all the tests are OK, install the library by issuing:
--->
-
 Now let's have a look at the libraries we have just installed:
 
 ```sh
@@ -386,7 +388,13 @@ At present, the Fortran interface is not required by Abinit, only the C library.
 We made this choice, because one can easily use the C library with Abinit compiled with different Fortran compilers/version
 without having to rebuild libxc with a different Fortran compiler.
 Note, however, that for other libraries (fftw3, netcdf) we will use Fortran bindings, in this case it is important that
-the bindings are built with the same compiler as the one used for Abinit. 
+the bindings are built with the **same compiler as the one used to compile Abinit**. 
+In a nutshell, Fortran/C++ libraries are compiler-dependent because these two languages are relatively high-level so they need 
+to rely on implementation details.
+C libraries, on the other, are usually more portable as the C language has less abstractions 
+and, last but not least, the Linux-OS is written
+in C, the Linux kernel in 99.9% of the cases is compiled with GNU-GCC and all the other vendors need to maintain compatibility with the GCC ABI.
+
 In principle, one can reuse libraries as long as the major version of the Fortran compiler is the same but experience has 
 shown that it's always a good idea to require strict matching.
 
@@ -397,10 +405,10 @@ TODO: Discuss FCFLAGS and FCDFLAGS
 FFTW is a C library for computing the Fast Fourier transform in one or more dimensions.
 ABINIT already provides an internal implementation of the FFT algorithm
 hence FFTW is considered an optional dependency although it is highly recommended 
-if you care about **performance**. 
+if you really care about **performance**. 
 Indeed, FFTW (or, even better, the intel DFTI library provided by MKL) 
 is usually faster than the internal ABINIT version.
-The [[fftalg]] variable defines the implementation to be used and 312 corresponds to FFTW.
+The [[fftalg]] variable defines the implementation to be used and 312 corresponds to the FFTW implementation.
 
 The FFTW source code can be downloaded from [fftw.org](http://www.fftw.org/), 
 and the tarball of the latest version is available at <http://www.fftw.org/fftw-3.3.8.tar.gz>.
@@ -488,7 +496,7 @@ and/or you plan to run ABINIT with multiple processes.
 It is worth to stress that the MPI installation provides two scripts (**mpif90** and **mpicc**)
 wrapping the Fortran and the C compiler, respectively.
 These scripts must be used to compile parallel software using MPI instead 
-of the "sequential" compilers `gfortran` and `gcc`. 
+of the "sequential" compilers e.g. `gfortran` and `gcc`. 
 The MPI library also provides launcher scripts installed in the *bin* directory (*mpirun* or *mpiexec*)
 to execute MPI applications with NUM_PROCS processes and the syntax:
 
@@ -597,6 +605,8 @@ ls $HOME/local/include/mpi*
     These modules must be *passed* to the Fortran compiler when compiling e.g ABINIT.
     Note that these `.mod` files are **compiler-dependent** and the format may depend on the version of the compiler.
     In other words, one cannot use these module files to compile Fortran code with another compiler.
+    and you should not expect to be able to use modules compiled with a different version of the different compiler.
+    This is one of the reasons why the version of the Fortran compiler at hand really matters.
 
 
 ## Installing HDF5 and netcdf4
@@ -605,10 +615,10 @@ Netcdf4 is built on top of HDF5 and consists of two different parts:
 
 * The low-level C library
 * The Fortran bindings i.e. Fortran routines calling the C implementation.
-  This is the high-level API used by ABINIT to perform all the IO operations on netcdf files.
+  This is the high-level API/ABI used by ABINIT to perform all the IO operations on netcdf files.
 
 To build the libraries required by ABINIT, we will compile the different parts
-in bottom-up fashion starting from the HDF5 package.
+in a bottom-up fashion starting from the HDF5 package.
 Since we want to activate support for parallel IO, we need to compile the library using the wrappers
 provided by our MPI installation instead of using *gcc* or *gfortran* directly.
 
@@ -668,7 +678,7 @@ Parallel HDF5: yes
 
 tells us that our HDF5 build will support parallel IO (because we used CC=mpicc during the configuration step).
 Also note that, as far as ABINIT is concerned, Fortran support is **optional**
-as ABINIT will be interfaced with HDF5 through the Fortran bindings provided by netcdf.
+as ABINIT will be interfaced with HDF5 through the Fortran bindings provided by netcdf-fortran.
 In other words, ABINIT requires netcdf-fortran and not the Fortran bindings for HDF5.
 
 Again, issue `make -j NUM` followed by 
@@ -693,7 +703,7 @@ cd netcdf-c-4.7.3
 ```
 
 where we have used the `CC` variable to specify that we want to use the `mpicc` wrapper installed previously.
-At the end of the configure step, you should have
+At the end of the configuration step, one should have
 
 ```sh
 # NetCDF C Configuration Summary
@@ -799,7 +809,7 @@ See also <https://www.unidata.ucar.edu/software/netcdf/docs/building_netcdf_fort
 ## How to compile ABINIT
 
 In this section, we discuss how to compile and install ABINIT 
-using the (MPI) compilers and the libraries installed previously.
+using the (MPI) compilers and the libraries we have installed previously.
 <!--
 There are two ways of getting the source code of ABINIT:
 
@@ -992,14 +1002,16 @@ How would you fix the problem?
 ## How to compile ABINIT on a cluster with the intel toolchain
 
 On intel-based clusters, we suggest to compile ABINIT with the intel compilers and the MKL library 
-in order to achieve better performance.
-MKL, indeed, provides highly-optimized implementations for BLAS, LAPACK, FFT, and SCALAPACK
+in order to improve performance.
+The MKL library, indeed, provides highly-optimized implementations for BLAS, LAPACK, FFT, and SCALAPACK
 that can lead to a significant speedup while simplifying considerably the compilation process.
 
 In what follows, we assume a cluster in which the sysadmin has already installed all the modules 
 (compilers, MPI and libs) required to compile ABINIT.
 If some required libraries are lacking, it should not be that difficult to reuse the expertise acquired 
-in this tutorial to build and install your own libs inside $HOME/local.
+in this tutorial to build and install your own libs inside $HOME/local although the best solution is 
+to ask the syadmin to provide modules with the dependencies requiered by Abinit or, even better, 
+an Abinit module.
 
 For a quick introduction to the environment modules, please consult
 [this documentation](https://support.ceci-hpc.be/doc/_contents/UsingSoftwareAndLibraries/UsingPreInstalledSoftware/index.html).
@@ -1048,7 +1060,7 @@ On the contrary, answering the questions:
 * When and why should I use OpenMP threads for my calculations?
 * How many threads should I use and what is the parallel speedup I should expect?
 
-is way more difficult because there are several factors that should be taken into account.
+is way more difficult to answer as there are several factors that should be taken into account.
 
 To keep a long story short, one should use OpenMP threads 
 when one starts to trigger limitations or bottlenecks in the MPI implementation, 

@@ -34,9 +34,8 @@ MODULE m_ddk
  use m_hdr
  use m_dtset
  use m_krank
- use m_fstab
+ !use m_fstab
  use m_crystal
- use m_wfd
  use m_mpinfo
  use m_cgtools
  use m_hamiltonian
@@ -56,6 +55,7 @@ MODULE m_ddk
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
  use m_wfk,           only : wfk_read_ebands, wfk_read_h1mat
+ use m_wfd,           only : wfd_t, wfd_init, wave_t
 
  implicit none
 
@@ -208,6 +208,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp, hdr
  type(ddkop_t) :: ddkop
+ type(wave_t),pointer :: wave_v, wave_c
 !arrays
  integer,parameter :: voigt2ij(2, 6) = reshape([1, 1, 2, 2, 3, 3, 2, 3, 1, 3, 1, 2], [2, 6])
  integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:),nband(:,:), kg_k(:,:)
@@ -346,7 +347,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    ABI_MALLOC(cg_v, (2,mpw*nspinor))
  end if
 
- ABI_DT_MALLOC(cwaveprj, (0, 0))
+ ABI_MALLOC(cwaveprj, (0, 0))
 
  ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
  ABI_MALLOC(ihrc,    (3, nspinor**2))
@@ -401,7 +402,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
          call wfd%copy_cg(ib_v, ik, spin, cg_v)
          call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
        else
-         ug_v(1:npw_k*nspinor) = wfd%wave(ib_v,ik,spin)%ug
+         ABI_CHECK(wfd%get_wave_ptr(ib_v, ik, spin, wave_v, msg) == 0, msg)
+         ug_v(1:npw_k*nspinor) = wave_v%ug
        end if
 
        ! Loop over bands
@@ -434,7 +436,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
            end do
 
          else
-           ug_c(1:npw_k*nspinor) = wfd%wave(ib_c,ik,spin)%ug
+           ABI_CHECK(wfd%get_wave_ptr(ib_c, ik, spin, wave_c, msg) == 0, msg)
+           ug_c(1:npw_k*nspinor) = wave_c%ug
 
            ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
            ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,dtset%inclvkb, kpt,ug_c,ug_v,kg_k)
@@ -485,7 +488,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_FREE(ug_v)
  ABI_FREE(kg_k)
  ABI_FREE(ihrc)
- ABI_DT_FREE(cwaveprj)
+ ABI_FREE(cwaveprj)
 
  ABI_SFREE(distrib_mat)
  ABI_SFREE(distrib_diago)

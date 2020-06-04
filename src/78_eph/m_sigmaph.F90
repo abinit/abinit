@@ -2921,6 +2921,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  new%mu_e(:) = ebands%fermie
 
  if (dtset%eph_fermie == zero) then
+   call cwtime(cpu, wall, gflops, "start")
    if (new%use_doublegrid) then
      call ebands_copy(ebands_dense, tmp_ebands)
    else
@@ -2931,6 +2932,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    new%mu_e = zero
    do it=1,new%ntemp
      if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
+
      ! Use Fermi-Dirac occopt
      call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), dtset%spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
@@ -2958,6 +2960,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    call ebands_free(tmp_ebands)
    call xmpi_sum(new%mu_e, comm, ierr)
+   call cwtime_report(" get_mu_e", cpu, wall, gflops)
  endif
 
  call ebands_free(ebands_dense)

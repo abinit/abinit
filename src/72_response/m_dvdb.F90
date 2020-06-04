@@ -2149,7 +2149,7 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
  logical :: has_phase
  logical,parameter :: debug=.False.
  character(len=500) :: msg
- integer,save :: enough=0
+ !integer,save :: enough=0
 !arrays
  integer :: symrel_eq(3,3),symrec_eq(3,3),g0_qpt(3),l0(3),tsm1g(3) !symm(3,3),
  integer :: symq(4,2,cryst%nsym)
@@ -2199,10 +2199,10 @@ pcase_loop: &
    has_phase = any(abs(tnon) > tol12)
    ! FIXME
    !ABI_CHECK(.not. has_phase, "has phase must be tested")
-   if (has_phase) then
-     enough = enough + 1
-     if (enough == 1) MSG_WARNING("has phase must be tested")
-   end if
+   !if (has_phase) then
+   !  enough = enough + 1
+   !  if (enough == 1) MSG_WARNING("has phase must be tested")
+   !end if
 
    workg = zero
 
@@ -2323,8 +2323,7 @@ pcase_loop: &
 
  ! Handle possible error.
  if (any(pflag == 0)) then
-   write(std_out,"(2a)")&
-     "The following perturbations cannot be recostructed by symmetry for q-point: ",trim(ktoa(qpt))
+   write(std_out,"(2a)")"The following perturbations cannot be recostructed by symmetry for q-point: ",trim(ktoa(qpt))
    do ipert=1,cryst%natom
      do idir=1,3
        if (pflag(idir, ipert) == 0) write(std_out,"(2(a,i0))")"idir= ",idir,", ipert= ",ipert

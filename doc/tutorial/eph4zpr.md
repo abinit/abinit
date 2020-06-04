@@ -214,8 +214,20 @@ discuss the basic input variables.
 We use [[getddb_filepath]], [[getwfk_filepath]], [[getdvdb_filepath]] to specify the paths to the external files.
 [[ngkpt]] 
 
-[[nkptgw]]
-[[kptgw]]
+
+## How to select the states for the QP corrections.
+
+There are different approaches one can use to specify the set of $\nk$ states in the $\Sigma_{\nk}$
+matrix elements.
+Each approach has pros and cons.
+
+The most direct way consists in listing the $\kk$-points and the bands explicitly via
+
+[[nkptgw]], [[kptgw]], [[bdgw]]
+
+Alternatively, one can use [[sigma_erange]] 
+
+or [[gw_qprange]]
 
 ### Convergence wrt nband
 
@@ -232,13 +244,15 @@ So XXX bands are needed to convergece the ZPR
 In this section, we discuss how to take advantange of the Sternheimer equation 
 to accelerate the convergence with [[nband]].
 To activate the Sternheimer method, use [[eph_stern]] = 1 
-and pass the file to the GS KS potential file via [[getpot_filepath]].
-The non-self-consistent Sternheimer equation is solved on-the-fly
-using max [[nline]] iterations. 
-The NSCF iteration stops when the solution is convergenced within [[tolwfr]].
-In this example, we use the default values. You might need to adjust the values for more complicaed systems.
+and pass the file with the GS KS potential file via the [[getpot_filepath]] input variable.
 
-Note that the [[nband]]
+The non-self-consistent Sternheimer equation is solved on-the-fly
+using max [[nline]] iterations and the NSCF iteration stops when 
+the solution is convergenced within [[tolwfr]].
+In this example, we use the default values. 
+You might need to adjust the values for more complicaed systems.
+
+Note that [[nband]]
 
 ### How to compute the spectral function
 

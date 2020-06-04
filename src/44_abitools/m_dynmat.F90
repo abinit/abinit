@@ -2784,7 +2784,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
  integer :: my_ierr, ierr, ii, irpt, all_nrpt
  real(dp) :: toldist
  integer :: ngqpt9(9)
- character(len=500) :: msg
+ character(len=500*4) :: msg
 !arrays
  integer,allocatable :: all_cell(:,:)
  real(dp),allocatable :: all_rpt(:,:), all_wghatm(:,:,:)

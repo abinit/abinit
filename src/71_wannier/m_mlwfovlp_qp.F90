@@ -316,14 +316,14 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  if (.not.g0w0_exists) then ! read QPS file (default behavior).
    input = from_QPS_FILE
-   ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Dtset%usepaw))
+   ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Dtset%usepaw))
    ABI_MALLOC(qp_rhor,(nfftot,nspden*dimrho))
 
    call rdqps(QP_bst,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,dimrho,nscf,&
     nfftot,my_ngfft,ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_ks_to_qp,qp_rhor,prev_Pawrhoij)
 
    ABI_FREE(qp_rhor)
-   ABI_DT_FREE(prev_Pawrhoij)
+   ABI_FREE(prev_Pawrhoij)
 
  else
    ! Read GW file (m_ks_to_qp has been already set to 1, no extrapolation is performed)

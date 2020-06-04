@@ -41,6 +41,10 @@ program abitk
  use m_ebands
  use m_crystal
  use m_kpts
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
 
  use defs_datatypes,   only : ebands_t
  use m_fstrings,       only : sjoin, strcat, basename
@@ -51,6 +55,7 @@ program abitk
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
+ use m_wfk,            only : wfk_kerange_check
 
  implicit none
 
@@ -63,17 +68,17 @@ program abitk
  integer :: ndivsm, abimem_level
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
  character(len=500) :: command, arg, msg
- character(len=fnlen) :: path !, prefix
+ character(len=fnlen) :: path, other_path, fullwfk_path, kerange_path, kerange_wfk_path !, prefix
  type(hdr_type) :: hdr
- type(ebands_t) :: ebands, ebands_kpath
+ type(ebands_t) :: ebands, ebands_kpath, other_ebands
  type(edos_t) :: edos
- type(crystal_t) :: cryst
+ type(crystal_t) :: cryst, other_cryst
  type(geo_t) :: geo
  type(kpath_t) :: kpath
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
- real(dp) :: params(4)
+ real(dp) :: skw_params(4)
  real(dp),allocatable :: bounds(:,:)
  !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
@@ -99,7 +104,6 @@ program abitk
  nargs = command_argument_count()
  ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
 
-
  ! Command line options.
  do ii=1,command_argument_count()
    call get_command_argument(ii, arg)
@@ -117,7 +121,7 @@ program abitk
      write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
      write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
      write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
-     write(std_out,"(a)")"from_poscar POSCAR_FILE              Read POSCAR file, print abint variables."
+     write(std_out,"(a)")"from_poscar POSCAR_FILE              Read POSCAR file, print abinit variables."
      write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
      write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
      write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with electron bands."
@@ -233,10 +237,12 @@ program abitk
 
  !case ("nesting")
    !call get_path_ebands_cryst(path, ebands, cryst, comm)
-   !ierr = ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermie_nest, qpath_vertices,errmsg)
+   !ierr = ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg)
 
- case ("ebands_skw_kpath")
+ case ("skw_kpath")
+   ! Get energies on the IBZ from path
    call get_path_ebands_cryst(path, ebands, cryst, comm)
+
    ! Generate k-path
    ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
    !MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
@@ -246,22 +252,48 @@ program abitk
    !ABI_CHECK(get_args_from_string("bounds", bounds, msg, default="[0,0,0,1/2,0,0,0,1/2]") == 0, msg)
    kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
    ABI_FREE(bounds)
-   call kpath%print(header="Interpolating energies on k-path", unit=std_out)
-   ! Interpolate band energies with star-functions
-   params = 0; params(1) = 1; params(2) = 5
-   !ABI_CHECK(get_arg_list("einterp", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
-   !if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
-   ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, params, [1, ebands%mband], comm)
 
-   call kpath%free()
+   call kpath%print(header="Interpolating energies on k-path", unit=std_out)
+
+   ! Interpolate band energies with star-functions
+   call parse_skw_params(skw_params)
+   !ABI_CHECK(get_arg_list("einterp", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
+   !if (nint(dtset%einterp(1)) == 1) skw_params = dtset%einterp
+   ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
+
    !call wrtout(std_out, sjoin(" Writing interpolated bands to:",  path)
    ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
    call ebands_write(ebands_kpath, prtebands, path)
-   call ebands_free(ebands_kpath)
 
-   !ebands_kmesh = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
+   !ebands_kmesh = ebands_interp_kmesh(ebands, cryst, skw_params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
    !     band_block, comm, out_prefix)
    !call ebands_free(ebands_kmesh)
+
+ case ("skw_compare")
+   ! Get energies on the IBZ from filepath
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+
+   ! Get ab-initio energies for the second file (assume it's a path!)
+   call get_path_ebands_cryst(other_path, other_ebands, other_cryst, comm, argpos=3)
+
+   ! Interpolate band energies on the path with star-functions
+   kpath = kpath_new(other_ebands%kptns, other_cryst%gprimd, -1)
+
+   call parse_skw_params(skw_params)
+   ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
+
+   !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
+   !call ebands_write(ebands_kpath, prtebands, path)
+
+   ! Write EBANDS file
+#ifdef HAVE_NETCDF
+   NCF_CHECK(ebands_ncwrite_path(other_ebands, cryst, "abinitio_EBANDS.nc"))
+   NCF_CHECK(ebands_ncwrite_path(ebands_kpath, other_cryst, "skw_EBANDS.nc"))
+#endif
+
+   call wrtout(std_out, &
+     ch10//" Use `abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot` to compare the bands with AbiPy.", &
+     newlines=2)
 
  case ("ebands_extrael")
    call get_path_ebands(path, ebands, comm)
@@ -276,6 +308,20 @@ program abitk
    call ebands_update_occ(ebands, spinmagntarget, prtvol=prtvol)
    call ebands_print(ebands, prtvol=prtvol)
 
+ ! ====================
+ ! Tools for developers
+ ! ====================
+
+ case ("wfk_kerange_check")
+    call get_command_argument(2, fullwfk_path)
+    call get_command_argument(3, kerange_path)
+    call get_command_argument(4, kerange_wfk_path)
+    call wfk_kerange_check(fullwfk_path, kerange_path, kerange_wfk_path, xmpi_comm_self)
+
+ ! ===========
+ ! Unit tests
+ ! ===========
+
  case ("tetra_unit_tests")
    call tetra_unittests(comm)
 
@@ -289,7 +335,11 @@ program abitk
  ! Deallocate memory to make memcheck happy.
  call hdr%free()
  call cryst%free()
+ call other_cryst%free()
+ call kpath%free()
  call ebands_free(ebands)
+ call ebands_free(ebands_kpath)
+ call ebands_free(other_ebands)
 
  ABI_SFREE(kibz)
  ABI_SFREE(wtk)
@@ -313,13 +363,9 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
+subroutine get_path_ebands_cryst(path, ebands, cryst, comm, argpos)
 
 !Arguments ------------------------------------
 !scalars
@@ -327,14 +373,16 @@ subroutine get_path_ebands_cryst(path, ebands, cryst, comm)
  type(ebands_t),intent(out) :: ebands
  type(crystal_t),intent(out) :: cryst
  integer,intent(in) :: comm
+ integer,intent(in),optional :: argpos
 
 !Arguments ----------------------------
 !Local variables-----------------------
- integer :: nargs
+ integer :: nargs, apos
 
+ apos = 2; if (present(argpos)) apos = argpos
  nargs = command_argument_count()
- ABI_CHECK(nargs > 1, "FILE argument is required.")
- call get_command_argument(2, path)
+ ABI_CHECK(nargs >= apos, "FILE argument is required.")
+ call get_command_argument(apos, path)
  cryst = crystal_from_file(path, comm)
  ebands = ebands_from_file(path, comm)
 
@@ -350,10 +398,6 @@ end subroutine get_path_ebands_cryst
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -387,10 +431,6 @@ end subroutine get_path_ebands
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_path_cryst(path, cryst, comm)
@@ -411,6 +451,38 @@ subroutine get_path_cryst(path, cryst, comm)
  cryst = crystal_from_file(path, comm)
 
 end subroutine get_path_cryst
+!!***
+
+!!****f* abitk/parse_skw_params
+!! NAME
+!! parse_skw_params
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine parse_skw_params(params)
+
+!Arguments ----------------------------
+!Local variables-----------------------
+ real(dp),intent(out) :: params(4)
+
+ integer :: lpratio
+ real(dp) :: rcut, rsigma
+
+!*******************************************************
+
+ !params = zero; params(1) = 1; params(2) = 5
+ ABI_CHECK(get_arg("lpratio", lpratio, msg, default=5) == 0, msg)
+ ABI_CHECK(get_arg("rcut", rcut, msg, default=zero) == 0, msg)
+ ABI_CHECK(get_arg("rsigma", rsigma, msg, default=zero) == 0, msg)
+ params = [one, dble(lpratio), rcut, rsigma]
+
+end subroutine parse_skw_params
 !!***
 
 end program abitk

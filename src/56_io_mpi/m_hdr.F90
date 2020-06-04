@@ -3854,7 +3854,7 @@ end subroutine hdr_get_occ3d
 !!
 !! SOURCE
 
-subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
+subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 
 !Arguments ------------------------------------
 !scalars

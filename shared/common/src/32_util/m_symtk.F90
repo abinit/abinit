@@ -615,16 +615,16 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 !  Compute symmetric of primitive vectors under point symmetry operations
    do ii=1,3
      rprimd_sym(:,ii)=symrel(1,ii,isym)*rprimd(:,1)+&
-&     symrel(2,ii,isym)*rprimd(:,2)+&
-&     symrel(3,ii,isym)*rprimd(:,3)
+                      symrel(2,ii,isym)*rprimd(:,2)+&
+                      symrel(3,ii,isym)*rprimd(:,3)
    end do
 
 !  If the new lattice is the same as the original one,
 !  the lengths and angles are preserved
    do ii=1,3
      rmet_sym(ii,:)=rprimd_sym(1,ii)*rprimd_sym(1,:)+&
-&     rprimd_sym(2,ii)*rprimd_sym(2,:)+&
-&     rprimd_sym(3,ii)*rprimd_sym(3,:)
+                    rprimd_sym(2,ii)*rprimd_sym(2,:)+&
+                    rprimd_sym(3,ii)*rprimd_sym(3,:)
    end do
 
    residual=zero
@@ -634,12 +634,12 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
      end do
    end do
 
-   if(sqrt(residual)>tol*sqrt(rmet2))then
+   if(sqrt(residual) > tol*sqrt(rmet2))then
      if(iexit==0)then
-       write(msg, '(a,i5,a,a,a,a,a,es12.4,a,a,a,a,a,a,a)' )&
+       write(msg, '(a,i0,5a,es12.4,a,es12.4,6a)' )&
         'The symmetry operation number ',isym,' does not preserve',ch10,&
         'vector lengths and angles.',ch10,&
-        'The value of the residual is ',residual,'.',ch10,&
+        'The value of the residual is: ',residual, 'that is greater than threshold:', tol*sqrt(rmet2),ch10,&
         'Action: modify rprim, acell and/or symrel so that',ch10,&
         'vector lengths and angles are preserved.',ch10,&
         'Beware, the tolerance on symmetry operations is very small.'
@@ -652,8 +652,8 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 !  Also, the scalar product of rprimd_sym and gprimd must give integer numbers
    do ii=1,3
      prods(ii,:)=rprimd_sym(1,ii)*gprimd(1,:)+ &
-&     rprimd_sym(2,ii)*gprimd(2,:)+ &
-&     rprimd_sym(3,ii)*gprimd(3,:)
+                 rprimd_sym(2,ii)*gprimd(2,:)+ &
+                 rprimd_sym(3,ii)*gprimd(3,:)
    end do
 
    do ii=1,3
@@ -661,9 +661,10 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
        residual=prods(ii,jj)-anint(prods(ii,jj))
        if(abs(residual)>tol)then
          if(iexit==0)then
-           write(msg, '(a,i0,a,a,a,a,a,a,a)' )&
+           write(msg, '(a,i0,5a,es12.4,a,es12.4,4a)' )&
             'The symmetry operation number ',isym,' generates',ch10,&
             'a different lattice.',ch10,&
+            'The value of the residual is: ',residual, 'that is greater than the threshold:', tol, ch10,&
             'Action: modify rprim, acell and/or symrel so that',ch10,&
             'the lattice is preserved.'
            MSG_ERROR(msg)

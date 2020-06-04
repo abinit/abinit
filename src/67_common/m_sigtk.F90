@@ -389,7 +389,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    call gaps%print(unit=std_out)
  end if
 
- ABI_CHECK(maxval(gaps%ierr) == 0, "erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
+ ABI_CHECK(maxval(gaps%ierr) == 0, "sigma_erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  if (any(dtset%sigma_ngkpt /= 0)) then
     call wrtout(std_out, sjoin(" Generating initial list of k-points from sigma_nkpt.", ltoa(dtset%sigma_ngkpt)))
@@ -601,7 +601,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call gaps%print(header="Gaps from input ebands", unit=std_out)
  call gaps%free()
 
- ! Interpolate band energies with star-functions.
+ ! Interpolate band energies with star functions.
  ! In the EPH code, we will need eigens in the IBZ to compute efermi not just energies inside pockets.
  fine_kptrlatt = 0
  do ii=1,3
@@ -612,13 +612,14 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  fine_ebands = ebands_interp_kmesh(ebands, cryst, params, fine_kptrlatt, &
                                    dtset%sigma_nshiftk, dtset%sigma_shiftk, band_block, comm)
+ fine_ebands%istwfk = 1
 
  call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
  call ebands_print(fine_ebands, header="FINE EBANDS", unit=std_out, prtvol=dtset%prtvol)
 
  ! Interpolate bands on k-path.
  !if (nint(dtset%einterp(1)) == 0)
- !call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
+ !  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
  !end do
 
  ! Compute gaps using fine_ebands.
@@ -631,6 +632,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
  codvsn="        "
  codvsn(1:min(len_trim(ABINIT_VERSION),8))=ABINIT_VERSION(1:min(len_trim(ABINIT_VERSION),8))
+
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
@@ -640,7 +642,8 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
 
  ! Find k-points inside sigma_erange energy window.
- ! Set entry to 1 if (ikpt, spin) is inside the pocket (last index discerns between hole and electron pockets)
+ ! Set entry to the number of states inside the pocket at (ikpt, spin)
+ ! (last index discerns between hole and electron pockets)
  ABI_ICALLOC(kshe_mask, (fine_ebands%nkpt, ebands%nsppol, 2))
 
  do spin=1,ebands%nsppol
@@ -668,8 +671,9 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  end do
 
  ! Build list of k-points inside pockets.
- nkpt_inerange = count(kshe_mask /= 0)
- ABI_MALLOC(krange2ibz, (nkpt_inerange))
+ ! Use overdimensioned array.
+ cnt = count(kshe_mask /= 0)
+ ABI_MALLOC(krange2ibz, (cnt))
  cnt = 0
  do ikf_ibz=1,fine_ebands%nkpt
    if (any(kshe_mask(ikf_ibz,:,:) /= 0)) then
@@ -677,16 +681,18 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
      krange2ibz(cnt) = ikf_ibz
    end if
  end do
+ nkpt_inerange = cnt
 
  ! Possible extensions that may be implemented at this level:
- !     Find image points in the BZ?
- !     Compute tetra and q-points for EPH calculation or use +/- wmax window and heuristic approach in sigmaph at runtime?
- !     Compute SKW 1st and 2nd derivatives needed to treat Frohlich?
+ !     1. Find image points in the BZ?
+ !     2. Compute tetra and q-points for EPH calculation or use +/- wmax window and heuristic approach in sigmaph at runtime?
+ !     3. Compute SKW 1st and 2nd derivatives needed to treat Frohlich?
 
  ! Write output files with k-point list.
  if (my_rank == master .and. len_trim(prefix) /= 0) then
    write(std_out, "(a,i0,a,f5.1,a)")" Found: ",  nkpt_inerange, " kpoints in sigma_erange energy windows. (nkeff / nkibz): ", &
        (100.0_dp * nkpt_inerange) / fine_ebands%nkpt, " [%]"
+
    ! Write text file with Abinit input variables (mainly for testing purposes).
    path = strcat(prefix, "_KERANGE")
    if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
@@ -726,7 +732,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    ! Write extra arrays.
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "krange2ibz"), krange2ibz(1:nkpt_inerange)))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
    NCF_CHECK(nf90_close(ncid))
