@@ -380,11 +380,6 @@ $\qq \rightarrow 0$ is properly described yet the Fourier interpolation can intr
 between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the 
 physical results [[cite:Brunin2020]].
 
-<!--
-Note that the same consideration holds for Wannier-based approaches
-independently on the degree of localization of the (maximally-localized) Wannier functions.
--->
-
 ## Tricks to accelerate the computation and reduce the memory requirements
 
 Each sub-driver implements tricks to accelerate the calculation and reduce the memory requirements.
@@ -426,20 +421,3 @@ When [[prtwf]] is set to -1, the DFPT code writes the 1WF only if the DFPT SCF c
 so that one can still restart from these wavefunctions if really needed 
 (restarting a DFPT run from the 1WF file is more effective than restarting from the first order density).
 
-<!--
-On the one hand, this approach was relatively easy to implement as most of the work,
-in particular the computation of the EPH matrix elements, was already performed by the DFPT code.
-On the other hand, the resulting implementation was too rigid
-as several important dimensions such as the number of $\kk$-points, $\qq$-points and bands
-in the EPH matrix elements had to be fixed at the level of the DFPT calculation.
-Performing convergence studies with respect to the $\kk$-point sampling, for instance,
-required performing new (and more expensive) DFPT calculations with denser $\kk$-meshes.
-Similarly, convergence studies for the $\qq$-points required additional DFPT computations, possibly
-on meshes that were multiples of the initial sampling so to reuse the $\qq$-points computed previously.
-A different philosophy is used, in which EPH matrix elements are computed directly starting from the basic ingredients, namely,
-the GS wavefunctions stored in the WFK file, and the first-order change of the Kohn-Sham (KS) potential produced by the DFPT code.
-This approach allows for more flexibility because electron and phonon calculations are now partly decoupled:
-the $\kk$-mesh can be densified by performing non-self-consistent calculations,
-thus bypassing the DFPT part, and interpolation schemes for the linear-response in $\qq$-space can be readily implemented.
-Unlike the previous algorithms implemented in ANADDB, the new driver is directly interfaced with  the ABINIT executable.
--->
