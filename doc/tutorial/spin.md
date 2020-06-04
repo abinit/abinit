@@ -152,7 +152,7 @@ well as the spin-magnetization. For this reason, it might be more difficult to r
 than in the non-magnetic case. 
 Not only starting with a reasonable magnetic moment might help in this respect, but also,
 modified (tighter) calculation parameters might be needed. For example, in the case of
-Chromium, in order to obtain the correct (non-zero) magnetic moment, a rather
+Cobalt, in order to obtain the correct (non-zero) magnetic moment, a rather
 dense sampling of wavevectors in the Brillouin zone must be used (e.g.e 16x16x16), with a 
 rather small value of [[tsmear]]. The solution of the Kohn-Sham equation
 will benefit of using a smaller value of [[tolrde]] (e.g. 0.001 instead of the default 0.005),
