@@ -15,7 +15,7 @@
 
  CASE (ABI_FFTW_BACKWARD) ! G --> R
    !
-   ! The prototype fo sfftw_plan_many_dft is:
+   ! The prototype of sfftw_plan_many_dft is:
    ! sfftw_plan_many_dft(rank, n, howmany, 
    !   fin,  iembed, istride, idist, 
    !   fout, oembed, ostride, odist, isign, my_flags)

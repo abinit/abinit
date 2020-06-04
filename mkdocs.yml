@@ -163,6 +163,9 @@ pages:
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
+    - Building Abinit: 
+        - Compilation Howto: tutorial/compilation.md
+        - Source Code: tutorial/source_code.md
     - Base Tutorials:
         - Base1: tutorial/base1.md
         - Base2: tutorial/base2.md
@@ -185,6 +188,10 @@ pages:
         - tutorial/nlo.md
     - DMFT: tutorial/dmft.md
     - EPH:
+        - tutorial/eph_intro.md
+        - tutorial/eph4mob.md
+        #- tutorial/eph4zpr.md
+    - EPH-legacy:
         - tutorial/eph.md
         - tutorial/tdepes.md
     - Many-Body:
@@ -263,6 +270,7 @@ markdown_extensions:
   - markdown.extensions.tables
   - markdown.extensions.def_list
   - markdown.extensions.sane_lists
+  - markdown.extensions.attr_list
   #- mdx_math:
   #      enable_dollar_delimiter: True
   - pymdownx.arithmatex:
@@ -319,7 +327,7 @@ copyright: Copyright &copy; 2019-2020 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.1.3  
+    version: 9.1.4  
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt

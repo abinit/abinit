@@ -167,6 +167,8 @@ subroutine abimem_init(level, delta_time, filename, limit_mb)
  character(len=500) :: msg
 ! *************************************************************************
 
+ !write(std_out, "(a,i0)")"Initializing abimem profiling with level: ", level
+
  minfo%level = level
  !start_time = abimem_wtime()
 

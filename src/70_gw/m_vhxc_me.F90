@@ -67,7 +67,7 @@ contains
 !!
 !! FUNCTION
 !!  Evaluate the matrix elements of $v_H$ and $v_{xc}$ and $v_U$
-!!  both in case of NC pseudopotentials and PAW (LDA+U, presently, is only available in PAW)
+!!  both in case of NC pseudopotentials and PAW (DFT+U, presently, is only available in PAW)
 !!  The matrix elements of $v_{xc}$ are calculated with and without the core contribution.
 !!  The later quantity is required in case of GW calculations.
 !!
@@ -548,12 +548,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    ABI_CHECK(ltest,"dijxc, dijxc_hat or dijxc_val not allocated")
    ABI_CHECK(nspinor == 1, "PAW with nspinor not tested")
 
-   ! For LDA+U
+   ! For DFT+U
    do iat=1,Cryst%natom
      itypat=Cryst%typat(iat)
      if (Pawtab(itypat)%usepawu/=0) then
        ltest=(allocated(Paw_ij(iat)%dijU))
-       ABI_CHECK(ltest,"LDA+U but dijU not allocated")
+       ABI_CHECK(ltest,"DFT+U but dijU not allocated")
      end if
    end do
 
@@ -722,7 +722,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
                        end if
                      end if
 
-                     ! TODO "ADD LDA+U and SO"
+                     ! TODO "ADD DFT+U and SO"
                      ! check this part
                      if (Mflags%has_vu==1) then
                        if (Pawtab(itypat)%usepawu/=0) then

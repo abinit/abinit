@@ -467,6 +467,11 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      call testkgrid(bravais,iout,kptrlatt,kptrlen, msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
    end if
 
+   ! TODO: Avoid call to getkgrid if eph
+   !eph_task = -1
+   !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
+   !if(tread==1) eph_task=intarr(1)
+
    fockdownsampling(:)=1
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fockdownsampling',tread,'INT')
    if(tread==1)fockdownsampling=intarr(1:3)

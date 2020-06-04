@@ -184,7 +184,6 @@ program anaddb
 !******************************************************************
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
-
  call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION,comm=comm, dimonly=1)
 
  natom = ddb_hdr%natom
@@ -192,7 +191,7 @@ program anaddb
  mtyp = ddb_hdr%mblktyp
  usepaw = ddb_hdr%usepaw
 
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
  mpert=natom+MPERT_MAX
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
@@ -245,7 +244,8 @@ program anaddb
  write(msg, '(a,a)' )' read the DDB information and perform some checks',ch10
  call wrtout([std_out, ab_out], msg)
 
- call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
+ call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc, ddb_hdr, crystal, comm, prtvol=inp%prtvol)
+ call ddb_hdr%free()
  nsym = Crystal%nsym
 
  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
@@ -614,7 +614,7 @@ program anaddb
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
    close(ddbun)
    call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
  end if
 
 

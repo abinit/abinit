@@ -86,6 +86,8 @@ module m_multibinit_dataset
   integer :: fit_ncoeff
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
+  integer :: fit_EFS(3)
+  integer :: sel_EFS(3) 
   integer :: opt_effpot 
   integer :: opt_ncoeff 
   integer :: ts_option
@@ -95,6 +97,7 @@ module m_multibinit_dataset
   ! TODO hexu: why integer dtion?
   integer :: dtion
   integer :: dynamics
+  integer :: dyn_chksym
   integer :: natifc
   integer :: natom
   integer :: ncoeff
@@ -107,7 +110,6 @@ module m_multibinit_dataset
   integer :: nsphere
   integer :: optcell
   integer :: prt_model
-  integer :: prt_names
   integer :: dipdip_prt
   integer :: prt_phfrq
   integer :: prt_ifc
@@ -116,7 +118,8 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: restartxf
   integer :: symdynmat
-  integer :: test_effpot ! TODO MARCUS add test_effpot for test-set implementation
+  integer :: test_effpot 
+  integer :: test_prt_ph 
   integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
@@ -155,6 +158,7 @@ module m_multibinit_dataset
   real(dp) :: conf_power_fact_disp
   real(dp) :: conf_power_fact_strain
   real(dp) :: delta_df
+  real(dp) :: dyn_tolsym
   real(dp) :: energy_reference
   real(dp) :: bound_cutoff
   real(dp) :: bound_Temp
@@ -163,9 +167,11 @@ module m_multibinit_dataset
   real(dp) :: fit_tolMSDS
   real(dp) :: fit_tolMSDE
   real(dp) :: fit_tolMSDFS
+  real(dp) :: strfact
   real(dp) :: temperature
   real(dp) :: rifcsph
   real(dp) :: conf
+  real(dp) :: tolmxf
   real(dp) :: acell(3)
   real(dp) :: strten_reference(6)
   real(dp) :: strtarget(6)
@@ -206,13 +212,24 @@ module m_multibinit_dataset
   integer, allocatable :: fit_bancoeff(:)
   ! fit_bancoeffs(fit_nbancoeff)
 
+  integer, allocatable :: iatfix(:,:) 
+  ! iatfix(3,natom) atom fix contraints for Broyden
+
   integer, allocatable :: opt_coeff(:)
   ! opt_coeff(opt_ncoeff)
 
   !integer, allocatable :: spin_sublattice(:) ! TODO hexu: difficult to use, better in xml?
 
+! Logical array 
+  logical :: fit_on(3)
+  ! fit_on(1) == TRUE, fit on energy, fit_on(2,3)=TRUE fit on forces stresses, fit_on(1,2,3)=TRUE fit on EFS 
+
+  logical :: sel_on(3)
+  ! sel_on(1) == TRUE, select on energy, sel_on(2,3)=TRUE select on forces stresses, fit_on(1,2,3)=TRUE select on EFS 
+
   real(dp), allocatable :: qmass(:)
   ! qmass(nnos)
+
 
 
 ! Real arrays
@@ -309,6 +326,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%dipdip_prt=0
  multibinit_dtset%dtion=100
  multibinit_dtset%dynamics=0
+ multibinit_dtset%dyn_chksym=0
+ multibinit_dtset%dyn_tolsym=1d-10
  multibinit_dtset%eivec=0
  multibinit_dtset%energy_reference= zero
  multibinit_dtset%enunit=0
@@ -327,6 +346,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_iatom=0
  multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
+ multibinit_dtset%fit_EFS = (/ 0, 1, 1 /)
+ multibinit_dtset%sel_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
  multibinit_dtset%fit_SPC_maxS=1
@@ -360,7 +381,6 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%opt_effpot=0
  multibinit_dtset%opt_coeff=0
  multibinit_dtset%prt_model=0
- multibinit_dtset%prt_names=0
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
  multibinit_dtset%strcpling = -1
@@ -368,9 +388,12 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%restartxf=0
  multibinit_dtset%rfmeth=1
  multibinit_dtset%rifcsph=zero
+ multibinit_dtset%strfact=100.0d0
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0 
+ multibinit_dtset%test_prt_ph=0 
+ multibinit_dtset%tolmxf=2.0d-5
  
  multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
@@ -436,6 +459,7 @@ multibinit_dtset%slc_coupling=0
  multibinit_dtset%conf_cutoff_disp(:)=zero
  ABI_ALLOCATE(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
  multibinit_dtset%q1shft(:,:) = zero
+ ABI_ALLOCATE(multibinit_dtset%iatfix,(3,natom))
 
  multibinit_dtset%latt_mask(:) = 0
 
@@ -507,6 +531,10 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  if(allocated(multibinit_dtset%q1shft))then
    ABI_DEALLOCATE(multibinit_dtset%q1shft)
  end if
+ if(allocated(multibinit_dtset%iatfix))then 
+   ABI_DEALLOCATE(multibinit_dtset%iatfix)
+ end if
+
 
  !if (allocated(multibinit_dtset%gilbert_damping))  then
  !  ABI_DEALLOCATE(multibinit_dtset%gilbert_damping)
@@ -572,7 +600,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Dummy arguments for subroutine 'intagm' to parse input file
 !Set routine version number here:
 !scalars
- integer :: iatifc,ii,iph1,iph2,jdtset,jj,marr,tread
+ integer :: iatifc,ii,iph1,iph2,jdtset,jj,marr,tread,idir,natfix,iatom
+ integer :: natom_sc
  character(len=500) :: message
 !arrays
  integer,allocatable :: intarr(:)
@@ -815,6 +844,33 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%fit_EFS=(/0,1,1/)
+ multibinit_dtset%fit_on = (/ .TRUE.,.TRUE.,.FALSE. /)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_EFS',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_EFS(1:3)=intarr(1:3)
+ if(multibinit_dtset%fit_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
+ if(multibinit_dtset%fit_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
+ if(multibinit_dtset%fit_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
+ if(any(multibinit_dtset%fit_EFS<0) .or. any(multibinit_dtset%fit_EFS>1))then
+   write(message, '(a,i8,a,a,a)' )&
+&   'fit_EFS is',multibinit_dtset%fit_EFS,', but the only allowed values are 0 and 1',ch10,&
+&   'Action: correct fit_EFS in your input file.'
+   MSG_ERROR(message)
+ end if
+ 
+ multibinit_dtset%sel_EFS=(/0,1,1/)
+ multibinit_dtset%sel_on = (/ .TRUE.,.TRUE.,.FALSE. /)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'sel_EFS',tread,'INT')
+ if(tread==1) multibinit_dtset%sel_EFS(1:3)=intarr(1:3)
+ if(multibinit_dtset%sel_EFS(1) == 1)multibinit_dtset%sel_on(3) = .TRUE.
+ if(multibinit_dtset%sel_EFS(2) == 0)multibinit_dtset%sel_on(1) = .FALSE.
+ if(multibinit_dtset%sel_EFS(3) == 0)multibinit_dtset%sel_on(2) = .FALSE.
+ if(any(multibinit_dtset%sel_EFS<0) .or. any(multibinit_dtset%sel_EFS>1))then
+   write(message, '(a,i8,a,a,a)' )&
+&   'sel_EFS is',multibinit_dtset%sel_EFS,', but the only allowed values are 0 and 1',ch10,&
+&   'Action: correct sel_EFS in your input file.'
+   MSG_ERROR(message)
+ end if
 
  multibinit_dtset%ts_option=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ts_option',tread,'INT')
@@ -899,6 +955,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
       &   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13.and.&
       &   multibinit_dtset%dynamics/=27.and.&
       &   multibinit_dtset%dynamics/=9.and.&
+      &   multibinit_dtset%dynamics/=7.and.&
+      &   multibinit_dtset%dynamics/=1.and.&
       &   multibinit_dtset%dynamics/=2.and.&
       &   multibinit_dtset%dynamics/=22.and.&
       &   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25 .and. &
@@ -907,7 +965,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is ',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 2,6,9,12,13, 22,24,25,101,102, 103 or 120 (see ionmov in abinit documentation).',ch10,&
+&   'are 1,2,6,7,9,12,13, 22,24,25,101,102, 103 or 120 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
@@ -918,7 +976,25 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_WARNING(message)
  end if
 
+ multibinit_dtset%dyn_chksym=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dyn_chksym',tread,'INT')
+ if(tread==1) multibinit_dtset%dyn_chksym=intarr(1)
+ if(multibinit_dtset%dyn_chksym<0 .or. multibinit_dtset%dyn_chksym>1)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'dyn_chksym is',multibinit_dtset%dyn_chksym,', but the only allowed values are 0 and 1.',ch10,&
+&   'Action: correct dyn_chksym in your input file.'
+   MSG_ERROR(message)
+ end if
 
+ multibinit_dtset%dyn_tolsym=1d-10
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dyn_tolsym',tread,'DPR')
+ if(tread==1) multibinit_dtset%dyn_tolsym=dprarr(1)
+ if(multibinit_dtset%dyn_tolsym<0)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'dyn_tolsym is',multibinit_dtset%dyn_tolsym,', but the only allowed values are positive.',ch10,&
+&   'Action: correct dyn_tolsym in your input file.'
+   MSG_ERROR(message)
+ end if
 !L
  multibinit_dtset%latt_compressibility=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_compressibility',tread,'DPR')
@@ -1104,16 +1180,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%prt_names=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_names',tread,'INT')
- if(tread==1) multibinit_dtset%prt_names=intarr(1)
- if(multibinit_dtset%prt_names<0.or.multibinit_dtset%prt_names>1)then
-   write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_names is',multibinit_dtset%prt_names,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct prt_names in your input file.'
-   MSG_ERROR(message)
- end if
 
  multibinit_dtset%prt_phfrq=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_phfrq',tread,'INT')
@@ -1583,10 +1649,20 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
+ multibinit_dtset%strfact=100.0d0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strfact',tread,'DPR')
+ if(tread==1) multibinit_dtset%strfact=dprarr(1)
+ if(multibinit_dtset%strfact<-tol12)then
+   write(message, '(a,f10.1,a,a,a,a,a)' )&
+&   'strfact is ',multibinit_dtset%strfact,'. The only allowed values',ch10,&
+&   'are positives values.',ch10,&
+&   'Action: correct strfact in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !T
 
- multibinit_dtset%temperature=325
+ multibinit_dtset%temperature=325.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%temperature=dprarr(1)
  if(multibinit_dtset%temperature<=0)then
@@ -1607,8 +1683,28 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct test_effpot in your input file.'
    MSG_ERROR(message)
  end if
+ 
+ multibinit_dtset%test_prt_ph=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_prt_ph',tread,'DPR')
+ if(tread==1) multibinit_dtset%test_prt_ph=dprarr(1)
+ if(multibinit_dtset%test_prt_ph<0 .or. multibinit_dtset%test_prt_ph>1)then
+   write(message, '(a,i0,a,a,a,a,a)' )&
+&   'test_prt_ph is ',multibinit_dtset%test_prt_ph,'. The only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct test_prt_ph in your input file.'
+   MSG_ERROR(message)
+ end if
 
-
+ multibinit_dtset%tolmxf=2.0d-5
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolmxf',tread,'DPR')
+ if(tread==1) multibinit_dtset%tolmxf=dprarr(1)
+ if(multibinit_dtset%tolmxf<0)then
+   write(message, '(a,i0,a,a,a,a,a)' )&
+&   'tolmxf is ',multibinit_dtset%tolmxf,'. The only allowed values',ch10,&
+&   'are positiv.',ch10,&
+&   'Action: correct tolmxf in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !U
 
@@ -2238,6 +2334,96 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Z
 
 !=======================================================================
+! Read Geometric constraint variables for relaxation
+!=======================================================================
+
+ natom_sc = natom*multibinit_dtset%ncell(1)*multibinit_dtset%ncell(2)*multibinit_dtset%ncell(3)
+ ABI_ALLOCATE(multibinit_dtset%iatfix,(3,natom_sc))
+ multibinit_dtset%iatfix(:,:)=0
+
+ do idir=0,3
+
+   if(idir==0)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfix',tread,'INT')
+   else if(idir==1)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfixx',tread,'INT')
+   else if(idir==2)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfixy',tread,'INT')
+   else if(idir==3)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfixz',tread,'INT')
+   end if
+
+!  Use natfix also for natfixx,natfixy,natfixz
+   natfix=0
+   if(tread==1)then 
+      natfix=intarr(1)        
+      ABI_DEALLOCATE(intarr)
+      ABI_DEALLOCATE(dprarr)
+      ABI_ALLOCATE(intarr,(natfix))
+      ABI_ALLOCATE(dprarr,(natfix))
+      marr = natfix
+   endif 
+
+!  Checks the validity of natfix
+   if (natfix<0 .or. natfix>natom_sc) then
+     write(message, '(a,a,a,i0,a,i4,a,a,a)' )&
+&     'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
+&     'between 0 and natom of the supercell (= ',natom_sc,'), while one of them is ',natfix,'.',ch10,&
+&     'Action: correct that occurence in your input file.'
+     MSG_ERROR(message)
+   end if
+
+!  Read iatfix
+   if(idir==0)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfix',tread,'INT')
+   else if(idir==1)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfixx',tread,'INT')
+   else if(idir==2)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfixy',tread,'INT')
+   else if(idir==3)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfixz',tread,'INT')
+   end if
+
+!  If some iatfix was read, natfix must vanish
+   if (natfix==0 .and. tread==1)then
+     write(message, '(a,i1,5a)' )&
+&     'For direction ',idir,' the corresponding natfix is zero,',ch10,&
+&     'while iatfix specifies some atoms to be fixed.',ch10,&
+&     'Action: either specify a non-zero natfix(x,y,z) or suppress iatfix(x,y,z).'
+     MSG_ERROR(message)
+   end if
+
+!  If natfix is non-zero, iatfix must be defined
+   if (natfix>0 .and. tread==0)then
+     write(message, '(a,i1,3a,i0,3a)' )&
+&     'For direction ',idir,' no iatfix has been specified,',ch10,&
+&     'while natfix specifies that some atoms to be fixed, natfix= ',natfix,'.',ch10,&
+&     'Action: either set natfix(x,y,z) to zero or define iatfix(x,y,z).'
+     MSG_ERROR(message)
+   end if
+
+   if(tread==1)then
+     do ii=1,natfix
+!      Checks the validity of the input iatfix
+       if (intarr(ii)<1 .or. intarr(ii)>natom_sc) then
+         write(message, '(a,a,a,i0,a,a,a)' )&
+&         'The input variables iatfix, iatfixx, iatfixy and iatfixz must be',ch10,&
+&         'between 1 and natom of the supercell, while one of them is ',intarr(ii),'.',ch10,&
+&         'Action: correct that occurence in your input file.'
+         MSG_ERROR(message)
+       end if
+!      Finally set the value of the internal iatfix array
+       do iatom=1,natom_sc
+         if(intarr(ii)==iatom)then
+           if(idir==0)multibinit_dtset%iatfix(1:3,iatom)=1
+           if(idir/=0)multibinit_dtset%iatfix(idir,iatom)=1
+         end if
+       end do
+     end do
+   end if
+ end do
+
+!=======================================================================
 ! Read SCALE UP variables 
 !=======================================================================
 
@@ -2435,7 +2621,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 !Local variables -------------------------
 !Set routine version number here:
 !scalars
- integer :: ii,iph1,iph2,iqshft
+ integer :: ii,iph1,iph2,iqshft,natfix
 
 !*********************************************************************
 
@@ -2457,6 +2643,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  if(multibinit_dtset%dynamics/=0)then
    write(nunit,'(a)')' Molecular Dynamics :'
    write(nunit,'(3x,a9,3I10.1)')' dynamics',multibinit_dtset%dynamics
+   write(nunit,'(3x,a9,3I10.1)')' dyn_chksym',multibinit_dtset%dyn_chksym
    write(nunit,'(3x,a9,3F10.1)')'     temp',multibinit_dtset%temperature
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    if (multibinit_dtset%nctime /=1)then
@@ -2474,6 +2661,16 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(3x,a12)',advance='no')'    qmass  '
      write(nunit,'(3x,15F12.10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
    end if
+
+   if(any(multibinit_dtset%iatfix /= 0))then 
+      natfix = 0
+      do ii=1,size(multibinit_dtset%iatfix,2)
+          if(any(multibinit_dtset%iatfix(:,ii) /= 0))then 
+             natfix = natfix + 1 
+          endif 
+      enddo       
+      write(nunit,'(3x,a9,3I10)')'   natfix', natfix
+   endif 
 
    if(multibinit_dtset%dynamics==101)then
    end if

@@ -6,6 +6,7 @@ prt_model = 1
 
 dipdip = 1
 dipdip_prt = 1
+ncell 2 2 2
 
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients
@@ -26,7 +27,7 @@ bound_cutoff = 3.8
 bound_anhaStrain = 0 
 bound_SPCoupling = 1
 
-bound_cell = 4 4 4
+bound_cell = 2 2 2 
 bound_temp = 100
 bound_step = 100
 

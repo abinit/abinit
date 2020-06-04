@@ -46,7 +46,7 @@ module m_exc_build
  use m_geometry,     only : normv
  use m_crystal,      only : crystal_t
  use m_gsphere,      only : gsphere_t, gsph_fft_tabs
- use m_vcoul,        only : vcoul_t 
+ use m_vcoul,        only : vcoul_t
  use m_bz_mesh,      only : kmesh_t, get_BZ_item, get_BZ_diff, has_BZ_item, isamek, findqg0
  use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_pawang,       only : pawang_type
@@ -109,9 +109,9 @@ contains
 !!
 !! NOTES
 !!  *) Version for K_V = K_C (q=0), thus KP_V = KP_C
-!!  *) No exchange limit: use LDA energies in case.
+!!  *) No exchange limit: use DFT energies in case.
 !!  *) Symmetry of H(-k-k') = H*(k k') not used.
-!!  *) Coulomb term can be approssimateed as diagonal in G.
+!!  *) Coulomb term can be approximated as diagonal in G.
 !!  *) Valence bands treated from lomo on.
 !!  *) Symmetries of the sub-blocks are used to reduce the number of elements to calculate.
 !!
@@ -314,22 +314,22 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ABI_MALLOC(ur_vk ,(nspinor*nfftot_osc))
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp_vk,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_vk,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_vk,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_ck,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_ck,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_ck,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_ckp,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_ckp,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_ckp,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_vkp,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_vkp,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_vkp,0,Wfd%nlmn_atm)
 
-   ABI_DT_MALLOC(Cp_tmp1,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp1,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp1,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp2,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp2,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp2,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp3,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp3,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp3,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp_tmp4,(Wfd%natom,nspinor))
+   ABI_MALLOC(Cp_tmp4,(Wfd%natom,nspinor))
    call pawcprj_alloc(Cp_tmp4,0,Wfd%nlmn_atm)
  end if
  !
@@ -687,7 +687,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          ! === Evaluate oscillator matrix elements ===
          ! * $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form.
          if (Wfd%usepaw==1.and.ik_bz/=ikp_bz) then
-           ABI_DT_MALLOC(Pwij_q,(Cryst%ntypat))
+           ABI_MALLOC(Pwij_q,(Cryst%ntypat))
            call pawpwij_init(Pwij_q,npweps,Qmesh%bz(:,iq_bz),Gsph_c%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
          end if
 
@@ -933,7 +933,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
          if (Wfd%usepaw==1.and.ik_bz/=ikp_bz) then ! Free the onsite contribution for this q.
            call pawpwij_free(Pwij_q)
-           ABI_DT_FREE(Pwij_q)
+           ABI_FREE(Pwij_q)
          end if
 
        end do ! ik_bz
@@ -1632,21 +1632,21 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  ! Deallocation for PAW.
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cp_vk)
-   ABI_DT_FREE(Cp_vk)
+   ABI_FREE(Cp_vk)
    call pawcprj_free(Cp_ck)
-   ABI_DT_FREE(Cp_ck)
+   ABI_FREE(Cp_ck)
    call pawcprj_free(Cp_ckp)
-   ABI_DT_FREE(Cp_ckp)
+   ABI_FREE(Cp_ckp)
    call pawcprj_free(Cp_vkp)
-   ABI_DT_FREE(Cp_vkp)
+   ABI_FREE(Cp_vkp)
    call pawcprj_free(Cp_tmp1)
-   ABI_DT_FREE(Cp_tmp1)
+   ABI_FREE(Cp_tmp1)
    call pawcprj_free(Cp_tmp2)
-   ABI_DT_FREE(Cp_tmp2)
+   ABI_FREE(Cp_tmp2)
    call pawcprj_free(Cp_tmp3)
-   ABI_DT_FREE(Cp_tmp3)
+   ABI_FREE(Cp_tmp3)
    call pawcprj_free(Cp_tmp4)
-   ABI_DT_FREE(Cp_tmp4)
+   ABI_FREE(Cp_tmp4)
  end if
 
  call xmpi_barrier(comm)
@@ -1682,9 +1682,9 @@ end subroutine exc_build_block
 !!
 !! NOTES
 !!  *) Version for K_V = K_C (q=0), thus KP_V = KP_C
-!!  *) No exchange limit: use LDA energies in case.
+!!  *) No exchange limit: use DFT energies in case.
 !!  *) Symmetry of H(-k-k') = H*(k k') not used.
-!!  *) Coulomb term can be approssimateed as diagonal in G.
+!!  *) Coulomb term can be approximated as diagonal in G.
 !!  *) Valence bands treated from lomo on.
 !!  *) Symmetries of the sub-blocks are used to reduce the number of elements to calculate.
 !!
@@ -2306,9 +2306,9 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  ! &              * (Cryst%ucvol*Kmesh%nbz)/(2*pi)**3. * QL*QL
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
+   ABI_MALLOC(Cp2,(Wfd%natom,Wfd%nspinor))
    call pawcprj_alloc(Cp2,0,Wfd%nlmn_atm)
  end if
 
@@ -2326,7 +2326,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  call get_BZ_item(Qmesh,iqbz0,qbz,iq_ibz,isym_q,itim_q)
 
  if (Wfd%usepaw==1) then ! Prepare onsite contributions at q==0
-   ABI_DT_MALLOC(Pwij_q0,(Cryst%ntypat))
+   ABI_MALLOC(Pwij_q0,(Cryst%ntypat))
    call pawpwij_init(Pwij_q0,npweps,Qmesh%bz(:,iqbz0),Gsph_x%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
  end if
  !
@@ -2474,11 +2474,11 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  if (Wfd%usepaw==1) then
    ! Deallocation for PAW.
    call pawpwij_free(Pwij_q0)
-   ABI_DT_FREE(Pwij_q0)
+   ABI_FREE(Pwij_q0)
    call pawcprj_free(Cp1)
-   ABI_DT_FREE(Cp1)
+   ABI_FREE(Cp1)
    call pawcprj_free(Cp2)
-   ABI_DT_FREE(Cp2)
+   ABI_FREE(Cp2)
  end if
 
  call timab(671,2,tsec)

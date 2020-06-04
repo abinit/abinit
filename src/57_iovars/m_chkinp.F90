@@ -869,6 +869,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%eph_task == [-5, -14])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5, -14]")
      end if
+     !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
+     !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
+     !end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
@@ -910,6 +913,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
     if (dt%eph_np_pqbks(1) /= 0 .and. dt%eph_np_pqbks(1) > 3 * dt%natom ) then
       MSG_ERROR_NOSTOP("Number of procs for perturbation parallelism  cannot be greater than 3 * natom", ierr)
     end if
+
+#ifndef HAVE_NETCDF_MPI
+    if (abs(dt%eph_task) == 4 .and. (dt%eph_np_pqbks(4) /= 1 .or. dt%eph_np_pqbks(5) /= 1)) then
+      MSG_ERROR_NOSTOP("k-point and/or spin parallelism in EPH code requires Netcdf4 with MPI-IO support!", ierr)
+    end if
+#endif
    end if
 
    ! exchmix
@@ -993,7 +1002,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (optdriver==RUNL_SCREENING .and. (dt%awtr /=1 .or. dt%spmeth /=0)) then
        write(msg,'(3a)' )&
         'When gwcomp /= 0, the Adler-Wiser formula with time-reversal should be used',ch10,&
-         'Action: set awtr to 1 or/and spmeth to 0'
+        'Action: set awtr to 1 or/and spmeth to 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
@@ -1199,19 +1208,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='wvl_bigdft_comp' ; cond_values(1)=dt%wvl_bigdft_comp
      if(wvlbigdft) then
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
+        'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
      else
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+        'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
 !    If wvl+metal, iscf cannot be 0
      if (dt%occopt>2) then
        cond_string(1)='occopt' ; cond_values(1)=dt%occopt
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+        'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
    end if
-!  If ionmov==4, iscf must be 2, 12, 5 or 6.
+
+   ! If ionmov==4, iscf must be 2, 12, 5 or 6.
    if(dt%ionmov==4)then
      cond_string(1)='ionmov' ; cond_values(1)=4
      call chkint_eq(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,4,(/2,12,5,6/),iout)
@@ -2290,10 +2300,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   !Longwave calculation not cmpatible with nonlinear core corrections  
+   !Longwave calculation not compatible with nonlinear core corrections
    if(dt%optdriver==RUNL_LONGWAVE)then
      do ipsp=1,npsp
-  !    Check that xccc is zero 
+  !    Check that xccc is zero
        if (pspheads(ipsp)%xccc/=0) then
          write(msg, '(5a,i0,3a)' )&
   &     'For a longwave calculation it is not possible to use norm-conserving pseudopotentials',ch10,&
@@ -2304,13 +2314,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end do
    end if
-   !Longwave calculation function only for LDA 
+   !Longwave calculation function only for LDA
    allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
    if(allow)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
    end if
-   !Longwave calculation function only for useylm=1 
+   !Longwave calculation function only for useylm=1
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
     write(msg, '(3a,i0,2a)' )&
   & 'A longwave calculation requires the input variable "useylm" to be 1,',ch10 ,&
@@ -2322,7 +2332,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%optdriver==RUNL_LONGWAVE)then
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
-   endif 
+   endif
    !Longwave calculation not compatible with spin-dependent calculations
    if(dt%nsppol/=1.or.dt%nspden/=1)then
      cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
@@ -2453,7 +2463,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%usepawu/=0.and.nspinor==2.and.dt%pawcpxocc==1) then
        write(msg, '(5a)' )&
 &       'When non-collinear magnetism is activated ,',ch10,&
-&       'and LDA+U activated ',ch10,&
+&       'and DFT+U activated ',ch10,&
 &       'PAW occupancies must be complex !'
        MSG_ERROR_NOSTOP(msg, ierr)
      else if (dt%pawspnorb==1.and.(dt%kptopt==0.or.dt%kptopt>=3).and.dt%pawcpxocc==1) then
@@ -3242,7 +3252,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)/=-1.and.dt%lpawu(itypat)/=maxval(dt%lpawu(:))) then
            write(msg, '(3a)' )&
-&           'When usedmatpu/=0 (use of an initial density matrix for LDA+U),',ch10,&
+&           'When usedmatpu/=0 (use of an initial density matrix for DFT+U),',ch10,&
 &           'lpawu must be equal for all types of atoms on which +U is applied !'
            MSG_ERROR_NOSTOP(msg,ierr)
          end if
@@ -3333,7 +3343,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
      if(dt%pawspnorb>0) then
        write(msg,'(3a)' ) &
-&       '  LDA+U+SpinOrbit is still on test ',ch10,&
+&       '  DFT+U+SpinOrbit is still on test ',ch10,&
 &       '  (not yet in production)'
        MSG_WARNING(msg)
      end if
@@ -3343,8 +3353,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  Restriction when use together
    if(dt%useexexch/=0.and.dt%usepawu/=0)then
      do itypat=1,dt%ntypat
-       if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.&
-&       dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
+       if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
          write(msg, '(5a,i2,3a)' )&
 &         'When PAW+U (usepawu/=0) and local exact-exchange (useexexch/=0)',ch10,&
 &         'are selected together, they must apply on the same',ch10,&
@@ -3842,6 +3851,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     'Put iomode to 3 to use ETSF retart files.'
      MSG_WARNING(msg)
    end if
+ end if
+
+ ! ===========================================================
+ ! Write COMMENTs if some combination of input vars look weird
+ ! ===========================================================
+ if (dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
+   MSG_COMMENT("dipdip can be set to 0 in case of metals. The default value is required for polar materials.")
  end if
 
  ! If there was a problem, then stop.

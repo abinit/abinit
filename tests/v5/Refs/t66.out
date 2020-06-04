@@ -1034,7 +1034,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -1689,7 +1689,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -1817,7 +1817,7 @@ KS_gap     :    2.536
 QP_gap     :    2.982
 Delta_QP_KS:    0.446
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -6.442 -10.626 -17.206   7.945   0.516  -0.939  -9.922   0.704  -5.738
         2   5.620 -11.496 -12.344   1.431   0.783  -0.277 -11.040   0.456   6.076
         3   5.620 -11.496 -12.344   1.431   0.783  -0.277 -11.040   0.456   6.076
@@ -1836,7 +1836,7 @@ KS_gap     :    3.476
 QP_gap     :    3.930
 Delta_QP_KS:    0.455
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -2.251 -11.018 -15.704   5.270   0.674  -0.483 -10.624   0.394  -1.857
         2  -2.251 -11.018 -15.704   5.270   0.674  -0.483 -10.624   0.394  -1.857
         3   2.726 -10.787 -12.908   2.474   0.761  -0.315 -10.518   0.269   2.995
@@ -1854,7 +1854,7 @@ KS_gap     :    2.692
 QP_gap     :    3.244
 Delta_QP_KS:    0.552
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -4.071 -11.009 -16.565   6.378   0.624  -0.602 -10.496   0.514  -3.557
         2  -1.440 -10.391 -14.608   4.594   0.683  -0.463 -10.133   0.258  -1.182
         3   4.409 -11.247 -12.631   1.878   0.775  -0.291 -10.864   0.383   4.792
@@ -1986,7 +1986,7 @@ meta: {optdriver: 4, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -2114,7 +2114,7 @@ KS_gap     :    2.536
 QP_gap     :    2.987
 Delta_QP_KS:    0.451
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -6.442 -10.626 -17.206   7.945   0.516  -0.939  -9.942   0.724  -5.717
         2   5.620 -11.496 -12.344   1.431   0.783  -0.277 -11.076   0.588   6.208
         3   5.620 -11.496 -12.344   1.431   0.783  -0.277 -11.076   0.588   6.208
@@ -2133,7 +2133,7 @@ KS_gap     :    3.476
 QP_gap     :    3.976
 Delta_QP_KS:    0.501
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -2.251 -11.018 -15.704   5.270   0.674  -0.483 -10.648   0.443  -1.807
         2  -2.251 -11.018 -15.704   5.270   0.674  -0.483 -10.648   0.443  -1.807
         3   2.726 -10.787 -12.908   2.474   0.761  -0.315 -10.540   0.339   3.065
@@ -2151,7 +2151,7 @@ KS_gap     :    2.692
 QP_gap     :    3.311
 Delta_QP_KS:    0.619
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -4.071 -11.009 -16.565   6.378   0.624  -0.602 -10.521   0.556  -3.515
         2  -1.440 -10.391 -14.608   4.594   0.683  -0.463 -10.154   0.302  -1.138
         3   4.409 -11.247 -12.631   1.878   0.775  -0.291 -10.894   0.485   4.894

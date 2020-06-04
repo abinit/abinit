@@ -106,7 +106,6 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
               asr           2
            chneut           0
         ddb_ngqpt        4    4    4
-       dvdb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
        eph_fsewin      2.93994603E-02 Hartree
        eph_fsmear1     9.99999978E-03 Hartree
@@ -1279,7 +1278,6 @@ All the independent perturbations are available
               asr           2
            chneut           0
         ddb_ngqpt        4    4    4
-       dvdb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
        eph_fsewin      2.93994603E-02 Hartree
        eph_fsmear1     9.99999978E-03 Hartree

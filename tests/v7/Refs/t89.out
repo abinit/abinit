@@ -107,10 +107,6 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
         ddb_ngqpt2       0    0    0
         ddb_ngqpt3       4    4    4
         ddb_ngqpt4       4    4    4
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       4    4    4
-       dvdb_ngqpt4       4    4    4
              ecut      6.00000000E+00 Hartree
          eph_task1          1
          eph_task2          1
@@ -760,10 +756,6 @@ All the independent perturbations are available
         ddb_ngqpt2       0    0    0
         ddb_ngqpt3       4    4    4
         ddb_ngqpt4       4    4    4
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       4    4    4
-       dvdb_ngqpt4       4    4    4
              ecut      6.00000000E+00 Hartree
          eph_task1          1
          eph_task2          1

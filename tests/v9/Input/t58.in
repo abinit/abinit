@@ -8,7 +8,6 @@ t57o_DS6_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test =

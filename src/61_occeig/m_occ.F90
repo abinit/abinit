@@ -700,7 +700,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
        call wrtout(std_out,msg,'COLL')
      end do
    end do
-   if (nkpt/=nkpt_eff) call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
+   if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
 
    call wrtout(std_out,'  (2) spin down values  ','COLL')
    do ikpt=1,nkpt_eff
