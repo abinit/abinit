@@ -889,10 +889,11 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
        if (abs(symcrys(1,2,isym)).lt.tst.and.abs(symcrys(1,3,isym)).lt.tst &
        .and.abs(symcrys(2,1,isym)).lt.tst.and.abs(symcrys(2,3,isym)).lt.tst.and.  &
        abs(symcrys(3,1,isym)).lt.tst.and.abs(symcrys(3,2,isym)).lt.tst) then
-         write(std_out,*) '-----------------------------------------'
-         write(std_out,*) '    the crystal has inversion symmetry   '
-         write(std_out,*) '    the SHG susceptibility is zero       '
-         write(std_out,*) '-----------------------------------------'
+         write(std_out,*) '-------------------------------------------'
+         write(std_out,*) '    The crystal has inversion symmetry     '
+         write(std_out,*) '    The SHG susceptibility is zero         '
+         write(std_out,*) '    Action : set num_nonlin_comp to zero   '
+         write(std_out,*) '-------------------------------------------'
          MSG_ERROR("Aborting now")
        end if
      end if
@@ -901,8 +902,10 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in nlinopt:                        '
-     write(std_out,*) '    the polarisation directions incorrect    '
+     write(std_out,*) '    Incorrect polarisation directions        '
      write(std_out,*) '    1=x,  2=y  and 3=z                       '
+     write(std_out,*) '    Action : check your input file,          ' 
+     write(std_out,*) '    use only 1, 2 or 3 to define directions  '
      write(std_out,*) '---------------------------------------------'
      MSG_ERROR("Aborting now")
    end if
@@ -929,19 +932,19 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
   !broadening
    if (brod.gt.0.009) then
      write(std_out,*) '---------------------------------------------'
-     write(std_out,*) '    ATTENTION: broadening is quite high      '
+     write(std_out,*) '    WARNING : broadening is quite high       '
      write(std_out,*) '    ideally should be less than 0.005        '
      write(std_out,*) '---------------------------------------------'
    else if (brod.gt.0.015) then
      write(std_out,*) '----------------------------------------'
-     write(std_out,*) '    ATTENTION: broadening is too high   '
+     write(std_out,*) '    WARNING : broadening is too high    '
      write(std_out,*) '    ideally should be less than 0.005   '
      write(std_out,*) '----------------------------------------'
    end if
   !tolerance
    if (tol.gt.0.006) then
      write(std_out,*) '----------------------------------------'
-     write(std_out,*) '    ATTENTION: tolerance is too high    '
+     write(std_out,*) '    WARNING : tolerance is too high     '
      write(std_out,*) '    ideally should be less than 0.004   '
      write(std_out,*) '----------------------------------------'
    end if

@@ -1009,7 +1009,7 @@ end subroutine wfk_ncdef_dims_vars
 !!  Test two wfk_t objects for consistency. Return non-zero value if test fails.
 !!
 !! INPUTS
-!!  wfk1, wfk1<class(wfk_t)> = WFK handlers to be compared
+!!  wfk1, wfk2 <class(wfk_t)> = WFK handlers to be compared
 !!
 !! OUTPUT
 !!  ierr
@@ -1035,31 +1035,33 @@ integer function wfk_compare(wfk1, wfk2) result(ierr)
 
  ierr = 0
 
+ ierr=wfk1%hdr%compare(wfk2%hdr)
+
  ! Test basic dimensions
- if (wfk1%hdr%nsppol /= wfk2%hdr%nsppol) then
-   ierr = ierr + 1; MSG_WARNING("Different nsppol")
- end if
- if (wfk1%hdr%nspinor /= wfk2%hdr%nspinor) then
-   ierr = ierr + 1; MSG_WARNING("Different nspinor")
- end if
- if (wfk1%hdr%nspden /= wfk2%hdr%nspden) then
-   ierr = ierr + 1; MSG_WARNING("Different nspden")
- end if
- if (wfk1%hdr%nkpt /= wfk2%hdr%nkpt) then
-   ierr = ierr + 1; MSG_WARNING("Different nkpt")
- end if
+!if (wfk1%hdr%nsppol /= wfk2%hdr%nsppol) then
+!  ierr = ierr + 1; MSG_WARNING("Different nsppol")
+!end if
+!if (wfk1%hdr%nspinor /= wfk2%hdr%nspinor) then
+!  ierr = ierr + 1; MSG_WARNING("Different nspinor")
+!end if
+!if (wfk1%hdr%nspden /= wfk2%hdr%nspden) then
+!  ierr = ierr + 1; MSG_WARNING("Different nspden")
+!end if
+!if (wfk1%hdr%nkpt /= wfk2%hdr%nkpt) then
+!  ierr = ierr + 1; MSG_WARNING("Different nkpt")
+!end if
  if (wfk1%formeig /= wfk2%formeig) then
    ierr = ierr + 1; MSG_WARNING("Different formeig")
  end if
- if (wfk1%hdr%usepaw /= wfk2%hdr%usepaw) then
-   ierr = ierr + 1; MSG_WARNING("Different usepaw")
- end if
- if (wfk1%hdr%ntypat /= wfk2%hdr%ntypat) then
-   ierr = ierr + 1; MSG_WARNING("Different ntypat")
- end if
- if (wfk1%hdr%natom /= wfk2%hdr%natom) then
-   ierr = ierr + 1; MSG_WARNING("Different natom")
- end if
+!if (wfk1%hdr%usepaw /= wfk2%hdr%usepaw) then
+!  ierr = ierr + 1; MSG_WARNING("Different usepaw")
+!end if
+!if (wfk1%hdr%ntypat /= wfk2%hdr%ntypat) then
+!  ierr = ierr + 1; MSG_WARNING("Different ntypat")
+!end if
+!if (wfk1%hdr%natom /= wfk2%hdr%natom) then
+!  ierr = ierr + 1; MSG_WARNING("Different natom")
+!end if
  !if (wfk1%hdr%fform /= wfk2%hdr%fform) then
  !  ierr = ierr + 1; MSG_WARNING("Different fform")
  !end if
@@ -1068,18 +1070,18 @@ integer function wfk_compare(wfk1, wfk2) result(ierr)
  if (ierr /= 0) return
 
  ! Test important arrays (rprimd is not tested)
- if (any(wfk1%hdr%typat /= wfk2%hdr%typat)) then
-   ierr = ierr + 1; MSG_WARNING("Different typat")
- end if
- if (any(wfk1%hdr%npwarr /= wfk2%hdr%npwarr)) then
-   ierr = ierr + 1; MSG_WARNING("Different npwarr array")
- end if
+!if (any(wfk1%hdr%typat /= wfk2%hdr%typat)) then
+!  ierr = ierr + 1; MSG_WARNING("Different typat")
+!end if
+!if (any(wfk1%hdr%npwarr /= wfk2%hdr%npwarr)) then
+!  ierr = ierr + 1; MSG_WARNING("Different npwarr array")
+!end if
  if (any(wfk1%nband /= wfk2%nband)) then
    ierr = ierr + 1; MSG_WARNING("Different nband array")
  end if
- if (any(abs(wfk1%hdr%kptns - wfk2%hdr%kptns) > tol6)) then
-   ierr = ierr + 1; MSG_WARNING("Different kptns array")
- end if
+!if (any(abs(wfk1%hdr%kptns - wfk2%hdr%kptns) > tol6)) then
+!  ierr = ierr + 1; MSG_WARNING("Different kptns array")
+!end if
 
  ! Call hdr_check to get a nice diff of the header but don't check restart and restartpaw.
  call hdr_check(wfk1%fform,wfk2%fform,wfk1%hdr,wfk2%hdr,"PERS",restart,restartpaw)

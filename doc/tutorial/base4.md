@@ -315,16 +315,18 @@ The total energy after the first SCF cycle, when the atomic positions are equal 
 
     ETOT  6  -6.2619738807344
 
-Note that the total energy of three aluminum atoms in the bulk,
-(from section 4.3, etotal24 multiplied by three) is -6.293994 Ha
-so that the non-relaxed surface energy, per surface unit cell (there are two surfaces in our simulation cell!)
-is 0.016010 Ha = 0.436 eV.
+The total energy of three aluminum atoms in the bulk,
+(from section 4.3, etotal24 multiplied by three) is -6.293994 Ha.
+Comparing the non-relaxed slab energy and the bulk energy, one obtains
+the non-relaxed surface energy, per surface unit cell (there are two surfaces in our simulation cell!),
+namely 0.016010 Ha = 0.436 eV.
 
 The total energy after the Broyden relaxation is:
 
     etotal     -6.2622251508E+00
 
-so that the relaxed surface energy, per surface unit cell is 0.015885 Ha = 0.432eV.
+The relaxed surface energy, per surface unit cell, is obtained by comparing the bulk energy and the 
+relaxed slab energy, and gives 0.015885 Ha = 0.432eV.
 It seems that the relaxation energy is very small, compared to the surface energy, but we need to do the convergence studies.
 
 ## Surface energy: increasing the number of vacuum layers
