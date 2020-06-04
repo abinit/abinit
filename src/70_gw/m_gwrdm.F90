@@ -145,16 +145,16 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
  if(iinfo==0) then
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   !call wrtout(ab_out,msg,'COLL')
    write(msg,'(a11,i5,a8,i5,a5,i5,a7)')'from band ',ib1,' to band',ib2,' with',nomega_sigc,' omegas'
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(a11,5x,*(f10.5))')'First omega',Sr%omega_i(1)
+   !call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a11,5x,*(f17.5))')'First omega',Sr%omega_i(1)
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   write(msg,'(a11,5x,*(f10.5))')'Last  omega',Sr%omega_i(nomega_sigc)
+   !call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a11,5x,*(f17.5))')'Last  omega',Sr%omega_i(nomega_sigc)
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   !call wrtout(ab_out,msg,'COLL')
  endif
 
  dm1=0.0d0
@@ -226,8 +226,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
 
  !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
- !Order from highest occ to lowest occ
  !eigenvect=dm1_tmp
+ !Order from highest occ to lowest occ
  occs_tmp=occs
  do ib1dm=1,ndim
   occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
@@ -376,31 +376,39 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  ABI_MALLOC(Umat,(ndim,ndim))
  ABI_MALLOC(Kex_tmp,(ndim,ndim))
  res=czero
+
  do ib1dm=1,ndim
    do ib2dm=1,ndim
      Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
      Kex_tmp(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
    enddo
  enddo
+
  ! Print for debug
  !do ib1dm=ib1,ib2
- !  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1:ib2,ikpoint,1))
+ !  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikpoint,1))
  !  call wrtout(std_out,msg,'COLL')
- !  call wrtout(ab_out,msg,'COLL')
  !enddo
+
+ write(msg,'(a3)') 'MAU'
+ call wrtout(std_out,msg,'COLL')
+
+ ! <KS|K[NO]KS> = U <NO|K[NO]|NO> (U^t)*
  res=matmul(Umat,Kex_tmp)
  Kex_tmp=matmul(res,conjg(transpose(Umat)))
+
  do ib1dm=1,ndim
    do ib2dm=1,ndim
      Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Kex_tmp(ib1dm,ib2dm)
    enddo
  enddo
+
  ! Print for debug
- !do ib1dm=ib1,ib2
- !  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1:ib2,ikpoint,1))
- !  call wrtout(std_out,msg,'COLL')
- !  call wrtout(ab_out,msg,'COLL')
- !enddo
+ do ib1dm=ib1,ib2
+   write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikpoint,1))
+   call wrtout(std_out,msg,'COLL')
+ enddo
+
  ABI_FREE(res)
  ABI_FREE(Umat)
  ABI_FREE(Kex_tmp)
