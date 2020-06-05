@@ -379,11 +379,10 @@ module m_dvdb
   ! my_rpt(3, my_nrpt)
   ! Real space points for Fourier interpolation (MPI distributed if nprocs_rpt > 1)
 
-  !real(kind=sp),allocatable :: v1scf_rpt(:,:,:,:,:)
-  real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
+  real(kind=sp),allocatable :: wsr(:,:,:,:,:)
   ! DFPT potential in the real space supercell representation.
-  ! v1scf_rpt(1, my_nrpt, nfft, nspden, my_npert)
-  ! TODO: Could be made single precision to save memory
+  ! wsr(1, my_nrpt, nfft, nspden, my_npert)
+  ! NOTE kind=sp to save memory as much as possible.
 
   real(dp),allocatable :: my_wratm(:,:)
   ! my_wratm(my_nrpt, minatom:maxatom)
@@ -938,7 +937,7 @@ subroutine dvdb_free(db)
  ! real arrays
  ABI_SFREE(db%qpts)
  ABI_SFREE(db%my_rpt)
- ABI_SFREE(db%v1scf_rpt)
+ ABI_SFREE(db%wsr)
  ABI_SFREE(db%my_wratm)
  ABI_SFREE(db%rhog1_g0)
  ABI_SFREE(db%zeff)
@@ -2808,7 +2807,7 @@ end subroutine rotate_fqg
 !!  dvdb_ftinterp_setup
 !!
 !! FUNCTION
-!!  Precompute the v1scf_rpt array with with the DFPT potential in the supercell
+!!  Precompute the wsr array with with the DFPT potential in the supercell
 !!  required for the Fourier interpolation
 !!  This is a collective routine that should be called by all procs inside db%comm.
 !!
@@ -2931,9 +2930,9 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%natom3))
  ABI_CALLOC(v1r_lr, (2, nfft, db%my_npert))
 
- ABI_SFREE(db%v1scf_rpt)
- ABI_MALLOC_OR_DIE(db%v1scf_rpt, (1, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
- db%v1scf_rpt = zero
+ ABI_SFREE(db%wsr)
+ ABI_MALLOC_OR_DIE(db%wsr, (1, db%my_nrpt, nfft, db%nspden, db%my_npert), ierr)
+ db%wsr = zero
 
  ! TODO: Parallelize this part over q-points using comm_rpt. For the time being only pert parallelism.
  iqst = 0
@@ -2946,7 +2945,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
    call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
 
    ! Reconstruct by symmetry the potentials for the star of this q-point,
-   ! perform slow FT and accumulate in v1scf_rpt. Be careful with the gamma point.
+   ! perform slow FT and accumulate in wsr. Be careful with the gamma point.
    do ii=1,nqsts(iq_ibz)
      iqst = iqst + 1
      !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism.
@@ -2989,8 +2988,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
          do ispden=1,db%nspden
            do ifft=1,nfft
              do irpt=1,db%my_nrpt
-               db%v1scf_rpt(1, irpt, ifft, ispden, imyp) = db%v1scf_rpt(1, irpt, ifft, ispden, imyp) + &
-                                                               v1r_qibz(1, ifft, ispden, ipc)
+               db%wsr(1, irpt, ifft, ispden, imyp) = db%wsr(1, irpt, ifft, ispden, imyp) + &
+                                                   v1r_qibz(1, ifft, ispden, ipc)
              end do
            end do
          end do
@@ -3033,17 +3032,17 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
          ipc = db%my_pinfo(3, imyp)
          do ispden=1,db%nspden
            do ifft=1,nfft
-             db%v1scf_rpt(1, :, ifft, ispden, imyp) = db%v1scf_rpt(1, :, ifft, ispden, imyp) &
+             db%wsr(1, :, ifft, ispden, imyp) = db%wsr(1, :, ifft, ispden, imyp) &
                 + emiqr(1, :) * v1r_qbz(1, ifft, ispden, ipc) &
                 - emiqr(2, :) * v1r_qbz(2, ifft, ispden, ipc)
 
-             !db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) &
+             !db%wsr(2, :, ifft, ispden, imyp) = db%wsr(2, :, ifft, ispden, imyp) &
              !   + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
              !   + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
            end do
 
            !call zgerc(db%my_nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, &
-           !           db%v1scf_rpt(:,:,:,ispden,imyp), db%my_nrpt)
+           !           db%wsr(:,:,:,ispden,imyp), db%my_nrpt)
 
          end do ! ispden
        end do ! imyp
@@ -3069,8 +3068,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ABI_FREE(v1r_qbz)
  ABI_FREE(v1r_lr)
 
- !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
- db%v1scf_rpt = db%v1scf_rpt / nqbz
+ !call xmpi_sum(db%wsr, db%comm, ierr)
+ db%wsr = db%wsr / nqbz
 
  call cwtime_report(" Construction of W(R,r)", cpu_all, wall_all, gflops_all)
 
@@ -3108,9 +3107,9 @@ subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
 
 ! *************************************************************************
 
- ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
+ ABI_CHECK(allocated(db%wsr), "wsr is not allocated (call dvdb_ftinterp_setup)")
 
- nfft = size(db%v1scf_rpt, dim=3)
+ nfft = size(db%wsr, dim=3)
  ABI_CALLOC(maxw, (db%nrtot, db%natom3))
 
  ! Need all RPTs to sort output.
@@ -3128,7 +3127,7 @@ subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
      phre = zero
      do ispden=1,db%nspden
        do ifft=1,nfft
-         phre = max(phre, db%v1scf_rpt(1,irpt,ifft,ispden,imyp) ** 2) ! + db%v1scf_rpt(2,irpt,ifft,ispden,imyp) ** 2)
+         phre = max(phre, db%wsr(1,irpt,ifft,ispden,imyp) ** 2) ! + db%wsr(2,irpt,ifft,ispden,imyp) ** 2)
        end do
      end do
      maxw(irpt_tot, ipc) = sqrt(phre)
@@ -3417,7 +3416,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    return
  end if
 
- ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
+ ABI_CHECK(allocated(db%wsr), "wsr is not allocated (call dvdb_ftinterp_setup)")
 
  ! Examine the symmetries of the q-wavevector
  call littlegroup_q(db%cryst%nsym, qpt, symq, db%cryst%symrec, db%cryst%symafm, timerev_q, prtvol=db%prtvol)
@@ -3448,8 +3447,8 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      ! Slow FT.
      do ifft=1,nfft
        do ir=1,db%my_nrpt
-         wr = db%v1scf_rpt(1, ir, ifft, ispden, imyp)
-         !wi = db%v1scf_rpt(2, ir, ifft, ispden, imyp)
+         wr = db%wsr(1, ir, ifft, ispden, imyp)
+         !wi = db%wsr(2, ir, ifft, ispden, imyp)
          ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr(1, ir) ! - wi * weiqr(2, ir)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) ! + wi * weiqr(1, ir)
        end do
@@ -3465,7 +3464,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      !  beta = cone
      !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
      !end if
-     !call ZGEMV("T", db%my_nrpt, nfft, cone, db%v1scf_rpt(1,1,1,ispden,imyp), db%mynrpt, weiqr, 1, &
+     !call ZGEMV("T", db%my_nrpt, nfft, cone, db%wsr(1,1,1,ispden,imyp), db%mynrpt, weiqr, 1, &
      !           beta, ov1r(1,1,ispden,imyp), 1)
 
      ! Remove the phase to get the lattice-periodic part.
@@ -6138,7 +6137,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
 
    write(std_out, "(/, a)")" Max values over q-points and perturbations"
    call vdiff_print(vd_max)
-   ABI_FREE(dvdb%v1scf_rpt)
+   ABI_FREE(dvdb%wsr)
  end if
 
  ! Now downsample the q-mesh, build real-space representation with coarse q-mesh and
