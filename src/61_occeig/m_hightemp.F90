@@ -52,7 +52,7 @@ module m_hightemp
   end type hightemp_type
 
   ! type(hightemp_type),save,pointer :: hightemp=>null()
-  public :: dip12,djp12,dip32,djp32
+  public :: dip12,djp12,dip32,djp32,hightemp_e_heg
   public :: hightemp_gaussian_jintegral,hightemp_gaussian_kintegral
   public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
   public :: hightemp_get_nfreeel_approx,hightemp_prt_eigocc
@@ -105,9 +105,6 @@ contains
     this%nfreeel=zero
     this%e_shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
-
-    write(0,*) hightemp_gaussian_jintegral(3.08642000000_dp,833.33333_dp)
-    write(0,*) hightemp_gaussian_kintegral(3.08642000000_dp,833.33333_dp)
   end subroutine init
 
   subroutine destroy(this)
@@ -153,7 +150,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,mpi_enreg,nkpt,nsppol)
+  subroutine compute_e_shiftfactor(this,eigen,eknk,mband,mpi_enreg,nband,nkpt,nsppol,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
@@ -161,39 +158,74 @@ contains
     integer,intent(in) :: mband,nkpt,nsppol
     type(MPI_type), intent(inout) :: mpi_enreg
     ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
     real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,krow,niter
+    integer :: band_index,ii,ikpt,isppol,krow,nband_k,niter,delta_n
     ! Arrays
     real(dp) :: eigentemp(mband*nkpt*nsppol)
     real(dp) :: eknktemp(mband*nkpt*nsppol)
     logical :: mk(mband*nkpt*nsppol)
 
     ! *********************************************************************
+    
+    delta_n=20
 
-    eigentemp(:)=zero
-    eknktemp(:)=zero
-    mk(:)=.true.
+    ! U_{K_0}
+    ! this%e_shiftfactor=zero
+    ! band_index=0
+    ! do isppol=1,nsppol
+    !   do ikpt=1,nkpt
+    !     nband_k=nband(ikpt+(isppol-1)*nkpt)
+    !     do ii=nband_k-delta_n+1,nband_k
+    !       this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
+    !     end do
+    !     band_index=band_index+nband_k
+    !   end do
+    ! end do
+    ! this%e_shiftfactor=this%e_shiftfactor/delta_n
+    ! write(0,*) 'eknk_new', this%e_shiftfactor
 
-    ! Sorting eigen and eknk in ascending energy order.
-    do ii=1,this%bcut*nkpt*nsppol
-      krow=minloc(eigen,dim=1,mask=mk)
-      mk(minloc(eigen,dim=1,mask=mk))=.false.
-      eigentemp(ii)=eigen(krow)
-      eknktemp(ii)=eknk(krow)
-    end do
-
-    ! Doing the average over the 25 lasts states...
-    niter=0
+    ! U_{HEG_0}
     this%e_shiftfactor=zero
-    do ii=this%bcut*nkpt*nsppol-25,this%bcut*nkpt*nsppol
-      this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
-      niter=niter+1
+    band_index=0
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        do ii=nband_k-delta_n+1,nband_k
+          this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-hightemp_e_heg(dble(ii),this%ucvol))
+        end do
+        band_index=band_index+nband_k
+      end do
     end do
-    this%e_shiftfactor=this%e_shiftfactor/niter
+    this%e_shiftfactor=this%e_shiftfactor/delta_n
+    ! write(0,*) 'eheg_new', this%e_shiftfactor
+
+    ! U_{LEGACY_0}
+    ! eigentemp(:)=zero
+    ! eknktemp(:)=zero
+    ! mk(:)=.true.
+    ! ! Sorting eigen and eknk in ascending energy order.
+    ! do ii=1,this%bcut*nkpt*nsppol
+    !   krow=minloc(eigen,dim=1,mask=mk)
+    !   mk(minloc(eigen,dim=1,mask=mk))=.false.
+    !   eigentemp(ii)=eigen(krow)
+    !   eknktemp(ii)=eknk(krow)
+    ! end do
+    ! ! Doing the average over the delta_n lasts states...
+    ! niter=0
+    ! this%e_shiftfactor=zero
+    ! do ii=this%bcut*nkpt*nsppol-delta_n+1,this%bcut*nkpt*nsppol
+    !   this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
+    !   niter=niter+1
+    ! end do
+    ! this%e_shiftfactor=this%e_shiftfactor/niter
+    ! write(0,*) 'eknk_legacy', this%e_shiftfactor
+
     this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
   end subroutine compute_e_shiftfactor
 
@@ -854,6 +886,36 @@ contains
     hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
   end function hightemp_dosfreeel
 
+  !!****f* ABINIT/m_hightemp/hightemp_e_heg
+  !! NAME
+  !! hightemp_e_heg
+  !!
+  !! FUNCTION
+  !! Returns the free particle energy for a given orbital (in Hartree)
+  !!
+  !! INPUTS
+  !! iband=considered orbital
+  !! ucvol=unit cell volume (bohr^3)
+  !!
+  !! OUTPUT
+  !! hightemp_e_heg=value of free particle density of states at given energy
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function hightemp_e_heg(iband,ucvol)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: iband,ucvol
+    real(dp) :: hightemp_e_heg
+
+    ! *********************************************************************
+    hightemp_e_heg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
+  end function hightemp_e_heg
+
   !!****f* ABINIT/m_hightemp/hightemp_gaussian_jintegral
   !! NAME
   !! hightemp_dosfreeel
@@ -936,7 +998,7 @@ contains
   !!
   !! SOURCE
   subroutine hightemp_get_e_shiftfactor(cg,ecut,ecutsm,effmass_free,eigen,gmet,hightemp,&
-  & istwfk,kg,kptns,mband,mcg,mkmem,mpi_enreg,mpw,my_nspinor,nband,nkpt,nsppol,npwarr)
+  & istwfk,kg,kptns,mband,mcg,mkmem,mpi_enreg,mpw,my_nspinor,nband,nkpt,nsppol,npwarr,wtk)
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: mband,mcg,mpw,mkmem,my_nspinor,nkpt,nsppol
@@ -948,6 +1010,7 @@ contains
     integer,intent(in) :: kg(3,mpw*mkmem)
     real(dp),intent(in) :: cg(2,mcg),eigen(mband*nkpt*nsppol)
     real(dp),intent(in) :: kptns(3,nkpt),gmet(3,3)
+    real(dp),intent(in) :: wtk(nkpt)
 
     ! Local variables -------------------------
     ! Scalars
@@ -1000,7 +1063,7 @@ contains
     end do
 
     call hightemp%compute_e_shiftfactor(eigen,eknk,mband,mpi_enreg,&
-    & nkpt,nsppol)
+    & nband,nkpt,nsppol,wtk)
 
     ABI_DEALLOCATE(eknk)
   end subroutine hightemp_get_e_shiftfactor

@@ -879,7 +879,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call hightemp_get_e_shiftfactor(cg,dtset%ecut,dtset%ecutsm,dtset%effmass_free,&
 &     eigen,gmet,hightemp,dtset%istwfk,kg,dtset%kptns,&
 &     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,my_nspinor,&
-&     dtset%nband,dtset%nkpt,dtset%nsppol,npwarr)
+&     dtset%nband,dtset%nkpt,dtset%nsppol,npwarr,dtset%wtk)
    end if
 
    ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
