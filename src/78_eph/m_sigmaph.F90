@@ -2380,6 +2380,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
      new%nbcalc_ks(ikcalc, :) = 0
      cycle ! MPI parallelism inside comm
    end if
+
    ! Note symrel and use_symrel.
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax, cryst%gmet, indkk_k, ebands%kptns, kk, ebands%nkpt, 1, cryst%nsym,&

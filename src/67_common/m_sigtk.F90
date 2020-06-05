@@ -189,7 +189,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
  val_indeces = get_valence_idx(ebands)
 
  if (any(dtset%sigma_ngkpt /= 0)) then
-    call wrtout(std_out, " Generating list of k-points for self-energy from sigma_nkpt and qprange.")
+    call wrtout(std_out, " Generating list of k-points for self-energy from sigma_ngkpt and qprange.")
     ABI_CHECK(qprange /= 0, "qprange must be != 0")
     ! Get %kcalc from sigma_ngkpt
     kptrlatt = 0

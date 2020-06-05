@@ -639,7 +639,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
        write(msg, '(a,i0,5a,es12.4,a,es12.4,6a)' )&
         'The symmetry operation number ',isym,' does not preserve',ch10,&
         'vector lengths and angles.',ch10,&
-        'The value of the residual is: ',residual, 'that is greater than threshold:', tol*sqrt(rmet2),ch10,&
+        'The value of the residual is: ',residual, 'that is greater than threshold:', (tol*sqrt(rmet2))**2,ch10,&
         'Action: modify rprim, acell and/or symrel so that',ch10,&
         'vector lengths and angles are preserved.',ch10,&
         'Beware, the tolerance on symmetry operations is very small.'

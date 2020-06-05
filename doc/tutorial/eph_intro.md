@@ -159,7 +159,8 @@ specified by [[ph_ngqpt]].
 The default $\qq$ grid is 20×20×20, you may want to increase this value for more accurate results.
 The step of the (linear) frequency mesh is governed by [[ph_wstep]].
 The linear tetrahedron integration method [[cite:Bloechl1994]] is used by default.
-The Gaussian method can be activated via [[ph_intmeth]] with [[ph_smear]] defining the Gaussian smearing (in Hartree units by default).
+The Gaussian method can be activated via [[ph_intmeth]] with [[ph_smear]] defining
+the Gaussian smearing (in Hartree units by default).
 The final results are stored in the PHDOS.nc file (same format at the one produced by ANADDB).
 The computation of the PHDOS can be disabled by setting [[prtphdos]] = 0.
 
@@ -436,7 +437,7 @@ $\kk$-point in the IBZ.
 For instance, the computation of mobilities in semiconductors require the knowledge of the KS states whose energy
 is slight above (below) the CMB (VBM), let's say ~0.2 eV.
 In metals, only states close the Fermi level are needed to compute superconducting properties with the standard formalism.
-In other words, several EPH calculations require extremely dense BZ meshes to converge but as a matter of fact 
+In other words, several EPH calculations require extremely dense BZ meshes to converge but as a matter of fact
 only a relatively small fraction of the IBZ is nededed.
 
 At this point a question naturally arises: can we avoid the NSCF computation of $\kk$-points that are supposed to give negligible
@@ -444,7 +445,7 @@ contribution to the final physical results?
 The answer is yes provided we are able to predict in some easy way and with some reasonable accuracy the
 eigenvalues $\ee_{nk}$ without actually solving the KS equations.
 
-The aproach used in the EPH code is based on the 
+The aproach used in the EPH code is based on the
 star-function interpolation by Shankland-Koelling-Wood Fourier (SKW) interpolation scheme [[cite:Pickett1988]].
 The single-particle energies are expressed in terms of the (symmetrized) Fourier sum
 
@@ -495,7 +496,7 @@ An example can be found in this
 %
 %1 → Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [Pickett1988]
 %2 → B-spline interpolation.
-%The meaning of the other entries depend on the interpolation technique selected. 
+%The meaning of the other entries depend on the interpolation technique selected.
 %In the case of star-function interpolation:
 %
 %einterp(2): Number of star-functions per {\it ab initio} k-point
@@ -506,9 +507,41 @@ An example can be found in this
 %and
 %where G is a reciprocal lattice vector and is an operation of the point group.
 %Therefore it is possible to employ the star-function interpolation by Shankland, Koelling and Wood in the improved version proposed by Pickett to fit the {\it ab initio} results. This interpolation technique, by construction, passes through the initial points and satisfies the basic symmetry property of the band energies.
-%It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings that may cause unphysical oscillations between the {\it ab initio} points. 
+%It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings that may cause unphysical oscillations between the {\it ab initio} points.
 -->
 
 Without entering into details (that will be discussed more in the specialized lessons)
-one can use the SKW algorithm to find the relevant $\kk$-points, perform an *ab-initio* for these wavevectors only 
+one can use the SKW algorithm to find the relevant $\kk$-points, perform an *ab-initio* for these wavevectors only
 and produce a WFK file that can be used by the EPH code.
+
+The entire procedure is performed in an automatic way inside ABINIT but before running big EPH calculations, 
+we strongly recommend to check whether the SKW interpolation gives reasonable results.
+A typical test would be:
+
+1) Compute a WFK file on the IBZ
+2) Perform a NSCF band structure calculation along a high-symmetry path that covers the most important 
+   regions of the BZ (e.g. band edges in semiconductors). KPATH_WKF
+3) Compare the ab-initio band structure with the SKW interpolation obtained using the WKF file produced in step (1).
+
+```sh
+abitk skw_compare IBZ_WFK KPATH_WFK [--lpratio 5] [--rcut 0.0] [--rsigma]
+```
+
+To compare the bands with AbiPy.
+
+```sh
+abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot
+```
+
+If the fit is not good, try the following:
+
+1) Increase the IBZ mesh (you may want to shift the mesh)
+2) Increase the value of lpratio
+3) Play with rcut and rsigma to damp oscillations
+
+Note that sometimes is difficult to get rid of spurious oscillation or artifacts in the SKW interpolation
+but remember that we are not trying to get perfect agreement between SKW and ab-initio results.
+As long as the SKW interpolant is close enough
+
+
+

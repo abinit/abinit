@@ -55,7 +55,6 @@ program abitk
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
- use m_wfk,            only : wfk_kerange_check
 
  implicit none
 
@@ -115,13 +114,17 @@ program abitk
      write(std_out,"(a)")" --version              Show version number and exit."
      write(std_out,"(a)")" -h, --help                 Show this help and exit."
      write(std_out,"(a)")" -v                         Increase verbosity level"
+
      write(std_out,"(2a)")ch10,"=== HEADER ==="
      write(std_out,"(a)")"hdr FILE                   Print ABINIT header."
+
      write(std_out,"(2a)")ch10,"=== KPOINTS ==="
      write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
+
      write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
      write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
      write(std_out,"(a)")"from_poscar POSCAR_FILE              Read POSCAR file, print abinit variables."
+
      write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
      write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
      write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with electron bands."
@@ -130,7 +133,9 @@ program abitk
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
      !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
-     !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
+     !write(std_out,"(a)")"skw_path FILE                     Produce BXSF file for Xcrysden."
+     !write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK       Use eigens from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
+
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
      write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
      write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
@@ -312,11 +317,11 @@ program abitk
  ! Tools for developers
  ! ====================
 
- case ("wfk_kerange_check")
-    call get_command_argument(2, fullwfk_path)
-    call get_command_argument(3, kerange_path)
-    call get_command_argument(4, kerange_wfk_path)
-    call wfk_kerange_check(fullwfk_path, kerange_path, kerange_wfk_path, xmpi_comm_self)
+ !case ("wfk_kerange_check")
+ !   call get_command_argument(2, fullwfk_path)
+ !   call get_command_argument(3, kerange_path)
+ !   call get_command_argument(4, kerange_wfk_path)
+ !   call wfk_kerange_check(fullwfk_path, kerange_path, kerange_wfk_path, xmpi_comm_self)
 
  ! ===========
  ! Unit tests

@@ -379,6 +379,7 @@ module m_dvdb
   ! my_rpt(3, my_nrpt)
   ! Real space points for Fourier interpolation (MPI distributed if nprocs_rpt > 1)
 
+  !real(kind=sp),allocatable :: v1scf_rpt(:,:,:,:,:)
   real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
   ! DFPT potential in the real space supercell representation.
   ! v1scf_rpt(1, my_nrpt, nfft, nspden, my_npert)
@@ -3040,6 +3041,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
              !   + emiqr(1, :) * v1r_qbz(2, ifft, ispden, ipc) &
              !   + emiqr(2, :) * v1r_qbz(1, ifft, ispden, ipc)
            end do
+
            !call zgerc(db%my_nrpt, nfft, cone, emiqr, 1, v1r_qbz(:,:,ispden,ipc), 1, &
            !           db%v1scf_rpt(:,:,:,ispden,imyp), db%my_nrpt)
 
@@ -3069,16 +3071,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 
  !call xmpi_sum(db%v1scf_rpt, db%comm, ierr)
  db%v1scf_rpt = db%v1scf_rpt / nqbz
- !call dvdb_enforce_asr(db)
-
- !do imyp=1,db%my_npert
- !  write(std_out, *)" Imaginary part for imyp:", imyp
- !  do ispden=1,db%nspden
- !    write(std_out, *)"min, max, avg:", &
- !       minval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), maxval(abs(db%v1scf_rpt(2, :, :, ispden, imyp))), &
- !       sum(abs(db%v1scf_rpt(2, :, :, ispden, imyp))) / (nfft * db%my_nrpt)
- !  end do
- !end do
 
  call cwtime_report(" Construction of W(R,r)", cpu_all, wall_all, gflops_all)
 
@@ -3161,107 +3153,6 @@ subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
  ABI_FREE(iperm_irpt)
 
 end subroutine dvdb_get_maxw
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_dvdb/dvdb_enforce_asr1
-!! NAME
-!!  dvdb_enforce_asr1
-!!
-!! FUNCTION
-!!  Enforce acoustic sum rule on the DFPT potentials.
-!!
-!! INPUTS
-!!
-!! FUNCTION
-!!
-
-subroutine dvdb_enforce_asr1(db)
-
-!Arguments ------------------------------------
-!scalars
- class(dvdb_t),target,intent(inout) :: db
-
-!Local variables-------------------------------
-!scalars
-integer :: imyp, idir, ipert, ifft, nfft, ierr, irpt, ispden
-!arrays
- real(dp) :: sumr(1)
- real(dp),allocatable :: asr_work(:,:,:,:)
-
-! *************************************************************************
-
- ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
- nfft = size(db%v1scf_rpt, dim=2)
-
- ! Enforcing ASR \sum_{R,kappa} v1(R, r, kappa, alpha) = f(r, alpha) = 0 for each r and alpha-direction
- call wrtout(std_out, " Enforcing ASR on W(R,r) i.e. \sum_{R,kappa} v1(R, r, kappa, alpha) = 0")
- ABI_CALLOC(asr_work, (2, nfft, db%nspden, 3))
-
- do imyp=1,db%my_npert
-   idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
-   do ispden=1,db%nspden
-     do ifft=1,nfft
-       sumr = zero
-       do irpt=1,db%my_nrpt
-         sumr(:) = sumr(:) + db%my_wratm(irpt, ipert) * db%v1scf_rpt(:,irpt,ifft,ispden,imyp)
-       end do
-       asr_work(:,ifft,ispden, idir) = asr_work(:,ifft,ispden, idir) + sumr(:)
-     end do
-   end do
- end do
- if (db%nprocs_rpt /= 1) call xmpi_sum(asr_work, db%comm_rpt, ierr)
- if (db%nprocs_pert /= 1) call xmpi_sum(asr_work, db%comm_pert, ierr)
- asr_work = asr_work / (db%nrtot * db%natom)
-
- do idir=1,3
-   write(std_out, *)" ASR breaking for idir:" ,idir
-   write(std_out, *)"   For Re:  minval, maxval_fft:", minval(abs(asr_work(1,:,1,idir))), maxval(abs(asr_work(1,:,1,idir)))
-   write(std_out, *)"   For Im:  minval, maxval_fft:", minval(abs(asr_work(2,:,1,idir))), maxval(abs(asr_work(2,:,1,idir)))
- end do
-
- ! Remove average value.
- do imyp=1,db%my_npert
-   idir = db%my_pinfo(1, imyp)
-   do ispden=1,db%nspden
-     do ifft=1,nfft
-       db%v1scf_rpt(1, :, ifft, ispden, imyp) = db%v1scf_rpt(1, :, ifft, ispden, imyp) - asr_work(1, ifft, ispden, idir)
-       !db%v1scf_rpt(2, :, ifft, ispden, imyp) = db%v1scf_rpt(2, :, ifft, ispden, imyp) - asr_work(2, ifft, ispden, idir)
-     end do
-   end do
- end do
-
- ! Here I change only the R=0 term
- !my_ir0 = -1
- !do irpt=1,db%my_nrpt
- !  if (all(abs(db%my_rpt(:,irpt)) <= tol10)) then
- !    my_ir0 = irpt; exit
- !  end if
- !end do
-
- !if (my_ir0 /= -1) then
- !  asr_work = asr_work * (nrtot * db%natom)
- !  do imyp=1,db%my_npert
- !    idir = db%my_pinfo(1, imyp)
- !    do ispden=1,db%nspden
- !      asr_work(:,:,ispden, idir) = asr_work(:,:,ispden, idir) - db%v1scf_rpt(:,my_ir0,:,ispden,imyp)
- !    end do
- !  end do
- !  asr_work = asr_work / db%natom
-
- !  do imyp=1,db%my_npert
- !    idir = db%my_pinfo(1, imyp)
- !    do ispden=1,db%nspden
- !      !write(std_out, *)"imyp ispden:", imyp, ispden, "max: ", maxval(v1r_qbz(:, :, ispden, imyp), dim=2)
- !      db%v1scf_rpt(:, my_ir0, :, ispden, imyp) = - asr_work(:, :, ispden, idir)
- !    end do
- !  end do
- !end if
-
- ABI_FREE(asr_work)
-
-end subroutine dvdb_enforce_asr1
 !!***
 
 !----------------------------------------------------------------------
