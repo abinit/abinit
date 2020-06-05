@@ -5223,10 +5223,10 @@ subroutine wfk_kerange_check(fullwfk_path, kerange_path, kerange_wfk_path, comm)
 !scalars
  integer,parameter :: formeig0 = 0, useoverlap0 = 0,  mgsc0 = 0, master = 0, icg1 = 1, igsc0 = 0
  integer :: spin, ik_ibz, nband_k, mpw, mband, nspinor, ierr, mcg !fine_mband, ikin,
- integer :: nsppol, iomode, npw_k, ii, my_rank, ncid, fform, fform_kerange, istwf_k, prtvol
+ integer :: nsppol, iomode, npw_k, my_rank, ncid, fform, fform_kerange, istwf_k, prtvol !ii,
  integer :: restart, restartpaw, wfk_fform
  logical :: in_pocket
- character(len=500) :: msg
+ !character(len=500) :: msg
  type(wfk_t) :: full_wfk, ker_wfk
  type(hdr_type) :: ker_hdr
  type(ebands_t) :: full_ebands, ker_ebands

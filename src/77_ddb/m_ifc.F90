@@ -597,7 +597,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
     'Action: make input atomic positions more symmetric.',ch10,&
     'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine and recompile.',ch10,&
     'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
-    'if abs(brav) /= 1, in which case you should change brav to 1.'
+    'if abs(brav) /= 1, in this case you should change brav to 1. If brav is already set to 1 (default) try -1.'
    MSG_ERROR(msg)
  end if
 

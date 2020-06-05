@@ -150,7 +150,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, brav1 = 1
+ integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
@@ -442,13 +442,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ABI_CALLOC(dummy_atifc, (dtset%natom))
 
  if (use_wfk) then
-   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
+   call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
                      prtvol=dtset%prtvol)
    call cryst_ddb%free()
  else
    ! Get crystal from DDB.
    ! Warning: We may loose precision in rprimd and xred because DDB does not have enough significant digits.
-   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
+   call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
                      prtvol=dtset%prtvol)
  end if
  call ddb_hdr%free()
@@ -487,7 +487,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! TODO: Add support for dipquad and quadquad in abinit
  call ifc_init(ifc, cryst, ddb, &
-   brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+   dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
    qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
 
  ABI_FREE(ddb_qshifts)
@@ -553,6 +553,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf
+
+   ! Copy brav variable
+   dvdb%brav = dtset%brav
 
    ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
    dvdb%rspace_cell = dtset%dvdb_rspace_cell

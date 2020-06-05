@@ -7,6 +7,7 @@ tolwfr 1e-16
 #mixprec 1
 boxcutmin 1.7
 prtphdos 0
+brav 1
 
 # K-mesh (must equal the one used to produce the WFK file)
 ngkpt    4 4 4

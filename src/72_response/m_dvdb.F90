@@ -280,6 +280,9 @@ module m_dvdb
   integer :: prtvol = 0
    ! Verbosity level
 
+  integer :: brav = 1
+  ! Option for the sampling of the BZ (input variable, the same option is stored in ifc_t)
+
   real(dp) :: qdamp = 0.1_dp
    ! Exponential damping used in the Fourier transform of the long-range potentials
    ! Use negative value to deactivate damping.
@@ -3286,7 +3289,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1, timrev1=1, brav1=1, cutmode2=2
+ integer,parameter :: sppoldbl1=1, timrev1=1, cutmode2=2
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
@@ -3359,10 +3362,10 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    !
    ! Compute rprim, and gprim
    call mkradim(acell, rprim, cryst%rprimd)
-   call canat9(brav1, cryst%natom, rcan, rprim, trans, cryst%xred)
+   call canat9(db%brav, cryst%natom, rcan, rprim, trans, cryst%xred)
    call matr3inv(rprim, gprim)
    ! TODO: In principle one may have N_R that depends on iatom to minimize memory.
-   call get_bigbox_and_weights(brav1, cryst%natom, nqbz, ngqpt, nqshift, qshift, rprim, cryst%rprimd, gprim, rcan, &
+   call get_bigbox_and_weights(db%brav, cryst%natom, nqbz, ngqpt, nqshift, qshift, rprim, cryst%rprimd, gprim, rcan, &
                                cutmode2, nrtot, all_rcart, all_cell, all_wghatm, r_inscribed_sphere, comm)
    ABI_FREE(all_cell)
    do ii=1,nrtot
@@ -6149,7 +6152,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: brav1 = 1, master = 0, chneut2 = 2
+ integer,parameter :: master = 0, chneut2 = 2
  integer :: nfft, iq, cplex, mu, ispden, comm_rpt, iblock_dielt, iblock_dielt_zeff, my_rank,  ierr
  logical :: autotest
  type(dvdb_t) :: dvdb, coarse_dvdb
@@ -6574,7 +6577,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  type(ddb_type),optional,target,intent(in) :: ddb
 
 !Local variables ------------------------------
- integer,parameter :: brav1 = 1, master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
+ integer,parameter :: master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
  integer :: my_rank, iblock_dielt, iblock_dielt_zeff, iblock_quadrupoles
  logical :: free_ddb
  type(crystal_t) :: cryst_ddb
@@ -6594,7 +6597,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
    ! Build ddb object from file. Will release memory before returning.
    ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
    ABI_CALLOC(dummy_atifc, (dvdb%natom))
-   call ddb_from_file(this_ddb, ddb_filepath, brav1, dvdb%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
+   call ddb_from_file(this_ddb, ddb_filepath, dvdb%brav, dvdb%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
                       prtvol=prtvol)
    call ddb_hdr%free()
    ABI_FREE(dummy_atifc)

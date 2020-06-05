@@ -720,6 +720,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
  if(tread==1) dtset%use_yaml=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
+ if(tread==1) dtset%brav=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'boxcutmin',tread,'DPR')
  if(tread==1) dtset%boxcutmin=dprarr(1)
 
@@ -1175,7 +1178,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
      zelect=zval-charge
-     ! Then select the minimum number of bands, and add the required number. 
+     ! Then select the minimum number of bands, and add the required number.
      ! Note that this number might be smaller than the one computed
      ! by a slightly different formula in invars1 (difference in fband).
      nband1=dtset%nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
