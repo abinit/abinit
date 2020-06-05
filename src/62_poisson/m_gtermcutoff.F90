@@ -155,7 +155,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
  integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing,icount
  integer            :: c1,c2,opt_cylinder
  integer            :: my_start,my_stop
- integer            :: n1,n2,n3,nfft,npt
+ integer            :: n1,n2,n3,nfft
  integer            :: test,opt_surface !opt_cylinder
  real(dp)           :: cutoff,rcut,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
