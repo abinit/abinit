@@ -294,7 +294,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      end do
 
 !     if (opt_surface==1) then
-!       ABI_CHECK(ALL(pdir == (/1,1,0/)),"Surface must be in the x-y plane")
+!       ABI_CHECK(ALL(pdir == (/0,0,1/)),"Surface must be in the x-y plane")
        rcut = half*SQRT(DOT_PRODUCT(a3,a3))
 !     end if
 
@@ -310,7 +310,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      qopt_    =6         ! Quadrature method, see quadrature routine.
      ntrial_  =30        ! Max number of attempts.
      accuracy_=0.001     ! Fractional accuracy required.
-     npts_    =100       ! Initial number of point (only for Gauss-Legendre method).
+     npts_    =10       ! Initial number of point (only for Gauss-Legendre method).
 
      write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
 &      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
@@ -349,7 +349,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 
 !         write(*,*)tmp
 
-         gcutoff(ii)=two*(quad*two)
+         gcutoff(ii)=tmp
 
        end do !i1
       end do !i2
@@ -364,18 +364,21 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
        MSG_BUG(msg)
      end if
       
-     npt=6
-     ABI_MALLOC(xx,(npt))
+     npts_=6
+     ABI_MALLOC(xx,(npts_))
 
      if (ABS(hcyl)>tol12) then
        write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut
        call wrtout(std_out,msg,'COLL')
+       hcyl_=hcyl
        hcyl2=hcyl**2
        rcut2=rcut**2
 
        do i3=1,n3
         do i2=1,n2
+         i23=n1*(i2-1 + n2*(i3-1))
          do i1=1,n1
+         ii=i1+i23
 
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para_=ABS(gcart(3)) ; gcart_perp_=SQRT(gcart(1)**2+gcart(2)**2)
@@ -387,33 +390,32 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
                MSG_ERROR("Accuracy not reached")
              end if
 
-!             vccut(ig,iq)=four_pi*quad
+             gcutoff(ii)=pi*quad
 
            else if (gcart_perp_==zero.and.gcart_para_/=zero) then
+
              ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
              call quadrature(F3,zero,hcyl,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
              if (ierr/=0) then
                MSG_ERROR("Accuracy not reached")
              end if
 
-             c1=one/gcart_para_**2-COS(gcart_para_*hcyl_)/gcart_para_**2-hcyl*SIN(gcart_para_*hcyl)/gcart_para_
-             c2=SIN(gcart_para_*hcyl)*SQRT(hcyl2+rcut2)
-!             vccut(ig,iq)=four_pi*c1+four_pi*(c2-quad)/qpg_para_
-             gcutoff(ii)=one
+             c1=one/gcart_para_**2-COS(gcart_para_*hcyl_)/gcart_para_**2-hcyl*SIN(gcart_para_*hcyl_)/gcart_para_
+             c2=SIN(gcart_para_*hcyl_)*SQRT(hcyl2+rcut2)
+             gcutoff(ii)=c1+(c2-quad)/gcart_para_
 
            else if (gcart_perp_/=zero.and.gcart_para_==zero) then
              ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
-             call quadrature(F4,zero,rcut,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
              if (ierr/=0) then
                MSG_ERROR("Accuracy not reached")
              end if
 
-!             vccut(ig,iq)=four_pi*quad
-             gcutoff(ii)=one
+             gcutoff(ii)=quad
 
            else if (gcart_perp_==zero.and.gcart_para_==zero) then
              ! Use lim q+G --> 0
-!             vccut(ig,iq)=two_pi*(-hcyl2+hcyl_*SQRT(hcyl2+rcut2)+rcut2*LOG((hcyl_+SQRT(hcyl_+SQRT(hcyl2+rcut2)))/rcut_))
+              gcutoff(ii)=zero
 
            else
              MSG_BUG('You should not be here!')
@@ -495,7 +497,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 
      !CASE SURFACE 1 - Beigi
        CASE(1)
-
+ 
        do i3=1,n3
         do i2=1,n2
          i23=n1*(i2-1 + n2*(i3-1))
@@ -503,7 +505,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if(ABS(gcart_para)>tol4.and.ABS(gcart_perp)>tol4) then
+           if(ABS(gcart_para)>tol4.and.ABS(gcart_perp)>tol4.and.gpq(ii)<=cutoff) then
              gcutoff(ii)=one-EXP(-gcart_para*rcut)*COS(gcart_perp*rcut)
            else 
              gcutoff(ii)=zero
@@ -523,7 +525,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if(ABS(gcart_para)>tol4) then
+           if(ABS(gcart_para)>tol4.and.gpq(ii)<=cutoff) then
              gcutoff(ii)=one+EXP(-gcart_para*rcut)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut)-COS(gcart_perp*rcut))
            else if (ABS(gcart_perp)>tol4) then
              gcutoff(ii)=one-COS(gcart_perp*rcut)-gcart_perp/rcut*SIN(gcart_perp*rcut)
