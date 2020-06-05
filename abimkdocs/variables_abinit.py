@@ -21605,7 +21605,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval=1
+    defaultval=1,
     mnemonics="BRAVais",
     added_in_version="9.1.4",
     text=r"""

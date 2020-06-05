@@ -346,7 +346,7 @@ Let's now discuss in more detail the output files produced by the code.
 
 ## Increasing the q-mesh
 
-[[eph_nqgpt_fine]]
+[[eph_ngqpt_fine]]
 
 ## Notes on the MPI parallelism
 
