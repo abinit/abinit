@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 30 Mar 2020.
-- ( at 23h38 )
+.Starting date : Fri  5 Jun 2020.
+- ( at 19h05 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.in
 - output file    -> teph4mob_5.out
@@ -565,8 +565,9 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783695.0    0.000
+   5   3.525    0.000 783694.8    0.000
 ============================================================================================
+- Reading carrier lifetimes from: teph4mob_5o_SIGEPH.nc
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
