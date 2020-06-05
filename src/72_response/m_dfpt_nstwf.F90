@@ -289,7 +289,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !scalars
  integer,parameter :: tim_fourwf=18,tim_getgh1c=2,tim_projbd=3,formeig1=1
  integer :: bd2tot_index,bdtot_index,berryopt,bufsz,choice,cpopt,cplex_rhoij,ddkcase
- integer :: dimffnl,dimffnl1,dimffnl1_idir1,dimylmgr1
+ integer :: dimffnl,dimffnl1,dimffnl1_idir1,dimylmgr1,g0term
  integer :: ia,iatom,iband,ibg,ibgq,ibg1,icg,icgq,icg1,ider,idir0,idir1,idir_cprj
  integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
  integer :: ispden,isppol,istwf_k,istr,istr1,itypat,jband,jj,kdir1,kpert1,master,mcgq,mcprjq
@@ -607,9 +607,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &           vspl=psps%vlspl)
          else
            if(ipert1==dtset%natom+3.or.ipert1==dtset%natom+4) then
+
+             !To compute Absolute Deformation Potentials toghether with FxE tensor
+             !the reference has to be the same as in the FxE routines
+             g0term=0; if (dtset%rfstrs_ref==1) g0term=1
+
              call vlocalstr(gmet,gprimd,gsqcut,istr1,mgfftf,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
 &             nattyp,nfftf,ngfftf,dtset%ntypat,ph1df,psps%qgrid_vl,ucvol,&
-&             psps%vlspl,vpsp1_idir1)
+&             psps%vlspl,vpsp1_idir1,g0term=g0term)
            else
              call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
 &             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&

@@ -269,7 +269,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,parameter :: level=11,response=1,formeig1=1,master=0,fake_unit=-666
  integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
- integer :: gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
+ integer :: gscase,g0term,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
@@ -1558,9 +1558,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
      if(ipert==dtset%natom+3 .or. ipert==dtset%natom+4) then
 !      Section for strain perturbation
+
+       !To compute Absolute Deformation Potentials toghether with FxE tensor
+       !the reference has to be the same as in the FxE routines
+       g0term=0; if (dtset%rfstrs_ref==1) g0term=1
+ 
        call vlocalstr(gmet,gprimd,gsqcut,istr,mgfftf,mpi_enreg,&
 &       psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,ph1df,psps%qgrid_vl,&
-&       ucvol,psps%vlspl,vpsp1)
+&       ucvol,psps%vlspl,vpsp1,g0term=g0term)
      else
        call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
 &       nattyp,nfftf,ngfftf,ntypat,ngfftf(1),ngfftf(2),ngfftf(3),ph1df,psps%qgrid_vl,&

@@ -391,7 +391,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer,parameter :: level=12,response=1
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
  integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,errid,denpot
- integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
+ integer :: g0term,iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,istep_fock_outer,istep_mix,itypat,izero,me,mgfftdiel,mvdum !lmn2_size,
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
  integer :: optene,optfr,option,optres,prtfor,qphase_rhoij,quit,quit_sum,qzero
@@ -2622,6 +2622,10 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  ABI_ALLOCATE(vhartr01,(nfft))
  xccc3d1(:)=zero
 
+!To compute Absolute Deformation Potentials toghether with FxE tensor
+!the reference has to be the same as in the FxE routines
+g0term=0; if (dtset%rfstrs_ref==1) g0term=1
+
 !Double loop over strain perturbations
  do ipert1=natom+3,natom+4
    do idir1=1,3
@@ -2634,7 +2638,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 !    Get first-order local potential.
      call vlocalstr(gmet,gprimd,gsqcut,istr1,mgfft,mpi_enreg,&
 &     psps%mqgrid_vl,natom,gs_hamk%nattyp,nfft,ngfft,ntypat,ph1d,psps%qgrid_vl,&
-&     ucvol,psps%vlspl,vpsp1)
+&     ucvol,psps%vlspl,vpsp1,g0term=g0term)
 
 !    Get first-order hartree potential.
      call hartrestr(gsqcut,idir1,ipert1,mpi_enreg,natom,nfft,ngfft,&
