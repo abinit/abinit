@@ -3329,7 +3329,6 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  !NCF_CHECK(nctk_get_dim(ncid, "natom3", natom3))
  NCF_CHECK(nctk_get_dim(ncid, "nqibz", new%nqibz))
  NCF_CHECK(nctk_get_dim(ncid, "nqbz", new%nqbz))
-
  !NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
  !NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
 
@@ -3345,6 +3344,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  !NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
  NCF_CHECK(nf90_get_var(ncid, vid("imag_only"), imag_only))
  new%imag_only = (imag_only == 1)
+ NCF_CHECK(nf90_get_var(ncid, vid("mrta"), new%mrta))
 
  ABI_MALLOC(new%kcalc, (3, new%nkcalc))
  ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
@@ -3478,10 +3478,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 #ifdef HAVE_NETCDF
  integer :: ncerr, varid
 #endif
- logical :: has_mrta, has_vel, has_car_vel, has_red_vel
 !arrays
  integer,allocatable :: indkk(:,:)
- real(dp) :: dksqmax, vk_red(2,3), vk_car(2,3)
+ real(dp) :: dksqmax
 
 ! *************************************************************************
 
@@ -3504,7 +3503,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  ! store mapping to return
  if (present(indq2ebands)) then
    ABI_MALLOC(indq2ebands, (self%nkcalc))
-   indq2ebands(:) = indkk(:,1)
+   indq2ebands(:) = indkk(:, 1)
  end if
 
  ! Allocate using only the relevant bands for transport
@@ -3512,67 +3511,41 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  mband = maxval(self%bstop_ks)
  new = ebands_chop(ebands, 1, mband)
  !mband = ebands%mband
- !call ebands_copy(ebands,new)
+ !call ebands_copy(ebands, new)
 
 #ifdef HAVE_NETCDF
- has_mrta = .true.
- ierr = nf90_inq_varid(self%ncid, "vals_e0k", varid)
- if (ierr /= nf90_noerr) has_mrta = .false.
-
- has_car_vel = .false.
- has_red_vel = .false.
- ierr = nf90_inq_varid(self%ncid, "vcar_calc", varid)
- if (ierr == nf90_noerr) has_car_vel = .true.
- ierr = nf90_inq_varid(self%ncid, "vred_calc", varid)
- if (ierr == nf90_noerr) has_red_vel = .true.
- has_vel = (has_car_vel .or. has_red_vel)
-
  ! Read linewidths from sigmaph
+ ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
  ABI_CALLOC(linewidth_serta, (self%ntemp, mband, nkpt, nsppol))
- if (has_mrta) then
+ if (self%mrta > 0) then
    ABI_CALLOC(linewidth_mrta, (self%ntemp, mband, nkpt, nsppol))
- end if
- if (has_vel) then
-   ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
  end if
 
  do spin=1,nsppol
    do ikcalc=1,self%nkcalc
-     bstart_ks = self%bstart_ks(ikcalc,spin)
-     nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
+     bstart_ks = self%bstart_ks(ikcalc, spin)
+     nbcalc_ks = self%nbcalc_ks(ikcalc, spin)
      do iband=1,nbcalc_ks
        band_ks = iband + bstart_ks - 1
-       ikpt = indkk(ikcalc,1)
+       ikpt = indkk(ikcalc, 1)
 
        do itemp=1,self%ntemp
          ! Read SERTA lifetimes
-         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"),&
-                 linewidth_serta(itemp,band_ks,ikpt,spin), start=[2, itemp, iband, ikcalc, spin])
+         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), &
+                 linewidth_serta(itemp, band_ks, ikpt, spin), start=[2, itemp, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
          ! Read MRTA lifetimes
-         if (has_mrta) then
-            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"),&
-                                 linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp, iband, ikcalc, spin])
-            NCF_CHECK(ncerr)
+         if (self%mrta > 0) then
+           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
+                              linewidth_mrta(itemp, band_ks, ikpt, spin), start=[itemp, iband, ikcalc, spin])
+           NCF_CHECK(ncerr)
          end if
        end do
 
        ! Read band velocities
-       if (has_vel) then
-         if (has_car_vel) then
-           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"),&
-                                velocity(:,band_ks,ikpt,spin), start=[1, iband, ikcalc, spin])
-           NCF_CHECK(ncerr)
-         end if
-         ! TODO: This section of code can be removed because we don't write vred_calc anymore
-         if (has_red_vel) then
-           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"),&
-                                vk_red(1,:), start=[1, iband, ikcalc, spin])
-           NCF_CHECK(ncerr)
-           call ddk_red2car(cryst%rprimd, vk_red, vk_car)
-           velocity(:,band_ks,ikpt,spin) = vk_car(1,:)
-         end if
-       end if
+       ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), &
+                            velocity(:,band_ks,ikpt,spin), start=[1, iband, ikcalc, spin])
+       NCF_CHECK(ncerr)
 
      end do
    end do

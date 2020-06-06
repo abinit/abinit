@@ -103,11 +103,13 @@ MODULE m_ebands
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
  public :: ebands_downsample       ! Build a new ebands_t with a downsampled IBZ.
  public :: ebands_chop             ! Build a new ebands_t with selected nbands.
- public :: ebands_get_edos         ! Compute electron DOS from band structure.
+ public :: ebands_get_edos         ! Compute e-DOS from band structure.
  public :: ebands_get_jdos         ! Compute electron joint-DOS from band structure.
- public :: ebands_get_dos_matrix_elements
 
- public :: ebands_interp_kmesh     ! Interpolate energies on a k-mesh.
+ public :: ebands_get_dos_matrix_elements ! Compute e-DOS and other DOS-like quantities involving
+                                          ! vectorial or tensorial matrix elements.
+
+ public :: ebands_interp_kmesh     ! Use SWK Interpolate energies on a k-mesh.
  public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
  public :: ebands_interpolate_kpath
 
@@ -4169,20 +4171,31 @@ end function ebands_interp_kpath
 !!  ebands_get_dos_matrix_elements
 !!
 !! FUNCTION
-!!  Calculate the electronic density of states from ebands_t
+!!  Compute e-DOS and other DOS-like quantities involving
+!!  vectorial or tensorial matrix elements.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
+!!  nvals
+!!  bks_vecs
+!!  nvecs
+!!  bks_tens
+!!  ntens
 !!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
 !!    If nkpt == 1 (Gamma only), the routine fallbacks to gaussian method.
-!!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
+!!  step=Step on the linear mesh in Ha. If < 0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
 !!    No meaning for tetrahedrons
 !!  comm=MPI communicator
+!!  [emin, emax]
 !!
 !! OUTPUT
+!!  out_mesh:
+!!  out_valsdos:
+!!  out_vecsdos:
+!!  out_tensdos:
 !!
 !! PARENTS
 !!
@@ -4269,13 +4282,13 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
  ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
  if (nvals > 0) then
-   ABI_CALLOC(out_valsdos,  (nw, 2, 0:ebands%nsppol, nvals))
+   ABI_CALLOC(out_valsdos, (nw, 2, 0:ebands%nsppol, nvals))
  endif
  if (nvecs > 0) then
-   ABI_CALLOC(out_vecsdos,  (nw, 2, 0:ebands%nsppol, 3, nvecs))
+   ABI_CALLOC(out_vecsdos, (nw, 2, 0:ebands%nsppol, 3, nvecs))
  end if
  if (ntens > 0) then
-   ABI_CALLOC(out_tensdos,  (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
+   ABI_CALLOC(out_tensdos, (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
  end if
 
  call cwtime(cpu, wall, gflops, "start")
@@ -4332,6 +4345,7 @@ select case (intmeth)
 
      end do !ikpt
    end do !spin
+
    ABI_FREE(wme0)
    call xmpi_sum(edos%dos, comm, ierr)
    if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
@@ -4458,13 +4472,13 @@ select case (intmeth)
  call cwtime_report(" ebands_get_dos_matrix_elements", cpu, wall, gflops)
 
 contains
- function symmetrize_vector(cryst,v) result(vsum)
-  integer :: isym
-  type(crystal_t) :: cryst
+ function symmetrize_vector(cryst, v) result(vsum)
+  type(crystal_t),intent(in) :: cryst
   real(dp) :: vsym(3), vsum(3), v(3)
+  integer :: isym
 
   !symmetrize
-  vsum = 0
+  vsum = zero
   do isym=1, cryst%nsym
     vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
     vsum = vsum + vsym
@@ -4473,13 +4487,13 @@ contains
 
  end function symmetrize_vector
 
- function symmetrize_tensor(cryst,t) result(tsum)
+ function symmetrize_tensor(cryst, t) result(tsum)
+  type(crystal_t),intent(in) :: cryst
   integer :: isym
-  type(crystal_t) :: cryst
   real(dp) :: tsym(3,3), tsum(3,3), t(3,3)
 
   !symmetrize
-  tsum = 0
+  tsum = zero
   do isym=1, cryst%nsym
     tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
     tsum = tsum + tsym

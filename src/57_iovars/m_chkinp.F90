@@ -906,12 +906,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        if (dt%nspinor == 2) then
          MSG_ERROR_NOSTOP("Spin parallelism cannot be used when nspinor == 2", ierr)
        else if (dt%nspinor == 1 .and. dt%eph_np_pqbks(5) > dt%nsppol) then
-         MSG_ERROR_NOSTOP("Number of procs for spin cannot be greater than nsppol", ierr)
+         MSG_ERROR_NOSTOP("nproc for spin parallelism cannot be greater than nsppol", ierr)
        end if
      end if
 
     if (dt%eph_np_pqbks(1) /= 0 .and. dt%eph_np_pqbks(1) > 3 * dt%natom ) then
-      MSG_ERROR_NOSTOP("Number of procs for perturbation parallelism  cannot be greater than 3 * natom", ierr)
+      MSG_ERROR_NOSTOP("nproc for pert parallelism cannot be greater than 3 * natom", ierr)
+    end if
+
+    if (mod(3 * dt%natom, dt%eph_np_pqbks(1)) /= 0) then
+      MSG_ERROR_NOSTOP("nproc for pert parallelism must divide 3 * natom.", ierr)
     end if
 
 #ifndef HAVE_NETCDF_MPI

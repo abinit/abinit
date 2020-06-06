@@ -33,7 +33,7 @@ For a review of the different possible approaches see [[cite:Ponce2020]].
 In the SERTA, the transport linewidth is given by
 the imaginary part of the electron-phonon (e-ph) self-energy evaluated at the KS energy.
 Only the Fan-Migdal (FM) part contributes to the linewidth as the Debye-Waller is Hermitian.
-The linewidth of the electron state $n\kk$ due to the scattering with phonons are obtained as
+The linewidth of the electron state $n\kk$ due to the scattering with phonons are obtained from
 
 \begin{equation}
 \begin{split}
@@ -113,7 +113,8 @@ For electrons,
 where $n\in\text{CB}$ denotes states in the conduction bands. Similar expressions hold for holes.
 At zero total carrier concentration, the Fermi level $\ef$ is located inside the band gap so that $n_e = n_h$.
 
-A typical computation of mobilities requires different steps that are summarized in the [introduction page for the EPH code](eph_intro).
+A typical computation of mobilities requires different steps that are summarized 
+in the [introduction page for the EPH code](eph_intro).
 Here we only describe the e-ph related part, i.e the blue-box in the workflow presented in the previous page.
 For this purpose, we use [[eph_task]] -4 to obtain only the imaginary part of the SE and explain other important
 aspects in this tutorial.
@@ -286,11 +287,11 @@ You will compute the electron lifetimes and group velocities on this dense mesh.
 We will therefore need the wavefunctions on this dense mesh.
 -->
 Note that in this tutorial, a single dense $\kk$-mesh is used.
-However, the mobility strongly depends on this
-mesh and a convergence study should be performed by increasing the $\kk$-mesh density,
+However, the mobility strongly depends on this mesh and a convergence study should be performed by 
+increasing the $\kk$-mesh density,
 as well as the $\qq$-mesh used for the integration of the imaginary part of the self-energy.
-This study is explained later and left to the user
-but it should be clear even at this point that systems with small effective masses (e.g GaAs)
+This study is explained later and left to the user as excercise.
+It should be clear even that systems with small effective masses (e.g GaAs)
 require denser homogeneous $\kk$-meshes and are more difficult to converge.
 
 The computation of the dense WFK file is similar to a NSCF band structure computation.
@@ -305,7 +306,7 @@ It consists of two parts: the first one (dataset 1) computes the GS wavefunction
 and the second one (datasets 2-3) computes the dense WFK that will be used to evaluate the mobility.
 We also compute a denser WFK file that will be used with the double-grid method explained later.
 
-We want to compute the mobility of electrons in the conduction band, therefore
+As we want to compute the mobility of electrons in the conduction band, 
 we need to consider conduction bands in the computation of the WFK ([[nband]] = 8).
 
 Copy the file in the *Work_eph4mob* directory, and run ABINIT:
@@ -346,14 +347,15 @@ Let's discuss the meaning of the e-ph variables in more details:
 * [[optdriver]] 7 is required to activate the EPH driver
 
 * [[eph_task]] -4 tells ABINIT that we only need the imaginary part
-  of the e-ph self-energy, which directly gives the electron lifetimes.
+  of the e-ph self-energy at the KS energy, which directly gives the electron lifetimes.
 
 * The homogeneous mesh corresponding to the WFK file is specified by [[ngkpt]] 24 24 24.
   The code will stop with an error if [[ngkpt]] is not the same as the one corresponding to the 
   dense WFK file.
 
 * [[occopt]] 3 is required to correctly compute the
-  location of the Fermi level, using the Fermi-Dirac occupation function.
+  location of the Fermi level using the Fermi-Dirac occupation function as we are dealing with the
+  physical temperature and not a Fictitious broadening for integration purposes.
 
 * [[ddb_ngqpt]] defined the initial grid used for the DFPT computation (4×4×4 in this example)
 
@@ -388,7 +390,8 @@ to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to
 ensure energy and momentum conservation for a given $\kk$-point.
 All the other $\qq$-points do not need to be considered and can be filtered out.
 The use of the tetrahedron method is automatically activated when [[eph_task]] is set to -4.
-It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended.
+It is possible to change this behaviour by using [[eph_intmeth]] albeit not recommended 
+as the calculation will become significantly slower.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
 The carrier concentration is deduced from the number of extra electrons in the unit cell,
@@ -400,9 +403,10 @@ we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ elect
 
     The computational cost increases with the number of temperatures.
     For the initial convergence studies, we suggest to start from a relatively small number
-    of temperatures covering the region of interest. The T-mesh can be densified aftwerwards when 
-    converged parameters are found.
+    of temperatures covering the region of interest. 
+    The T-mesh can be densified aftwerwards when  converged parameters are found.
     Note that the convergence might be different depending on the temperature.
+    Low temperatures are more difficult to converge.
 
 The [[sigma_erange]] variable defines the energy window, below the VBM and above the
 CBM where the lifetimes will be computed.
@@ -482,7 +486,7 @@ K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
 	5   3.573    0.000  31553.2    0.000
 ```
 
-Only the first temperature is printed in the output file, but all the information can be found in the SIGEPH.nc file.
+Only the first temperature is printed in the output file, but all the results can be found in the SIGEPH.nc file.
 
 !!! tip
 
@@ -508,7 +512,7 @@ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
 ```
 
 The temperature is first given then the electron and hole densities followed by electron and hole mobilities.
-In this computation, we consider only electrons, so the values for holes are zero.
+In this computation, we consider only electrons and this explains why the values for holes are zero.
 Note that the transport driver is automatically executed after the EPH run.
 You can run the transport driver in standalone mode by setting [[eph_task]] 7, 
 provided you already have the lifetimes in a SIGEPH.nc file,
@@ -572,7 +576,8 @@ The previous computations used 24×24×24 $\kk$- and $\qq$-meshes. This is far f
 In silicon, for instance, a 45×45×45 $\kk$-mesh and 90×90×90 $\qq$-mesh are needed
 to reach convergence within 5%.
 
-In order to compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh, there are two possibilities.
+In order to compute the mobility with a $\qq$-mesh twice as dense as the $\kk$-mesh, 
+there are two possible approaches.
 Let us take the previous example of silicon.
 
 1. Run a computation with:
