@@ -857,6 +857,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      MSG_ERROR(message)
    else
      call hightemp%init(dtset%useric,dtset%mband,dtset%userib,rprimd)
+     ! hightemp module version
+     if(dtset%userie >= 0) then
+       hightemp%version=dtset%userie
+     end if
    end if
  end if
 
