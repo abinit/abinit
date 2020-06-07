@@ -720,13 +720,8 @@ the perturbation distribution.
 However, there might be tricky systems in which you start to experience memory shortage that
 prevents you from running with several MPI processes.
 This problems should show up for very dense $\kk$/$\qq$ meshes.
-As a rule of thumb, calculations with meshes denser than e.g 200x200x200 are memory demanding
+As a rule of thumb, calculations with meshes denser than e.g 200x200x200 start to be very memory demanding
 and become much slower because several algorithms and tables related to the BZ sampling will start to dominate.
-<!--
-We stress again that decreasing [[boxcutmin]] is very beneficial and this the first thing one should try.
-Remember however that using values smaller than 1.1 is risky.
-If decreasing [[boxcutmin]] does not solve the problem, one can activate additional tricks.
--->
 
 The code uses an internal cache to store the DFPT potentials in the dense IBZ.
 The size of the cache is defined by [[dvdb_qcache_mb]] whose default value is 1024 Mb.
@@ -736,14 +731,14 @@ You can save some space by decreasing this value at the price of a global slow d
 The code allocates a relatively small buffer to store the Bloch states involved in transport but unfortunately
 the $\kk$-points are not easy to distribute with MPI.
 To reduce the size of this part, one may opt for an internal buffer in single precision.
-This option is enabled by using `enable_gw_dpc="no"` at configure time (default value).
+This option is enabled by using `enable_gw_dpc="no"` at configure time (note that this is the default behaviour).
 
 If these tricks do not solve your problem, consider using OpenMP threads.
 The code is not optimized for OpenMP but a few threads can be useful to avoid replicating memory at the MPI level.
 As a rule of thumb 2-4 OpenMP threads should be OK provided you link with threaded FFT and BLAS libraries.
-OpemMP may be beneficial for large calculations.
 
-Last but not least, do not use datasets: large arrays allocated for $\kk$-points and the size depends on ndtset.
+Last but not least, do not use datasets: large arrays allocated for $\kk$-points and the size depends on [[ndtset]].
+Never ever use multiple datasets for big EPH calculations. You have been warned!
 
 ### How to compute only the $\kk$-points close to the band edges
 
@@ -753,7 +748,7 @@ As we have already seen in the previous sections, a relatively small number of $
 close to the band edges is usually sufficient to converge mobilities.
 Yet, in the NSCF run, we computed a WFK file for all the $\kk$-points of the dense IBZ
 hence we spent a lot of resources to compute and store states that are not
-needed to compute phonon-limited mobilities.
+needed for phonon-limited mobilities.
 
 In principle, it is possible to restrict the NSCF calculation to the relevant $\kk$-points
 provided we have a cheap and good-enough method to predict whether the wavevector
@@ -768,10 +763,9 @@ the idea is relatively simple and goes as follows:
 2. Use this *coarse* WFK file to interpolate the eigenvalues on a much denser $\kk$-mesh specified by the user.
 3. Find the wavevectors of the dense mesh inside an energy window specified by the user and
    store the list of $\kk$-points in a external file.
-4. Use this file to run a NSCF calculation only for these $\kk$-points.
-   At the end of the run, ABINIT will produce a **customized** WFK file on the dense mesh that
-   can be used by the EPH code.
-
+4. Use this external file to run a NSCF calculation only for these $\kk$-points.
+   At the end of the NSCF job, ABINIT will produce a **customized** WFK file on the dense mesh that
+   can be used by run calculations for phonon-limited mobilities
 
 An example will help clarify.
 Suppose we have computed a WFK file with a NSCF run using a 16x16x16 $\kk$-mesh (let's call it *161616_WFK*)

@@ -6462,11 +6462,11 @@ end subroutine invcb
 !!
 !! SOURCE
 
-elemental subroutine safe_div( n, d, altv, q )
+elemental subroutine safe_div(n, d, altv, q)
 
 !Arguments ----------------------------------------------
 !scalars
- real(dp), intent(in) :: n, d, altv
+ real(dp),intent(in) :: n, d, altv
  real(dp),intent(out) :: q
 
 ! *********************************************************************

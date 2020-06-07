@@ -3326,7 +3326,6 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nctk_get_dim(ncid, "max_nbcalc", new%max_nbcalc))
  NCF_CHECK(nctk_get_dim(ncid, "nsppol", new%nsppol))
  NCF_CHECK(nctk_get_dim(ncid, "ntemp", new%ntemp))
- !NCF_CHECK(nctk_get_dim(ncid, "natom3", natom3))
  NCF_CHECK(nctk_get_dim(ncid, "nqibz", new%nqibz))
  NCF_CHECK(nctk_get_dim(ncid, "nqbz", new%nqbz))
  !NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
@@ -3368,10 +3367,11 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
 
  ! Try to read the done array used to implement restart capabilities.
  ABI_ICALLOC(new%qp_done, (new%nkcalc, new%nsppol))
- ncerr = nf90_inq_varid(ncid, "qp_done", varid)
- if (ncerr == nf90_noerr) then
-   NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
- end if
+ !ncerr = nf90_inq_varid(ncid, "qp_done", varid)
+ !if (ncerr == nf90_noerr) then
+ !NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
+ !end if
+ NCF_CHECK(nf90_get_var(ncid, vid("qp_done"), new%qp_done))
 
  ! ============================================================
  ! Read and check consistency against dtset
@@ -3507,14 +3507,18 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  end if
 
  ! Allocate using only the relevant bands for transport
- ! includin valence states to allow to compute different doping
+ ! including valence states to allow to compute different doping
+ ! MG: TODO: Do we really need this!
  mband = maxval(self%bstop_ks)
  new = ebands_chop(ebands, 1, mband)
  !mband = ebands%mband
  !call ebands_copy(ebands, new)
 
 #ifdef HAVE_NETCDF
- ! Read linewidths from sigmaph
+ ! Read linewidths from sigmaph file.
+ ! Use global array (mband, nkpt, nsppol) but keep in mind that results in SIGPEPH are packed
+ ! so that only the relevant k-points are stored.
+
  ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
  ABI_CALLOC(linewidth_serta, (self%ntemp, mband, nkpt, nsppol))
  if (self%mrta > 0) then
@@ -3526,7 +3530,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
      bstart_ks = self%bstart_ks(ikcalc, spin)
      nbcalc_ks = self%nbcalc_ks(ikcalc, spin)
      do iband=1,nbcalc_ks
+       ! band index in global array.
        band_ks = iband + bstart_ks - 1
+       ! kcalc --> ibz index
        ikpt = indkk(ikcalc, 1)
 
        do itemp=1,self%ntemp

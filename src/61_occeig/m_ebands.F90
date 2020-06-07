@@ -3745,12 +3745,9 @@ end function ebands_downsample
 !!
 !! FUNCTION
 !!  Return a new ebands_t object of type ebands_t with only a selected number of bands
+!!  between bstart and bstop
 !!
 !! INPUTS
-!!  cryst<crystal_t>=Info on unit cell and symmetries.
-!!  in_kptrlatt(3,3)=Defines the sampling of the "small" IBZ. Must be submesh of the "fine" mesh.
-!!  in_nshiftk= Number of shifts in the coarse k-mesh
-!!  in_shiftk(3, in_nshiftk) = Shifts of the coarse k-mesh
 !!
 !! PARENTS
 !!
@@ -3778,12 +3775,12 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
  ABI_FREE(new%occ)
  ABI_FREE(new%doccde)
 
- mband  = bstop-bstart+1
+ mband  = bstop - bstart + 1
  nkpt   = self%nkpt
  nsppol = self%nsppol
- ABI_MALLOC(new%eig, (mband,nkpt,nsppol))
- ABI_MALLOC(new%occ, (mband,nkpt,nsppol))
- ABI_MALLOC(new%doccde, (mband,nkpt,nsppol))
+ ABI_MALLOC(new%eig, (mband, nkpt, nsppol))
+ ABI_MALLOC(new%occ, (mband, nkpt, nsppol))
+ ABI_MALLOC(new%doccde, (mband, nkpt, nsppol))
 
  new%mband  = mband
  new%nband  = mband
@@ -4171,30 +4168,33 @@ end function ebands_interp_kpath
 !!  ebands_get_dos_matrix_elements
 !!
 !! FUNCTION
-!!  Compute e-DOS and other DOS-like quantities involving
-!!  vectorial or tensorial matrix elements.
+!!  Compute e-DOS and weighted DOS with weights given by precomputed scalar, vectorial or tensorial matrix elements.
+!!  Weights are provided in input as (..., num_entries, mband, nkpt, nsppol) tables.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  nvals
-!!  bks_vecs
-!!  nvecs
-!!  bks_tens
-!!  ntens
-!!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
-!!    If nkpt == 1 (Gamma only), the routine fallbacks to gaussian method.
+!!  nvals=Number of scalar entries. Maybe zero
+!!  bks_vals=Scalar matrix elements
+!!  bks_vecsa=Vectorial matrix elements in Cartesian Coordinates
+!!  nvecs=Number of 3d-vectorial entries. Maybe zero
+!!  bks_tens= Tensorial matrix elements (3x3) in Cartesian Coordinates
+!!  ntens=Numer of 3x3 tensorial entries in Cartesian coordinates. Maybe zero
+!!  intmeth=
+!!    1 for Gaussian,
+!!    2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
+!!    If nkpt == 1 (Gamma only), the routine fallbacks to the Gaussian method.
 !!  step=Step on the linear mesh in Ha. If < 0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
 !!    No meaning for tetrahedrons
 !!  comm=MPI communicator
-!!  [emin, emax]
+!!  [emin, emax]=Minimum and maximum energy to be considered. Default: full range.
 !!
 !! OUTPUT
-!!  out_mesh:
-!!  out_valsdos:
-!!  out_vecsdos:
+!!  out_mesh: Frequency mesh.
+!!  out_valsdos: (nw, 2, 0:nsppol, nvals) array with DOS for scalar quantities if nvals > 0
+!!  out_vecsdos: (nw, 2, 0:nsppol, 3, nvecs)) array with DOS for vectorial
 !!  out_tensdos:
 !!
 !! PARENTS
@@ -4281,6 +4281,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  ABI_CALLOC(edos%gef, (0:edos%nsppol))
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
  ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
+ ! Allocate output arrays depending on input.
  if (nvals > 0) then
    ABI_CALLOC(out_valsdos, (nw, 2, 0:ebands%nsppol, nvals))
  endif
@@ -4319,7 +4320,7 @@ select case (intmeth)
            !get components
            v(:) = bks_vecs(:, idat, band, ikpt, spin)
            !symmetrize
-           vsum = symmetrize_vector(cryst,v)
+           vsum = symmetrize_vector(cryst, v)
            !put components
            do ii=1,3
              out_vecsdos(:, 1, spin, ii, idat) = out_vecsdos(:, 1, spin, ii, idat) + wme0(:) * vsum(ii)
@@ -4332,7 +4333,7 @@ select case (intmeth)
            !get components
            t(:,:) = bks_tens(:, :, idat, band, ikpt, spin)
            !symmetrize
-           tsum = symmetrize_tensor(cryst,t)
+           tsum = symmetrize_tensor(cryst, t)
            !put components
            do ii=1,3
              do jj=1,3
@@ -4399,7 +4400,7 @@ select case (intmeth)
            !get components
            v(:) = bks_vecs(:, idat, band, ikpt, spin)
            !symmetrize
-           vsum = symmetrize_vector(cryst,v)
+           vsum = symmetrize_vector(cryst, v)
            !put components
            do ii=1,3
              out_vecsdos(:, 1, spin, ii, idat) = out_vecsdos(:, 1, spin, ii, idat) + wdt(:, ikpt, 1) * vsum(ii)
@@ -4412,7 +4413,7 @@ select case (intmeth)
            !get components
            t(:,:) = bks_tens(:, :, idat, band, ikpt, spin)
            !symmetrize
-           tsum = symmetrize_tensor(cryst,t)
+           tsum = symmetrize_tensor(cryst, t)
            !put components
            do ii=1,3
              do jj=1,3
@@ -4445,7 +4446,7 @@ select case (intmeth)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
 
  do spin=1,edos%nsppol
-   call simpson_int(nw,edos%step,edos%dos(:,spin),edos%idos(:,spin))
+   call simpson_int(nw, edos%step,edos%dos(:,spin), edos%idos(:,spin))
  end do
  edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
