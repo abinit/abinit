@@ -3864,7 +3864,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  ABI_MALLOC(eig_ki, ((2*mband)**iwfk%formeig*mband) )
  ABI_MALLOC(occ_ki, (mband))
 
- !TODO: timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+ !TODO: timrev = kpts_timrev_from_kptopt(ebands%kptopt) + 1
  cryst = iwfk%hdr%get_crystal(2)
 
  ! Build new header for owfk. This is the most delicate part since all the arrays in hdr_full

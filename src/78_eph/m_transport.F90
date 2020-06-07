@@ -800,7 +800,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
          mu_e = self%transport_mu_e(itemp)
-         self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk,kT,mu_e) * max_occ
+         self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
        end do
      end do
 
@@ -835,14 +835,17 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
        vv_tens = symmetrize_tensor(cryst, vv_tens)
 
        ! Multiply by the lifetime
+       !do ii=1,2
        do itemp=1,self%ntemp
          mu_e = self%transport_mu_e(itemp)
          kT = self%kTmesh(itemp)
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         !linewidth = abs(self%linewidth_mrta(itemp, ib, ik, ispin))
+         !if (ii == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
+         !if (ii == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, ispin))
          call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk,kT,mu_e), linewidth, zero, vv_tenslw(:, :))
          self%mobility_mu(ielhol, ispin, :, :, itemp) = self%mobility_mu(ielhol, ispin, :, :, itemp) + vv_tenslw(:, :)
        end do
+       !end of
      end do
 
    end do !kpt

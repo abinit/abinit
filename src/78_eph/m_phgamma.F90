@@ -66,7 +66,7 @@ module m_phgamma
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_special_funcs,  only : fermi_dirac
- use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt
  use defs_elphon,      only : complete_gamma !, complete_gamma_tr
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
@@ -2057,7 +2057,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
        write(msg,'(3a)') ch10,'Warning: some of the following quantities should be integrated over spin', ch10
        call wrtout(ount, msg)
      end if
-     
+
      if (do_qintp) then
        write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated).'
      else
@@ -4541,6 +4541,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  integer :: ib1, ib2 ! band_k, band_kq
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, enemin, enemax
+ logical :: use_tr
  !character(len=500) :: msg
  type(krank_t) :: ibz_krank
  type(t_tetrahedron) :: tetra
@@ -4595,8 +4596,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- !timrev = 0; if (use_tr) timrev=1
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
+ ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  nb = fs%maxnb
  ABI_MALLOC(kbz, (3, nkbz))
@@ -4908,8 +4909,8 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- !timrev = 0; if (use_tr) timrev=1
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
+ ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  nb = bstop - bstart + 1
  ABI_MALLOC(kbz, (3, nkbz))

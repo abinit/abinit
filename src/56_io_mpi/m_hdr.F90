@@ -57,6 +57,7 @@ module m_hdr
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
  use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust, strcat, atoi
  use m_symtk,         only : print_symmetries
+ !use m_kpts,          only : kpts_timrev_from_kptopt
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_pawtab,        only : pawtab_type
@@ -5010,6 +5011,10 @@ type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
 
  rinv=.FALSE.; if (PRESENT(remove_inv)) rinv=remove_inv
  use_antiferro = hdr%nspden == 2 .and. hdr%nsppol ==1
+
+ !if (.not. present(timerev) timrev = kpts_timrev_from_kptopt(hdr%kptopt) + 1
+ !timrev = 1; if (any(hdr%kptopt == [3, 4])) timrev = 0
+ !timrev = timrev + 1
 
  ! Consistency check
  ABI_CHECK(any(timrev == [1, 2]), "timrev should be in (1|2)")

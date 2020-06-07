@@ -36,7 +36,7 @@ module m_chkinp
 
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
- use m_numeric_tools,  only : iseven
+ use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : chkgrp, chkorthsy
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
@@ -859,8 +859,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
+
      if (dt%eph_task == 1 .and. dt%ph_nqpath <= 0) then
        MSG_ERROR("When eph_task == 1, the q-path for the linewidth must be specified via ph_nqpath and ph_qpath")
+     end if
+     if (dt%eph_task == 1 .and. dt%nshiftk <= 0) then
+       MSG_ERROR_NOSTOP('phgamma does not work with multiple k-shifts ', ierr)
+     end if
+     if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
+       MSG_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
 
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
@@ -2829,22 +2836,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  prtfsurf only one shift allowed (gamma)
    if (dt%prtfsurf == 1) then
 
-     if (abs(dt%kptrlatt(1,2))+abs(dt%kptrlatt(1,3))+abs(dt%kptrlatt(2,3))+&
-         abs(dt%kptrlatt(2,1))+abs(dt%kptrlatt(3,1))+abs(dt%kptrlatt(3,2)) /= 0 ) then
+     if (.not. isdiagmat(dt%kptrlatt)) then
        write(msg,'(4a)')ch10,&
          'prtfsurf does not work with non-diagonal kptrlatt ', ch10,&
          'Action: set nshift 1 and shiftk 0 0 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
      if (dt%nshiftk > 1) then
-       write(msg,'(4a)') ch10,&
-        'prtfsurf does not work with multiple kpt shifts ', ch10, &
-        'Action: set nshift 1 and shiftk 0 0 0'
-       MSG_ERROR_NOSTOP(msg, ierr)
+       MSG_ERROR_NOSTOP('prtfsurf does not work with multiple kpt shifts ', ierr)
      end if
      if (sum(abs(dt%shiftk(:,1:dt%nshiftk))) > tol8) then
        write(msg,'(4a)')ch10,&
-        'prtfsurf does not work with non-zero kpt shift ',ch10,&
+        'prtfsurf does not work with non-zero k-shifts ',ch10,&
         'Action: set nshift 1 and shiftk 0 0 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
