@@ -90,7 +90,7 @@ CONTAINS  !=====================================================================
 !! Wfd<wfd_t>=Wavefunction descriptor (input k-mesh)
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials.
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data.
-!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
+!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
 !!
 !! OUTPUT
 !!  The imaginary part of the macroscopic dielectric function is written on the external file _EXC_MDF

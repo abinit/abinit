@@ -29,7 +29,7 @@
  nqpt1     0
  rfphon1   0
  kptopt1   1
- prtpot1   1
+ prtpot1   1     # Important: we need the GS POT file to use the Sternheimer trick in the e-ph self-energy
 
 ##################################################
 # Dataset 2 (NSCF run to get WFK with empty states
@@ -87,8 +87,9 @@ getwfk7 1
 sigma_ngkpt7   8 8 8 
 sigma_nshiftk7 1
 sigma_shiftk7 0 0 0
-einterp7 1 5 0 0           # Parameters for star-functions interpolation
+einterp7 1 5 0 0           # Parameters for star-function interpolation
 sigma_erange7 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
+
 # Cancel default values
 nqpt7     0 
 rfphon7   0 
@@ -114,7 +115,6 @@ kptopt7   1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 

@@ -1,8 +1,8 @@
 
-.Version 8.11.14 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  2 Mar 2020.
-- ( at 19h43 )
+.Starting date : Tue 14 Apr 2020.
+- ( at 15h43 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--t83.nc
+-/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v9/Input/t83.nc
  to initialize the multibinit input
 
 ================================================================================
@@ -34,6 +34,7 @@
      strcpli        -1
  Molecular Dynamics :
     dynamics       102
+    dyn_chks         0
         temp      50.0
        ntime        10
        ncell         4         4         4
@@ -82,6 +83,6 @@ Lattice dynamic steps:
 
 ================================================================================
 
-+Total cpu time      0.076  and wall time      0.077 sec
++Total cpu time      0.055  and wall time      0.058 sec
 
  multibinit : the run completed succesfully.

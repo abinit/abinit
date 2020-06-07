@@ -263,7 +263,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  real(dp),allocatable :: vpsp(:),xccc3d(:)
  real(dp),allocatable :: ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
  real(dp),allocatable :: kxc(:,:) !,qp_kxc(:,:)
- complex(dpc),allocatable :: m_lda_to_qp(:,:,:,:)
+ complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(Pawrhoij_type),allocatable :: prev_Pawrhoij(:) !QP_pawrhoij(:),
@@ -406,13 +406,13 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
-   ! Initialize and compute data for LDA+U
+   ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
 &     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
 &     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu)
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
-     msg='BS equation with LDA+U not completely coded!'
+     msg='BS equation with DFT+U not completely coded!'
      MSG_ERROR(msg)
    end if
    if (my_rank == master) call pawtab_print(Pawtab)
@@ -787,24 +787,24 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !call copy_bandstructure(KS_BSt,QP_BSt)
 
  if (.FALSE.) then
-!  $ m_lda_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}> $
-   ABI_MALLOC(m_lda_to_qp,(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol))
-   m_lda_to_qp=czero
+!  $ m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}> $
+   ABI_MALLOC(m_ks_to_qp,(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol))
+   m_ks_to_qp=czero
    do spin=1,Wfd%nsppol
      do ik_ibz=1,Wfd%nkibz
        do band=1,Wfd%nband(ik_ibz,spin)
-         m_lda_to_qp(band,band,ik_ibz,spin)=cone ! Initialize the QP amplitudes with KS wavefunctions.
+         m_ks_to_qp(band,band,ik_ibz,spin)=cone ! Initialize the QP amplitudes with KS wavefunctions.
        end do
      end do
    end do
    !
-   ! Now read m_lda_to_qp and update the energies in QP_BSt.
+   ! Now read m_ks_to_qp and update the energies in QP_BSt.
    ! TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Wfd%nspden))
    ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Wfd%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Wfd%usepaw,Wfd%nspden,1,nscf,&
-    nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,prev_rhor,prev_Pawrhoij)
+    nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_ks_to_qp,prev_rhor,prev_Pawrhoij)
 
    ABI_FREE(prev_rhor)
    if (Psps%usepaw==1.and.nscf>0) then
@@ -813,7 +813,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ABI_FREE(prev_pawrhoij)
    !
    !  if (nscf>0.and.wfd_iam_master(Wfd)) then ! Print the unitary transformation on std_out.
-   !  call show_QP(QP_BSt,m_lda_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
+   !  call show_QP(QP_BSt,m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    !  end if
    !
    !  === Compute QP wfg as linear combination of KS states ===
@@ -822,9 +822,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
    !  TODO here we should use nbsc instead of nbnds
 
-   call wfd%rotate(Cryst,m_lda_to_qp)
+   call wfd%rotate(Cryst,m_ks_to_qp)
 
-   ABI_FREE(m_lda_to_qp)
+   ABI_FREE(m_ks_to_qp)
    !
    !  === Reinit the storage mode of Wfd as ug have been changed ===
    !  * Update also the wavefunctions for GW corrections on each processor
@@ -927,7 +927,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  call timab(659,1,tsec) ! bse(make_pawhur_t)
  if (Bsp%inclvkb/=0 .and. Wfd%usepaw==1 .and. Dtset%usepawu/=0) then !TODO here I need KS_Paw_ij
-   MSG_WARNING("Commutator for LDA+U not tested")
+   MSG_WARNING("Commutator for DFT+U not tested")
    call pawhur_init(hur,Wfd%nsppol,Wfd%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,KS_Paw_ij)
  end if
  call timab(659,2,tsec) ! bse(make_pawhur_t)
@@ -2181,9 +2181,9 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  ABI_FREE(qlwl)
 
  bantot_dense=SUM(Hdr_wfk_dense%nband(1:Hdr_wfk_dense%nkpt*Hdr_wfk_dense%nsppol))
- ABI_ALLOCATE(doccde,(bantot_dense))
- ABI_ALLOCATE(eigen,(bantot_dense))
- ABI_ALLOCATE(occfact,(bantot_dense))
+ ABI_MALLOC(doccde,(bantot_dense))
+ ABI_MALLOC(eigen,(bantot_dense))
+ ABI_MALLOC(occfact,(bantot_dense))
  doccde=zero; eigen=zero; occfact=zero
 
  jj=0; ibtot=0
@@ -2211,9 +2211,9 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 &  hdr_wfk_dense%charge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
 &  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
 
- ABI_DEALLOCATE(doccde)
- ABI_DEALLOCATE(eigen)
- ABI_DEALLOCATE(npwarr)
+ ABI_FREE(doccde)
+ ABI_FREE(eigen)
+ ABI_FREE(npwarr)
 
  ABI_FREE(nbands_temp)
 
@@ -2255,17 +2255,17 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  ! Transitions are ALWAYS ordered in c-v-k mode with k being the slowest index.
  ! FIXME: linewidths not coded.
- ABI_ALLOCATE(gw_energy,(BSp%nbnds,Kmesh_dense%nibz,Dtset%nsppol))
+ ABI_MALLOC(gw_energy, (BSp%nbnds,Kmesh_dense%nibz,Dtset%nsppol))
  gw_energy = QP_BSt_dense%eig
 
- ABI_ALLOCATE(Bsp%nreh_interp,(Hdr_wfk_dense%nsppol))
+ ABI_MALLOC(Bsp%nreh_interp,(Hdr_wfk_dense%nsppol))
  Bsp%nreh_interp=zero
 
  call init_transitions(BSp%Trans_interp,BSp%lomo_spin,BSp%humo_spin,BSp%ircut,Bsp%uvcut,BSp%nkbz_interp,Bsp%nbnds,&
 &  Bsp%nkibz_interp,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,gw_energy,QP_BSt_dense%occ,Kmesh_dense%tab,minmax_tene,&
 &  Bsp%nreh_interp)
 
- ABI_DEALLOCATE(gw_energy)
+ ABI_FREE(gw_energy)
 
  do spin=1,Dtset%nsppol
    write(msg,'(a,i2,a,i0)')" For spin: ",spin,' the number of resonant e-h transitions is: ',BSp%nreh_interp(spin)
@@ -2279,7 +2279,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  !
  ! Create transition table vcks2t
  is1=BSp%lomo_min;is2=BSp%homo_max;is3=BSp%lumo_min;is4=BSp%humo_max
- ABI_ALLOCATE(Bsp%vcks2t_interp,(is1:is2,is3:is4,BSp%nkbz_interp,Dtset%nsppol))
+ ABI_MALLOC(Bsp%vcks2t_interp, (is1:is2,is3:is4,BSp%nkbz_interp,Dtset%nsppol))
  Bsp%vcks2t_interp = 0
 
  do spin=1,Dtset%nsppol

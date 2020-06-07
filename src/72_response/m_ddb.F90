@@ -62,7 +62,7 @@ MODULE m_ddb
                             ! mixed since strain derivatives are already in cartesian) to cartesian
                             ! coordinates
  public :: ddb_lw_copy      ! Copy the ddb object after reading the long wave 3rd order derivatives
-                            ! into a new ddb_lw and resizes ddb as for 2nd order derivatives 
+                            ! into a new ddb_lw and resizes ddb as for 2nd order derivatives
 
  integer,public,parameter :: DDB_VERSION=100401
  ! DDB Version number.
@@ -550,7 +550,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
  integer :: rfqvec_(4)
 
 ! *********************************************************************
- 
+
  mpert = ddb%mpert
  natom = ddb%natom
 
@@ -1177,7 +1177,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 
  xred(:,:) = ddb_hdr%xred(:,:)
 
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
@@ -1315,7 +1315,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
 
      call lwcart(tmpflg,car3flg,tmpval,d3cart,gprimd,mpert,natom,rprimd)
-     
+
      ddb%flg(1:nsize,iblok) = reshape(car3flg, shape = (/3*mpert*3*mpert*3*mpert/))
      ddb%val(1,1:nsize,iblok) = reshape(d3cart(1,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
      ddb%val(2,1:nsize,iblok) = reshape(d3cart(2,:,:,:,:,:,:), shape = (/3*mpert*3*mpert*3*mpert/))
@@ -1575,6 +1575,7 @@ end subroutine nlopt
 !! FUNCTION
 !!  This subroutine reads data from the DDB file and constructs an instance of ddb_type
 !!  It also returns an instance of crystal_t with the crystalline structure reported in the DDB file
+!!  and the DDB header.
 !!
 !! INPUTS
 !!  filename=DDB filename.
@@ -1588,7 +1589,8 @@ end subroutine nlopt
 !!
 !! OUTPUT
 !!  ddb<type(ddb_type)>=Object storing the DDB results.
-!!  Crystal<type(crystal_t)>=Crystal structure parameters
+!!  crystal<type(crystal_t)>=Crystal structure parameters
+!!  ddb_hdr= Header of the DDB file.
 !!  atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc
 !!    has to be done for atom ia; otherwise 0.
 !!
@@ -1604,7 +1606,7 @@ end subroutine nlopt
 !!
 !! SOURCE
 
-subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, comm, prtvol)
+subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, ddb_hdr, crystal, comm, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -1613,6 +1615,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
  character(len=*),intent(in) :: filename
  type(crystal_t),intent(out) :: Crystal
  type(ddb_type),intent(inout) :: ddb
+ type(ddb_hdr_type),intent(out) :: ddb_hdr
 !array
  integer,intent(inout) :: atifc(natom)
 
@@ -1623,7 +1626,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
  integer :: mtyp,mpert,msize,ddb_natom,nblok,occopt,timrev,space_group,npsp,ddbun
  real(dp) :: factor,ucvol
  logical :: use_antiferro
- type(ddb_hdr_type) :: ddb_hdr
+
 !arrays
  integer,allocatable :: symrec(:,:,:),symrel(:,:,:),symafm(:),indsym(:,:,:),typat(:)
  real(dp) :: acell(3),gmet(3,3),gprim(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
@@ -1652,7 +1655,6 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
 
  ! JWZ occopt was used below before being initialized 13 April 2018
  occopt = ddb_hdr%occopt
- call ddb_hdr_free(ddb_hdr)
 
  if (ddb_natom /= natom) then
    MSG_ERROR(sjoin("input natom:",itoa(natom),"does not agree with DDB value:",itoa(natom)))
@@ -2531,9 +2533,9 @@ end function ddb_get_dielt
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
-!!  lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative 
+!!  lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative
 !!             |-> 1st gradient of polarization response to atomic displacement
-!!         = 1 symmetrize the tensor wrt efield and qvec derivative 
+!!         = 1 symmetrize the tensor wrt efield and qvec derivative
 !!             |-> dynamic quadrupoles
 !!  rftyp  = 1 if non-stationary block
 !!           2 if stationary block
@@ -2570,7 +2572,36 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
  integer :: rfqvec(4)
  real(dp) :: qphnrm(3),qphon(3,3)
 
+#if 1
+ integer :: ii, jj, iatdir, iatom, iq1dir, iq2dir, quad_unt
+
 ! *********************************************************************
+
+ ! MG: Temporary hack to read the quadrupole tensor from a text file
+ ! Will be removed when the EPH code will be able to read Q* from the DDB.
+ iblok = 0
+ quadrupoles = zero
+ if (file_exists("quadrupoles_cart.out")) then
+   call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
+   quad_unt = 71
+   open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
+   do ii=1,2
+     read(quad_unt,*) msg
+     write(std_out, *)" msg: ", trim(msg)
+   end do
+
+   do ii=1,3
+     do jj=1,3*3*ddb%natom
+       read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+       write(std_out, *) iq2dir,iatom,iatdir,iq1dir,quadrupoles(iq1dir,iq2dir,iatdir,iatom)
+     end do
+     read(quad_unt,'(a)') msg
+   end do
+   close(quad_unt)
+   iblok = 1
+   return
+ end if
+#endif
 
  ! Look for the Gamma Block in the DDB
  qphon(:,:)=zero
@@ -2578,9 +2609,9 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
  rfphon(:)=0
  rfelfd(:)=0
  rfqvec(:)=0
- rfphon(3)=1
- rfelfd(3)=1
  rfstrs(:)=0
+ rfelfd(1)=2
+ rfphon(2)=1
  rfqvec(3)=1
 
  call ddb%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec=rfqvec)
@@ -2597,12 +2628,11 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
      write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor (units: e Bohr)',ch10
    else if (lwsym==0) then
      write(msg, '(3a)' ) ch10, &
-   & ' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) ',ch10
+     ' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) ',ch10
    endif
    call wrtout([std_out, ab_out], msg,'COLL')
 
    call dtqdrp(ddb%val(:,:,iblok),lwsym,ddb%mpert,ddb%natom,quadrupoles)
-
  end if
 
 end function ddb_get_quadrupoles
@@ -3478,7 +3508,7 @@ subroutine ddb_to_dtset(comm,dtset,filename,psps)
  !   end do
  ! end if
 
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
 end subroutine ddb_to_dtset
 !!***
@@ -3580,7 +3610,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    lmnmax=max(lmnmax,ddb_hdr%psps%lmnmax)
    usepaw=max(usepaw,ddb_hdr%usepaw)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
  end do
 
  mpert=matom+MPERT_MAX
@@ -3637,7 +3667,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 !    Compare the current DDB and input DDB information.
 !    In case of an inconsistency, halt the execution.
      call wrtout(std_out, ' compare the current and input DDB information', 'COLL')
-     call ddb_hdr_compare(ddb_hdr, ddb_hdr8)
+     call ddb_hdr%compare(ddb_hdr8)
 
    else if(chkopt==0)then
 !    No comparison between the current DDB and input DDB information.
@@ -3685,7 +3715,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    ddb_hdr%psps%pspso(:) = ddb_hdr8%psps%pspso(:)
    ddb_hdr%psps%ekb(:,:) = ddb_hdr8%psps%ekb(:,:)
 
-   call ddb_hdr_free(ddb_hdr8)
+   call ddb_hdr8%free()
  end do
 
  call wrtout(std_out,' All DDBs have been read ','COLL')
@@ -3763,7 +3793,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  ddb_hdr%nblok = nblok
  ddb_hdr%mblktyp = mblktyp
 
- call ddb_hdr_open_write(ddb_hdr, filnam(1), ddbun, fullinit=1)
+ call ddb_hdr%open_write(filnam(1), ddbun, fullinit=1)
 
  if(nddb>1)then
 
@@ -3800,7 +3830,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  ABI_DEALLOCATE(mgblok)
 
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
  call ddb_free(ddb)
 
 end subroutine mblktyp1
@@ -3905,9 +3935,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    lmnmax=max(lmnmax,ddb_hdr%psps%lmnmax)
    usepaw=max(usepaw,ddb_hdr%usepaw)
 
-
-   call ddb_hdr_free(ddb_hdr)
-
+   call ddb_hdr%free()
  end do
 
  mpert=matom+MPERT_MAX
@@ -3973,7 +4001,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      write(message, '(a)' )' compare the current and input DDB information'
      call wrtout(std_out,message,'COLL')
 
-     call ddb_hdr_compare(ddb_hdr, ddb_hdr8)
+     call ddb_hdr%compare(ddb_hdr8)
 
    else if(chkopt==0)then
 !    No comparison between the current DDB and input DDB information.
@@ -4024,8 +4052,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    ddb_hdr%psps%pspso(:) = ddb_hdr8%psps%pspso(:)
    ddb_hdr%psps%ekb(:,:) = ddb_hdr8%psps%ekb(:,:)
 
-   call ddb_hdr_free(ddb_hdr8)
-
+   call ddb_hdr8%free()
  end do
 
  call wrtout(std_out,' All DDBs have been read ','COLL')
@@ -4072,7 +4099,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  ddb_hdr%nblok = nblok !nblokt
  ddb_hdr%mblktyp = mblktyp
 
- call ddb_hdr_open_write(ddb_hdr, filnam(1), ddbun, fullinit=1)
+ call ddb_hdr%open_write(filnam(1), ddbun, fullinit=1)
 
  if(nddb>1)then
 
@@ -4099,7 +4126,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
        ii = ii+1
      end do
      close(ddbuntmp)
-     call ddb_hdr_free(ddb_hdr8)
+     call ddb_hdr8%free()
    end do !iddb=1,nddb
 
 !  Also write summary of bloks at the end
@@ -4118,7 +4145,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !*********************************************************************
 
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
 !Deallocate arrays
  ABI_DEALLOCATE(mgblok)
@@ -4135,7 +4162,7 @@ end subroutine mblktyp5
 !! dfpt_lw_doutput
 !!
 !! FUNCTION
-!! Write the matrix of third-order derivatives from the long wave calculation 
+!! Write the matrix of third-order derivatives from the long wave calculation
 !! to the to the DDB
 !!
 !! INPUTS
@@ -4179,7 +4206,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
  call ddb%malloc(msize,1,natom,ntypat)
 
  ddb%nrm = one
- ddb%qpt = zero  
+ ddb%qpt = zero
 
  index=0
  do ipert3=1,mpert
@@ -4216,7 +4243,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
  write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=4,6),ddb%nrm(2,1)
  write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=7,9),ddb%nrm(3,1)
 
-!Write the matrix elements 
+!Write the matrix elements
  index=0
  do ipert3=1,mpert
    do idir3=1,3
@@ -4355,9 +4382,9 @@ end subroutine lwcart
 !!
 !! INPUTS
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
-!! lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative 
+!! lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative
 !!             |-> 1st gradient of polarization response to atomic displacement
-!!        = 1 symmetrize the tensor wrt efield and qvec derivative 
+!!        = 1 symmetrize the tensor wrt efield and qvec derivative
 !!             |-> dynamic quadrupoles
 !! natom= number of atoms in unit cell
 !! mpert =maximum number of ipert
@@ -4394,21 +4421,25 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
-!Extraction of quadrupoles (need symmetrization wrt qvecd and elfd) 
+!Extraction of quadrupoles (need symmetrization wrt qvecd and elfd)
  do iatom = 1,natom
    do iatd = 1,3
      do elfd = 1,3
        do qvecd = 1,elfd-1
          if (lwsym==1) then
-           lwtens(qvecd,elfd,iatd,iatom) = -two* &
+           lwtens(elfd,qvecd,iatd,iatom) = -two* &
          (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
-           lwtens(elfd,qvecd,iatd,iatom) = lwtens(qvecd,elfd,iatd,iatom) 
+           lwtens(qvecd,elfd,iatd,iatom) = lwtens(elfd,qvecd,iatd,iatom)
          else if (lwsym==0) then
-           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
-           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
+           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
+           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
          end if
        end do
-       lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+       if (lwsym==1) then
+         lwtens(elfd,elfd,iatd,iatom) = -four*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+       else if (lwsym==0) then
+         lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+       end if
      end do
    end do
  end do
@@ -4460,7 +4491,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !! ddb_lw_copy
 !!
 !! FUNCTION
-!! Copy the ddb object after reading the long wave 3rd order derivatives  
+!! Copy the ddb object after reading the long wave 3rd order derivatives
 !! into a new ddb_lw and resizes ddb as for 2nd order derivatives
 !!
 !! INPUTS
@@ -4470,7 +4501,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 !! ntypat= number of atom types
 !!
 !! OUTPUT
-!! ddb_lw= ddb block datastructure 
+!! ddb_lw= ddb block datastructure
 !!
 !! PARENTS
 !!     anaddb
@@ -4500,7 +4531,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
    nsize=3*mpert*3*mpert
    nblok=ddb_lw%nblok-count(ddb_lw%typ(:)==33)
    call ddb%malloc(nsize, nblok, natom, ntypat)
-   
+
  ! Copy dimensions and static variables.
    ddb%msize = nsize
    ddb%mpert = ddb_lw%mpert
@@ -4509,7 +4540,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
    ddb%ntypat = ddb_lw%ntypat
    ddb%occopt = ddb_lw%occopt
    ddb%prtvol = ddb_lw%prtvol
-  
+
    ddb%rprim = ddb_lw%rprim
    ddb%gprim = ddb_lw%gprim
    ddb%acell = ddb_lw%acell

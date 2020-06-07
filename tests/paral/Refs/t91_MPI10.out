@@ -321,7 +321,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     270.500     270.474
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -726,7 +726,7 @@ force_length_stats: {min:   2.87277063E-32, max:   8.61831190E-32, mean:   4.309
    0.00314  -0.00314   0.00104   0.91297   0.00180
    0.00000  -0.00180   0.00000   0.00180   0.67943
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1521,7 +1521,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.01734  -0.01734   0.00530   0.65517   0.00917
    0.00000  -0.00917   0.00000   0.00917   0.90017
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -2016,9 +2016,9 @@ P           mkmem           1
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
-- [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.

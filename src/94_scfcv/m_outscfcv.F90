@@ -303,7 +303,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_zeeman
  real(dp) :: e_fermie
- type(oper_type) :: lda_occup
+ type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
@@ -1132,10 +1132,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call print_dmft(paw_dmft,dtset%pawprtvol)
 
 !    ==  compute psichi
-     call init_oper(paw_dmft,lda_occup)
+     call init_oper(paw_dmft,dft_occup)
 
      call datafordmft(crystal,cprj,dimcprj,dtset,eigen,e_fermie &
-&     ,lda_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
+&     ,dft_occup,dtset%mband,dtset%mband,dtset%mkmem,mpi_enreg,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
 &     paw_dmft,paw_ij,pawang,pawtab,psps,usecprj,dtfil%unpaw,dtset%nbandkss)
 
@@ -1170,7 +1170,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        ! selfr does not have any double couting in self%hdc
        ! hdc from self%hdc has been put in real part of self in rw_self.
-       ! For the LDA BS: use opt_self=0 and fermie=fermie_lda
+       ! For the DFT BS: use opt_self=0 and fermie=fermie_dft
 
       ! Compute green  function on real axis
        call compute_green(crystal,greenr,paw_dmft,pawang,1,selfr,&
@@ -1195,7 +1195,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call destroy_self(self)
      endif
      call destroy_dmft(paw_dmft)
-     call destroy_oper(lda_occup)
+     call destroy_oper(dft_occup)
    end if
 
    call timab(964,1,tsec) ! outscfcv(outkss)

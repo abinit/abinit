@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h44 )
+.Starting date : Tue 28 Apr 2020.
+- ( at 14h21 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_tnlo_2-tnlo_3-tnlo_4-tnlo_5/tnlo_3.in
+- input  file    -> /home/baguetl/PROGRAM/abinit/finitediff_exc/build/ubuntu/Test_suite/tutorespfn_tnlo_2-tnlo_3-tnlo_4-tnlo_5/tnlo_3.in
 - output file    -> tnlo_3.out
 - root for input  files -> tnlo_3i
 - root for output files -> tnlo_3o
@@ -100,7 +100,7 @@ _ WF disk file :      2.111 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0530000000E+01  1.0530000000E+01  1.0530000000E+01 Bohr
@@ -436,7 +436,7 @@ P          mk1mem4        432
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -461,8 +461,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.03767
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -479,8 +479,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/33as.pspnc
+- pspatm: opening atomic psp file    /home/baguetl/PROGRAM/abinit/finitediff_exc/tests/Psps_for_tests/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -515,11 +515,11 @@ tolerances: {toldfe: 1.00E-12, }
  ETOT  5  -10.085769244430    -1.106E-07 9.730E-08 8.941E-07
  ETOT  6  -10.085769246132    -1.703E-09 8.805E-09 1.353E-08
  ETOT  7  -10.085769246152    -1.923E-11 1.782E-09 3.560E-10
- ETOT  8  -10.085769246152    -6.040E-13 1.895E-10 1.687E-12
- ETOT  9  -10.085769246152    -5.329E-15 3.730E-11 1.143E-14
+ ETOT  8  -10.085769246152    -6.022E-13 1.895E-10 1.687E-12
+ ETOT  9  -10.085769246152    -8.882E-15 3.730E-11 1.143E-14
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-12
+  for the second time, diff in etot=  8.882E-15 < toldfe=  1.000E-12
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.11100708E-06  sigma(3 2)=  0.00000000E+00
@@ -537,7 +537,7 @@ lattice_vectors:
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.9189397E+02
-convergence: {deltae: -5.329E-15, res2:  1.143E-14, residm:  3.730E-11, diffor: null, }
+convergence: {deltae: -8.882E-15, res2:  1.143E-14, residm:  3.730E-11, diffor: null, }
 etotal    :  -1.00857692E+01
 entropy   :   0.00000000E+00
 fermie    :   9.08248925E-02
@@ -607,7 +607,7 @@ local_psp           : -2.29227186213511E+00
 non_local_psp       :  6.69000570216654E-01
 total_energy        : -1.00857692461523E+01
 total_energy_eV     : -2.74447738480434E+02
-band_energy         : -6.49063509419859E-01
+band_energy         : -6.49063509419858E-01
 ...
 
 
@@ -623,7 +623,7 @@ band_energy         : -6.49063509419859E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -714,7 +714,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -776,21 +776,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.419562004637     -1.042E+01 1.040E+01 0.000E+00
- ETOT  2  -10.423366793466     -3.805E-03 1.934E-03 0.000E+00
+-ETOT  1  -10.419562005059     -1.042E+01 1.040E+01 0.000E+00
+ ETOT  2  -10.423366793467     -3.805E-03 1.934E-03 0.000E+00
  ETOT  3  -10.423368081196     -1.288E-06 1.204E-07 0.000E+00
  ETOT  4  -10.423368081681     -4.851E-10 5.044E-11 0.000E+00
- ETOT  5  -10.423368081681     -4.281E-13 2.149E-14 0.000E+00
- ETOT  6  -10.423368081681     -1.776E-14 1.991E-17 0.000E+00
- ETOT  7  -10.423368081681      9.592E-14 2.283E-20 0.000E+00
- ETOT  8  -10.423368081681     -2.487E-14 9.998E-23 0.000E+00
+ ETOT  5  -10.423368081681     -4.174E-13 2.149E-14 0.000E+00
+ ETOT  6  -10.423368081681     -5.329E-15 1.990E-17 0.000E+00
+ ETOT  7  -10.423368081681      6.928E-14 2.283E-20 0.000E+00
+ ETOT  8  -10.423368081681      0.000E+00 1.000E-22 0.000E+00
 
  At SCF step    8   max residual=  1.00E-22 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   35.823E-24; max=  99.983E-24
+ Mean square residual over all n,k,spin=   35.929E-24; max=  10.000E-23
  dfpt_looppert : ek2=    1.7090085353E+01
           f-sum rule ratio=    1.2328367987E+00 (note : ecutsm/=0)
  prteigrs : about to open file tnlo_3t_1WF1_EIG
@@ -835,21 +835,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.419562394212     -1.042E+01 1.040E+01 0.000E+00
- ETOT  2  -10.423366793092     -3.804E-03 1.934E-03 0.000E+00
+-ETOT  1  -10.419562393053     -1.042E+01 1.040E+01 0.000E+00
+ ETOT  2  -10.423366793091     -3.804E-03 1.934E-03 0.000E+00
  ETOT  3  -10.423368081005     -1.288E-06 1.204E-07 0.000E+00
  ETOT  4  -10.423368081495     -4.894E-10 5.044E-11 0.000E+00
- ETOT  5  -10.423368081495     -3.908E-13 2.149E-14 0.000E+00
- ETOT  6  -10.423368081495     -3.375E-14 2.230E-17 0.000E+00
- ETOT  7  -10.423368081495      3.908E-14 3.942E-20 0.000E+00
- ETOT  8  -10.423368081495      8.882E-15 9.999E-23 0.000E+00
+ ETOT  5  -10.423368081495     -4.192E-13 2.149E-14 0.000E+00
+ ETOT  6  -10.423368081495     -2.487E-14 2.230E-17 0.000E+00
+ ETOT  7  -10.423368081495      3.197E-14 3.942E-20 0.000E+00
+ ETOT  8  -10.423368081495      1.243E-14 9.998E-23 0.000E+00
 
  At SCF step    8   max residual=  1.00E-22 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.012E-24; max=  99.991E-24
+ Mean square residual over all n,k,spin=   35.959E-24; max=  99.984E-24
  dfpt_looppert : ek2=    1.7090085353E+01
           f-sum rule ratio=    1.2328367987E+00 (note : ecutsm/=0)
  prteigrs : about to open file tnlo_3t_1WF1_EIG
@@ -894,21 +894,21 @@ tolerances: {tolwfr: 1.00E-22, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -10.419561950459     -1.042E+01 1.040E+01 0.000E+00
+-ETOT  1  -10.419561950824     -1.042E+01 1.040E+01 0.000E+00
  ETOT  2  -10.423366793025     -3.805E-03 1.934E-03 0.000E+00
  ETOT  3  -10.423368080824     -1.288E-06 1.204E-07 0.000E+00
  ETOT  4  -10.423368081309     -4.852E-10 5.044E-11 0.000E+00
  ETOT  5  -10.423368081310     -3.180E-13 2.149E-14 0.000E+00
- ETOT  6  -10.423368081310     -3.730E-14 1.989E-17 0.000E+00
- ETOT  7  -10.423368081310      7.105E-15 2.283E-20 0.000E+00
- ETOT  8  -10.423368081310     -2.487E-14 1.000E-22 0.000E+00
+ ETOT  6  -10.423368081310     -3.020E-14 1.989E-17 0.000E+00
+ ETOT  7  -10.423368081310     -1.599E-14 2.283E-20 0.000E+00
+ ETOT  8  -10.423368081310     -1.421E-14 1.000E-22 0.000E+00
 
  At SCF step    8   max residual=  1.00E-22 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   35.771E-24; max=  99.996E-24
+ Mean square residual over all n,k,spin=   35.824E-24; max=  99.996E-24
  dfpt_looppert : ek2=    1.7090085353E+01
           f-sum rule ratio=    1.2328367987E+00 (note : ecutsm/=0)
  prteigrs : about to open file tnlo_3t_1WF1_EIG
@@ -954,7 +954,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1019,19 +1019,19 @@ tolerances: {toldfe: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.9685703202464     -9.291E+00 2.951E+00 8.747E+01
- ETOT  2   1.2395273409032     -7.290E-01 3.026E-03 3.718E+00
- ETOT  3   1.2154806563562     -2.405E-02 1.178E-05 1.874E-01
- ETOT  4   1.2145604375579     -9.202E-04 4.982E-07 2.297E-03
- ETOT  5   1.2145529087482     -7.529E-06 6.932E-09 1.773E-05
- ETOT  6   1.2145528463092     -6.244E-08 4.457E-11 2.647E-07
- ETOT  7   1.2145528453845     -9.247E-10 5.350E-13 7.332E-09
- ETOT  8   1.2145528453576     -2.689E-11 2.474E-14 2.186E-10
- ETOT  9   1.2145528453569     -7.390E-13 3.955E-16 2.643E-12
- ETOT 10   1.2145528453569     -1.776E-14 7.847E-18 8.535E-15
+-ETOT  1   1.9685703205554     -9.291E+00 2.951E+00 8.747E+01
+ ETOT  2   1.2395273409326     -7.290E-01 3.026E-03 3.718E+00
+ ETOT  3   1.2154806563568     -2.405E-02 1.178E-05 1.874E-01
+ ETOT  4   1.2145604375580     -9.202E-04 4.982E-07 2.297E-03
+ ETOT  5   1.2145529087483     -7.529E-06 6.932E-09 1.773E-05
+ ETOT  6   1.2145528463093     -6.244E-08 4.457E-11 2.647E-07
+ ETOT  7   1.2145528453846     -9.247E-10 5.350E-13 7.332E-09
+ ETOT  8   1.2145528453578     -2.689E-11 2.474E-14 2.186E-10
+ ETOT  9   1.2145528453570     -7.176E-13 3.955E-16 2.643E-12
+ ETOT 10   1.2145528453570     -2.842E-14 7.847E-18 8.535E-15
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  1.776E-14 < toldfe=  1.000E-12
+  for the second time, diff in etot=  2.842E-14 < toldfe=  1.000E-12
 -open ddk wf file :tnlo_3o_DS3_1WF7
 -open ddk wf file :tnlo_3o_DS3_1WF8
 -open ddk wf file :tnlo_3o_DS3_1WF9
@@ -1084,19 +1084,19 @@ tolerances: {toldfe: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.9685930493919     -9.291E+00 2.951E+00 8.747E+01
- ETOT  2   1.2395259260824     -7.291E-01 3.026E-03 3.717E+00
- ETOT  3   1.2154805314160     -2.405E-02 1.178E-05 1.874E-01
- ETOT  4   1.2145604432392     -9.201E-04 4.981E-07 2.297E-03
- ETOT  5   1.2145529121921     -7.531E-06 6.930E-09 1.774E-05
- ETOT  6   1.2145528497132     -6.248E-08 4.457E-11 2.648E-07
- ETOT  7   1.2145528487885     -9.247E-10 5.345E-13 7.339E-09
- ETOT  8   1.2145528487616     -2.692E-11 2.475E-14 2.187E-10
- ETOT  9   1.2145528487609     -7.212E-13 3.956E-16 2.650E-12
- ETOT 10   1.2145528487609     -1.066E-14 7.876E-18 8.576E-15
+-ETOT  1   1.9685930489401     -9.291E+00 2.951E+00 8.747E+01
+ ETOT  2   1.2395259261280     -7.291E-01 3.026E-03 3.717E+00
+ ETOT  3   1.2154805314179     -2.405E-02 1.178E-05 1.874E-01
+ ETOT  4   1.2145604432393     -9.201E-04 4.981E-07 2.297E-03
+ ETOT  5   1.2145529121923     -7.531E-06 6.930E-09 1.774E-05
+ ETOT  6   1.2145528497134     -6.248E-08 4.457E-11 2.648E-07
+ ETOT  7   1.2145528487887     -9.247E-10 5.345E-13 7.339E-09
+ ETOT  8   1.2145528487617     -2.693E-11 2.475E-14 2.187E-10
+ ETOT  9   1.2145528487610     -7.176E-13 3.956E-16 2.650E-12
+ ETOT 10   1.2145528487610     -2.487E-14 7.876E-18 8.576E-15
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-12
+  for the second time, diff in etot=  2.487E-14 < toldfe=  1.000E-12
 -open ddk wf file :tnlo_3o_DS3_1WF7
 -open ddk wf file :tnlo_3o_DS3_1WF8
 -open ddk wf file :tnlo_3o_DS3_1WF9
@@ -1149,19 +1149,19 @@ tolerances: {toldfe: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.9685709056517     -9.291E+00 2.951E+00 8.747E+01
- ETOT  2   1.2395277383709     -7.290E-01 3.026E-03 3.717E+00
- ETOT  3   1.2154805178708     -2.405E-02 1.178E-05 1.874E-01
- ETOT  4   1.2145604468564     -9.201E-04 4.981E-07 2.297E-03
- ETOT  5   1.2145529145278     -7.532E-06 6.929E-09 1.775E-05
- ETOT  6   1.2145528520039     -6.252E-08 4.457E-11 2.648E-07
- ETOT  7   1.2145528510788     -9.251E-10 5.342E-13 7.347E-09
- ETOT  8   1.2145528510519     -2.696E-11 2.476E-14 2.193E-10
- ETOT  9   1.2145528510512     -6.892E-13 3.961E-16 2.658E-12
- ETOT 10   1.2145528510512     -1.243E-14 7.858E-18 8.608E-15
+-ETOT  1   1.9685709058808     -9.291E+00 2.951E+00 8.747E+01
+ ETOT  2   1.2395277383554     -7.290E-01 3.026E-03 3.717E+00
+ ETOT  3   1.2154805178706     -2.405E-02 1.178E-05 1.874E-01
+ ETOT  4   1.2145604468565     -9.201E-04 4.981E-07 2.297E-03
+ ETOT  5   1.2145529145280     -7.532E-06 6.929E-09 1.775E-05
+ ETOT  6   1.2145528520041     -6.252E-08 4.457E-11 2.648E-07
+ ETOT  7   1.2145528510790     -9.251E-10 5.342E-13 7.347E-09
+ ETOT  8   1.2145528510520     -2.698E-11 2.476E-14 2.193E-10
+ ETOT  9   1.2145528510513     -6.981E-13 3.961E-16 2.658E-12
+ ETOT 10   1.2145528510513     -1.066E-14 7.858E-18 8.608E-15
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-12
+  for the second time, diff in etot=  1.066E-14 < toldfe=  1.000E-12
 -open ddk wf file :tnlo_3o_DS3_1WF7
 -open ddk wf file :tnlo_3o_DS3_1WF8
 -open ddk wf file :tnlo_3o_DS3_1WF9
@@ -1214,19 +1214,19 @@ tolerances: {toldfe: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4739618528702     -5.009E+00 1.137E+00 8.448E+01
- ETOT  2  0.88358053254366     -5.904E-01 4.393E-04 2.281E+00
- ETOT  3  0.87095720736135     -1.262E-02 9.860E-06 8.722E-02
- ETOT  4  0.87058485860144     -3.723E-04 2.048E-07 1.964E-03
- ETOT  5  0.87057785964555     -6.999E-06 8.467E-09 1.531E-05
- ETOT  6  0.87057780698565     -5.266E-08 4.213E-11 1.510E-07
- ETOT  7  0.87057780638348     -6.022E-10 7.060E-13 1.805E-09
- ETOT  8  0.87057780637545     -8.028E-12 7.466E-15 1.376E-11
- ETOT  9  0.87057780637535     -1.004E-13 5.719E-17 2.947E-13
- ETOT 10  0.87057780637535     -6.217E-15 9.630E-19 7.552E-15
+-ETOT  1   1.4739618529547     -5.009E+00 1.137E+00 8.448E+01
+ ETOT  2  0.88358053253846     -5.904E-01 4.393E-04 2.281E+00
+ ETOT  3  0.87095720736158     -1.262E-02 9.860E-06 8.722E-02
+ ETOT  4  0.87058485860142     -3.723E-04 2.048E-07 1.964E-03
+ ETOT  5  0.87057785964551     -6.999E-06 8.467E-09 1.531E-05
+ ETOT  6  0.87057780698563     -5.266E-08 4.213E-11 1.510E-07
+ ETOT  7  0.87057780638342     -6.022E-10 7.060E-13 1.805E-09
+ ETOT  8  0.87057780637540     -8.023E-12 7.466E-15 1.376E-11
+ ETOT  9  0.87057780637531     -8.882E-14 5.719E-17 2.947E-13
+ ETOT 10  0.87057780637531      0.000E+00 9.630E-19 7.552E-15
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  6.217E-15 < toldfe=  1.000E-12
+  for the second time, diff in etot=  0.000E+00 < toldfe=  1.000E-12
 -open ddk wf file :tnlo_3o_DS3_1WF7
 -open ddk wf file :tnlo_3o_DS3_1WF8
 -open ddk wf file :tnlo_3o_DS3_1WF9
@@ -1279,19 +1279,19 @@ tolerances: {toldfe: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4740034022508     -5.009E+00 1.137E+00 8.448E+01
- ETOT  2  0.88358109236086     -5.904E-01 4.393E-04 2.281E+00
- ETOT  3  0.87095729126253     -1.262E-02 9.863E-06 8.724E-02
- ETOT  4  0.87058486128595     -3.724E-04 2.048E-07 1.965E-03
- ETOT  5  0.87057785904755     -7.002E-06 8.470E-09 1.531E-05
+-ETOT  1   1.4740034021596     -5.009E+00 1.137E+00 8.448E+01
+ ETOT  2  0.88358109236618     -5.904E-01 4.393E-04 2.281E+00
+ ETOT  3  0.87095729126262     -1.262E-02 9.863E-06 8.724E-02
+ ETOT  4  0.87058486128590     -3.724E-04 2.048E-07 1.965E-03
+ ETOT  5  0.87057785904751     -7.002E-06 8.470E-09 1.531E-05
  ETOT  6  0.87057780635256     -5.269E-08 4.206E-11 1.508E-07
- ETOT  7  0.87057780575154     -6.010E-10 7.061E-13 1.783E-09
- ETOT  8  0.87057780574362     -7.923E-12 7.533E-15 9.335E-12
- ETOT  9  0.87057780574359     -2.309E-14 4.280E-17 2.683E-13
- ETOT 10  0.87057780574358     -1.243E-14 9.906E-19 6.999E-15
+ ETOT  7  0.87057780575150     -6.011E-10 7.061E-13 1.783E-09
+ ETOT  8  0.87057780574359     -7.913E-12 7.533E-15 9.335E-12
+ ETOT  9  0.87057780574355     -3.730E-14 4.280E-17 2.683E-13
+ ETOT 10  0.87057780574353     -2.043E-14 9.906E-19 6.999E-15
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-12
+  for the second time, diff in etot=  2.043E-14 < toldfe=  1.000E-12
 -open ddk wf file :tnlo_3o_DS3_1WF7
 -open ddk wf file :tnlo_3o_DS3_1WF8
 -open ddk wf file :tnlo_3o_DS3_1WF9
@@ -1344,19 +1344,19 @@ tolerances: {toldfe: 1.00E-12, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.4738327977540     -5.009E+00 1.137E+00 8.447E+01
- ETOT  2  0.88357791528006     -5.903E-01 4.393E-04 2.281E+00
- ETOT  3  0.87095702079371     -1.262E-02 9.850E-06 8.718E-02
- ETOT  4  0.87058484752999     -3.722E-04 2.047E-07 1.962E-03
- ETOT  5  0.87057785810280     -6.989E-06 8.457E-09 1.530E-05
- ETOT  6  0.87057780551903     -5.258E-08 4.184E-11 1.508E-07
- ETOT  7  0.87057780491750     -6.015E-10 7.055E-13 1.753E-09
- ETOT  8  0.87057780490975     -7.744E-12 7.649E-15 5.094E-12
- ETOT  9  0.87057780490977      1.155E-14 2.853E-17 1.454E-13
- ETOT 10  0.87057780490974     -2.220E-14 5.667E-19 2.919E-15
+-ETOT  1   1.4738327958248     -5.009E+00 1.137E+00 8.447E+01
+ ETOT  2  0.88357791526277     -5.903E-01 4.393E-04 2.281E+00
+ ETOT  3  0.87095702078905     -1.262E-02 9.850E-06 8.718E-02
+ ETOT  4  0.87058484752979     -3.722E-04 2.047E-07 1.962E-03
+ ETOT  5  0.87057785810274     -6.989E-06 8.457E-09 1.530E-05
+ ETOT  6  0.87057780551899     -5.258E-08 4.184E-11 1.508E-07
+ ETOT  7  0.87057780491745     -6.015E-10 7.055E-13 1.753E-09
+ ETOT  8  0.87057780490970     -7.748E-12 7.649E-15 5.094E-12
+ ETOT  9  0.87057780490971      1.243E-14 2.853E-17 1.454E-13
+ ETOT 10  0.87057780490970     -1.243E-14 5.667E-19 2.919E-15
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  2.220E-14 < toldfe=  1.000E-12
+  for the second time, diff in etot=  1.243E-14 < toldfe=  1.000E-12
 -open ddk wf file :tnlo_3o_DS3_1WF7
 -open ddk wf file :tnlo_3o_DS3_1WF8
 -open ddk wf file :tnlo_3o_DS3_1WF9
@@ -1364,7 +1364,7 @@ tolerances: {toldfe: 1.00E-12, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.958E-20; max=  56.669E-20
+ Mean square residual over all n,k,spin=   20.957E-20; max=  56.666E-20
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1459,7 +1459,7 @@ tolerances: {toldfe: 1.00E-12, }
    1    4   3    1         0.0000000000         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
-   1    4   1    5         0.0000000000         0.0000000000
+   1    4   1    5        -0.0000000000         0.0000000000
    1    4   2    5         0.0000000000         0.0000000000
    1    4   3    5         0.0000000000         0.0000000000
    1    4   1    6         1.9796105835         0.0000000000
@@ -1470,9 +1470,9 @@ tolerances: {toldfe: 1.00E-12, }
    2    4   3    1         0.0000000000         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   2    4   1    5         0.0000000000         0.0000000000
-   2    4   2    5        -0.0000000000         0.0000000000
-   2    4   3    5         0.0000000000         0.0000000000
+   2    4   1    5        -0.0000000000         0.0000000000
+   2    4   2    5         0.0000000000         0.0000000000
+   2    4   3    5        -0.0000000000         0.0000000000
    2    4   1    6        -1.9796105835         0.0000000000
    2    4   2    6         1.9796105823         0.0000000000
    2    4   3    6        -1.9796105746         0.0000000000
@@ -1482,8 +1482,8 @@ tolerances: {toldfe: 1.00E-12, }
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
    3    4   1    5         0.0000000000         0.0000000000
-   3    4   2    5         0.0000000000         0.0000000000
-   3    4   3    5         0.0000000000         0.0000000000
+   3    4   2    5        -0.0000000000         0.0000000000
+   3    4   3    5        -0.0000000000         0.0000000000
    3    4   1    6        -1.9796105835         0.0000000000
    3    4   2    6        -1.9796105823         0.0000000000
    3    4   3    6         1.9796105746         0.0000000000
@@ -1629,23 +1629,23 @@ tolerances: {toldfe: 1.00E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    5         0.0000000000         0.0000000000
+   1    4   1    5        -0.0000000000         0.0000000000
    1    4   2    5        -0.0000000000         0.0000000000
-   1    4   3    5         0.0000000000         0.0000000000
+   1    4   3    5        -0.0000000000         0.0000000000
    1    4   1    6        -0.0113658821         0.0000000000
    1    4   2    6         0.0000000000         0.0000000000
    1    4   3    6        -0.0000000000         0.0000000000
   
-   2    4   1    5         0.0000000000         0.0000000000
-   2    4   2    5         0.0000000000         0.0000000000
-   2    4   3    5         0.0000000000         0.0000000000
-   2    4   1    6        -0.0000000000         0.0000000000
+   2    4   1    5        -0.0000000000         0.0000000000
+   2    4   2    5        -0.0000000000         0.0000000000
+   2    4   3    5        -0.0000000000         0.0000000000
+   2    4   1    6         0.0000000000         0.0000000000
    2    4   2    6        -0.0113658821         0.0000000000
    2    4   3    6        -0.0000000000         0.0000000000
   
-   3    4   1    5         0.0000000000         0.0000000000
-   3    4   2    5        -0.0000000000         0.0000000000
-   3    4   3    5         0.0000000000         0.0000000000
+   3    4   1    5        -0.0000000000         0.0000000000
+   3    4   2    5         0.0000000000         0.0000000000
+   3    4   3    5        -0.0000000000         0.0000000000
    3    4   1    6         0.0000000000         0.0000000000
    3    4   2    6         0.0000000000         0.0000000000
    3    4   3    6        -0.0113658821         0.0000000000
@@ -2076,10 +2076,10 @@ P          mk1mem4        432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         33.0  wall=         34.2
+- Proc.   0 individual time (sec): cpu=         32.1  wall=        130.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and  49 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         33.0  wall=         34.2
+.Delivered   5 WARNINGs and  49 COMMENTs to log file.
++Overall time at end (sec) : cpu=         32.1  wall=        130.9

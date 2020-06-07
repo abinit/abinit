@@ -16,6 +16,20 @@ inp_files = [
 "t03.in",
 # Structure variable
 "t04.in",
+# Optic
+"t05.in", # GGA-PBE nsppol=1
+"t06.in", # optic
+"t07.in", # GGA-PBE nsppol=2
+"t08.in", # optic
+"t09.in", # GGA-PBE PAW nsppol=1
+"t10.in", # optic
+"t11.in", # GGA-PBE PAW nsppol=2
+"t12.in", # optic
+"t13.in", # metallinc iron GGA-PBE PAW nsppol=2
+"t14.in", # optic
+# DFPT
+"t41.in",
+"t42.in",
 # Electron-phonon
 "t50.in",
 "t51.in",
@@ -36,4 +50,6 @@ inp_files = [
 "t83.in", # Langevin NVT 
 "t84.in", # Berendsen NVT
 "t85.in", # Velocity Verlet NVE
+"t86.in", # Spin lattice coupling, Only Oiju term activated.
+"t87.in", # Spin lattice coupling, Oiju and Tijuv. 
 ]
