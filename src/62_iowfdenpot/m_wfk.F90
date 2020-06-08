@@ -3864,8 +3864,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  ABI_MALLOC(eig_ki, ((2*mband)**iwfk%formeig*mband) )
  ABI_MALLOC(occ_ki, (mband))
 
- !TODO: timrev = kpts_timrev_from_kptopt(ebands%kptopt) + 1
- cryst = iwfk%hdr%get_crystal(2)
+ cryst = iwfk%hdr%get_crystal()
 
  ! Build new header for owfk. This is the most delicate part since all the arrays in hdr_full
  ! that depend on k-points must be consistent with kfull and nkfull.
@@ -5013,8 +5012,7 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  ihdr => iwfk%hdr
  mband = iwfk%mband; nsppol = iwfk%nsppol; nspinor = iwfk%nspinor
 
- !TODO: timrev = kpts_timrev_from_kptopt(ebands%kptopt)
- cryst = iwfk%hdr%get_crystal(2)
+ cryst = iwfk%hdr%get_crystal()
 
  ! Find correspondence fine kmesh --> input WFK and handle possible mismatch
  !TODO: Write specialized routine wrapping listkk to find mapping without O(N2) scaling.

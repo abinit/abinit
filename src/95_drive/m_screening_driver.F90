@@ -1748,7 +1748,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    MSG_WARNING(msg)
  end if
 
- cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ cryst = Hdr_wfk%get_crystal(gw_timrev=timrev, remove_inv=remove_inv)
  call cryst%print(mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===

@@ -2965,7 +2965,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  ! Create crystal_t data type
- cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ cryst = Hdr_wfk%get_crystal(gw_timrev=timrev, remove_inv=remove_inv)
  call cryst%print()
 
  if (Sigp%npwwfn > ng_kss) then ! cannot use more G"s for the wfs than those stored on file

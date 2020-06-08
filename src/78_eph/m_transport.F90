@@ -408,11 +408,13 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
  if (new%transport_fermie == zero .and. new%transport_extrael /= new%eph_extrael) then
    if (new%transport_extrael /= new%eph_extrael) then
-     write(msg,'(a,e18.8,a,e18.8,a)') 'extrael from SIGEPH ',new%transport_extrael, &
-                                      ' and input file ',new%eph_extrael, &
-                                      ' differ. Will recompute the chemical potential'
+     write(msg,'(a,e18.8,a,e18.8,a)') &
+       'extrael from SIGEPH ',new%transport_extrael, &
+       ' and input file ',new%eph_extrael, &
+       ' differ. Will recompute the chemical potential'
+     call wrtout(std_out, msg)
    end if
-   call wrtout(std_out, msg)
+
    call ebands_copy(ebands, tmp_ebands)
 
    ! We only need mu_e so MPI parallelize the T-loop.
@@ -772,8 +774,8 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  mband = self%ebands%mband; nkpt = self%ebands%nkpt; nsppol = self%ebands%nsppol
 
  ! Compute index of valence band
- max_occ = two / (self%nspinor*self%nsppol)
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
+ max_occ = two / (self%nspinor*self%nsppol)
  nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
 
  ABI_MALLOC(self%mobility_mu, (2, self%nsppol, 3, 3, self%ntemp+1))

@@ -246,7 +246,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  ! Get ebands and hdr from WFK file.
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
- cryst = hdr%get_crystal(2)
+ cryst = hdr%get_crystal()
 
  ! Extract important dimensions from hdr%
  nkpt    = hdr%nkpt

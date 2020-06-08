@@ -147,7 +147,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,brav1=1,timrev2=2
+ integer,parameter :: master=0
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
@@ -211,7 +211,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
  call wfk0_hdr%vs_dtset(dtset)
 
- cryst = wfk0_hdr%get_crystal(timrev2)
+ cryst = wfk0_hdr%get_crystal()
  call cryst%print(header="crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)

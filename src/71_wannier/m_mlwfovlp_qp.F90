@@ -139,7 +139,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  integer :: iband,icg,icg_shift,ii,ipw,isppol,my_nspinor,nband_k,ord_iband
  integer :: nfftot,ikpt,irzkpt,npw_k,ikg
  integer :: nscf,nbsc,itimrev,band_index,nkibz,nkbz
- integer :: gw_timrev,input !,jb_idx,ib_idx,ijpack, jband,
+ integer :: input !,jb_idx,ib_idx,ijpack, jband,
  integer :: nprocs,ios
  real(dp) :: TOL_SORT=tol12
  real(dp) :: dksqmax,ucvol !ortho_err,
@@ -222,8 +222,8 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ! on ab_out thus we should be consistent. Ideally Cryst should be
  ! one of the basic abinit objects and it should be passed to this routine.
 
- gw_timrev=1; if (timrev==1) gw_timrev=2 !different conventions are used in GW and abinit!!
- cryst = hdr%get_crystal(gw_timrev)
+ !different conventions are used in GW and abinit!!
+ cryst = hdr%get_crystal(gw_timrev=timrev+1)
  call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
  call cryst%free()

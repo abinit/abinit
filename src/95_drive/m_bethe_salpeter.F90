@@ -1181,7 +1181,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
             ! 1 => do not use time-reversal symmetry
             ! 2 => take advantage of time-reversal symmetry
 
- cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ cryst = Hdr_wfk%get_crystal(gw_timrev=timrev, remove_inv=remove_inv)
  call cryst%print()
  !
  ! Setup of the k-point list and symmetry tables in the  BZ -----------------------------------

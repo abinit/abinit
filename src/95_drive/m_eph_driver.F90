@@ -150,7 +150,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
+ integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
@@ -325,7 +325,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm)
    call wfk0_hdr%vs_dtset(dtset)
 
-   cryst = wfk0_hdr%get_crystal(timrev2)
+   cryst = wfk0_hdr%get_crystal()
    call cryst%print(header="crystal structure from WFK file")
 
    ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)

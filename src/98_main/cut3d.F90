@@ -83,7 +83,7 @@ program cut3d
  integer :: fform0,gridshift1,gridshift2,gridshift3,i1,i2,i3
  integer :: iatom,ifiles,ii,ii1,ii2,ii3,index,iprompt,ir1,ir2,ir3,ispden,cplex
  integer :: itask,jfiles,natom,nfiles,nr1,nr2,unt,comm,iomode,nprocs,my_rank
- integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat,timrev,nfft
+ integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat,nfft
  real(dp) :: dotdenpot,maxmz,normz,sumdenpot,ucvol,xm,xnow,xp,ym,ynow,yp,zm,znow,zp,tcpui,twalli
  character(len=24) :: codename
  character(len=fnlen) :: filnam,filrho,filrho_tmp
@@ -766,8 +766,7 @@ program cut3d
 
          case (15)
            ! Write netcdf file.
-           timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-           cryst = hdr%get_crystal(timrev)
+           cryst = hdr%get_crystal()
            call ngfft_seq(ngfft, [nr1, nr2, nr3])
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))

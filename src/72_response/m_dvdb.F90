@@ -574,7 +574,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,timrev2=2
+ integer,parameter :: master=0
  integer :: iv1,ii,ierr,unt,fform,nqpt,iq,iq_found,cplex,trev_q
  integer :: idir,ipert,my_rank, nprocs, iatom, pertcase
  real(dp) :: cpu, wall, gflops
@@ -729,7 +729,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  end if
 
  ! Init crystal_t from the hdr read from file.
- new%cryst = new%hdr_ref%get_crystal(timrev2)
+ new%cryst = new%hdr_ref%get_crystal()
  new%my_npert = new%natom3
 
  ! Init tables assuming no MPI distribution of perturbations.
