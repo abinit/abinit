@@ -195,7 +195,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
 !scalars
  integer::ndim,ib1dm,ib2dm,lwork,info
  character(len=500) :: msg,msg2
- real(dp) :: toccs_k
+ real(dp) :: toccs_k,tol10
 !arrays
  real(dp),allocatable :: occs(:),rwork(:),occs_tmp(:)
  complex(dpc),allocatable :: work(:),dm1_tmp(:,:),eigenvect(:,:)
@@ -203,6 +203,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
 
  DBG_ENTER("COLL")
  
+ tol10=1.0d-10
+
  ndim=ib2-ib1+1
  lwork=2*ndim-1
  ABI_MALLOC(occs,(ndim))
@@ -227,13 +229,16 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
 
  !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
  !eigenvect=dm1_tmp
+ !occs_tmp=occs
  !Order from highest occ to lowest occ
- occs_tmp=occs
  do ib1dm=1,ndim
   occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
   do ib2dm=1,ndim
    eigenvect(ib2dm,ib1dm)=dm1_tmp(ib2dm,(ndim-(ib1dm-1)))
   enddo
+  if(abs(occs_tmp(ib1dm))<tol10) then
+    occs_tmp(ib1dm)=0.0_dp
+  endif
  enddo
 
  if(info==0) then
@@ -385,13 +390,13 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  enddo
 
  ! Print for debug
+ !write(msg,'(a4)') 'MAU1'
+ !call wrtout(std_out,msg,'COLL')
  !do ib1dm=ib1,ib2
  !  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikpoint,1))
  !  call wrtout(std_out,msg,'COLL')
  !enddo
 
- write(msg,'(a3)') 'MAU'
- call wrtout(std_out,msg,'COLL')
 
  ! <KS|K[NO]KS> = U <NO|K[NO]|NO> (U^t)*
  res=matmul(Umat,Kex_tmp)
@@ -404,6 +409,8 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  enddo
 
  ! Print for debug
+ write(msg,'(a4)') 'MAU2'
+ call wrtout(std_out,msg,'COLL')
  do ib1dm=ib1,ib2
    write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikpoint,1))
    call wrtout(std_out,msg,'COLL')

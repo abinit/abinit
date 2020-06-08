@@ -293,17 +293,18 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  ABI_MALLOC(rhotwgp, (npwx*nspinor))
  ABI_MALLOC(vc_sqrt_qbz, (npwx))
 
+ ! MRM allow lower occ numbers
  ! Normalization of theta_mu_minus_esum
  ! If nsppol==2, qp_occ $\in [0,1]$
  SELECT CASE (nsppol)
  CASE (1)
-   fact_sp=half; tol_empty=0.01   ! below this value the state is assumed empty
+   fact_sp=half; tol_empty=0.00001   ! below this value the state is assumed empty
    if (Sigp%nspinor==2) then
-    fact_sp=one; tol_empty=0.005  ! below this value the state is assumed empty
+    fact_sp=one; tol_empty=0.000005  ! below this value the state is assumed empty
    end if
  CASE (2)
-   fact_sp=one; tol_empty=0.005 ! to be consistent and obtain similar results if a metallic
- CASE DEFAULT                    ! spin unpolarized system is treated using nsppol==2
+   fact_sp=one;  tol_empty=0.000005  ! to be consistent and obtain similar results if a metallic
+ CASE DEFAULT                        ! spin unpolarized system is treated using nsppol==2
    MSG_BUG('Wrong nsppol')
  END SELECT
 
@@ -317,7 +318,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    do ik_bz=1,Kmesh%nbz
      ik_ibz = Kmesh%tab(ik_bz)
      do ib_sum=1,Sigp%nbnds
-       bks_mask(ib_sum,ik_bz,spin) = (dabs(qp_occ(ib_sum,ik_ibz,spin)) >= tol_empty)  ! MRM allow negative occ
+       bks_mask(ib_sum,ik_bz,spin) = (abs(qp_occ(ib_sum,ik_ibz,spin)) >= tol_empty)  ! MRM allow negative occ
      end do
    end do
  end do
@@ -535,7 +536,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        if (proc_distrb(ib_sum,ik_bz,spin)/=Wfd%my_rank) CYCLE
 
        ! Skip empty states.
-       if (dabs(qp_occ(ib_sum,ik_ibz,spin))<tol_empty) CYCLE  ! MRM allow negative occ numbers
+       if (abs(qp_occ(ib_sum,ik_ibz,spin))<tol_empty) CYCLE  ! MRM allow negative occ numbers
 
        call wfd%get_ur(ib_sum,ik_ibz,spin,ur_ibz)
 
@@ -637,7 +638,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
            rhotwg = rhotwg_ki(:,jb)
            ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
            ! Do the scalar product only if ib_sum is occupied.
-           if (theta_mu_minus_esum/fact_sp >= tol_empty) then
+           if (abs(theta_mu_minus_esum/fact_sp) >= tol_empty) then     ! MRM allow negative occ numbers
              do iab=1,Sigp%nsig_ab
                spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
                gwpc_sigxme = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum

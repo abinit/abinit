@@ -2276,7 +2276,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
-        ! Debug print full exchange (Sr%x_mat)
+        ! Debug print full exchange (Sr%x_mat) MAU
         do ib1dm=ib1,ib2
           write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
           call wrtout(std_out,msg,'COLL')
@@ -2431,7 +2431,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),& 
          & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_natorb,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
-         ! Transform in <NO_i|Sigma_x[NO]|NO_j> the outer NOs->KSs (at this point all mat. elements are stored in Sr%x_mat)
+         ! Transform in <NO_i|Sigma_x[NO]|NO_j> the outer NOs -> KSs (at this point all mat. elements are stored in Sr%x_mat)
          call rotate_exchange(ikcalc,ib1,ib2,Sr,nateigv) ! <KS_i|K[NO]|KS_j>
        end do
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating Wfd_natorb
