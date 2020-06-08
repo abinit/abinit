@@ -3292,7 +3292,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
 !scalars
  integer :: imag_only
 #ifdef HAVE_NETCDF
- integer :: ncid, varid, ncerr
+ integer :: ncid !, varid !, ncerr
 #endif
  real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear
  real(dp) :: cpu, wall, gflops
@@ -3476,7 +3476,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
 #ifdef HAVE_NETCDF
- integer :: ncerr, varid
+ integer :: ncerr !, varid
 #endif
 !arrays
  integer,allocatable :: indkk(:,:)
@@ -3490,6 +3490,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ! Map ebands kpoints to sigmaph
  ABI_MALLOC(indkk, (self%nkcalc, 6))
+ !timrev1 = kpts_timrev_from_kptopt(ebands%kptopt)
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, self%nkcalc, cryst%nsym, &
              sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
 

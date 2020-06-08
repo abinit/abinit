@@ -42,6 +42,7 @@ module m_transport
 #endif
 
  use defs_datatypes,   only : ebands_t
+ use m_io_tools,       only : open_file
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div
@@ -180,6 +181,7 @@ type,public :: transport_rta_t
     procedure :: compute => transport_rta_compute
     procedure :: compute_mobility => transport_rta_compute_mobility
     procedure :: print => transport_rta_print
+    procedure :: write_tensor => tranrta_write_tensor
     procedure :: free => transport_rta_free
 
  end type transport_rta_t
@@ -239,7 +241,8 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  call wrtout(std_out, ' Transport computation driver')
  call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin))
 
- sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
+ sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, &
+                        keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
 
  ! Initialize transport object
@@ -255,7 +258,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 
  ! Print transport results to stdout (for the test suite)
  if (my_rank == master) then
-   call transport_rta%print(cryst)
+   call transport_rta%print(cryst, dtset, dtfil)
 
    ! Master creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
@@ -367,7 +370,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    kptrlatt(3,3) = dtset%transport_ngkpt(3)
    tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero,zero,zero])
 
-   ! Map the points of downsampled bands to dense ebands
+   ! Map the points of the downsampled bands to dense ebands
    ABI_MALLOC(indkk, (tmp_ebands%nkpt, 6))
    call listkk(dksqmax, cryst%gmet, indkk, new%ebands%kptns, tmp_ebands%kptns, &
                new%ebands%nkpt, tmp_ebands%nkpt, cryst%nsym, &
@@ -375,17 +378,15 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
    if (dksqmax > tol12) then
       write(msg, '(3a,es16.6,a)' ) &
-       "Error downsampling ebands in transport driver",ch10,&
+       "Error downsampling ebands in transport driver",ch10, &
        "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
       MSG_ERROR(msg)
    end if
 
-   ! linewidths serta
+   ! Downsampling linewidths and velocities.
    call downsample_array(new%linewidth_serta, indkk, tmp_ebands%nkpt)
-   ! linewidths mrta
-   call downsample_array(new%linewidth_mrta, indkk, tmp_ebands%nkpt)
-   ! velocities
-   call downsample_array(new%velocity, indkk, tmp_ebands%nkpt)
+   call downsample_array(new%linewidth_mrta,  indkk, tmp_ebands%nkpt)
+   call downsample_array(new%velocity,        indkk, tmp_ebands%nkpt)
 
    ABI_SFREE(indkk)
    call ebands_free(new%ebands)
@@ -609,8 +610,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
                  kT * self%l0(:,:,:,:,itemp), zero, self%kappa(:,:,:,:,itemp))
  end do
 
- ! Compute the index of the fermi level
- ! and Handle out of range condition.
+ ! Compute the index of the Fermi level and handle possible out of range condition.
  ifermi = bisect(self%vvdos_mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
    MSG_ERROR("Bisection could not find energy index of the Fermi level!")
@@ -1014,11 +1014,13 @@ end subroutine transport_rta_ncwrite
 !!
 !! SOURCE
 
-subroutine transport_rta_print(self, cryst)
+subroutine transport_rta_print(self, cryst, dtset, dtfil)
 
 !Arguments --------------------------------------
  class(transport_rta_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
+ type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
 
 !Local variables --------------------------------
  integer :: itemp, ispin
@@ -1041,7 +1043,76 @@ subroutine transport_rta_print(self, cryst)
    end do ! itemp
  end do ! spin
 
+ call self%write_tensor(dtset, "sigma", self%sigma, strcat(dtfil%filnam_ds(4), "_SERTA_SIGMA"))
+ call self%write_tensor(dtset, "seebeck", self%seebeck, strcat(dtfil%filnam_ds(4), "_SERTA_SBK"))
+ call self%write_tensor(dtset, "kappa", self%kappa, strcat(dtfil%filnam_ds(4), "_SERTA_KAPPA"))
+ call self%write_tensor(dtset, "pi", self%pi, strcat(dtfil%filnam_ds(4), "_SERTA_PI"))
+
 end subroutine transport_rta_print
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_transport/tranrta_write_tensor
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine tranrta_write_tensor(self, dtset, header, values, path)
+
+!Arguments --------------------------------------
+ class(transport_rta_t),intent(in) :: self
+ type(dataset_type),intent(in) :: dtset
+ character(len=*),intent(in) :: header
+ real(dp),intent(in) :: values(:,:,:,:,:)
+ character(len=*),intent(in) :: path
+
+!Local variables --------------------------------
+ integer :: itemp, iw, ispin, ount
+ character(len=500) :: msg
+
+!************************************************************************
+
+ if (open_file(trim(path), msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ ! write header
+ write(ount, "(2a)")"# ", trim(header)
+ write(ount, "(a)")"# Results in atomic units. Electron energies in Hartree"
+ write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
+ write(ount, "(a)")"#"
+ !write(ount, "()")"#"
+
+ ! (nw, nsppol, 3, 3, ntemp+1)
+ if (self%nsppol == 1) then
+   do itemp=1, self%ntemp
+     write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
+     write(ount, "(a)")"# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
+     do iw=1,self%nw
+       write(ount, "(10(es16.6))")self%vvdos_mesh(iw), values(iw, 1, :, :, itemp)
+     end do
+   end do
+  write(ount, "(a)")""
+ else
+   do itemp=1, self%ntemp
+     write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
+     write(ount, "(a)") &
+       "# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
+     do iw=1,self%nw
+       write(ount, "(19(es16.6))")self%vvdos_mesh(iw), values(iw, 1, :, :, itemp), values(iw, 2, :, :, itemp)
+     end do
+   end do
+  write(ount, "(a)")""
+ end if
+
+ close(ount)
+
+end subroutine tranrta_write_tensor
 !!***
 
 !----------------------------------------------------------------------

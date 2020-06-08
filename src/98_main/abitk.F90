@@ -67,7 +67,7 @@ program abitk
  integer :: ndivsm, abimem_level
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
  character(len=500) :: command, arg, msg
- character(len=fnlen) :: path, other_path, fullwfk_path, kerange_path, kerange_wfk_path !, prefix
+ character(len=fnlen) :: path, other_path !, prefix
  type(hdr_type) :: hdr
  type(ebands_t) :: ebands, ebands_kpath, other_ebands
  type(edos_t) :: edos
@@ -316,12 +316,6 @@ program abitk
  ! ====================
  ! Tools for developers
  ! ====================
-
- !case ("wfk_kerange_check")
- !   call get_command_argument(2, fullwfk_path)
- !   call get_command_argument(3, kerange_path)
- !   call get_command_argument(4, kerange_wfk_path)
- !   call wfk_kerange_check(fullwfk_path, kerange_path, kerange_wfk_path, xmpi_comm_self)
 
  ! ===========
  ! Unit tests
