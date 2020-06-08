@@ -119,6 +119,7 @@ contains
     this%ioptden=0
     this%bcut=0
     this%nbcut=0
+    this%version=0
     this%ebcut=zero
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
