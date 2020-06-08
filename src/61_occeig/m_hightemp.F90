@@ -206,8 +206,8 @@ contains
       end do
       this%e_shiftfactor=this%e_shiftfactor/delta_n
       this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
-      write(0,*) this%ebcut, eigen(this%bcut*nkpt*nsppol)
-      write(0,*) 'eheg_new', this%e_shiftfactor
+      ! write(0,*) this%ebcut, eigen(this%bcut*nkpt*nsppol)
+      ! write(0,*) 'eheg_new', this%e_shiftfactor
     end if
 
     ! U_{LEGACY_0}
@@ -231,9 +231,8 @@ contains
       end do
       this%e_shiftfactor=this%e_shiftfactor/niter
       this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
-      write(0,*) 'eknk_legacy', this%e_shiftfactor
+      ! write(0,*) 'eknk_legacy', this%e_shiftfactor
     end if
-
   end subroutine compute_e_shiftfactor
 
   !!****f* ABINIT/m_hightemp/compute_nfreeel
@@ -262,13 +261,14 @@ contains
 
     ! Arguments -------------------------------
     ! Scalars
-    class(hightemp_type),intent(inout) :: this
     real(dp),intent(in) :: fermie,tsmear
+    class(hightemp_type),intent(inout) :: this
 
     ! *********************************************************************
 
     call hightemp_get_nfreeel_approx(this%e_shiftfactor,this%ebcut,&
-    & fermie,this%nfreeel,tsmear,this%ucvol)
+    & fermie,this%bcut,this%nfreeel,tsmear,this%ucvol,this%version)
+    write(0,*) "nfreeel=",this%nfreeel
     ! write(0,*) this%nfreeel, factor*djp12(xcut,gamma), abs(factor*djp12(xcut,gamma)-this%nfreeel)
   end subroutine compute_nfreeel
 
@@ -380,11 +380,15 @@ contains
     ! *********************************************************************
 
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-    xcut=(this%ebcut-this%e_shiftfactor)/tsmear
+    if(this%version==0) then
+      xcut=(this%ebcut-this%e_shiftfactor)/tsmear
+    else if(this%version==1) then
+      xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
+    end if
     gamma=(fermie-this%e_shiftfactor)/tsmear
 
-
     this%e_kin_freeel=factor*djp32(xcut,gamma)
+    write(0,*) "e_kin_freeel=",this%e_kin_freeel
 
     ! Computation of edc_kin_freeel
     this%edc_kin_freeel=zero
@@ -1161,11 +1165,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_get_nfreeel_approx(e_shiftfactor,ebcut,fermie,nfreeel,tsmear,ucvol)
+  subroutine hightemp_get_nfreeel_approx(e_shiftfactor,ebcut,fermie,bcut,&
+  & nfreeel,tsmear,ucvol,version)
 
     ! Arguments -------------------------------
     ! Scalars
-
+    integer :: bcut,version
     real(dp),intent(inout) :: nfreeel
     real(dp),intent(in) :: e_shiftfactor,ebcut,fermie,tsmear,ucvol
 
@@ -1177,7 +1182,11 @@ contains
 
     nfreeel=0.
     factor=sqrt(2.)/(PI*PI)*ucvol*tsmear**(1.5)
-    xcut=(ebcut-e_shiftfactor)/tsmear
+    if(version==0) then
+      xcut=(ebcut-e_shiftfactor)/tsmear
+    else if(version==1) then
+      xcut=hightemp_e_heg(dble(bcut),ucvol)/tsmear
+    end if
     gamma=(fermie-e_shiftfactor)/tsmear
 
     nfreeel=factor*djp12(xcut,gamma)

@@ -495,7 +495,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    ! call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermilo,1024,nelect_tmp,&
    ! & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
    call hightemp_get_nfreeel_approx(hightemp%e_shiftfactor,hightemp%ebcut,&
-   & fermilo,nelect_tmp,tsmear,hightemp%ucvol)
+   & fermilo,hightemp%bcut,nelect_tmp,tsmear,hightemp%ucvol,hightemp%version)
    nelectlo=nelectlo+nelect_tmp
  end if
 
@@ -513,7 +513,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    ! call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermihi,1024,nelect_tmp,&
    ! & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
    call hightemp_get_nfreeel_approx(hightemp%e_shiftfactor,hightemp%ebcut,&
-   & fermihi,nelect_tmp,tsmear,hightemp%ucvol)
+   & fermihi,hightemp%bcut,nelect_tmp,tsmear,hightemp%ucvol,hightemp%version)
    nelecthi=nelecthi+nelect_tmp
  end if
 
@@ -563,7 +563,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
        ! call hightemp_getnfreeel(hightemp%ebcut,entropy_tmp,fermimid,1024,nelect_tmp,&
        ! & tsmear,hightemp%e_shiftfactor,hightemp%ucvol)
        call hightemp_get_nfreeel_approx(hightemp%e_shiftfactor,hightemp%ebcut,&
-       & fermimid,nelect_tmp,tsmear,hightemp%ucvol)
+       & fermimid,hightemp%bcut,nelect_tmp,tsmear,hightemp%ucvol,hightemp%version)
        nelectmid=nelectmid+nelect_tmp
        ! entropy=entropy-entropy_tmp
      end if
