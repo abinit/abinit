@@ -237,8 +237,8 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
- call wrtout(std_out, ' Transport RTA computation driver')
- call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin))
+ call wrtout([std_out, ab_out], ch10//' Entering transport RTA computation driver.')
+ call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1)
 
  sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, &
                         keep_open=.true., extrael_fermie=extrael_fermie)
@@ -261,8 +261,8 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
 
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
-   path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
-   call wrtout([std_out, ab_out], sjoin("- Writing RTA transport results to:", path))
+   path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
+   call wrtout([std_out, ab_out], ch10//sjoin("- Writing RTA transport results to:", path))
    NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
    call rta_ncwrite(rta, cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
@@ -516,6 +516,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  nsppol = self%ebands%nsppol; nkpt= self%ebands%nkpt; mband = self%ebands%mband
 
  ! Allocate vv tensors with and without the lifetimes
+ ! Eq 8 of [[cite:Madsen2018]]
  ntens = (1 + self%ntemp) ! * 2
  ABI_MALLOC(vv_tens, (3, 3, ntens, mband, nkpt, nsppol))
 
@@ -523,7 +524,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
    do ik=1,nkpt
      do ib=1,mband
        vr(:) = self%velocity(:, ib, ik, ispin)
-       ! Store outer product in vv_tens
+       ! Store outer product (v_bks x v_bks) in vv_tens
        do ii=1,3
          do jj=1,3
            vv_tens(ii, jj, 1, ib, ik, ispin) = vr(ii) * vr(jj)
@@ -531,7 +532,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
        end do
        !vv_tens(:, :, 1, 2, ib, ik, ispin) = vv_tens(:, :, 1, 1, ib, ik, ispin)
 
-       ! Multiply by the lifetime
+       ! Multiply by the lifetime (SERTA and MRTA)
        !do ii=1,2
        do itemp=1,self%ntemp
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
@@ -579,6 +580,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ABI_FREE(vv_tens)
 
  ! Compute onsager coefficients
+ ! Eq 9 of [[cite:Madsen2018]]
  ABI_MALLOC(self%l0, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
  ABI_MALLOC(self%l1, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
  ABI_MALLOC(self%l2, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
@@ -588,6 +590,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  call onsager(2, self%l2)
 
  ! Compute transport quantities
+ ! Eq 12-15 of [[cite:Madsen2018]]
  ABI_MALLOC(self%sigma,   (self%nw, self%nsppol, 3, 3, self%ntemp+1))
  ABI_CALLOC(self%seebeck, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
  ABI_CALLOC(self%kappa,   (self%nw, self%nsppol, 3, 3, self%ntemp+1))
@@ -690,10 +693,10 @@ contains
  real(dp) :: fact, mu, ee, kT
  real(dp) :: kernel(self%nw,self%nsppol,3,3), integral(self%nw)
 
+ ! FIXME Here I think one shoud use vvdos(iw, 0) to make it work for nsppol
  ! Get spin degeneracy
  max_occ = two / (self%nspinor*self%nsppol)
- ! 2 comes from linewidth-lifetime relation
- ! FIXME Here I think one shoud use vvdos(iw, 0) to make it work for nsppol
+ ! 2 comes from linewidth-lifetime relation because we divided by the linewidth and now by (2 * linewidth)
  fact = max_occ / two
 
  do itemp=1,self%ntemp
@@ -842,7 +845,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
          !if (ii == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
          !if (ii == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, ispin))
-         call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk,kT,mu_e), linewidth, zero, vv_tenslw(:, :))
+         call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk, kT, mu_e), linewidth, zero, vv_tenslw(:, :))
          self%mobility_mu(ielhol, ispin, :, :, itemp) = self%mobility_mu(ielhol, ispin, :, :, itemp) + vv_tenslw(:, :)
        end do
        !end of

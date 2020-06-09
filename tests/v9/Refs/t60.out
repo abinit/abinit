@@ -1230,10 +1230,16 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t60o_DS4_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
+
+- Writing RTA transport results to: t60o_DS4_RTA.nc
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1575,10 +1581,16 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    3  -0.415    0.150      2.2    0.000
    4  -0.415    0.150      2.2    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t60o_DS6_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
+
+- Writing RTA transport results to: t60o_DS6_RTA.nc
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -1759,10 +1771,16 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    3  -0.415    0.147      2.2    0.000
    4  -0.415    0.147      2.2    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t60o_DS7_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
+
+- Writing RTA transport results to: t60o_DS7_RTA.nc
 
 ================================================================================
 == DATASET  8 ==================================================================

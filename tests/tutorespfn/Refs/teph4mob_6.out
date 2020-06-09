@@ -669,7 +669,10 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.525    0.000 783694.8    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_6o_DS1_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
@@ -678,6 +681,8 @@ Transport calculation results
           182.00        0.23E+17        0.00E+00          423.94            0.00
           241.00        0.23E+17        0.00E+00          419.47            0.00
           300.00        0.23E+17        0.00E+00          363.87            0.00
+
+- Writing RTA transport results to: teph4mob_6o_DS1_RTA.nc
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -945,7 +950,10 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.525    0.000 783694.8    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_6o_DS2_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
@@ -954,6 +962,8 @@ Transport calculation results
           182.00        0.23E+17        0.00E+00          423.94            0.00
           241.00        0.23E+17        0.00E+00          419.47            0.00
           300.00        0.23E+17        0.00E+00          363.87            0.00
+
+- Writing RTA transport results to: teph4mob_6o_DS2_RTA.nc
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -1221,7 +1231,10 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.525    0.000 783694.8    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_6o_DS3_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
@@ -1230,6 +1243,8 @@ Transport calculation results
           182.00        0.23E+17        0.00E+00          423.94            0.00
           241.00        0.23E+17        0.00E+00          419.47            0.00
           300.00        0.23E+17        0.00E+00          363.87            0.00
+
+- Writing RTA transport results to: teph4mob_6o_DS3_RTA.nc
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1507,7 +1522,10 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.673    0.006     58.9    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_6o_DS4_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
@@ -1516,6 +1534,8 @@ Transport calculation results
           182.00        0.23E+17        0.00E+00          424.37            0.00
           241.00        0.23E+17        0.00E+00          422.77            0.00
           300.00        0.23E+17        0.00E+00          371.75            0.00
+
+- Writing RTA transport results to: teph4mob_6o_DS4_RTA.nc
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1798,7 +1818,10 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.673    0.006     58.9    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_6o_DS5_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
@@ -1807,6 +1830,8 @@ Transport calculation results
           182.00        0.23E+17        0.00E+00          424.97            0.00
           241.00        0.23E+17        0.00E+00          426.18            0.00
           300.00        0.23E+17        0.00E+00          379.63            0.00
+
+- Writing RTA transport results to: teph4mob_6o_DS5_RTA.nc
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -2089,7 +2114,10 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.673    0.006     58.9    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_6o_DS6_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
@@ -2098,6 +2126,8 @@ Transport calculation results
           182.00        0.23E+17        0.00E+00          424.97            0.00
           241.00        0.23E+17        0.00E+00          426.18            0.00
           300.00        0.23E+17        0.00E+00          379.63            0.00
+
+- Writing RTA transport results to: teph4mob_6o_DS6_RTA.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================

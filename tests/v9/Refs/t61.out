@@ -775,11 +775,16 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    4  -0.208    0.000 999999.0    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t61o_DS3_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
+
+- Writing RTA transport results to: t61o_DS3_RTA.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================

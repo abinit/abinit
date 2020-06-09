@@ -596,7 +596,10 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.525    0.000 999999.0    0.000
 ============================================================================================
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_7o_DS1_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.18E+18        0.00E+00            0.00            0.00
@@ -605,6 +608,8 @@ Transport calculation results
           182.00        0.45E+17        0.00E+00          139.22            0.00
           241.00        0.33E+17        0.00E+00          163.96            0.00
           300.00        0.28E+17        0.00E+00          157.29            0.00
+
+- Writing RTA transport results to: teph4mob_7o_DS1_RTA.nc
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -767,7 +772,10 @@ Values initialized with zeros
 - Writing phonon DOS to netcdf file: teph4mob_7o_DS2_PHDOS.nc
 --------------------------------------------------------------------------------
 
+
+ Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_7o_DS1_SIGEPH.nc
+
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.14E+19        0.00E+00            0.00            0.00
@@ -776,6 +784,8 @@ Transport calculation results
           182.00        0.32E+18        0.00E+00            0.00            0.00
           241.00        0.19E+18        0.00E+00            0.00            0.00
           300.00        0.13E+18        0.00E+00            0.00            0.00
+
+- Writing RTA transport results to: teph4mob_7o_DS2_RTA.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================
