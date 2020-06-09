@@ -262,7 +262,7 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
    path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
-   !call wrtout([std_out, ab_out], sjoin("- Writing transport results to:", path ))
+   call wrtout([std_out, ab_out], sjoin("- Writing RTA transport results to:", path))
    NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
    call rta_ncwrite(rta, cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
@@ -358,7 +358,6 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    new%ebands = sigmaph%get_ebands(cryst, ebands, new%linewidth_serta, new%linewidth_mrta, &
                                    new%velocity, xmpi_comm_self, ierr)
  end if
-
 
  if (any(dtset%transport_ngkpt /= 0)) then
    ! Perform further downsampling (usefull for debugging purposes)
