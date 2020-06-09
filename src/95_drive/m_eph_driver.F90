@@ -56,7 +56,7 @@ module m_eph_driver
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
  use m_special_funcs,   only : levi_civita_3
- use m_transport,       only : transport
+ use m_rta,             only : rta_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -634,6 +634,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  select case (dtset%eph_task)
  case (0)
+   ! This is just to access the DDB post-processing tools
    continue
 
  case (1)
@@ -656,7 +657,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   if (dtset%eph_task == -4) call transport(dtfil, dtset, ebands, cryst, comm)
+   if (dtset%eph_task == -4) call rta_driver(dtfil, dtset, ebands, cryst, comm)
 
  case (5, -5)
    ! Interpolate the phonon potential.
@@ -668,8 +669,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (7)
-   ! Compute phonon-limited transport from SIGEPH file.
-   call transport(dtfil, dtset, ebands, cryst, comm)
+   ! Compute phonon-limited rta from SIGEPH file.
+   call rta_driver(dtfil, dtset, ebands, cryst, comm)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.

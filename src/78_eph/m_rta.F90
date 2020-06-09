@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_transport
+!!****m* ABINIT/m_rta
 !! NAME
-!!  m_transport
+!!  m_rta
 !!
 !! FUNCTION
 !!  Module to compute transport properties using the
@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-module m_transport
+module m_rta
 
  use defs_basis
  use iso_c_binding
@@ -55,21 +55,21 @@ module m_transport
  private
 !!****
 
- public :: transport ! main entry point for transport calculations
+ public :: rta_driver ! main entry point for transport calculations withing RTA
 !!****
 
 !----------------------------------------------------------------------
 
-!!****t* m_transport/transport_rta_t
+!!****t* m_rta/rta_t
 !! NAME
-!! transport_rta_t
+!! rta_t
 !!
 !! FUNCTION
 !! Container for transport quantities in the relaxation time approximation
 !!
 !! SOURCE
 
-type,public :: transport_rta_t
+type,public :: rta_t
 
    integer :: nsppol
    ! number of independent spin polarizations
@@ -178,13 +178,13 @@ type,public :: transport_rta_t
 
  contains
 
-    procedure :: compute => transport_rta_compute
-    procedure :: compute_mobility => transport_rta_compute_mobility
-    procedure :: print => transport_rta_print
-    procedure :: write_tensor => tranrta_write_tensor
-    procedure :: free => transport_rta_free
+    procedure :: compute => rta_compute
+    procedure :: compute_mobility => rta_compute_mobility
+    procedure :: print => rta_print
+    procedure :: write_tensor => rta_write_tensor
+    procedure :: free => rta_free
 
- end type transport_rta_t
+ end type rta_t
 !!***
 
 !----------------------------------------------------------------------
@@ -194,9 +194,9 @@ contains  !=====================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport
+!!****f* m_rta/rta_driver
 !! NAME
-!! transport
+!! rta_driver
 !!
 !! FUNCTION
 !! General driver to compute transport properties
@@ -210,7 +210,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine transport(dtfil, dtset, ebands, cryst, comm)
+subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -219,7 +219,6 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
-
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
@@ -230,7 +229,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(sigmaph_t) :: sigmaph
- type(transport_rta_t) :: transport_rta
+ type(rta_t) :: rta
 !arrays
  real(dp) :: extrael_fermie(2)
 
@@ -238,49 +237,49 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
- call wrtout(std_out, ' Transport computation driver')
+ call wrtout(std_out, ' Transport RTA computation driver')
  call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin))
 
  sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, &
                         keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
 
- ! Initialize transport object
- transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
+ ! Initialize RTA object
+ rta = rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
  sigmaph%ncid = nctk_noid
  call sigmaph%free()
 
- ! Compute transport
- call transport_rta%compute(cryst, dtset, comm)
+ ! Compute RTA transport
+ call rta%compute(cryst, dtset, comm)
 
- ! Compute mobility
- call transport_rta%compute_mobility(cryst, dtset, comm)
+ ! Compute RAT mobility
+ call rta%compute_mobility(cryst, dtset, comm)
 
- ! Print transport results to stdout (for the test suite)
  if (my_rank == master) then
-   call transport_rta%print(cryst, dtset, dtfil)
+   ! Print RTA transport results to stdout and other external txt files (for the test suite)
+   call rta%print(cryst, dtset, dtfil)
 
-   ! Master creates the netcdf file used to store the results of the calculation.
+   ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
    path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
    !call wrtout([std_out, ab_out], sjoin("- Writing transport results to:", path ))
    NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
-   call transport_rta_ncwrite(transport_rta, cryst, dtset, ncid)
+   call rta_ncwrite(rta, cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
 
  ! Free memory
- call transport_rta%free()
+ call rta%free()
 
-end subroutine transport
+end subroutine rta_driver
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport_rta_new
+!!****f* m_rta/rta_new
 !! NAME
-!! transport_rta_new
+!! rta_new
 !!
 !! FUNCTION
 !! Compute transport quantities in the relaxation time approximation
@@ -296,7 +295,7 @@ end subroutine transport
 !!
 !! SOURCE
 
-type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm) result (new)
+type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm) result (new)
 
 !Arguments -------------------------------------
  integer, intent(in) :: comm
@@ -451,7 +450,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    call xmpi_sum(new%transport_mu_e, comm, ierr)
  endif
 
- call cwtime_report(" transport_rta_new", cpu, wall, gflops)
+ call cwtime_report(" rta_new", cpu, wall, gflops)
 
  contains
  subroutine downsample_array(array, indkk, nkpt)
@@ -474,14 +473,14 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
  end subroutine downsample_array
 
-end function transport_rta_new
+end function rta_new
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport_rta_compute
+!!****f* m_rta/rta_compute
 !! NAME
-!! transport_rta_compute
+!! rta_compute
 !!
 !! FUNCTION
 !!
@@ -492,11 +491,11 @@ end function transport_rta_new
 !!
 !! SOURCE
 
-subroutine transport_rta_compute(self, cryst, dtset, comm)
+subroutine rta_compute(self, cryst, dtset, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- class(transport_rta_t),intent(inout) :: self
+ class(rta_t),intent(inout) :: self
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
 
@@ -657,7 +656,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
    end do ! itemp
  end do ! spin
 
- call cwtime_report(" transport_rta_compute", cpu, wall, gflops)
+ call cwtime_report(" rta_compute", cpu, wall, gflops)
 
 contains
  real(dp) function carriers(wmesh, dos, istart, istop, kT, mu)
@@ -730,14 +729,14 @@ contains
 
  end subroutine onsager
 
-end subroutine transport_rta_compute
+end subroutine rta_compute
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport_rta_compute_mobility
+!!****f* m_rta/rta_compute_mobility
 !! NAME
-!! transport_rta_compute_mobility
+!! rta_compute_mobility
 !!
 !! FUNCTION
 !!
@@ -748,10 +747,10 @@ end subroutine transport_rta_compute
 !!
 !! SOURCE
 
-subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
+subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
 !Arguments ------------------------------------
- class(transport_rta_t),intent(inout) :: self
+ class(rta_t),intent(inout) :: self
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
@@ -865,7 +864,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
                  self%nh(itemp) / cryst%ucvol / Bohr_meter**3, zero, self%mobility_mu(2,:,:,:,itemp) )
  end do
 
- call cwtime_report(" transport_rta_compute_mobility", cpu, wall, gflops)
+ call cwtime_report(" rta_compute_mobility", cpu, wall, gflops)
 
 contains
  function symmetrize_tensor(cryst, tcart) result(tsum)
@@ -882,14 +881,14 @@ contains
 
  end function symmetrize_tensor
 
-end subroutine transport_rta_compute_mobility
+end subroutine rta_compute_mobility
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport_rta_ncwrite
+!!****f* m_rta/rta_ncwrite
 !! NAME
-!! transport_rta_ncwrite
+!! rta_ncwrite
 !!
 !! FUNCTION
 !!
@@ -899,10 +898,10 @@ end subroutine transport_rta_compute_mobility
 !!
 !! SOURCE
 
-subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
+subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
 !Arguments --------------------------------------
- type(transport_rta_t),intent(in) :: self
+ type(rta_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: ncid
@@ -996,16 +995,16 @@ subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
  !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu_mrta"), self%mobility_mu(:,:,:,:,:self%ntemp,2)))
 #endif
 
- call cwtime_report(" transport_rta_ncwrite", cpu, wall, gflops)
+ call cwtime_report(" rta_ncwrite", cpu, wall, gflops)
 
-end subroutine transport_rta_ncwrite
+end subroutine rta_ncwrite
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport_rta_print
+!!****f* m_rta/rta_print
 !! NAME
-!! transport_rta_print
+!! rta_print
 !!
 !! FUNCTION
 !!
@@ -1014,10 +1013,10 @@ end subroutine transport_rta_ncwrite
 !!
 !! SOURCE
 
-subroutine transport_rta_print(self, cryst, dtset, dtfil)
+subroutine rta_print(self, cryst, dtset, dtfil)
 
 !Arguments --------------------------------------
- class(transport_rta_t),intent(in) :: self
+ class(rta_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
@@ -1048,12 +1047,12 @@ subroutine transport_rta_print(self, cryst, dtset, dtfil)
  call self%write_tensor(dtset, "kappa", self%kappa, strcat(dtfil%filnam_ds(4), "_SERTA_KAPPA"))
  call self%write_tensor(dtset, "pi", self%pi, strcat(dtfil%filnam_ds(4), "_SERTA_PI"))
 
-end subroutine transport_rta_print
+end subroutine rta_print
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/tranrta_write_tensor
+!!****f* m_rta/rta_write_tensor
 !! NAME
 !!
 !! FUNCTION
@@ -1062,10 +1061,10 @@ end subroutine transport_rta_print
 !!
 !! SOURCE
 
-subroutine tranrta_write_tensor(self, dtset, header, values, path)
+subroutine rta_write_tensor(self, dtset, header, values, path)
 
 !Arguments --------------------------------------
- class(transport_rta_t),intent(in) :: self
+ class(rta_t),intent(in) :: self
  type(dataset_type),intent(in) :: dtset
  character(len=*),intent(in) :: header
  real(dp),intent(in) :: values(:,:,:,:,:)
@@ -1112,14 +1111,14 @@ subroutine tranrta_write_tensor(self, dtset, header, values, path)
 
  close(ount)
 
-end subroutine tranrta_write_tensor
+end subroutine rta_write_tensor
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport_rta_free
+!!****f* m_rta/rta_free
 !! NAME
-!! transport_rta_free
+!! rta_free
 !!
 !! FUNCTION
 !!  Free dynamic memory.
@@ -1128,10 +1127,10 @@ end subroutine tranrta_write_tensor
 !!
 !! SOURCE
 
-subroutine transport_rta_free(self)
+subroutine rta_free(self)
 
 !Arguments --------------------------------------
- class(transport_rta_t),intent(inout) :: self
+ class(rta_t),intent(inout) :: self
 
  ABI_SFREE(self%n)
  ABI_SFREE(self%vvdos)
@@ -1160,8 +1159,8 @@ subroutine transport_rta_free(self)
  call self%gaps%free()
  call self%edos%free()
 
-end subroutine transport_rta_free
+end subroutine rta_free
 !!***
 
-end module m_transport
+end module m_rta
 !!***
