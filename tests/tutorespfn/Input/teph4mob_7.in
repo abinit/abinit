@@ -91,7 +91,7 @@ nband 8
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_7.out, tolnlines= 57, tolabs=  30, tolrel= 0.03;
-#%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 8.0, tolrel= 9.0e-1, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 10.0, tolrel= 1.2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;

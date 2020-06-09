@@ -1070,7 +1070,7 @@ subroutine rta_write_tensor(self, dtset, header, values, path)
  character(len=*),intent(in) :: path
 
 !Local variables --------------------------------
- integer :: itemp, iw, ispin, ount
+ integer :: itemp, iw, ount
  character(len=500) :: msg
 
 !************************************************************************
