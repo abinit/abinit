@@ -2445,7 +2445,7 @@ end function ddb_get_dielt_zeff
 !!  ddb_get_dielt
 !!
 !! FUNCTION
-!! Reads the Dielectric Tensor from the DDB file
+!! Reads the electronic dielectric tensor from the DDB file
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
@@ -2454,7 +2454,7 @@ end function ddb_get_dielt_zeff
 !!           3 if third order derivatives
 !!
 !! OUTPUT
-!!  dielt(3,3) = Macroscopic dielectric tensor
+!!  dielt(3,3) = Macroscopic dielectric tensor (electronic contribution)
 !!  iblok=Index of the block containing the data. 0 if block is not found.
 !!
 !! NOTES
