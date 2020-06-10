@@ -3232,7 +3232,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spin_dipdip spin_dt spin_dynamics '
  list_vars=trim(list_vars)//' spin_init_orientation spin_init_qpoint spin_init_rotate_axis spin_init_state'
  list_vars=trim(list_vars)//' spin_mag_field spin_nctime spin_ntime spin_ntime_pre'
- list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_qpoint'
+ list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_projection_qpoint'
  list_vars=trim(list_vars)//' spin_sia_add spin_sia_k1amp spin_sia_k1dir'
  list_vars=trim(list_vars)//' spin_temperature spin_temperature_end'
  list_vars=trim(list_vars)//' spin_temperature_nstep spin_temperature_start spin_tolavg'
