@@ -632,7 +632,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
- real(dp) :: vkk_norm2, osc_ecut
+ real(dp) :: vkk_norm, osc_ecut ! vkq_norm
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -1625,10 +1625,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
            do ib_k=1,nbcalc_ks
              vk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
-             vkk_norm2 = dot_product(vk, vk)
+             vkk_norm = sqrt(dot_product(vk, vk))
              alpha_mrta(ib_k) = zero
-             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm2 ** 2
-             !if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / (vkk * vkq)
+             if (vkk_norm > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm ** 2
+             !if (vkk_norm > tol6) then
+             !  vkq_norm = sqrt(dot_product(vkq, vkq))
+             !  alpha_mrta(ib_k) = one - dot_product(vkq, vk) / (vkk_norm * vkq_norm)
+             !end if
            end do
          end if
 

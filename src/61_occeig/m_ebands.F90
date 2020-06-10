@@ -4192,10 +4192,11 @@ end function ebands_interp_kpath
 !!  [emin, emax]=Minimum and maximum energy to be considered. Default: full range.
 !!
 !! OUTPUT
-!!  out_mesh: Frequency mesh.
+!!  out_mesh(nw): Frequency mesh.
 !!  out_valsdos: (nw, 2, 0:nsppol, nvals) array with DOS for scalar quantities if nvals > 0
-!!  out_vecsdos: (nw, 2, 0:nsppol, 3, nvecs)) array with DOS for vectorial
-!!  out_tensdos: (nw, 2, 0:nsppol, 3, 3, ntens)
+!!  out_vecsdos: (nw, 2, 0:nsppol, 3, nvecs)) array with DOS weighted by vectorial terms if nvecs > 0
+!!  out_tensdos: (nw, 2, 0:nsppol, 3, 3, ntens) array with DOS weighted by tensorial terms if ntens > 0
+!!   All these arrays allocated by the routine. The number of points is available in edos%nw.
 !!
 !! PARENTS
 !!
@@ -4223,7 +4224,6 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: kptopt3=3
  real(dp),parameter :: max_occ1 = one
  integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
  !integer :: my_nkibz, nkfull, timrev
@@ -4240,6 +4240,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  real(dp),allocatable :: wme0(:),wdt(:,:,:),tmp_eigen(:)
 
 ! *********************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
@@ -4267,6 +4269,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  eminmax_spin = get_minmax(ebands, "eig")
  min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
  max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
+ ! or use optional args if provided.
  if (present(emin)) min_ene = emin
  if (present(emax)) max_ene = emax
 
@@ -4281,6 +4284,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  ABI_CALLOC(edos%gef, (0:edos%nsppol))
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
  ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
+
  ! Allocate output arrays depending on input.
  if (nvals > 0) then
    ABI_CALLOC(out_valsdos, (nw, 2, 0:ebands%nsppol, nvals))
@@ -4292,10 +4296,10 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
    ABI_CALLOC(out_tensdos, (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
  end if
 
- call cwtime(cpu, wall, gflops, "start")
  !call wrtout(std_out, " Computing DOS weighted by matrix elements.")
 
-select case (intmeth)
+ select case (intmeth)
+
  case (1)
    ! Gaussian
    ABI_MALLOC(wme0, (nw))
@@ -4309,32 +4313,28 @@ select case (intmeth)
          wme0 = gaussian(wme0, broad) * wtk
          edos%dos(:,spin) = edos%dos(:,spin) + wme0(:)
 
-         !scalar
+         ! scalar
          do idat=1,nvals
            out_valsdos(:, 1, spin, idat) = out_valsdos(:,1,spin,idat) + wme0(:) * bks_vals(idat,band,ikpt,spin)
            call simpson_int(nw, step, out_valsdos(:,1,spin,idat), out_valsdos(:,2,spin,idat))
          end do
 
-         !vector
+         ! vector
          do idat=1,nvecs
-           !get components
+           ! get components, symmetrize and accumulate.
            v(:) = bks_vecs(:, idat, band, ikpt, spin)
-           !symmetrize
            vsum = symmetrize_vector(cryst, v)
-           !put components
            do ii=1,3
              out_vecsdos(:, 1, spin, ii, idat) = out_vecsdos(:, 1, spin, ii, idat) + wme0(:) * vsum(ii)
              call simpson_int(nw, step, out_vecsdos(:,1,spin,ii,idat), out_vecsdos(:,2,spin,ii,idat))
            end do
          end do
 
-         !tensor
+         ! tensor
          do idat=1,ntens
-           !get components
+           ! get components, symmetrize and accumulate.
            t(:,:) = bks_tens(:, :, idat, band, ikpt, spin)
-           !symmetrize
            tsum = symmetrize_tensor(cryst, t)
-           !put components
            do ii=1,3
              do jj=1,3
                out_tensdos(:,1,spin,jj,ii,idat) = out_tensdos(:,1,spin,jj,ii,idat) + wme0(:) * tsum(jj,ii)
@@ -4342,8 +4342,8 @@ select case (intmeth)
              end do
            end do
          end do
-       end do
 
+       end do !band
      end do !ikpt
    end do !spin
 
@@ -4355,12 +4355,12 @@ select case (intmeth)
 
  case (2, 3)
    ! Consistency test
-   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedrons, nband(:) must be constant')
+   ABI_CHECK(all(ebands%nband == ebands%nband(1)), 'For tetrahedrons, nband(:) must be constant')
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
      ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
-   if (ierr /= 0) MSG_ERROR(msg)
+   ABI_CHECK(ierr == 0, msg)
 
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
@@ -4388,33 +4388,30 @@ select case (intmeth)
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
 
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, ikpt, 1)
-         !scalar
+
+         ! scalar
          do idat=1,nvals
            ! Compute DOS/IDOS
            out_valsdos(:, 1, spin, idat) = out_valsdos(:, 1, spin, idat) + wdt(:, ikpt, 1) * bks_vals(idat, band, ikpt, spin)
            out_valsdos(:, 2, spin, idat) = out_valsdos(:, 2, spin, idat) + wdt(:, ikpt, 2) * bks_vals(idat, band, ikpt, spin)
          end do
 
-         !vector
+         ! vector
          do idat=1,nvecs
-           !get components
+           ! get components, symmetrize and accumulate.
            v(:) = bks_vecs(:, idat, band, ikpt, spin)
-           !symmetrize
            vsum = symmetrize_vector(cryst, v)
-           !put components
            do ii=1,3
              out_vecsdos(:, 1, spin, ii, idat) = out_vecsdos(:, 1, spin, ii, idat) + wdt(:, ikpt, 1) * vsum(ii)
              out_vecsdos(:, 2, spin, ii, idat) = out_vecsdos(:, 2, spin, ii, idat) + wdt(:, ikpt, 2) * vsum(ii)
            end do
          end do
 
-         !tensor
+         ! tensor
          do idat=1,ntens
-           !get components
+           ! get components, symmetrize and accumulate.
            t(:,:) = bks_tens(:, :, idat, band, ikpt, spin)
-           !symmetrize
            tsum = symmetrize_tensor(cryst, t)
-           !put components
            do ii=1,3
              do jj=1,3
                out_tensdos(:, 1, spin, jj, ii, idat) = out_tensdos(:, 1, spin, jj, ii, idat) + wdt(:, ikpt, 1) * tsum(jj,ii)
@@ -4442,11 +4439,11 @@ select case (intmeth)
  end select
 
  ! Compute total DOS and IDOS
- max_occ = two/(ebands%nspinor*ebands%nsppol)
+ max_occ = two / (ebands%nspinor * ebands%nsppol)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
 
  do spin=1,edos%nsppol
-   call simpson_int(nw, edos%step,edos%dos(:,spin), edos%idos(:,spin))
+   call simpson_int(nw, edos%step, edos%dos(:,spin), edos%idos(:,spin))
  end do
  edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
@@ -4457,10 +4454,11 @@ select case (intmeth)
 
  ! Handle out of range condition.
  if (ief == 0 .or. ief == nw) then
-   write(msg,"(3a)")&
+   write(msg,"(5a)")&
     "Bisection could not find an initial guess for the Fermi level!",ch10,&
-    "Possible reasons: not enough bands or wrong number of electrons"
-   !MSG_WARNING(msg)
+    "Possible reasons: not enough bands or wrong number of electrons.", ch10, &
+    "Returning from ebands_get_dos_matrix_elements without setting edos%ief !"
+   MSG_WARNING(msg)
    return
  end if
 

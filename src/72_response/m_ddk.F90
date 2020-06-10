@@ -34,7 +34,6 @@ MODULE m_ddk
  use m_hdr
  use m_dtset
  use m_krank
- !use m_fstab
  use m_crystal
  use m_mpinfo
  use m_cgtools
@@ -47,14 +46,14 @@ MODULE m_ddk
  use netcdf
 #endif
 
- use m_fstrings,      only : strcat, sjoin, itoa, endswith, ktoa
+ use m_fstrings,      only : strcat, sjoin, itoa, ktoa
  use m_io_tools,      only : iomode_from_fname
- use m_time,          only : cwtime, sec2str
+ use m_time,          only : cwtime, cwtime_report
  use defs_abitypes,   only : MPI_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
- use m_wfk,           only : wfk_read_ebands, wfk_read_h1mat
+ use m_wfk,           only : wfk_read_ebands !, wfk_read_h1mat
  use m_wfd,           only : wfd_t, wfd_init, wave_t
 
  implicit none
@@ -233,7 +232,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  if (my_rank == master) then
    write(msg, '(2a)') "Computation of velocity matrix elements (ddk)", ch10
-   call wrtout(ab_out, msg); call wrtout(std_out, msg)
+   call wrtout([std_out, ab_out], msg)
  end if
 
  if (psps%usepaw == 1) then
@@ -364,6 +363,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  end if
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+
  ! Loop over spins
  do spin=1,nsppol
    ! Loop over kpoints
@@ -374,7 +374,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      else
        if (all(distrib_mat(bandmin:bandmax,bandmin:bandmax,ik,spin) /= my_rank)) cycle
      end if
-     call cwtime(cpu,wall,gflops,"start")
+     call cwtime(cpu, wall, gflops, "start")
 
      nband_k  = wfd%nband(ik,spin)
      istwf_k  = wfd%istwfk(ik)
@@ -473,16 +473,13 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      ! Free KB form factors
      call vkbr_free(vkbr)
 
-     call cwtime(cpu,wall,gflops,"stop")
-     write(msg,'(2(a,i0),2(a,f8.2))')"k-point [",ik,"/",nkpt,"] completed. cpu:",cpu,", wall:",wall
-     call wrtout(std_out, msg, do_flush=.True.)
+     write(msg,'(2(a,i0),a)')"k-point [",ik,"/",nkpt,"]"
+     call cwtime_report(msg, cpu, wall, gflops)
 
    end do ! k-points
  end do ! spin
 
- call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, sjoin("Calculation completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
-             sec2str(wall_all)), do_flush=.True.)
+ call cwtime_report(msg, cpu_all, wall_all, gflops_all)
 
  ABI_FREE(ug_c)
  ABI_FREE(ug_v)
@@ -667,88 +664,6 @@ end subroutine ddk_compute
 
 !----------------------------------------------------------------------
 
-!!!!     !!****f* m_ddk/ddk_fs_average_veloc
-!!!!     !! NAME
-!!!!     !!  ddk_fs_average_veloc
-!!!!     !!
-!!!!     !! FUNCTION
-!!!!     !!  Perform Fermi surface average of velocity squared then square rooted, print and store in ddk object
-!!!!     !!
-!!!!     !! INPUTS
-!!!!     !!   ddk = object with electron band velocities
-!!!!     !!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
-!!!!     !!     and the k-points in the IBZ
-!!!!     !!   comm=MPI communicator
-!!!!     !!
-!!!!     !! PARENTS
-!!!!     !!      m_phgamma
-!!!!     !!
-!!!!     !! CHILDREN
-!!!!     !!      wrtout
-!!!!     !!
-!!!!     !! SOURCE
-!!!!
-!!!!     subroutine ddk_fs_average_veloc(ddk, ebands, fstab, eph_fsmear)
-!!!!
-!!!!     !Arguments ------------------------------------
-!!!!     !scalars
-!!!!     !integer,intent(in) :: comm  ! could distribute this over k in the future
-!!!!      real(dp),intent(in) :: eph_fsmear
-!!!!      type(ebands_t),intent(in) :: ebands
-!!!!      type(ddk_t),intent(inout) :: ddk
-!!!!      type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
-!!!!
-!!!!     !Local variables-------------------------------
-!!!!     !scalars
-!!!!      integer :: idir, ikfs, isppol, ik_ibz, iene
-!!!!      integer :: iband, mnb, nband_k
-!!!!      type(fstab_t), pointer :: fs
-!!!!     !arrays
-!!!!      real(dp), allocatable :: wtk(:)
-!!!!
-!!!!     !************************************************************************
-!!!!
-!!!!      ddk%nene = fstab(1)%nene
-!!!!      ABI_MALLOC(ddk%velocity_fsavg, (3,ddk%nene,ddk%nsppol))
-!!!!      ddk%velocity_fsavg = zero
-!!!!
-!!!!      mnb = 1
-!!!!      do isppol=1,ddk%nsppol
-!!!!        fs => fstab(isppol)
-!!!!        mnb = max(mnb, maxval(fs%bstart_cnt_ibz(2, :)))
-!!!!      end do
-!!!!      ABI_MALLOC(wtk, (mnb))
-!!!!
-!!!!      do isppol=1,ddk%nsppol
-!!!!        fs => fstab(isppol)
-!!!!        do iene = 1, fs%nene
-!!!!          do ikfs=1,fs%nkfs
-!!!!            ik_ibz = fs%indkk_fs(1,ikfs)
-!!!!            nband_k = fs%bstart_cnt_ibz(2, ik_ibz)
-!!!!            call fs%get_weights_ibz(ebands, ik_ibz, isppol, eph_fsmear, wtk, iene)
-!!!!
-!!!!            do idir = 1,3
-!!!!              do iband = 1, nband_k
-!!!!                ddk%velocity_fsavg(idir, iene, isppol) = ddk%velocity_fsavg(idir, iene, isppol) + &
-!!!!     &             wtk(iband) * ddk%velocity(idir, iband, ikfs, isppol)**2
-!!!!     !&             fs%tetra_wtk_ene(iband,ik_ibz,iene) * ddk%velocity(idir, iband, ikfs, isppol)**2
-!!!!              end do
-!!!!            end do ! idir
-!!!!          end do ! ikfs
-!!!!        end do ! iene
-!!!!       ! sqrt is element wise on purpose
-!!!!        ddk%velocity_fsavg(:,:,isppol) = sqrt(ddk%velocity_fsavg(:,:,isppol)) / dble(fs%nkfs)
-!!!!      end do ! isppol
-!!!!
-!!!!      ABI_DEALLOCATE(wtk)
-!!!!
-!!!!     end subroutine ddk_fs_average_veloc
-!!!!     !!***
-
-!----------------------------------------------------------------------
-
-!----------------------------------------------------------------------
-
 !!****f* m_ddk/ddk_red2car
 !! NAME
 !!  ddk_red2car
@@ -766,7 +681,7 @@ end subroutine ddk_compute
 !!
 !! SOURCE
 
-subroutine ddk_red2car(rprimd, vred, vcar)
+pure subroutine ddk_red2car(rprimd, vred, vcar)
 
 !Arguments -------------------------------------
  real(dp),intent(in) :: rprimd(3,3)
