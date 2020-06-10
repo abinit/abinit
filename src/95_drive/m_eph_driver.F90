@@ -37,6 +37,7 @@ module m_eph_driver
  use m_efmas_defs
  use m_dtfil
  use m_ddb
+ use m_ddb_hdr
  use m_dvdb
  use m_ifc
  use m_phonons
@@ -167,6 +168,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb
+ type(ddb_hdr_type) :: ddb_hdr
  type(dvdb_t) :: dvdb
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
@@ -230,7 +232,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dvdb_filepath == ABI_NOFILE) then
    dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
- use_wfk = all(dtset%eph_task /= [5, -5, 6, +15, -15, 16])
+ use_wfk = all(dtset%eph_task /= [5, -5, 6, +15, -15, -16, 16])
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
  ! If eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
@@ -427,13 +429,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ABI_CALLOC(dummy_atifc, (dtset%natom))
 
  if (use_wfk) then
-   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=dtset%prtvol)
+   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
+                     prtvol=dtset%prtvol)
    call cryst_ddb%free()
  else
    ! Get crystal from DDB.
    ! Warning: We may loose precision in rprimd and xred because DDB does not have enough significant digits.
-   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, cryst, comm, prtvol=dtset%prtvol)
+   call ddb_from_file(ddb, ddb_filepath, brav1, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
+                     prtvol=dtset%prtvol)
  end if
+ call ddb_hdr%free()
  ABI_FREE(dummy_atifc)
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
@@ -467,26 +472,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
-! if (any(dtset%ddb_qrefine > 1)) then
-!   ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-!   ! Build the IFCs using the coarse q-mesh.
-!   ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
-!   call ifc_init(ifc_coarse, cryst, ddb, &
-!     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-!     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
-!
-!   ! Now use the coarse q-mesh to fill the entries in dynmat(q)
-!   ! on the dense q-mesh that cannot be obtained from the DDB file.
-!   call ifc_init(ifc, cryst, ddb, &
-!     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-!     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
-!   call ifc_coarse%free()
-
-! else
-   call ifc_init(ifc, cryst, ddb, &
-     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
-! end if
+ ! TODO: Add support for dipquad and quadquad in abinit
+ call ifc_init(ifc, cryst, ddb, &
+   brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+   qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
 
  ABI_FREE(ddb_qshifts)
  call ifc%print(unit=std_out)
@@ -548,19 +537,24 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_filepath, comm)
    if (dtset%prtvol > 10) dvdb%debug = .True.
+
    ! This to symmetrize the DFPT potentials.
    dvdb%symv1 = dtset%symv1scf
+
+   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   dvdb%rspace_cell = dtset%dvdb_rspace_cell
 
    !call dvdb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 
    ! Set qdamp from frohl_params
-   if (dtset%frohl_params(4) /= 0) then
-     dvdb%qdamp = dtset%frohl_params(4)
-     !dvdb%qdamp = dtset%qdamp
-   end if
+   dvdb%qdamp = dtset%dvdb_qdamp
+
+   ! Set quadrupoles
+   dvdb%qstar = qdrp_cart
+   if (iblock_quadrupoles /= 0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.
-   ! This activates automatically the treatment of the long-range term in the Fourier interpolation
+   ! This flag activates automatically the treatment of the long-range term in the Fourier interpolation
    ! of the DFPT potentials except when dvdb_add_lr == 0
    dvdb%add_lr = dtset%dvdb_add_lr
    if (iblock_dielt /= 0) then
@@ -674,9 +668,18 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call dvdb%write_v1qavg(dtset, strcat(dtfil%filnam_ds(4), "_V1QAVG.nc"))
    end if
 
- case (16)
-   ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
-   call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+ case (-16, 16)
+   if (nprocs > 1) then
+     MSG_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
+   end if
+
+   dvdb%comm = xmpi_comm_self
+   if (my_rank == master) then
+     call dvdb%open_read(ngfftf, xmpi_comm_self)
+
+     ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
+     call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+   end if
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

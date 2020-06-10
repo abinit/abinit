@@ -87,7 +87,7 @@ jpawu  0.0000  # values in Hartree
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%                  t29.out,     tolnlines =150, tolabs = 2e-6, tolrel = 2.2e-6, fld_options=-medium
+#%%                  t29.out,     tolnlines =150, tolabs = 2e-6, tolrel = 2.2e-6, fld_options=-easy
 #%% psp_files = 58ce.paw
 #%% [paral_info]
 #%% max_nprocs = 10

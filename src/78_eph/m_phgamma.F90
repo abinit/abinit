@@ -2057,8 +2057,12 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
        write(msg,'(3a)') ch10,'Warning: some of the following quantities should be integrated over spin', ch10
        call wrtout(ount, msg)
      end if
-
-     write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling.'
+     
+     if (do_qintp) then
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated).'
+     else
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid).'
+     endif
      write(ount,'(a,es16.6)')' isotropic lambda = ',lambda_iso
      write(ount,'(a,es16.6,a,es16.6,a)' )' omegalog  = ',omega_log,' (Ha) ', omega_log * Ha_K, ' (Kelvin) '
      write(ount,'(a,es16.6,a,es16.6,a)')' MacMillan Tc = ',tc_macmill,' (Ha) ', tc_macmill * Ha_K, ' (Kelvin) '
@@ -3232,7 +3236,11 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
 
    ! TODO: make output only for irred values xx yy zz and top half of matrix
    if (my_rank == master) then
-     write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions '
+     if (do_qintp) then
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (interpolated) '
+     else
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (coarse grid) '
+     endif
      write(ount,'(a,3(3es10.3,2x))') ' lambda = ',lambda_iso
      write(ount,'(a,3(3es10.3,2x),a)' )' omegalog  = ',omega_log,' (Ha) '
      write(ount,'(a,3(3es10.3,2x),a)' )'             ',omega_log*Ha_K, ' (Kelvin) '
@@ -3496,7 +3504,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q, ltetra
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
- integer :: jene, iene, comm_rpt, method, nesting
+ integer :: jene, iene, comm_rpt, nesting
  integer :: my_npert, imyp, imyq
 #ifdef HAVE_NETCDF
  integer :: ncerr
@@ -3764,7 +3772,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  !call xmpi_barrier(comm)
 
- ! Now reopen the file inside ncwrite_comm to perform pararallel-IO (required for q-point parallelism).
+ ! Now reopen the file inside ncwrite_comm to perform parallel-IO (required for q-point parallelism).
  !if (self%ncwrite_comm%value /= xmpi_comm_null) then
  !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
  !  NCF_CHECK(nctk_set_datamode(self%ncid))
@@ -3807,8 +3815,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Prepare Fourier interpolation of DFPT potentials.
    comm_rpt = xmpi_comm_self
    !comm_rpt = bqs_comm%value
-   method = dtset%userid
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
  end if
 
  ! Initialize the wave function descriptor.

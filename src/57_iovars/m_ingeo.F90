@@ -26,7 +26,6 @@
 module m_ingeo
 
  use defs_basis
- use m_intagm_img
  use m_abicore
  use m_errors
  use m_atomdata
@@ -37,7 +36,7 @@ module m_ingeo
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
- use m_parser,     only : intagm, geo_t, geo_from_abivar_string
+ use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
 
  implicit none
 
@@ -86,8 +85,7 @@ contains
 !! nzchempot=defines the use of a spatially-varying chemical potential along z
 !! pawspnorb=1 when spin-orbit is activated within PAW
 !! ratsph(1:ntypat)=radius of the atomic sphere
-!! string*(*)=character string containing all the input data, used
-!!  only if choice=1 or 3. Initialized previously in instrng.
+!! string*(*)=character string containing all the input data. Initialized previously in instrng.
 !! supercell_latt(3)=supercell lattice
 !! comm: MPI communicator
 !!
@@ -179,11 +177,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
  integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,mu,multiplicity,natom_uc,natfix,natrd
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
- integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma, tread_geo
+ integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
- real(dp) :: amu_default,a2,aa,cc,cosang,ucvol,sumalch
+ real(dp) :: amu_default,ucvol,sumalch
  character(len=500) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
@@ -212,90 +210,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    geo = geo_from_abivar_string(geo_string, comm)
    acell = one
    rprim = geo%rprimd
-   !call exclude(jdtset, "acell, rprim, angdeg, scalecar")
+   !call exclude(lenstr, string, jdtset, iimage, "acell, rprim, angdeg, scalecar")
 
  else
    ! Set up unit cell from acell, rprim, angdeg
-   !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
-
-   acell(1:3)=one
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
-   if(tacell==1) acell(1:3)=dprarr(1:3)
-   call intagm_img(acell,iimage,jdtset,lenstr,nimage,3,string,"acell",tacell,'LEN')
-
-   ! Check that input length scales acell(3) are > 0
-   do mu=1,3
-     if(acell(mu)<=zero) then
-       write(msg, '(a,i0,a, 1p,e14.6,4a)' )&
-        'Length scale ',mu,' is input as acell: ',acell(mu),ch10,&
-        'However, length scales must be > 0 ==> stop',ch10,&
-        'Action: correct acell in input file.'
-       MSG_ERROR(msg)
-     end if
-   end do
-
-   ! Initialize rprim, or read the angles
-   tread=0
-   call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',trprim,'DPR')
-   if (trprim==1) rprim(:,:) = reshape( dprarr(1:9), [3, 3])
-   call intagm_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
-
-   if(trprim==0)then
-     ! If none of the rprim were read ...
-     call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'angdeg',tangdeg,'DPR')
-     angdeg(:)=dprarr(1:3)
-     call intagm_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
-
-     if(tangdeg==1)then
-       !call wrtout(std_out,' ingeo: use angdeg to generate rprim.')
-
-       ! Check that input angles are positive
-       do mu=1,3
-         if(angdeg(mu)<=0.0_dp) then
-           write(msg, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
-            'Angle number ',mu,' is input as angdeg: ',angdeg(mu),ch10,&
-            'However, angles must be > 0 ==> stop',ch10,&
-            'Action: correct angdeg in the input file.'
-           MSG_ERROR(msg)
-         end if
-       end do
-
-       ! Check that the sum of angles is smaller than 360 degrees
-       if(angdeg(1)+angdeg(2)+angdeg(3)>=360.0_dp) then
-         write(msg, '(a,a,a,es14.4,a,a,a)' )&
-          'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
-          'while it is: ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
-          'Action: correct angdeg in the input file.'
-         MSG_ERROR(msg)
-       end if
-
-       if( abs(angdeg(1)-angdeg(2))<tol12 .and. &
-           abs(angdeg(2)-angdeg(3))<tol12 .and. &
-           abs(angdeg(1)-90._dp)+abs(angdeg(2)-90._dp)+abs(angdeg(3)-90._dp)>tol12 )then
-         ! Treat the case of equal angles (except all right angles):
-         ! generates trigonal symmetry wrt third axis
-         cosang=cos(pi*angdeg(1)/180.0_dp)
-         a2=2.0_dp/3.0_dp*(1.0_dp-cosang)
-         aa=sqrt(a2)
-         cc=sqrt(1.0_dp-a2)
-         rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
-         rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
-         rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-         ! write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
-       else
-         ! Treat all the other cases
-         rprim(:,:)=0.0_dp
-         rprim(1,1)=1.0_dp
-         rprim(1,2)=cos(pi*angdeg(3)/180.0_dp)
-         rprim(2,2)=sin(pi*angdeg(3)/180.0_dp)
-         rprim(1,3)=cos(pi*angdeg(2)/180.0_dp)
-         rprim(2,3)=(cos(pi*angdeg(1)/180.0_dp)-rprim(1,2)*rprim(1,3))/rprim(2,2)
-         rprim(3,3)=sqrt(1.0_dp-rprim(1,3)**2-rprim(2,3)**2)
-       end if
-
-     end if
-   end if ! No problem if neither rprim nor angdeg are defined: use default rprim
-
+   call get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, rprim)
  end if ! geo% or (acell, rprim, angdeg)
 
  ! Rescale rprim using scalecart (and set scalecart to one)
@@ -335,8 +254,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end if
 
  ! Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
- call mkrdim(acell,rprim,rprimd)
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ call mkrdim(acell, rprim, rprimd)
+ call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
  tolsym = tol8
  !if (tread_geo /= 0 .and. geo%filetype == "poscar") then
@@ -1214,8 +1133,7 @@ end subroutine ingeo
 !! natrd=number of atoms that have been read in the calling routine
 !! natom=number of atoms
 !! nobj=the number of objects
-!! string*(*)=character string containing all the input data, used
-!!  only if choice=1 or 3. Initialized previously in instrng.
+!! string*(*)=character string containing all the input data. Initialized previously in instrng.
 !! typat_read(natrd)=type integer for each atom in the primitive set
 !! xcart_read(3,natrd)=cartesian coordinates of atoms (bohr), in the primitive set
 !!

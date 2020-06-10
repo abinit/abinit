@@ -70,7 +70,6 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
       eph_extrael      1.00000000E-06
@@ -229,7 +228,7 @@ meta: {optdriver: 7, eph_task: 5, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t54o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t154o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t54o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -344,7 +343,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t54o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t154o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t54o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -418,10 +417,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 8
  List of K-points for self-energy corrections:
@@ -563,7 +562,6 @@ Transport calculation results
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
       eph_extrael      1.00000000E-06

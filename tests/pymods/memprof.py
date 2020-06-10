@@ -1,5 +1,7 @@
 from __future__ import print_function, division, unicode_literals
 
+import time
+
 from pprint import pprint
 from itertools import groupby
 from collections import namedtuple, deque
@@ -89,7 +91,7 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         return "%s:%s@%s:%s" % (self.action, self.vname, self.file, self.line)
 
     def __hash__(self):
-        return hash(self.locus, self.size) 
+        return hash(self.locus, self.size)
 
     def __eq__(self, other):
         return self.locus == other.locus and self.size == other.size
@@ -109,6 +111,29 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, line, tot_memor
         return True
 
 
+
+def entries_to_dataframe(entries):
+    """
+    Convert list of entries to pandas DataFrame.
+    """
+    import pandas as pd
+    rows, index = [], []
+    for e in entries:
+        rows.append(OrderedDict([
+            ("locus", e.locus),
+            ("vname", e.vname),
+            ("file", e.file),
+            ("line", e.line),
+            ("action", e.action),
+            ("size_mb", e.size_mb),
+            ("tot_memory_mb", e.tot_memory_mb),
+            ("ptr", e.ptr),
+        ]))
+        index.append(e.locus)
+
+    return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+
+
 class AbimemFile(object):
     def __init__(self, path):
         self.path = path
@@ -116,7 +141,7 @@ class AbimemFile(object):
     def __str__(self):
         return self.to_string()
 
-    def to_string(self):
+    def to_string(self, verbose=0):
         lines = []
         app = lines.append
         df = self.get_intense_dataframe()
@@ -135,7 +160,7 @@ class AbimemFile(object):
 
     def get_intense_dataframe(self):
         """
-        Find intensive spots i.e. variables that are allocated/freed many times.
+        Return DataFrame with intensive spots i.e. variables that are allocated/freed many times.
         """
         df = self.dataframe
         index, rows = [], []
@@ -154,19 +179,19 @@ class AbimemFile(object):
         df = pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
         return df.sort_values(by="ncalls", ascending=False)
 
-    def find_zerosized(self):
-        """Find zero-sized allocations."""
+    def find_zerosized(self, as_dataframe=False):
+        """
+        Find zero-sized allocations.
+
+        Args:
+            as_dataframe: True to return a pandas dataframe instead of a deque.
+        """
         elist = []
         eapp = elist.append
         for e in self.all_entries:
             if e.size == 0: eapp(e)
 
-        if elist:
-            print("Found %d zero-sized entries:" % len(elist))
-            pprint(elist)
-        else:
-            print("No zero-sized found")
-        return elist
+        return entries_to_dataframe(elist) if as_dataframe else elist
 
     def find_weird_ptrs(self):
         """Find negative or zero pointers."""
@@ -184,7 +209,7 @@ class AbimemFile(object):
 
     @lazy_property
     def all_entries(self):
-        """Parse file and create List of Entries."""
+        """Parse file and create list of Entries."""
         all_entries = []
         app = all_entries.append
         with open(self.path, "rt") as fh:
@@ -199,9 +224,13 @@ class AbimemFile(object):
 
         return all_entries
 
-    def get_peaks(self, maxlen=30):
+    def get_peaks(self, maxlen=30, as_dataframe=False):
         """
         Find peaks in the allocation with the corresponding variable.
+
+        Args:
+            maxlen: Maximum number of peaks
+            as_dataframe: True to return a pandas dataframe instead of a deque.
         """
         # The deque is bounded to the specified maximum length. Once a bounded length deque is full,
         # when new items are added, a corresponding number of items are discarded from the opposite end.
@@ -225,29 +254,14 @@ class AbimemFile(object):
                 peaks = deque(sorted(peaks, key=lambda x: x.size), maxlen=maxlen)
 
         peaks = deque(sorted(peaks, key=lambda x: x.size, reverse=True), maxlen=maxlen)
-        return peaks
+        return entries_to_dataframe(peaks) if as_dataframe else peaks
 
     @lazy_property
     def dataframe(self):
         """
-        Return a |pandas-DataFrame| with all entries.
+        Return a |pandas-DataFrame| with **all** entries.
         """
-        import pandas as pd
-        rows, index = [], []
-        for e in self.all_entries:
-            rows.append(OrderedDict([
-                ("locus", e.locus),
-                ("vname", e.vname),
-                ("file", e.file),
-                ("line", e.line),
-                ("action", e.action),
-                ("size_mb", e.size_mb),
-                ("tot_memory_mb", e.tot_memory_mb),
-                ("ptr", e.ptr),
-            ]))
-            index.append(e.locus) 
-
-        return pd.DataFrame(rows, index=index, columns=list(rows[0].keys()))
+        return entries_to_dataframe(self.all_entries)
 
     @add_fig_kwargs
     def plot_memory_usage(self, ax=None, **kwargs):
@@ -258,14 +272,19 @@ class AbimemFile(object):
         ax, fig, plt = get_ax_fig_plt(ax=ax)
         ax.plot(memory)
         ax.grid(True)
-        ax.set_ylabel("Total Memory [Mb]")
+        ax.set_ylabel("Total Memory (Mb)")
         return fig
 
     @add_fig_kwargs
-    def plot_peaks(self, ax=None, maxlen=30, fontsize=6, **kwargs):
+    def plot_peaks(self, ax=None, maxlen=20, fontsize=4, rotation=25, **kwargs):
         """
+        Plot memory peaks as vertical bars.
+
         Args:
+            ax: |matplotlib-Axes| or None if a new figure should be created.
+            maxlen: Maximum number of peaks
             fontsize: fontsize for legends and titles
+            rotation: Rotation angle for xticklabels.
 
         Returns: |matplotlib-Figure|
         """
@@ -277,13 +296,32 @@ class AbimemFile(object):
         ax.bar(xs, data)
         ax.grid(True)
         ax.set_xticks(xs)
-        ax.set_xticklabels(names, fontsize=fontsize, rotation=25) 
-        ax.set_ylabel("Memory [Mb]")
+        ax.set_xticklabels(names, fontsize=fontsize, rotation=rotation)
+        ax.set_ylabel("Memory (Mb)")
         return fig
 
-    #@add_fig_kwargs
-    def get_hotspots_dataframe(self, ax=None, fontsize=6, **kwargs):
+    @add_fig_kwargs
+    def plot_hist(self, ax=None, **kwargs):
+        """
+        Plot histogram with the number of arrays allocated for a given size
+
+        Args:
+            ax: |matplotlib-Axes| or None if a new figure should be created.
+
+        Returns: |matplotlib-Figure|
+        """
         ax, fig, plt = get_ax_fig_plt(ax=ax)
+        data = [e.size_mb for e in self.all_entries]
+        ax.hist(data) #, bins=n_bins)
+        ax.grid(True)
+        ax.set_ylabel("Number of arrays")
+        ax.set_xlabel("Memory (Mb)")
+        return fig
+
+    def get_hotspots_dataframe(self):
+        """
+        Return DataFrame with total memory allocated per Fortran file.
+        """
         index, rows = [], []
         for filename, g in self.dataframe.groupby(by="file"):
             malloc_mb = g[g["action"] == "A"].size_mb.sum()
@@ -308,10 +346,11 @@ class AbimemFile(object):
         """
         Shows a predefined list of matplotlib figures with minimal input from the user.
         """
-        from abipy.tools.plotting import MplExpose
+        #from abipy.tools.plotting import MplExpose
         with MplExpose(slide_mode=slide_mode, slide_timeout=slide_mode, verbose=1) as e:
             e(self.plot_memory_usage(show=False))
             e(self.plot_peaks(show=False))
+            e(self.plot_hist(show=False))
 
     def find_memleaks(self, verbose=0):
         """
@@ -341,7 +380,7 @@ class AbimemFile(object):
                 else:
                     # In principle this should never happen but there are exceptions:
                     #
-                    # 1) The compiler could decide to put the allocatable on the stack
+                    # 1) The compiler may decide to put the allocatable on the stack
                     #    In this case the ptr reported by gfortran is 0.
                     #
                     # 2) The allocatable variable is "reallocated" by the compiler (F2003).
@@ -418,6 +457,13 @@ class AbimemFile(object):
 
         return len(heap) + len(stack) + len(reallocs)
 
+    def get_panel(self):
+        """
+        Build panel with widgets to interact with the memocc file either in a notebook or in panel app.
+        """
+        from .memprof_panel import MoccViewer
+        return MoccViewer(self).get_panel()
+
 
 class Heap(dict):
 
@@ -446,3 +492,84 @@ class Stack(dict):
         if not self: return
         pprint(self)
         print("")
+
+
+# Copied  from abipy.tools.plotting
+class MplExpose(object): # pragma: no cover
+    """
+    Example:
+
+        with MplExpose() as e:
+            e(obj.plot1(show=False))
+            e(obj.plot2(show=False))
+    """
+    def __init__(self, slide_mode=False, slide_timeout=None, verbose=1):
+        """
+        Args:
+            slide_mode: If true, iterate over figures. Default: Expose all figures at once.
+            slide_timeout: Close figure after slide-timeout seconds Block if None.
+            verbose: verbosity level
+        """
+        self.figures = []
+        self.slide_mode = bool(slide_mode)
+        self.timeout_ms = slide_timeout
+        self.verbose = verbose
+        if self.timeout_ms is not None:
+            self.timeout_ms = int(self.timeout_ms * 1000)
+            assert self.timeout_ms >= 0
+
+        if self.verbose:
+            if self.slide_mode:
+                print("\nSliding matplotlib figures with slide timeout: %s [s]" % slide_timeout)
+            else:
+                print("\nLoading all matplotlib figures before showing them. It may take some time...")
+
+        self.start_time = time.time()
+
+    def __call__(self, obj):
+        """
+        Add an object to MplExpose. Support mpl figure, list of figures or
+        generator yielding figures.
+        """
+        import types
+        if isinstance(obj, (types.GeneratorType, list, tuple)):
+            for fig in obj:
+                self.add_fig(fig)
+        else:
+            self.add_fig(obj)
+
+    def add_fig(self, fig):
+        """Add a matplotlib figure."""
+        if fig is None: return
+
+        if not self.slide_mode:
+            self.figures.append(fig)
+        else:
+            #print("Printing and closing", fig)
+            import matplotlib.pyplot as plt
+            if self.timeout_ms is not None:
+                # Creating a timer object
+                # timer calls plt.close after interval milliseconds to close the window.
+                timer = fig.canvas.new_timer(interval=self.timeout_ms)
+                timer.add_callback(plt.close, fig)
+                timer.start()
+
+            plt.show()
+            fig.clear()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Activated at the end of the with statement. """
+        self.expose()
+
+    def expose(self):
+        """Show all figures. Clear figures if needed."""
+        if not self.slide_mode:
+            print("All figures in memory, elapsed time: %.3f s" % (time.time() - self.start_time))
+            import matplotlib.pyplot as plt
+            plt.show()
+            for fig in self.figures:
+                fig.clear()
+
