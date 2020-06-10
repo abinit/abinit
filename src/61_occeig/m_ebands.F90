@@ -4176,10 +4176,10 @@ end function ebands_interp_kpath
 !!  cryst<cryst_t>=Info on the crystalline structure.
 !!  nvals=Number of scalar entries. Maybe zero
 !!  bks_vals=Scalar matrix elements
-!!  bks_vecsa=Vectorial matrix elements in Cartesian Coordinates
 !!  nvecs=Number of 3d-vectorial entries. Maybe zero
-!!  bks_tens= Tensorial matrix elements (3x3) in Cartesian Coordinates
+!!  bks_vecs=Vectorial matrix elements in Cartesian Coordinates
 !!  ntens=Numer of 3x3 tensorial entries in Cartesian coordinates. Maybe zero
+!!  bks_tens= Tensorial matrix elements (3x3) in Cartesian Coordinates
 !!  intmeth=
 !!    1 for Gaussian,
 !!    2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
@@ -4193,10 +4193,14 @@ end function ebands_interp_kpath
 !!
 !! OUTPUT
 !!  out_mesh(nw): Frequency mesh.
-!!  out_valsdos: (nw, 2, 0:nsppol, nvals) array with DOS for scalar quantities if nvals > 0
-!!  out_vecsdos: (nw, 2, 0:nsppol, 3, nvecs)) array with DOS weighted by vectorial terms if nvecs > 0
-!!  out_tensdos: (nw, 2, 0:nsppol, 3, 3, ntens) array with DOS weighted by tensorial terms if ntens > 0
+!!  out_valsdos: (nw, 2, nvals, 0:nsppol) array with DOS for scalar quantities if nvals > 0
+!!  out_vecsdos: (nw, 2, 3, nvecs, 0:nsppol)) array with DOS weighted by vectorial terms if nvecs > 0
+!!  out_tensdos: (nw, 2,3, 3, ntens,  0:nsppol) array with DOS weighted by tensorial terms if ntens > 0
+!!
 !!   All these arrays allocated by the routine. The number of points is available in edos%nw.
+!!   (nw, 1, ...) stores the weighted DOS (w-DOS)
+!!   (nw, 2, ...) stores the integrated w-DOS
+!!   As concerns spin: Index 0 stores the total DOS (UP+DOW), then UP and DOWN contributions
 !!
 !! PARENTS
 !!
@@ -4205,7 +4209,7 @@ end function ebands_interp_kpath
 !! SOURCE
 
 type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
-                                                     bks_vals, nvals, bks_vecs, nvecs, bks_tens, ntens, &
+                                                     nvals, bks_vals, nvecs, bks_vecs, ntens, bks_tens, &
                                                      intmeth, step, broad, comm, out_mesh, &
                                                      out_valsdos, out_vecsdos, out_tensdos, emin, emax) result(edos)
 
@@ -4287,13 +4291,13 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
 
  ! Allocate output arrays depending on input.
  if (nvals > 0) then
-   ABI_CALLOC(out_valsdos, (nw, 2, 0:ebands%nsppol, nvals))
+   ABI_CALLOC(out_valsdos, (nw, 2, nvals, 0:ebands%nsppol))
  endif
  if (nvecs > 0) then
-   ABI_CALLOC(out_vecsdos, (nw, 2, 0:ebands%nsppol, 3, nvecs))
+   ABI_CALLOC(out_vecsdos, (nw, 2, 3, nvecs, 0:ebands%nsppol))
  end if
  if (ntens > 0) then
-   ABI_CALLOC(out_tensdos, (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
+   ABI_CALLOC(out_tensdos, (nw, 2, 3, 3, ntens, 0:ebands%nsppol))
  end if
 
  !call wrtout(std_out, " Computing DOS weighted by matrix elements.")
@@ -4315,8 +4319,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
 
          ! scalar
          do idat=1,nvals
-           out_valsdos(:, 1, spin, idat) = out_valsdos(:,1,spin,idat) + wme0(:) * bks_vals(idat,band,ikpt,spin)
-           call simpson_int(nw, step, out_valsdos(:,1,spin,idat), out_valsdos(:,2,spin,idat))
+           out_valsdos(:, 1, idat, spin) = out_valsdos(:,1, idat, spin) + wme0(:) * bks_vals(idat,band,ikpt,spin)
+           call simpson_int(nw, step, out_valsdos(:,1, idat, spin), out_valsdos(:,2,idat,spin))
          end do
 
          ! vector
@@ -4325,8 +4329,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
            v(:) = bks_vecs(:, idat, band, ikpt, spin)
            vsum = symmetrize_vector(cryst, v)
            do ii=1,3
-             out_vecsdos(:, 1, spin, ii, idat) = out_vecsdos(:, 1, spin, ii, idat) + wme0(:) * vsum(ii)
-             call simpson_int(nw, step, out_vecsdos(:,1,spin,ii,idat), out_vecsdos(:,2,spin,ii,idat))
+             out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wme0(:) * vsum(ii)
+             call simpson_int(nw, step, out_vecsdos(:,1,ii,idat,spin), out_vecsdos(:,2,ii,idat,spin))
            end do
          end do
 
@@ -4337,8 +4341,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
            tsum = symmetrize_tensor(cryst, t)
            do ii=1,3
              do jj=1,3
-               out_tensdos(:,1,spin,jj,ii,idat) = out_tensdos(:,1,spin,jj,ii,idat) + wme0(:) * tsum(jj,ii)
-               call simpson_int(nw, step, out_tensdos(:,1,spin,jj,ii,idat), out_tensdos(:,2,spin,jj,ii,idat))
+               out_tensdos(:,1,jj,ii,idat,spin) = out_tensdos(:,1,jj,ii,idat,spin) + wme0(:) * tsum(jj,ii)
+               call simpson_int(nw, step, out_tensdos(:,1,jj,ii,idat,spin), out_tensdos(:,2,jj,ii,idat,spin))
              end do
            end do
          end do
@@ -4392,8 +4396,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
          ! scalar
          do idat=1,nvals
            ! Compute DOS/IDOS
-           out_valsdos(:, 1, spin, idat) = out_valsdos(:, 1, spin, idat) + wdt(:, ikpt, 1) * bks_vals(idat, band, ikpt, spin)
-           out_valsdos(:, 2, spin, idat) = out_valsdos(:, 2, spin, idat) + wdt(:, ikpt, 2) * bks_vals(idat, band, ikpt, spin)
+           out_valsdos(:, 1, idat, spin) = out_valsdos(:, 1, idat, spin) + wdt(:, ikpt, 1) * bks_vals(idat, band, ikpt, spin)
+           out_valsdos(:, 2, idat, spin) = out_valsdos(:, 2, idat, spin) + wdt(:, ikpt, 2) * bks_vals(idat, band, ikpt, spin)
          end do
 
          ! vector
@@ -4402,8 +4406,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
            v(:) = bks_vecs(:, idat, band, ikpt, spin)
            vsum = symmetrize_vector(cryst, v)
            do ii=1,3
-             out_vecsdos(:, 1, spin, ii, idat) = out_vecsdos(:, 1, spin, ii, idat) + wdt(:, ikpt, 1) * vsum(ii)
-             out_vecsdos(:, 2, spin, ii, idat) = out_vecsdos(:, 2, spin, ii, idat) + wdt(:, ikpt, 2) * vsum(ii)
+             out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wdt(:, ikpt, 1) * vsum(ii)
+             out_vecsdos(:, 2, ii, idat, spin) = out_vecsdos(:, 2, ii, idat, spin) + wdt(:, ikpt, 2) * vsum(ii)
            end do
          end do
 
@@ -4414,8 +4418,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
            tsum = symmetrize_tensor(cryst, t)
            do ii=1,3
              do jj=1,3
-               out_tensdos(:, 1, spin, jj, ii, idat) = out_tensdos(:, 1, spin, jj, ii, idat) + wdt(:, ikpt, 1) * tsum(jj,ii)
-               out_tensdos(:, 2, spin, jj, ii, idat) = out_tensdos(:, 2, spin, jj, ii, idat) + wdt(:, ikpt, 2) * tsum(jj,ii)
+               out_tensdos(:, 1, jj, ii, idat, spin) = out_tensdos(:, 1, jj, ii, idat, spin) + wdt(:, ikpt, 1) * tsum(jj,ii)
+               out_tensdos(:, 2, jj, ii, idat, spin) = out_tensdos(:, 2, jj, ii, idat, spin) + wdt(:, ikpt, 2) * tsum(jj,ii)
              end do
            end do
          end do
@@ -5671,7 +5675,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
 
    !MG: dummy_vals, vv_tens ... are not allocated!
    edos = ebands_get_dos_matrix_elements(ebands_kmesh, cryst, &
-                                         dummy_vals, 0, dummy_vecs, 0, vv_tens, 1, &
+                                         0, dummy_vals, 0, dummy_vecs, 1, vv_tens, &
                                          edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
                                          dummy_dosvals, dummy_dosvecs, vvdos_tens, emin, emax)
    ABI_SFREE(dummy_dosvals)

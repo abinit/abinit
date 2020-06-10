@@ -142,16 +142,16 @@ type,public :: rta_t
    ! electronic density of states
 
    real(dp),allocatable :: vv_dos_mesh(:)
-   ! velocity density of states mesh
+   ! mesh used for vv_dod and vvtau_dos.
    ! (%nw)
 
    real(dp),allocatable :: vv_dos(:,:,:,:,:)
-   ! velocity density of states multiplied by tau if itemp > 1.
-   ! (nw, nsppol, 3, 3, nrta)
+   ! (v x v)  DOS
+   ! (nw, 3, 3, nsppol, nrta) >>
 
    real(dp),allocatable :: vvtau_dos(:,:,:,:,:,:)
-   ! velocity density of states multiplied by tau if itemp > 1.
-   ! (nw, nsppol, 3, 3, ntemp, nrta)
+   ! (v x v * tau) DOS
+   ! (nw, 3, 3, ntemp, nsppol, nrta) >>
 
    real(dp),allocatable :: ne(:)
    ! (%ntemp) number of electrons at transport_mu_e(ntemp)
@@ -162,27 +162,28 @@ type,public :: rta_t
    real(dp),allocatable :: l0(:,:,:,:,:,:)
    real(dp),allocatable :: l1(:,:,:,:,:,:)
    real(dp),allocatable :: l2(:,:,:,:,:,:)
-   ! (nw, nsppol, 3, 3, ntemp, nrta)
-   ! onsager coeficients
+   ! (nw, 3, 3, ntemp, nsppol, nrta) >>
+   ! Onsager coeficients
 
    real(dp),allocatable :: sigma(:,:,:,:,:,:)
    real(dp),allocatable :: seebeck(:,:,:,:,:,:)
    real(dp),allocatable :: kappa(:,:,:,:,:,:)
    real(dp),allocatable :: pi(:,:,:,:,:,:)
-   ! (nw, nsppol, 3, 3, ntemp, nrta)
-   ! transport coefficients
+   ! (nw, 3, 3, ntemp, nsppol, nrta)  >>
+   ! Transport coefficients
 
    real(dp),allocatable :: mobility(:,:,:,:,:,:,:)
    ! Mobility
-   ! (%nw, %nsppol, 3, 3, %ntemp, 2, nrta)
-   ! e-h
+   ! (%nw, 3, 3, %ntemp, 2, %nsppol, nrta)  >>>
+   ! 5-th index is for e-h
 
    real(dp),allocatable :: n(:,:,:)
    ! (nw, ntemp,2) carrier density for e/h (n/cm^3)
 
    real(dp),allocatable :: mobility_mu(:,:,:,:,:,:)
-   ! (2, nsppol, 3, 3, ntemp, nrta)
+   ! (2, 3, 3, nsppol, ntemp, nrta) >>
    ! mobility for electrons and holes (first dimension) at transport_mu_e(ntemp)
+   ! 2-nd index is for e-h
 
  contains
 
@@ -578,15 +579,15 @@ subroutine rta_compute(self, cryst, dtset, comm)
  end do
 
  ! Compute DOS, vv_dos and vvtau_DOS (vxv times lifetimes)
- ! TODO: Check what happens with nsppol as out_valsdos, (nw, 2, 0:ebands%nsppol, nvals))
+ ! TODO: Check what happens with nsppol as out_valsdos, (nw, 2, nvals, 0:ebands%nsppol))
  self%edos = ebands_get_dos_matrix_elements(self%ebands, cryst, &
-                                            dummy_vals, nvals0, dummy_vecs, nvecs0, vv_tens, ntens, &
+                                            nvals0, dummy_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
                                             edos_intmeth, edos_step, edos_broad, comm, &
                                             self%vv_dos_mesh, &
                                             dummy_dosvals, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
                                             !dummy_dosvals, dummy_dosvecs, self%vv_dos, emin=emin, emax=emax)
 
- ! Unpack data stored in out_tensdos with shape (nw, 2, 0:nsppol, 3, 3, ntens)
+ ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, 0:nsppol)
  self%nw = self%edos%nw
  ABI_MALLOC(self%vv_dos, (self%nw, nsppol, 3, 3, self%nrta))
  ABI_MALLOC(self%vvtau_dos, (self%nw, nsppol, 3, 3, self%ntemp, self%nrta))
@@ -596,21 +597,21 @@ subroutine rta_compute(self, cryst, dtset, comm)
      itens = itemp + (irta - 1) * (self%ntemp + 1)
      do spin=1,nsppol
        if (itemp == 1) then
-         self%vv_dos(:,spin,:,:,irta) = out_tensdos(:, 1, spin, :, :, itens)
+         self%vv_dos(:,spin,:,:,irta) = out_tensdos(:, 1, :, :, itens, spin)
        else
-         self%vvtau_dos(:,spin,:,:, itemp-1, irta) = out_tensdos(:, 1, spin, :, :, itens)
+         self%vvtau_dos(:,spin,:,:, itemp-1, irta) = out_tensdos(:, 1, :, :, itens, spin)
        end if
      end do
    end do
  end do
- ABI_FREE(out_tensdos)
 
  ! Free memory
+ ABI_SFREE(out_tensdos)
  ABI_SFREE(dummy_dosvals)
  ABI_SFREE(dummy_dosvecs)
- ABI_FREE(vv_tens)
+ ABI_SFREE(vv_tens)
 
- ! Compute onsager coefficients. Eq 9 of [[cite:Madsen2018]]
+ ! Compute Onsager coefficients. Eq 9 of [[cite:Madsen2018]]
  ABI_MALLOC(self%l0, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
  ABI_MALLOC(self%l1, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
  ABI_MALLOC(self%l2, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
@@ -619,8 +620,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  call onsager(1, self%l1)
  call onsager(2, self%l2)
 
- ! Compute transport quantities
- ! Eq 12-15 of [[cite:Madsen2018]]
+ ! Compute transport quantities, Eq 12-15 of [[cite:Madsen2018]]
  ABI_MALLOC(self%sigma,   (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
  ABI_CALLOC(self%seebeck, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
  ABI_CALLOC(self%kappa,   (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
@@ -639,6 +639,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
      ! HM: to write it as a single division I do: kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
      ! Check why do we need minus sign here to get consistent results with Boltztrap!
+     ! MG: Very likely because we don't use the same conventions in the defintion of the Onsanger coefficients.
      call safe_div( &
        -volt_SI**2 * fact0 * (self%l1(:,:,:,:,itemp,irta)**2 - self%l2(:,:,:,:,itemp,irta) * self%l0(:,:,:,:,itemp,irta)), &
        kT * self%l0(:,:,:,:,itemp,irta), zero, self%kappa(:,:,:,:,itemp,irta))

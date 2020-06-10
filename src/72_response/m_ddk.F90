@@ -557,7 +557,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    call gaps%free()
 
    edos = ebands_get_dos_matrix_elements(ebands, cryst, &
-                                         dummy_vals, 0, dummy_vecs, 0, vv_tens, 1, &
+                                         0, dummy_vals, 0, dummy_vecs, 1, vv_tens, &
                                          edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
                                          dummy_dosvals, dummy_dosvecs, vvdos_tens, &
                                          emin=emin, emax=emax)
