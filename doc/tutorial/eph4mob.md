@@ -765,7 +765,7 @@ the idea is relatively simple and goes as follows:
    store the list of $\kk$-points in a external file.
 4. Use this external file to run a NSCF calculation only for these $\kk$-points.
    At the end of the NSCF job, ABINIT will produce a **customized** WFK file on the dense mesh that
-   can be used by run calculations for phonon-limited mobilities
+   can be used to run calculations for phonon-limited mobilities
 
 An example will help clarify.
 Suppose we have computed a WFK file with a NSCF run using a 16x16x16 $\kk$-mesh (let's call it *161616_WFK*)

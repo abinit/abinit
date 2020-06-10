@@ -316,6 +316,32 @@ program abitk
  ! ====================
  ! Tools for developers
  ! ====================
+ !case ("f2nc")
+ !   call get_command_argument(2, path)
+ !   call get_command_argument(3, other_path)
+ !   call f2nc(path, other_path)
+
+   ! Get important dimensions from the first header and rewind the file.
+   !call hdr_fort_read(new%hdr_ref, unt, fform)
+   !if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
+   !  MSG_ERROR(sjoin("While reading:", path, ch10, msg))
+   !end if
+   !! Fortran IO
+   !do ispden=1,hdr1%nspden
+   !  read(units(jj), err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
+   !  write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
+   !end do
+   !if (new%debug) call new%hdr_ref%echo(fform, 4, unit=std_out)
+   !call hdr1%free()
+
+   !! first order potentials are always written because the eph code requires them
+   !! the files are small (much much smaller that 1WFK, actually we should avoid writing 1WFK)
+   !rdwrpaw=0
+   !call appdig(pertcase,dtfil%fnameabo_pot,fi1o)
+   !! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+   !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
+   !ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+
 
  ! ===========
  ! Unit tests

@@ -46,7 +46,7 @@ module m_rta
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div
- use m_fstrings,       only : strcat, sjoin, ltoa
+ use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa
  use m_kpts,           only : listkk
  use m_occ,            only : occ_fd, occ_dfd
 
@@ -85,6 +85,9 @@ type,public :: rta_t
 
    integer :: nw
    ! number of frequencies at which transport quantities are computed
+
+   integer :: nrta
+   ! Number of relaxation-time approximations used (SERTA, MRTA)
 
    real(dp) :: eph_extrael
    ! extra electrons per unit cell from sigeph (lifetimes)
@@ -138,13 +141,17 @@ type,public :: rta_t
    type(edos_t) :: edos
    ! electronic density of states
 
-   real(dp),allocatable :: vvdos_mesh(:)
+   real(dp),allocatable :: vv_dos_mesh(:)
    ! velocity density of states mesh
    ! (%nw)
 
-   real(dp),allocatable :: vvdos(:,:,:,:,:,:)
-   ! velocity density of states
-   ! (nw, 2, 0:nsppol, 3, 3, 1+ntemp)
+   real(dp),allocatable :: vv_dos(:,:,:,:,:)
+   ! velocity density of states multiplied by tau if itemp > 1.
+   ! (nw, nsppol, 3, 3, nrta)
+
+   real(dp),allocatable :: vvtau_dos(:,:,:,:,:,:)
+   ! velocity density of states multiplied by tau if itemp > 1.
+   ! (nw, nsppol, 3, 3, ntemp, nrta)
 
    real(dp),allocatable :: ne(:)
    ! (%ntemp) number of electrons at transport_mu_e(ntemp)
@@ -152,28 +159,29 @@ type,public :: rta_t
    real(dp),allocatable :: nh(:)
    ! (%ntemp) number of holes at transport_mu_e(ntemp)
 
-   real(dp),allocatable :: l0(:,:,:,:,:)
-   real(dp),allocatable :: l1(:,:,:,:,:)
-   real(dp),allocatable :: l2(:,:,:,:,:)
-   ! (nw, nsppol, 3, 3, ntemp+1)
+   real(dp),allocatable :: l0(:,:,:,:,:,:)
+   real(dp),allocatable :: l1(:,:,:,:,:,:)
+   real(dp),allocatable :: l2(:,:,:,:,:,:)
+   ! (nw, nsppol, 3, 3, ntemp, nrta)
    ! onsager coeficients
 
-   real(dp),allocatable :: sigma(:,:,:,:,:)
-   real(dp),allocatable :: seebeck(:,:,:,:,:)
-   real(dp),allocatable :: kappa(:,:,:,:,:)
-   real(dp),allocatable :: pi(:,:,:,:,:)
-   ! (nw, nsppol, 3, 3, ntemp+1)
+   real(dp),allocatable :: sigma(:,:,:,:,:,:)
+   real(dp),allocatable :: seebeck(:,:,:,:,:,:)
+   real(dp),allocatable :: kappa(:,:,:,:,:,:)
+   real(dp),allocatable :: pi(:,:,:,:,:,:)
+   ! (nw, nsppol, 3, 3, ntemp, nrta)
    ! transport coefficients
 
-   real(dp),allocatable :: mobility(:,:,:,:,:,:)
+   real(dp),allocatable :: mobility(:,:,:,:,:,:,:)
    ! Mobility
-   ! (%nw,%nsppol,3,3,%ntemp+1,2)
+   ! (%nw, %nsppol, 3, 3, %ntemp, 2, nrta)
+   ! e-h
 
    real(dp),allocatable :: n(:,:,:)
    ! (nw, ntemp,2) carrier density for e/h (n/cm^3)
 
-   real(dp),allocatable :: mobility_mu(:,:,:,:,:)
-   ! (2, nsppol, 3, 3, ntemp)
+   real(dp),allocatable :: mobility_mu(:,:,:,:,:,:)
+   ! (2, nsppol, 3, 3, ntemp, nrta)
    ! mobility for electrons and holes (first dimension) at transport_mu_e(ntemp)
 
  contains
@@ -252,7 +260,7 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
  ! Compute RTA transport
  call rta%compute(cryst, dtset, comm)
 
- ! Compute RAT mobility
+ ! Compute RTA mobility
  call rta%compute_mobility(cryst, dtset, comm)
 
  if (my_rank == master) then
@@ -326,6 +334,9 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  new%ntemp = sigmaph%ntemp
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = sigmaph%kTmesh
+
+ ! How many RTA approximations have we computed in sigmaph?
+ new%nrta = 2; if (sigmaph%mrta == 0) new%nrta = 1
 
  ! Information about the gaps
  new%nsppol = ebands%nsppol
@@ -500,12 +511,13 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
 !Local variables ------------------------------
  integer,parameter :: nvals0 = 0, nvecs0 = 0
- integer :: nsppol, nkpt, mband, ib, ik, iw, ispin, ii, jj, itemp
+ integer :: nsppol, nkpt, mband, ib, ik, iw, spin, ii, jj, itemp, irta, itens
  integer :: ntens, edos_intmeth, ifermi, iel
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, linewidth, fact0
  real(dp) :: cpu, wall, gflops
  real(dp) :: vr(3), dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
- real(dp),allocatable :: vv_tens(:,:,:,:,:,:), dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
+ real(dp),allocatable :: vv_tens(:,:,:,:,:,:,:), dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
+ real(dp),allocatable :: out_tensdos(:,:,:,:,:,:)
  !character(len=500) :: msg
 
 !************************************************************************
@@ -515,37 +527,39 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! create alias for dimensions
  nsppol = self%ebands%nsppol; nkpt= self%ebands%nkpt; mband = self%ebands%mband
 
- ! Allocate vv tensors with and without the lifetimes
- ! Eq 8 of [[cite:Madsen2018]]
- ntens = (1 + self%ntemp) ! * 2
- ABI_MALLOC(vv_tens, (3, 3, ntens, mband, nkpt, nsppol))
+ ! Allocate vv tensors with and without the lifetimes. Eq 8 of [[cite:Madsen2018]]
+ ! The total number of tensorial entries is ntens
+ ntens = (1 + self%ntemp) * self%nrta
+ ABI_MALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, mband, nkpt, nsppol))
 
- do ispin=1,nsppol
+ do spin=1,nsppol
    do ik=1,nkpt
      do ib=1,mband
-       vr(:) = self%velocity(:, ib, ik, ispin)
-       ! Store outer product (v_bks x v_bks) in vv_tens
+       vr(:) = self%velocity(:, ib, ik, spin)
+       ! Store outer product (v_bks x v_bks) in vv_tens. This part does not depend on T and irta.
        do ii=1,3
          do jj=1,3
-           vv_tens(ii, jj, 1, ib, ik, ispin) = vr(ii) * vr(jj)
+           vv_tens(ii, jj, 1, 1, ib, ik, spin) = vr(ii) * vr(jj)
          end do
        end do
-       !vv_tens(:, :, 1, 2, ib, ik, ispin) = vv_tens(:, :, 1, 1, ib, ik, ispin)
 
        ! Multiply by the lifetime (SERTA and MRTA)
-       !do ii=1,2
-       do itemp=1,self%ntemp
-         linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         !if (ii == 1 )linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         !if (ii == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, ispin))
-         call safe_div(vv_tens(:, :, 1, ib, ik, ispin), linewidth, zero, vv_tens(:, :, 1+itemp, ib, ik, ispin))
+       do irta=1,self%nrta
+         ! Copy vvdos just to initialize MRTA arrays at itemp = 1
+         if (irta > 1) vv_tens(:, :, 1, irta, ib, ik, spin) = vv_tens(:, :, 1, 1, ib, ik, spin)
+         do itemp=1,self%ntemp
+           ! linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin, irta))
+           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin))
+           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, spin))
+           call safe_div(vv_tens(:, :, 1, irta, ib, ik, spin), linewidth, zero, vv_tens(:, :, 1+itemp, irta, ib, ik, spin))
+         end do
        end do
-       !end do
+
      end do
    end do
  end do
 
- ! Compute DOS and VVDOS
+ ! Compute DOS and VV_DOS and VV_TAU_DOS
  ! Define integration method and mesh step.
  edos_intmeth = 2
  if (dtset%prtdos == 1) edos_intmeth = 1
@@ -558,32 +572,48 @@ subroutine rta_compute(self, cryst, dtset, comm)
  emax = maxval(self%eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
  ! If sigma_erange is set, get emin and emax
- do ispin=1,self%ebands%nsppol
-   if (dtset%sigma_erange(1) >= zero) emin = self%gaps%vb_max(ispin) + tol2 * eV_Ha - dtset%sigma_erange(1)
-   if (dtset%sigma_erange(2) >= zero) emax = self%gaps%cb_min(ispin) - tol2 * eV_Ha + dtset%sigma_erange(2)
+ do spin=1,self%ebands%nsppol
+   if (dtset%sigma_erange(1) >= zero) emin = self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
+   if (dtset%sigma_erange(2) >= zero) emax = self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
  end do
 
- ! Compute dos and vvdos multiplied by lifetimes
+ ! Compute DOS, vv_dos and vvtau_DOS (vxv times lifetimes)
  ! TODO: Check what happens with nsppol as out_valsdos, (nw, 2, 0:ebands%nsppol, nvals))
  self%edos = ebands_get_dos_matrix_elements(self%ebands, cryst, &
                                             dummy_vals, nvals0, dummy_vecs, nvecs0, vv_tens, ntens, &
                                             edos_intmeth, edos_step, edos_broad, comm, &
-                                            self%vvdos_mesh, &
-                                            dummy_dosvals, dummy_dosvecs, self%vvdos, emin=emin, emax=emax)
+                                            self%vv_dos_mesh, &
+                                            dummy_dosvals, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
+                                            !dummy_dosvals, dummy_dosvecs, self%vv_dos, emin=emin, emax=emax)
 
+ ! Unpack data stored in out_tensdos with shape (nw, 2, 0:nsppol, 3, 3, ntens)
  self%nw = self%edos%nw
- !ABI_MALLOC(self%vvdos, (nw, 2, 0:nsppol, 3, 3, 1+ntemp))
+ ABI_MALLOC(self%vv_dos, (self%nw, nsppol, 3, 3, self%nrta))
+ ABI_MALLOC(self%vvtau_dos, (self%nw, nsppol, 3, 3, self%ntemp, self%nrta))
+
+ do irta=1,self%nrta
+   do itemp=1,self%ntemp+1
+     itens = itemp + (irta - 1) * (self%ntemp + 1)
+     do spin=1,nsppol
+       if (itemp == 1) then
+         self%vv_dos(:,spin,:,:,irta) = out_tensdos(:, 1, spin, :, :, itens)
+       else
+         self%vvtau_dos(:,spin,:,:, itemp-1, irta) = out_tensdos(:, 1, spin, :, :, itens)
+       end if
+     end do
+   end do
+ end do
+ ABI_FREE(out_tensdos)
 
  ! Free memory
  ABI_SFREE(dummy_dosvals)
  ABI_SFREE(dummy_dosvecs)
  ABI_FREE(vv_tens)
 
- ! Compute onsager coefficients
- ! Eq 9 of [[cite:Madsen2018]]
- ABI_MALLOC(self%l0, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
- ABI_MALLOC(self%l1, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
- ABI_MALLOC(self%l2, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
+ ! Compute onsager coefficients. Eq 9 of [[cite:Madsen2018]]
+ ABI_MALLOC(self%l0, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
+ ABI_MALLOC(self%l1, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
+ ABI_MALLOC(self%l2, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
 
  call onsager(0, self%l0)
  call onsager(1, self%l1)
@@ -591,66 +621,72 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
  ! Compute transport quantities
  ! Eq 12-15 of [[cite:Madsen2018]]
- ABI_MALLOC(self%sigma,   (self%nw, self%nsppol, 3, 3, self%ntemp+1))
- ABI_CALLOC(self%seebeck, (self%nw, self%nsppol, 3, 3, self%ntemp+1))
- ABI_CALLOC(self%kappa,   (self%nw, self%nsppol, 3, 3, self%ntemp+1))
- ABI_MALLOC(self%pi,      (self%nw, self%nsppol, 3, 3, self%ntemp+1))
+ ABI_MALLOC(self%sigma,   (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
+ ABI_CALLOC(self%seebeck, (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
+ ABI_CALLOC(self%kappa,   (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
+ ABI_MALLOC(self%pi,      (self%nw, self%nsppol, 3, 3, self%ntemp, self%nrta))
 
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
 
  self%sigma = fact0 * self%l0
  call safe_div(volt_SI * self%l1, self%l0, zero, self%pi)
 
- do itemp=1,self%ntemp
-   kT = self%kTmesh(itemp) / kb_HaK
-   call safe_div(volt_SI * self%l1(:,:,:,:,itemp), kT * self%l0(:,:,:,:,itemp), zero, self%seebeck(:,:,:,:,itemp))
+ do irta=1,self%nrta
+   do itemp=1,self%ntemp
+     kT = self%kTmesh(itemp) / kb_HaK
+     call safe_div(volt_SI * self%l1(:,:,:,:,itemp,irta), kT * self%l0(:,:,:,:,itemp,irta), zero, &
+                   self%seebeck(:,:,:,:,itemp,irta))
 
-   ! HM: to write it as a single division I do: kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
-   ! Check why do we need minus sign here to get consistent results with Boltztrap!
-   call safe_div( - volt_SI**2 * fact0 * (self%l1(:,:,:,:,itemp)**2 - self%l2(:,:,:,:,itemp) * self%l0(:,:,:,:,itemp)), &
-                 kT * self%l0(:,:,:,:,itemp), zero, self%kappa(:,:,:,:,itemp))
+     ! HM: to write it as a single division I do: kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
+     ! Check why do we need minus sign here to get consistent results with Boltztrap!
+     call safe_div( &
+       -volt_SI**2 * fact0 * (self%l1(:,:,:,:,itemp,irta)**2 - self%l2(:,:,:,:,itemp,irta) * self%l0(:,:,:,:,itemp,irta)), &
+       kT * self%l0(:,:,:,:,itemp,irta), zero, self%kappa(:,:,:,:,itemp,irta))
+   end do
  end do
 
  ! Compute the index of the Fermi level and handle possible out of range condition.
- ifermi = bisect(self%vvdos_mesh, self%ebands%fermie)
+ ifermi = bisect(self%vv_dos_mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
    MSG_ERROR("Bisection could not find energy index of the Fermi level!")
  end if
 
  ! Mobility
  ABI_MALLOC(self%n, (self%nw, self%ntemp, 2))
- ABI_MALLOC(self%mobility, (self%nw, self%nsppol, 3, 3, self%ntemp+1, 2))
+ ABI_MALLOC(self%mobility, (self%nw, self%nsppol, 3, 3, self%ntemp, 2, self%nrta))
 
  self%mobility = zero
  max_occ = two / (self%nspinor * self%nsppol)
 
- do ispin=1,self%nsppol
+ do spin=1,self%nsppol
    do itemp=1,self%ntemp
      ! Compute carrier density
      kT = self%kTmesh(itemp)
 
      ! Compute carrier density of electrons
      do iw=1,self%nw !doping
-       self%n(iw,itemp,1) = carriers(self%vvdos_mesh, self%edos%dos(:,ispin) * max_occ, ifermi, self%nw, &
-                                     kT, self%vvdos_mesh(iw)) / cryst%ucvol / Bohr_meter**3
+       self%n(iw,itemp,1) = carriers(self%vv_dos_mesh, self%edos%dos(:,spin) * max_occ, ifermi, self%nw, &
+                                     kT, self%vv_dos_mesh(iw)) / cryst%ucvol / Bohr_meter**3
      end do
 
      ! Compute carrier density of holes
      do iw=1,self%nw !doping
-       self%n(iw,itemp,2) = carriers(self%vvdos_mesh, self%edos%dos(:,ispin) * max_occ, 1, ifermi, &
-                                     kT, self%vvdos_mesh(iw)) / cryst%ucvol / Bohr_meter**3
+       self%n(iw,itemp,2) = carriers(self%vv_dos_mesh, self%edos%dos(:,spin) * max_occ, 1, ifermi, &
+                                     kT, self%vv_dos_mesh(iw)) / cryst%ucvol / Bohr_meter**3
      end do
 
      self%n(:,itemp,2) = self%n(self%nw,itemp,2) - self%n(:,itemp,2)
 
      ! Compute mobility
-     do iel=1,2
-       do ii=1,3
-         do jj=1,3
-           do iw=1,self%nw
-             call safe_div(self%sigma(iw,ispin,ii,jj,itemp) * 100**2, &
-                           e_Cb * self%n(iw,itemp,iel), &
-                           zero, self%mobility(iw,ispin,ii,jj,itemp,iel) )
+     do irta=1,self%nrta
+       do iel=1,2
+         do ii=1,3
+           do jj=1,3
+             do iw=1,self%nw
+               call safe_div(self%sigma(iw, spin, ii, jj, itemp, irta) * 100**2, &
+                             e_Cb * self%n(iw, itemp, iel), &
+                             zero, self%mobility(iw, spin, ii, jj, itemp, iel, irta))
+             end do
            end do
          end do
        end do
@@ -665,8 +701,7 @@ contains
 
  !Arguments -------------------------------------------
  real(dp),intent(in) :: kT, mu
- real(dp),intent(in) :: wmesh(self%nw)
- real(dp),intent(in) :: dos(self%nw)
+ real(dp),intent(in) :: wmesh(self%nw), dos(self%nw)
  integer,intent(in) ::  istart, istop
 
  !Local variables -------------------------------------
@@ -686,48 +721,48 @@ contains
 
  !Arguments -------------------------------------------
  integer,intent(in) :: order
- real(dp),intent(out) :: lorder(self%nw,self%nsppol,3,3,self%ntemp+1)
+ real(dp),intent(out) :: lorder(self%nw,self%nsppol,3,3,self%ntemp,self%nrta)
 
  !Local variables -------------------------------------
- integer :: ispin, iw, imu
+ integer :: spin, iw, imu, irta
  real(dp) :: fact, mu, ee, kT
  real(dp) :: kernel(self%nw,self%nsppol,3,3), integral(self%nw)
 
- ! FIXME Here I think one shoud use vvdos(iw, 0) to make it work for nsppol
+ ! FIXME Here I think one shoud use vv_dos(iw, 0) to make it work for nsppol
  ! Get spin degeneracy
  max_occ = two / (self%nspinor*self%nsppol)
  ! 2 comes from linewidth-lifetime relation because we divided by the linewidth and now by (2 * linewidth)
  fact = max_occ / two
 
- do itemp=1,self%ntemp
-   kT = self%kTmesh(itemp)
-   do imu=1,self%nw
-     mu = self%vvdos_mesh(imu)
+ do irta=1,self%nrta
+   do itemp=1,self%ntemp
+     kT = self%kTmesh(itemp)
+     do imu=1,self%nw
+       mu = self%vv_dos_mesh(imu)
 
-     ! Build integrand for mu
-     do iw=1,self%nw
-       ee = self%vvdos_mesh(iw)
-       if (order > 0) then
-         kernel(iw,:,:,:) = fact * self%vvdos(iw,1,1:,:,:,1+itemp) * (mu - ee)**order * occ_dfd(ee, kT, mu)
-       else
-         kernel(iw,:,:,:) = fact * self%vvdos(iw,1,1:,:,:,1+itemp) * occ_dfd(ee, kT, mu)
-       end if
-     end do
+       ! Build integrand for mu
+       do iw=1,self%nw
+         ee = self%vv_dos_mesh(iw)
+         if (order > 0) then
+           kernel(iw,:,:,:) = fact * self%vvtau_dos(iw,:,:,:,itemp, irta) * (mu - ee)**order * occ_dfd(ee, kT, mu)
+         else
+           kernel(iw,:,:,:) = fact * self%vvtau_dos(iw,:,:,:,itemp, irta) * occ_dfd(ee, kT, mu)
+         end if
+       end do
 
-     ! Integrate with simpson_int
-     do ispin=1,self%nsppol
-       do jj=1,3
-         do ii=1,3
-           call simpson_int(self%nw, edos_step, kernel(:,ispin,ii,jj), integral)
-           lorder(imu, ispin, ii, jj, itemp) = integral(self%nw)
+       ! Integrate with simpson_int
+       do spin=1,self%nsppol
+         do jj=1,3
+           do ii=1,3
+             call simpson_int(self%nw, edos_step, kernel(:,spin,ii,jj), integral)
+             lorder(imu, spin, ii, jj, itemp, irta) = integral(self%nw)
+           end do
          end do
        end do
-     end do
 
-   end do ! imu
- end do ! itemp
-
- lorder(:,:,:,:,self%ntemp+1) = zero
+     end do ! imu
+   end do ! itemp
+ end do
 
  end subroutine onsager
 
@@ -758,7 +793,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkpt, mband, ib, ik, ispin, ii, jj, itemp, ielhol, nvalence, cnt, nprocs
+ integer :: nsppol, nkpt, mband, ib, ik, spin, ii, jj, itemp, ielhol, nvalence, cnt, nprocs, irta
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
  real(dp) :: cpu, wall, gflops
  integer :: bmin(2), bmax(2)
@@ -779,27 +814,27 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  max_occ = two / (self%nspinor*self%nsppol)
  nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
 
- ABI_MALLOC(self%mobility_mu, (2, self%nsppol, 3, 3, self%ntemp+1))
+ ABI_MALLOC(self%mobility_mu, (2, self%nsppol, 3, 3, self%ntemp, self%nrta))
  ABI_CALLOC(self%ne, (self%ntemp))
  ABI_CALLOC(self%nh, (self%ntemp))
 
- do ispin=1,nsppol
+ do spin=1,nsppol
    do ik=1,nkpt
      wtk = self%ebands%wtk(ik)
 
      ! number of holes
      do ib=1,nvalence
-       eig_nk = self%ebands%eig(ib, ik, ispin)
+       eig_nk = self%ebands%eig(ib, ik, spin)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
          mu_e = self%transport_mu_e(itemp)
-         self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk,kT,mu_e)) * max_occ
+         self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk, kT, mu_e)) * max_occ
        end do
      end do
 
      ! number of electrons
      do ib=nvalence+1,mband
-       eig_nk = self%ebands%eig(ib, ik, ispin)
+       eig_nk = self%ebands%eig(ib, ik, spin)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
          mu_e = self%transport_mu_e(itemp)
@@ -817,7 +852,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ! Compute mobility
  self%mobility_mu = zero
  cnt = 0
- do ispin=1,nsppol
+ do spin=1,nsppol
    do ik=1,nkpt
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      wtk = self%ebands%wtk(ik)
@@ -826,8 +861,8 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
      do ib=1,mband
        ielhol = 2; if (ib > nvalence) ielhol = 1
-       eig_nk = self%ebands%eig(ib, ik, ispin)
-       vr(:) = self%velocity(:,ib,ik,ispin)
+       eig_nk = self%ebands%eig(ib, ik, spin)
+       vr(:) = self%velocity(:,ib,ik,spin)
        ! Store outer product in vv_tens
        do ii=1,3
          do jj=1,3
@@ -838,17 +873,18 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
        vv_tens = symmetrize_tensor(cryst, vv_tens)
 
        ! Multiply by the lifetime
-       !do ii=1,2
-       do itemp=1,self%ntemp
-         mu_e = self%transport_mu_e(itemp)
-         kT = self%kTmesh(itemp)
-         linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         !if (ii == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
-         !if (ii == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, ispin))
-         call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk, kT, mu_e), linewidth, zero, vv_tenslw(:, :))
-         self%mobility_mu(ielhol, ispin, :, :, itemp) = self%mobility_mu(ielhol, ispin, :, :, itemp) + vv_tenslw(:, :)
+       do irta=1,self%nrta
+         do itemp=1,self%ntemp
+           mu_e = self%transport_mu_e(itemp)
+           kT = self%kTmesh(itemp)
+           ! linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin, irta))
+           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin))
+           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, spin))
+           call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk, kT, mu_e), linewidth, zero, vv_tenslw(:, :))
+           self%mobility_mu(ielhol, spin, :, :, itemp, irta) = self%mobility_mu(ielhol, spin, :, :, itemp, irta) &
+             + vv_tenslw(:, :)
+         end do
        end do
-       !end of
      end do
 
    end do !kpt
@@ -857,13 +893,15 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  !call xmpi_sum(self%mobility_mu, comm, ierr)
 
  ! Scale by the carrier concentration
- do itemp=1,self%ntemp
-   ! for electrons
-   call safe_div(fact * self%mobility_mu(1,:,:,:,itemp), &
-                 self%ne(itemp) / cryst%ucvol / Bohr_meter**3, zero, self%mobility_mu(1,:,:,:,itemp) )
-   ! for holes
-   call safe_div(fact * self%mobility_mu(2,:,:,:,itemp), &
-                 self%nh(itemp) / cryst%ucvol / Bohr_meter**3, zero, self%mobility_mu(2,:,:,:,itemp) )
+ do irta=1,self%nrta
+   do itemp=1,self%ntemp
+     ! for electrons
+     call safe_div(fact * self%mobility_mu(1,:,:,:,itemp,irta), &
+                   self%ne(itemp) / cryst%ucvol / Bohr_meter**3, zero, self%mobility_mu(1,:,:,:,itemp,irta) )
+     ! for holes
+     call safe_div(fact * self%mobility_mu(2,:,:,:,itemp,irta), &
+                   self%nh(itemp) / cryst%ucvol / Bohr_meter**3, zero, self%mobility_mu(2,:,:,:,itemp,irta) )
+   end do
  end do
 
  call cwtime_report(" rta_compute_mobility", cpu, wall, gflops)
@@ -874,7 +912,7 @@ contains
   integer :: isym
   real(dp) :: tsum(3,3), tcart(3,3)
 
-  !symmetrize
+  ! symmetrize
   tsum = zero
   do isym=1, cryst%nsym
     tsum = tsum + matmul((cryst%symrel_cart(:,:,isym)), matmul(tcart, transpose(cryst%symrel_cart(:,:,isym))))
@@ -919,7 +957,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 #ifdef HAVE_NETCDF
  ! Write to netcdf file
  ncerr = nctk_def_dims(ncid, [ &
-    nctkdim_t("ntemp", self%ntemp), &
+    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), &
     nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
  NCF_CHECK(ncerr)
 
@@ -932,29 +970,19 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
     nctkarr_t('kTmesh', "dp", "ntemp"), &
     nctkarr_t('transport_mu_e', "dp", "ntemp"), &
     nctkarr_t('eph_mu_e', "dp", "ntemp"), &
-    nctkarr_t('vvdos_mesh', "dp", "edos_nw"), &
-    nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three"), &
-    nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp"), &
-    !nctkarr_t('vvdos_tau_mrta', "dp", "edos_nw, nsppol_plus1, three, three, ntemp"), &
-    nctkarr_t('L0', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    !nctkarr_t('L0_mrta', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    nctkarr_t('L1', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    !nctkarr_t('L1_mrta', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    nctkarr_t('L2', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    !nctkarr_t('L2_mrta', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    nctkarr_t('sigma',   "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    !nctkarr_t('sigma_mrta',   "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    nctkarr_t('kappa',   "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    !nctkarr_t('kappa_mrta',   "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    nctkarr_t('seebeck', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    !nctkarr_t('seebeck_mrta', "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    nctkarr_t('pi',      "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    !nctkarr_t('pi_mrta',      "dp", "edos_nw, nsppol, three, three, ntemp"), &
-    nctkarr_t('mobility',"dp", "edos_nw, nsppol, three, three, ntemp, two"), &
-    !nctkarr_t('mobility_mrta',"dp", "edos_nw, nsppol, three, three, ntemp, two"), &
+    nctkarr_t('vv_dos_mesh', "dp", "edos_nw"), &
+    nctkarr_t('vv_dos', "dp", "edos_nw, nsppol, three, three, nrta"), &
+    nctkarr_t('vvtau_dos', "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('L0', "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('L1', "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('L2', "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('sigma',   "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('kappa',   "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('seebeck', "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('pi',      "dp", "edos_nw, nsppol, three, three, ntemp, nrta"), &
+    nctkarr_t('mobility',"dp", "edos_nw, nsppol, three, three, ntemp, two, nrta"), &
     nctkarr_t('N',  "dp", "edos_nw, ntemp, two"), &
-    nctkarr_t('mobility_mu',"dp", "two, nsppol, three, three, ntemp")], &
-    !nctkarr_t('mobility_mu_mrta',"dp", "two, nsppol, three, three, ntemp")], &
+    nctkarr_t('mobility_mu',"dp", "two, nsppol, three, three, ntemp, nrta")], &
  defmode=.True.)
  NCF_CHECK(ncerr)
 
@@ -972,29 +1000,19 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_mu_e"), self%eph_mu_e))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_mu_e"), self%transport_mu_e))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), self%vvdos_mesh))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), self%vvdos(:,1,:,:,:,1)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau"),  self%vvdos(:,1,:,:,:,2:)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau_mrta"),  self%vvdos(:,1,:,:,:,2:,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L0"), self%l0(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L0_mrta"), self%l0(:,:,:,:,:self%ntemp,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L1"), self%l1(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L1_mrta"), self%l1(:,:,:,:,:self%ntemp,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L2"), self%l2(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L2_mrta"), self%l2(:,:,:,:,:self%ntemp,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma"),   self%sigma(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_mrta"),   self%sigma(:,:,:,:,:self%ntemp,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kappa"),   self%kappa(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kappa_mrta"),   self%kappa(:,:,:,:,:self%ntemp,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "seebeck_mrta"), self%seebeck(:,:,:,:,:self%ntemp,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pi"),      self%pi(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pi_mrta"),      self%pi(:,:,:,:,:self%ntemp,2)))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vv_dos_mesh"), self%vv_dos_mesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vv_dos"), self%vv_dos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvtau_dos"),  self%vvtau_dos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L0"), self%l0))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L1"), self%l1))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L2"), self%l2))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma"),   self%sigma))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kappa"),   self%kappa))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pi"),      self%pi))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "N"), self%n))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility"), self%mobility(:,:,:,:,:self%ntemp,:)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mrta"), self%mobility(:,:,:,:,:self%ntemp,:,2)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu(:,:,:,:,:self%ntemp)))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu_mrta"), self%mobility_mu(:,:,:,:,:self%ntemp,2)))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility"), self%mobility))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
 #endif
 
  call cwtime_report(" rta_ncwrite", cpu, wall, gflops)
@@ -1024,30 +1042,50 @@ subroutine rta_print(self, cryst, dtset, dtfil)
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables --------------------------------
- integer :: itemp, ispin
- character(len=500) :: msg
+ integer :: itemp, spin, irta
+ character(len=500) :: msg, pre
 
 !************************************************************************
 
- call wrtout([std_out, ab_out], 'Transport calculation results')
- write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
- call wrtout([std_out, ab_out], msg)
+ call wrtout([std_out, ab_out], 'Transport (RTA) calculation results:', newlines=1)
 
- do ispin=1,self%nsppol
-   do itemp=1,self%ntemp
-     write(msg,"(f16.2,2e16.2,2f16.2)") &
-       self%kTmesh(itemp) / kb_HaK, &
-       self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-       self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-       self%mobility_mu(1,ispin,1,1,itemp), self%mobility_mu(2,ispin,1,1,itemp)
-     call wrtout([std_out, ab_out], msg)
-   end do ! itemp
- end do ! spin
+ !do irta=1,self%nrta
+ do irta=1,1
+   !write(msg, "(a)")irta2info(irta)
+   !call wrtout([std_out, ab_out], msg, newlines=1)
 
- call self%write_tensor(dtset, "sigma", self%sigma, strcat(dtfil%filnam_ds(4), "_SERTA_SIGMA"))
- call self%write_tensor(dtset, "seebeck", self%seebeck, strcat(dtfil%filnam_ds(4), "_SERTA_SBK"))
- call self%write_tensor(dtset, "kappa", self%kappa, strcat(dtfil%filnam_ds(4), "_SERTA_KAPPA"))
- call self%write_tensor(dtset, "pi", self%pi, strcat(dtfil%filnam_ds(4), "_SERTA_PI"))
+   write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+   call wrtout([std_out, ab_out], msg)
+
+   do spin=1,self%nsppol
+     if (self%nsppol == 2) call wrtout([std_out, ab_out], sjoin(" For spin:", stoa(spin)))
+     do itemp=1,self%ntemp
+       write(msg,"(f16.2,2e16.2,2f16.2)") &
+         self%kTmesh(itemp) / kb_HaK, &
+         self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+         self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+         self%mobility_mu(1, spin, 1, 1, itemp, irta), self%mobility_mu(2, spin, 1, 1, itemp, irta)
+       call wrtout([std_out, ab_out], msg)
+     end do ! itemp
+   end do ! spin
+
+   call wrtout([std_out, ab_out], ch10)
+ end do ! irta
+
+ do irta=1,self%nrta
+   select case (irta)
+   case (1)
+     pre = "_SERTA"
+   case (2)
+     pre = "_MRTA"
+   case default
+     MSG_ERROR(sjoin("Don't know how to handle irta:", itoa(irta)))
+   end select
+   call self%write_tensor(dtset, irta, "sigma", self%sigma(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_SIGMA"))
+   call self%write_tensor(dtset, irta, "seebeck", self%seebeck(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_SBK"))
+   call self%write_tensor(dtset, irta, "kappa", self%kappa(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_KAPPA"))
+   call self%write_tensor(dtset, irta, "pi", self%pi(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_PI"))
+ end do
 
 end subroutine rta_print
 !!***
@@ -1063,11 +1101,12 @@ end subroutine rta_print
 !!
 !! SOURCE
 
-subroutine rta_write_tensor(self, dtset, header, values, path)
+subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 
 !Arguments --------------------------------------
  class(rta_t),intent(in) :: self
  type(dataset_type),intent(in) :: dtset
+ integer,intent(in) :: irta
  character(len=*),intent(in) :: header
  real(dp),intent(in) :: values(:,:,:,:,:)
  character(len=*),intent(in) :: path
@@ -1083,19 +1122,19 @@ subroutine rta_write_tensor(self, dtset, header, values, path)
  end if
 
  ! write header
- write(ount, "(2a)")"# ", trim(header)
+ write(ount, "(2a)")"# ", trim(header) ! with irta
  write(ount, "(a)")"# Results in atomic units. Electron energies in Hartree"
  write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
  write(ount, "(a)")"#"
  !write(ount, "()")"#"
 
- ! (nw, nsppol, 3, 3, ntemp+1)
+ ! (nw, nsppol, 3, 3, ntemp)
  if (self%nsppol == 1) then
    do itemp=1, self%ntemp
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
      write(ount, "(a)")"# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
      do iw=1,self%nw
-       write(ount, "(10(es16.6))")self%vvdos_mesh(iw), values(iw, 1, :, :, itemp)
+       write(ount, "(10(es16.6))")self%vv_dos_mesh(iw), values(iw, 1, :, :, itemp)
      end do
    end do
   write(ount, "(a)")""
@@ -1105,7 +1144,7 @@ subroutine rta_write_tensor(self, dtset, header, values, path)
      write(ount, "(a)") &
        "# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
      do iw=1,self%nw
-       write(ount, "(19(es16.6))")self%vvdos_mesh(iw), values(iw, 1, :, :, itemp), values(iw, 2, :, :, itemp)
+       write(ount, "(19(es16.6))")self%vv_dos_mesh(iw), values(iw, 1, :, :, itemp), values(iw, 2, :, :, itemp)
      end do
    end do
   write(ount, "(a)")""
@@ -1135,8 +1174,9 @@ subroutine rta_free(self)
  class(rta_t),intent(inout) :: self
 
  ABI_SFREE(self%n)
- ABI_SFREE(self%vvdos)
- ABI_SFREE(self%vvdos_mesh)
+ ABI_SFREE(self%vv_dos)
+ ABI_SFREE(self%vvtau_dos)
+ ABI_SFREE(self%vv_dos_mesh)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
  ABI_SFREE(self%eph_mu_e)
@@ -1163,6 +1203,38 @@ subroutine rta_free(self)
 
 end subroutine rta_free
 !!***
+
+!!! !----------------------------------------------------------------------
+!!!
+!!! !!****f* m_rta/irta2info
+!!! !! NAME
+!!! !! irta2info
+!!! !!
+!!! !! FUNCTION
+!!! !! Return string with info about RTA associated to the irta index
+!!! !!
+!!! !! SOURCE
+!!!
+!!! subroutine irta2info(irta)
+!!!
+!!! !Arguments ------------------------------------
+!!! !scalars
+!!!  integer, intent(in) :: irta
+!!!
+!!! !Local variables ------------------------------
+!!!
+!!! ! *************************************************************************
+!!!
+!!!  select case (irta)
+!!!  case (1)
+!!!    irta2a = "SERTA"
+!!!  case (2)
+!!!    irta2a = "MRTA"
+!!!  case default
+!!!    irta2a = "Unknown approximation!"
+!!!  end select
+!!!
+!!! end subroutine irta2ifo
 
 end module m_rta
 !!***

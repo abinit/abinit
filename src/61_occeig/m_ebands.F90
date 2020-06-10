@@ -4195,7 +4195,7 @@ end function ebands_interp_kpath
 !!  out_mesh: Frequency mesh.
 !!  out_valsdos: (nw, 2, 0:nsppol, nvals) array with DOS for scalar quantities if nvals > 0
 !!  out_vecsdos: (nw, 2, 0:nsppol, 3, nvecs)) array with DOS for vectorial
-!!  out_tensdos:
+!!  out_tensdos: (nw, 2, 0:nsppol, 3, 3, ntens)
 !!
 !! PARENTS
 !!
