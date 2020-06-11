@@ -5398,7 +5398,7 @@ end subroutine simpson_int
 !!
 !! SOURCE
 
-function simpson(step,values) result(res)
+function simpson(step, values) result(res)
 
 
 !Arguments ------------------------------------

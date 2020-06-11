@@ -3475,8 +3475,8 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
 !Local variables -----------------------------------------
 !scalars
- integer,parameter :: sppoldbl1 = 1, timrev1 = 1
- integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt
+ integer,parameter :: sppoldbl1 = 1
+ integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
 #ifdef HAVE_NETCDF
  integer :: ncerr !, varid
@@ -3493,9 +3493,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ! Map ebands kpoints to sigmaph
  ABI_MALLOC(indkk, (self%nkcalc, 6))
- !timrev1 = kpts_timrev_from_kptopt(ebands%kptopt)
+ timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, self%nkcalc, cryst%nsym, &
-             sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+             sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6,a)' ) &
@@ -3544,10 +3544,12 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
          ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), &
                  linewidth_serta(itemp, band_ks, ikpt, spin), start=[2, itemp, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
+
          ! Read MRTA lifetimes
          if (self%mrta > 0) then
+           !print *, "reading linewidth_mrta"
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
-                              linewidth_mrta(itemp, band_ks, ikpt, spin), start=[itemp, iband, ikcalc, spin])
+                                linewidth_mrta(itemp, band_ks, ikpt, spin), start=[itemp, iband, ikcalc, spin])
            NCF_CHECK(ncerr)
          end if
        end do
@@ -3561,6 +3563,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
    end do
  end do
 #endif
+
+ !print *, "linewidth_serta", maxval(abs(linewidth_serta))
+ !print *, "linewidth_mrta", maxval(abs(linewidth_mrta))
 
  ABI_FREE(indkk)
 
