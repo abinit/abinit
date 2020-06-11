@@ -508,6 +508,7 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
 
  my_unt =std_out; if (present(unit)) my_unt = unit
  my_mode='COLL'; if (present(mode_paral)) my_mode=mode_paral
+ if (my_unt == dev_null) return
 
  do spin=1,gaps%nsppol
    if (spin == 1) then
@@ -3304,6 +3305,7 @@ subroutine edos_print(edos, unit)
 ! *************************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
+ if (unt == dev_null) return
 
  write(unt,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief) * Ha_eV, " (eV)"
  write(unt,"(a,es16.8)")" Total electron DOS at Fermi level in states/eV: ", edos%gef(0) / Ha_eV

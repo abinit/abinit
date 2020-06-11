@@ -600,7 +600,9 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_7o_DS1_SIGEPH.nc
 
-Transport calculation results
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.18E+18        0.00E+00            0.00            0.00
            64.00        0.15E+18        0.00E+00            4.71            0.00
@@ -608,6 +610,8 @@ Transport calculation results
           182.00        0.45E+17        0.00E+00          139.22            0.00
           241.00        0.33E+17        0.00E+00          163.96            0.00
           300.00        0.28E+17        0.00E+00          157.29            0.00
+
+
 
 - Writing RTA transport results to: teph4mob_7o_DS1_RTA.nc
 
@@ -776,7 +780,11 @@ Values initialized with zeros
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: teph4mob_7o_DS1_SIGEPH.nc
 
-Transport calculation results
+ Downsampling the k-mesh before computing transport:
+ Using transport_ngkpt: [12,12,12]
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.14E+19        0.00E+00            0.00            0.00
            64.00        0.12E+19        0.00E+00            0.00            0.00
@@ -784,6 +792,8 @@ Transport calculation results
           182.00        0.32E+18        0.00E+00            0.00            0.00
           241.00        0.19E+18        0.00E+00            0.00            0.00
           300.00        0.13E+18        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: teph4mob_7o_DS2_RTA.nc
 

@@ -489,7 +489,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS1_SIGEPH.nc
 
-Transport (RTA) calculation results:
+
+ Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
@@ -503,6 +504,8 @@ Transport (RTA) calculation results:
           240.00        0.33E-22        0.00E+00            0.00            0.00
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t56o_DS1_RTA.nc
 
@@ -655,7 +658,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS2_SIGEPH.nc
 
-Transport (RTA) calculation results:
+
+ Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
@@ -669,6 +673,8 @@ Transport (RTA) calculation results:
           240.00        0.28E-12        0.00E+00            0.00            0.00
           270.00        0.13E-08        0.00E+00            0.00            0.00
           300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t56o_DS2_RTA.nc
 
@@ -822,7 +828,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS3_SIGEPH.nc
 
-Transport (RTA) calculation results:
+
+ Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.25E+23        0.00E+00            0.00            0.00
@@ -836,6 +843,8 @@ Transport (RTA) calculation results:
           240.00        0.18E+23        0.00E+00            0.00            0.00
           270.00        0.18E+23        0.00E+00            0.00            0.00
           300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t56o_DS3_RTA.nc
 
@@ -994,7 +1003,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS4_SIGEPH.nc
 
-Transport (RTA) calculation results:
+
+ Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.34E+23        0.00E+00            0.00            0.00
@@ -1008,6 +1018,8 @@ Transport (RTA) calculation results:
           240.00        0.34E+23        0.00E+00            0.00            0.00
           270.00        0.34E+23        0.00E+00            0.00            0.00
           300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t56o_DS4_RTA.nc
 
@@ -1162,7 +1174,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS5_SIGEPH.nc
 
-Transport (RTA) calculation results:
+
+ Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.17E+23        0.00E+00            0.00            0.00
@@ -1176,6 +1189,8 @@ Transport (RTA) calculation results:
           240.00        0.17E+23        0.00E+00            0.00            0.00
           270.00        0.17E+23        0.00E+00            0.00            0.00
           300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t56o_DS5_RTA.nc
 
@@ -1323,7 +1338,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS6_SIGEPH.nc
 
-Transport (RTA) calculation results:
+
+ Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
@@ -1337,6 +1353,8 @@ Transport (RTA) calculation results:
           240.00        0.33E-22        0.00E+00            0.00            0.00
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t56o_DS6_RTA.nc
 

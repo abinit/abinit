@@ -1234,10 +1234,15 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS4_SIGEPH.nc
 
-Transport calculation results
+ Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t60o_DS4_RTA.nc
 
@@ -1585,10 +1590,15 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS6_SIGEPH.nc
 
-Transport calculation results
+ Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t60o_DS6_RTA.nc
 
@@ -1775,10 +1785,15 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS7_SIGEPH.nc
 
-Transport calculation results
+ Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
+
+
 
 - Writing RTA transport results to: t60o_DS7_RTA.nc
 
@@ -2112,6 +2127,7 @@ All the independent perturbations are available
 
  Computing average over the unit cell of the periodic part of the DFPT potentials
 
+
  Using list of q-points specified by ph_qpath with 5 qpoints
 
  - Results stored in: t60o_DS9_V1QAVG.nc
@@ -2233,6 +2249,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Computing average over the unit cell of the periodic part of the DFPT potentials
+
 
  Using list of q-points found in the DVDB file
 

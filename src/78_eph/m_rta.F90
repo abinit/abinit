@@ -353,12 +353,13 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    end do
    MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
  end if
+
  if (my_rank == master) call new%gaps%print(unit=std_out)
 
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
-   call wrtout(std_out, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
+   call wrtout([std_out, ab_out], sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
 
@@ -376,7 +377,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
  if (any(dtset%transport_ngkpt /= 0)) then
    ! Perform further downsampling (usefull for debugging purposes)
-   call wrtout(std_out, sjoin(" Downsampling the k-mesh before computing transport:", ltoa(dtset%transport_ngkpt)))
+   call wrtout([std_out, ab_out], " Downsampling the k-mesh before computing transport:")
+   call wrtout([std_out, ab_out], sjoin(" Using transport_ngkpt: ", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%transport_ngkpt(1)
    kptrlatt(2,2) = dtset%transport_ngkpt(2)
@@ -570,7 +572,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
  ! Compute DOS and VV_DOS and VV_TAU_DOS
  ! Define integration method and mesh step.
- ! TODO Add tau(e)?
+ ! TODO Add tau(e) with tetra?
  edos_intmeth = 2
  if (dtset%prtdos == 1) edos_intmeth = 1
  if (dtset%prtdos == -2) edos_intmeth = 3
@@ -581,7 +583,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  emin = minval(self%eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
  emax = maxval(self%eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
- ! If sigma_erange is set, get emin and emax
+ ! If sigma_erange is set, get emin and emax from this variable
  do spin=1,self%ebands%nsppol
    if (dtset%sigma_erange(1) >= zero) emin = self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
    if (dtset%sigma_erange(2) >= zero) emax = self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
@@ -593,6 +595,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
                                             edos_intmeth, edos_step, edos_broad, comm, &
                                             self%vv_dos_mesh, &
                                             dummy_dosvals, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
+ call self%edos%print(unit=std_out)
 
  ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, 0:nsppol)
  self%nw = self%edos%nw
@@ -659,7 +662,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Compute the index of the Fermi level and handle possible out of range condition.
  ifermi = bisect(self%vv_dos_mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
-   MSG_ERROR("Bisection could not find energy index of the Fermi level!")
+   MSG_ERROR("Bisection could not find index of the Fermi level!")
  end if
 
  ! Mobility
@@ -1058,16 +1061,18 @@ subroutine rta_print(self, cryst, dtset, dtfil)
 
 !Local variables --------------------------------
  integer :: itemp, spin, irta
- character(len=500) :: msg, pre
+ character(len=500) :: msg, pre, rta_type
 
 !************************************************************************
 
- call wrtout([std_out, ab_out], 'Transport (RTA) calculation results:', newlines=1)
+ call wrtout([std_out, ab_out], ch10//' Transport (RTA) calculation results:', newlines=1)
 
  !do irta=1,self%nrta
  do irta=1,1
    !write(msg, "(a)")irta2info(irta)
-   !call wrtout([std_out, ab_out], msg, newlines=1)
+   if (irta == 1) rta_type = "RTA type: Self-energy relaxation time approximation (SERTA)"
+   if (irta == 2) rta_type = "RTA type: Momentum relaxation time approximation (MRTA)"
+   !call wrtout([std_out, ab_out], rta_type, newlines=1)
 
    write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
    call wrtout([std_out, ab_out], msg)
