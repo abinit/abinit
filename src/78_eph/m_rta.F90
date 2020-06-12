@@ -142,12 +142,16 @@ type,public :: rta_t
    ! electronic density of states
 
    real(dp),allocatable :: vv_dos_mesh(:)
-   ! mesh used for vv_dod and vvtau_dos.
+   ! mesh used for vv_dos, vvtau_dos and tau_dos
    ! (%nw)
 
-   real(dp),allocatable :: vv_dos(:,:,:,:,:)
+   real(dp),allocatable :: tau_dos(:,:,:,:)
+   ! tau(e)  DOS
+   ! (nw, ntemp, nsppol, nrta)
+
+   real(dp),allocatable :: vv_dos(:,:,:,:)
    ! (v x v)  DOS
-   ! (nw, 3, 3, nsppol, nrta)
+   ! (nw, 3, 3, nsppol)
 
    real(dp),allocatable :: vvtau_dos(:,:,:,:,:,:)
    ! (v x v * tau) DOS
@@ -255,6 +259,8 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
 
  ! Initialize RTA object
  rta = rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
+
+ ! sigmaph is not needed anymore. Free it.
  sigmaph%ncid = nctk_noid
  call sigmaph%free()
 
@@ -301,7 +307,6 @@ end subroutine rta_driver
 !!  extrael_fermie
 !!  comm=MPI communicator.
 !!
-!!
 !! SOURCE
 
 type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm) result (new)
@@ -331,7 +336,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! Allocate temperature arrays (same as the ones used in SIGEPH calculation
+ ! Allocate temperature arrays (same as the ones used in the SIGEPH calculation).
  new%ntemp = sigmaph%ntemp
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = sigmaph%kTmesh
@@ -521,25 +526,32 @@ subroutine rta_compute(self, cryst, dtset, comm)
  type(crystal_t),intent(in) :: cryst
 
 !Local variables ------------------------------
- integer,parameter :: nvals0 = 0, nvecs0 = 0
- integer :: nsppol, nkpt, mband, ib, ik, iw, spin, ii, jj, itemp, irta, itens
- integer :: ntens, edos_intmeth, ifermi, iel
+ integer,parameter :: nvecs0 = 0, master = 0
+ integer :: nsppol, nkpt, mband, ib, ik, iw, spin, ii, jj, itemp, irta, itens, iscal
+ integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, linewidth, fact0
  real(dp) :: cpu, wall, gflops
- real(dp) :: vr(3), dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
- real(dp),allocatable :: vv_tens(:,:,:,:,:,:,:), dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
- real(dp),allocatable :: out_tensdos(:,:,:,:,:,:)
+ real(dp) :: vr(3), dummy_vecs(1,1,1,1,1)
+ real(dp),allocatable :: vv_tens(:,:,:,:,:,:,:), out_valsdos(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
+ real(dp),allocatable :: out_tensdos(:,:,:,:,:,:), tau_vals(:,:,:,:,:)
  !character(len=500) :: msg
 
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
 
+ my_rank = xmpi_comm_rank(comm)
+
  ! Basic dimensions
  nsppol = self%ebands%nsppol; nkpt = self%ebands%nkpt; mband = self%ebands%mband
 
  ! Allocate vv tensors with and without the lifetimes. Eq 8 of [[cite:Madsen2018]]
  ! The total number of tensorial entries is ntens and accounts for nrta
+ ! Remember that we haven't computed all the k-points in the IBZ hence we can have zero linewidths
+ ! or very small values when the states is at the band edge so use safe_dif to avoid SIGFPE.
+ nvals = self%ntemp * self%nrta
+ ABI_MALLOC(tau_vals, (self%ntemp, self%nrta, mband, nkpt, nsppol))
+
  ntens = (1 + self%ntemp) * self%nrta
  ABI_MALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, mband, nkpt, nsppol))
 
@@ -563,6 +575,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
            call safe_div(vv_tens(:, :, 1, irta, ib, ik, spin), linewidth, zero, vv_tens(:, :, 1+itemp, irta, ib, ik, spin))
            !if (irta == 2)
            !print *, "irta", irta," lw", linewidth, "out_tensdos", maxval(abs(vv_tens(:, :, 1+itemp, irta, ib, ik, spin)))
+           call safe_div(one/two, linewidth, zero, tau_vals(itemp, irta, ib, ik, spin))
          end do
        end do
 
@@ -572,7 +585,6 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
  ! Compute DOS and VV_DOS and VV_TAU_DOS
  ! Define integration method and mesh step.
- ! TODO Add tau(e) with tetra?
  edos_intmeth = 2
  if (dtset%prtdos == 1) edos_intmeth = 1
  if (dtset%prtdos == -2) edos_intmeth = 3
@@ -590,24 +602,30 @@ subroutine rta_compute(self, cryst, dtset, comm)
  end do
 
  ! Compute DOS, vv_dos and vvtau_DOS (v x v times lifetimes)
+ !  out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
+ !  out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
+
  self%edos = ebands_get_dos_matrix_elements(self%ebands, cryst, &
-                                            nvals0, dummy_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
+                                            nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
                                             edos_intmeth, edos_step, edos_broad, comm, &
                                             self%vv_dos_mesh, &
-                                            dummy_dosvals, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
- call self%edos%print(unit=std_out)
+                                            out_valsdos, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
 
- ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, 0:nsppol)
+ if (my_rank == master) call self%edos%print(unit=std_out)
+
+ ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, nsppol)
  self%nw = self%edos%nw
- ABI_MALLOC(self%vv_dos, (self%nw, 3, 3, nsppol, self%nrta))
+ ABI_MALLOC(self%tau_dos, (self%nw, self%ntemp, nsppol, self%nrta))
+ ABI_MALLOC(self%vv_dos, (self%nw, 3, 3, nsppol))
  ABI_MALLOC(self%vvtau_dos, (self%nw, 3, 3, self%ntemp, nsppol, self%nrta))
 
  do irta=1,self%nrta
-   do itemp=1,self%ntemp+1
-     itens = itemp + (irta - 1) * (self%ntemp + 1)
-     do spin=1,nsppol
+   do spin=1,nsppol
+     do itemp=1,self%ntemp+1
+       itens = itemp + (irta - 1) * (self%ntemp + 1)
+
        if (itemp == 1) then
-         self%vv_dos(:,:,:,spin, irta) = out_tensdos(:, 1, :, :, itens, spin)
+         self%vv_dos(:,:,:,spin) = out_tensdos(:, 1, :, :, itens, spin)
        else
          self%vvtau_dos(:,:,:, itemp-1, spin, irta) = out_tensdos(:, 1, :, :, itens, spin)
          !print *, "irta", irta, "out_tensdos", maxval(abs(out_tensdos(:, 1, :, :, itens, spin)))
@@ -616,9 +634,20 @@ subroutine rta_compute(self, cryst, dtset, comm)
    end do
  end do
 
+ ! Transfer tau(e)
+ do irta=1,self%nrta
+   do spin=1,nsppol
+     do itemp=1,self%ntemp
+       iscal = itemp + (irta - 1) * self%ntemp
+       self%tau_dos(:, itemp, spin, irta) = out_valsdos(:, 1, iscal, spin)
+     end do
+   end do
+ end do
+
  ! Free memory
  ABI_SFREE(out_tensdos)
- ABI_SFREE(dummy_dosvals)
+ ABI_SFREE(tau_vals)
+ ABI_SFREE(out_valsdos)
  ABI_SFREE(dummy_dosvecs)
  ABI_SFREE(vv_tens)
 
@@ -831,6 +860,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_CALLOC(self%ne, (self%ntemp))
  ABI_CALLOC(self%nh, (self%ntemp))
 
+ ! Compute carrier concentration
  do spin=1,nsppol
    do ik=1,nkpt
      wtk = self%ebands%wtk(ik)
@@ -971,8 +1001,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 #ifdef HAVE_NETCDF
  ! Write to netcdf file
  ncerr = nctk_def_dims(ncid, [ &
-    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), &
-    nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
+    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(cryst%ncwrite(ncid))
@@ -987,8 +1016,9 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
     nctkarr_t('vb_max', "dp", "nsppol"), &
     nctkarr_t('cb_min', "dp", "nsppol"), &
     nctkarr_t('vv_dos_mesh', "dp", "edos_nw"), &
-    nctkarr_t('vv_dos', "dp", "edos_nw, three, three, nsppol, nrta"), &
+    nctkarr_t('vv_dos', "dp", "edos_nw, three, three, nsppol"), &
     nctkarr_t('vvtau_dos', "dp", "edos_nw, three, three, ntemp, nsppol, nrta"), &
+    nctkarr_t('tau_dos', "dp", "edos_nw, ntemp, nsppol, nrta"), &
     nctkarr_t('L0', "dp", "edos_nw, three, three, ntemp, nsppol, nrta"), &
     nctkarr_t('L1', "dp", "edos_nw, three, three, ntemp, nsppol, nrta"), &
     nctkarr_t('L2', "dp", "edos_nw, three, three, ntemp, nsppol, nrta"), &
@@ -1021,6 +1051,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vv_dos_mesh"), self%vv_dos_mesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vv_dos"), self%vv_dos))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvtau_dos"),  self%vvtau_dos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "tau_dos"),  self%tau_dos))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L0"), self%l0))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L1"), self%l1))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "L2"), self%l2))
@@ -1134,13 +1165,16 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 
 !Local variables --------------------------------
  integer :: itemp, iw, ount
- character(len=500) :: msg
+ character(len=500) :: msg, rta_type
 
 !************************************************************************
 
  if (open_file(trim(path), msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
    MSG_ERROR(msg)
  end if
+
+ if (irta == 1) rta_type = "RTA type: Self-energy relaxation time approximation (SERTA)"
+ if (irta == 2) rta_type = "RTA type: Momentum relaxation time approximation (MRTA)"
 
  ! write header
  write(ount, "(2a)")"# ", trim(header) ! with irta
@@ -1197,6 +1231,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%n)
  ABI_SFREE(self%vv_dos)
  ABI_SFREE(self%vvtau_dos)
+ ABI_SFREE(self%tau_dos)
  ABI_SFREE(self%vv_dos_mesh)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)

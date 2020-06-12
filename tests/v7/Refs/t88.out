@@ -465,10 +465,10 @@ All the independent perturbations are available
    1.58563817E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
- Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS1_EDOS 
 
@@ -688,10 +688,10 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
- Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS2_EDOS 
 
@@ -1077,10 +1077,10 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
- Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS4_EDOS 
 

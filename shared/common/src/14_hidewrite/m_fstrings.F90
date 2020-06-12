@@ -1317,7 +1317,7 @@ character(len=4) pure function stoa(spin)
  case (2)
    stoa = "DOWN"
  case default
-   stoa = "UNKNOWN"
+   stoa = "????"
  end select
 
 end function stoa

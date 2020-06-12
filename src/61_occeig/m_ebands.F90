@@ -140,11 +140,11 @@ MODULE m_ebands
    integer :: nw
    ! Number of points in the frequency mesh.
 
-   integer :: ief=0
+   integer :: ief = 0
    ! Rightmost Index of the energy mesh such as IDOS[mesh[ief]] < nelect.
    ! 0 if Fermi level could not be computed
    ! Note the value of gef stored in edos_t is computed by performing
-   ! a linear interpolation between ief and ief+1
+   ! a linear interpolation between ief and ief + 1
 
    integer :: intmeth
    ! 1 for gaussian, 2 tetra
@@ -3307,6 +3307,23 @@ subroutine edos_print(edos, unit)
  unt = std_out; if (present(unit)) unt = unit
  if (unt == dev_null) return
 
+ select case (edos%intmeth)
+ case (1)
+   write(unt, "(a,f6.4,a,es16.8,a)") &
+     " Gaussian method with broadening: ", edos%broad * Ha_eV, "(eV) and mesh step:", edos%mesh * Ha_eV, " (eV)"
+ case (2)
+   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with mesh step:", edos%step * Ha_eV, " (eV)"
+ case (3)
+   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with Blochl corrections and mesh step:", edos%step * Ha_eV, " (eV)"
+ case default
+   MSG_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
+ end select
+
+ if (edos%ief == 0) then
+   write(unt, "(a, /)")" edos%ief == 0, cannot print quantities at the Fermi level"
+   return
+ end if
+
  write(unt,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief) * Ha_eV, " (eV)"
  write(unt,"(a,es16.8)")" Total electron DOS at Fermi level in states/eV: ", edos%gef(0) / Ha_eV
  if (edos%nsppol == 2) then
@@ -3319,17 +3336,6 @@ subroutine edos_print(edos, unit)
    write(unt,"(a,es16.8)")"   N(eF) for spin down:", edos%idos(edos%ief, 2)
  end if
 
- select case (edos%intmeth)
- case (1)
-   write(unt, "(a,f6.4,a,es16.8,a)") &
-     " Gaussian method with broadening: ", edos%broad * Ha_eV, "(eV) and mesh step:", edos%mesh * Ha_eV, " (eV)"
- case (2)
-   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with mesh step:", edos%step * Ha_eV, " (eV)"
- case (3)
-   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with Blochl corrections and mesh step:", edos%step * Ha_eV, " (eV)"
- case default
-   MSG_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
- end select
  write(unt, "(a)")""
 
 end subroutine edos_print
@@ -4195,14 +4201,13 @@ end function ebands_interp_kpath
 !!
 !! OUTPUT
 !!  out_mesh(nw): Frequency mesh.
-!!  out_valsdos: (nw, 2, nvals, 0:nsppol) array with DOS for scalar quantities if nvals > 0
-!!  out_vecsdos: (nw, 2, 3, nvecs, 0:nsppol)) array with DOS weighted by vectorial terms if nvecs > 0
-!!  out_tensdos: (nw, 2,3, 3, ntens,  0:nsppol) array with DOS weighted by tensorial terms if ntens > 0
+!!  out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
+!!  out_vecsdos: (nw, 2, 3, nvecs, nsppol)) array with DOS weighted by vectorial terms if nvecs > 0
+!!  out_tensdos: (nw, 2,3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
 !!
 !!   All these arrays allocated by the routine. The number of points is available in edos%nw.
 !!   (nw, 1, ...) stores the weighted DOS (w-DOS)
 !!   (nw, 2, ...) stores the integrated w-DOS
-!!   As concerns spin: Index 0 stores the total DOS (UP+DOW), then UP and DOWN contributions
 !!
 !! PARENTS
 !!
@@ -4293,13 +4298,13 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
 
  ! Allocate output arrays depending on input.
  if (nvals > 0) then
-   ABI_CALLOC(out_valsdos, (nw, 2, nvals, 0:ebands%nsppol))
+   ABI_CALLOC(out_valsdos, (nw, 2, nvals, ebands%nsppol))
  endif
  if (nvecs > 0) then
-   ABI_CALLOC(out_vecsdos, (nw, 2, 3, nvecs, 0:ebands%nsppol))
+   ABI_CALLOC(out_vecsdos, (nw, 2, 3, nvecs, ebands%nsppol))
  end if
  if (ntens > 0) then
-   ABI_CALLOC(out_tensdos, (nw, 2, 3, 3, ntens, 0:ebands%nsppol))
+   ABI_CALLOC(out_tensdos, (nw, 2, 3, 3, ntens, ebands%nsppol))
  end if
 
  !call wrtout(std_out, " Computing DOS weighted by matrix elements.")

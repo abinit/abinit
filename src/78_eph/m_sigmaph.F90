@@ -3274,6 +3274,8 @@ end subroutine sigmaph_write
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !!  comm=MPI communicator
+!!  [keep_open]=True to keep the Nc file handle open for further reading. Default: False.
+!!  [extrael_fermie]: Return the value of (eph_extrael, eph_fermie) read from file.
 !!
 !! PARENTS
 !!
@@ -3288,7 +3290,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
  character(len=500),intent(out) :: msg
- real(dp), optional, intent(inout) :: extrael_fermie(2)
+ real(dp), optional, intent(out) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
 
 !Local variables ------------------------------
