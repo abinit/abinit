@@ -239,7 +239,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,verbose ! MRM new gw1rdm and verbose
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -2276,7 +2276,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
-        ! Debug print full exchange (Sr%x_mat) MAU
+        ! Debug print full exchange (Sr%x_mat)
+        write(msg,'(a4)') 'MAU0'
+        call wrtout(std_out,msg,'COLL')
         do ib1dm=ib1,ib2
           write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
           call wrtout(std_out,msg,'COLL')
@@ -2295,6 +2297,23 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    ! for the time being, do not remove this barrier!
    call xmpi_barrier(Wfd%comm)
+
+   ! Print initial Vee = J + K  components 
+   if(gw1rdm>3 .and. gwcalctyp==21) then
+     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a41)')' Exchange energy obtained using KS 1-RDM:'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
+     write(msg,'(a,2(es16.6,a))')' Ex[KS] = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   end if
 
    call timab(421,2,tsec) ! calc_sigx_me
 
@@ -2333,7 +2352,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        if(gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
          if(gw1rdm>1) then
-           !MAU call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
+           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
          endif
 !        Update the full 1RDM with the correlation (k-point) one
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2470,6 +2489,28 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
            call wrtout(ab_out,msg,'COLL')
          enddo
        enddo
+       write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       !
+       ! Print the updated exchange energy
+       !
+       write(msg,'(a1)')' '
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
+       write(msg,'(a41)')' Exchange energy obtained using GW 1-RDM:'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a,2(es16.6,a))')' Ex[NO] = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
        !
        ! Clean GW1RDM_me
        !
