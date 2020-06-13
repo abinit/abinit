@@ -2132,6 +2132,12 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &   ucvol,dtfil%unpaw,xred,ylm,ylmgr)
  end if
 
+! MRM print final Hartree energy components
+ write(std_out,'(a1)')' '
+ write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
+ write(std_out,'(a,2(es16.6,a))')' Eh[GS]  = : ',energies%e_hartree,' Ha ,',energies%e_hartree*Ha_eV,' eV'
+ write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
+
  call timab(246,2,tsec)
  call timab(247,1,tsec)
 

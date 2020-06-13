@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
  use m_spacepar,          only : hartre
- use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst,rotate_exchange
+ use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst, rotate_exchange, me_get_haene
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
  implicit none
@@ -239,7 +239,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,verbose ! MRM new gw1rdm and verbose
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi 
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy ! MRM 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -1110,7 +1110,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call melements_print(KS_me,header="Matrix elements in the KS basis set",prtvol=Dtset%prtvol)
  !
- ! If possible, calculate the EXX energy from the between the frozen core
+ ! If possible, calculate the EXX energy between the frozen core
  ! and the valence electrons using KS wavefunctions
  ! MG: BE careful here, since ex_energy is meaningful only is all occupied states are calculated.
  if( KS_mflags%has_sxcore ==1 ) then
@@ -2303,11 +2303,18 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a41)')' Exchange energy obtained using KS 1-RDM:'
+     write(msg,'(a46)')' Vee[HF-like] energy obtained using KS 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
-     write(msg,'(a,2(es16.6,a))')' Ex[KS] = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     eh_energy = 0.5d0*me_get_haene(Sr,KS_me,Kmesh,QP_BSt)
+     write(msg,'(a,2(es16.6,a))')' Eh[KS]  = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     ex_energy = 0.25*sigma_get_exene(Sr,Kmesh,QP_BSt)
+     write(msg,'(a,2(es16.6,a))')' Ex[KS]  = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a,2(es16.6,a))')' Vee[KS] = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
@@ -2493,7 +2500,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        !
-       ! Print the updated exchange energy
+       ! Print the updated Vee[HF-like] energy
        !
        write(msg,'(a1)')' '
        call wrtout(std_out,msg,'COLL')
@@ -2501,11 +2508,18 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
-       write(msg,'(a41)')' Exchange energy obtained using GW 1-RDM:'
+       write(msg,'(a46)')' Vee[HF-like] energy obtained using GW 1-RDM:'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Ex[NO] = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+       eh_energy = 0.5d0*me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
+       write(msg,'(a,2(es16.6,a))')' Eh[GW]  = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       ex_energy = 0.25*sigma_get_exene(Sr,Kmesh,QP_BSt)
+       write(msg,'(a,2(es16.6,a))')' Ex[GW]  = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       write(msg,'(a,2(es16.6,a))')' Vee[GW] = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'

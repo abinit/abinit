@@ -27,6 +27,10 @@ module m_gwrdm
  use m_time
  use m_wfd           
  use m_hdr
+ use m_melemts
+ use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
+                             kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
+                             get_bz_item, has_IBZ_item, find_qmesh
  use m_dtset
 
  use defs_datatypes,   only : ebands_t
@@ -37,7 +41,7 @@ module m_gwrdm
  private
 !!***
 
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange ! ,update_wfd_bst ! -> The commented one only works on serial mode
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,me_get_haene ! ,update_wfd_bst ! -> The commented one only works on serial mode
 !!***
 
 contains
@@ -226,6 +230,9 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
  occs=0.0d0
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
+ if(info/=0) then
+   MSG_WARNING("Diagonalization of the updated GW 1-RDM failed")
+ endif
 
  !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
  !eigenvect=dm1_tmp
@@ -318,7 +325,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  do ikpoint=1,BSt%nkpt
    BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
  enddo
- MSG_COMMENT("QP_BSt occupations correctly updated with nat. orb. ones")
+ MSG_COMMENT("QP_BSt occupancies correctly updated with nat. orb. ones")
  if((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
    !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver.F90
    MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
@@ -333,7 +340,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
      ib1dm=ib1dm+1
    enddo
  enddo
- MSG_COMMENT("Hdr_sigma occupations correctly updated with nat. orb. ones")
+ MSG_COMMENT("Hdr_sigma occupancies correctly updated with nat. orb. ones")
 
  Hdr%npwarr(:)=Wfd%npwarr(:)                                   ! Use the npw = ones used in GW calc
  Hdr%ngfft(1:3)=ngfft_in(1:3)
@@ -422,6 +429,39 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
 end subroutine rotate_exchange
 !!***
 
+pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: eh_energy
+ type(sigma_t),intent(in) :: sigma
+ type(kmesh_t),intent(in) :: kmesh
+ type(ebands_t),intent(in) :: bands
+ type(melements_t),intent(in) :: Mels
+!Local variables-------------------------------
+!scalars
+ integer :: ik,ib,spin
+ real(dp) :: wtk,occ_bks
+
+! *************************************************************************
+
+ eh_energy = zero
+
+ do spin=1,sigma%nsppol
+   do ik=1,sigma%nkibz
+     wtk = kmesh%wt(ik)
+     do ib=sigma%b1gw,sigma%b2gw
+       occ_bks = bands%occ(ib,ik,spin)
+       if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
+         eh_energy = eh_energy + occ_bks * wtk * Mels%vhartree(ib,ib,ik,spin)
+       end if
+     end do
+   end do
+ end do
+
+end function me_get_haene
+!!***
+
 end module m_gwrdm
 !!***
 
@@ -461,7 +501,7 @@ end module m_gwrdm
 ! enddo
 !
 ! ! MRM BSt occ are changed and never recoverd
-! MSG_COMMENT("QP_BSt occupations correctly updated with nat. orb. ones")
+! MSG_COMMENT("QP_BSt occupancies correctly updated with nat. orb. ones")
 ! do ikpoint=1,BSt%nkpt
 !   BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
 ! enddo
@@ -471,7 +511,7 @@ end module m_gwrdm
 ! endif
 ! ! MRM change occs in Header Hdr
 ! ! Update occ in Hdr before printing
-! MSG_COMMENT("Hdr_sigma occupations correctly updated with nat. orb. ones")
+! MSG_COMMENT("Hdr_sigma occupancies correctly updated with nat. orb. ones")
 ! ib1dm=1
 ! do ikpoint=1,BSt%nkpt
 !   dim_bands=size(BSt%occ(:,ikpoint,1))
