@@ -698,7 +698,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Compute the index of the Fermi level and handle possible out of range condition.
  ifermi = bisect(self%vv_dos_mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
-   MSG_ERROR("Bisection could not find index of the Fermi level! in vv_dos_mesh")
+   MSG_ERROR("Bisection could not find the index of the Fermi level in vv_dos_mesh!")
  end if
 
  ! Mobility
