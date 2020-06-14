@@ -468,8 +468,8 @@ All the independent perturbations are available
 
 
  Linear tetrahedron method.
- Mesh step: 10.0 (meV) with npts:3100
- From emin: -4.8 to emax: 26.2 (eV)
+ Mesh step:  10.0 (meV) with npts: 3100
+ From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ29
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
@@ -696,8 +696,8 @@ All the independent perturbations are available
 
 
  Linear tetrahedron method.
- Mesh step: 10.0 (meV) with npts:3100
- From emin: -4.8 to emax: 26.2 (eV)
+ Mesh step:  10.0 (meV) with npts: 3100
+ From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ29
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
@@ -1090,8 +1090,8 @@ All the independent perturbations are available
 
 
  Linear tetrahedron method.
- Mesh step: 10.0(meV) with npts:3100
- From emin: -4.8 to emax: 26.2(eV)
+ Mesh step:  10.0 (meV) with npts: 3100
+ From emin:  -4.8 to emax:  26.2 (eV)
  Number of k-points in the IBZ29
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
