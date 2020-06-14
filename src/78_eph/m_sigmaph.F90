@@ -3473,7 +3473,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  integer, intent(out) :: ierr
  real(dp), allocatable, intent(out) :: linewidth_serta(:,:,:,:), linewidth_mrta(:,:,:,:), velocity(:,:,:,:)
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
- character(len=500) :: msg
+
 
 !Local variables -----------------------------------------
 !scalars
@@ -3481,13 +3481,16 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
 #ifdef HAVE_NETCDF
- integer :: ncerr !, varid
+ integer :: ncerr
 #endif
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: indkk(:,:)
  real(dp) :: dksqmax
 
 ! *************************************************************************
+
+ ierr = 0
 
  ! copy useful dimensions
  nsppol = self%nsppol

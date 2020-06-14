@@ -64,7 +64,7 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
- integer :: ndivsm, abimem_level
+ integer :: ndivsm, abimem_level, ierr, spin
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: path, other_path !, prefix
@@ -74,6 +74,7 @@ program abitk
  type(crystal_t) :: cryst, other_cryst
  type(geo_t) :: geo
  type(kpath_t) :: kpath
+ type(gaps_t) :: gaps
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
@@ -132,6 +133,7 @@ program abitk
      write(std_out,"(a)")"ebands_dos FILE --intmeth, --step, --broad  Compute electron DOS."
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
+     !write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
      !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
      !write(std_out,"(a)")"skw_path FILE                     Produce BXSF file for Xcrysden."
      !write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK       Use eigens from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
@@ -215,6 +217,18 @@ program abitk
      prtebands = 1; if (command == "ebands_gnuplot") prtebands = 2
      call ebands_write(ebands, prtebands, basename(path))
    end if
+
+ case ("ebands_gaps")
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+   ierr = get_gaps(ebands, gaps)
+   if (ierr /= 0) then
+     do spin=1, ebands%nsppol
+       MSG_WARNING(trim(gaps%errmsg_spin(spin)))
+     end do
+     MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
+   end if
+   call gaps%print(unit=std_out)
+   call gaps%free()
 
  case ("ebands_dos", "ebands_jdos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)

@@ -497,7 +497,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
 
  if (dtset%prtphdos == 1) then
-   call wrtout(std_out, "Computing Phonon DOS. Use prtphdos 0 to disable this part.")
+   call wrtout(std_out, " Computing Phonon DOS. Use prtphdos 0 to disable this part.")
    wminmax = zero
    do
      call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
@@ -621,16 +621,16 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! ===========================================
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
- ! ====================================================
- ! === This is the real epc stuff once all is ready ===
- ! ====================================================
-
  ! TODO: Make sure that all subdrivers work with useylm == 1
  ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
 
  ! Relase nkpt-based arrays in dtset to decreased memory requirement if dense sampling.
  ! EPH routines should not access them after this point.
  if (dtset%eph_task /= 6) call dtset%free_nkpt_arrays()
+
+ ! ====================================================
+ ! === This is the real epc stuff once all is ready ===
+ ! ====================================================
 
  select case (dtset%eph_task)
  case (0)

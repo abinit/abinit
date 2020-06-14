@@ -746,7 +746,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    write(std_out,'(2a)') ch10,'======================================================= '
-   write(std_out,'(a,i0)') 'invars1m : enter jdtset= ',jdtset
+   write(std_out,'(a,i0)') ' invars1m : enter jdtset= ',jdtset
 
    ! Input default values
    dtsets(idtset)%bravais(:)=0

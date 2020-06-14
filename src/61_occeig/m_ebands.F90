@@ -476,7 +476,6 @@ end subroutine gaps_free
 !!  gaps<gaps_t>=Object with info on the gaps.
 !!  [header]=Optional title.
 !!  [unit]=Optional unit for output (std_out if not specified)
-!!  [mode_paral]=Either "COLL" or "PERS", former is default.
 !!
 !! OUTPUT
 !!  Only writing.
@@ -488,37 +487,34 @@ end subroutine gaps_free
 !!
 !! SOURCE
 
-subroutine gaps_print(gaps, header, unit, mode_paral)
+subroutine gaps_print(gaps, unit, header)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in),optional :: unit
- character(len=4),intent(in),optional :: mode_paral
- character(len=*),intent(in),optional :: header
  class(gaps_t),intent(in)  :: gaps
+ integer,intent(in),optional :: unit
+ character(len=*),intent(in),optional :: header
 
 !Local variables-------------------------------
 !scalars
- integer :: spin,ikopt,ivk,ick,my_unt
- real(dp) :: fun_gap,opt_gap
- character(len=4) :: my_mode
+ integer :: spin, ikopt, ivk, ick, my_unt
+ real(dp) :: fun_gap, opt_gap
  character(len=500) :: msg
 
 ! *********************************************************************
 
  my_unt =std_out; if (present(unit)) my_unt = unit
- my_mode='COLL'; if (present(mode_paral)) my_mode=mode_paral
  if (my_unt == dev_null) return
 
  do spin=1,gaps%nsppol
    if (spin == 1) then
      msg = ch10
      if (present(header)) msg = ch10//' === '//trim(adjustl(header))//' === '
-     call wrtout(my_unt, msg, my_mode)
+     call wrtout(my_unt, msg)
    end if
 
    if (gaps%ierr(spin) /= 0) then
-     call wrtout(my_unt, gaps%errmsg_spin(spin), my_mode)
+     call wrtout(my_unt, gaps%errmsg_spin(spin))
      continue
    end if
 
@@ -533,21 +529,22 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
 
    ivk = gaps%fo_kpos(1, spin)
    ick = gaps%fo_kpos(2, spin)
-   ikopt = gaps%fo_kpos(3,spin)
+   ikopt = gaps%fo_kpos(3, spin)
 
-   write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)') &
+   write(msg,'(a,i2,a,2(a,f6.2,a,2a),30x,2a)') &
     '  >>>> For spin ', spin, ch10, &
-    '   Minimum direct gap = ',opt_gap*Ha_eV,' (eV), located at k-point     : ',gaps%kpoints(:,ikopt),ch10,&
-    '   Fundamental gap    = ',fun_gap*Ha_eV,' (eV), Top of valence bands at: ',gaps%kpoints(:,ivk),ch10,  &
-                                             '      Bottom of conduction at: ',gaps%kpoints(:,ick)
-   call wrtout(my_unt,msg,my_mode)
-   write(msg, "((a,f8.4,2a))") " Valence Maximum: ", gaps%vb_max(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ivk)))
-   call wrtout(my_unt,msg,my_mode)
-   write(msg, "((a,f8.4,2a))") " Conduction minimum: ", gaps%cb_min(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ick)))
-   call wrtout(my_unt,msg,my_mode)
-   write(msg, "((a,f8.4,a))") " Fermi level:", gaps%fermie * Ha_eV, " (eV)"
-   call wrtout(my_unt,msg,my_mode)
+    '   Minimum direct gap = ',opt_gap*Ha_eV,' (eV), located at k-point     : ', trim(ktoa(gaps%kpoints(:,ikopt))),ch10, &
+    '   Fundamental gap    = ',fun_gap*Ha_eV,' (eV), Top of valence bands at: ', trim(ktoa(gaps%kpoints(:,ivk))),ch10, &
+                                             '       Bottom of conduction at: ', trim(ktoa(gaps%kpoints(:,ick)))
+   call wrtout(my_unt, msg)
+   write(msg, "((a,f6.2,2a))")"   Valence Max:    ", gaps%vb_max(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ivk)))
+   call wrtout(my_unt, msg)
+   write(msg, "((a,f6.2,2a))")"   Conduction min: ", gaps%cb_min(spin) * Ha_eV, " (eV) at: ", trim(ktoa(gaps%kpoints(:, ick)))
+   call wrtout(my_unt, msg)
  end do ! spin
+
+ write(msg, "((a,f6.2,a))")  "   Fermi level:", gaps%fermie * Ha_eV, " (eV)"
+ call wrtout(my_unt, msg, newlines=1)
 
 end subroutine gaps_print
 !!***
@@ -3293,11 +3290,12 @@ end function edos_ncwrite
 !!
 !! SOURCE
 
-subroutine edos_print(edos, unit)
+subroutine edos_print(edos, unit, header)
 
 !Arguments ------------------------------------
  class(edos_t),intent(in) :: edos
  integer,optional,intent(in) :: unit
+ character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
  integer :: unt
@@ -3307,20 +3305,29 @@ subroutine edos_print(edos, unit)
  unt = std_out; if (present(unit)) unt = unit
  if (unt == dev_null) return
 
+ if (present(header)) then
+   write(unt, "(a)") ch10//' === '//trim(adjustl(header))//' === '
+ else
+   write(unt, "(a)") ch10
+ end if
+
  select case (edos%intmeth)
  case (1)
-   write(unt, "(a,f6.4,a,es16.8,a)") &
-     " Gaussian method with broadening: ", edos%broad * Ha_eV, "(eV) and mesh step:", edos%mesh * Ha_eV, " (eV)"
+   write(unt, "(a,f5.1,a)") " Gaussian method with broadening: ", edos%broad * Ha_meV, " (meV)"
  case (2)
-   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with mesh step:", edos%step * Ha_eV, " (eV)"
+   write(unt, "(a)")" Linear tetrahedron method."
  case (3)
-   write(unt, "(a,es16.8,a)")" Linear tetrahedron method with Blochl corrections and mesh step:", edos%step * Ha_eV, " (eV)"
+   write(unt, "(a)")" Linear tetrahedron method with Blochl corrections."
  case default
    MSG_ERROR(sjoin("Wrong intmeth:", itoa(edos%intmeth)))
  end select
 
+ write(unt, "(a,f5.1,a, i0)")" Mesh step: ", edos%step * Ha_meV, " (meV) with npts: ", edos%nw
+ write(unt, "(2(a,f5.1),a)")" From emin: ", edos%mesh(1) * Ha_eV, " to emax: ", edos%mesh(edos%nw) * Ha_eV, " (eV)"
+ write(unt, "(a, i0)")" Number of k-points in the IBZ", edos%nkibz
+
  if (edos%ief == 0) then
-   write(unt, "(a, /)")" edos%ief == 0, cannot print quantities at the Fermi level"
+   write(unt, "(a, /)")" edos%ief == 0 --> Cannot print quantities at the Fermi level."
    return
  end if
 
@@ -4198,6 +4205,7 @@ end function ebands_interp_kpath
 !!    No meaning for tetrahedrons
 !!  comm=MPI communicator
 !!  [emin, emax]=Minimum and maximum energy to be considered. Default: full range.
+!!   Implemented only for tetra.
 !!
 !! OUTPUT
 !!  out_mesh(nw): Frequency mesh.
@@ -4264,7 +4272,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol
  edos%intmeth = intmeth
  if (ebands%nkpt == 1) then
-   MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
+   MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
    edos%intmeth = 1
  end if
 
@@ -4319,6 +4327,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
      do ikpt=1,ebands%nkpt
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
        wtk = ebands%wtk(ikpt)
+
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          wme0 = out_mesh - ebands%eig(band, ikpt, spin)
          wme0 = gaussian(wme0, broad) * wtk

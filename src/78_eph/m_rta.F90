@@ -46,7 +46,7 @@ module m_rta
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div
- use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa
+ use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
  use m_kpts,           only : listkk, kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_dfd
 
@@ -258,6 +258,7 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
  ABI_CHECK(ierr == 0, msg)
 
  ! Initialize RTA object
+ ! TODO: Should store more metadata: energy window, nkcalc ....
  rta = rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
 
  ! sigmaph is not needed anymore. Free it.
@@ -363,6 +364,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
+ !if (any(dtset%sigma_ngkpt /= 0) .and. .False.) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
    call wrtout([std_out, ab_out], sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0
@@ -399,8 +401,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
    if (dksqmax > tol12) then
       write(msg, '(3a,es16.6,a)' ) &
-       "Error downsampling ebands in transport driver",ch10, &
-       "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
+       "Error while downsampling ebands in transport driver",ch10, &
+       "The k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
       MSG_ERROR(msg)
    end if
 
@@ -434,10 +436,9 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
  if (new%transport_fermie == zero .and. new%transport_extrael /= new%eph_extrael) then
    if (new%transport_extrael /= new%eph_extrael) then
-     write(msg,'(a,e18.8,a,e18.8,a)') &
-       'extrael from SIGEPH ',new%transport_extrael, &
-       ' and input file ',new%eph_extrael, &
-       ' differ. Will recompute the chemical potential'
+     write(msg,'(2(a,e18.8),3a)') &
+       ' extrael from SIGEPH: ',new%transport_extrael, ' and input file: ',new%eph_extrael, "differ", ch10, &
+       ' Will recompute the chemical potential'
      call wrtout(std_out, msg)
    end if
 
@@ -462,8 +463,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
        ! for finite doping it's hard to find nelect that exactly matches ebands%nelect.
        ! in this case we print a warning
        write(msg,'(3(a,f10.6))')&
-         ' Calculated number of electrons nelect = ',nelect,&
-         ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,' for T = ',new%kTmesh(itemp)
+         ' Calculated number of electrons nelect: ',nelect,&
+         ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for T: ',new%kTmesh(itemp)
        if (new%kTmesh(itemp) == zero) then
          MSG_WARNING(msg)
        else
@@ -588,7 +589,9 @@ subroutine rta_compute(self, cryst, dtset, comm)
  edos_intmeth = 2
  if (dtset%prtdos == 1) edos_intmeth = 1
  if (dtset%prtdos == -2) edos_intmeth = 3
- edos_step = dtset%dosdeltae; if (edos_step == 0) edos_step = 0.001
+ edos_step = dtset%dosdeltae
+ if (edos_step == zero) edos_step = 0.001
+ if (edos_step == zero) edos_step = one / Ha_meV
  edos_broad = dtset%tsmear
 
  ! Set default energy range for DOS
@@ -602,16 +605,20 @@ subroutine rta_compute(self, cryst, dtset, comm)
  end do
 
  ! Compute DOS, vv_dos and vvtau_DOS (v x v times lifetimes)
- !  out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
- !  out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
+ !    out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
+ !    out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
+ !  Vectors and tensors are in Cartesian coordinates.
 
+ ! TODO: vv_dos_mesh is redundant with edos_mesh and should be removed
  self%edos = ebands_get_dos_matrix_elements(self%ebands, cryst, &
                                             nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
                                             edos_intmeth, edos_step, edos_broad, comm, &
                                             self%vv_dos_mesh, &
                                             out_valsdos, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
 
- if (my_rank == master) call self%edos%print(unit=std_out)
+ if (my_rank == master) then
+   call self%edos%print(unit=std_out, header="DOS, VV_DOS and VVTAU_DOS settings")
+ end if
 
  ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, nsppol)
  self%nw = self%edos%nw
@@ -680,7 +687,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
        ! HM: to write it as a single division I do: kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
        ! Check why do we need minus sign here to get consistent results with Boltztrap!
-       ! MG: Very likely because we don't use the same conventions in the defintion of the Onsanger coefficients.
+       ! MG: Very likely because we don't use the same conventions in the defintion of the Onsager coefficients.
        call safe_div( -volt_SI**2 * fact0 * &
          (self%l1(:,:,:,itemp,spin,irta)**2 - self%l2(:,:,:,itemp,spin,irta) * self%l0(:,:,:,itemp,spin,irta)), &
          kT * self%l0(:,:,:,itemp,spin,irta), zero, self%kappa(:,:,:,itemp,spin,irta))
@@ -691,7 +698,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Compute the index of the Fermi level and handle possible out of range condition.
  ifermi = bisect(self%vv_dos_mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
-   MSG_ERROR("Bisection could not find index of the Fermi level!")
+   MSG_ERROR("Bisection could not find index of the Fermi level! in vv_dos_mesh")
  end if
 
  ! Mobility
@@ -853,7 +860,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Compute index of valence band
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
- max_occ = two / (self%nspinor*self%nsppol)
+ max_occ = two / (self%nspinor * self%nsppol)
  nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
 
  ABI_MALLOC(self%mobility_mu, (2, 3, 3, self%ntemp, self%nsppol, self%nrta))
@@ -892,7 +899,8 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
  fact = max_occ * fact0 / e_Cb / two * 100**2
 
- ! Compute mobility
+ ! Compute mobility_mu i.e. results in which lifetimes have been computed in a consistent way
+ ! with the same the Fermi level. In all the other cases, indeed we assume tau does not depend on ef.
  self%mobility_mu = zero
  cnt = 0
  do spin=1,nsppol
@@ -915,7 +923,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
        ! Symmetrize tensor
        vv_tens = symmetrize_tensor(cryst, vv_tens)
 
-       ! Multiply by the lifetime
+       ! Multiply by the lifetime (SERTA or MRTA)
        do irta=1,self%nrta
          do itemp=1,self%ntemp
            mu_e = self%transport_mu_e(itemp)
@@ -1100,7 +1108,6 @@ subroutine rta_print(self, cryst, dtset, dtfil)
 
  !do irta=1,self%nrta
  do irta=1,1
-   !write(msg, "(a)")irta2info(irta)
    if (irta == 1) rta_type = "RTA type: Self-energy relaxation time approximation (SERTA)"
    if (irta == 2) rta_type = "RTA type: Momentum relaxation time approximation (MRTA)"
    !call wrtout([std_out, ab_out], rta_type, newlines=1)
@@ -1259,38 +1266,6 @@ subroutine rta_free(self)
 
 end subroutine rta_free
 !!***
-
-!!! !----------------------------------------------------------------------
-!!!
-!!! !!****f* m_rta/irta2info
-!!! !! NAME
-!!! !! irta2info
-!!! !!
-!!! !! FUNCTION
-!!! !! Return string with info about RTA associated to the irta index
-!!! !!
-!!! !! SOURCE
-!!!
-!!! subroutine irta2info(irta)
-!!!
-!!! !Arguments ------------------------------------
-!!! !scalars
-!!!  integer, intent(in) :: irta
-!!!
-!!! !Local variables ------------------------------
-!!!
-!!! ! *************************************************************************
-!!!
-!!!  select case (irta)
-!!!  case (1)
-!!!    irta2a = "SERTA"
-!!!  case (2)
-!!!    irta2a = "MRTA"
-!!!  case default
-!!!    irta2a = "Unknown approximation!"
-!!!  end select
-!!!
-!!! end subroutine irta2ifo
 
 end module m_rta
 !!***

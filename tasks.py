@@ -302,7 +302,7 @@ def lldb(ctx, input_name, exec_name="abinit"):
 
 
 @task
-def abinit_run(ctx, input_name):
+def abinit(ctx, input_name):
     """
     Execute `abinit` with the given `input_name`.
     """
@@ -310,13 +310,13 @@ def abinit_run(ctx, input_name):
 
 
 @task
-def anaddb_run(ctx, input_name):
-    """"Execute `abinit` with the given `input_name`."""
+def anaddb(ctx, input_name):
+    """"execute `anaddb` with the given `input_name`."""
     _run(ctx, input_name, exec_name="anaddb")
 
 
 def _run(ctx, input_name, exec_name):
-    """"Execute `abinit input_name`"""
+    """"Execute `exec_name input_name`"""
     top = find_top_build_tree(".", with_abinit=True)
     binpath = os.path.join(top, "src", "98_main", exec_name)
     cprint(f"Using binpath: {binpath}", "green")
