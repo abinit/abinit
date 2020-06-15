@@ -362,7 +362,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp) :: ecutf,ecutsus,edum,elast,etotal,evxc,fermie,gsqcut,hyb_mixing,hyb_mixing_sr
  real(dp) :: maxfor,res2,residm,ucvol,ucvol_local,val_max
  real(dp) :: val_min,vxcavg,vxcavg_dum
- real(dp) :: zion,wtime_step,now,prev
+ real(dp) :: zion,wtime_step,now,prev,esum !MRM
  character(len=10) :: tag
  character(len=500) :: MY_NAME = "scfcv_core"
  character(len=1500) :: message
@@ -2135,7 +2135,31 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 ! MRM print final Hartree energy components
  write(std_out,'(a1)')' '
  write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
- write(std_out,'(a,2(es16.6,a))')' Eh[GS]  = : ',energies%e_hartree,' Ha ,',energies%e_hartree*Ha_eV,' eV'
+
+ esum=energies%e_kinetic+energies%e_ewald+energies%e_corepsp+energies%e_hartree+energies%e_xc&
+ &+energies%e_localpsp+energies%e_nlpsp_vfock-energies%e_fock0& 
+ &+energies%e_hybcomp_E0+energies%e_hybcomp_v0+energies%e_hybcomp_v+energies%e_vdw_dftd&
+ &+energies%e_elecfield+energies%e_magfield   
+
+ write(std_out,'(a,2(es16.6,a))')' T          = : ',energies%e_kinetic    ,' Ha ,',energies%e_kinetic*Ha_eV    ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Vnn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Core       = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV      ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' J          = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Exc        = : ',energies%e_xc         ,' Ha ,',energies%e_xc*Ha_eV         ,' eV'
+ if(abs(energies%e_vdw_dftd)>1.0d-6) then
+   write(std_out,'(a,2(es16.6,a))')' EvdW-D     = : ',energies%e_vdw_dftd   ,' Ha ,',energies%e_vdw_dftd*Ha_eV   ,' eV'
+ endif
+ write(std_out,'(a,2(es16.6,a))')' Elocalpsp  = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Enlpsp_fock= : ',energies%e_nlpsp_vfock,' Ha ,',energies%e_nlpsp_vfock*Ha_eV,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Efock0     = : ',-energies%e_fock0     ,' Ha ,',-energies%e_fock0*Ha_eV     ,' eV'
+ if(abs(energies%e_elecfield)>1.0d-6) then
+   write(std_out,'(a,2(es16.6,a))')' Eefield    = : ',energies%e_elecfield  ,' Ha ,',energies%e_elecfield*Ha_eV  ,' eV'
+ endif
+ if(abs(energies%e_magfield)>1.0d-6) then
+   write(std_out,'(a,2(es16.6,a))')' Emfield    = : ',energies%e_magfield   ,' Ha ,',energies%e_magfield*Ha_eV   ,' eV'
+ endif
+ write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
+ write(std_out,'(a,2(es16.6,a))')' Etot       = : ',esum                  ,' Ha ,',esum*Ha_eV                  ,' eV'
  write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
 
  call timab(246,2,tsec)

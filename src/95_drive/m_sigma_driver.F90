@@ -2307,14 +2307,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      eh_energy = 0.5d0*me_get_haene(Sr,KS_me,Kmesh,QP_BSt)
-     write(msg,'(a,2(es16.6,a))')' Eh[KS]  = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Eh[KS]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      ex_energy = 0.25*sigma_get_exene(Sr,Kmesh,QP_BSt)
-     write(msg,'(a,2(es16.6,a))')' Ex[KS]  = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Ex[KS]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Vee[KS] = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+     write(msg,'(a,2(es16.6,a))')' Vee[KS]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
      write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
@@ -2359,7 +2359,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        if(gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
          if(gw1rdm>1) then
-           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
+           !MAU call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
          endif
 !        Update the full 1RDM with the correlation (k-point) one
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2512,14 +2512,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        eh_energy = 0.5d0*me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
-       write(msg,'(a,2(es16.6,a))')' Eh[GW]  = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
+       write(msg,'(a,2(es16.6,a))')' Eh[GW]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        ex_energy = 0.25*sigma_get_exene(Sr,Kmesh,QP_BSt)
-       write(msg,'(a,2(es16.6,a))')' Ex[GW]  = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
+       write(msg,'(a,2(es16.6,a))')' Ex[GW]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a,2(es16.6,a))')' Vee[GW] = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
+       write(msg,'(a,2(es16.6,a))')' Vee[GW]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
