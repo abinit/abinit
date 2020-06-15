@@ -74,7 +74,6 @@ program abitk
  type(crystal_t) :: cryst, other_cryst
  type(geo_t) :: geo
  type(kpath_t) :: kpath
- type(gaps_t) :: gaps
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
@@ -133,7 +132,7 @@ program abitk
      write(std_out,"(a)")"ebands_dos FILE --intmeth, --step, --broad  Compute electron DOS."
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
-     !write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
+     write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
      !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
      !write(std_out,"(a)")"skw_path FILE                     Produce BXSF file for Xcrysden."
      !write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK       Use eigens from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
@@ -220,15 +219,7 @@ program abitk
 
  case ("ebands_gaps")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   ierr = get_gaps(ebands, gaps)
-   if (ierr /= 0) then
-     do spin=1, ebands%nsppol
-       MSG_WARNING(trim(gaps%errmsg_spin(spin)))
-     end do
-     MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
-   end if
-   call gaps%print(unit=std_out)
-   call gaps%free()
+   call ebands_print_gaps(ebands, std_out)
 
  case ("ebands_dos", "ebands_jdos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
@@ -290,6 +281,7 @@ program abitk
 
  case ("skw_compare")
    ! Get energies on the IBZ from filepath
+
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
    ! Get ab-initio energies for the second file (assume it's a path!)
@@ -298,8 +290,13 @@ program abitk
    ! Interpolate band energies on the path with star-functions
    kpath = kpath_new(other_ebands%kptns, other_cryst%gprimd, -1)
 
+
    call parse_skw_params(skw_params)
    ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
+
+   ! Compare gaps
+   call ebands_print_gaps(other_ebands, std_out, header="Ab-initio gaps")
+   call ebands_print_gaps(ebands_kpath, std_out, header="SKW interpolated gaps")
 
    !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
    !call ebands_write(ebands_kpath, prtebands, path)

@@ -608,6 +608,8 @@ subroutine rta_compute(self, cryst, dtset, comm)
  !    out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
  !    out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
  !  Vectors and tensors are in Cartesian coordinates.
+ !  Note how we compute the DOS only between [emin, emax] to save time and memory
+ !  this implies that IDOS and edos%ifermi are ill-defined
 
  self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, &
                                              nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &

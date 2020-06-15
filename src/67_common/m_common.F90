@@ -1923,7 +1923,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform, ncid
+ integer :: ncid, fform
  type(hdr_type) :: hdr
 !arrays
  real(dp),pointer :: gs_eigen(:,:,:)
@@ -1932,8 +1932,8 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
  ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
-   call hdr_read_from_fname(hdr, path, fform, comm)
-   ABI_CHECK(fform /= 0, "fform == 0")
+   !call hdr_read_from_fname(hdr, path, fform, comm)
+   !ABI_CHECK(fform /= 0, "fform == 0")
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
 
@@ -1941,6 +1941,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, path, comm))
    call hdr_ncread(hdr, ncid, fform)
+   ABI_CHECK(fform /= 0, "fform == 0")
    ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
    NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)

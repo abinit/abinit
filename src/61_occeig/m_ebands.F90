@@ -300,12 +300,67 @@ MODULE m_ebands
 
  end type gaps_t
 
- public :: get_gaps      ! Build the gaps object from a bandstructure.
+ public :: get_gaps            ! Build the gaps object from a bandstructure.
+ public :: ebands_print_gaps   ! Helper function to print gaps directrly from ebands.
 !!***
 
 !----------------------------------------------------------------------
 
 CONTAINS  !=====================================================================================
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_print_gaps
+!! NAME
+!! ebands_print_gaps
+!!
+!! FUNCTION
+!!  Helper function to print gaps directrly from ebands.
+!!
+!! INPUTS
+!!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_print_gaps(ebands, unit, header)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in)  :: ebands
+ integer,intent(in) :: unit
+ character(len=*),optional,intent(in) :: header
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr, spin
+ type(gaps_t) :: gaps
+
+! *********************************************************************
+
+ if (unit == dev_null) return
+
+ ierr = get_gaps(ebands, gaps)
+ if (ierr /= 0) then
+   do spin=1, ebands%nsppol
+     write(unit, "(2a)")"WARNING: " // trim(gaps%errmsg_spin(spin))
+   end do
+ end if
+
+ if (present(header)) then
+   call gaps%print(unit=std_out, header=header)
+ else
+   call gaps%print(unit=std_out, header=header)
+ end if
+ call gaps%free()
+
+end subroutine ebands_print_gaps
 !!***
 
 !----------------------------------------------------------------------
@@ -4466,8 +4521,8 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 
  ! Handle out of range condition.
  if (ief == 0 .or. ief == nw) then
-   write(msg,"(5a)")&
-    "Bisection could not find an initial guess for the Fermi level!",ch10,&
+   write(msg,"(a, f14.2, 4a)")&
+    "Bisection could not find an initial guess for the Fermi level with nelect:",ch10, ebands%nelect, &
     "Possible reasons: not enough bands or wrong number of electrons.", ch10, &
     "Returning from ebands_get_edos_matrix_elements without setting edos%ief !"
    MSG_WARNING(msg)
