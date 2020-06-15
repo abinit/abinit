@@ -39,8 +39,8 @@ will show the location of the gfortran executable or nothing if the gfortran pac
 
 Other packages of interest are developer libraries (followed by `-dev`). Those contain among others
 
-      - header files (extension `.h`). Those constitute the interface for developpers and are most often put in an include folder (e.g. /usr/include).
-      - library files (extension `.so`). Those provide the actual content of the library and are often put in a lib folder (e.g. /usr/lib).
+  - header files (extension `.h`). Those constitute the interface for developpers and are most often put in an include folder (e.g. /usr/include).
+  - library files (extension `.so`). Those provide the actual content of the library and are often put in a lib folder (e.g. /usr/lib).
 
 To obtain the locations of such files, one can use the unix command (from the dpkg package)
 
@@ -109,7 +109,7 @@ tells ABINIT to configure for a compilation with gfortran and to enable MPI supp
 
     ../configure --help
 
-Most options are detected automatically by ABINIT. For example, if `with_mpi` is set to 'yes', ABINIT will try to use the parallel fortran compiler (mpifort) and detect directories with useful library (.so) and header (.h) files for MPI support (when you use Open MPI via apt, these directories can be displayed by using `dpkg -L 'libopenmpi-dev'`).
+Most options are detected automatically by ABINIT. For example, if `with_mpi` is set to 'yes', ABINIT will try to use the parallel fortran compiler (mpifort) and detect directories with useful library (.so) and header (.h) files for MPI support. When you installed the Open MPI package via apt, these directories can be displayed by using `dpkg -L 'libopenmpi-dev'`.
 
 When a lot of options are used, it is advised to use a config file. For example, a parallellized version of abinit using lapack and blas is obtained by using the config file
 
@@ -129,9 +129,9 @@ When a lot of options are used, it is advised to use a config file. For example,
 
 Remark that
 
-        - one uses '-' when typing a flag but '_' inside the config file, e.g. `--with-mpi="yes"` becomes `with_mpi="yes"`.
-        - the LINALG_LIBS variable was explicitly set for this linux distrubution. The directory was extracted via `dpkg -L liblapack-dev` and `dpkg -L libblas-dev`.
-        - when finetuning variables and flags for a particular linux distribution, it is advised to take a look at the template file `~abinit/doc/build/config-template.ac9`. For example, the setting of `LINALG_LIBS` in this template file is given by the rule `#LINALG_LIBS="-L/usr/local/lib -llapack -lblas"`.
+  - one uses '-' when typing a flag but '_' inside the config file, e.g. `--with-mpi="yes"` becomes `with_mpi="yes"`.
+  - the LINALG_LIBS variable was explicitly set for this linux distrubution. The directory was extracted via `dpkg -L liblapack-dev` and `dpkg -L libblas-dev`.
+  - when finetuning variables and flags for a particular linux distribution, it is advised to take a look at the template file `~abinit/doc/build/config-template.ac9`. For example, the setting of `LINALG_LIBS` in this template file is given by the line `#LINALG_LIBS="-L/usr/local/lib -llapack -lblas"`.
 
 More specialized libraries might be harder to detect. For example, following section was added to the config file to detect a customized FFT and XML library. These libraries are available via apt (`libfftw3-dev `and `libxml2-dev`). The directories for the corresponding library and header files can be found by using `dpkg -L [package]` and other flags can be extracted from the `~abinit/doc/build/config-template.ac9` template
 
