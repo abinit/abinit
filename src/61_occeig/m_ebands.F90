@@ -4522,8 +4522,8 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
  ! Handle out of range condition.
  if (ief == 0 .or. ief == nw) then
    write(msg,"(a, f14.2, 4a)")&
-    "Bisection could not find an initial guess for the Fermi level with nelect:",ch10, ebands%nelect, &
-    "Possible reasons: not enough bands or wrong number of electrons.", ch10, &
+    "Bisection could not find an initial guess for the Fermi level with nelect:",ebands%nelect, ch10, &
+    "Possible reasons: not enough bands in DOS or wrong number of electrons.", ch10, &
     "Returning from ebands_get_edos_matrix_elements without setting edos%ief !"
    MSG_WARNING(msg)
    return

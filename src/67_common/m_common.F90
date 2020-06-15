@@ -1932,8 +1932,6 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
  ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
-   !call hdr_read_from_fname(hdr, path, fform, comm)
-   !ABI_CHECK(fform /= 0, "fform == 0")
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
 

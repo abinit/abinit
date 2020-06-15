@@ -155,7 +155,6 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
       eph_intmeth           1
-         eph_mrta           0
          eph_task          -4
 -          fftalg         312
            getddb          20
@@ -1490,7 +1489,6 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
       eph_intmeth           1
-         eph_mrta           0
          eph_task          -4
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00

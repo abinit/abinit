@@ -21565,24 +21565,6 @@ is not relevant for the definition of the LR model.
 ),
 
 Variable(
-    abivarname="eph_mrta",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_expert'],
-    dimensions="scalar",
-    defaultval=1,
-    mnemonics="activate Momentum Relaxation Time Approximation",
-    added_in_version="9.1.0",
-    text=r"""
-This **advanced** variable can be used to deactivate the computation of the electron linewidths with the
-Momentum Relaxation Time (MRTA) when [[eph_task]] == -4
-By default, the code computes linewidths both with the SERTA and MRTA and results are stored to netcdf file.
-The calculation of the MRTA is relatively fast but if performance is critical and only SERTA is needed, one can use
-eph_mrta 0.
-""",
-),
-
-Variable(
     abivarname="getsigeph_filepath",
     varset="files",
     vartype="string",

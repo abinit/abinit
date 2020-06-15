@@ -2245,10 +2245,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  natom = cryst%natom; natom3 = cryst%natom * 3
 
  ! Re-Im or Im only?
- new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
-
- ! Compute lifetimes in the MRTA approximation?
- new%mrta = dtset%eph_mrta
+ new%imag_only = .False.
+ if (dtset%eph_task == -4) then
+   new%imag_only = .True.
+   new%mrta = 1 ! Compute lifetimes in the MRTA approximation? Default is yes
+ end if
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)

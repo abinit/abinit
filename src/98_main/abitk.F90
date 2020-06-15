@@ -134,8 +134,8 @@ program abitk
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
      write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
      !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
-     !write(std_out,"(a)")"skw_path FILE                     Produce BXSF file for Xcrysden."
-     !write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK       Use eigens from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
+     !write(std_out,"(a)")"skw_path FILE                       Produce BXSF file for Xcrysden."
+     write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK        Use e_nk from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
 
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
      write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."

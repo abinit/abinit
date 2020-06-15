@@ -559,6 +559,8 @@ no additional $\kk$-point is considered.
 It is the case here for the first 3 datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
 
+<!-- TODO: Discuss how to dope the system! -->
+
 ### Convergence w.r.t. the k- and q-meshes
 
 Once the energy window has been set, we can start to converge the mobility with respect to the
@@ -705,13 +707,6 @@ The MPI parallelism over $\kk$-points and spins is very efficient
 but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if the memory requirements are under control
 and you want to boost the calculation.
-
-If performance is really of concern, you can also try to set [[eph_mrta]] to 0.
-By default, the code computes transport lifetimes both with the SERTA and the MRTA.
-The MRTA requires the computation of the group velocities at $\kk$ and $\kk+\qq$.
-This part is relatively fast yet it does not come for free.
-If you know in advance that you don't need MRTA results, it is possible to gain some speedup
-by avoiding the computation of $v_{m\kq}$
 
 ### How to reduce memory requirements
 

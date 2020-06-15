@@ -146,7 +146,6 @@ type, public :: dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
- integer :: eph_mrta = 1
  integer :: eph_restart = 0
  integer :: eph_task
  integer :: exchn2n3d
@@ -1388,7 +1387,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  !dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
- dtout%eph_mrta           = dtin%eph_mrta
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -3098,7 +3096,7 @@ subroutine chkvars(string)
   ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
- list_vars=trim(list_vars)//' eph_mrta eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
