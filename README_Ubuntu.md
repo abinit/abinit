@@ -31,7 +31,9 @@ The newest release of ABINIT is available at our github [https://github.com/abin
 
     sudo apt install [package]
 
-If you want to get search a package or look for more details about a package, you can use the commands `apt search` and `apt show` respectively. Packages can contain for example executable files that are placed in a bin folder (e.g. /usr/bin) and their location can be requested via the unix `which` command. For example
+If you want to search a package or look for more details about a package, you can use the commands `apt search` and `apt show` respectively.
+
+Packages can contain for example executable files that are placed in a bin folder (e.g. /usr/bin) and their location can be requested via the unix `which` command. For example
 
     which gfortran
 
@@ -68,15 +70,29 @@ Depending on your linux distribution, you might need to manually add the `mpi-de
 
 5. Some mandatory libraries:
 
-      - HDF5, NetCDF and NetCDF-Fortran, libraries to process binary files. Those are e.g. available via the `libhdf5-dev`, `libnetcdff-dev` and `libpnetcdf-dev` packages from apt.
+      - HDF5, NetCDF and NetCDF-Fortran, libraries to process binary files. Those are e.g. available via the `libhdf5-dev`, `libnetcdf-dev` and `libnetcdff-dev` packages from apt. For parallel IO also the `libpnetcdf-dev` is required.
       - LIBXC, a library containing exchange-correlation potentials, e.g. from the `libxc-dev` package.
   
-  It is also possible to generate these libraries via the ABINIT fallbacks 
+  It is also possible to generate these libraries via the ABINIT fallbacks:
 
     cd fallbacks
     ./build-abinit-fallbacks.sh
 
-  In the later case the ABINIT config file (see later) should contain `with_fallbacks="yes"`.
+  In the latter case the ABINIT config file (see later) should contain `with_fallbacks="yes"`.
+
+Following code installs a possible selection of required packages from apt for a simple parallel ABINIT compilation. This list might depend on your linux distribution, the exact ABINIT version you want to compile and the libraries you want to use.
+
+    # 1 # compiler
+    sudo apt install gfortran 
+    
+    # 2 # MPI libraries - choice for Open MPI
+    sudo apt install mpi-default-dev libopenmpi-dev
+    
+    # 3 # math libraries - choice for lapack and blas
+    sudo apt install liblapack-dev libblas-dev
+    
+    # 4 # mandatory libraries
+    sudo apt install libhdf5-dev libnetcdf-dev libnetcdff-dev libpnetcdf-dev libxc-dev
 
 ### Installing ABINIT
 
