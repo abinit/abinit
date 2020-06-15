@@ -490,6 +490,26 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 - Reading carrier lifetimes from: t56o_DS1_SIGEPH.nc
 
 
+
+  >>>> For spin  1
+   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   Fermi level: 15.06 (eV)
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 2224
+ From emin:  -9.7 to emax:  50.8 (eV)
+ Number of k-points in the IBZ: 8
+ Fermi level:   1.23189641E+01 (eV)
+ Total electron DOS at Fermi level in states/eV:   9.14819245E-03
+ Total number of electrons at eF:    8.0
+
+
  Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -657,6 +677,26 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS2_SIGEPH.nc
+
+
+
+  >>>> For spin  1
+   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   Fermi level: 15.06 (eV)
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 2224
+ From emin:  -9.7 to emax:  50.8 (eV)
+ Number of k-points in the IBZ: 8
+ Fermi level:   1.23189641E+01 (eV)
+ Total electron DOS at Fermi level in states/eV:   9.14819245E-03
+ Total number of electrons at eF:    8.0
 
 
  Transport (RTA) calculation results:
@@ -827,6 +867,22 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS3_SIGEPH.nc
+
+
+
+Metallic system for spin channel 1
+Cannot detect gap for spin: 1
+   Fermi level: 17.48 (eV)
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 2224
+ From emin:  -9.7 to emax:  50.8 (eV)
+ Number of k-points in the IBZ: 8
+ Fermi level:   1.86047941E+01 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.98393583E-01
+ Total number of electrons at eF:    8.2
 
 
  Transport (RTA) calculation results:
@@ -1004,6 +1060,22 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 - Reading carrier lifetimes from: t56o_DS4_SIGEPH.nc
 
 
+
+Metallic system for spin channel 1
+Cannot detect gap for spin: 1
+   Fermi level: 17.48 (eV)
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 2224
+ From emin:  -9.7 to emax:  50.8 (eV)
+ Number of k-points in the IBZ: 8
+ Fermi level:   1.86047941E+01 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.98393583E-01
+ Total number of electrons at eF:    8.2
+
+
  Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -1175,6 +1247,22 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 - Reading carrier lifetimes from: t56o_DS5_SIGEPH.nc
 
 
+
+Metallic system for spin channel 1
+Cannot detect gap for spin: 1
+   Fermi level: 17.50 (eV)
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 2224
+ From emin:  -9.7 to emax:  50.8 (eV)
+ Number of k-points in the IBZ: 8
+ Fermi level:   1.86047941E+01 (eV)
+ Total electron DOS at Fermi level in states/eV:   3.98393583E-01
+ Total number of electrons at eF:    8.2
+
+
  Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -1337,6 +1425,26 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t56o_DS6_SIGEPH.nc
+
+
+
+  >>>> For spin  1
+   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+   Fermi level: 15.06 (eV)
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 2224
+ From emin:  -9.7 to emax:  50.8 (eV)
+ Number of k-points in the IBZ: 8
+ Fermi level:   1.23189641E+01 (eV)
+ Total electron DOS at Fermi level in states/eV:   9.14819245E-03
+ Total number of electrons at eF:    8.0
 
 
  Transport (RTA) calculation results:

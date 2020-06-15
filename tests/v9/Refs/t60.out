@@ -1234,7 +1234,27 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS4_SIGEPH.nc
 
+
+
+  >>>> For spin  1
+   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fermi level:  4.07 (eV)
+
  Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 3768
+ From emin: -21.7 to emax:  80.8 (eV)
+ Number of k-points in the IBZ: 3
+ Fermi level:   8.68615077E+00 (eV)
+ Total electron DOS at Fermi level in states/eV:   2.20305172E-02
+ Total number of electrons at eF:    8.0
+
 
  Transport (RTA) calculation results:
 
@@ -1590,7 +1610,25 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS6_SIGEPH.nc
 
+
+
+  >>>> For spin  1
+   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fermi level:  4.07 (eV)
+
  Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 351
+ From emin:  -0.7 to emax:   8.8 (eV)
+ Number of k-points in the IBZ: 3
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
 
  Transport (RTA) calculation results:
 
@@ -1785,7 +1823,25 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS7_SIGEPH.nc
 
+
+
+  >>>> For spin  1
+   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fermi level:  4.07 (eV)
+
  Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 351
+ From emin:  -0.7 to emax:   8.8 (eV)
+ Number of k-points in the IBZ: 3
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
 
  Transport (RTA) calculation results:
 

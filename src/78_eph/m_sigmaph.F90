@@ -3067,9 +3067,8 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
  if (dtset%prtdos /= 0) then
    call cwtime(cpu, wall, gflops, "start")
    ! Compute electron DOS.
-   edos_intmeth = 2; if (self%bcorr == 1) edos_intmeth = 3
+   edos_intmeth = 2; if (self%bcorr == 1) edos_intmeth = -2
    if (dtset%prtdos == 1) edos_intmeth = 1
-   !if (dtset%prtdos == -2) edos_intmeth = 3
    edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
    call wrtout(std_out, " Computing electron dos. Use prtdos 0 to disable this part...", do_flush=.True.)
    edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)

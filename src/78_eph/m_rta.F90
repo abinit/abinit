@@ -140,9 +140,7 @@ type,public :: rta_t
 
    type(edos_t) :: edos
    ! electronic density of states
-
-   real(dp),allocatable :: vv_dos_mesh(:)
-   ! mesh used for vv_dos, vvtau_dos and tau_dos
+   ! edos%mesh is the mesh used for vv_dos, vvtau_dos and tau_dos
    ! (%nw)
 
    real(dp),allocatable :: tau_dos(:,:,:,:)
@@ -360,7 +358,10 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
  end if
 
- if (my_rank == master) call new%gaps%print(unit=std_out)
+ if (my_rank == master) then
+   call new%gaps%print(unit=std_out)
+   call new%gaps%print(unit=ab_out)
+ end if
 
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
@@ -587,8 +588,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Compute DOS and VV_DOS and VV_TAU_DOS
  ! Define integration method and mesh step.
  edos_intmeth = 2
- if (dtset%prtdos == 1) edos_intmeth = 1
- if (dtset%prtdos == -2) edos_intmeth = 3
+ if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae
  if (edos_step == zero) edos_step = 0.001
  if (edos_step == zero) edos_step = one / Ha_meV
@@ -609,15 +609,14 @@ subroutine rta_compute(self, cryst, dtset, comm)
  !    out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
  !  Vectors and tensors are in Cartesian coordinates.
 
- ! TODO: vv_dos_mesh is redundant with edos_mesh and should be removed
- self%edos = ebands_get_dos_matrix_elements(self%ebands, cryst, &
-                                            nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
-                                            edos_intmeth, edos_step, edos_broad, comm, &
-                                            self%vv_dos_mesh, &
-                                            out_valsdos, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
+ self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, &
+                                             nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
+                                             edos_intmeth, edos_step, edos_broad, comm, &
+                                             out_valsdos, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
 
  if (my_rank == master) then
-   call self%edos%print(unit=std_out, header="DOS, VV_DOS and VVTAU_DOS settings")
+   call self%edos%print(unit=std_out, header="Computation of DOS, VV_DOS and VVTAU_DOS")
+   call self%edos%print(unit=ab_out,  header="Computation of DOS, VV_DOS and VVTAU_DOS")
  end if
 
  ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, nsppol)
@@ -696,9 +695,9 @@ subroutine rta_compute(self, cryst, dtset, comm)
  end do
 
  ! Compute the index of the Fermi level and handle possible out of range condition.
- ifermi = bisect(self%vv_dos_mesh, self%ebands%fermie)
+ ifermi = bisect(self%edos%mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
-   MSG_ERROR("Bisection could not find the index of the Fermi level in vv_dos_mesh!")
+   MSG_ERROR("Bisection could not find the index of the Fermi level in edos%mesh!")
  end if
 
  ! Mobility
@@ -715,14 +714,14 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
      ! Compute carrier density of electrons (ifermi:self%nw)
      do iw=1,self%nw ! doping
-       self%n(iw,itemp,1) = carriers(self%vv_dos_mesh, self%edos%dos(:,spin) * max_occ, ifermi, self%nw, &
-                                     kT, self%vv_dos_mesh(iw)) / cryst%ucvol / Bohr_meter**3
+       self%n(iw,itemp,1) = carriers(self%edos%mesh, self%edos%dos(:,spin) * max_occ, ifermi, self%nw, &
+                                     kT, self%edos%mesh(iw)) / cryst%ucvol / Bohr_meter**3
      end do
 
      ! Compute carrier density of holes (1:ifermi)
      do iw=1,self%nw ! doping
-       self%n(iw,itemp,2) = carriers(self%vv_dos_mesh, self%edos%dos(:,spin) * max_occ, 1, ifermi, &
-                                     kT, self%vv_dos_mesh(iw)) / cryst%ucvol / Bohr_meter**3
+       self%n(iw,itemp,2) = carriers(self%edos%mesh, self%edos%dos(:,spin) * max_occ, 1, ifermi, &
+                                     kT, self%edos%mesh(iw)) / cryst%ucvol / Bohr_meter**3
      end do
 
      self%n(:,itemp,2) = self%n(self%nw,itemp,2) - self%n(:,itemp,2)
@@ -787,11 +786,11 @@ contains
    do itemp=1,self%ntemp
      kT = self%kTmesh(itemp)
      do imu=1,self%nw
-       mu = self%vv_dos_mesh(imu)
+       mu = self%edos%mesh(imu)
 
        ! Build integrand for mu
        do iw=1,self%nw
-         ee = self%vv_dos_mesh(iw)
+         ee = self%edos%mesh(iw)
          if (order > 0) then
            kernel(iw,:,:,:) = fact * self%vvtau_dos(iw,:,:,itemp,:,irta) * (mu - ee)**order * occ_dfd(ee, kT, mu)
          else
@@ -921,7 +920,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
          end do
        end do
        ! Symmetrize tensor
-       vv_tens = symmetrize_tensor(cryst, vv_tens)
+       vv_tens = cryst%symmetrize_cart_tens33(vv_tens)
 
        ! Multiply by the lifetime (SERTA or MRTA)
        do irta=1,self%nrta
@@ -937,8 +936,8 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
        end do
      end do
 
-   end do !kpt
- end do !spin
+   end do ! kpt
+ end do ! spin
 
  !call xmpi_sum(self%mobility_mu, comm, ierr)
 
@@ -946,10 +945,10 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  do irta=1,self%nrta
    do spin=1,nsppol
      do itemp=1,self%ntemp
-       ! for electrons
+       ! electrons
        call safe_div(fact * self%mobility_mu(1,:,:,itemp,spin,irta), &
                      self%ne(itemp) / cryst%ucvol / Bohr_meter**3, zero, self%mobility_mu(1,:,:,itemp,spin,irta) )
-       ! for holes
+       ! holes
        call safe_div(fact * self%mobility_mu(2,:,:,itemp,spin,irta), &
                      self%nh(itemp) / cryst%ucvol / Bohr_meter**3, zero, self%mobility_mu(2,:,:,itemp,spin,irta) )
      end do
@@ -957,21 +956,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  end do
 
  call cwtime_report(" rta_compute_mobility", cpu, wall, gflops)
-
-contains
- function symmetrize_tensor(cryst, tcart) result(tsum)
-  type(crystal_t),intent(in) :: cryst
-  integer :: isym
-  real(dp) :: tsum(3,3), tcart(3,3)
-
-  ! symmetrize
-  tsum = zero
-  do isym=1, cryst%nsym
-    tsum = tsum + matmul((cryst%symrel_cart(:,:,isym)), matmul(tcart, transpose(cryst%symrel_cart(:,:,isym))))
-  end do
-  tsum = tsum / cryst%nsym
-
- end function symmetrize_tensor
 
 end subroutine rta_compute_mobility
 !!***
@@ -1023,7 +1007,6 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
     nctkarr_t('eph_mu_e', "dp", "ntemp"), &
     nctkarr_t('vb_max', "dp", "nsppol"), &
     nctkarr_t('cb_min', "dp", "nsppol"), &
-    nctkarr_t('vv_dos_mesh', "dp", "edos_nw"), &
     nctkarr_t('vv_dos', "dp", "edos_nw, three, three, nsppol"), &
     nctkarr_t('vvtau_dos', "dp", "edos_nw, three, three, ntemp, nsppol, nrta"), &
     nctkarr_t('tau_dos', "dp", "edos_nw, ntemp, nsppol, nrta"), &
@@ -1056,7 +1039,6 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min"), self%gaps%cb_min))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_mu_e"), self%eph_mu_e))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_mu_e"), self%transport_mu_e))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vv_dos_mesh"), self%vv_dos_mesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vv_dos"), self%vv_dos))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvtau_dos"),  self%vvtau_dos))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "tau_dos"),  self%tau_dos))
@@ -1196,7 +1178,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
      write(ount, "(a)")"# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
      do iw=1,self%nw
-       write(ount, "(10(es16.6))")self%vv_dos_mesh(iw), values(iw, :, :, itemp, 1)
+       write(ount, "(10(es16.6))")self%edos%mesh(iw), values(iw, :, :, itemp, 1)
      end do
    end do
   write(ount, "(a)")""
@@ -1206,7 +1188,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
      write(ount, "(a)") &
        "# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
      do iw=1,self%nw
-       write(ount, "(19(es16.6))")self%vv_dos_mesh(iw), values(iw, :, :, itemp, 1), values(iw, :, :, itemp, 2)
+       write(ount, "(19(es16.6))")self%edos%mesh(iw), values(iw, :, :, itemp, 1), values(iw, :, :, itemp, 2)
      end do
    end do
   write(ount, "(a)")""
@@ -1239,7 +1221,6 @@ subroutine rta_free(self)
  ABI_SFREE(self%vv_dos)
  ABI_SFREE(self%vvtau_dos)
  ABI_SFREE(self%tau_dos)
- ABI_SFREE(self%vv_dos_mesh)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
  ABI_SFREE(self%eph_mu_e)

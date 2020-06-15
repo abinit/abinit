@@ -221,7 +221,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
- real(dp),allocatable :: vvdos_mesh(:) !, vvdos_vals(:,:,:,:)
+ !real(dp),allocatable :: vvdos_mesh(:) !, vvdos_vals(:,:,:,:)
  complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -486,7 +486,6 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_FREE(kg_k)
  ABI_FREE(ihrc)
  ABI_FREE(cwaveprj)
-
  ABI_SFREE(distrib_mat)
  ABI_SFREE(distrib_diago)
 
@@ -510,8 +509,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  if (is_kmesh .and. only_diago) then
    ! Compute electron DOS with tetra.
    edos_intmeth = 2
-   if (dtset%prtdos == 1) edos_intmeth = 1
-   if (dtset%prtdos == -2) edos_intmeth = 3
+   if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
    edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
    if (edos_step == 0) edos_step = 0.001
    !edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
@@ -556,9 +554,9 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    end do
    call gaps%free()
 
-   edos = ebands_get_dos_matrix_elements(ebands, cryst, &
+   edos = ebands_get_edos_matrix_elements(ebands, cryst, &
                                          0, dummy_vals, 0, dummy_vecs, 1, vv_tens, &
-                                         edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
+                                         edos_intmeth, edos_step, edos_broad, comm, &
                                          dummy_dosvals, dummy_dosvecs, vvdos_tens, &
                                          emin=emin, emax=emax)
    ABI_SFREE(dummy_dosvals)
@@ -601,7 +599,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")], defmode=.True.)
      NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), edos%mesh))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_tens(:,1,:,:,:,1)))
    end if
    NCF_CHECK(nf90_close(ncid))
@@ -647,7 +645,6 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_SFREE(vdiago)
  ABI_SFREE(vmat)
 
- ABI_SFREE(vvdos_mesh)
  ABI_SFREE(vvdos_tens)
  call edos%free()
  !call jdos%free()

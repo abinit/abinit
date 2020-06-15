@@ -780,6 +780,24 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
 - Reading carrier lifetimes from: t61o_DS3_SIGEPH.nc
 
 
+
+  >>>> For spin  1
+   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fermi level:  4.07 (eV)
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 329
+ From emin:  -0.4 to emax:   8.5 (eV)
+ Number of k-points in the IBZ: 29
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
  Transport (RTA) calculation results:
 
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]

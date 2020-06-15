@@ -152,11 +152,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
- integer :: ierr,usexcnhat !,edos_intmeth
+ integer :: ierr,usexcnhat
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
- !real(dp) :: edos_step,edos_broad
  !real(dp) :: cpu,wall,gflops
  !real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,nelect,norm,oldefermi
  character(len=500) :: msg
@@ -165,7 +164,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: cryst
  type(ebands_t) :: ebands
- !type(edos_t) :: edos
  type(pawfgr_type) :: pawfgr
  !type(paw_dmft_type) :: paw_dmft
  type(mpi_type) :: mpi_enreg
@@ -248,40 +246,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !call ebands_update_occ(ebands, spinmagntarget)
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
  ABI_FREE(gs_eigen)
-
- ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points
- ! Could just do DOS around efermi
- !edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- !edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- !call edos_init(edos,ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
- !ABI_CHECK(ierr==0, "Error in edos_init, see message above.")
-
- ! Store DOS per spin channels
- !n0(:) = edos%gef(1:edos%nsppol)
- !if (my_rank == master) then
- !  path = strcat(dtfil%filnam_ds(4), "_EDOS")
- !  call edos_write(edos, path)
- !  !call edos_print(edos)
- !  write(ab_out,"(a)")sjoin("- Writing electron DOS to file:", path)
- !  write(ab_out,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief)*Ha_eV," [eV]"
- !  write(ab_out,"(a,es16.8)")" Total electron DOS in states/eV : ",edos%gef(0) / Ha_eV
- !  if (ebands%nsppol == 2) then
- !    write(ab_out,"(a,es16.8)")"   Spin up:  ",edos%gef(1) / Ha_eV
- !    write(ab_out,"(a,es16.8)")"   Spin down:",edos%gef(2) / Ha_eV
- !  end if
- !end if
- !call edos_free(edos)
-
- ! Output useful info on the electronic bands.
- ! Fermi Surface
- !if (dtset%prtfsurf /= 0  .and. my_rank == master) then
- !  path = strcat(dtfil%filnam_ds(4), "_BXSF")
- !  if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
- !    MSG_WARNING("Cannot produce file for Fermi surface, check log file for more info")
- !  end if
- !end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&

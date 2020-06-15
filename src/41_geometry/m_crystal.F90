@@ -224,6 +224,12 @@ MODULE m_crystal
    procedure :: print => crystal_print
    ! Print dimensions and basic info stored in the object
 
+   procedure :: symmetrize_cart_vec3 => crystal_symmetrize_cart_vec3
+   ! Symmetrize a 3d cartesian vector
+
+   procedure :: symmetrize_cart_tens33 => crystal_symmetrize_cart_tens33
+   ! Symmetrize a cartesian 3x3 tensor
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
@@ -1517,6 +1523,80 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  close (iout)
 
 end subroutine prtposcar
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_symmetrize_cart_vec3
+!! NAME
+!!  crystal_symmetrize_cart_vec3
+!!
+!! FUNCTION
+!!  Symmetrize a cartesian vector.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function crystal_symmetrize_cart_vec3(cryst, v) result(vsum)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: v(3)
+ real(dp) :: vsum(3)
+
+!Local variables-------------------------------
+ integer :: isym
+ real(dp) :: vsym(3)
+
+ !symmetrize
+ vsum = zero
+ do isym=1, cryst%nsym
+   vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
+   vsum = vsum + vsym
+ end do
+ vsum = vsum / cryst%nsym
+
+end function crystal_symmetrize_cart_vec3
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_symmetrize_cart_vec3
+!! NAME
+!!  crystal_symmetrize_cart_vec3
+!!
+!! FUNCTION
+!!  Symmetrize a cartesian 3x3 tensor
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function crystal_symmetrize_cart_tens33(cryst, t) result(tsum)
+
+!Arguments ------------------------------------
+ class(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: t(3,3)
+ real(dp) :: tsum(3,3)
+
+!Local variables-------------------------------
+ integer :: isym
+ real(dp) :: tsym(3,3)
+
+ !symmetrize
+ tsum = zero
+ do isym=1, cryst%nsym
+   tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
+   tsum = tsum + tsym
+ end do
+ tsum = tsum / cryst%nsym
+
+end function crystal_symmetrize_cart_tens33
 !!***
 
 END MODULE m_crystal
