@@ -20,6 +20,7 @@ abinit.dir
 build_g95
 build_gfortran
 build_ifort
+build.*
 debian.ac
 config.optim
 logfile
@@ -36,6 +37,7 @@ abiref.ac
 rafael.ac
 tmp
 tmp2
+ubuntu.ac
 auto-*.m4
 *.srcc
 tmp-*
