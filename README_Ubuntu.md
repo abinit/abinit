@@ -27,7 +27,7 @@ WARNING!
 
 ### Background (optional section)
 
-The newest release of ABINIT is available at our github [https://github.com/abinit/abinit](https://github.com/abinit/abinit). Compilation from source enables one to optimize parallellism, customize linear algebra libraries etc. Any of the prerequired packages are available via apt. Simply type
+The newest release of ABINIT is available at [https://www.abinit.org/packages](https://www.abinit.org/packages). Compilation from source enables one to optimize parallellism, customize linear algebra libraries etc. Any of the prerequired packages are available via apt. Simply type
 
     sudo apt install [package]
 
@@ -98,9 +98,14 @@ Following code installs a possible selection of required packages from apt for a
 
 ### Installing ABINIT
 
+Download ABINIT. For normal users it is advised to get the newest version from our website (replace 9.0.4 by the newest version available).
+
+    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
+    tar xzf abinit-9.0.4.tar.gz
+    cd abinit-9.0.4 
+
 Create a working directory:
 
-    cd abinit_src_dir
     mkdir build && cd build
 
 To configure:
