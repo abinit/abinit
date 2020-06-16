@@ -19,9 +19,9 @@ To install ABINIT, just type:
 
 ... type your user password and ABINIT should install smoothly with its dependencies.
 
-Note:
+WARNING!
 
-* This version of ABINIT is often an older one.
+* This version of ABINIT is most likely an older one.
 
 ## Compiling from source under Ubuntu
 
@@ -49,6 +49,8 @@ To obtain the locations of such files, one can use the unix command (from the dp
     dpkg -L [package]
 
 ### Prerequesites
+
+The prerequisites are first discussed qualitatively, because the exact installation of these might depend on the exact linux distribution. A possible list (tested for Ubuntu 19.10) is found at the end of this section.
 
 1. Ubuntu or a similar linux distribution
 

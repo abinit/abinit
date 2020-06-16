@@ -22,6 +22,7 @@ build_gfortran
 build_ifort
 build.*
 debian.ac
+debian.ac9
 config.optim
 logfile
 make.log
@@ -38,6 +39,7 @@ rafael.ac
 tmp
 tmp2
 ubuntu.ac
+ubuntu.ac9
 auto-*.m4
 *.srcc
 tmp-*
