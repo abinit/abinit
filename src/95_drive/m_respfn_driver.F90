@@ -840,7 +840,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
-&   dtset%qprtrb,dum_rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+&   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
  end if
 
@@ -4013,7 +4013,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    optatm=0;optdyfr=1;optgr=0;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1;opteltfr=0
    call atm2fft(atindx1,dum_atmrho,dum_atmvloc,dyfrxc,dyfrlo,dum_eltfrxc,&
 &   dum_gauss,gmet,gprimd,dum_grn,dum_grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
-&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,qprtrb,rhog,&
+&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,qprtrb,dtset%rcut,rhog,&
 &   rprimd,dum_strn,dum_strv,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb,vlspl)
    ABI_DEALLOCATE(vxctotg)
    if (n3xccc==0) dyfrxc=zero
@@ -4028,7 +4028,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    ABI_ALLOCATE(v_dum,(nfft))
    call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
 &   gr_dum,gsqcut,dtset%icutcoul,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,dtset%nkpt,&
-&   ntypat,option,ph1d,qgrid,qprtrb,rhog,rprimd,ucvol,dtset%vcutgeo,vlspl,vprtrb,v_dum)
+&   ntypat,option,ph1d,qgrid,qprtrb,dtset%rcut,rhog,rprimd,ucvol,dtset%vcutgeo,vlspl,vprtrb,v_dum)
    do iatom=1,natom
 !    Reestablish correct order of atoms
      dyfrlo(1:3,1:3,atindx1(iatom))=dyfrlo_tmp1(1:3,1:3,iatom)

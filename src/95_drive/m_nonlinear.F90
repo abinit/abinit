@@ -847,7 +847,7 @@ end if
    call atm2fft(atindx1,xccc3d,vpsp,dum_dyfrn,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
 &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
-&   dtset%qprtrb,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+&   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
  else
 !  Norm-cons.: compute Vloc in reciprocal space and core charge in real space

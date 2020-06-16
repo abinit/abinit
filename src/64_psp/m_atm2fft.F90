@@ -194,7 +194,7 @@ contains
 subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &                  grn,grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
 &                  optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,rprimd,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
+&                  psps,pawtab,ph1d,qgrid,qprtrb,rcut,rhog,rprimd,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
 &                  is2_in,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
 
 !Arguments ------------------------------------
@@ -202,7 +202,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,optatm,optdyfr,opteltfr
  integer,intent(in) :: optgr,optn,optn2,optstr,optv,usepaw
  integer,optional,intent(in) :: is2_in,me_g0,comm_fft,paral_kgb
- real(dp),intent(in) :: gsqcut,ucvol
+ real(dp),intent(in) :: rcut,gsqcut,ucvol
  type(pseudopotential_type),target,intent(in) :: psps
  type(distribfft_type),optional,intent(in),target :: distribfft
 !arrays
@@ -363,7 +363,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  !Initialize Gcut-off array from m_termcutoff
  !ABI_ALLOCATE(gcutoff,(nfft))
- call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,1,rprimd,vcutgeo)
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,1,rcut,rprimd,vcutgeo)
 
  ia1=1
  do itypat=1,ntypat

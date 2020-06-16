@@ -283,7 +283,7 @@ contains
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,rprimd,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,dum_rcut,rhog,rprimd,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    end if
@@ -302,7 +302,7 @@ contains
      call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
 &     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
 &     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,rprimd,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,dum_rcut,rhog,rprimd,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      corstr(1:6)=corstr(1:6)+taustr(1:6)

@@ -595,7 +595,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 !      Note: atindx1 should be passed to atm2fft (instead of atindx) but it is unused...
        call atm2fft(atindx,xccc3d,vpsp,dummy,dummy2,dummy9,dummy1,gmet,gprimd,dummy3,dummy4,gsqcut,&
 &       mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,&
-&       optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dummy5,rprimd,dummy6,dummy7,&
+&       optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,dummy5,rprimd,dummy6,dummy7,&
 &       ucvol,psps%usepaw,dummy8,dummy8,dummy8,vprtrb,psps%vlspl,&
 &       comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &       paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
@@ -1225,7 +1225,7 @@ end subroutine prcref
      call atm2fft(atindx,xccc3d,vpsp,dummy_out1,dummy_out2,dummy_out3,dummy_in,gmet,&
 &     gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,&
 &     nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&     psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dummy_in,rprimd,dummy_out6,dummy_out7,ucvol,&
+&     psps,pawtab,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,dummy_in,rprimd,dummy_out6,dummy_out7,ucvol,&
 &     psps%usepaw,dummy_in,dummy_in,dummy_in,vprtrb,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
