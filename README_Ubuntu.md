@@ -105,9 +105,9 @@ Create a working directory:
 
 To configure:
 
-    ../configure --with-config-file='my_config_file.ac'
+    ../configure --with-config-file='my_config_file.ac9'
 
-where 'my_config_file.ac' is either a self made config file. More on the configure options is presented in next section.
+where 'my_config_file.ac9' is either a self made config file. More on the configure options is presented in next section.
 
 Compile with:
 
