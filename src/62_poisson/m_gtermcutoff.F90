@@ -138,12 +138,12 @@ contains
 !!
 !! SOURCE
 
-subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
+subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)   :: icutcoul, nkpt
- real(dp),intent(in)  :: gsqcut
+ real(dp),intent(in)  :: gsqcut,rcut
 
 !arrays
  integer,intent(in)    :: ngfft(18)
@@ -157,7 +157,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
  integer            :: my_start,my_stop
  integer            :: n1,n2,n3,nfft
  integer            :: test,opt_surface !opt_cylinder
- real(dp)           :: cutoff,rcut,rcut2,check,rmet(3,3)
+ real(dp)           :: cutoff,rcut_loc,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
  real(dp)           :: gcart_para,gcart_perp,gcart_xy,gcart_z
  real(dp)           :: j0,j1,k0,k1
@@ -244,13 +244,17 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 
    CASE('SPHERE') ! Spencer-Alavi method
 
-     ! Calculate rcut for each method 
-     rcut= (three*ucvol/four_pi)**(one/three)
+     ! Calculate rcut for each method
+     if(rcut>tol4) then
+         rcut_loc = rcut
+     else
+         rcut_loc= (three*nkpt*ucvol/four_pi)**(one/three)
+     endif
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
-          gcutoff(ig)=zero ! two_pi*rcut - value for the V_coul
-       else if(gpq(ig)<=cutoff) then
-          gcutoff(ig)=one-cos(rcut*sqrt(four_pi/gpq2(ig)))
+          gcutoff(ig)=zero !two_pi*rcut_loc**2 !- value for the V_coul
+       else !if(gpq(ig)<=cutoff) then
+          gcutoff(ig)=one-cos(rcut_loc*sqrt(four_pi/gpq2(ig)))
       end if
      end do
 
@@ -293,12 +297,12 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
        end if
      end do
 
-!     if (opt_surface==1) then
-!       ABI_CHECK(ALL(pdir == (/0,0,1/)),"Surface must be in the x-y plane")
-       rcut = half*SQRT(DOT_PRODUCT(a3,a3))
-!     end if
+     if (opt_surface==1) then
+       ABI_CHECK(ALL(pdir == (/0,0,1/)),"Surface must be in the x-y plane")
+       rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
+     end if
 
-     rcut_= rcut
+     rcut_= rcut_loc
 
      ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
      hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
@@ -368,11 +372,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      ABI_MALLOC(xx,(npts_))
 
      if (ABS(hcyl)>tol12) then
-       write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut
+       write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut_loc
        call wrtout(std_out,msg,'COLL')
        hcyl_=hcyl
        hcyl2=hcyl**2
-       rcut2=rcut**2
+       rcut2=rcut_loc**2
 
        do i3=1,n3
         do i2=1,n2
@@ -440,7 +444,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
             call CALJY1(gcart_xy*rcut_,j1,0)
             call CALJY0(gcart_xy*rcut_,j0,0)
             call CALCK1(gcart_z *rcut_,k1,1)
-            gcutoff(ii)=one+rcut*gcart_xy*j1*k0-gcart_z*rcut*j0*k1
+            gcutoff(ii)=one+rcut_loc*gcart_xy*j1*k0-gcart_z*rcut_loc*j0*k1
           else
             if (gcart_xy>tol4) then
               ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
@@ -451,7 +455,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
                 gcutoff(ii)=-four_pi*quad
               else
                 ! === Analytic expression ===
-                gcutoff(ii)=-pi*rcut**2*(two*LOG(rcut)-one)
+                gcutoff(ii)=-pi*rcut_loc**2*(two*LOG(rcut_loc)-one)
             end if
           end if
         end do !i1
@@ -478,7 +482,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
      a3=rprimd(:,3); b3=two_pi*gprimd(:,3)
 
      ! Calculate rcut for each method !
-     rcut = half*SQRT(DOT_PRODUCT(a3,a3))
+     rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
 
      !SURFACE Default - Beigi
      opt_surface=1; alpha(:)=zero
@@ -505,10 +509,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if(ABS(gcart_para)>tol4.and.ABS(gcart_perp)>tol4.and.gpq(ii)<=cutoff) then
-             gcutoff(ii)=one-EXP(-gcart_para*rcut)*COS(gcart_perp*rcut)
-           else 
+           if(ABS(gcart_para)<tol4) then !.and.ABS(gcart_perp)<tol4) then
              gcutoff(ii)=zero
+           else
+             gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)
            end if
          end do !i1
         end do !i2
@@ -525,12 +529,12 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if(ABS(gcart_para)>tol4.and.gpq(ii)<=cutoff) then
-             gcutoff(ii)=one+EXP(-gcart_para*rcut)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut)-COS(gcart_perp*rcut))
-           else if (ABS(gcart_perp)>tol4) then
-             gcutoff(ii)=one-COS(gcart_perp*rcut)-gcart_perp/rcut*SIN(gcart_perp*rcut)
+           if (ABS(gcart_perp)<tol4.and.ABS(gcart_para)<tol4) then
+             gcutoff(ii)=one
+           else if (ABS(gcart_perp)>tol4.and.ABS(gcart_para)<tol4) then
+             gcutoff(ii)=one-COS(gcart_perp*rcut_loc)-gcart_perp/rcut_loc*SIN(gcart_perp*rcut_loc)
            else
-             gcutoff(ii)=zero
+             gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut_loc)-COS(gcart_perp*rcut_loc))
            end if
          end do !i1
         end do !i2
@@ -543,27 +547,35 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
 
    CASE('ERF')
 
-   ! Calculate rcut for each method ! Same as SPHERE
-   rcut= (three*nkpt*ucvol/four_pi)**(one/three)
+    ! Calculate rcut for each method ! Same as SPHERE
+    if(rcut>tol4) then
+        rcut_loc = rcut
+    else
+        rcut_loc= (three*nkpt*ucvol/four_pi)**(one/three)
+    endif
   
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
           gcutoff(ig)=zero ! @Gamma: initialize quantity in each requiered routine
-       else if(gpq(ig)<=cutoff) then
-          gcutoff(ig)=exp(-pi/(gpq2(ig)*rcut**2))
+       else !if(gpq(ig)<=cutoff) then
+          gcutoff(ig)=exp(-pi/(gpq2(ig)*rcut_loc**2))
        end if
      end do  !ig
  
    CASE('ERFC')
 
    ! Calculate rcut for each method ! Same as SPHERE
-   rcut= (three*nkpt*ucvol/four_pi)**(one/three)
+     if(rcut>tol4) then
+         rcut_loc = rcut
+     else
+         rcut_loc= (three*nkpt*ucvol/four_pi)**(one/three)
+     endif
 
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
           gcutoff(ig)=zero ! @Gamma: initialize quantity in each requiered routine
-       else if(gpq(ig)<=cutoff) then
-          gcutoff(ig)=one-exp(-pi/(gpq2(ig)*rcut**2))
+       else
+          gcutoff(ig)=one-exp(-pi/(gpq2(ig)*rcut_loc**2))
        end if
      end do !ig
 

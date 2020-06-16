@@ -196,8 +196,8 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    if (psps%vlspl_recipSpace) then
      call mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,&
 &     dtset%icutcoul,lpsstr,mgfft,mpi_enreg,psps%mqgrid_vl,natom,nattyp, &
-&     nfft,ngfft,dtset%nkpt,ntypat,option,ph1d,psps%qgrid_vl,qprtrb,rhog,rprimd,&
-&     ucvol,dtset%vcutgeo,psps%vlspl,vprtrb,vpsp)
+&     nfft,ngfft,dtset%nkpt,ntypat,option,ph1d,psps%qgrid_vl,qprtrb,dtset%rcut,&
+&     rhog,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vprtrb,vpsp)
    else
      call mklocl_realspace(grtn,dtset%icoulomb,mpi_enreg,natom,nattyp,nfft, &
 &     ngfft,dtset%nscforder,nspden,ntypat,option,pawtab,psps,rhog,rhor, &
@@ -288,12 +288,12 @@ end subroutine mklocl
 
 subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,mgfft,&
 &  mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,ntypat,option,ph1d,qgrid,qprtrb,&
-&  rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb,vpsp)
+&  rcut,rhog,rprimd,ucvol,vcutgeo,vlspl,vprtrb,vpsp)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,mqgrid,natom,nfft,nkpt,ntypat,option,icutcoul
- real(dp),intent(in) :: eei,gsqcut,rprimd(3,3),ucvol,vcutgeo(3)
+ real(dp),intent(in) :: eei,gsqcut,rcut,rprimd(3,3),ucvol,vcutgeo(3)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nattyp(ntypat),ngfft(18),qprtrb(3)
@@ -377,14 +377,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
  ia1=1
 
  !Initialize Gcut-off array from m_gtermcutoff
- call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rprimd,vcutgeo)
- !Print out the method used for cut-off
- !if (icutcoul==0) mode='SPHERE'
- !if (icutcoul==1) mode='CYLINDER'
- !if (icutcoul==2) mode='SURFACE'
- !if (icutcoul==3) mode='CRYSTAL'
- !if (icutcoul==4) mode='ERF'
- !if (icutcoul==5) mode='ERFC'
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -604,6 +597,8 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
    ABI_DEALLOCATE(work1)
 
  end if
+
+ !write(*,*)'This is the sum of vpsp ',SUM(vpsp(:)), icutcoul
 
  ABI_DEALLOCATE(gcutoff) 
 
