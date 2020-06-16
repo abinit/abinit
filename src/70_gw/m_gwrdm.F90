@@ -104,16 +104,16 @@ subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  endif
-
+ 
  do ib1dm=ib1,ib2-1  
    do ib2dm=ib1dm+1,ib2
      if((BSt%occ(ib1dm,kpoint,1)>tol8) .and. (BSt%occ(ib2dm,kpoint,1)<tol8)) then
-       dm1(ib1dm,ib2dm)=sgn_spin*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1))
-       dm1(ib2dm,ib1dm)=dm1(ib1dm,ib2dm)
+       dm1(ib1dm,ib2dm)=sgn_spin*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1)+tol8)
+       dm1(ib2dm,ib1dm)=conjg(dm1(ib1dm,ib2dm))
      endif
    enddo
  enddo
-
+ 
  DBG_EXIT("COLL")
 
 end subroutine calc_rdmx
@@ -222,16 +222,17 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
  do ib2dm=1,ndim
    do ib1dm=ib2dm,ndim
      dm1_tmp(ib1dm,ib2dm)=dm1(ib1+(ib1dm-1),ib1+(ib2dm-1))
-     dm1_tmp(ib2dm,ib1dm)=dm1_tmp(ib1dm,ib2dm)
+     dm1_tmp(ib2dm,ib1dm)=conjg(dm1_tmp(ib1dm,ib2dm))
    enddo
  enddo
+ !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
 
  work=0.0d0
  occs=0.0d0
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
  if(info/=0) then
-   MSG_WARNING("Diagonalization of the updated GW 1-RDM failed")
+   MSG_WARNING("Faild the diagonalization of the updated GW 1-RDM")
  endif
 
  !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 

@@ -2310,7 +2310,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      write(msg,'(a,2(es16.6,a))')' Eh[KS]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     ex_energy = 0.25*sigma_get_exene(Sr,Kmesh,QP_BSt)
+     ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
      write(msg,'(a,2(es16.6,a))')' Ex[KS]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2349,10 +2349,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
          ! Compute correlated part using the coarse gwc_ngfft mesh.
-         call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
-&         Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-!&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p)
-&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
+         ! MAU
+!         call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
+!&         Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
+!&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p) ! already commented. Do not uncomment it 
+!&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        ! MRM compute 1-RDM correction and update dm1
@@ -2515,7 +2516,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        write(msg,'(a,2(es16.6,a))')' Eh[GW]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       ex_energy = 0.25*sigma_get_exene(Sr,Kmesh,QP_BSt)
+       ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
        write(msg,'(a,2(es16.6,a))')' Ex[GW]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
