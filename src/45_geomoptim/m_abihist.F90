@@ -1185,21 +1185,17 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 #if defined HAVE_NETCDF
 
  need_to_write = .FALSE.
- ! if(nctime==0 .or. ifirst==1 .or. (itime > nctime .and.mod(itime,nctime) == 0)) need_to_write = .TRUE.
- if(nctime .NE. 0) then
-    if (ifirst .EQ. 1) need_to_write = .TRUE.
-    if ((itime .GT. nctime) .AND. (mod(itime,nctime) .EQ. 0)) need_to_write = .TRUE.
- else
-    need_to_write = .TRUE.
- endif
- 
+ if(nctime==0 .or. ifirst==1) need_to_write = .TRUE.
+ if (itime > nctime .and. nctime /= 0) then
+     if (mod(itime,nctime) == 0) need_to_write = .TRUE.
+ end if
 !Return if we don't need to write the HIST file at this step
  if (.not. need_to_write) return
 
  if (ifirst==1) then
 !##### First access: Create NetCDF file and write defs
 
-   write(std_out,*) 'Write iteration in HIST netCDF file'
+   write(std_out,*) 'Write iteration in HIST netCDF file (also create it)'
    npsp=size(znucl)
 
 !  Create netCDF file

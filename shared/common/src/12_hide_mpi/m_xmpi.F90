@@ -32,6 +32,7 @@ MODULE m_xmpi
  use defs_basis
  use m_profiling_abi
 ! use m_errors
+ use iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16,int32,int64
 #endif
@@ -300,6 +301,7 @@ MODULE m_xmpi
 interface xmpi_allgather
   module procedure xmpi_allgather_int
   module procedure xmpi_allgather_char
+  module procedure xmpi_allgather_int1d_1b
   module procedure xmpi_allgather_int1d
   module procedure xmpi_allgather_int2d
   module procedure xmpi_allgather_dp1d
@@ -2669,7 +2671,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
  rr=int(largecount,kind=int32)-cc*INT_MAX
 
 !Create user-defined datatype
- if (rr==0) then 
+ if (rr==0) then
    call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,largetype,ierr)
    if (ierr==0) call MPI_TYPE_COMMIT(largetype,ierr)
  else

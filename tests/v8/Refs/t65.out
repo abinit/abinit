@@ -53,7 +53,6 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
              ecut      1.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
    eph_ngqpt_fine        4    4    4
@@ -247,7 +246,6 @@ Interpolation of the electron-phonon coupling potential completed
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
              ecut      1.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
    eph_ngqpt_fine        4    4    4
