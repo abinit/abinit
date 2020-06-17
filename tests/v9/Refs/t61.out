@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  4 Jun 2020.
-- ( at 23h45 )
+.Starting date : Wed 17 Jun 2020.
+- ( at 13h26 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t61.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.in
 - output file    -> t61.out
 - root for input  files -> t61i
 - root for output files -> t61o
@@ -291,8 +291,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -306,8 +306,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -727,19 +727,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 6 of 6
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    2  -0.193    0.000 999999.0    0.000
    3  -0.193    0.000 999999.0    0.000
@@ -749,29 +750,29 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    3  -0.226    0.001    288.7    0.000
    4  -0.226    0.001    288.7    0.000
 ============================================================================================
-K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    3  -0.306    0.160      2.1    0.000
    4  -0.306    0.160      2.1    0.000
 ============================================================================================
-K-point: [ 1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
+K-point: [ 1.2500E-01,  1.2500E-01,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    3  -0.343    0.319      1.0    0.000
    4  -0.343    0.319      1.0    0.000
 ============================================================================================
-K-point: [-2.5000E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
+K-point: [-2.5000E-01,  1.2500E-01,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    4  -0.284    0.055      6.0    0.000
 ============================================================================================
-K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
+K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    4  -0.208    0.000 999999.0    0.000
 ============================================================================================
@@ -1015,10 +1016,10 @@ P           mkmem3         29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         29.3  wall=         30.1
+- Proc.   0 individual time (sec): cpu=         30.3  wall=         31.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.3  wall=         30.1
++Overall time at end (sec) : cpu=         30.3  wall=         31.1

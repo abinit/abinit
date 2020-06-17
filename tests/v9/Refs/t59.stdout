@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of MRGDV 
+.Version 9.1.4 of MRGDV 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 21h35 )
+.Starting date : Wed 17 Jun 2020.
+- ( at 13h25 )
   
 ->> Enter name of output file: 
 ->> Enter total number of DFPT POT files: 
@@ -51,7 +51,7 @@ Merged successfully 8 files
  symatm: atom number 2 is reached starting at atom
    2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
    2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
-- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s]
+- dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
  DVDB version: 2
  File path: t59o_DVDB

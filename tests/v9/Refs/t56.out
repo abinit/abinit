@@ -15,9 +15,9 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 17 Jun 2020.
-- ( at 12h30 )
+- ( at 13h24 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
 - root for input  files -> t56i
 - root for output files -> t56o
@@ -386,8 +386,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -434,19 +434,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.266
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
    2  12.800   -0.333      1.0   21.589
@@ -460,8 +461,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 
  Entering transport RTA computation driver.
@@ -623,19 +624,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.1    0.000
    2  12.800   -0.052      6.3   21.589
@@ -649,8 +651,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 
  Entering transport RTA computation driver.
@@ -814,19 +816,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   17.595
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.1    0.000
    2  12.800   -0.333      1.0   21.589
@@ -840,8 +843,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 
  Entering transport RTA computation driver.
@@ -1006,19 +1009,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   18.045
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.0    0.000
    2  12.800   -0.052      6.3   21.589
@@ -1032,8 +1036,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 
  Entering transport RTA computation driver.
@@ -1193,19 +1197,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  300.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.500
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    552.2    0.000
    2  12.800   -0.334      1.0   21.589
@@ -1527,10 +1532,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         88.7  wall=         90.2
+- Proc.   0 individual time (sec): cpu=         98.5  wall=         99.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         76.1  wall=         78.0
+.Delivered  13 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         98.5  wall=         99.9

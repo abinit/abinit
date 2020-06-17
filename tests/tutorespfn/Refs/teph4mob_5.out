@@ -1,5 +1,5 @@
 
-.Version 9.1.2 of ABINIT 
+.Version 9.1.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  5 Jun 2020.
-- ( at 19h05 )
+.Starting date : Wed 17 Jun 2020.
+- ( at 13h26 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.in
 - output file    -> teph4mob_5.out
@@ -541,30 +541,31 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.573    0.000  31934.9    0.000
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.608    0.001    482.1    0.000
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.525    0.000 783694.8    0.000
 ============================================================================================
@@ -854,10 +855,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         23.5  wall=         24.0
+- Proc.   0 individual time (sec): cpu=         23.5  wall=         24.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.5  wall=         24.0
+.Delivered   4 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         23.5  wall=         24.4
