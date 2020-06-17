@@ -59,7 +59,7 @@ occopt4 3
 # Setting the Fermi level
 #########
 eph_fermie5 17.5 eV
-tmesh5 300 0 1   # Cannot use more than one T when using eph_fermie
+tmesh5 300 0 1   # Cannot use more than one Temperature when using eph_fermie
 occopt5 3
 
 # Structure 

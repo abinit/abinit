@@ -19,6 +19,7 @@ nshiftk  1
 shiftk   0.0 0.0 0.0
 
 ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
+#eph_doping  -1e-18
 
 ############
 # Dataset 1

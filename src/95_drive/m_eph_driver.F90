@@ -190,7 +190,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !************************************************************************
 
- ! This part performs the initialization of basic objects used to perform e-ph calculations:
+ ! This part performs the initialization of the basic objects used to perform e-ph calculations:
  !
  !     1) Crystal structure `cryst`
  !     2) Ground state band energies: `ebands`
@@ -259,7 +259,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        MSG_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, msg))
      end if
    end if
-
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -419,6 +418,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Output useful info on electronic bands
  ! =======================================
  call cwtime(cpu, wall, gflops, "start")
+
  if (my_rank == master) then
    ! Fermi Surface
    if (dtset%prtfsurf /= 0) then

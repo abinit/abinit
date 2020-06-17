@@ -23,7 +23,8 @@ getdvdb_filepath "teph4mob_3_DVDB"
 # Variables related to transport properties
 tmesh 5.0 59.0 6  # List of Temperature for which the mobility will be computed
 
-eph_extrael 1e-6  # Change this depending on the concentration you want
+# Change this depending on the concentration you want
+eph_doping  -2.26e+16    # this corresponds to eph_extrael 1e-6  
 
 sigma_erange  0 0.15 eV # We compute the lifetimes of electrons only,
                         # in an energy window of 0.15 eV from the CBM

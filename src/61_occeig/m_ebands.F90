@@ -2548,7 +2548,7 @@ end subroutine ebands_set_nelect
 !! ebands_get_muT_with_fd
 !!
 !! FUNCTION
-!!  Compute chemical potential for different temperatures using Fermi-Dirac occupation function (physical T)
+!!  Compute the Fermi level for different temperatures using Fermi-Dirac occupation function (physical T)
 !!  Use ebands%nelect provided in input. Does not change input ebands.
 !!
 !! INPUTS
@@ -2591,9 +2591,8 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
    if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
 
    ! Use Fermi-Dirac occopt
-   ! TODO: Avoid these two calls (expensive if dense k-meshes)
    call ebands_set_scheme(tmp_ebands, occopt3, kTmesh(it), spinmagntarget, prtvol)
-   call ebands_set_nelect(tmp_ebands, self%nelect, spinmagntarget, msg)
+   !call ebands_set_nelect(tmp_ebands, self%nelect, spinmagntarget, msg)
    mu_e(it) = tmp_ebands%fermie
    !
    ! Check that the total number of electrons is correct
