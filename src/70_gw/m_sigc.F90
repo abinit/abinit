@@ -41,7 +41,7 @@ module m_sigc
  use m_gsphere,       only : gsphere_t, gsph_fft_tabs
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
- use m_wfd,           only : wfd_t
+ use m_wfd,           only : wfd_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
  use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
@@ -221,6 +221,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg,sigma_type
+ type(wave_t),pointer :: wave_sum, wave_jb
  complex(gwpc),allocatable :: botsq(:,:),otq(:,:),eig(:,:)
 !arrays
  integer :: g0(3),spinor_padc(2,4),got(Wfd%nproc)
@@ -842,8 +843,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwc+1, jb) = zero
              if (ib==jb) then
-               cg_sum => Wfd%Wave(ib,ik_ibz,spin)%ug
-               cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
+               ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, spin, wave_sum, msg) == 0, msg)
+               cg_sum => wave_sum%ug
+               ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+               cg_jb  => wave_jb%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)

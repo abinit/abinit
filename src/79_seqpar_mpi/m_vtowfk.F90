@@ -501,17 +501,21 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      ! Print residual and wall-time required by NSCF iteration.
      if (inonsc <= enough .or. mod(inonsc, 20) == 0) then
        call cwtime(cpu, wall, gflops, "stop")
-       if (inonsc == 1) call wrtout(std_out, sjoin(" k-point: [", itoa(ikpt), "/", itoa(nkpt), "], spin:", itoa(isppol)))
-       call wrtout(std_out, sjoin("   Max resid =", ftoa(residk, fmt="es13.5"), &
-         " (exclude nbdbuf bands). One NSCF iteration cpu-time:", &
-         sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
-       if (inonsc == enough) call wrtout(std_out, "   Printing residuals every mod(20) iteration ...")
+       if (ikpt == 1 .or. mod(ikpt, 100) == 0) then
+         if (inonsc == 1) call wrtout(std_out, sjoin(" k-point: [", itoa(ikpt), "/", itoa(nkpt), "], spin:", itoa(isppol)))
+         call wrtout(std_out, sjoin("   Max resid =", ftoa(residk, fmt="es13.5"), &
+           " (exclude nbdbuf bands). One NSCF iteration cpu-time:", &
+           sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+         if (inonsc == enough) call wrtout(std_out, "   Printing residuals every mod(20) iterations...")
+       end if
      end if
    end if
 
    ! Exit loop over inonsc if converged
    if (residk < dtset%tolwfr) then
-     if (iscf < 0) call wrtout(std_out, sjoin("   NSCF loop completed after", itoa(inonsc), "iterations"))
+     if (iscf < 0 .and. (ikpt == 1 .or. mod(ikpt, 100) == 0)) then
+       call wrtout(std_out, sjoin("   NSCF loop completed after", itoa(inonsc), "iterations"))
+     end if
      exit
    end if
  end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)

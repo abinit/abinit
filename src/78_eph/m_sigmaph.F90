@@ -632,7 +632,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
- real(dp) :: vkk_norm2, osc_ecut
+ real(dp) :: vkk_norm, osc_ecut ! vkq_norm
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -1625,10 +1625,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
            do ib_k=1,nbcalc_ks
              vk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
-             vkk_norm2 = dot_product(vk, vk)
+             vkk_norm = sqrt(dot_product(vk, vk))
              alpha_mrta(ib_k) = zero
-             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm2 ** 2
-             !if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / (vkk * vkq)
+             if (vkk_norm > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm ** 2
+             !if (vkk_norm > tol6) then
+             !  vkq_norm = sqrt(dot_product(vkq, vkq))
+             !  alpha_mrta(ib_k) = one - dot_product(vkq, vk) / (vkk_norm * vkq_norm)
+             !end if
            end do
          end if
 
@@ -2380,6 +2383,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
      new%nbcalc_ks(ikcalc, :) = 0
      cycle ! MPI parallelism inside comm
    end if
+
    ! Note symrel and use_symrel.
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax, cryst%gmet, indkk_k, ebands%kptns, kk, ebands%nkpt, 1, cryst%nsym,&
@@ -2876,6 +2880,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    new%use_doublegrid = .True.
  end if
 
+ ! Apply the scissor operator to the dense mesh
+ if ((new%use_doublegrid) .and. (abs(dtset%mbpt_sciss) > tol6)) then
+   call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
+   call apply_scissor(ebands_dense,dtset%mbpt_sciss)
+ end if
+
  ! Build object used to compute integration weights taking into account double-grid.
  ! Note that we compute the weights only for the states included in the sum
  ! bstart and new%bsum select the band range.
@@ -2915,6 +2925,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  new%mu_e(:) = ebands%fermie
 
  if (dtset%eph_fermie == zero) then
+   call cwtime(cpu, wall, gflops, "start")
    if (new%use_doublegrid) then
      call ebands_copy(ebands_dense, tmp_ebands)
    else
@@ -2925,6 +2936,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    new%mu_e = zero
    do it=1,new%ntemp
      if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
+
      ! Use Fermi-Dirac occopt
      call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), dtset%spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
@@ -2952,6 +2964,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    call ebands_free(tmp_ebands)
    call xmpi_sum(new%mu_e, comm, ierr)
+   call cwtime_report(" get_mu_e", cpu, wall, gflops)
  endif
 
  call ebands_free(ebands_dense)
@@ -3261,6 +3274,8 @@ end subroutine sigmaph_write
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !!  comm=MPI communicator
+!!  [keep_open]=True to keep the Nc file handle open for further reading. Default: False.
+!!  [extrael_fermie]: Return the value of (eph_extrael, eph_fermie) read from file.
 !!
 !! PARENTS
 !!
@@ -3275,14 +3290,14 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
  character(len=500),intent(out) :: msg
- real(dp), optional, intent(inout) :: extrael_fermie(2)
+ real(dp), optional, intent(out) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
 
 !Local variables ------------------------------
 !scalars
  integer :: imag_only
 #ifdef HAVE_NETCDF
- integer :: ncid, varid, ncerr
+ integer :: ncid !, varid !, ncerr
 #endif
  real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear
  real(dp) :: cpu, wall, gflops
@@ -3316,10 +3331,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nctk_get_dim(ncid, "max_nbcalc", new%max_nbcalc))
  NCF_CHECK(nctk_get_dim(ncid, "nsppol", new%nsppol))
  NCF_CHECK(nctk_get_dim(ncid, "ntemp", new%ntemp))
- !NCF_CHECK(nctk_get_dim(ncid, "natom3", natom3))
  NCF_CHECK(nctk_get_dim(ncid, "nqibz", new%nqibz))
  NCF_CHECK(nctk_get_dim(ncid, "nqbz", new%nqbz))
-
  !NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
  !NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
 
@@ -3335,6 +3348,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  !NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
  NCF_CHECK(nf90_get_var(ncid, vid("imag_only"), imag_only))
  new%imag_only = (imag_only == 1)
+ NCF_CHECK(nf90_get_var(ncid, vid("mrta"), new%mrta))
 
  ABI_MALLOC(new%kcalc, (3, new%nkcalc))
  ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
@@ -3358,10 +3372,11 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
 
  ! Try to read the done array used to implement restart capabilities.
  ABI_ICALLOC(new%qp_done, (new%nkcalc, new%nsppol))
- ncerr = nf90_inq_varid(ncid, "qp_done", varid)
- if (ncerr == nf90_noerr) then
-   NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
- end if
+ !ncerr = nf90_inq_varid(ncid, "qp_done", varid)
+ !if (ncerr == nf90_noerr) then
+ !NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
+ !end if
+ NCF_CHECK(nf90_get_var(ncid, vid("qp_done"), new%qp_done))
 
  ! ============================================================
  ! Read and check consistency against dtset
@@ -3458,22 +3473,24 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  integer, intent(out) :: ierr
  real(dp), allocatable, intent(out) :: linewidth_serta(:,:,:,:), linewidth_mrta(:,:,:,:), velocity(:,:,:,:)
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
- character(len=500) :: msg
+
 
 !Local variables -----------------------------------------
 !scalars
- integer,parameter :: sppoldbl1 = 1, timrev1 = 1
- integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt
+ integer,parameter :: sppoldbl1 = 1
+ integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
 #ifdef HAVE_NETCDF
- integer :: ncerr, varid
+ integer :: ncerr
 #endif
- logical :: has_mrta, has_vel, has_car_vel, has_red_vel
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: indkk(:,:)
- real(dp) :: dksqmax, vk_red(2,3), vk_car(2,3)
+ real(dp) :: dksqmax
 
 ! *************************************************************************
+
+ ierr = 0
 
  ! copy useful dimensions
  nsppol = self%nsppol
@@ -3481,8 +3498,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ! Map ebands kpoints to sigmaph
  ABI_MALLOC(indkk, (self%nkcalc, 6))
+ timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, self%nkcalc, cryst%nsym, &
-             sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+             sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6,a)' ) &
@@ -3494,80 +3512,65 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  ! store mapping to return
  if (present(indq2ebands)) then
    ABI_MALLOC(indq2ebands, (self%nkcalc))
-   indq2ebands(:) = indkk(:,1)
+   indq2ebands(:) = indkk(:, 1)
  end if
 
  ! Allocate using only the relevant bands for transport
- ! includin valence states to allow to compute different doping
+ ! including valence states to allow to compute different doping
+ ! MG: TODO: Do we really need this!
  mband = maxval(self%bstop_ks)
  new = ebands_chop(ebands, 1, mband)
  !mband = ebands%mband
- !call ebands_copy(ebands,new)
+ !call ebands_copy(ebands, new)
 
 #ifdef HAVE_NETCDF
- has_mrta = .true.
- ierr = nf90_inq_varid(self%ncid, "vals_e0k", varid)
- if (ierr /= nf90_noerr) has_mrta = .false.
+ ! Read linewidths from sigmaph file.
+ ! Use global array (mband, nkpt, nsppol) but keep in mind that results in SIGPEPH are packed
+ ! so that only the relevant k-points are stored.
 
- has_car_vel = .false.
- has_red_vel = .false.
- ierr = nf90_inq_varid(self%ncid, "vcar_calc", varid)
- if (ierr == nf90_noerr) has_car_vel = .true.
- ierr = nf90_inq_varid(self%ncid, "vred_calc", varid)
- if (ierr == nf90_noerr) has_red_vel = .true.
- has_vel = (has_car_vel .or. has_red_vel)
-
- ! Read linewidths from sigmaph
+ ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
  ABI_CALLOC(linewidth_serta, (self%ntemp, mband, nkpt, nsppol))
- if (has_mrta) then
+ if (self%mrta > 0) then
    ABI_CALLOC(linewidth_mrta, (self%ntemp, mband, nkpt, nsppol))
- end if
- if (has_vel) then
-   ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
  end if
 
  do spin=1,nsppol
    do ikcalc=1,self%nkcalc
-     bstart_ks = self%bstart_ks(ikcalc,spin)
-     nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
+     bstart_ks = self%bstart_ks(ikcalc, spin)
+     nbcalc_ks = self%nbcalc_ks(ikcalc, spin)
      do iband=1,nbcalc_ks
+       ! band index in global array.
        band_ks = iband + bstart_ks - 1
-       ikpt = indkk(ikcalc,1)
+       ! kcalc --> ibz index
+       ikpt = indkk(ikcalc, 1)
 
        do itemp=1,self%ntemp
          ! Read SERTA lifetimes
-         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"),&
-                 linewidth_serta(itemp,band_ks,ikpt,spin), start=[2, itemp, iband, ikcalc, spin])
+         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), &
+                 linewidth_serta(itemp, band_ks, ikpt, spin), start=[2, itemp, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
+
          ! Read MRTA lifetimes
-         if (has_mrta) then
-            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"),&
-                                 linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp, iband, ikcalc, spin])
-            NCF_CHECK(ncerr)
+         if (self%mrta > 0) then
+           !print *, "reading linewidth_mrta"
+           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
+                                linewidth_mrta(itemp, band_ks, ikpt, spin), start=[itemp, iband, ikcalc, spin])
+           NCF_CHECK(ncerr)
          end if
        end do
 
        ! Read band velocities
-       if (has_vel) then
-         if (has_car_vel) then
-           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"),&
-                                velocity(:,band_ks,ikpt,spin), start=[1, iband, ikcalc, spin])
-           NCF_CHECK(ncerr)
-         end if
-         ! TODO: This section of code can be removed because we don't write vred_calc anymore
-         if (has_red_vel) then
-           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"),&
-                                vk_red(1,:), start=[1, iband, ikcalc, spin])
-           NCF_CHECK(ncerr)
-           call ddk_red2car(cryst%rprimd, vk_red, vk_car)
-           velocity(:,band_ks,ikpt,spin) = vk_car(1,:)
-         end if
-       end if
+       ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), &
+                            velocity(:,band_ks,ikpt,spin), start=[1, iband, ikcalc, spin])
+       NCF_CHECK(ncerr)
 
      end do
    end do
  end do
 #endif
+
+ !print *, "linewidth_serta", maxval(abs(linewidth_serta))
+ !print *, "linewidth_mrta", maxval(abs(linewidth_mrta))
 
  ABI_FREE(indkk)
 

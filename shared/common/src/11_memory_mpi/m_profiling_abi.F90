@@ -29,7 +29,7 @@ module m_profiling_abi
 
  use defs_basis
  use iso_c_binding
- !use m_clib
+ use m_clib
 #ifdef HAVE_MPI2
  use mpi
 #endif

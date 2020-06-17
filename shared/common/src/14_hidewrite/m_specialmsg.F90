@@ -358,8 +358,8 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
  integer,optional,intent(in) :: newlines
 
 !Local variables-------------------------------
- integer :: comm,me,nproc, my_newlines
  integer,save :: master=0
+ integer :: comm, me, nproc, my_newlines, ii
  logical :: my_flush
  character(len=len(msg)+50) :: string
  character(len=500) :: my_mode_paral
@@ -385,13 +385,21 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
 
  if (my_mode_paral == 'COLL' .or. nproc == 1) then
    if (me == master) then
-      call wrtout_myproc(unit, msg, do_flush=my_flush)
-      if (my_newlines /= 0) write(unit, "(a)")""
+     call wrtout_myproc(unit, msg, do_flush=my_flush)
+     if (my_newlines /= 0) then
+       do ii=1,my_newlines
+         write(unit, "(a)")""
+       end do
+     end if
    end if
 
  else if (my_mode_paral == 'PERS') then
    call write_lines(unit,msg)
-   if (my_newlines /= 0) write(unit, "(a)")""
+   if (my_newlines /= 0) then
+     do ii=1,my_newlines
+       write(unit, "(a)")""
+     end do
+   end if
    ! Flush unit
    if (my_flush) call flush_unit(unit)
 
@@ -405,8 +413,6 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
    '  Continuing anyway ...'
    write(unit, '(A)' ) trim(string)
  end if
-
-
 
 end subroutine wrtout_unit
 !!***

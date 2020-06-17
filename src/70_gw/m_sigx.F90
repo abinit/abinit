@@ -50,7 +50,7 @@ module m_sigx
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_paw_nhat,      only : pawmknhat_psipsi
  use m_paw_sym,       only : paw_symcprj
- use m_wfd,           only : wfd_t
+ use m_wfd,           only : wfd_t, wave_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
@@ -198,6 +198,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  complex(gwpc) :: gwpc_sigxme
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3),spinor_padx(2,4)
  integer,allocatable :: igfftxg0(:),igfftfxg0(:)
@@ -609,8 +610,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
              npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (ib_sum == jb) then
-               cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
-               cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
+               ABI_CHECK(wfd%get_wave_ptr(ib_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
+               cg_sum => wave_sum%ug
+               ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+               cg_jb  => wave_jb%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)

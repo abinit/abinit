@@ -1982,7 +1982,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform, gw_timrev
+ integer :: fform
  type(hdr_type) :: hdr
 
 ! *************************************************************************
@@ -1990,8 +1990,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
  ! Assume file with Abinit header
  call hdr_read_from_fname(hdr, path, fform, comm)
  ABI_CHECK(fform /= 0, "fform == 0")
- gw_timrev = kpts_timrev_from_kptopt(hdr%kptopt) + 1
- new = hdr%get_crystal(gw_timrev)
+ new = hdr%get_crystal()
  call hdr%free()
 
 end function crystal_from_file
