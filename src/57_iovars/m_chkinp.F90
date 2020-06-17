@@ -2036,7 +2036,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 
 !    nucdipmom requires kptopt 3 or zero
-     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
+     ! if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
+     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
