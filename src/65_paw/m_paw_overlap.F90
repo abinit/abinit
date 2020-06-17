@@ -98,19 +98,19 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,mband,&
-&                           natom,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
+ subroutine overlap_k1k2_paw(cprj_k1,cprj_k2,dk,gprimd,k1k2_paw,lmn2max,lmnsize,&
+&                           natom,nband,nband_occ,nspinor,ntypat,pawang,pawrad,pawtab,typat,xred)
 
 !Arguments---------------------------
 !scalars
- integer,intent(in) :: lmn2max,mband,natom,nspinor,ntypat
+ integer,intent(in) :: lmn2max,natom,nband,nband_occ,nspinor,ntypat
  type(pawang_type),intent(in) :: pawang
- type(pawcprj_type),intent(in) :: cprj_k1(natom,mband),cprj_k2(natom,mband)
+ type(pawcprj_type),intent(in) :: cprj_k1(natom,nband),cprj_k2(natom,nband)
 
 !arrays
  integer,intent(in) :: lmnsize(ntypat),typat(natom)
  real(dp),intent(in) :: dk(3),gprimd(3,3),xred(natom,3)
- real(dp),intent(out) :: k1k2_paw(2,mband,mband)
+ real(dp),intent(out) :: k1k2_paw(2,nband_occ,nband_occ)
  type(pawrad_type),intent(in) :: pawrad(ntypat)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
 
@@ -144,8 +144,8 @@ CONTAINS  !=====================================================================
      do jlmn=1,lmnsize(itypat)
        klmn=max(ilmn,jlmn)*(max(ilmn,jlmn)-1)/2 + min(ilmn,jlmn)
        paw_onsite = cmplx(calc_qijb(1,klmn,iatom),calc_qijb(2,klmn,iatom))
-       do iband = 1, mband
-         do jband = 1, mband
+       do iband = 1, nband_occ
+         do jband = 1, nband_occ
            do ispinor = 1, nspinor
              ibs = nspinor*(iband-1) + ispinor
              jbs = nspinor*(jband-1) + ispinor

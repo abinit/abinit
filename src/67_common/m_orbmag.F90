@@ -1213,8 +1213,9 @@ subroutine covar_test(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,
                 &         ikptb,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
                 &         my_nspinor,dtset%nsppol,0)
            call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                &           dtorbmag%lmn_size,dtset%mband,&
-                &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                &           dtorbmag%lmn_size,&
+                &           dtset%natom,dtset%mband,dtset%mband,&
+                &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
            sflag_k=0
            cg1_k(:,:) = zero
@@ -1227,8 +1228,8 @@ subroutine covar_test(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,
            call covar_cprj(cprj_kb,cprj_kb_covar,dtset,nband_k,nband_occ,pawtab,smat_inv)
 
            call overlap_k1k2_paw(cprj_k,cprj_kb_covar,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                &           dtorbmag%lmn_size,dtset%mband,&
-                &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
            do iband = 1, nband_k
               do jband = 1, nband_k
@@ -1499,8 +1500,8 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
      ABI_ALLOCATE(sflag_k,(nband_k))
      
      ! ! get covariant |u_{n,k+b}> and associated cprj
-     call overlap_k1k2_paw(cprj,cprjg,gvec,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
-          &           dtset%natom,dtset%nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+     call overlap_k1k2_paw(cprj,cprjg,gvec,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,&
+          &           dtset%natom,dtset%mband,dtset%mband,dtset%nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
      sflag_k=0
      ! cgg1 will hold |\tilde{u}_{n,k+b}>
@@ -1514,8 +1515,8 @@ subroutine covar_gamma(atindx1,cg,cgg1,cprj,cprjg1,dtorbmag,dtset,gmet,gprimd,mc
      call covar_cprj(cprjg,cprjg1(idir,:,:),dtset,nband_k,nband_occ,pawtab,smat_inv)
 
 
-     call overlap_k1k2_paw(cprj,cprjg1(idir,:,:),gvec,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
-          &           dtset%natom,dtset%nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+     call overlap_k1k2_paw(cprj,cprjg1(idir,:,:),gvec,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,&
+          &           dtset%natom,dtset%mband,dtset%mband,dtset%nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
      ! the following tests that cg(n).cgg1(m) = delta(n,m)
      ! and that cg(n).[cgg1(m) - cg(m)] = 0
@@ -1691,8 +1692,8 @@ subroutine duqdu_gamma(atindx1,cgg1,cprjg1,dtorbmag,dtset,duqduchern,duqdumag,&
         dkbg = dkg - dkb
         ! overlap of covariant cprj at kb and kg
         call overlap_k1k2_paw(cprj1_kb,cprj1_kg,dkbg,gprimd,kk_paw,&
-             & dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
-             & dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,&
+             & dtorbmag%lmn2max,dtorbmag%lmn_size,&
+             & dtset%natom,dtset%mband,dtset%mband,my_nspinor,dtset%ntypat,pawang,pawrad,&
              & pawtab,dtset%typat,xred)
         
         do iband = 1, nband_k
@@ -1793,7 +1794,7 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   integer :: epsabg,gdir,gfor,gsigma,iband
   integer :: icg,icprji,ierr
   integer :: ikg,ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi,ish1,ish2,isppol,itrs
-  integer :: me,mcg1_k,my_nspinor,n2dim,nband_occ,ncpgr,npw_k,npw_kb,npw_kg,nproc,ntotcp
+  integer :: me,mcg_k,mcg1_k,my_nspinor,n2dim,nband_occ,ncpgr,npw_k,npw_kb,npw_kg,nproc,ntotcp
   integer :: shiftbd,smatrix_ddkflag,smatrix_job,spaceComm
   real(dp) :: deltab,deltag,doti,dotr,ENK
   complex(dpc) :: cprefac,duqduchern_term,duqdumag_term
@@ -1825,11 +1826,11 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
   ABI_DATATYPE_ALLOCATE(cprj_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
-  ABI_DATATYPE_ALLOCATE(cprj1_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+  ABI_DATATYPE_ALLOCATE(cprj1_kb,(dtset%natom,dtorbmag%nspinor*nband_occ))
   call pawcprj_alloc(cprj1_kb,ncpgr,dimlmn)
   ABI_DATATYPE_ALLOCATE(cprj_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj_kg,ncpgr,dimlmn)
-  ABI_DATATYPE_ALLOCATE(cprj1_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+  ABI_DATATYPE_ALLOCATE(cprj1_kg,(dtset%natom,dtorbmag%nspinor*nband_occ))
   call pawcprj_alloc(cprj1_kg,ncpgr,dimlmn)
   n2dim = dtorbmag%nspinor*nband_k
   ntotcp = n2dim*SUM(dimlmn(:))
@@ -1838,20 +1839,21 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
      call pawcprj_alloc(cprj_buf,ncpgr,dimlmn)
   end if
 
-  ABI_ALLOCATE(kk_paw,(2,dtset%mband,dtset%mband))
-  ABI_ALLOCATE(sflag_k,(nband_k))
+  ABI_ALLOCATE(sflag_k,(nband_occ))
   ABI_ALLOCATE(pwind_kb,(dtset%mpw))
   ABI_ALLOCATE(pwind_kg,(dtset%mpw))
   ABI_ALLOCATE(pwnsfac_k,(4,dtset%mpw))
   pwnsfac_k(1,:) = one; pwnsfac_k(2,:) = zero
   pwnsfac_k(3,:) = one; pwnsfac_k(4,:) = zero
 
-  mcg1_k = dtset%mpw*dtset%nsppol*my_nspinor*nband_k
-  ABI_ALLOCATE(cg_k,(2,mcg1_k))
+  mcg_k = dtset%mpw*dtset%nsppol*my_nspinor*nband_k
+  mcg1_k = dtset%mpw*dtset%nsppol*my_nspinor*nband_occ
+  ABI_ALLOCATE(cg_k,(2,mcg_k))
   ABI_ALLOCATE(cg1_kb,(2,mcg1_k))
   ABI_ALLOCATE(cg1_kg,(2,mcg1_k))
-  ABI_ALLOCATE(smat_inv,(2,nband_k,nband_k))
-  ABI_ALLOCATE(smat_kk,(2,nband_k,nband_k))
+  ABI_ALLOCATE(kk_paw,(2,nband_occ,nband_occ))
+  ABI_ALLOCATE(smat_inv,(2,nband_occ,nband_occ))
+  ABI_ALLOCATE(smat_kk,(2,nband_occ,nband_occ))
 
   smatrix_ddkflag = 1
   itrs = 0
@@ -1916,8 +1918,8 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                  
                  ! get covariant |u_{n,k+b}> and associated cprj
                  call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                      &           dtorbmag%lmn_size,dtset%mband,&
-                      &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                      &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                      &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                  sflag_k=0
                  cg1_kb(:,:) = zero
                  ! cg1_kb will hold |\tilde{u}_{n,k+b}>
@@ -1964,8 +1966,8 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
 
                     ! get covariant |u_{n,k+g}> and associated cprj
                     call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                         &           dtorbmag%lmn_size,dtset%mband,&
-                         &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                         &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                         &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                     sflag_k=0
                     cg1_kg(:,:) = zero
                     ! cg1_kg will hold |\tilde{u}_{n,k+g}>
@@ -1978,8 +1980,8 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                     dkbg = dkg - dkb
                     ! overlap of covariant cprj at kb and kg
                     call overlap_k1k2_paw(cprj1_kb,cprj1_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                         &           dtorbmag%lmn_size,dtset%mband,&
-                         &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                         &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                         &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                     do iband = 1, nband_k
                           
                        ish1 = (iband-1)*npw_k+1
@@ -2497,8 +2499,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
               if (ikpt > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the overlaps
                  ! get covariant |u_{n,k+b}> and associated cprj
                  call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                      &           dtorbmag%lmn_size,dtset%mband,&
-                      &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                      &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                      &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                  sflag_k=0
 
                  ABI_ALLOCATE(cg1_kb,(2,countk))
@@ -2582,8 +2584,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
 
                     ! get covariant |u_{n,k+g}> and associated cprj
                     call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                         &           dtorbmag%lmn_size,dtset%mband,&
-                         &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                         &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                         &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                     sflag_k=0
                     ABI_ALLOCATE(cg1_kg,(2,countk))
                     cg1_kg(:,:) = zero
@@ -2989,8 +2991,8 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
 
                  ! get covariant |u_{n,k+g}> and associated cprj
                  call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                      &           dtorbmag%lmn_size,dtset%mband,&
-                      &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                      &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                      &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                  sflag_k=0
                  cg1_kg(:,:) = zero
                  ! cg1_kg will hold |\tilde{u}_{n,k+g}>
@@ -5677,8 +5679,8 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
 
                     if (.NOT. has_smat(ikpt,bdx,0)) then
                        call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                            &           dtorbmag%lmn_size,dtset%mband,&
-                            &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                            &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                            &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
                        sflag_k=0
                        call smatrix(cg,cgqb,cg1_k,ddkflag,dtm_k,icg,0,itrs,job,nband_k,&
@@ -5697,8 +5699,8 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
                     if (.NOT. has_smat(ikpt,bdx,gdx) .AND. .NOT. has_smat(ikpt,gdx,bdx) ) then
 
                        call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                            &             dtorbmag%lmn_size,dtset%mband,&
-                            &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                            &             dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                            &             my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
 
                        call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
                             &             dtorbmag%indkk_f2ibz,ikptb,ikptg,&
