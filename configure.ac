@@ -773,18 +773,19 @@ fi
 # HDF5 library support
 SD_HDF5_DETECT
 
-# Parallel NetCDF requires a few conditions to work
-if test "${abi_netcdf_mpi_enable}" = "yes"; then
-  if test "${sd_mpi_ok}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but MPI is not available])
-  fi
-  if test "${abi_mpi_io_enable}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but MPI I/O is disabled])
-  fi
-  if test "${sd_hdf5_mpi_ok}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but parallel HDF5 is not available])
-  fi
-fi
+## Parallel NetCDF requires a few conditions to work
+# TODO abi_netcdf_mpi_enable not defined
+#if test "${abi_netcdf_mpi_enable}" = "yes"; then
+#  if test "${sd_mpi_ok}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but MPI is not available])
+#  fi
+#  if test "${abi_mpi_io_enable}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but MPI I/O is disabled])
+#  fi
+#  if test "${sd_hdf5_mpi_ok}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but parallel HDF5 is not available])
+#  fi
+#fi
 
 # NetCDF library support (must be done after HDF5)
 SD_NETCDF_DETECT
