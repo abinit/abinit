@@ -2845,6 +2845,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
  ! TODO: Should only check the value of getwfkfine_filepath
  new%use_doublegrid = .False.
+
+ ! Construct ebands_dense for double grid either from WFK file or via SKW.
+
+
  if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
@@ -2883,10 +2887,16 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    new%use_doublegrid = .True.
  end if
 
- ! Apply the scissor operator to the dense mesh
- if ((new%use_doublegrid) .and. (abs(dtset%mbpt_sciss) > tol6)) then
-   call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
-   call apply_scissor(ebands_dense, dtset%mbpt_sciss)
+ if (new%use_doublegrid) then
+   ! Note that we don't recompute %fermie and %occ in ebands_dense, only %nelect must be consistent with the
+   ! input ebands to handle possible doping
+   ebands_dense%nelect = ebands%nelect
+   ebands_dense%fermie = ebands%fermie
+   if (abs(dtset%mbpt_sciss) > tol6) then
+     ! Apply the scissor operator to the dense mesh
+     call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
+     call apply_scissor(ebands_dense, dtset%mbpt_sciss)
+   end if
  end if
 
  ! Build object used to compute integration weights taking into account double-grid.
@@ -2933,14 +2943,15 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    call cwtime(cpu, wall, gflops, "start")
    if (new%use_doublegrid) then
-     call ebands_copy(ebands_dense, tmp_ebands)
-     !call ebands_get_muT_with_fd(ebands_dense, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
+     !call ebands_copy(ebands_dense, tmp_ebands)
+     !ebands_dense%nelect = ebands%nelect
+     call ebands_get_muT_with_fd(ebands_dense, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    else
-     call ebands_copy(ebands, tmp_ebands)
-     !call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
+     !call ebands_copy(ebands, tmp_ebands)
+     call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    end if
 
-#if 1
+#if 0
    ! We only need mu_e so MPI parallelize the T-loop.
    new%mu_e = zero
 
@@ -4380,7 +4391,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
          " [K], mu_e: ", self%mu_e(it) * Ha_eV
      end if
      if (self%imag_only) then
-       ! TODO: Add tau^SERTA, tau^MRTA, and v tau
+       ! TODO: Add tau^SERTA, tau^MRTA, and v tau, ps instead of fmts?
        write(ab_out,"(a)")"   B    eKS    SE2(eKS)  TAU(eKS)  DeKS"
      else
        write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"

@@ -1389,8 +1389,8 @@ end function get_bandenergy
 !! FUNCTION
 !!  For each k-point and spin polarisation, report:
 !!
-!!    1) the index of the valence in case of Semiconductors.
-!!    2) the index of the band at the Fermi energy + toldfe
+!!    1) the index of the valence in case of semiconductors at T = 0
+!!    2) (band_k - 1) where band_k is the first band whose energy is > Fermi energy + told_fermi
 !!
 !!  using the value of the Fermi level.
 !!
@@ -1406,7 +1406,7 @@ end function get_bandenergy
 !!
 !! SOURCE
 
-pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
+pure function get_valence_idx(ebands, tol_fermi) result(val_idx)
 
 !Arguments ------------------------------------
 !scalars
@@ -2362,14 +2362,14 @@ end subroutine ebands_update_occ
 !!
 !! SOURCE
 
-subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
+subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(inout) :: ebands
  integer,intent(in) :: occopt
  integer,optional,intent(in) :: prtvol
- real(dp),intent(in) :: tsmear,spinmagntarget
+ real(dp),intent(in) :: tsmear, spinmagntarget
 
 !Local variables-------------------------------
 !scalars
@@ -2432,7 +2432,7 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option1=1,unitdos0=0
+ integer,parameter :: option1=1, unitdos0=0
  integer :: mband,nkpt,nsppol
  real(dp),parameter :: dosdeltae0=zero
  real(dp) :: prev_fermie,prev_nelect,maxocc

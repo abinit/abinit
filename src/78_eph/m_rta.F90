@@ -447,7 +447,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
      call wrtout(std_out, msg)
    end if
 
-#if 0
+#if 1
    call ebands_get_muT_with_fd(ebands, new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
 #else
    call ebands_copy(ebands, tmp_ebands)

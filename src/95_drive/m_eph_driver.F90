@@ -344,6 +344,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Here we change the GS bands (Fermi level, scissors operator ...)
  ! All the modifications to ebands should be done here.
+ ! FIXME: This part should be rationalized!
  if (use_wfk) then
 
    if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
