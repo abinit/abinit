@@ -397,15 +397,6 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
    enddo
  enddo
 
- ! Print for debug
- !write(msg,'(a4)') 'MAU1'
- !call wrtout(std_out,msg,'COLL')
- !do ib1dm=ib1,ib2
- !  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikpoint,1))
- !  call wrtout(std_out,msg,'COLL')
- !enddo
-
-
  ! <KS|K[NO]KS> = U <NO|K[NO]|NO> (U^t)*
  res=matmul(Umat,Kex_tmp)
  Kex_tmp=matmul(res,conjg(transpose(Umat)))
@@ -417,7 +408,7 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  enddo
 
  ! Print for debug
- write(msg,'(a4)') 'MAU2'
+ write(msg,'(a4)') 'MAU1'
  call wrtout(std_out,msg,'COLL')
  do ib1dm=ib1,ib2
    write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikpoint,1))
@@ -446,7 +437,7 @@ pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
 
 ! *************************************************************************
 
- eh_energy = zero
+ eh_energy=zero
 
  do spin=1,sigma%nsppol
    do ik=1,sigma%nkibz
@@ -454,11 +445,13 @@ pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
      do ib=sigma%b1gw,sigma%b2gw
        occ_bks = bands%occ(ib,ik,spin)
        if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
-         eh_energy = eh_energy + occ_bks * wtk * Mels%vhartree(ib,ib,ik,spin)
+         eh_energy=eh_energy+occ_bks*wtk*Mels%vhartree(ib,ib,ik,spin)
        end if
      end do
    end do
  end do
+
+ eh_energy=0.5d0*eh_energy
 
 end function me_get_haene
 !!***

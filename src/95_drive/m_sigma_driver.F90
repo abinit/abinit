@@ -2306,7 +2306,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      write(msg,'(a46)')' Vee[HF-like] energy obtained using KS 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     eh_energy = 0.5d0*me_get_haene(Sr,KS_me,Kmesh,QP_BSt)
+     eh_energy = me_get_haene(Sr,KS_me,Kmesh,QP_BSt)
      write(msg,'(a,2(es16.6,a))')' Eh[KS]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2349,18 +2349,17 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &         gwc_ngfft,Dtset%iomode,Dtset%prtvol,sigcme_k)
        else
          ! Compute correlated part using the coarse gwc_ngfft mesh.
-         ! MAU
-!         call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
-!&         Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
+         call calc_sigc_me(ik_ibz,ikcalc,nomega_sigc,ib1,ib2,Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,&
+&         Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 !&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p) ! already commented. Do not uncomment it 
-!&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
+&         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
        ! MRM compute 1-RDM correction and update dm1
        if(gwcalctyp==21 .and. gw1rdm>0) then
          dm1k=czero 
          if(gw1rdm>1) then
-           !MAU call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
+           call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,verbose,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
          endif
 !        Update the full 1RDM with the correlation (k-point) one
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2512,7 +2511,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        write(msg,'(a46)')' Vee[HF-like] energy obtained using GW 1-RDM:'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       eh_energy = 0.5d0*me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
+       eh_energy = me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        write(msg,'(a,2(es16.6,a))')' Eh[GW]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
