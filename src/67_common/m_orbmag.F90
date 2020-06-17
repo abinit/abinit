@@ -2765,7 +2765,8 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
   integer :: gdir,gfor,gsigma,ia,iband,ibs1,ibs2
   integer :: icg,icprji,ider,idir,ierr
   integer :: ikg,ikg1,ikpt,ikpt_loc,ikpti,ikptg,ikptgi,ilm,isppol,istwf_k,itrs
-  integer :: mcg1_k,me,my_nspinor,n2dim,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6
+  integer :: mcg_k,mcg1_k,me,my_nspinor,n2dim,nband_occ,ncpgr
+  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6
   integer :: nkpg,nproc,npw_k,npw_k_,npw_kg
   integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_ndat
   integer :: nonlop_paw_opt,nonlop_signs,ntotcp
@@ -2793,6 +2794,8 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
   nproc=xmpi_comm_size(spaceComm)
   me = mpi_enreg%me_kpt
 
+  nband_occ = dtorbmag%mband_occ
+
   ncpgr = cprj(1,1)%ncpgr
   ABI_ALLOCATE(dimlmn,(dtset%natom))
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
@@ -2809,8 +2812,8 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
      call pawcprj_alloc(cprj_buf,ncpgr,dimlmn)
   end if
 
-  ABI_ALLOCATE(kk_paw,(2,dtset%mband,dtset%mband))
-  ABI_ALLOCATE(sflag_k,(nband_k))
+  ABI_ALLOCATE(kk_paw,(2,nband_occ,nband_occ))
+  ABI_ALLOCATE(sflag_k,(nband_occ))
   ABI_ALLOCATE(pwind_kg,(dtset%mpw))
   ABI_ALLOCATE(pwnsfac_k,(4,dtset%mpw))
   pwnsfac_k(1,:) = one; pwnsfac_k(2,:) = zero
@@ -2818,11 +2821,12 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
 
   ABI_ALLOCATE(kg_k,(3,dtset%mpw))
 
-  mcg1_k = dtset%mpw*dtset%nsppol*my_nspinor*nband_k
+  mcg_k = dtset%mpw*dtset%nsppol*my_nspinor*nband_k
+  mcg1_k = dtset%mpw*dtset%nsppol*my_nspinor*nband_occ
+  ABI_ALLOCATE(cg_k,(2,mcg_k))
   ABI_ALLOCATE(cg1_kg,(2,mcg1_k))
-  ABI_ALLOCATE(cg_k,(2,mcg1_k))
-  ABI_ALLOCATE(smat_inv,(2,nband_k,nband_k))
-  ABI_ALLOCATE(smat_kk,(2,nband_k,nband_k))
+  ABI_ALLOCATE(smat_inv,(2,nband_occ,nband_occ))
+  ABI_ALLOCATE(smat_kk,(2,nband_occ,nband_occ))
 
   smatrix_ddkflag = 1
   itrs = 0
@@ -2927,10 +2931,10 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
         ABI_ALLOCATE(cwavef,(2,npw_k))
         ABI_ALLOCATE(svectout,(2,npw_k))
         ABI_ALLOCATE(vectout,(2,npw_k))
-        ABI_ALLOCATE(svect,(2,3,npw_k*nband_k))
+        ABI_ALLOCATE(svect,(2,3,npw_k*nband_occ))
         
         do bdir = 1, 3
-           do iband = 1, nband_k
+           do iband = 1, nband_occ
 
               ibs1=(iband-1)*npw_k+1
               ibs2=iband*npw_k
@@ -2991,16 +2995,16 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
 
                  ! get covariant |u_{n,k+g}> and associated cprj
                  call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                      &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                      &           dtorbmag%lmn_size,dtset%natom,nband_k,nband_occ,&
                       &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                  sflag_k=0
                  cg1_kg(:,:) = zero
                  ! cg1_kg will hold |\tilde{u}_{n,k+g}>
-                 call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_k,&
-                      &           mcg1_k,mcg1_k,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
+                 call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
+                      &           mcg_k,mcg_k,mcg1_k,1,dtset%mpw,nband_k,nband_occ,npw_k,npw_kg,my_nspinor,&
                       &           pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
 
-                 do iband = 1, nband_k
+                 do iband = 1, nband_occ
                     
                     ibs1=(iband-1)*npw_k+1
                     ibs2=iband*npw_k
@@ -4931,6 +4935,10 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
     duqduchern(2,1:3) = ucvol*MATMUL(gprimd,duqduchern(2,1:3))
 
     ! factor of two in numerator is band occupations
+    ! note that duqdu and udsqdu routines both explicitly compute with only nband_occ
+    ! so having empty bands in the original calculation is ok, they are not used in computing
+    ! the Berry responses
+    !
     ! factor of two_pi in denominator is in definition of Chern number
     ! factor of ucvol*fnkpt is discrete representation of integral over BZ
     chernnorm = two/(two_pi*ucvol*dtorbmag%fnkpt)
@@ -4941,9 +4949,9 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
     udsqduchern(2,1:3) = ucvol*MATMUL(gprimd,udsqduchern(2,1:3))
     udsqduchern(1:2,1:3) = udsqduchern(1:2,1:3)*chernnorm
 
-    ! dtorbmag%chern(1:2,1:3) = duqduchern(1:2,1:3)+udsqduchern(1:2,1:3)
+    dtorbmag%chern(1:2,1:3) = duqduchern(1:2,1:3)+udsqduchern(1:2,1:3)
     ! dtorbmag%chern(1:2,1:3) = udsqduchern(1:2,1:3)
-    dtorbmag%chern(1:2,1:3) = duqduchern(1:2,1:3)
+    ! dtorbmag%chern(1:2,1:3) = duqduchern(1:2,1:3)
     
     call output_orbmag(2,dtorbmag%chern)
     
