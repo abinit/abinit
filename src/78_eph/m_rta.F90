@@ -383,6 +383,9 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  !print *, "linewidth_serta", maxval(abs(new%linewidth_serta))
  !print *, "linewidth_mrta", maxval(abs(new%linewidth_mrta))
 
+ ! FIXME: I think transport_ngkpt is buggy, wrong ne(T), weird zeros if MRTA ...
+ ! Do we really need this option?
+
  if (any(dtset%transport_ngkpt /= 0)) then
    ! Perform further downsampling (usefull for debugging purposes)
    call wrtout([std_out, ab_out], " Downsampling the k-mesh before computing transport:")
@@ -436,6 +439,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  if (new%transport_fermie /= zero) new%transport_mu_e = new%transport_fermie
 
  if (new%transport_fermie == zero .and. new%transport_extrael /= new%eph_extrael) then
+
    if (new%transport_extrael /= new%eph_extrael) then
      write(msg,'(2(a,e18.8),3a)') &
        ' extrael from SIGEPH: ',new%transport_extrael, ' and input file: ',new%eph_extrael, "differ", ch10, &
@@ -443,6 +447,9 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
      call wrtout(std_out, msg)
    end if
 
+#if 0
+   call ebands_get_muT_with_fd(ebands, new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
+#else
    call ebands_copy(ebands, tmp_ebands)
 
    ! We only need mu_e so MPI parallelize the T-loop.
@@ -476,7 +483,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
    call ebands_free(tmp_ebands)
    call xmpi_sum(new%transport_mu_e, comm, ierr)
- endif
+#endif
+ end if
 
  call cwtime_report(" rta_new", cpu, wall, gflops)
 
@@ -1002,8 +1010,12 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(ebands_ncwrite(self%ebands, ncid))
  NCF_CHECK(self%edos%ncwrite(ncid))
 
+ !nctk_copy from sigeph?
+ !    nctkarr_t("eph_ngqpt_fine", "int", "three"), &
+
  ncerr = nctk_def_arrays(ncid, [ &
     nctkarr_t('transport_ngkpt', "int", "three"), &
+    nctkarr_t('sigma_erange', "dp", "two"), &
     nctkarr_t('kTmesh', "dp", "ntemp"), &
     nctkarr_t('transport_mu_e', "dp", "ntemp"), &
     nctkarr_t('eph_mu_e', "dp", "ntemp"), &
@@ -1036,6 +1048,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_ngkpt"), dtset%transport_ngkpt))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), self%gaps%vb_max))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min"), self%gaps%cb_min))

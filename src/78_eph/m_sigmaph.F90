@@ -535,8 +535,9 @@ module m_sigmaph
     procedure :: get_ebands => sigmaph_get_ebands
       ! Fill in values in ebands from the sigmaph structure and netcdf file
 
-    procedure :: skip_mode => sigmaph_skip_mode
+    procedure :: skip_phmode => sigmaph_skip_phmode
       ! Ignore contribution of phonon mode depending on phonon frequency value or mode index.
+      ! TODO: Add similar interface to ignore q < qcut (taking into account umlapp though)
 
  end type sigmaph_t
 !!***
@@ -919,7 +920,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Note that acoustic modes are ignored.
      do nu=4,natom3
-       wqnu = phfrq(nu); if (sigma%skip_mode(nu, wqnu)) cycle
+       wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
        cp3 = czero
        do iatom=1, natom
          cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
@@ -1504,7 +1505,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Compute contribution to Fan-Migdal for M > sigma%nbsum
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
-           wqnu = phfrq(nu); if (sigma%skip_mode(nu, wqnu)) cycle
+           wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
 
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
@@ -1638,7 +1639,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
            ! Ignore acoustic or unstable modes.
-           wqnu = phfrq(nu); if (sigma%skip_mode(nu, wqnu)) cycle
+           wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
 
            ! For each band in Sigma_{bk}
            do ib_k=1,nbcalc_ks
@@ -1945,7 +1946,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
            ! Ignore acoustic or unstable modes.
-           wqnu = phfrq(nu); if (sigma%skip_mode(nu, wqnu)) cycle
+           wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
 
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
@@ -2302,6 +2303,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    gap_err = get_gaps(tmp_ebands,gaps)
    call ebands_free(tmp_ebands)
  end if
+
  call gaps%print(unit=std_out)
  val_indeces = get_valence_idx(ebands)
 
@@ -2884,7 +2886,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ! Apply the scissor operator to the dense mesh
  if ((new%use_doublegrid) .and. (abs(dtset%mbpt_sciss) > tol6)) then
    call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
-   call apply_scissor(ebands_dense,dtset%mbpt_sciss)
+   call apply_scissor(ebands_dense, dtset%mbpt_sciss)
  end if
 
  ! Build object used to compute integration weights taking into account double-grid.
@@ -2926,15 +2928,22 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  new%mu_e(:) = ebands%fermie
 
  if (dtset%eph_fermie == zero) then
+   ! TODO: Optimize this part
+   ! grep "TIME" /home/acad/ucl-naps/gbrunin/GaP_FHI/mobility/conv_fine/v9/k144x144x144/q288x288x288/log | grep get_mu get_mu_e completed. cpu: 06:02 [minutes] , wall: 06:02 [minutes] <<< TIME
+
    call cwtime(cpu, wall, gflops, "start")
    if (new%use_doublegrid) then
      call ebands_copy(ebands_dense, tmp_ebands)
+     !call ebands_get_muT_with_fd(ebands_dense, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    else
      call ebands_copy(ebands, tmp_ebands)
+     !call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    end if
 
+#if 1
    ! We only need mu_e so MPI parallelize the T-loop.
    new%mu_e = zero
+
    do it=1,new%ntemp
      if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
 
@@ -2963,8 +2972,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
      end if
    end do ! it
 
-   call ebands_free(tmp_ebands)
    call xmpi_sum(new%mu_e, comm, ierr)
+   call ebands_free(tmp_ebands)
+#endif
+
    call cwtime_report(" get_mu_e", cpu, wall, gflops)
  endif
 
@@ -3967,9 +3978,9 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 end subroutine sigmaph_setup_kcalc
 !!***
 
-!!****f* m_sigmaph/sigmaph_skip_mode
+!!****f* m_sigmaph/sigmaph_skip_phmode
 !! NAME
-!!  sigmaph_skip_mode
+!!  sigmaph_phskip_mode
 !!
 !! FUNCTION
 !!  Ignore contribution of phonon mode depending on phonon frequency value or mode index.
@@ -3982,7 +3993,7 @@ end subroutine sigmaph_setup_kcalc
 !!
 !! SOURCE
 
-pure logical function sigmaph_skip_mode(self, nu, wqnu) result(skip)
+pure logical function sigmaph_skip_phmode(self, nu, wqnu) result(skip)
 
 !Arguments ------------------------------------
  class(sigmaph_t),intent(in) :: self
@@ -3993,7 +4004,7 @@ pure logical function sigmaph_skip_mode(self, nu, wqnu) result(skip)
 
  skip = wqnu < EPHTK_WTOL .or. self%phmodes_skip(nu) == 1
 
-end function sigmaph_skip_mode
+end function sigmaph_skip_phmode
 !!***
 
 !!****f* m_sigmaph/sigmaph_setup_qloop
@@ -4897,7 +4908,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol,
 
    ! Note that acoustic modes are ignored.
    do nu=4,3*cryst%natom
-     wqnu = phfrq(nu); if (sigma%skip_mode(nu, wqnu)) cycle
+     wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
 
      ! Get phonon occupation for all temperatures.
      nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)

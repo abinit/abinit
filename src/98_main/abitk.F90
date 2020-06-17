@@ -280,16 +280,15 @@ program abitk
    !call ebands_free(ebands_kmesh)
 
  case ("skw_compare")
-   ! Get energies on the IBZ from filepath
 
+   ! Get energies on the IBZ from filepath
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
-   ! Get ab-initio energies for the second file (assume it's a path!)
+   ! Get ab-initio energies for the second file (assume k-path!)
    call get_path_ebands_cryst(other_path, other_ebands, other_cryst, comm, argpos=3)
 
    ! Interpolate band energies on the path with star-functions
    kpath = kpath_new(other_ebands%kptns, other_cryst%gprimd, -1)
-
 
    call parse_skw_params(skw_params)
    ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
@@ -327,10 +326,10 @@ program abitk
  ! ====================
  ! Tools for developers
  ! ====================
- !case ("f2nc")
+ !case ("denpot_f2nc")
  !   call get_command_argument(2, path)
  !   call get_command_argument(3, other_path)
- !   call f2nc(path, other_path)
+ !   call denpot_f2nc(path, other_path)
 
    ! Get important dimensions from the first header and rewind the file.
    !call hdr_fort_read(new%hdr_ref, unt, fform)
@@ -512,7 +511,6 @@ subroutine parse_skw_params(params)
 
 !*******************************************************
 
- !params = zero; params(1) = 1; params(2) = 5
  ABI_CHECK(get_arg("lpratio", lpratio, msg, default=5) == 0, msg)
  ABI_CHECK(get_arg("rcut", rcut, msg, default=zero) == 0, msg)
  ABI_CHECK(get_arg("rsigma", rsigma, msg, default=zero) == 0, msg)

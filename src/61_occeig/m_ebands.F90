@@ -94,6 +94,7 @@ MODULE m_ebands
  public :: ebands_set_scheme       ! Set the occupation scheme.
  public :: ebands_set_fermie       ! Change the fermi level (assume metallic scheme).
  public :: ebands_set_nelect       ! Change the number of electrons (assume metallic scheme).
+ public :: ebands_get_muT_with_fd  ! Change the number of electrons (assume metallic scheme).
  public :: ebands_calc_nelect      ! Compute nelect from Fermi level and Temperature.
  public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
  public :: ebands_ncwrite          ! Write object to NETCDF file (use ncid)
@@ -401,6 +402,7 @@ function get_gaps(ebands, gaps, kmask) result(retcode)
  real(dp),parameter :: tol_fermi=tol6
  real(dp) :: fun_gap,opt_gap
  logical :: ismetal
+ !type(ebands_t)  :: tmp_ebands
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
  real(dp) :: top_valence(ebands%nkpt),bot_conduct(ebands%nkpt)
@@ -473,6 +475,19 @@ function get_gaps(ebands, gaps, kmask) result(retcode)
  end do spin_loop
 
  retcode = maxval(gaps%ierr)
+
+ ! TODO
+ !gap_err = get_gaps(ebands, gaps)
+ !if (retcode /= 0) then
+ !  ! In case of error try to enforce semiconductor occupations before calling get_gaps
+ !  ! This might still fail though...
+ !  call gaps%free()
+ !  call ebands_copy(ebands, tmp_ebands)
+ !  call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ !  call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect-dtset%eph_extrael, dtset%spinmagntarget, msg)
+ !  gap_err = get_gaps(tmp_ebands, gaps)
+ !  call ebands_free(tmp_ebands)
+ !end if
 
 end function get_gaps
 !!***
@@ -2365,14 +2380,13 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 ! *************************************************************************
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
- ebands%occopt = occopt; ebands%tsmear = tsmear
-
  if (my_prtvol > 10) then
    call wrtout(std_out, " Changing occupation scheme in electron bands")
    call wrtout(std_out, sjoin(" occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
    call wrtout(std_out, sjoin(" tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
  end if
 
+ ebands%occopt = occopt; ebands%tsmear = tsmear
  call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=my_prtvol)
 
  if (my_prtvol > 10) call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
@@ -2526,6 +2540,87 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
  call wrtout(std_out, msg)
 
 end subroutine ebands_set_nelect
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_get_muT_with_fd
+!! NAME
+!! ebands_get_muT_with_fd
+!!
+!! FUNCTION
+!!  Compute chemical potential for different temperatures using Fermi-Dirac occupation function (physical T)
+!!  Use ebands%nelect provided in input. Does not change input ebands.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in) :: self
+ integer,intent(in) :: ntemp, prtvol, comm
+ real(dp),intent(in) :: spinmagntarget
+ real(dp),intent(in) :: kTmesh(ntemp)
+ real(dp),intent(out) :: mu_e(ntemp)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: occopt3 = 3
+ integer :: ierr, it, nprocs, my_rank
+ real(dp) :: nelect
+ type(ebands_t) :: tmp_ebands
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ call ebands_copy(self, tmp_ebands)
+
+ mu_e = zero
+
+ do it=1,ntemp
+   if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
+
+   ! Use Fermi-Dirac occopt
+   ! TODO: Avoid these two calls (expensive if dense k-meshes)
+   call ebands_set_scheme(tmp_ebands, occopt3, kTmesh(it), spinmagntarget, prtvol)
+   call ebands_set_nelect(tmp_ebands, self%nelect, spinmagntarget, msg)
+   mu_e(it) = tmp_ebands%fermie
+   !
+   ! Check that the total number of electrons is correct
+   ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
+   ! are different from the occ_fd that will be used in the rest of the code.
+   nelect = ebands_calc_nelect(tmp_ebands, kTmesh(it), mu_e(it))
+
+   if (abs(nelect - self%nelect) > tol6) then
+     ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
+     ! for finite doping its hard to find nelect that exactly matches self%nelect.
+     ! in this case we print a warning
+     write(msg,'(3(a,f10.6))') &
+       'Calculated number of electrons nelect: ',nelect, &
+       ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for T = ',kTmesh(it)
+     if (kTmesh(it) == 0) then
+       MSG_WARNING(msg)
+     else
+       MSG_ERROR(msg)
+     end if
+   end if
+ end do ! it
+
+ call ebands_free(tmp_ebands)
+ call xmpi_sum(mu_e, comm, ierr)
+
+end subroutine ebands_get_muT_with_fd
 !!***
 
 !----------------------------------------------------------------------

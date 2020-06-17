@@ -59,6 +59,7 @@ occopt4 3
 # Setting the Fermi level
 #########
 eph_fermie5 17.5 eV
+#tmesh5 300 0 1
 occopt5 3
 
 # Structure 
@@ -85,5 +86,5 @@ znucl 6
 #%% keywords = NC, DFPT, EPH
 #%% description = 
 #%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
-#%%   Test of the calculation of the fermi level under different conditions
+#%%   Test of the calculation of the Fermi level under different conditions
 #%%<END TEST_INFO>

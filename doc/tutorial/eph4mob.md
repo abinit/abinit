@@ -559,7 +559,10 @@ no additional $\kk$-point is considered.
 It is the case here for the first 3 datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
 
-<!-- TODO: Discuss how to dope the system! -->
+<!-- 
+TODO: Discuss how to dope the system! 
+Other quantities (Seebeck etc may have a different convergence behaviour
+-->
 
 ### Convergence w.r.t. the k- and q-meshes
 

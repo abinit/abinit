@@ -268,6 +268,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
+ Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -556,6 +557,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
+ Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -825,6 +827,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
+ Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -1093,6 +1096,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
+ Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
