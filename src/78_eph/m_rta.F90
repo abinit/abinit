@@ -447,43 +447,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
      call wrtout(std_out, msg)
    end if
 
-#if 1
+   ! Compute Fermi level at various T
    call ebands_get_muT_with_fd(ebands, new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
-#else
-   call ebands_copy(ebands, tmp_ebands)
-
-   ! We only need mu_e so MPI parallelize the T-loop.
-   new%transport_mu_e = zero
-   do itemp=1,new%ntemp
-     if (mod(itemp, nprocs) /= my_rank) cycle ! MPI parallelism.
-     ! Use Fermi-Dirac occopt
-     call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(itemp), dtset%spinmagntarget, dtset%prtvol)
-
-     new%transport_mu_e(itemp) = tmp_ebands%fermie
-
-     ! Check that the total number of electrons is correct
-     ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
-     ! are different from the occ_fd that will be used in the rest of the code.
-     nelect = ebands_calc_nelect(tmp_ebands, new%kTmesh(itemp), new%transport_mu_e(itemp))
-
-     if (abs(nelect - tmp_ebands%nelect) > tol6) then
-       ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
-       ! for finite doping it's hard to find nelect that exactly matches ebands%nelect.
-       ! in this case we print a warning
-       write(msg,'(3(a,f10.6))')&
-         ' Calculated number of electrons nelect: ',nelect,&
-         ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for T: ',new%kTmesh(itemp)
-       if (new%kTmesh(itemp) == zero) then
-         MSG_WARNING(msg)
-       else
-         MSG_ERROR(msg)
-       end if
-     end if
-   end do ! it
-
-   call ebands_free(tmp_ebands)
-   call xmpi_sum(new%transport_mu_e, comm, ierr)
-#endif
  end if
 
  call cwtime_report(" rta_new", cpu, wall, gflops)

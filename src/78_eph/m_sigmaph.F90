@@ -2209,14 +2209,14 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 !scalars
  integer,parameter :: master = 0, occopt3 = 3, qptopt1 = 1, sppoldbl1 = 1, istwfk1 = 1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
- integer :: onpw, ii, ipw, ierr, it, spin, gap_err, ikcalc, qprange_, bstop
+ integer :: onpw, ii, ipw, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
  integer :: jj, bstart, natom, natom3 !, ip, iatom, idir, pertcase,
  integer :: isym_k, trev_k, mband, i1,i2,i3
  integer :: nrest, color
  logical :: downsample
  character(len=fnlen) :: wfk_fname_dense
  character(len=500) :: msg
- real(dp) :: dksqmax,nelect, estep
+ real(dp) :: dksqmax, estep
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: changed, isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -2943,49 +2943,10 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    call cwtime(cpu, wall, gflops, "start")
    if (new%use_doublegrid) then
-     !call ebands_copy(ebands_dense, tmp_ebands)
-     !ebands_dense%nelect = ebands%nelect
      call ebands_get_muT_with_fd(ebands_dense, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    else
-     !call ebands_copy(ebands, tmp_ebands)
      call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
    end if
-
-#if 0
-   ! We only need mu_e so MPI parallelize the T-loop.
-   new%mu_e = zero
-
-   do it=1,new%ntemp
-     if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism inside comm.
-
-     ! Use Fermi-Dirac occopt
-     call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), dtset%spinmagntarget, dtset%prtvol)
-     call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
-     new%mu_e(it) = tmp_ebands%fermie
-     !
-     ! Check that the total number of electrons is correct
-     ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
-     ! are different from the occ_fd that will be used in the rest of the code.
-     nelect = ebands_calc_nelect(tmp_ebands, new%kTmesh(it), new%mu_e(it))
-
-     if (abs(nelect - ebands%nelect) > tol6) then
-       ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
-       ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
-       ! in this case we print a warning
-       write(msg,'(3(a,f10.6))')&
-         'Calculated number of electrons nelect: ',nelect, &
-         ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for T = ',new%kTmesh(it)
-       if (new%kTmesh(it) == 0) then
-         MSG_WARNING(msg)
-       else
-         MSG_ERROR(msg)
-       end if
-     end if
-   end do ! it
-
-   call xmpi_sum(new%mu_e, comm, ierr)
-   call ebands_free(tmp_ebands)
-#endif
 
    call cwtime_report(" get_mu_e", cpu, wall, gflops)
  endif
