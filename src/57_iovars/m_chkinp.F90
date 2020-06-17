@@ -880,9 +880,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
      !end if
      ! TODO: Activate this test
-     !if (dt%eph_fermie /= zero .and. dt%tmesh(3) /= 0) then
-     !  MSG_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
-     !end if
+     if (dt%eph_fermie /= zero .and. nint(dt%tmesh(3)) /= 1) then
+       MSG_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
+     end if
      if (dt%eph_fermie /= zero .and. dt%eph_extrael /= zero) then
        MSG_ERROR_NOSTOP("eph_fermie and eph_extrael are mutually exclusive", ierr)
      end if

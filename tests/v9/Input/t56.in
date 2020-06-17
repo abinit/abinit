@@ -1,7 +1,7 @@
 # C in diamond structure. 
 # Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 6
+ndtset 5
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB files from DS20_DDB
@@ -59,7 +59,7 @@ occopt4 3
 # Setting the Fermi level
 #########
 eph_fermie5 17.5 eV
-#tmesh5 300 0 1
+tmesh5 300 0 1   # Cannot use more than one T when using eph_fermie
 occopt5 3
 
 # Structure 
