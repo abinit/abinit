@@ -4341,7 +4341,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
  ABI_SFREE(a2few_avg)
 
- ! Compute QP energies and Gaps.
+ ! Compute QP energies and Gaps (Note that I'm assuming a non-magnetic semiconductor!)
  ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
  kse_val = huge(one) * tol6; kse_cond = huge(one) * tol6
  qp_enes = huge(one) * tol6; qpoms_enes = huge(one) * tol6
@@ -4351,31 +4351,36 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  ! Write legend.
  if (ikcalc == 1 .and. spin == 1) then
    write(ab_out,"(a)")repeat("=", 80)
-   write(ab_out,"(a)")"Final results in eV."
-   write(ab_out,"(a)")"Notations:"
-   write(ab_out,"(a)")"   eKS: Kohn-Sham energy. eQP: quasi-particle energy."
-   write(ab_out,"(a)")"   eQP - eKS: Difference between the QP and the KS energy."
-   write(ab_out,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
-   write(ab_out,"(a)")"   Z(eKS): Renormalization factor."
-   write(ab_out,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
-   write(ab_out,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
-   write(ab_out,"(a)")"   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)"
-   write(ab_out,"(a)")"   TAU(eKS): Lifetime in femtoseconds computed at the KS energy."
+   write(ab_out,"(a)")" Final results in eV."
+   write(ab_out,"(a)")" Notations:"
+   write(ab_out,"(a)")"     eKS: Kohn-Sham energy. eQP: quasi-particle energy."
+   write(ab_out,"(a)")"     eQP - eKS: Difference between the QP and the KS energy."
+   write(ab_out,"(a)")"     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
+   write(ab_out,"(a)")"     Z(eKS): Renormalization factor."
+   write(ab_out,"(a)")"     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
+   write(ab_out,"(a)")"     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
+   write(ab_out,"(a)")"     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)"
+   write(ab_out,"(a)")"     TAU(eKS): Lifetime in femtoseconds computed at the KS energy."
+   write(ab_out,"(a)")"     mu_e: Fermi level for given (T, nelect)"
    write(ab_out,"(a)")" "
    write(ab_out,"(a)")" "
  end if
 
  do it=1,self%ntemp
+
    ! Write header.
    if (it <= max_ntemp) then
      if (self%nsppol == 1) then
-       write(ab_out,"(3a,f6.1,a)") &
-         "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", T= ", self%kTmesh(it) / kb_HaK, " [K]"
+       write(ab_out,"(3a,f6.1,a,f8.3)") &
+         "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", T: ", self%kTmesh(it) / kb_HaK, &
+         " [K], mu_e: ", self%mu_e(it) * Ha_eV
      else
-       write(ab_out,"(3a,i1,a,f6.1,a)") &
-         "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", spin: ", spin, ", T= ",self%kTmesh(it) / kb_HaK, " [K]"
+       write(ab_out,"(3a,i1,a,f6.1,a,f8.3)") &
+         "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", spin: ", spin, ", T: ",self%kTmesh(it) / kb_HaK, &
+         " [K], mu_e: ", self%mu_e(it) * Ha_eV
      end if
      if (self%imag_only) then
+       ! TODO: Add tau^SERTA, tau^MRTA, and v tau
        write(ab_out,"(a)")"   B    eKS    SE2(eKS)  TAU(eKS)  DeKS"
      else
        write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
@@ -4460,13 +4465,13 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  end do ! it
 
  if (self%ntemp > max_ntemp .and. (ikcalc == 1 .and. spin == 1)) then
-   write(ab_out, "(a,i0,a)")"No more than ", max_ntemp, " temperatures are written to the main output file."
-   write(ab_out, "(2a)")"Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
+   write(ab_out, "(a,i0,a)")" No more than ", max_ntemp, " temperatures are written to the main output file."
+   write(ab_out, "(2a)")" Please use SIGEPH.nc file and AbiPy to analyze the results.",ch10
  end if
 
  if (prtvol > 0 .and. (ikcalc == 1 .and. spin == 1)) then
    if (self%gfw_nomega > 0) then
-     write(ab_out, "(2a)")"omega and Eliashberg function gf_{nk}(omega) for testing purposes:"
+     write(ab_out, "(2a)")" omega and Eliashberg function gf_{nk}(omega) for testing purposes:"
      iw = (self%gfw_nomega / 2)
      do ib=1,min(self%nbcalc_ks(ikcalc, spin), 5)
        band_ks = self%bstart_ks(ikcalc, spin) + ib - 1
@@ -4479,7 +4484,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    end if
 
    if (self%nwr >= 3) then
-     write(ab_out, "(2a)")ch10,"omega and Sigma_nk(omega, T=1) in eV for testing purposes:"
+     write(ab_out, "(2a)")ch10," omega and Sigma_nk(omega, T=1) in eV for testing purposes:"
      it = 1; iw = (self%nwr / 2)
      do ib=1,min(self%nbcalc_ks(ikcalc, spin), 5)
        band_ks = self%bstart_ks(ikcalc, spin) + ib - 1

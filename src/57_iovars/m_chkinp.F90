@@ -884,7 +884,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        MSG_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
      end if
      if (dt%eph_fermie /= zero .and. dt%eph_extrael /= zero) then
-       MSG_ERROR_NOSTOP("eph_fermie and eph_extrael are mutually exclusive", ierr)
+       MSG_ERROR_NOSTOP("eph_fermie and (eph_extrael|eph_doping) are mutually exclusive", ierr)
      end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
