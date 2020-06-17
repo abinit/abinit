@@ -1918,13 +1918,13 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                  
                  ! get covariant |u_{n,k+b}> and associated cprj
                  call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                      &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                      &           dtorbmag%lmn_size,dtset%natom,nband_k,nband_occ,&
                       &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                  sflag_k=0
                  cg1_kb(:,:) = zero
                  ! cg1_kb will hold |\tilde{u}_{n,k+b}>
-                 call smatrix(cg_k,cgqb,cg1_kb,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_k,&
-                      &           mcg1_k,mcg1_k,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
+                 call smatrix(cg_k,cgqb,cg1_kb,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
+                      &           mcg_k,mcg_k,mcg1_k,1,dtset%mpw,nband_k,nband_occ,npw_k,npw_kb,my_nspinor,&
                       &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
                  ! cprj1_kb will hold cprj for cg1_kb
                  call covar_cprj(cprj_kb,cprj1_kb,dtset,nband_k,nband_occ,pawtab,smat_inv)
@@ -1966,13 +1966,13 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
 
                     ! get covariant |u_{n,k+g}> and associated cprj
                     call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                         &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                         &           dtorbmag%lmn_size,dtset%natom,nband_k,nband_occ,&
                          &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                     sflag_k=0
                     cg1_kg(:,:) = zero
                     ! cg1_kg will hold |\tilde{u}_{n,k+g}>
-                    call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_k,&
-                         &           mcg1_k,mcg1_k,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
+                    call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
+                         &           mcg_k,mcg_k,mcg1_k,1,dtset%mpw,nband_k,nband_occ,npw_k,npw_kg,my_nspinor,&
                          &           pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
                     ! cprj1_kg will hold cprj for cg1_kg
                     call covar_cprj(cprj_kg,cprj1_kg,dtset,nband_k,nband_occ,pawtab,smat_inv)
@@ -1980,9 +1980,9 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                     dkbg = dkg - dkb
                     ! overlap of covariant cprj at kb and kg
                     call overlap_k1k2_paw(cprj1_kb,cprj1_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                         &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                         &           dtorbmag%lmn_size,dtset%natom,nband_occ,nband_occ,&
                          &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
-                    do iband = 1, nband_k
+                    do iband = 1, nband_occ
                           
                        ish1 = (iband-1)*npw_k+1
                        ish2 = iband*npw_k
