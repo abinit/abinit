@@ -637,7 +637,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dtset%eph_task /= 6) call dtset%free_nkpt_arrays()
 
  ! ====================================================
- ! === This is the real epc stuff once all is ready ===
+ ! === This is the real EPH stuff once all is ready ===
  ! ====================================================
 
  select case (dtset%eph_task)

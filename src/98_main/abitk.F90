@@ -312,9 +312,10 @@ program abitk
 
  case ("ebands_extrael")
    call get_path_ebands(path, ebands, comm)
+
+   ABI_CHECK(get_arg("extrael", extrael, msg) == 0, msg)
    ABI_CHECK(get_arg("occopt", occopt, msg, default=3) == 0, msg)
    ABI_CHECK(get_arg("tsmear", tsmear, msg, default=tol2) == 0, msg)
-   ABI_CHECK(get_arg("extrael", extrael, msg) == 0, msg)
    ABI_CHECK(get_arg("spinmagntarget", spinmagntarget, msg, default=-99.99_dp) == 0, msg)
 
    call ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol)

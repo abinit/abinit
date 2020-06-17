@@ -3796,8 +3796,10 @@ Variable(
     mnemonics="Electron-PHonon: EXTRA ELectrons",
     added_in_version="before_v9",
     text=r"""
-Number of electrons per unit cell to be added to the initial value computed
-from the pseudopotentials and unit cell.
+Number of electrons per unit cell to be added/subtracted to the initial value computed
+from the pseudopotentials and the unit cell.
+Can be used to simulate doping within the rigid band approximation.
+See also [[eph_doping]] to specify the same quantity in terms of charge/cm^3
 """,
 ),
 
@@ -3812,9 +3814,11 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable can be used to change the value of the Fermi level when
-performing electron-phonon calculations with [[optdriver]] == 7. This variable
-has effect only if set to a non-zero value. See also [[eph_extrael]].
+This variable can be used to change artificially the value of the Fermi level when
+performing e-ph calculations.
+The variable has effect only if set to a non-zero value.
+This option is mutually exclusive with [[eph_extrael]] and [[eph_doping]].
+When [[eph_fermie]] is used the number of temperatures specified by [[tmesh]] cannot be greater than one.
 """,
 ),
 
@@ -21592,6 +21596,22 @@ Variable(
     added_in_version="9.1.4",
     text=r"""
     See [[brav@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="eph_doping",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="EPH doping",
+    added_in_version="9.2.0",
+    text=r"""
+Gives the doping charge in units of |e_charge| / cm^3.
+Negative for n-doping, positive for p-doping.
+Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
 """,
 ),
 
