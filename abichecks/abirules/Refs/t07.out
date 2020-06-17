@@ -1,7 +1,7 @@
 **********************************************************************
 Warning pattern : 'CHARACTER expression will be truncated in assignment'
 **********************************************************************
-m_hdr.F90 = line: 2751, [31mcode: 2750 |      hdr%title(ipsp-1) =list_tmp(1:fnlen)[0m
+m_hdr.F90 = line: 2751, [31mcode: 2751 |      hdr%title(ipsp-1) =list_tmp(1:fnlen)[0m
 dummy_tests.F90 = line: 91, [31mcode: 91 |  dummy_string="This is too long !"[0m
 **********************************************************************
 Warning count = 2
