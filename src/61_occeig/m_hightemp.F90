@@ -33,7 +33,9 @@ module m_hightemp
   use m_geometry
   use m_special_funcs
   use m_specialmsg
+  use m_xmpi
   use m_energies,       only : energies_type
+  use m_gsphere,        only : getkpgnorm
   use m_kg,             only : mkkin
   use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle
   use m_numeric_tools,  only : simpson, simpson_int
@@ -42,12 +44,13 @@ module m_hightemp
   implicit none
 
   type,public :: hightemp_type
-    integer :: bcut,ioptden,nbcut,version
+    integer :: bcut,ioptden,nbcut,version,delta_n
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,e_ent_freeel
     real(dp) :: nfreeel,e_shiftfactor,ucvol
+    logical :: prt_cg
   contains
     procedure :: compute_e_ent_freeel,compute_e_kin_freeel_approx
-    procedure :: compute_nfreeel
+    procedure :: compute_nfreeel,compute_pw_avg_std
     procedure :: compute_e_shiftfactor,init,destroy
   end type hightemp_type
 
@@ -100,11 +103,13 @@ contains
     this%nbcut=nbcut
     this%version=0
     this%ebcut=zero
+    this%delta_n=20
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%e_ent_freeel=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
+    this%prt_cg=.false.
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
 
@@ -120,6 +125,7 @@ contains
     this%bcut=0
     this%nbcut=0
     this%version=0
+    this%delta_n=0
     this%ebcut=zero
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
@@ -167,7 +173,7 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: band_index,ii,ikpt,isppol,krow,nband_k,niter,delta_n
+    integer :: band_index,ii,ikpt,isppol,krow,nband_k,niter
     ! Arrays
     real(dp) :: eigentemp(mband*nkpt*nsppol)
     real(dp) :: eknktemp(mband*nkpt*nsppol)
@@ -175,7 +181,6 @@ contains
 
     ! *********************************************************************
 
-    delta_n=20
 
     ! U_{K_0}
     ! this%e_shiftfactor=zero
@@ -183,13 +188,13 @@ contains
     ! do isppol=1,nsppol
     !   do ikpt=1,nkpt
     !     nband_k=nband(ikpt+(isppol-1)*nkpt)
-    !     do ii=nband_k-delta_n+1,nband_k
+    !     do ii=nband_k-this%delta_n+1,nband_k
     !       this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
     !     end do
     !     band_index=band_index+nband_k
     !   end do
     ! end do
-    ! this%e_shiftfactor=this%e_shiftfactor/delta_n
+    ! this%e_shiftfactor=this%e_shiftfactor/this%delta_n
     ! write(0,*) 'eknk_new', this%e_shiftfactor
 
     ! U_{HEG_0}
@@ -199,13 +204,13 @@ contains
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
-          do ii=nband_k-delta_n+1,nband_k
+          do ii=nband_k-this%delta_n+1,nband_k
             this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-hightemp_e_heg(dble(ii),this%ucvol))
           end do
           band_index=band_index+nband_k
         end do
       end do
-      this%e_shiftfactor=this%e_shiftfactor/delta_n
+      this%e_shiftfactor=this%e_shiftfactor/this%delta_n
       this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
       ! write(0,*) this%ebcut, eigen(this%bcut*nkpt*nsppol)
       ! write(0,*) 'eheg_new', this%e_shiftfactor
@@ -223,10 +228,10 @@ contains
         eigentemp(ii)=eigen(krow)
         eknktemp(ii)=eknk(krow)
       end do
-      ! Doing the average over the delta_n lasts states...
+      ! Doing the average over the this%delta_n lasts states...
       niter=0
       this%e_shiftfactor=zero
-      do ii=this%bcut*nkpt*nsppol-delta_n+1,this%bcut*nkpt*nsppol
+      do ii=this%bcut*nkpt*nsppol-this%delta_n+1,this%bcut*nkpt*nsppol
         this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
         niter=niter+1
       end do
@@ -458,6 +463,161 @@ contains
       this%e_ent_freeel=simpson(step,valuesent)
     end if
   end subroutine compute_e_ent_freeel
+
+  !****f* ABINIT/m_hightemp/compute_pw_avg_std
+  ! NAME
+  ! compute_pw_avg_std
+  !
+  ! FUNCTION
+  ! Compute the planewaves average standard deviation over lasts bands.
+  !
+  ! INPUTS
+  ! this=hightemp_type object concerned
+  ! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  ! eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+  ! mband=maximum number of bands
+  ! nkpt=number of k points
+  ! nsppol=1 for unpolarized, 2 for spin-polarized
+  !
+  ! OUTPUT
+  ! this=hightemp_type object concerned
+  !
+  ! PARENTS
+  !
+  ! CHILDREN
+  !
+  ! SOURCE
+  subroutine compute_pw_avg_std(this,cg,ckpt,ecut,eig_k,ek_k,exchn2n3d,fnameabo,istwfk,kg_k,kpt,&
+  & mcg,mpi_enreg,mpw,nband,nkpt,npw_k,nsppol,rprimd)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    integer,intent(in) :: ckpt,mcg,mpw,nkpt,npw_k,nsppol,exchn2n3d
+    real(dp),intent(in) :: ecut
+    class(hightemp_type),intent(inout) :: this
+    type(MPI_type),intent(inout) :: mpi_enreg
+    ! Arrays
+    integer,intent(in) :: istwfk(nkpt),kg_k(3,npw_k),nband(nkpt)
+    real(dp),intent(in) :: kpt(3,nkpt),rprimd(3,3)
+    real(dp),intent(in) :: cg(2,mcg)
+    real(dp),intent(in) :: eig_k(nband(ckpt)),ek_k(nband(ckpt))
+    character(len=*),intent(in) :: fnameabo
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: cgshift,cgshift_tot,iband,iout,ipw,ipw_tot
+    integer :: mcg_tot,mpierr,npw_tot
+    real(dp) :: ucvol,kpg1_tot,kpg2_tot,kpg3_tot
+    character(len=50) :: filenameoutpw
+    character(len=4) :: mode_paral
+    ! Arrays
+    integer :: nppw_tot(mpi_enreg%nproc_band)
+    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+    integer,allocatable :: kg_tot(:,:)
+    real(dp),allocatable :: cg_tot(:,:),kpgnorm(:),kpgnorm_tot(:),tempwfk(:,:)
+
+    ! *********************************************************************
+
+    write(std_out,'(a,I5.5,a)') 'Writing plane waves coefs of kpt=',ckpt,'...'
+    mode_paral='PERS'
+    iout=-1
+    call metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
+
+    ABI_ALLOCATE(kpgnorm,(npw_k))
+    call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
+
+    mcg_tot=mcg
+    nppw_tot(:)=0
+    nppw_tot(mpi_enreg%me_band + 1)=npw_k
+    call xmpi_sum(nppw_tot,mpi_enreg%comm_world,mpierr)
+    call xmpi_sum(mcg_tot,mpi_enreg%comm_world,mpierr)
+
+    npw_tot=sum(nppw_tot)
+    ABI_ALLOCATE(cg_tot,(2,mcg_tot))
+    ABI_ALLOCATE(kpgnorm_tot,(npw_tot))
+    ABI_ALLOCATE(kg_tot,(3,npw_tot))
+
+    cg_tot(:,:)=zero
+    kpgnorm_tot(:)=zero
+    kg_tot(:,:)=0
+    do ipw=1,npw_k
+      ipw_tot=sum(nppw_tot(1:mpi_enreg%me_band))+ipw
+      kpgnorm_tot(ipw_tot)=kpgnorm(ipw)
+      kg_tot(:,ipw_tot)=kg_k(:,ipw)
+
+      do iband=1,nband(ckpt)
+        cgshift=(iband-1)*npw_k
+        cgshift_tot=(iband-1)*npw_tot
+        cg_tot(:,cgshift_tot+ipw_tot)=cg(:,cgshift+ipw)
+      end do
+    end do
+
+    call xmpi_sum(cg_tot,mpi_enreg%comm_world,mpierr)
+    call xmpi_sum(kpgnorm_tot,mpi_enreg%comm_world,mpierr)
+    call xmpi_sum(kg_tot,mpi_enreg%comm_world,mpierr)
+
+
+    if(mpi_enreg%me==mpi_enreg%me_kpt) then
+      if(this%prt_cg) then
+        ! Writting plane waves vector coordinates
+        write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
+
+        open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
+        do ipw=1, npw_tot
+          kpg1_tot=kpt(1,ckpt)+dble(kg_tot(1,ipw))
+          kpg2_tot=kpt(2,ckpt)+dble(kg_tot(2,ipw))
+          kpg3_tot=kpt(3,ckpt)+dble(kg_tot(3,ipw))
+
+          write(23,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
+          & ipw,&
+          & gprimd(1,1)*kpg1_tot+gprimd(1,2)*kpg2_tot+gprimd(1,3)*kpg3_tot,&
+          & gprimd(2,1)*kpg1_tot+gprimd(2,2)*kpg2_tot+gprimd(2,3)*kpg3_tot,&
+          & gprimd(3,1)*kpg1_tot+gprimd(3,2)*kpg2_tot+gprimd(3,3)*kpg3_tot,&
+          & kpgnorm_tot(ipw)
+        end do
+        close(23)
+
+        ! Writting Eigen energies
+        write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ckpt
+        open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
+        write(23,'(ES12.5)') eig_k
+        close(23)
+
+        ! Writting Kinetic energies
+        write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ckpt
+        open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
+        write(23,'(ES12.5)') ek_k
+        close(23)
+      end if
+
+      ABI_ALLOCATE(tempwfk,(npw_tot, 3))
+      do iband=1, nband(ckpt)
+
+        if(this%prt_cg) then
+          tempwfk(:,:) = zero
+          cgshift_tot=(iband-1)*npw_tot
+          do ipw=1, npw_tot
+            tempwfk(ipw,2) = ABS(dcmplx(cg_tot(1,cgshift_tot+ipw), cg_tot(2,cgshift_tot+ipw)))
+            ! Hartree to eV * Kinetic energy of the pw
+            tempwfk(ipw,1) = 27.2114*(2*pi*kpgnorm_tot(ipw))**2/2.
+            tempwfk(ipw,3) = ipw
+          end do
+
+          write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ckpt,'_b',iband
+          open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
+          do ipw=1, npw_tot
+            write(23,'(i14,ES14.6,ES14.6,i14)') int(tempwfk(ipw, 3)),tempwfk(ipw, 1),tempwfk(ipw,2)
+          end do
+          close(23)
+        end if
+      end do
+      ABI_DEALLOCATE(tempwfk)
+    end if
+    ABI_DEALLOCATE(kpgnorm)
+    ABI_DEALLOCATE(kg_tot)
+    ABI_DEALLOCATE(cg_tot)
+    ABI_DEALLOCATE(kpgnorm_tot)
+  end subroutine compute_pw_avg_std
 
   ! *********************************************************************
 

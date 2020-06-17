@@ -967,12 +967,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift)
 
 
-       !blanchet PRINT WAVE FUNCTIONS COEFFICIENTS
-       if(dtset%userid==6661) then
-         call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
-&         dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
-&         dtset%nkpt,npw_k,dtset%nsppol,rprimd)
-        end if
+       !blanchet WORK ON PLANEWAVES
+       if(associated(hightemp)) then
+         if(hightemp%version==1) then
+           call hightemp%compute_pw_avg_std(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
+  &         dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
+  &         dtset%nkpt,npw_k,dtset%nsppol,rprimd)
+         else if((hightemp%version/=1).and.(hightemp%prt_cg)) then
+           call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
+&           dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
+&           dtset%nkpt,npw_k,dtset%nsppol,rprimd)
+         end if
+       end if
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA

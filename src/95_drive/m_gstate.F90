@@ -861,6 +861,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      if(dtset%userie >= 0) then
        hightemp%version=dtset%userie
      end if
+     if(dtset%userid==6661) then
+       hightemp%prt_cg=.TRUE.
+     end if
    end if
  end if
 
