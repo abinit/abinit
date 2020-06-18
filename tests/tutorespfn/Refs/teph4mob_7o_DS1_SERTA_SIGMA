@@ -1,5 +1,6 @@
 # sigma
-# Results in atomic units. Electron energies in Hartree
+# 
+RTA type: Self-energy relaxation time approximation (SERTA)
 #0 0 0
 #
 

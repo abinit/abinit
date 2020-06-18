@@ -564,7 +564,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae
  if (edos_step == zero) edos_step = 0.001
- if (edos_step == zero) edos_step = one / Ha_meV
+ if (edos_step == zero) edos_step = ten / Ha_meV
  edos_broad = dtset%tsmear
 
  ! Set default energy range for DOS
@@ -577,7 +577,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
    if (dtset%sigma_erange(2) >= zero) emax = self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
  end do
 
- ! Compute DOS, vv_dos and vvtau_DOS (v x v times lifetimes)
+ ! Compute DOS, vv_dos and vvtau_DOS (v x v tau)
  !    out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
  !    out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
  !  Vectors and tensors are in Cartesian coordinates.
@@ -1061,36 +1061,42 @@ subroutine rta_print(self, cryst, dtset, dtfil)
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables --------------------------------
- integer :: itemp, spin, irta
+ integer :: itemp, spin, irta, ii
+ integer :: unts(2)
  character(len=500) :: msg, pre, rta_type
+ character(len=2) :: components(3)
 
 !************************************************************************
 
- call wrtout([std_out, ab_out], ch10//' Transport (RTA) calculation results:', newlines=1)
+ unts = [std_out, ab_out]
 
- !do irta=1,self%nrta
- do irta=1,1
-   if (irta == 1) rta_type = "RTA type: Self-energy relaxation time approximation (SERTA)"
-   if (irta == 2) rta_type = "RTA type: Momentum relaxation time approximation (MRTA)"
-   !call wrtout([std_out, ab_out], rta_type, newlines=1)
+ call wrtout(unts, ch10//' Transport (RTA) calculation results:', newlines=1)
+ components = ["xx", "yy", "zz"]
 
-   write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-   call wrtout([std_out, ab_out], msg)
-   ! TODO: here we are writing the xx component only!.
+ do irta=1,self%nrta
+   if (irta == 1) rta_type = "SERTA"
+   if (irta == 2) rta_type = "MRTA"
 
-   do spin=1,self%nsppol
-     if (self%nsppol == 2) call wrtout([std_out, ab_out], sjoin(" For spin:", stoa(spin)))
-     do itemp=1,self%ntemp
-       write(msg,"(f16.2,2e16.2,2f16.2)") &
-         self%kTmesh(itemp) / kb_HaK, &
-         self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-         self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-         self%mobility_mu(1, 1, 1, itemp, spin, irta), self%mobility_mu(2, 1, 1, itemp, spin, irta)
-       call wrtout([std_out, ab_out], msg)
-     end do ! itemp
-   end do ! spin
+   do ii=1,3
+     call wrtout(unts, sjoin("Cartesian component of", rta_type, "mobility tensor:", components(ii)))
+     write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+     call wrtout(unts, msg)
 
-   call wrtout([std_out, ab_out], ch10)
+     do spin=1,self%nsppol
+       if (self%nsppol == 2) call wrtout([std_out, ab_out], sjoin(" For spin:", stoa(spin)), newlines=1)
+       do itemp=1,self%ntemp
+         write(msg,"(f16.2,2e16.2,2f16.2)") &
+           self%kTmesh(itemp) / kb_HaK, &
+           self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+           self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+           self%mobility_mu(1, ii, ii, itemp, spin, irta), self%mobility_mu(2, ii, ii, itemp, spin, irta)
+         call wrtout(unts, msg)
+       end do ! itemp
+     end do ! spin
+     call wrtout(unts, ch10)
+   end do
+
+   call wrtout(unts, ch10)
  end do ! irta
 
  do irta=1,self%nrta
@@ -1147,7 +1153,8 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 
  ! write header
  write(ount, "(2a)")"# ", trim(header) ! with irta
- write(ount, "(a)")"# Results in atomic units. Electron energies in Hartree"
+ write(ount, "(a)")"# ", trim(rta_type)
+ !write(ount, "(a)")"# Results in atomic units. Electron energies in Hartree"
  write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
  write(ount, "(a)")"#"
  !write(ount, "()")"#"

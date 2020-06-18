@@ -394,8 +394,8 @@ It is possible to change this behaviour by using [[eph_intmeth]] albeit not reco
 as the calculation will become significantly slower.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
-The carrier concentration is deduced from the number of extra electrons in the unit cell,
-specified by [[eph_extrael]].
+The carrier concentration is specified by [[eph_doping]] is |electron_charge| / cm^3 units so negative for electron-doping,
+positive for hole doping.
 To obtain results that are representative of the intrinsic mobility,
 we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
 
