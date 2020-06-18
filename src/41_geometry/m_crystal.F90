@@ -1564,9 +1564,9 @@ end function crystal_symmetrize_cart_vec3
 
 !----------------------------------------------------------------------
 
-!!****f* m_crystal/crystal_symmetrize_cart_vec3
+!!****f* m_crystal/crystal_symmetrize_cart_tens33
 !! NAME
-!!  crystal_symmetrize_cart_vec3
+!!  crystal_symmetrize_cart_tens33
 !!
 !! FUNCTION
 !!  Symmetrize a cartesian 3x3 tensor

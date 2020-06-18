@@ -171,56 +171,49 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
    MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
 
-!Initialize the occupation function and generalized entropy function,
-!at the beginning, or if occopt changed
+ ! Initialize the occupation function and generalized entropy function,
+ ! at the beginning, or if occopt changed
 
-!Just get the number nptsdiv2 and allocate entfun, occfun, smdfun and xgrid accordingly
+ ! Just get the number nptsdiv2 and allocate entfun, occfun, smdfun and xgrid accordingly
  nptsdiv2 = nptsdiv2_def
-
-! call init_occ_ent(entfun, limit, &
-!& nptsdiv2, occfun, occopt, -1, smdfun, tphysel, &
-!& tsmear, tsmearinv, xgrid)
 
  ABI_MALLOC(entfun,(-nptsdiv2:nptsdiv2,2))
  ABI_MALLOC(occfun,(-nptsdiv2:nptsdiv2,2))
  ABI_MALLOC(smdfun,(-nptsdiv2:nptsdiv2,2))
  ABI_MALLOC(xgrid,(-nptsdiv2:nptsdiv2))
 
-!Call to init_occ_ent
- call init_occ_ent(entfun, limit, nptsdiv2, occfun, occopt, option, smdfun, tphysel, &
-& tsmear, tsmearinv, xgrid)
-
-!The initialisation of occfun and entfun is done
+ call init_occ_ent(entfun, limit, nptsdiv2, occfun, occopt, option, smdfun, tphysel, tsmear, tsmearinv, xgrid)
+ ! The initialisation of occfun and entfun is done
 
 !---------------------------------------------------------------------
 
-!write(std_out,*)' getnel : debug  tphysel, tsmear = ', tphysel, tsmear
+ ! write(std_out,*)' getnel : debug  tphysel, tsmear = ', tphysel, tsmear
  bantot=sum(nband(:))
 
  ABI_MALLOC(arg,(bantot))
  ABI_MALLOC(derfun,(bantot))
  ABI_MALLOC(ent,(bantot))
 
- if(option==1)then
+ if (option==1) then
    ! normal evaluation of occupations and entropy
 
-!  Compute the arguments of the occupation and entropy functions
-!  HM 20/08/2018 Treat the T --> 0 limit
+   !  Compute the arguments of the occupation and entropy functions
+   !  HM 20/08/2018 Treat the T --> 0 limit
    if (tsmear==0) then
      arg(:)=sign(huge_tsmearinv,fermie-eigen(1:bantot))
    else
      arg(:)=(fermie-eigen(1:bantot))*tsmearinv
    endif
 
-!  Compute the values of the occupation function, and the entropy function
-!  Note : splfit also takes care of the points outside of the interval,
-!  and assign to them the value of the closest extremal point,
-!  which is what is needed here.
+   !  Compute the values of the occupation function, and the entropy function
+   !  Note: splfit also takes care of the points outside of the interval,
+   !  and assign to them the value of the closest extremal point,
+   !  which is what is needed here.
 
    call splfit(xgrid,doccde,occfun,1,arg,occ,(2*nptsdiv2+1),bantot)
    call splfit(xgrid,derfun,entfun,0,arg,ent,(2*nptsdiv2+1),bantot)
 
-!  Normalize occ and ent, and sum number of electrons and entropy
+   ! Normalize occ and ent, and sum number of electrons and entropy
    nelect=zero; entropy=zero
    index=0
    do isppol=1,nsppol
@@ -236,32 +229,32 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
      end do
    end do
 
-!  write(std_out,*) ' getnel : debug   wtk, occ, eigen = ', wtk, occ, eigen
-!  write(std_out,*)xgrid(-nptsdiv2),xgrid(nptsdiv2)
-!  write(std_out,*)'fermie',fermie
-!  do ii=1,bantot
-!  write(std_out,*)ii,arg(ii),doccde(ii)
-!  end do
-!  write(std_out,*)'eigen',eigen(:)
-!  write(std_out,*)'arg',arg(:)
-!  write(std_out,*)'occ',occ(:)
-!  write(std_out,*)'nelect',nelect
+   ! write(std_out,*) ' getnel : debug   wtk, occ, eigen = ', wtk, occ, eigen
+   ! write(std_out,*)xgrid(-nptsdiv2),xgrid(nptsdiv2)
+   ! write(std_out,*)'fermie',fermie
+   ! do ii=1,bantot
+   ! write(std_out,*)ii,arg(ii),doccde(ii)
+   ! end do
+   ! write(std_out,*)'eigen',eigen(:)
+   ! write(std_out,*)'arg',arg(:)
+   ! write(std_out,*)'occ',occ(:)
+   ! write(std_out,*)'nelect',nelect
 
- else if(option==2)then
+ else if (option==2) then
   ! evaluate DOS for smearing, half smearing, and double.
 
    buffer=limit/tsmearinv*.5_dp
 
-  ! A Similar section is present is dos_calcnwrite. Should move all DOS stuff to m_ebands
-  ! Choose the lower and upper energies
+   ! A Similar section is present is dos_calcnwrite. Should move all DOS stuff to m_ebands
+   ! Choose the lower and upper energies
    enemax=maxval(eigen(1:bantot))+buffer
    enemin=minval(eigen(1:bantot))-buffer
 
-  ! Extend the range to a nicer value
+   ! Extend the range to a nicer value
    enemax=0.1_dp*ceiling(enemax*10._dp)
    enemin=0.1_dp*floor(enemin*10._dp)
 
-  ! Choose the energy increment
+   ! Choose the energy increment
    if(abs(dosdeltae)<tol10)then
      deltaene=0.001_dp
      if(prtdos1>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
@@ -296,26 +289,28 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
      enex=enemin
      do iene=1,nene
 
-!      Compute the arguments of the dos and occupation function
+       ! Compute the arguments of the dos and occupation function
        arg(:)=(enex-eigen(1:bantot))*tsmearinv
 
        call splfit(xgrid,derfun,smdfun,0,arg,dos,(2*nptsdiv2+1),bantot)
        call splfit(xgrid,derfun,occfun,0,arg,intdos,(2*nptsdiv2+1),bantot)
-!      Also compute the dos with tsmear halved and doubled
+
+       ! Also compute the dos with tsmear halved and doubled
        arg(:)=arg(:)*2.0_dp
        call splfit(xgrid,derfun,smdfun,0,arg,doshalf,(2*nptsdiv2+1),bantot)
-!      Since arg was already doubled, must divide by four
+
+       ! Since arg was already doubled, must divide by four
        arg(:)=arg(:)*0.25_dp
        call splfit(xgrid,derfun,smdfun,0,arg,dosdble,(2*nptsdiv2+1),bantot)
 
-!      Now, accumulate the contribution from each eigenenergy
+       ! Now, accumulate the contribution from each eigenenergy
        dostot=zero
        intdostot=zero
        doshalftot=zero
        dosdbletot=zero
        index=index_start
 
-!      write(std_out,*)' eigen, arg, dos, intdos, doshalf, dosdble'
+       ! write(std_out,*)' eigen, arg, dos, intdos, doshalf, dosdble'
        do ikpt=1,nkpt
          do iband=1,nband(ikpt+nkpt*(isppol-1))
            index=index+1
@@ -326,7 +321,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
          end do
        end do
 
-!      Print the data for this energy
+       ! Print the data for this energy
        write(unitdos, '(f8.3,2f14.6,2f14.3)' )enex,dostot,intdostot,doshalftot,dosdbletot
 
        enex=enex+deltaene
@@ -338,9 +333,9 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
    ABI_FREE(doshalf)
    ABI_FREE(intdos)
 
-!  MG: It does not make sense to close the unit here since the routines
-!  did not open the file here!
-!  Close the DOS file
+   ! MG: It does not make sense to close the unit here since the routines
+   ! did not open the file here!
+   ! Close the DOS file
    close(unitdos)
  end if
 
@@ -467,16 +462,16 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    MSG_BUG(msg)
  end if
 
- !Use bisection algorithm to find fermi energy
- !This choice is due to the fact that it will always give sensible
- !result (because the answer is bounded, even if the smearing function
- !is non-monotonic (which is the case for occopt=4 or 6)
- !Might speed up it, if needed !
+ ! Use bisection algorithm to find fermi energy
+ ! This choice is due to the fact that it will always give sensible
+ ! result (because the answer is bounded, even if the smearing function
+ ! is non-monotonic (which is the case for occopt=4 or 6)
+ ! Might speed up it, if needed !
 
- !Lowest and largest trial fermi energies, and corresponding number of electrons
- !They are obtained from the smallest or largest eigenenergy, plus a range of
- !energy that allows for complete occupation of all bands, or, on the opposite,
- !for zero occupation of all bands (see getnel.f)
+ ! Lowest and largest trial fermi energies, and corresponding number of electrons
+ ! They are obtained from the smallest or largest eigenenergy, plus a range of
+ ! energy that allows for complete occupation of all bands, or, on the opposite,
+ ! for zero occupation of all bands (see getnel.f)
 
  dosdeltae=zero  ! the DOS is not computed, with option=1
  fermilo=minval(eigen(1:nband(1)*nkpt*nsppol))-6.001_dp*tsmear
@@ -572,9 +567,9 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      call wrtout(std_out,msg)
    end if
 
- else ! Calculations with a specified moment
-
-!  Bisection loop
+ else
+   ! Calculations with a specified moment
+   ! Bisection loop
    cnt2=0
    cnt3=0
    entropy=zero
@@ -750,7 +745,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
  real(dp),intent(out) :: limit,tsmearinv
  real(dp),intent(inout) :: entfun(-nptsdiv2:nptsdiv2,2),occfun(-nptsdiv2:nptsdiv2,2)
  real(dp),intent(inout) :: smdfun(-nptsdiv2:nptsdiv2,2),xgrid(-nptsdiv2:nptsdiv2)
-
 
 !Local variables-------------------------------
 !scalars
@@ -1246,8 +1240,7 @@ end subroutine init_occ_ent
 !!
 !! FUNCTION
 !! For each pair of active bands (m,n), generates ratios
-!! that depend on the difference between occupation numbers
-!! and eigenvalues.
+!! that depend on the difference between occupation numbers and eigenvalues.
 !!
 !! INPUTS
 !!  doccde_k(nband_k)=derivative of occ_k wrt the energy
@@ -1563,7 +1556,6 @@ end function occ_dbe
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_occ/dos_hdr_write
 !!
 !! NAME
@@ -1620,17 +1612,17 @@ subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
 
 !Write the DOS file
  write(msg, '(7a,i2,a,i5,a,i4)' ) "#",ch10, &
-& '# ABINIT package : DOS file  ',ch10,"#",ch10,&
-& '# nsppol =',nsppol,', nkpt =',nkpt,', nband(1)=',nband(1)
- call wrtout(unitdos,msg,'COLL')
+  '# ABINIT package : DOS file  ',ch10,"#",ch10,&
+  '# nsppol =',nsppol,', nkpt =',nkpt,', nband(1)=',nband(1)
+ call wrtout(unitdos, msg)
 
  if (any(prtdos== [1,4])) then
    write(msg, '(a,i2,a,f6.3,a,f6.3,a)' )  &
-&   '# Smearing technique, occopt =',occopt,', tsmear=',tsmear,' Hartree, tphysel=',tphysel,' Hartree'
+    '# Smearing technique, occopt =',occopt,', tsmear=',tsmear,' Hartree, tphysel=',tphysel,' Hartree'
  else
    write(msg, '(a)' ) '# Tetrahedron method '
  end if
- call wrtout(unitdos,msg,'COLL')
+ call wrtout(unitdos, msg)
 
  if (mband*nkpt*nsppol>=3) then
    write(msg, '(a,3f8.3,2a)' )'# For identification : eigen(1:3)=',eigen(1:3),ch10,"#"
@@ -1638,47 +1630,47 @@ subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
    write(msg, '(a,3f8.3)' ) '# For identification : eigen=',eigen
    write(msg, '(3a)')trim(msg),ch10,"#"
  end if
- call wrtout(unitdos,msg,'COLL')
+ call wrtout(unitdos, msg)
 
  write(msg, '(a,f16.8)' ) '# Fermi energy : ', fermie
- call wrtout(unitdos,msg,'COLL')
+ call wrtout(unitdos, msg)
 
  if (prtdos==1) then
    write(msg, '(5a)' ) "#",ch10,&
-&   '# The DOS (in electrons/Hartree/cell) and integrated DOS (in electrons/cell),',&
-&   ch10,'# as well as the DOS with tsmear halved and doubled, are computed,'
+    '# The DOS (in electrons/Hartree/cell) and integrated DOS (in electrons/cell),',&
+    ch10,'# as well as the DOS with tsmear halved and doubled, are computed,'
 
  else if (prtdos==2)then
    write(msg, '(3a)' ) "#",ch10,&
-&   '# The DOS (in electrons/Hartree/cell) and integrated DOS (in electrons/cell) are computed,'
+    '# The DOS (in electrons/Hartree/cell) and integrated DOS (in electrons/cell) are computed,'
 
  else if (any(prtdos == [3, 4])) then
    write(msg, '(5a)' ) "#",ch10,&
-&   '# The local DOS (in electrons/Hartree for one atomic sphere)',ch10,&
-&   '# and integrated local DOS (in electrons for one atomic sphere) are computed.'
+    '# The local DOS (in electrons/Hartree for one atomic sphere)',ch10,&
+    '# and integrated local DOS (in electrons for one atomic sphere) are computed.'
 
  else if (prtdos==5)then
    write(msg, '(9a)' ) "#",ch10,&
-&   '# The spin component DOS (in electrons/Hartree/cell)',ch10,&
-&   '# and integrated spin component DOS (in electrons/cell) are computed.',ch10,&
-&   '# Remember that the wf are eigenstates of S_z and S^2, not S_x and S_y',ch10,&
-&   '#   so the latter will not always sum to 0 for paired electronic states.'
+   '# The spin component DOS (in electrons/Hartree/cell)',ch10,&
+   '# and integrated spin component DOS (in electrons/cell) are computed.',ch10,&
+   '# Remember that the wf are eigenstates of S_z and S^2, not S_x and S_y',ch10,&
+   '#   so the latter will not always sum to 0 for paired electronic states.'
  end if
- call wrtout(unitdos,msg,'COLL')
+ call wrtout(unitdos, msg)
 
  write(msg, '(a,i5,a,a,a,f9.4,a,f9.4,a,f8.5,a,a,a)' )&
-& '# at ',nene,' energies (in Hartree) covering the interval ',ch10,&
-& '# between ',enemin,' and ',enemax,' Hartree by steps of ',deltaene,' Hartree.',ch10,"#"
- call wrtout(unitdos,msg,'COLL')
+  '# at ',nene,' energies (in Hartree) covering the interval ',ch10,&
+  '# between ',enemin,' and ',enemax,' Hartree by steps of ',deltaene,' Hartree.',ch10,"#"
+ call wrtout(unitdos, msg)
 
  if (prtdos==1) then
    write(msg, '(a,a)' )&
-&   '#       energy        DOS       Integr. DOS   ','     DOS           DOS    '
-   call wrtout(unitdos,msg,'COLL')
+    '#       energy        DOS       Integr. DOS   ','     DOS           DOS    '
+   call wrtout(unitdos,msg)
 
    write(msg, '(a)' )&
-&   '#                                              (tsmear/2)    (tsmear*2) '
-   call wrtout(unitdos,msg,'COLL')
+    '#                                              (tsmear/2)    (tsmear*2) '
+   call wrtout(unitdos,msg)
  else
    write(msg, '(a)' ) '#       energy        DOS '
  end if

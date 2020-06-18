@@ -320,8 +320,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
 !Local variables ------------------------------
  integer,parameter :: occopt3 = 3, sppoldbl1 = 1, master = 0
- integer :: ierr, itemp, spin, nprocs, my_rank, timrev
- real(dp) :: nelect, dksqmax
+ integer :: ierr, spin, nprocs, my_rank, timrev
+ real(dp) :: dksqmax
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(ebands_t) :: tmp_ebands
@@ -819,7 +819,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  integer :: nsppol, nkpt, mband, ib, ik, spin, ii, jj, itemp, ielhol, nvalence, cnt, nprocs, irta
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
  real(dp) :: cpu, wall, gflops
- integer :: bmin(2), bmax(2)
+ !integer :: bmin(2), bmax(2)
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
 
 !************************************************************************
@@ -881,14 +881,15 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
    do ik=1,nkpt
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      wtk = self%ebands%wtk(ik)
-     bmin = [nvalence + 1, 1]
-     bmax = [mband, nvalence]
+     !bmin = [nvalence + 1, 1]
+     !bmax = [mband, nvalence]
 
      do ib=1,mband
        ielhol = 2; if (ib > nvalence) ielhol = 1
        eig_nk = self%ebands%eig(ib, ik, spin)
-       vr(:) = self%velocity(:,ib,ik,spin)
+
        ! Store outer product in vv_tens
+       vr(:) = self%velocity(:,ib,ik,spin)
        do ii=1,3
          do jj=1,3
            vv_tens(ii, jj) = vr(ii) * vr(jj)

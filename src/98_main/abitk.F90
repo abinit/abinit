@@ -63,8 +63,8 @@ program abitk
 !scalars
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
- integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
- integer :: ndivsm, abimem_level, ierr, spin
+ integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth
+ integer :: ndivsm, abimem_level !, ierr, spin
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: path, other_path !, prefix

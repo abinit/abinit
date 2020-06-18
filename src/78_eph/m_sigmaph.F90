@@ -2847,8 +2847,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  new%use_doublegrid = .False.
 
  ! Construct ebands_dense for double grid either from WFK file or via SKW.
-
-
  if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)

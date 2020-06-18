@@ -392,7 +392,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  ABI_CHECK(maxval(gaps%ierr) == 0, "sigma_erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  if (any(dtset%sigma_ngkpt /= 0)) then
-    call wrtout(std_out, sjoin(" Generating initial list of k-points from sigma_nkpt.", ltoa(dtset%sigma_ngkpt)))
+    call wrtout(std_out, sjoin(" Generating initial list of k-points from sigma_nkpt:", ltoa(dtset%sigma_ngkpt)))
     ! Get tentative tmp_nkpt and tmp_kcalc from sigma_ngkpt.
     kptrlatt = 0
     kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)

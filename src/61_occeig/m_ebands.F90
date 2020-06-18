@@ -1257,16 +1257,16 @@ subroutine get_eneocc_vect(ebands,arr_name,vect)
 
  mband =ebands%mband; bantot=ebands%bantot; nkpt=ebands%nkpt; nsppol=ebands%nsppol
 
- SELECT CASE (arr_name)
- CASE ('occ')
+ select case (arr_name)
+ case ('occ')
    call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%occ,vect)
- CASE ('eig')
+ case ('eig')
    call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%eig,vect)
- CASE ('doccde')
+ case ('doccde')
    call pack_eneocc(nkpt,nsppol,mband,ebands%nband,bantot,ebands%doccde,vect)
- CASE DEFAULT
-   MSG_BUG(sjoin('Wrong arr_name= ', arr_name))
- END SELECT
+ case default
+   MSG_BUG(sjoin('Wrong arr_name:', arr_name))
+ end select
 
 end subroutine get_eneocc_vect
 !!***
@@ -1657,7 +1657,7 @@ subroutine apply_scissor(ebands, scissor_energy)
    end do
  end do
 
- ! Recalculate the fermi level and occ. factors.
+ ! Recalculate the Fermi level and occupation factors.
  ! For Semiconductors only the Fermi level is changed (in the middle of the new gap)
  spinmagntarget_ = -99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
  call ebands_update_occ(ebands, spinmagntarget_)
