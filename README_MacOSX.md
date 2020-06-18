@@ -128,9 +128,14 @@ Other options available by typing:
 
 ### Installing ABINIT
 
+Download ABINIT. For normal users it is advised to get the newest version from our website (replace 9.0.4 by the newest version available).
+
+    wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.4.tar.gz
+    tar xzf abinit-9.0.4.tar.gz
+    cd abinit-9.0.4
+
 Create a working directory:
 
-    cd abinit_src_dir
     mkdir build && cd build
 
 To configure the sequential version:

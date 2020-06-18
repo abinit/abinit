@@ -60,6 +60,7 @@ program mrgddb
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
  use m_ddb,          only : DDB_VERSION, mblktyp1, mblktyp5
+
  implicit none
 
 !Local variables-------------------------------
@@ -225,7 +226,7 @@ program mrgddb
    call ddb_hdr_open_read(ddb_hdr,filnam(iddb+1),ddbun,DDB_VERSION,dimonly=1)
 
    if (ddb_hdr%mblktyp > mblktyptmp) mblktyptmp = ddb_hdr%mblktyp
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
  end do
 
  mblktyp = mblktyptmp

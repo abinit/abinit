@@ -44,7 +44,7 @@ module m_cohsex
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
- use m_wfd,           only : wfd_t
+ use m_wfd,           only : wfd_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
@@ -202,6 +202,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3),spinor_padc(2,4),nbv_ks(Kmesh%nibz,Wfd%nsppol)
  integer,allocatable :: proc_distrb(:,:,:),coh_distrb(:,:,:,:),degtab(:,:,:)
@@ -386,7 +387,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 
  ! Additional allocations for PAW
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
 
    ! For COHSEX we need the onsite terms of the PW on the FFT mesh.
@@ -395,7 +396,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      ABI_MALLOC(gw_gfft,(3,gwc_nfftot))
      q0=zero
      call get_gftt(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
-     ABI_DT_MALLOC(Pwij_fft,(Psps%ntypat))
+     ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,gwc_nfftot,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if ! usepaw==1
@@ -473,7 +474,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
      dimcprj_gw=nspinor*(ib2-ib1+1)
-     ABI_DT_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
+     ABI_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
@@ -536,7 +537,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 
      if (Psps%usepaw==1) then
        ! Get PAW oscillator matrix elements $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form.
-       ABI_DT_MALLOC(Pwij_qg,(Psps%ntypat))
+       ABI_MALLOC(Pwij_qg,(Psps%ntypat))
        q0 = qbz !;if (q_is_gamma) q0 = (/0.00001_dp,0.00001_dp,0.00001_dp/) ! GW_Q0_DEFAULT
        call pawpwij_init(Pwij_qg, npwc, q0, Gsph_c%gvec, Cryst%rprimd, Psps, Pawtab, Paw_pwff)
      end if
@@ -615,8 +616,10 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
              npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwc+1, jb) = zero
              if (ib == jb) then
-               cg_sum => Wfd%Wave(ib, ik_ibz, spin)%ug
-               cg_jb  => Wfd%Wave(jb, jk_ibz, spin)%ug
+               ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, spin, wave_sum, msg) == 0, msg)
+               cg_sum => wave_sum%ug
+               ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+               cg_jb => wave_jb%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
@@ -722,14 +725,14 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      ABI_FREE(gw_gbound)
      if (Psps%usepaw==1) then
        call pawpwij_free(Pwij_qg)
-       ABI_DT_FREE(Pwij_qg)
+       ABI_FREE(Pwij_qg)
      end if
    end do !ik_bz
 
    ABI_FREE(wfr_bdgw)
    if (Wfd%usepaw==1) then
      call pawcprj_free(Cprj_kgw)
-     ABI_DT_FREE(Cprj_kgw)
+     ABI_FREE(Cprj_kgw)
    end if
  end do !spin
 
@@ -809,10 +812,10 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      ABI_FREE(gw_gfft)
    end if
    call pawcprj_free(Cprj_ksum)
-   ABI_DT_FREE(Cprj_ksum)
+   ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
  end if
 

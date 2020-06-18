@@ -26,6 +26,8 @@
 
 MODULE m_fstrings
 
+ use iso_c_binding
+
  use defs_basis, only : dp, std_out, ch10
 
  implicit none
@@ -57,6 +59,7 @@ MODULE m_fstrings
  public :: itoa            ! Convert an integer into a string
  public :: ftoa            ! Convert a float into a string
  public :: ktoa            ! Convert a k-point into a string.
+ public :: stoa            ! Convert a spin index into a string
  public :: ltoa            ! Convert a list into a string.
  public :: atoi            ! Convert a string into a integer
  public :: atof            ! Convert a string into a floating-point number.
@@ -75,6 +78,10 @@ MODULE m_fstrings
  public :: inupper         ! Maps all characters in string to uppercase except for tokens between quotation marks.
 
  !TODO method to center a string
+ interface itoa
+   module procedure itoa_1b
+   module procedure itoa_4b
+ end interface itoa
 
  interface write_num
    module procedure write_rdp_0D
@@ -1178,33 +1185,46 @@ real(dp) function atof(string)
 end function atof
 !!***
 
-!!****f* m_fstrings/itoa
+!!****f* m_fstrings/itoa_1b
 !! NAME
-!! itoa
+!! itoa_1b
 !!
 !! FUNCTION
 !!  Convert an integer into a string
 !!
-!! INPUTS
-!!  value=The integer
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
+pure function itoa_1b(value)
 
-pure function itoa(value)
-
- integer,intent(in) :: value
- character(len=22) :: itoa
+ integer(c_int8_t),intent(in) :: value
+ character(len=22) :: itoa_1b
 
 ! *********************************************************************
 
  ! len=22 is large enough to contain integer*8
- write(itoa,"(i0)")value
- itoa = ADJUSTL(itoa)
+ write(itoa_1b,"(i0)")value
+ itoa_1b = ADJUSTL(itoa_1b)
 
-end function itoa
+end function itoa_1b
+!!***
+
+!!****f* m_fstrings/itoa_4b
+!! NAME
+!! itoa_4b
+!!
+!! FUNCTION
+!!  Convert an integer into a string
+!!
+pure function itoa_4b(value)
+
+ integer,intent(in) :: value
+ character(len=22) :: itoa_4b
+
+! *********************************************************************
+
+ ! len=22 is large enough to contain integer*8
+ write(itoa_4b,"(i0)")value
+ itoa_4b = ADJUSTL(itoa_4b)
+
+end function itoa_4b
 !!***
 
 !----------------------------------------------------------------------
@@ -1269,6 +1289,38 @@ pure function ktoa(kpt,fmt)
  ktoa = ADJUSTL(ktoa)
 
 end function ktoa
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/stoa
+!! NAME
+!! stoa
+!!
+!! FUNCTION
+!!  Convert a spin index into a string
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+
+character(len=4) pure function stoa(spin)
+
+  integer,intent(in) :: spin
+
+! *********************************************************************
+
+ select case (spin)
+ case (1)
+   stoa = "UP"
+ case (2)
+   stoa = "DOWN"
+ case default
+   stoa = "????"
+ end select
+
+end function stoa
 !!***
 
 !----------------------------------------------------------------------
