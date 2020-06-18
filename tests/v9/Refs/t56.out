@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 17 Jun 2020.
-- ( at 13h24 )
+.Starting date : Thu 18 Jun 2020.
+- ( at 10h34 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
@@ -491,6 +491,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.266
 
  Transport (RTA) calculation results:
 
+Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -503,6 +504,85 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.266
           240.00        0.33E-22        0.00E+00            0.00            0.00
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.20-151        0.00E+00            0.00            0.00
+           90.00        0.55E-94        0.00E+00            0.00            0.00
+          120.00        0.28E-65        0.00E+00            0.00            0.00
+          150.00        0.48E-48        0.00E+00            0.00            0.00
+          180.00        0.15E-36        0.00E+00            0.00            0.00
+          210.00        0.23E-28        0.00E+00            0.00            0.00
+          240.00        0.33E-22        0.00E+00            0.00            0.00
+          270.00        0.20E-17        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.20-151        0.00E+00            0.00            0.00
+           90.00        0.55E-94        0.00E+00            0.00            0.00
+          120.00        0.28E-65        0.00E+00            0.00            0.00
+          150.00        0.48E-48        0.00E+00            0.00            0.00
+          180.00        0.15E-36        0.00E+00            0.00            0.00
+          210.00        0.23E-28        0.00E+00            0.00            0.00
+          240.00        0.33E-22        0.00E+00            0.00            0.00
+          270.00        0.20E-17        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
+
+
+Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.20-151        0.00E+00            0.00            0.00
+           90.00        0.55E-94        0.00E+00            0.00            0.00
+          120.00        0.28E-65        0.00E+00            0.00            0.00
+          150.00        0.48E-48        0.00E+00            0.00            0.00
+          180.00        0.15E-36        0.00E+00            0.00            0.00
+          210.00        0.23E-28        0.00E+00            0.00            0.00
+          240.00        0.33E-22        0.00E+00            0.00            0.00
+          270.00        0.20E-17        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.20-151        0.00E+00            0.00            0.00
+           90.00        0.55E-94        0.00E+00            0.00            0.00
+          120.00        0.28E-65        0.00E+00            0.00            0.00
+          150.00        0.48E-48        0.00E+00            0.00            0.00
+          180.00        0.15E-36        0.00E+00            0.00            0.00
+          210.00        0.23E-28        0.00E+00            0.00            0.00
+          240.00        0.33E-22        0.00E+00            0.00            0.00
+          270.00        0.20E-17        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.20-151        0.00E+00            0.00            0.00
+           90.00        0.55E-94        0.00E+00            0.00            0.00
+          120.00        0.28E-65        0.00E+00            0.00            0.00
+          150.00        0.48E-48        0.00E+00            0.00            0.00
+          180.00        0.15E-36        0.00E+00            0.00            0.00
+          210.00        0.23E-28        0.00E+00            0.00            0.00
+          240.00        0.33E-22        0.00E+00            0.00            0.00
+          270.00        0.20E-17        0.00E+00            0.00            0.00
+          300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
 
 
 
@@ -681,6 +761,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
 
  Transport (RTA) calculation results:
 
+Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -693,6 +774,85 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
           240.00        0.28E-12        0.00E+00            0.00            0.00
           270.00        0.13E-08        0.00E+00            0.00            0.00
           300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.98-112        0.00E+00            0.00            0.00
+           90.00        0.16E-67        0.00E+00            0.00            0.00
+          120.00        0.20E-45        0.00E+00            0.00            0.00
+          150.00        0.36E-32        0.00E+00            0.00            0.00
+          180.00        0.25E-23        0.00E+00            0.00            0.00
+          210.00        0.51E-17        0.00E+00            0.00            0.00
+          240.00        0.28E-12        0.00E+00            0.00            0.00
+          270.00        0.13E-08        0.00E+00            0.00            0.00
+          300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.98-112        0.00E+00            0.00            0.00
+           90.00        0.16E-67        0.00E+00            0.00            0.00
+          120.00        0.20E-45        0.00E+00            0.00            0.00
+          150.00        0.36E-32        0.00E+00            0.00            0.00
+          180.00        0.25E-23        0.00E+00            0.00            0.00
+          210.00        0.51E-17        0.00E+00            0.00            0.00
+          240.00        0.28E-12        0.00E+00            0.00            0.00
+          270.00        0.13E-08        0.00E+00            0.00            0.00
+          300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
+
+
+Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.98-112        0.00E+00            0.00            0.00
+           90.00        0.16E-67        0.00E+00            0.00            0.00
+          120.00        0.20E-45        0.00E+00            0.00            0.00
+          150.00        0.36E-32        0.00E+00            0.00            0.00
+          180.00        0.25E-23        0.00E+00            0.00            0.00
+          210.00        0.51E-17        0.00E+00            0.00            0.00
+          240.00        0.28E-12        0.00E+00            0.00            0.00
+          270.00        0.13E-08        0.00E+00            0.00            0.00
+          300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.98-112        0.00E+00            0.00            0.00
+           90.00        0.16E-67        0.00E+00            0.00            0.00
+          120.00        0.20E-45        0.00E+00            0.00            0.00
+          150.00        0.36E-32        0.00E+00            0.00            0.00
+          180.00        0.25E-23        0.00E+00            0.00            0.00
+          210.00        0.51E-17        0.00E+00            0.00            0.00
+          240.00        0.28E-12        0.00E+00            0.00            0.00
+          270.00        0.13E-08        0.00E+00            0.00            0.00
+          300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+           30.00        0.00E+00        0.00E+00            0.00            0.00
+           60.00        0.98-112        0.00E+00            0.00            0.00
+           90.00        0.16E-67        0.00E+00            0.00            0.00
+          120.00        0.20E-45        0.00E+00            0.00            0.00
+          150.00        0.36E-32        0.00E+00            0.00            0.00
+          180.00        0.25E-23        0.00E+00            0.00            0.00
+          210.00        0.51E-17        0.00E+00            0.00            0.00
+          240.00        0.28E-12        0.00E+00            0.00            0.00
+          270.00        0.13E-08        0.00E+00            0.00            0.00
+          300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
 
 
 
@@ -869,6 +1029,7 @@ Cannot detect gap for spin: 1
 
  Transport (RTA) calculation results:
 
+Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.25E+23        0.00E+00            0.00            0.00
            30.00        0.18E+23        0.00E+00            0.00            0.00
@@ -881,6 +1042,85 @@ Cannot detect gap for spin: 1
           240.00        0.18E+23        0.00E+00            0.00            0.00
           270.00        0.18E+23        0.00E+00            0.00            0.00
           300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.25E+23        0.00E+00            0.00            0.00
+           30.00        0.18E+23        0.00E+00            0.00            0.00
+           60.00        0.18E+23        0.00E+00            0.00            0.00
+           90.00        0.18E+23        0.00E+00            0.00            0.00
+          120.00        0.18E+23        0.00E+00            0.00            0.00
+          150.00        0.18E+23        0.00E+00            0.00            0.00
+          180.00        0.18E+23        0.00E+00            0.00            0.00
+          210.00        0.18E+23        0.00E+00            0.00            0.00
+          240.00        0.18E+23        0.00E+00            0.00            0.00
+          270.00        0.18E+23        0.00E+00            0.00            0.00
+          300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.25E+23        0.00E+00            0.00            0.00
+           30.00        0.18E+23        0.00E+00            0.00            0.00
+           60.00        0.18E+23        0.00E+00            0.00            0.00
+           90.00        0.18E+23        0.00E+00            0.00            0.00
+          120.00        0.18E+23        0.00E+00            0.00            0.00
+          150.00        0.18E+23        0.00E+00            0.00            0.00
+          180.00        0.18E+23        0.00E+00            0.00            0.00
+          210.00        0.18E+23        0.00E+00            0.00            0.00
+          240.00        0.18E+23        0.00E+00            0.00            0.00
+          270.00        0.18E+23        0.00E+00            0.00            0.00
+          300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
+
+
+Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.25E+23        0.00E+00            0.00            0.00
+           30.00        0.18E+23        0.00E+00            0.00            0.00
+           60.00        0.18E+23        0.00E+00            0.00            0.00
+           90.00        0.18E+23        0.00E+00            0.00            0.00
+          120.00        0.18E+23        0.00E+00            0.00            0.00
+          150.00        0.18E+23        0.00E+00            0.00            0.00
+          180.00        0.18E+23        0.00E+00            0.00            0.00
+          210.00        0.18E+23        0.00E+00            0.00            0.00
+          240.00        0.18E+23        0.00E+00            0.00            0.00
+          270.00        0.18E+23        0.00E+00            0.00            0.00
+          300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.25E+23        0.00E+00            0.00            0.00
+           30.00        0.18E+23        0.00E+00            0.00            0.00
+           60.00        0.18E+23        0.00E+00            0.00            0.00
+           90.00        0.18E+23        0.00E+00            0.00            0.00
+          120.00        0.18E+23        0.00E+00            0.00            0.00
+          150.00        0.18E+23        0.00E+00            0.00            0.00
+          180.00        0.18E+23        0.00E+00            0.00            0.00
+          210.00        0.18E+23        0.00E+00            0.00            0.00
+          240.00        0.18E+23        0.00E+00            0.00            0.00
+          270.00        0.18E+23        0.00E+00            0.00            0.00
+          300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.25E+23        0.00E+00            0.00            0.00
+           30.00        0.18E+23        0.00E+00            0.00            0.00
+           60.00        0.18E+23        0.00E+00            0.00            0.00
+           90.00        0.18E+23        0.00E+00            0.00            0.00
+          120.00        0.18E+23        0.00E+00            0.00            0.00
+          150.00        0.18E+23        0.00E+00            0.00            0.00
+          180.00        0.18E+23        0.00E+00            0.00            0.00
+          210.00        0.18E+23        0.00E+00            0.00            0.00
+          240.00        0.18E+23        0.00E+00            0.00            0.00
+          270.00        0.18E+23        0.00E+00            0.00            0.00
+          300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
 
 
 
@@ -1062,6 +1302,7 @@ Cannot detect gap for spin: 1
 
  Transport (RTA) calculation results:
 
+Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.34E+23        0.00E+00            0.00            0.00
            30.00        0.34E+23        0.00E+00            0.00            0.00
@@ -1074,6 +1315,85 @@ Cannot detect gap for spin: 1
           240.00        0.34E+23        0.00E+00            0.00            0.00
           270.00        0.34E+23        0.00E+00            0.00            0.00
           300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.34E+23        0.00E+00            0.00            0.00
+           30.00        0.34E+23        0.00E+00            0.00            0.00
+           60.00        0.34E+23        0.00E+00            0.00            0.00
+           90.00        0.34E+23        0.00E+00            0.00            0.00
+          120.00        0.34E+23        0.00E+00            0.00            0.00
+          150.00        0.34E+23        0.00E+00            0.00            0.00
+          180.00        0.34E+23        0.00E+00            0.00            0.00
+          210.00        0.34E+23        0.00E+00            0.00            0.00
+          240.00        0.34E+23        0.00E+00            0.00            0.00
+          270.00        0.34E+23        0.00E+00            0.00            0.00
+          300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.34E+23        0.00E+00            0.00            0.00
+           30.00        0.34E+23        0.00E+00            0.00            0.00
+           60.00        0.34E+23        0.00E+00            0.00            0.00
+           90.00        0.34E+23        0.00E+00            0.00            0.00
+          120.00        0.34E+23        0.00E+00            0.00            0.00
+          150.00        0.34E+23        0.00E+00            0.00            0.00
+          180.00        0.34E+23        0.00E+00            0.00            0.00
+          210.00        0.34E+23        0.00E+00            0.00            0.00
+          240.00        0.34E+23        0.00E+00            0.00            0.00
+          270.00        0.34E+23        0.00E+00            0.00            0.00
+          300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
+
+
+Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.34E+23        0.00E+00            0.00            0.00
+           30.00        0.34E+23        0.00E+00            0.00            0.00
+           60.00        0.34E+23        0.00E+00            0.00            0.00
+           90.00        0.34E+23        0.00E+00            0.00            0.00
+          120.00        0.34E+23        0.00E+00            0.00            0.00
+          150.00        0.34E+23        0.00E+00            0.00            0.00
+          180.00        0.34E+23        0.00E+00            0.00            0.00
+          210.00        0.34E+23        0.00E+00            0.00            0.00
+          240.00        0.34E+23        0.00E+00            0.00            0.00
+          270.00        0.34E+23        0.00E+00            0.00            0.00
+          300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.34E+23        0.00E+00            0.00            0.00
+           30.00        0.34E+23        0.00E+00            0.00            0.00
+           60.00        0.34E+23        0.00E+00            0.00            0.00
+           90.00        0.34E+23        0.00E+00            0.00            0.00
+          120.00        0.34E+23        0.00E+00            0.00            0.00
+          150.00        0.34E+23        0.00E+00            0.00            0.00
+          180.00        0.34E+23        0.00E+00            0.00            0.00
+          210.00        0.34E+23        0.00E+00            0.00            0.00
+          240.00        0.34E+23        0.00E+00            0.00            0.00
+          270.00        0.34E+23        0.00E+00            0.00            0.00
+          300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.34E+23        0.00E+00            0.00            0.00
+           30.00        0.34E+23        0.00E+00            0.00            0.00
+           60.00        0.34E+23        0.00E+00            0.00            0.00
+           90.00        0.34E+23        0.00E+00            0.00            0.00
+          120.00        0.34E+23        0.00E+00            0.00            0.00
+          150.00        0.34E+23        0.00E+00            0.00            0.00
+          180.00        0.34E+23        0.00E+00            0.00            0.00
+          210.00        0.34E+23        0.00E+00            0.00            0.00
+          240.00        0.34E+23        0.00E+00            0.00            0.00
+          270.00        0.34E+23        0.00E+00            0.00            0.00
+          300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
 
 
 
@@ -1247,8 +1567,38 @@ Cannot detect gap for spin: 1
 
  Transport (RTA) calculation results:
 
+Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
           300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+          300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+          300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
+
+
+Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+          300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+          300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+          300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
 
 
 
@@ -1532,10 +1882,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         98.5  wall=         99.9
+- Proc.   0 individual time (sec): cpu=         90.9  wall=         91.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         98.5  wall=         99.9
++Overall time at end (sec) : cpu=         90.9  wall=         91.9

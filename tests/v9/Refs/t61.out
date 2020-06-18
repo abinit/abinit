@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 17 Jun 2020.
-- ( at 13h26 )
+.Starting date : Thu 18 Jun 2020.
+- ( at 10h37 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.in
 - output file    -> t61.out
@@ -801,9 +801,44 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
 
  Transport (RTA) calculation results:
 
+Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.31E+02        0.00E+00            0.00            0.00
+
+
+Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.31E+02        0.00E+00            0.00            0.00
+
+
+
+
+Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.31E+02        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.31E+02        0.00E+00            0.00            0.00
+
+
+Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.00E+00        0.00E+00            0.00            0.00
+          300.00        0.31E+02        0.00E+00            0.00            0.00
+
+
 
 
 
@@ -1016,10 +1051,10 @@ P           mkmem3         29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         30.3  wall=         31.1
+- Proc.   0 individual time (sec): cpu=         30.1  wall=         30.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         30.3  wall=         31.1
++Overall time at end (sec) : cpu=         30.1  wall=         30.8
