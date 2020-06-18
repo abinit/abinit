@@ -109,6 +109,7 @@ subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
    do ib2dm=ib1dm+1,ib2
      if((BSt%occ(ib1dm,kpoint,1)>tol8) .and. (BSt%occ(ib2dm,kpoint,1)<tol8)) then
        dm1(ib1dm,ib2dm)=sgn_spin*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1)+tol8)
+       ! Dji = Dij^*
        dm1(ib2dm,ib1dm)=conjg(dm1(ib1dm,ib2dm))
      endif
    enddo
@@ -222,6 +223,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
  do ib2dm=1,ndim
    do ib1dm=ib2dm,ndim
      dm1_tmp(ib1dm,ib2dm)=dm1(ib1+(ib1dm-1),ib1+(ib2dm-1))
+     ! Dji = Dij^*
      dm1_tmp(ib2dm,ib1dm)=conjg(dm1_tmp(ib1dm,ib2dm))
    enddo
  enddo
