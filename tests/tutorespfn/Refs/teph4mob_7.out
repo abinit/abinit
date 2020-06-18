@@ -72,7 +72,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
+      eph_extrael      9.99995378E-07
    eph_ngqpt_fine       24   24   24
          eph_task1         -4
          eph_task2          7
@@ -330,7 +330,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -672,7 +672,7 @@ meta: {optdriver: 7, eph_task: 7, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -845,7 +845,7 @@ Values initialized with zeros
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
+      eph_extrael      9.99995378E-07
    eph_ngqpt_fine       24   24   24
          eph_task1         -4
          eph_task2          7

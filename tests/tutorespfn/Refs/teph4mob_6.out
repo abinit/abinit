@@ -140,7 +140,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
+      eph_extrael      9.99995378E-07
    eph_ngqpt_fine       24   24   24
          eph_task          -4
 -          fftalg         312
@@ -406,7 +406,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -669,7 +669,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783694.8    0.000
+   5   3.525    0.000 783698.3    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -742,7 +742,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -974,7 +974,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783694.8    0.000
+   5   3.525    0.000 783698.3    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -1047,7 +1047,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -1279,7 +1279,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783694.8    0.000
+   5   3.525    0.000 783698.3    0.000
 ============================================================================================
 
  Entering transport RTA computation driver.
@@ -1352,7 +1352,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -1590,7 +1590,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783694.8    0.000
+   5   3.525    0.000 783698.3    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1667,7 +1667,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -1910,7 +1910,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783694.8    0.000
+   5   3.525    0.000 783698.3    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1987,7 +1987,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
- Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -2230,7 +2230,7 @@ K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783694.8    0.000
+   5   3.525    0.000 783698.3    0.000
 ============================================================================================
 K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2282,7 +2282,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
+      eph_extrael      9.99995378E-07
    eph_ngqpt_fine       24   24   24
          eph_task          -4
            etotal1     0.0000000000E+00
