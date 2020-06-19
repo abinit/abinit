@@ -41,7 +41,7 @@ module m_gwrdm
  private
 !!***
 
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,me_get_haene ! ,update_wfd_bst ! -> The commented one only works on serial mode
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,rotate_hartree,me_get_haene ! ,update_wfd_bst ! -> The commented one only works on serial mode
 !!***
 
 contains
@@ -234,7 +234,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
  if(info/=0) then
-   MSG_WARNING("Faild the diagonalization of the updated GW 1-RDM")
+   MSG_WARNING("Failed the diagonalization of the updated GW 1-RDM")
  endif
 
  !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
@@ -399,7 +399,7 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
    enddo
  enddo
 
- ! <KS|K[NO]KS> = U <NO|K[NO]|NO> (U^t)*
+ ! <KS|K[NO]|KS> = U <NO|K[NO]|NO> (U^t)*
  res=matmul(Umat,Kex_tmp)
  Kex_tmp=matmul(res,conjg(transpose(Umat)))
 
@@ -421,6 +421,49 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  ABI_FREE(Umat)
  ABI_FREE(Kex_tmp)
 end subroutine rotate_exchange
+!!***
+
+subroutine rotate_hartree(ikpoint,ib1,ib2,GW1RDM_me,nateigv) ! Only used for debug of this file, do not use it with large arrays
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ib1,ib2,ikpoint 
+ type(melements_t),intent(inout) :: GW1RDM_me
+!arrays
+ complex(dpc),intent(in) :: nateigv(:,:,:,:)
+!Local variables ------------------------------
+!scalars
+ integer::ib1dm,ib2dm,ndim
+ character(len=500) :: msg
+!arrays
+ complex(dpc),allocatable :: res(:,:),Umat(:,:),Kex_tmp(:,:)
+!************************************************************************
+ ndim=ib2-ib1+1
+ ABI_MALLOC(res,(ndim,ndim))
+ ABI_MALLOC(Umat,(ndim,ndim))
+ ABI_MALLOC(Kex_tmp,(ndim,ndim))
+ res=czero
+
+ do ib1dm=1,ndim
+   do ib2dm=1,ndim
+     Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+     Kex_tmp(ib1dm,ib2dm)=GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+   enddo
+ enddo
+
+ ! <NO|J[NO]|NO> =  (U^t)* <KS|J[NO]|KS> U
+ res=matmul(conjg(transpose(Umat)),Kex_tmp)
+ Kex_tmp=matmul(res,Umat)
+
+ do ib1dm=1,ndim
+   do ib2dm=1,ndim
+     GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Kex_tmp(ib1dm,ib2dm)
+   enddo
+ enddo
+
+ ABI_FREE(res)
+ ABI_FREE(Umat)
+ ABI_FREE(Kex_tmp)
+end subroutine rotate_hartree
 !!***
 
 pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)

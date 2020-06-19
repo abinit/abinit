@@ -193,6 +193,7 @@ type, public :: dataset_type
  integer :: gw_nqlwl
  integer :: gw_nstep
  integer :: gw_sigxcore
+ integer :: x1rdm  ! MRM
 
  ! GWLS
  integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
@@ -1846,6 +1847,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%w90prtunk          = dtin%w90prtunk
  dtout%xclevel            = dtin%xclevel
  dtout%xc_denpos          = dtin%xc_denpos
+ dtout%x1rdm              = dtin%x1rdm ! MRM
 
 !Copy allocated integer arrays from dtin to dtout
  dtout%bdberry(:)         = dtin%bdberry(:)
@@ -3249,7 +3251,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
 !X
- list_vars=trim(list_vars)//' xangst xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile'
+ list_vars=trim(list_vars)//' xangst xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile x1rdm' !MRM
 !Y
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'

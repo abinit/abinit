@@ -2143,28 +2143,29 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  &+energies%e_elecfield+energies%e_magfield   
 
  write(std_out,'(a,2(es16.6,a))')' T          = : ',energies%e_kinetic    ,' Ha ,',energies%e_kinetic*Ha_eV    ,' eV'
- write(std_out,'(a,2(es16.6,a))')' Vnn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' Vext       = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
  write(std_out,'(a,2(es16.6,a))')' PspCore    = : ',energies%e_corepsp    ,' Ha ,',energies%e_corepsp*Ha_eV      ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' E.nloc.psp = : ',enonlocalpsp          ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
  write(std_out,'(a,2(es16.6,a))')' J          = : ',energies%e_hartree    ,' Ha ,',energies%e_hartree*Ha_eV    ,' eV'
+ write(std_out,'(a,2(es16.6,a))')' K          = : ',energies%e_fock0      ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
  write(std_out,'(a,2(es16.6,a))')' Exc        = : ',energies%e_xc         ,' Ha ,',energies%e_xc*Ha_eV         ,' eV'
  if(abs(energies%e_vdw_dftd)>1.0d-6) then
    write(std_out,'(a,2(es16.6,a))')' EvdW-D     = : ',energies%e_vdw_dftd   ,' Ha ,',energies%e_vdw_dftd*Ha_eV   ,' eV'
  endif
- write(std_out,'(a,2(es16.6,a))')' Vext       = : ',energies%e_localpsp   ,' Ha ,',energies%e_localpsp*Ha_eV   ,' eV'
- write(std_out,'(a,2(es16.6,a))')' E.nloc.psp = : ',enonlocalpsp          ,' Ha ,',enonlocalpsp*Ha_eV          ,' eV'
- write(std_out,'(a,2(es16.6,a))')' Efock      = : ',energies%e_fock0      ,' Ha ,',energies%e_fock0*Ha_eV      ,' eV'
  if(abs(energies%e_elecfield)>1.0d-6) then
    write(std_out,'(a,2(es16.6,a))')' Eefield    = : ',energies%e_elecfield  ,' Ha ,',energies%e_elecfield*Ha_eV  ,' eV'
  endif
  if(abs(energies%e_magfield)>1.0d-6) then
    write(std_out,'(a,2(es16.6,a))')' Emfield    = : ',energies%e_magfield   ,' Ha ,',energies%e_magfield*Ha_eV   ,' eV'
  endif
+ write(std_out,'(a,2(es16.6,a))')' Vnn        = : ',energies%e_ewald      ,' Ha ,',energies%e_ewald*Ha_eV      ,' eV'
  write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
  write(std_out,'(a,2(es16.6,a))')' Etot       = : ',esum                  ,' Ha ,',esum*Ha_eV                  ,' eV'
  write(std_out,'(a98)')'-------------------------------------------------------------------------------------------------'
 
  call timab(246,2,tsec)
  call timab(247,1,tsec)
+ ! end MRM printing energy components
 
 !SHOULD CLEAN THE ARGS OF THIS ROUTINE
  call afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
