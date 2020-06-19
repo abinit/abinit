@@ -31,7 +31,7 @@ module m_occ
  use m_splines
  use m_xmpi
 
- use m_time,         only : timab
+ use m_time,         only : timab, cwtime, cwtime_report
  use m_fstrings,     only : sjoin, itoa
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : proc_distrb_cycle
@@ -154,8 +154,9 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 ! arrays! This Constants should be stored somewhere in a module.
  integer,parameter :: nptsdiv2_def=6000,  prtdos1=1
  integer :: bantot,iband,iene,ikpt,index,index_start,isppol, nene,nptsdiv2
- real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot
+ real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot, wk
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: entfun(:,:),occfun(:,:)
@@ -170,6 +171,8 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  if(option/=1 .and. option/=2)then
    MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
+
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Initialize the occupation function and generalized entropy function,
  ! at the beginning, or if occopt changed
@@ -205,26 +208,40 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
      arg(:)=(fermie-eigen(1:bantot))*tsmearinv
    endif
 
-   !  Compute the values of the occupation function, and the entropy function
-   !  Note: splfit also takes care of the points outside of the interval,
-   !  and assign to them the value of the closest extremal point,
-   !  which is what is needed here.
+   ! Compute the values of the occupation function, and the entropy function
+   ! Note: splfit also takes care of the points outside of the interval,
+   ! and assign to them the value of the closest extremal point,
+   ! which is what is needed here.
 
    call splfit(xgrid,doccde,occfun,1,arg,occ,(2*nptsdiv2+1),bantot)
    call splfit(xgrid,derfun,entfun,0,arg,ent,(2*nptsdiv2+1),bantot)
 
    ! Normalize occ and ent, and sum number of electrons and entropy
+   ! Use different loops for nelect and entropy because bantot may be quite large in the EPH code
+   ! when we use very dense k-meshes.
+   ent = ent * maxocc
+   occ = occ * maxocc
+   doccde = -doccde * maxocc * tsmearinv
+
    nelect=zero; entropy=zero
    index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt
+       wk = wtk(ikpt)
        do iband=1,nband(ikpt+nkpt*(isppol-1))
-         index=index+1
-         ent(index)=ent(index)*maxocc
-         occ(index)=occ(index)*maxocc
-         doccde(index)=-doccde(index)*maxocc*tsmearinv
-         entropy=entropy+wtk(ikpt)*ent(index)
-         nelect=nelect+wtk(ikpt)*occ(index)
+         index = index  +1
+         entropy = entropy + wk * ent(index)
+       end do
+     end do
+   end do
+
+   index=0
+   do isppol=1,nsppol
+     do ikpt=1,nkpt
+       wk = wtk(ikpt)
+       do iband=1,nband(ikpt+nkpt*(isppol-1))
+         index = index  +1
+         nelect = nelect + wk * occ(index)
        end do
      end do
    end do
@@ -346,6 +363,8 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  ABI_FREE(occfun)
  ABI_FREE(smdfun)
  ABI_FREE(xgrid)
+
+ call cwtime_report(" getnel", cpu, wall, gflops, end_str=ch10)
 
  DBG_EXIT("COLL")
 
@@ -671,19 +690,20 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    end do
    if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information')
 
-!  DEBUG
-!  call wrtout(std_out,' newocc: corresponding derivatives are ')
-!  do ikpt=1,nkpt_eff
-!  write(msg,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
-!  do ii=0,(nband(1)-1)/12
-!  write(msg,'(12f6.1)') doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
-!  call wrtout(std_out,msg)
-!  end do
-!  end do
-!  if(nkpt/=nkpt_eff)then
-!    call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information')
-!  end if
-!  ENDDEBUG
+   !DEBUG
+   !call wrtout(std_out,' newocc: corresponding derivatives are ')
+   !do ikpt=1,nkpt_eff
+   !write(msg,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
+   !do ii=0,(nband(1)-1)/12
+   !write(msg,'(12f6.1)') doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+   !call wrtout(std_out,msg)
+   !end do
+   !end do
+   !if(nkpt/=nkpt_eff)then
+   !  call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information')
+   !end if
+   !ENDDEBUG
+
  else
    write(msg, '(a,i0,2a)' )' newocc: computed new occupation numbers for occopt= ',occopt,ch10,'  (1) spin up   values  '
    call wrtout(std_out,msg)
@@ -891,8 +911,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        end do
 
      else
-       write(msg, '(a,i0,a)' )' Occopt=',occopt,' is not allowed in getnel. '
-       MSG_BUG(msg)
+       MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
 !    ---------------------------------------------------------
@@ -968,8 +987,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
          smd2(-ii)=smd2(ii)
        end do
      else
-       write(msg, '(a,i0,a)' )' Occopt= ',occopt,' is not allowed in getnel. '
-       MSG_BUG(msg)
+       MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
 !    Use O(1/N4) algorithm from Num Rec (see below)

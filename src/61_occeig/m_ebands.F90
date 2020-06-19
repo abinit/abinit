@@ -2576,12 +2576,14 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
  integer,parameter :: occopt3 = 3
  integer :: ierr, it, nprocs, my_rank
  real(dp) :: nelect
+ real(dp) :: cpu,wall,gflops
  type(ebands_t) :: tmp_ebands
  character(len=500) :: msg
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ call cwtime(cpu, wall, gflops, "start")
 
  call ebands_copy(self, tmp_ebands)
 
@@ -2617,6 +2619,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
 
  call ebands_free(tmp_ebands)
  call xmpi_sum(mu_e, comm, ierr)
+ call cwtime_report(" ebands_get_muT_with_fd", cpu, wall, gflops, end_str=ch10)
 
 end subroutine ebands_get_muT_with_fd
 !!***
