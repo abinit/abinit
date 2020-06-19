@@ -210,6 +210,7 @@ ABI_TOPICS = [
     "k-points",
     "LatticeModel",
     "LDAminushalf",
+    "longwave" ,
     "LOTF",
     "MagField",
     "MagMom",
@@ -243,7 +244,7 @@ ABI_TOPICS = [
     "STM",
     "Susceptibility",
     "TDDFT",
-    "Tdep",
+    "a-TDEP",
     "TDepES",
     "Temperature",
     "TransPath",
@@ -316,7 +317,6 @@ class Variable(object):
             commentdefault=None,
             commentdims=None,
             added_in_version (str): String with the Abinit version in which this variable was added.
-                None if variable is present in Abinit <= 8.6.3
             alternative_name: alias name (used if a new variable with a different name was introduced, in place
                 of of an old variable that is still supported.
             text: markdown string with documentation. Required.
@@ -338,7 +338,7 @@ class Variable(object):
         self.text = my_unicode(text)
 
         errors = []
-        for a in ("abivarname", "varset", "vartype", "topics", "dimensions", "text"):
+        for a in ("abivarname", "varset", "vartype", "topics", "dimensions", "added_in_version", "text"):
             if getattr(self, a) is None:
                 errors.append("attribute %s is mandatory" % a)
         if errors:
@@ -565,6 +565,7 @@ class Variable(object):
             app("*Only relevant if:* %s  " % str(self.requires))
         if self.excludes:
             app("*The use of this variable forbids the use of:* %s  " % self.excludes)
+        app("*Added in version:* %s  " % self.added_in_version)
 
         # Add links to tests.
         if hasattr(self, "tests") and not self.is_internal:

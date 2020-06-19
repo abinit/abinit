@@ -23,8 +23,9 @@
        0 1 0
        0 0 1
  typat  2*1
- xangst -0.385 0 0
+ xcart  -0.385 0 0
          0.385  0 0
+         Angstrom
  znucl  1.0
 
 # Structure Optimization

@@ -18,7 +18,6 @@ t85o_DS9_POT2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in
 #%% [files]
 #%% files_to_test = 

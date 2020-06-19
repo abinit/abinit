@@ -1009,7 +1009,7 @@ end subroutine wfk_ncdef_dims_vars
 !!  Test two wfk_t objects for consistency. Return non-zero value if test fails.
 !!
 !! INPUTS
-!!  wfk1, wfk1<class(wfk_t)> = WFK handlers to be compared
+!!  wfk1, wfk2 <class(wfk_t)> = WFK handlers to be compared
 !!
 !! OUTPUT
 !!  ierr
@@ -1035,31 +1035,33 @@ integer function wfk_compare(wfk1, wfk2) result(ierr)
 
  ierr = 0
 
+ ierr=wfk1%hdr%compare(wfk2%hdr)
+
  ! Test basic dimensions
- if (wfk1%hdr%nsppol /= wfk2%hdr%nsppol) then
-   ierr = ierr + 1; MSG_WARNING("Different nsppol")
- end if
- if (wfk1%hdr%nspinor /= wfk2%hdr%nspinor) then
-   ierr = ierr + 1; MSG_WARNING("Different nspinor")
- end if
- if (wfk1%hdr%nspden /= wfk2%hdr%nspden) then
-   ierr = ierr + 1; MSG_WARNING("Different nspden")
- end if
- if (wfk1%hdr%nkpt /= wfk2%hdr%nkpt) then
-   ierr = ierr + 1; MSG_WARNING("Different nkpt")
- end if
+!if (wfk1%hdr%nsppol /= wfk2%hdr%nsppol) then
+!  ierr = ierr + 1; MSG_WARNING("Different nsppol")
+!end if
+!if (wfk1%hdr%nspinor /= wfk2%hdr%nspinor) then
+!  ierr = ierr + 1; MSG_WARNING("Different nspinor")
+!end if
+!if (wfk1%hdr%nspden /= wfk2%hdr%nspden) then
+!  ierr = ierr + 1; MSG_WARNING("Different nspden")
+!end if
+!if (wfk1%hdr%nkpt /= wfk2%hdr%nkpt) then
+!  ierr = ierr + 1; MSG_WARNING("Different nkpt")
+!end if
  if (wfk1%formeig /= wfk2%formeig) then
    ierr = ierr + 1; MSG_WARNING("Different formeig")
  end if
- if (wfk1%hdr%usepaw /= wfk2%hdr%usepaw) then
-   ierr = ierr + 1; MSG_WARNING("Different usepaw")
- end if
- if (wfk1%hdr%ntypat /= wfk2%hdr%ntypat) then
-   ierr = ierr + 1; MSG_WARNING("Different ntypat")
- end if
- if (wfk1%hdr%natom /= wfk2%hdr%natom) then
-   ierr = ierr + 1; MSG_WARNING("Different natom")
- end if
+!if (wfk1%hdr%usepaw /= wfk2%hdr%usepaw) then
+!  ierr = ierr + 1; MSG_WARNING("Different usepaw")
+!end if
+!if (wfk1%hdr%ntypat /= wfk2%hdr%ntypat) then
+!  ierr = ierr + 1; MSG_WARNING("Different ntypat")
+!end if
+!if (wfk1%hdr%natom /= wfk2%hdr%natom) then
+!  ierr = ierr + 1; MSG_WARNING("Different natom")
+!end if
  !if (wfk1%hdr%fform /= wfk2%hdr%fform) then
  !  ierr = ierr + 1; MSG_WARNING("Different fform")
  !end if
@@ -1068,18 +1070,18 @@ integer function wfk_compare(wfk1, wfk2) result(ierr)
  if (ierr /= 0) return
 
  ! Test important arrays (rprimd is not tested)
- if (any(wfk1%hdr%typat /= wfk2%hdr%typat)) then
-   ierr = ierr + 1; MSG_WARNING("Different typat")
- end if
- if (any(wfk1%hdr%npwarr /= wfk2%hdr%npwarr)) then
-   ierr = ierr + 1; MSG_WARNING("Different npwarr array")
- end if
+!if (any(wfk1%hdr%typat /= wfk2%hdr%typat)) then
+!  ierr = ierr + 1; MSG_WARNING("Different typat")
+!end if
+!if (any(wfk1%hdr%npwarr /= wfk2%hdr%npwarr)) then
+!  ierr = ierr + 1; MSG_WARNING("Different npwarr array")
+!end if
  if (any(wfk1%nband /= wfk2%nband)) then
    ierr = ierr + 1; MSG_WARNING("Different nband array")
  end if
- if (any(abs(wfk1%hdr%kptns - wfk2%hdr%kptns) > tol6)) then
-   ierr = ierr + 1; MSG_WARNING("Different kptns array")
- end if
+!if (any(abs(wfk1%hdr%kptns - wfk2%hdr%kptns) > tol6)) then
+!  ierr = ierr + 1; MSG_WARNING("Different kptns array")
+!end if
 
  ! Call hdr_check to get a nice diff of the header but don't check restart and restartpaw.
  call hdr_check(wfk1%fform,wfk2%fform,wfk1%hdr,wfk2%hdr,"PERS",restart,restartpaw)
@@ -2759,12 +2761,12 @@ subroutine wfk_read_eigk(Wfk,ik_ibz,spin,sc_mode,eig_k,occ_k)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: band_block00(2)=[0,0]
+ integer,parameter :: band_block00(2) = [0, 0]
 
 !************************************************************************
 
  if (present(occ_k)) then
-   ABI_CHECK(Wfk%formeig==0,"formeig !=0")
+   ABI_CHECK(Wfk%formeig == 0, "formeig !=0")
    call wfk%read_band_block(band_block00,ik_ibz,spin,sc_mode,eig_k=eig_k,occ_k=occ_k)
  else
    call wfk%read_band_block(band_block00,ik_ibz,spin,sc_mode,eig_k=eig_k)
@@ -2799,7 +2801,7 @@ end subroutine wfk_read_eigk
 !!
 !! SOURCE
 
-subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
+subroutine wfk_read_eigenvalues(fname, eigen, Hdr_out, comm, occ)
 
 !Arguments ------------------------------------
 !scalars
@@ -2807,7 +2809,7 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
  character(len=*),intent(in) :: fname
  type(hdr_type),intent(out) :: Hdr_out
 !arrays
-!MGTODO: Replace pointers with allocatable.
+!TODO: Replace pointers with allocatable.
  real(dp),pointer :: eigen(:,:,:)
  real(dp),pointer,optional :: occ(:,:,:)
 
@@ -2823,8 +2825,9 @@ subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
  call cwtime(cpu, wall, gflops, "start")
  my_rank = xmpi_comm_rank(comm)
  iomode = iomode_from_fname(fname)
+ !iomode = IO_MODE_FORTRAN
 
- call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname,", with iomode: ", iomode2str(iomode)))
+ call wrtout(std_out, sjoin(" Reading eigenvalues from:", fname, ", with iomode:", iomode2str(iomode)))
 
  if (my_rank == master) then
    ! Open the file.

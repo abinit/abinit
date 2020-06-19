@@ -6,7 +6,7 @@
 !! Calculate the effective interaction in the correlated orbitals
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,14 @@
 
 MODULE m_calc_ucrpa
 
- use defs_basis
+#ifndef HAVE_CRPA_OPTIM
+#ifdef FC_INTEL
+#warning "optimization of m_calc_ucrpa is deactivated on intel fortran"
+!DEC$ NOOPTIMIZE
+#endif
+#endif
+
+  use defs_basis
  implicit none
 
  private
@@ -85,7 +92,7 @@ contains
 !! SOURCE
 
  subroutine calc_ucrpa(itypatcor,cryst,Kmesh,lpawu,M1_q_m,Qmesh,npwe,&
-& npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname)
+& npw,nsym,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname,plowan_compute,rhot1,wanbz)
 
  use defs_basis
  use m_abicore
@@ -97,9 +104,10 @@ contains
  use m_io_screening,  only : read_screening, em1_ncname
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_crystal,       only : crystal_t
+ use m_plowannier,    only : operwan_realspace_type,plowannier_type
  implicit none
-!   _____            _
-!  |_   _|          | |
+!   _____                   _
+!  |_   _|                 | |
 !    | |  _ __  _ __  _   _| |_
 !    | | | '_ \| '_ \| | | | __|
 !   _| |_| | | | |_) | |_| | |_
@@ -112,6 +120,7 @@ contains
  integer, intent(in)   :: nomega
  integer, intent(in)   :: bandinf
  integer, intent(in)   :: bandsup
+ integer, intent(in)   :: plowan_compute
  character(len=fnlen), intent(in) :: fname
  character(len=*), intent(in) :: optimisation
  real(dp), intent(in) :: ucvol,omegamin,omegamax
@@ -119,23 +128,25 @@ contains
  type(wfd_t),intent(inout) :: Wfd
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
- complex(dpc), intent(in) :: rhot1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
+ type(operwan_realspace_type),intent(in) :: rhot1(npw,Qmesh%nibz)
+ type(plowannier_type),intent(in) :: wanbz
  complex(dpc), intent(in) :: M1_q_m(cryst%nattyp(itypatcor),Wfd%nspinor,Wfd%nspinor,2*lpawu+1,2*lpawu+1,npw,Qmesh%nibz)
 
 !Local variables ------------------------------
 !scalars
  real(dp) :: x
  real(dp) :: t1,t2
- real(dp):: tol,eVnorme
+ real(dp):: tol
  complex(dpc) :: uu,jj
 
  complex :: nC,ualter
 
- integer :: iat,im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4
+ integer :: iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,ispin,one_orbital
+ integer :: im_paral,iqalloc,ib1,ib2,m1,m2,m3,m4,iqibz,mbband1,mbband2,mbband3,mbband4,spin1,spin2
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
- integer :: isym_kgw,iik,unt
- complex(dpc) ::ph_mkt
+ integer :: isym_kgw,iik,unt, cp_paral
+ complex(dpc) ::ph_mkt,cplx1,cplx2
 
  logical :: wannier=.TRUE.
  logical :: verbose=.FALSE.
@@ -147,10 +158,11 @@ contains
 !arrays
  complex(dpc), allocatable :: V_m(:,:,:,:)
  complex(dpc), allocatable :: U_m(:,:,:,:)
-
+ complex(dpc),allocatable :: uspin(:,:),jspin(:,:)
 ! complex(dpc), allocatable :: coeffW_BZ(:,:,:),coeffW_IBZ(:,:,:)
- complex(dpc), allocatable :: rhot_q_m(:,:,:,:,:,:)
- complex(dpc), allocatable :: rhot_q_m_npwe(:,:,:,:,:,:),trrho(:,:),sumrhorhoeps(:)
+ complex(dpc), allocatable :: rhot_q_m1m3(:,:,:,:,:,:),rhot_q_m2m4(:,:,:,:,:,:)
+ complex(dpc), allocatable :: rhot_q_m1m3_npwe(:,:,:,:,:,:),rhot_q_m2m4_npwe(:,:,:,:,:,:)
+ complex(dpc),allocatable :: trrho(:,:),sumrhorhoeps(:)
  complex(gwpc), allocatable :: scr(:,:,:,:)
 
  real(dp),allocatable :: k_coord(:,:)!,k_coordIBZ(:,:)
@@ -158,6 +170,7 @@ contains
  real(dp),allocatable:: normG(:)
  complex(dpc),allocatable:: uomega(:),jomega(:)
  real(dp),allocatable:: omega(:)
+ complex(dpc),allocatable:: eiqr(:)
 
  integer,allocatable:: ikmq_bz_t(:,:)
 
@@ -188,8 +201,8 @@ contains
 
  ABI_ALLOCATE(k_coord,(nkbz,3))
  ABI_ALLOCATE(q_coord,(nqibz,4))
-
-
+ ABI_ALLOCATE(eiqr,(nqibz))
+ eiqr=czero
 !==Read k and q==!
 !open(unit=2012,file='ikbz_COORD',form='formatted',status='unknown')
 !read(2012,*) (ik_bz,k_coord(ik_bz,:),i=1,nkbz)
@@ -218,6 +231,7 @@ contains
  ABI_ALLOCATE(bijection,(nkbz))
  ABI_ALLOCATE(ikmq_bz_t,(nkbz,nqibz))
  bijection(:)=.FALSE.
+ if (nsym==1) then
  do ik_bz=1,nkbz
    do iq_ibz=1,nqibz
      ikmq_bz_t(ik_bz,iq_ibz)=findkmq(ik_bz,k_coord,q_coord(iq_ibz,:),nkbz)
@@ -242,6 +256,7 @@ contains
    write(message,*)  "Bijection Ok."
    call wrtout(std_out,message,'COLL')
  end if
+endif
 !                                           _____
 !                                          / ____|
 !   _ __   ___  _ __ _ __ ___   ___       | |  __
@@ -328,29 +343,39 @@ contains
 !==========================================================
 !== Read Wannier coefficient in forlb.ovlp
 !==========================================================
- write(message,*) ""
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
- write(message,*) "Read wannier in iBZ"
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
  nkibz=Kmesh%nibz
 
 !Read "l"
- if (open_file('forlb.ovlp',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-   MSG_ERROR(message)
- end if
- rewind(unt)
+ if (plowan_compute<10) then
+   write(message,*) ""
+   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+   write(message,*) "Read wannier in iBZ"
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+   if (open_file('forlb.ovlp',message,newunit=unt,form='formatted',status='unknown') /= 0) then
+     MSG_ERROR(message)
+   end if
+   rewind(unt)
  read(unt,*) message
- read(unt,*) message, lpawu_read
- read(unt,*) message, ib1, ib2
- close(unt)
+   read(unt,*) message, lpawu_read
+   read(unt,*) message, ib1, ib2
+   close(unt)
+   mbband=2*lpawu_read+1
+ else
+   ib1=wanbz%bandi_wan
+   ib2=wanbz%bandf_wan
+   mbband=2*wanbz%latom_wan(1)%lcalc(1)+1
+   write(message,*)"Read l and bands from wanbz",ib1,ib2,mbband
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ endif
  if(ib1/=bandinf.and.ib2/=bandsup) then
    write(message,*) "Error with bands",ib1,bandinf,ib2,bandsup
    MSG_ERROR(message)
  endif
 !!Read the bandinf, bandinf redondance information
- mbband=2*lpawu_read+1
+
 
 !*******************************************************
 !if (3==4) then
@@ -538,34 +563,101 @@ contains
 !===============================================================!
  ABI_DEALLOCATE(ikmq_bz_t)
 
- ABI_ALLOCATE(rhot_q_m,(nspinor,nspinor,mbband,mbband,npw,nqibz))
+ !ABI_ALLOCATE(rhot_q_m,(nspinor,nspinor,mbband,mbband,npw,nqibz))
 
- do iat=1,Cryst%nattyp(itypatcor)
-   write(message,*)  "== cRPA Calculation of Interaction for atom  ", iat
-   call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+ ! if (plowan_compute>=10)then
+ !   write(message,*)" cRPA calculation using plowan module"
+ !   call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+ !   do iG=1,npw
+ !     do iqibz=1,nqibz
+ !       do ispinor1=1,nspinor
+ !         do ispinor2=1,nspinor
+ !           do m1=1,2*wanbz%latom_wan(1)%lcalc(1)+1
+ !             do m2=1,2*wanbz%latom_wan(1)%lcalc(1)+1
+ !               rhot_q_m(ispinor1,ispinor2,m1,m2,iG,iqibz)=&
+ !                 &rhot1(iG,iqibz)%atom_index(1,1)%position(1,1)%atom(1,1)%matl(m1,m2,1,ispinor1,ispinor2)
+ !               !write(6,*) rhot_q_m(ispinor1,ispinor2,m1,m2,iG,iqbz)
+ !             enddo
+ !           enddo
+ !         enddo
+ !       enddo
+ !     enddo
+ !   enddo
+ ! endif
+  do iatom1=1,wanbz%natom_wan
+  do iatom2=1,wanbz%natom_wan
+  do iatom3=1,wanbz%natom_wan
+  do iatom4=1,wanbz%natom_wan
+    if (iatom1/=iatom3 .or. iatom2/=iatom4)cycle
+    do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
+    do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
+    do pos3=1,size(wanbz%nposition(iatom3)%pos,1)
+    do pos4=1,size(wanbz%nposition(iatom4)%pos,1)
+      if (pos1/=pos3 .or. pos2/=pos4)cycle
+      do il1=1,wanbz%nbl_atom_wan(iatom1)
+      do il2=1,wanbz%nbl_atom_wan(iatom2)
+      do il3=1,wanbz%nbl_atom_wan(iatom3)
+      do il4=1,wanbz%nbl_atom_wan(iatom4)
+      if(il1/=il3 .or. il2/=il4)cycle
+      if (wanbz%nsppol/=1)then
+        ABI_ALLOCATE(uspin,(4,nomega))
+        ABI_ALLOCATE(jspin,(4,nomega))
+      endif
+      if (iatom1==iatom2 .and. pos1==pos2 .and. il1 == il2)then
+        one_orbital=1
+      else
+        one_orbital=0
+      endif
+      ABI_ALLOCATE(omega,(nomega))
+      do spin1=1,wanbz%nsppol
+      do spin2=1,wanbz%nsppol
+        cp_paral=0
+        mbband1=2*wanbz%latom_wan(iatom1)%lcalc(il1)+1
+        mbband2=2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
+        mbband3=2*wanbz%latom_wan(iatom3)%lcalc(il3)+1
+        mbband4=2*wanbz%latom_wan(iatom4)%lcalc(il4)+1
+        ABI_ALLOCATE(rhot_q_m1m3,(npw,nqibz,mbband1,mbband3,nspinor,nspinor))
+        ABI_ALLOCATE(rhot_q_m2m4,(npw,nqibz,mbband2,mbband4,nspinor,nspinor))
+        rhot_q_m1m3=czero
+        rhot_q_m2m4=czero
+        do ispinor1=1,wanbz%nspinor
+        do ispinor2=1,wanbz%nspinor
+        do ispinor3=1,wanbz%nspinor
+        do ispinor4=1,wanbz%nspinor
+          do m1=1,mbband1
+          do m2=1,mbband2
+          do m3=1,mbband3
+          do m4=1,mbband4
+            do iqibz=1,nqibz
+              !Loig Vaugier PhD eq. 5.15
+              eiqr(iqibz)=exp(cmplx(0.0, 1.0 ) * two_pi * ( &
+                q_coord(iqibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
+                q_coord(iqibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
+                q_coord(iqibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
+            do iG=1,npw
+              ! cp_paral=cp_paral+1
+              ! if(mod(cp_paral-1,nprocs)==Wfd%my_rank) then
+              cplx1=rhot1(iG,iqibz)%atom_index(iatom1,iatom3)%position(pos1,pos3)%atom(il1,il3)%matl(m1,m3,spin1,ispinor1,ispinor3)
+              rhot_q_m1m3(iG,iqibz,m1,m3,ispinor1,ispinor3)=cplx1
 
-   rhot_q_m(:,:,:,:,:,:)=rhot1_q_m(iat,:,:,:,:,:,:)
+              cplx2=rhot1(iG,iqibz)%atom_index(iatom2,iatom4)%position(pos2,pos4)%atom(il2,il4)%matl(m2,m4,spin2,ispinor2,ispinor4)
+              rhot_q_m2m4(iG,iqibz,m2,m4,ispinor2,ispinor4)=cplx2
 
-   if (verbose) then
-     !==Ecriture de Ro_G^(mm')(q)==!:
-     eVnorme=sqrt(Ha_eV/ucvol)
-     if (open_file('Ro_mm11(q)',message,newunit=unt,form='formatted',status='unknown') /= 0) then
-       MSG_ERROR(message)
-     end if
-     do iG=1,npw
-       do ispinor1=1,nspinor
-         do ispinor2=1,nspinor
-           do m1=1,mbband
-             do m2=1,mbband
-               write(unt,*) normG(iG),m1,m2,ispinor1,ispinor2,rhot_q_m(ispinor1,ispinor2,m1,m2,iG,:)
-             enddo
-           enddo
-         enddo
-       enddo
-     end do
-     write(unt,*) q_coord
-     close(unt)
-   end if
+              !endif
+            enddo!iG
+            enddo!iqibz
+          enddo!m4
+          enddo!m3
+          enddo!m2
+          enddo!m1
+        enddo!ispinor4
+        enddo!ispinor3
+        enddo!ispinor2
+        enddo!ispinor1
+        ! call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
+        ! call xmpi_sum(rhot_q_m1m3,Wfd%comm,ierr)
+        ! call xmpi_sum(rhot_q_m2m4,Wfd%comm,ierr)
+        ! call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
 
 !    __      __
 !    \ \    / /
@@ -575,63 +667,63 @@ contains
 !        \/        |_| |_| |_|
 
 
-   ABI_ALLOCATE(V_m,(mbband*nspinor,mbband*nspinor,mbband*nspinor,mbband*nspinor))
-   write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-   write(message,*)  "==Calculation of the bare interaction  V m=="
-    call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-   V_m=czero
-   call cpu_time ( t1 )
-   im_paral=0
-   nprocs  = xmpi_comm_size(Wfd%comm)
-   do ispinor1=1,nspinor
-     do ispinor2=1,nspinor
-       do ispinor3=1,nspinor
-         do ispinor4=1,nspinor
-           do m1=1,mbband
-             do m2=1,mbband
-               do m3=1,mbband
-                 do m4=1,mbband
-                   ms1=m1+(ispinor1-1)*mbband
-                   ms2=m2+(ispinor2-1)*mbband
-                   ms3=m3+(ispinor3-1)*mbband
-                   ms4=m4+(ispinor4-1)*mbband
-                   im_paral=im_paral+1
-                   if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
-                    !!somme interne sur iG, puis somme externe sur iq_ibz
-                    !! Sum_(iq_ibz) wi(iq_ibz)*Sum_ig  Rho(m3,m1,iG,iq)cong*Rho(m2,m4,ig,iq)
-                     V_m(ms1,ms2,ms3,ms4)=sum(q_coord(:,4)*sum(conjg(rhot_q_m(ispinor3,ispinor1,m3,m1,:,:))* &
-&                      rhot_q_m(ispinor2,ispinor4,m2,m4,:,:),dim = 1))&
-&                     *Ha_eV/(ucvol)
-                   if(m1==1.and.m2==1.and.m3==1.and.m4==1) then
-!                     do iq_ibz=1,nqibz
-!                       write(6,*) sum(conjg(rhot_q_m(m3,m1,:,iq_ibz))*rhot_q_m(m2,m4,:,iq_ibz),dim = 1)
-!                       write(6,*) q_coord(iq_ibz,4)
-!                       write(6,*) sum(conjg(rhot_q_m(m3,m1,:,iq_ibz))*rhot_q_m(m2,m4,:,iq_ibz),dim = 1)*q_coord(iq_ibz,4)
-!                       write(6,*) sum(conjg(rhot_q_m(m3,m1,:,iq_ibz))*rhot_q_m(m2,m4,:,iq_ibz),dim = 1)*q_coord(iq_ibz,4)*Ha_EV/ucvol
-!                       write(6,*) "---"
-!                     enddo
-                   endif
-                   endif
-                 end do
-               end do
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
-   call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
-   call xmpi_sum(V_m,Wfd%comm,ierr)
-   call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
-   call cpu_time ( t2 )
-   write(message,*)  "in ",t2-t1,"sec"
-   call wrtout(std_out,message,'COLL')
-!  !==Check if calculation is correct
-   tol=1E-2
-   write(message,*)  "BARE INTERACTION"
-   call wrtout(std_out,message,'COLL')
-   call checkk(V_m,1,mbband*nspinor,tol,1,0,uu,jj,"bare interaction")
+        ABI_ALLOCATE(V_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
+        write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+        write(message,*)  "==Calculation of the bare interaction  V m=="
+        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
 
+        call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,1)
+        V_m=czero
+        call cpu_time ( t1 )
+        im_paral=0
+        nprocs  = xmpi_comm_size(Wfd%comm)
+
+
+
+
+
+
+        do ispinor1=1,nspinor
+        do ispinor2=1,nspinor
+        do ispinor3=1,nspinor
+        do ispinor4=1,nspinor
+          do m1=1,mbband1
+          do m2=1,mbband2
+          do m3=1,mbband3
+          do m4=1,mbband4
+            ms1=m1+(ispinor1-1)*mbband1
+            ms2=m2+(ispinor2-1)*mbband2
+            ms3=m3+(ispinor3-1)*mbband3
+            ms4=m4+(ispinor4-1)*mbband4
+            im_paral=im_paral+1
+            if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
+!!somme interne sur iG, puis somme externe sur iq_ibz
+!! Sum_(iq_ibz) wi(iq_ibz)*Sum_ig  Rho(m3,m1,iG,iq)cong*Rho(m2,m4,ig,iq)
+              V_m(ms1,ms2,ms3,ms4)=sum(eiqr(:)*q_coord(:,4)*sum(conjg(rhot_q_m1m3(:,:,m3,m1,ispinor3,ispinor1))* &
+                &rhot_q_m2m4(:,:,m2,m4,ispinor2,ispinor4),dim = 1))*Ha_eV/(ucvol)
+              !end do
+            endif!paral
+          end do!m4
+          end do!m3
+          end do!m2
+          end do!m1
+        end do!ispinor4
+        end do!ispinor3
+        end do!ispinor2
+        end do!ispinor1
+        call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
+        call xmpi_sum(V_m,Wfd%comm,ierr)
+        call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
+        call cpu_time ( t2 )
+        write(message,*)  "in ",t2-t1,"sec"
+        call wrtout(std_out,message,'COLL')
+!  !==Check if calculation is correct
+        tol=1E-2
+
+        write(message,*)  "BARE INTERACTION"
+        call wrtout(std_out,message,'COLL')
+        call checkk(V_m,1,mbband*nspinor,1,0,uu,jj,"bare interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
+        !call print_U(mbband1,mbband2,mbband3,mbband4,nspinor,V_m)
 !  ========================================================================
 !  ------------------------------------------------------------------------
 
@@ -651,28 +743,28 @@ contains
 !  ==========================================================
 !  == Read Dielectric Matrix for _SCR file
 !  ==========================================================
-   write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+        write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+        call wrtout(std_out,message,'COLL')
+        call wrtout(ab_out,message,'COLL')
  !  write(message,*) "==Read the dielectric matrix=="
  !  call wrtout(ab_out,message,'COLL'); call wrtout(std_out,message,'COLL')
 
-   lscr_one=.true.
+        lscr_one=.true.
 
    ! if symetry is not enabled then a large number of q-point are used
    ! and they are read with direct access to avoid having too large
    ! memory.
    !-------------------------------------------------------------------
-   if(nsym>1.and..not.lscr_one) nqalloc=nqibz
-   if(nsym==1.or.lscr_one) nqalloc=1
+        if(nsym>1.and..not.lscr_one) nqalloc=nqibz
+        if(nsym==1.or.lscr_one) nqalloc=1
 
-   ABI_ALLOCATE(scr,(npwe,npwe,nomega,nqalloc))
-   scr=czero
-   if(nsym>1.and..not.lscr_one) then
-     write(message,*) "==Read the dielectric matrix=="
-     call wrtout(ab_out,message,'COLL'); call wrtout(std_out,message,'COLL')
-     call read_screening(em1_ncname,fname,npwe,nqibz,nomega,scr,IO_MODE_MPI,Wfd%comm)
-   endif
+        ABI_ALLOCATE(scr,(npwe,npwe,nomega,nqalloc))
+        scr=czero
+        if(nsym>1.and..not.lscr_one) then
+          write(message,*) "==Read the dielectric matrix=="
+          call wrtout(ab_out,message,'COLL'); call wrtout(std_out,message,'COLL')
+          call read_screening(em1_ncname,fname,npwe,nqibz,nomega,scr,IO_MODE_MPI,Wfd%comm)
+        endif
 
 !   if (verbose) then
 !     open(unit=2211,file='Screening',form='formatted',status='unknown')
@@ -684,36 +776,36 @@ contains
 !     close(2211)
 !   end if
 !
-   if(nsym>1.and..not.lscr_one) then
-     write(message,*) "Check the hermiticity"
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
-     tol = 1E-2
-     do iG1=1,npwe
-       if (modulo(iG1,100).EQ.1) then
-         write(message,*)  iG1,"/",npw
-         call wrtout(std_out,message,'COLL')
-       end if
-       do iG2=iG1,npwe
-         if (ANY(abs(scr(iG1,iG2,:,:)-scr(iG2,iG1,:,:))>tol)) then
-           write(message,*) iG1,iG2,"False"
-           MSG_ERROR(message)
-           do iomega1=1,nomega
-             if(abs(scr(iG1,iG2,iomega1,1)-scr(iG2,iG1,iomega1,1))>tol) then
-               write(message,*) iG1,iG2,"False",scr(iG1,iG2,iomega1,1),scr(iG2,iG1,iomega1,1)
-               call wrtout(std_out,message,'COLL')
-             endif
-           enddo
-         end if
-         if(iG1==iG2) then
-           scr(iG1,iG1,:,:)=scr(iG1,iG1,:,:)-one ! unscreened part of
-         endif
-       end do
-     end do
-     write(message,*)  "Done: Hermiticity of dielectric matrix checked"
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
-   endif
+        if(nsym>1.and..not.lscr_one) then
+          write(message,*) "Check the hermiticity"
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
+          tol = 1E-2
+          do iG1=1,npwe
+            if (modulo(iG1,100).EQ.1) then
+              write(message,*)  iG1,"/",npw
+              call wrtout(std_out,message,'COLL')
+            end if
+            do iG2=iG1,npwe
+              if (ANY(abs(scr(iG1,iG2,:,:)-scr(iG2,iG1,:,:))>tol)) then
+                write(message,*) iG1,iG2,"False"
+                MSG_ERROR(message)
+                do iomega1=1,nomega
+                  if(abs(scr(iG1,iG2,iomega1,1)-scr(iG2,iG1,iomega1,1))>tol) then
+                    write(message,*) iG1,iG2,"False",scr(iG1,iG2,iomega1,1),scr(iG2,iG1,iomega1,1)
+                    call wrtout(std_out,message,'COLL')
+                  endif
+                enddo
+              end if
+              if(iG1==iG2) then
+                scr(iG1,iG1,:,:)=scr(iG1,iG1,:,:)-one ! unscreened part of
+              endif
+            end do
+          end do
+          write(message,*)  "Done: Hermiticity of dielectric matrix checked"
+          call wrtout(std_out,message,'COLL')
+          call wrtout(ab_out,message,'COLL')
+        endif
 
 !  ========================================================================
 !  ------------------------------------------------------------------------
@@ -730,28 +822,31 @@ contains
 !    | |__| |     | | | | | |
 !     \____/      |_| |_| |_|
 !
-   write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-   write(message,*)  "== Calculation of the screened interaction on the correlated orbital U m =="
-   call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-   write(message,*)ch10,  " = Start loop over frequency "
-   call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+        write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+        write(message,*)  "== Calculation of the screened interaction on the correlated orbital U m =="
+        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+        write(message,*)ch10,  " = Start loop over frequency "
+        call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
 
-   ABI_ALLOCATE(U_m,(mbband*nspinor,mbband*nspinor,mbband*nspinor,mbband*nspinor))
-   ABI_ALLOCATE(rhot_q_m_npwe,(nspinor,nspinor,mbband,mbband,npwe,nqibz))
-   ABI_ALLOCATE(trrho,(npwe,nqibz))
-   ABI_ALLOCATE(sumrhorhoeps,(nqibz))
+        ABI_ALLOCATE(U_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
+        ABI_ALLOCATE(rhot_q_m1m3_npwe,(npwe,nqibz,mbband1,mbband3,nspinor,nspinor))
+        ABI_ALLOCATE(rhot_q_m2m4_npwe,(npwe,nqibz,mbband2,mbband4,nspinor,nspinor))
+        ABI_ALLOCATE(trrho,(npwe,nqibz))
+        ABI_ALLOCATE(sumrhorhoeps,(nqibz))
 
    ! Following lines are only for debug
    !--------------------------------------------
-   trrho(:,:)=czero
-   do iG1=1,npwe
-     rhot_q_m_npwe(:,:,:,:,iG1,:)=rhot_q_m(:,:,:,:,iG1,:)
-     do ispinor1=1,nspinor
-       do m1=1,mbband
-         trrho(iG1,:)= trrho(iG1,:)+rhot_q_m(ispinor1,ispinor1,m1,m1,iG1,:)
-       enddo
-     enddo
-   enddo
+        trrho(:,:)=czero
+        do iG1=1,npwe
+          rhot_q_m1m3_npwe(iG1,:,:,:,:,:)=rhot_q_m1m3(iG1,:,:,:,:,:)
+          rhot_q_m2m4_npwe(iG1,:,:,:,:,:)=rhot_q_m2m4(iG1,:,:,:,:,:)
+        enddo
+        !  do  ispinor1=1,nspinor
+        !     do m1=1,mbband
+        !       trrho(iG1,:)= trrho(iG1,:)+rhot_q_m(ispinor1,ispinor1,m1,m1,iG1,:)
+        !     enddo
+        !   enddo
+        ! enddo
 !   write(6,*) "trrho"
 !   do iG1=1,npwe
 !     do iq_ibz=1,nqibz
@@ -762,178 +857,230 @@ contains
 
    ! Loop over frequencies to compute cRPA U(w)
    !--------------------------------------------
-   ABI_ALLOCATE(uomega,(nomega))
-   ABI_ALLOCATE(jomega,(nomega))
-   ABI_ALLOCATE(omega,(nomega))
-   iomega=1
-   do iomega=1,nomega
-     write(message,'(2a,i4,2a)')ch10,  " --- For frequency w =",iomega, "  -------------",ch10
-     call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
-     sumrhorhoeps(:)=czero
-     ualter=czero
+        ABI_ALLOCATE(uomega,(nomega))
+        ABI_ALLOCATE(jomega,(nomega))
 
-     write(std_out,*) Optimisation
-     U_m=cmplx(0,0)
-     SELECT CASE(trim(Optimisation))
-     CASE("naif")
-     CASE("onlyG")
-     CASE("Gsum2")
-     CASE("Gsum")
-      ! write(message,*)  "Optimisation on G and sum"
-      ! call wrtout(std_out,message,'COLL')
-       U_m=cmplx(0,0)
-       nc=cmplx(0,0)
-       im_paral=0
-       call cpu_time ( t1 )
-       nprocs  = xmpi_comm_size(Wfd%comm)
-       do iq_ibz=1,nqibz
+        iomega=1
+        do iomega=1,nomega
+          write(message,'(2a,i4,2a)')ch10,  " --- For frequency w =",iomega, "  -------------",ch10
+          call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+          sumrhorhoeps(:)=czero
+          ualter=czero
 
-         if(nsym>1.and..not.lscr_one)  iqalloc=iq_ibz
-         if(nsym==1.or.lscr_one) iqalloc=1
-         if(nsym==1.or.lscr_one) then
+          write(std_out,*) Optimisation
+          U_m=cmplx(0,0)
+          SELECT CASE(trim(Optimisation))
+          CASE("naif")
+          CASE("onlyG")
+          CASE("Gsum2")
+          CASE("Gsum")
+! write(message,*)  "Optimisation on G and sum"
+! call wrtout(std_out,message,'COLL')
+            U_m=cmplx(0,0)
+            nc=cmplx(0,0)
+            im_paral=0
+            call cpu_time ( t1 )
+            nprocs  = xmpi_comm_size(Wfd%comm)
+            do iq_ibz=1,nqibz
+              ! eiqr=exp(cmplx(0.0, 1.0 ) * two_pi * ( &
+              !   q_coord(iq_ibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
+              !   q_coord(iq_ibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
+              !   q_coord(iq_ibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
+              if(nsym>1.and..not.lscr_one)  iqalloc=iq_ibz
+              if(nsym==1.or.lscr_one) iqalloc=1
+              if(nsym==1.or.lscr_one) then
 #ifdef HAVE_MPI_IO
-           call read_screening(em1_ncname,fname,npwe,1,nomega,scr,IO_MODE_MPI,Wfd%comm,iqiA=iq_ibz)
+                call read_screening(em1_ncname,fname,npwe,1,nomega,scr,IO_MODE_MPI,Wfd%comm,iqiA=iq_ibz)
 #else
-           call read_screening(em1_ncname,fname,npwe,1,nomega,scr,IO_MODE_FORTRAN,Wfd%comm,iqiA=iq_ibz)
+                call read_screening(em1_ncname,fname,npwe,1,nomega,scr,IO_MODE_FORTRAN,Wfd%comm,iqiA=iq_ibz)
 #endif
-           write(message,*) "Check the hermiticity"
-           call wrtout(std_out,message,'COLL')
-           tol = 0.01_dp
-           do iG1=1,npwe
-             if (modulo(iG1,100).EQ.1) then
-               write(message,*)  iG1,"/",npw
-               call wrtout(std_out,message,'COLL')
-             end if
-             do iG2=iG1,npwe
-               if (ANY(abs(scr(iG1,iG2,:,:)-scr(iG2,iG1,:,:))>tol)) then
-                 do iomega1=1,nomega
-                   if(abs(scr(iG1,iG2,iomega1,1)-scr(iG2,iG1,iomega1,1))>tol) then
-                     write(message,*) iG1,iG2,"False",scr(iG1,iG2,iomega1,1),scr(iG2,iG1,iomega1,1)
-                     call wrtout(std_out,message,'COLL')
-                   endif
-                 enddo
-                 write(message,*) "CHECK THE HERMITICITY"
-                 MSG_WARNING(message)
-               end if
-               if(iG1==iG2) then
-                 scr(iG1,iG1,:,:)=scr(iG1,iG1,:,:)-one ! unscreened part of
+                write(message,*) "Check the hermiticity"
+                call wrtout(std_out,message,'COLL')
+                tol = 0.01_dp
+                do iG1=1,npwe
+                  if (modulo(iG1,100).EQ.1) then
+                    write(message,*)  iG1,"/",npw
+                    call wrtout(std_out,message,'COLL')
+                  end if
+                  do iG2=iG1,npwe
+                    if (ANY(abs(scr(iG1,iG2,:,:)-scr(iG2,iG1,:,:))>tol)) then
+                      do iomega1=1,nomega
+                        if(abs(scr(iG1,iG2,iomega1,1)-scr(iG2,iG1,iomega1,1))>tol) then
+                          write(message,*) iG1,iG2,"False",scr(iG1,iG2,iomega1,1),scr(iG2,iG1,iomega1,1)
+                          call wrtout(std_out,message,'COLL')
+                        endif
+                      enddo
+                      write(message,*) "CHECK THE HERMITICITY"
+                      MSG_WARNING(message)
+                    end if
+                    if(iG1==iG2) then
+                      scr(iG1,iG1,:,:)=scr(iG1,iG1,:,:)-one ! unscreened part of
 !                 interaction is computed before
 !                 scr(iG1,iG1,:,:)=one
 !               else
 !                 scr(iG1,iG2,:,:)=zero
-               endif
-             end do
-           end do
-         endif
-         write(message,*)  "Done: Hermiticity of dielectric matrix checked"
+                    endif
+                  end do
+                end do
+              endif
+              write(message,*)  "Done: Hermiticity of dielectric matrix checked"
 
-         do iG1=1,npwe
-           do iG2=1,npwe
-!              sumrhorhoeps(iq_ibz)=sumrhorhoeps(iq_ibz)+conjg(trrho(iG1,iq_ibz))*trrho(iG2,iq_ibz)*scr(iG2,iG1,iomega,1)
-              sumrhorhoeps(iq_ibz)=sumrhorhoeps(iq_ibz) + scr(iG2,iG1,iomega,iqalloc)
-           enddo
-         enddo
-         ualter=ualter+sumrhorhoeps(iq_ibz)*q_coord(iq_ibz,4)*Ha_eV/ucvol/(mbband)**2
+              ! do iG1=1,npwe
+!                 do iG2=1,npwe
+!                   sumrhorhoeps(iq_ibz)=sumrhorhoeps(iq_ibz)+conjg(trrho(iG1,iq_ibz))*trrho(iG2,iq_ibz)*scr(iG2,iG1,iomega,1)
+!                   sumrhorhoeps(iq_ibz)=sumrhorhoeps(iq_ibz) + scr(iG2,iG1,iomega,iqalloc)
+!                 enddo
+!               enddo
+!             ualter=ualter+sumrhorhoeps(iq_ibz)*q_coord(iq_ibz,4)*Ha_eV/ucvol/(mbband)**2
 !         write(6,*) "sumrhorhoeps",iq_ibz,sumrhorhoeps(iq_ibz)
 !         write(6,*) "ualter",iq_ibz,ualter
-         do ispinor1=1,nspinor
-           do ispinor2=1,nspinor
-             do ispinor3=1,nspinor
-               do ispinor4=1,nspinor
-                 do m1=1,mbband
-                   do m2=1,mbband
-                     do m3=1,mbband
-                       do m4=1,mbband
-                         ms1=m1+(ispinor1-1)*mbband
-                         ms2=m2+(ispinor2-1)*mbband
-                         ms3=m3+(ispinor3-1)*mbband
-                         ms4=m4+(ispinor4-1)*mbband
-                         im_paral=im_paral+1
-                         if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
+              do ispinor1=1,nspinor
+              do ispinor2=1,nspinor
+              do ispinor3=1,nspinor
+              do ispinor4=1,nspinor
+                do m1=1,mbband1
+                do m2=1,mbband2
+                do m3=1,mbband3
+                do m4=1,mbband4
+                  ms1=m1+(ispinor1-1)*mbband1
+                  ms2=m2+(ispinor2-1)*mbband2
+                  ms3=m3+(ispinor3-1)*mbband3
+                  ms4=m4+(ispinor4-1)*mbband4
+                  im_paral=im_paral+1
+                  if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
+!     sum q sum G1 sum G2 f(G1,q)f(G2,q)G(G1,G2,q)
+!     sum q sum G1 f(g1,q) sum G2 f(G2,q)G(G1,G2,q)
+                    do iG1=1,npwe
+                      nc=nc+conjg(rhot_q_m1m3_npwe(iG1,iq_ibz,m1,m3,ispinor1,ispinor3))*&
+                      &sum(rhot_q_m2m4_npwe(:,iq_ibz,m2,m4,ispinor2,ispinor4)*scr(:,iG1,iomega,iqalloc))
+                    end do
 
-                      !     sum q sum G1 sum G2 f(G1,q)f(G2,q)G(G1,G2,q)
-                      !     sum q sum G1 f(g1,q) sum G2 f(G2,q)G(G1,G2,q)
-                             do iG1=1,npwe
-                                  nc=nc+conjg(rhot_q_m_npwe(ispinor3,ispinor1,m3,m1,iG1,iq_ibz))*&
- &                                sum(rhot_q_m_npwe(ispinor2,ispinor4,m2,m4,:,iq_ibz)*scr(:,iG1,iomega,iqalloc))
-                             end do
-
-                             U_m(ms1,ms2,ms3,ms4)=U_m(ms1,ms2,ms3,ms4)+nc*q_coord(iq_ibz,4)
+                    U_m(ms1,ms2,ms3,ms4)=U_m(ms1,ms2,ms3,ms4)+nc*q_coord(iq_ibz,4)*eiqr(iq_ibz)
 !                   if(m1==1.and.m2==1.and.m3==1.and.m4==1) then
 !                     write(6,*) "TEST2"
 !                     write(6,*) iq_ibz,nc
 !                     write(6,*) q_coord(iq_ibz,4)
 !                   endif
-                             nc=cmplx(0,0)
-                         endif
-                       end do
-                     end do
-                   end do
-                 end do
-               end do
-             end do
-           end do
-         end do
-       end do
-       U_m(:,:,:,:)=U_m(:,:,:,:)*Ha_eV/(ucvol)
-       call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
-       call xmpi_sum(U_m,Wfd%comm,ierr)
-       call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
-       call cpu_time ( t2 )
-       write(message,*)  "in ",t2-t1, "sec"
-       call wrtout(std_out,message,'COLL')
-     END SELECT
+                    nc=cmplx(0,0)
+                  endif!paral
+                end do!m4
+                end do!m3
+                end do!m2
+                end do!m1
+              end do!ispinor4
+              end do!ispinor3
+              end do!ispinor2
+              end do!ispinor1
+            end do!iq_ibz
+            U_m(:,:,:,:)=U_m(:,:,:,:)*Ha_eV/(ucvol)
+            call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
+            call xmpi_sum(U_m,Wfd%comm,ierr)
+            call xmpi_barrier(Wfd%comm)  ! First make sure that all processors are here
+            call cpu_time ( t2 )
+            write(message,*)  "in ",t2-t1, "sec"
+            call wrtout(std_out,message,'COLL')
+          END SELECT
     ! tolerance of the symetry of screened U.
-      tol=1E-2
-      call checkk(U_m,1,mbband*nspinor,tol,0,iomega,uu,jj,"UminusVbare")
-      U_m=V_m+U_m
-      write(message,*)  "UCRPA interaction"
-      call wrtout(std_out,message,'COLL')
-      call checkk(U_m,1,mbband*nspinor,tol,1,iomega,uomega(iomega),jomega(iomega),"cRPA interaction")
-   enddo
+          tol=1E-2
+          call checkk(U_m,1,mbband*nspinor,0,iomega,uu,jj,"UminusVbare",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
+          U_m=V_m+U_m
+          write(message,*)  "UCRPA interaction"
+          call wrtout(std_out,message,'COLL')
+          call checkk(U_m,1,mbband*nspinor,1,iomega,uomega(iomega),jomega(iomega),&
+            &"cRPA interaction",mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
+          if (spin1==1 .and. spin2==1) then
+            ispin=1
+          else if(spin1==1 .and. spin2==2) then
+            ispin=2
+          else if (spin1==2 .and. spin2==1)then
+            ispin=3
+          else
+            ispin=4
+          endif
+          if (wanbz%nsppol/=1)then
+            uomega(iomega)=4*uomega(iomega)
+            jomega(iomega)=4*jomega(iomega)
+            uspin(ispin,iomega)=uomega(iomega)
+            jspin(ispin,iomega)=jomega(iomega)
+          endif
+          !write(message,*)ch10,"SCREENED INTERACTION"
+          !call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+          !call print_U(mbband1,mbband2,mbband3,mbband4,nspinor,U_m)
+        enddo
 
-!   Summarize the calculation.
-   write(message,*)ch10,"  -------------------------------------------------------------"
-   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   write(message,*)"           Average U and J as a function of frequency   "
-   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   write(message,*)"  -------------------------------------------------------------"
-   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   write(message,*)"        omega           U(omega)            J(omega)"
-   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   do iomega=1,nomega
-     if(nomega==1) then
-       omega(iomega)=omegamin
-     else
-       omega(iomega)=(omegamax-omegamin)/(nomega-1)*(iomega-1)+omegamin
-     endif
-     if(nomega==1)  omega(iomega)=omegamin
-     write(message,'(2x,f11.3,2x,2f10.4,2x,2f10.4)')  omega(iomega)*Ha_eV, uomega(iomega),jomega(iomega)
-     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   enddo
-   write(message,*)"  -------------------------------------------------------------"
-   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,0)
+        write(message,*)ch10,"  -------------------------------------------------------------"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        write(message,*)"           Average U and J as a function of frequency   "
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        write(message,*)"  -------------------------------------------------------------"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        write(message,*)"        omega           U(omega)            J(omega)"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        do iomega=1,nomega
+          if(nomega==1) then
+            omega(iomega)=omegamin
+          else
+            omega(iomega)=(omegamax-omegamin)/(nomega-1)*(iomega-1)+omegamin
+          endif
+          if(nomega==1)  omega(iomega)=omegamin
+          write(message,'(2x,f11.3,2x,2f10.4,2x,2f10.4)')  omega(iomega)*Ha_eV, uomega(iomega),jomega(iomega)
+          call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+        enddo
+        write(message,*)"  -------------------------------------------------------------"
+        call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
 !  END OF LOOP ON ATOMS !!
-   ABI_DEALLOCATE(omega)
-   ABI_DEALLOCATE(uomega)
-   ABI_DEALLOCATE(jomega)
-   ABI_DEALLOCATE(V_m)
-   ABI_DEALLOCATE(rhot_q_m_npwe)
-   ABI_DEALLOCATE(trrho)
-   ABI_DEALLOCATE(sumrhorhoeps)
-   ABI_DEALLOCATE(scr)
-   ABI_DEALLOCATE(U_m)
- enddo
 
+        ABI_DEALLOCATE(uomega)
+        ABI_DEALLOCATE(jomega)
+        ABI_DEALLOCATE(V_m)
+        ABI_DEALLOCATE(rhot_q_m1m3_npwe)
+        ABI_DEALLOCATE(rhot_q_m2m4_npwe)
+        ABI_DEALLOCATE(trrho)
+        ABI_DEALLOCATE(sumrhorhoeps)
+        ABI_DEALLOCATE(scr)
+        ABI_DEALLOCATE(U_m)
+        ABI_DEALLOCATE(rhot_q_m1m3)
+        ABI_DEALLOCATE(rhot_q_m2m4)
 !    Print dielectric matrix
 !   do iq_ibz=1,nqibz
 !       call read_screening(em1_ncname,fname,npwe,1,nomega,scr,IO_MODE_FORTRAN,Wfd%comm,iqiA=iq_ibz)
 !   enddo
-
- ABI_DEALLOCATE(rhot_q_m)
+      enddo!spin2
+      enddo!spin1
+      if (wanbz%nsppol/=1)then
+        do iomega=1,nomega
+          if(nomega==1) then
+            omega(iomega)=omegamin
+          else
+            omega(iomega)=(omegamax-omegamin)/(nomega-1)*(iomega-1)+omegamin
+          endif
+          if(nomega==1)  omega(iomega)=omegamin
+        enddo
+        !call print_orbitals(1,1,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,2)
+        call print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
+      endif
+      if (wanbz%nsppol/=1)then
+        ABI_DEALLOCATE(uspin)
+        ABI_DEALLOCATE(jspin)
+      endif
+      ABI_DEALLOCATE(omega)
+      enddo!il4
+      enddo!il3
+      enddo!il2
+      enddo!il1
+    enddo!pos4
+    enddo!pos3
+    enddo!pos2
+    enddo!pos1
+  enddo!iatom4
+  enddo!iatom3
+  enddo!iatom2
+  enddo!iatom1
  ABI_DEALLOCATE(k_coord)
  ABI_DEALLOCATE(q_coord)
+ ABI_DEALLOCATE(eiqr)
  ABI_DEALLOCATE(bijection)
  ABI_DEALLOCATE(normG)
 ! ABI_DEALLOCATE(coeffW_BZ)
@@ -1003,25 +1150,23 @@ contains
  end if
  END FUNCTION findkmq
 
- SUBROUTINE checkk(Interaction,m_inf,m_sup,tol,prtopt,ifreq,uu,jj,utype)
+ SUBROUTINE checkk(Interaction,m_inf,m_sup,prtopt,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
  implicit none
- integer, intent(in) :: m_inf,m_sup,ifreq
- complex(dpc), intent(in) :: Interaction(m_inf:m_sup,m_inf:m_sup,m_inf:m_sup,m_inf:m_sup)
- real(dp), intent(in)    :: tol
+ integer, intent(in) :: m_inf,m_sup,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
+ complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
  complex(dpc), intent(out)    :: uu,jj
  character(len=*), intent(in) :: utype
- integer     :: i,j
  integer :: prtopt
- logical        :: bug=.FALSE.
+
 
 !==Check correctness
- write(message,*)  "== Check == "
- call wrtout(std_out,message,'COLL')
- write(message,*) 'Tolerance :',tol
- call wrtout(std_out,message,'COLL')
- do i=m_inf,m_sup
-   do j=i+1,m_sup
+ ! write(message,*)  "== Check == "
+ ! call wrtout(std_out,message,'COLL')
+ ! write(message,*) 'Tolerance :',tol
+ ! call wrtout(std_out,message,'COLL')
+ ! do i=m_inf,m_sup
+ !   do j=i+1,m_sup
       !if (abs(abs(Interaction(i,i,i,i)-Interaction(j,j,j,j)))>tol) then
       !     BUG=.TRUE.
       !     write(message,*) "Problem in the interband calculation"&
@@ -1029,21 +1174,21 @@ contains
       !     call wrtout(std_out,message,'COLL')
       !end if
 
-     if (abs(Interaction(i,j,i,j)-Interaction(j,i,j,i))>tol) then
-       BUG=.TRUE.
-       write(message,*) "Warning in the symetry of U'",i,j,abs(Interaction(i,j,i,j)),&
-&       abs(Interaction(j,i,j,i)),abs(Interaction(i,j,i,j)-Interaction(j,i,j,i))
-       call wrtout(std_out,message,'COLL')
-     end if
+!      if (abs(Interaction(i,j,i,j)-Interaction(j,i,j,i))>tol) then
+!        BUG=.TRUE.
+!        write(message,*) "Warning in the symetry of U'",i,j,abs(Interaction(i,j,i,j)),&
+! &       abs(Interaction(j,i,j,i)),abs(Interaction(i,j,i,j)-Interaction(j,i,j,i))
+!        call wrtout(std_out,message,'COLL')
+!      end if
 
-     if (abs(Interaction(i,i,j,j)-Interaction(j,j,i,i))>tol) then
-       BUG=.TRUE.
-       write(message,*) "Warning in the symetry of J'",i,j,abs(Interaction(i,i,j,j)),&
-&       abs(Interaction(j,j,i,i)),abs(Interaction(j,j,i,i)-Interaction(i,i,j,j))
-       call wrtout(std_out,message,'COLL')
-     end if
-   end do
- end do
+!      if (abs(Interaction(i,i,j,j)-Interaction(j,j,i,i))>tol) then
+!        BUG=.TRUE.
+!        write(message,*) "Warning in the symetry of J'",i,j,abs(Interaction(i,i,j,j)),&
+! &       abs(Interaction(j,j,i,i)),abs(Interaction(j,j,i,i)-Interaction(i,i,j,j))
+!        call wrtout(std_out,message,'COLL')
+!      end if
+!    end do
+!  end do
 
 
 ! do i=m_inf,m_sup
@@ -1066,15 +1211,15 @@ contains
 !     call Affichage(Interaction,m_inf,m_sup,1)
 ! end if
 
- if(prtopt>0)  call Affichage(Interaction,m_inf,m_sup,1,ifreq,uu,jj,utype)
+ if(prtopt>0)  call Affichage(Interaction,m_inf,m_sup,1,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
  END SUBROUTINE checkk
 
- SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype)
+ SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital)
 
   implicit none
-  integer, intent(in) :: m_inf,m_sup,option,ifreq
-  complex(dpc), intent(in) :: Interaction(m_inf:m_sup,m_inf:m_sup,m_inf:m_sup,m_inf:m_sup)
+  integer, intent(in) :: m_inf,m_sup,option,ifreq,mbband1,mbband2,mbband3,mbband4,nspinor,one_orbital
+  complex(dpc), intent(in) :: Interaction(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor)
   complex(dpc),intent(out) :: UU,JJ
   character(len=*), intent(in) :: utype
   complex(dpc) :: UU1,UUmJJ,JJ1,JJ2
@@ -1090,29 +1235,31 @@ contains
   endif
   write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
 
-  if(lprint) then
-    write(message,*)" Diagonal ",utype
-    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-  endif
+  if (one_orbital==1) then
+    if(lprint) then
+      write(message,*)" Diagonal ",utype
+      call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+    endif
 
-  do m1=m_inf,m_sup
-    if (option.EQ.1) then
-      write(message,'(a,i3,14f7.3)') " ",m1,real(Interaction(m1,m1,m1,m1))
-      call wrtout(std_out,message,'COLL')
-      call wrtout(ab_out,message,'COLL')
-    end if
-  end do
+    do m1=m_inf,m_sup
+      if (option.EQ.1) then
+        write(message,'(a,i3,14f7.3)') " ",m1,real(Interaction(m1,m1,m1,m1))
+        call wrtout(std_out,message,'COLL')
+        call wrtout(ab_out,message,'COLL')
+      end if
+    end do
+  endif
 
   if(lprint) then
     write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
     write(message,*)" U'=U(m1,m2,m1,m2) for the ",utype
     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
-    write(message,'(a,14i7)') " -",(m1,m1=m_inf,m_sup)
+    write(message,'(a,14i7)') " -",(m2,m2=1,mbband2)
     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
     do m1=m_inf,m_sup
       if (option.EQ.1) then
-        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m2,m1,m2)),m2=m_inf,m_sup)
+        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m2,m1,m2)),m2=1,mbband2)
         call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
       end if
     end do
@@ -1123,87 +1270,99 @@ contains
  call wrtout(ab_out,message,'COLL')
 
  UU=czero
- do m1=m_inf,m_sup
-   do m2=m_inf,m_sup
+ do m1=1,mbband1
+   do m2=1,mbband2
      UU=UU+Interaction(m1,m2,m1,m2)
    enddo
  enddo
- UU=UU/float((m_sup-m_inf+1)**2)
+ UU=UU/float(mbband1*mbband2)
  if(ifreq/=0) write(message,'(3a,i3,a,2f10.4,a)')'  Hubbard ',utype,' for w =',ifreq,', U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=',UU,ch10
  if(ifreq==0) write(message,'(3a,2f10.4,a)') '  Hubbard ',utype, ' U=1/(2l+1)**2 \sum U(m1,m2,m1,m2)=',UU,ch10
  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
- UU1=czero
- do m1=m_inf,m_sup
-     UU1=UU1+Interaction(m1,m1,m1,m1)
- enddo
- UU1=UU1/((m_sup-m_inf+1))
- if(ifreq/=0) write(message,'(3a,i4,a,2f10.4,2a)')&
- & '  (Hubbard ',utype,' for w =',ifreq,', U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
- if(ifreq==0) write(message,'(3a,2f10.4,2a)')' (Hubbard ',utype,' U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
- call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
- if(lprint) then
+
+if (one_orbital==1)then
+  UU1=czero
+  do m1=1,mbband1
+    UU1=UU1+Interaction(m1,m1,m1,m1)
+  enddo
+  UU1=UU1/((mbband1))
+  if(ifreq/=0) write(message,'(3a,i4,a,2f10.4,2a)')&
+    & '  (Hubbard ',utype,' for w =',ifreq,', U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
+  if(ifreq==0) write(message,'(3a,2f10.4,2a)')' (Hubbard ',utype,' U=1/(2l+1) \sum U(m1,m1,m1,m1)=',UU1,')',ch10
+  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+endif
+
+ if(lprint .and. one_orbital==1) then
    write(message,*)' Hund coupling J=U(m1,m1,m2,m2) for the ', utype
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
-   write(message,'(a,14i7)') " -",(m1,m1=m_inf,m_sup)
+   write(message,'(a,14i7)') " -",(m2,m2=1,mbband1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   do m1=m_inf,m_sup
+   do m1=1,mbband1
      if (option.EQ.1) then
-        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m1,m2,m2)),m2=m_inf,m_sup)
+        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m1,m2,m2)),m2=1,mbband1)
         call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
      end if
    end do
  endif
-
- UUmJJ=czero
- do m1=m_inf,m_sup
-   do m2=m_inf,m_sup
-      UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
+ if (one_orbital==1)then
+   UUmJJ=czero
+   do m1=1,mbband1
+     do m2=1,mbband1
+       UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m2,m2,m1)
+     enddo
    enddo
- enddo
- UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
- JJ1=UU-UUmJJ
+   if (mbband1/=1) then
+     UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
+     JJ1=UU-UUmJJ
+   endif
 
-! JJ=czero
-! do m1=m_inf,m_sup
-!   do m2=m_inf,m_sup
-!     if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
-!   enddo
-! enddo
-! JJ=JJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
- write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
-& ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
- call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
- UUmJJ=czero
- do m1=m_inf,m_sup
-   do m2=m_inf,m_sup
-      UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
+   JJ=czero
+   do m1=1,mbband1
+     do m2=1,mbband1
+       if(m1/=m2) JJ=JJ+Interaction(m1,m2,m2,m1)
+     enddo
    enddo
- enddo
- UUmJJ=UUmJJ/float((m_sup-m_inf+1)*(m_sup-m_inf))
- JJ2=UU-UUmJJ
+   if (mbband1/=1) then
+     JJ=JJ/float((mbband1)*(mbband1-1))
+   endif
 
-
- if(abs(JJ1-JJ2)<0.0001) then
-   JJ=JJ1
- else
    write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
-&   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
-   call wrtout(std_out,message,'COLL')
-   stop
+     & ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=',JJ1,ch10
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+
+   if (mbband1/=1) then
+     UUmJJ=czero
+     do m1=1,mbband1
+       do m2=1,mbband1
+         UUmJJ=UUmJJ+Interaction(m1,m2,m1,m2)-Interaction(m1,m1,m2,m2)
+       enddo
+     enddo
+     UUmJJ=UUmJJ/float((mbband1)*(mbband1-1))
+     JJ2=UU-UUmJJ
+     if(abs(JJ1-JJ2)<0.0001) then
+       JJ=JJ1
+     else
+
+     write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
+       &   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
+     call wrtout(std_out,message,'COLL')
+!     stop
+   endif
  endif
+endif
 
- if(lprint) then
-   write(message,*)' Hund coupling J2=U(m1,m2,m2,m1) for the ', utype
+ if(lprint .and. one_orbital==1) then
+   write(message,*)ch10,' Hund coupling J2=U(m1,m2,m2,m1) for the ', utype
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
 
-   write(message,'(a,14i7)') " -",(m1,m1=m_inf,m_sup)
+   write(message,'(a,14i7)') " -",(m2,m2=1,mbband1)
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
-   do m1=m_inf,m_sup
+   do m1=1,mbband1
      if (option.EQ.1) then
-        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m2,m2,m1)),m2=m_inf,m_sup)
+        write(message,'(a,i3,14f7.3)') " ",m1,(real(Interaction(m1,m2,m2,m1)),m2=1,mbband1)
         call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
      end if
    end do
@@ -1241,6 +1400,175 @@ contains
  end do
  close(unt)
  END SUBROUTINE Sauvegarde_M_q_m
+
+ subroutine print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,opt)
+   implicit none
+   integer, intent(in) :: spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,opt
+   type(plowannier_type),intent(in) :: wanbz
+   character(len=5000) ::message
+   character(len=10):: print_spin
+
+   if (spin1==spin2 .and. spin1==1)then
+     print_spin=" Up-Up"
+   else if(spin1==1 .and. spin2==2)then
+     print_spin=" Up-Down"
+   else if(spin1==2 .and. spin2==1) then
+     print_spin=" Down-Up"
+   else
+     print_spin=" Down-Down"
+   endif
+   if (opt==1)then
+     write(message,*)ch10,"==Definition of the orbitals=="
+   else if (opt==0) then
+     write(message,*)ch10,"==Reminder of the orbitals=="
+   else if (opt==2) then
+     write(message,*)ch10,"==Reminder of the orbitals=="
+     write(print_spin,*)" summary"
+   else if (opt==3) then
+     write(message,*)ch10,"==Reminder of the orbitals=="
+     write(print_spin,*)" average"
+   endif
+   call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+   if (iatom1==iatom2.and. iatom3==iatom4 .and. iatom3==iatom2)then
+     if(pos1==pos2 .and. pos3==pos4 .and. pos1==pos3)then
+       if (il1==il2 .and. il3==il4 .and. il3==il1)then
+         write(message,*)" Only one orbital"
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)" Orbital with l=",wanbz%latom_wan(iatom1)%lcalc(il1),&
+           &"on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       else
+         write(message,*)"Different orbitals on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 1 with l=",wanbz%latom_wan(iatom1)%lcalc(il1)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 2 with l=",wanbz%latom_wan(iatom1)%lcalc(il2)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 3 with l=",wanbz%latom_wan(iatom1)%lcalc(il3)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 4 with l=",wanbz%latom_wan(iatom1)%lcalc(il4)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       endif
+     else
+       if(il1==il2 .and. il3==il4 .and. il1==il3)then
+         write(message,*)" Different position of the same orbital"
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)" Orbitals with l=",wanbz%latom_wan(iatom1)%lcalc(il1),&
+           &"on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 1 at postion ",wanbz%nposition(iatom1)%pos(pos1,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 2 at postion ",wanbz%nposition(iatom1)%pos(pos2,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 3 at postion ",wanbz%nposition(iatom1)%pos(pos3,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 4 at postion ",wanbz%nposition(iatom1)%pos(pos4,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       else
+         write(message,*)" Different orbitals on the same atom, with different positions"
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)" Orbitals on atom",wanbz%iatom_wan(iatom1),"with spin's orientations",print_spin
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 1 with l=",wanbz%latom_wan(iatom1)%lcalc(il1),"at position ",wanbz%nposition(iatom1)%pos(pos1,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 2 with l=",wanbz%latom_wan(iatom1)%lcalc(il2),"at position ",wanbz%nposition(iatom1)%pos(pos2,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 3 with l=",wanbz%latom_wan(iatom1)%lcalc(il3),"at position ",wanbz%nposition(iatom1)%pos(pos3,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+         write(message,*)"  orbital 4 with l=",wanbz%latom_wan(iatom1)%lcalc(il4),"at position ",wanbz%nposition(iatom1)%pos(pos4,:)
+         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       endif
+     endif
+   else
+     if(pos1==pos2 .and. pos3==pos4 .and. pos1==pos3)then
+       write(message,*)"Different atoms, with spin orientation",print_spin
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 1 with l=",wanbz%latom_wan(iatom1)%lcalc(il1),"on atom",wanbz%iatom_wan(iatom1)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 2 with l=",wanbz%latom_wan(iatom2)%lcalc(il2),"on atom",wanbz%iatom_wan(iatom2)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 3 with l=",wanbz%latom_wan(iatom3)%lcalc(il3),"on atom",wanbz%iatom_wan(iatom3)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 4 with l=",wanbz%latom_wan(iatom4)%lcalc(il4),"on atom",wanbz%iatom_wan(iatom4)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+     else
+       write(message,*)"Different atoms, in different postions with spin's orientations",print_spin
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 1 with l=",wanbz%latom_wan(iatom1)%lcalc(il1),&
+         &"on atom",wanbz%iatom_wan(iatom1),"at position ",wanbz%nposition(iatom1)%pos(pos1,:)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 2 with l=",wanbz%latom_wan(iatom2)%lcalc(il2),&
+         &"on atom",wanbz%iatom_wan(iatom2),"at position ",wanbz%nposition(iatom2)%pos(pos2,:)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 3 with l=",wanbz%latom_wan(iatom3)%lcalc(il3),&
+         &"on atom",wanbz%iatom_wan(iatom3),"at position ",wanbz%nposition(iatom3)%pos(pos3,:)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+       write(message,*)"  orbital 4 with l=",wanbz%latom_wan(iatom4)%lcalc(il4),&
+         &"on atom",wanbz%iatom_wan(iatom4),"at position ",wanbz%nposition(iatom4)%pos(pos4,:)
+       call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
+     endif
+   endif
+ end subroutine print_orbitals
+
+
+ subroutine print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
+   implicit none
+   integer,intent(in) :: nomega,one_orbital
+   complex(dpc),intent(in) :: uspin(4,nomega)
+   complex(dpc),intent(in) :: jspin(4,nomega)
+   real(dp),intent(in) :: omega(nomega)
+   integer :: iomega,ispin
+   complex(dpc) :: uomega(nomega),jomega(nomega)
+   character(len=500)::message
+
+   call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,3)
+   write(message,*)ch10," --------------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)" Sum up of the calcul for different spin polarization and frequencies"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)" --------------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+
+
+   write(message,*)ch10,"Sum up of U",ch10
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+
+   write(message,'(6a)')" -omega (eV)- "," Up-Up "," Up-Down "," Down-Up "," Down-Down "," Average "
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   do iomega=1,nomega
+     write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(uspin(ispin,iomega)),ispin=1,4),sum(real(uspin(:,iomega)))/4
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   end do
+
+   if (one_orbital==1)then
+     write(message,*)ch10,"Sum up of J",ch10
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+
+     write(message,'(6a)')" -omega (eV)- "," Up-Up "," Up-Down "," Down-Up "," Down-Down "," Average "
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do iomega=1,nomega
+       write(message,'(a,f7.2,5f9.3)')"    ",omega(iomega)*Ha_eV,(real(jspin(ispin,iomega)),ispin=1,4),sum(real(jspin(:,iomega)))/4
+       call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     end do
+   endif
+   uomega(:)=sum(uspin,dim=1)/4
+   jomega(:)=sum(jspin,dim=1)/4
+   !call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,3)
+   write(message,*)ch10,"  -------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"           Average U and J as a function of frequency   "
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"  -------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"        omega           U(omega)            J(omega)"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   do iomega=1,nomega
+     write(message,'(2x,f11.3,2x,2f10.4,2x,2f10.4)')  omega(iomega)*Ha_eV, uomega(iomega),jomega(iomega)
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   enddo
+   write(message,*)"  -------------------------------------------------------------"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+ end subroutine print_uj_spin
 
  end subroutine calc_ucrpa
 !!***

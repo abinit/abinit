@@ -138,8 +138,9 @@ contains
 !!  [vtauresid(nfft,nspden*dtset%usekden)]=array for vtau residue (see vtau below))
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vhartr(nfft)=array for holding Hartree potential
-!!  vnew_mean(nspden)=constrained mean value of the future trial potential (might be
-!!    spin-polarized
+!!  vnew_mean(nspden)=constrained mean value of the future trial potential
+!!                    (might be spin-polarized)
+!!  vres_mean(nspden)=mean value of the potential residual
 !!  vpsp(nfft)=array for holding local psp
 !!  vresid(nfft,nspden)=array for the residual of the potential
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree)
@@ -205,7 +206,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
      &  pawrhoij,&
      &  ph1d,&
      &  psps,rhor,rprimd,susmat,usepaw,&
-     &  vhartr,vnew_mean,vpsp,vresid,&
+     &  vhartr,vnew_mean,vpsp,vresid,vres_mean,&
      &  vtrial,vxc,xred,&
      &  nfftf,&
      &  pawtab,&
@@ -240,7 +241,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  real(dp),intent(in) :: fcart(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: susmat(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
- real(dp),intent(in) :: vhartr(nfft),vnew_mean(dtset%nspden)
+ real(dp),intent(in) :: vhartr(nfft),vnew_mean(dtset%nspden),vres_mean(dtset%nspden)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden)
  real(dp),intent(inout) :: dielinv(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(inout), target :: dtn_pc(3,dtset%natom)
@@ -381,6 +382,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 
  call timab(901,2,tsec)
 
+ call timab(902,1,tsec)
+
 !Select components of potential to be mixed
  ABI_ALLOCATE(vtrial0,(ispmix*nfftmix,dtset%nspden))
  ABI_ALLOCATE(vresid0,(ispmix*nfftmix,dtset%nspden))
@@ -443,7 +446,10 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    ABI_DEALLOCATE(vreswk)
  end if
 
- call timab(902,1,tsec)
+!Retrieve "input" Vtau from "output" one and potential residual
+ if (dtset%usekden==1) then
+   vtau0(:,1:dtset%nspden)=vtau0(:,1:dtset%nspden)-vtauresid0(:,1:dtset%nspden)
+ end if
 
 !Choice of preconditioner governed by iprcel, densfor_pred and iprcfc
  ABI_ALLOCATE(vrespc,(ispmix*nfftmix,dtset%nspden))
@@ -705,15 +711,22 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !When spin-polarized and fixed occupation numbers,
 !treat separately spin up and spin down.
 !Otherwise, use only global mean
- do ispden=1,dtset%nspden
-   if (dtset%nspden==2.and.dtset%occopt>=3.and. &
-&   abs(dtset%spinmagntarget+99.99_dp)<1.0d-10)then
-     vme=(vnew_mean(1)+vnew_mean(2)-vmean(1)-vmean(2))*half
-   else
-     vme=vnew_mean(ispden)-vmean(ispden)
-   end if
-   vtrial(:,ispden)=vtrial(:,ispden)+vme
- end do
+ if (mix%iscf/=AB7_MIXING_NONE) then
+   do ispden=1,dtset%nspden
+     if (dtset%nspden==2.and.dtset%occopt>=3.and. &
+&     abs(dtset%spinmagntarget+99.99_dp)<1.0d-10)then
+       vme=(vnew_mean(1)+vnew_mean(2)-vmean(1)-vmean(2))*half
+     else
+       vme=vnew_mean(ispden)-vmean(ispden)
+     end if
+     vtrial(:,ispden)=vtrial(:,ispden)+vme
+   end do
+ else
+!  If no mixing, just re-add the residual mean
+   do ispden=1,dtset%nspden
+     vtrial(:,ispden)=vtrial(:,ispden)+vres_mean(ispden)
+   end do
+ end if
 
  if(moved_atm_inside==1 .and. istep/=nstep )then
    if(abs(dtset%densfor_pred)==1.or.abs(dtset%densfor_pred)==4)then

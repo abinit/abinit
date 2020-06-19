@@ -102,8 +102,8 @@ nfreqsp5 0
 eph_task6 4
 eph_stern6 1
 eph_ngqpt_fine6  4 4 4 
-getdvdb_path6 "t44o_DS20_DVDB"
-getpot_path6 "t41o_DS1_POT"
+getdvdb_filepath6 "t44o_DS20_DVDB"
+getpot_filepath6 "t41o_DS1_POT"
 symsigma6 1
 eph_intmeth6 2
 nfreqsp6 0
@@ -124,7 +124,6 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 

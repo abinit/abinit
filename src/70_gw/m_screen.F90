@@ -568,7 +568,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
    select case (W%fgg_qbz_stat)
    case (FGG_QBZ_ISALLOCATED)
      call fgg_free_0D(W%Fgg_qbz)
-     ABI_DT_FREE(W%Fgg_qbz)
+     ABI_FREE(W%Fgg_qbz)
      nullify(W%Fgg_qbz)
      W%fgg_qbz_stat = FGG_QBZ_ISPOINTER
 
@@ -587,7 +587,7 @@ subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
    case (FGG_QBZ_ISPOINTER)
      ! Allocate memory
      nullify(W%Fgg_qbz)
-     ABI_DT_MALLOC(W%Fgg_qbz,)
+     ABI_MALLOC(W%Fgg_qbz,)
 
      call fgg_init(W%Fgg_qbz,W%npw,W%nomega,nqlwl)
      W%fgg_qbz_stat = FGG_QBZ_ISALLOCATED
@@ -776,7 +776,7 @@ subroutine screen_free(W)
  select case (W%fgg_qbz_stat)
  case (FGG_QBZ_ISALLOCATED)
    call fgg_free_0D(W%Fgg_qbz)
-   ABI_DT_FREE(W%Fgg_qbz)
+   ABI_FREE(W%Fgg_qbz)
    nullify(W%Fgg_qbz)
    W%fgg_qbz_stat=FGG_QBZ_ISPOINTER
 
@@ -791,7 +791,7 @@ subroutine screen_free(W)
  ! Free the Fgg matrices.
  if (associated(W%Fgg)) then
    call fgg_free(W%Fgg)
-   ABI_DT_FREE(W%Fgg)
+   ABI_FREE(W%Fgg)
  end if
  !
  ! Free the plasmon pole tables.
@@ -1050,7 +1050,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  nomega = W%nomega
  nI     = W%ni
  nJ     = W%nj
- ABI_DT_MALLOC(W%Fgg,(nqibz))
+ ABI_MALLOC(W%Fgg,(nqibz))
 
  if (from_file) then
 

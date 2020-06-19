@@ -20,7 +20,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "defs_wannier90.F90",
  "m_mlwfovlp.F90",
- "m_plowannier.F90",
  "m_mlwfovlp_qp.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

@@ -7,14 +7,12 @@ EXTRA_DIST += \
 	README_xlf.md \
 	RELNOTES \
 	autogen.sh \
-	wipeout.sh
+	wipeout.sh \
+	upgrade-build-config-file.sh
 
 # Additional files to clean
 CLEANFILES += \
 	config.fc_info.tmp
-
-# Files that should not be left in the source tree
-DISTCLEANFILES = fallbacks/Makefile
 
 # Files to install
 install-data-local: config.pc
@@ -56,7 +54,7 @@ test_wannier90:
 	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_wannier90.files >& testin_wannier90.stdout && cat testin_wannier90_tmp_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn
 
 tests_in:
-	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90
+	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90 
 
 # ---------------------------------------------------------------------------- #
 
@@ -89,7 +87,6 @@ multi_nprocs = 4
 # Special targets for parallel builds, in order to work around random
 # failures (e.g. LibXC, NetCDF) and make sure dependencies are met
 multi:
-	cd fallbacks && $(MAKE) @SET_MAKE@
 	$(MAKE) -j$(multi_nprocs) @SET_MAKE@
 
 multi_dual mj2:

@@ -457,7 +457,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Additional allocations for PAW.
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
    !
    ! For the extrapolar method we need the onsite terms of the PW in the FT mesh.
@@ -466,7 +466,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ABI_MALLOC(gw_gfft,(3,gwc_nfftot))
      q0=zero
      call get_gftt(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
-     ABI_DT_MALLOC(Pwij_fft,(Psps%ntypat))
+     ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,gwc_nfftot,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if ! usepaw==1
@@ -587,7 +587,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
      dimcprj_gw=nspinor*(ib2-ib1+1)
-     ABI_DT_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
+     ABI_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
@@ -681,7 +681,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! Evaluate oscillator matrix elements
      ! $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form.
      if (Psps%usepaw==1) then
-       ABI_DT_MALLOC(Pwij_qg,(Psps%ntypat))
+       ABI_MALLOC(Pwij_qg,(Psps%ntypat))
        q0 = qbz !;if (q_is_gamma) q0 = (/0.00001_dp,0.00001_dp,0.00001_dp/) ! GW_Q0_DEFAULT
        call pawpwij_init(Pwij_qg,npwc,q0,Gsph_c%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
      end if
@@ -1123,7 +1123,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end if
      if (Psps%usepaw==1) then
        call pawpwij_free(Pwij_qg)
-       ABI_DT_FREE(Pwij_qg)
+       ABI_FREE(Pwij_qg)
      end if
 
    end do ! ik_bz
@@ -1131,7 +1131,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ABI_FREE(wfr_bdgw)
    if (Wfd%usepaw==1) then
      call pawcprj_free(Cprj_kgw)
-     ABI_DT_FREE(Cprj_kgw)
+     ABI_FREE(Cprj_kgw)
      if (Dtset%pawcross==1) then
        ABI_FREE(ur_ae_bdgw)
        ABI_FREE(ur_ae_onsite_bdgw)
@@ -1258,10 +1258,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ABI_FREE(gw_gfft)
    end if
    call pawcprj_free(Cprj_ksum)
-   ABI_DT_FREE(Cprj_ksum)
+   ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
    if (Dtset%pawcross==1) then
      ABI_FREE(ur_ae_sum)

@@ -46,9 +46,11 @@ program abitk
  use m_fstrings,       only : sjoin, strcat, basename
  use m_specialmsg,     only : herald
  use m_symtk,          only : matr3inv
+ use m_bz_mesh,        only : kpath_new, kpath_t
  use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
+ use m_parser,         only : geo_t, geo_from_poscar_path
 
  implicit none
 
@@ -58,18 +60,21 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
- real(dp) :: spinmagntarget, tsmear, extrael, step, broad
+ integer :: ndivsm, abimem_level
+ real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
  character(len=500) :: command, arg, msg
  character(len=fnlen) :: path !, prefix
  type(hdr_type) :: hdr
- type(ebands_t) :: ebands !, ebands_kpath
+ type(ebands_t) :: ebands, ebands_kpath
  type(edos_t) :: edos
  type(crystal_t) :: cryst
- type(poscar_t) :: poscar
+ type(geo_t) :: geo
+ type(kpath_t) :: kpath
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
- !real(dp):: params(4)
+ real(dp) :: params(4)
+ real(dp),allocatable :: bounds(:,:)
  !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
@@ -85,13 +90,15 @@ program abitk
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
- !call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  nargs = command_argument_count()
  ABI_CHECK(get_arg("prtvol", prtvol, msg, default=0) == 0, msg)
+
 
  ! Command line options.
  do ii=1,command_argument_count()
@@ -110,15 +117,16 @@ program abitk
      write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
      write(std_out,"(2a)")ch10,"=== CRYSTAL ==="
      write(std_out,"(a)")"crystal_print FILE                   Print info on crystalline structure."
+     write(std_out,"(a)")"from_poscar POSCAR_FILE              Read POSCAR file, print abint variables."
      write(std_out,"(2a)")ch10,"=== ELECTRONS ==="
      write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
-     write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with bands."
-     write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with bands."
+     write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with electron bands."
+     write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with electron bands."
      write(std_out,"(a)")"ebands_dos FILE --intmeth, --step, --broad  Compute electron DOS."
-     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
-     !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
+     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
+     !write(std_out,"(a)")"ebands_skw_path FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
      write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
      write(std_out,"(a)")"kptrank_unit_tests                    Run unit tests for kptrank routines."
@@ -129,11 +137,16 @@ program abitk
  call get_command_argument(1, command)
 
  select case (command)
- case ("poscar")
+ case ("from_poscar")
    call get_command_argument(2, path)
-   poscar = poscar_from_filepath(path, comm)
-   call poscar%print_abivars(std_out)
-   call poscar%free()
+   geo = geo_from_poscar_path(path, comm)
+   call geo%print_abivars(std_out)
+   call geo%free()
+
+ !case ("to_poscar")
+ !  call get_command_argument(2, path)
+ !  call get_path_cryst(path, cryst, comm)
+ !  call prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
 
  !case ("wfk_downsample")
  ! e.g. go from a 8x8x8 WFK to a 4x4x4
@@ -150,6 +163,7 @@ program abitk
  case ("ibz")
    ! Print list of kpoints in the IBZ with the corresponding weights
    call get_path_cryst(path, cryst, comm)
+
    call parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
    ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
@@ -169,7 +183,11 @@ program abitk
        write(std_out, "((a, 3(f3.1, 1x)), a)")" [", shiftk(:, ii), "]      ......"
      end if
    end do
-   write(std_out, "(/, a, i0)")" nkibz: ", nkibz
+   write(std_out,"(a)")"#  List of kpoints in the IBZ with the corresponding weights:"
+   write(std_out,"(/,a,i0,/,a)")" nkpt ", nkibz, "kpt"
+   do ii=1,nkibz
+     write(std_out, "(3(es11.4,a),a,es11.4)") kibz(:, ii), " # ", wtk(ii)
+   end do
 
  !case ("testkgrid")
    !call get_path_cryst(path, cryst, comm)
@@ -220,27 +238,26 @@ program abitk
  case ("ebands_skw_kpath")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    ! Generate k-path
-   !ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
-   !nbounds = dtset%nkpath
-   !if (nbounds <= 0) then
-   !  MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
-   !  nbounds = 5
-   !  ABI_MALLOC(bounds, (3, 5))
-   !  bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
-   !else
-   !  call alloc_copy(dtset%kptbounds, bounds)
-   !end if
-   !kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
-   !call kpath_print(kpath, header="Interpolating energies on k-path", unit=std_out)
+   ABI_CHECK(get_arg("ndivsm", ndivsm, msg, default=20) == 0, msg)
+   !MSG_COMMENT("Using hard-coded k-path because nkpath not present in input file.")
+   !nbounds = 5
+   ABI_MALLOC(bounds, (3, 5))
+   bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
+   !ABI_CHECK(get_args_from_string("bounds", bounds, msg, default="[0,0,0,1/2,0,0,0,1/2]") == 0, msg)
+   kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+   ABI_FREE(bounds)
+   call kpath%print(header="Interpolating energies on k-path", unit=std_out)
    ! Interpolate band energies with star-functions
-   !params = 0; params(1) = 1; params(2) = 5
+   params = 0; params(1) = 1; params(2) = 5
+   !ABI_CHECK(get_arg_list("einterp", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
    !if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
-   !ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, params, [1, ebands%mband], comm)
-   !call kpath%free()
-   !call ebands_free(ebands_kpath)
-   !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=1) == 0, msg)
-   !call ebands_write(ebands_kpath, prtebands, basename(path))
-   !call ebands_kpath(ebands_kpath)
+   ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, params, [1, ebands%mband], comm)
+
+   call kpath%free()
+   !call wrtout(std_out, sjoin(" Writing interpolated bands to:",  path)
+   ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
+   call ebands_write(ebands_kpath, prtebands, path)
+   call ebands_free(ebands_kpath)
 
    !ebands_kmesh = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
    !     band_block, comm, out_prefix)

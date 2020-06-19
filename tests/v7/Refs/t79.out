@@ -329,6 +329,49 @@ P           mkmem           4
         pawprtdos4          0
         pawprtdos5          0
         pawprtvol           3
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         12
+     plowan_bandi4          0
+     plowan_bandi5          0
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+     plowan_bandf4          0
+     plowan_bandf5          0
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+   plowan_compute4         10
+   plowan_compute5         10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it1       0    0    0
+        plowan_it2       0    0    0
+        plowan_it3       0    0    0
+        plowan_it4       0    0    0
+        plowan_it5       0    0    0
+     plowan_iatom1       1
+     plowan_iatom2       1
+     plowan_iatom3       1
+     plowan_iatom4       1
+     plowan_iatom5       1
+       plowan_nbl1       1
+       plowan_nbl2       1
+       plowan_nbl3       1
+       plowan_nbl4       1
+       plowan_nbl5       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
+     plowan_lcalc3       2
+     plowan_lcalc4       2
+     plowan_lcalc5       2
+  plowan_projcalc1      -2
+  plowan_projcalc2      -2
+  plowan_projcalc3      -2
+  plowan_projcalc4      -2
+  plowan_projcalc5      -2
           ppmodel           2
            prtdos1          0
            prtdos2          3
@@ -378,11 +421,6 @@ P           mkmem           4
             typat      1  2  3  3  3
             ucrpa           1
      ucrpa_window     -1.8374662699E-01  1.8374662699E-01 Hartree
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
-          usedmft4          0
-          usedmft5          0
           usepawu           1
            useylm           1
               wtk        0.29630    0.44444    0.22222    0.03704
@@ -539,7 +577,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -713,7 +751,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -889,7 +927,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -1069,7 +1107,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1244,14 +1282,10 @@ P newkpt: treating     25 bands with npw=     124 for ikpt=   3 by node    0
 P newkpt: treating     25 bands with npw=     136 for ikpt=   4 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     117.926     117.783
 
--       ( number of procs used in dmft ) =  1
-
 
  ******************************************
- DFT+DMFT Method is used
+ DFT+U Method used: FLL
  ******************************************
-
- DMFT uses the Hubbard one solver
 
  =======================================================================
   == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
@@ -1410,7 +1444,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1426,6 +1460,29 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 
 
+
+ ======================================================================================
+
+ == Start computation of Projected Local Orbitals Wannier functions ==  -1
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
+
+   (The band structure is shifted by fermie =      15.6640 eV )
+
+ Wannier band structure for atom  1
+ 1      -1.646      -1.646       3.514       4.044       4.044
+ 2       0.862       2.652       2.817       3.626       4.760
+ 3      -1.943      -0.389       0.505       3.068       3.068
+ 4      -4.108      -4.108      -1.964      -1.964      -1.964
+
+ Print the psichi coefficients in data.plowann
 
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
@@ -1673,7 +1730,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -1727,7 +1784,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    0
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -1778,7 +1835,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -1824,7 +1881,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -1934,7 +1991,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1956,6 +2013,29 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   2    2.000000E+00    0.000000E+00
   3    4.000000E+00    0.000000E+00
   4    6.000000E+00    0.000000E+00
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
 
 
 --------------------------------------------------------------------------------
@@ -2287,7 +2367,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -2341,7 +2421,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    0
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -2392,7 +2472,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -2438,7 +2518,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -2542,7 +2622,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.13584   0.00000   0.00000   0.00000   0.00000   0.12428   0.00000
    0.00000   0.00000   0.00000   0.00000   0.41828   0.00000   0.00000   0.00000   0.00000   0.54401
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -2558,16 +2638,42 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
 
 
+ cRPA calculations using wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   12   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
+ Read l and bands from wanbz          12          25           5
 
- Read wannier in iBZ
-
- == cRPA Calculation of Interaction for atom             1
 
  ==Calculation of the bare interaction  V m==
+ 
+==Definition of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
 
   Diagonal bare interaction
    1  9.505
@@ -2598,7 +2704,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2510    0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1  9.505  0.255  0.255  0.241  0.041
    2  0.255  9.504  0.095  0.241  0.202
@@ -2644,7 +2751,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2305    0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  5.540  0.229  0.234  0.221  0.040
    2  0.229  5.555  0.089  0.222  0.186
@@ -2684,7 +2792,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2298   -0.0002
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  5.377  0.228  0.234  0.220  0.040
    2  0.228  5.401  0.088  0.221  0.186
@@ -2724,7 +2833,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2287   -0.0006
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  5.201  0.226  0.234  0.220  0.040
    2  0.226  5.196  0.088  0.221  0.185
@@ -2764,13 +2874,18 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.2231   -0.0012
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  4.334  0.221  0.227  0.216  0.040
    2  0.221  4.311  0.086  0.215  0.181
    3  0.227  0.086  4.108  0.088  0.172
    4  0.216  0.215  0.088  4.535  0.185
    5  0.040  0.181  0.172  0.185  4.158
+ 
+==Reminder of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
  
   -------------------------------------------------------------
             Average U and J as a function of frequency
@@ -3097,6 +3212,49 @@ P           mkmem           4
         pawprtdos4          0
         pawprtdos5          0
         pawprtvol           3
+     plowan_bandi1          0
+     plowan_bandi2          0
+     plowan_bandi3         12
+     plowan_bandi4          0
+     plowan_bandi5          0
+     plowan_bandf1          0
+     plowan_bandf2          0
+     plowan_bandf3         25
+     plowan_bandf4          0
+     plowan_bandf5          0
+   plowan_compute1          0
+   plowan_compute2          0
+   plowan_compute3          1
+   plowan_compute4         10
+   plowan_compute5         10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it1       0    0    0
+        plowan_it2       0    0    0
+        plowan_it3       0    0    0
+        plowan_it4       0    0    0
+        plowan_it5       0    0    0
+     plowan_iatom1       1
+     plowan_iatom2       1
+     plowan_iatom3       1
+     plowan_iatom4       1
+     plowan_iatom5       1
+       plowan_nbl1       1
+       plowan_nbl2       1
+       plowan_nbl3       1
+       plowan_nbl4       1
+       plowan_nbl5       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
+     plowan_lcalc3       2
+     plowan_lcalc4       2
+     plowan_lcalc5       2
+  plowan_projcalc1      -2
+  plowan_projcalc2      -2
+  plowan_projcalc3      -2
+  plowan_projcalc4      -2
+  plowan_projcalc5      -2
           ppmodel           2
            prtdos1          0
            prtdos2          3
@@ -3156,11 +3314,6 @@ P           mkmem           4
             typat      1  2  3  3  3
             ucrpa           1
      ucrpa_window     -1.8374662699E-01  1.8374662699E-01 Hartree
-          usedmft1          0
-          usedmft2          0
-          usedmft3          1
-          usedmft4          0
-          usedmft5          0
           usepawu           1
            useylm           1
               wtk        0.29630    0.44444    0.22222    0.03704
@@ -3217,9 +3370,9 @@ P           mkmem           4
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
-- [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.

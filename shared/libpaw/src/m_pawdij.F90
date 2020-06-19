@@ -55,11 +55,11 @@ MODULE m_pawdij
  public :: pawdijhat        ! Dij^hat (compensation charge contribution)
  public :: pawdijnd         ! Dij nuclear dipole
  public :: pawdijso         ! Dij spin-orbit
- public :: pawdiju          ! Dij LDA+U
- public :: pawdiju_euijkl   ! Dij LDA+U, using pawrhoij instead of occupancies
+ public :: pawdiju          ! Dij DFT+U
+ public :: pawdiju_euijkl   ! Dij DFT+U, using pawrhoij instead of occupancies
  public :: pawdijexxc       ! Dij local exact-exchange
  public :: pawdijfr         ! 1st-order frozen Dij
- public :: pawpupot         ! On-site LDA+U potential
+ public :: pawpupot         ! On-site DFT+U potential
  public :: pawxpot          ! On-site local exact-exchange potential
  public :: symdij           ! Symmetrize total Dij or one part of it
  public :: symdij_all       ! Symmetrize all contributions to Dij
@@ -86,7 +86,7 @@ CONTAINS
 !! Within standard PAW formalism, Dij can be decomposd as follows:
 !!      Dij = Dij_atomic + Dij_Hartree + Dij_XC + Dij^hat
 !! In case of additional approximations, several other terms can appear:
-!!      Dij_LDA+U, Dij_spin-orbit, Dij_local-exact-exchange, Dij_Fock...
+!!      Dij_DFT+U, Dij_spin-orbit, Dij_local-exact-exchange, Dij_Fock...
 !!
 !! INPUTS
 !!  cplex=1 if no phase is applied (GS), 2 if a exp(-iqr) phase is applied (Response Function at q<>0)
@@ -397,7 +397,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    dijso_available=(pawspnorb>0.and.ipert<=0.and.ipositron/=1)
    dijso_prereq=(paw_ij(iatom)%has_dijso==2.or.&
 &               (paw_an(iatom)%has_vhartree>0.and.paw_an(iatom)%has_vxc>0))
-!  DijU: not available for positron; only for LDA+U
+!  DijU: not available for positron; only for DFT+U
    dijU_available=(pawtab(itypat)%usepawu/=0.and.ipositron/=1)
    dijU_prereq=(paw_ij(iatom)%has_dijU==2.or.paw_ij(iatom)%has_pawu_occ>0.or. &
 &              (paw_ij(iatom)%has_dijU>0))
@@ -812,7 +812,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    end if
 
-
 !  ------------------------------------------------------------------------
 !  ----------- Add Dij spin-orbit to Dij
 !  ------------------------------------------------------------------------
@@ -837,7 +836,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    end if
 
 !  ------------------------------------------------------------------------
-!  ----------- Add Dij_{LDA+U} to Dij
+!  ----------- Add Dij_{DFT+U} to Dij
 !  ------------------------------------------------------------------------
 
    if ((dijU_need.or.dij_need).and.dijU_available) then
@@ -854,7 +853,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        else
          lpawu=pawtab(itypat)%lpawu
          LIBPAW_POINTER_ALLOCATE(vpawu,(cplex_dij,lpawu*2+1,lpawu*2+1,ndij))
-         if (usepawu>=10) vpawu=zero ! if dmft, do not apply U in LDA+U
+         if (usepawu>=10) vpawu=zero ! if dmft, do not apply U in DFT+U
          if (usepawu< 10) then
            call pawpupot(cplex_dij,ndij,paw_ij(iatom)%noccmmp,paw_ij(iatom)%nocctot,&
 &                        pawprtvol,pawtab(itypat),vpawu)
@@ -1601,8 +1600,10 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
                j0ln=jln*(jln-1)/2
                do iln=1,jln
                  kln=j0ln+iln
-                 ff(1:mesh_size)=vxctau1(1:mesh_size,ipts,ispden)*pawtab%phiphj(1:mesh_size,kln) &
-&                               -vxcttau1(1:mesh_size,ipts,ispden)*pawtab%tphitphj(1:mesh_size,kln)
+                 ff(2:mesh_size)=(vxctau1(2:mesh_size,ipts,ispden)*pawtab%phiphj(2:mesh_size,kln) &
+&                                -vxcttau1(2:mesh_size,ipts,ispden)*pawtab%tphitphj(2:mesh_size,kln)) &
+&                                /pawrad%rad(2:mesh_size)**2
+                 call pawrad_deducer0(ff,mesh_size,pawrad)
                  call simp_gen(vxctauij1(kln),ff,pawrad)
                  ff(1:mesh_size)=vxctau1(1:mesh_size,ipts,ispden) &
 &                               *pawtab%nablaphi(1:mesh_size,iln)*pawtab%nablaphi(1:mesh_size,jln) &
@@ -1635,13 +1636,15 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
                j0ln=jln*(jln-1)/2
                do iln=1,jln
                  kln=j0ln+iln
-                 do ir=1,mesh_size
+                 do ir=2,mesh_size
                    ir1=2*ir
                    ff(ir)=vxctau1(ir1-1,ipts,ispden)*pawtab%phiphj(ir,kln) &
 &                        -vxcttau1(ir1-1,ipts,ispden)*pawtab%tphitphj(ir,kln)
                    gg(ir)=vxctau1(ir1,ipts,ispden)*pawtab%phiphj(ir,kln) &
 &                        -vxcttau1(ir1,ipts,ispden)*pawtab%tphitphj(ir,kln)
                  end do
+                 call pawrad_deducer0(ff,mesh_size,pawrad)
+                 call pawrad_deducer0(gg,mesh_size,pawrad)
                  call simp_gen(vxctauij1(2*kln-1),ff,pawrad)
                  call simp_gen(vxctauij1(2*kln  ),gg,pawrad)
                  do ir=1,mesh_size
@@ -2731,7 +2734,7 @@ end subroutine pawdijso
 !! pawdiju
 !!
 !! FUNCTION
-!! Compute the LDA+U contribution to the PAW pseudopotential strength Dij,
+!! Compute the DFT+U contribution to the PAW pseudopotential strength Dij,
 !! (for one atom only):
 !!   Dijpawu^{\sigma}_{mi,ni,mj,nj}=
 !!     \sum_{m,m'} [vpawu^{\sigma}_{m,m'}*phiphjint_{ni,nj}^{m,m'}]=
@@ -2743,7 +2746,7 @@ end subroutine pawdijso
 !!  ndij= number of spin components
 !!  nsppol=number of independent spin WF components
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,ndij)=moments of LDA+U potential for current atom
+!!  vpawu(cplex_dij,lpawu*2+1,lpawu*2+1,ndij)=moments of DFT+U potential for current atom
 !!  --- Optional arguments ---
 !!    atvshift(natvshift,nsppol)=potential energy shift for lm channel & spin (current atom)
 !!    fatvshift=factor that multiplies atvshift
@@ -2857,7 +2860,7 @@ subroutine pawdiju(dijpawu,cplex_dij,qphase,ndij,nsppol,pawtab,vpawu,&
            in2=pawtab%klmntomn(4,klmn)
            icount=in1+(in2*(in2-1))/2
            if (pawtab%ij_proj<icount)  then
-             msg='LDA+U: Problem while computing dijexxc !'
+             msg='DFT+U: Problem while computing dijexxc !'
              MSG_BUG(msg)
            end if
 
@@ -2914,7 +2917,7 @@ end subroutine pawdiju
 !! pawdiju_euijkl
 !!
 !! FUNCTION
-!! Compute the LDA+U contribution to the PAW pseudopotential strength Dij (for one atom only).
+!! Compute the DFT+U contribution to the PAW pseudopotential strength Dij (for one atom only).
 !! Alternative to pawdiju using the following property:
 !!     D_ij^pawu^{\sigma}_{mi,ni,mj,nj}=\sum_{k,l} [rho^{\sigma}_kl*e^U_ijkl]
 !! The routine structure is very similar to the one of pawdijhartree.
@@ -4139,10 +4142,10 @@ end subroutine pawdijfr
 !! pawpupot
 !!
 !! FUNCTION
-!! Compute the PAW LDA+U on-site potential
+!! Compute the PAW DFT+U on-site potential
 !!
 !! INPUTS
-!!  cplex_dij=2 if LDA+U pot. is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
+!!  cplex_dij=2 if DFT+U pot. is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
 !!  ndij=number of spin components for Dij
 !!  pawprtvol=control print volume and debugging output for PAW
 !!  noccmmp(cplex_dij,2*lpawu+1,2*lpawu+1,ndij)=density matrix in the augm. region
@@ -4225,7 +4228,7 @@ end subroutine pawdijfr
  end if
 
 !=====================================================
-!Compute LDA+U Potential on the basis of projectors
+!Compute DFT+U Potential on the basis of projectors
 !cf PRB 52 5467 (1995) [[cite:Liechenstein1995]]
 !-----------------------------------------------------
 

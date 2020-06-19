@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 21h35 )
+.Starting date : Thu  7 May 2020.
+- ( at 23h47 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -206,17 +206,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.10000000E+00
+        ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -227,6 +218,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+   eph_ngqpt_fine1       0    0    0
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       4    4    4
+   eph_ngqpt_fine4       4    4    4
+   eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -238,28 +239,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          eph_task8          4
          eph_task9         15
          eph_task10       -15
-   eph_ngqpt_fine1       0    0    0
-   eph_ngqpt_fine2       4    4    4
-   eph_ngqpt_fine3       4    4    4
-   eph_ngqpt_fine4       4    4    4
-   eph_ngqpt_fine5       0    0    0
-   eph_ngqpt_fine6       4    4    4
-   eph_ngqpt_fine7       4    4    4
-   eph_ngqpt_fine8       4    4    4
-   eph_ngqpt_fine9       0    0    0
-   eph_ngqpt_fine10      0    0    0
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-        ph_nqpath1          3
-        ph_nqpath2          3
-        ph_nqpath3          3
-        ph_nqpath4          3
-        ph_nqpath5          5
-        ph_nqpath6          3
-        ph_nqpath7          3
-        ph_nqpath8          3
-        ph_nqpath9          5
-        ph_nqpath10         3
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
@@ -310,6 +299,16 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        ph_nqpath1          3
+        ph_nqpath2          3
+        ph_nqpath3          3
+        ph_nqpath4          3
+        ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
         prteliash           1
          prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
@@ -476,6 +475,8 @@ meta: {optdriver: 7, eph_task: 4, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -518,8 +519,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -533,8 +534,8 @@ All the independent perturbations are available
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -561,10 +562,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 3
  List of K-points for self-energy corrections:
@@ -718,7 +719,9 @@ meta: {optdriver: 7, eph_task: 5, }
          2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-- Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t160o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -840,7 +843,9 @@ meta: {optdriver: 7, eph_task: 4, }
          2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-- Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t160o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -912,10 +917,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 3
  List of K-points for self-energy corrections:
@@ -948,18 +953,18 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.735  -19.742   -0.006   -0.007   -0.002    0.982   -0.347    0.340    0.000    0.000
-   2  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000   19.542   19.718
-   3  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000    0.000    0.000
-   4  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000    0.000    0.000
-   5   8.342    8.293   -0.049   -0.050   -0.001    0.993    0.068   -0.118    8.536    8.317
-   6  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000   14.521   14.572
+   1 -19.735  -19.743   -0.007   -0.008   -0.002    0.982   -0.348    0.340    0.000    0.000
+   2  -0.193   -0.028    0.165    0.268   -0.095    0.616    0.268    0.000   19.542   19.715
+   3  -0.193   -0.028    0.165    0.268   -0.095    0.616    0.268    0.000    0.000    0.000
+   4  -0.193   -0.028    0.165    0.268   -0.095    0.616    0.268    0.000    0.000    0.000
+   5   8.342    8.295   -0.048   -0.048   -0.001    0.993    0.070   -0.118    8.536    8.323
+   6  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000   14.521   14.570
    7  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
    8  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
  
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
- QP gap:    8.317 (OTMS:    8.208)
- QP_gap - KS_gap:   -0.218 (OTMS:   -0.328)
+ QP gap:    8.323 (OTMS:    8.220)
+ QP_gap - KS_gap:   -0.213 (OTMS:   -0.316)
  
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
@@ -967,35 +972,35 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.234  -19.239   -0.006   -0.006   -0.002    0.981   -0.354    0.348    0.000    0.000
-   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.124   -0.250    0.000   16.537   16.261
-   3  -0.415   -1.980   -1.566    0.143   -0.262  -10.980    0.143   -0.000    2.282    0.997
-   4  -0.415   -1.980   -1.566    0.143   -0.262  -10.980    0.143   -0.000    0.000    0.000
-   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.005
-   6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
-   7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
-   8  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    0.000    0.000
+   1 -19.234  -19.240   -0.006   -0.006   -0.002    0.980   -0.354    0.348    0.000    0.000
+   2  -2.697   -2.965   -0.267   -0.241   -0.192    1.110   -0.241    0.000   16.537   16.275
+   3  -0.415   -3.276   -2.861    0.136   -0.252  -21.000    0.136   -0.000    2.282   -0.312
+   4  -0.415   -3.276   -2.861    0.136   -0.252  -21.000    0.136   -0.000    0.000    0.000
+   5  10.027   10.026   -0.000   -0.000   -0.001    0.991    0.096   -0.096   10.441   13.302
+   6  15.827   15.829    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.803
+   7  17.971   17.979    0.008    0.009   -0.001    0.994    0.110   -0.101    2.144    2.150
+   8  17.971   17.979    0.008    0.009   -0.001    0.994    0.110   -0.101    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   12.005 (OTMS:   10.297)
- QP_gap - KS_gap:    1.564 (OTMS:   -0.144)
+ QP gap:   13.302 (OTMS:   10.305)
+ QP_gap - KS_gap:    2.861 (OTMS:   -0.136)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -18.981  -18.997   -0.015   -0.016   -0.002    0.980   -0.357    0.341    0.000    0.000
-   2  -3.149   -3.270   -0.121   -0.145   -0.021    0.838   -0.145    0.000   15.833   15.726
-   3  -1.171   -1.192   -0.021   -0.036   -0.123    0.571   -0.036   -0.000    1.978    2.079
-   4  -1.171   -1.192   -0.021   -0.036   -0.123    0.571   -0.036   -0.000    0.000    0.000
-   5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.180
-   6  15.747   15.725   -0.022   -0.022   -0.001    0.992    0.130   -0.152    1.760    1.737
-   7  16.382   16.325   -0.057   -0.057   -0.001    0.993    0.125   -0.183    0.635    0.600
-   8  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    2.876    2.934
+   1 -18.981  -18.997   -0.016   -0.016   -0.002    0.980   -0.357    0.341    0.000    0.000
+   2  -3.149   -3.268   -0.119   -0.141   -0.020    0.843   -0.141    0.000   15.833   15.729
+   3  -1.171   -1.191   -0.020   -0.035   -0.118    0.580   -0.035   -0.000    1.978    2.076
+   4  -1.171   -1.191   -0.020   -0.035   -0.118    0.580   -0.035   -0.000    0.000    0.000
+   5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.179
+   6  15.747   15.726   -0.020   -0.021   -0.001    0.992    0.132   -0.152    1.760    1.739
+   7  16.382   16.327   -0.056   -0.056   -0.001    0.993    0.127   -0.183    0.635    0.600
+   8  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    2.876    2.933
    9  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
- QP gap:   15.180 (OTMS:   15.195)
- QP_gap - KS_gap:    0.022 (OTMS:    0.037)
+ QP gap:   15.179 (OTMS:   15.194)
+ QP_gap - KS_gap:    0.021 (OTMS:    0.036)
  
 ============================================================================================
 
@@ -1071,6 +1076,8 @@ meta: {optdriver: 7, eph_task: -4, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1143,10 +1150,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 3
  List of K-points for self-energy corrections:
@@ -1179,7 +1186,7 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.735    0.002    139.8    0.000
+   1 -19.735    0.002    147.9    0.000
    2  -0.193    0.000 999999.0   19.542
    3  -0.193    0.000 999999.0    0.000
    4  -0.193    0.000 999999.0    0.000
@@ -1196,14 +1203,14 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.234    1.771      0.2    0.000
-   2  -2.697    0.091      3.6   16.537
-   3  -0.415    0.156      2.1    2.282
-   4  -0.415    0.156      2.1    0.000
-   5  10.027    0.039      8.4   10.441
-   6  15.827    0.146      2.3    5.800
-   7  17.971    0.620      0.5    2.144
-   8  17.971    0.620      0.5    0.000
+   1 -19.234    1.708      0.2    0.000
+   2  -2.697    0.088      3.7   16.537
+   3  -0.415    0.151      2.2    2.282
+   4  -0.415    0.151      2.2    0.000
+   5  10.027    0.032     10.4   10.441
+   6  15.827    0.130      2.5    5.800
+   7  17.971    0.606      0.5    2.144
+   8  17.971    0.606      0.5    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
  
@@ -1211,14 +1218,14 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1 -18.981    0.000 999999.0    0.000
-   2  -3.149    0.000   4166.1   15.833
-   3  -1.171    0.120      2.7    1.978
-   4  -1.171    0.120      2.7    0.000
-   5  13.987    0.005     60.6   15.158
-   6  15.747    0.202      1.6    1.760
-   7  16.382    0.104      3.2    0.635
-   8  19.258    0.194      1.7    2.876
-   9  19.258    0.194      1.7    0.000
+   2  -3.149    0.000   4359.5   15.833
+   3  -1.171    0.117      2.8    1.978
+   4  -1.171    0.117      2.8    0.000
+   5  13.987    0.005     67.8   15.158
+   6  15.747    0.190      1.7    1.760
+   7  16.382    0.102      3.2    0.635
+   8  19.258    0.183      1.8    2.876
+   9  19.258    0.183      1.8    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  
@@ -1299,6 +1306,8 @@ meta: {optdriver: 7, eph_task: -5, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1440,6 +1449,8 @@ meta: {optdriver: 7, eph_task: -4, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1512,10 +1523,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 2
  sigma_erange:  0.500  0.500  (eV)
@@ -1561,8 +1572,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.415    0.155      2.1    0.000
-   4  -0.415    0.155      2.1    0.000
+   3  -0.415    0.150      2.2    0.000
+   4  -0.415    0.150      2.2    0.000
 ============================================================================================
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -1641,6 +1652,8 @@ meta: {optdriver: 7, eph_task: -4, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1694,10 +1707,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 2
  sigma_erange:  0.500  0.500  (eV)
@@ -1743,8 +1756,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.415    0.155      2.1    0.000
-   4  -0.415    0.155      2.1    0.000
+   3  -0.415    0.147      2.2    0.000
+   4  -0.415    0.147      2.2    0.000
 ============================================================================================
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
@@ -1823,6 +1836,8 @@ meta: {optdriver: 7, eph_task: 4, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1875,10 +1890,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 3
  List of K-points for self-energy corrections:
@@ -1911,18 +1926,18 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.735  -19.742   -0.006   -0.006   -0.002    0.982   -0.347    0.340    0.000    0.000
-   2  -0.193   -0.024    0.169    0.279   -0.099    0.607    0.279    0.000   19.542   19.718
-   3  -0.193   -0.024    0.169    0.279   -0.099    0.607    0.279    0.000    0.000    0.000
-   4  -0.193   -0.024    0.169    0.279   -0.099    0.607    0.279    0.000    0.000    0.000
-   5   8.342    8.293   -0.049   -0.050   -0.001    0.993    0.068   -0.118    8.536    8.317
-   6  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000   14.521   14.572
+   1 -19.735  -19.743   -0.007   -0.008   -0.002    0.982   -0.348    0.340    0.000    0.000
+   2  -0.193   -0.029    0.164    0.266   -0.095    0.617    0.266    0.000   19.542   19.714
+   3  -0.193   -0.029    0.164    0.266   -0.095    0.617    0.266    0.000    0.000    0.000
+   4  -0.193   -0.029    0.164    0.266   -0.095    0.617    0.266    0.000    0.000    0.000
+   5   8.342    8.295   -0.047   -0.048   -0.001    0.993    0.070   -0.118    8.536    8.324
+   6  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000   14.521   14.570
    7  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
    8  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
  
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
- QP gap:    8.317 (OTMS:    8.207)
- QP_gap - KS_gap:   -0.219 (OTMS:   -0.329)
+ QP gap:    8.324 (OTMS:    8.221)
+ QP_gap - KS_gap:   -0.212 (OTMS:   -0.314)
  
 ============================================================================================
 No more than 1 temperatures are written to the main output file.
@@ -1930,35 +1945,35 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.234  -19.239   -0.005   -0.005   -0.002    0.981   -0.354    0.348    0.000    0.000
-   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.124   -0.250    0.000   16.537   16.261
-   3  -0.415   -2.026   -1.611    0.144   -0.262  -11.196    0.144   -0.000    2.282    0.952
-   4  -0.415   -2.026   -1.611    0.144   -0.262  -11.196    0.144   -0.000    0.000    0.000
-   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.051
-   6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
-   7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
-   8  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    0.000    0.000
+   1 -19.234  -19.240   -0.006   -0.006   -0.002    0.980   -0.355    0.348    0.000    0.000
+   2  -2.697   -2.964   -0.267   -0.240   -0.192    1.109   -0.240    0.000   16.537   16.276
+   3  -0.415   -4.443   -4.028    0.136   -0.248  -29.682    0.136   -0.000    2.282   -1.479
+   4  -0.415   -4.443   -4.028    0.136   -0.248  -29.682    0.136   -0.000    0.000    0.000
+   5  10.027   10.027   -0.000   -0.000   -0.001    0.991    0.096   -0.096   10.441   14.469
+   6  15.827   15.829    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.803
+   7  17.971   17.979    0.009    0.009   -0.001    0.994    0.110   -0.101    2.144    2.150
+   8  17.971   17.979    0.009    0.009   -0.001    0.994    0.110   -0.101    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   12.051 (OTMS:   10.296)
- QP_gap - KS_gap:    1.609 (OTMS:   -0.146)
+ QP gap:   14.469 (OTMS:   10.306)
+ QP_gap - KS_gap:    4.028 (OTMS:   -0.136)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -18.981  -18.997   -0.015   -0.015   -0.002    0.980   -0.357    0.342    0.000    0.000
-   2  -3.149   -3.270   -0.122   -0.145   -0.021    0.838   -0.145    0.000   15.833   15.726
-   3  -1.171   -1.191   -0.020   -0.036   -0.123    0.570   -0.036   -0.000    1.978    2.079
-   4  -1.171   -1.191   -0.020   -0.036   -0.123    0.570   -0.036   -0.000    0.000    0.000
+   1 -18.981  -18.997   -0.016   -0.016   -0.002    0.980   -0.358    0.342    0.000    0.000
+   2  -3.149   -3.267   -0.118   -0.140   -0.020    0.843   -0.140    0.000   15.833   15.730
+   3  -1.171   -1.191   -0.020   -0.035   -0.116    0.580   -0.035   -0.000    1.978    2.076
+   4  -1.171   -1.191   -0.020   -0.035   -0.116    0.580   -0.035   -0.000    0.000    0.000
    5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.179
-   6  15.747   15.725   -0.022   -0.022   -0.001    0.992    0.130   -0.152    1.760    1.737
-   7  16.382   16.325   -0.057   -0.057   -0.001    0.993    0.125   -0.183    0.635    0.600
-   8  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    2.876    2.934
+   6  15.747   15.727   -0.020   -0.020   -0.001    0.992    0.132   -0.152    1.760    1.739
+   7  16.382   16.327   -0.056   -0.056   -0.001    0.993    0.127   -0.183    0.635    0.600
+   8  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    2.876    2.933
    9  19.258   19.259    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
- QP gap:   15.179 (OTMS:   15.195)
- QP_gap - KS_gap:    0.021 (OTMS:    0.037)
+ QP gap:   15.179 (OTMS:   15.194)
+ QP_gap - KS_gap:    0.021 (OTMS:    0.036)
  
 ============================================================================================
 
@@ -2033,6 +2048,8 @@ meta: {optdriver: 7, eph_task: 15, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2153,6 +2170,8 @@ meta: {optdriver: 7, eph_task: -15, }
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2209,17 +2228,8 @@ All the independent perturbations are available
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.10000000E+00
+        ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -2230,6 +2240,16 @@ All the independent perturbations are available
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+   eph_ngqpt_fine1       0    0    0
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       4    4    4
+   eph_ngqpt_fine4       4    4    4
+   eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -2241,28 +2261,16 @@ All the independent perturbations are available
          eph_task8          4
          eph_task9         15
          eph_task10       -15
-   eph_ngqpt_fine1       0    0    0
-   eph_ngqpt_fine2       4    4    4
-   eph_ngqpt_fine3       4    4    4
-   eph_ngqpt_fine4       4    4    4
-   eph_ngqpt_fine5       0    0    0
-   eph_ngqpt_fine6       4    4    4
-   eph_ngqpt_fine7       4    4    4
-   eph_ngqpt_fine8       4    4    4
-   eph_ngqpt_fine9       0    0    0
-   eph_ngqpt_fine10      0    0    0
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-        ph_nqpath1          3
-        ph_nqpath2          3
-        ph_nqpath3          3
-        ph_nqpath4          3
-        ph_nqpath5          5
-        ph_nqpath6          3
-        ph_nqpath7          3
-        ph_nqpath8          3
-        ph_nqpath9          5
-        ph_nqpath10         3
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -2334,6 +2342,16 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        ph_nqpath1          3
+        ph_nqpath2          3
+        ph_nqpath3          3
+        ph_nqpath4          3
+        ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
         prteliash           1
          prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
@@ -2511,10 +2529,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         27.8  wall=         30.2
+- Proc.   0 individual time (sec): cpu=         23.6  wall=         25.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.8  wall=         30.2
++Overall time at end (sec) : cpu=         23.6  wall=         25.3

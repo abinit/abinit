@@ -73,6 +73,7 @@ _ WF disk file :     18.606 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
     occopt =       3   xclevel =       1
 -    mband =          50        mffmem =           1         mkmem =           2
        mpw =         762          nfft =       13824          nkpt =          32
+Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
@@ -639,6 +640,41 @@ P           mkmem           2
         pawecutdg      2.00000000E+01 Hartree
         pawoptosc           1
         pawprtvol           3
+     plowan_bandi1          0
+     plowan_bandi2         21
+     plowan_bandi3          0
+     plowan_bandi4          0
+     plowan_bandf1          0
+     plowan_bandf2         25
+     plowan_bandf3          0
+     plowan_bandf4          0
+   plowan_compute1          0
+   plowan_compute2          1
+   plowan_compute3         10
+   plowan_compute4         10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it1       0    0    0
+        plowan_it2       0    0    0
+        plowan_it3       0    0    0
+        plowan_it4       0    0    0
+     plowan_iatom1       1
+     plowan_iatom2       1
+     plowan_iatom3       1
+     plowan_iatom4       1
+       plowan_nbl1       1
+       plowan_nbl2       1
+       plowan_nbl3       1
+       plowan_nbl4       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
+     plowan_lcalc3       2
+     plowan_lcalc4       2
+  plowan_projcalc1      -2
+  plowan_projcalc2      -2
+  plowan_projcalc3      -2
+  plowan_projcalc4      -2
            prtvol          10
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
@@ -659,10 +695,6 @@ P           mkmem           2
       ucrpa_bands2         -1      -1
       ucrpa_bands3         21      25
       ucrpa_bands4         -1      -1
-          usedmft1          0
-          usedmft2          1
-          usedmft3          0
-          usedmft4          0
           usepawu1          1
           usepawu2         10
           usepawu3          1
@@ -832,7 +864,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -9279,7 +9311,7 @@ force_length_stats: {min:   2.44621789E-10, max:   6.39645191E-10, mean:   4.103
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -10256,14 +10288,6 @@ P newkpt: treating     50 bands with npw=     753 for ikpt=  30 by node   14
 P newkpt: treating     50 bands with npw=     753 for ikpt=  31 by node   15
 P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 
--       ( number of procs used in dmft ) = 24
-
-
- ******************************************
- DFT+DMFT Method is used
- ******************************************
-
- DMFT check: no solver and U=J=0
 
  =======================================================================
   == Calculation of diagonal bare Coulomb interaction on ATOMIC orbitals 
@@ -10973,7 +10997,7 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -10991,6 +11015,81 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 
 
+
+ ======================================================================================
+
+ == Start computation of Projected Local Orbitals Wannier functions ==  -1
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ 
+ Print the occupation levels (not normalized) for 1 atom, 1 orbitals
+  Atom =           1 orbital =           2
+ 
+ The occupation matrix before normalization is :
+ 
+ For one spin :
+        0.2088139238        0.0000000000       -0.0000000000        0.0000000000        0.0000000000
+        0.0000000000        0.2088142384        0.0000000000        0.0000000002       -0.0000000000
+       -0.0000000000        0.0000000000        0.0006148090        0.0000000000       -0.0000000000
+        0.0000000000        0.0000000002        0.0000000000        0.2088139084        0.0000000000
+        0.0000000000       -0.0000000000       -0.0000000000        0.0000000000        0.0006148091
+ 
+ Print the occupation levels (normalized) for 1 atom, 1 orbital
+ Atom =           1 orbital =           2
+ 
+ The occupation matrix after normalization is :
+ 
+ For one spin :
+        0.3328418734        0.0000000001       -0.0000000000        0.0000000001       -0.0000000000
+        0.0000000001        0.3328423769        0.0000000000        0.0000000003       -0.0000000000
+       -0.0000000000        0.0000000000        0.0007369504        0.0000000000       -0.0000000001
+        0.0000000001        0.0000000003        0.0000000000        0.3328418487        0.0000000000
+       -0.0000000000       -0.0000000000       -0.0000000001        0.0000000000        0.0007369505
+
+ == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
+
+   (The band structure is shifted by fermie =       7.7667 eV )
+
+ Wannier band structure for atom  1
+ 1      -0.176      -0.076      -0.076       2.310       2.310
+ 2      -0.038       0.989       1.009       2.297       3.960
+ 3      -0.038       0.989       1.009       2.297       3.960
+ 4      -0.176      -0.076      -0.076       2.310       2.310
+ 5      -0.038       0.989       1.009       2.297       3.960
+ 6       1.017       1.075       1.344       3.024       5.194
+ 7       1.017       1.075       1.344       3.024       5.194
+ 8      -0.038       0.989       1.009       2.297       3.960
+ 9      -0.038       0.989       1.009       2.297       3.960
+ 10       1.017       1.075       1.344       3.024       5.194
+ 11       1.017       1.075       1.344       3.024       5.194
+ 12      -0.038       0.989       1.009       2.297       3.960
+ 13      -0.176      -0.076      -0.076       2.310       2.310
+ 14      -0.038       0.989       1.009       2.297       3.960
+ 15      -0.038       0.989       1.009       2.297       3.960
+ 16      -0.176      -0.076      -0.076       2.310       2.310
+ 17      -0.038       0.989       1.009       2.297       3.960
+ 18       1.017       1.075       1.344       3.024       5.194
+ 19       1.017       1.075       1.344       3.024       5.194
+ 20      -0.038       0.989       1.009       2.297       3.960
+ 21       1.017       1.075       1.344       3.024       5.194
+ 22       1.484       1.520       1.520       5.121       5.121
+ 23       1.484       1.520       1.520       5.121       5.121
+ 24       1.017       1.075       1.344       3.024       5.194
+ 25       1.017       1.075       1.344       3.024       5.194
+ 26       1.484       1.520       1.520       5.121       5.121
+ 27       1.484       1.520       1.520       5.121       5.121
+ 28       1.017       1.075       1.344       3.024       5.194
+ 29      -0.038       0.989       1.009       2.297       3.960
+ 30       1.017       1.075       1.344       3.024       5.194
+ 31       1.017       1.075       1.344       3.024       5.194
+ 32      -0.038       0.989       1.009       2.297       3.960
+
+ Print the psichi coefficients in data.plowann
 
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
@@ -11725,7 +11824,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -11776,7 +11875,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -11827,7 +11926,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -11874,7 +11973,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -11985,7 +12084,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -12005,11 +12104,33 @@ meta: {optdriver: 3, gwcalctyp: 2, }
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
 
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
+
 
 --------------------------------------------------------------------------------
   q-point number  1        q = ( 0.000000, 0.000000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000
@@ -12039,7 +12160,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  2        q = (-0.250000,-0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.200  -4.785  -3.833  -4.786  -3.838  -4.785  -3.833  -1.053  -1.117
@@ -12054,7 +12174,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  3        q = ( 0.250000, 0.000000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474   0.099  -0.177  -2.348  -2.348  -2.347  -2.348  -0.049   0.317
@@ -12069,7 +12188,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  4        q = ( 0.500000,-0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -24.000  -3.065  -5.033  -7.963  -6.512  -7.964  -6.513  -0.944  -0.917
@@ -12084,7 +12202,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  5        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -17.628   0.486  -0.315  -5.963  -5.963  -5.963  -5.964   0.012   0.467
@@ -12099,7 +12216,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  6        q = ( 0.250000,-0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.201  -3.839  -4.786  -4.784  -3.835  -4.784  -3.835  -1.118  -1.052
@@ -12114,7 +12230,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  7        q = ( 0.000000,-0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -4.316  -4.315  -2.677  -2.039  -2.676  -2.037  -1.148  -1.148
@@ -12129,7 +12244,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  8        q = ( 0.000000, 0.250000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474  -2.348  -2.348   0.099  -0.177  -2.347  -2.348  -0.049  -0.049
@@ -12144,7 +12258,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number  9        q = (-0.250000, 0.500000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.999  -7.963  -6.508  -3.062  -5.033  -7.964  -6.517  -0.944  -1.418
@@ -12159,7 +12272,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 10        q = ( 0.250000, 0.250000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.039  -2.677  -2.039  -2.677  -4.315  -4.315  -0.281   0.197
@@ -12174,7 +12286,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 11        q = ( 0.500000, 0.500000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.898  -5.426  -8.240  -5.421  -8.240 -10.067  -8.263  -1.594  -1.060
@@ -12189,7 +12300,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 12        q = ( 0.500000, 0.250000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -1.434  -2.874  -5.257  -6.483  -7.336  -7.338  -0.388   0.240
@@ -12204,7 +12314,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 13        q = ( 0.250000, 0.500000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.998  -6.511  -7.965  -3.055  -5.031  -7.967  -6.513  -1.417  -0.938
@@ -12219,7 +12328,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 14        q = (-0.250000, 0.250000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.677  -2.039  -2.038  -2.677  -4.315  -4.315   0.197  -0.281
@@ -12234,7 +12342,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 15        q = ( 0.000000, 0.500000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.157  -7.335  -7.336  -1.432  -2.874  -6.483  -5.261  -1.083  -1.082
@@ -12249,7 +12356,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 16        q = ( 0.000000, 0.500000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -17.628  -5.963  -5.963   0.486  -0.315  -5.963  -5.964   0.012   0.012
@@ -12264,7 +12370,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 17        q = (-0.250000, 0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.201  -4.784  -3.833  -3.838  -4.785  -4.785  -3.838  -1.118  -1.387
@@ -12279,7 +12384,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 18        q = ( 0.250000, 0.500000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -5.258  -6.483  -1.434  -2.874  -7.337  -7.337  -0.388   0.263
@@ -12294,7 +12398,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 19        q = ( 0.500000, 0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.998  -3.062  -5.032  -6.507  -7.964  -7.967  -6.512  -1.418  -1.084
@@ -12309,7 +12412,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 20        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -27.182  -4.268  -6.724  -4.268  -6.725  -9.340  -9.343  -0.607   0.190
@@ -12324,7 +12426,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 21        q = ( 0.250000, 0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -16.201  -3.837  -4.786  -3.832  -4.784  -4.786  -3.836  -1.386  -1.115
@@ -12339,7 +12440,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 22        q = ( 0.000000, 0.250000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -4.314  -4.315  -2.038  -2.677  -2.678  -2.040  -1.251  -1.251
@@ -12354,7 +12454,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 23        q = (-0.250000, 0.000000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.812  -2.676  -2.035  -4.317  -4.316  -2.678  -2.038  -1.149  -1.251
@@ -12369,7 +12468,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 24        q = ( 0.500000, 0.000000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.158  -1.436  -2.874  -7.334  -7.336  -6.484  -5.258  -1.084  -0.964
@@ -12384,7 +12482,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 25        q = ( 0.250000, 0.000000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -11.813  -2.040  -2.678  -4.313  -4.314  -2.677  -2.038  -1.251  -1.147
@@ -12399,7 +12496,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 26        q = ( 0.000000, 0.000000,-0.250000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.474  -2.348  -2.347  -2.348  -2.347  -0.177   0.099  -1.349  -1.349
@@ -12414,7 +12510,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 27        q = (-0.250000,-0.250000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.997  -7.968  -6.512  -7.963  -6.507  -3.059  -5.034  -3.642  -3.224
@@ -12429,7 +12524,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 28        q = ( 0.500000,-0.250000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.899  -5.420  -8.242 -10.061  -8.268  -5.429  -8.240  -2.815  -3.411
@@ -12444,7 +12538,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 29        q = ( 0.250000,-0.250000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -23.999  -6.508  -7.964  -7.964  -6.517  -3.062  -5.032  -3.221  -3.636
@@ -12459,7 +12552,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 30        q = ( 0.000000,-0.250000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.157  -7.338  -7.336  -6.482  -5.258  -1.435  -2.874  -3.602  -3.599
@@ -12474,7 +12566,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 31        q = (-0.250000, 0.500000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -28.901 -10.065  -8.269  -5.427  -8.238  -5.427  -8.238  -2.828  -3.012
@@ -12489,7 +12580,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 32        q = ( 0.500000, 0.500000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -31.663  -6.989 -10.330  -7.000 -10.328  -6.987 -10.333  -3.068  -2.963
@@ -12504,7 +12594,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 33        q = ( 0.000000, 0.500000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -27.182  -9.339  -9.345  -4.270  -6.724  -4.266  -6.724  -2.864  -2.862
@@ -12519,7 +12608,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 34        q = (-0.250000, 0.000000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -21.157  -6.485  -5.259  -7.335  -7.333  -1.433  -2.874  -3.602  -3.272
@@ -12534,7 +12622,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 35        q = ( 0.500000, 0.000000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -27.180  -4.260  -6.726  -9.337  -9.346  -4.265  -6.726  -2.852  -3.288
@@ -12549,7 +12636,6 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --------------------------------------------------------------------------------
   q-point number 36        q = ( 0.000000, 0.000000, 0.500000) [r.l.u.]
 --------------------------------------------------------------------------------
- Reconstruct in full BZ
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1 -17.628  -5.963  -5.964  -5.962  -5.965   0.486  -0.315  -3.702  -3.701
@@ -12748,7 +12834,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -12799,7 +12885,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -12850,7 +12936,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -12897,7 +12983,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -13002,7 +13088,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -13018,19 +13104,42 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
 
 
- Reconstruct in full BZ
- Reconstruct in full BZ
- Reconstruct in full BZ
+ cRPA calculations using wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
  
 ==== Calculation of the screened interaction ====
 
  Read K and Q mesh
+ Read l and bands from wanbz          21          25           5
 
- Read wannier in iBZ
-
- == cRPA Calculation of Interaction for atom             1
 
  ==Calculation of the bare interaction  V m==
+ 
+==Definition of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
 
   Diagonal bare interaction
    1 16.041
@@ -13061,7 +13170,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
    bare interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.6667   -0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the bare interaction
  -      1      2      3      4      5
    1 16.041  0.482  0.555  0.478  0.249
    2  0.482 16.041  0.329  0.478  0.478
@@ -13107,13 +13217,18 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
    cRPA interaction value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m2,m2,m1))=    0.5997    0.0000
 
-  Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
+ 
+ Hund coupling J2=U(m1,m2,m2,m1) for the cRPA interaction
  -      1      2      3      4      5
    1  3.434  0.440  0.508  0.435  0.247
    2  0.440  3.434  0.315  0.436  0.442
    3  0.508  0.315  3.641  0.378  0.444
    4  0.435  0.436  0.378  3.434  0.446
    5  0.247  0.442  0.444  0.446  3.641
+ 
+==Reminder of the orbitals==
+  Only one orbital
+  Orbital with l=           2 on atom           1 with spin's orientations Up-Up
  
   -------------------------------------------------------------
             Average U and J as a function of frequency
@@ -14178,6 +14293,41 @@ P           mkmem           2
         pawecutdg      2.00000000E+01 Hartree
         pawoptosc           1
         pawprtvol           3
+     plowan_bandi1          0
+     plowan_bandi2         21
+     plowan_bandi3          0
+     plowan_bandi4          0
+     plowan_bandf1          0
+     plowan_bandf2         25
+     plowan_bandf3          0
+     plowan_bandf4          0
+   plowan_compute1          0
+   plowan_compute2          1
+   plowan_compute3         10
+   plowan_compute4         10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it1       0    0    0
+        plowan_it2       0    0    0
+        plowan_it3       0    0    0
+        plowan_it4       0    0    0
+     plowan_iatom1       1
+     plowan_iatom2       1
+     plowan_iatom3       1
+     plowan_iatom4       1
+       plowan_nbl1       1
+       plowan_nbl2       1
+       plowan_nbl3       1
+       plowan_nbl4       1
+     plowan_lcalc1       2
+     plowan_lcalc2       2
+     plowan_lcalc3       2
+     plowan_lcalc4       2
+  plowan_projcalc1      -2
+  plowan_projcalc2      -2
+  plowan_projcalc3      -2
+  plowan_projcalc4      -2
            prtvol          10
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup           1
@@ -14204,10 +14354,6 @@ P           mkmem           2
       ucrpa_bands2         -1      -1
       ucrpa_bands3         21      25
       ucrpa_bands4         -1      -1
-          usedmft1          0
-          usedmft2          1
-          usedmft3          0
-          usedmft4          0
           usepawu1          1
           usepawu2         10
           usepawu3          1
@@ -14264,25 +14410,17 @@ P           mkmem           2
 - Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2014
 -
-- [2] Plane-wave based electronic structure calculations for correlated materials.
-- using dynamical mean-field theory and projected local orbitals,
-- B. Amadon, F. Lechermann, A. Georges, F. Jollet, T.O. Wehling, A.I. Lichenstein,
-- Phys. Rev. B 77, 205112 (2008).
-- Comment: to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
-- i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008
--
-- [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [2] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
-- [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [5] Libxc: A library of exchange and correlation functionals for density functional theory.
+- [4] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
 - Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.

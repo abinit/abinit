@@ -26,7 +26,6 @@
 module m_ingeo
 
  use defs_basis
- use m_intagm_img
  use m_abicore
  use m_errors
  use m_atomdata
@@ -37,7 +36,7 @@ module m_ingeo
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
- use m_parser,     only : intagm
+ use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
 
  implicit none
 
@@ -86,9 +85,9 @@ contains
 !! nzchempot=defines the use of a spatially-varying chemical potential along z
 !! pawspnorb=1 when spin-orbit is activated within PAW
 !! ratsph(1:ntypat)=radius of the atomic sphere
-!! string*(*)=character string containing all the input data, used
-!!  only if choice=1 or 3. Initialized previously in instrng.
-!! supercell_latt(3,3)=supercell lattice
+!! string*(*)=character string containing all the input data. Initialized previously in instrng.
+!! supercell_latt(3)=supercell lattice
+!! comm: MPI communicator
 !!
 !! OUTPUT
 !! acell(3)=length of primitive vectors
@@ -141,24 +140,24 @@ contains
 !! SOURCE
 
 subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
-& genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-& msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
-& nucdipmom,nzchempot,pawspnorb,&
-& ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
-& symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
+  genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
+  msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+  nucdipmom,nzchempot,pawspnorb,&
+  ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
+  symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
  integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol
- integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb
+ integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
  integer,intent(inout) :: nsym !vz_i
  real(dp),intent(out) :: slabzbeg,slabzend,tolsym
  character(len=*),intent(in) :: string
 !arrays
- integer,intent(in) :: supercell_lattice(3,3)
+ integer,intent(in) :: supercell_lattice(3)
  integer,intent(out) :: bravais(11),iatfix(3,natom) !vz_i
  integer,intent(inout) :: symafm(msym) !vz_i
  integer,intent(inout) :: symrel(3,3,msym) !vz_i
@@ -178,20 +177,22 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
  integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,mu,multiplicity,natom_uc,natfix,natrd
+ integer :: ipsp,irreducible,isym,itypat,jsym,marr,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
- integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma
- integer :: txangst,txcart,txred,txrandom,use_inversion
- real(dp) :: amu_default,a2,aa,cc,cosang,ucvol,sumalch
+ integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
+ integer :: txcart,txred,txrandom,use_inversion
+ real(dp) :: amu_default,ucvol,sumalch
  character(len=500) :: msg
+ character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
+ type(geo_t) :: geo
 !arrays
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:),xangst_read(:,:)
+ real(dp),allocatable :: tnons_cart(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -200,123 +201,68 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
- ! 1) set up unit cell: acell, rprim and rprimd ---------------------
- acell(1:3)=one
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
- if(tacell==1) acell(1:3)=dprarr(1:3)
- call intagm_img(acell,iimage,jdtset,lenstr,nimage,3,string,"acell",tacell,'LEN')
+ ! Try from geo_string
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
+             'KEY', key_value=geo_string)
 
+ if (tread_geo /= 0) then
+   ! Set up unit cell from external file.
+   geo = geo_from_abivar_string(geo_string, comm)
+   acell = one
+   rprim = geo%rprimd
+   !call exclude(lenstr, string, jdtset, iimage, "acell, rprim, angdeg, scalecar")
+
+ else
+   ! Set up unit cell from acell, rprim, angdeg
+   call get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, rprim)
+ end if ! geo% or (acell, rprim, angdeg)
+
+ ! Rescale rprim using scalecart (and set scalecart to one)
  scalecart(1:3)=one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'scalecart',tscalecart,'LEN')
  if(tscalecart==1) scalecart(1:3)=dprarr(1:3)
  call intagm_img(scalecart,iimage,jdtset,lenstr,nimage,3,string,"scalecart",tscalecart,'LEN')
 
- ! Check that input length scales acell(3) are > 0
- do mu=1,3
-   if(acell(mu)<=zero) then
-     write(msg, '(a,i0,a, 1p,e14.6,a,a,a,a)' )&
-      'Length scale ',mu,' is input as acell=',acell(mu),ch10,&
-      'However, length scales must be > 0 ==> stop',ch10,&
-      'Action: correct acell in input file.'
-     MSG_ERROR(msg)
-   end if
- end do
-
- ! Initialize rprim, or read the angles
- tread=0
- call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',trprim,'DPR')
- if(trprim==1)rprim(:,:)=reshape( dprarr(1:9) , (/3,3/) )
- call intagm_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
-
- if(trprim==0)then
-   ! If none of the rprim were read ...
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'angdeg',tangdeg,'DPR')
-   angdeg(:)=dprarr(1:3)
-   call intagm_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
-
-   if(tangdeg==1)then
-     call wrtout(std_out,' ingeo: use angdeg to generate rprim.')
-
-     ! Check that input angles are positive
-     do mu=1,3
-       if(angdeg(mu)<=0.0_dp) then
-         write(msg, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
-          'Angle number ',mu,' is input as angdeg=',angdeg(mu),ch10,&
-          'However, angles must be > 0 ==> stop',ch10,&
-          'Action: correct angdeg in input file.'
-         MSG_ERROR(msg)
-       end if
-     end do
-
-     ! Check that the sum of angles is smaller than 360 degrees
-     if(angdeg(1)+angdeg(2)+angdeg(3)>=360.0_dp) then
-       write(msg, '(a,a,a,es14.4,a,a,a)' )&
-        'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
-        'while it is ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
-        'Action: correct angdeg in input file.'
-       MSG_ERROR(msg)
-     end if
-
-     if( abs(angdeg(1)-angdeg(2))<tol12 .and. &
-         abs(angdeg(2)-angdeg(3))<tol12 .and. &
-         abs(angdeg(1)-90._dp)+abs(angdeg(2)-90._dp)+abs(angdeg(3)-90._dp)>tol12 )then
-       ! Treat the case of equal angles (except all right angles):
-       ! generates trigonal symmetry wrt third axis
-       cosang=cos(pi*angdeg(1)/180.0_dp)
-       a2=2.0_dp/3.0_dp*(1.0_dp-cosang)
-       aa=sqrt(a2)
-       cc=sqrt(1.0_dp-a2)
-       rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
-       rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
-       rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-       ! write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
-     else
-       ! Treat all the other cases
-       rprim(:,:)=0.0_dp
-       rprim(1,1)=1.0_dp
-       rprim(1,2)=cos(pi*angdeg(3)/180.0_dp)
-       rprim(2,2)=sin(pi*angdeg(3)/180.0_dp)
-       rprim(1,3)=cos(pi*angdeg(2)/180.0_dp)
-       rprim(2,3)=(cos(pi*angdeg(1)/180.0_dp)-rprim(1,2)*rprim(1,3))/rprim(2,2)
-       rprim(3,3)=sqrt(1.0_dp-rprim(1,3)**2-rprim(2,3)**2)
-     end if
-
-   end if
- end if ! No problem if neither rprim nor angdeg are defined: use default rprim
-
- ! Rescale rprim using scalecart (and set scalecart to one)
  rprim(:,1)=scalecart(:)*rprim(:,1)
  rprim(:,2)=scalecart(:)*rprim(:,2)
  rprim(:,3)=scalecart(:)*rprim(:,3)
  scalecart(:)=one
 
  ! Compute the multiplicity of the supercell
- call mati3det(supercell_lattice,multiplicity)
+ multiplicity=supercell_lattice(1)*supercell_lattice(2)*supercell_lattice(3)
 
- ! Get the number of atom in the unit cell. Read natom from string
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
+ if (tread_geo == 0) then
+   ! Get the number of atom in the unit cell. Read natom from string
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
 
- ! Might initialize natom from XYZ file
- if(tread==0)then
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
+   ! Might initialize natom from XYZ file
+   if (tread==0) call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
+
+   if(tread==1) natom_uc=intarr(1)
+ else
+   natom_uc = geo%natom
  end if
- if(tread==1)natom_uc=intarr(1)
 
  ! Store the rprimd of the unit cell
  call mkrdim(acell,rprim,rprimd_read)
 
  ! Multiply the rprim to get the rprim of the supercell
  if(multiplicity > 1)then
-   rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
-   rprim(:,2) = rprim(:,2) * supercell_lattice(2,2)
-   rprim(:,3) = rprim(:,3) * supercell_lattice(3,3)
+   rprim(:,1) = rprim(:,1) * supercell_lattice(1)
+   rprim(:,2) = rprim(:,2) * supercell_lattice(2)
+   rprim(:,3) = rprim(:,3) * supercell_lattice(3)
  end if
 
  ! Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
- call mkrdim(acell,rprim,rprimd)
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ call mkrdim(acell, rprim, rprimd)
+ call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
- tolsym=tol8
+ tolsym = tol8
+ !if (tread_geo /= 0 .and. geo%filetype == "poscar") then
+ !  tolsym = tol4
+ !  MSG_COMMENT("Reading structure from POSCAR --> default value of tolsym is set to 1e-4")
+ !end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolsym',tread,'DPR')
  if(tread==1) tolsym=dprarr(1)
 
@@ -359,8 +305,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      else
        write(msg,'(3a,I0,a,I0,a,I0,2a)')&
        'The input variable supercell_latt is present',ch10,&
-       'thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
-       ' ',supercell_lattice(3,3),' is generated',ch10
+       'thus a supercell ',supercell_lattice(1),' ',supercell_lattice(2),&
+       ' ',supercell_lattice(3),' is generated',ch10
        MSG_WARNING(msg)
      end if
    else
@@ -376,13 +322,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_ALLOCATE(typat_read,(natrd))
  typat_read(1)=1
 
- call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'typat',tread,'INT')
+ if (tread_geo == 0) then
+   call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'typat',tread,'INT')
 
- ! If not read, try the XYZ data
- if(tread==0)then
-   call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'_typat',tread,'INT')
+   ! If not read, try the XYZ data
+   if(tread==0) call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'_typat',tread,'INT')
+   if(tread==1) typat_read(1:natrd)=intarr(1:natrd)
+
+ else
+   typat_read = geo%typat
  end if
- if(tread==1) typat_read(1:natrd)=intarr(1:natrd)
 
  do iatom=1,natrd
    if(typat_read(iatom)<1 .or. typat_read(iatom)>ntypat )then
@@ -395,7 +344,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end do
 
  ! 6) Read coordinates for each atom in the primitive set--------
- ABI_ALLOCATE(xangst_read,(3,natrd))
  ABI_ALLOCATE(xcart_read,(3,natrd))
  ABI_ALLOCATE(xred_read,(3,natrd))
 
@@ -416,59 +364,56 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
  !end if
 
- call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
- if(txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
- call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
+ if (tread_geo == 0) then
 
- call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xangst',txangst,'DPR')
- if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
- call intagm_img(xangst_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xangst",txangst,'DPR')
+   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
+   if (txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd) , [3, natrd])
+   call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
 
- call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xcart',txcart,'LEN')
- if(txcart==1 .and. txrandom==0)xcart_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
- call intagm_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
+   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xcart',txcart,'LEN')
+   if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
+   call intagm_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
 
- ! Might initialize xred from XYZ file
- if(txred+txcart+txangst+txrandom==0)then
-   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xred',txred,'DPR')
-   if(txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+   ! Might initialize xred from XYZ file
+   if (txred+txcart+txrandom==0) then
+     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xred',txred,'DPR')
+     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
 
-   call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xangst',txangst,'DPR')
-   if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+     call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xcart',txcart,'DPR')
+     if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
+   end if
+
+ else
+   txcart = 0; txrandom = 0; txred = 1
+   xred_read = geo%xred
  end if
 
- if (txred+txcart+txangst+txrandom==0) then
+ if (txred + txcart + txrandom == 0) then
    write(msg, '(3a)' )&
-    'Neither xred nor xangst nor xcart are present in input file. ',ch10,&
+    'Neither xred nor xcart are present in input file. ',ch10,&
     'Action: define one of these in your input file.'
    MSG_ERROR(msg)
  end if
 
  if (txred==1)   write(msg, '(a)' ) '  xred   is defined in input file'
- if (txangst==1) write(msg, '(a)' ) '  xangst is defined in input file'
- if (txcart ==1) write(msg, '(a)' ) '  xcart  is defined in input file'
+ if (txcart ==1) write(msg, '(a)' ) '  xcart  is defined in input file (possibly in Angstrom)'
  if (txrandom ==1) write(msg, '(a)' ) '  xred  as random positions in the unit cell'
  if (txrandom ==1) write(msg, '(a)' ) '  xcart  are defined from a random distribution '
  call wrtout(std_out, msg)
 
- if (txred+txcart+txangst+txrandom>1)then
+ if (txred + txcart + txrandom > 1)then
    write(msg, '(3a)' )&
     'Too many input channels for atomic positions are defined.',ch10,&
     'Action: choose to define only one of these.'
    MSG_ERROR(msg)
  end if
 
- if(txred==1 .or. txrandom /=0 )then
+ if (txred==1 .or. txrandom /=0 ) then
    call wrtout(std_out,' ingeo: takes atomic coordinates from input array xred ')
    call xred2xcart(natrd,rprimd_read,xcart_read,xred_read)
  else
-   if(txangst==1)then
-     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xangst')
-     xcart_read(:,:)=xangst_read(:,:)/Bohr_Ang
-   else
-     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xcart')
-   end if
-   txred=1
+   call wrtout(std_out,' ingeo: takes atomic coordinates from input array xcart')
+   txcart=1
  end if
 
  !At this stage, the cartesian coordinates are known, for the atoms whose coordinates where read.
@@ -484,18 +429,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Check that nsym is not negative
  if (nsym<0) then
-   write(msg, '(a,i0,a,a,a,a)' )&
+   write(msg, '(a,i0,4a)' )&
     'Input nsym must be positive or 0, but was ',nsym,ch10,&
-    'This is not allowed.',ch10,&
-    'Action: correct nsym in your input file.'
+    'This is not allowed.',ch10,'Action: correct nsym in your input file.'
    MSG_ERROR(msg)
  end if
  ! Check that nsym is not bigger than msym
  if (nsym>msym) then
    write(msg, '(2(a,i0),5a)')&
     'Input nsym = ',nsym,' exceeds msym = ',msym,'.',ch10,&
-    'This is not allowed.',ch10,&
-    'Action: correct nsym in your input file.'
+    'This is not allowed.',ch10,'Action: correct nsym in your input file.'
    MSG_ERROR(msg)
  end if
  if (multiplicity>1) then
@@ -592,7 +535,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
    ! Will use the geometry builder
    if(tnatrd/=1 .and. nobj/=0)then
-     write(msg, '(a,a,a,i0,a,a,a,a,a)' )&
+     write(msg, '(3a,i0,5a)' )&
       'The number of atoms to be read (natrd) must be initialized',ch10,&
       'in the input file, when nobj= ',nobj,'.',ch10,&
       'This is not the case.',ch10,&
@@ -630,9 +573,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    ! Compute xred/typat and spinat for the supercell
    if(multiplicity > 1)then
      iatom_supercell = 0
-     do i1 = 1, supercell_lattice(1,1)
-       do i2 = 1, supercell_lattice(2,2)
-         do i3 = 1, supercell_lattice(3,3)
+     do i1 = 1, supercell_lattice(1)
+       do i2 = 1, supercell_lattice(2)
+         do i3 = 1, supercell_lattice(3)
            do iatom = 1, natom_uc
              iatom_supercell = iatom_supercell + 1
              xcart(:,iatom_supercell) = xcart_read(:,iatom) + matmul(rprimd_read,(/i1-1,i2-1,i3-1/))
@@ -648,7 +591,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      ! No supercell
      call xcart2xred(natrd,rprimd,xcart_read,xred)
    end if
-
 
    spgroup=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spgroup',tread,'INT')
@@ -873,7 +815,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          use_inversion=0
        end if
 
-!      Get field in reduced coordinates (reduced e/d field)
+       ! Get field in reduced coordinates (reduced e/d field)
 
        field_xred(:)=zero
        if (dtset%berryopt ==4) then
@@ -905,7 +847,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
          chrgat=chrgat,nucdipmom=nucdipmom)
 
-!      If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
+       ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
        if(tolsym>1.00001e-8)then
          ABI_ALLOCATE(indsym,(4,natom,nsym))
          ABI_ALLOCATE(symrec,(3,3,nsym))
@@ -930,20 +872,21 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end if
    end if
 
-!  Finalize the computation of coordinates: produce xcart
+   ! Finalize the computation of coordinates: produce xcart
    call xred2xcart(natom,rprimd,xcart,xred)
 
  end if ! check of existence of an object
 
  ABI_DEALLOCATE(ptsymrel)
- ABI_DEALLOCATE(xangst_read)
  ABI_DEALLOCATE(xcart_read)
  ABI_DEALLOCATE(xcart)
  ABI_DEALLOCATE(xred_read)
  ABI_DEALLOCATE(typat_read)
 
-!Correct the default nsym value, if a symmetry group has not been generated.
- if(nsym==0)nsym=1
+ call geo%free()
+
+ ! Correct the default nsym value, if a symmetry group has not been generated.
+ if (nsym==0) nsym=1
 
 !--------------------------------------------------------------------------------------------------------
 
@@ -951,8 +894,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'icoulomb',tread,'INT')
  if(tread==1)icoulomb=intarr(1)
 
-!calculate the center of the atomic system such as to put the
-!atoms in the middle of the simulation box for the free BC case.
+ ! calculate the center of the atomic system such as to put the
+ ! atoms in the middle of the simulation box for the free BC case.
  if (icoulomb == 1) then
    rcm(:)=zero
    do iatom=1,natom
@@ -962,7 +905,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    do iatom=1,natom
      xred(:,iatom)=xred(:,iatom)-rcm(:)
    end do
-!  Also modify the tnons
+   ! Also modify the tnons
    do isym=1,nsym
      tnons(:,isym)=matmul(symrel(:,:,isym),rcm(:))-rcm(:)+tnons(:,isym)
    end do
@@ -970,19 +913,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    MSG_WARNING('icoulomb is 1 --> the average center of coordinates has been translated to (0.5,0.5,0.5)')
  end if
 
-!========================================================================================================
-!
-!At this stage, the cell parameters and atomic coordinates are known, as well as the symmetry operations
-!There has been a preliminary analysis of the holohedry (not definitive, though ...)
-!
-!========================================================================================================
+ !========================================================================================================
+ !
+ ! At this stage, the cell parameters and atomic coordinates are known, as well as the symmetry operations
+ ! There has been a preliminary analysis of the holohedry (not definitive, though ...)
+ !
+ !========================================================================================================
 
-!Here, determine correctly the Bravais lattice and other space group or shubnikov group characteristics
+ ! Here, determine correctly the Bravais lattice and other space group or shubnikov group characteristics
  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
-!If the tolerance on symmetries is bigger than 1.e-8, symmetrize the rprimd. Keep xred fixed.
+ ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the rprimd. Keep xred fixed.
  if(tolsym>1.00001e-8)then
-!  Check whether the symmetry operations are consistent with the lattice vectors
+   ! Check whether the symmetry operations are consistent with the lattice vectors
    iexit=1
 
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
@@ -1009,13 +952,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
 !--------------------------------------------------------------------------------------
 
-!Finally prune the set of symmetry in case non-symmorphic operations must be excluded
+ !Finally prune the set of symmetry in case non-symmorphic operations must be excluded
  if(symmorphi==0)then
    jsym=0
    do isym=1,nsym
      if(sum(tnons(:,isym)**2)<tol6)then
        jsym=jsym+1
-!      This symmetry operation is non-symmorphic, and can be kept
+       ! This symmetry operation is non-symmorphic, and can be kept
        if(isym/=jsym)then
          symrel(:,:,jsym)=symrel(:,:,isym)
          tnons(:,jsym)=tnons(:,isym)
@@ -1028,12 +971,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  !call symmultsg(nsym,symafm,symrel,tnons)
 
-!9) initialize the list of fixed atoms, and initial velocities -----------------
-!Note: these inputs do not influence the previous generation of
-!symmetry operations. This might be changed in the future
+ ! 9) initialize the list of fixed atoms, and initial velocities -----------------
+ ! Note: these inputs do not influence the previous generation of
+ ! symmetry operations. This might be changed in the future
 
-!idir=0 is for iatfix , idir=1 is for iatfixx,
-!idir=2 is for iatfixy, idir=3 is for iatfixz
+ ! idir=0 is for iatfix , idir=1 is for iatfixx,
+ ! idir=2 is for iatfixy, idir=3 is for iatfixz
  iatfix(:,:)=0
 
  do idir=0,3
@@ -1048,11 +991,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfixz',tread,'INT')
    end if
 
-!  Use natfix also for natfixx,natfixy,natfixz
+   ! Use natfix also for natfixx,natfixy,natfixz
    natfix=0
    if(tread==1) natfix=intarr(1)
 
-   ! Checks the validity of natfix
+   ! Check the validity of natfix
    if (natfix<0 .or. natfix>natom) then
      write(msg, '(a,a,a,i0,a,i4,a,a,a)' )&
        'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
@@ -1061,7 +1004,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      MSG_ERROR(msg)
    end if
 
-   ! Read iatfix
+   !Read iatfix
    if(idir==0)then
      call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfix',tread,'INT')
    else if(idir==1)then
@@ -1114,17 +1057,17 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  vel(:,:)=zero
  call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'vel',tread,'DPR')
- if(tread==1)vel(:,:)=reshape( dprarr(1:3*natom) , (/3,natom/) )
+ if(tread==1)vel(:,:)=reshape( dprarr(1:3*natom), [3, natom])
  call intagm_img(vel,iimage,jdtset,lenstr,nimage,3,natom,string,"vel",tread,'DPR')
 
  vel_cell(:,:)=zero
  call intagm(dprarr,intarr,jdtset,marr,3*3,string(1:lenstr),'vel_cell',tread,'DPR')
- if(tread==1)vel_cell(:,:)=reshape( dprarr(1:9) , (/3,3/) )
+ if(tread==1)vel_cell(:,:)=reshape( dprarr(1:9), [3,3])
 
-!mixalch
+ ! mixalch
  if(ntypalch>0)then
    call intagm(dprarr,intarr,jdtset,marr,npspalch*ntypalch,string(1:lenstr),'mixalch',tread,'DPR')
-   if(tread==1) mixalch(1:npspalch,1:ntypalch)= reshape(dprarr(1:npspalch*ntypalch),(/npspalch,ntypalch/))
+   if(tread==1) mixalch(1:npspalch,1:ntypalch)= reshape(dprarr(1:npspalch*ntypalch), [npspalch, ntypalch])
    do itypat=1,ntypalch
      sumalch=sum(mixalch(1:npspalch,itypat))
      if(abs(sumalch-one)>tol10)then
@@ -1190,8 +1133,7 @@ end subroutine ingeo
 !! natrd=number of atoms that have been read in the calling routine
 !! natom=number of atoms
 !! nobj=the number of objects
-!! string*(*)=character string containing all the input data, used
-!!  only if choice=1 or 3. Initialized previously in instrng.
+!! string*(*)=character string containing all the input data. Initialized previously in instrng.
 !! typat_read(natrd)=type integer for each atom in the primitive set
 !! xcart_read(3,natrd)=cartesian coordinates of atoms (bohr), in the primitive set
 !!

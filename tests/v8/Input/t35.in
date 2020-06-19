@@ -40,7 +40,7 @@ nsppol 2
 nspden 2 
 spinat 0.0 0.0 4.0
 
-# LDA+U
+# DFT+U
 usepawu    4
 dmatpuopt 2
 lpawu   2
@@ -73,7 +73,7 @@ dmatpawu
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description =
 #%%   Test to use usepawu=4
 #%%   Test done in comparison to [[cite:Chen2016a]].

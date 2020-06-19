@@ -32,7 +32,7 @@ else:
 
 from collections import OrderedDict
 from .jobrunner import TimeBomb
-from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor)
+from .tools import RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor
 from .xyaptu import xcopier
 from .devtools import NoErrorFileLock, makeunique
 from .memprof import AbimemFile
@@ -296,7 +296,6 @@ class FileToTest(object):
         ("diff_fname", "", str),
         ("use_yaml", "no", str),
         ("verbose_report", "no", str),
-        # ("pydiff_fname","",str),
     ]
 
     def __init__(self, dic):
@@ -310,8 +309,7 @@ class FileToTest(object):
                 raise ValueError("%s must be defined" % atr_name)
 
             value = f(value)
-            if hasattr(value, "strip"):
-                value = value.strip()
+            if hasattr(value, "strip"): value = value.strip()
             self.__dict__[atr_name] = value
 
         # Postprocess fld_options
@@ -322,6 +320,11 @@ class FileToTest(object):
 
         self.has_line_count_error = False
         self.do_html_diff = False
+
+        # Initialize variables that will be set by fldiff to be on the safe side.
+        self.fld_isok = False
+        self.fld_status = "failed"
+        self.fld_msg = "Initialized in __init__"
 
     @lazy__str__
     def __str__(self): pass
@@ -637,8 +640,7 @@ class AbinitTestInfoParser(object):
         try:
             start, stop = lines.index(HEADER), lines.index(FOOTER)
         except ValueError:
-            raise self.Error("{} does not contain any valid testcnf section!"
-                             .format(inp_fname))
+            raise self.Error("{} does not contain any valid testcnf section!".format(inp_fname))
 
         # Keep only test section lines and remove one space at the begining
         lines = [line[1:] if line.startswith(' ') else line
@@ -1937,7 +1939,7 @@ class BaseTest(object):
                 with open(self.stdin_fname, "wt") as fh:
                     fh.writelines(self.make_stdin())
                 stdin_fname = self.stdin_fname
-                bin_argstr = self.exec_args
+                bin_argstr = " " + self.exec_args
 
             else:
                 # New CLI mode: invoke exec with syntax `abinit run.abi`
@@ -1947,7 +1949,7 @@ class BaseTest(object):
                 self.prepare_new_cli_invokation()
 
                 path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
-                bin_argstr = path + self.exec_args
+                bin_argstr = path + " " + self.exec_args
                 #print("Using .abi mode with bin_argstr", bin_argstr)
 
             self.run_etime = runner.run(self.nprocs, self.bin_path,
@@ -2526,13 +2528,17 @@ class AbinitTest(BaseTest):
 
     def prepare_new_cli_invokation(self):
         """Perform operations required to execute test with new CLI."""
-        # Need to add pseudopotential info to input.
+        # Read full input in line.
         with open(self.inp_fname, "rt") as fh:
             line = fh.read()
 
+        # Add extra variables for pseudos and output file if not already present.
+        # Note that the code checks for the presence of `varname = "`
         extra = ["# Added by runtests.py"]
         app = extra.append
-        app('output_file = "%s"' % (self.id + ".out"))
+
+        if 'output_file = "' not in line:
+            app('output_file = "%s"' % (self.id + ".out"))
 
         # This is needed for ATOMPAW as the pseudo will be generated at runtime.
         #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
@@ -2545,7 +2551,9 @@ class AbinitTest(BaseTest):
         # This is to check whether the parser supports "long strings"
         #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
 
-        app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
+        # Need to add pseudopotential info to input.
+        if 'pseudos = ' not in line:
+            app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
 
         #pp_paths = self.get_pseudo_paths()
         #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
@@ -2558,9 +2566,13 @@ class AbinitTest(BaseTest):
         # FIXME: Use temp prefix and change iofn
         t_prefix = self.id  + "t"
 
-        app('indata_prefix "%s"' % i_prefix)
-        app('outdata_prefix "%s"' % o_prefix)
-        app('tmpdata_prefix "%s"' % t_prefix)
+        if 'indata_prefix = ' not in line:
+            app('indata_prefix = "%s"' % i_prefix)
+        if 'outdata_prefix = ' not in line:
+            app('outdata_prefix = "%s"' % o_prefix)
+        if 'tmpdata_prefix = ' not in line:
+            app('tmpdata_prefix = "%s"' % t_prefix)
+
         app("# end runtests.py section\n\n")
 
         path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
@@ -2626,16 +2638,25 @@ class AnaddbTest(BaseTest):
 
         extra = ["# Added by runtests.py"]
         app = extra.append
-        app('ddb_path = "%s"' % (self.get_ddb_path()))
-        app('output_file = "%s"' % (self.id + ".out"))
+
+        # Add extra variables for ddb_filepath, output_file if not already present.
+        # Note that the code checks for the presence of `varname = "`
+        if 'ddb_filepath = "' not in line:
+            app('ddb_filepath = "%s"' % (self.get_ddb_path()))
+
+        if 'output_file = "' not in line:
+            app('output_file = "%s"' % (self.id + ".out"))
 
         # EPH stuff
         gkk_path = self.get_gkk_path()
-        if gkk_path: app('gkk_path = "%s"' % gkk_path)
-        ddk_path = self.get_ddk_path()
-        if ddk_path: app('ddk_path = "%s"' % ddk_path)
+        if gkk_path and 'gkk_filepath = "' not in line:
+            app('gkk_filepath = "%s"' % gkk_path)
 
-        if gkk_path or ddk_path:
+        ddk_path = self.get_ddk_path()
+        if ddk_path and 'ddk_filepath = "' not in line:
+            app('ddk_filepath = "%s"' % ddk_path)
+
+        if (gkk_path or ddk_path) and 'eph_prefix = "' not in line:
             # EPH calculation
             app('eph_prefix = "%s"' % self.id)
 
@@ -2705,7 +2726,7 @@ class MultibinitTest(BaseTest):
 
 class TdepTest(BaseTest):
     """
-    Class for TDEP tests. Redefine the make_stdin method of BaseTest
+    Class for a-TDEP tests. Redefine the make_stdin method of BaseTest
     """
     def make_stdin(self):
         t_stdin = StringIO()
@@ -2816,7 +2837,7 @@ def exec2class(exec_name):
         "band2eps": Band2epsTest,
         "optic": OpticTest,
         "multibinit": MultibinitTest,
-        "tdep": TdepTest,
+        "atdep": TdepTest,
     }.get(exec_name, BaseTest)
 
 
@@ -3902,13 +3923,15 @@ class Results(object):
     def outref_files(self, status):
         """
         Return (out_files, ref_files)
-        where out and ref are list with the output files and the reference
+        where out_files and ref_files are lists with the output files and the reference
         files of the tests with the given status.
         """
         out_files, ref_files = [], []
-        for test in (self.tests_with_status(status)):
+        for test in self.tests_with_status(status):
             for f in test.files_to_test:
-                # if status != "all" and f.status != status: continue
+                #print(f"status: {status}, f.fld_status: {f.fld_status}")
+                #print(f)
+                #if status != "all" and f.fld_status != status: continue
 
                 out_files.append(os.path.join(test.workdir, f.name))
                 ref_fname = os.path.join(test.ref_dir, f.name)

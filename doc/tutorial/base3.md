@@ -227,22 +227,25 @@ and we fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 
 We will ask for 8 bands (4 valence and 4 conduction).
 
 A band structure can be computed by solving the Kohn-Sham equation for many different k-points,
-along different lines of the Brillouin zone. The potential that enters the Kohn-Sham must be
+along different segments of the Brillouin zone. The potential that enters the Kohn-Sham must be
 derived from a previous self-consistent calculation, and will not vary during the scan of different k-point lines.
 
-Suppose that you want to make a L-Gamma-X-(U-)Gamma circuit, with 10, 12 and 17 divisions for each line
-(each segment has a different length in reciprocal space, and these divisions give approximately
-the same distance between points along a line). The circuit will be obtained easily by the following choice of segment end points:
+Suppose that you want to make a L-Gamma-X-(U-)Gamma circuit, with at least 10 divisions for each segment.
+The circuit will be obtained easily by the following choice of segment end points:
 
     L     (1/2 0 0)
     Gamma (0 0 0)
     X     (0 1/2 1/2)
     Gamma (1 1 1)
 
+In order to enforce at least 10 divisions for each segment, one uses the input variable [[ndivsm]].
+ABINIT will generate roughly the same distance between points along each segment,
+despite each segment having a different length in reciprocal space.
+
 Note:
 
 1. the last Gamma point is in another cell of the reciprocal space than the first one,
-   this choice allows to construct the X-U-Gamma line easily;
+   this choice allows to construct the X-U-Gamma segment easily;
 
 2. the k-points are specified using reduced coordinates - in agreement with the input setting of the primitive 2-atom unit cell -
    in standard textbooks, you will often find the L, Gamma or X point given in coordinates of the conventional 8-atom cell:
@@ -256,8 +259,7 @@ in which you output the density ([[prtden]] 1), and, for the second dataset:
 * define [[getden]] -1, to take the output density of dataset 1;
 * set [[nband]] to 8;
 * set [[kptopt]] to -3, to define three segments in the brillouin Zone;
-* set [[ndivk]] to 10 12 17 (this means a circuit defined by 4 points, with 10 divisions of the first segment,
-  12 divisions of the second, 17 divisions of the third)
+* set [[ndivsm]] to 10 
 * set [[kptbounds]] to
 
         0.5  0.0  0.0 # L point
@@ -305,7 +307,7 @@ Even without a graphical tool we will have a quick look at the values at L, $\Ga
      kpt#  23, nband=  8, wtk=  1.00000, kpt=  0.0000  0.5000  0.5000 (reduced coord)
       -1.96393  -1.96393   3.00569   3.00569   6.51173   6.51173  15.95524  15.95524
 
-     kpt#  40, nband=  8, wtk=  1.00000, kpt=  1.0000  1.0000  1.0000 (reduced coord)
+     kpt#  39, nband=  8, wtk=  1.00000, kpt=  1.0000  1.0000  1.0000 (reduced coord)
       -6.17005   5.91814   5.91814   5.91814   8.44836   8.44836   8.44836   9.17755
 
 The last $\Gamma$ is exactly equivalent to the first $\Gamma$.

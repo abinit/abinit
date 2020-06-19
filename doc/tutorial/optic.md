@@ -4,13 +4,13 @@ authors: SS, XG, YG, NAP
 
 # Tutorial on optical properties
 
-## Frequency-dependent linear and second order nonlinear optical response.
+## Frequency-dependent linear and second-order nonlinear optical response.
 
 This tutorial aims at showing how to get the following physical properties, for semiconductors:
 
-  * Frequency dependent linear dielectric tensor
-  * Frequency dependent second order nonlinear susceptibility tensor
-  * Frequency dependent electro-optical susceptibility tensor
+  * Frequency-dependent linear dielectric tensor
+  * Frequency-dependent second-order nonlinear susceptibility tensor
+  * Frequency-dependent electro-optical susceptibility tensor
 
 in the simple *Random-Phase Approximation* or *Sum-over-states* approach.
 This tutorial will help you to understand and make use of *optic*.
@@ -44,7 +44,8 @@ Issue:
 
 We now examine the files.
 
-{% dialog tests/tutorespfn/Input/toptic_1.files tests/tutorespfn/Input/toptic_1.in %}
+{% dialog tests/tutorespfn/Input/toptic_1.files %} 
+{% dialog tests/tutorespfn/Input/toptic_1.in %}
 
 The computation concerns a crystal of GaAs, in the zinc-blende structure (2 atoms per primitive cell).
 The *toptic_1.files* is a typical Abinit *files file* (nothing special).
@@ -58,24 +59,29 @@ The second dataset is a non-self-consistent calculation, where the number of ban
 The third dataset uses the result of the second one to produce the
 wavefunctions for all the bands, for the full Brillouin Zone
 (this step could be skipped, but is included for later CPU time saving).
+If only the linear optical response is computed, then time-reversal symmetry can be used, and the computation
+might be restricted to the half Brillouin zone ([[kptopt]]=2).
 
-The fourth, fifth, and sixth datasets correspond to the computation of the ddk matrix elements,
-that is, matrix elements of the $\partial/\partial k$ operators. Note that the number of bands is the same as for datasets 2 and 3.
+The fourth, fifth, and sixth datasets correspond to the computation of the dH/dk matrix elements,
+that is, matrix elements of the $\partial H / \partial k$ operators where H is the Hamiltonian. 
+Note that the number of bands is the same as for datasets 2 and 3.
 Note also that these are non-self-consistent calculations, moreover, restricted to [[nstep]] = 1 and [[nline]] = 0.
-Indeed, only the matrix elements between explicitly computed states are required.
-Using a larger nstep would lead to a full computation of the derivative of the wavefunction with respect to
-the wavevector, while in Optic, only the matrix elements are needed.
+Indeed, only the matrix elements between explicitly computed (unperturbed) states are required.
+This also is why [[prtwf]]=3 is used.
+Using a larger [[nstep]] would lead to a full computation of the derivative of the wavefunction with respect to
+the wavevector, while in Optic, only the matrix elements between unperturbed states are needed.
 Thus a value of [[nstep]] larger than one would not only lead to erroneous matrix elements, but would be a waste of time.
 
-In order to have a sufficiently fast tutorial, the k point sampling was chosen to be extremely small.
+
+In order to have a sufficiently fast tutorial, the k point sampling was chosen to be extremely dense.
 Instead of a $4\times 4\times 4$
 FCC lattice (256 k points), it should be something like $28\times 28\times 28$ FCC (about 100000 k points).
 Also, the cut-off energy (2 Ha) is too small. As usual, convergence studies are the responsibility of the user.
 Moreover, we emphasize that in general the results of a sum-over-states approach, as is used in Optic,
-typically converges quite slowly with the k point mesh. Thus it is of extra importance to
+typically converges quite slowly with the k point mesh. Thus it is of uttermost importance to
 test convergence carefully.
 
-The run take a few minutes on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
+The run takes less than one minute on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
 *toptic_1o_DS4_1WF7*, *toptic_1o_DS5_1WF8* and *toptic_1o_DS6_1WF9* are the four
 files requested for the Optic run.
 The first file contains the wavefunctions for the filled and empty states in the entire
@@ -160,7 +166,8 @@ and the Real part with:
 
 This would be a good time to review [[help:optic#troubleshooting|section 5]] of the optic help file.
 
-For comparison, we have included in the tutorial, three files that have been
+For comparison, we have included in the tutorial directory of the ABINIT package (ask your administrator to have access 
+to the full ABINIT package if you do not have your own installation), three files that have been
 obtained with a much better k point sampling (still with a low cut-off energy
 and a number of bands that should be larger). You can visualize them as follows:
 
@@ -248,7 +255,8 @@ Copy the files *toptic_3.files* and *toptic_3.in* in *Work_optic*:
     cp ../toptic_3.files .
     cp ../toptic_3.in .
 
-{% dialog tests/tutorespfn/Input/toptic_3.files tests/tutorespfn/Input/toptic_3.in %}
+{% dialog tests/tutorespfn/Input/toptic_3.files %}
+{% dialog tests/tutorespfn/Input/toptic_3.in %}
 
 Issue:
 
@@ -267,7 +275,8 @@ Copy the files *toptic_4.files* and *toptic_4.in* in *Work_optic*:
     cp ../toptic_4.files .
     cp ../toptic_4.in .
 
-{% dialog tests/tutorespfn/Input/toptic_4.files tests/tutorespfn/Input/toptic_4.in %}
+{% dialog tests/tutorespfn/Input/toptic_4.files %}
+{% dialog tests/tutorespfn/Input/toptic_4.in %}
 
 Examine *toptic_4.in* file: only the linear optic spectra will be built.
 
@@ -343,7 +352,8 @@ Copy the files *toptic_5.files* and *toptic_5.in* in *Work_optic*:
     cp ../toptic_5.files .
     cp ../toptic_5.in .
 
- {% dialog tests/tutorespfn/Input/toptic_5.files tests/tutorespfn/Input/toptic_5.in %}
+{% dialog tests/tutorespfn/Input/toptic_5.files %}
+{% dialog tests/tutorespfn/Input/toptic_5.in %}
 
 Note that *toptic_5.files* has not changed (we want to use the previously calculated wave functions). However, examine *toptic_5.in*,  only the linear electro-optic susceptibility will be calculated.
 

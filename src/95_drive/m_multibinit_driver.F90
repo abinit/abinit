@@ -122,7 +122,7 @@ contains
     integer :: filetype,ii,lenstr
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
-    logical :: need_analyze_anh_pot
+    logical :: need_analyze_anh_pot,need_prt_files
 ! MS
 ! temporary variables for testing SCALE-UP with Multibinit
   !Variable to pass tu effpot_evaluate routine of multibinit
@@ -420,11 +420,13 @@ elec_eval = .FALSE.
                     &         fit_tolMSDFS=inp%fit_tolMSDFS,&
                     &         verbose=.true.,positive=.false.,&
                     &         anharmstr=inp%fit_anhaStrain==1,&
-                    &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
-                    &         fit_iatom=inp%fit_iatom)
+                    &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
+                    &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on)
              else 
                 inp%fit_nfixcoeff = -1
+                need_prt_files=.FALSE.
                 do ii=1,natom
+                  if(ii == natom)need_prt_files=.TRUE.
                   call fit_polynomial_coeff_fit(reference_effective_potential,&
                        &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
                        &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
@@ -434,8 +436,8 @@ elec_eval = .FALSE.
                        &         fit_tolMSDFS=inp%fit_tolMSDFS,&
                        &         verbose=.true.,positive=.false.,&
                        &         anharmstr=inp%fit_anhaStrain==1,&
-                       &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
-                       &         fit_iatom=ii)
+                       &         spcoupling=inp%fit_SPCoupling==1,prt_anh=inp%analyze_anh_pot,& 
+                       &         fit_iatom=ii,prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on)
                 enddo 
              endif 
           end if
@@ -521,7 +523,8 @@ elec_eval = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.  
 !  Call to test routine
      call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,&
-&                                   print_anharmonic=need_analyze_anh_pot,scup_dtset=inp%scup_dtset)
+&                                   print_anharmonic=need_analyze_anh_pot,scup_dtset=inp%scup_dtset,& 
+&                                         prt_ph=inp%test_prt_ph)
 
    end if ! End if(inp%test_effpot == 1)then 
    
@@ -577,7 +580,7 @@ elec_eval = .FALSE.
     !TEST_AM SECTION
 
 
-    ! Compute the monte carlo, molecular dynamics of compute specific energy
+    ! Run lattice dynamics (relaxation or molecular dynamics, most of abinits ionmovs are allowed)
     !****************************************************************************************
     if(inp%dynamics>=1) then
        call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)

@@ -38,8 +38,8 @@ eph_intmeth 1
 ###########
 # Use of the two-grids technique
 ###########
-getwfkfine_path1 "t50o_DS6_WFK"
-getwfkfine_path2 "t50o_DS6_WFK"
+getwfkfine_filepath1 "t50o_DS6_WFK"
+getwfkfine_filepath2 "t50o_DS6_WFK"
 eph_intmeth2 2
 
 bs_interp_kmult3 2 2 2
@@ -58,7 +58,6 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[789].0_.*
 #%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
 #%% [files]
 #%% files_to_test = 

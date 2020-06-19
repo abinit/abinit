@@ -53,7 +53,7 @@ module m_gstate
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init
  use m_fstrings,         only : strcat, sjoin
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
@@ -80,7 +80,6 @@ module m_gstate
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
- use m_dtfil,            only : dtfil_init_time
  use m_jellium,          only : jellium
  use m_iowf,             only : outwf
  use m_outqmc,           only : outqmc
@@ -938,7 +937,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !write(std_out,*) "paw_dmft%use_dmft",paw_dmft%use_dmft
 
 !PAW: 1- Initialize values for several arrays unchanged during iterations
-!2- Initialize data for LDA+U
+!2- Initialize data for DFT+U
 !3- Eventually open temporary storage file
  if(psps%usepaw==1) then
 !  1-
@@ -954,7 +953,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      hyb_range_fock=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range_fock)
      call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usekden,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
@@ -971,7 +970,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
-!  2-Initialize and compute data for LDA+U, EXX, or LDA+DMFT
+!  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
@@ -1400,8 +1399,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
     occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
-   if (dtset%getkerange_path /= ABI_NOFILE) then
-     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_path, dtset, comm)
+   if (dtset%getkerange_filepath /= ABI_NOFILE) then
+     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_filepath, dtset, comm)
    end if
 
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
@@ -1485,9 +1484,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &   nblok,xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
+   call ddb_hdr%open_write(ddbnm,dtfil%unddb,fullinit=0)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
    choice=2
    mpert = dtset%natom + 6 ; msize = 3*mpert

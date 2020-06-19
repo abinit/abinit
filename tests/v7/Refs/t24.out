@@ -138,6 +138,15 @@ P           mkmem           8
            occopt           3
         optdriver           3
         pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it4       0    0    0
+     plowan_iatom4       1
+       plowan_nbl4       1
+     plowan_lcalc4       2
+  plowan_projcalc4      -2
           ppmodel           3
           spgroup           1
            tolvrs      1.00000000E-10
@@ -313,7 +322,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -367,7 +376,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    0
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    2
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -418,7 +427,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -464,7 +473,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   shape_lambda ...................................   -1
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    1
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -574,7 +583,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    0.00000   0.00000   0.00000   0.11746   0.00000   0.00000   0.00000   0.00000   0.08793   0.00000
    0.00000   0.00000   0.00000   0.00000   0.17778   0.00000   0.00000   0.00000   0.00000   0.27708
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -593,6 +602,29 @@ meta: {optdriver: 3, gwcalctyp: 0, }
 
  calculating chi0 at frequencies [eV] :
   1    0.000000E+00    0.000000E+00
+
+ == Lower and upper values of the selected bands    0    0
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+Reading of the Wannier weights from data.plowann
+
+ == Lower and upper values of the selected bands   21   25
+ == Number of atoms                                      1
+ == Atoms selected                                1
+ == Nb of angular momenta used for each atom      1
+ == Value of the angular momenta for atom 1 is :  2
+ == Value of the projectors      for atom 1 is : -2
+ Reconstruction of the full Brillouin Zone using data.plowann in the IBZ
 
 
 --------------------------------------------------------------------------------
@@ -817,6 +849,15 @@ P           mkmem           8
            occopt           3
         optdriver           3
         pawecutdg      5.00000000E+00 Hartree
+   plowan_compute          10
+     plowan_natom           1
+        plowan_nt           1
+ plowan_realspace           1
+        plowan_it4       0    0    0
+     plowan_iatom4       1
+       plowan_nbl4       1
+     plowan_lcalc4       2
+  plowan_projcalc4      -2
           ppmodel           3
           spgroup           1
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -875,9 +916,9 @@ P           mkmem           8
 - Comment: Describes the cRPA implementation of the screened Coulomb interaction in PAW
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2014
 -
-- [2] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [2] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.

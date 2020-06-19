@@ -34,6 +34,8 @@ module m_effective_potential_file
  use m_anharmonics_terms
  use m_effective_potential
  use m_ifc
+ use m_ddb
+ use m_ddb_hdr
 #if defined HAVE_NETCDF
  use netcdf
 #endif
@@ -237,9 +239,7 @@ CONTAINS  !=====================================================================
 
 subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
-  use m_effective_potential
   use m_multibinit_dataset
-  use m_ddb, only : ddb_from_file
   use m_strain
   use m_crystal, only : crystal_t
   use m_dynmat, only : bigbx9
@@ -258,6 +258,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 !scalars
   integer :: ii,filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
+  type(ddb_hdr_type) :: ddb_hdr
 !array
   integer,allocatable :: atifc(:)
 
@@ -291,7 +292,8 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       ABI_ALLOCATE(atifc,(inp%natom))
       atifc = inp%atifc
 
-      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc,Crystal,comm)
+      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc, ddb_hdr, Crystal,comm)
+      call ddb_hdr%free()
 
 !     And finaly, we can check if the value of atifc is not change...
       if (.not.all(atifc.EQ.inp%atifc)) then
@@ -578,9 +580,6 @@ end subroutine effective_potential_file_getType
 
 subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt)
 
- use m_ddb
- use m_ddb_hdr
-
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
@@ -619,7 +618,7 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    natom = ddb_hdr%natom
    ntypat = ddb_hdr%ntypat
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Must read some value to initialze  array (nprt for ifc)
 !   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
@@ -1274,7 +1273,6 @@ end subroutine system_getDimFromXML
  subroutine system_xml2effpot(eff_pot,filename,comm,strcpling)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
 
@@ -2214,18 +2212,11 @@ end subroutine system_xml2effpot
 
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
- use defs_basis
- use m_errors
- use m_abicore
  use m_dynmat
- use m_xmpi
 
- use m_ddb
- use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t
  use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !Arguments ------------------------------------
 !scalars
@@ -2255,7 +2246,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
- real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
+ real(dp),allocatable :: instrain(:,:),zeff(:,:,:),qdrp_cart(:,:,:,:)
  real(dp),pointer :: atmfrc_red(:,:,:,:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(asrq0_t) :: asrq0
@@ -2277,7 +2268,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Initialisation of usefull values
   natom = ddb%natom
   nblok = ddb%nblok
-  mpert=natom+6
+  mpert=natom+MPERT_MAX
   msize=3*mpert*3*mpert;
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
@@ -2358,12 +2349,14 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! Dielectric Tensor and Effective Charges
 !**********************************************************************
   ABI_ALLOCATE(zeff,(3,3,natom))
+  ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
   ABI_ALLOCATE(effective_potential%harmonics_terms%zeff,(3,3,natom))
 
   rftyp   = 1 ! Blocks obtained by a non-stationary formulation.
   chneut  = 1 ! The ASR for effective charges is imposed
   selectz = 0 ! No selection of some parts of the effective charge tensor
   iblok = ddb%get_dielt_zeff(crystal,rftyp,chneut,selectz,dielt,zeff)
+  qdrp_cart = zero
   if (iblok /=0 .and. maxval(abs(dielt)) < 10000) then
     effective_potential%harmonics_terms%epsilon_inf = dielt
     effective_potential%harmonics_terms%zeff = zeff
@@ -2580,7 +2573,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(ab_out,message,'COLL')
 
   call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
-&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,&
+&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,qdrp_cart,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
 !***************************************************************************
@@ -2619,7 +2612,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,xmpi_comm_self)
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,qdrp_cart,ifc%ewald_option,xmpi_comm_self)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
@@ -2862,6 +2855,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 ! DEALLOCATION OF ARRAYS
   ABI_DEALLOCATE(blkval)
   ABI_DEALLOCATE(zeff)
+  ABI_DEALLOCATE(qdrp_cart)
   ABI_DEALLOCATE(instrain)
   ABI_DEALLOCATE(d2asr)
   call asrq0%free()
@@ -2898,7 +2892,6 @@ end subroutine system_ddb2effpot
 subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  use m_atomdata
- use m_effective_potential, only : effective_potential_type
  use m_polynomial_coeff
  use m_polynomial_term
  use m_crystal, only : symbols_crystal
@@ -2930,6 +2923,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  character (len=XML_RECL) :: strg,strg1
 #endif
  character(len=500) :: message
+ character(len=264) :: filename_tmp
  character(len=5),allocatable :: symbols(:)
  integer,parameter :: master=0
  logical :: iam_master
@@ -2943,9 +2937,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 ! *************************************************************************
 
-
+ filename_tmp = trim(filename)  
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')'-Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',filename_tmp
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -3439,7 +3433,7 @@ end subroutine effective_potential_file_readMDfile
 !!
 !! SOURCE
 
-subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose)
 
 !Arguments ------------------------------------
 !scalars
@@ -3448,15 +3442,16 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
+ integer,optional,allocatable,intent(inout) :: iatfix(:,:)
 !Local variables-------------------------------
 !scalar
  integer :: factE_hist,ia,ib,ii,jj,natom_hist,ncells,nstep_hist
  real(dp):: factor
- logical :: revelant_factor,need_map,need_verbose
+ logical :: revelant_factor,need_map,need_verbose,need_fixmap
 !arrays
  real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
  integer :: ncell(3),scale_cell(3)
- integer,allocatable  :: shift(:,:)
+ integer,allocatable  :: shift(:,:),iatfix_tmp(:,:)
  integer,allocatable  :: list_map(:) !blkval(:),
  real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
  real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
@@ -3466,7 +3461,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
 !Set optional values
  need_verbose = .false.
+ need_fixmap = .FALSE.
  if (present(verbose)) need_verbose = verbose
+ if (present(iatfix)) need_fixmap = .TRUE.
 
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
@@ -3534,7 +3531,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  ABI_ALLOCATE(list_absdist,(3,natom_hist))
  ABI_ALLOCATE(list_dist,(natom_hist))
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
-
+ 
  !Putting maping list to zero
  list_map = 0
 
@@ -3644,7 +3641,7 @@ end do  ! ia
      hist_tmp%fcart(:,ia,:) = hist%fcart(:,list_map(ia),:)
      hist_tmp%vel(:,ia,:)   = hist%vel(:,list_map(ia),:)
    end do
-
+  
 ! free the old hist and reinit
    call abihist_free(hist)
    call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
@@ -3656,6 +3653,16 @@ end do  ! ia
    end do
    hist_tmp%mxhist = nstep_hist
    call abihist_free(hist_tmp)
+
+   !map also fixes if present
+   if(need_fixmap)then  
+     ABI_ALLOCATE(iatfix_tmp,(3,natom_hist))
+     do ia=1,natom_hist
+        iatfix_tmp(:,ia) = iatfix(:,list_map(ia))
+     end do
+     iatfix = iatfix_tmp 
+     ABI_DEALLOCATE(iatfix_tmp)  
+   end if
  end if !need map
 
 !deallocation

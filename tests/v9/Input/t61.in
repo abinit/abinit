@@ -31,7 +31,7 @@ ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with 
 # DATASET 1
 ############
 optdriver1 0
-getkerange_path1 "t57o_DS7_KERANGE.nc"
+getkerange_filepath1 "t57o_DS7_KERANGE.nc"
 getden1   20    # Read DEN from DS20_DEN
 getwfk1   20    # Init GS wavefunctions from DS20_WFK
 iscf1 -2
@@ -83,7 +83,6 @@ znucl 3 9
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 

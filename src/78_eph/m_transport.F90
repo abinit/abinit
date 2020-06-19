@@ -43,7 +43,7 @@ module m_transport
  use defs_datatypes,   only : ebands_t
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : bisect, simpson_int, safe_div !polyn_interp,
+ use m_numeric_tools,  only : bisect, simpson_int, safe_div
  use m_fstrings,       only : strcat, sjoin, ltoa
  use m_kpts,           only : listkk
  use m_occ,            only : occ_fd, occ_dfd
@@ -216,7 +216,7 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
- character(len=fnlen) :: path, sigeph_path
+ character(len=fnlen) :: path, sigeph_filepath
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -224,10 +224,12 @@ subroutine transport(dtfil, dtset, ebands, cryst, comm)
  my_rank = xmpi_comm_rank(comm)
  call wrtout(std_out, ' Transport computation driver')
 
- sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
- sigmaph = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
+ !sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ sigeph_filepath = dtfil%filsigephin
+ call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", sigeph_filepath))
+
+ sigmaph = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
- ! if dtset%sigma_ngkpt /= sigeph_path
 
  ! Initialize transport
  transport_rta = transport_rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm)
@@ -311,7 +313,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = sigmaph%kTmesh
 
- ! Information about the Gaps
+ ! Information about the gaps
  new%nsppol = ebands%nsppol
  new%nspinor = ebands%nspinor
  ABI_MALLOC(new%eminmax_spin, (2,ebands%nsppol))
@@ -345,9 +347,8 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  end if
 
  ! Perform further downsampling (usefull for debugging purposes)
- ! TODO: introduce transport_ngkpt variable
- if (any(dtset%transport_ngkpt/=0)) then
-
+ ! TODO: Add test for transport_ngkpt variable
+ if (any(dtset%transport_ngkpt /= 0)) then
    call wrtout(std_out, sjoin(" Downsampling the k-point mesh before computing transport:", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%transport_ngkpt(1)
@@ -356,7 +357,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero,zero,zero])
 
    ! Map the points of downsampled bands to dense ebands
-   ABI_MALLOC(indkk,(tmp_ebands%nkpt, 6))
+   ABI_MALLOC(indkk, (tmp_ebands%nkpt, 6))
    call listkk(dksqmax, cryst%gmet, indkk, new%ebands%kptns, tmp_ebands%kptns, &
                new%ebands%nkpt, tmp_ebands%nkpt, cryst%nsym, &
                sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
@@ -370,20 +371,21 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
 
    ! linewidths serta
    if (allocated(new%linewidth_serta)) then
-     call downsample_array(new%linewidth_serta,indkk,tmp_ebands%nkpt)
+     call downsample_array(new%linewidth_serta, indkk, tmp_ebands%nkpt)
    end if
 
    ! linewidths mrta
    if (allocated(new%linewidth_mrta)) then
-     call downsample_array(new%linewidth_mrta,indkk,tmp_ebands%nkpt)
+     call downsample_array(new%linewidth_mrta, indkk, tmp_ebands%nkpt)
    end if
 
    ! velocities
    if (allocated(new%linewidth_serta)) then
-     call downsample_array(new%velocity,indkk,tmp_ebands%nkpt)
+     call downsample_array(new%velocity, indkk, tmp_ebands%nkpt)
    end if
 
    ABI_SFREE(indkk)
+   call ebands_free(new%ebands)
    call ebands_copy(tmp_ebands, new%ebands)
    call ebands_free(tmp_ebands)
  end if
@@ -449,10 +451,10 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
  call cwtime_report(" transport_rta_new", cpu, wall, gflops)
 
  contains
- subroutine downsample_array(array,indkk,nkpt)
+ subroutine downsample_array(array, indkk, nkpt)
 
    real(dp),allocatable,intent(inout) :: array(:,:,:,:)
-   integer,allocatable,intent(in) :: indkk(:,:)
+   integer,intent(in) :: indkk(:,:)
 
    real(dp),allocatable :: tmp_array(:,:,:,:)
    integer :: ikpt,nkpt
@@ -461,7 +463,7 @@ type(transport_rta_t) function transport_rta_new(dtset, sigmaph, cryst, ebands, 
    ABI_MOVE_ALLOC(array, tmp_array)
    tmp_shape = shape(array)
    tmp_shape(3) = nkpt
-   ABI_MALLOC(array,(tmp_shape(1),tmp_shape(2),tmp_shape(3),tmp_shape(4)))
+   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4)))
    do ikpt=1,nkpt
      array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt,1),:)
    end do
@@ -518,7 +520,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  ! Allocate vv tensors with and without the lifetimes
- ntens = 1+self%ntemp
+ ntens = 1 + self%ntemp
  ABI_MALLOC(vv_tens, (3, 3, ntens, mband, nkpt, nsppol))
  do ispin=1,nsppol
    do ik=1,nkpt
@@ -764,7 +766,6 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
 
  call cwtime(cpu, wall, gflops, "start")
 
-
  ! create alias for dimensions
  nsppol = self%ebands%nsppol
  nkpt   = self%ebands%nkpt
@@ -899,7 +900,6 @@ subroutine transport_rta_ncwrite(self, cryst, dtset, ncid)
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
-
 
 #ifdef HAVE_NETCDF
  ! Write to netcdf file

@@ -96,6 +96,8 @@ module m_screening_driver
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
+ use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier,&
+                             &fullbz_plowannier,destroy_plowannier
 
  implicit none
 
@@ -246,7 +248,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
- complex(dpc),allocatable :: m_lda_to_qp(:,:,:,:)
+ complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
  complex(dpc),allocatable :: chi0_lwing(:,:,:),chi0_uwing(:,:,:),chi0_head(:,:,:)
  complex(dpc),allocatable :: chi0intra_lwing(:,:,:),chi0intra_uwing(:,:,:),chi0intra_head(:,:,:)
  complex(gwpc),allocatable,target :: chi0(:,:,:),chi0intra(:,:,:)
@@ -261,6 +263,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:),prev_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
+ type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
 !************************************************************************
 
@@ -378,7 +381,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
 &     Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
-&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,0,Dtset%usepotzero)
+&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%ixc,Dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
@@ -401,7 +404,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
 
-!  * Initialize and compute data for LDA+U.
+!  * Initialize and compute data for DFT+U.
 !  paw_dmft%use_dmft=dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
 &     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
@@ -729,12 +732,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call timab(304,1,tsec) ! KS => QP; [wfrg]
 
    ! Initialize with KS eigenvalues and eigenfunctions.
-   ABI_MALLOC(m_lda_to_qp,(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol))
-   m_lda_to_qp = czero
+   ABI_MALLOC(m_ks_to_qp,(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol))
+   m_ks_to_qp = czero
    do spin=1,Wfd%nsppol
      do ik_ibz=1,Wfd%nkibz
        do band=1,Wfd%nband(ik_ibz,spin)
-         m_lda_to_qp(band,band,:,:) = cone
+         m_ks_to_qp(band,band,:,:) = cone
        end do
      end do
    end do
@@ -745,7 +748,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Psps%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Dtset%usepaw,Dtset%nspden,1,nscf,&
-   nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
+   nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_ks_to_qp,rhor_p,prev_Pawrhoij)
 
    ABI_FREE(rhor_p)
    ABI_FREE(prev_Pawrhoij)
@@ -760,9 +763,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! === Update only the wfg treated with GW ===
    ! For PAW update and re-symmetrize cprj in the full BZ, TODO add rotation in spinor space
-   if (nscf/=0) call wfd%rotate(Cryst,m_lda_to_qp)
+   if (nscf/=0) call wfd%rotate(Cryst,m_ks_to_qp)
 
-   ABI_FREE(m_lda_to_qp)
+   ABI_FREE(m_ks_to_qp)
    call timab(304,2,tsec)
  end if ! gwcalctyp>=10
 
@@ -1072,6 +1075,14 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(321,2,tsec) ! screening(2)
 
  iqcalc = 0
+ if(Dtset%plowan_compute >= 10) then
+   call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
+&Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
+&Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
+&Dtset%kptns,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz_in)
+   call get_plowannier(wanibz_in,wanibz,Dtset)
+   call fullbz_plowannier(Dtset,Kmesh,Cryst,Pawang,wanibz,wanbz)
+ endif
  do iqibz=1,Qmesh%nibz
    call timab(306,1,tsec)
    is_first_qcalc=(iqibz==1)
@@ -1111,7 +1122,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &     Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
-&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
 
      chihw = chi_new(ep%npwe, ep%nomega)
      chihw%head = chi0_head
@@ -1161,7 +1172,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0(use_tr,Dtset,Cryst,Qmesh%ibz(:,iqibz),Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftgw,ngfftf,nfftf_tot,chi0,ktabr,ktabrf,&
-&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
+
 
      call timab(308,2,tsec)
    end if
@@ -1453,8 +1465,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call timab(310,2,tsec)
  end do ! Loop over q-points
-
- !----------------------------- END OF THE CALCULATION ------------------------
+ if (Dtset%plowan_compute >=10)then
+   call destroy_plowannier(wanbz)
+ endif
+!----------------------------- END OF THE CALCULATION ------------------------
 
  ! Close Files.
  if (my_rank==master) then
@@ -2043,9 +2057,9 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ABI_MALLOC(Ep%qcalc,(3,Ep%nqcalc))
  if (Ep%nqcalc/=Ep%nqibz) then
    write(msg,'(6a)')ch10,&
-&    ' Dielectric matrix will be calculated only for some ',ch10,&
-&    ' selected q points provided by the user through the input variables ',ch10,&
-&    ' nqptdm and qptdm'
+    ' Dielectric matrix will be calculated only for some ',ch10,&
+    ' selected q points provided by the user through the input variables ',ch10,&
+    ' nqptdm and qptdm'
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    ltest= Ep%nqcalc <= Qmesh%nibz
@@ -2076,9 +2090,9 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  if (has_q0.and.normv(Ep%qcalc(:,1),gmet,'G')>=GW_TOLQ0) then
    write(msg,'(5a)')&
-&    'The list of q-points to be calculated contains the Gamma point, ',ch10,&
-&    'however Gamma is not the first point in the list. ' ,ch10,&
-&    'Please, change your input file accordingly. '
+    'The list of q-points to be calculated contains the Gamma point, ',ch10,&
+    'however Gamma is not the first point in the list. ' ,ch10,&
+    'Please, change your input file accordingly. '
    MSG_ERROR(msg)
  end if
 
@@ -2109,8 +2123,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ! Make sure that Dtset%wtk==Kmesh%wt due to the dirty treatment of
  ! the symmetry operations in the old GW code (symmorphy and inversion)
- ltest=(ALL(ABS(Dtset%wtk(1:Kmesh%nibz)-Kmesh%wt(1:Kmesh%nibz))<tol6))
- ABI_CHECK(ltest,'Mismatch between Dtset%wtk and Kmesh%wt')
+ ltest = (ALL(ABS(Dtset%wtk(1:Kmesh%nibz)-Kmesh%wt(1:Kmesh%nibz)) < tol6))
+ if (.not. ltest) then
+   do jj=1,Kmesh%nibz
+     write(std_out, *)"wtk dtset vs kmesh:", dtset%wtk(jj), kmesh%wt(jj)
+   end do
+ end if
+ ABI_CHECK(ltest, 'Mismatch between Dtset%wtk and Kmesh%wt')
 
  ABI_MALLOC(npwarr,(Hdr_wfk%nkpt))
  npwarr(:)=Ep%npwwfn
