@@ -992,17 +992,17 @@ subroutine htetra_print(self, unit)
 
  unique_tetra_size = self%nunique_tetra*5*four/1024/1024
  total_size        = unique_tetra_size
- write(unit,'(a,i12)')     ' htetra unique_tetra      ', self%nunique_tetra
+ !write(unit,'(a,i0)')     ' htetra unique_tetra:', self%nunique_tetra
  !write(unit,'(a,f12.1,a)') ' htetra unique_tetra_size ', unique_tetra_size, ' [Mb] <<< MEM'
  if (allocated(self%ibz)) then
    ibz_pointer_size  = self%nibz_tetra*2*four / 1024 ** 2
-   write(unit,'(a,i12)')     ' ibz_tetra         ', self%nibz_tetra
-   write(unit,'(a,f12.1,a)') ' ibz_tetra_size    ', ibz_pointer_size, ' [Mb] <<< MEM'
+   write(unit,'(a,i0)')     ' ibz_tetra: ', self%nibz_tetra
+   write(unit,'(a,f12.1,a)') ' ibz_tetra_size: ', ibz_pointer_size, ' [Mb] <<< MEM'
    total_size = total_size + ibz_pointer_size
  end if
  ! integer arrays
  total_size = total_size + 3 * (self%nkibz * 4) / 1024**2
- write(unit,'(a,f12.1,a)') ' htetra total size        ', total_size, ' [Mb] <<< MEM'
+ write(unit,'(a,f12.1,a)') ' htetra total size:', total_size, ' [Mb] <<< MEM'
 
 end subroutine htetra_print
 !!***

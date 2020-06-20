@@ -422,6 +422,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    call ebands_free(new%ebands)
    call ebands_copy(tmp_ebands, new%ebands)
    call ebands_free(tmp_ebands)
+   !call ebands_transfer(tmp_ebands, new%ebands)
  end if
 
  ! Same doping case as sigmaph
@@ -548,8 +549,6 @@ subroutine rta_compute(self, cryst, dtset, comm)
            if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin))
            if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, spin))
            call safe_div(vv_tens(:, :, 1, irta, ib, ik, spin), linewidth, zero, vv_tens(:, :, 1+itemp, irta, ib, ik, spin))
-           !if (irta == 2)
-           !print *, "irta", irta," lw", linewidth, "out_tensdos", maxval(abs(vv_tens(:, :, 1+itemp, irta, ib, ik, spin)))
            call safe_div(one/two, linewidth, zero, tau_vals(itemp, irta, ib, ik, spin))
          end do
        end do
@@ -609,7 +608,6 @@ subroutine rta_compute(self, cryst, dtset, comm)
          self%vv_dos(:,:,:,spin) = out_tensdos(:, 1, :, :, itens, spin)
        else
          self%vvtau_dos(:,:,:, itemp-1, spin, irta) = out_tensdos(:, 1, :, :, itens, spin)
-         !print *, "irta", irta, "out_tensdos", maxval(abs(out_tensdos(:, 1, :, :, itens, spin)))
        end if
      end do
    end do

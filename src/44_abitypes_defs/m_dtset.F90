@@ -1214,17 +1214,17 @@ subroutine dtset_chkneu(dtset, charge, occopt)
          ' This is not the case. '
        else
 !        The discrepancy is not so severe
-         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
+         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than: ',tol11
        end if
        MSG_WARNING(msg)
 
-       write(msg, '(a,a,a,a,a,a)' ) &
+       write(msg, '(6a)' ) &
        'Action: check input file for occ,wtk, and charge.',ch10,&
        'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
        'but IS automatically normalized otherwise.',ch10
        call wrtout(std_out,msg)
 
-!      If the discrepancy is severe, stop
+       ! If the discrepancy is severe, stop
        if (abs(nelect_occ-dtset%nelect)>tol8)then
          MSG_ERROR(msg)
        end if

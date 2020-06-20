@@ -50,10 +50,10 @@ module m_occ
  public :: getnel        ! Compute total number of electrons from efermi or DOS
  public :: newocc        ! Compute new occupation numbers at each k point,
  public :: occeig        ! (occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$,
- public :: occ_fd        ! Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
- public :: occ_dfd       ! Derivative of Fermi-Dirac statistic: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
- public :: occ_be        ! Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
- public :: occ_dbe       ! Derivative of Bose-Einstein statistic  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
+ public :: occ_fd        ! Fermi-Dirac statistics 1 / [(exp((e - mu)/ KT) + 1]
+ public :: occ_dfd       ! Derivative of Fermi-Dirac statistics: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
+ public :: occ_be        ! Bose-Einstein statistics  1 / [(exp((e - mu)/ KT) - 1]
+ public :: occ_dbe       ! Derivative of Bose-Einstein statistics  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
  public :: dos_hdr_write
  public :: pareigocc
 
@@ -65,13 +65,13 @@ contains
 !! getnel
 !!
 !! FUNCTION
-!! Option=1:
+!! Option = 1:
 !!   Get the total number of electrons nelect, given a trial fermienergy fermie.
 !!   For this, compute new occupation numbers at each k point,
 !!   from eigenenergies eigen, according to the
 !!   smearing scheme defined by occopt (and smearing width tsmear or tphysel).
 !!
-!! Option=2:
+!! Option = 2:
 !!   Compute and output the smeared density of states, and the integrated density
 !!   of states, then write these data
 !!
@@ -79,7 +79,7 @@ contains
 !! routine, and that the values of the arguments are sensible
 !!
 !! NOTE
-!! in order to speed the calculation, it would be easy to
+!! In order to speed the calculation, it would be easy to
 !! compute the entropy only when the fermi energy is well converged
 !!
 !! INPUTS
@@ -112,6 +112,7 @@ contains
 !! Feed re-smeared "Dirac delta" to the rest of ABINIT with only one parameter,
 !! tphysel, which is the physical temperature.
 !! encorr = correction to energy for terms of order tsmear^2:
+!!
 !!       $  E_{phys} = E_{free} - encorr*(E_{int}-E_{free}) + O(tsmear^3)  $
 !!
 !! PARENTS
@@ -123,7 +124,7 @@ contains
 !! SOURCE
 
 subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
-&  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk)
+                  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk)
 
 !Arguments ------------------------------------
 !scalars
@@ -133,19 +134,17 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
- real(dp),intent(out) :: doccde(mband*nkpt*nsppol) !vz_i
- real(dp),intent(inout) :: occ(mband*nkpt*nsppol) !vz_i
+ real(dp),intent(out) :: doccde(mband*nkpt*nsppol)
+ real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
 ! nptsdiv2 is the number of integration points, divided by 2.
 ! tratio  = ratio tsmear/tphysel for convoluted smearing function
 ! save values so we can impose recalculation of smdfun when
-! the smearing or electronic temperature change between
-! datasets
+! the smearing or electronic temperature change between datasets
 ! corresponds roughly to delta_FD (maxFDarg) = 1.0d-100
 !
 ! return fermi-dirac smearing function analytically
-!
 ! real(dp) :: smdFD
 ! smdFD (tt) = 1.0_dp / (exp(-tt/2.0_dp) + exp(tt/2.0_dp))**2
 !scalars
@@ -156,7 +155,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  integer :: bantot,iband,iene,ikpt,index,index_start,isppol, nene,nptsdiv2
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot, wk
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: entfun(:,:),occfun(:,:)
@@ -166,13 +165,11 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
+ !call cwtime(cpu, wall, gflops, "start")
 
- if(option/=1 .and. option/=2)then
+ if (option/=1 .and. option/=2)then
    MSG_BUG(sjoin('Option must be either 1 or 2. It is:', itoa(option)))
  end if
-
- call cwtime(cpu, wall, gflops, "start")
 
  ! Initialize the occupation function and generalized entropy function,
  ! at the beginning, or if occopt changed
@@ -200,21 +197,22 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  if (option==1) then
    ! normal evaluation of occupations and entropy
 
-   !  Compute the arguments of the occupation and entropy functions
-   !  HM 20/08/2018 Treat the T --> 0 limit
+   ! Compute the arguments of the occupation and entropy functions
+   ! HM 20/08/2018 Treat the T --> 0 limit
    if (tsmear==0) then
      arg(:)=sign(huge_tsmearinv,fermie-eigen(1:bantot))
    else
      arg(:)=(fermie-eigen(1:bantot))*tsmearinv
    endif
 
+   ! MG TODO: This part is expensive for dense k-meshes
    ! Compute the values of the occupation function, and the entropy function
    ! Note: splfit also takes care of the points outside of the interval,
    ! and assign to them the value of the closest extremal point,
    ! which is what is needed here.
 
-   call splfit(xgrid,doccde,occfun,1,arg,occ,(2*nptsdiv2+1),bantot)
-   call splfit(xgrid,derfun,entfun,0,arg,ent,(2*nptsdiv2+1),bantot)
+   call splfit(xgrid, doccde, occfun, 1, arg, occ, (2*nptsdiv2+1), bantot)
+   call splfit(xgrid, derfun, entfun, 0, arg, ent, (2*nptsdiv2+1), bantot)
 
    ! Normalize occ and ent, and sum number of electrons and entropy
    ! Use different loops for nelect and entropy because bantot may be quite large in the EPH code
@@ -246,19 +244,19 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
      end do
    end do
 
-   ! write(std_out,*) ' getnel : debug   wtk, occ, eigen = ', wtk, occ, eigen
-   ! write(std_out,*)xgrid(-nptsdiv2),xgrid(nptsdiv2)
-   ! write(std_out,*)'fermie',fermie
-   ! do ii=1,bantot
-   ! write(std_out,*)ii,arg(ii),doccde(ii)
-   ! end do
-   ! write(std_out,*)'eigen',eigen(:)
-   ! write(std_out,*)'arg',arg(:)
-   ! write(std_out,*)'occ',occ(:)
-   ! write(std_out,*)'nelect',nelect
+   !write(std_out,*) ' getnel : debug   wtk, occ, eigen = ', wtk, occ, eigen
+   !write(std_out,*)xgrid(-nptsdiv2),xgrid(nptsdiv2)
+   !write(std_out,*)'fermie',fermie
+   !do ii=1,bantot
+   !write(std_out,*)ii,arg(ii),doccde(ii)
+   !end do
+   !write(std_out,*)'eigen',eigen(:)
+   !write(std_out,*)'arg',arg(:)
+   !write(std_out,*)'occ',occ(:)
+   !write(std_out,*)'nelect',nelect
 
  else if (option==2) then
-  ! evaluate DOS for smearing, half smearing, and double.
+   ! evaluate DOS for smearing, half smearing, and double.
 
    buffer=limit/tsmearinv*.5_dp
 
@@ -364,9 +362,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  ABI_FREE(smdfun)
  ABI_FREE(xgrid)
 
- call cwtime_report(" getnel", cpu, wall, gflops, end_str=ch10)
-
- DBG_EXIT("COLL")
+ !call cwtime_report(" getnel", cpu, wall, gflops, end_str=ch10)
 
 end subroutine getnel
 !!***
@@ -500,14 +496,14 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
   nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
 
  fermihi=maxval(eigen(1:nband(1)*nkpt*nsppol))+6.001_dp*tsmear
- !safety value
+ ! Safety value
  fermihi = min(fermihi, 1.e6_dp)
  if(occopt==3)fermihi=fermihi+24.0_dp*tsmear
 
  call getnel(doccde,dosdeltae,eigen,entropy,fermihi,maxocc,mband,nband,&
   nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
 
- !Prepare fixed moment calculation
+ ! Prepare fixed moment calculation
  if(abs(spinmagntarget+99.99_dp)>1.0d-10)then
    sign = 1
    do is = 1, nsppol
@@ -520,7 +516,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    end do
  end if
 
- !If the target nelect is not between nelectlo and nelecthi, exit
+ ! If the target nelect is not between nelectlo and nelecthi, exit
  if(nelect<nelectlo .or. nelect>nelecthi)then
    write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
     ' newocc: ',ch10,&
@@ -544,10 +540,12 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    ! Usual bisection loop
    do ii=1,niter_max
      fermimid=(fermihi+fermilo)*half
+
      ! Produce nelectmid from fermimid
      call getnel(doccde,dosdeltae,eigen,entropy,fermimid,maxocc,mband,nband,&
        nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      ! write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
+
      if(nelectmid>nelect*(one-tol14))then
        fermihi=fermimid
        nelecthi=nelectmid
@@ -556,7 +554,9 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
        fermilo=fermimid
        nelectlo=nelectmid
      end if
+
      if( abs(nelecthi-nelectlo) <= nelect*two*tol14 .or. abs(fermihi-fermilo) <= tol14*abs(fermihi+fermilo) ) exit
+
      if(ii==niter_max)then
        write(msg,'(a,i0,3a,es22.14,a,es22.14,a)')&
         'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
@@ -604,12 +604,12 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      fermilo = fermilot(is)
      nelecthi = nelecthit(is)
      nelectlo = nelectlot(is)
-!    write(std_out,'(a,i1,3(f8.4,1x))') "Spin, N(spin):", is, nelect, fermihi, fermilo
-!    write(std_out,'(a,2(f8.4,1x))') "Hi, lo:", nelecthi, nelectlo
+     ! write(std_out,'(a,i1,3(f8.4,1x))') "Spin, N(spin):", is, nelect, fermihi, fermilo
+     ! write(std_out,'(a,2(f8.4,1x))') "Hi, lo:", nelecthi, nelectlo
 
      do ii=1,niter_max
        fermimid_tmp=(fermihi+fermilo)/2.0_dp
-!      temporary arrays
+       ! temporary arrays
        cnt = 0
        do ik = 1, nkpt
          nbandt(ik) = mband
@@ -621,13 +621,14 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
          end do
        end do
 
-!      Produce nelectmid from fermimid
+       ! Produce nelectmid from fermimid
        call getnel(doccdet,dosdeltae,eigent,entropy_tmp,fermimid_tmp,maxocc,mband,nbandt,&
-&       nelectmid,nkpt,1,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
+         nelectmid,nkpt,1,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
        entropyt(is) = entropy_tmp
        fermimidt(is) = fermimid_tmp
        fermimid = fermimidt(is)
-!      temporary arrays
+
+       ! temporary arrays
        cnt = 0
        do ik = 1, nkpt
          do ib = 1, mband
@@ -636,7 +637,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
            doccde(cnt+cnt2) = doccdet(cnt)
          end do
        end do
-!      write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
+       ! write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
 
        if(nelectmid>=nelect_tmp)then
          fermihi=fermimid_tmp
@@ -670,12 +671,11 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    ABI_FREE(nbandt)
    ABI_FREE(occt)
 
- end if !  End of logical on fixed moment calculations
+ end if ! End of logical on fixed moment calculations
 
  !write(std_out,*) "kT*Entropy:", entropy*tsmear
 
- nkpt_eff=nkpt
- if(prtvol==0)nkpt_eff=min(nkpt_max,nkpt)
+ nkpt_eff=nkpt; if (prtvol==0) nkpt_eff = min(nkpt_max,nkpt)
 
  if (nsppol==1)then
    write(msg, '(a,i0,a)' )' newocc: computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
@@ -690,7 +690,6 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    end do
    if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information')
 
-   !DEBUG
    !call wrtout(std_out,' newocc: corresponding derivatives are ')
    !do ikpt=1,nkpt_eff
    !write(msg,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
@@ -702,7 +701,6 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    !if(nkpt/=nkpt_eff)then
    !  call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information')
    !end if
-   !ENDDEBUG
 
  else
    write(msg, '(a,i0,2a)' )' newocc: computed new occupation numbers for occopt= ',occopt,ch10,'  (1) spin up   values  '
@@ -800,13 +798,13 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
    tsmear_prev=tsmear
    tphysel_prev=tphysel
 
-!  Check whether input values of tphysel tsmear and occopt are consistent
+   ! Check whether input values of tphysel tsmear and occopt are consistent
    dblsmr = 0
    if (abs(tphysel)>tol12) then
-!    Use re-smearing scheme
+     ! Use re-smearing scheme
      if (abs(tsmear)>tol12) then
        dblsmr = 1
-!      Use FD occupations (one smearing) only with "physical" temperature tphysel
+       ! Use FD occupations (one smearing) only with "physical" temperature tphysel
      else if (occopt /= 3) then
        write(msg, '(a,i6,a)' )' tphysel /= 0, tsmear == 0, but occopt is not = 3, but ',occopt,'.'
        MSG_ERROR(msg)
@@ -819,14 +817,14 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
    ABI_MALLOC(workfun,(-nptsdiv2_def:nptsdiv2_def))
    ABI_MALLOC(work,(-nptsdiv2_def:nptsdiv2_def))
 
-!  Prepare the points on the grid
-!  limit is the value of the argument that will give 0.0 or 1.0 , with
-!  less than about 1.0d-15 error for 4<=occopt<=8, and less than about 1.0d-12
-!  error for occopt==3. It is not worth to compute the function beyond
-!  that point. Even with a less severe requirement, it is significantly
-!  larger for occopt==3, with an exponential
-!  tail, than for the other occupation functions, with a Gaussian tail.
-!  Note that these values are useful in newocc.f also.
+   ! Prepare the points on the grid
+   ! limit is the value of the argument that will give 0.0 or 1.0 , with
+   ! less than about 1.0d-15 error for 4<=occopt<=8, and less than about 1.0d-12
+   ! error for occopt==3. It is not worth to compute the function beyond
+   ! that point. Even with a less severe requirement, it is significantly
+   ! larger for occopt==3, with an exponential
+   ! tail, than for the other occupation functions, with a Gaussian tail.
+   ! Note that these values are useful in newocc.f also.
    limit_occ=6.0_dp
    if(occopt==3)limit_occ=30.0_dp
    if(dblsmr /= 0) then
@@ -834,25 +832,25 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      limit_occ=30.0_dp + 6.0_dp*tratio
    end if
 
-!  With nptsdiv2_def=6000 (thus increm=0.001 for 4<=occopt<=8,
-!  and increm=0.005 for occopt==3, the O(1/N4) algorithm gives 1.0d-12
-!  accuracy on the stored values occfun and entfun. These, together
-!  with smdfun and xgrid_prev, need permanently about 0.67 MB, which is affordable.
+   ! With nptsdiv2_def=6000 (thus increm=0.001 for 4<=occopt<=8,
+   ! and increm=0.005 for occopt==3, the O(1/N4) algorithm gives 1.0d-12
+   ! accuracy on the stored values occfun and entfun. These, together
+   ! with smdfun and xgrid_prev, need permanently about 0.67 MB, which is affordable.
    increm=limit_occ/nptsdiv2_def
    do ii=-nptsdiv2_def,nptsdiv2_def
      xgrid_prev(ii)=ii*increm
    end do
 
-!  ---------------------------------------------------------
-!  Ordinary (unique) smearing function
-!  ---------------------------------------------------------
+   !  ---------------------------------------------------------
+   !  Ordinary (unique) smearing function
+   !  ---------------------------------------------------------
    if (dblsmr == 0) then
 
-!    Compute the unnormalized smeared delta function between -limit_occ and +limit_occ
-!    (well, they are actually normalized ...)
-     if(occopt==3)then
+     ! Compute the unnormalized smeared delta function between -limit_occ and +limit_occ
+     ! (well, they are actually normalized ...)
 
-!      Fermi-Dirac
+     if(occopt==3)then
+       ! Fermi-Dirac
        do ii=0,nptsdiv2_def
          xx=xgrid_prev(ii)
          smdfun_prev( ii,1)=0.25_dp/(cosh(xx/2.0_dp)**2)
@@ -860,11 +858,10 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        end do
 
      else if(occopt==4 .or. occopt==5)then
-
-!      Cold smearing of Marzari, two values of the "a" parameter being possible
-!      first value gives minimization of the bump
+       ! Cold smearing of Marzari, two values of the "a" parameter being possible
+       ! first value gives minimization of the bump
        if(occopt==4)aa=-.5634
-!      second value gives monotonic occupation function
+       ! second value gives monotonic occupation function
        if(occopt==5)aa=-.8165
 
        dsqrpi=1.0_dp/sqrt(pi)
@@ -877,7 +874,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
      else if(occopt==6)then
 
-!      First order Hermite-Gaussian of Paxton and Methfessel
+       ! First order Hermite-Gaussian of Paxton and Methfessel
        dsqrpi=1.0_dp/sqrt(pi)
        do ii=0,nptsdiv2_def
          xx=xgrid_prev(ii)
@@ -887,7 +884,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
      else if(occopt==7)then
 
-!      Gaussian smearing
+       ! Gaussian smearing
        dsqrpi=1.0_dp/sqrt(pi)
        do ii=0,nptsdiv2_def
          xx=xgrid_prev(ii)
@@ -897,7 +894,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
      else if(occopt==8)then
 
-!      Constant value of the delta function over the smearing interval, for testing purposes only.
+       ! Constant value of the delta function over the smearing interval, for testing purposes only.
        do ii=0,nptsdiv2_def
          xx=xgrid_prev(ii)
          if(xx>half+tol8)then
@@ -914,23 +911,23 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
-!    ---------------------------------------------------------
-!    smear FD delta with occopt delta calculated in smdfun_prev
-!    ---------------------------------------------------------
    else if (dblsmr /= 0) then
+     !    ---------------------------------------------------------
+     !    smear FD delta with occopt delta calculated in smdfun_prev
+     !    ---------------------------------------------------------
 
      nconvd2 = 6000
      convlim = 10.0_dp
      incconv = convlim / nconvd2
 
-!    store smearing functions in smd1 and smd2
+     ! store smearing functions in smd1 and smd2
      ABI_MALLOC(smd1,(-nconvd2:nconvd2))
      ABI_MALLOC(smd2,(-nconvd2:nconvd2))
      ABI_MALLOC(tgrid,(-nconvd2:nconvd2))
 
-!    FD function in smd1( ii) and second smearing delta in smd2( ii)
-!
-!    smd1(:) contains delta_FD ( x )
+     ! FD function in smd1( ii) and second smearing delta in smd2( ii)
+     !
+     ! smd1(:) contains delta_FD ( x )
      do ii=0,nconvd2
        tgrid(ii)=ii*incconv
        tgrid(-ii)=-tgrid(ii)
@@ -939,18 +936,18 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        smd1(-ii)=smd1(ii)
      end do
 
-!    check input values of occopt and fill smd2(:) with appropriate data:
-!    smd2(:) contains delta_resmear ( x )
+     ! check input values of occopt and fill smd2(:) with appropriate data:
+     ! smd2(:) contains delta_resmear ( x )
      if(occopt == 3) then
        write(msg, '(a,a)' )&
-&       'Occopt=3 is not allowed as a re-smearing.', &
-&       'Use a single FD, or re-smear with a different delta type (faster cutoff). '
+        'Occopt=3 is not allowed as a re-smearing.', &
+        'Use a single FD, or re-smear with a different delta type (faster cutoff). '
        MSG_ERROR(msg)
      else if(occopt==4 .or. occopt==5)then
-!      Cold smearing of Marzari, two values of the "a" parameter being possible
-!      first value gives minimization of the bump
+       ! Cold smearing of Marzari, two values of the "a" parameter being possible
+       ! first value gives minimization of the bump
        if(occopt==4)aa=-.5634
-!      second value gives monotonic occupation function
+       ! second value gives monotonic occupation function
        if(occopt==5)aa=-.8165
 
        dsqrpi=1.0_dp/sqrt(pi)
@@ -990,38 +987,38 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        MSG_BUG(sjoin('Occopt: ', itoa(occopt),' is not allowed in getnel.'))
      end if
 
-!    Use O(1/N4) algorithm from Num Rec (see below)
-!
-!    The grid for the convoluted delta is taken (conservatively)
-!    to be that for the FD delta ie 6000 pts in [-limit_occ;limit_occ]
-!    Smearing functions are given on [-dbllim;dbllim] and the grid must
-!    superpose the normal grid on [-limit_occ:limit_occ]
-!    The maximal interval for integration of the convolution is
-!    [-dbllim+limit_occ+lim(delta2);dbllim-limit_occ-lim(delta2)] =
-!    [-dbllim+36;dbllim-36]
+     ! Use O(1/N4) algorithm from Num Rec (see below)
+     !
+     ! The grid for the convoluted delta is taken (conservatively)
+     ! to be that for the FD delta ie 6000 pts in [-limit_occ;limit_occ]
+     ! Smearing functions are given on [-dbllim;dbllim] and the grid must
+     ! superpose the normal grid on [-limit_occ:limit_occ]
+     ! The maximal interval for integration of the convolution is
+     ! [-dbllim+limit_occ+lim(delta2);dbllim-limit_occ-lim(delta2)] =
+     ! [-dbllim+36;dbllim-36]
 
-!    test the smdFD function for extreme values:
-!    do jj=-nptsdiv2_def,-nptsdiv2_def
-!    do ii=-nconvd2+4,nconvd2
-!    call smdFD(xgrid_prev(jj) - tgrid(ii)*tratio, resFD)
-!    write(std_out,*) 'ii jj = ', ii,jj, ' smdFD (', xgrid_prev(jj) - tgrid(ii)*tratio, ') ', resFD
-!    end do
-!    end do
+     ! test the smdFD function for extreme values:
+     ! do jj=-nptsdiv2_def,-nptsdiv2_def
+     ! do ii=-nconvd2+4,nconvd2
+     ! call smdFD(xgrid_prev(jj) - tgrid(ii)*tratio, resFD)
+     ! write(std_out,*) 'ii jj = ', ii,jj, ' smdFD (', xgrid_prev(jj) - tgrid(ii)*tratio, ') ', resFD
+     ! end do
+     ! end do
 
      expinc = exp(half*incconv*tratio)
 
-!    jj = position of point at which we are calculating smdfun_prev
+     ! jj = position of point at which we are calculating smdfun_prev
      do jj=-nptsdiv2_def,nptsdiv2_def
-!      Do not care about the 8 boundary points,
-!      where the values should be extremely small anyway
+       ! Do not care about the 8 boundary points,
+       ! where the values should be extremely small anyway
        smdfun_prev(jj,1)=0.0_dp
-!      only add contribution with delta_FD > 1.0d-100
+       ! only add contribution with delta_FD > 1.0d-100
        nmaxFD = floor  (( maxFDarg+xgrid_prev(jj)) / tratio / incconv )
        nmaxFD = min (nmaxFD, nconvd2)
        nminFD = ceiling((-maxFDarg+xgrid_prev(jj)) / tratio / incconv )
        nminFD = max (nminFD, -nconvd2)
 
-!      Calculate the Fermi-Dirac distrib at point xgrid_prev(jj)-tgrid(ii)*tratio
+       ! Calculate the Fermi-Dirac distrib at point xgrid_prev(jj)-tgrid(ii)*tratio
        expxo2 = exp (-half*(xgrid_prev(jj) - (nminFD)*incconv*tratio))
        expx22 = expxo2*expxo2
        tmpexpsum = expxo2 / (expx22 + 1.0_dp)
@@ -1039,20 +1036,20 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        tmpexpsum = expxo2 / (expx22 + 1.0_dp)
        resFD1 = tmpexpsum * tmpexpsum
 
-!      core contribution to the integral with constant weight (48)
+       ! core contribution to the integral with constant weight (48)
        tmpsmdfun = 0.0_dp
        do ii=nminFD+4,nmaxFD-4
          expxo2 = expxo2*expinc
-!        tmpexpsum = 1.0_dp / (expxo2 + 1.0_dp / expxo2 )
+         ! tmpexpsum = 1.0_dp / (expxo2 + 1.0_dp / expxo2 )
          expx22 = expxo2*expxo2
          tmpexpsum = expxo2 / (expx22 + 1.0_dp)
          tmpsmdfun = tmpsmdfun + smd2(ii) * tmpexpsum * tmpexpsum
        end do
 
-!      Add on end contributions for show (both functions smd and smdFD are very small
+       ! Add on end contributions for show (both functions smd and smdFD are very small
        smdfun_prev(jj,1)=smdfun_prev(jj,1)       +48.0_dp*tmpsmdfun             &
-&       + 31.0_dp*smd2(nminFD+3)*resFD1 -11.0_dp*smd2(nminFD+2)*resFD2 &
-&       +  5.0_dp*smd2(nminFD+1)*resFD3 -       smd2(nminFD)*resFD4
+         + 31.0_dp*smd2(nminFD+3)*resFD1 -11.0_dp*smd2(nminFD+2)*resFD2 &
+         +  5.0_dp*smd2(nminFD+1)*resFD3 -       smd2(nminFD)*resFD4
 
        expxo2 = expxo2*expinc
        expx22 = expxo2*expxo2
@@ -1071,10 +1068,10 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        tmpexpsum = expxo2 / (expx22 + 1.0_dp)
        resFD4 = tmpexpsum * tmpexpsum
 
-!      Contribution above
+       ! Contribution above
        smdfun_prev(jj,1)=smdfun_prev(jj,1)                                      &
-&       + 31.0_dp*smd2(nmaxFD-3)*resFD1  -11.0_dp*smd2(nmaxFD-2)*resFD2 &
-&       +  5.0_dp*smd2(nmaxFD-1)*resFD3  -       smd2(nmaxFD)*resFD4
+         + 31.0_dp*smd2(nmaxFD-3)*resFD1  -11.0_dp*smd2(nmaxFD-2)*resFD2 &
+         +  5.0_dp*smd2(nmaxFD-1)*resFD3  -       smd2(nmaxFD)*resFD4
        smdfun_prev(jj,1)=incconv*smdfun_prev(jj,1)/48.0_dp
      end do
 
@@ -1099,11 +1096,11 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        resmom  = xgrid_prev(ii+1)  *xgrid_prev(ii+1)  *smdfun_prev(ii+1,  1)
      end do
      secmom=increm * secmom / 48.0_dp
-!    thdmom=increm * thdmom / 48.0_dp
-!
-!    smom1  = second moment of delta in smd1(:)
-!    smom2  = second moment of delta in smd2(:)
-!
+     ! thdmom=increm * thdmom / 48.0_dp
+     !
+     ! smom1  = second moment of delta in smd1(:)
+     ! smom2  = second moment of delta in smd2(:)
+     !
      smom1  = 0.0_dp
      smom2  = 0.0_dp
      tmom1  = 0.0_dp
@@ -1135,25 +1132,25 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
    end if
 
-!  --------------------------------------------------------
-!  end of smearing function initialisation, dblsmr case
-!  --------------------------------------------------------
+   !  --------------------------------------------------------
+   !  end of smearing function initialisation, dblsmr case
+   !  --------------------------------------------------------
 
 
-!  Now that the smeared delta function has been initialized, compute the
-!  occupation function
+   !  Now that the smeared delta function has been initialized, compute the
+   !  occupation function
    occfun_prev(-nptsdiv2_def,1)=zero
    entfun_prev(-nptsdiv2_def,1)=zero
 
-!  Different algorithms are possible, corresponding to the formulas
-!  (4.1.11), (4.1.12) and (4.1.14) in Numerical recipes (pp 107 and 108),
-!  with respective O(1/N2), O(1/N3), O(1/N4) convergence, where N is the
-!  number of points in the interval.
+   !  Different algorithms are possible, corresponding to the formulas
+   !  (4.1.11), (4.1.12) and (4.1.14) in Numerical recipes (pp 107 and 108),
+   !  with respective O(1/N2), O(1/N3), O(1/N4) convergence, where N is the
+   !  number of points in the interval.
    algo=4
 
    if(algo==2)then
 
-!    Extended trapezoidal rule (4.1.11), taken in a cumulative way
+     ! Extended trapezoidal rule (4.1.11), taken in a cumulative way
      do ii=-nptsdiv2_def+1,nptsdiv2_def
        occfun_prev(ii,1)=occfun_prev(ii-1,1)+increm*(smdfun_prev(ii,1)+smdfun_prev(ii-1,1))/2.0_dp
        entfun_prev(ii,1)=entfun_prev(ii-1,1)+increm*&
@@ -1162,9 +1159,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
    else if(algo==3)then
 
-!    Derived from (4.1.12). Converges as O(1/N3).
-!    Do not care about the following points,
-!    where the values are extremely small anyway
+     ! Derived from (4.1.12). Converges as O(1/N3).
+     ! Do not care about the following points,
+     ! where the values are extremely small anyway
      occfun_prev(-nptsdiv2_def+1,1)=0.0_dp ;   entfun_prev(-nptsdiv2_def+1,1)=0.0_dp
      do ii=-nptsdiv2_def+2,nptsdiv2_def
        occfun_prev(ii,1)=occfun_prev(ii-1,1)+increm*&
@@ -1177,9 +1174,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
    else if(algo==4)then
 
-!    Derived from (4.1.14)- alternative extended Simpsons rule. Converges as O(1/N4).
-!    Do not care about the following points,
-!    where the values are extremely small anyway
+     ! Derived from (4.1.14)- alternative extended Simpsons rule. Converges as O(1/N4).
+     ! Do not care about the following points,
+     ! where the values are extremely small anyway
      occfun_prev(-nptsdiv2_def+1,1)=0.0_dp ;   entfun_prev(-nptsdiv2_def+1,1)=0.0_dp
      occfun_prev(-nptsdiv2_def+2,1)=0.0_dp ;   entfun_prev(-nptsdiv2_def+2,1)=0.0_dp
      occfun_prev(-nptsdiv2_def+3,1)=0.0_dp ;   entfun_prev(-nptsdiv2_def+3,1)=0.0_dp
@@ -1200,25 +1197,25 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
    end if ! End of choice between different algorithms for integration
 
-!  Normalize the functions (actually not needed for occopt=3..7)
+   ! Normalize the functions (actually not needed for occopt=3..7)
    factor=1.0_dp/occfun_prev(nptsdiv2_def,1)
    smdfun_prev(:,1)=smdfun_prev(:,1)*factor
    occfun_prev(:,1)=occfun_prev(:,1)*factor
    entfun_prev(:,1)=entfun_prev(:,1)*factor
 
-!  Compute the cubic spline fitting of the smeared delta function
+   !  Compute the cubic spline fitting of the smeared delta function
    yp1=0.0_dp ; ypn=0.0_dp
    workfun(:)=smdfun_prev(:,1)
    call spline(xgrid_prev, workfun, (2*nptsdiv2_def+1), yp1, ypn, smdder)
    smdfun_prev(:,2)=smdder(:)
 
-!  Compute the cubic spline fitting of the occupation function
+   ! Compute the cubic spline fitting of the occupation function
    yp1=0.0_dp ; ypn=0.0_dp
    workfun(:)=occfun_prev(:,1)
    call spline(xgrid_prev, workfun, (2*nptsdiv2_def+1), yp1, ypn, occder)
    occfun_prev(:,2)=occder(:)
 
-!  Compute the cubic spline fitting of the entropy function
+   ! Compute the cubic spline fitting of the entropy function
    yp1=0.0_dp ; ypn=0.0_dp
    workfun(:)=entfun_prev(:,1)
    call spline(xgrid_prev, workfun, (2*nptsdiv2_def+1), yp1, ypn, entder)
@@ -1312,9 +1309,9 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
 
 ! *************************************************************************
 
-!The parameter tol5 defines the treshhold for degeneracy, and the width of the step function
+ !The parameter tol5 defines the treshhold for degeneracy, and the width of the step function
 
- rocceig(:,:)=0.0_dp
+ rocceig(:,:) = zero
 
  do ibandk=1,nband_k
    do ibandkq=1,nband_k
@@ -1325,30 +1322,30 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
        ratio=diffocc/diffeig
      else
        if(occopt<3)then
-!        In a non-metallic case, if the eigenvalues are degenerate,
-!        the occupation numbers must also be degenerate, in which
-!        case there is no contribution from this pair of bands
+         ! In a non-metallic case, if the eigenvalues are degenerate,
+         ! the occupation numbers must also be degenerate, in which
+         ! case there is no contribution from this pair of bands
          if( abs(diffocc) > tol5 ) then
            write(msg,'(a,a,a,a,a,a,a,2(a,i4,a,es16.6,a,es16.6,a,a),a)' ) &
-&           'In a non-metallic case (occopt<3), for a RF calculation,',ch10,&
-&           'if the eigenvalues are degenerate,',' the occupation numbers must also be degenerate.',ch10,&
-&           'However, the following pair of states gave :',ch10,&
-&           'k -state, band number',ibandk,', occ=',occ_k(ibandk),'eigenvalue=',eig0_k(ibandk),',',ch10,&
-&           ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
-&           'Action: change occopt, consistently, in GS and RF calculations.'
+           'In a non-metallic case (occopt<3), for a RF calculation,',ch10,&
+           'if the eigenvalues are degenerate,',' the occupation numbers must also be degenerate.',ch10,&
+           'However, the following pair of states gave :',ch10,&
+           'k -state, band number',ibandk,', occ=',occ_k(ibandk),'eigenvalue=',eig0_k(ibandk),',',ch10,&
+           ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
+           'Action: change occopt, consistently, in GS and RF calculations.'
            MSG_ERROR(msg)
          end if
          ratio=0.0_dp
        else
-!        In the metallic case, one can compute a better approximation of the
-!        ratio by using derivatives doccde
+         ! In the metallic case, one can compute a better approximation of the
+         ! ratio by using derivatives doccde
          ratio=0.5_dp*(doccde_kq(ibandkq)+doccde_k(ibandk))
-!        write(std_out,*)' occeig : ibandkq,doccde_kq(ibandkq)',ibandkq,doccde_kq(ibandkq)
-!        write(std_out,*)'          ibandk ,doccde_k (ibandk )',ibandk,doccde_k(ibandk)
+         ! write(std_out,*)' occeig : ibandkq,doccde_kq(ibandkq)',ibandkq,doccde_kq(ibandkq)
+         ! write(std_out,*)'          ibandk ,doccde_k (ibandk )',ibandk,doccde_k(ibandk)
        end if
      end if
 
-!    Here, must pay attention to the smallness of some coefficient
+     ! Here, must pay attention to the smallness of some coefficient
      diffabsocc=abs(occ_k(ibandk))-abs(occ_kq(ibandkq))
      sumabsocc=abs(occ_k(ibandk))+abs(occ_kq(ibandkq))
      if(sumabsocc>tol8)then
@@ -1374,7 +1371,7 @@ end subroutine occeig
 !!  occ_fd
 !!
 !! FUNCTION
-!!  Fermi-Dirac statistic: 1 / [(exp((e - mu)/ KT) + 1]
+!!  Fermi-Dirac statistics: 1 / [(exp((e - mu)/ KT) + 1]
 !!  Note that occ_fs in [0, 1] so the spin factor is not included, unlike the
 !!  occupations stored in ebands%occ.
 !!
@@ -1432,7 +1429,7 @@ end function occ_fd
 !!  occ_dfd
 !!
 !! FUNCTION
-!!  Derivative of Fermi-Dirac statistic: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
+!!  Derivative of Fermi-Dirac statistics: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
 !!  Note that kT is given in Hartree so the derivative as well
 !!
 !! INPUTS
@@ -1482,7 +1479,7 @@ end function occ_dfd
 !!  occ_be
 !!
 !! FUNCTION
-!!   Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
+!!   Bose-Einstein statistics  1 / [(exp((e - mu)/ KT) - 1]
 !!
 !! INPUTS
 !!   ee=Single particle energy in Ha
@@ -1530,7 +1527,7 @@ end function occ_be
 !!  occ_dbe
 !!
 !! FUNCTION
-!!   Derivative of Bose-Einstein statistic  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
+!!   Derivative of Bose-Einstein statistics  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
 !!   Note that kT is given in Hartree so the derivative as well
 !!
 !! INPUTS
@@ -1611,7 +1608,7 @@ end function occ_dbe
 !! SOURCE
 
 subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
-&  nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
+                         nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
 
 !Arguments ------------------------------------
 !scalars
@@ -1628,7 +1625,7 @@ subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
 
 ! *************************************************************************
 
-!Write the DOS file
+ ! Write the DOS file
  write(msg, '(7a,i2,a,i5,a,i4)' ) "#",ch10, &
   '# ABINIT package : DOS file  ',ch10,"#",ch10,&
   '# nsppol =',nsppol,', nkpt =',nkpt,', nband(1)=',nband(1)

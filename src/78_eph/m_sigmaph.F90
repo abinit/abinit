@@ -319,7 +319,7 @@ module m_sigmaph
    ! itreat_qibz(nqibz)
    ! Table used to distribute potentials over q-points in the IBZ.
    ! The loop over qpts in the IBZ(k) is MPI distributed inside qpt_comm accordinging to this table.
-   ! 0 if this IBZ point is not treated by this proc.
+   ! 0 if this IBZ point is not reated by this proc.
    ! 1 if this IBZ is treated.
 
   integer,allocatable :: my_pinfo(:,:)
@@ -537,7 +537,7 @@ module m_sigmaph
 
     procedure :: skip_phmode => sigmaph_skip_phmode
       ! Ignore contribution of phonon mode depending on phonon frequency value or mode index.
-      ! TODO: Add similar interface to ignore q < qcut (taking into account umlapp though)
+      ! TODO: Add similar interface to ignore q < qcut (taking into account umklapp though)
 
  end type sigmaph_t
 !!***
@@ -3936,6 +3936,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  end do
  ABI_FREE(iqk2dvdb)
 
+ ! FIXME: This is a hotspot
  call cwtime_report(" k+q --> ebands", cpu, wall, gflops)
 
  if (self%qint_method > 0 .and. .not. self%use_doublegrid) then
@@ -4126,7 +4127,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
        write(msg, "(a,i0,2a,f7.3,a)") &
-        " Number of q-points in IBZ(k) treated by this proc: ", self%my_nqibz_k, ch10, &
+        " Number of q-points in IBZ(k) treated by this MPI proc: ", self%my_nqibz_k, ch10, &
         " Load balance inside qpt_comm: ", (self%my_nqibz_k * self%qpt_comm%nproc) / (one * self%nqibz_k), " (should be ~1)"
        call wrtout(std_out, msg)
        MSG_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
@@ -4237,7 +4238,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 ! *************************************************************************
 
  ! Could use non-blocking communications and double buffer technique to reduce synchronisation cost...
- call cwtime(cpu, wall, gflops, "start", msg=" Gathering results. Waiting for other processes...")
+ call cwtime(cpu, wall, gflops, "start", msg=" Gathering results. Waiting for other MPI processes...")
 
  my_rank = xmpi_comm_rank(comm)
  call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
@@ -5070,6 +5071,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  end do
 
  ABI_FREE(kbz)
+ ABI_FREE(bz2ibz)
  call krank%free()
 
  call xmpi_sum(qbz_count, comm, ierr)
@@ -5079,6 +5081,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  ABI_MALLOC(qbz2qpt, (nqbz, 6))
  call listkk(dksqmax, cryst%gmet, qbz2qpt, qpts, qbz, nqpt, nqbz, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,2a)' )&
      "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10, &
@@ -5097,7 +5100,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  ABI_FREE(qbz_count)
  ABI_FREE(qbz2qpt)
- ABI_FREE(bz2ibz)
 
  cnt = count(qselect /= 0)
  write(std_out, "(a, i0, a, f5.1, a)")" qpoints_oracle: calculation of tau_nk will need: ", cnt, &

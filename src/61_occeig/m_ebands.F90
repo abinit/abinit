@@ -2701,7 +2701,7 @@ end function ebands_calc_nelect
 !!
 !! SOURCE
 
-subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
+subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
 
 !Arguments ------------------------------------
 !scalars
@@ -3564,7 +3564,6 @@ integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermi
  end if
 
  ! FIXME: needs to be generalized to complete the k grid for one of the arguments to mknesting
-
  fermie = ebands%fermie
  nqpath = size(qpath_vertices, dim=2)
 

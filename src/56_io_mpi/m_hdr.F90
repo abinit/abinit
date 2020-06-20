@@ -3362,7 +3362,7 @@ end function hdr_backspace
 !! FUNCTION
 !! This subroutine deals with the output of the hdr_type structured variables in ETSF+NETCDF fornat.
 !! It handles variables according to the ETSF format, whenever possible and uses new variables
-!!  when not available in the ETSF format.
+!! when not available in the ETSF format.
 !!
 !! INPUTS
 !!  fform=kind of the array in the file
@@ -3463,7 +3463,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    ])
    NCF_CHECK(ncerr)
 
-   ! Define states section. TODO: write smearing_scheme
+   ! Define states section.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("number_of_states", "int", "number_of_kpoints, number_of_spins"), &
      nctkarr_t("eigenvalues", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &

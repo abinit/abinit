@@ -1755,7 +1755,6 @@ end subroutine symchk
 !!
 !! SOURCE
 
-
 subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 
 !Arguments ------------------------------------

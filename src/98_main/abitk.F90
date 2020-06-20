@@ -63,10 +63,10 @@ program abitk
 !scalars
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
- integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth
+ integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth, lenr
  integer :: ndivsm, abimem_level !, ierr, spin
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
- character(len=500) :: command, arg, msg
+ character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
  type(hdr_type) :: hdr
  type(ebands_t) :: ebands, ebands_kpath, other_ebands
@@ -75,11 +75,9 @@ program abitk
  type(geo_t) :: geo
  type(kpath_t) :: kpath
 !arrays
- integer :: kptrlatt(3,3), new_kptrlatt(3,3)
- !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
+ integer :: kptrlatt(3,3), new_kptrlatt(3,3), ngqpt(3)
  real(dp) :: skw_params(4)
  real(dp),allocatable :: bounds(:,:)
- !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
 !*******************************************************
@@ -158,9 +156,6 @@ program abitk
  !  call get_path_cryst(path, cryst, comm)
  !  call prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
 
- !case ("wfk_downsample")
- ! e.g. go from a 8x8x8 WFK to a 4x4x4
-
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)
@@ -194,6 +189,7 @@ program abitk
      end if
    end do
    write(std_out,"(a)")"#  List of kpoints in the IBZ with the corresponding weights:"
+   !write(std_out,"(/,a,i0)")" kptopt ", kptopt
    write(std_out,"(/,a,i0,/,a)")" nkpt ", nkibz, "kpt"
    do ii=1,nkibz
      write(std_out, "(3(es11.4,a),a,es11.4)") kibz(:, ii), " # ", wtk(ii)
@@ -311,12 +307,22 @@ program abitk
      newlines=2)
 
  case ("ebands_extrael")
-   call get_path_ebands(path, ebands, comm)
+
+   ! Get energies on the IBZ from filepath
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
 
    ABI_CHECK(get_arg("extrael", extrael, msg) == 0, msg)
    ABI_CHECK(get_arg("occopt", occopt, msg, default=3) == 0, msg)
    ABI_CHECK(get_arg("tsmear", tsmear, msg, default=tol2) == 0, msg)
    ABI_CHECK(get_arg("spinmagntarget", spinmagntarget, msg, default=-99.99_dp) == 0, msg)
+
+   !extrael = - dprarr(1) * cryst%ucvol * (Bohr_meter * 100) ** 3
+   !ebands%nelect = ebands%nelect + extrael
+   !call ebands_print_gaps(ebands, std_out, header="KS gaps")
+   !integer,intent(in) :: ntemp
+   !real(dp),intent(in) :: kTmesh(ntemp)
+   !real(dp),intent(out) :: mu_e(ntemp)
+   !call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
 
    call ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol)
    call ebands_set_nelect(ebands, ebands%nelect + extrael, spinmagntarget, msg)
@@ -359,7 +365,9 @@ program abitk
  ! ===========
 
  case ("tetra_unit_tests")
-   call tetra_unittests(comm)
+   ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
+   ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[20, 20, 20]) == 0, msg)
+   call tetra_unittests(ptgroup, ngqpt, comm)
 
  case ("kptrank_unit_tests")
    call kptrank_unittests(comm)
