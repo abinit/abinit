@@ -31,9 +31,9 @@ module m_unittests
  use m_tetrahedron
  use m_htetra
  use m_krank
- use m_hashtable
  use m_symkpt
  use m_sort
+ use m_xmpi
 
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : ltoa, itoa, sjoin
@@ -198,9 +198,9 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
 !Local variables -------------------------
 !scalars
  type(crystal_t) :: crystal
- integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0
+ integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0, master = 0
  real(dp),parameter :: max_occ1 = one
- integer :: nqibz,iqibz,nqbz,ierr,nw
+ integer :: nqibz,iqibz,nqbz,ierr,nw, my_rank
  logical :: use_old_tetra
  real(dp) :: cpu, wall, gflops
  real(dp) :: dosdeltae, emin, emax, qnorm, dos_int
@@ -218,10 +218,11 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
 
 ! *********************************************************************
 
+ my_rank = xmpi_comm_rank(comm)
+
+ call wrtout(std_out, sjoin("Tetra DOS unit tests with ptgroup:", ptgroup, ", and ngqpt", ltoa(ngqpt)))
+
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, "Tetra DOS unit tests")
- call wrtout(std_out, sjoin("ngqpt:", ltoa(ngqpt)))
- call wrtout(std_out, sjoin("Point group:", ptgroup))
  !
  ! 0. Initialize
  call wrtout(std_out,'0. Initialize')
@@ -294,9 +295,12 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    dos(:)  = sum(dweight,2)
    idos(:) = sum(tweight,2)
    call ctrap(nw, dos, dosdeltae, dos_int)
-   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
    call cwtime_report(" tetra_blochl   ", cpu, wall, gflops, end_str=ch10)
-   call write_file('parabola_tetra.dat', nw, energies, idos, dos)
+
+   if (my_rank == master) then
+     write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+     call write_file('parabola_tetra.dat', nw, energies, idos, dos)
+   end if
  end if
 
  ! Compute blochl weights
@@ -308,9 +312,12 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
  call ctrap(nw, dos, dosdeltae, dos_int)
- write(std_out,*) "dos_int, idos", dos_int, idos(nw)
  call cwtime_report(" htetra_blochl   ", cpu, wall, gflops, end_str=ch10)
- call write_file('parabola_htetra.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_htetra.dat', nw, energies, idos, dos)
+ end if
 
  ! Compute blochl weights
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, 1, tweight, dweight, comm)
@@ -321,9 +328,12 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
  call ctrap(nw, dos, dosdeltae, dos_int)
- write(std_out,*) "dos_int, idos", dos_int, idos(nw)
  call cwtime_report(" htetra_blochl_corr   ", cpu, wall, gflops, end_str=ch10)
- call write_file('parabola_htetra_corr.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_htetra_corr.dat', nw, energies, idos, dos)
+ end if
 
  ! Compute weights using LV integration from TDEP
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, 2, tweight, dweight, comm)
@@ -331,12 +341,15 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    dweight(:,iqibz) = dweight(:,iqibz) * mat(iqibz)
    tweight(:,iqibz) = tweight(:,iqibz) * mat(iqibz)
  end do
- dos(:)  = sum(dweight,dim=2)
- idos(:) = sum(tweight,dim=2)
+ dos(:)  = sum(dweight, dim=2)
+ idos(:) = sum(tweight, dim=2)
  call ctrap(nw, dos, dosdeltae, dos_int)
- write(std_out,*) "dos_int, idos", dos_int, idos(nw)
  call cwtime_report(" htetra_blochl_lv   ", cpu, wall, gflops, end_str=ch10)
- call write_file('parabola_htetra_lv.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_htetra_lv.dat', nw, energies, idos, dos)
+ end if
 
  ! Compute DOS using new tetrahedron implementation
  ABI_MALLOC(cenergies, (nw))
@@ -348,18 +361,24 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
  idos(:) =  sum(real(cweight(:,:)), dim=2)
  call ctrap(nw, dos, dosdeltae, dos_int)
- write(std_out,*) "dos_int, idos", dos_int, idos(nw)
  call cwtime_report(" htetra_weights_wvals_zinv_simtet   ", cpu, wall, gflops, end_str=ch10)
- call write_file('parabola_zinv_simtet.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_zinv_simtet.dat', nw, energies, idos, dos)
+ end if
 
  ! Use LV integration from TDEP
  call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 2, cweight, comm)
  dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
  idos(:) =  sum(real(cweight(:,:)), dim=2)
  call ctrap(nw, dos, dosdeltae, dos_int)
- write(std_out,*) "dos_int, idos", dos_int, idos(nw)
  call cwtime_report(" htetra_weights_wvals_zinv_lv   ", cpu, wall, gflops, end_str=ch10)
- call write_file('parabola_zinv_lv.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_zinv_lv.dat', nw, energies, idos, dos)
+ end if
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
@@ -369,9 +388,12 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
  end do
  call ctrap(nw, dos, dosdeltae, dos_int)
- write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+
  call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops, end_str=ch10)
- call write_file('parabola_htetra_onewk_wvals.dat', nw, energies, idos, dos)
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_htetra_onewk_wvals.dat', nw, energies, idos, dos)
+ end if
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
@@ -381,10 +403,13 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iqibz)
  end do
  call ctrap(nw, dos, dosdeltae, dos_int)
- write(std_out,*) "dos_int, idos", dos_int, idos(nw)
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops, end_str=ch10)
- call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
- call htetraq%print(std_out)
+
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
+   call htetraq%print(std_out)
+ end if
 
  ! 2. Compute energies for a flat band
  call wrtout(std_out, ' 2. Testing Flat Band')
@@ -396,7 +421,9 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    dos(:)  = sum(dweight, dim=2)
    idos(:) = sum(tweight, dim=2)
    call cwtime_report(" tetra_blochl", cpu, wall, gflops, end_str=ch10)
-   call write_file('flat_tetra.dat', nw, energies, idos, dos)
+   if (my_rank == master) then
+     call write_file('flat_tetra.dat', nw, energies, idos, dos)
+   end if
  end if
 
  ! Compute DOS using new tetrahedron implementation
@@ -404,7 +431,10 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
  call cwtime_report(" htetra_blochl", cpu, wall, gflops, end_str=ch10)
- call write_file('flat_htetra.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   call write_file('flat_htetra.dat', nw, energies, idos, dos)
+ end if
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
@@ -413,7 +443,10 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iqibz)
  end do
  call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops, end_str=ch10)
- call write_file('flat_htetra_onewk_wvals.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   call write_file('flat_htetra_onewk_wvals.dat', nw, energies, idos, dos)
+ end if
 
  dos = zero; idos = zero
  do iqibz=1,nqibz
@@ -422,7 +455,10 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iqibz)
  end do
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops, end_str=ch10)
- call write_file('flat_htetra_onewk.dat', nw, energies, idos, dos)
+
+ if (my_rank == master) then
+   call write_file('flat_htetra_onewk.dat', nw, energies, idos, dos)
+ end if
 
  ! 3. Compute tetrahedron for simple TB FCC
  !TODO
@@ -464,7 +500,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
   do iw=1,nw
     write(funit,*) energies(iw), idos(iw), dos(iw)
   end do
-  close(unit=funit)
+  close(funit)
 
  end subroutine write_file
 
@@ -487,7 +523,8 @@ subroutine kptrank_unittests(ptgroup, ngqpt, comm)
  integer,intent(in) :: comm
  integer,intent(in) :: ngqpt(3)
 
-!Variables -------------------------------
+!Local variables -------------------------
+!scalars
  type(crystal_t) :: crystal
  type(krank_t) :: krank
  integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
@@ -505,7 +542,9 @@ subroutine kptrank_unittests(ptgroup, ngqpt, comm)
  real(dp),allocatable :: wtq_ibz(:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:)
 
- ABI_UNUSED(comm)
+! *********************************************************************
+
+ call wrtout(std_out, sjoin("kptrank_unittests with ptgroup:", ptgroup, ", and ngqpt", ltoa(ngqpt)))
 
  ! Create fake crystal from ptgroup
  crystal = crystal_from_ptgroup(ptgroup)

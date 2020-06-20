@@ -81,7 +81,7 @@ MODULE m_ebands
  public :: get_valence_idx         ! Gives the index of the (valence|bands at E_f).
  public :: get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
  public :: ebands_vcbm_range_from_gaps ! Find band and energy range for states close to the CBM/VBM given input energies.
- public :: apply_scissor           ! Apply a scissor operator (no k-dependency)
+ public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
  public :: get_occupied            ! Returns band indeces after wich occupations are less than an input value.
  public :: enclose_degbands        ! Adjust band indeces such that all degenerate states are treated.
  public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
@@ -481,7 +481,7 @@ function get_gaps(ebands, gaps, kmask) result(retcode)
  !  ! This might still fail though...
  !  call gaps%free()
  !  call ebands_copy(ebands, tmp_ebands)
- !  call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ !  call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
  !  call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect-dtset%eph_extrael, dtset%spinmagntarget, msg)
  !  gap_err = get_gaps(tmp_ebands, gaps)
  !  call ebands_free(tmp_ebands)
@@ -1586,9 +1586,9 @@ end function ebands_vcbm_range_from_gaps
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/apply_scissor
+!!****f* m_ebands/ebands_apply_scissors
 !! NAME
-!!  apply_scissor
+!!  ebands_apply_scissors
 !!
 !! FUNCTION
 !!  Apply a scissor operator of amplitude scissor_energy.
@@ -1610,7 +1610,7 @@ end function ebands_vcbm_range_from_gaps
 !!
 !! SOURCE
 
-subroutine apply_scissor(ebands, scissor_energy)
+subroutine ebands_apply_scissors(ebands, scissor_energy)
 
 !Arguments ------------------------------------
 !scalars
@@ -1661,7 +1661,7 @@ subroutine apply_scissor(ebands, scissor_energy)
  spinmagntarget_ = -99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
  call ebands_update_occ(ebands, spinmagntarget_)
 
-end subroutine apply_scissor
+end subroutine ebands_apply_scissors
 !!***
 
 !----------------------------------------------------------------------
@@ -2290,10 +2290,9 @@ end subroutine ebands_update_occ
 !! occopt=Occupation options (see input variable)
 !! tsmear=Temperature of smearing.
 !! spinmagntarget=if differ from -99.99d0, fix the spin polarization (in Bohr magneton)
-!! [prtvol]=Verbosity level (0 for lowest level)
-!!
-!! SIDE EFFECTS
-!! ebands<ebands_t>=Info on the band structure, see above for side effects
+!! prtvol=Verbosity level (0 for lowest level)
+!! [update_occ]=False to avoid recomputing occupation factors (mainly used when a call to set_scheme is followed
+!!  by another call to set_nelect (update_occ is expensive for large k-meshes). Default: True.
 !!
 !! PARENTS
 !!      eph,m_sigmaph
@@ -2302,33 +2301,37 @@ end subroutine ebands_update_occ
 !!
 !! SOURCE
 
-subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol)
+subroutine ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol, update_occ)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(inout) :: ebands
  integer,intent(in) :: occopt
- integer,optional,intent(in) :: prtvol
+ integer,intent(in) :: prtvol
  real(dp),intent(in) :: tsmear, spinmagntarget
+ logical,optional,intent(in) :: update_occ
 
 !Local variables-------------------------------
 !scalars
- real(dp),parameter :: stmbias0=zero
- integer :: my_prtvol
+ real(dp),parameter :: stmbias0 = zero
+ logical :: my_update_occ
 
 ! *************************************************************************
 
- my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
- if (my_prtvol > 10) then
+ my_update_occ = .True.; if (present(update_occ)) my_update_occ = update_occ
+
+ if (prtvol > 10) then
    call wrtout(std_out, " Changing occupation scheme in electron bands")
    call wrtout(std_out, sjoin(" occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
    call wrtout(std_out, sjoin(" tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
  end if
 
  ebands%occopt = occopt; ebands%tsmear = tsmear
- call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=my_prtvol)
 
- if (my_prtvol > 10) call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
+ if (my_update_occ) then
+   call ebands_update_occ(ebands, spinmagntarget, stmbias0, prtvol=prtvol)
+   if (prtvol > 10) call wrtout(std_out, sjoin(' Fermi level is now:', ftoa(ebands%fermie)))
+ end if
 
 end subroutine ebands_set_scheme
 !!***

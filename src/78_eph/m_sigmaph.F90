@@ -1036,7 +1036,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    qselect = 1
    if (sigma%imag_only .and. sigma%qint_method == 1) then
      call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
-     !qselect = 1
    end if
    call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
 
@@ -2298,7 +2297,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    ! This might still fail though...
    call gaps%free()
    call ebands_copy(ebands, tmp_ebands)
-   call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
    call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect - dtset%eph_extrael, dtset%spinmagntarget, msg)
    gap_err = get_gaps(tmp_ebands,gaps)
    call ebands_free(tmp_ebands)
@@ -2893,7 +2892,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    if (abs(dtset%mbpt_sciss) > tol6) then
      ! Apply the scissor operator to the dense mesh
      call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
-     call apply_scissor(ebands_dense, dtset%mbpt_sciss)
+     call ebands_apply_scissors(ebands_dense, dtset%mbpt_sciss)
    end if
  end if
 
@@ -4816,7 +4815,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    ABI_FREE(tmp_cweights)
  end if
 
- call cwtime_report(" weights with tetrahedron", cpu, wall, gflops)
+ call cwtime_report(" get_all_qweights with tetrahedron", cpu, wall, gflops)
 
 end subroutine sigmaph_get_all_qweights
 !!***
@@ -4998,7 +4997,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: timrev1 = 1
+ integer,parameter :: timrev1 = 1, master = 0
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
  real(dp) :: eig0nk, eig0mkq, dksqmax, ediff, cpu, wall, gflops
@@ -5039,6 +5038,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
 
  ! Make full k-point rank arrays
  krank = krank_new(nkbz, kbz)
+ call cwtime_report(" krank_new", cpu, wall, gflops)
 
  ABI_ICALLOC(qbz_count, (nqbz))
  cnt = 0
@@ -5069,6 +5069,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
      end do
    end do
  end do
+ call cwtime_report(" qbz_count_loop", cpu, wall, gflops)
 
  ABI_FREE(kbz)
  ABI_FREE(bz2ibz)
@@ -5077,7 +5078,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  call xmpi_sum(qbz_count, comm, ierr)
  call cwtime_report(" qbz_count", cpu, wall, gflops)
 
- ! Get mapping QBZ --> QPTS q-points.
+ ! Get mapping QBZ --> QPTS q-points. Time-reversal is always used for phonons.
  ABI_MALLOC(qbz2qpt, (nqbz, 6))
  call listkk(dksqmax, cryst%gmet, qbz2qpt, qpts, qbz, nqpt, nqbz, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
@@ -5101,9 +5102,11 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  ABI_FREE(qbz_count)
  ABI_FREE(qbz2qpt)
 
- cnt = count(qselect /= 0)
- write(std_out, "(a, i0, a, f5.1, a)")" qpoints_oracle: calculation of tau_nk will need: ", cnt, &
-   " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
+ if (my_rank == master) then
+   cnt = count(qselect /= 0)
+   write(std_out, "(a, i0, a, f5.1, a)")" qpoints_oracle: calculation of tau_nk will need: ", cnt, &
+     " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
+ end if
 
 end subroutine qpoints_oracle
 !!***

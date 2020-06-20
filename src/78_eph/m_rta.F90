@@ -365,7 +365,6 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
- !if (any(dtset%sigma_ngkpt /= 0) .and. .False.) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
    call wrtout([std_out, ab_out], sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0

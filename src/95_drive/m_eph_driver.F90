@@ -319,8 +319,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! Construct crystal and ebands from the GS WFK file.
  if (use_wfk) then
+   ! Construct crystal and ebands from the GS WFK file.
    call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm)
    call wfk0_hdr%vs_dtset(dtset)
 
@@ -352,25 +352,25 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
      "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
      call wrtout([std_out, ab_out], msg)
-     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
 
      if (abs(dtset%mbpt_sciss) > tol6) then
        ! Apply the scissor operator
        call wrtout([std_out, ab_out], &
          sjoin(" Applying scissors operator to the conduction states with value: ", &
          ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-       call apply_scissor(ebands, dtset%mbpt_sciss)
+       call ebands_apply_scissors(ebands, dtset%mbpt_sciss)
      end if
 
      if (use_wfq) then
-       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
+       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
 
        if (abs(dtset%mbpt_sciss) > tol6) then
          ! Apply the scissor operator
-         call wrtout(std_out, &
+         call wrtout([std_out, ab_out], &
            sjoin(" Applying scissors operator to the k+q conduction with value:", &
            ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-         call apply_scissor(ebands_kq, dtset%mbpt_sciss)
+         call ebands_apply_scissors(ebands_kq, dtset%mbpt_sciss)
        end if
      end if
    end if
@@ -390,11 +390,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    else if (abs(dtset%eph_extrael) > zero) then
      call wrtout([std_out, ab_out], &
                  sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
-     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
      call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
      call wrtout([std_out, ab_out], msg)
      if (use_wfq) then
-       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
        call ebands_set_nelect(ebands_kq, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
        call wrtout(ab_out, msg)
      end if
@@ -452,7 +452,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfk) then
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
-                     prtvol=dtset%prtvol)
+                      prtvol=dtset%prtvol)
    call cryst_ddb%free()
  else
    ! Get crystal from DDB.

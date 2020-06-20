@@ -55,7 +55,7 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
+ use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, ebands_apply_scissors, &
                              ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
                              get_ng0sh, kmesh_print, find_qmesh, get_BZ_item
@@ -159,7 +159,7 @@ contains
 !!      driver
 !!
 !! CHILDREN
-!!      apply_scissor,calc_rpa_functional,cchi0,cchi0q0,chi0_bksmask
+!!      ebands_apply_scissors,calc_rpa_functional,cchi0,cchi0q0,chi0_bksmask
 !!      chi0q0_intraband,chi_free,chkpawovlp,coeffs_gausslegint
 !!      destroy_mpi_enreg,ebands_copy,ebands_free,ebands_update_occ
 !!      em1params_free,energies_init,fourdp,get_gftt,getph,gsph_free,hdr_free
@@ -783,7 +783,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &   ' applying a scissor operator of [eV] : ',Ep%mbpt_sciss*Ha_eV,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   call apply_scissor(QP_BSt,Ep%mbpt_sciss)
+   call ebands_apply_scissors(QP_BSt,Ep%mbpt_sciss)
  else if (update_energies) then
    write(msg,'(4a)')&
 &   ' screening : performing a first self-consistency',ch10,&

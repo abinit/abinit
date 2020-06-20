@@ -102,6 +102,7 @@ module defs_datatypes
   real(dp),allocatable :: linewidth(:,:,:,:)
   ! linewidth(itemp,mband,nkpt,nsppol)
   ! Linewidth of each band
+  ! MG: TODO: This array should be removed (I think Yannick introduced it, see also Ktmesh)
 
   real(dp),allocatable :: kTmesh(:)
   ! kTmesh(ntemp)
