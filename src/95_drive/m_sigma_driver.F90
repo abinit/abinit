@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
  use m_spacepar,          only : hartre
- use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst, rotate_exchange, rotate_hartree, me_get_haene
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,rotate_hartree,me_get_haene
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
  implicit none
@@ -2307,11 +2307,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      write(msg,'(a46)')' Vee[HF-like] energy obtained using KS 1-RDM:'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     eh_energy = me_get_haene(Sr,KS_me,Kmesh,QP_BSt)
+     eh_energy=me_get_haene(Sr,KS_me,Kmesh,QP_BSt)
      write(msg,'(a,2(es16.6,a))')' Eh[KS]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
-     ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)
+     ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)
      write(msg,'(a,2(es16.6,a))')' Ex[KS]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
@@ -2355,6 +2355,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &           Ltg_k(ikcalc),PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 !&           gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_p) 
 &           gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
+         else
+           write(msg,'(a44,i5)')  ' Skipping the calc. of Sigma_c for k-point: ',ikcalc
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(ab_out,msg,'COLL')
          endif
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
@@ -2440,7 +2444,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end do
        call calc_vhxc_me(Wfd,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&    ! Build matrix elements from gw_vhartr -> GW1RDM_me
        & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
-       & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur) 
+       & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
        ABI_FREE(tmp_kstab)
        !
        ! Exchange <KS_i|K[NO]|KS_i>
@@ -2450,6 +2454,17 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                       ! Build new Wfd_natorb
        call Wfd_natorb%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))        ! Read WFK and store it in Wfd_natorb
        call Wfd_natorb%rotate(Cryst,nateigv)                                   ! Let rotate build the NOs in Wfd_natorb (KS->NO)
+       !Debug test for Vhartree rotation uncomment the 10 lines below and comment from call calc_vhxc_me to ABI_FREE above.
+       !call calc_vhxc_me(Wfd_natorb,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&    ! Build matrix elements from gw_vhartr -> GW1RDM_me
+       !& ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
+       !& gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
+       !ABI_FREE(tmp_kstab)
+       !do ikcalc=1,Sigp%nkptgw                                                 
+       !  ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
+       !  ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
+       !  ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+       !  call rot2(ikcalc,ib1,ib2,GW1RDM_me,nateigv) ! <NO_i|J[NO]|NO_j> -> <KS_i|J[NO]|KS_j>
+       !enddo
        do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
@@ -2461,7 +2476,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_natorb,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
        end do
-       ex_energy = sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy 
+       ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy 
        ! Transform in <NO_i|Sigma_x[NO]|NO_j> the outer NOs -> KSs (at this point all mat. elements are stored in Sr%x_mat)
        do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
@@ -2517,7 +2532,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          call rotate_hartree(ikcalc,ib1,ib2,GW1RDM_me,nateigv) ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
        end do
-       eh_energy = me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
+       eh_energy=me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        write(msg,'(a1)')' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
