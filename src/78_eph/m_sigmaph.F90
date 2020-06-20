@@ -2299,7 +2299,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    call gaps%free()
    call ebands_copy(ebands, tmp_ebands)
    call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect-dtset%eph_extrael, dtset%spinmagntarget, msg)
+   call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect - dtset%eph_extrael, dtset%spinmagntarget, msg)
    gap_err = get_gaps(tmp_ebands,gaps)
    call ebands_free(tmp_ebands)
  end if

@@ -3670,7 +3670,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "nelect", "charge"],[hdr%nelect, hdr%charge])
  NCF_CHECK(ncerr)
 
- ! FIXME: in etsf_io the number of electrons is declared as integer!!!
+ ! NB: In etsf_io the number of electrons is declared as integer.
+ ! We use abinit nelect to store the value as real(dp).
  NCF_CHECK(nf90_put_var(ncid, vid("number_of_electrons"), nint(hdr%nelect)))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt"), hdr%kptrlatt))

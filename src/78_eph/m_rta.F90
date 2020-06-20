@@ -422,7 +422,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    call ebands_free(new%ebands)
    call ebands_copy(tmp_ebands, new%ebands)
    call ebands_free(tmp_ebands)
-   !call ebands_transfer(tmp_ebands, new%ebands)
+   !call ebands_move_alloc(tmp_ebands, new%ebands)
  end if
 
  ! Same doping case as sigmaph
@@ -724,7 +724,7 @@ contains
  !Arguments -------------------------------------------
  real(dp),intent(in) :: kT, mu
  real(dp),intent(in) :: wmesh(self%nw), dos(self%nw)
- integer,intent(in) ::  istart, istop
+ integer,intent(in) :: istart, istop
 
  !Local variables -------------------------------------
  integer :: iw
@@ -832,6 +832,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Compute index of valence band
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
+ ! Generalize expression to metals using mu_e
  max_occ = two / (self%nspinor * self%nsppol)
  nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
 

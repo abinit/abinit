@@ -87,7 +87,6 @@ MODULE m_ebands
  public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
  public :: get_minmax              ! Returns min and Max value of (eig|occ|doccde).
- public :: ebands_edstats          ! Compute statistical parameters of the energy differences e_ks[b+1] - e_ks[b]
  public :: ebands_has_metal_scheme ! .True. if metallic occupation scheme is used.
  public :: ebands_write_bxsf       ! Write 3D energies for Fermi surface visualization (XSF format)
  public :: ebands_update_occ       ! Update the occupation numbers.
@@ -1975,7 +1974,7 @@ end function ebands_nelect_per_spin
 !!
 !! SOURCE
 
-function get_minmax(ebands,arr_name) result(minmax)
+function get_minmax(ebands, arr_name) result(minmax)
 
 !Arguments ------------------------------------
 !scalars
@@ -1993,16 +1992,16 @@ function get_minmax(ebands,arr_name) result(minmax)
 
 ! *************************************************************************
 
- SELECT CASE (tolower(arr_name))
- CASE ('occ')
+ select case (tolower(arr_name))
+ case ('occ')
    rdata => ebands%occ
- CASE ('eig')
+ case ('eig')
    rdata => ebands%eig
- CASE ('doccde')
+ case ('doccde')
    rdata => ebands%doccde
- CASE DEFAULT
+ case default
    MSG_BUG(sjoin('Wrong arr_name:', arr_name))
- END SELECT
+ end select
 
  minmax(1,:)=greatest_real
  minmax(2,:)=smallest_real
@@ -2019,65 +2018,6 @@ function get_minmax(ebands,arr_name) result(minmax)
  end do
 
 end function get_minmax
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ebands/ebands_edstats
-!! NAME
-!! ebands_edstats
-!!
-!! FUNCTION
-!!  Compute statistical parameters of the energy differences e_ks[b+1] - e_ks[b]
-!!  Returns stats_t record with the results (mean, stdev, min, max)
-!!
-!! INPUTS
-!!  ebands<ebands_t>=Band energies.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-type(stats_t) function ebands_edstats(ebands) result(stats)
-
-!Arguments ------------------------------------
-!scalars
- class(ebands_t),intent(in) :: ebands
-
-!Local variables-------------------------------
-!scalars
- integer :: ikibz,nband_k,spin
-!arrays
- real(dp),allocatable :: ediffs(:,:,:),edvec(:)
-
-! *************************************************************************
-
- ! TODO: Remove
- ! Compute energy difference between b+1 and b.
- ABI_CALLOC(ediffs, (ebands%mband-1,ebands%nkpt,ebands%nsppol))
-
- do spin=1,ebands%nsppol
-   do ikibz=1,ebands%nkpt
-     nband_k=ebands%nband(ikibz+(spin-1)*ebands%nkpt)
-     if (nband_k > 1) then
-       ediffs(1:nband_k-1,ikibz,spin) = ebands%eig(2:nband_k,ikibz,spin) - ebands%eig(1:nband_k-1,ikibz,spin)
-     end if
-   end do
- end do
-
- ! Calculate the statistical parameters
- ! Not completely correct if nband_k varies but ...
- ABI_MALLOC(edvec, ((ebands%mband-1)*ebands%nkpt*ebands%nsppol))
- edvec = reshape(ediffs, [(ebands%mband-1)*ebands%nkpt*ebands%nsppol])
-
- stats = stats_eval(edvec)
-
- ABI_FREE(ediffs)
- ABI_FREE(edvec)
-
-end function ebands_edstats
 !!***
 
 !----------------------------------------------------------------------
@@ -2576,7 +2516,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
  integer,parameter :: occopt3 = 3
  integer :: ierr, it, nprocs, my_rank
  real(dp) :: nelect
- real(dp) :: cpu,wall,gflops
+ real(dp) :: cpu, wall, gflops
  type(ebands_t) :: tmp_ebands
  character(len=500) :: msg
 
@@ -2903,7 +2843,8 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
 
  ! Write data.
  ! 1) Electrons.
- ! FIXME: in etsf_io the number of electrons is declared as integer!!!
+ ! NB: In etsf_io the number of electrons is declared as integer.
+ ! We use abinit nelect to store the value as real(dp).
  nelect_int = nint(ebands%nelect)
 
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -2928,7 +2869,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  ! ===========================================================
  ! Define variables.
  NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "occopt", "kptopt"], defmode=.True.))
- NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "tphysel", "charge"]))
+ NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "tphysel", "charge", "nelect"]))
 
  ncerr = nctk_def_arrays(ncid, nctkarr_t('istwfk', "i", 'number_of_kpoints'))
  NCF_CHECK(ncerr)
@@ -2947,13 +2888,14 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
    NCF_CHECK(ncerr)
  end if
 
- ! Write variables
+ ! Write Abinit variables
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, vid("tphysel"), ebands%tphysel))
  NCF_CHECK(nf90_put_var(ncid, vid("occopt"), ebands%occopt))
  NCF_CHECK(nf90_put_var(ncid, vid("istwfk"), ebands%istwfk))
  NCF_CHECK(nf90_put_var(ncid, vid("kptopt"), ebands%kptopt))
  NCF_CHECK(nf90_put_var(ncid, vid("charge"), ebands%charge))
+ NCF_CHECK(nf90_put_var(ncid, vid("nelect"), ebands%nelect))
  NCF_CHECK(nf90_put_var(ncid, vid('kptrlatt_orig'), ebands%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid('shiftk_orig'), ebands%shiftk_orig))
  NCF_CHECK(nf90_put_var(ncid, vid('kptrlatt'),ebands%kptrlatt))
@@ -3073,7 +3015,6 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  integer :: nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
- type(stats_t) :: ediffs
  type(htetra_t) :: tetra
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol)
@@ -3093,12 +3034,6 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  end if
 
  edos%broad = broad; edos%step = step
- if (broad <= tol16 .or. step <= tol16) then
-   ! Compute the mean value of the energy spacing.
-   ediffs = ebands_edstats(ebands)
-   if (edos%broad <= tol16) edos%broad = ediffs%mean
-   if (edos%step <= tol16) edos%step = 0.1 * ediffs%mean
- end if
 
  ! Compute the linear mesh so that it encloses all bands.
  eminmax_spin = get_minmax(ebands, "eig")
@@ -4399,7 +4334,6 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
  real(dp) :: max_ene,min_ene,wtk,max_occ
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
- type(stats_t) :: ediffs
  type(htetra_t) :: tetra
 !arrays
  !integer,allocatable :: bz2ibz(:,:)
@@ -4421,12 +4355,6 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
  end if
 
  edos%broad = broad; edos%step = step
- if (broad <= tol16 .or. step <= tol16) then
-   ! Compute the mean value of the energy spacing.
-   ediffs = ebands_edstats(ebands)
-   if (edos%broad <= tol16) edos%broad = ediffs%mean
-   if (edos%step <= tol16) edos%step = 0.1 * ediffs%mean
- end if
 
  ! Compute the linear mesh so that it encloses all bands.
  eminmax_spin = get_minmax(ebands, "eig")
@@ -4676,7 +4604,6 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
 !scalars
  integer :: ik_ibz,ibc,ibv,spin,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,bcorr !iw, unt,
  real(dp) :: wtk,wmax,wstep,wbroad
- type(stats_t) :: ediffs
  type(htetra_t) :: tetra
  character(len=500) :: msg
  !character(len=fnlen) :: path
@@ -4705,13 +4632,11 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    end if
  end do
 
- ! Compute the mean value of the energy spacing.
- ediffs = ebands_edstats(ebands)
- wbroad = broad; if (wbroad <= tol16) wbroad = 0.1 * ediffs%mean
+ wbroad = broad
 
  ! Compute the linear mesh so that it encloses all bands.
  !if (.not. present(mesh)) then
- wstep = step; if (wstep <= tol16) wstep = 0.02 * ediffs%mean
+ wstep = step
  eminmax = get_minmax(ebands, "eig")
  wmax = maxval(eminmax(2,:) - eminmax(1,:))
  nw = nint(wmax/wstep) + 1
@@ -4769,7 +4694,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
 
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
      ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
-   if (ierr/=0) then
+   if (ierr /= 0) then
      call tetra%free(); return
    end if
 
@@ -4920,7 +4845,6 @@ end function jdos_ncwrite
 subroutine jdos_free(jdos)
 
 !Arguments ------------------------------------
-!scalars
  class(jdos_t),intent(inout)  :: jdos
 
 ! *********************************************************************

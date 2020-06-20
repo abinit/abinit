@@ -64,13 +64,14 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth, lenr
- integer :: ndivsm, abimem_level !, ierr, spin
+ integer :: ndivsm, abimem_level, ierr !, spin
  real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
  character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
  type(hdr_type) :: hdr
  type(ebands_t) :: ebands, ebands_kpath, other_ebands
  type(edos_t) :: edos
+ type(jdos_t) :: jdos
  type(crystal_t) :: cryst, other_cryst
  type(geo_t) :: geo
  type(kpath_t) :: kpath
@@ -219,7 +220,7 @@ program abitk
 
  case ("ebands_dos", "ebands_jdos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   ABI_CHECK(get_arg("intmeth", intmeth, msg, default=1) == 0, msg)
+   ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.04 * ev_Ha) == 0, msg)
 
@@ -230,15 +231,15 @@ program abitk
 
    else if (command == "ebands_jdos") then
      NOT_IMPLEMENTED_ERROR()
-     !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+     jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
-     !call jdos%free()
+     call jdos%free()
    end if
 
  case ("ebands_bxsf")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    if (ebands_write_bxsf(ebands, cryst, strcat(basename(path), "_BXSF")) /= 0)  then
-     MSG_ERROR("Cannot produce file for Fermi surface, check log file for more info")
+     MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
    end if
 
  !case ("nesting")
@@ -370,7 +371,9 @@ program abitk
    call tetra_unittests(ptgroup, ngqpt, comm)
 
  case ("kptrank_unit_tests")
-   call kptrank_unittests(comm)
+   ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
+   ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[100, 100, 100]) == 0, msg)
+   call kptrank_unittests(ptgroup, ngqpt, comm)
 
  case default
    MSG_ERROR(sjoin("Unknown command:", command))

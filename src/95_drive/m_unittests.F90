@@ -60,6 +60,7 @@ contains
 !!  This is only for testing porposes
 !!
 function rprim_from_ptgroup(ptgroup) result(rprim)
+
  character(len=*),intent(in) :: ptgroup
  real(dp) :: rprim(3,3)
  real(dp) :: tx,ty,tz
@@ -478,11 +479,13 @@ end subroutine tetra_unittests
 !! FUNCTION
 !!  Test the krank routines
 !!
-subroutine kptrank_unittests(comm)
+subroutine kptrank_unittests(ptgroup, ngqpt, comm)
 
 !Arguments -------------------------------
 !scalars
+ character(len=*),intent(in) :: ptgroup
  integer,intent(in) :: comm
+ integer,intent(in) :: ngqpt(3)
 
 !Variables -------------------------------
  type(crystal_t) :: crystal
@@ -504,15 +507,13 @@ subroutine kptrank_unittests(comm)
 
  ABI_UNUSED(comm)
 
- ! Create fake crystal
- !crystal = crystal_from_ptgroup('6')
- crystal = crystal_from_ptgroup('m-3m')
+ ! Create fake crystal from ptgroup
+ crystal = crystal_from_ptgroup(ptgroup)
 
  ! Create a regular grid
- in_qptrlatt(:,1)=[ 100, 0, 0]
- in_qptrlatt(:,2)=[ 0, 100, 0]
- in_qptrlatt(:,3)=[ 0, 0, 100]
+ in_qptrlatt = 0; in_qptrlatt(1,1) = ngqpt(1); in_qptrlatt(2,2) = ngqpt(2); in_qptrlatt(3,3) = ngqpt(3)
  dos_qshift(:,1) =[0.0,0.0,0.0]
+
  call cwtime(cpu, wall, gflops, "start")
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
@@ -522,18 +523,18 @@ subroutine kptrank_unittests(comm)
  krank = krank_new(nqbz, qbz)
  do iqbz=1,nqbz
    iqbz_rank = krank%get_index(qbz(:,iqbz))
-   ABI_CHECK(iqbz==iqbz_rank,'wrong q-point')
+   ABI_CHECK(iqbz == iqbz_rank, 'wrong q-point')
  end do
  call cwtime_report(" krank", cpu, wall, gflops)
  call krank%free()
 
- ABI_MALLOC(wtq_fullbz,(nqbz))
- ABI_MALLOC(wtq_folded,(nqbz))
- ABI_MALLOC(ibz2bz,(nqbz))
- ABI_MALLOC(ibz2bz_new,(nqbz))
- ABI_MALLOC(bz2ibz_symkpt,(6,nqbz))
- ABI_MALLOC(bz2ibz_symkpt_new,(6,nqbz))
- wtq_fullbz = one/nqbz
+ ABI_MALLOC(wtq_fullbz, (nqbz))
+ ABI_MALLOC(wtq_folded, (nqbz))
+ ABI_MALLOC(ibz2bz, (nqbz))
+ ABI_MALLOC(ibz2bz_new, (nqbz))
+ ABI_MALLOC(bz2ibz_symkpt, (6,nqbz))
+ ABI_MALLOC(bz2ibz_symkpt_new, (6,nqbz))
+ wtq_fullbz = one / nqbz
 
  ! Test symkpt (note that the above call to kpts_ibz_from_kptrlatt already involves calling this routine)
  call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,&
@@ -541,12 +542,12 @@ subroutine kptrank_unittests(comm)
              wtq_fullbz,wtq_folded, bz2ibz_symkpt, comm)
  call cwtime_report(" symkpt", cpu, wall, gflops)
 
- wtq_fullbz = one/nqbz
+ wtq_fullbz = one / nqbz
  call symkpt_new(chksymbreak0,crystal%gmet,ibz2bz_new,iout0,qbz,nqbz,&
                  nqibz_symkpt_new,crystal%nsym,crystal%symrec,crystal%timrev,&
                  bz2ibz_symkpt_new, comm)
  call cwtime_report(" symkpt_new", cpu, wall, gflops)
- ABI_CHECK(nqibz_symkpt==nqibz_symkpt_new,'Wrong number of qpoints in the IBZ')
+ ABI_CHECK(nqibz_symkpt == nqibz_symkpt_new, 'Wrong number of qpoints in the IBZ')
 
  ! check if ibz is the same
  do iqibz=1,nqibz
