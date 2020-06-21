@@ -514,7 +514,6 @@ subroutine rta_compute(self, cryst, dtset, comm)
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
-
  my_rank = xmpi_comm_rank(comm)
 
  ! Basic dimensions
@@ -718,6 +717,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  call cwtime_report(" rta_compute", cpu, wall, gflops)
 
 contains
+
  real(dp) function carriers(wmesh, dos, istart, istop, kT, mu)
 
  !Arguments -------------------------------------------
@@ -816,7 +816,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  integer :: nsppol, nkpt, mband, ib, ik, spin, ii, jj, itemp, ielhol, nvalence, cnt, nprocs, irta
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
  real(dp) :: cpu, wall, gflops
- !integer :: bmin(2), bmax(2)
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
 
 !************************************************************************
@@ -830,8 +829,9 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  mband = self%ebands%mband; nkpt = self%ebands%nkpt; nsppol = self%ebands%nsppol
 
  ! Compute index of valence band
- ! TODO: should add nelect0 to ebands to keep track of intrinsic
- ! Generalize expression to metals using mu_e
+ ! TODO:
+ !  1) Should add nelect0 to ebands to keep track of intrinsic
+ !  2) Generalize expression to metals using mu_e
  max_occ = two / (self%nspinor * self%nsppol)
  nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
 
@@ -879,8 +879,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
    do ik=1,nkpt
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      wtk = self%ebands%wtk(ik)
-     !bmin = [nvalence + 1, 1]
-     !bmax = [mband, nvalence]
 
      do ib=1,mband
        ielhol = 2; if (ib > nvalence) ielhol = 1
@@ -1151,12 +1149,11 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
  if (irta == 2) rta_type = "RTA type: Momentum relaxation time approximation (MRTA)"
 
  ! write header
- write(ount, "(2a)")"# ", trim(header) ! with irta
+ write(ount, "(2a)")"# ", trim(header)
  write(ount, "(a)")"# ", trim(rta_type)
- !write(ount, "(a)")"# Results in atomic units. Electron energies in Hartree"
+ ! TODO: Units ?
  write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
  write(ount, "(a)")"#"
- !write(ount, "()")"#"
 
  ! (nw, 3, 3, ntemp, nsppol)
  if (self%nsppol == 1) then

@@ -2831,6 +2831,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    ABI_CALLOC(new%a2few, (new%a2f_ne, new%gfw_nomega, new%max_nbcalc))
  end if
 
+ call cwtime_report(" MPI setup", cpu, wall, gflops)
+
  ! Initialize object for the computation of integration weights (integration in q-space).
  ! Weights can be obtained in different ways:
  !
@@ -3479,6 +3481,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  ! Map ebands kpoints to sigmaph
  ABI_MALLOC(indkk, (self%nkcalc, 6))
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, self%nkcalc, cryst%nsym, &
              sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
 
@@ -3506,7 +3509,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 #ifdef HAVE_NETCDF
  ! Read linewidths from sigmaph file.
  ! Use global array (mband, nkpt, nsppol) but keep in mind that results in SIGPEPH are packed
- ! so that only the relevant k-points are stored.
+ ! so that only the relevant k-points are stored on file.
 
  ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
  ABI_CALLOC(linewidth_serta, (self%ntemp, mband, nkpt, nsppol))
@@ -3532,7 +3535,6 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
          ! Read MRTA lifetimes
          if (self%mrta > 0) then
-           !print *, "reading linewidth_mrta"
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
                                 linewidth_mrta(itemp, band_ks, ikpt, spin), start=[itemp, iband, ikcalc, spin])
            NCF_CHECK(ncerr)
@@ -3541,16 +3543,13 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
        ! Read band velocities
        ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), &
-                            velocity(:,band_ks,ikpt,spin), start=[1, iband, ikcalc, spin])
+                            velocity(:, band_ks, ikpt, spin), start=[1, iband, ikcalc, spin])
        NCF_CHECK(ncerr)
 
      end do
    end do
  end do
 #endif
-
- !print *, "linewidth_serta", maxval(abs(linewidth_serta))
- !print *, "linewidth_mrta", maxval(abs(linewidth_mrta))
 
  ABI_FREE(indkk)
 
@@ -3828,6 +3827,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
      "(including time-reversal symmetry)"))
    call wrtout(std_out, sjoin(" Number of q-points in the IBZ(k):", itoa(lgk_ptr%nibz)))
 
+   ! TODO: Pointers instead of copies to save space?
    self%nqibz_k = lgk_ptr%nibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
@@ -3911,6 +3911,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
  !
  ABI_MALLOC(kq_list, (3, self%nqibz_k))
+!!!!$OMP PARALLEL DO
  do iq_ibz=1,self%nqibz_k
    kq_list(:, iq_ibz) = kk + self%qibz_k(:,iq_ibz)
  end do
@@ -4127,7 +4128,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
 
        write(msg, "(a,i0,2a,f7.3,a)") &
         " Number of q-points in IBZ(k) treated by this MPI proc: ", self%my_nqibz_k, ch10, &
-        " Load balance inside qpt_comm: ", (self%my_nqibz_k * self%qpt_comm%nproc) / (one * self%nqibz_k), " (should be ~1)"
+        " Load balance inside qpt_comm: ", (self%nqibz_k / (one * self%my_nqibz_k * self%qpt_comm%nproc)), " (should be ~1)"
        call wrtout(std_out, msg)
        MSG_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
 
@@ -4246,7 +4247,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  if (self%mrta > 0) call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
 
- call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
+ call cwtime_report(" Sigma_nk gather", cpu, wall, gflops, comm=comm)
 
  ! Only procs inside ncwrite_comm perform IO (ab_out and ncid)
  if (self%ncwrite_comm%value == xmpi_comm_null) return
@@ -4725,53 +4726,52 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
    ! loop over bands to sum
    do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
-    ! loop over my phonon modes
-    do imyp=1,sigma%my_npert
-      nu = sigma%my_pinfo(3, imyp)
+     ! loop over my phonon modes
+     do imyp=1,sigma%my_npert
+       nu = sigma%my_pinfo(3, imyp)
 
-      ! HM: This one should be faster but uses more memory, I compute for each ib instead
-      ! Compute weights inside qb_comm
-      !call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, nbcalc_ks, &
-      !                                  ebands%eig(bstart_ks:bstart_ks+nbcalc_ks, ik_ibz, spin), &
-      !                                  sigma%bcorr, tmp_deltaw_pm, sigma%qb_comm%value)
+       ! HM: This one should be faster but uses more memory, I compute for each ib instead
+       ! Compute weights inside qb_comm
+       !call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, nbcalc_ks, &
+       !                                  ebands%eig(bstart_ks:bstart_ks+nbcalc_ks, ik_ibz, spin), &
+       !                                  sigma%bcorr, tmp_deltaw_pm, sigma%qb_comm%value)
 
-      ! loop over bands in self-energy matrix elements.
-      do ib_k=1,nbcalc_ks
-        band_ks = ib_k + bstart_ks - 1
-        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+       ! loop over bands in self-energy matrix elements.
+       do ib_k=1,nbcalc_ks
+         band_ks = ib_k + bstart_ks - 1
+         eig0nk = ebands%eig(band_ks, ik_ibz, spin)
 
-        ! Compute weights inside qb_comm
-        call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, 1, [eig0nk], &
-                                          sigma%bcorr, tmp_deltaw_pm, sigma%qb_comm%value)
+         ! Compute weights inside qb_comm
+         call sigma%ephwg%get_deltas_wvals(ibsum_kq, spin, nu, 1, [eig0nk], sigma%bcorr, tmp_deltaw_pm, sigma%qb_comm%value)
 
-        ! For all the q-points that I am going to calculate
-        do imyq=1,sigma%my_nqibz_k
-          iq_ibz = sigma%myq2ibz_k(imyq)
+         ! For all the q-points that I am going to calculate
+         do imyq=1,sigma%my_nqibz_k
+           iq_ibz = sigma%myq2ibz_k(imyq)
 
-          if (sigma%use_doublegrid) then
-            ! For all the q-points in the microzone
-            ! This is done again in the main sigmaph routine
-            qpt = sigma%qibz_k(:,iq_ibz)
-            kq = kk + qpt
-            call sigma%eph_doublegrid%get_mapping(kk, kq, qpt)
-            do jj=1,sigma%eph_doublegrid%ndiv
-              iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)
-              iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
-              weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
-              !dpm = tmp_deltaw_pm(ib_k, iq_ibz_fine, :)
-              dpm = tmp_deltaw_pm(1, iq_ibz_fine, :)
-              sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, jj) = dpm / weight
-            end do
-          else
-            weight = sigma%ephwg%lgk%weights(iq_ibz)
-            !dpm = tmp_deltaw_pm(ib_k, iq_ibz, :)
-            dpm = tmp_deltaw_pm(1, iq_ibz, :)
-            sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, 1) = dpm / weight
-          end if
+           if (sigma%use_doublegrid) then
+             ! For all the q-points in the microzone
+             ! This is done again in the main sigmaph routine
+             qpt = sigma%qibz_k(:,iq_ibz)
+             kq = kk + qpt
+             call sigma%eph_doublegrid%get_mapping(kk, kq, qpt)
+             do jj=1,sigma%eph_doublegrid%ndiv
+               iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)
+               iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
+               weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
+               !dpm = tmp_deltaw_pm(ib_k, iq_ibz_fine, :)
+               dpm = tmp_deltaw_pm(1, iq_ibz_fine, :)
+               sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, jj) = dpm / weight
+             end do
+           else
+             weight = sigma%ephwg%lgk%weights(iq_ibz)
+             !dpm = tmp_deltaw_pm(ib_k, iq_ibz, :)
+             dpm = tmp_deltaw_pm(1, iq_ibz, :)
+             sigma%deltaw_pm(:, ib_k, imyp, ibsum_kq, imyq, 1) = dpm / weight
+           end if
 
-        end do
-      end do
-    end do
+         end do
+       end do
+     end do
    end do
 
    ABI_FREE(tmp_deltaw_pm)
@@ -5040,6 +5040,9 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  krank = krank_new(nkbz, kbz)
  call cwtime_report(" krank_new", cpu, wall, gflops)
 
+ ! This loop is Expensive with a 288^3
+ ! qbz_count_loop completed. cpu: 03:16 [minutes] , wall: 03:16 [minutes] <<< TIME
+ ! qbz_count completed. cpu: 04:41 [minutes] , wall: 04:40 [minutes] <<< TIME
  ABI_ICALLOC(qbz_count, (nqbz))
  cnt = 0
  do spin=1,sigma%nsppol

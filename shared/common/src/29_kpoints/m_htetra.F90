@@ -1989,10 +1989,10 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
-   if (mod(ihash,nprocs) /= my_rank) cycle
+   if (mod(ihash, nprocs) /= my_rank) cycle
 
    ! For each tetrahedron
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
@@ -2025,10 +2025,10 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
  select case(tetra%opt)
  case(1)
    do ik_ibz=1,tetra%nkibz
-     dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
+     dweight(:,ik_ibz) = dweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
    end do
  case(2)
-   dweight = dweight*tetra%vv/4.0_dp
+   dweight = dweight * tetra%vv / 4.0_dp
  end select
 
  call xmpi_sum(dweight, comm, ierr)
@@ -2151,7 +2151,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
          call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
        end select
 
-       ! Acumulate the contributions
+       ! Accumulate contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
          cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit)*multiplicity*max_occ

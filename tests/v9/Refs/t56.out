@@ -413,8 +413,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -683,8 +683,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -955,8 +955,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -1228,8 +1228,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -1496,8 +1496,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 1 From: 3.000000E+02 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1

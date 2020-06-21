@@ -578,25 +578,25 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  call xmpi_split_work(nkpt1, comm, isk_start, isk_stop)
  !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
 
+!!!$OMP PARALLEL DO PRIVATE(k1, k1int, kpg1, ikpg1)
  do ikpt1=isk_start,isk_stop
-   k1(:)=kptns1(:,ikpt1)
-   !write(std_out,*)ikpt1,k1(:)
-   k1int(:)=nint(k1(:)+tol12)
-   k1(:)=k1(:)-k1int(:)
+   k1(:) = kptns1(:,ikpt1)  !; write(std_out,*)ikpt1,k1(:)
+   k1int(:) = nint(k1(:) + tol12)
+   k1(:) = k1(:) - k1int(:)
    do ig1=-limit,limit
-     kpg1(1)=k1(1)+ig1
+     kpg1(1) = k1(1) + ig1
      do ig2=-limit,limit
-       kpg1(2)=k1(2)+ig2
+       kpg1(2) = k1(2) + ig2
        do ig3=-limit,limit
-         kpg1(3)=k1(3)+ig3
+         kpg1(3) = k1(3) + ig3
 
-         ikpg1 = ig1+limit+1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
+         ikpg1 = ig1 + limit + 1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
          ! Compute the norm of the vector (also taking into account possible umklapp)
-         lkpg1(ikpg1)=sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2 + &
-                           gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1) + &
-                           gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
-         lkpg1_sorted(ikpg1)=lkpg1(ikpg1)
-         isort(ikpg1)=ikpg1
+         lkpg1(ikpg1) = sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2 + &
+                             gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1) + &
+                             gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
+         lkpg1_sorted(ikpg1) = lkpg1(ikpg1)
+         isort(ikpg1) = ikpg1
          !write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
        end do
      end do
@@ -609,7 +609,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
    call xmpi_sum(isort, comm, ierr)
  end if
 
- call sort_dp(l3*nkpt1,lkpg1_sorted,isort,tol12)
+ call sort_dp(l3*nkpt1, lkpg1_sorted, isort, tol12)
  ! From "precompute" to "sort_dp" represents more than 50% of the overall wall time for large meshes.
 
  !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
