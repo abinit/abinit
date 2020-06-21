@@ -1987,6 +1987,7 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 ! *************************************************************************
 
  ! Assume file with Abinit header
+ ! TODO: Should add routine to read crystal from structure without hdr
  call hdr_read_from_fname(hdr, path, fform, comm)
  ABI_CHECK(fform /= 0, "fform == 0")
  new = hdr%get_crystal()

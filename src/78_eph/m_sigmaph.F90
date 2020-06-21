@@ -4126,9 +4126,10 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
-       write(msg, "(a,i0,2a,f7.3,a)") &
+       write(msg, "(2(a,i0,a),a,f7.3,a)") &
         " Number of q-points in IBZ(k) treated by this MPI proc: ", self%my_nqibz_k, ch10, &
-        " Load balance inside qpt_comm: ", (self%nqibz_k / (one * self%my_nqibz_k * self%qpt_comm%nproc)), " (should be ~1)"
+        " Number of MPI procs in qpt_comm: ", self%qpt_comm%nproc, ch10, &
+        " Load balance inside qpt_comm: ", (one * self%my_nqibz_k * self%qpt_comm%nproc) / self%nqibz_k, " (should be ~1)"
        call wrtout(std_out, msg)
        MSG_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
 
@@ -4216,7 +4217,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
- integer,parameter :: master=0, max_ntemp=1
+ integer,parameter :: master = 0, max_ntemp = 1
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band_ks,ik_ibz,ibc,ib_val,ib_cond,jj
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau

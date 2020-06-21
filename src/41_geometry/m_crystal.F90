@@ -191,6 +191,9 @@ MODULE m_crystal
    procedure :: ncwrite_path => crystal_ncwrite_path
    ! Dump the object to netcdf file.
 
+   !procedure :: ncread => crystal_ncread
+   ! TODO: Should add routine to read crystal from structure without hdr
+
    procedure :: isymmorphic
    ! True if space group is symmorphic.
 
@@ -582,7 +585,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  class(crystal_t),intent(in) :: Cryst
 
 !Local variables-------------------------------
- integer :: my_unt,my_prtvol,nu,iatom
+ integer :: my_unt,my_prtvol,nu,iatom, isym, ii, nsym
  character(len=4) :: my_mode
  character(len=500) :: msg
 ! *********************************************************************
@@ -624,7 +627,21 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
    call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
 
-   ! TODO: Add indsym
+   ! Print indsym using the same format as in symatm
+   nsym = cryst%nsym
+   do iatom=1,cryst%natom
+     write(msg, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
+     call wrtout(std_out, msg)
+     do ii=1,(nsym-1)/24+1
+       if (cryst%natom<100) then
+         write(msg, '(1x,24i3)' ) (cryst%indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       else
+         write(msg, '(1x,24i6)' ) (cryst%indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+       end if
+       call wrtout(std_out, msg)
+     end do
+   end do
+
  end if
 
  call wrtout(my_unt, " Reduced atomic positions [iatom, xred, symbol]:", my_mode)

@@ -1844,9 +1844,8 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
  ! MG: Do not change this behaviour. symatm is called many times in the EPH code in which we have tons of q-points
  ! and it's really annoying to see this output repeated over and over again.
  ! If you need to print the indsym table at the beginning of the calculation, find the call to symatm
- ! and pass the optional argument print_indsym_ or use `abitk crystal_print FILE`
+ ! and pass the optional argument print_indsym_ or use `abitk crystal_print FILE --prtvol 1`
  print_indsym_ = -1; if (present(print_indsym)) print_indsym_ = print_indsym
- !if (natom <= 50) then
  if (natom <= print_indsym_) then
    do iatom=1,natom
      write(msg, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
