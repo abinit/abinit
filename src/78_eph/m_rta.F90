@@ -502,7 +502,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
 !Local variables ------------------------------
  integer,parameter :: nvecs0 = 0, master = 0
- integer :: nsppol, nkpt, mband, ib, ik, iw, spin, ii, jj, itemp, irta, itens, iscal
+ integer :: nsppol, nkpt, mband, ib, ik, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, linewidth, fact0
  real(dp) :: cpu, wall, gflops
@@ -524,13 +524,15 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! Remember that we haven't computed all the k-points in the IBZ hence we can have zero linewidths
  ! or very small values when the states is at the band edge so use safe_dif to avoid SIGFPE.
  nvals = self%ntemp * self%nrta
- ABI_MALLOC(tau_vals, (self%ntemp, self%nrta, mband, nkpt, nsppol))
+ ABI_CALLOC(tau_vals, (self%ntemp, self%nrta, mband, nkpt, nsppol))
 
  ntens = (1 + self%ntemp) * self%nrta
- ABI_MALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, mband, nkpt, nsppol))
+ ABI_CALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, mband, nkpt, nsppol))
 
+ cnt = 0
  do spin=1,nsppol
    do ik=1,nkpt
+     !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      do ib=1,mband
 
        vr(:) = self%velocity(:, ib, ik, spin)
@@ -547,13 +549,17 @@ subroutine rta_compute(self, cryst, dtset, comm)
            if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin))
            if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, spin))
            call safe_div(vv_tens(:, :, 1, irta, ib, ik, spin), linewidth, zero, vv_tens(:, :, 1+itemp, irta, ib, ik, spin))
-           call safe_div(one/two, linewidth, zero, tau_vals(itemp, irta, ib, ik, spin))
+           call safe_div(one / two, linewidth, zero, tau_vals(itemp, irta, ib, ik, spin))
          end do
        end do
 
      end do
    end do
  end do
+
+ !call xmpi_sum(vv_tens, comm, ierr)
+ !call xmpi_sum(tau_vals, comm, ierr)
+ call cwtime_report(" rta_compute_loop1", cpu, wall, gflops)
 
  ! Compute DOS and VV_DOS and VV_TAU_DOS
  ! Define integration method and mesh step.
@@ -590,6 +596,8 @@ subroutine rta_compute(self, cryst, dtset, comm)
    call self%edos%print(unit=std_out, header="Computation of DOS, VV_DOS and VVTAU_DOS")
    call self%edos%print(unit=ab_out,  header="Computation of DOS, VV_DOS and VVTAU_DOS")
  end if
+
+ call cwtime_report(" rta_compute_edos", cpu, wall, gflops)
 
  ! Unpack data stored in out_tensdos with shape (nw, 2, 3, 3, ntens, nsppol)
  self%nw = self%edos%nw
@@ -636,6 +644,8 @@ subroutine rta_compute(self, cryst, dtset, comm)
  call onsager(0, self%l0)
  call onsager(1, self%l1)
  call onsager(2, self%l2)
+
+ call cwtime_report(" rta_compute_onsanger", cpu, wall, gflops)
 
  ! Compute transport quantities, Eqs 12-15 of [[cite:Madsen2018]]
  ABI_MALLOC(self%sigma,   (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))

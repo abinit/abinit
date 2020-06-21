@@ -266,7 +266,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    write(ab_out, "(a)")""
  end if
 
- ! Create distribution of the wavefunctions mask
+ ! Create distribution of the wavefunctions mask.
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkpt, nsppol))
@@ -279,14 +279,14 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    ABI_MALLOC(distrib_diago, (bandmin:bandmax, nkpt, nsppol))
    distrib_diago = -1
 
-   ! Create bks_mask to load the wavefunctions
+   ! Create bks_mask to load the wavefunctions.
    ii = 0
    do spin=1,nsppol
      do ik=1,nkpt
        do ib_v=bandmin,bandmax
           ii = ii + 1; if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism.
           distrib_diago(ib_v, ik, spin) = my_rank
-          bks_mask(ib_v,ik,spin) = .true.
+          bks_mask(ib_v, ik, spin) = .true.
        end do
      end do
    end do
@@ -402,7 +402,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
        bstop = bandmax; if (only_diago) bstop = ib_v
        do ib_c=ib_v,bstop
          if (.not. only_diago) then
-           if (distrib_mat(ib_c,ib_v,ik,spin) /= my_rank) cycle
+           if (distrib_mat(ib_c, ib_v, ik, spin) /= my_rank) cycle
          end if
 
          if (dtset%useria /= 666) then
@@ -465,7 +465,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      ! Free KB form factors
      call vkbr_free(vkbr)
 
-     write(msg,'(2(a,i0),a)')"k-point [",ik,"/",nkpt,"]"
+     write(msg,'(2(a,i0),a)')"k-point [", ik, "/", nkpt, "]"
      call cwtime_report(msg, cpu, wall, gflops)
 
    end do ! k-points
@@ -532,7 +532,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
    ! If sigma_erange is set, get emin and emax
    ierr = get_gaps(ebands,gaps)
-   if (ierr/=0.and.ebands%occopt.eq.1) then
+   if (ierr /=0 .and. ebands%occopt .eq. 1) then
      call ebands_copy(ebands,ebands_tmp)
      call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
      call gaps%free()

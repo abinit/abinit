@@ -1737,6 +1737,8 @@ end subroutine symchk
 !! xred(3,natom)=reduced coordinates of atoms in terms of real space
 !!               primitive translations
 !! tolsym=tolerance for the symmetries
+!! [print_indsym]: Print indsym table to std_out if the number of atoms is smaller that print_indsym
+!!  Default: -1 i.e. no output is provided.
 !!
 !! OUTPUT
 !! indsym(4,nsym,natom)=indirect indexing array described above: for each
@@ -1755,11 +1757,12 @@ end subroutine symchk
 !!
 !! SOURCE
 
-subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
+subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print_indsym)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
+ integer,optional,intent(in) :: print_indsym
  real(dp), intent(in) :: tolsym
 !arrays
  integer,intent(in) :: symrec(3,3,nsym),typat(natom)
@@ -1768,7 +1771,7 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 
 !Local variables-------------------------------
 !scalars
- integer :: eatom,errout,iatom,ii,isym,mu
+ integer :: eatom,errout,iatom,ii,isym,mu,print_indsym_
  real(dp) :: difmax,err
  character(len=500) :: msg
 !arrays
@@ -1838,7 +1841,13 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
    end do !iatom
  end do !isym
 
- if (natom<=50) then
+ ! MG: Do not change this behaviour. symatm is called many times in the EPH code in which we have tons of q-points
+ ! and it's really annoying to see this output repeated over and over again.
+ ! If you need to print the indsym table at the beginning of the calculation, find the call to symatm
+ ! and pass the optional argument print_indsym_ or use `abitk crystal_print FILE`
+ print_indsym_ = -1; if (present(print_indsym)) print_indsym_ = print_indsym
+ !if (natom <= 50) then
+ if (natom <= print_indsym_) then
    do iatom=1,natom
      write(msg, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
      call wrtout(std_out,msg)

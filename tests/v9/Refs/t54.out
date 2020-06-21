@@ -292,7 +292,7 @@ All the independent perturbations are available
 
  Interpolation of the electron-phonon coupling potential
 
- From coarse q-mesh: [2,2,2] to: [4,4,4]
+ From coarse q-mesh: [2, 2, 2] to: [4, 4, 4]
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
@@ -417,8 +417,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 2 From: 5.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1

@@ -65,7 +65,7 @@ program abitk
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth, lenr
  integer :: ndivsm, abimem_level, ierr !, spin
- real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
+ real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb, tolsym
  character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
  type(hdr_type) :: hdr
@@ -204,6 +204,13 @@ program abitk
  case ("crystal_print")
     call get_path_cryst(path, cryst, comm)
     call cryst%print(unit=std_out, prtvol=prtvol)
+
+ !case ("crystal_indsym")
+ !   call get_path_cryst(path, cryst, comm)
+ !   ABI_CHECK(get_arg("tolsym", tolsym, msg, default=tol8) == 0, msg)
+ !   ABI_MALLOC(indsym, (4, cryst%nsym, cryst%natom))
+ !   !integer,intent(out) :: indsym(4,nsym,natom)
+ !   !call symatm(indsym, cryst%natom, cryst%nsym, cryst%symrec, cryst%tnons, tolsym, cryst%typat, cryst%xred, print_indsym=huge(1))
 
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)

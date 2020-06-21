@@ -561,8 +561,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -767,7 +767,7 @@ All the independent perturbations are available
 
  Interpolation of the electron-phonon coupling potential
 
- From coarse q-mesh: [2,2,2] to: [4,4,4]
+ From coarse q-mesh: [2, 2, 2] to: [4, 4, 4]
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
@@ -917,8 +917,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -1151,8 +1151,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -1247,7 +1247,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Fermi level:  4.07 (eV)
 
- Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+ Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
@@ -1591,8 +1591,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -1659,7 +1659,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Fermi level:  4.07 (eV)
 
- Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+ Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
@@ -1840,8 +1840,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -1908,7 +1908,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Fermi level:  4.07 (eV)
 
- Computing integrals with downsampled sigma_ngkpt: [2,2,2]
+ Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
@@ -2088,8 +2088,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
