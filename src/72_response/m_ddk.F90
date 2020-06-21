@@ -634,8 +634,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_SFREE(dipoles)
  ABI_SFREE(vdiago)
  ABI_SFREE(vmat)
-
  ABI_SFREE(vvdos_tens)
+
  call edos%free()
  call wfd%free()
  call ebands_free(ebands)

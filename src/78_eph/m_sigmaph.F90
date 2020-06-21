@@ -4127,9 +4127,9 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
        write(msg, "(2(a,i0,a),a,f7.3,a)") &
-        " Number of q-points in IBZ(k) treated by this MPI proc: ", self%my_nqibz_k, ch10, &
+        " Number of q-points in the IBZ(k) treated by this MPI proc: ", self%my_nqibz_k, ch10, &
         " Number of MPI procs in qpt_comm: ", self%qpt_comm%nproc, ch10, &
-        " Load balance inside qpt_comm: ", (one * self%my_nqibz_k * self%qpt_comm%nproc) / self%nqibz_k, " (should be ~1)"
+        " Load balance inside qpt_comm: ", (one * self%my_nqibz_k * self%qpt_comm%nproc) / nqeff, " (should be ~1)"
        call wrtout(std_out, msg)
        MSG_WARNING_IF(self%my_nqibz_k == 0, "my_nqibz_k == 0")
 
