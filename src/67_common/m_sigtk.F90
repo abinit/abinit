@@ -186,7 +186,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
 
  mband = ebands%mband
 
- val_indeces = get_valence_idx(ebands)
+ val_indeces = ebands_get_valence_idx(ebands)
 
  if (any(dtset%sigma_ngkpt /= 0)) then
     call wrtout(std_out, " Generating list of k-points for self-energy from sigma_ngkpt and qprange.")
@@ -286,7 +286,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  ABI_CHECK(maxval(gaps%ierr) == 0, "qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  nsppol = ebands%nsppol
- val_indeces = get_valence_idx(ebands)
+ val_indeces = ebands_get_valence_idx(ebands)
 
  ! Include the direct and the fundamental KS gap.
  ! The problem here is that kptgw and nkptgw do not depend on the spin and therefore
@@ -501,7 +501,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
  if (my_rank == master) then
    write(std_out, "(a, i0, a, 2(f6.3, 1x), a)") &
-   " Found ", nkcalc, " k-points within erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+     " Found ", nkcalc, " k-points within sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
    write(std_out, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " MAX(nbcalc_ks): ", maxval(nbcalc_ks)
  end if
 
@@ -719,8 +719,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    NCF_CHECK(fine_hdr%ncwrite(ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.)
-   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.))
    ! Define extra arrays.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("kshe_mask", "int", "number_of_kpoints, number_of_spins, two"), &

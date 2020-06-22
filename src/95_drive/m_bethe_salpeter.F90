@@ -59,7 +59,7 @@ module m_bethe_salpeter
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
-                               ebands_update_occ, get_valence_idx, ebands_apply_scissors, ebands_report_gap
+                               ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
  use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
@@ -834,7 +834,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
    ABI_MALLOC(qp_vbik,(QP_BSt%nkpt,QP_BSt%nsppol))
-   qp_vbik(:,:) = get_valence_idx(QP_BSt)
+   qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
    ABI_FREE(qp_vbik)
 
    call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
@@ -1595,7 +1595,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  call ebands_report_gap(KS_BSt,header=" KS band structure",unit=std_out,mode_paral="COLL")
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
- val_indeces = get_valence_idx(KS_BSt)
+ val_indeces = ebands_get_valence_idx(KS_BSt)
 
  do spin=1,KS_BSt%nsppol
    val_idx(spin) = val_indeces(1,spin)

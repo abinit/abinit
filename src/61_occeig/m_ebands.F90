@@ -67,26 +67,29 @@ MODULE m_ebands
 
  private
 
+ ! Helper functions
+ public :: pack_eneocc             ! Helper function for reshaping (energies|occupancies|derivate of occupancies).
+ public :: get_eneocc_vect         ! Reshape (ene|occ|docdde) returning a matrix instead of a vector.
+ public :: put_eneocc_vect         ! Put (ene|occ|doccde) in vectorial form into the data type doing a reshape.
+ public :: unpack_eneocc           ! Helper function for reshaping (energies|occupancies|derivate of occupancies).
+
+ ! Ebands methods
  public :: ebands_init             ! Main creation method.
  public :: ebands_from_hdr         ! Init object from the abinit header.
  public :: ebands_from_dtset       ! Init object from the abinit dataset.
  public :: ebands_free             ! Destruction method.
  public :: ebands_copy             ! Deep copy of the ebands_t.
  public :: ebands_print            ! Printout basic info on the data type.
- public :: unpack_eneocc           ! Helper function for reshaping (energies|occupancies|derivate of occupancies).
- public :: pack_eneocc             ! Helper function for reshaping (energies|occupancies|derivate of occupancies).
- public :: get_eneocc_vect         ! Reshape (ene|occ|docdde) returning a matrix instead of a vector.
- public :: put_eneocc_vect         ! Put (ene|occ|doccde) in vectorial form into the data type doing a reshape.
- public :: get_bandenergy          ! Returns the band energy of the system.
- public :: get_valence_idx         ! Gives the index of the (valence|bands at E_f).
- public :: get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
+ public :: ebands_get_bandenergy   ! Returns the band energy of the system.
+ public :: ebands_get_valence_idx  ! Gives the index of the (valence|bands at E_f).
+ public :: ebands_get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
  public :: ebands_vcbm_range_from_gaps ! Find band and energy range for states close to the CBM/VBM given input energies.
  public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
- public :: get_occupied            ! Returns band indeces after wich occupations are less than an input value.
- public :: enclose_degbands        ! Adjust band indeces such that all degenerate states are treated.
+ public :: ebands_get_occupied     ! Returns band indeces after wich occupations are less than an input value.
+ public :: ebands_enclose_degbands ! Adjust band indeces such that all degenerate states are treated.
  public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
- public :: get_minmax              ! Returns min and Max value of (eig|occ|doccde).
+ public :: ebands_get_minmax       ! Returns min and Max value of (eig|occ|doccde).
  public :: ebands_has_metal_scheme ! .True. if metallic occupation scheme is used.
  public :: ebands_write_bxsf       ! Write 3D energies for Fermi surface visualization (XSF format)
  public :: ebands_update_occ       ! Update the occupation numbers.
@@ -320,7 +323,8 @@ MODULE m_ebands
    integer :: nkx, nky, nkz
    ! Number of input data points
 
-   real(dp),allocatable :: xyzdata(:,:,:,:,:,:)
+   real(dp),allocatable :: bzdata(:,:,:,:,:,:)
+    ! (nkx, nky, nkz, mband, ndat, nsppol)
 
  contains
 
@@ -461,7 +465,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
 
  my_kmask=.TRUE.; if (PRESENT(kmask)) my_kmask=kmask
 
- val_idx(:,:) = get_valence_idx(ebands, tol_fermi)
+ val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi)
 
  spin_loop: &
 &  do spin=1,nsppol
@@ -1368,9 +1372,9 @@ end subroutine put_eneocc_vect
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/get_bandenergy
+!!****f* m_ebands/ebands_get_bandenergy
 !! NAME
-!! get_bandenergy
+!! ebands_get_bandenergy
 !!
 !! FUNCTION
 !!  Return the band energy (weighted sum of occupied eigenvalues)
@@ -1390,7 +1394,7 @@ end subroutine put_eneocc_vect
 !!
 !! SOURCE
 
-pure real(dp) function get_bandenergy(ebands) result(band_energy)
+pure real(dp) function ebands_get_bandenergy(ebands) result(band_energy)
 
 !Arguments ------------------------------------
 !scalars
@@ -1410,12 +1414,12 @@ pure real(dp) function get_bandenergy(ebands) result(band_energy)
    end do
  end do
 
-end function get_bandenergy
+end function ebands_get_bandenergy
 !!***
 
-!!****f* m_ebands/get_valence_idx
+!!****f* m_ebands/ebands_get_valence_idx
 !! NAME
-!!  get_valence_idx
+!!  ebands_get_valence_idx
 !!
 !! FUNCTION
 !!  For each k-point and spin polarisation, report:
@@ -1437,7 +1441,7 @@ end function get_bandenergy
 !!
 !! SOURCE
 
-pure function get_valence_idx(ebands, tol_fermi) result(val_idx)
+pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
 
 !Arguments ------------------------------------
 !scalars
@@ -1469,12 +1473,12 @@ pure function get_valence_idx(ebands, tol_fermi) result(val_idx)
    end do
  end do
 
-end function get_valence_idx
+end function ebands_get_valence_idx
 !!***
 
-!!****f* m_ebands/get_bands_from_erange
+!!****f* m_ebands/ebands_get_bands_from_erange
 !! NAME
-!!  get_bands_from_erange
+!!  ebands_get_bands_from_erange
 !!
 !! FUNCTION
 !! Return the indices of the min and max band index within an energy window.
@@ -1491,7 +1495,7 @@ end function get_valence_idx
 !!
 !! SOURCE
 
-pure subroutine get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
+pure subroutine ebands_get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
 
 !Arguments ------------------------------------
 !scalars
@@ -1516,7 +1520,7 @@ pure subroutine get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
    end do
  end do
 
-end subroutine get_bands_from_erange
+end subroutine ebands_get_bands_from_erange
 !!***
 
 !!****f* m_ebands/ebands_vcbm_range_from_gaps
@@ -1658,7 +1662,7 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
 ! *************************************************************************
 
  ! Get the valence band index for each k and spin
- val_idx(:,:) = get_valence_idx(ebands)
+ val_idx(:,:) = ebands_get_valence_idx(ebands)
 
  do spin=1,ebands%nsppol
    if (any(val_idx(:, spin) /= val_idx(1, spin))) then
@@ -1698,9 +1702,9 @@ end subroutine ebands_apply_scissors
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/get_occupied
+!!****f* m_ebands/ebands_get_occupied
 !! NAME
-!!  get_occupied
+!!  ebands_get_occupied
 !!
 !! FUNCTION
 !!  For each k-point and spin polarisation, report the band index
@@ -1722,7 +1726,7 @@ end subroutine ebands_apply_scissors
 !!
 !! SOURCE
 
-pure function get_occupied(ebands, tol_occ) result(occ_idx)
+pure function ebands_get_occupied(ebands, tol_occ) result(occ_idx)
 
 !Arguments ------------------------------------
 !scalars
@@ -1756,14 +1760,14 @@ pure function get_occupied(ebands, tol_occ) result(occ_idx)
    end do
  end do
 
-end function get_occupied
+end function ebands_get_occupied
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/enclose_degbands
+!!****f* m_ebands/ebands_enclose_degbands
 !! NAME
-!!  enclose_degbands
+!!  ebands_enclose_degbands
 !!
 !! FUNCTION
 !!  Adjust ibmin and ibmax such that all the degenerate states are enclosed
@@ -1794,15 +1798,15 @@ end function get_occupied
 !!
 !! SOURCE
 
-subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,degblock)
+subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, tol_enedif, degblock)
 
 !Arguments ------------------------------------
 !scalars
+ class(ebands_t),intent(in) :: ebands
  integer,intent(in) :: ikibz,spin
  integer,intent(inout) :: ibmin,ibmax
  real(dp),intent(in) :: tol_enedif
  logical,intent(out) :: changed
- class(ebands_t),intent(in) :: ebands
 !arrays
  integer,allocatable,optional,intent(out) :: degblock(:,:)
 
@@ -1858,7 +1862,7 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,deg
    degblock(2, ndeg) = ibmax
  end if
 
-end subroutine enclose_degbands
+end subroutine ebands_enclose_degbands
 !!***
 
 !----------------------------------------------------------------------
@@ -1984,9 +1988,9 @@ end function ebands_nelect_per_spin
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/get_minmax
+!!****f* m_ebands/ebands_get_minmax
 !! NAME
-!!  get_minmax
+!!  ebands_get_minmax
 !!
 !! FUNCTION
 !!  Report the min and max value over k-points and bands of (eig|occ|doccde) for each
@@ -2006,7 +2010,7 @@ end function ebands_nelect_per_spin
 !!
 !! SOURCE
 
-function get_minmax(ebands, arr_name) result(minmax)
+function ebands_get_minmax(ebands, arr_name) result(minmax)
 
 !Arguments ------------------------------------
 !scalars
@@ -2049,7 +2053,7 @@ function get_minmax(ebands, arr_name) result(minmax)
    end do
  end do
 
-end function get_minmax
+end function ebands_get_minmax
 !!***
 
 !----------------------------------------------------------------------
@@ -2715,7 +2719,7 @@ subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
 
  if (PRESENT(gaps)) gaps=zero
 
- val_idx(:,:) = get_valence_idx(ebands,tol_fermi)
+ val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi)
  first=0
 
  ! Initialize the return status for the gaps
@@ -3075,7 +3079,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  edos%broad = broad; edos%step = step
 
  ! Compute the linear mesh so that it encloses all bands.
- eminmax_spin = get_minmax(ebands, "eig")
+ eminmax_spin = ebands_get_minmax(ebands, "eig")
  min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
  max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
 
@@ -4396,7 +4400,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
  edos%broad = broad; edos%step = step
 
  ! Compute the linear mesh so that it encloses all bands.
- eminmax_spin = get_minmax(ebands, "eig")
+ eminmax_spin = ebands_get_minmax(ebands, "eig")
  min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
  max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
  ! or use optional args if provided.
@@ -4659,7 +4663,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  jdos%nkibz = ebands%nkpt
 
  ! Find the valence band index for each k and spin.
- val_idx = get_valence_idx(ebands)
+ val_idx = ebands_get_valence_idx(ebands)
 
  do spin=1,ebands%nsppol
    if (any(val_idx(:,spin) /= val_idx(1,spin))) then
@@ -4672,7 +4676,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
 
  ! Compute the linear mesh so that it encloses all bands.
  !if (.not. present(mesh)) then
- eminmax = get_minmax(ebands, "eig")
+ eminmax = ebands_get_minmax(ebands, "eig")
  wmax = maxval(eminmax(2,:) - eminmax(1,:))
  nw = nint(wmax/step) + 1
  ABI_MALLOC(jdos%mesh, (nw))
@@ -5742,7 +5746,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    end do
 
    !set default erange
-   eminmax_spin = get_minmax(ebands, "eig")
+   eminmax_spin = ebands_get_minmax(ebands, "eig")
    emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
    emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
@@ -5864,10 +5868,10 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    ierr = ierr + 1
  end if
  if (ierr /= 0) then
-   MSG_ERROR("bspline interpolation cannot be performed. See messages above.")
+   MSG_ERROR("Linear interpolation cannot be performed. See messages above.")
  end if
 
- ! Build BZ mesh Note that in the simplest case of unshifted mesh:
+ ! Build BZ mesh. Note that in the simplest case of unshifted mesh:
  ! 1) k-point coordinates are in [0, 1]
  ! 2) The mesh is closed i.e. (0,0,0) and (1,1,1) are included
  ngkpt(1) = kptrlatt(1, 1)
@@ -5931,7 +5935,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    MSG_ERROR(msg)
  end if
 
- ABI_MALLOC(new%xyzdata, (nkx, nky, nkz, mband, ndat, nsppol))
+ ABI_MALLOC(new%bzdata, (nkx, nky, nkz, mband, ndat, nsppol))
  !new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, mband]
 
  do spin=1,nsppol
@@ -5945,7 +5949,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
          do ix=1,nkx
            ikf = ikf + 1
            ik_ibz = bz2ibz(ikf, 1)
-           new%xyzdata(ix, iy, iz, 1:mband, idat, spin) = values_ibz(1:mband, ik_ibz, spin, idat)
+           new%bzdata(ix, iy, iz, 1:mband, idat, spin) = values_ibz(1:mband, ik_ibz, spin, idat)
          end do
        end do
      end do
@@ -5988,7 +5992,7 @@ subroutine klinterp_free(self)
 
 ! *********************************************************************
 
- ABI_SFREE(self%xyzdata)
+ ABI_SFREE(self%bzdata)
 
 end subroutine klinterp_free
 !!***
@@ -6029,7 +6033,7 @@ subroutine klinterp_eval(self, kpt, values)
  do spin=1,self%nsppol
    do idat=1,self%ndat
       do band=1,self%mband
-        values(band, idat, spin) = interpol3d(kwrap, self%nkz, self%nkz, self%nkz, self%xyzdata(:,:,:, band, idat, spin))
+        values(band, idat, spin) = interpol3d(kwrap, self%nkz, self%nkz, self%nkz, self%bzdata(:,:,:, band, idat, spin))
       end do
    end do
  end do

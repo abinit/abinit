@@ -350,7 +350,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  ! Information about the gaps
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
  ABI_MALLOC(new%eminmax_spin, (2, ebands%nsppol))
- new%eminmax_spin = get_minmax(ebands, "eig")
+ new%eminmax_spin = ebands_get_minmax(ebands, "eig")
 
  new%gaps = ebands_get_gaps(ebands, ierr)
  if (ierr /= 0) then

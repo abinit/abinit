@@ -526,7 +526,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    end do
 
    !set default erange
-   eminmax_spin(:,:ebands%nsppol) = get_minmax(ebands, "eig")
+   eminmax_spin(:,:ebands%nsppol) = ebands_get_minmax(ebands, "eig")
    emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
    emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 

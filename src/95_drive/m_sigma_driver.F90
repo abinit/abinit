@@ -59,9 +59,9 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gftt, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
+ use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
                              ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
-                             enclose_degbands, ebands_get_gaps, gaps_t
+                             ebands_enclose_degbands, ebands_get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
@@ -453,7 +453,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(qp_vbik,(KS_BSt%nkpt,KS_BSt%nsppol))
 
  !call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=0)
- ks_vbik(:,:) = get_valence_idx(KS_BSt)
+ ks_vbik(:,:) = ebands_get_valence_idx(KS_BSt)
 
  ! ============================
  ! ==== PAW initialization ====
@@ -1165,7 +1165,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Compute QP occupation numbers.
    call wrtout(std_out,'sigma: calculating QP occupation numbers:','COLL')
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
-   qp_vbik(:,:) = get_valence_idx(QP_BSt)
+   qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
 !  #ifdef DEV_HAVE_SCGW_SYM
    ! Calculate the irreducible representations of the new QP amplitdues.
@@ -1352,10 +1352,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
    call wrtout(ab_out,msg,'COLL')
    write(msg,'(5a,f9.4,3a,es21.14,2a,es21.14)')ch10,&
-&   ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
-&   '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
-&   '  QP Band energy    [Ha] = ',get_bandenergy(QP_BSt),ch10,&
-&   '  QP Hartree energy [Ha] = ',ehartree
+    ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
+    '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
+    '  QP Band energy    [Ha] = ',ebands_get_bandenergy(QP_BSt),ch10,&
+    '  QP Hartree energy [Ha] = ',ehartree
    call wrtout(ab_out,msg,'COLL')
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
    call wrtout(ab_out,msg,'COLL')
@@ -2456,7 +2456,7 @@ endif
 
      ! Recalculate new occupations and Fermi level.
      call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
-     qp_vbik(:,:) = get_valence_idx(QP_BSt)
+     qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
      write(msg,'(2a,3x,2(es16.6,a))')ch10,' New Fermi energy : ',QP_BSt%fermie,' Ha ,',QP_BSt%fermie*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
@@ -3069,7 +3069,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call ebands_report_gap(KS_BSt, unit=std_out)
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
- val_indeces = get_valence_idx(KS_BSt)
+ val_indeces = ebands_get_valence_idx(KS_BSt)
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
@@ -3233,7 +3233,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      do ikcalc=1,Sigp%nkptgw
 
        if (has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikibz,G0)) then
-         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
+         call ebands_enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
             "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&
