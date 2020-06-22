@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_efmas
 !! NAME
 !! m_efmas
@@ -7,7 +6,7 @@
 !! This module contains datatypes for efmas functionalities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (JLJ)
+!! Copyright (C) 2001-2020 ABINIT group (JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -573,8 +572,8 @@ end subroutine print_efmas
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
 
 !Prepare the efmas* datastructures
- ABI_DT_MALLOC(efmasdeg,(nkpt))
- ABI_DT_MALLOC(efmasval,(mband,nkpt))
+ ABI_MALLOC(efmasdeg,(nkpt))
+ ABI_MALLOC(efmasval,(mband,nkpt))
 
  ideg_tot=1
  ieig=1

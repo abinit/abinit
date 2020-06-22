@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_slc_dynamics
 !! NAME
 !! m_slc_potential
@@ -8,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu, NH)
+!! Copyright (C) 2001-2020 ABINIT group (hexu, NH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -124,15 +123,63 @@ module  m_slc_dynamics
      msg=repeat("-", 80)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
-    end if
+   end if
 
+   !thermalization of spin degrees of freedom
+   if (abs(self%spin_mover%thermal_time) > 1e-30) then
+     if (iam_master) then
+       msg="Thermalization run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+     end if
+
+     do while(t<self%spin_mover%thermal_time)
+       counter=counter+1
+       call self%spin_mover%run_one_step(effpot=calculator, displacement=displacement, strain=strain, &
+            & lwf=lwf, energy_table=energy_table)
+       if (iam_master) then
+         call self%spin_mover%hist%set_vars( time=t,  inc=.True.)
+         if(mod(counter, self%spin_mover%hist%spin_nctime)==0) then
+           call self%spin_mover%spin_ob%get_observables( self%spin_mover%hist%S(:,:, self%spin_mover%hist%ihist_prev), &
+                self%spin_mover%hist%Snorm(:,self%spin_mover%hist%ihist_prev), & 
+                self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev))
+           etotal = energy_table%sum_val()
+           espin = energy_table%sum_val(label='SpinPotential')
+           elatt = energy_table%sum_val(label='Lattice_harmonic_potential')
+           elatt = elatt + energy_table%sum_val(label='Lattice kinetic energy')
+           eslc = energy_table%sum_val(prefix='SLCPotential')
+           write(msg, "(A1, 1X, I13, 2X, ES13.5, 2X, ES13.5, 2X, ES13.5, 2X, ES13.5)") "-", counter, espin, elatt, eslc, etotal
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(ab_out, msg, 'COLL')
+         endif
+       end if
+       t=t+self%dt
+     end do
+
+     t=0.0
+     counter=0
+     if (iam_master) then
+       call self%spin_mover%hist%reset(array_to_zero=.False.)
+     end if
+   endif
+
+   if(iam_master) then
+     call self%spin_mover%spin_ob%reset()
+   endif
 
     do while(t<self%spin_mover%total_time)
+     !if (iam_master) then
+     !  msg="Measurement run:"
+     !  call wrtout(std_out,msg,'COLL')
+     !  call wrtout(ab_out, msg, 'COLL')
+     !end if
+
       counter=counter+1
       !one step in coupled spin-lattice dynamics
       call self%run_one_step(effpot=calculator, spin=spin, displacement=displacement, strain=strain, lwf=lwf, &
            & energy_table=energy_table)
 
+      !Writing to output and hist files
       if (iam_master) then
         call self%spin_mover%hist%set_vars(time=t,  inc=.True.)
         call self%spin_mover%spin_ob%get_observables(self%spin_mover%hist%S(:,:, self%spin_mover%hist%ihist_prev), &

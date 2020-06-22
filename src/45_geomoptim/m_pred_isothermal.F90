@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_isothermal
 !! NAME
 !!  m_pred_isothermal
@@ -11,7 +10,7 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -463,7 +462,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !  Convert back to xred (reduced coordinates)
    call xcart2xred(ab_mover%natom,rprimd_next,xcart_next,xred_next)
 !  Computation of the forces for the new positions
-!  Compute LDA forces (big loop)
+!  Compute DFT forces (big loop)
 
 !  COMMENTED
 !  This should be in mover.F90

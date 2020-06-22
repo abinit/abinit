@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_nhat
 !! NAME
 !!  m_paw_nhat
@@ -8,7 +7,7 @@
 !!    charge density (i.e. n^hat(r)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT, MG, TRangel)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -135,7 +134,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  integer,intent(in) :: nhatgrdim,nspden,ntypat
  integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb
  real(dp),intent(in) :: ucvol
- real(dp),intent(out) :: compch_fft
+ real(dp),intent(inout) :: compch_fft
  type(distribfft_type),optional,intent(in),target :: distribfft
  type(pawang_type),intent(in) :: pawang
 !arrays
@@ -476,8 +475,8 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !            -i.q_i * [n^hat(r).exp(-i.q.r)]
              ro(1:2)=pawnhat_atm(jc:jc+1)
              do ii=1,3
-               pawgrnhat_atm(jc  ,ii)=pawgrnhat_atm(kc  ,ii)+qphon(ii)*ro(2)
-               pawgrnhat_atm(jc+1,ii)=pawgrnhat_atm(kc+1,ii)-qphon(ii)*ro(1)
+               pawgrnhat_atm(jc  ,ii)=pawgrnhat_atm(jc  ,ii)+qphon(ii)*ro(2)
+               pawgrnhat_atm(jc+1,ii)=pawgrnhat_atm(jc+1,ii)-qphon(ii)*ro(1)
              end do
            end do
          end if

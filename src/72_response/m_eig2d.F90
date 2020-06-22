@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eig2d
 !! NAME
 !!  m_eig2d
@@ -9,7 +8,7 @@
 !!  displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2019 ABINIT group (SP, PB, XG)
+!! Copyright (C) 2014-2020 ABINIT group (SP, PB, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,6 +41,7 @@ MODULE m_eig2d
  use m_hdr
  use m_dtset
  use m_dtfil
+ use m_ddb_hdr
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
@@ -50,7 +50,6 @@ MODULE m_eig2d
  use m_crystal,    only : crystal_init,  crystal_t
  use m_pawtab,     only : pawtab_type
  use m_ddb,        only : DDB_VERSION
- use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_double_grid,only : kptfine_av
  use m_mpinfo,     only : distrb2, proc_distrb_cycle
 
@@ -1675,11 +1674,10 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &     1,xred=xred,occ=occ_rbz)
 
-     call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, unitout)
-
-     call ddb_hdr_free(ddb_hdr)
-
+     call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, unitout)
+     call ddb_hdr%free()
    end if
+
    if(ieig2rf == 3 ) then
      call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
    end if
@@ -1767,9 +1765,8 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &       1,xred=xred,occ=occ_rbz)
 
-       call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
-
-       call ddb_hdr_free(ddb_hdr)
+       call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
+       call ddb_hdr%free()
 
        call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_phpi
 !! NAME
 !!
@@ -6,7 +5,7 @@
 !!  Tools for the computation of phonon self-energy.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (GKA)
+!!  Copyright (C) 2008-2020 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -306,7 +305,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ! TODO FOR PAW
  usecprj = 0
- ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
+ ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
  ! Prepare call to getgh1c
  usevnl = 0
@@ -596,7 +595,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call wfd_kq%free()
 
  call pawcprj_free(cwaveprj0)
- ABI_DT_FREE(cwaveprj0)
+ ABI_FREE(cwaveprj0)
 
 end subroutine eph_phpi
 !!***

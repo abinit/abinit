@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/ptg_D6h
 !!
 !! NAME
@@ -7,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MG)
+!! Copyright (C) 2010-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,31 +36,29 @@
 
 #include "abi_common.h"
 
-
 module m_ptg_D6h
-contains
-!!**
-
-
-
- subroutine ptg_D6h (nsym,nclass,sym,class_ids,class_names,Irr)
 
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
+
+contains
+!!**
+
+ subroutine ptg_D6h (nsym,nclass,sym,class_ids,class_names,Irr)
 
  use defs_basis
  use m_abicore
  use m_defs_ptgroups,  only : irrep_t
  implicit none
 !Arguments ------------------------------------
- integer,intent(out) :: nclass,nsym 
+ integer,intent(out) :: nclass,nsym
  !arrays
  integer,allocatable,intent(out) :: sym(:,:,:), class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irr(:)
  !Local variables-------------------------------
- complex(dpc) :: j=(0.0_dp,1.0_dp) 
+ complex(dpc) :: j=(0.0_dp,1.0_dp)
  ! ********************************************************************************
 ! List of symmetries packed in classes
  nsym = 24
@@ -120,21 +117,21 @@ contains
  class_ids(2,12) = 24
 
 ABI_MALLOC(class_names,(12))
- class_names(1) = "1+" 
- class_names(2) = "3+" 
- class_names(3) = "2+" 
- class_names(4) = "6+" 
- class_names(5) = "2+" 
- class_names(6) = "2+" 
- class_names(7) = "-2-" 
- class_names(8) = "-6-" 
- class_names(9) = "-2+" 
- class_names(10) = "-6+" 
- class_names(11) = "-2+" 
- class_names(12) = "-2+" 
+ class_names(1) = "1+"
+ class_names(2) = "3+"
+ class_names(3) = "2+"
+ class_names(4) = "6+"
+ class_names(5) = "2+"
+ class_names(6) = "2+"
+ class_names(7) = "-2-"
+ class_names(8) = "-6-"
+ class_names(9) = "-2+"
+ class_names(10) = "-6+"
+ class_names(11) = "-2+"
+ class_names(12) = "-2+"
 
 ! List of irreducible representations.
- ABI_DT_MALLOC(Irr, (12))
+ ABI_MALLOC(Irr, (12))
  Irr(1)%name = "A1g"
  Irr(1)%dim = 1
  Irr(1)%nsym = 24
@@ -485,7 +482,7 @@ ABI_MALLOC(class_names,(12))
 
  RETURN
   if (.FALSE.) write(std_out,*) j
- end subroutine ptg_D6h 
+ end subroutine ptg_D6h
 !!***
 
 end module m_ptg_D6h

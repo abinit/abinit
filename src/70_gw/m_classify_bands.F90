@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_classify_bands
 !! NAME
 !!  m_classify_bands
@@ -8,7 +7,7 @@
 !!  a set of degenerate bands at a given k-point and spin.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -276,11 +275,11 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  nullify(zarot)
 
  if (Wfd%usepaw==1) then ! Allocate cprj_k and cprj_krot to store a set of bands for a single (K,SPIN).
-   ABI_DT_MALLOC(Cprj_b1   ,(Cryst%natom,Wfd%nspinor))
+   ABI_MALLOC(Cprj_b1   ,(Cryst%natom,Wfd%nspinor))
    call pawcprj_alloc(Cprj_b1,   0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj_b2   ,(Cryst%natom,Wfd%nspinor))
+   ABI_MALLOC(Cprj_b2   ,(Cryst%natom,Wfd%nspinor))
    call pawcprj_alloc(Cprj_b2,   0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj_b2rot,(Cryst%natom,Wfd%nspinor))
+   ABI_MALLOC(Cprj_b2rot,(Cryst%natom,Wfd%nspinor))
    call pawcprj_alloc(Cprj_b2rot,0,Wfd%nlmn_atm)
 
    !zarot => Pawang%zarot
@@ -303,7 +302,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
    cplex=1
    call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
-   ABI_DT_MALLOC(Pawfgrtab,(Cryst%natom))
+   ABI_MALLOC(Pawfgrtab,(Cryst%natom))
    call pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,Wfd%nspden,Cryst%typat)
    ABI_FREE(l_size_atm)
 
@@ -317,7 +316,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
    !call pawfgrtab_print(Pawfgrtab,unit=std_out,Wfd%prtvol=10)
 
-   ABI_DT_MALLOC(Paw_onsite,(Cryst%natom))
+   ABI_MALLOC(Paw_onsite,(Cryst%natom))
 
    if (use_paw_aeur) then
      MSG_WARNING("Using AE wavefunction for rotation in real space!")
@@ -521,16 +520,16 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cprj_b1)
-   ABI_DT_FREE(Cprj_b1)
+   ABI_FREE(Cprj_b1)
    call pawcprj_free(Cprj_b2)
-   ABI_DT_FREE(Cprj_b2)
+   ABI_FREE(Cprj_b2)
    call pawcprj_free(Cprj_b2rot)
-   ABI_DT_FREE(Cprj_b2rot)
+   ABI_FREE(Cprj_b2rot)
    ABI_FREE(zarot)
    call pawfgrtab_free(Pawfgrtab)
-   ABI_DT_FREE(Pawfgrtab)
+   ABI_FREE(Pawfgrtab)
    call paw_pwaves_lmn_free(Paw_onsite)
-   ABI_DT_FREE(Paw_onsite)
+   ABI_FREE(Paw_onsite)
  end if
 
  DBG_EXIT("COLL")

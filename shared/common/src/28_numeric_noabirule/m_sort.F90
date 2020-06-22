@@ -7,7 +7,7 @@
 !! Sorting algorithms.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG)
+!!  Copyright (C) 2008-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,6 +86,7 @@ subroutine sort_dp(n,list,iperm,tol)
 !scalars
  integer :: l,ir,iap,i,j
  real(dp) :: ap
+ character(len=500) :: msg
 
  if (n==1) then
 
@@ -95,10 +96,10 @@ subroutine sort_dp(n,list,iperm,tol)
  else if (n<1) then
 
 ! Should not call with n<1
-  write(std_out,1000) n
-  1000  format(/,' sort_dp has been called with array length n=',i12,/, &
-&  ' having a value less than 1.  This is not allowed.')
-  MSG_ERROR("Aborting now")
+  write(msg, "(a,i0,2a)")&
+    "sort_dp has been called with array length n= ",n, ch10, &
+    "having a value less than 1. This is not allowed."
+  MSG_ERROR(msg)
 
  else ! n>1
 
@@ -159,7 +160,6 @@ subroutine sort_dp(n,list,iperm,tol)
 end subroutine sort_dp
 !!***
 
-
 !!****f* m_sort/sort_int
 !! NAME
 !!  sort_int
@@ -196,6 +196,7 @@ subroutine sort_int(n,list,iperm)
 !Local variables-------------------------------
 !scalars
  integer :: l,ir,i,j,ip,ipp
+ character(len=500) :: msg
 ! *************************************************************************
 
  if (n==1) then
@@ -206,10 +207,10 @@ subroutine sort_int(n,list,iperm)
  else if (n<1) then
 
 ! Should not call with n<1
-  write(std_out,1000) n
-  1000  format(/,' sort_int has been called with array length n=',i12,/, &
-&  ' having a value less than 1.  This is not allowed.')
-  MSG_ERROR("Aborting now")
+  write(msg, "(a,i0,2a)")&
+    "sort_int has been called with array length n= ",n, ch10, &
+    "having a value less than 1. This is not allowed."
+  MSG_ERROR(msg)
 
  else ! n>1
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gstate
 !! NAME
 !!  m_gstate
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,7 +55,7 @@ module m_gstate
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init
  use m_fstrings,         only : strcat, sjoin
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
@@ -83,7 +82,6 @@ module m_gstate
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
- use m_dtfil,            only : dtfil_init_time
  use m_jellium,          only : jellium
  use m_iowf,             only : outwf
  use m_outqmc,           only : outqmc
@@ -241,7 +239,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !scalars
  integer,intent(inout) :: iexit,initialized
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(args_gs_type),intent(in) :: args_gs
  type(datafiles_type),intent(inout) :: dtfil
@@ -447,7 +445,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ylm_option=0
      if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
      if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
-     if ((dtset%orbmag.GT.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
+     if ((dtset%orbmag.NE.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
 &     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
@@ -797,8 +795,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else if(ios==0)then
      write(message, '(a,a,i4,a)' )ch10,&
 &     ' gstate : reading',ab_xfh%nxfh,' (x,f) history pairs from input wf file.'
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    end if
 !  WARNING : should check that restartxf is not negative
 !  WARNING : should check that restartxf /= only when dtfil%ireadwf is activated
@@ -987,7 +984,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !write(std_out,*) "paw_dmft%use_dmft",paw_dmft%use_dmft
 
 !PAW: 1- Initialize values for several arrays unchanged during iterations
-!2- Initialize data for LDA+U
+!2- Initialize data for DFT+U
 !3- Eventually open temporary storage file
  if(psps%usepaw==1) then
 !  1-
@@ -1001,9 +998,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      hyb_range_fock=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range_fock)
-     call pawinit(gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usekden,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
@@ -1020,7 +1017,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
 
-!  2-Initialize and compute data for LDA+U, EXX, or LDA+DMFT
+!  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
@@ -1126,14 +1123,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
 !      Compute up+down rho(G) by fft
-       ABI_ALLOCATE(work,(nfftf))
-       work(:)=rhor(:,1)
-       call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        if(dtset%usekden==1)then
-         work(:)=taur(:,1)
-         call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+         call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
-       ABI_DEALLOCATE(work)
 
      else if(dtfil%ireadwf/=0)then
        izero=0
@@ -1150,6 +1143,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
 &         hightemp=hightemp)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+         if(dtset%usekden==1)then
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
+         end if
          ABI_DEALLOCATE(rhowfg)
          ABI_DEALLOCATE(rhowfr)
        else
@@ -1230,14 +1228,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      end if
 
 !    Compute up+down rho(G) by fft
-     ABI_ALLOCATE(work,(nfftf))
-     work(:)=rhor(:,1)
-     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      if(dtset%usekden==1)then
-       work(:)=taur(:,1)
-       call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
-     ABI_DEALLOCATE(work)
 
    end if
  end if ! has_to_init
@@ -1279,7 +1273,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  !! orbital magnetization initialization
  dtorbmag%orbmag = dtset%orbmag
- if (dtorbmag%orbmag > 0) then
+ if (dtorbmag%orbmag .NE. 0) then
     call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 &                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                   rprimd,symrec,xred)
@@ -1336,8 +1330,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call dtfil_init_time(dtfil,0)
 
    write(message,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
    if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
@@ -1390,8 +1383,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  write(message, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
 & ' ----iterations are completed or convergence reached----',ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ call wrtout([std_out, ab_out], message)
 
 !Mark this GS computation as done
  initialized=1
@@ -1456,8 +1448,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
     occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
-   if (dtset%getkerange_path /= ABI_NOFILE) then
-     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_path, dtset, comm)
+   if (dtset%getkerange_filepath /= ABI_NOFILE) then
+     call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_filepath, dtset, comm)
    end if
 
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
@@ -1502,10 +1494,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(message,'(a,a)')   ch10, 'Constant reduced ebar and d calculation  - final values:'
    end if
 
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call prtefield(dtset,dtefield,ab_out,rprimd)
-
-   call wrtout(std_out,message,'COLL')
    call prtefield(dtset,dtefield,std_out,rprimd)
 
 !  To check if the final electric field is below the critical field
@@ -1519,13 +1509,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   '  As a rough estimate,',ch10,&
 &   '  to be below the critical field, the bandgap of your system',ch10,&
 &   '  should be larger than ',maxval(efield_band)*Ha_eV,' eV.',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
    write(message,'(a)')  '--------------------------------------------------------------------------------'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-
+   call wrtout([std_out, ab_out], message)
  end if
 
 !Open the formatted derivative database file, and write the preliminary information
@@ -1546,9 +1533,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &   nblok,xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
+   call ddb_hdr%open_write(ddbnm,dtfil%unddb,fullinit=0)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
    choice=2
    mpert = dtset%natom + 6 ; msize = 3*mpert
@@ -1776,6 +1763,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call timab(32,2,tsec)
 
  DBG_EXIT("COLL")
+
 end subroutine gstate
 !!***
 
@@ -1861,17 +1849,14 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 
 !  Ensure portability of output thanks to tol8
      if (dtset%usewvl == 0) then
-       write(message, '(a,2f12.3)' ) &
-&       '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
+       write(message, '(a,2f12.3)' ) '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
      else
 #if defined HAVE_BIGDFT
        write(message, '(a,2I8)' ) ' setup2: nwvl coarse and fine are', &
 &       wfs%ks%lzd%Glr%wfd%nvctr_c, wfs%ks%lzd%Glr%wfd%nvctr_f
 #endif
      end if
-     call wrtout(ab_out,  message,'COLL')
-     call wrtout(std_out, message,'COLL')
-
+     call wrtout([std_out, ab_out], message)
    end if
 
 #if !defined HAVE_BIGDFT
@@ -2317,92 +2302,82 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 !scalars
  integer :: iatom,mu
  real(dp) :: devsqr,grchempot2
- character(len=500) :: message
+ character(len=500) :: msg
+ integer :: units(2)
 
 ! *************************************************************************
-!
-!DEBUG
+
 !write(std_out,*)' clnup2 : enter '
-!ENDDEBUG
 
 !Only print additional info for scf calculations
  if (iscf>=0) then
 
-   if((prtvol>=10).and.(prtfor>0))then
+   if(prtvol >= 10 .and. prtfor > 0) then
+     write(msg, '(a,10x,a)' ) ch10, '===> extra information on forces <==='
+     call wrtout(ab_out,msg)
 
-     write(message, '(a,10x,a)' ) ch10,&
-&     '===> extra information on forces <==='
-     call wrtout(ab_out,message,'COLL')
-
-     write(message, '(a)' ) ' ewald contribution to reduced grads'
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out, ' ewald contribution to reduced grads')
      do iatom=1,natom
-       write(message,format01020) iatom,(grewtn(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg,format01020) iatom,(grewtn(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
 
      grchempot2=sum(grchempottn(:,:)**2)
      if(grchempot2>tol16)then
-       write(message, '(a)' ) ' chemical potential contribution to reduced grads'
-       call wrtout(ab_out,message,'COLL')
+       call wrtout(ab_out, ' chemical potential contribution to reduced grads')
        do iatom=1,natom
-         write(message,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     write(message, '(a)' ) ' nonlocal contribution to red. grads'
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,' nonlocal contribution to red. grads')
      do iatom=1,natom
-       write(message,format01020) iatom,(synlgr(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg,format01020) iatom,(synlgr(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
 
-     write(message, '(a)' ) ' local psp contribution to red. grads'
-     call wrtout(ab_out,message,'COLL')
-     if (n1xccc/=0) then
+     call wrtout(ab_out, ' local psp contribution to red. grads')
+     if (n1xccc /= 0) then
        do iatom=1,natom
-         write(message,format01020) iatom,fred(:,iatom)-&
-&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,fred(:,iatom) - &
+          (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
+         call wrtout(ab_out,msg)
        end do
      else
        do iatom=1,natom
-         write(message,format01020) iatom,fred(:,iatom)-&
-&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,fred(:,iatom) - &
+         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     if (n1xccc/=0) then
-       write(message, '(a)' ) ' core charge xc contribution to reduced grads'
-       call wrtout(ab_out,message,'COLL')
+     if (n1xccc /= 0) then
+       call wrtout(ab_out,' core charge xc contribution to reduced grads')
        do iatom=1,natom
-         write(message,format01020) iatom,(grxc(mu,iatom),mu=1,3)
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,(grxc(mu,iatom),mu=1,3)
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     if (ngrvdw==natom) then
-       write(message, '(a)' ) ' Van der Waals DFT-D contribution to reduced grads'
-       call wrtout(ab_out,message,'COLL')
+     if (ngrvdw == natom) then
+       call wrtout(ab_out,' Van der Waals DFT-D contribution to reduced grads')
        do iatom=1,natom
-         write(message,format01020) iatom,(grvdw(mu,iatom),mu=1,3)
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,(grvdw(mu,iatom),mu=1,3)
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     write(message, '(a)' ) ' residual contribution to red. grads'
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,' residual contribution to red. grads')
      do iatom=1,natom
-       write(message,format01020) iatom,(gresid(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg,format01020) iatom,(gresid(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
 
    end if
 
 !  Compute mean squared deviation from starting coords
-   devsqr=0.0_dp
+   devsqr=zero
    do iatom=1,natom
      do mu=1,3
        devsqr=devsqr+(xred(mu,iatom)-start(mu,iatom))**2
@@ -2411,69 +2386,50 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 
 !  When shift is nonnegligible then print values
    if (devsqr>1.d-14) then
-     write(message, '(a,1p,e12.4,3x,a)' ) &
-&     ' rms coord change=',sqrt(devsqr/dble(3*natom)),&
-&     'atom, delta coord (reduced):'
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(a,1p,e12.4,3x,a)' )' rms coord change=',sqrt(devsqr/dble(3*natom)),'atom, delta coord (reduced):'
+     call wrtout(ab_out,msg)
      do iatom=1,natom
-       write(message, '(1x,i5,2x,3f20.12)' ) iatom,&
-&       (xred(mu,iatom)-start(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(1x,i5,2x,3f20.12)' ) iatom, (xred(mu,iatom)-start(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
    end if
 
-!  Write out stress results
-   if (prtstr>0) then
-     write(message, '(a,a)' ) ch10,&
-&     ' Cartesian components of stress tensor (hartree/bohr^3)'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+   if (prtstr > 0) then
+     !  Write out stress results
+     units = [std_out, ab_out]
+     write(msg, '(a,a)' ) ch10,' Cartesian components of stress tensor (hartree/bohr^3)'
+     call wrtout(units, msg)
 
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '  sigma(1 1)=',strten(1),'  sigma(3 2)=',strten(4)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '  sigma(2 2)=',strten(2),'  sigma(3 1)=',strten(5)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '  sigma(3 3)=',strten(3),'  sigma(2 1)=',strten(6)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(1 1)=',strten(1),'  sigma(3 2)=',strten(4)
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(2 2)=',strten(2),'  sigma(3 1)=',strten(5)
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(3 3)=',strten(3),'  sigma(2 1)=',strten(6)
+     call wrtout(units, msg)
 
-!    Also output the pressure (minus one third the trace of the stress
-!    tensor.
-     write(message, '(a,a,es12.4,a)' ) ch10,&
-&     '-Cartesian components of stress tensor (GPa)         [Pressure=',&
-&     -(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa]'
+     !  Also output the pressure (minus one third the trace of the stress tensor).
+     write(msg, '(a,a,es12.4,a)' ) ch10,&
+     '-Cartesian components of stress tensor (GPa)         [Pressure=',&
+      -(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa]'
+     call wrtout(units, msg)
 
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
-&     '  sigma(3 2)=',strten(4)*HaBohr3_GPa
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '- sigma(2 2)=',strten(2)*HaBohr3_GPa,&
-&     '  sigma(3 1)=',strten(5)*HaBohr3_GPa
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '- sigma(3 3)=',strten(3)*HaBohr3_GPa,&
-&     '  sigma(2 1)=',strten(6)*HaBohr3_GPa
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
+       '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
+       '  sigma(3 2)=',strten(4)*HaBohr3_GPa
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
+       '- sigma(2 2)=',strten(2)*HaBohr3_GPa,&
+       '  sigma(3 1)=',strten(5)*HaBohr3_GPa
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
+       '- sigma(3 3)=',strten(3)*HaBohr3_GPa,&
+       '  sigma(2 1)=',strten(6)*HaBohr3_GPa
+     call wrtout(units, msg)
    end if
 
-!  Last end if above refers to iscf > 0
- end if
+ end if ! iscf > 0
 
-!DEBUG
-!write(std_out,*)' clnup2 : exit '
-!ENDDEBUG
+ !write(std_out,*)' clnup2 : exit '
 
 end subroutine clnup2
 !!***
@@ -2654,7 +2610,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2019 ABINIT group (MB)
+!! Copyright (C) 2003-2020 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

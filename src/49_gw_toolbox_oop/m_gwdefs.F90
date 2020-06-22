@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwdefs
 !! NAME
 !! m_gwdefs
@@ -7,7 +6,7 @@
 !! This module contains definitions for a number of named constants used in the GW part of abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2020 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -350,7 +349,7 @@ MODULE m_gwdefs
   real(dp) :: omegasimax                 ! Max omega for Sigma along the imag axis in case of analytic continuation
   real(dp) :: omegasimin                 ! min omega for Sigma along the imag axis in case of analytic continuation
 
-  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element. 
+  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element.
                                          ! Usually one, except for the hybrid functionals.
 
   real(dp) :: zcut                       ! Value of $\delta$ used to avoid the divergences (see related input variable)
@@ -476,7 +475,7 @@ subroutine sigijtab_free(Sigijtab)
       do kk=ilow,iup
         ABI_FREE(Sigijtab(ii,jj)%col(kk)%bidx)
       end do
-      ABI_DT_FREE(Sigijtab(ii,jj)%col)
+      ABI_FREE(Sigijtab(ii,jj)%col)
 
     end do
   end do

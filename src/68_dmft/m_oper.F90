@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_oper
 !! NAME
 !!  m_oper
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,7 +87,7 @@ MODULE m_oper
   integer :: has_opermatlu
 
   character(len=12) :: whichoper
-  ! describe the type of operator computed (LDA, DMFT, KS..)
+  ! describe the type of operator computed (DFT, DMFT, KS..)
 
 !  ! Polarisation
   type(matlu_type), allocatable :: matlu(:)
@@ -381,8 +380,8 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
    iband1=1
    iband2=oper%mbandc
 !   do ib=1,oper%mbandc
-!     if(-(paw_dmft%eigen_lda(1,1,ib)+paw_dmft%fermie).ge.0.3) iband1=ib
-!     if( (paw_dmft%eigen_lda(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
+!     if(-(paw_dmft%eigen_dft(1,1,ib)+paw_dmft%fermie).ge.0.3) iband1=ib
+!     if( (paw_dmft%eigen_dft(1,1,ib)-paw_dmft%fermie).le.0.3) iband2=ib
 !   enddo
 
    ximag=.false.
@@ -412,11 +411,11 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
            if(option<5) then
              if(abs(aimag(oper%ks(isppol,ikpt,ib,ib))).ge.tol10) then
                write(message, '(a,i4,e14.5,3x,e14.5,3x,e21.14)') "   -iband--",ib,&
-&               paw_dmft%eigen_lda(isppol,ikpt,ib),oper%ks(isppol,ikpt,ib,ib)
+&               paw_dmft%eigen_dft(isppol,ikpt,ib),oper%ks(isppol,ikpt,ib,ib)
                call wrtout(std_out,message,'COLL')
              else
                write(message, '(a,i4,e14.5,3x,e14.5)') "   -iband--",ib,&
-&               paw_dmft%eigen_lda(isppol,ikpt,ib),real(oper%ks(isppol,ikpt,ib,ib))
+&               paw_dmft%eigen_dft(isppol,ikpt,ib),real(oper%ks(isppol,ikpt,ib,ib))
                call wrtout(std_out,message,'COLL')
              endif
            endif

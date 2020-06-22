@@ -8,7 +8,7 @@
 !!  (sqrt root)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (BA)
+!! Copyright (C) 2009-2020 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,6 +60,8 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  matrix= square root of the matrix
+!!  force_diag = 0 if it no 0 on diagonal
+!!             = nb of zeros found otherwise
 !!
 !! PARENTS
 !!
@@ -67,12 +69,13 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine invsqrt_matrix(matrix,tndim)
+subroutine invsqrt_matrix(matrix,tndim,force_diag)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: tndim 
  complex(dpc),intent(inout) :: matrix(tndim,tndim)
+ integer, intent(out) :: force_diag
 !arrays
 
 !Local variables-------------------------------
@@ -131,7 +134,7 @@ subroutine invsqrt_matrix(matrix,tndim)
  nb_of_zero=0
  do im=1,tndim
 
-   if(eig(im)<zero) then
+   if(eig(im)< -tol8) then
      message = "  - Eigenvalues from zheev are negative or zero ! - "
      write(std_out,*)
      write(std_out,*) "    Eigenvalue=",eig(im)
@@ -140,12 +143,13 @@ subroutine invsqrt_matrix(matrix,tndim)
        write(std_out,'(100f7.3)') (initialmatrix(im1,im2),im2=1,tndim)
      enddo
      MSG_ERROR(message)
-   else if(eig(im)<tol8) then
+   else if(abs(eig(im))<tol8) then
      nb_of_zero=nb_of_zero+1
    else
      diag(im,im)=cmplx(one/sqrt(eig(im)),zero,kind=dp)
    endif
  enddo
+ force_diag=nb_of_zero
  ABI_DEALLOCATE(eig)
 ! write(std_out,*) "sqrt(eig)                , diag(1,1)",sqrt(eig(1)),diag(1,1)
 ! write(std_out,*) "cmplx(sqrt(eig(1)),zero,dp) , diag(1,1)",cmplx(sqrt(eig(1)),zero,dp),diag(1,1)

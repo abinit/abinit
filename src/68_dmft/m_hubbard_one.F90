@@ -7,7 +7,7 @@
 !! Solve Anderson model with the density/density Hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@ contains
 !! Solve the hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,14 +59,14 @@ contains
 !!
 !! INPUTS
 !!  cryst_struc
-!!  istep    =  step of iteration for LDA.
-!!  lda_occup
+!!  istep    =  step of iteration for DFT.
+!!  dft_occup
 !!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
 !!
@@ -171,7 +171,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !     do isppol=1,nsppol
 !!      Take \epsilon_{nks}
 !!      ========================
-!       energy_level%ks(isppol,ikpt,iband,iband)=paw_dmft%eigen_lda(isppol,ikpt,iband)
+!       energy_level%ks(isppol,ikpt,iband,iband)=paw_dmft%eigen_dft(isppol,ikpt,iband)
 !     end do
 !   end do
 ! end do
@@ -181,7 +181,7 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 !!Compute atomic levels from projection of \epsilon_{nks} and symetrize
 !!======================================================================
 ! call loc_oper(energy_level,paw_dmft,1)
-! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only LDA"
+! write(message,'(a,2x,a,f13.5)') ch10," == Print Energy levels before sym and only DFT"
 ! call wrtout(std_out,message,'COLL')
 ! call print_matlu(energy_level%matlu,natom,1)
 ! do iatom = 1 , natom
@@ -374,7 +374,7 @@ contains
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -382,14 +382,14 @@ contains
 !!
 !! INPUTS
 !!  cryst_struc
-!!  istep    =  step of iteration for LDA.
-!!  lda_occup
+!!  istep    =  step of iteration for DFT.
+!!  dft_occup
 !!  mpi_enreg=informations about MPI parallelization
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!
 !! OUTPUT
-!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
 !!
@@ -784,7 +784,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

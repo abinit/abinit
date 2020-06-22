@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/ujdet
 !! NAME
 !! ujdet
@@ -8,7 +7,7 @@
 !!  atomic positions, and potential shifts.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DJA)
+!!  Copyright (C) 1998-2020 ABINIT group (DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

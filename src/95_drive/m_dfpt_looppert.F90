@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_loopert
 !! NAME
 !!  m_dfpt_loopert
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +39,7 @@ module m_dfpt_loopert
  use m_paral_pert
  use m_nctk
  use m_ddb
+ use m_ddb_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -49,7 +49,6 @@ module m_dfpt_loopert
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
- use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
  use m_time,       only : timab
  use m_fstrings,   only : strcat
@@ -233,7 +232,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: cpus,vxcavg
  real(dp), intent(inout) :: fermie
  real(dp), intent(inout) :: etotal
- character(len=6), intent(in) :: codvsn
+ character(len=8), intent(in) :: codvsn
  type(MPI_type), intent(inout) :: mpi_enreg
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in), target :: dtset
@@ -315,7 +314,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(eigr2d_t)  :: eigr2d,eigi2d
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den,hdr_tmp
- type(ddb_hdr_type) :: ddb_hdr
+ type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
  type(pawang_type) :: pawang1
  type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
@@ -623,15 +622,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_ALLOCATE(eigen0_copy,(dtset%mband*nkpt*dtset%nsppol))
  eigen0_copy(:)=zero
 
-! SP : Retreval of the DDB information and computing of effective charge and
-! dielectric tensor
+ ! SP : Retreval of the DDB information and computing of effective charge and
+ ! dielectric tensor
  ABI_ALLOCATE(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
-   filnam = dtfil%filddbsin  !'test_DDB'
+   filnam = dtfil%filddbsin
    ABI_ALLOCATE(dummy,(dtset%natom))
-   call ddb_from_file(ddb,filnam,1,dtset%natom,0,dummy,ddb_crystal,mpi_enreg%comm_world)
-!  Get Dielectric Tensor and Effective Charges
-!  (initialized to one_3D and zero if the derivatives are not available in the DDB file)
+   call ddb_from_file(ddb, filnam, 1, dtset%natom, 0, dummy, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call tmp_ddb_hdr%free()
+   ! Get Dielectric Tensor and Effective Charges
+   ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)
    call ddb_crystal%free()
    call ddb%free()
@@ -839,6 +839,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(symaf1_tmp,(nsym))
    ABI_ALLOCATE(symrl1_tmp,(3,3,nsym))
    ABI_ALLOCATE(tnons1_tmp,(3,nsym))
+
    if (dtset%prepanl/=1.and.&
 &   dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 &   dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17) then
@@ -869,7 +870,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &   nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
    if (psps%usepaw==1) then
 !    Allocate/initialize only zarot in pawang1 datastructure
-     call pawang_init(pawang1,0,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+     call pawang_init(pawang1,0,0,pawang%l_max-1,0,0,nsym1,0,0,0,0)
      call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
    end if
 
@@ -914,6 +915,17 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
 &     ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
+
+     !MR: Modified to agree with quadrupole and flexoelectrics routines
+     if(dtset%prepalw==1) then
+       if (dtset%kptopt==2) timrev_pert=1
+       if (dtset%kptopt==3) timrev_pert=0
+       timrev_kpt = timrev_pert
+       !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are
+       !implemented in the quadrupole and flexoelectrics routines
+       nsym1=1
+     end if
+
 !    The time reversal symmetry is not used for the BZ sampling when kptopt=3 or 4
      if (dtset%kptopt==3.or.dtset%kptopt==4) timrev_kpt = 0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
@@ -1987,12 +1999,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call gkk_init(gkk,gkk2d,dtset%mband,dtset%nsppol,nkpt_rbz,1,1)
 
      ! Write the netCDF file.
-     fname = strcat(gkkfilnam,".nc")
-     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-     NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
-     call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
-     NCF_CHECK(nf90_close(ncid))
+     if (me == master) then
+       fname = strcat(gkkfilnam,".nc")
+       NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
+       NCF_CHECK(crystal%ncwrite(ncid))
+       NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
+       call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
+       NCF_CHECK(nf90_close(ncid))
+     end if
 
      ! Free memory
      ABI_DEALLOCATE(gkk)
@@ -2038,12 +2052,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     occ_rbz,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
    end if
 
+
 #ifdef HAVE_NETCDF
-  ! Output DDK file in netcdf format.
+   ! Output DDK file in netcdf format.
+   ! Can be used by optic instead of the 1WF file that is really huge.
    if (me == master .and. ipert == dtset%natom + 1) then
      fname = strcat(dtfil%filnam_ds(4), "_EVK.nc")
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
-    ! Have to build hdr on k-grid with info about perturbation.
+     ! Have to build hdr on k-grid with info about perturbation.
      call hdr_copy(hdr0, hdr_tmp)
      hdr_tmp%kptopt = dtset%kptopt
      hdr_tmp%pertcase = pertcase
@@ -2202,9 +2218,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! Clean band structure datatypes (should use it more in the future !)
    call ebands_free(ebands_k)
    call ebands_free(ebands_kq)
-   if(.not.kramers_deg) then
-     call ebands_free(ebands_kmq)
-   end if
+   if(.not.kramers_deg) call ebands_free(ebands_kmq)
 
 !  %%%% Parallelization over perturbations %%%%%
 !  *Redefine output/log files
@@ -2301,19 +2315,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &         1,xred=xred,occ=occ_pert)
 
-         call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigr2d, dtfil%unddb)
+         call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, dtfil%unddb)
 
          call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
 !        print _EIGI2D file for this perturbation
          if(smdelta>0) then
 
            unitout = dtfil%unddb
-           call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_eigi2d, unitout)
+           call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
 
            call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
          end if !smdelta
 
-         call ddb_hdr_free(ddb_hdr)
+         call ddb_hdr%free()
 
 !        Output of the EIGR2D.nc file.
          fname = strcat(dtfil%filnam_ds(4),"_EIGR2D.nc")
@@ -2379,20 +2393,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
 
-   if(dtset%prtefmas==1)then
-     fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
-     !write(std_out,*)' dfpt_looppert: will write ',fname
+   if (dtset%prtefmas == 1 .and. me == master) then
+     fname = strcat(dtfil%filnam_ds(4), "_EFMAS.nc")
 #ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal%ncwrite(ncid))
-!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
-     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
+     !NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     call print_efmas(efmasdeg, efmasval, kpt_rbz_pert, ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
    endif
 
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
-
    ABI_DEALLOCATE(kpt_rbz_pert)
  end if
 

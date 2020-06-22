@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_melemts
 !! NAME
 !!  m_melemts
@@ -10,7 +9,7 @@
 !!  using the perturbative approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -765,7 +764,7 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
    my_keys = ANAMES
  end if
 
- ABI_DT_MALLOC(data_p,(my_nkeys))
+ ABI_MALLOC(data_p,(my_nkeys))
  ABI_MALLOC(tab,(my_nkeys))
  tab=0
 
@@ -850,7 +849,7 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
 
 10 continue
  ABI_FREE(my_keys)
- ABI_DT_FREE(data_p)
+ ABI_FREE(data_p)
  ABI_FREE(tab)
 
 end subroutine melements_print

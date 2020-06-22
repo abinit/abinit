@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h16 )
   
-- input  file    -> t85.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t85/t85.in
 - output file    -> t85.out
 - root for input  files -> t85i
 - root for output files -> t85o
@@ -271,7 +271,16 @@ P          mk1mem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 69, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.40000000E+01, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   2.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -296,8 +305,8 @@ P          mk1mem           8
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/22ti.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/22ti.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -314,8 +323,8 @@ P          mk1mem           8
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/28ni.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/28ni.pspnc
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/28ni.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/28ni.pspnc
 -  Troullier-Martins psp for element  Ni        Thu Oct 27 17:35:45 EDT 1994
 - 28.00000  10.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -346,6 +355,12 @@ P newkpt: treating     18 bands with npw=      69 for ikpt=   8 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-18, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
 
@@ -1546,6 +1561,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
   sigma(2 2)= -3.08018074E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -3.08018074E-03  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  5.7180000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.7180000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.7180000, ]
+lattice_lengths: [   5.71800,    5.71800,    5.71800, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.8695301E+02
+convergence: {deltae:  4.974E-14, res2:  1.577E-20, residm:  1.702E-18, diffor: null, }
+etotal    :  -3.58533835E+01
+entropy   :   0.00000000E+00
+fermie    :   1.69392503E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -3.08018074E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -3.08018074E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.08018074E-03, ]
+pressure_GPa:   9.0622E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ti]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Ni]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1684,25 +1728,22 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
  Next minimum=    2.9116E-03  at reduced coord.    0.0833    0.0000    0.0000
    Integrated=    1.4000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  9.26879723445936E+00
-    Hartree energy  =  1.98523841875123E+00
-    XC energy       = -1.42935821641380E+01
-    Ewald energy    = -3.43897678578178E+01
-    PspCore energy  =  9.15219322696063E+00
-    Loc. psp. energy= -7.03910783439594E+00
-    NL   psp  energy= -5.41428788946279E-01
-    >>>>> Internal E= -3.58576577651267E+01
-
-    -kT*entropy     =  4.27425459043892E-03
-    >>>>>>>>> Etotal= -3.58533835105363E+01
-
- Other information on the energy :
-    Total energy(eV)= -9.75620181384998E+02 ; Band energy (Ha)=  -2.4109033098E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  9.26879723445936E+00
+hartree             :  1.98523841875123E+00
+xc                  : -1.42935821641380E+01
+Ewald energy        : -3.43897678578178E+01
+psp_core            :  9.15219322696063E+00
+local_psp           : -7.03910783439594E+00
+non_local_psp       : -5.41428788946279E-01
+internal            : -3.58576577651267E+01
+'-kT*entropy'       :  4.27425459043892E-03
+total_energy        : -3.58533835105363E+01
+total_energy_eV     : -9.75620181384998E+02
+band_energy         : -2.41090330979936E+00
+...
 
 
           ===> extra information on forces <===
@@ -1734,7 +1775,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 73, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.40000000E+01, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   2.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1840,6 +1890,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
   6.2179E-01  6.5303E-01  7.5576E-01  7.6421E-01  8.1239E-01  9.8806E-01
   prteigrs : nnsclo,ikpt=   20    8 max resid (incl. the buffer)=  4.37681E-06
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  5.7180000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.7180000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.7180000, ]
+lattice_lengths: [   5.71800,    5.71800,    5.71800, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.8695301E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.849E-19, diffor:  0.000E+00, }
+etotal    :  -3.58533835E+01
+entropy   :   0.00000000E+00
+fermie    :   1.69392503E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ti]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Ni]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1849,7 +1923,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   91.639E-08; max=  40.312E-06
+ Mean square residual over all n,k,spin=   37.185E-20; max=  98.494E-20
    0.2500  0.2500  0.2917    1  3.52894E-06 kpt; spin; max resid(k); each band:
   2.47E-20 8.05E-19 1.43E-19 7.98E-20 3.03E-19 4.52E-20 5.59E-19 4.10E-19
   8.20E-19 4.70E-19 3.40E-19 1.72E-19 9.23E-19 5.88E-19 5.85E-19 8.24E-19
@@ -1934,7 +2008,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 8, mband: 18, nsppol: 1, nspinor: 1, nspden: 1, mpw: 73, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.40000000E+01, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   2.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2024,9 +2107,15 @@ P newkpt: treating     18 bands with npw=      71 for ikpt=   2 by node    0
 P newkpt: treating     18 bands with npw=      73 for ikpt=   3 by node    0
 P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   15.291155401402     -1.907E+01 3.146E-02 4.443E+02
+-ETOT  1   15.291155401402     -1.907E+01 3.853E-02 4.443E+02
 
  ETOT  2   12.691632987108     -2.600E+00 6.117E-04 1.520E+02
 
@@ -2042,13 +2131,13 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
  ETOT  8   11.350264044569     -1.812E-06 9.892E-10 1.831E-05
 
- ETOT  9   11.350264043913     -6.566E-10 2.689E-12 4.195E-05
+ ETOT  9   11.350264043913     -6.566E-10 3.197E-12 4.195E-05
 
  ETOT 10   11.350264042475     -1.438E-09 2.553E-13 6.108E-07
 
  ETOT 11   11.350264042486      1.085E-11 2.165E-15 1.246E-06
 
- ETOT 12   11.350264042476     -9.926E-12 3.863E-17 7.040E-07
+ ETOT 12   11.350264042476     -9.926E-12 4.030E-17 7.040E-07
 
  ETOT 13   11.350264042463     -1.275E-11 4.334E-17 3.448E-11
 
@@ -2057,7 +2146,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  43.336E-18
+ Mean square residual over all n,k,spin=   94.859E-19; max=  43.336E-18
    0.2500  0.2500  0.2500    1  3.07322E-17 kpt; spin; max resid(k); each band:
   6.30E-18 7.19E-18 4.45E-18 5.31E-18 5.76E-18 9.85E-18 9.01E-18 4.63E-18
   9.64E-18 2.49E-18 2.83E-18 6.38E-18 5.47E-18 6.47E-18 3.07E-17 2.79E-17
@@ -2119,6 +2208,12 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 P newkpt: treating     18 bands with npw=      71 for ikpt=   1 by node    0
 P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1   125945520.57105      1.259E+08 3.126E-01 6.978E+12
@@ -2133,7 +2228,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
  ETOT  6   11.108461447305     -1.159E-01 1.176E-05 1.617E+03
 
- ETOT  7   11.052572059785     -5.589E-02 1.045E-05 2.020E+02
+ ETOT  7   11.052572059785     -5.589E-02 1.813E-05 2.020E+02
 
  ETOT  8   11.048249316486     -4.323E-03 2.427E-07 3.042E+01
 
@@ -2141,13 +2236,13 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
  ETOT 10   11.047637035857     -3.357E-04 4.833E-09 8.520E-01
 
- ETOT 11   11.047617647267     -1.939E-05 2.715E-09 7.898E-04
+ ETOT 11   11.047617647267     -1.939E-05 4.418E-09 7.898E-04
 
  ETOT 12   11.047618284598      6.373E-07 1.170E-11 3.690E-02
 
  ETOT 13   11.047617644929     -6.397E-07 3.316E-12 1.742E-03
 
- ETOT 14   11.047617614253     -3.068E-08 1.353E-14 4.264E-05
+ ETOT 14   11.047617614253     -3.068E-08 1.972E-14 4.264E-05
 
  ETOT 15   11.047617614013     -2.400E-10 6.827E-15 2.970E-05
 
@@ -2164,7 +2259,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  11.961E-19
+ Mean square residual over all n,k,spin=   30.771E-20; max=  11.961E-19
    0.2500  0.2500  0.2500    1  1.19611E-18 kpt; spin; max resid(k); each band:
   2.14E-19 4.32E-19 3.21E-19 1.06E-19 2.11E-19 2.52E-19 3.94E-19 6.86E-20
   3.81E-19 1.42E-19 4.74E-20 4.81E-20 6.34E-19 4.17E-19 1.20E-18 3.98E-19
@@ -2224,6 +2319,12 @@ P newkpt: treating     18 bands with npw=      71 for ikpt=   2 by node    0
 P newkpt: treating     18 bands with npw=      73 for ikpt=   3 by node    0
 P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1   171.57963533385     -1.101E+01 2.558E-01 2.165E+04
@@ -2238,15 +2339,15 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
  ETOT  6   7.2935382722853     -3.184E-04 2.533E-07 6.583E+01
 
- ETOT  7   7.2923890778188     -1.149E-03 5.999E-09 1.506E+00
+ ETOT  7   7.2923890778188     -1.149E-03 6.341E-09 1.506E+00
 
- ETOT  8   7.2922958696911     -9.321E-05 1.324E-08 4.578E-04
+ ETOT  8   7.2922958696911     -9.321E-05 1.347E-08 4.578E-04
 
- ETOT  9   7.2922956881820     -1.815E-07 7.749E-11 9.563E-05
+ ETOT  9   7.2922956881820     -1.815E-07 8.321E-11 9.563E-05
 
  ETOT 10   7.2922956845624     -3.620E-09 2.026E-12 2.213E-06
 
- ETOT 11   7.2922956849008      3.383E-10 2.356E-14 2.375E-05
+ ETOT 11   7.2922956849008      3.383E-10 2.458E-14 2.375E-05
 
  ETOT 12   7.2922956845949     -3.058E-10 7.739E-16 6.803E-06
 
@@ -2259,7 +2360,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  43.021E-18
+ Mean square residual over all n,k,spin=   11.000E-18; max=  43.021E-18
    0.2500  0.2500  0.2500    1  1.93180E-17 kpt; spin; max resid(k); each band:
   4.68E-18 1.73E-17 9.33E-18 6.18E-18 7.86E-18 1.23E-17 1.75E-17 1.07E-17
   6.26E-18 5.29E-18 2.49E-18 5.96E-18 3.16E-18 3.97E-18 1.93E-17 1.36E-17
@@ -2321,9 +2422,15 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 P newkpt: treating     18 bands with npw=      71 for ikpt=   1 by node    0
 P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   793918198.07952      7.939E+08 1.020E+00 4.399E+13
+-ETOT  1   793918198.07952      7.939E+08 1.074E+00 4.399E+13
 
  ETOT  2   187760237.58329     -6.062E+08 6.594E+00 1.040E+13
 
@@ -2333,25 +2440,25 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
  ETOT  5   5.3390190649086     -3.180E+03 2.107E-02 1.251E+03
 
- ETOT  6   4.4365919150363     -9.024E-01 2.181E-04 1.676E+02
+ ETOT  6   4.4365919150363     -9.024E-01 2.570E-04 1.676E+02
 
- ETOT  7   4.3005738071188     -1.360E-01 6.487E-05 2.925E+03
+ ETOT  7   4.3005738071188     -1.360E-01 8.132E-05 2.925E+03
 
  ETOT  8   4.2284410407980     -7.213E-02 5.877E-06 3.684E+01
 
  ETOT  9   4.2293284967472      8.875E-04 6.599E-08 1.038E+02
 
- ETOT 10   4.2274268959376     -1.902E-03 2.352E-08 3.932E+00
+ ETOT 10   4.2274268959376     -1.902E-03 4.299E-08 3.932E+00
 
- ETOT 11   4.2273425350839     -8.436E-05 5.587E-09 5.385E-03
+ ETOT 11   4.2273425350839     -8.436E-05 1.248E-08 5.385E-03
 
  ETOT 12   4.2273429139603      3.789E-07 5.987E-11 3.265E-02
 
- ETOT 13   4.2273424420730     -4.719E-07 7.077E-13 6.666E-03
+ ETOT 13   4.2273424420730     -4.719E-07 1.010E-12 6.666E-03
 
  ETOT 14   4.2273423243004     -1.178E-07 4.362E-14 1.447E-04
 
- ETOT 15   4.2273423246012      3.008E-10 1.835E-14 1.648E-04
+ ETOT 15   4.2273423246012      3.008E-10 1.923E-14 1.648E-04
 
  ETOT 16   4.2273423217549     -2.846E-09 4.599E-15 7.402E-06
 
@@ -2368,7 +2475,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  18.786E-18
+ Mean square residual over all n,k,spin=   48.856E-19; max=  18.786E-18
    0.2500  0.2500  0.2500    1  1.87862E-17 kpt; spin; max resid(k); each band:
   1.53E-18 4.65E-19 3.40E-18 6.68E-19 3.12E-18 8.06E-18 1.78E-18 2.45E-18
   1.81E-18 4.98E-19 1.01E-18 5.95E-18 1.56E-17 1.88E-17 4.77E-18 4.61E-18
@@ -2996,7 +3103,35 @@ P          mk1mem           8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -3010,22 +3145,11 @@ P          mk1mem           8
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -3034,27 +3158,14 @@ P          mk1mem           8
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          6.2  wall=          6.9
+- Proc.   0 individual time (sec): cpu=          6.2  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  25 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.2  wall=          6.9
++Overall time at end (sec) : cpu=          6.2  wall=          8.2

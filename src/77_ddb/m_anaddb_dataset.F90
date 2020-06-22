@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_anaddb_dataset
 !! NAME
 !!  m_anaddb_dataset
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,12 +68,14 @@ module m_anaddb_dataset
   integer :: chneut
   integer :: dieflag
   integer :: dipdip
+  integer :: dipquad
   integer :: dossum
   integer :: ep_scalprod
   integer :: eivec
   integer :: elaflag
   integer :: elphflag
   integer :: enunit
+  integer :: flexoflag
   integer :: gkk2write
   integer :: gkk_rptwrite
   integer :: gkqwrite
@@ -122,6 +123,7 @@ module m_anaddb_dataset
   integer :: telphint
   integer :: thmflag
   integer :: qgrid_type
+  integer :: quadquad
   integer :: ep_b_min
   integer :: ep_b_max
   integer :: ep_int_gkk
@@ -364,7 +366,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !C
 
- anaddb_dtset%chneut=0
+ anaddb_dtset%chneut=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
  if(tread==1) anaddb_dtset%chneut=intarr(1)
  if(anaddb_dtset%chneut<0.or.anaddb_dtset%chneut>2)then
@@ -389,10 +391,20 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
  if(tread==1) anaddb_dtset%dipdip=intarr(1)
- if(anaddb_dtset%dipdip<0.or.anaddb_dtset%dipdip>1)then
+ if(anaddb_dtset%dipdip<-1.or.anaddb_dtset%dipdip>1)then
    write(message, '(a,i0,5a)' )&
    'dipdip is ',anaddb_dtset%dipdip,', but the only allowed values',ch10,&
-   'are 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
+   'are -1, 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ anaddb_dtset%dipquad=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
+ if(tread==1) anaddb_dtset%dipquad=intarr(1)
+ if(anaddb_dtset%dipquad<-1.or.anaddb_dtset%dipquad>1)then
+   write(message, '(a,i0,5a)' )&
+   'dipquad is ',anaddb_dtset%dipquad,', but the only allowed values',ch10,&
+   'are 0 or 1 .',ch10,'Action: correct dipquad in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -598,6 +610,17 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !F
+
+ anaddb_dtset%flexoflag=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'flexoflag',tread,'INT')
+ if(tread==1) anaddb_dtset%flexoflag=intarr(1)
+ if(anaddb_dtset%flexoflag<0.or.anaddb_dtset%flexoflag>4)then
+   write(message,'(3a,i0,5a)' )&
+   ' flexoflag is ',anaddb_dtset%flexoflag,', but the only allowed values',ch10,&
+   'are 0, 1,2,3,4  .',ch10,'Action: correct flexoflag in your input file.'
+   MSG_ERROR(message)
+ end if
+
  anaddb_dtset%freeze_displ = zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freeze_displ',tread,'DPR')
  if(tread==1) anaddb_dtset%freeze_displ=dprarr(1)
@@ -1143,6 +1166,16 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      MSG_ERROR(message)
    end if
  end do
+
+ anaddb_dtset%quadquad=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
+ if(tread==1) anaddb_dtset%quadquad=intarr(1)
+ if(anaddb_dtset%quadquad<-1.or.anaddb_dtset%quadquad>1)then
+   write(message, '(a,i0,5a)' )&
+   'quadquad is ',anaddb_dtset%quadquad,', but the only allowed values',ch10,&
+   'are 0 or 1 .',ch10,'Action: correct quadquad in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !R
 
@@ -1739,12 +1772,14 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
 
 !The flags
  if (anaddb_dtset%dieflag/=0 .or. anaddb_dtset%ifcflag/=0 .or. &
+     anaddb_dtset%flexoflag/=0 .or. &
      anaddb_dtset%nlflag/=0 .or. anaddb_dtset%thmflag/=0 .or. &
      anaddb_dtset%elaflag/=0 .or. anaddb_dtset%elphflag/=0 .or. &
      anaddb_dtset%polflag/=0 .or. anaddb_dtset%instrflag/=0 .or. &
      anaddb_dtset%piezoflag/=0) then
    write(nunit,'(a)')' Flags :'
    if(anaddb_dtset%dieflag/=0)write(nunit,'(3x,a9,3i10)')'  dieflag',anaddb_dtset%dieflag
+   if(anaddb_dtset%flexoflag/=0)write(nunit,'(3x,a9,3i10)')'flexoflag',anaddb_dtset%flexoflag
    if(anaddb_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',anaddb_dtset%ifcflag
    if(anaddb_dtset%nlflag/=0)write(nunit,'(3x,a9,3i10)')'   nlflag',anaddb_dtset%nlflag
    if(anaddb_dtset%thmflag/=0)write(nunit,'(3x,a9,3i10)')'  thmflag',anaddb_dtset%thmflag
@@ -1767,7 +1802,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    if(anaddb_dtset%enunit/=0)write(nunit,'(3x,a9,3i10)')'   enunit',anaddb_dtset%enunit
    if(anaddb_dtset%eivec/=0) write(nunit,'(3x,a9,3i10)')'    eivec',anaddb_dtset%eivec
    if(anaddb_dtset%asr/=0)   write(nunit,'(3x,a9,3i10)')'      asr',anaddb_dtset%asr
-   if(anaddb_dtset%chneut/=0)write(nunit,'(3x,a9,3i10)')'   chneut',anaddb_dtset%chneut
+   if(anaddb_dtset%chneut/=1)write(nunit,'(3x,a9,3i10)')'   chneut',anaddb_dtset%chneut
    if(anaddb_dtset%selectz/=0)write(nunit,'(3x,a9,3i10)')'  selectz',anaddb_dtset%selectz
    if(anaddb_dtset%symdynmat/=1)write(nunit,'(3x,a9,3i10)')'symdynmat',anaddb_dtset%symdynmat
  end if
@@ -1785,6 +1820,8 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
  if(anaddb_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Interatomic Force Constants Inputs :'
    write(nunit,'(3x,a9,3i10)')'   dipdip',anaddb_dtset%dipdip
+   write(nunit,'(3x,a9,3i10)')'   dipquad',anaddb_dtset%dipquad
+   write(nunit,'(3x,a9,3i10)')'   quadquad',anaddb_dtset%quadquad
    if(anaddb_dtset%nsphere/=0)write(nunit,'(3x,a9,3i10)')'  nsphere',anaddb_dtset%nsphere
    if(abs(anaddb_dtset%rifcsph)>tol10)write(nunit,'(3x,a9,E16.6)')'  nsphere',anaddb_dtset%rifcsph
    write(nunit,'(3x,a9,3i10)')'   ifcana',anaddb_dtset%ifcana
@@ -2042,10 +2079,10 @@ subroutine anaddb_init(input_path, filnam)
 
  if (len_trim(input_path) == 0) then
    ! Legacy Files file mode.
-   write(std_out, "(2a)")"DeprecationWarning: ",ch10
+   write(std_out, "(2a)")" DeprecationWarning: ",ch10
    write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
-   write(std_out, "(2a)")"     Use the syntax `anaddb t01.abi` where t01.abi is an anaddb input with ddb_path.",ch10
-   write(std_out, "(3a)")'            ddb_path = "out_DDB"',ch10,ch10
+   write(std_out, "(2a)")"     Use the syntax `anaddb t01.abi` where t01.abi is an anaddb input with ddb_filepath.",ch10
+   write(std_out, "(3a)")'            ddb_filepath = "out_DDB"',ch10,ch10
 
    write(std_out,*)' Give name for formatted input file: '
    read(std_in, '(a)' ) filnam(1)
@@ -2088,19 +2125,19 @@ subroutine anaddb_init(input_path, filnam)
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
    write(std_out, "(2a)")'- Name for formatted output file: ', trim(filnam(2))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_path", tread, 'KEY', key_value=filnam(3))
-   ABI_CHECK(tread == 1, "ddb_path variable must be specified in the input file")
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_filepath", tread, 'KEY', key_value=filnam(3))
+   ABI_CHECK(tread == 1, "ddb_filepath variable must be specified in the input file")
    write(std_out, "(2a)")'- Input derivative database: ', trim(filnam(3))
 
    ! Nobody knows the scope of this line in the files file.
    !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_path", tread, 'KEY', key_value=filnam(5))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value=filnam(5))
    if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
 
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
    if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_path", tread, 'KEY', key_value=filnam(7))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value=filnam(7))
    if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
 
    ABI_FREE(intarr)
@@ -2155,13 +2192,13 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars=trim(list_vars)//' chneut'
 !D
- list_vars=trim(list_vars)//' dieflag dipdip dossum dosdeltae dossmear dostol'
+ list_vars=trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol'
 !E
  list_vars=trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars=trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
  list_vars=trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist'
 !F
- list_vars=trim(list_vars)//' freeze_displ frmax frmin'
+ list_vars=trim(list_vars)//' flexoflag freeze_displ frmax frmin'
 !G
  list_vars=trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
 !H
@@ -2182,7 +2219,7 @@ subroutine anaddb_chkvars(string)
  list_vars=trim(list_vars)//' piezoflag polflag prtddb prtdos prt_ifc prtmbm prtfsurf'
  list_vars=trim(list_vars)//' prtnest prtphbands prtsrlr prtvol prtbltztrp'
 !Q
- list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l'
+ list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l quadquad'
 !R
  list_vars=trim(list_vars)//' ramansr relaxat relaxstr rfmeth rifcsph'
 !S
@@ -2202,7 +2239,7 @@ subroutine anaddb_chkvars(string)
  list_logicals=' '
 
 !String input variables
- list_strings=' gruns_ddbs ddb_path output_file gkk_path eph_prefix ddk_path' ! md_output
+ list_strings=' gruns_ddbs ddb_filepath output_file gkk_filepath eph_prefix ddk_filepath' ! md_output
 !</ANADDB_VARS>
 
 !Extra token, also admitted:

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_linked_list
 !! NAME
 !! m_linked_list
@@ -17,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -191,9 +190,13 @@ module m_linked_list
        do while(associated(self%iter))
           ! at the begining i<i0
           ! before the end,
-          if (i>self%iter%i .and. associated(self%iter%next) .and. i<self%iter%next%i) then
-             call llist_insert_after(self,self%iter,i,val)
-             return
+          if (i>self%iter%i) then
+             if (associated(self%iter%next)) then
+                 if (i<self%iter%next%i) then
+                    call llist_insert_after(self,self%iter,i,val)
+                    return
+                 end if
+             end if
           else if(i==self%iter%i) then
              ! i<i0 or i>i
              if(mode==0) then

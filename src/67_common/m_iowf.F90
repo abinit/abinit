@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_iowf
 !! NAME
 !! m_iowf
@@ -7,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -142,6 +141,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer :: iomode,action,band_index,fform,formeig,iband,ibdkpt,icg,iat,iproj
  integer :: ierr,ii,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
  integer :: nband_k,nkpt_eff,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
+ integer :: nband_eff
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
 #ifdef HAVE_MPI
  integer :: ipwnbd
@@ -156,7 +156,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: cg_disk(:,:),eig_k(:),occ_k(:)
 #ifdef HAVE_NETCDF
- integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk, timrev
+ integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
  type(crystal_t) :: crystal
 #endif
@@ -225,21 +225,24 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 !Compute mean square and maximum residual over all bands and k points and spins
 !(disregard k point weights and occupation numbers here)
- band_index=sum(nband(1:nkpt*nsppol))
- resims=sum(resid(1:band_index))/dble(band_index)
-
+ resims=zero
 !Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
 !Already AVAILABLE in hdr ?!
- ibdkpt=1
  residm=zero
+ ibdkpt=0
+ band_index=0
  do spin=1,nsppol
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(spin-1)*nkpt)
-     nband_k=max(1,nband_k-dtset%nbdbuf)
-     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_k-1)))
+     nband_eff=max(1,nband_k-dtset%nbdbuf)
+     residm=max(residm,maxval(resid(ibdkpt+1:ibdkpt+nband_eff)))
+     resims=resims    +   sum(resid(ibdkpt+1:ibdkpt+nband_eff))
      ibdkpt=ibdkpt+nband_k
+     band_index=band_index+nband_eff
    end do
  end do
+ !band_index=sum(nband(1:nkpt*nsppol))
+ resims = resims/dble(band_index)
 
  write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
  call wrtout([std_out, ab_out], msg)
@@ -261,7 +264,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
        call wrtout(std_out,msg,'COLL')
        do ii=0,(nband_k-1)/8
-         write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+         write(msg,'(1x,1p,8e10.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
          if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
          call wrtout(std_out,msg,'COLL')
        end do
@@ -343,8 +346,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
        ABI_MALLOC(kg_disk, (3, mpw_disk))
 
-       timrev = 2 ! FIXME: Use abinit convention for timrev
-       crystal = hdr%get_crystal(timrev)
+       crystal = hdr%get_crystal()
 
        ! For each k-point: read full G-vector list from file, compute KB data and write to file.
        do ikpt=1,nkpt
@@ -402,11 +404,9 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr%get_crystal(2)
-     !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
+     !crystal = hdr%get_crystal()
+     !NCF_CHECK(ebands_ncwrite_path(gs_ebands, cryst, filname)
      !call crystal%free()
-     !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
-     !NCF_CHECK(ncerr)
 #else
      MSG_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
@@ -738,7 +738,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
  integer :: comm_cell,comm_fft,comm_bandfft,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
- integer :: timrev,paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
+ integer :: paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
  integer :: ipw,ispinor_index,npwso,npwsotot,npwtot,nspinortot,ikpt_this_proc,ispinor
  integer :: bandpp,nproc_band,nproc_fft,nproc_spinor,me_fft,nproc_cell,nwrites
  integer :: comm_mpiio,nranks,bstart,bcount !nbdblock,nblocks,
@@ -794,9 +794,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    ABI_CHECK(all(npwarr == hdr%npwarr), "npwarr != hdr%npwarr")
  end if
 
- ! FIXME: Use abinit convention for timrev
- timrev = 2
- crystal = hdr%get_crystal(timrev)
+ crystal = hdr%get_crystal()
 
  ! TODO
  ! Be careful with response == 1.

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/mrgscr
 !! NAME
 !! mrgscr
@@ -8,7 +7,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2020 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -95,7 +94,7 @@ program mrgscr
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0,rdwr2=2,prtvol=0,cplex1=1
- integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles,timrev
+ integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles
  integer :: unt_dump,idx,ig1,ig2,iomega,ppmodel,npwe_asked,mqmem,io,unt_dump2
  integer :: id_required,ikxc,approx_type,option_test,dim_kxcg,usexcnhat,usefinegrid
  integer :: mgfft,nqlwl,nfft,igmax,comm,nq_selected,kptopt
@@ -275,8 +274,7 @@ program mrgscr
    fname = fname_out
  end if
 
- timrev=2 ! This should be read from kptopt
- cryst = HScr0%Hdr%get_crystal(timrev,remove_inv=.FALSE.)
+ cryst = HScr0%Hdr%get_crystal(remove_inv=.FALSE.)
 
  kptopt=1
  call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)

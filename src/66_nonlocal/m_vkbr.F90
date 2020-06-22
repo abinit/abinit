@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vkbr
 !! NAME
 !!  m_vkbr
@@ -12,7 +11,7 @@
 !!  This module is deprecated. Use ddkop_t in m_ddk.F90
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2020 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -331,7 +330,7 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !************************************************************************
 
- ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
+ ABI_CHECK(nspinor == 1, "inclvkb > 0 with nspinor == 2 is not coded")
 
  ! Adding term i <c,k|[Vnl,r]|v,k> ===
  select case (vkbr%inclvkb)
@@ -594,7 +593,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
 
  ! [H, r] = -\nabla + [V_{nl}, r]
  ! V_nl is present only in the case of NC pseudos but
- ! not in PAW unless even the AE Hamiltonian in non-local e.g. LDA+U or LEXX.
+ ! not in PAW unless even the AE Hamiltonian in non-local e.g. DFT+U or LEXX.
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates is always included.
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)

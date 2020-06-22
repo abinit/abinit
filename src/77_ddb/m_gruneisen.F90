@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gruneisen
 !! NAME
 !!  m_gruneisen
@@ -8,7 +7,7 @@
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MG)
+!! Copyright (C) 2011-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -113,7 +112,7 @@ contains  !===========================================================
 !!  Construct new object from a list of DDB files.
 !!
 !! INPUTS
-!!  ddb_paths(:)=Paths of the DDB files (must be ordered by volume)
+!!  ddb_filepaths(:)=Paths of the DDB files (must be ordered by volume)
 !!  inp<anaddb_dataset_type>=Anaddb dataset with input variables
 !!  comm=MPI communicator
 !!
@@ -123,30 +122,29 @@ contains  !===========================================================
 !!
 !! SOURCE
 
-type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
+type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  type(anaddb_dataset_type),intent(in) :: inp
 !arrays
- character(len=*),intent(in) :: ddb_paths(:)
+ character(len=*),intent(in) :: ddb_filepaths(:)
 
 !Local variables-------------------------------
  integer,parameter :: natifc0=0,master=0
- integer :: ivol,iblock,natom,ddbun
- integer :: nprocs,my_rank,ierr
+ integer :: ivol,iblock,natom,ddbun, nprocs,my_rank,ierr
  character(len=500) :: msg
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
  integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
- real(dp),allocatable :: zeff(:,:,:)
+ real(dp),allocatable :: zeff(:,:,:), qdrp_cart(:,:,:,:)
 
 ! ************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- new%nvols = size(ddb_paths)
+ new%nvols = size(ddb_filepaths)
  ABI_MALLOC(new%cryst_vol, (new%nvols))
  ABI_MALLOC(new%ddb_vol, (new%nvols))
  ABI_MALLOC(new%ifc_vol, (new%nvols))
@@ -155,15 +153,17 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
  ddbun = get_unit()
  do ivol=1,new%nvols
-   call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr, ddb_paths(ivol), ddbun, DDB_VERSION, dimonly=1)
+   call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
+   call ddb_hdr_open_read(ddb_hdr, ddb_filepaths(ivol), ddbun, DDB_VERSION, dimonly=1)
    natom = ddb_hdr%natom
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
    ABI_MALLOC(atifc0, (natom))
    atifc0 = 0
-   call ddb_from_file(new%ddb_vol(ivol), ddb_paths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
+   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, &
+                      ddb_hdr, new%cryst_vol(ivol), comm)
+   call ddb_hdr%free()
    ABI_FREE(atifc0)
    if (my_rank == master) then
      call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
@@ -172,18 +172,20 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    ABI_MALLOC(zeff, (3,3,natom))
+   ABI_CALLOC(qdrp_cart, (3,3,3,natom))
    iblock = new%ddb_vol(ivol)%get_dielt_zeff(new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
    if (iblock == 0) then
-     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
+     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
      call wrtout(ab_out, "Values initialized with zeros")
    else
-     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
+     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
    end if
 
    call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
-     inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, inp%ngqpt(1:3), inp%nqshft, inp%q1shft, dielt, zeff, &
-     inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm)
+     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
+     qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    ABI_FREE(zeff)
+   ABI_FREE(qdrp_cart)
  end do
 
  ! Consistency check

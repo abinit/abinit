@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_QR_factorization
 !! NAME
 !! m_gwls_QR_factorization
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +42,6 @@ use m_gwls_hamiltonian
 
 !abinit modules
 use defs_basis
-use defs_abitypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi

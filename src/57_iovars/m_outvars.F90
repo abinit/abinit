@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvars
 !! NAME
 !!  m_outvars
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -210,7 +209,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      end if
    end if
  else
-   MSG_WARNING("output of OUT.nc has been disabled. Too many datasets")
+   MSG_COMMENT("output of OUT.nc has been disabled. Too many datasets")
  end if
 #endif
  !ncid = 0

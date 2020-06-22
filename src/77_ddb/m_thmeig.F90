@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_thmeig
 !! NAME
 !!  m_thmeig
@@ -7,7 +6,7 @@
 !! Calculate thermal corrections to the eigenvalues.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (PB, XG, GA)
+!!  Copyright (C) 2008-2020 ABINIT group (PB, XG, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -426,7 +425,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
  end if
 
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
 
  write(message,'(a,a)')ch10,' thmeig : list of q wavevectors, with integration weights '
@@ -452,8 +451,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
 
 !!Prepare the reading of the EIG2 files
  call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
-
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
 !iqpt2 will be the index of the q point bloks inside the EIG2 file
  iqpt2=0
@@ -527,7 +525,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, ddbun, iout, n
      close(ddbun)
 
      call ddb_hdr_open_read(ddb_hdr, eig2_filnam, ddbun, DDB_VERSION, msym=msym)
-     call ddb_hdr_free(ddb_hdr)
+     call ddb_hdr%free()
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
      found=0

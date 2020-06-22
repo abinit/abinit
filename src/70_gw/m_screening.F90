@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screening
 !! NAME
 !!  m_screening
@@ -8,7 +7,7 @@
 !!  with the inverse dielectric matrix as well as related methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,7 +54,7 @@ MODULE m_screening
  use m_fftcore,         only : kgindex
  use m_fft,             only : fourdp
  use m_gsphere,         only : gsphere_t
- use m_vcoul,           only : vcoul_t
+ use m_vcoul,           only : vcoul_t 
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
  use m_paw_sphharm,     only : ylmc

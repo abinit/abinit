@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fft
 !! NAME
 !!  m_fft
@@ -8,7 +7,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
+!! Copyright (C) 2009-2020 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2841,9 +2840,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        end if ! fftalga
      end if ! if option==2 or 3
 
-     if (allocated(work1))  then
-       ABI_FREE(work1)
-     end if
+     ABI_SFREE(work1)
    end if
 
    ! Here, call more specialized 3-dimensional fft
@@ -2863,13 +2860,8 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft)
    end if
 
-   if (allocated(work4))  then
-     ABI_FREE(work4)
-   end if
-   if (allocated(work2))  then
-     ABI_FREE(work2)
-   end if
-
+   ABI_SFREE(work4)
+   ABI_SFREE(work2)
  end select
 
 ! Accumulate timing

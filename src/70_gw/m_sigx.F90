@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigx
 !! NAME
 !!  m_six
@@ -7,7 +6,7 @@
 !!  Calculate diagonal and off-diagonal matrix elements of the exchange part of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2020 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +50,7 @@ module m_sigx
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_paw_nhat,      only : pawmknhat_psipsi
  use m_paw_sym,       only : paw_symcprj
- use m_wfd,           only : wfd_t
+ use m_wfd,           only : wfd_t, wave_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
@@ -199,6 +198,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  complex(gwpc) :: gwpc_sigxme
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3),spinor_padx(2,4)
  integer,allocatable :: igfftxg0(:),igfftfxg0(:)
@@ -371,7 +371,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Additional allocations for PAW.
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj_ksum,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj_ksum,0,Wfd%nlmn_atm)
 
    nhat12_grdim=0
@@ -429,7 +429,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
      dimcprj_gw=nspinor*(ib2-ib1+1)
-     ABI_DT_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
+     ABI_MALLOC(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
@@ -517,7 +517,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ! Evaluate oscillator matrix elements
        ! $ <phj/r|e^{-i(q+G)}|phi/r> - <tphj/r|e^{-i(q+G)}|tphi/r> $ in packed form
        q0 = qbz !;if (q_is_gamma) q0 = (/0.00001_dp,0.00001_dp,0.00001_dp/) ! GW_Q0_DEFAULT
-       ABI_DT_MALLOC(Pwij_qg,(Psps%ntypat))
+       ABI_MALLOC(Pwij_qg,(Psps%ntypat))
        call pawpwij_init(Pwij_qg, npwx, q0, Gsph_x%gvec, Cryst%rprimd, Psps, Pawtab, Paw_pwff)
      end if
 
@@ -610,8 +610,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
              npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwx+1, jb) = zero
              if (ib_sum == jb) then
-               cg_sum => Wfd%Wave(ib_sum,ik_ibz,spin)%ug
-               cg_jb  => Wfd%Wave(jb,jk_ibz,spin)%ug
+               ABI_CHECK(wfd%get_wave_ptr(ib_sum, ik_ibz, spin, wave_sum, msg) == 0, msg)
+               cg_sum => wave_sum%ug
+               ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+               cg_jb  => wave_jb%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                rhotwg_ki(1, jb) = CMPLX(SQRT(Vcp%i_sz_resid), 0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)
@@ -668,14 +670,14 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
      if (Psps%usepaw==1.and.use_pawnhat==0) then
        call pawpwij_free(Pwij_qg)
-       ABI_DT_FREE(Pwij_qg)
+       ABI_FREE(Pwij_qg)
      end if
    end do ! ik_bz Got all diagonal (off-diagonal) matrix elements.
 
    ABI_FREE(wfr_bdgw)
    if (Wfd%usepaw==1) then
      call pawcprj_free(Cprj_kgw)
-     ABI_DT_FREE(Cprj_kgw)
+     ABI_FREE(Cprj_kgw)
      if (pawcross==1) then
        ABI_FREE(ur_ae_bdgw)
        ABI_FREE(ur_ae_onsite_bdgw)
@@ -789,10 +791,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      ABI_FREE(gwx_gfft)
    end if
    call pawcprj_free(Cprj_ksum)
-   ABI_DT_FREE(Cprj_ksum)
+   ABI_FREE(Cprj_ksum)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
    if (use_pawnhat==1) then
      ABI_FREE(nhat12)

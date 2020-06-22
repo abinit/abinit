@@ -82,8 +82,8 @@ ucrpa_bands4  12 25  # In principle, it is useless for ucrpa=2. It is however st
 dmftbandi3 12       # Precise the definition of Wannier functions (also used for DMFT calculations)
 dmftbandf3 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
 
-# -- LDAU: 1st dataset and definition of correlated angular momentum
-usepawu    1        # LDA+U is used just for printing usefull quantities.
+# -- DFTU: 1st dataset and definition of correlated angular momentum
+usepawu    1        # DFT+U is used just for printing usefull quantities.
 dmatpuopt  1        # choose expression of the density matrix
 lpawu      2 -1 -1
 jpawu      0.0 0.0 0.0 eV
@@ -131,6 +131,7 @@ dmft_solv3 2         # usefull to avoid supplementary variables in the input fil
  getwfk4       -1     # Obtain WFK file from previous dataset
  nfreqim4       0
  gwcalctyp4 2
+ symsigma       0
  upawu4 0 0 0         # necessary if upawu/=0 in the first three datasets as usepawu=1 everywhere
 #  pawoptosc 1 (should be used here, but not used because it is time consuming)
 

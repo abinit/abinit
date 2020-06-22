@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_kss
 !! NAME
 !!  m_io_kss
@@ -7,7 +6,7 @@
 !!  This module contains procedured dealing with the IO of the KSS file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
+!! Copyright (C) 1999-2020 ABINIT group (MG, MT, VO, AR, LR, RWG, MM, XG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1228,7 +1227,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      write(msg,'(a,f0.3,a)')" Out-of-memory in gtg_mat. Memory required by the PAW overlap operator: ",size_mat," [Mb]."
      ABI_CHECK(ierr==0, msg)
 
-     ABI_DT_MALLOC(cwaveprj,(natom,nspinor*(1+cpopt)*gs_hamk%usepaw))
+     ABI_MALLOC(cwaveprj,(natom,nspinor*(1+cpopt)*gs_hamk%usepaw))
      if (cpopt==0) then
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
      end if
@@ -1268,7 +1267,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ABI_FREE(gsc)
 
      if (psps%usepaw==1.and.cpopt==0) call pawcprj_free(cwaveprj)
-     ABI_DT_FREE(cwaveprj)
+     ABI_FREE(cwaveprj)
 
      if (dtset%prtvol > 0) then
        !===========================================

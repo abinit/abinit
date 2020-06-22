@@ -8,7 +8,7 @@
 !!  Special messages= WARNING, COMMENT, EXIT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MT)
+!! Copyright (C) 2008-2020 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -234,8 +234,8 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2019
- mm_rel=11
+ year_rel=2020
+ mm_rel=05
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -249,7 +249,7 @@ subroutine herald(code_name,code_version,iout)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
- '.Copyright (C) 1998-2019 ABINIT group . ',&
+ '.Copyright (C) 1998-2020 ABINIT group . ',&
  ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
  ' It is free software, and you are welcome to redistribute it',&
  ' under certain conditions (GNU General Public License,',&
@@ -358,8 +358,8 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
  integer,optional,intent(in) :: newlines
 
 !Local variables-------------------------------
- integer :: comm,me,nproc, my_newlines
  integer,save :: master=0
+ integer :: comm, me, nproc, my_newlines, ii
  logical :: my_flush
  character(len=len(msg)+50) :: string
  character(len=500) :: my_mode_paral
@@ -385,13 +385,21 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
 
  if (my_mode_paral == 'COLL' .or. nproc == 1) then
    if (me == master) then
-      call wrtout_myproc(unit, msg, do_flush=my_flush)
-      if (my_newlines /= 0) write(unit, "(a)")""
+     call wrtout_myproc(unit, msg, do_flush=my_flush)
+     if (my_newlines /= 0) then
+       do ii=1,my_newlines
+         write(unit, "(a)")""
+       end do
+     end if
    end if
 
  else if (my_mode_paral == 'PERS') then
    call write_lines(unit,msg)
-   if (my_newlines /= 0) write(unit, "(a)")""
+   if (my_newlines /= 0) then
+     do ii=1,my_newlines
+       write(unit, "(a)")""
+     end do
+   end if
    ! Flush unit
    if (my_flush) call flush_unit(unit)
 
@@ -406,8 +414,6 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
    write(unit, '(A)' ) trim(string)
  end if
 
-
-
 end subroutine wrtout_unit
 !!***
 
@@ -420,7 +426,7 @@ end subroutine wrtout_unit
 !!
 !! INPUTS
 !!  msg=(character(len=*)) message to be written
-!!  unit=unit number for writing. The named constant dev_null defined in defs_basis can be used to avoid any printing.
+!!  units=unit number for writing. The named constant dev_null defined in defs_basis can be used to avoid any printing.
 !!  [mode_paral]= --optional argument--
 !!   'COLL' if all procs are calling the routine with the same message to be written once only. Default.
 !!   'PERS' if the procs are calling the routine with different messages each to be written,

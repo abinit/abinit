@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkrho
 !! NAME
 !!  m_dfpt_mkrho
@@ -7,7 +6,7 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

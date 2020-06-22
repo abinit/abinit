@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_esymm
 !! NAME
 !! m_esymm
@@ -8,7 +7,7 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -654,7 +653,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
    if (esymm%has_chtabs) then
      ! Multiply the point group irreps by e^{-ik.\tau} to have the irreps of the little group.
      ! Store the results in esymm%Ref_irreps so that one can classify the states afterwards.
-     ABI_DT_MALLOC(esymm%Ref_irreps,(esymm%nclass))
+     ABI_MALLOC(esymm%Ref_irreps,(esymm%nclass))
      ABI_MALLOC(phase_mkt,(esymm%nsym_gk))
 
      do isym_gk=1,esymm%nsym_gk
@@ -784,10 +783,10 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
  nacc_deg=0
  ABI_MALLOC(esymm%degs_dim,(esymm%ndegs))
- ABI_DT_MALLOC(esymm%Calc_irreps,(esymm%ndegs))
+ ABI_MALLOC(esymm%Calc_irreps,(esymm%ndegs))
 
  if (esymm%can_use_tr)  then
-   ABI_DT_MALLOC(esymm%trCalc_irreps,(esymm%ndegs))
+   ABI_MALLOC(esymm%trCalc_irreps,(esymm%ndegs))
  end if
 
  do idg=1,esymm%ndegs
@@ -983,7 +982,7 @@ subroutine esymm_free_0D(esymm)
    do ii=LBOUND(esymm%irrep2b,DIM=1),UBOUND(esymm%irrep2b,DIM=1)
      ABI_FREE(esymm%irrep2b(ii)%value)
    end do
-   ABI_DT_FREE(esymm%irrep2b)
+   ABI_FREE(esymm%irrep2b)
  end if
 
  if (allocated(esymm%Calc_irreps)) call irrep_free(esymm%Calc_irreps)
@@ -1178,7 +1177,7 @@ subroutine esymm_finalize(esymm,prtvol)
  end if
  !
  ! %irrep2b(0)) gives the indeces of the states that have not been classified.
- ABI_DT_MALLOC(esymm%irrep2b,(0:esymm%nclass))
+ ABI_MALLOC(esymm%irrep2b,(0:esymm%nclass))
 
  !write(std_out,*)"b2irrep",esymm%b2irrep
 

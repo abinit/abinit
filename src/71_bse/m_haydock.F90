@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_haydock
 !! NAME
 !! m_haydock
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
+!!  Copyright (C) 2008-2020 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,7 +90,7 @@ CONTAINS  !=====================================================================
 !! Wfd<wfd_t>=Wavefunction descriptor (input k-mesh)
 !! Psps <type(pseudopotential_type)>=variables related to pseudopotentials.
 !! Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data.
-!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
+!! Hur(Cryst%natom*usepaw)<type(pawhur_t)>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
 !!
 !! OUTPUT
 !!  The imaginary part of the macroscopic dielectric function is written on the external file _EXC_MDF

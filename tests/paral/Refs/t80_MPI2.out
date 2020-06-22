@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.1.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h48 )
+.Starting date : Tue 10 Mar 2020.
+- ( at 17h18 )
   
 -  nproc =    2
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t80_sys.xml
+-/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t80_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -35,6 +35,7 @@
      strcpli        -1
  Molecular Dynamics :
     dynamics        13
+    dyn_chks         0
         temp    1000.0
        ntime        50
        ncell         3         3         3
@@ -65,8 +66,8 @@
 
 ================================================================================
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t80_sys.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t80_sys.xml with LibXML library
+-Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t80_sys.xml
+-Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t80_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -144,8 +145,8 @@
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t80_coeff.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t80_coeff.xml with LibXML library
+-Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t80_coeff.xml
+-Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/paral/Input/t80_coeff.xml with LibXML library
 
 ================================================================================
 
@@ -172,7 +173,7 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    :  2.9101169050763933E-29 Hartree
+ Energy of the ifc part                    :  2.9101169050763916E-29 Hartree
  Energy of the fitted coefficient          :  0.0000000000000000E+00 Hartree
 
     >>>>>>>>> Etotal= -4.37673047012100E+01
@@ -200,9 +201,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    :  2.9885028056440319E-02 Hartree
+ Energy of the ifc part                    :  2.9885028056440326E-02 Hartree
  Energy of the elastic part                :  1.5127400996553398E-10 Hartree
- Energy of the fitted coefficient          :  1.0428443388317643E-05 Hartree
+ Energy of the fitted coefficient          :  1.0428443388317641E-05 Hartree
 
     >>>>>>>>> Etotal= -4.37374092445589E+01
 
@@ -229,9 +230,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    :  8.9208182422752011E-02 Hartree
- Energy of the elastic part                :  2.2193788038905322E-09 Hartree
- Energy of the fitted coefficient          :  1.6987276669742614E-04 Hartree
+ Energy of the ifc part                    :  8.9208182422751567E-02 Hartree
+ Energy of the elastic part                :  2.2193788039223096E-09 Hartree
+ Energy of the fitted coefficient          :  1.6987276669742435E-04 Hartree
 
     >>>>>>>>> Etotal= -4.36779266438012E+01
 
@@ -258,9 +259,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    :  1.1634486690809598E-01 Hartree
- Energy of the elastic part                :  1.0119546094265277E-08 Hartree
- Energy of the fitted coefficient          :  8.9060744313156938E-04 Hartree
+ Energy of the ifc part                    :  1.1634486690809365E-01 Hartree
+ Energy of the elastic part                :  1.0119546094537417E-08 Hartree
+ Energy of the fitted coefficient          :  8.9060744313155529E-04 Hartree
 
     >>>>>>>>> Etotal= -4.36500692167392E+01
 
@@ -287,9 +288,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    :  7.6725537989508222E-02 Hartree
- Energy of the elastic part                :  2.9597776484494722E-08 Hartree
- Energy of the fitted coefficient          :  2.9758621154590270E-03 Hartree
+ Energy of the ifc part                    :  7.6725537989507320E-02 Hartree
+ Energy of the elastic part                :  2.9597776478946925E-08 Hartree
+ Energy of the fitted coefficient          :  2.9758621154591172E-03 Hartree
 
     >>>>>>>>> Etotal= -4.36876032715073E+01
 
@@ -316,9 +317,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -6.4770146006917859E-03 Hartree
- Energy of the elastic part                :  7.1006527629680071E-08 Hartree
- Energy of the fitted coefficient          :  7.8391332007416558E-03 Hartree
+ Energy of the ifc part                    : -6.4770146006941400E-03 Hartree
+ Energy of the elastic part                :  7.1006527620209488E-08 Hartree
+ Energy of the fitted coefficient          :  7.8391332007417998E-03 Hartree
 
     >>>>>>>>> Etotal= -4.37659425116034E+01
 
@@ -345,9 +346,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -7.8465789509233969E-02 Hartree
- Energy of the elastic part                :  1.5393029331019417E-07 Hartree
- Energy of the fitted coefficient          :  1.7809463146148299E-02 Hartree
+ Energy of the ifc part                    : -7.8465789509236009E-02 Hartree
+ Energy of the elastic part                :  1.5393029330354019E-07 Hartree
+ Energy of the fitted coefficient          :  1.7809463146148393E-02 Hartree
 
     >>>>>>>>> Etotal= -4.38279608736428E+01
 
@@ -374,8 +375,8 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.1250655291691997E-01 Hartree
- Energy of the elastic part                :  3.0914177074293560E-07 Hartree
+ Energy of the ifc part                    : -1.1250655291692356E-01 Hartree
+ Energy of the elastic part                :  3.0914177073919521E-07 Hartree
  Energy of the fitted coefficient          :  3.6409302902748492E-02 Hartree
 
     >>>>>>>>> Etotal= -4.38434016420824E+01
@@ -403,9 +404,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.4318982734459493E-01 Hartree
- Energy of the elastic part                :  5.7501686001257290E-07 Hartree
- Energy of the fitted coefficient          :  6.8465071114316073E-02 Hartree
+ Energy of the ifc part                    : -1.4318982734460289E-01 Hartree
+ Energy of the elastic part                :  5.7501686000160096E-07 Hartree
+ Energy of the fitted coefficient          :  6.8465071114316350E-02 Hartree
 
     >>>>>>>>> Etotal= -4.38420288824234E+01
 
@@ -432,9 +433,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -2.3509164398966190E-01 Hartree
- Energy of the elastic part                :  9.9298207245507357E-07 Hartree
- Energy of the fitted coefficient          :  1.1992687892179255E-01 Hartree
+ Energy of the ifc part                    : -2.3509164398966809E-01 Hartree
+ Energy of the elastic part                :  9.9298207244170337E-07 Hartree
+ Energy of the fitted coefficient          :  1.1992687892179324E-01 Hartree
 
     >>>>>>>>> Etotal= -4.38824684732958E+01
 
@@ -461,11 +462,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -4.1833277853507594E-01 Hartree
- Energy of the elastic part                :  1.6092905638921196E-06 Hartree
+ Energy of the ifc part                    : -4.1833277853507800E-01 Hartree
+ Energy of the elastic part                :  1.6092905638587815E-06 Hartree
  Energy of the fitted coefficient          :  1.9712539863477030E-01 Hartree
 
-    >>>>>>>>> Etotal= -4.39885104718197E+01
+    >>>>>>>>> Etotal= -4.39885104718198E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -490,9 +491,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -6.5909973528502763E-01 Hartree
- Energy of the elastic part                :  2.4779933085907450E-06 Hartree
- Energy of the fitted coefficient          :  3.0495737800792933E-01 Hartree
+ Energy of the ifc part                    : -6.5909973528502896E-01 Hartree
+ Energy of the elastic part                :  2.4779933085466299E-06 Hartree
+ Energy of the fitted coefficient          :  3.0495737800792821E-01 Hartree
 
     >>>>>>>>> Etotal= -4.41214445804938E+01
 
@@ -519,11 +520,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -8.9510410443962429E-01 Hartree
- Energy of the elastic part                :  3.6486187605103797E-06 Hartree
- Energy of the fitted coefficient          :  4.4395374545682609E-01 Hartree
+ Energy of the ifc part                    : -8.9510410443963084E-01 Hartree
+ Energy of the elastic part                :  3.6486187604918953E-06 Hartree
+ Energy of the fitted coefficient          :  4.4395374545682664E-01 Hartree
 
-    >>>>>>>>> Etotal= -4.42184514115740E+01
+    >>>>>>>>> Etotal= -4.42184514115741E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -548,9 +549,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.0962065457344070E+00 Hartree
- Energy of the elastic part                :  5.1359873574368007E-06 Hartree
- Energy of the fitted coefficient          :  6.0772430172147540E-01 Hartree
+ Energy of the ifc part                    : -1.0962065457344141E+00 Hartree
+ Energy of the elastic part                :  5.1359873574352608E-06 Hartree
+ Energy of the fitted coefficient          :  6.0772430172147485E-01 Hartree
 
     >>>>>>>>> Etotal= -4.42557818092356E+01
 
@@ -577,11 +578,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.2839842999573685E+00 Hartree
- Energy of the elastic part                :  6.8986797172109888E-06 Hartree
- Energy of the fitted coefficient          :  7.8309763848411529E-01 Hartree
+ Energy of the ifc part                    : -1.2839842999573845E+00 Hartree
+ Energy of the elastic part                :  6.8986797172659274E-06 Hartree
+ Energy of the fitted coefficient          :  7.8309763848411729E-01 Hartree
 
-    >>>>>>>>> Etotal= -4.42681844640035E+01
+    >>>>>>>>> Etotal= -4.42681844640036E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -606,9 +607,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.4957380672727261E+00 Hartree
- Energy of the elastic part                :  8.8528655205212961E-06 Hartree
- Energy of the fitted coefficient          :  9.5343013903269602E-01 Hartree
+ Energy of the ifc part                    : -1.4957380672727343E+00 Hartree
+ Energy of the elastic part                :  8.8528655206148051E-06 Hartree
+ Energy of the fitted coefficient          :  9.5343013903269935E-01 Hartree
 
     >>>>>>>>> Etotal= -4.43096037765845E+01
 
@@ -635,9 +636,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.7409405395770390E+00 Hartree
- Energy of the elastic part                :  1.0910419086150596E-05 Hartree
- Energy of the fitted coefficient          :  1.1030980527854903E+00 Hartree
+ Energy of the ifc part                    : -1.7409405395770499E+00 Hartree
+ Energy of the elastic part                :  1.0910419086247002E-05 Hartree
+ Energy of the fitted coefficient          :  1.1030980527854948E+00 Hartree
 
     >>>>>>>>> Etotal= -4.44051362775825E+01
 
@@ -664,11 +665,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.9945144654181077E+00 Hartree
- Energy of the elastic part                :  1.3006880370066580E-05 Hartree
- Energy of the fitted coefficient          :  1.2210885334439849E+00 Hartree
+ Energy of the ifc part                    : -1.9945144654181097E+00 Hartree
+ Energy of the elastic part                :  1.3006880370134812E-05 Hartree
+ Energy of the fitted coefficient          :  1.2210885334439894E+00 Hartree
 
-    >>>>>>>>> Etotal= -4.45407176263038E+01
+    >>>>>>>>> Etotal= -4.45407176263037E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -693,9 +694,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -2.2252105719107682E+00 Hartree
- Energy of the elastic part                :  1.5103657184288296E-05 Hartree
- Energy of the fitted coefficient          :  1.3028854145522026E+00 Hartree
+ Energy of the ifc part                    : -2.2252105719107913E+00 Hartree
+ Energy of the elastic part                :  1.5103657184446201E-05 Hartree
+ Energy of the fitted coefficient          :  1.3028854145522151E+00 Hartree
 
     >>>>>>>>> Etotal= -4.46896147549114E+01
 
@@ -722,9 +723,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -2.4260479216942454E+00 Hartree
- Energy of the elastic part                :  1.7179415629227035E-05 Hartree
- Energy of the fitted coefficient          :  1.3506009572679223E+00 Hartree
+ Energy of the ifc part                    : -2.4260479216942770E+00 Hartree
+ Energy of the elastic part                :  1.7179415629462880E-05 Hartree
+ Energy of the fitted coefficient          :  1.3506009572679361E+00 Hartree
 
     >>>>>>>>> Etotal= -4.48427344862207E+01
 
@@ -751,9 +752,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -2.6181163690249085E+00 Hartree
- Energy of the elastic part                :  1.9233314281058575E-05 Hartree
- Energy of the fitted coefficient          :  1.3716603868708588E+00 Hartree
+ Energy of the ifc part                    : -2.6181163690249436E+00 Hartree
+ Energy of the elastic part                :  1.9233314281270805E-05 Hartree
+ Energy of the fitted coefficient          :  1.3716603868708717E+00 Hartree
 
     >>>>>>>>> Etotal= -4.50137414500498E+01
 
@@ -780,9 +781,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -2.8282946826404132E+00 Hartree
- Energy of the elastic part                :  2.1303093084183074E-05 Hartree
- Energy of the fitted coefficient          :  1.3766764691942106E+00 Hartree
+ Energy of the ifc part                    : -2.8282946826404478E+00 Hartree
+ Energy of the elastic part                :  2.1303093084543399E-05 Hartree
+ Energy of the fitted coefficient          :  1.3766764691942210E+00 Hartree
 
     >>>>>>>>> Etotal= -4.52189016115631E+01
 
@@ -809,9 +810,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -3.0659684486153447E+00 Hartree
- Energy of the elastic part                :  2.3477850115042230E-05 Hartree
- Energy of the fitted coefficient          :  1.3770670748451361E+00 Hartree
+ Energy of the ifc part                    : -3.0659684486153895E+00 Hartree
+ Energy of the elastic part                :  2.3477850115568936E-05 Hartree
+ Energy of the fitted coefficient          :  1.3770670748451510E+00 Hartree
 
     >>>>>>>>> Etotal= -4.54561825971301E+01
 
@@ -838,9 +839,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -3.3207206857283631E+00 Hartree
- Energy of the elastic part                :  2.5885273986776938E-05 Hartree
- Energy of the fitted coefficient          :  1.3825357136680427E+00 Hartree
+ Energy of the ifc part                    : -3.3207206857283680E+00 Hartree
+ Energy of the elastic part                :  2.5885273987222186E-05 Hartree
+ Energy of the fitted coefficient          :  1.3825357136680414E+00 Hartree
 
     >>>>>>>>> Etotal= -4.57054637879963E+01
 
@@ -867,9 +868,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -3.5791295862501395E+00 Hartree
- Energy of the elastic part                :  2.8657095478867997E-05 Hartree
- Energy of the fitted coefficient          :  1.3985725346090931E+00 Hartree
+ Energy of the ifc part                    : -3.5791295862501675E+00 Hartree
+ Energy of the elastic part                :  2.8657095479342379E-05 Hartree
+ Energy of the fitted coefficient          :  1.3985725346090865E+00 Hartree
 
     >>>>>>>>> Etotal= -4.59478330957556E+01
 
@@ -896,11 +897,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -3.8403661831637974E+00 Hartree
- Energy of the elastic part                :  3.1899200163081586E-05 Hartree
- Energy of the fitted coefficient          :  1.4248714423498925E+00 Hartree
+ Energy of the ifc part                    : -3.8403661831637956E+00 Hartree
+ Energy of the elastic part                :  3.1899200163504248E-05 Hartree
+ Energy of the fitted coefficient          :  1.4248714423498783E+00 Hartree
 
-    >>>>>>>>> Etotal= -4.61827675428237E+01
+    >>>>>>>>> Etotal= -4.61827675428238E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -925,9 +926,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -4.1155318677465385E+00 Hartree
- Energy of the elastic part                :  3.5688725848045312E-05 Hartree
- Energy of the fitted coefficient          :  1.4559583841138068E+00 Hartree
+ Energy of the ifc part                    : -4.1155318677465651E+00 Hartree
+ Energy of the elastic part                :  3.5688725848474317E-05 Hartree
+ Energy of the fitted coefficient          :  1.4559583841137926E+00 Hartree
 
     >>>>>>>>> Etotal= -4.64268424961169E+01
 
@@ -954,9 +955,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -4.4157488687985342E+00 Hartree
- Energy of the elastic part                :  4.0094426111438885E-05 Hartree
- Energy of the fitted coefficient          :  1.4843614307304456E+00 Hartree
+ Energy of the ifc part                    : -4.4157488687985467E+00 Hartree
+ Energy of the elastic part                :  4.0094426111981203E-05 Hartree
+ Energy of the fitted coefficient          :  1.4843614307304347E+00 Hartree
 
     >>>>>>>>> Etotal= -4.66986520448520E+01
 
@@ -983,11 +984,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -4.7439853765171369E+00 Hartree
- Energy of the elastic part                :  4.5198988747651709E-05 Hartree
- Energy of the fitted coefficient          :  1.5048105895134438E+00 Hartree
+ Energy of the ifc part                    : -4.7439853765171662E+00 Hartree
+ Energy of the elastic part                :  4.5198988748177141E-05 Hartree
+ Energy of the fitted coefficient          :  1.5048105895134318E+00 Hartree
 
-    >>>>>>>>> Etotal= -4.70064342892249E+01
+    >>>>>>>>> Etotal= -4.70064342892250E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1012,9 +1013,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -5.0973549374336660E+00 Hartree
- Energy of the elastic part                :  5.1108212765409585E-05 Hartree
- Energy of the fitted coefficient          :  1.5167827760366048E+00 Hartree
+ Energy of the ifc part                    : -5.0973549374336979E+00 Hartree
+ Energy of the elastic part                :  5.1108212766104471E-05 Hartree
+ Energy of the fitted coefficient          :  1.5167827760365986E+00 Hartree
 
     >>>>>>>>> Etotal= -4.73478257543943E+01
 
@@ -1041,9 +1042,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -5.4743159708988429E+00 Hartree
- Energy of the elastic part                :  5.7948434285137516E-05 Hartree
- Energy of the fitted coefficient          :  1.5234952382346747E+00 Hartree
+ Energy of the ifc part                    : -5.4743159708988598E+00 Hartree
+ Energy of the elastic part                :  5.7948434285728745E-05 Hartree
+ Energy of the fitted coefficient          :  1.5234952382346538E+00 Hartree
 
     >>>>>>>>> Etotal= -4.77180674854399E+01
 
@@ -1070,11 +1071,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -5.8782315108996039E+00 Hartree
- Energy of the elastic part                :  6.5862426583466075E-05 Hartree
- Energy of the fitted coefficient          :  1.5282358227754043E+00 Hartree
+ Energy of the ifc part                    : -5.8782315108996332E+00 Hartree
+ Energy of the elastic part                :  6.5862426584090494E-05 Hartree
+ Energy of the fitted coefficient          :  1.5282358227753874E+00 Hartree
 
-    >>>>>>>>> Etotal= -4.81172345269076E+01
+    >>>>>>>>> Etotal= -4.81172345269077E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1099,9 +1100,9 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -6.3149115072664728E+00 Hartree
- Energy of the elastic part                :  7.5010412843742592E-05 Hartree
- Energy of the fitted coefficient          :  1.5315915154288757E+00 Hartree
+ Energy of the ifc part                    : -6.3149115072665207E+00 Hartree
+ Energy of the elastic part                :  7.5010412844268647E-05 Hartree
+ Energy of the fitted coefficient          :  1.5315915154288606E+00 Hartree
 
     >>>>>>>>> Etotal= -4.85505496826348E+01
 
@@ -1128,11 +1129,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -6.7882881765807763E+00 Hartree
- Energy of the elastic part                :  8.5573155155766763E-05 Hartree
- Energy of the fitted coefficient          :  1.5325040605081308E+00 Hartree
+ Energy of the ifc part                    : -6.7882881765808651E+00 Hartree
+ Energy of the elastic part                :  8.5573155156325154E-05 Hartree
+ Energy of the fitted coefficient          :  1.5325040605081137E+00 Hartree
 
-    >>>>>>>>> Etotal= -4.90230032441275E+01
+    >>>>>>>>> Etotal= -4.90230032441276E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1157,11 +1158,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -7.2988014971509632E+00 Hartree
- Energy of the elastic part                :  9.7748287946640449E-05 Hartree
- Energy of the fitted coefficient          :  1.5317593267332279E+00 Hartree
+ Energy of the ifc part                    : -7.2988014971510173E+00 Hartree
+ Energy of the elastic part                :  9.7748287947291472E-05 Hartree
+ Energy of the fitted coefficient          :  1.5317593267332117E+00 Hartree
 
-    >>>>>>>>> Etotal= -4.95342491233398E+01
+    >>>>>>>>> Etotal= -4.95342491233399E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1186,11 +1187,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -7.8449522162917562E+00 Hartree
- Energy of the elastic part                :  1.1173601288318332E-04 Hartree
- Energy of the fitted coefficient          :  1.5331393452389575E+00 Hartree
+ Energy of the ifc part                    : -7.8449522162918184E+00 Hartree
+ Energy of the elastic part                :  1.1173601288387935E-04 Hartree
+ Energy of the fitted coefficient          :  1.5331393452389406E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.00790058362499E+01
+    >>>>>>>>> Etotal= -5.00790058362500E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1215,11 +1216,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -8.4254197528703934E+00 Hartree
- Energy of the elastic part                :  1.2772363250998620E-04 Hartree
- Energy of the fitted coefficient          :  1.5401680377519427E+00 Hartree
+ Energy of the ifc part                    : -8.4254197528705106E+00 Hartree
+ Energy of the elastic part                :  1.2772363251085836E-04 Hartree
+ Energy of the fitted coefficient          :  1.5401680377519331E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.06524286926959E+01
+    >>>>>>>>> Etotal= -5.06524286926961E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1244,11 +1245,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -9.0397230842501504E+00 Hartree
- Energy of the elastic part                :  1.4588717856234864E-04 Hartree
- Energy of the fitted coefficient          :  1.5526997861184682E+00 Hartree
+ Energy of the ifc part                    : -9.0397230842502232E+00 Hartree
+ Energy of the elastic part                :  1.4588717856344426E-04 Hartree
+ Energy of the fitted coefficient          :  1.5526997861184610E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.12541821121631E+01
+    >>>>>>>>> Etotal= -5.12541821121632E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1273,11 +1274,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -9.6876164058660486E+00 Hartree
- Energy of the elastic part                :  1.6641996783836688E-04 Hartree
- Energy of the fitted coefficient          :  1.5682318511907138E+00 Hartree
+ Energy of the ifc part                    : -9.6876164058661161E+00 Hartree
+ Energy of the elastic part                :  1.6641996783966977E-04 Hartree
+ Energy of the fitted coefficient          :  1.5682318511907050E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.18865228359175E+01
+    >>>>>>>>> Etotal= -5.18865228359176E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1302,11 +1303,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.0368467858777720E+01 Hartree
- Energy of the elastic part                :  1.8957669158524264E-04 Hartree
- Energy of the fitted coefficient          :  1.5856827723294074E+00 Hartree
+ Energy of the ifc part                    : -1.0368467858777821E+01 Hartree
+ Energy of the elastic part                :  1.8957669158665448E-04 Hartree
+ Energy of the fitted coefficient          :  1.5856827723293994E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.25499002109667E+01
+    >>>>>>>>> Etotal= -5.25499002109668E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1331,11 +1332,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.1081362605746351E+01 Hartree
- Energy of the elastic part                :  2.1570705437387114E-04 Hartree
- Energy of the fitted coefficient          :  1.6058452066293230E+00 Hartree
+ Energy of the ifc part                    : -1.1081362605746452E+01 Hartree
+ Energy of the elastic part                :  2.1570705437546655E-04 Hartree
+ Energy of the fitted coefficient          :  1.6058452066293021E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.32426063932727E+01
+    >>>>>>>>> Etotal= -5.32426063932728E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1360,11 +1361,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.1825781236917543E+01 Hartree
- Energy of the elastic part                :  2.4525670640907616E-04 Hartree
- Energy of the fitted coefficient          :  1.6290445283901556E+00 Hartree
+ Energy of the ifc part                    : -1.1825781236917674E+01 Hartree
+ Energy of the elastic part                :  2.4525670641063594E-04 Hartree
+ Energy of the fitted coefficient          :  1.6290445283901229E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.39637961530310E+01
+    >>>>>>>>> Etotal= -5.39637961530311E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1389,11 +1390,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.2602195399382516E+01 Hartree
- Energy of the elastic part                :  2.7872941521156909E-04 Hartree
- Energy of the fitted coefficient          :  1.6548163404194738E+00 Hartree
+ Energy of the ifc part                    : -1.2602195399382632E+01 Hartree
+ Energy of the elastic part                :  2.7872941521336355E-04 Hartree
+ Energy of the fitted coefficient          :  1.6548163404194340E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.47144050307578E+01
+    >>>>>>>>> Etotal= -5.47144050307580E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1418,11 +1419,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.3411978730630219E+01 Hartree
- Energy of the elastic part                :  3.1662627125001835E-04 Hartree
- Energy of the fitted coefficient          :  1.6831960287776628E+00 Hartree
+ Energy of the ifc part                    : -1.3411978730630404E+01 Hartree
+ Energy of the elastic part                :  3.1662627125197143E-04 Hartree
+ Energy of the fitted coefficient          :  1.6831960287776171E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.54957707767913E+01
+    >>>>>>>>> Etotal= -5.54957707767915E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1447,11 +1448,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.4256632033027909E+01 Hartree
- Energy of the elastic part                :  3.5939963680600451E-04 Hartree
- Energy of the fitted coefficient          :  1.7144271397571309E+00 Hartree
+ Energy of the ifc part                    : -1.4256632033028087E+01 Hartree
+ Energy of the elastic part                :  3.5939963680785145E-04 Hartree
+ Energy of the fitted coefficient          :  1.7144271397570754E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.63091501948440E+01
+    >>>>>>>>> Etotal= -5.63091501948442E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1476,11 +1477,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.5136948437188135E+01 Hartree
- Energy of the elastic part                :  4.0745778416127352E-04 Hartree
- Energy of the fitted coefficient          :  1.7481393728336667E+00 Hartree
+ Energy of the ifc part                    : -1.5136948437188297E+01 Hartree
+ Energy of the elastic part                :  4.0745778416325805E-04 Hartree
+ Energy of the fitted coefficient          :  1.7481393728336099E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.71557063077803E+01
+    >>>>>>>>> Etotal= -5.71557063077805E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1505,11 +1506,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.6052769359939244E+01 Hartree
- Energy of the elastic part                :  4.6121377032185489E-04 Hartree
- Energy of the fitted coefficient          :  1.7834803411706170E+00 Hartree
+ Energy of the ifc part                    : -1.6052769359939539E+01 Hartree
+ Energy of the elastic part                :  4.6121377032374075E-04 Hartree
+ Energy of the fitted coefficient          :  1.7834803411705622E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.80361325062083E+01
+    >>>>>>>>> Etotal= -5.80361325062087E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1534,11 +1535,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.7003470703526308E+01 Hartree
- Energy of the elastic part                :  5.2112679606942111E-04 Hartree
- Energy of the fitted coefficient          :  1.8192829552705554E+00 Hartree
+ Energy of the ifc part                    : -1.7003470703526453E+01 Hartree
+ Energy of the elastic part                :  5.2112679607105175E-04 Hartree
+ Energy of the fitted coefficient          :  1.8192829552704919E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.89509713226697E+01
+    >>>>>>>>> Etotal= -5.89509713226699E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1563,11 +1564,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.7988735481954176E+01 Hartree
- Energy of the elastic part                :  5.8769224850776624E-04 Hartree
- Energy of the fitted coefficient          :  1.8545584622990932E+00 Hartree
+ Energy of the ifc part                    : -1.7988735481954294E+01 Hartree
+ Energy of the elastic part                :  5.8769224850949121E-04 Hartree
+ Energy of the fitted coefficient          :  1.8545584622990359E+00 Hartree
 
-    >>>>>>>>> Etotal= -5.99008940286166E+01
+    >>>>>>>>> Etotal= -5.99008940286167E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1592,11 +1593,11 @@
  Components of total energy (in Hartree) :
 
  Energy of the reference structure         : -4.3767304701210001E+01 Hartree
- Energy of the ifc part                    : -1.9008925233471533E+01 Hartree
- Energy of the elastic part                :  6.6139542889708772E-04 Hartree
- Energy of the fitted coefficient          :  1.8891826473449114E+00 Hartree
+ Energy of the ifc part                    : -1.9008925233471793E+01 Hartree
+ Energy of the elastic part                :  6.6139542889901445E-04 Hartree
+ Energy of the fitted coefficient          :  1.8891826473448543E+00 Hartree
 
-    >>>>>>>>> Etotal= -6.08863858919077E+01
+    >>>>>>>>> Etotal= -6.08863858919080E+01
 
 --------------------------------------------------------------------------------
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1617,10 +1618,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
 
 ================================================================================
 
-+Total cpu time      1.786  and wall time      4.581 sec
++Total cpu time      0.984  and wall time      1.099 sec
 
  multibinit : the run completed succesfully.

@@ -2,8 +2,8 @@
 
 ndtset 10
 
-getwfk_path  "t60o_DS20_WFK"
-getddb_path  "t60o_DS20_DDB"
+getwfk_filepath  "t60o_DS20_WFK"
+getddb_filepath  "t60o_DS20_DDB"
 
 #getwfk   20    # Read GS wavefunctions from DS20_WFK
 #getddb   20    # Read DDB files from DS20_DDB
@@ -57,7 +57,7 @@ sigma_ngkpt1 2 2 2
 # interpolate DVDB
 eph_task2 5
 eph_ngqpt_fine2 4 4 4
-getdvdb_path2  "t60o_DS20_DVDB"
+getdvdb_filepath2  "t60o_DS20_DVDB"
 
 ############
 # DATASET 3
@@ -139,7 +139,7 @@ getdvdb8  20
 ############
 # Interpolate DFPT potentials, produce v1qavg file  along q-path
 eph_task9 15
-getdvdb_path9  "t60o_DS20_DVDB"
+getdvdb_filepath9  "t60o_DS20_DVDB"
 
 ph_nqpath9 5
 ph_qpath9
@@ -154,7 +154,7 @@ ph_qpath9
 ############
 # Interpolate DFPT potentials, produce v1qavg file along q-path
 eph_task10 -15
-getdvdb_path10  "t60o_DS20_DVDB"
+getdvdb_filepath10  "t60o_DS20_DVDB"
 
 ############################################################################################
 #                                         STRUCTURE
@@ -175,7 +175,6 @@ getdvdb_path10  "t60o_DS20_DVDB"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 

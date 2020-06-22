@@ -2,7 +2,7 @@
 .Version 8.3.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -316,7 +316,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -680,7 +680,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
    0.00314  -0.00314   0.00104   0.91297   0.00180
    0.00000  -0.00180   0.00000   0.00180   0.67943
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1390,7 +1390,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     135.500     135.484
   -0.00448   0.00448   0.00390   0.88059   0.00675
    0.00000  -0.00675   0.00000   0.00675   0.71650
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -1886,9 +1886,9 @@ P           mkmem           3
 - Comment : to be cited in case the computation of overlap operator for Wannier90 interface within PAW is used,
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
 -
-- [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment : DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).

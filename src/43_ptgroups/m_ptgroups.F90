@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ptgroups
 !! NAME
 !! m_ptgroups
@@ -8,7 +7,7 @@
 !!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MG)
+!! Copyright (C) 2010-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -418,7 +417,7 @@ subroutine point_group_free(Ptg)
 
  if (allocated(Ptg%Irreps)) then
    call irrep_free(Ptg%Irreps)
-   ABI_DT_FREE(Ptg%Irreps)
+   ABI_FREE(Ptg%Irreps)
  end if
 
 end subroutine point_group_free
@@ -779,7 +778,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
  ! * Read the list of the k-points.
  read(unt,*,ERR=10) nkpt
 
- ABI_DT_MALLOC(Lgrps,(nkpt))
+ ABI_MALLOC(Lgrps,(nkpt))
 
  ABI_MALLOC(klist,(3,nkpt))
  ABI_MALLOC(kname,(nkpt))
@@ -841,7 +840,7 @@ subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
    ABI_CHECK(Gk%nclass == nirreps_k,"Gk%nclass /= nirreps_k")
 
    !$$ allocate(Gk%class_names(Gk%nclass))
-   ABI_DT_MALLOC(Gk%Irreps,(nirreps_k))
+   ABI_MALLOC(Gk%Irreps,(nirreps_k))
 
    do irp=1,nirreps_k
      OneIrr =>  Gk%Irreps(irp)
@@ -1150,27 +1149,19 @@ subroutine groupk_free(Gk)
 ! *************************************************************************
 
 ! integer
- if (allocated(Gk%class_ids))   then
-   ABI_FREE(Gk%class_ids)
- end if
- if (allocated(Gk%sym))   then
-   ABI_FREE(Gk%sym)
- end if
+ ABI_SFREE(Gk%class_ids)
+ ABI_SFREE(Gk%sym)
 
 !real
- if (allocated(Gk%tnons)) then
-   ABI_FREE(Gk%tnons)
- end if
+ ABI_SFREE(Gk%tnons)
 
 !character
- if (allocated(Gk%class_names)) then
-   ABI_FREE(Gk%class_names)
- end if
+ ABI_SFREE(Gk%class_names)
 
 !type
  if (allocated(Gk%Irreps)) then
    call irrep_free(Gk%Irreps)
-   ABI_DT_FREE(Gk%Irreps)
+   ABI_FREE(Gk%Irreps)
  end if
 
 end subroutine groupk_free

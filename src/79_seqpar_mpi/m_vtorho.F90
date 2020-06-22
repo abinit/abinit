@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorho
 !! NAME
 !!  m_vtorho
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,7 +69,7 @@ module m_vtorho
  use m_fock,               only : fock_type, fock_ACE_type, fock_updateikpt, fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_tddft,              only : tddft
- use m_kg,                 only : mkkin, mkkpg, mknucdipmom_k
+ use m_kg,                 only : mkkin, mkkpg
  use m_suscep_stat,        only : suscep_stat
  use m_fft,                only : fftpac
  use m_spacepar,           only : symrhg
@@ -200,8 +199,8 @@ contains
 !!  with_vectornd = 1 if vectornd allocated
 !!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
-!!  vxctau=(only for meta-GGA): derivative of XC energy density with respect to
-!!    kinetic energy density (depsxcdtau). The arrays vxctau(nfft,nspden,4) contains also
+!!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
+!!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
 !!    the gradient of vxctau (gvxctau) in vxctau(:,:,2:4)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -360,7 +359,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
- real(dp) :: dmft_ldaocc
+ real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: freeden_part
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
@@ -375,13 +374,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
- real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
+ real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
+ real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vlocal_tmp(:,:,:)
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  complex(dpc),target,allocatable :: nucdipmom_k(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
- type(oper_type) :: lda_occup
+ type(oper_type) :: dft_occup
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
 
  type(crystal_t) :: cryst_struc
@@ -416,13 +416,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  compch_fft=-1.d5
 
 !Check that usekden is not 0 if want to use vxctau
- with_vxctau = (dtset%usekden/=0)
+ with_vxctau = (present(vxctau).and.dtset%usekden/=0)
 
 !Check that fock is present if want to use fock option
  usefock = (dtset%usefock==1 .and. associated(fock))
  usefock_ACE=0
  if (usefock) usefock_ACE=fock%fock_common%use_ACE
-
 
 !Init MPI
  spaceComm_distrb=mpi_enreg%comm_cell
@@ -486,17 +485,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !Initialize rhor if needed; store old rhor
  if(iscf>=0 .or. iscf==-3) then
    if (optres==1) then
-     nvresid=rhor
-     tauresid=taur
+     nvresid=rhor ; tauresid=taur
    end if
 !  NC and plane waves
    if (psps%usepaw==0 .and. dtset%usewvl==0) then
-     rhor=zero
-!    PAW
-   elseif(psps%usepaw==1) then
+     rhor=zero ; taur=zero
+!  PAW
+   else if(psps%usepaw==1) then
      ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
      ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
-     rhowfr(:,:)=zero
+     ABI_ALLOCATE(tauwfr,(dtset%nfft,dtset%nspden*dtset%usekden))
+     ABI_ALLOCATE(tauwfg,(2,dtset%nfft*dtset%usekden))
+     rhowfr(:,:)=zero ; tauwfr(:,:)=zero
    end if
  end if
 
@@ -693,8 +693,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        else
          ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
-         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
-         call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal,2)
+         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
+&                       rhodum,rhodum,cgrvtrial,vtrial)
+         call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
+&                    cgrvtrial,vlocal,2)
+         if(with_vxctau) then
+           do ii=1,4
+             call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
+&                           rhodum,rhodum,cgrvtrial,vxctau(:,:,ii))
+             call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
+&                        cgrvtrial,vxctaulocal(:,:,:,:,ii),2)
+           end do
+         end if
          ABI_DEALLOCATE(cgrvtrial)
        end if
      else
@@ -736,7 +746,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call gs_hamk%load_spin(isppol,vxctaulocal=vxctaulocal)
      end if
      if (has_vectornd) then
-        call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
+       call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
      end if
 
      call timab(982,2,tsec)
@@ -873,21 +883,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
 &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
        end if
-
-! !     compute and load nuclear dipole Hamiltonian at current k point
-!        if(any(abs(gs_hamk%nucdipmom)>0.0)) then
-!          if(allocated(nucdipmom_k)) then
-!            ABI_DEALLOCATE(nucdipmom_k)
-!          end if
-!          ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
-!          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
-!          if(allocated(gs_hamk%nucdipmom_k)) then
-!             ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
-!          end if
-!          ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
-!          call gs_hamk%load_k(nucdipmom_k=nucdipmom_k)
-!        end if
-
 
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors
@@ -1276,7 +1271,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
 !    !=========  DMFT call begin ============================================
-     dmft_ldaocc=0
+     dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
 
@@ -1285,7 +1280,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      ==  0 to a dmft calculation and do not use lda occupations
 !      ==  1 to a lda calculation with the dmft loop
-       if(dtset%dmftcheck==-1) dmft_ldaocc=1
+       if(dtset%dmftcheck==-1) dmft_dftocc=1
 
 !      ==  initialise occnd
        paw_dmft%occnd=zero
@@ -1301,10 +1296,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end do
 
 
-       if(dmft_ldaocc==0) then
+       if(dmft_dftocc==0) then
          if(dtset%occopt/=3) then
-           message = ' occopt should be equal to 3 in dmft'
-           MSG_ERROR(message)
+           MSG_ERROR('occopt should be equal to 3 in dmft')
          end if
 !        ==  initialise edmft
          if(paw_dmft%use_dmft>=1) edmft = zero
@@ -1341,7 +1335,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            MSG_WARNING(message)
          end if
 
-!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_lda
+!        ==  allocate paw_dmft%psichi and paw_dmft%eigen_dft
          call init_dmft(dmatpawu,dtset,energies%e_fermie,dtfil%fnameabo_app,&
 &         dtfil%filnam_ds(3),dtset%nspinor,paw_dmft,pawtab,psps,dtset%typat)
          call print_dmft(paw_dmft,dtset%pawprtvol)
@@ -1356,11 +1350,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        ==  compute psichi
          call xmpi_barrier(spaceComm_distrb)
-         call init_oper(paw_dmft,lda_occup)
+         call init_oper(paw_dmft,dft_occup)
          call flush_unit(std_out)
          call timab(620,1,tsec)
          call datafordmft(cryst_struc,cprj,gs_hamk%dimcprj,dtset,eigen,energies%e_fermie,&
-&         lda_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
+&         dft_occup,dtset%mband,mband_cprj,dtset%mkmem,mpi_enreg,&
 &         dtset%nkpt,my_nspinor,dtset%nsppol,occ,&
 &         paw_dmft,paw_ij,pawang,pawtab,psps,usecprj_local,dtfil%unpaw)
          call timab(620,2,tsec)
@@ -1370,7 +1364,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  solve dmft loop
          call xmpi_barrier(spaceComm_distrb)
 
-         call dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,dtset%pawprtvol)
+         call dmft_solve(cryst_struc,istep,dft_occup,paw_dmft,pawang,pawtab,dtset%pawprtvol)
          edmft=paw_dmft%edmft
          energies%e_paw=energies%e_paw+edmft
          energies%e_pawdc=energies%e_pawdc+edmft
@@ -1413,8 +1407,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !        ==  destroy crystal_t cryst_struc
          call cryst_struc%free()
-         call destroy_oper(lda_occup)
-       end if ! dmft_ldaocc
+         call destroy_oper(dft_occup)
+       end if ! dmft_dftocc
        call timab(991,2,tsec)
 
      end if ! usedmft
@@ -1460,7 +1454,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          dmft
            if(paw_dmft%use_dmft>=1.and.dtset%nbandkss==0) then
              if(paw_dmft%band_in(iband)) then
-               if( paw_dmft%use_dmft == 1 .and. dmft_ldaocc == 1 ) then ! test of the code
+               if( paw_dmft%use_dmft == 1 .and. dmft_dftocc == 1 ) then ! test of the code
                  paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
                end if
                locc_test = abs(paw_dmft%occnd(1,iband,iband,ikpt,isppol))+&
@@ -1674,11 +1668,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
    call timab(994,1,tsec)
 
-
 !  Compute the kinetic energy density
    if(dtset%usekden==1 .and. (iscf > 0 .or. iscf==-3 ) )then
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&     taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+     if (psps%usepaw==0) then
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&       taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+     else
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&      tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+     end if
    end if
 
    if (usefock) then
@@ -1796,6 +1794,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       my_natom,natom,dtset%nspden,dtset%nsym,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
+       if (dtset%usekden==1) then
+!        DO WE NEED TAUG?
+         call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
+       end if
      else
 !      here do not pass rhog, we do not use it
        call pawmkrho(1,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
@@ -1837,7 +1839,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if (optres==1) then
        nvresid=rhor-nvresid
        call sqnorm_v(1,nfftf,nres2,dtset%nspden,optres,nvresid,mpi_comm_sphgrid=mpi_comm_sphgrid)
-       tauresid=taur-tauresid
+       if (dtset%usekden==1) then
+         if (optres==1) tauresid=taur-tauresid
+       endif
      end if
    end if
 
@@ -1846,6 +1850,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(psps%usepaw==1.and.(iscf>=0.or.iscf==-3))  then
    ABI_DEALLOCATE(rhowfr)
    ABI_DEALLOCATE(rhowfg)
+   if (dtset%usekden==1) then
+     ABI_DEALLOCATE(tauwfr)
+     ABI_DEALLOCATE(tauwfg)
+   end if
  end if
 
  ABI_DEALLOCATE(eknk)

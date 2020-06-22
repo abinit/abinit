@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/predict_ga
 !! NAME
 !! predict_ga
@@ -9,7 +8,7 @@
 !! to the next generation. Those are chosen from ga_opt_percent% best fit and (1-ga_opt_percent)% from Genetic rules
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (XG, AHR)
+!! Copyright (C) 2009-2020 ABINIT group (XG, AHR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -73,13 +72,12 @@ MODULE m_use_ga
  use m_geometry,       only : mkradim, mkrdim, metric, dist2
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
-
+ 
  implicit none
 
  private
 
  public :: predict_ga
-
 
 CONTAINS
 
@@ -694,7 +692,7 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion
+  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
   integer :: chkprim,nsym
 ! Arrays
   integer :: bravais(11),ptsymrel(3,3,msym)

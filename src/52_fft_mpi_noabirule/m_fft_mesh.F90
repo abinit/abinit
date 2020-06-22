@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fft_mesh
 !! NAME
 !!  m_fft_mesh
@@ -9,7 +8,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2020 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,6 +47,8 @@ MODULE m_fft_mesh
  public :: check_rot_fft       ! Test whether the mesh is compatible with the rotational part of the space group.
  public :: fft_check_rotrans   ! Test whether the mesh is compatible with the symmetries of the space group.
  public :: rotate_fft_mesh     ! Calculate the FFT index of the rotated mesh.
+ public :: denpot_project      ! Compute n(r) + n( $R^{-1}(r-\tau)$ in) / 2
+                               ! Mainly used with R = inversion to select the even/odd part under inversion
  public :: cigfft              ! Calculate the FFT index of G-G0.
  public :: ig2gfft             ! Returns the component of a G in the FFT Box from its sequential index.
  public :: g2ifft              ! Returns the index of the G in the FFT box from its reduced coordinates.
@@ -58,7 +59,7 @@ MODULE m_fft_mesh
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
- public :: mkgrid_fft          !  It sets the grid of fft (or real space) points to be treated.
+ public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -219,13 +220,8 @@ subroutine zpad_free(zpad)
 
 ! *************************************************************************
 
- if (allocated(zpad%zplane)) then
-   ABI_FREE(zpad%zplane)
- end if
-
- if (allocated(zpad%linex2ifft_yz)) then
-   ABI_FREE(zpad%linex2ifft_yz)
- end if
+ ABI_SFREE(zpad%zplane)
+ ABI_SFREE(zpad%linex2ifft_yz)
 
 end subroutine zpad_free
 !!***
@@ -875,6 +871,73 @@ subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
  end do
 
 end subroutine rotate_fft_mesh
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/denpot_project
+!! NAME
+!!
+!! FUNCTION
+!!  Compute n(r) + n( $R^{-1}(r-\tau)$ in) / 2
+!!  Mainly used with R = inversion to select the even/odd part under inversion
+!!
+!! INPUTS
+!!  cplex=1 for real, 2 for complex data.
+!!  ngfft(3)=Mesh divisions of input array
+!!  nspden=Number of density components.
+!!  in_rhor(cplex * nfftot * nspden)=Input array
+!!  one_symrel(3,3)= R operation
+!!  tau(3)=Fractional translation.
+!!
+!! OUTPUT
+!!  out_rhor(cplex * nfftot * nspden)=Output array
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine denpot_project(cplex,  ngfft, nspden, in_rhor, one_symrel, one_tnons, out_rhor)
+
+!Arguments-------------------------------------------------------------
+!scalars
+ integer,intent(in) :: cplex, nspden
+!arrays
+ integer,intent(in) :: ngfft(18), one_symrel(3,3)
+ real(dp),intent(in) :: in_rhor(cplex, product(ngfft(1:3)), nspden)
+ real(dp),intent(in) :: one_tnons(3)
+ real(dp),intent(out) :: out_rhor(cplex, product(ngfft(1:3)), nspden)
+
+!Local variables--------------------------------------------------------
+!scalars
+ integer,parameter :: nsym1 = 1, isgn = 1
+ integer :: ispden, ii, ifft, ifft_rot, nfft
+ logical :: preserve
+!arrays
+ integer,allocatable :: irottb(:)
+
+! *************************************************************************
+
+ nfft = product(ngfft(1:3))
+ ABI_MALLOC(irottb, (nfft))
+
+ call rotate_fft_mesh(nsym1, one_symrel, one_tnons, ngfft, irottb, preserve)
+ ABI_CHECK(preserve, "FFT mesh is not compatible with {R, tau}")
+
+ do ispden=1,nspden
+   do ifft=1,nfft
+     ifft_rot = irottb(ifft)
+     do ii=1,cplex
+       out_rhor(cplex, ifft, ispden) = (in_rhor(cplex, ifft, ispden) + isgn * in_rhor(cplex, ifft_rot, ispden)) * half
+     end do
+   end do
+ end do
+
+ ABI_FREE(irottb)
+
+end subroutine denpot_project
 !!***
 
 !----------------------------------------------------------------------
@@ -1594,7 +1657,7 @@ end subroutine phase
 !!  mkgrid_fft
 !!
 !! FUNCTION
-!!  It sets the grid of fft (or real space) points to be treated.
+!!  Sets the grid of fft (or real space) points to be treated.
 !!
 !! INPUTS
 !!

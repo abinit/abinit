@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abihist
 !! NAME
 !! m_abihist
@@ -22,7 +21,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2020 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,7 +173,7 @@ contains  !=============================================================
 !! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
- 
+!!
 !!  natom = Number of atoms per unitary cell
 !!  mxhist = Maximal number of records to store
 !!  isVUsed,isARUsed=flags used to initialize hsit structure
@@ -1186,14 +1185,17 @@ subroutine write_md_hist(hist,filename,ifirst,itime,natom,nctime,ntypat,&
 #if defined HAVE_NETCDF
 
  need_to_write = .FALSE.
- if(nctime==0 .or. ifirst==1 .or. (itime > nctime .and.mod(itime,nctime) == 0)) need_to_write = .TRUE.
+ if(nctime==0 .or. ifirst==1) need_to_write = .TRUE.
+ if (itime > nctime .and. nctime /= 0) then
+     if (mod(itime,nctime) == 0) need_to_write = .TRUE.
+ end if
 !Return if we don't need to write the HIST file at this step
  if (.not. need_to_write) return
 
  if (ifirst==1) then
 !##### First access: Create NetCDF file and write defs
 
-   write(std_out,*) 'Write iteration in HIST netCDF file'
+   write(std_out,*) 'Write iteration in HIST netCDF file (also create it)'
    npsp=size(znucl)
 
 !  Create netCDF file
@@ -1656,7 +1658,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
  integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id, two_id,mdtemp_id
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
 #endif
@@ -1668,8 +1670,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 !1.Define the dimensions
 
  if (npsp/=ntypat) then
-   msg='HIST file does not support alchemical mixing!'
-   MSG_WARNING(msg)
+   MSG_WARNING('HIST file does not support alchemical mixing!')
  end if
 
  ncerr = nf90_def_dim(ncid,"natom",natom,natom_id)

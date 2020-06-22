@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optic_tools
 !! NAME
 !! m_optic_tools
@@ -7,7 +6,7 @@
 !!  Helper functions used in the optic code
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
+!! Copyright (C) 2002-2020 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -459,7 +458,7 @@ character(len=fnlen) :: fnam1
 character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
-complex(dpc), allocatable :: chi(:)
+complex(dpc), allocatable :: chi(:,:)
 complex(dpc), allocatable :: eps(:)
 
 ! *********************************************************************
@@ -537,7 +536,7 @@ complex(dpc), allocatable :: eps(:)
 ! end if
 
 !allocate local arrays
- ABI_ALLOCATE(chi,(nmesh))
+ ABI_ALLOCATE(chi,(nmesh,nspin))
  ABI_ALLOCATE(eps,(nmesh))
  ieta=(0._dp,1._dp)*brod
  renorm_factor=1._dp/(omega*dble(nsymcrys))
@@ -571,10 +570,8 @@ complex(dpc), allocatable :: eps(:)
  call xmpi_split_work(nkpt,comm,my_k1,my_k2)
 
 !start calculating linear optical response
- chi(:)=0._dp
-! TODO: this loop should be outside the ik one, for speed and cache.
+ chi(:,:)=0._dp
  do isp=1,nspin
-   !do ik=1,nkpt
    do ik=my_k1,my_k2
      write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
      do ist1=1,nstval
@@ -585,15 +582,12 @@ complex(dpc), allocatable :: eps(:)
        if(do_linewidth) then
          e1_ep = e1_ep + EPBSt%linewidth(1,ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
-!      if (e1.lt.efermi) then
-!      do ist2=ist1,nstval
        do ist2=1,nstval
          e2=KSBSt%eig(ist2,ik,isp)
          e2_ep=EPBSt%eig(ist2,ik,isp)
          if(do_linewidth) then
            e2_ep = e2_ep - EPBSt%linewidth(1,ist2,ik,isp)*(0.0_dp,1.0_dp)
          end if
-!        if (e2.gt.efermi) then
          if (ist1.ne.ist2) then
 !          scissors correction of momentum matrix
            if(REAL(e1) > REAL(e2)) then
@@ -619,15 +613,15 @@ complex(dpc), allocatable :: eps(:)
 !          calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
-             chi(iw)=chi(iw)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
+             chi(iw,isp)=chi(iw,isp)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
              (b12/(-e12_ep-w)))
            end do
          end if
        end do ! states
 !      end if
      end do
-   end do ! spin
- end do ! k-points
+   end do ! k points
+ end do ! spin
 
  call xmpi_sum(chi,comm,ierr)
 
@@ -637,7 +631,7 @@ complex(dpc), allocatable :: eps(:)
  do iw=2,nmesh
    ene=(iw-1)*de
    ene=ene*ha2ev
-   eps(iw)=deltav1v2+4._dp*pi*chi(iw)
+   eps(iw)=deltav1v2+4._dp*pi*sum(chi(iw,:))
  end do
 
  if (my_rank == master) then
@@ -655,19 +649,23 @@ complex(dpc), allocatable :: eps(:)
    write(fout1, '(a,es16.6,a,es16.6,a)' ) ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
    write(std_out,*) 'energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
    write(fout1,*)
-   write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
+   if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))'
+   if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Im(eps(w))         Spin up       Spin down '
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
+     if(nspin==1)write(fout1, '(2es16.6)' ) ene,aimag(eps(iw))
+     if(nspin==2)write(fout1, '(4es16.6)' ) ene,aimag(eps(iw)),4._dp*pi*aimag(chi(iw,1)),4._dp*pi*aimag(chi(iw,2))
    end do
    write(fout1,*)
    write(fout1,*)
-   write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
+   if(nspin==1)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))'
+   if(nspin==2)write(fout1, '(a)' ) ' # Energy(eV)         Re(eps(w))         Spin up       Spin down    +delta(diag) '
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
+     if(nspin==1)write(fout1, '(2es16.6)' ) ene,dble(eps(iw))
+     if(nspin==2)write(fout1, '(5es16.6)' ) ene,dble(eps(iw)),4._dp*pi*dble(chi(iw,1)),4._dp*pi*dble(chi(iw,2)),deltav1v2
    end do
    write(fout1,*)
    write(fout1,*)
@@ -703,12 +701,12 @@ complex(dpc), allocatable :: eps(:)
    end do
    write(fout1,*)
    write(fout1,*)
-   write(fout1, '(a)' )' # Energy(eV)         absorption coeff (in m-1) = omega Im(eps) / c n(eps)'
+   write(fout1, '(a)' )' # Energy(eV)         absorption coeff (in 10^6 m-1) = omega Im(eps) / c n(eps)'
    do iw=2,nmesh
      ene=(iw-1)*de
      tmpabs=zero
      if (abs(eps(iw)) + dble(eps(iw)) > zero) then
-       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter
+       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter * 1.0d-6
      end if
      write(fout1, '(2es16.6)' ) ha2ev*ene, tmpabs
    end do
@@ -891,10 +889,11 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
        if (abs(symcrys(1,2,isym)).lt.tst.and.abs(symcrys(1,3,isym)).lt.tst &
        .and.abs(symcrys(2,1,isym)).lt.tst.and.abs(symcrys(2,3,isym)).lt.tst.and.  &
        abs(symcrys(3,1,isym)).lt.tst.and.abs(symcrys(3,2,isym)).lt.tst) then
-         write(std_out,*) '-----------------------------------------'
-         write(std_out,*) '    the crystal has inversion symmetry   '
-         write(std_out,*) '    the SHG susceptibility is zero       '
-         write(std_out,*) '-----------------------------------------'
+         write(std_out,*) '-------------------------------------------'
+         write(std_out,*) '    The crystal has inversion symmetry     '
+         write(std_out,*) '    The SHG susceptibility is zero         '
+         write(std_out,*) '    Action : set num_nonlin_comp to zero   '
+         write(std_out,*) '-------------------------------------------'
          MSG_ERROR("Aborting now")
        end if
      end if
@@ -903,8 +902,10 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
    if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in nlinopt:                        '
-     write(std_out,*) '    the polarisation directions incorrect    '
+     write(std_out,*) '    Incorrect polarisation directions        '
      write(std_out,*) '    1=x,  2=y  and 3=z                       '
+     write(std_out,*) '    Action : check your input file,          ' 
+     write(std_out,*) '    use only 1, 2 or 3 to define directions  '
      write(std_out,*) '---------------------------------------------'
      MSG_ERROR("Aborting now")
    end if
@@ -931,19 +932,19 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
   !broadening
    if (brod.gt.0.009) then
      write(std_out,*) '---------------------------------------------'
-     write(std_out,*) '    ATTENTION: broadening is quite high      '
+     write(std_out,*) '    WARNING : broadening is quite high       '
      write(std_out,*) '    ideally should be less than 0.005        '
      write(std_out,*) '---------------------------------------------'
    else if (brod.gt.0.015) then
      write(std_out,*) '----------------------------------------'
-     write(std_out,*) '    ATTENTION: broadening is too high   '
+     write(std_out,*) '    WARNING : broadening is too high    '
      write(std_out,*) '    ideally should be less than 0.005   '
      write(std_out,*) '----------------------------------------'
    end if
   !tolerance
    if (tol.gt.0.006) then
      write(std_out,*) '----------------------------------------'
-     write(std_out,*) '    ATTENTION: tolerance is too high    '
+     write(std_out,*) '    WARNING : tolerance is too high     '
      write(std_out,*) '    ideally should be less than 0.004   '
      write(std_out,*) '----------------------------------------'
    end if

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_tddft
 !! NAME
 !!  m_tddft
@@ -7,7 +6,7 @@
 !!  Routines for computing excitation energies within TDDFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
+!! Copyright (C) 1999-2020 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

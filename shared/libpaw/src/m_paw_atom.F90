@@ -7,7 +7,7 @@
 !!  atompaw related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (T. Rangel, MT, JWZ, GJ)
+!!  Copyright (C) 2012-2020 ABINIT group (T. Rangel, MT, JWZ, GJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -575,7 +575,7 @@ end subroutine atompaw_shapebes
    vhtnzc_sph(1:meshsz)=vhtnzc(1:meshsz)
  end if
 
-!Initiialize Kij with Dij0
+!Initialize Kij with Dij0
 !=========================
  kij(1:lmn2_size)=pawtab%dij0(1:lmn2_size)
 

@@ -2,7 +2,7 @@
 .Version 7.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.6 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -796,7 +796,7 @@ P newkpt: treating     20 bands with npw=    1859 for ikpt=   2 by node    1
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
 ================================================================================
@@ -992,7 +992,7 @@ P newkpt: treating     20 bands with npw=    1859 for ikpt=   2 by node    1
    0.00000   0.00000   0.00000   0.00000   0.00000  -0.00001   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00002   0.00000  -0.00003   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000
 
- ---------- LDA+U DATA ---------------------------------------------------
+ ---------- DFT+U DATA ---------------------------------------------------
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   3
 
@@ -1225,7 +1225,7 @@ P newkpt: treating     20 bands with npw=    1859 for ikpt=   2 by node    1
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  ==>  initialize data related to q vector <== 
@@ -2415,7 +2415,7 @@ P newkpt: treating     20 bands with npw=    1859 for ikpt=  16 by node    1
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  ==>  initialize data related to q vector <== 
@@ -2862,7 +2862,7 @@ P newkpt: treating     20 bands with npw=    1859 for ikpt=  16 by node    1
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  ==>  initialize data related to q vector <== 
@@ -3973,9 +3973,9 @@ P          mk1mem4         16
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 
- [1] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+ [1] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
  B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
- Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+ Comment : DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 
  [2] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
  M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).

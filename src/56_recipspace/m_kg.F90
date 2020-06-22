@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_kg
 !! NAME
 !! m_kg
@@ -7,7 +6,7 @@
 !!  Low-level functions to operate of G-vectors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
+!!  Copyright (C) 2008-2020 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,13 +44,14 @@ MODULE m_kg
  public :: getcut       ! Compute cutoff G^2
  public :: getmpw       ! Compute recommended npw from ecut, ucvol and gmet
  public :: mkkin        ! Compute elements of kinetic energy operator in reciprocal space at a given k point
- public :: mknucdipmom_k ! Compute elements of magnetic nuclear dipole moment array in reciprocal space at a given k point
  public :: kpgio        ! Do initialization of kg data.
  public :: ph1d3d       ! Compute the three-dimensional phase factor $e^{i 2 \pi (k+G) cdot xred}$
  public :: getph        ! Compute three factors of one-dimensional structure factor phase
  public :: kpgstr       ! Derivative of kinetic energy operator in reciprocal space.
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
  public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
+ public :: mkkpgcart    ! Compute all (k+G) vectors (dp, in cartesian coordinates) for given k point
+ public :: mkkin_metdqdq ! Compute the second q-gradient of the derivative of the kinetic energy operator w.r.t a metric
 
 contains
 !!***
@@ -120,7 +120,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 !scalars
  integer :: plane
  real(dp) :: boxsq,cutrad,ecut_pw,effcut,largesq,sphsq
- character(len=500) :: message
+ character(len=1000) :: message
 !arrays
  integer :: gbound(3)
 
@@ -169,12 +169,15 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,f12.6)' )&
+       write(message, '(9a,f12.6,6a)' )&
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Actio: try larger ngfft or smaller ecut.',ch10,&
-&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
+&       '  Action: try larger ngfft or smaller ecut.',ch10,&
+&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        MSG_ERROR(message)
      end if
@@ -191,11 +194,14 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      end if
 
      if (boxcut<1.5_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,a)' ) ch10,&
+       write(message, '(15a)' ) ch10,&
 &       ' getcut : WARNING -',ch10,&
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
-&       '  Be sure to test with larger ngfft(1:3) values.',ch10
+&       '  Be sure to test with larger ngfft(1:3) values.',ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
@@ -1016,7 +1022,7 @@ end subroutine mkkpg
 !! as appear in Berry phase derived quantities
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2019 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1171,151 +1177,195 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 end subroutine mkpwind_k
 !!***
 
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/mknucdipmom_k
+!!****f* m_kg/mkkpgcart
 !! NAME
-!! mknucdipmom_k
+!! mkkpgcart
 !!
 !! FUNCTION
-!! compute Hamiltonian in reciprocal space due to array of nuclear
-!! dipole moments, at a given k point
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
+!! Compute all (k+G) vectors (dp, in cartesian coordinates) for given k point,
+!! from integer coordinates of G vectors.
 !!
 !! INPUTS
-!! gmet(3,3)=metric for reciprocal space vectors
-!! gprimd(3,3)=recip space translation vectors
-!! kg(3,npw)=reduced planewave coordinates at current k point
-!! kpt(3)=current k point, reduced coordinates
-!! natom=number of atoms in cell
-!! nucdipmom(3,natom)=nuclear dipole moment vectors, at each atom (cartesian coords, atomic units)
-!! npw=number of planewaves
-!! rprimd(3,3)=real space translation vectors
-!! ucvol=unit cell volume
-!! xred(3,natom)=location of atoms in unit cell, in reduced coordinates
+!!  gprimd(3,3)=dimensional reciprocal space primitive translations
+!!  kg(3,npw)=integer coords of planewaves in basis sphere
+!!  kpt(3)=k point in terms of recip. translations
+!!  nkpg=second dimension of array kpg
+!!  npw=number of plane waves in reciprocal space
 !!
 !! OUTPUT
-!!  nucdipmom_k(npw*(npw+1)/2) = nuclear dipole moment Hamiltonian matrix, in
-!!                                 lower diagonal Hermitian packed storage, at current k point
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!! Given nuclear magnetic dipoles on the atomic sites, the first-order Hamiltonian term
-!! is $(-q/m)(\mu_0/4\pi)\sum\frac{m_I\times(r-I)}{|r-I|^3}\cdot p$, where the sum is over
-!! atomic positions I and m_I is the nuclear magnetic dipole moment vector on site I
-!! (may be zero). This is in SI units. In atomic units, the formula for electrons is
-!! $\alpha^2 \sum \frac{m_I\times(r-I)}{|r-I|^3}\cdot p$ where \alpha is the fine structure
-!! constant.
-!! In reciprocal space, the <G'+k|H|G+k> matrix element is
-!! 4\pi i \alpha^2/\Omega \exp(2\pi i (G-G')) m\cdot (G-G')\times (k+G) / |(G-G')|^2
-!! below we handle the scalar triple product m\cdot (G-G')\times (k+G) fully in reduced coords
-!
+!!  kpg(npw,3)= (k+G) components
 !!
 !! PARENTS
+!!  nonlop_ylm  
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
 
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: natom,npw
-  real(dp),intent(in) :: ucvol
+subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
 
-  !arrays
-  integer,intent(in) :: kg(3,npw)
-  real(dp),intent(in) :: gmet(3,3),kpt(3),nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
-  complex(dpc),intent(out) :: nucdipmom_k(npw*(npw+1)/2)
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpg,npw
+!arrays
+ real(dp),intent(in) :: gprimd(3,3)
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(out) :: kpgcar(npw,nkpg)
 
-  !Local variables-------------------------------
-  !scalars
-  integer :: atom_nd_tot,col,iatom,ndp_index,row
-  real(dp) :: dg2,phasefac,scale_conversion
-  complex(dpc) :: cphasefac,cscale_conversion
-  !arrays
-  integer :: atom_nd(natom)
-  real(dp) :: crpr(3), crpr_cart(3), dgp_red(3), gpk_red(3)
+!Local variables-------------------------------
+!scalars
+ integer :: ipw,mu
+ character(len=500) :: message
+!arrays
+ real(dp),allocatable :: kpg(:,:)
 
-  ! *************************************************************************
-  !
+! *************************************************************************
 
-  ! scale conversion from SI to atomic units,
-  ! here \alpha^2 where \alpha is the fine structure constant
-  scale_conversion = 1.d0/(InvFineStruct*InvFineStruct)
-  ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
-  ! 4\pi i comes from series expansion of plane waves, and ucvol comes from integration over space
-  cscale_conversion = CMPLX(zero,four_pi*scale_conversion/ucvol)
+ DBG_ENTER("COLL")
 
-  ! make list of atoms with non-zero nuclear magnetic dipoles
-  atom_nd_tot = 0
-  do iatom = 1, natom
-     if(any(abs(nucdipmom(:,iatom))>tol12)) then
-        atom_nd_tot = atom_nd_tot + 1
-        atom_nd(atom_nd_tot) = iatom
-     end if
-  end do
+ if (nkpg==0) return
 
-  ndp_index = 0
-  do col=1,npw ! enumerate plane waves G
-     ! form k + G at this k point for current plane wave (this is the ket |k+G> )
-     ! in reduced coordinates
-     gpk_red(1)=dble(kg(1,col))+kpt(1)
-     gpk_red(2)=dble(kg(2,col))+kpt(2)
-     gpk_red(3)=dble(kg(3,col))+kpt(3)
+!-- Test nkpg --
+ if (nkpg/=3) then
+   write(message, '(a,i0)' )' Bad value for nkpg !',nkpg
+   MSG_BUG(message)
+ end if
 
-     do row=col,npw ! enumerate lower diagonal from 1 to G
-        ! index of the current matrix element, in lower triangular packed storage
-        ! "packed sequentially, column by column"
-        ndp_index = ndp_index + 1
-        nucdipmom_k(ndp_index) = czero
+!-- Compute (k+G) --
+ ABI_ALLOCATE(kpg,(npw,nkpg))
+!$OMP PARALLEL DO COLLAPSE(2) &
+!$OMP PRIVATE(mu,ipw)
+ do ipw=1,npw
+   do mu=1,3
+     kpg(ipw,mu)=kpt(mu)+dble(kg(mu,ipw))
+   end do
+ end do
+!$OMP END PARALLEL DO
 
-        ! form G-G' = \Delta G at this k pt (this is the bra <k+G'| )
-        ! in reduced coordinates
-        dgp_red(1)=dble(kg(1,col)-kg(1,row))
-        dgp_red(2)=dble(kg(2,col)-kg(2,row))
-        dgp_red(3)=dble(kg(3,col)-kg(3,row))
+!$OMP PARALLEL DO &
+!$OMP PRIVATE(ipw)
+ do ipw=1,npw
+   kpgcar(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
+   kpgcar(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
+   kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
+ end do
+!$OMP END PARALLEL DO
+ ABI_DEALLOCATE(kpg)
 
-        ! compute |\Delta G|^2
-        ! must use gmet metric because G's are in reduced coords in reciprocal space
-        dg2 = DOT_PRODUCT(dgp_red,MATMUL(gmet,dgp_red))
-        ! if \Delta G = 0, Hamiltonian term is zero and move on to next one
-        if (abs(dg2)<tol8) then
-           nucdipmom_k(ndp_index)=czero
-           cycle
-        end if
+ DBG_EXIT("COLL")
 
-        ! form \Delta G x (k+G) ; note that both are in reduced coords at this point
-        crpr(1) =  dgp_red(2)*gpk_red(3) - dgp_red(3)*gpk_red(2)
-        crpr(2) = -dgp_red(1)*gpk_red(3) + dgp_red(3)*gpk_red(1)
-        crpr(3) =  dgp_red(1)*gpk_red(2) - dgp_red(2)*gpk_red(1)
+end subroutine mkkpgcart
+!!***
 
-        ! convert to cart coords using gprimd(\Delta G) x gprimd(k+G) =
-        ! det(gprimd)*(gprimd^{-1,T})(\Delta G x (k+G)) =
-        ! 1/ucvol * rprimd * (\Delta G x (k+G))
-        crpr_cart(1:3) = MATMUL(rprimd(1:3,1:3),crpr(1:3))/ucvol
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mkkin_metdqdq
+!! NAME
+!! mkkin_metdqdq
+!!
+!! FUNCTION
+!! Compute elements of the second q-gradient of the metric
+!! kinetic energy operator in reciprocal
+!! space at given k point wrt cartesian q components.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2017 ABINIT group (DRH, XG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  effmass=effective mass for electrons (1. in common case)
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  idir= strain perturbation direction
+!!  kg(3,npw) = integer coordinates of planewaves in basis sphere.
+!!  kpt(3)    = reduced coordinates of k point
+!!  npw       = number of plane waves at kpt.
+!!  qdir      = direction of the first q-gradient
+!!
+!! OUTPUT
+!!  dqdqkinpw(npw)=d/deps(istr) ( (1/2)*(2 pi)**2 * (k+G)**2 )
+!!
+!! NOTES
+!!
+!!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
+!!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
+!!    in the reduced to cartesian derivative conversion process) is here
+!!    explicictly included in the formulas.
+!!
+!!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
+!!    because this term is not symmetric w.r.t permutations of the two strain
+!!    indices.
+!!
+!!  **A -i factor has been factorized out in all the contributions of the second
+!!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
+!!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
+!!
+!! PARENTS
+!!      getgh1dqc_setup
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
-        ! loop over the atoms with non-zero nuclear dipoles
-        ! phase factors exp(i*\Delta G*I) where I is ion position,
-        ! might be retrievable from ph1d, need to check
-        do iatom = 1, atom_nd_tot
-           phasefac = two_pi*DOT_PRODUCT(dgp_red,xred(:,atom_nd(iatom)))
-           cphasefac = CMPLX(cos(phasefac),sin(phasefac))
-           nucdipmom_k(ndp_index) = nucdipmom_k(ndp_index) + &
-                & cscale_conversion*cphasefac*DOT_PRODUCT(nucdipmom(1:3,atom_nd(iatom)),crpr_cart(1:3))/dg2
-        end do ! end loop over atoms with nonzero dipoles
+subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
 
-     end do ! end loop over G' = G to npw
+ implicit none
 
-  end do ! end loop over G = 1 to npw
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: idir,npw,qdir
+ real(dp),intent(in) :: effmass
+!arrays
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: gprimd(3,3),kpt(3)
+ real(dp),intent(out) :: dqdqkinpw(npw)
 
-end subroutine mknucdipmom_k
+!Local variables -------------------------
+!scalars
+ integer :: beta,delta,gamma,ig,ka,kb
+ real(dp) :: delbd,delbg,deldg
+ real(dp) :: dkinetic,gpk1,gpk2,gpk3,htpi
+ real(dp) :: gpkc(3)
+!arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+
+! *********************************************************************
+
+!htpi is (1/2) (2 Pi):
+ htpi=0.5_dp*two_pi
+
+ ka=idx(2*idir-1);kb=idx(2*idir)
+
+!For easier formula implementation
+ beta=ka
+ delta=kb
+ gamma=qdir
+
+!Kronecker deltas
+ delbd=0.0_dp; delbg=0.0_dp; deldg=0.0_dp
+ if (beta==delta) delbd=1.0_dp
+ if (beta==gamma) delbg=1.0_dp
+ if (delta==gamma) deldg=1.0_dp
+
+ do ig=1,npw
+   gpk1=dble(kg(1,ig))+kpt(1)
+   gpk2=dble(kg(2,ig))+kpt(2)
+   gpk3=dble(kg(3,ig))+kpt(3)
+
+!  Obtain G in cartesian coordinates
+   gpkc(1)=gprimd(1,1)*gpk1+gprimd(1,2)*gpk2+gprimd(1,3)*gpk3
+   gpkc(2)=gprimd(2,1)*gpk1+gprimd(2,2)*gpk2+gprimd(2,3)*gpk3
+   gpkc(3)=gprimd(3,1)*gpk1+gprimd(3,2)*gpk2+gprimd(3,3)*gpk3
+
+   dkinetic=htpi*(2.0_dp*deldg*gpkc(beta)+delbg*gpkc(delta)+ &
+ & delbd*gpkc(gamma))
+
+   dqdqkinpw(ig)=dkinetic/effmass
+ end do
+
+end subroutine mkkin_metdqdq
 !!***
 
 end module m_kg

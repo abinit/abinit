@@ -7,7 +7,7 @@
 !! Choose among the whole set of geometry predictors defined by iomov.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2019 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 2018-2020 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +59,7 @@ module m_precpred_1geo
  use m_pred_steepdesc,     only : pred_steepdesc
  use m_pred_simple,        only : pred_simple, prec_simple
  use m_pred_hmc,           only : pred_hmc
- use m_generate_training_set, only : generate_training_set
+!use m_generate_training_set, only : generate_training_set
 
  implicit none
 
@@ -102,7 +102,7 @@ contains
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! Rest of i/o is related to lda
+!! Rest of i/o is related to DFT
 !!  xred(3,natom)=reduced dimensionless atomic coordinates; updated on output
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!

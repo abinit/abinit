@@ -7,7 +7,7 @@
 !!   Atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2019 ABINIT group (XG, MJV, MT, MG)
+!!  Copyright (C) 2000-2020 ABINIT group (XG, MJV, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,8 @@ module m_atomdata
  use defs_basis
  use m_errors
  use m_abicore
+
+ use m_fstrings, only : sjoin
 
  implicit none
 
@@ -590,7 +592,7 @@ subroutine atomdata_from_symbol(atom,symbol)
  case('Xx')
    amu=     260.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=104
  case default
-   MSG_ERROR("Unknown symbol name: "//TRIM(symbol))
+   MSG_ERROR(sjoin("Unknown element symbol: `",trim(symbol), "`"))
  end select
 
  atom%znucl = znucl

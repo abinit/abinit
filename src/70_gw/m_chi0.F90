@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_chi0
 !! NAME
 !!  m_chi0
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2020 ABINIT group (GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,6 +62,7 @@ module m_chi0
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init, paw_ihr, paw_cross_ihr_comm
  use m_read_plowannier, only : read_plowannier
+ use m_plowannier,      only : plowannier_type
 
  implicit none
 
@@ -184,7 +184,7 @@ contains
 
 subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
-&  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf)
+&  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -213,13 +213,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  type(Paw_ij_type),intent(in) :: Paw_ij(Cryst%natom*Psps%usepaw)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
+ type(plowannier_type),intent(inout) :: wan
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp=1,enough=10,two_poles=2,one_pole=1,ndat1=1
- integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft
- integer :: band1,band2,iat,ig,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k
+ integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
+ integer :: band1,band2,iat1,iat2,iat,ig,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
  integer :: my_nbbp,my_nbbpks,spin,nsppol !ig1,ig2,
  integer :: comm,ierr,my_wl,my_wr,iomegal,iomegar,gw_mgfft,dummy
@@ -233,6 +234,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  logical :: qzero,luwindow
  character(len=500) :: msg_tmp,msg,allup
  type(gsphere_t) :: Gsph_FFT
+ type(wave_t),pointer :: wave1, wave2
 !arrays
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
  integer :: ucrpa_bands(2)
@@ -287,12 +289,12 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
- if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.and.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
+ if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
    luwindow=.true.
  endif
 
  ! For cRPA calculation of U: read forlb.ovlp
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute<10) then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
 & nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
@@ -310,8 +312,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      MSG_WARNING('Neglecting <n,k|[Vnl,iqr]|m,k>')
    end if
  else
-   ! For PAW+LDA+U, precalculate <\phi_i|[Hu,r]|phi_j\>
-   ABI_DT_MALLOC(HUr,(Cryst%natom))
+   ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>
+   ABI_MALLOC(HUr,(Cryst%natom))
    if (Dtset%usepawu/=0) then
      call pawhur_init(hur,nsppol,Dtset%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
@@ -343,7 +345,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      ABI_MALLOC(gw_gfft,(3,nfft))
      q0=zero
      call get_gftt(ngfft_gw,q0,Cryst%gmet,gw_gsq,gw_gfft) ! The set of plane waves in the FFT Box.
-     ABI_DT_MALLOC(Pwij_fft,(Psps%ntypat))
+     ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,nfft,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if
@@ -386,8 +388,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  call wrtout(std_out,msg,'COLL')
 
  write(msg,'(a,i2,2a,i2)')&
-&  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
-&  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
+  ' Using spectral method for the imaginary part = ',Ep%spmeth,ch10,&
+  ' Using symmetries to sum only over the IBZ_q  = ',Ep%symchi
  call wrtout(std_out,msg,'COLL')
 
  if (use_tr) then
@@ -400,17 +402,17 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Pwij,(Psps%ntypat))
+   ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0,(/zero,zero,zero/),Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
 
-   ABI_DT_MALLOC(Cprj1_bz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_bz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_bz,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj2_bz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj2_bz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj2_bz,0,Wfd%nlmn_atm)
 
-   ABI_DT_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_ibz,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj2_ibz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj2_ibz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj2_ibz,0,Wfd%nlmn_atm)
    if (Dtset%pawcross==1) then
      ABI_MALLOC(ur_ae1,(nfftf_tot*nspinor))
@@ -536,7 +538,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,'COLL')
  end if
 
- ABI_DT_MALLOC(vkbr,(Kmesh%nibz))
+ ABI_MALLOC(vkbr,(Kmesh%nibz))
  gradk_not_done=.TRUE.
 
  write(msg,'(a,i6,a)')' Calculation status ( ',nkpt_summed,' to be completed):'
@@ -582,7 +584,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      do band1=1,Ep%nbnds
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-       ug1 => Wfd%Wave(band1,ik_ibz,spin)%ug
+       ABI_CHECK(wfd%get_wave_ptr(band1, ik_ibz, spin, wave1, msg) == 0, msg)
+       ug1 => wave1%ug
+
        call wfd%get_ur(band1,ik_ibz,spin,ur1_kibz)
 
        if (Psps%usepaw==1) then
@@ -621,7 +625,8 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
            if (qp_occ(band2,ik_ibz,spin) < GW_TOL_DOCC .and. ( ABS(deltaf_b1b2)< GW_TOL_DOCC .or. band1<band2)) CYCLE
          end if
 
-         ug2 => Wfd%Wave(band2,ik_ibz,spin)%ug
+         ABI_CHECK(wfd%get_wave_ptr(band2, ik_ibz, spin, wave2, msg) == 0, msg)
+         ug2 => wave2%ug
          call wfd%get_ur(band2,ik_ibz,spin,ur2_kibz)
 
          if (Psps%usepaw==1) then
@@ -759,30 +764,63 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
                if (       band1<=ucrpa_bands(2).AND.band1>=ucrpa_bands(1)&
 &                    .AND.band2<=ucrpa_bands(2).AND.band2>=ucrpa_bands(1)) then
 !               if(dtset%prtvol>=10)write(6,*)"calculation is in progress",band1,band2,ucrpa_bands(1),ucrpa_bands(2)
-                 do iat=1, cryst%nattyp(itypatcor)
-                   do ispinor1=1,nspinor
-                     do m1=1,2*lcor+1
-                       fac1=fac1+ real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                 conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)))
-                       fac2=fac2+ real(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)*&
-&                                 conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)))
-                       do ispinor2=1,nspinor
-                         do m2=1,2*lcor+1
-                           fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                    conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
-&                                    coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
-&                                    conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)))
-                           fac3=fac3 + real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
-&                                      conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
-&                                      coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
+                 if (dtset%plowan_compute>=10) then
+                   band1c=band1-wan%bandi_wan+1
+                   band2c=band2-wan%bandi_wan+1
+                   do iat1=1,wan%natom_wan
+                     do ispinor1=1,wan%nspinor
+                       do il1=1,wan%nbl_atom_wan(iat1)
+                         do m1=1,2*(wan%latom_wan(iat1)%lcalc(il1))+1
+                          fac1=fac1 + real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                      &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))
+                          fac2=fac2 + real(wan%psichi(ik_bz,band2c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                      &conjg(wan%psichi(ik_bz,band2c,iat1)%atom(il1)%matl(m1,spin,ispinor1))
+                          do iat2=1,wan%natom_wan
+                            do ispinor2=1,wan%nspinor
+                              do il2=1,wan%nbl_atom_wan(iat2)
+                                do m2=1,2*(wan%latom_wan(iat2)%lcalc(il2))+1
+                                  fac=fac -  real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1)*&
+&                                           conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+&                                                 wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
+&                                           conjg(wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)))
+                                  fac3=fac3+ real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                             &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                             &wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
+                                             &conjg(wan%psichi(ik_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2))
+                                enddo !m2
+                              enddo !il2
+                            enddo !ispinor2
+                          enddo !iat2
+                        enddo !m1
+                      enddo !il1
+                    enddo !ispinor1
+                  enddo !iat
+                else !plowan_compute
+                  do iat=1, cryst%nattyp(itypatcor)
+                     do ispinor1=1,nspinor
+                       do m1=1,2*lcor+1
+                         fac1=fac1+ real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+                                    &conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)))
+                         fac2=fac2+ real(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)*&
+&                                   conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor1,m1)))
+                         do ispinor2=1,nspinor
+                           do m2=1,2*lcor+1
+                             fac=fac -  real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+&                                      conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))*&
+&                                            coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
 &                                      conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)))
+                             fac3=fac3 + real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+&                                        conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
+&                                        coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)*&
+&                                        conjg(coeffW_BZ(iat,spin,band2,ik_bz,ispinor2,m2)))
 !                         if(dtset%prtvol>=10)write(6,*) fac,fac3
-                         enddo
-                       enddo
+                         enddo !m2
+                       enddo !ispinor2
 !                       if(dtset%prtvol>=10)write(6,*) fac,fac3,fac1,fac2,fac1*fac2
-                     enddo
-                   enddo
-                 enddo
+                     enddo !m1
+                   enddo !ispinor1
+                 enddo !iat
+               endif !plowan_compute>=10
                  fac4=fac
 !                 fac=zero
                  if(dtset%ucrpa==1) fac=zero
@@ -861,7 +899,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ABI_FREE(igffteps0)
 
  call vkbr_free(vkbr)
- ABI_DT_FREE(vkbr)
+ ABI_FREE(vkbr)
 
  ! === After big fat loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of (metallic|spin) polarized systems.
@@ -1004,21 +1042,21 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  if (Psps%usepaw==1) then ! deallocation for PAW.
    call pawcprj_free(Cprj1_bz )
-   ABI_DT_FREE(Cprj1_bz)
+   ABI_FREE(Cprj1_bz)
    call pawcprj_free(Cprj2_bz )
-   ABI_DT_FREE(Cprj2_bz)
+   ABI_FREE(Cprj2_bz)
    call pawcprj_free(Cprj1_ibz )
-   ABI_DT_FREE(Cprj1_ibz)
+   ABI_FREE(Cprj1_ibz)
    call pawcprj_free(Cprj2_ibz )
-   ABI_DT_FREE(Cprj2_ibz)
+   ABI_FREE(Cprj2_ibz)
    call pawpwij_free(Pwij)
-   ABI_DT_FREE(Pwij)
+   ABI_FREE(Pwij)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
    call pawhur_free(Hur)
-   ABI_DT_FREE(Hur)
+   ABI_FREE(Hur)
    if (Dtset%pawcross==1) then
      ABI_FREE(ur_ae1)
      ABI_FREE(ur_ae_onsite1)
@@ -1032,7 +1070,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    end if
  end if
 
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute <10 ) then
    ABI_DEALLOCATE(coeffW_BZ)
  endif
 
@@ -1131,7 +1169,7 @@ end subroutine cchi0q0
 
 subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
-& chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf)
+& chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf,wan)
 
 !Arguments ------------------------------------
 !scalars
@@ -1156,14 +1194,15 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Psps%usepaw)
  type(pawpwff_t),intent(in) :: Paw_pwff(Psps%ntypat*Psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: Pawfgrtab(Cryst%natom*Psps%usepaw)
+ type(plowannier_type),intent(inout) :: wan
  type(paw_pwaves_lmn_t),intent(in) :: Paw_onsite(Cryst%natom)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp1=1,two_poles=2,one_pole=1,ndat1=1
- integer :: bandinf,bandsup,dim_rtwg,band1,band2,ierr
- integer :: ig1,ig2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
- integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft
+ integer :: bandinf,bandsup,dim_rtwg,band1,band2,ierr,band1c,band2c
+ integer :: ig1,ig2,iat1,iat2,iat,ik_bz,ik_ibz,ikmq_bz,ikmq_ibz
+ integer :: io,iomegal,iomegar,ispinor1,ispinor2,isym_k,itypatcor,nfft,il1,il2
  integer :: isym_kmq,itim_k,itim_kmq,m1,m2,my_wl,my_wr,size_chi0
  integer :: nfound,nkpt_summed,nspinor,nsppol,mband
  integer :: comm,gw_mgfft,use_padfft,gw_fftalga,lcor,mgfftf,use_padfftf
@@ -1210,7 +1249,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
- if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.and.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
+ if(abs(dtset%ucrpa_window(1)+1_dp)>tol8.or.(abs(dtset%ucrpa_window(2)+1_dp)>tol8)) then
    luwindow=.true.
  endif
 ! write(6,*)"ucrpa_bands",ucrpa_bands
@@ -1218,7 +1257,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 ! write(6,*)"luwindow",luwindow
 
 !  For cRPA calculation of U: read forlb.ovlp
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute <10) then
    call read_plowannier(Cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,&
 & nspinor,nsppol,pawang,dtset%prtvol,ucrpa_bands)
  endif
@@ -1264,7 +1303,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ABI_MALLOC(gw_gfft,(3,nfft))
      q0=zero
      call get_gftt(ngfft_gw,q0,Cryst%gmet,gw_gsq,gw_gfft) ! Get the set of plane waves in the FFT Box.
-     ABI_DT_MALLOC(Pwij_fft,(Psps%ntypat))
+     ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,nfft,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if
@@ -1343,7 +1382,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  call wrtout(std_out,msg,'PERS')
 
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Pwij,(Psps%ntypat))
+   ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0,qpoint,Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    ! Allocate statements moved to inside openmp loop
  end if
@@ -1416,9 +1455,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ABI_MALLOC(green_w,(Ep%nomega))
    end if
    if (Psps%usepaw==1) then
-     ABI_DT_MALLOC(Cprj2_k  ,(Cryst%natom,nspinor))
+     ABI_MALLOC(Cprj2_k  ,(Cryst%natom,nspinor))
      call pawcprj_alloc(Cprj2_k,  0,Wfd%nlmn_atm)
-     ABI_DT_MALLOC(Cprj1_kmq,(Cryst%natom,nspinor))
+     ABI_MALLOC(Cprj1_kmq,(Cryst%natom,nspinor))
      call pawcprj_alloc(Cprj1_kmq,0,Wfd%nlmn_atm)
      if (Dtset%pawcross==1) then
        ABI_MALLOC(ur_ae1,(nfftf_tot*nspinor))
@@ -1678,20 +1717,45 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
              if(dtset%ucrpa<=2) then
                if (       band1<=ucrpa_bands(2).AND.band1>=ucrpa_bands(1)&
 &                    .AND.band2<=ucrpa_bands(2).AND.band2>=ucrpa_bands(1)) then
-                 do iat=1, cryst%nattyp(itypatcor)
-                   do ispinor1=1,nspinor
-                     do ispinor2=1,nspinor
-                       do m1=1,2*lcor+1
-                         do m2=1,2*lcor+1
-                           fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
+                 if (dtset%plowan_compute >=10) then
+                   band1c=band1-wan%bandi_wan+1
+                   band2c=band2-wan%bandi_wan+1
+                   do iat1=1, wan%natom_wan
+                     do iat2=1, wan%natom_wan
+                       do ispinor1=1,wan%nspinor
+                         do ispinor2=1,wan%nspinor
+                           do il1=1,wan%nbl_atom_wan(iat1)
+                             do il2=1,wan%nbl_atom_wan(iat2)
+                               do m1=1,2*wan%latom_wan(iat1)%lcalc(il1)+1
+                                 do m2=1,2*wan%latom_wan(iat2)%lcalc(il2)+1
+                                   fac=fac - real(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1)*&
+                                             &conjg(wan%psichi(ik_bz,band1c,iat1)%atom(il1)%matl(m1,spin,ispinor1))*&
+                                             &wan%psichi(ikmq_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)*&
+                                             &conjg(wan%psichi(ikmq_bz,band2c,iat2)%atom(il2)%matl(m2,spin,ispinor2)))
+                                 enddo !m2
+                               enddo !m1
+                             enddo !il2
+                           enddo !il1
+                         enddo !ispinor2
+                       enddo !isspinor1
+                     enddo !iat2
+                   enddo !iat1
+                 else !plowan_compute>=10
+                  do iat=1, cryst%nattyp(itypatcor)
+                    do ispinor1=1,nspinor
+                      do ispinor2=1,nspinor
+                        do m1=1,2*lcor+1
+                          do m2=1,2*lcor+1
+                            fac=fac - real(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1)*&
 &                                     conjg(coeffW_BZ(iat,spin,band1,ik_bz,ispinor1,m1))* &
 &                                     coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)*&
 &                                     conjg(coeffW_BZ(iat,spin,band2,ikmq_bz,ispinor2,m2)))
-                         enddo
-                       enddo
-                     enddo
-                   enddo
-                 enddo
+                          enddo !m2
+                        enddo !m1
+                      enddo !ispinor2
+                    enddo !ispinor1
+                  enddo !iat
+                endif !plowan_compute>=10
                  if(dtset%ucrpa==1) fac=zero
                endif
              else if (dtset%ucrpa>=3) then
@@ -1783,9 +1847,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
    end if
    if (Psps%usepaw==1) then
      call pawcprj_free(Cprj2_k)
-     ABI_DT_FREE(Cprj2_k)
+     ABI_FREE(Cprj2_k)
      call pawcprj_free(Cprj1_kmq)
-     ABI_DT_FREE(Cprj1_kmq)
+     ABI_FREE(Cprj1_kmq)
      if (Dtset%pawcross==1) then
        ABI_FREE(ur_ae1)
        ABI_FREE(ur_ae_onsite1)
@@ -1885,14 +1949,14 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  ! deallocation for PAW.
  if (Psps%usepaw==1) then
    call pawpwij_free(Pwij)
-   ABI_DT_FREE(Pwij)
+   ABI_FREE(Pwij)
    if (allocated(Pwij_fft)) then
      call pawpwij_free(Pwij_fft)
-     ABI_DT_FREE(Pwij_fft)
+     ABI_FREE(Pwij_fft)
    end if
  end if
 
- if(dtset%ucrpa>=1) then
+ if(dtset%ucrpa>=1 .AND. dtset%plowan_compute<10) then
    ABI_DEALLOCATE(coeffW_BZ)
  endif
 
@@ -2016,6 +2080,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q
  type(vkbr_t) :: vkbr
+ type(wave_t),pointer :: wave
 !arrays
  integer :: my_band_list(Wfd%mband)
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
@@ -2061,10 +2126,10 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ihr_comm = czero
 
  if (Wfd%usepaw==1) then
-   ABI_DT_MALLOC(Cp_bks,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cp_bks,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cp_bks,0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(HUr,(Cryst%natom))
-   if (usepawu/=0) then ! For PAW+LDA+U, precalculate <\phi_i|[Hu,r]|phi_j\>.
+   ABI_MALLOC(HUr,(Cryst%natom))
+   if (usepawu/=0) then ! For PAW+DFT+U, precalculate <\phi_i|[Hu,r]|phi_j\>.
      call pawhur_init(hur,nsppol,Wfd%pawprtvol,Cryst,Pawtab,Pawang,Pawrad,Paw_ij)
    end if
  end if
@@ -2089,7 +2154,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
      do lbidx=1,my_nband
        band=my_band_list(lbidx)
-       ug => Wfd%Wave(band,ik_ibz,spin)%ug
+
+       ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
+       ug => wave%ug
 
        if (Wfd%usepaw==0) then
          ! Matrix elements of i[H,r] for NC pseudopotentials.
@@ -2112,9 +2179,9 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  if (Wfd%usepaw==1) then
    call pawcprj_free(Cp_bks)
-   ABI_DT_FREE(Cp_bks)
+   ABI_FREE(Cp_bks)
    call pawhur_free(Hur)
-   ABI_DT_FREE(Hur)
+   ABI_FREE(Hur)
  end if
 
  nqlwl=1
@@ -2241,12 +2308,12 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  !
  ! === Evaluate oscillator matrix elements btw partial waves. Note that q=Gamma is used.
  if (Psps%usepaw==1) then
-   ABI_DT_MALLOC(Pwij,(Psps%ntypat))
+   ABI_MALLOC(Pwij,(Psps%ntypat))
    call pawpwij_init(Pwij,Ep%npwepG0, [zero,zero,zero], Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
 
-   ABI_DT_MALLOC(Cprj1_bz ,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_bz ,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_bz, 0,Wfd%nlmn_atm)
-   ABI_DT_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
+   ABI_MALLOC(Cprj1_ibz,(Cryst%natom,nspinor))
    call pawcprj_alloc(Cprj1_ibz,0,Wfd%nlmn_atm)
  end if
 
@@ -2426,11 +2493,11 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ! deallocation for PAW.
  if (Psps%usepaw==1) then
    call pawcprj_free(Cprj1_bz)
-   ABI_DT_FREE(Cprj1_bz)
+   ABI_FREE(Cprj1_bz)
    call pawcprj_free(Cprj1_ibz)
-   ABI_DT_FREE(Cprj1_ibz)
+   ABI_FREE(Cprj1_ibz)
    call pawpwij_free(Pwij)
-   ABI_DT_FREE(Pwij)
+   ABI_FREE(Pwij)
  end if
 
  call littlegroup_free(Ltg_q)

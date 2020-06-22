@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover
 !! NAME
 !!  m_mover
@@ -7,7 +6,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +35,7 @@ module m_mover
  use m_xmpi
  use m_nctk
  use m_dtfil
+ use m_yaml
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -51,10 +51,8 @@ module m_mover
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
- use m_hightemp,           only : hightemp_prt_eigocc
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
@@ -73,7 +71,7 @@ module m_mover
  use m_pred_steepdesc,     only : pred_steepdesc
  use m_pred_simple,        only : pred_simple, prec_simple
  use m_pred_hmc,           only : pred_hmc
- use m_generate_training_set, only : generate_training_set
+!use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
@@ -243,7 +241,7 @@ character(len=500) :: message
 !character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
-character(len=fnlen) :: filename,fname_ddb, name_file
+character(len=fnlen) :: filename,fname_ddb,name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
@@ -252,8 +250,8 @@ logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
-real(dp) :: minE,wtime_step,now,prev,e_shiftfactor
 logical :: file_exists
+real(dp) :: minE,wtime_step,now,prev
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
 real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
@@ -362,14 +360,18 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
 !  If restarxf specifies to start to the last iteration
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
+     if(present(effective_potential))then
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
+       hist%ihist = 1
+     end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     !xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
      call abihist_free(hist_prev)
    end if
 
  end if !if (ab_mover%restartxf<=0)
-
 #endif
 
 !###########################################################
@@ -405,8 +407,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      write(message,'(2a,i2,5a,80a)')&
 &     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),' with effective potential',&
 &     ch10,('=',kk=1,80)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    end if
    need_elec_eval = .FALSE.
    if(present(scup_dtset))then
@@ -417,8 +418,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      write(message,'(a,a,i2,a,a,a,80a)')&
 &     ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
 &     ch10,('=',kk=1,80)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    end if
  end if
 
@@ -434,26 +434,31 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !### 07. Fill the history of the first SCFCV
 
  if (ab_mover%ionmov==26)then
+
 !Tdep call need to merge with adewandre branch
- else if (ab_mover%ionmov==27)then
-   if(present(filename_ddb))then
-     fname_ddb = trim(filename_ddb)
-   else
-     fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
-   end if
-   INQUIRE(FILE=filename, EXIST=file_exists)
+  else if (ab_mover%ionmov==27)then
+    if(present(filename_ddb))then
+      fname_ddb = trim(filename_ddb)
+    else
+      fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
+    end if
+    INQUIRE(FILE=filename, EXIST=file_exists)
 
-   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
-&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
-&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
-&                             ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
-&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
+    MSG_ERROR("This section has been disabled, ph_freez_disp is not defined in main ABINIT")
+
+! XG 20200322 : The input variables ph_freez_disp are not documented neither tested, so they
+! have been removed from the allowed list in the parser. Also, you should not be here !
+!   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
+!&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
+!&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
+!&                             ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
+!&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
 
 
-   !Fill history with the values of xred, acell and rprimd of the first configuration
-   acell(:)   =hist%acell(:,1)
-   rprimd(:,:)=hist%rprimd(:,:,1)
-   xred(:,:)  =hist%xred(:,:,1)
+    !Fill history with the values of xred, acell and rprimd of the first configuration
+    acell(:)   =hist%acell(:,1)
+    rprimd(:,:)=hist%rprimd(:,:,1)
+    xred(:,:)  =hist%xred(:,:,1)
 
  else
 
@@ -485,6 +490,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  do itime=1,ntime
 
+   call yaml_iterstart("itime", itime, dev_null, scfcv_args%dtset%use_yaml)
+
    ! Handle time limit condition.
    if (itime == 1) prev = abi_wtime()
    if (itime  > 1) then
@@ -492,7 +499,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      wtime_step = now - prev
      prev = now
      write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
-     if(need_verbose)call wrtout(std_out, message, "COLL")
+     if(need_verbose)call wrtout(std_out, message)
      if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
@@ -500,7 +507,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
            write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
 &           ". Will exit itime loop in mover."
            if(need_verbose)MSG_COMMENT(message)
-           if(need_verbose)call wrtout(ab_out, message, "COLL")
+           if(need_verbose)call wrtout(ab_out, message)
            timelimit_exit = 1
            exit
          end if
@@ -520,15 +527,16 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !  ### 09. Loop for icycle (From 1 to ncycle)
    do icycle=1,ncycle
 
-     itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
+     call yaml_iterstart("icycle", icycle, dev_null, scfcv_args%dtset%use_yaml)
+
+     itime_hist = (itime-1)*ncycle + icycle ! Store the time step in the history
 
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
      if(need_verbose)then
        write(message,fmt)&
 &       ch10,'--- Iteration: (',itime,'/',ntime,') Internal Cycle: (',icycle,'/',ncycle,')',ch10,('-',kk=1,80)
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+        call wrtout([std_out, ab_out], message)
      end if
      if (useprtxfase) then
        call prtxfase(ab_mover,hist,itime_hist,std_out,mover_BEFORE)
@@ -561,15 +569,12 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if (need_verbose) then
        if (need_scfcv_cycle) then
          write(message,'(a,3a,33a,44a)')&
-&         ch10,('-',kk=1,3),&
-&         'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+          ch10,('-',kk=1,3),'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
        else
          write(message,'(a,3a,33a,44a)')&
-&         ch10,('-',kk=1,3),&
-&         'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
+          ch10,('-',kk=1,3),'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
        end if
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
      end if
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
@@ -620,7 +625,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !          (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
+               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -649,8 +654,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
-               message = "The simulation is diverging, please check your effective potential"
-               MSG_WARNING(message)
+               MSG_WARNING("The simulation is diverging, please check your effective potential")
              end if
 !            Set the flag to finish the simulation
              iexit=1
@@ -733,8 +737,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !        The size of ab_xfh%xfhist is to big for very large supercell.
 !        Call it only for specific ionmov
          if(any((/2,3,10,11,22/)==ab_mover%ionmov)) then
-           call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
-&           hist%strten(:,hist%ihist),xred)
+           call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,hist%strten(:,hist%ihist),xred)
          end if
        end if
        ABI_DEALLOCATE(fred_corrected)
@@ -755,10 +758,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 14. Output after SCFCV
      if(need_verbose.and.need_scfcv_cycle)then
-       write(message,'(a,3a,a,72a)')&
-&       ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+       write(message,'(a,3a,a,72a)')ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
+       call wrtout([std_out, ab_out], message)
      end if
      if (useprtxfase) then
        call prtxfase(ab_mover,hist,itime_hist,ab_out,mover_AFTER)
@@ -779,6 +780,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if(specs%isFconv)then
        if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5).or.mod(itime,2)==1)then
          if (scfcv_args%dtset%tolmxf/=0)then
+
            call fconv(hist%fcart(:,:,hist%ihist),&
 &           scfcv_args%dtset%iatfix, &
 &           iexit,itime,&
@@ -885,16 +887,16 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
        exit
      end if
 
-     write(message,*) 'ICYCLE',icycle,skipcycle
-     if(need_verbose)call wrtout(std_out,message,'COLL')
-     write(message,*) 'NCYCLE',ncycle
-     if(need_verbose)call wrtout(std_out,message,'COLL')
+
+     if (need_verbose) then
+       write(message,*) 'ICYCLE',icycle,skipcycle
+       call wrtout(std_out,message)
+       write(message,*) 'NCYCLE',ncycle
+       call wrtout(std_out,message)
+     end if
      if (skipcycle) exit
 
-!DEBUG
-!    write(std_out,*)' m_mover : will call precpred_1geo'
-!    call flush(std_out)
-!ENDDEBUG
+     !write(std_out,*)' m_mover : will call precpred_1geo'
 
 
 !    ###########################################################
@@ -1108,8 +1110,7 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
    write(message, '(a,a,i4,a,a,a,es11.4,a,es11.4,a,a)' ) ch10,&
 &   ' At Broyd/MD step',itime,', gradients are converged : ',ch10,&
 &   '  max grad (force/stress) =',fmax,' < tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    iexit=1
  else
    if(iexit==1)then
@@ -1117,8 +1118,7 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 &     ' fconv : WARNING -',ch10,&
 &     '  ntime=',ntime,' was not enough Broyd/MD steps to converge gradients: ',ch10,&
 &     '  max grad (force/stress) =',fmax,' > tolmxf=',tolmxf,' ha/bohr (free atoms)',ch10
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
 
      write(std_out,"(8a)")ch10,&
 &     "--- !RelaxConvergenceWarning",ch10,&
@@ -1189,8 +1189,7 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 &     ' At Broyd/MD step',itime,', energy is converged : ',ch10,&
 &     '  the difference in energy with respect to the two ',ch10,&
 &     '  previous steps is < tolmxde=',tolmxde,' ha',ch10
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
      iexit=1
    else
      maxediff = max(abs(ediff1),abs(ediff2))
@@ -1199,8 +1198,7 @@ subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 &       ' erlxconv : WARNING -',ch10,&
 &       '  ntime=',ntime,' was not enough Broyd/MD steps to converge energy: ',ch10,&
 &       '  max difference in energy =',maxediff,' > tolmxde=',tolmxde,' ha',ch10
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+       call wrtout([std_out, ab_out], message)
 
        write(std_out,"(8a)")ch10,&
 &       "--- !RelaxConvergenceWarning",ch10,&
@@ -1626,7 +1624,7 @@ end subroutine prtxfase
 !!  - POSABIN : values of coordinates and velocities for the next time step
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FLambert,MT)
+!! Copyright (C) 1998-2020 ABINIT group (FLambert,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_harmonic_thermo
 !! NAME
 !! m_harmonic_thermo
@@ -8,7 +7,7 @@
 !! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (CL, XG)
+!!  Copyright (C) 2008-2020 ABINIT group (CL, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -790,10 +789,19 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
              do iatom=1,natom
                do ij=1,6
                  diffbb=bbij(ij,iatom,itemper)-bij(ij,iatom,itemper)
-                 if (diffbb > 1d-10  .and. diffbb/bij(ij,iatom,itemper) > thmtol) then
-                   write(msg,'(a)' )' harmonic_thermo : Bij changes are larger than thmtol '
-                   call wrtout(std_out,msg,'COLL')
-                   convth=0
+                 !if (diffbb > 1d-10  .and. diffbb/bij(ij,iatom,itemper) > thmtol) then
+                 !  write(msg,'(a)' )' harmonic_thermo : Bij changes are larger than thmtol '
+                 !  call wrtout(std_out,msg,'COLL')
+                 !  convth=0
+                 !end if
+                 if (diffbb > 1d-10) then
+                   if (bij(ij,iatom,itemper) /= zero) then
+                     if (diffbb/bij(ij,iatom,itemper) > thmtol) then
+                       write(msg,'(a)' )' harmonic_thermo : Bij changes are larger than thmtol '
+                       call wrtout(std_out,msg,'COLL')
+                       convth=0
+                     end if
+                   end if
                  end if
                  if(convth==0)exit
                end do

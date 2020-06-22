@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_respfn_driver
 !! NAME
 !!  m_respfn_driver
@@ -7,7 +6,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MT, MKV)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MT, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +52,7 @@ module m_respfn_driver
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : DDB_VERSION
- use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
  use m_ddb_interpolate, only : outddbnc
  use m_occ,         only : newocc
  use m_efmas,       only : efmasdeg_free_array, efmasval_free_array
@@ -218,7 +217,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,intent(inout) :: iexit
  real(dp),intent(in) :: cpui
  real(dp),intent(inout) :: etotal !vz_i
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -631,9 +630,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (psp_gencond==1.or.call_pawinit) then
 !    Some gen-cond have to be added...
      call timab(553,1,tsec)
-     call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
      call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
@@ -1148,6 +1147,17 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Determine the symmetrical perturbations
  ABI_ALLOCATE(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
+
+!MR: Deactivate perturbation symmetries temporarily for a longwave calculation
+!The same has been done in 51_manage_mpi/get_npert_rbz.F90
+ if (dtset%prepalw==1) then
+   do ipert=1,natom+6
+     do idir=1,3
+       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+     end do
+   end do
+ endif
+
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -1464,9 +1474,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Open the formatted derivative database file, and write the header
-   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Output of the dynamical matrix (master only)
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
@@ -1595,8 +1605,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(eigen0_pert)
    ABI_DEALLOCATE(eigen1_pert)
  end if
- ABI_DEALLOCATE(doccde)
 
+ ABI_DEALLOCATE(doccde)
 
  if(me==0)then
    if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &

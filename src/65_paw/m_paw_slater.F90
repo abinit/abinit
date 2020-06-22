@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_slater
 !! NAME
 !!  m_paw_slater
@@ -8,7 +7,7 @@
 !!  using real spherical Harmonics.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -826,9 +825,9 @@ subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc
  ! * Free memory.
  ABI_FREE(kln2ln)
  call slatang_cshell_free(Slatang3l)
- ABI_DT_FREE(Slatang3l)
+ ABI_FREE(Slatang3l)
  call slatrad_cshell_free(Slatrad3l)
- ABI_DT_FREE(Slatrad3l)
+ ABI_FREE(Slatrad3l)
 
 end subroutine paw_sigxcore
 !!***

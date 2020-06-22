@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_occ
 !! NAME
 !! m_occ
@@ -7,7 +6,7 @@
 !!  Low-level functions for occupation factors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, AF)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -183,10 +182,10 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 !& nptsdiv2, occfun, occopt, -1, smdfun, tphysel, &
 !& tsmear, tsmearinv, xgrid)
 
- ABI_ALLOCATE(entfun,(-nptsdiv2:nptsdiv2,2))
- ABI_ALLOCATE(occfun,(-nptsdiv2:nptsdiv2,2))
- ABI_ALLOCATE(smdfun,(-nptsdiv2:nptsdiv2,2))
- ABI_ALLOCATE(xgrid,(-nptsdiv2:nptsdiv2))
+ ABI_MALLOC(entfun,(-nptsdiv2:nptsdiv2,2))
+ ABI_MALLOC(occfun,(-nptsdiv2:nptsdiv2,2))
+ ABI_MALLOC(smdfun,(-nptsdiv2:nptsdiv2,2))
+ ABI_MALLOC(xgrid,(-nptsdiv2:nptsdiv2))
 
 !Call to init_occ_ent
  call init_occ_ent(entfun, limit, nptsdiv2, occfun, occopt, option, smdfun, tphysel, &
@@ -199,9 +198,9 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 !write(std_out,*)' getnel : debug  tphysel, tsmear = ', tphysel, tsmear
  bantot=sum(nband(:))
 
- ABI_ALLOCATE(arg,(bantot))
- ABI_ALLOCATE(derfun,(bantot))
- ABI_ALLOCATE(ent,(bantot))
+ ABI_MALLOC(arg,(bantot))
+ ABI_MALLOC(derfun,(bantot))
+ ABI_MALLOC(ent,(bantot))
 
  if(option==1)then
    ! normal evaluation of occupations and entropy
@@ -272,21 +271,21 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
    end if
    nene=nint((enemax-enemin)/deltaene)+1
 
-!  Write the header of the DOS file, and also decides the energy range and increment
+   ! Write the header of the DOS file, and also decides the energy range and increment
    call dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
-&   nkpt,nsppol,occopt,prtdos1,tphysel,tsmear,unitdos)
+     nkpt,nsppol,occopt,prtdos1,tphysel,tsmear,unitdos)
 
-   ABI_ALLOCATE(dos,(bantot))
-   ABI_ALLOCATE(dosdble,(bantot))
-   ABI_ALLOCATE(doshalf,(bantot))
-   ABI_ALLOCATE(intdos,(bantot))
+   ABI_MALLOC(dos,(bantot))
+   ABI_MALLOC(dosdble,(bantot))
+   ABI_MALLOC(doshalf,(bantot))
+   ABI_MALLOC(intdos,(bantot))
 
    do isppol=1,nsppol
 
      if (nsppol==2) then
        if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
        if(isppol==2) write(msg,'(2a,16x,a)')  ch10,'#','Spin-dn DOS '
-       call wrtout(unitdos,msg,'COLL')
+       call wrtout(unitdos,msg)
      end if
      index_start=0
      if(isppol==2)then
@@ -335,10 +334,10 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
      end do ! iene
    end do ! isppol
 
-   ABI_DEALLOCATE(dos)
-   ABI_DEALLOCATE(dosdble)
-   ABI_DEALLOCATE(doshalf)
-   ABI_DEALLOCATE(intdos)
+   ABI_FREE(dos)
+   ABI_FREE(dosdble)
+   ABI_FREE(doshalf)
+   ABI_FREE(intdos)
 
 !  MG: It does not make sense to close the unit here since the routines
 !  did not open the file here!
@@ -346,13 +345,13 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
    close(unitdos)
  end if
 
- ABI_DEALLOCATE(arg)
- ABI_DEALLOCATE(derfun)
- ABI_DEALLOCATE(ent)
- ABI_DEALLOCATE(entfun)
- ABI_DEALLOCATE(occfun)
- ABI_DEALLOCATE(smdfun)
- ABI_DEALLOCATE(xgrid)
+ ABI_FREE(arg)
+ ABI_FREE(derfun)
+ ABI_FREE(ent)
+ ABI_FREE(entfun)
+ ABI_FREE(occfun)
+ ABI_FREE(smdfun)
+ ABI_FREE(xgrid)
 
  DBG_EXIT("COLL")
 
@@ -457,14 +456,13 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  ! Check whether nelect is strictly positive
  if(nelect <= zero)then
    write(msg,'(3a,es16.8,a)')&
-&   'nelect must be a positive number, while ',ch10,&
-&   'the calling routine asks nelect= ',nelect,'.'
+   'nelect must be a positive number, while ',ch10, 'the calling routine asks nelect= ',nelect,'.'
    MSG_BUG(msg)
  end if
 
  maxocc=two/(nsppol*nspinor)
-!Check whether nelect is coherent with nband (nband(1) is enough,
-!since it was checked that nband is independent of k-point and spin-pol
+ ! Check whether nelect is coherent with nband (nband(1) is enough,
+ ! since it was checked that nband is independent of k-point and spin-pol
  if (nelect > nband(1)*nsppol*maxocc) then
    write(msg,'(3a,es16.8,a,i0,a,es16.8,a)' )&
    'nelect must be smaller than nband*maxocc, while ',ch10,&
@@ -472,22 +470,23 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    MSG_BUG(msg)
  end if
 
-!Use bisection algorithm to find fermi energy
-!This choice is due to the fact that it will always give sensible
-!result (because the answer is bounded, even if the smearing function
-!is non-monotonic (which is the case for occopt=4 or 6)
-!Might speed up it, if needed !
+ !Use bisection algorithm to find fermi energy
+ !This choice is due to the fact that it will always give sensible
+ !result (because the answer is bounded, even if the smearing function
+ !is non-monotonic (which is the case for occopt=4 or 6)
+ !Might speed up it, if needed !
 
-!Lowest and largest trial fermi energies, and corresponding number of electrons
-!They are obtained from the smallest or largest eigenenergy, plus a range of
-!energy that allows for complete occupation of all bands, or, on the opposite,
-!for zero occupation of all bands (see getnel.f)
+ !Lowest and largest trial fermi energies, and corresponding number of electrons
+ !They are obtained from the smallest or largest eigenenergy, plus a range of
+ !energy that allows for complete occupation of all bands, or, on the opposite,
+ !for zero occupation of all bands (see getnel.f)
+
  dosdeltae=zero  ! the DOS is not computed, with option=1
  fermilo=minval(eigen(1:nband(1)*nkpt*nsppol))-6.001_dp*tsmear
  if(occopt==3)fermilo=fermilo-24.0_dp*tsmear
 
  call getnel(doccde,dosdeltae,eigen,entropy,fermilo,maxocc,mband,nband,&
-& nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
+  nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
@@ -500,12 +499,12 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  end if
 
  fermihi=maxval(eigen(1:nband(1)*nkpt*nsppol))+6.001_dp*tsmear
-!safety value
+ !safety value
  fermihi = min(fermihi, 1.e6_dp)
  if(occopt==3)fermihi=fermihi+24.0_dp*tsmear
 
  call getnel(doccde,dosdeltae,eigen,entropy,fermihi,maxocc,mband,nband,&
-& nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
+  nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
 
 !Blanchet - Compute the number of free electrons with corresponding chemical
 !potential and add to nelect bounds.
@@ -530,31 +529,31 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    end do
  end if
 
-!If the target nelect is not between nelectlo and nelecthi, exit
+ !If the target nelect is not between nelectlo and nelecthi, exit
  if(nelect<nelectlo .or. nelect>nelecthi)then
    write(msg, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
-&   ' newocc: ',ch10,&
-&   '  The calling routine gives nelect=',nelect,ch10,&
-&   '  The lowest bound is ',fermilo,', with nelect=',nelectlo,ch10,&
-&   '  The highest bound is ',fermihi,', with nelect=',nelecthi
-   call wrtout(std_out,msg,'COLL')
+    ' newocc: ',ch10,&
+    '  The calling routine gives nelect=',nelect,ch10,&
+    '  The lowest bound is ',fermilo,', with nelect=',nelectlo,ch10,&
+    '  The highest bound is ',fermihi,', with nelect=',nelecthi
+   call wrtout(std_out, msg)
 
    write(msg, '(11a)' )&
-&   'In order to get the right number of electrons,',ch10,&
-&   'it seems that the Fermi energy must be outside the range',ch10,&
-&   'of eigenenergies, plus 6 or 30 times the smearing, which is strange.',ch10,&
-&   'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
-&   'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
-&   'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
+    'In order to get the right number of electrons,',ch10,&
+    'it seems that the Fermi energy must be outside the range',ch10,&
+    'of eigenenergies, plus 6 or 30 times the smearing, which is strange.',ch10,&
+    'It might be that your number of bands (nband) corresponds to the strictly',ch10,&
+    'minimum number of bands to accomodate your electrons (so, OK for an insulator),',ch10,&
+    'while you are trying to describe a metal. In this case, increase nband, otherwise ...'
    MSG_BUG(msg)
  end if
 
  if( abs(spinmagntarget+99.99_dp) < tol10 ) then
 
-!  Usual bisection loop
+   ! Usual bisection loop
    do ii=1,niter_max
      fermimid=(fermihi+fermilo)*half
-!    Produce nelectmid from fermimid
+     ! Produce nelectmid from fermimid
      call getnel(doccde,dosdeltae,eigen,entropy,fermimid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      !Blanchet - Compute the number of free electrons with corresponding chemical
@@ -580,31 +579,31 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      if( abs(nelecthi-nelectlo) <= nelect*two*tol14 .or. abs(fermihi-fermilo) <= tol14*abs(fermihi+fermilo) ) exit
      if(ii==niter_max)then
        write(msg,'(a,i0,3a,es22.14,a,es22.14,a)')&
-&       'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
-&       'nelecthi = ',nelecthi,', and nelectlo = ',nelectlo,'.'
+        'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
+        'nelecthi: ',nelecthi,', and nelectlo: ',nelectlo,'.'
        MSG_BUG(msg)
      end if
    end do ! End of bisection loop
 
    fermie=fermimid
    write(msg, '(2(a,f14.6),a,i0)' ) &
-&   ' newocc: new Fermi energy is ',fermie,' , with nelect=',nelectmid,', Number of bisection calls: ',ii
-   call wrtout(std_out,msg,'COLL')
+   ' newocc: new Fermi energy is ',fermie,' , with nelect=',nelectmid,', Number of bisection calls: ',ii
+   call wrtout(std_out,msg)
 
-!  Compute occupation numbers for prtstm/=0, close to the Fermi energy
+   !  Compute occupation numbers for prtstm/=0, close to the Fermi energy
    if(abs(stmbias)>tol10)then
      fermi_biased=fermie-stmbias
-     ABI_ALLOCATE(occt,(mband*nkpt*nsppol))
+     ABI_MALLOC(occt,(mband*nkpt*nsppol))
      call getnel(doccde,dosdeltae,eigen,entropy,fermi_biased,maxocc,mband,nband,&
-&     nelect_biased,nkpt,nsppol,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
+       nelect_biased,nkpt,nsppol,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      occ(:)=occ(:)-occt(:)
      nelect_biased=abs(nelectmid-nelect_biased)
-!    Here, arrange to have globally positive occupation numbers, irrespective of the stmbias sign
+     ! Here, arrange to have globally positive occupation numbers, irrespective of the stmbias sign
      if(-stmbias>tol10)occ(:)=-occ(:)
-     ABI_DEALLOCATE(occt)
+     ABI_FREE(occt)
 
      write(msg,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end if
 
  else ! Calculations with a specified moment
@@ -614,10 +613,10 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
    cnt3=0
    entropy=zero
    maxocc=one
-   ABI_ALLOCATE(doccdet,(nkpt*mband))
-   ABI_ALLOCATE(eigent,(nkpt*mband))
-   ABI_ALLOCATE(occt,(nkpt*mband))
-   ABI_ALLOCATE(nbandt,(nkpt))
+   ABI_MALLOC(doccdet,(nkpt*mband))
+   ABI_MALLOC(eigent,(nkpt*mband))
+   ABI_MALLOC(occt,(nkpt*mband))
+   ABI_MALLOC(nbandt,(nkpt))
 
    do is = 1, nsppol
      nelect_tmp = nelectt(is)
@@ -670,8 +669,8 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 
        if(ii==niter_max)then
          write(msg,'(a,i3,3a,es22.14,a,es22.14,a)')&
-&         'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
-&         'nelecthi= ',nelecthi,', and nelectlo= ',nelectlo,'.'
+          'It was not possible to find Fermi energy in ',niter_max,' bisections.',ch10,&
+          'nelecthi= ',nelecthi,', and nelectlo= ',nelectlo,'.'
          MSG_BUG(msg)
        end if
      end do ! End of bisection loop
@@ -680,72 +679,72 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      entropy = entropy + entropyt(is)
      fermie=fermimid
      write(msg, '(a,i2,a,f14.6,a,f14.6,a,a,i4)' ) &
-&     ' newocc: new Fermi energy for spin ', is, ' is ',fermie,' , with nelect=',nelectmid,ch10,&
-&     '  Number of bisection calls =',ii
-     call wrtout(std_out,msg,'COLL')
+       ' newocc: new Fermi energy for spin ', is, ' is ',fermie,' , with nelect=',nelectmid,ch10,&
+       '  Number of bisection calls =',ii
+     call wrtout(std_out,msg)
 
    end do ! spin
 
-   ABI_DEALLOCATE(doccdet)
-   ABI_DEALLOCATE(eigent)
-   ABI_DEALLOCATE(nbandt)
-   ABI_DEALLOCATE(occt)
+   ABI_FREE(doccdet)
+   ABI_FREE(eigent)
+   ABI_FREE(nbandt)
+   ABI_FREE(occt)
 
  end if !  End of logical on fixed moment calculations
 
-!write(std_out,*) "kT*Entropy:", entropy*tsmear
+ !write(std_out,*) "kT*Entropy:", entropy*tsmear
 
  nkpt_eff=nkpt
  if(prtvol==0)nkpt_eff=min(nkpt_max,nkpt)
 
  if (nsppol==1)then
    write(msg, '(a,i0,a)' )' newocc: computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    do ikpt=1,nkpt_eff
      write(msg,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
      do ii=0,(nband(1)-1)/12
        if (ii == 3 .and. prtvol /= 0) exit
        write(msg,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end do
    end do
-   if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
+   if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information')
 
 !  DEBUG
-!  call wrtout(std_out,' newocc: corresponding derivatives are ','COLL')
+!  call wrtout(std_out,' newocc: corresponding derivatives are ')
 !  do ikpt=1,nkpt_eff
 !  write(msg,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
 !  do ii=0,(nband(1)-1)/12
 !  write(msg,'(12f6.1)') doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
-!  call wrtout(std_out,msg,'COLL')
+!  call wrtout(std_out,msg)
 !  end do
 !  end do
 !  if(nkpt/=nkpt_eff)then
-!    call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
+!    call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information')
 !  end if
 !  ENDDEBUG
  else
    write(msg, '(a,i0,2a)' )' newocc: computed new occupation numbers for occopt= ',occopt,ch10,'  (1) spin up   values  '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    do ikpt=1,nkpt_eff
      write(msg,'(a,i0,a)' ) ' k-point number ',ikpt,':'
      do ii=0,(nband(1)-1)/12
        if (ii == 3 .and. prtvol /= 0) exit
        write(msg,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end do
    end do
-   if (nkpt/=nkpt_eff) call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
+   if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information')
 
-   call wrtout(std_out,'  (2) spin down values  ','COLL')
+   call wrtout(std_out,'  (2) spin down values  ')
    do ikpt=1,nkpt_eff
      do ii=0,(nband(1)-1)/12
        if (ii == 3 .and. prtvol /= 0) exit
        write(msg,'(12f6.3)') occ( 1+ii*12+(ikpt-1+nkpt)*nband(1):min(12+ii*12,nband(1))+(ikpt-1+nkpt)*nband(1) )
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end do
    end do
-   if(nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
+   if(nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information')
  end if ! End choice based on spin
 
  call timab(74,2,tsec)
@@ -834,11 +833,11 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      end if
    end if
 
-   ABI_ALLOCATE(entder,(-nptsdiv2_def:nptsdiv2_def))
-   ABI_ALLOCATE(occder,(-nptsdiv2_def:nptsdiv2_def))
-   ABI_ALLOCATE(smdder,(-nptsdiv2_def:nptsdiv2_def))
-   ABI_ALLOCATE(workfun,(-nptsdiv2_def:nptsdiv2_def))
-   ABI_ALLOCATE(work,(-nptsdiv2_def:nptsdiv2_def))
+   ABI_MALLOC(entder,(-nptsdiv2_def:nptsdiv2_def))
+   ABI_MALLOC(occder,(-nptsdiv2_def:nptsdiv2_def))
+   ABI_MALLOC(smdder,(-nptsdiv2_def:nptsdiv2_def))
+   ABI_MALLOC(workfun,(-nptsdiv2_def:nptsdiv2_def))
+   ABI_MALLOC(work,(-nptsdiv2_def:nptsdiv2_def))
 
 !  Prepare the points on the grid
 !  limit is the value of the argument that will give 0.0 or 1.0 , with
@@ -946,9 +945,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      incconv = convlim / nconvd2
 
 !    store smearing functions in smd1 and smd2
-     ABI_ALLOCATE(smd1,(-nconvd2:nconvd2))
-     ABI_ALLOCATE(smd2,(-nconvd2:nconvd2))
-     ABI_ALLOCATE(tgrid,(-nconvd2:nconvd2))
+     ABI_MALLOC(smd1,(-nconvd2:nconvd2))
+     ABI_MALLOC(smd2,(-nconvd2:nconvd2))
+     ABI_MALLOC(tgrid,(-nconvd2:nconvd2))
 
 !    FD function in smd1( ii) and second smearing delta in smd2( ii)
 !
@@ -1152,9 +1151,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
      encorr =  smom2*tratio*tratio/secmom
 
-     ABI_DEALLOCATE(tgrid)
-     ABI_DEALLOCATE(smd1)
-     ABI_DEALLOCATE(smd2)
+     ABI_FREE(tgrid)
+     ABI_FREE(smd1)
+     ABI_FREE(smd2)
 
    end if
 
@@ -1247,11 +1246,11 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
    call spline(xgrid_prev, workfun, (2*nptsdiv2_def+1), yp1, ypn, entder)
    entfun_prev(:,2)=entder(:)
 
-   ABI_DEALLOCATE(entder)
-   ABI_DEALLOCATE(occder)
-   ABI_DEALLOCATE(smdder)
-   ABI_DEALLOCATE(work)
-   ABI_DEALLOCATE(workfun)
+   ABI_FREE(entder)
+   ABI_FREE(occder)
+   ABI_FREE(smdder)
+   ABI_FREE(work)
+   ABI_FREE(workfun)
 
  end if
 
@@ -1811,8 +1810,8 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
    else if(localrdwf==1)then
 
 !    Prepare transmission of eigen (and occ)
-     ABI_ALLOCATE(buffer1,(2*mband**(formeig+1)*nkpt*nsppol))
-     ABI_ALLOCATE(buffer2,(2*mband**(formeig+1)*nkpt*nsppol))
+     ABI_MALLOC(buffer1,(2*mband**(formeig+1)*nkpt*nsppol))
+     ABI_MALLOC(buffer2,(2*mband**(formeig+1)*nkpt*nsppol))
      buffer1(:)=zero
      buffer2(:)=zero
 
@@ -1889,8 +1888,8 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
        end do
      end do
 
-     ABI_DEALLOCATE(buffer1)
-     ABI_DEALLOCATE(buffer2)
+     ABI_FREE(buffer1)
+     ABI_FREE(buffer2)
    end if
  end if
 

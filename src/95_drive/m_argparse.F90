@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_argparse
 !! NAME
 !! m_argparse
@@ -7,7 +6,7 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +35,7 @@ module m_argparse
  use m_fft
  use m_exit
  use m_clib
+ use m_nctk
 
  use m_build_info,      only : dump_config, abinit_version
  use m_io_tools,        only : open_file, file_exists
@@ -223,33 +223,16 @@ type(args_t) function args_parser() result(args)
       end if
 
     else if (arg == "--log") then
-       ! Enable logging
-       call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
-       call libpaw_log_flag_set(.True.)
+      ! Enable logging
+      call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
+      call libpaw_log_flag_set(.True.)
 
-    !else if (arg == "-i" .or. arg == "--input") then
-    !  call get_command_argument(ii + 1, arg)
-    !  args%input_path = trim(arg)
-    !  ! Redirect stdin to file.
-    !  if (iam_master) then
-    !     ABI_CHECK(file_exists(args%input_path), sjoin("Cannot find input file:", args%input_path))
-    !     !close(std_in)
-    !     !if (open_file(arg, msg, unit=std_in, form='formatted', status='old', action="read") /= 0) then
-    !     !  MSG_ERROR(msg)
-    !     !end if
-    !  end if
+    else if (arg == "--netcdf-classic") then
+      !  Use netcdf classic mode for new files when only sequential-IO needs to be performed
+      call nctk_use_classic_for_seq()
 
-    !else if (arg == "-o" .or. arg == "--output") then
-    !  ! Redirect stdout to file.
-    !  call get_command_argument(ii + 1, arg)
-    !  if (iam_master) then
-    !  close(std_out)
-    !  if (open_file(arg, msg, unit=std_out, form='formatted', status='new', action="write") /= 0) then
-    !    MSG_ERROR(message)
-    !  end if
-
-    ! For multibinit only
     else if (arg == "--F03") then
+       ! For multibinit only
        args%multibinit_F03_mode = 1
 
     else if (arg == "-h" .or. arg == "--help") then
@@ -267,8 +250,8 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"--xgemm3m[=bool]           Use [Z,C]GEMM3M]"
         write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
         write(std_out,*)"--log                      Enable log files and status files in parallel execution."
-        write(std_out,*)"-i FILE                    Read input data from FILE instead of stdin."
-        write(std_out,*)"                           Useful if MPI library does not handle `abinit < files` redirection"
+        write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
+        write(std_out,*)"                           Default is netcdf4/hdf5"
         write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm notation:"
         write(std_out,*)"                               days-hours"
         write(std_out,*)"                               days-hours:minutes"
@@ -815,7 +798,7 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
  real(dp),allocatable,intent(out) :: shiftk(:,:)
 
 !Local variables-------------------------------
- integer :: ii, lenr
+ integer :: ii, lenr, ierr
  character(len=500) :: msg
  integer :: ivec9(9), ngkpt(3)
  real(dp) :: my_shiftk(3 * MAX_NSHIFTK)
@@ -824,15 +807,19 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
 
  ABI_CHECK(get_arg("kptopt", kptopt, msg, default=1) == 0, msg)
  ABI_CHECK(get_arg("chksymbreak", chksymbreak, msg, default=1) == 0, msg)
- ABI_CHECK(get_arg_list("ngkpt", ngkpt, lenr, msg, exclude="kptrlatt", want_len=3) == 0, msg)
- if (lenr == 3) then
+
+ ierr = get_arg_list("ngkpt", ngkpt, lenr, msg, exclude="kptrlatt", want_len=3)
+ if (ierr == 0) then
+ !if (lenr == 3) then
    kptrlatt = 0
    do ii=1,3
      kptrlatt(ii, ii) = ngkpt(ii)
    end do
+ else
+   ABI_CHECK(get_arg_list("kptrlatt", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
+   ABI_CHECK(lenr == 9, "Expecting 9 values for kptrlatt")
+   kptrlatt = transpose(reshape(ivec9, [3, 3]))
  end if
- ABI_CHECK(get_arg_list("kptrlatt", ivec9, lenr, msg, exclude="ngkpt", want_len=9) == 0, msg)
- if (lenr == 9) kptrlatt = transpose(reshape(ivec9, [3, 3]))
 
  ! Init default
  ABI_CHECK(get_arg_list("shiftk", my_shiftk, lenr, msg) == 0, msg)
@@ -843,8 +830,8 @@ subroutine parse_kargs(kptopt, kptrlatt, nshiftk, shiftk, chksymbreak)
    shiftk = reshape(my_shiftk(1:lenr), [3, nshiftk])
  else
    nshiftk = 1
-   ABI_MALLOC(shiftk, (3, nshiftk))
-   shiftk(:, 1) = [half, half, half]
+   ABI_CALLOC(shiftk, (3, nshiftk))
+   !shiftk(:, 1) = [half, half, half]
  end if
  !write(std_out, *)"kptopt = ", kptopt, ", chksymbreak = ", chksymbreak, ", nshiftk = ", nshiftk, ", kptrlatt = ", kptrlatt
 

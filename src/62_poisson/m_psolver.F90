@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psolver
 !! NAME
 !!  m_psolver
@@ -7,7 +6,7 @@
 !!  Poisson solver
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR,TRangel).
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR,TRangel).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -186,8 +185,8 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
 !  ngrad=1 is for LDAs or LSDs, ngrad=2 is for GGAs
    ngrad=1;if(xclevel==2)ngrad=2
-!  ixc 31 to 34 are for mgga test purpose only (fake functionals based on LDA but need the gradients too)
-   if(ixc>=31 .and. ixc<=34)ngrad=2
+!  ixc 31 to 35 are for mgga test purpose only (fake functionals based on LDA but need the gradients too)
+   if(ixc>=31 .and. ixc<=35)ngrad=2
 !  Test: has a compensation density to be added/substracted (PAW) ?
 !  test_nhat=((nhatdim==1).and.(usexcnhat==0.or.(ngrad==2.and.nhatgrdim==1)))
    test_nhat=((nhatdim==1).and.(usexcnhat==0))

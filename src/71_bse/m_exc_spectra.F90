@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_spectra
 !! NAME
 !! m_exc_spectra
@@ -7,7 +6,7 @@
 !!  Routines to compute the macroscopic dielectric function in the Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
+!! Copyright (C) 2009-2020 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,7 +84,7 @@ contains
 !!  QP_BSt=The QP energies.
 !!  Psps <pseudopotential_type>=variables related to pseudopotentials.
 !!  Pawtab(Cryst%ntypat*usepaw)<pawtab_type>=PAW tabulated starting data
-!!  Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and LDA+U, quantities used to evaluate the commutator [H_u,r].
+!!  Hur(Cryst%natom*usepaw)<pawhur_t>=Only for PAW and DFT+U, quantities used to evaluate the commutator [H_u,r].
 !!  Wfd<wfd_t>=Handler for the wavefunctions.
 !!    nsppol=Number of independent spin polarizations.
 !!    nspinor=Number of spinorial components.

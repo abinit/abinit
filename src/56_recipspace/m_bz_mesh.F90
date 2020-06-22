@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bz_mesh
 !! NAME
 !!  m_bz_mesh
@@ -12,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -229,7 +228,7 @@ MODULE m_bz_mesh
 
   integer,allocatable :: ndivs(:)
    ! ndivs(nbounds-1)
-   ! Number of division for each segment.
+   ! Number of divisions for each segment.
 
   integer,allocatable :: bounds2kpt(:)
    ! bounds2kpt(nbounds)
@@ -258,6 +257,7 @@ MODULE m_bz_mesh
  end type kpath_t
 
  public :: kpath_new        ! Construct a new path
+ !public :: kpath_from_cryst ! High-level API to construct a path from a crystal_t
  public :: make_path        ! Construct a normalized path. TODO: Remove
 !!***
 
@@ -1863,7 +1863,7 @@ end subroutine getkptnorm_bycomponent
 !!
 !! SOURCE
 
-subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
+subroutine make_path(nbounds, bounds, met, space, ndivsm, ndivs, npts, path, unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -1900,8 +1900,8 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
  nfact=MINVAL(lng)
  if (ABS(nfact)<tol6) then
    write(msg,'(3a)')&
-&    'Found two equivalent consecutive points in the path ',ch10,&
-&    'This is not allowed, modify the path in your input file'
+     'Found two equivalent consecutive points in the path ',ch10,&
+     'This is not allowed, modify the path in your input file'
    MSG_ERROR(msg)
  end if
 
@@ -1910,20 +1910,20 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
  npts=SUM(ndivs)+1 !1 for the first point
 
  write(msg,'(2a,i0,2a)')ch10,&
-&  ' Total number of points in the path: ',npts,ch10,&
-&  ' Number of divisions for each segment of the normalized path: '
- call wrtout(ount,msg,'COLL')
+  ' Total number of points in the path: ',npts,ch10,&
+  ' Number of divisions for each segment of the normalized path: '
+ call wrtout(ount,msg)
 
  do ii=1,nbounds-1
    write(msg,'(2(3f8.5,a),i0,a)')bounds(:,ii),' ==> ',bounds(:,ii+1),' ( ndivs : ',ndivs(ii),' )'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  end do
- call wrtout(ount,ch10,'COLL')
+ call wrtout(ount,ch10)
 
  ! Allocate and construct the path.
  ABI_MALLOC(path,(3,npts))
 
- if (prtvol > 0) call wrtout(ount,' Normalized Path: ','COLL')
+ if (prtvol > 0) call wrtout(ount,' Normalized Path: ')
  idx=0
  do ii=1,nbounds-1
    do jp=1,ndivs(ii)
@@ -1931,7 +1931,7 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
      path(:,idx)=bounds(:,ii)+(jp-1)*(bounds(:,ii+1)-bounds(:,ii))/ndivs(ii)
      if (prtvol > 0) then
        write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
-       call wrtout(ount,msg,'COLL')
+       call wrtout(ount,msg)
      end if
    end do
  end do
@@ -1939,7 +1939,7 @@ subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
 
  if (prtvol > 0) then
    write(msg,'(i0,4x,3(f8.5,1x))')npts,path(:,npts)
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  end if
 
 end subroutine make_path
@@ -2976,9 +2976,7 @@ end function box_len
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  gprimd(3,3)=Reciprocal lattice vectors
 !!  ndivsm=Number of divisions to be used for the smallest segment.
-!!
-!! OUTPUT
-!!  Kpath<type(kpath_t)>=Object with the normalized path.
+!!   A negative value activates a specialized mode if with bounds is suppose to supply the full list of k-points.
 !!
 !! PARENTS
 !!      wfk_analyze
@@ -2999,12 +2997,11 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
  integer :: ii
 !arrays
  real(dp) :: dk(3)
- real(dp),allocatable :: pts(:,:)
 
 ! *************************************************************************
 
  ABI_CHECK(size(bounds, dim=1) == 3, "Wrong dim1 in bounds")
- ABI_CHECK(ndivsm > 0, sjoin("ndivsm:", itoa(ndivsm)))
+ !ABI_CHECK(ndivsm > 0, sjoin("ndivsm:", itoa(ndivsm)))
  Kpath%nbounds = size(bounds, dim=2)
  Kpath%ndivsm = ndivsm
 
@@ -3012,14 +3009,19 @@ type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
  Kpath%gprimd = gprimd; Kpath%gmet = matmul(transpose(gprimd), gprimd)
 
  ABI_MALLOC(Kpath%ndivs, (Kpath%nbounds-1))
- call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndivsm,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
 
- ABI_MALLOC(Kpath%bounds, (3,Kpath%nbounds))
+ if (kpath%ndivsm > 0) then
+   call make_path(Kpath%nbounds, bounds, Kpath%gmet, "G", ndivsm, Kpath%ndivs, Kpath%npts, kpath%points, unit=dev_null)
+ else
+   ! Get list of points directly.
+   kpath%ndivs = 1
+   kpath%npts = kpath%nbounds
+   ABI_MALLOC(Kpath%points, (3, Kpath%npts))
+   kpath%points = bounds
+ end if
+
+ ABI_MALLOC(Kpath%bounds, (3, Kpath%nbounds))
  Kpath%bounds = bounds
-
- ABI_MALLOC(Kpath%points, (3,Kpath%npts))
- Kpath%points = pts
- ABI_FREE(pts)
 
  ! Compute distance between point i-1 and i
  ABI_CALLOC(kpath%dl, (kpath%npts))
@@ -3116,8 +3118,8 @@ subroutine kpath_print(kpath, header, unit, prtvol, pre)
  if (unt <= 0) return
 
  if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
- write(unt, "(a)") sjoin(my_pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
- write(unt, "(a)") sjoin(my_pre, "Boundaries and corresponding index in the k-points array:")
+ write(unt, "(a)") sjoin(my_pre, " Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
+ write(unt, "(a)") sjoin(my_pre, " Boundaries and corresponding index in the k-points array:")
  do ii=1,kpath%nbounds
    write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
  end do

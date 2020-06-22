@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -26,7 +26,7 @@ sources = [
  "m_green.F90",
  "m_hu.F90",
  "m_hubbard_one.F90",
- "m_ldau_self.F90",
+ "m_dftu_self.F90",
  "m_matlu.F90",
  "m_oper.F90",
  "m_self.F90",

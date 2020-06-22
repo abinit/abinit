@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/cut3d
 !! NAME
 !! cut3d
@@ -8,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2020 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,9 +69,11 @@ program cut3d
  use m_geometry,        only : xred2xcart, metric
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : ngfft_seq
+ use m_fft_mesh,        only : denpot_project
  use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
+
  implicit none
 
 !Local variables-------------------------------
@@ -82,7 +83,7 @@ program cut3d
  integer :: fform0,gridshift1,gridshift2,gridshift3,i1,i2,i3
  integer :: iatom,ifiles,ii,ii1,ii2,ii3,index,iprompt,ir1,ir2,ir3,ispden,cplex
  integer :: itask,jfiles,natom,nfiles,nr1,nr2,unt,comm,iomode,nprocs,my_rank
- integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat,timrev,nfft
+ integer :: nr3,nr1_stored,nr2_stored,nr3_stored,nrws,nspden,nspden_stored,ntypat,nfft
  real(dp) :: dotdenpot,maxmz,normz,sumdenpot,ucvol,xm,xnow,xp,ym,ynow,yp,zm,znow,zp,tcpui,twalli
  character(len=24) :: codename
  character(len=fnlen) :: filnam,filrho,filrho_tmp
@@ -96,7 +97,7 @@ program cut3d
  integer :: ngfft(18)
  real(dp) :: rprimd(3,3),shift_tau(3),tsec(2)
  real(dp) :: xcart2(3),gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: grid(:,:,:),grid_full(:,:,:,:),grid_full_stored(:,:,:,:,:),gridtt(:,:,:)
+ real(dp),allocatable :: grid(:,:,:),grid_full(:,:,:,:),grid_full_stored(:,:,:,:,:),gridtt(:,:,:) !, grid_rot(:,:,:,:)
  real(dp),allocatable :: tau2(:,:),xcart(:,:),xred(:,:),rhomacu(:,:),gridmz(:,:,:),gridmy(:,:,:),gridmx(:,:,:)
  character(len=fnlen),allocatable :: filrho_stored(:)
  character(len=500) :: message
@@ -276,6 +277,14 @@ program cut3d
      end if
 
      call cut3d_rrho(filrho,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
+
+     !MSG_WARNING("Computing (rhor(r) + rho(-r)) / 2")
+     !ABI_MALLOC(grid_rot, (nr1,nr2,nr3,nspden))
+     !call ngfft_seq(ngfft, [nr1, nr2, nr3])
+     !ngfft(4:6) = ngfft(1:3)
+     !call denpot_project(1, ngfft, nspden, grid_full, inversion_3d, [zero, zero, zero], grid_rot)
+     !grid_full = grid_rot
+     !ABI_FREE(grid_rot)
 
 !    Do not forget that the first sub-array of a density file is the total density,
 !    while the first sub-array of a potential file is the spin-up potential
@@ -757,8 +766,7 @@ program cut3d
 
          case (15)
            ! Write netcdf file.
-           timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-           cryst = hdr%get_crystal(timrev)
+           cryst = hdr%get_crystal()
            call ngfft_seq(ngfft, [nr1, nr2, nr3])
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))

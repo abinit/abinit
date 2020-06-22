@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_rot_cg
 !! NAME
 !! m_rot_cg

@@ -8,7 +8,7 @@
 !! and functions to get cpu and wall time.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, XG, MT, TD)
+!! Copyright (C) 2009-2020 ABINIT group (MG, XG, MT, TD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -591,16 +591,20 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
 
  if (present(comm)) then
    call cwtime(cpu, wall, gflops, "stop", comm=comm)
-   avg_type = "(MPI average)"
+   avg_type = "(MPI average) <<< TIME"
  else
    call cwtime(cpu, wall, gflops, "stop")
-   avg_type = ""
+   avg_type = "<<< TIME"
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
+
  call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
      do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)
  call cwtime(cpu, wall, gflops, "start")
+
+ ! Activate this line to get mallinfo section for each checkpoint
+ !call clib_print_mallinfo(std_out)
 
 end subroutine cwtime_report
 !!***

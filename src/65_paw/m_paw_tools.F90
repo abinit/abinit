@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_tools
 !! NAME
 !!  m_paw_tools
@@ -7,7 +6,7 @@
 !!  This module contains miscelaneous routines used in the PAW context.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ,MT)
+!! Copyright (C) 2018-2020 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -263,7 +262,7 @@ end subroutine chkpawovlp
 !! To be called at the end of the SCF cycle
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FJ,MT,BA)
+!! Copyright (C) 1998-2020 ABINIT group (FJ,MT,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -533,7 +532,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
    do i_unitfi=1,2
      unitfi=ab_out;if (i_unitfi==2) unitfi=std_out
      write(msg,'(3a)') &
-&     ' ---------- LDA+U DATA --------------------------------------------------- ',ch10
+&     ' ---------- DFT+U DATA --------------------------------------------------- ',ch10
      call wrtout(unitfi,msg,'COLL')
      do iatom=1,dtset%natom
        itypat=dtset%typat(iatom);ll=pawtab(itypat)%lpawu

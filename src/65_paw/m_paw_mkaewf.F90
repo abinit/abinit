@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_mkaewf
 !! NAME
 !!  m_paw_mkaewf
@@ -7,7 +6,7 @@
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -379,7 +378,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 #endif
 
 !Init structure storing phi_{nlm} and tphi_(nlm} on the dense FFT points located in the PAW spheres.
- ABI_DT_MALLOC(Paw_onsite,(natom))
+ ABI_MALLOC(Paw_onsite,(natom))
  if (paral_atom) then
    call paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,crystal%ntypat,crystal%rprimd,crystal%xcart,&
    Pawtab,Pawrad,local_pawfgrtab, comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
@@ -440,7 +439,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        end do
      end do
 
-     ABI_DT_MALLOC(Cprj_k,(natom,dtset%nspinor*nband_k))
+     ABI_MALLOC(Cprj_k,(natom,dtset%nspinor*nband_k))
      call pawcprj_alloc(Cprj_k,0,dimcprj)
 
 !    Extract cprj for this k-point.
@@ -693,7 +692,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
      ABI_FREE(kg_k)
 
      call pawcprj_free(Cprj_k)
-     ABI_DT_FREE(Cprj_k)
+     ABI_FREE(Cprj_k)
 
    end do !ikpt
  end do !nsppol
@@ -703,7 +702,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
  ! Free augmentation waves.
  call paw_pwaves_lmn_free(Paw_onsite)
- ABI_DT_FREE(Paw_onsite)
+ ABI_FREE(Paw_onsite)
 
  ! Maximum relative error over CPUs.
  call xmpi_max(norm_rerr,max_rerr,comm_cell,ierr)

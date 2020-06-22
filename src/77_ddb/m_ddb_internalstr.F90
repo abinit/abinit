@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_internalstr
 !! NAME
 !!  m_ddb_internalstr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XW)
+!!  Copyright (C) 1999-2020 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -463,7 +462,6 @@ natom,nblok,prt_internalstr)
 
 !Now do simple mulplication to obtain the displacement response
 !internal strain tensor
-
  instrain_dis(:,:)=0.0_dp
  do ivarA=1,6
    do ivarB=1,3*natom

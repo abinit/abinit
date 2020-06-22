@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_symfind
 !! NAME
 !!  m_symfind
@@ -7,7 +6,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2019 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2020 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,10 +124,10 @@ contains
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
  real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20
  real(dp) :: spinat2,spinatcl2,spinatcl20
-! TRUE if antiferro symmetries are used with non-collinear magnetism. 
- integer :: afm_noncoll=1 !For noncoll==1.  If 1, all symops are permitted ; if 0 symafm must be 1. 
+! TRUE if antiferro symmetries are used with non-collinear magnetism.
+ integer :: afm_noncoll=1 !For noncoll==1.  If 1, all symops are permitted ; if 0 symafm must be 1.
 !For noncoll=1. If noncoll_orthorhombic1, require the symmetry operations to be a subset of the orthorhombic symmetries, except if all spinat=0..
- integer :: noncoll_orthorhombic=0 
+ integer :: noncoll_orthorhombic=0
  logical :: test_sameabsspin,test_samechrg
  logical :: test_samenucdipmom
  character(len=500) :: message
@@ -598,6 +597,7 @@ end subroutine symfind
 !!  of primitive translations
 !! tnons(3,1:msym)=nonsymmorphic translations for symmetry operations
 !! tolsym=tolerance for the symmetry operations
+!! verbose= if true, will list the symmetry operation labels
 !!
 !! OUTPUT
 !! bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
@@ -613,37 +613,54 @@ end subroutine symfind
 !!
 !! SOURCE
 
-subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
+subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym,verbose)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chkprim,msym,nsym
  integer,intent(out) :: ptgroupma,spgroup
  real(dp),intent(in) :: tolsym
+ logical,optional :: verbose
 !arrays
  integer,intent(out) :: bravais(11)
  integer,intent(in) :: symafm(msym),symrel(3,3,msym)
  real(dp),intent(in) :: rprimd(3,3)
- real(dp),intent(inout) :: tnons(3,msym)
+ real(dp),intent(in) :: tnons(3,msym)
  real(dp),intent(out) :: genafm(3)
 
 !Local variables-------------------------------
 !scalars
+ integer, parameter :: maxsym=192 
+! In this routine, maxsym is used either to determine the ptsymrel from the rprimd (routine symlatt),
+! so, it might be up to 192 = 4*48 for FCC, and also to define the maximum number of symmetry operation labels,
+! but only in case the cell is primitive, which gives the same upper bound. Thus in this routine, msym might
+! be equal to nsym.
  integer :: iholohedry_nomagn,isym,isym_nomagn,multi
  integer :: nptsym,nsym_nomagn,shubnikov
+ logical :: verbose_
  character(len=5) :: ptgroup,ptgroupha
  character(len=500) :: message
 !arrays
  integer :: identity(3,3)
  integer,allocatable :: ptsymrel(:,:,:),symrel_nomagn(:,:,:)
  real(dp),allocatable :: tnons_nomagn(:,:)
+ character(len=128) :: labels(maxsym)
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,*)' symanal : enter'
+!ENDDEBUG
+
+ verbose_=.false.
+ if(present(verbose))then
+   verbose_=verbose
+ endif
+
 !This routine finds the Bravais characteristics, without actually
 !looking at the symmetry operations.
- ABI_ALLOCATE(ptsymrel,(3,3,msym))
- call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+ ABI_ALLOCATE(ptsymrel,(3,3,maxsym))
+ call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimd,tolsym)
  ABI_DEALLOCATE(ptsymrel)
 
 !Check whether the cell is primitive or not.
@@ -688,8 +705,17 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 !    Find the correct Bravais characteristics and point group
 !    Should also be used for Shubnikov groups of type IV ...
      call symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym)
+
 !    Find the space group
-     call symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
+     call symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
+
+     if(verbose_)then
+       do isym=1,nsym
+         write(message,'(a,i3,2a)')' symanal : the symmetry operation no. ',isym,' is ',trim(labels(isym))
+         call wrtout(std_out,message,'COLL')
+       enddo
+     endif
+
    end if
 
    if(shubnikov/=1)then
@@ -726,10 +752,24 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
      else if(shubnikov==4)then
 
 !      Find the Fedorov space group of the halved symmetry set
-       call symspgr(bravais,nsym_nomagn,spgroup,symrel_nomagn,tnons_nomagn,tolsym)
+       call symspgr(bravais,labels,nsym_nomagn,spgroup,symrel_nomagn,tnons_nomagn,tolsym)
 
 !      The magnetic translation generator genafm has already been determined
 !      write(std_out,*)' genafm =',genafm, ' spgroup=',spgroup
+
+       if(verbose_)then
+
+         write(message, '(a)' )' Select only the non-magnetic symmetry operations '
+         call wrtout(std_out,message,'COLL')
+
+         do isym=1,nsym
+           if(symafm(isym)==1)then
+             isym_nomagn=isym_nomagn+1
+             write(message,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(labels(isym_nomagn))
+             call wrtout(std_out,message,'COLL')
+           endif
+         enddo
+       endif
 
      end if
 
@@ -793,7 +833,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !Local variables-------------------------------
 !scalars
  integer :: iaxis,ii,bravais1now,ideform,iholohedry,invariant,isym
- integer :: jaxis,next_stage,nptsym,problem
+ integer :: jaxis,next_stage,nptsym,problem,maxsym
  real(dp) :: norm,scprod
  character(len=500) :: message
 !arrays
@@ -804,6 +844,11 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
  real(dp) :: rprimdconv_invt(3,3)
 
 !**************************************************************************
+
+!DEBUG
+!write(std_out,*)' symbrav : enter '
+!call flush(std_out)
+!ENDDEBUG
 
  identity(:,:)=0
  identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
@@ -838,11 +883,13 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
 !DEBUG
 !write(std_out,*)' symbrav, after symptgroup: nsym=',nsym
+!call flush(std_out)
 !write(std_out,*)' symbrav: symrel='
 !do isym=1,nsym
 !  write(std_out,'(9i4)')symrel(:,:,isym)
 !enddo
 !write(std_out,*)' symbrav: iholohedry=',iholohedry
+!call flush(std_out)
 !ENDDEBUG
 
 !Loop over trial deformations
@@ -861,11 +908,13 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
 !DEBUG
 !write(std_out,*)' symbrav: inside loop with ideform=',ideform
+!call flush(std_out)
 !write(std_out,'(a,9f10.4)')' rprimdtry=',rprimdtry(:,:)
 !ENDDEBUG
 
-   ABI_ALLOCATE(ptsymrel,(3,3,msym))
-   call symlatt(bravais,msym,nptsym,ptsymrel,rprimdtry,tolsym)
+   maxsym=max(192,msym)
+   ABI_ALLOCATE(ptsymrel,(3,3,maxsym))
+   call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
    ABI_DEALLOCATE(ptsymrel)
 
 !  Examine the agreement with bravais(1)
@@ -1056,11 +1105,11 @@ end subroutine symbrav
 !! symspgr
 !!
 !! FUNCTION
-!! Using the type of each symmetry operation (found in symplanes.f and symaxes.f):
-!! proper symmetries 1,2,2_1,3,3_1,3_2,4,4_1,4_2,4_3,6,6_1,...6_5
-!! improper symmetries -1,m,a,b,c,d,n,g,-3,-4,-6 ,
-!! build an array with the number of such operations. then, call symlist.f to identify the space group.
-!! The identification is not unambiguous still ...
+!! Find the type of each symmetry operation (calling symcharac):
+!!   proper symmetries 1,2,2_1,3,3_1,3_2,4,4_1,4_2,4_3,6,6_1,...6_5
+!!   improper symmetries -1,m,a,b,c,d,n,g,-3,-4,-6 ,
+!! Then, build an array with the number of such operations. 
+!! Then, call symlist to identify the space group.
 !!
 !! INPUTS
 !! bravais(11): bravais(1)=iholohedry
@@ -1074,6 +1123,7 @@ end subroutine symbrav
 !!   be 0 0 0 each for a symmorphic space group)
 !!
 !! OUTPUT
+!! labels(maxsym=192)= labels of the symmetry operations
 !! spgroup=symmetry space group number
 !!
 !! NOTES
@@ -1106,7 +1156,7 @@ end subroutine symbrav
 !!
 !! SOURCE
 
-subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
+subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 
  use m_numeric_tools, only : OPERATOR(.x.)
 
@@ -1117,7 +1167,8 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  real(dp),intent(in) :: tolsym
 !arrays
  integer,intent(in) :: bravais(11),symrel(3,3,nsym)
- real(dp),intent(inout) :: tnons(3,nsym)
+ real(dp),intent(in) :: tnons(3,nsym)
+ character(len=128),intent(out) :: labels(192) ! 192 = maxsym
 
 !Local variables-------------------------------
 !scalars
@@ -1128,8 +1179,8 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  character(len=15) :: intsb,ptintsb,ptschsb,schsb
  character(len=35) :: intsbl
  character(len=500) :: message
- character(len=128) :: label
 !arrays
+ integer :: ivec1(3), ivec2(3)
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
  integer :: uniaxis(3),uniaxis_try(3)
  integer,allocatable :: determinant(:),symrelconv(:,:,:),t_axes(:)
@@ -1224,7 +1275,9 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 
  do isym=1,nsymconv
 
-   call symcharac(center, determinant(isym), iholohedry, isym, label, &
+!  Note : nsymconv might be bigger than 192, but only for non-primitive cells, in which case labels will not be echoed anywhere.
+!  192 is the fixed dimension of labels, so this avoids possible memory problems.
+   call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym-1,192)+1), &   
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
      write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
@@ -1437,7 +1490,8 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
      do ii=1,3
        jj=ii+1 ; if(jj==4)jj=1
 !      Cross product
-       uniaxis=symrel_uni(ii,:).x.symrel_uni(jj,:)
+       ivec1 = symrel_uni(ii,:); ivec2 = symrel_uni(jj,:)
+       uniaxis = ivec1 .x. ivec2
        if(sum(uniaxis**2)/=0)then
          found=1 ; exit
        end if
@@ -1491,7 +1545,8 @@ end subroutine symspgr
 !! 3) Generate the symmetry operations of the holohedral group
 !!
 !! INPUTS
-!! msym=default maximal number of symmetries
+!! msym=default maximal number of symmetries. WARNING : cannot be simply set to nsym, because
+!!   the number of symmetries found here will likely be bigger than sym !
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !! tolsym=tolerance for the symmetries
 !!

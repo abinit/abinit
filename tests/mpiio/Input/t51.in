@@ -68,7 +68,7 @@ natom 2
 #%% keywords = NC, DFPT
 #%% authors = M. Giantomassi
 #%% description = 
-#%%   C-diamond, Bulk, 2 atoms, NC pseudos.
+#%%   C-diamond, Bulk, 2 atoms, NC pseudopotentials.
 #%%   Test the IO routines for a typical DFPT calculation
 #&&   Use paral_kgb==1 in the GS part in band-fft mode.
 #&&   Read the WFK part to perform phonon calculations at Gamma.

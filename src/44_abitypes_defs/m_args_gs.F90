@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_args_gs
 !! NAME
 !!  m_args_gs
@@ -9,7 +8,7 @@
 !!  especially those depending on the image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2019 ABINIT group (MT)
+!! Copyright (C) 2015-2020 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

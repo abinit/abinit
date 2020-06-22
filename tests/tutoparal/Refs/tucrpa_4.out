@@ -2,7 +2,7 @@
 .Version 8.11.8 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -828,7 +828,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -9234,7 +9234,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -10898,7 +10898,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    0.00000   0.00000   0.00000   0.05936   0.00000   0.00000   0.00000   0.00000   0.01041   0.00000
    0.00000   0.00000   0.00000   0.00000   0.16598   0.00000   0.00000   0.00000   0.00000   0.03840
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   2
 
@@ -11646,7 +11646,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -11696,7 +11696,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    1
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -11744,7 +11744,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -11788,7 +11788,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -11893,7 +11893,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    0.00000  -0.03421   0.00000   0.00000   0.18118   0.00000
    0.00000   0.00000  -0.03421   0.00000   0.00000   0.18118
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   1
 
@@ -12650,7 +12650,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
 
 
  ******************************************
- LDA+U Method used: FLL
+ DFT+U Method used: FLL
  ******************************************
 
  =======================================================================
@@ -12700,7 +12700,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    1
+  Use DFT+U ......................................    1
   L on which U is applied ........................    1
   Use Local Exact exchange .......................    0
   Number of (i,j) elements for PAW+U or EXX .....    3
@@ -12748,7 +12748,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -12792,7 +12792,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
   shape_lambda ...................................    0
   Use pseudized core density .....................    1
   Option for the use of hat density in XC terms ..    0
-  Use LDA+U ......................................    0
+  Use DFT+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
@@ -12891,7 +12891,7 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   31
    0.00000  -0.03421   0.00000   0.00000   0.18118   0.00000
    0.00000   0.00000  -0.03421   0.00000   0.00000   0.18118
 
- ---------- LDA+U DATA --------------------------------------------------- 
+ ---------- DFT+U DATA --------------------------------------------------- 
 
  ====== For Atom     1, occupations for correlated orbitals. lpawu =   1
 
@@ -14143,9 +14143,9 @@ P           mkmem           1
 - i.e. prtwant=2 and usepaw=1. The paper describes also the DFT+DMFT implementation on Wannier functions
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008
 -
-- [3] Gamma and beta cerium: LDA+U calculations of ground-state parameters.
+- [3] Gamma and beta cerium: DFT+U calculations of ground-state parameters.
 - B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).
-- Comment : LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.
+- Comment : DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#amadon2008a
 -
 - [4] Implementation of the Projector Augmented-Wave Method in the ABINIT code.

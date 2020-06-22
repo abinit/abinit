@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multibinit_manager
 !! NAME
 !! m_multibinit_manager
@@ -17,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -221,6 +220,7 @@ contains
     ! It might be null if there is no lattice part.
     if (associated(self%lattice_mover)) then
        call self%lattice_mover%finalize()
+       ABI_FREE_SCALAR(self%lattice_mover)
        nullify(self%lattice_mover)
     end if
     if(.not. self%use_external_params) then
@@ -238,6 +238,7 @@ contains
     self%has_spin=.False.
     self%has_lwf=.False.
     call self%energy_table%free()
+    call self%slc_mover%finalize()
   end subroutine finalize
 
   !-------------------------------------------------------------------!
@@ -517,6 +518,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
 
     character(len=90) :: msg
+
+    real(dp), allocatable :: Htmp(:,:)
     real(dp) :: etotal
     integer :: i
 
@@ -528,6 +531,13 @@ contains
 
     ! calculate various quantities for reference spin structure
     do i =1, self%pots%size
+      select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for spin_potential are used
+      type is (spin_potential_t) 
+        ABI_ALLOCATE(Htmp, (3,scpot%nspin))
+        call scpot%get_Heff(scpot%supercell%spin%Sref, Htmp, scpot%eref)
+        ABI_DEALLOCATE(Htmp)
+      end select
+
       select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for slc_potential are used
       type is (slc_potential_t) 
         call scpot%calculate_ref()

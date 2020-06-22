@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_phgamma
 !! NAME
 !!
@@ -6,7 +5,7 @@
 !!  Computation of phonon linewidths, isotropic superconducting properties and transport in metals with the LOVA.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,7 +66,7 @@ module m_phgamma
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_bz_mesh,        only : kpath_t, kpath_new
  use m_special_funcs,  only : fermi_dirac
- use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk, kpts_timrev_from_kptopt
  use defs_elphon,      only : complete_gamma !, complete_gamma_tr
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_pawang,         only : pawang_type
@@ -2059,7 +2058,11 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, intmeth, wstep, wminmax, smear, ngqp
        call wrtout(ount, msg)
      end if
 
-     write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling.'
+     if (do_qintp) then
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (interpolated).'
+     else
+       write(ount,'(a)')' Superconductivity: isotropic evaluation of parameters from electron-phonon coupling (coarse grid).'
+     endif
      write(ount,'(a,es16.6)')' isotropic lambda = ',lambda_iso
      write(ount,'(a,es16.6,a,es16.6,a)' )' omegalog  = ',omega_log,' (Ha) ', omega_log * Ha_K, ' (Kelvin) '
      write(ount,'(a,es16.6,a,es16.6,a)')' MacMillan Tc = ',tc_macmill,' (Ha) ', tc_macmill * Ha_K, ' (Kelvin) '
@@ -3233,7 +3236,11 @@ subroutine a2fw_tr_init(a2f_tr, gams, cryst, ifc, intmeth, wstep, wminmax, smear
 
    ! TODO: make output only for irred values xx yy zz and top half of matrix
    if (my_rank == master) then
-     write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions '
+     if (do_qintp) then
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (interpolated) '
+     else
+       write(ount,'(a)')' Evaluation of parameters analogous to electron-phonon coupling for 3x3 directions (coarse grid) '
+     endif
      write(ount,'(a,3(3es10.3,2x))') ' lambda = ',lambda_iso
      write(ount,'(a,3(3es10.3,2x),a)' )' omegalog  = ',omega_log,' (Ha) '
      write(ount,'(a,3(3es10.3,2x),a)' )'             ',omega_log*Ha_K, ' (Kelvin) '
@@ -3497,7 +3504,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q, ltetra
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
- integer :: jene, iene, comm_rpt, method, nesting
+ integer :: jene, iene, comm_rpt, nesting
  integer :: my_npert, imyp, imyq
 #ifdef HAVE_NETCDF
  integer :: ncerr
@@ -3765,7 +3772,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  !call xmpi_barrier(comm)
 
- ! Now reopen the file inside ncwrite_comm to perform pararallel-IO (required for q-point parallelism).
+ ! Now reopen the file inside ncwrite_comm to perform parallel-IO (required for q-point parallelism).
  !if (self%ncwrite_comm%value /= xmpi_comm_null) then
  !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
  !  NCF_CHECK(nctk_set_datamode(self%ncid))
@@ -3808,8 +3815,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    ! Prepare Fourier interpolation of DFPT potentials.
    comm_rpt = xmpi_comm_self
    !comm_rpt = bqs_comm%value
-   method = dtset%userid
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
  end if
 
  ! Initialize the wave function descriptor.
@@ -4530,7 +4536,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: enough = 50
+ integer,parameter :: enough = 5
  integer :: nkbz, ierr, nb, ik_bz, ik_ibz, ikq_ibz, ikq_fs, ik_fs, i1, i2, i3, nkfs_q, nene
  integer :: ib1, ib2 ! band_k, band_kq
  real(dp),parameter :: max_occ1 = one
@@ -4589,8 +4595,8 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- !timrev = 0; if (use_tr) timrev=1
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
+ ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  nb = fs%maxnb
  ABI_MALLOC(kbz, (3, nkbz))
@@ -4902,8 +4908,8 @@ subroutine calc_dbldelta(cryst, ebands, ltetra, bstart, bstop, nqibz, qibz, wtqs
  nkbz = product(nge(1:3))
 
  ! TODO: Handle symmetries in a cleaner way. Change API of krank_new to pass symafm and kptopt
- !timrev = 0; if (use_tr) timrev=1
- ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, time_reversal=.True.)
+ ibz_krank = krank_new(ebands%nkpt, ebands%kptns, nsym=cryst%nsym, symrec=cryst%symrec, &
+                       time_reversal=kpts_timrev_from_kptopt(ebands%kptopt) == 1)
 
  nb = bstop - bstart + 1
  ABI_MALLOC(kbz, (3, nkbz))

@@ -78,7 +78,7 @@
 #inverse square of hyb_range_fock .
  ixc15  -428                         # This should be HSE06
  hyb_range_fock15 0.001d0          # This should transform it to PBE0 in the limit of infinite number of k points
- nstep15 22
+ nstep15 21
 
 #DATASET 16  Get PBE. Fool LibXC by imposing to HSE06 an extremely small mixing parameter
 # So, gives the same as dataset 1 or 2. DOES NOT WORK, although the difference is at the level of 1.0d-4 !
@@ -88,8 +88,10 @@
 #DATASET 17  Get PBE. Fool LibXC by imposing to HSE06 a very short range screening
 # So, gives the same as dataset 8 or 9. DOES NOT WORK, although the difference is at the level of 1.0d-4 !
  ixc17  -428                              # This should be HSE06
- hyb_range_fock17 100.0                   # But these lines redefine the parameters to the PBE within tolerance
+ hyb_range_fock17 5.0                     # But these lines redefine the parameters to the PBE within tolerance
                                           # (the screening is complete at a very small distance already
+                                          # We should use hyb_range_fock=100.,
+                                          #   but calculation doesnt converge with libXC5
 
 
 #Play a bit with HSE03
@@ -181,7 +183,7 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t72.out, tolnlines=  1, tolabs=  4.0e-10, tolrel=  2.0e-04, fld_options = -easy
+#%%   t72.out, tolnlines=  1, tolabs=  0.0005, tolrel=  2.0e-04, fld_options = -easy
 #%% psp_files = 13al.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4

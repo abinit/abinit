@@ -46,6 +46,7 @@ istwfk *1
 #For all the dataset
 nsym 0
 icutcoul 6
+symsigma 0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets
@@ -82,8 +83,8 @@ ucrpa_window  -5.0 5.0 eV  # Exclude a large window of energy
 dmftbandi3 12       # Precise the definition of Wannier functions (also used for DMFT calculations)
 dmftbandf3 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
 
-# -- LDAU: 1st dataset and definition of correlated angular momentum
-usepawu    1        # LDA+U is used just for printing usefull quantities.
+# -- DFTU: 1st dataset and definition of correlated angular momentum
+usepawu    1        # DFT+U is used just for printing usefull quantities.
 dmatpuopt  1        # choose expression of the density matrix
 lpawu      2 -1 -1
 jpawu      0.0 0.0 0.0 eV

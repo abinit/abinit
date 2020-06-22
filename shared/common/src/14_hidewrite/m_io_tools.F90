@@ -7,7 +7,7 @@
 !!  This module contains basic tools to deal with Fortran IO
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,9 +82,11 @@ MODULE m_io_tools
   integer,parameter :: IO_MAX_LEN=500
   character(len=1),parameter :: BLANK=' '
 
-  ! === For Interactive sessions ===
+  ! For interactive sessions
   integer,parameter :: IO_EOT=-1           ! End of transmission i.e CTRL+D
-  character(len=4),parameter :: PS1='>>> '
+  !character(len=4),parameter :: PS1='>>> '
+  ! Prepend prompt with `-` to bypass bug in intel18-19 so that flddiff.py will ignore the line
+  character(len=4),parameter :: PS1='->> '
   character(len=4),parameter :: PS2='??? '
 
   integer,parameter :: IO_NO_AVAILABLE_UNIT  =-1   ! No units are available for Fortran I/O

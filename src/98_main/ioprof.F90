@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/ioprof
 !! NAME
 !! ioprof
@@ -7,7 +6,7 @@
 !! Tool for frofiling and and testing the IO routines used in abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MG)
+!! Copyright (C) 2004-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -186,7 +185,7 @@ program ioprof
            CYCLE
          end if
 
-         ABI_DT_MALLOC(Kvars, (hdr%nkpt))
+         ABI_MALLOC(Kvars, (hdr%nkpt))
 
          if (my_rank == master) then
            call wrtout(ount,"Calling wfk_create_wfkfile","COLL")
@@ -232,7 +231,7 @@ program ioprof
            end if
          end if
 
-         ABI_DT_FREE(Kvars)
+         ABI_FREE(Kvars)
        end do ! iomode
      end do ! formeig
 

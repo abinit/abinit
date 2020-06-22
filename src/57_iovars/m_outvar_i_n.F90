@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_i_n
 !! NAME
 !!  m_outvar_i_n
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -339,6 +338,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%icoulomb
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'icoulomb','INT',0)
+
+ intarr(1,:)=dtsets(:)%icsing
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'icsing','INT',0)
 
  intarr(1,:)=dtsets(:)%icutcoul
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'icutcoul','INT',0)
@@ -698,6 +700,11 @@ subroutine outvar_i_n (dtsets,iout,&
  end if
 #endif
 
+ intarr(1,:)=dtsets(:)%lw_flexo
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_flexo','INT',0)
+
+ intarr(1,:)=dtsets(:)%lw_qdrpl
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_qdrpl','INT',0)
 
 !write(ab_out,*)' outvar_i_n : M '
 !call flush(ab_out)

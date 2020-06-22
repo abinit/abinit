@@ -10,7 +10,7 @@
 !!  for a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2020 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1165,9 +1165,9 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 &                   my_prtvol,idum,-1.d0,1,opt_sym=2,asym_ij=dij2p_,mode_paral=my_mode)
      end if
 
-     !Dij LDA+U
+     !Dij DFT+U
      if (Paw_ij(iatom)%has_dijU/=0.and.(idij<=2.or.nspden==4).and.my_ipert<=0) then
-       write(msg,'(a)') '   ************* Dij_LDA+U (dijpawu) **********'
+       write(msg,'(a)') '   ************* Dij_DFT+U (dijpawu) **********'
        call wrtout(my_unt,msg,my_mode)
        call get_dij_parts(cplex_dij,qphase,Paw_ij(iatom)%diju)
        call pawio_print_ij(my_unt,dij2p,lmn2_size,tmp_cplex_dij,lmn_size,-1,idum,0,&

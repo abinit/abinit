@@ -58,7 +58,7 @@ diemac 3.0
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Stishovite, high-pressure polymorph of SiO2. LDA.
 #%%   Computation of the Fermi contact term at each atomic site.

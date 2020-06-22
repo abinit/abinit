@@ -55,8 +55,8 @@ pawecutdg   20.0    # PAW - Energy CUToff for the Double Grid ( need only when u
 #ecutwfn     12.0
 pawoptosc 1       # Choose the Shishkin Kresse way to compute oscillator matrix. In general Arnaud Alouani is much better, but too time consuming for this simple test.
 
-# -- LDAU: 1st dataset and definition of correlated angular momentum
-usepawu    1        # LDA+U is used just for printing usefull quantities.
+# -- DFTU: 1st dataset and definition of correlated angular momentum
+usepawu    1        # DFT+U is used just for printing usefull quantities.
 dmatpuopt  1        # choose expression of the density matrix
 lpawu      2 -1 -1
 jpawu      0.0 0.0 0.0 eV

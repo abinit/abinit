@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2006-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2006-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -204,7 +204,8 @@ now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 # Init
 cnf = MyConfigParser()
 cnf.read(my_configs[0])
-abinit_env_vars = cnf.sections()
+abinit_env_vars = [item for item in cnf.sections() \
+  if not cnf.get(item, "status") in ["dropped", "removed"]]
 abinit_env_vars.sort()
 
 # Start writing macro

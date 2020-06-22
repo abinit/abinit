@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xcdata
 !! NAME
 !!  m_xcdata
@@ -8,7 +7,7 @@
 !!  the xcdata_type used to drive the computation of the XC energy, potential, kernel, etc.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2019 ABINIT group (XG)
+!!  Copyright (C) 2017-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +31,8 @@ module m_xcdata
  use defs_basis
  use m_errors
  use libxc_functionals
- use m_dtset
+ use m_dtset, only : dataset_type
+ use m_drivexc, only : size_dvxc
 
  implicit none
 
@@ -73,6 +73,12 @@ module m_xcdata
   integer :: usefock
     ! 1 if the XC functional includes a (possibly screened) Fock contribution
 
+  integer :: usegradient
+    ! 1 if the XC functional depends on the density gradient
+
+  integer :: uselaplacian
+    ! 1 if the XC functional depends on the density laplacian
+
   integer :: usekden
     ! 1 if the XC functional depends on the kinetic energy density
 
@@ -101,6 +107,7 @@ module m_xcdata
     ! density positivity value
 
  end type xcdata_type
+
 !----------------------------------------------------------------------
 
  public :: xcdata_init                ! Initialize the object.
@@ -125,7 +132,6 @@ contains
 !!  [ixc= index of exchange-correlation functional]
 !!  [nelect = Number of electrons in the cell (for Fermi-Amaldi only)]
 !!  [tphysel = Physical temperature (for temperature-dependent functional)]
-!!  [usekden = 1 if the XC functional depends on the kinetic energy density]
 !!  [vdw_xc = Choice of van-der-Waals density functional]
 !!
 !! OUTPUT
@@ -142,17 +148,18 @@ contains
 !!
 !! SOURCE
 
-subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_denpos)
+subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&
+&                      vdw_xc,xc_denpos)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,usekden,vdw_xc
+ integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,vdw_xc
  real(dp),intent(in),optional :: hyb_mixing,nelect,tphysel,xc_denpos
  type(dataset_type), intent(in),optional :: dtset
  type(xcdata_type), intent(out) :: xcdata
 !Local variables-------------------------------
- integer :: usefock,xclevel
- character(len=500) :: message
+ integer :: nspden_updn
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -161,7 +168,6 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
    xcdata%intxc=dtset%intxc
    xcdata%ixc=dtset%ixc
    xcdata%nspden=dtset%nspden
-   xcdata%usekden=dtset%usekden
    xcdata%vdw_xc=dtset%vdw_xc
 
    xcdata%hyb_mixing=abs(dtset%hyb_mixing) ! Warning : the absolute value is needed, because of the singular way
@@ -172,12 +178,11 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
 
  else
    if(.not.(present(auxc_ixc).and.present(intxc).and.present(ixc).and.&
-&           present(usekden).and.present(vdw_xc).and.present(hyb_mixing).and.&
+&           present(vdw_xc).and.present(hyb_mixing).and.&
 &           present(nelect).and.present(nspden).and.&
 &           present(tphysel).and.present(xc_denpos)))then
-     write(message,'(a)') &
-&     ' If dtset is not provided, all the other optional arguments must be provided, which is not the case.'
-     MSG_BUG(message)
+     msg='If dtset is not provided, all the other optional arguments must be provided, which is not the case!'
+     MSG_BUG(msg)
    endif
  endif
 
@@ -185,7 +190,6 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
  if(present(intxc))     xcdata%intxc=intxc
  if(present(ixc))       xcdata%ixc=ixc
  if(present(nspden))    xcdata%nspden=nspden
- if(present(usekden))   xcdata%usekden=usekden
  if(present(vdw_xc))    xcdata%vdw_xc=vdw_xc
 
  if(present(hyb_mixing))xcdata%hyb_mixing=hyb_mixing
@@ -194,13 +198,17 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
  if(present(xc_denpos)) xcdata%xc_denpos=xc_denpos
 
 !Compute xclevel
- call get_xclevel(xcdata%ixc,xclevel,usefock=usefock)
- xcdata%xclevel=xclevel
- xcdata%usefock=usefock
+ call get_xclevel(xcdata%ixc,xcdata%xclevel,usefock=xcdata%usefock)
+
+!Compute usegradient,uselaplacian,usekden
+ nspden_updn=min(xcdata%nspden,2)
+ call size_dvxc(xcdata%ixc,1,nspden_updn,usegradient=xcdata%usegradient,&
+&               uselaplacian=xcdata%uselaplacian,usekden=xcdata%usekden)
 
 end subroutine xcdata_init
 !!***
 
+!----------------------------------------------------------------------
 
 !!****f* m_xcdata/get_xclevel
 !! NAME
@@ -240,43 +248,45 @@ subroutine get_xclevel(ixc,xclevel,usefock)
 
 ! *************************************************************************
 
- xclevel=0
+ xclevel=0 ; if(present(usefock)) usefock=0
  if( ( 1<=ixc .and. ixc<=10).or.(30<=ixc .and. ixc<=39).or.(ixc==50) )xclevel=1 ! LDA
  if( (11<=ixc .and. ixc<=19).or.(23<=ixc .and. ixc<=29).or. ixc==1402000)xclevel=2 ! GGA
  if( 20<=ixc .and. ixc<=22 )xclevel=3 ! ixc for TDDFT kernel tests
  if(present(usefock))then
-   usefock=0
    if( ixc>=40 .and. ixc<=42 )usefock=1 ! Hartree-Fock or internal hybrid functionals
  endif
+ if( ixc>=31 .and. ixc<=35)xclevel=2 ! ixc for internal fake mGGA
  if( ixc>=41 .and. ixc<=42)xclevel=2 ! ixc for internal hybrids using GGA
- if (ixc<0) then                                  ! libXC: metaGGA and hybrid functionals
+ if (ixc<0) then                     ! libXC: metaGGA and hybrid functionals
    xclevel=1
    do isiz=1,2
 !    ixc has ABINIT sign convention
 !    ii has Libxc sign convention
      if (isiz==1) ii=-ixc/1000
      if (isiz==2) ii=-ixc-ii*1000
+     if (ii<=0) cycle
      jj=libxc_functionals_family_from_id(ii)
      if (jj==XC_FAMILY_GGA    .or.jj==XC_FAMILY_MGGA) xclevel=2
-     if (jj==XC_FAMILY_HYB_GGA.or.jj==XC_FAMILY_HYB_MGGA) then
-       xclevel=2
-       if(present(usefock))then
-         usefock=1
-       endif
-       if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
-         write(message, '(a,i8,3a,i8,2a,2i8,2a)' )&
-&         'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
-&         'XC_FAMILY_HYB_GGA=',XC_FAMILY_HYB_GGA,ch10,&
-&         'ii,jj=',ii,jj,ch10,&
-&         'Action: try another hybrid functional.'
-         MSG_ERROR(message)
+     if (jj==XC_FAMILY_HYB_GGA.or.jj==XC_FAMILY_HYB_MGGA) xclevel=2
+     if (present(usefock)) then
+       if (libxc_functionals_is_hybrid_from_id(ii)) usefock=1
+       if (usefock==1) then
+         if (.not.libxc_functionals_gga_from_hybrid(hybrid_id=ii)) then
+           write(message, '(a,i8,3a,2i8,2a)' )&
+&           'ixc=',ixc,' (libXC hybrid functional) is presently not allowed.',ch10,&
+&           'ii,jj=',ii,jj,ch10,&
+&           'Action: try another hybrid functional.'
+           MSG_ERROR(message)
+         end if
        end if
-     end if
+     end if 
    end do
  end if
 
 end subroutine get_xclevel
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_xcdata/get_auxc_ixc
 !! NAME

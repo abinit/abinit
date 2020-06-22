@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psps
 !! NAME
 !!  m_psps
@@ -8,7 +7,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -441,7 +440,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
        do ii=1,size(psps%nctab)
          call nctab_free(psps%nctab(ii))
        end do
-       ABI_DT_FREE(psps%nctab)
+       ABI_FREE(psps%nctab)
      end if
    end if
    if (idtset/=1 .and. .not.psps%vlspl_recipSpace) then
@@ -455,7 +454,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
    if (psps%usepaw == 0) then
      ! If you change usepaw in the input, you will get what you deserve!
-     ABI_DT_MALLOC(psps%nctab, (dtset%ntypat))
+     ABI_MALLOC(psps%nctab, (dtset%ntypat))
      do itypat=1,dtset%ntypat
        call nctab_init(psps%nctab(itypat), psps%mqgrid_vl, .False., .False.)
      end do
@@ -567,7 +566,7 @@ subroutine psps_free(psps)
    do ii=1,size(psps%nctab)
      call nctab_free(psps%nctab(ii))
    end do
-   ABI_DT_FREE(psps%nctab)
+   ABI_FREE(psps%nctab)
  end if
 
 end subroutine psps_free
@@ -1262,7 +1261,7 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  nctab%dncdq0 = zero; nctab%d2ncdq0 = zero
  ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
  nctab%tcorespl = zero
- 
+
  ! tvalespl is allocated only if available.
  nctab%has_tvale = has_tvale
  nctab%dnvdq0 = zero

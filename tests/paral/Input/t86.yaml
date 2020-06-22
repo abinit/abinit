@@ -3,27 +3,27 @@ tol_vec: 1.0e-5
 
 ks:
     # tolvrs 1.0e-7
-    tol_abs: 5.0e-7
-    tol_rel: 5.0e-7
+    tol_abs: 5.0e-6
+    tol_rel: 5.0e-6
     ResultsGS!:
         convergence:
             ceil: 1.0e-6
-        stress_tensor:
+        cartesian_stress_tensor:
             tol_vec: 1.0e-7
 
-    EtotSteps:
-        data:
-            callback:
-                method: last_iter
-                tol_iter: 3
-                Etot(hartree):
-                    tol: 1.0e-7
-                deltaE(h):
-                    ceil: 2.0e-8
-                residm:
-                    ceil: 5.0e-7
-                nres2:
-                    ceil: 2.0e-8
+#    EtotSteps:
+#        data:
+#            callback:
+#                method: last_iter
+#                tol_iter: 3
+#                Etot(hartree):
+#                    tol: 1.0e-7
+#                deltaE(h):
+#                    ceil: 2.0e-8
+#                residm:
+#                    ceil: 5.0e-7
+#                nres2:
+#                    ceil: 2.0e-8
 
 dmft:
     tol_abs: 2.0e-8
@@ -38,31 +38,31 @@ dmft:
         fermie:
             tol_abs: 1.0e-7
             tol_rel: 1.0e-8
-        stress_tensor:
+        cartesian_stress_tensor:
             ignore: true
     EnergyTerms:
         total_energy_eV:
-            tol_abs: 1.0e-5
+            tol_abs: 1.0e-4
             tol_rel: 1.0e-8
     EnergyTermsDC:
         tol_abs: 1.0e-7
         total_energy_dc_eV:
-            tol_abs: 1.0e-5
+            tol_abs: 1.0e-4
             tol_rel: 1.0e-8
 
-    EtotSteps:
-        data:
-            callback:
-                method: last_iter
-                tol_iter: 3
-                Etot(hartree):
-                    tol: 1.0e-7
-                deltaE(h):
-                    ceil: 2.0e-4
-                residm:
-                    ceil: 1.0e-12
-                nres2:
-                    ceil: 2.0e-1
+#    EtotSteps:
+#        data:
+#            callback:
+#                method: last_iter
+#                tol_iter: 3
+#                Etot(hartree):
+#                    tol: 1.0e-7
+#                deltaE(h):
+#                    ceil: 2.0e-4
+#                residm:
+#                    ceil: 1.0e-12
+#                nres2:
+#                    ceil: 2.0e-1
 
 
 filters:

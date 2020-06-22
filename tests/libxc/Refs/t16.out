@@ -2,7 +2,7 @@
 .Version 6.8.1  of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -295,7 +295,7 @@ P           mkmem           3
  Self-Consistent on Energies and Wavefunctions
 
  k =    0.000   0.000   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+ Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
     1    -4.847   -10.718    -4.847     5.870   -16.392     6.613     1.000     0.000    -9.779     0.938    -3.909    -3.936
     2     6.658   -12.341     6.658    18.999   -13.847     2.897     1.000     0.000   -10.949     1.392     8.050     8.044
     3     6.658   -12.341     6.658    18.999   -13.847     2.895     1.000     0.000   -10.952     1.390     8.048     8.047
@@ -317,7 +317,7 @@ P           mkmem           3
 
 
  k =    0.500   0.000   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+ Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
     1    -2.512   -11.195    -2.512     8.683   -15.929     5.207     1.000     0.000   -10.722     0.473    -2.039    -2.049
     2     0.096   -10.455     0.096    10.552   -13.831     3.536     1.000     0.000   -10.295     0.160     0.257     0.214
     3     5.554   -11.868     5.554    17.422   -13.658     2.981     1.000     0.000   -10.677     1.191     6.745     6.713
@@ -339,7 +339,7 @@ P           mkmem           3
 
 
  k =    0.500   0.500   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+ Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
     1    -0.738   -11.213    -0.738    10.474   -15.138     4.006     1.000     0.000   -11.132     0.081    -0.657    -0.701
     2    -0.738   -11.213    -0.738    10.474   -15.138     3.984     1.000     0.000   -11.153     0.059    -0.679    -0.675
     3     3.993   -11.163     3.993    15.156   -13.345     3.087     1.000     0.000   -10.258     0.904     4.898     4.843

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ioarr
 !! NAME
 !! m_ioarr
@@ -11,7 +10,7 @@
 !!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +50,7 @@ MODULE m_ioarr
  use defs_wvltypes,   only : wvl_denspot_type
  use m_time,          only : cwtime, cwtime_report
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
- use m_fstrings,      only : sjoin, itoa, endswith
+ use m_fstrings,      only : sjoin, itoa, endswith, ltoa
  use m_numeric_tools, only : interpolate_denpot
  use m_geometry,      only : metric
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
@@ -913,7 +912,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 
 !Local variables-------------------------------
 !!scalars
- integer :: timrev,mband
+ integer :: mband
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
 !arrays
@@ -921,8 +920,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 
 ! *************************************************************************
 
- timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
- crystal = hdr%get_crystal(timrev)
+ crystal = hdr%get_crystal()
 
  if (present(eigen)) then
      mband = maxval(hdr%nband)
@@ -1070,10 +1068,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     if (fform /= fform_den) then
-       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file. fform: ',fform,", expecting: ", fform_den
-       MSG_WARNING(msg)
-     end if
+     !if (fform /= fform_den) then
+     !  write(msg, "(3a, 2(a, i0))")' File: ',trim(my_fname),ch10,' is not a density file. fform: ',fform,", expecting: ", fform_den
+     !  MSG_WARNING(msg)
+     !end if
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
        cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1
@@ -1095,10 +1093,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     if (fform /= fform_den) then
-       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
-       MSG_WARNING(msg)
-     end if
+     !if (fform /= fform_den) then
+     !  write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
+     !  MSG_WARNING(msg)
+     !end if
 
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
@@ -1122,28 +1120,9 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
    if (need_interp .and. allow_interp__) then
-     MSG_COMMENT("Real space meshes (DEN file, input rhor) are different. Will interpolate rhor(r).")
-
-#if 0
-     ABI_CHECK(cplex == 1, "cplex != 1 not coded!")
-     ngfft_file(1:3) = ohdr%ngfft(1:3)
-     ngfft_file(4) = 2*(ngfft_file(1)/2)+1 ! 4:18 are used in fourdp
-     ngfft_file(5) = 2*(ngfft_file(2)/2)+1
-     ngfft_file(6) = ngfft_file(3)
-     ngfft_file(7:18) = ngfft(7:18)
-     optin  = 0 ! Input is taken from rhor
-     optout = 0 ! Output is only in real space
-
-     ! Fake MPI_type for the sequential part.
-     !call initmpi_seq(MPI_enreg_seq)
-     !call init_distribfft_seq(MPI_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
-     !call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
-
-     call fourier_interpol(cplex,ohdr%nspden,optin,optout,nfftot_file,ngfft_file,nfft,ngfft,&
-       mpi_enreg,rhor_file,orhor,rhogdum,rhogdum)
-
-     !call destroy_mpi_enreg(MPI_enreg_seq)
-#endif
+     msg = sjoin("Different FFT meshes. Caller:", ltoa(ngfft(1:3)), &
+                 ". File: ", ltoa(ohdr%ngfft(1:3)), ". Will interpolate rhor(r).")
+     MSG_COMMENT(msg)
 
      ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))
      call interpolate_denpot(cplex, ohdr%ngfft(1:3), ohdr%nspden, rhor_file, ngfft(1:3), rhor_tmp)
@@ -1170,7 +1149,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    ! Read PAW Rhoij
    if (ohdr%usepaw == 1) then
-     ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
+     ABI_MALLOC(pawrhoij_file, (ohdr%natom))
      call pawrhoij_nullify(pawrhoij_file)
      call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
          ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
@@ -1202,7 +1181,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    ! Eventually copy (or distribute) PAW data
    if (ohdr%usepaw == 1 .and. pawread == 1) then
      if (my_rank /= master) then
-       ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
+       ABI_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
        call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
             ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
@@ -1246,7 +1225,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
            mybase  = 1 + cplex * (n1 * (i2-1 + n2*(i3_local-1)))
            globase = 1 + cplex * (n1 * (i2-1 + n2*(i3-1)))
            call denpot_spin_convert(rhor_file,ohdr%nspden,orhor,nspden,fform,&
-&                  istart_in=globase,istart_out=mybase,nelem=n1*cplex)
+                                    istart_in=globase,istart_out=mybase,nelem=n1*cplex)
          end do
        end do
      end if
@@ -1263,7 +1242,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
  if (allocated(pawrhoij_file)) then
    call pawrhoij_free(pawrhoij_file)
-   ABI_DT_FREE(pawrhoij_file)
+   ABI_FREE(pawrhoij_file)
  end if
 
 ! Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
