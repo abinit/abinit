@@ -2259,7 +2259,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        do ifreqs=1,order_int
          Sigp%omegasi(ifreqs)=cmplx(zero,freqs(ifreqs))
          Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
-         write(msg,'(3f10.5)') Sr%omega_i(ifreqs),weights(ifreqs)
+         write(msg,'(3f17.5)') Sr%omega_i(ifreqs),weights(ifreqs)
          call wrtout(std_out,msg,'COLL')
        enddo
      endif
