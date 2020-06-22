@@ -324,7 +324,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
 !************************************************************************
  DBG_ENTER("COLL")
 
- ! MRM BSt occ are changed and never recoverd
+ ! BSt occ are changed and never recoverd
  do ikpoint=1,BSt%nkpt
    BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
  enddo
@@ -333,7 +333,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
    !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver.F90
    MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
  endif
- ! MRM change occs in Header Hdr
+ ! change occs in Header Hdr
  ! Update occ in Hdr before printing
  ib1dm=1
  do ikpoint=1,BSt%nkpt
@@ -409,7 +409,7 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
    enddo
  enddo
 
- ! Print for debug
+ ! Print diagonal elements for debug
  write(msg,'(a4)') 'MAU1'
  call wrtout(std_out,msg,'COLL')
  do ib1dm=ib1,ib2
@@ -496,7 +496,7 @@ pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
    end do
  end do
 
- eh_energy=0.5d0*eh_energy
+ eh_energy=half*eh_energy
 
 end function me_get_haene
 !!***
@@ -582,7 +582,7 @@ end module m_gwrdm
 !   !write(*,*) ' ' !Space for debug
 ! enddo
 !
-! ! MRM BSt occ are changed and never recoverd
+! ! BSt occ are changed and never recoverd
 ! MSG_COMMENT("QP_BSt occupancies correctly updated with nat. orb. ones")
 ! do ikpoint=1,BSt%nkpt
 !   BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
@@ -591,7 +591,7 @@ end module m_gwrdm
 !   !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver.F90
 !   MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
 ! endif
-! ! MRM change occs in Header Hdr
+! ! Change occs in Header Hdr
 ! ! Update occ in Hdr before printing
 ! MSG_COMMENT("Hdr_sigma occupancies correctly updated with nat. orb. ones")
 ! ib1dm=1

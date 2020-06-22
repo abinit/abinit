@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
  use m_spacepar,          only : hartre
- use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,rotate_hartree,me_get_haene
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,rotate_hartree,me_get_haene!,rot2
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
  implicit none
