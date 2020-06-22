@@ -1997,6 +1997,9 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                        duqduchern_term = cprefac*cmplx((dotr+kk_paw(1,iband,iband)),(doti+kk_paw(2,iband,iband)))
                        duqdumag_term = duqduchern_term*ENK
                        
+                       ! write(std_out,'(a,6i4,3es16.8)')'JWZ debug iband gfor bfor epsabg adir ikpt_loc ENK duterm ',&
+                       !      & iband,gfor,bfor,epsabg,adir,ikpt_loc,ENK,real(duqdumag_term),aimag(duqdumag_term)
+                       
                        duqduchern(1,adir) = duqduchern(1,adir) + real(duqduchern_term)
                        duqduchern(2,adir) = duqduchern(2,adir) + aimag(duqduchern_term)
                        duqdumag(1,adir) = duqdumag(1,adir) + real(duqdumag_term)
@@ -3367,11 +3370,11 @@ end subroutine udsqdu_gamma
 
 
 subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-     & nband_k,npwarr,paw_ij,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
+     & nband_k,nband_occ,npwarr,paw_ij,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcg,mcprj,nband_k
+  integer,intent(in) :: mcg,mcprj,nband_k,nband_occ
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_type), intent(inout) :: dtorbmag
@@ -3561,13 +3564,13 @@ subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprim
            ABI_ALLOCATE(svectout,(2,npw_k))
            ABI_ALLOCATE(svectoutp,(2,npw_k))
            ABI_ALLOCATE(cwavefp,(2,npw_k))
-           do iband = 1, nband_k
+           do iband = 1, nband_occ
 
               ENK = energies(iband,ikpt)
               svectout(1:2,1:npw_k) = svect(1:2,gdir,(iband-1)*npw_k+1:iband*npw_k)
               svectoutp(1:2,1:npw_k) = svect(1:2,bdir,(iband-1)*npw_k+1:iband*npw_k)
 
-              do jband = 1, nband_k
+              do jband = 1, nband_occ
 
                  cwavefp(1:2,1:npw_k) = cg(1:2,icg+(jband-1)*npw_k+1:icg+jband*npw_k)
 
@@ -3586,8 +3589,8 @@ subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprim
                  cnum_udsdsu(1,adir) = cnum_udsdsu(1,adir) + real(udsdsu_term)
                  cnum_udsdsu(2,adir) = cnum_udsdsu(2,adir) + aimag(udsdsu_term)
 
-              end do !end loop over jband
-           end do ! end loop over iband
+              end do !end loop over occupied jband
+           end do ! end loop over occupied iband
            ABI_DEALLOCATE(svectout)
            ABI_DEALLOCATE(svectoutp)
            ABI_DEALLOCATE(cwavefp)
@@ -3654,11 +3657,11 @@ end subroutine udsdsu
 !!
 !! SOURCE
 
-subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
+subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,nband_occ,onsite_l_k,pawrad,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: idir,nband_k
+  integer,intent(in) :: idir,nband_k,nband_occ
   complex(dpc),intent(out) :: onsite_l_k
   type(dataset_type),intent(in) :: dtset
 
@@ -3698,7 +3701,8 @@ subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
               ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
               call simp_gen(intg,ff,pawrad(itypat))
-              do nn = 1, nband_k
+              ! only sum over the occupied bands
+              do nn = 1, nband_occ
                  cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
                  cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
                  onsite_l_k=onsite_l_k+conjg(cpb)*half*orbl_me*intg*cpk
@@ -3742,11 +3746,11 @@ end subroutine make_onsite_l_k
 !!
 !! SOURCE
 
-subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_l,pawrad,pawtab)
+subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,nband_occ,onsite_l,pawrad,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: idir,mcprj,nband_k
+  integer,intent(in) :: idir,mcprj,nband_k,nband_occ
   complex(dpc),intent(out) :: onsite_l
   type(MPI_type), intent(inout) :: mpi_enreg
   type(dataset_type),intent(in) :: dtset
@@ -3798,7 +3802,7 @@ subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_
      call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprj,ikpt_loc,0,isppol,dtset%mband,&
           &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
 
-     call make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
+     call make_onsite_l_k(cprj_k,dtset,idir,nband_k,nband_occ,onsite_l_k,pawrad,pawtab)
      onsite_l = onsite_l + onsite_l_k
 
   end do
@@ -3847,12 +3851,12 @@ end subroutine make_onsite_l
 !!
 !! SOURCE
 
-subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_bm,&
+subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,nband_occ,onsite_bm,&
      & pawang,pawrad,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: idir,mcprj,nband_k
+  integer,intent(in) :: idir,mcprj,nband_k,nband_occ
   complex(dpc),intent(out) :: onsite_bm
   type(MPI_type), intent(inout) :: mpi_enreg
   type(pawang_type),intent(in) :: pawang
@@ -3992,7 +3996,7 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
                     end select
                  end if ! end check on nonzero gaunt integral
               end do ! end loop over lp,mp
-              do nn = 1, nband_k
+              do nn = 1, nband_occ
                  cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
                  cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
                  onsite_bm=onsite_bm+conjg(cpb)*(bm1-bm2)*cpk
@@ -4086,7 +4090,7 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
  !Local variables -------------------------
  !scalars
  integer :: cpopt,dimffnl,eeig_size,exchn2n3d
- integer :: ierr,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
+ integer :: iband,ierr,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
  integer :: me,my_nspinor,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn
  integer :: nproc,npw_k,npw_k_,prtvol,sij_opt,spaceComm,tim_getghc,type_calc
  logical :: has_vectornd
@@ -4287,6 +4291,12 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     ABI_DEALLOCATE(buffer2)
  end if
 
+ ! do ikpt = 1, dtset%nkpt
+ !    do iband = 1, nband_k
+ !       write(std_out,'(a,2i4,es16.8)')'JWZ debug ikpt iband energy ',ikpt,iband,eeig(iband,ikpt)
+ !    end do
+ ! end do
+
  call gs_hamk%free()
  ABI_DEALLOCATE(vlocal)
  if(has_vectornd) then
@@ -4337,11 +4347,11 @@ end subroutine make_eeig
 !! SOURCE
 
 subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
-     & mcprj,mpi_enreg,nattyp,nband_k,pawtab,S1trace)
+     & mcprj,mpi_enreg,nattyp,nband_k,nband_occ,pawtab,S1trace)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: adir,mcprj,nband_k
+  integer,intent(in) :: adir,mcprj,nband_k,nband_occ
   complex(dpc),intent(out) :: S1trace
   type(MPI_type), intent(inout) :: mpi_enreg
   type(dataset_type),intent(in) :: dtset
@@ -4398,7 +4408,7 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
            gdir = modulo(adir,3)+1
         end if
 
-        do nn = 1, nband_k
+        do nn = 1, nband_occ
            ENK = eeig(nn,ikpt)
            do iatom=1,dtset%natom
               itypat=dtset%typat(iatom)
@@ -4411,7 +4421,7 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
                  end do ! end loop over jlmn
               end do ! end loop over ilmn
            end do ! end loop over atoms
-        end do ! end loop over bands
+        end do ! end loop over occupied bands
      end do ! end loop over epsabg
 
      icprj = icprj + nband_k
@@ -4461,11 +4471,11 @@ end subroutine make_S1trace
 !! SOURCE
 
 subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
-     & nattyp,nband_k,paw_ij,pawtab,rhorij1)
+     & nattyp,nband_k,nband_occ,paw_ij,pawtab,rhorij1)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: adir,mcprj,nband_k
+  integer,intent(in) :: adir,mcprj,nband_k,nband_occ
   complex(dpc),intent(out) :: rhorij1
   type(MPI_type), intent(inout) :: mpi_enreg
   type(dataset_type),intent(in) :: dtset
@@ -4521,7 +4531,7 @@ subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
            gdir = modulo(adir,3)+1
         end if
 
-        do nn = 1, nband_k
+        do nn = 1, nband_occ
            do iatom=1,dtset%natom
               itypat=dtset%typat(iatom)
               do ilmn=1,pawtab(itypat)%lmn_size
@@ -4539,7 +4549,7 @@ subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
                  end do ! end loop over jlmn
               end do ! end loop over ilmn
            end do ! end loop over atoms
-        end do ! end loop over bands
+        end do ! end loop over occupied bands
      end do ! end loop over epsabg
 
      icprj = icprj + nband_k
@@ -4852,7 +4862,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,isppol,istwf_k,my_nspinor,nband_k,npw_k,ncpgr
+ integer :: adir,isppol,istwf_k,my_nspinor,nband_k,nband_occ,npw_k,ncpgr
  real(dp) :: chernnorm,magnorm,ucvol
  complex(dpc) :: onsite_bm_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
 
@@ -4875,8 +4885,10 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
  ! TODO: generalize to nsppol > 1
  isppol = 1
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- nband_k = dtorbmag%mband_occ
+ nband_k = dtset%mband
  istwf_k = 1
+
+ nband_occ = dtorbmag%mband_occ
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -4962,20 +4974,20 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
 
     do adir = 1, 3
 
-       call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_l_dir,pawrad,pawtab)
+       call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,nband_occ,onsite_l_dir,pawrad,pawtab)
        onsite_l(1,adir) = real(onsite_l_dir)
        onsite_l(2,adir) = aimag(onsite_l_dir)
 
-       call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,pawtab,s1trace_dir)
+       call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,nband_occ,pawtab,s1trace_dir)
        s1trace(1,adir) = real(s1trace_dir)
        s1trace(2,adir) = aimag(s1trace_dir)
 
-       call make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,nband_k,paw_ij,pawtab,rhorij1_dir)
+       call make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,nband_k,nband_occ,paw_ij,pawtab,rhorij1_dir)
        rhorij1(1,adir) = real(rhorij1_dir)
        rhorij1(2,adir) = aimag(rhorij1_dir)
 
        if (any(abs(dtset%nucdipmom)>tol8)) then
-          call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_bm_dir,&
+          call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,nband_occ,onsite_bm_dir,&
                & pawang,pawrad,pawtab)
           onsite_bm(1,adir) = real(onsite_bm_dir)
           onsite_bm(2,adir) = aimag(onsite_bm_dir)
@@ -4994,9 +5006,10 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
     VVI=half*udsqdumag
 
     call udsdsu(atindx1,cg,VVII_udsdsu,cprj,dtorbmag,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-         & nband_k,npwarr,paw_ij,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
+         & nband_k,nband_occ,npwarr,paw_ij,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
 
-    VVII=half*(duqdumag - VVII_udsdsu) ! check this
+    ! VVII=half*(duqdumag - VVII_udsdsu) ! check this
+    VVII=half*duqdumag
 
     VVIII=half*udsqdumag
     
@@ -6810,7 +6823,7 @@ subroutine orbmag_rho(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !scalars
  integer :: adir,bdx,gdxstor
  integer :: isppol,istwf_k,my_nspinor
- integer :: nband_k,ncpgr,ncpgrb
+ integer :: nband_k,nband_occ,ncpgr,ncpgrb
  real(dp) :: ucvol,finish_time,start_time
  complex(dpc) :: CCI_dir,VVI_dir,VVII_dir
  complex(dpc) :: CCIV_dir,dpds_dir,onsite_bm_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
@@ -6837,6 +6850,8 @@ subroutine orbmag_rho(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  nband_k = dtorbmag%mband_occ
  istwf_k = 1
+
+ nband_occ = dtorbmag%mband_occ
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -6932,20 +6947,20 @@ subroutine orbmag_rho(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     write(std_out,'(a)')' orbmag progress: looping over B directions, step 6 of 6'
     do adir = 1, 3
 
-       call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_l_dir,pawrad,pawtab)
+       call make_onsite_l(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,nband_occ,onsite_l_dir,pawrad,pawtab)
        onsite_l(1,adir) = real(onsite_l_dir)
        onsite_l(2,adir) = aimag(onsite_l_dir)
 
-       call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,pawtab,s1trace_dir)
+       call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,nband_occ,pawtab,s1trace_dir)
        s1trace(1,adir) = real(s1trace_dir)
        s1trace(2,adir) = aimag(s1trace_dir)
 
-       call make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,nband_k,paw_ij,pawtab,rhorij1_dir)
+       call make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,nattyp,nband_k,nband_occ,paw_ij,pawtab,rhorij1_dir)
        rhorij1(1,adir) = real(rhorij1_dir)
        rhorij1(2,adir) = aimag(rhorij1_dir)
 
        if (any(abs(dtset%nucdipmom)>tol8)) then
-          call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,onsite_bm_dir,&
+          call make_onsite_bm(atindx1,cprj,dtset,adir,mcprj,mpi_enreg,nband_k,nband_occ,onsite_bm_dir,&
                & pawang,pawrad,pawtab)
           onsite_bm(1,adir) = real(onsite_bm_dir)
           onsite_bm(2,adir) = aimag(onsite_bm_dir)
