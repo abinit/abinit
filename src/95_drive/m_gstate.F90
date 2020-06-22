@@ -845,22 +845,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) xred_old=xred
 
 !Initialize (eventually) hightemp object
- if(dtset%useria==6661) then
+ if(dtset%use_hightemp>=1) then
    ABI_DATATYPE_ALLOCATE(hightemp,)
-   if(dtset%mband<25) then
-     write(message, '(a,i0,a)' )&
-&     "Not enough bands to activate hightemp routines: nband=",dtset%nband,&
-&     " < 25. Action: Increase nband."
+   if(dtset%mband<dtset%ht_nbcut) then
+     write(message,'(a,i0,a,i0,a)') "Not enough bands to activate hightemp routines: nband=",dtset%mband,&
+&     " < ht_nbcut=",dtset%ht_nbcut,". Action: Increase nband or decrease ht_nbcut."
      MSG_ERROR(message)
    else
-     call hightemp%init(dtset%useric,dtset%mband,dtset%userib,rprimd)
-     ! hightemp module version
-     if(dtset%userie >= 0) then
-       hightemp%version=dtset%userie
-     end if
-     if(dtset%userid==6661) then
-       hightemp%prt_cg=.TRUE.
-     end if
+     call hightemp%init(dtset%mband,dtset%ht_nbcut,dtset%ht_prt_cg,rprimd,&
+&     dtset%use_hightemp)
    end if
  end if
 
@@ -1656,7 +1649,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call data4entropyDMFT_destroy(paw_dmft%forentropyDMFT)
  end if
 
- if(dtset%useria==6661) then
+ if(associated(hightemp)) then
    call hightemp%destroy()
    ABI_DATATYPE_DEALLOCATE(hightemp)
  end if

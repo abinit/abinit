@@ -2167,20 +2167,22 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 & xccc3d,xcctau3d,xred,ylm,ylmgr,dtset%charge*SUM(vpotzero(:)),conv_retcode)
 
 
-!blanchet write eigocc file with pressure
-if(associated(hightemp)) then
-  call hightemp_prt_eigocc(hightemp%e_kin_freeel,hightemp%e_shiftfactor,eigen,&
-  & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
-  & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
-  & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-  & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
-else
-  call hightemp_prt_eigocc(zero,zero,eigen,&
-  & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
-  & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
-  & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-  & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
-end if
+!blanchet write eigocc output file
+ if(dtset%ht_prt_eigocc==1) then
+   if(associated(hightemp)) then
+     call hightemp_prt_eigocc(hightemp%e_kin_freeel,hightemp%e_shiftfactor,eigen,&
+     & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
+     & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
+     & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+     & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
+   else
+     call hightemp_prt_eigocc(zero,zero,eigen,&
+     & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
+     & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
+     & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+     & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
+   end if
+ end if
 
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)

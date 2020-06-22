@@ -224,6 +224,9 @@ type, public :: dataset_type
  integer :: gwpara
  integer :: hmcsst
  integer :: hmctt
+ integer :: ht_nbcut = 25
+ integer :: ht_prt_cg = 0
+ integer :: ht_prt_eigocc = 0
  integer :: iboxcut
  integer :: icoulomb
  integer :: icsing
@@ -515,6 +518,7 @@ type, public :: dataset_type
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
+ integer :: use_hightemp = 0
  integer :: use_yaml = 0
  integer :: use_slk
  integer :: vacnum
@@ -645,6 +649,7 @@ type, public :: dataset_type
  real(dp) :: gwencomp
  real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gw_toldfeig
+ real(dp) :: ht_gcut
  real(dp) :: hyb_mixing
  real(dp) :: hyb_mixing_sr
  real(dp) :: hyb_range_dft
@@ -1510,6 +1515,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_correlation     = dtin%gwls_correlation
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
+ dtout%ht_gcut              = dtin%ht_gcut
+ dtout%ht_nbcut             = dtin%ht_nbcut
+ dtout%ht_prt_cg            = dtin%ht_prt_cg
+ dtout%ht_prt_eigocc        = dtin%ht_prt_eigocc
  dtout%hyb_mixing      = dtin%hyb_mixing
  dtout%hyb_mixing_sr   = dtin%hyb_mixing_sr
  dtout%hyb_range_dft   = dtin%hyb_range_dft
@@ -1796,6 +1805,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
+ dtout%use_hightemp       = dtin%use_hightemp
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -3134,6 +3144,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
 !H
+ list_vars=trim(list_vars)//' ht_gcut ht_nbcut ht_prt_cg ht_prt_eigocc'
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
@@ -3258,7 +3269,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk use_yaml'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_slk use_hightemp use_yaml'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'

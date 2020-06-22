@@ -410,7 +410,7 @@ contains
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_it(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1) 
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1)
 
 
 !plowan_iatom
@@ -1166,6 +1166,9 @@ contains
 
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
+
+ intarr(1,:)=dtsets(:)%use_hightemp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_hightemp','INT',0)
 
  intarr(1,:)=dtsets(:)%use_yaml
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)

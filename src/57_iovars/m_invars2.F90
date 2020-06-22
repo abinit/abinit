@@ -449,6 +449,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%gwls_first_seed=dtset%gwls_band_index
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_gcut',tread,'DPR')
+ if(tread==1) dtset%ht_gcut=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_nbcut',tread,'INT')
+ if(tread==1) dtset%ht_nbcut=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_prt_cg',tread,'INT')
+ if(tread==1) dtset%ht_prt_cg=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ht_prt_eigocc',tread,'INT')
+ if(tread==1) dtset%ht_prt_eigocc=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)
 
@@ -716,6 +728,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_hightemp',tread,'INT')
+ if(tread==1) dtset%use_hightemp=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
  if(tread==1) dtset%use_yaml=intarr(1)

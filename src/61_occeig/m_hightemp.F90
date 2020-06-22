@@ -44,7 +44,7 @@ module m_hightemp
   implicit none
 
   type,public :: hightemp_type
-    integer :: bcut,ioptden,nbcut,version,delta_n
+    integer :: bcut,nbcut,version
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,e_ent_freeel
     real(dp) :: nfreeel,e_shiftfactor,ucvol
     logical :: prt_cg
@@ -83,12 +83,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine init(this,ioptden,mband,nbcut,rprimd)
+  subroutine init(this,mband,nbcut,prt_cg,rprimd,version)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
-    integer,intent(in) :: ioptden,mband,nbcut
+    integer,intent(in) :: mband,nbcut,version,prt_cg
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -98,18 +98,20 @@ contains
 
     ! *********************************************************************
 
-    this%ioptden=ioptden
     this%bcut=mband
     this%nbcut=nbcut
-    this%version=0
+    this%version=version
     this%ebcut=zero
-    this%delta_n=20
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%e_ent_freeel=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
-    this%prt_cg=.false.
+    if(prt_cg==1) then
+      this%prt_cg=.true.
+    else
+      this%prt_cg=.false.
+    end if
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
 
@@ -121,17 +123,16 @@ contains
 
     ! *********************************************************************
 
-    this%ioptden=0
     this%bcut=0
     this%nbcut=0
-    this%version=0
-    this%delta_n=0
+    this%version=1
     this%ebcut=zero
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%e_ent_freeel=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
+    this%prt_cg=.false.
     this%ucvol=zero
   end subroutine destroy
 
@@ -188,13 +189,13 @@ contains
     ! do isppol=1,nsppol
     !   do ikpt=1,nkpt
     !     nband_k=nband(ikpt+(isppol-1)*nkpt)
-    !     do ii=nband_k-this%delta_n+1,nband_k
+    !     do ii=nband_k-this%nbcut+1,nband_k
     !       this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
     !     end do
     !     band_index=band_index+nband_k
     !   end do
     ! end do
-    ! this%e_shiftfactor=this%e_shiftfactor/this%delta_n
+    ! this%e_shiftfactor=this%e_shiftfactor/this%nbcut
     ! write(0,*) 'eknk_new', this%e_shiftfactor
 
     ! U_{HEG_0}
@@ -204,20 +205,20 @@ contains
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
-          do ii=nband_k-this%delta_n+1,nband_k
+          do ii=nband_k-this%nbcut+1,nband_k
             this%e_shiftfactor=this%e_shiftfactor+wtk(ikpt)*(eigen(band_index+ii)-hightemp_e_heg(dble(ii),this%ucvol))
           end do
           band_index=band_index+nband_k
         end do
       end do
-      this%e_shiftfactor=this%e_shiftfactor/this%delta_n
+      this%e_shiftfactor=this%e_shiftfactor/this%nbcut
       this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
       ! write(0,*) this%ebcut, eigen(this%bcut*nkpt*nsppol)
       ! write(0,*) 'eheg_new', this%e_shiftfactor
     end if
 
     ! U_{LEGACY_0}
-    if(this%version==0) then
+    if(this%version==2) then
       eigentemp(:)=zero
       eknktemp(:)=zero
       mk(:)=.true.
@@ -228,10 +229,10 @@ contains
         eigentemp(ii)=eigen(krow)
         eknktemp(ii)=eknk(krow)
       end do
-      ! Doing the average over the this%delta_n lasts states...
+      ! Doing the average over the this%nbcut lasts states...
       niter=0
       this%e_shiftfactor=zero
-      do ii=this%bcut*nkpt*nsppol-this%delta_n+1,this%bcut*nkpt*nsppol
+      do ii=this%bcut*nkpt*nsppol-this%nbcut+1,this%bcut*nkpt*nsppol
         this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
         niter=niter+1
       end do
@@ -274,7 +275,7 @@ contains
 
     call hightemp_get_nfreeel_approx(this%e_shiftfactor,this%ebcut,&
     & fermie,this%bcut,this%nfreeel,tsmear,this%ucvol,this%version)
-    write(0,*) "nfreeel=",this%nfreeel
+    ! write(0,*) "nfreeel=",this%nfreeel
     ! write(0,*) this%nfreeel, factor*djp12(xcut,gamma), abs(factor*djp12(xcut,gamma)-this%nfreeel)
   end subroutine compute_nfreeel
 
@@ -386,7 +387,7 @@ contains
     ! *********************************************************************
 
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-    if(this%version==0) then
+    if(this%version==2) then
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
     else if(this%version==1) then
       xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
@@ -394,7 +395,7 @@ contains
     gamma=(fermie-this%e_shiftfactor)/tsmear
 
     this%e_kin_freeel=factor*djp32(xcut,gamma)
-    write(0,*) "e_kin_freeel=",this%e_kin_freeel
+    ! write(0,*) "e_kin_freeel=",this%e_kin_freeel
 
     ! Computation of edc_kin_freeel
     this%edc_kin_freeel=zero

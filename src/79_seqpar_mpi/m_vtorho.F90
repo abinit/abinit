@@ -968,7 +968,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            call hightemp%compute_pw_avg_std(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
   &         dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
   &         dtset%nkpt,npw_k,dtset%nsppol,rprimd)
-         else if((hightemp%version/=1).and.(hightemp%prt_cg)) then
+         else if((hightemp%version==2).and.(hightemp%prt_cg)) then
            call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
 &           dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
 &           dtset%nkpt,npw_k,dtset%nsppol,rprimd)
@@ -1255,19 +1255,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        end if
      end if
 
-!    Blanchet write eigocc file with pressure
-     if(associated(hightemp)) then
-       call hightemp_prt_eigocc(hightemp%e_kin_freeel,hightemp%e_shiftfactor,eigen,&
-       & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
-       & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
-       & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-       & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
-     else
-       call hightemp_prt_eigocc(zero,zero,eigen,&
-       & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
-       & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
-       & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
-       & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
+!    Blanchet write eigocc output file
+     if(dtset%ht_prt_eigocc==1) then
+       if(associated(hightemp)) then
+         call hightemp_prt_eigocc(hightemp%e_kin_freeel,hightemp%e_shiftfactor,eigen,&
+         & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
+         & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
+         & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+         & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
+       else
+         call hightemp_prt_eigocc(zero,zero,eigen,&
+         & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
+         & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
+         & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+         & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
+       end if
      end if
 
 !    !=========  DMFT call begin ============================================
@@ -1810,14 +1812,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if (paral_atom) then
        call pawrhoij_free(pawrhoij_unsym)
        ABI_DATATYPE_DEALLOCATE(pawrhoij_unsym)
-     end if
-   end if
-
-!  Blanchet Add free electron gas contribution to rhor
-   if(associated(hightemp)) then
-     if(hightemp%ioptden==1) then
-       rhor(:,:)=rhor(:,:)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden
-       rhog(1,1)=rhog(1,1)+hightemp%nfreeel/hightemp%ucvol/dtset%nspden/nfftf
      end if
    end if
 
