@@ -4,8 +4,8 @@
 !!
 !! FUNCTION
 !!  Module to compute transport properties using the
-!!  Boltzmann transport equation (BTE) in the relaxation-time approximation.
-!!  Initially for electron mobility limited by electron-phonon scattering.
+!!  Boltzmann transport equation (BTE) in the relaxation-time approximation (RTA).
+!!  Initially for phonon-limited carrier mobility.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2020 ABINIT group (HM)
@@ -72,22 +72,24 @@ module m_rta
 type,public :: rta_t
 
    integer :: nsppol
-   ! number of independent spin polarizations
+   ! number of independent spin polarizations.
 
    integer :: nspinor
-   ! number of spinorial components
+   ! number of spinorial components.
 
    integer :: ntemp
-   ! number of temperatures
+   ! number of temperatures.
 
    integer :: ndop
    ! number of carrier concentrations at which to evaluate chemical potential energy
+   ! TODO: Not used
 
    integer :: nw
-   ! number of frequencies at which transport quantities are computed
+   ! number of energies (chemical potentials) at which transport quantities are computed
+   ! Same number of energies used in DOS.
 
    integer :: nrta
-   ! Number of relaxation-time approximations used (SERTA, MRTA)
+   ! Number of relaxation-time approximations used (1 for SERTA, 2 for MRTA)
 
    real(dp) :: eph_extrael
    ! extra electrons per unit cell from sigeph (lifetimes)
@@ -102,6 +104,7 @@ type,public :: rta_t
    ! Fermi level from input file
 
    real(dp),allocatable :: kTmesh(:)
+   ! (%ntemp)
    ! a list of temperatures at which to compute the transport
 
    real(dp),allocatable :: eph_mu_e(:)
@@ -113,7 +116,8 @@ type,public :: rta_t
    ! Chemical potential at this carrier concentration and temperature
 
    real(dp),allocatable :: eminmax_spin(:,:)
-   ! min/max energy of the original ebands object
+   ! (2, %nsppol))
+   ! min/Max energy of the original ebands object
 
    real(dp),allocatable :: linewidth_serta(:,:,:,:)
    ! Linewidth computed in the self-energy relaxation time aproximation
@@ -125,7 +129,7 @@ type,public :: rta_t
    ! band velocity in Cartesian coordinates.
 
    type(gaps_t) :: gaps
-   ! get gaps of original ebands object
+   ! gaps of original ebands object
 
    !integer :: nmu
    ! number of dopings
@@ -144,7 +148,7 @@ type,public :: rta_t
    ! (%nw)
 
    real(dp),allocatable :: tau_dos(:,:,:,:)
-   ! tau(e)  DOS
+   ! tau(e) (isotropic average for tau_nk for SERTA and MRTA.
    ! (nw, ntemp, nsppol, nrta)
 
    real(dp),allocatable :: vv_dos(:,:,:,:)
@@ -180,12 +184,12 @@ type,public :: rta_t
    ! 5-th index is for e-h
 
    real(dp),allocatable :: n(:,:,:)
-   ! (nw, ntemp,2) carrier density for e/h (n/cm^3)
+   ! (nw, ntemp, 2) carrier density for e/h (n/cm^3)
 
    real(dp),allocatable :: mobility_mu(:,:,:,:,:,:)
    ! (2, 3, 3, ntemp, nsppol, nrta)
    ! mobility for electrons and holes (first dimension) at transport_mu_e(ntemp)
-   ! First index is for e-h
+   ! First index is for electron/hole
 
  contains
 

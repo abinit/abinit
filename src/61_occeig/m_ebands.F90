@@ -2537,7 +2537,6 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
 
    ! Use Fermi-Dirac occopt
    call ebands_set_scheme(tmp_ebands, occopt3, kTmesh(it), spinmagntarget, prtvol)
-   !call ebands_set_nelect(tmp_ebands, self%nelect, spinmagntarget, msg)
    mu_e(it) = tmp_ebands%fermie
    !
    ! Check that the total number of electrons is correct
@@ -2551,7 +2550,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
      ! in this case we print a warning
      write(msg,'(3(a,f10.6))') &
        'Calculated number of electrons nelect: ',nelect, &
-       ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for T = ',kTmesh(it)
+       ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for kT = ',kTmesh(it)
      if (kTmesh(it) == 0) then
        MSG_WARNING(msg)
      else
@@ -2605,10 +2604,12 @@ real(dp) pure function ebands_calc_nelect(self, kt, fermie) result(nelect)
  do spin=1,self%nsppol
    do ik=1,self%nkpt
      do ib=1,self%nband(ik + (spin-1)*self%nkpt)
-       nelect = nelect + ofact * self%wtk(ik) * occ_fd(self%eig(ib,ik,spin), kt, fermie)
+       nelect = nelect + self%wtk(ik) * occ_fd(self%eig(ib,ik,spin), kt, fermie)
      end do
    end do
  end do
+
+ nelect = ofact * nelect
 
 end function ebands_calc_nelect
 !!***
@@ -4341,7 +4342,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 !arrays
  !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp) :: v(3), vsum(3), t(3,3), tsum(3,3) !, tsym(3,3), vsym(3),
+ real(dp) :: vsum(3), tsum(3,3) !, tsym(3,3), vsym(3), t(3,3),
  real(dp),allocatable :: wme0(:),wdt(:,:,:),tmp_eigen(:)
 
 ! *********************************************************************
@@ -4406,17 +4407,16 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          wme0 = gaussian(wme0, broad) * wtk
          edos%dos(:,spin) = edos%dos(:,spin) + wme0(:)
 
-         ! scalar
+         ! scalars
          do idat=1,nvals
            out_valsdos(:, 1, idat, spin) = out_valsdos(:,1, idat, spin) + wme0(:) * bks_vals(idat,band,ikpt,spin)
            call simpson_int(nw, step, out_valsdos(:,1, idat, spin), out_valsdos(:,2,idat,spin))
          end do
 
-         ! vector
+         ! vectors
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           v(:) = bks_vecs(:, idat, band, ikpt, spin)
-           vsum = cryst%symmetrize_cart_vec3(v)
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ikpt, spin))
            do ii=1,3
              out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wme0(:) * vsum(ii)
              call simpson_int(nw, step, out_vecsdos(:,1,ii,idat,spin), out_vecsdos(:,2,ii,idat,spin))
@@ -4426,8 +4426,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          ! tensor
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           t(:,:) = bks_tens(:, :, idat, band, ikpt, spin)
-           tsum = cryst%symmetrize_cart_tens33(t)
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ikpt, spin))
            do ii=1,3
              do jj=1,3
                out_tensdos(:,1,jj,ii,idat,spin) = out_tensdos(:,1,jj,ii,idat,spin) + wme0(:) * tsum(jj,ii)
@@ -4480,20 +4479,21 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
        do ikpt=1,ebands%nkpt
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
 
+         ! Compute DOS
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, ikpt, 1)
 
          ! scalar
+!$OMP PARALLEL DO
          do idat=1,nvals
-           ! Compute DOS/IDOS
            out_valsdos(:, 1, idat, spin) = out_valsdos(:, 1, idat, spin) + wdt(:, ikpt, 1) * bks_vals(idat, band, ikpt, spin)
            out_valsdos(:, 2, idat, spin) = out_valsdos(:, 2, idat, spin) + wdt(:, ikpt, 2) * bks_vals(idat, band, ikpt, spin)
          end do
 
          ! vector
+!$OMP PARALLEL DO PRIVATE(vsum)
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           v(:) = bks_vecs(:, idat, band, ikpt, spin)
-           vsum = cryst%symmetrize_cart_vec3(v)
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ikpt, spin))
            do ii=1,3
              out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wdt(:, ikpt, 1) * vsum(ii)
              out_vecsdos(:, 2, ii, idat, spin) = out_vecsdos(:, 2, ii, idat, spin) + wdt(:, ikpt, 2) * vsum(ii)
@@ -4501,10 +4501,10 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          end do
 
          ! tensor
+!$OMP PARALLEL DO PRIVATE(tsum)
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           t(:,:) = bks_tens(:, :, idat, band, ikpt, spin)
-           tsum = cryst%symmetrize_cart_tens33(t)
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ikpt, spin))
            do ii=1,3
              do jj=1,3
                out_tensdos(:, 1, jj, ii, idat, spin) = out_tensdos(:, 1, jj, ii, idat, spin) + wdt(:, ikpt, 1) * tsum(jj,ii)
@@ -4712,7 +4712,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
      nbv = val_idx(1, spin)
      do ibv=1,nbv
        do ibc=nbv+1,ebands%mband
-         ! For each (c,v) get its contribution
+         ! For each (c, v) get its contribution
          cvmw = ebands%eig(ibc,:,spin) - ebands%eig(ibv,:,spin)
          do ik_ibz=1,ebands%nkpt
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism

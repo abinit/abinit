@@ -2072,7 +2072,7 @@ subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
 
 ! *********************************************************************
 
- wvals = linspace(enemin,enemax,nw)
+ wvals = linspace(enemin, enemax, nw)
  call htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,bcorr,tweight,dweight,comm)
 
 end subroutine htetra_blochl_weights

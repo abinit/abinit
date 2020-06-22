@@ -1169,7 +1169,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(ur_k, (wfd%nfft*wfd%nspinor, nbcalc_ks))
        ABI_MALLOC(ur_kq, (wfd%nfft*wfd%nspinor))
        ABI_MALLOC(work_ur, (wfd%nfft*wfd%nspinor))
-       ABI_MALLOC(gkq2_lr, (sigma%eph_doublegrid%ndiv,nbcalc_ks,sigma%my_npert))
+       ABI_MALLOC(gkq2_lr, (sigma%eph_doublegrid%ndiv, nbcalc_ks, sigma%my_npert))
      end if
 
      do ib_k=1,nbcalc_ks
@@ -1235,7 +1235,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Double grid stuff
        if (sigma%use_doublegrid) then
          call sigma%eph_doublegrid%get_mapping(kk, kq, qpt)
-         iq_bz_frohl = sigma%eph_doublegrid%get_index(qpt,2)
+         iq_bz_frohl = sigma%eph_doublegrid%get_index(qpt, 2)
          iq_ibz_frohl = sigma%eph_doublegrid%bz2ibz_dense(iq_bz_frohl)
        end if
 
@@ -1628,10 +1628,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              vkk_norm = sqrt(dot_product(vk, vk))
              alpha_mrta(ib_k) = zero
              if (vkk_norm > tol6) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vkk_norm ** 2
-             !if (vkk_norm > tol6) then
-             !  vkq_norm = sqrt(dot_product(vkq, vkq))
-             !  alpha_mrta(ib_k) = one - dot_product(vkq, vk) / (vkk_norm * vkq_norm)
-             !end if
            end do
          end if
 
@@ -2387,7 +2383,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    end if
 
    ! Note symrel and use_symrel.
-   kk = new%kcalc(:,ikcalc)
+   kk = new%kcalc(:, ikcalc)
    call listkk(dksqmax, cryst%gmet, indkk_k, ebands%kptns, kk, ebands%nkpt, 1, cryst%nsym,&
       sppoldbl1, cryst%symafm, cryst%symrel, new%timrev, xmpi_comm_self, exit_loop=.True., use_symrec=.False.)
 
@@ -2658,7 +2654,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
 #ifdef HAVE_MPI
  ! Create 5d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in Sigma sum, kpoints in Sigma_k, spins
- ! TODO: Fix spin
+ ! FIXME: Fix spin
  ndims = 5
  ABI_MALLOC(dims, (ndims))
  ABI_MALLOC(periods, (ndims))

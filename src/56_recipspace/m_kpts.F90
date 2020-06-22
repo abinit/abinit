@@ -156,7 +156,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0 = 0, chksymbreak0 = 0, iscf2=2
+ integer,parameter :: iout0 = 0, chksymbreak0 = 0, iscf2 = 2
  integer :: my_nshiftk
  real(dp) :: kptrlen
 !arrays
@@ -580,7 +580,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  call xmpi_split_work(nkpt1, comm, isk_start, isk_stop)
  !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
 
-!!!$OMP PARALLEL DO PRIVATE(k1, k1int, kpg1, ikpg1)
+!$OMP PARALLEL DO PRIVATE(k1, k1int, kpg1, ikpg1)
  do ikpt1=isk_start,isk_stop
    k1(:) = kptns1(:,ikpt1)  !; write(std_out,*)ikpt1,k1(:)
    k1int(:) = nint(k1(:) + tol12)
@@ -619,8 +619,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
  !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
  !do ii=1,l3*nkpt1
- !ikpt1=(isort(ii)-1)/l3+1
- !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
+ !  ikpt1=(isort(ii)-1)/l3+1
+ !  write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
  !enddo
 
  dksqmax = zero
