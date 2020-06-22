@@ -1924,7 +1924,7 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                  cg1_kb(:,:) = zero
                  ! cg1_kb will hold |\tilde{u}_{n,k+b}>
                  call smatrix(cg_k,cgqb,cg1_kb,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
-                      &           mcg_k,mcg_k,mcg1_k,1,dtset%mpw,nband_k,nband_occ,npw_k,npw_kb,my_nspinor,&
+                      &           mcg_k,countb,mcg1_k,1,dtset%mpw,nband_occ,nband_occ,npw_k,npw_kb,my_nspinor,&
                       &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
                  ! cprj1_kb will hold cprj for cg1_kb
                  call covar_cprj(cprj_kb,cprj1_kb,dtset,nband_k,nband_occ,pawtab,smat_inv)
@@ -1972,7 +1972,7 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
                     cg1_kg(:,:) = zero
                     ! cg1_kg will hold |\tilde{u}_{n,k+g}>
                     call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
-                         &           mcg_k,mcg_k,mcg1_k,1,dtset%mpw,nband_k,nband_occ,npw_k,npw_kg,my_nspinor,&
+                         &           mcg_k,countg,mcg1_k,1,dtset%mpw,nband_occ,nband_occ,npw_k,npw_kg,my_nspinor,&
                          &           pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
                     ! cprj1_kg will hold cprj for cg1_kg
                     call covar_cprj(cprj_kg,cprj1_kg,dtset,nband_k,nband_occ,pawtab,smat_inv)
@@ -3004,7 +3004,7 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
                  cg1_kg(:,:) = zero
                  ! cg1_kg will hold |\tilde{u}_{n,k+g}>
                  call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
-                      &           mcg_k,mcg_k,mcg1_k,1,dtset%mpw,nband_k,nband_occ,npw_k,npw_kg,my_nspinor,&
+                      &           mcg_k,countg,mcg1_k,1,dtset%mpw,nband_occ,nband_occ,npw_k,npw_kg,my_nspinor,&
                       &           pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
 
                  do iband = 1, nband_occ
