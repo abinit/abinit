@@ -2225,12 +2225,12 @@ end subroutine mpicomm_helper
 
 
 subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-     & nattyp,nband_k,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
+     & nattyp,nband_k,nband_occ,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
      & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcg,mcprj,nband_k,nfftf,pwind_alloc,with_vectornd
+  integer,intent(in) :: mcg,mcprj,nband_k,nband_occ,nfftf,pwind_alloc,with_vectornd
   real(dp),intent(in) :: ucvol
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -2255,13 +2255,13 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,bfor,bsigma,countb,countg,countk,cpopt,dimffnl
+  integer :: adir,bdir,bfor,bsigma,countb,countb1,countg,countg1,countk,cpopt,dimffnl
   integer :: getcprj_choice,getcprj_cpopt,getcprj_idir
   integer :: epsabg,exchn2n3d,gdir,gfor,gsigma,ia,iband,ibs1,ibs2
   integer :: icg,icprji,ider,idir,ierr
   integer :: ikg,ikg1,ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi
   integer :: ilm,isppol,istwf_k,itrs
-  integer :: me,my_nspinor,nband_occ,ncpgr,ndat
+  integer :: me,my_nspinor,ncpgr,ndat
   integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,npw_k,npw_k_,npw_kb,npw_kg,nproc
   integer :: prtvol,shiftbd,sij_opt,smatrix_ddkflag,smatrix_job,spaceComm
   integer :: tim_getghc,type_calc
@@ -2296,8 +2296,6 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
   spaceComm=mpi_enreg%comm_cell
   nproc=xmpi_comm_size(spaceComm)
   me=mpi_enreg%me_kpt
-
-  nband_occ = dtorbmag%mband_occ
 
   ! input parameters for calls to getghc at ikpt
   cpopt = -1
@@ -2362,11 +2360,11 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
   call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
   ABI_DATATYPE_ALLOCATE(cprj_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
-  ABI_DATATYPE_ALLOCATE(cprj1_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+  ABI_DATATYPE_ALLOCATE(cprj1_kb,(dtset%natom,dtorbmag%nspinor*nband_occ))
   call pawcprj_alloc(cprj1_kb,ncpgr,dimlmn)
   ABI_DATATYPE_ALLOCATE(cprj_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj_kg,ncpgr,dimlmn)
-  ABI_DATATYPE_ALLOCATE(cprj1_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+  ABI_DATATYPE_ALLOCATE(cprj1_kg,(dtset%natom,dtorbmag%nspinor*nband_occ))
   call pawcprj_alloc(cprj1_kg,ncpgr,dimlmn)
   ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
   call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
@@ -2376,10 +2374,10 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
   smatrix_job = 1
   shiftbd = 1
 
-  ABI_ALLOCATE(kk_paw,(2,dtset%mband,dtset%mband))
-  ABI_ALLOCATE(smat_kk,(2,dtset%mband,dtset%mband))
-  ABI_ALLOCATE(smat_inv,(2,dtset%mband,dtset%mband))
-  ABI_ALLOCATE(sflag_k,(nband_k))
+  ABI_ALLOCATE(kk_paw,(2,nband_occ,nband_occ))
+  ABI_ALLOCATE(smat_kk,(2,nband_occ,nband_occ))
+  ABI_ALLOCATE(smat_inv,(2,nband_occ,nband_occ))
+  ABI_ALLOCATE(sflag_k,(nband_occ))
   ABI_ALLOCATE(pwind_kb,(dtset%mpw))
   ABI_ALLOCATE(pwind_kg,(dtset%mpw))
   ABI_ALLOCATE(pwnsfac_k,(4,dtset%mpw))
@@ -2502,15 +2500,16 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
               if (ikpt > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the overlaps
                  ! get covariant |u_{n,k+b}> and associated cprj
                  call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                      &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                      &           dtorbmag%lmn_size,dtset%natom,nband_k,nband_occ,&
                       &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                  sflag_k=0
 
-                 ABI_ALLOCATE(cg1_kb,(2,countk))
+                 countb1 = npw_k*my_nspinor*nband_occ
+                 ABI_ALLOCATE(cg1_kb,(2,countb1))
                  cg1_kb(:,:) = zero
                  ! cg1_kb will hold |\tilde{u}_{n,k+b}>
-                 call smatrix(cg_k,cgqb,cg1_kb,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_k,&
-                      &           countk,countb,countk,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
+                 call smatrix(cg_k,cgqb,cg1_kb,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
+                      &           countk,countb,countb1,1,dtset%mpw,nband_occ,nband_occ,npw_k,npw_kb,my_nspinor,&
                       &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
 
                  ! cprj1_kb will hold cprj for cg1_kb that is <p|\tilde{u}_{n,k+b}>
@@ -2522,14 +2521,14 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
                  ABI_ALLOCATE(ghc,(2,npw_k))
                  ABI_ALLOCATE(gsc,(2,npw_k))
                  ABI_ALLOCATE(gvnlc,(2,npw_k))
-                 ABI_ALLOCATE(ghcall,(2,npw_k*nband_k))
+                 ABI_ALLOCATE(ghcall,(2,npw_k*nband_occ))
 
-                 do iband = 1, nband_k
+                 do iband = 1, nband_occ
                     ibs1 = (iband-1)*npw_k+1
                     ibs2 = iband*npw_k
                     cwavef(1:2,1:npw_k) = cg1_kb(1:2,ibs1:ibs2)
-                    call pawcprj_get(atindx1,cwaveprj,cprj1_kb,dtset%natom,iband,0,ikptb,0,isppol,dtset%mband,&
-                         & dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
+                    call pawcprj_get(atindx1,cwaveprj,cprj1_kb,dtset%natom,iband,0,ikptb,0,isppol,nband_occ,&
+                         & dtset%mkmem,dtset%natom,1,nband_occ,my_nspinor,dtset%nsppol,0)
                     call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
                          & prtvol,sij_opt,tim_getghc,type_calc)
                     ghcall(1:2,ibs1:ibs2) = ghc(1:2,1:npw_k)
@@ -2540,7 +2539,7 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
 
                  ! cprj generated here at k, rather than at k+b
                  call pawcprj_set_zero(cprj1_kb)
-                 do iband = 1, nband_k
+                 do iband = 1, nband_occ
                     ibs1 = (iband-1)*npw_k+1
                     ibs2 = iband*npw_k
                     cwavef(1:2,1:npw_k) = cg1_kb(1:2,ibs1:ibs2)
@@ -2551,8 +2550,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
                          & phkxred,ph1d,ph3d,ucvol,psps%useylm)
 
                     call pawcprj_put(atindx1,cwaveprj,cprj1_kb,dtset%natom,&
-                         & iband,0,ikpt,0,isppol,nband_k,dtset%mkmem,&
-                         & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
+                         & iband,0,ikpt,0,isppol,nband_occ,dtset%mkmem,&
+                         & dtset%natom,1,nband_occ,dimlmn,dtset%nspinor,dtset%nsppol,0,&
                          & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
                  end do
                  ABI_DEALLOCATE(cg1_kb)
@@ -2587,14 +2586,15 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
 
                     ! get covariant |u_{n,k+g}> and associated cprj
                     call overlap_k1k2_paw(cprj_k,cprj_kg,dkg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                         &           dtorbmag%lmn_size,dtset%natom,dtset%mband,dtset%mband,&
+                         &           dtorbmag%lmn_size,dtset%natom,nband_k,nband_occ,&
                          &           my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                     sflag_k=0
+                    countg1=npw_k*my_nspinor*nband_occ
                     ABI_ALLOCATE(cg1_kg,(2,countk))
                     cg1_kg(:,:) = zero
                     ! cg1_kg will hold |\tilde{u}_{n,k+g}>
-                    call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_k,&
-                         &           countk,countg,countk,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
+                    call smatrix(cg_k,cgqg,cg1_kg,smatrix_ddkflag,dtm_k,0,0,itrs,smatrix_job,nband_occ,&
+                         &           countk,countg,countg1,1,dtset%mpw,nband_occ,nband_occ,npw_k,npw_kg,my_nspinor,&
                          &           pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
                     ABI_DEALLOCATE(cgqg)
 
@@ -2604,7 +2604,7 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
                     ABI_ALLOCATE(cwavef,(2,npw_k))
                     ! cprj generated here at k, rather than at k+g
                     call pawcprj_set_zero(cprj1_kg)
-                    do iband = 1, nband_k
+                    do iband = 1, nband_occ
                        ibs1 = (iband-1)*npw_k+1
                        ibs2 = iband*npw_k
                        cwavef(1:2,1:npw_k) = cg1_kg(1:2,ibs1:ibs2)
@@ -2615,13 +2615,13 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,m
                             & phkxred,ph1d,ph3d,ucvol,psps%useylm)
 
                        call pawcprj_put(atindx1,cwaveprj,cprj1_kg,dtset%natom,&
-                            & iband,0,ikpt,0,isppol,nband_k,dtset%mkmem,&
-                            & dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0,&
+                            & iband,0,ikpt,0,isppol,nband_occ,dtset%mkmem,&
+                            & dtset%natom,1,nband_occ,dimlmn,dtset%nspinor,dtset%nsppol,0,&
                             & mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
                     end do
                     ABI_DEALLOCATE(cwavef)
                     
-                    do iband = 1, nband_k
+                    do iband = 1, nband_occ
                        ibs1=(iband-1)*npw_k+1
                        ibs2=iband*npw_k
                        dotr=DOT_PRODUCT(cg1_kg(1,ibs1:ibs2),ghcall(1,ibs1:ibs2)) + &
@@ -4999,7 +4999,7 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
 
     CCI=zero
     call duqhqdu(atindx1,cg,CCI,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
-         & nattyp,nband_k,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
+         & nattyp,nband_k,nband_occ,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
          & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
     CCI=-half*CCI
 
