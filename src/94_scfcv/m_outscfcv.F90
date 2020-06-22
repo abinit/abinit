@@ -1087,7 +1087,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan)
    call compute_coeff_plowannier(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
 &   mpi_enreg,occ,wan,pawtab,psps,usecprj,dtfil%unpaw,pawrad,dtfil)
-   if (me==master) then 
+   if (me==master) then
      call print_plowannier(wan)
    endif
    call destroy_plowannier(wan)
@@ -1269,7 +1269,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%prtbltztrp == 1 .and. me==master) call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
- if (nint(dtset%einterp(1)) /= 0) then
+ if (nint(dtset%einterp(1)) /= 0 .and. dtset%kptopt > 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
 

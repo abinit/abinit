@@ -594,7 +594,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  end if
 
  ! Compute gaps using input ebands.
- gap_err = get_gaps(ebands, gaps)
+ gaps = ebands_get_gaps(ebands, gap_err)
  if (gap_err /= 0) then
    MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
  end if
@@ -623,7 +623,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  !end do
 
  ! Compute gaps using fine_ebands.
- gap_err = get_gaps(fine_ebands, fine_gaps)
+ fine_gaps = ebands_get_gaps(fine_ebands, gap_err)
  if (gap_err /= 0) then
    MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
  end if

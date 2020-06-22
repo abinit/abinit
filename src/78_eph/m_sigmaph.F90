@@ -722,6 +722,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        sigma%qp_done = sigma_restart%qp_done
        restart = 1
        call wrtout([std_out, ab_out], "- Restarting from previous SIGEPH.nc file")
+       call wrtout([std_out, ab_out], &
+           sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
      else
        restart = 0; sigma%qp_done = 0
        MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
@@ -836,6 +838,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ !call wfd%read_wfk(wfk0_path, IO_MODE_FORTRAN)
  !call wfd%test_ortho(cryst, pawtab)
 
  ! if PAW, one has to solve a generalized eigenproblem
@@ -2219,7 +2222,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 !arrays
  integer :: intp_kptrlatt(3,3), g0_k(3)
  integer :: qptrlatt(3,3), indkk_k(1,6), my_gmax(3), band_block(2)
- integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
+ integer :: intp_nshiftk !val_indeces(ebands%nkpt, ebands%nsppol),
  integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
 #ifdef HAVE_MPI
@@ -2287,20 +2290,23 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
- gap_err = get_gaps(ebands, gaps)
+ gaps = ebands_get_gaps(ebands, gap_err)
  if (gap_err /= 0) then
-   ! In case of error try to enforce semiconductor occupations before calling get_gaps
+   ! In case of error try to enforce semiconductor occupations before calling ebands_get_gaps
    ! This might still fail though...
    call gaps%free()
    call ebands_copy(ebands, tmp_ebands)
    call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
    call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect - dtset%eph_extrael, dtset%spinmagntarget, msg)
-   gap_err = get_gaps(tmp_ebands,gaps)
+   gaps = ebands_get_gaps(tmp_ebands, gap_err)
    call ebands_free(tmp_ebands)
  end if
 
- call gaps%print(unit=std_out)
- val_indeces = get_valence_idx(ebands)
+ if (my_rank == master) then
+   call gaps%print(unit=std_out)
+   !call gaps%print(unit=ab_out)
+ end if
+ !val_indeces = get_valence_idx(ebands)
 
  ! Frequency mesh for sigma(w) and spectral function.
  ! TODO: Use GW variables but change default

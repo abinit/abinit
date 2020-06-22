@@ -52,7 +52,7 @@ MODULE m_ebands
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
-                              isdiagmat
+                              isdiagmat, interpol3d
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -299,9 +299,41 @@ MODULE m_ebands
 
  end type gaps_t
 
- public :: get_gaps            ! Build the gaps object from a bandstructure.
+ public :: ebands_get_gaps     ! Build the gaps object from a bandstructure.
  public :: ebands_print_gaps   ! Helper function to print gaps directrly from ebands.
 !!***
+
+!!****t* m_ebands/klinterp_t
+!! NAME
+!! klinterp_t
+!!
+!! FUNCTION
+!!  Linear interpolation of eigenvalue-like quantities (scalars with the same symmetry as the KS eigenvalues)
+!!  Used, for instance, to interpolate electron or phonon lifetimes.
+!!
+!! SOURCE
+
+ type,public :: klinterp_t
+
+   integer :: mband, nsppol, ndat
+
+   integer :: nkx, nky, nkz
+   ! Number of input data points
+
+   real(dp),allocatable :: xyzdata(:,:,:,:,:,:)
+
+ contains
+
+   procedure :: free => klinterp_free
+    ! Free dynamic memory
+
+   procedure :: eval => klinterp_eval
+    ! Interpolate values at an arbitrary k-point.
+
+ end type klinterp_t
+
+ public :: klinterp_new         ! Build interpolator.
+
 
 !----------------------------------------------------------------------
 
@@ -345,7 +377,7 @@ subroutine ebands_print_gaps(ebands, unit, header)
 
  if (unit == dev_null) return
 
- ierr = get_gaps(ebands, gaps)
+ gaps = ebands_get_gaps(ebands, ierr)
  if (ierr /= 0) then
    do spin=1, ebands%nsppol
      write(unit, "(2a)")"WARNING: " // trim(gaps%errmsg_spin(spin))
@@ -364,20 +396,20 @@ end subroutine ebands_print_gaps
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/get_gaps
+!!****f* m_ebands/ebands_get_gaps
 !! NAME
-!! get_gaps
+!! ebands_get_gaps
 !!
 !! FUNCTION
-!!  Returns a structure with info on the fundamental and direct gap.
+!!  Returns a gaps_t object with info on the fundamental and direct gap.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
 !!  [kmask]=Logical mask used to exclude k-points.
 !!
 !! OUTPUT
-!!  retcode=Return code (!=0 signals failure)
-!!  gaps<gaps_t>=object with info on the gaps (parent is responsible for freeing the object).
+!!  ierr=Return code (!=0 signals failure)
+!!  gaps<gaps_t>=object with info on the gaps (calleris responsible for freeing the object).
 !!
 !! PARENTS
 !!
@@ -385,18 +417,18 @@ end subroutine ebands_print_gaps
 !!
 !! SOURCE
 
-function get_gaps(ebands, gaps, kmask) result(retcode)
+type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),target,intent(in)  :: ebands
- type(gaps_t),intent(out) :: gaps
+ integer,intent(out) :: ierr
 !arrays
  logical,optional,intent(in) :: kmask(ebands%nkpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: ikibz,nband_k,spin,nsppol,ikopt,ivk,ick,ivb,icb,retcode
+ integer :: ikibz,nband_k,spin,nsppol,ikopt,ivk,ick,ivb,icb
  real(dp),parameter :: tol_fermi=tol6
  real(dp) :: fun_gap,opt_gap
  logical :: ismetal
@@ -412,7 +444,7 @@ function get_gaps(ebands, gaps, kmask) result(retcode)
 
  ! Initialize gaps_t
  gaps%nsppol = nsppol
- ABI_MALLOC(gaps%fo_kpos, (3,nsppol))
+ ABI_MALLOC(gaps%fo_kpos, (3, nsppol))
  ABI_MALLOC(gaps%ierr, (nsppol))
  ABI_MALLOC(gaps%fo_values, (2, nsppol))
  ABI_MALLOC(gaps%vb_max, (nsppol))
@@ -472,22 +504,22 @@ function get_gaps(ebands, gaps, kmask) result(retcode)
    gaps%fo_kpos(:, spin) = [ivk, ick, ikopt]
  end do spin_loop
 
- retcode = maxval(gaps%ierr)
+ ierr = maxval(gaps%ierr)
 
  ! TODO
- !gap_err = get_gaps(ebands, gaps)
- !if (retcode /= 0) then
- !  ! In case of error try to enforce semiconductor occupations before calling get_gaps
+ !gaps = ebands_get_gaps(ebands, gap_err)
+ !if (ierr /= 0) then
+ !  ! In case of error try to enforce semiconductor occupations before calling ebands_get_gaps
  !  ! This might still fail though...
  !  call gaps%free()
  !  call ebands_copy(ebands, tmp_ebands)
  !  call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
  !  call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect-dtset%eph_extrael, dtset%spinmagntarget, msg)
- !  gap_err = get_gaps(tmp_ebands, gaps)
+ !  gaps = ebands_get_gaps(tmp_ebands, ierr)
  !  call ebands_free(tmp_ebands)
  !end if
 
-end function get_gaps
+end function ebands_get_gaps
 !!***
 
 !----------------------------------------------------------------------
@@ -2641,6 +2673,9 @@ end function ebands_calc_nelect
 !!      gstate,m_exc_diago,m_sigmaph,setup_bse,setup_bse_interp,setup_sigma
 !!      sigma
 !!
+!! TODO
+!!  Can be replaced by ebands_print_gaps
+!!
 !! CHILDREN
 !!
 !! SOURCE
@@ -4606,7 +4641,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
 !Local variables-------------------------------
 !scalars
  integer :: ik_ibz,ibc,ibv,spin,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,bcorr !iw, unt,
- real(dp) :: wtk,wmax,wstep,wbroad
+ real(dp) :: wtk,wmax
  type(htetra_t) :: tetra
  character(len=500) :: msg
  !character(len=fnlen) :: path
@@ -4635,24 +4670,17 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    end if
  end do
 
- wbroad = broad
-
  ! Compute the linear mesh so that it encloses all bands.
  !if (.not. present(mesh)) then
- wstep = step
  eminmax = get_minmax(ebands, "eig")
  wmax = maxval(eminmax(2,:) - eminmax(1,:))
- nw = nint(wmax/wstep) + 1
+ nw = nint(wmax/step) + 1
  ABI_MALLOC(jdos%mesh, (nw))
- jdos%mesh = arth(zero, wstep, nw)
- !else
- !  nw = size(mesh)
- !  call alloc_copy(mesh, jdos%mesh)
- !end if
+ jdos%mesh = arth(zero, step, nw)
 
  jdos%nw = nw
  jdos%intmeth = intmeth
- jdos%broad = wbroad
+ jdos%broad = broad
 
  !if (ebands%nkpt == 1) then
  !  MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
@@ -4677,7 +4705,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
          do ibc=nbv+1,nband_k
            cvmw = ebands%eig(ibc,ik_ibz,spin) - ebands%eig(ibv,ik_ibz,spin) - jdos%mesh
-           jdos%values(:, spin) = jdos%values(:, spin) + wtk * gaussian(cvmw, wbroad)
+           jdos%values(:, spin) = jdos%values(:, spin) + wtk * gaussian(cvmw, broad)
          end do
        end do
 
@@ -5719,7 +5747,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
    ! If sigma_erange is set, get emin and emax
-   ierr = get_gaps(ebands_kmesh,gaps)
+   gaps = ebands_get_gaps(ebands_kmesh, ierr)
    do spin=1,ebands%nsppol
      if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
      if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
@@ -5775,6 +5803,238 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  ABI_SFREE(vvdos_tens)
 
 end subroutine ebands_interpolate_kpath
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebspl_new
+!! NAME
+!! ebspl_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt, kibz, &
+                                       mband, nkibz, nsppol, ndat, values_ibz, comm) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nshiftk, kptopt, mband, nkibz, nsppol, ndat, comm
+!arrays
+ integer,intent(in) :: kptrlatt(3,3)
+ real(dp),intent(in) :: kibz(3, nkibz), shiftk(3,nshiftk), values_ibz(mband, nkibz, nsppol, ndat)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1 = 1
+ integer :: ierr, nkfull, ikf
+ integer :: spin, band, ik_ibz, timrev, ix, iy, iz, nkx, nky, nkz, ii, idat
+ real(dp) :: dksqmax
+ character(len=500) :: msg
+!arrays
+ integer :: ngkpt(3)
+ integer,allocatable :: bz2ibz(:,:)
+ logical :: shifted(3)
+ real(dp),allocatable :: xvec(:), yvec(:), zvec(:), kfull(:,:)
+
+! *********************************************************************
+
+ ! Check input parameters
+ ierr = 0
+ if (nkibz == 1) then
+   MSG_WARNING("Cannot interpolate with a single k-point")
+   ierr = ierr + 1
+ end if
+ if (.not. isdiagmat(kptrlatt)) then
+   MSG_WARNING('kptrlatt is not diagonal. Multiple shifts are not allowed')
+   ierr = ierr + 1
+ end if
+ if (nshiftk /= 1) then
+   MSG_WARNING('Multiple shifts not allowed')
+   ierr = ierr + 1
+ end if
+ if (ierr /= 0) then
+   MSG_ERROR("bspline interpolation cannot be performed. See messages above.")
+ end if
+
+ ! Build BZ mesh Note that in the simplest case of unshifted mesh:
+ ! 1) k-point coordinates are in [0, 1]
+ ! 2) The mesh is closed i.e. (0,0,0) and (1,1,1) are included
+ ngkpt(1) = kptrlatt(1, 1)
+ ngkpt(2) = kptrlatt(2, 2)
+ ngkpt(3) = kptrlatt(3, 3)
+
+ ! Multiple shifts are not supported here.
+ shifted(:) = abs(shiftk(:, 1)) > tol8
+ nkx = ngkpt(1) + 1; if (shifted(1)) nkx = nkx + 1
+ nky = ngkpt(2) + 1; if (shifted(2)) nky = nky + 1
+ nkz = ngkpt(3) + 1; if (shifted(3)) nkz = nkz + 1
+
+ new%nkx = nkx; new%nky = nky; new%nkz = nkz
+ new%mband = mband; new%nsppol = nsppol; new%ndat = ndat
+
+ ABI_MALLOC(xvec, (nkx))
+ ABI_MALLOC(yvec, (nky))
+ ABI_MALLOC(zvec, (nkz))
+
+ do ix=1,nkx
+   ii = ix; if (shifted(1)) ii = ii - 1
+   xvec(ix) = (ii - 1 + shiftk(1,1)) / ngkpt(1)
+ end do
+ do iy=1,nky
+   ii = iy; if (shifted(2)) ii = ii - 1
+   yvec(iy) = (ii - 1 + shiftk(2,1)) / ngkpt(2)
+ end do
+ do iz=1,nkz
+   ii = iz; if (shifted(3)) ii = ii - 1
+   zvec(iz) = (ii - 1 + shiftk(3,1)) / ngkpt(3)
+ end do
+
+ ! Build list of k-points in full BZ (ordered as required by B-spline routines)
+ nkfull = nkx * nky * nkz
+ ABI_MALLOC(kfull, (3, nkfull))
+ ikf = 0
+ do iz=1,nkz
+   do iy=1,nky
+     do ix=1,nkx
+       ikf = ikf + 1
+       kfull(:,ikf) = [xvec(ix), yvec(iy), zvec(iz)]
+     end do
+   end do
+ end do
+
+ ! Build mapping kfull --> IBZ
+ ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1, 6))
+
+ timrev = kpts_timrev_from_kptopt(kptopt)
+
+ call listkk(dksqmax, cryst%gmet, bz2ibz, kibz, kfull, nkibz, nkfull, cryst%nsym,&
+   sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+ ABI_FREE(kfull)
+
+ if (dksqmax > tol12) then
+   write(msg, '(3a,es16.6,4a)' )&
+   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
+   'dksqmax=',dksqmax,ch10,&
+   'Action: check k-point input variables',ch10,&
+   '        e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+   MSG_ERROR(msg)
+ end if
+
+ ABI_MALLOC(new%xyzdata, (nkx, nky, nkz, mband, ndat, nsppol))
+ !new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, mband]
+
+ do spin=1,nsppol
+   do band=1,mband
+     !if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
+
+     ! Build array in full bz to prepare call to interpol3d.
+     ikf = 0
+     do iz=1,nkz
+       do iy=1,nky
+         do ix=1,nkx
+           ikf = ikf + 1
+           ik_ibz = bz2ibz(ikf, 1)
+           new%xyzdata(ix, iy, iz, 1:mband, idat, spin) = values_ibz(1:mband, ik_ibz, spin, idat)
+         end do
+       end do
+     end do
+
+   end do
+ end do
+
+ ABI_FREE(xvec)
+ ABI_FREE(yvec)
+ ABI_FREE(zvec)
+ ABI_FREE(bz2ibz)
+
+end function klinterp_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/klinterp_free
+!! NAME
+!! klinterp_free
+!!
+!! FUNCTION
+!!  Free dynamic memory.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine klinterp_free(self)
+
+!Arguments ------------------------------------
+!scalars
+ class(klinterp_t),intent(inout) :: self
+
+! *********************************************************************
+
+ ABI_SFREE(self%xyzdata)
+
+end subroutine klinterp_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/klinterp_eval
+!! NAME
+!! klinterp_eval
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine klinterp_eval(self, kpt, values)
+
+!Arguments ------------------------------------
+!scalars
+ class(klinterp_t),intent(in) :: self
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(out) :: values(self%mband, self%ndat, self%nsppol)
+
+!Local variables-------------------------------
+ integer :: spin, idat, band
+ real(dp) :: kwrap(3), shift(3)
+
+! *********************************************************************
+
+ call wrap2_zero_one(kpt, kwrap, shift)
+ do spin=1,self%nsppol
+   do idat=1,self%ndat
+      do band=1,self%mband
+        values(band, idat, spin) = interpol3d(kwrap, self%nkz, self%nkz, self%nkz, self%xyzdata(:,:,:, band, idat, spin))
+      end do
+   end do
+ end do
+
+end subroutine klinterp_eval
 !!***
 
 end module m_ebands

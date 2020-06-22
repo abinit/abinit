@@ -5004,8 +5004,7 @@ end function stats_eval
 !!
 !! SOURCE
 
-elemental subroutine wrap2_zero_one(num,red,shift)
-
+elemental subroutine wrap2_zero_one(num, red, shift)
 
 !Arguments ------------------------------------
 !scalars
@@ -5103,12 +5102,11 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
-
+pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
- integer,intent(in) :: nr1,nr2,nr3
+ integer,intent(in) :: nr1, nr2, nr3
  real(dp) :: res
 !arrays
  real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)

@@ -352,14 +352,14 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  ABI_MALLOC(new%eminmax_spin, (2, ebands%nsppol))
  new%eminmax_spin = get_minmax(ebands, "eig")
 
- ierr = get_gaps(ebands, new%gaps)
+ new%gaps = ebands_get_gaps(ebands, ierr)
  if (ierr /= 0) then
    do spin=1, ebands%nsppol
      MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
      new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
      new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
    end do
-   MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
+   MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
  end if
 
  if (my_rank == master) then
