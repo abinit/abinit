@@ -749,6 +749,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
      end if
 
+!    Reset hightemp standard deviation
+     if(associated(hightemp)) then
+       hightemp%std_init=zero
+     end if
      call timab(982,2,tsec)
 
 !    BIG FAT k POINT LOOP
@@ -966,8 +970,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(associated(hightemp)) then
          if(hightemp%version==1) then
            call hightemp%compute_pw_avg_std(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
-  &         dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
-  &         dtset%nkpt,npw_k,dtset%nsppol,rprimd)
+&           dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
+&           dtset%nkpt,npw_k,dtset%nsppol,rprimd,dtset%wtk(ikpt))
          else if((hightemp%version==2).and.(hightemp%prt_cg)) then
            call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
 &           dtset%istwfk,kg_k,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
@@ -1229,6 +1233,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
+       call xmpi_sum(hightemp%std_init,mpi_enreg%comm_world,ierr)
+       write(0,*) hightemp%std_init
        call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
      end if

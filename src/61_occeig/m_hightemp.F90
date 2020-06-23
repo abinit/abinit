@@ -46,7 +46,7 @@ module m_hightemp
   type,public :: hightemp_type
     integer :: bcut,nbcut,version
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,e_ent_freeel
-    real(dp) :: nfreeel,e_shiftfactor,ucvol
+    real(dp) :: std_init,nfreeel,e_shiftfactor,ucvol
     logical :: prt_cg
   contains
     procedure :: compute_e_ent_freeel,compute_e_kin_freeel_approx
@@ -105,6 +105,7 @@ contains
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%e_ent_freeel=zero
+    this%std_init=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
     if(prt_cg==1) then
@@ -130,6 +131,7 @@ contains
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%e_ent_freeel=zero
+    this%std_init=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
     this%prt_cg=.false.
@@ -489,12 +491,12 @@ contains
   !
   ! SOURCE
   subroutine compute_pw_avg_std(this,cg,ckpt,ecut,eig_k,ek_k,exchn2n3d,fnameabo,istwfk,kg_k,kpt,&
-  & mcg,mpi_enreg,mpw,nband,nkpt,npw_k,nsppol,rprimd)
+  & mcg,mpi_enreg,mpw,nband,nkpt,npw_k,nsppol,rprimd,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: ckpt,mcg,mpw,nkpt,npw_k,nsppol,exchn2n3d
-    real(dp),intent(in) :: ecut
+    real(dp),intent(in) :: ecut,wtk
     class(hightemp_type),intent(inout) :: this
     type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
@@ -508,7 +510,7 @@ contains
     ! Scalars
     integer :: cgshift,cgshift_tot,iband,iout,ipw,ipw_tot
     integer :: mcg_tot,mpierr,npw_tot
-    real(dp) :: ucvol,kpg1_tot,kpg2_tot,kpg3_tot
+    real(dp) :: average,ucvol,kpg1_tot,kpg2_tot,kpg3_tot,tmp_std1,tmp_std2
     character(len=50) :: filenameoutpw
     character(len=4) :: mode_paral
     ! Arrays
@@ -557,7 +559,6 @@ contains
     call xmpi_sum(kpgnorm_tot,mpi_enreg%comm_world,mpierr)
     call xmpi_sum(kg_tot,mpi_enreg%comm_world,mpierr)
 
-
     if(mpi_enreg%me==mpi_enreg%me_kpt) then
       if(this%prt_cg) then
         ! Writting plane waves vector coordinates
@@ -592,26 +593,46 @@ contains
       end if
 
       ABI_ALLOCATE(tempwfk,(npw_tot, 3))
+      tmp_std1=zero
       do iband=1, nband(ckpt)
+        tempwfk(:,:)=zero
+        cgshift_tot=(iband-1)*npw_tot
+        do ipw=1, npw_tot
+          tempwfk(ipw,2)=ABS(dcmplx(cg_tot(1,cgshift_tot+ipw), cg_tot(2,cgshift_tot+ipw)))
+          ! Hartree to eV * Kinetic energy of the pw
+          tempwfk(ipw,1)=(2*pi*kpgnorm_tot(ipw))**2/2.
+          tempwfk(ipw,3)=ipw
+        end do
 
+        ! Printing Plane wave in _PW output file on request
         if(this%prt_cg) then
-          tempwfk(:,:) = zero
-          cgshift_tot=(iband-1)*npw_tot
-          do ipw=1, npw_tot
-            tempwfk(ipw,2) = ABS(dcmplx(cg_tot(1,cgshift_tot+ipw), cg_tot(2,cgshift_tot+ipw)))
-            ! Hartree to eV * Kinetic energy of the pw
-            tempwfk(ipw,1) = 27.2114*(2*pi*kpgnorm_tot(ipw))**2/2.
-            tempwfk(ipw,3) = ipw
-          end do
-
           write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ckpt,'_b',iband
           open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
           do ipw=1, npw_tot
-            write(23,'(i14,ES14.6,ES14.6,i14)') int(tempwfk(ipw, 3)),tempwfk(ipw, 1),tempwfk(ipw,2)
+            write(23,'(i14,ES14.6,ES14.6,i14)') int(tempwfk(ipw, 3)),27.2114*tempwfk(ipw, 1),tempwfk(ipw,2)
           end do
           close(23)
         end if
+
+
+        ! Computing standard deviation for lasts bands
+        write(0,*) ckpt,sum(tempwfk(:,2)**2)
+        if(iband>=nband(ckpt)-this%nbcut+1) then
+          tmp_std2=zero
+          average=zero
+          cgshift_tot=(iband-1)*npw_tot
+          do ipw=1, npw_tot
+            average=average+tempwfk(ipw,1)*tempwfk(ipw,2)**2
+          end do
+          do ipw=1, npw_tot
+            tmp_std2=tmp_std2+(tempwfk(ipw,1)-average)**2*tempwfk(ipw,2)**2
+          end do
+          tmp_std1=tmp_std1+wtk*0.5*sqrt(tmp_std2)/this%nbcut
+        end if
       end do
+      ! Add kpt weighted contribution to standard deviation
+      this%std_init=this%std_init+tmp_std1
+      write(0,*) 'tmp = ',ckpt,tmp_std1
       ABI_DEALLOCATE(tempwfk)
     end if
     ABI_DEALLOCATE(kpgnorm)
