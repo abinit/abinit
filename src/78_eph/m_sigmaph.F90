@@ -726,7 +726,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
      else
        restart = 0; sigma%qp_done = 0
-       MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
+       msg = "Found SIGEPH.nc file with all QP entries already computed. Will overwrite file."
+       call wrtout(ab_out, sjoin("WARNING: ", msg))
+       MSG_WARNING(msg)
      end if
    end if
    call sigma_restart%free()
@@ -865,7 +867,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
      msg=" Computing diagonal elements of velocity operator for all states in Sigma_nk...")
- ABI_MALLOC(cgwork,   (2, mpw*wfd%nspinor))
+ ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
  ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)

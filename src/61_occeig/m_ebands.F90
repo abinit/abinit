@@ -319,9 +319,10 @@ MODULE m_ebands
  type,public :: klinterp_t
 
    integer :: mband, nsppol, ndat
+   ! Max number of bands, number of independent spin polarization, size of "extra" dimension.
 
    integer :: nkx, nky, nkz
-   ! Number of input data points
+   ! Number of divisions in the grid covering the first unit cell
 
    real(dp),allocatable :: bzdata(:,:,:,:,:,:)
     ! (nkx, nky, nkz, mband, ndat, nsppol)
@@ -438,8 +439,8 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
  logical :: ismetal
  !type(ebands_t)  :: tmp_ebands
 !arrays
- integer :: val_idx(ebands%nkpt,ebands%nsppol)
- real(dp) :: top_valence(ebands%nkpt),bot_conduct(ebands%nkpt)
+ integer :: val_idx(ebands%nkpt, ebands%nsppol)
+ real(dp) :: top_valence(ebands%nkpt), bot_conduct(ebands%nkpt)
  logical :: my_kmask(ebands%nkpt)
 
 ! *********************************************************************
@@ -703,8 +704,8 @@ end subroutine gaps_print
 !! SOURCE
 
 subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
-& nband,nkpt,npwarr,nsppol,nspinor,tphysel,tsmear,occopt,occ,wtk,&
-& charge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
+  nband,nkpt,npwarr,nsppol,nspinor,tphysel,tsmear,occopt,occ,wtk,&
+  charge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
 
 !Arguments ------------------------------------
 !scalars
@@ -1849,8 +1850,7 @@ subroutine ebands_enclose_degbands(ebands, ikibz, spin, ibmin, ibmax, changed, t
      if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) ndeg = ndeg + 1
    end do
    ! Build degblock table.
-   ABI_SFREE(degblock)
-   ABI_MALLOC(degblock, (2, ndeg))
+   ABI_REMALLOC(degblock, (2, ndeg))
    ndeg = 1; degblock(1, 1) = ibmin
    do ib=ibmin+1,ibmax
      if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) then
@@ -2205,11 +2205,11 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
    ! newocc assumes eigenvalues and occupations packed in 1d-vector!!
    mband = ebands%mband; nkpt = ebands%nkpt; nsppol = ebands%nsppol
 
-   ABI_MALLOC(eigen,(mband*nkpt*nsppol))
-   call get_eneocc_vect(ebands,'eig',eigen)
+   ABI_MALLOC(eigen, (mband*nkpt*nsppol))
+   call get_eneocc_vect(ebands, 'eig', eigen)
 
-   ABI_MALLOC(occ,(mband*nkpt*nsppol))
-   ABI_MALLOC(doccde,(mband*nkpt*nsppol))
+   ABI_MALLOC(occ, (mband*nkpt*nsppol))
+   ABI_MALLOC(doccde, (mband*nkpt*nsppol))
 
    call newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,ebands%nband,&
     ebands%nelect,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&

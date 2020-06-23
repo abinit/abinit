@@ -570,7 +570,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  edos_intmeth = 2
  if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae
- if (edos_step == zero) edos_step = 0.001
+ !if (edos_step == zero) edos_step = 0.001
  if (edos_step == zero) edos_step = ten / Ha_meV
  edos_broad = dtset%tsmear
 
@@ -886,7 +886,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  fact = max_occ * fact0 / e_Cb / two * 100**2
 
  ! Compute mobility_mu i.e. results in which lifetimes have been computed in a consistent way
- ! with the same the Fermi level. In all the other cases, indeed we assume tau does not depend on ef.
+ ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
  self%mobility_mu = zero
  cnt = 0
  do spin=1,nsppol
