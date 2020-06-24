@@ -15,3 +15,28 @@ Mandatory fallbaks are : HDF5, netCDF4, netCDF4-fortran and libXC.
 More detailed instructions are available at
 
     https://wiki.abinit.org/doku.php?id=build:fallbacks
+
+
+---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---
+
+Customize build-abinit-fallbacks.sh
+===================================
+
+If only a few fallbacks need to be built, 
+the script build-abinit-fallbacks.sh  can be modified
+
+Examples with the building of the libpsml/xmlf90/wanniers90 fallbacks:
+As these fallbacks depend only of linalg and libXC,
+
+Remove these lines :
+
+  --disable-wannier90 \
+  --disable-xmlf90 --disable-libpsml \
+
+and add these lines :
+
+  --with-libxc-incs="-I/usr/include" \
+  --with-libxc-libs="-L/usr/lib/x86_64-linux-gnu/lib -lxcf90 -lxc -lm" \
+
+
+---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---DRAFT---
