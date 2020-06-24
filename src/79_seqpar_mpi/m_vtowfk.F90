@@ -34,6 +34,7 @@ module m_vtowfk
  use m_cgtools
  use m_dtset
  use m_dtfil
+ use m_hightemp
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab, cwtime, sec2str
@@ -156,7 +157,7 @@ contains
 !! SOURCE
 
 subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
-& eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
+& eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,hightemp,&
 & ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj,mkgq,mpi_enreg,&
 & mpw,natom,nband_k,nkpt,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
 & pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift)
@@ -171,6 +172,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(efield_type), intent(inout) :: dtefield
  type(dataset_type), intent(in) :: dtset
  type(gs_hamiltonian_type), intent(inout) :: gs_hamk
+ type(hightemp_type),pointer,intent(inout) :: hightemp
  type(MPI_type), intent(inout) :: mpi_enreg
  type(paw_dmft_type), intent(in)  :: paw_dmft
  integer, intent(in) :: kg_k(3,npw_k)
@@ -629,6 +631,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0)
 
      ek_k(iband)=ar
+
+     ! Compute standard deviation of planeewaves
+     ! if(associated(hightemp)) then
+     !   if(hightemp%version==1) then
+     !     call hightemp%compute_pw_avg_std(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+     !     & ek_k(iband),dtfil%filnam_ds(4),iband,ikpt,kinpw,npw_k,mpi_enreg,my_nspinor)
+     !   end if
+     ! end if
+
 
      if(paw_dmft%use_dmft==1) then
        do iband1=1,nband_k

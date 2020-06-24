@@ -8,7 +8,7 @@
 !!  with orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2019 ABINIT group (A. Blanchet)
+!!  Copyright (C) 2018-2020 ABINIT group (A. Blanchet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -490,155 +490,105 @@ contains
   ! CHILDREN
   !
   ! SOURCE
-  subroutine compute_pw_avg_std(this,cg,ckpt,ecut,eig_k,ek_k,exchn2n3d,fnameabo,istwfk,kg_k,kpt,&
-  & mcg,mpi_enreg,mpw,nband,nkpt,npw_k,nsppol,rprimd,wtk)
+  subroutine compute_pw_avg_std(this,cg,eig_k,ek_k,fnameabo,&
+  & gprimd,icg,ikpt,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
+  & nkpt,npw_k,nspinor,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: ckpt,mcg,mpw,nkpt,npw_k,nsppol,exchn2n3d
-    real(dp),intent(in) :: ecut,wtk
+    integer,intent(in) :: icg,ikpt,mcg,nband_k,nkpt,npw_k,nspinor
+    real(dp),intent(in) :: wtk
     class(hightemp_type),intent(inout) :: this
-    type(MPI_type),intent(inout) :: mpi_enreg
-    ! Arrays
-    integer,intent(in) :: istwfk(nkpt),kg_k(3,npw_k),nband(nkpt)
-    real(dp),intent(in) :: kpt(3,nkpt),rprimd(3,3)
-    real(dp),intent(in) :: cg(2,mcg)
-    real(dp),intent(in) :: eig_k(nband(ckpt)),ek_k(nband(ckpt))
+    type(MPI_type),intent(in) :: mpi_enreg
     character(len=*),intent(in) :: fnameabo
+    ! Arrays
+    integer,intent(in) :: kg_k(3,npw_k)
+    real(dp),intent(in) :: eig_k(nband_k),ek_k(nband_k),gprimd(3,3)
+    real(dp),intent(in) :: kpt(3,nkpt),kinpw(npw_k),cg(2,mcg)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: cgshift,cgshift_tot,iband,iout,ipw,ipw_tot
-    integer :: mcg_tot,mpierr,npw_tot
-    real(dp) :: average,ucvol,kpg1_tot,kpg2_tot,kpg3_tot,tmp_std1,tmp_std2
+    integer :: blocksize,iband,iblock,iblocksize,ierr,ipw,nblockbd
+    real(dp) :: avnk,kpg1,kpg2,kpg3,tmp_std
     character(len=50) :: filenameoutpw
-    character(len=4) :: mode_paral
     ! Arrays
-    integer :: nppw_tot(mpi_enreg%nproc_band)
-    real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
-    integer,allocatable :: kg_tot(:,:)
-    real(dp),allocatable :: cg_tot(:,:),kpgnorm(:),kpgnorm_tot(:),tempwfk(:,:)
+    real(dp) :: cgnk(2,npw_k*nspinor),cgnk2(npw_k*nspinor)
 
     ! *********************************************************************
 
-    write(std_out,'(a,I5.5,a)') 'Writing plane waves coefs of kpt=',ckpt,'...'
-    mode_paral='PERS'
-    iout=-1
-    call metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
+    ! Debug : Priting Eigenvalues, Kinetic and PW grid if requested
+    if(this%prt_cg.and.(mpi_enreg%me==mpi_enreg%me_kpt)) then
+      write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ikpt
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+      do ipw=1,npw_k
+        kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
+        kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
+        kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
 
-    ABI_ALLOCATE(kpgnorm,(npw_k))
-    call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
-
-    mcg_tot=mcg
-    nppw_tot(:)=0
-    nppw_tot(mpi_enreg%me_band + 1)=npw_k
-    call xmpi_sum(nppw_tot,mpi_enreg%comm_world,mpierr)
-    call xmpi_sum(mcg_tot,mpi_enreg%comm_world,mpierr)
-
-    npw_tot=sum(nppw_tot)
-    ABI_ALLOCATE(cg_tot,(2,mcg_tot))
-    ABI_ALLOCATE(kpgnorm_tot,(npw_tot))
-    ABI_ALLOCATE(kg_tot,(3,npw_tot))
-
-    cg_tot(:,:)=zero
-    kpgnorm_tot(:)=zero
-    kg_tot(:,:)=0
-    do ipw=1,npw_k
-      ipw_tot=sum(nppw_tot(1:mpi_enreg%me_band))+ipw
-      kpgnorm_tot(ipw_tot)=kpgnorm(ipw)
-      kg_tot(:,ipw_tot)=kg_k(:,ipw)
-
-      do iband=1,nband(ckpt)
-        cgshift=(iband-1)*npw_k
-        cgshift_tot=(iband-1)*npw_tot
-        cg_tot(:,cgshift_tot+ipw_tot)=cg(:,cgshift+ipw)
+        write(23,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
+        & ipw,&
+        & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
+        & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
+        & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
+        & kinpw(ipw)
       end do
+      close(23)
+
+      write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ikpt
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+      write(23,'(ES12.5)') eig_k
+      close(23)
+
+      write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ikpt
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+      write(23,'(ES12.5)') ek_k
+      close(23)
+    end if
+
+    ! Parallelism over FFT and/or bands: define sizes and tabs
+    nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
+    blocksize=nband_k/nblockbd
+
+    ! Loop over bands or blocks of bands. Note that in sequential mode
+    ! iblock=iband, nblockbd=nband_k and blocksize=1
+    do ipw=1,npw_k
+      write(0,*) ikpt,ipw,kinpw(ipw)
     end do
-
-    call xmpi_sum(cg_tot,mpi_enreg%comm_world,mpierr)
-    call xmpi_sum(kpgnorm_tot,mpi_enreg%comm_world,mpierr)
-    call xmpi_sum(kg_tot,mpi_enreg%comm_world,mpierr)
-
-    if(mpi_enreg%me==mpi_enreg%me_kpt) then
-      if(this%prt_cg) then
-        ! Writting plane waves vector coordinates
-        write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ckpt
-
-        open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
-        do ipw=1, npw_tot
-          kpg1_tot=kpt(1,ckpt)+dble(kg_tot(1,ipw))
-          kpg2_tot=kpt(2,ckpt)+dble(kg_tot(2,ipw))
-          kpg3_tot=kpt(3,ckpt)+dble(kg_tot(3,ipw))
-
-          write(23,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
-          & ipw,&
-          & gprimd(1,1)*kpg1_tot+gprimd(1,2)*kpg2_tot+gprimd(1,3)*kpg3_tot,&
-          & gprimd(2,1)*kpg1_tot+gprimd(2,2)*kpg2_tot+gprimd(2,3)*kpg3_tot,&
-          & gprimd(3,1)*kpg1_tot+gprimd(3,2)*kpg2_tot+gprimd(3,3)*kpg3_tot,&
-          & kpgnorm_tot(ipw)
-        end do
-        close(23)
-
-        ! Writting Eigen energies
-        write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ckpt
-        open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
-        write(23,'(ES12.5)') eig_k
-        close(23)
-
-        ! Writting Kinetic energies
-        write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ckpt
-        open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
-        write(23,'(ES12.5)') ek_k
-        close(23)
-      end if
-
-      ABI_ALLOCATE(tempwfk,(npw_tot, 3))
-      tmp_std1=zero
-      do iband=1, nband(ckpt)
-        tempwfk(:,:)=zero
-        cgshift_tot=(iband-1)*npw_tot
-        do ipw=1, npw_tot
-          tempwfk(ipw,2)=ABS(dcmplx(cg_tot(1,cgshift_tot+ipw), cg_tot(2,cgshift_tot+ipw)))
-          ! Hartree to eV * Kinetic energy of the pw
-          tempwfk(ipw,1)=(2*pi*kpgnorm_tot(ipw))**2/2.
-          tempwfk(ipw,3)=ipw
-        end do
-
-        ! Printing Plane wave in _PW output file on request
+    do iblock=1,nblockbd
+      do iblocksize=1,blocksize
+        iband=(iblock-1)*blocksize+iblocksize
         if(this%prt_cg) then
-          write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ckpt,'_b',iband
-          open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
-          do ipw=1, npw_tot
-            write(23,'(i14,ES14.6,ES14.6,i14)') int(tempwfk(ipw, 3)),27.2114*tempwfk(ipw, 1),tempwfk(ipw,2)
+          cgnk(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
+          cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
+          write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ikpt,'_b',iband
+          open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+
+          open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+          do ipw=1,npw_k
+            write(23,'(i14,ES14.6,ES14.6,i14)') ipw,&
+            & kinpw(ipw),sqrt(cgnk2(ipw))
           end do
           close(23)
         end if
 
-
-        ! Computing standard deviation for lasts bands
-        write(0,*) ckpt,sum(tempwfk(:,2)**2)
-        if(iband>=nband(ckpt)-this%nbcut+1) then
-          tmp_std2=zero
-          average=zero
-          cgshift_tot=(iband-1)*npw_tot
-          do ipw=1, npw_tot
-            average=average+tempwfk(ipw,1)*tempwfk(ipw,2)**2
+        ! Computing planewaves standard deviation over lasts bands.
+        if(iband>=nband_k-this%nbcut+1) then
+          tmp_std=zero
+          avnk=zero
+          cgnk(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
+          cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
+          do ipw=1,npw_k
+            avnk=avnk+kinpw(ipw)*cgnk2(ipw)
           end do
-          do ipw=1, npw_tot
-            tmp_std2=tmp_std2+(tempwfk(ipw,1)-average)**2*tempwfk(ipw,2)**2
+          do ipw=1,npw_k
+            tmp_std=tmp_std+(kinpw(ipw)-avnk)**2*cgnk2(ipw)
           end do
-          tmp_std1=tmp_std1+wtk*0.5*sqrt(tmp_std2)/this%nbcut
+          ! write(0,*) 'for ikpt,band',ikpt,iband,0.5*sqrt(tmp_std)/this%nbcut,wtk*0.5*sqrt(tmp_std)/this%nbcut
+          this%std_init=this%std_init+wtk*0.5*sqrt(tmp_std)/this%nbcut
         end if
       end do
-      ! Add kpt weighted contribution to standard deviation
-      this%std_init=this%std_init+tmp_std1
-      write(0,*) 'tmp = ',ckpt,tmp_std1
-      ABI_DEALLOCATE(tempwfk)
-    end if
-    ABI_DEALLOCATE(kpgnorm)
-    ABI_DEALLOCATE(kg_tot)
-    ABI_DEALLOCATE(cg_tot)
-    ABI_DEALLOCATE(kpgnorm_tot)
+    end do
+
   end subroutine compute_pw_avg_std
 
   ! *********************************************************************

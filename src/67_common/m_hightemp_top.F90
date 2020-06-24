@@ -62,12 +62,12 @@ contains
     integer,intent(in) :: ckpt,mcg,mpw,nkpt,npw_k,nsppol,exchn2n3d
     real(dp),intent(in) :: ecut
     type(MPI_type),intent(inout) :: mpi_enreg
+    character(len=*),intent(in) :: fnameabo
     ! Arrays
     integer,intent(in) :: istwfk(nkpt),kg_k(3,npw_k),nband(nkpt)
     real(dp),intent(in) :: kpt(3,nkpt),rprimd(3,3)
     real(dp),intent(in) :: cg(2,mcg)
     real(dp),intent(in) :: eig_k(nband(ckpt)),ek_k(nband(ckpt))
-    character(len=*),intent(in) :: fnameabo
 
     ! Local variables -------------------------
     ! Scalars
