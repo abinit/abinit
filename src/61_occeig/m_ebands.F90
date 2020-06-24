@@ -4495,6 +4495,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
+   ! FIXME: Too much memory here.
    ABI_MALLOC(tmp_eigen, (ebands%nkpt))
    ABI_MALLOC(wdt, (nw, ebands%nkpt, 2))
 
@@ -4511,6 +4512,8 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
        if (present(emax)) then
          if (all(tmp_eigen > emax)) cycle
        end if
+
+       !call tetra%htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz, eig_ibz, weights)
 
        call tetra%blochl_weights(tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
@@ -4579,7 +4582,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
  end do
  edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
- ! Use bisection to find fermi level.
+ ! Use bisection to find the Fermi level.
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
  ! fullfilled if we use tetra and this is the reason why we have filtered the DOS.
  ief = bisect(edos%idos(:,0), ebands%nelect)
@@ -5893,15 +5896,15 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 
  do ix=1,nkx
    ii = ix; if (shifted(1)) ii = ii - 1
-   xvec(ix) = (ii - 1 + shiftk(1,1)) / ngkpt(1)
+   xvec(ix) = (ii - 1 + shiftk(1, 1)) / ngkpt(1)
  end do
  do iy=1,nky
    ii = iy; if (shifted(2)) ii = ii - 1
-   yvec(iy) = (ii - 1 + shiftk(2,1)) / ngkpt(2)
+   yvec(iy) = (ii - 1 + shiftk(2, 1)) / ngkpt(2)
  end do
  do iz=1,nkz
    ii = iz; if (shifted(3)) ii = ii - 1
-   zvec(iz) = (ii - 1 + shiftk(3,1)) / ngkpt(3)
+   zvec(iz) = (ii - 1 + shiftk(3, 1)) / ngkpt(3)
  end do
 
  ! Build list of k-points in full BZ (ordered as required by B-spline routines)

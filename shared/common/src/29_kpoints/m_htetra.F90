@@ -1852,6 +1852,7 @@ end subroutine htetra_get_delta_mask
 !! FUNCTION
 !!   Emulates the behaviour of the previous tetrahedron implementation but
 !!   taking a list of energies as input.
+!!
 !!   HM: I find that in many routines its better to change the implementation
 !!   and accumulate the tetrahedron weights in the same way as the
 !!   gaussian smearing weights using htetra_get_onewk_wvals. However this requires
@@ -1859,6 +1860,10 @@ end subroutine htetra_get_delta_mask
 !!   to transition to the new tetrahedron implementation without refactoring.
 !!   Looping over tetrahedra (i.e. using tetra_blochl_weights) is currently faster
 !!   than looping over k-points.
+!!
+!!   MG: Note, however, that tetra_blochl_weights requires more memory as
+!!       one has to allocate dweight(nw,nkpt),tweight(nw,nkpt) and the size of the arrays increases
+!!       quickly with the k-mesh and the number of frequencies (propto mband)
 !!
 !! INPUTS
 !!

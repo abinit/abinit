@@ -530,6 +530,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  nvals = self%ntemp * self%nrta
  ABI_CALLOC(tau_vals, (self%ntemp, self%nrta, mband, nkpt, nsppol))
 
+ ! FIXME: The memory explodes it natom is large
  ntens = (1 + self%ntemp) * self%nrta
  ABI_CALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, mband, nkpt, nsppol))
 
@@ -570,8 +571,8 @@ subroutine rta_compute(self, cryst, dtset, comm)
  edos_intmeth = 2
  if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae
- !if (edos_step == zero) edos_step = 0.001
- if (edos_step == zero) edos_step = ten / Ha_meV
+ if (edos_step == zero) edos_step = 0.001
+ !if (edos_step == zero) edos_step = ten / Ha_meV
  edos_broad = dtset%tsmear
 
  ! Set default energy range for DOS
