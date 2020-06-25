@@ -784,7 +784,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
 
  if (sigma%imag_only .and. sigma%qint_method == 1) then
-   call wrtout(std_out, " Including restricted set of states within energy window around bdgw states.")
+   call wrtout(std_out, " Including restricted set of states within energy window around relevant states.")
    do spin=1,sigma%nsppol
      do ik_ibz=1,ebands%nkpt
        do band=sigma%my_bsum_start, sigma%my_bsum_stop
@@ -1638,7 +1638,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          do imyp=1,my_npert
            nu = sigma%my_pinfo(3, imyp)
-           ! Ignore acoustic or unstable modes.
+           ! Ignore unstable modes or modes that should be skipped.
            wqnu = phfrq(nu); if (sigma%skip_phmode(nu, wqnu)) cycle
 
            ! For each band in Sigma_{bk}
@@ -1916,7 +1916,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Compute Debye-Waller term
      ! =========================
      if (.not. sigma%imag_only) then
-       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term...")
+       call cwtime(cpu_dw, wall_dw, gflops_dw, "start", msg=" Computing Debye-Waller term within rigid ion approx...")
        ! Collect gkq0_atm inside qpt_comm
        ! In principle it's sufficient to broadcast from itreated_q0 inside qpt_comm
        ! Yet, q-points are not equally distributed so this synch is detrimental.

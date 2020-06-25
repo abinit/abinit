@@ -407,6 +407,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     ABI_MALLOC(indkk, (tmp_nkpt,  6))
     call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, tmp_kcalc, ebands%nkpt, tmp_nkpt, cryst%nsym, &
          1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+
     if (dksqmax > tol12) then
       write(msg, '(a,es16.6,2a)' )&
         "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
@@ -461,7 +462,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
  ! Now we can define the list of k-points and the bands range.
  ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
- ! we have compute the union of the k-points.
+ ! we have to compute the union of the k-points.
  nkcalc = 0
  do ii=1,tmp_nkpt
    found = .False.

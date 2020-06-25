@@ -322,7 +322,7 @@ MODULE m_ebands
    ! Max number of bands, number of independent spin polarization, size of "extra" dimension.
 
    integer :: nkx, nky, nkz
-   ! Number of divisions in the grid covering the first unit cell
+   ! Number of divisions of the grid enclosing the first unit cell
 
    real(dp),allocatable :: bzdata(:,:,:,:,:,:)
     ! (nkx, nky, nkz, mband, ndat, nsppol)
@@ -4311,7 +4311,8 @@ end function ebands_interp_kpath
 !!  ebands_get_edos_matrix_elements
 !!
 !! FUNCTION
-!!  Compute e-DOS and weighted DOS with weights given by precomputed scalar, vectorial or tensorial matrix elements.
+!!  Compute e-DOS and weighted DOS with weights given by precomputed scalar, vectorial
+!!  or tensorial matrix elements.
 !!  Weights are provided in input as (..., num_entries, mband, nkpt, nsppol) tables.
 !!
 !! INPUTS
@@ -4333,7 +4334,6 @@ end function ebands_interp_kpath
 !!    No meaning for tetrahedrons
 !!  comm=MPI communicator
 !!  [emin, emax]=Minimum and maximum energy to be considered. Default: full range.
-!!   Implemented only for tetra.
 !!
 !! OUTPUT
 !!  out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
@@ -4371,18 +4371,16 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 !Local variables-------------------------------
 !scalars
  real(dp),parameter :: max_occ1 = one
- integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
- !integer :: my_nkibz, nkfull, timrev
+ integer :: nproc,my_rank,nw,spin,band,ik_ibz,cnt,idat,ierr,bcorr
  integer :: ii, jj, ief
  real(dp) :: max_ene,min_ene,wtk,max_occ
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(htetra_t) :: tetra
 !arrays
- !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp) :: vsum(3), tsum(3,3) !, tsym(3,3), vsym(3), t(3,3),
- real(dp),allocatable :: wme0(:),wdt(:,:,:),tmp_eigen(:)
+ real(dp) :: vsum(3), tsum(3,3)
+ real(dp),allocatable :: wme0(:),tmp_eigen(:), weights(:,:)
 
 ! *********************************************************************
 
@@ -4429,33 +4427,38 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
  end if
 
  !call wrtout(std_out, " Computing DOS weighted by matrix elements.")
-
  select case (intmeth)
-
  case (1)
    ! Gaussian
    ABI_MALLOC(wme0, (nw))
    cnt = 0
    do spin=1,ebands%nsppol
-     do ikpt=1,ebands%nkpt
+     do ik_ibz=1,ebands%nkpt
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
-       wtk = ebands%wtk(ikpt)
+       wtk = ebands%wtk(ik_ibz)
+       do band=1,ebands%nband(ik_ibz+(spin-1)*ebands%nkpt)
 
-       do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-         wme0 = edos%mesh - ebands%eig(band, ikpt, spin)
+         if (present(emin)) then
+           if (ebands%eig(band, ik_ibz, spin) < emin - five * broad) cycle
+         end if
+         if (present(emax)) then
+           if (ebands%eig(band, ik_ibz, spin) > emax + five * broad) cycle
+         end if
+
+         wme0 = edos%mesh - ebands%eig(band, ik_ibz, spin)
          wme0 = gaussian(wme0, broad) * wtk
          edos%dos(:,spin) = edos%dos(:,spin) + wme0(:)
 
          ! scalars
          do idat=1,nvals
-           out_valsdos(:, 1, idat, spin) = out_valsdos(:,1, idat, spin) + wme0(:) * bks_vals(idat,band,ikpt,spin)
+           out_valsdos(:, 1, idat, spin) = out_valsdos(:,1, idat, spin) + wme0(:) * bks_vals(idat,band,ik_ibz,spin)
            call simpson_int(nw, step, out_valsdos(:,1, idat, spin), out_valsdos(:,2,idat,spin))
          end do
 
          ! vectors
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ikpt, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ik_ibz, spin))
            do ii=1,3
              out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wme0(:) * vsum(ii)
              call simpson_int(nw, step, out_vecsdos(:,1,ii,idat,spin), out_vecsdos(:,2,ii,idat,spin))
@@ -4465,7 +4468,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          ! tensor
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ikpt, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ik_ibz, spin))
            do ii=1,3
              do jj=1,3
                out_tensdos(:,1,jj,ii,idat,spin) = out_tensdos(:,1,jj,ii,idat,spin) + wme0(:) * tsum(jj,ii)
@@ -4475,7 +4478,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          end do
 
        end do !band
-     end do !ikpt
+     end do !ik_ibz
    end do !spin
 
    ABI_FREE(wme0)
@@ -4495,9 +4498,8 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
-   ! FIXME: Too much memory here.
    ABI_MALLOC(tmp_eigen, (ebands%nkpt))
-   ABI_MALLOC(wdt, (nw, ebands%nkpt, 2))
+   ABI_MALLOC(weights, (nw, 2))
 
    bcorr = 0; if (intmeth == -2) bcorr = 1
    cnt = 0
@@ -4513,32 +4515,28 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          if (all(tmp_eigen > emax)) cycle
        end if
 
-       !call tetra%htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz, eig_ibz, weights)
+       do ik_ibz=1,ebands%nkpt
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism
 
-       call tetra%blochl_weights(tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
-         bcorr, wdt(:,:,2), wdt(:,:,1), comm)
-
-       do ikpt=1,ebands%nkpt
-         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
+         call tetra%get_onewk(ik_ibz, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, max_occ1, weights)
+         weights = weights * ebands%wtk(ik_ibz)
 
          ! Compute DOS
-         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, ikpt, 1)
+         edos%dos(:,spin) = edos%dos(:,spin) + weights(:, 1)
 
          ! scalar
 !$OMP PARALLEL DO
          do idat=1,nvals
-           out_valsdos(:, 1, idat, spin) = out_valsdos(:, 1, idat, spin) + wdt(:, ikpt, 1) * bks_vals(idat, band, ikpt, spin)
-           out_valsdos(:, 2, idat, spin) = out_valsdos(:, 2, idat, spin) + wdt(:, ikpt, 2) * bks_vals(idat, band, ikpt, spin)
+           out_valsdos(:, :, idat, spin) = out_valsdos(:, :, idat, spin) + weights(:, :) * bks_vals(idat, band, ik_ibz, spin)
          end do
 
          ! vector
 !$OMP PARALLEL DO PRIVATE(vsum)
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ikpt, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ik_ibz, spin))
            do ii=1,3
-             out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wdt(:, ikpt, 1) * vsum(ii)
-             out_vecsdos(:, 2, ii, idat, spin) = out_vecsdos(:, 2, ii, idat, spin) + wdt(:, ikpt, 2) * vsum(ii)
+             out_vecsdos(:, :, ii, idat, spin) = out_vecsdos(:, :, ii, idat, spin) + weights(:, :) * vsum(ii)
            end do
          end do
 
@@ -4546,28 +4544,27 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 !$OMP PARALLEL DO PRIVATE(tsum)
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ikpt, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ik_ibz, spin))
            do ii=1,3
              do jj=1,3
-               out_tensdos(:, 1, jj, ii, idat, spin) = out_tensdos(:, 1, jj, ii, idat, spin) + wdt(:, ikpt, 1) * tsum(jj,ii)
-               out_tensdos(:, 2, jj, ii, idat, spin) = out_tensdos(:, 2, jj, ii, idat, spin) + wdt(:, ikpt, 2) * tsum(jj,ii)
+               out_tensdos(:, :, jj, ii, idat, spin) = out_tensdos(:, :, jj, ii, idat, spin) + weights(:, :) * tsum(jj,ii)
              end do
            end do
          end do
 
-       end do ! ikpt
+       end do ! ik_ibz
      end do ! band
    end do ! spin
+
+   ! Free memory
+   ABI_FREE(weights)
+   ABI_FREE(tmp_eigen)
+   call tetra%free()
 
    call xmpi_sum(edos%dos, comm, ierr)
    if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
    if (nvecs > 0) call xmpi_sum(out_vecsdos, comm, ierr)
    if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
-
-   ! Free memory
-   ABI_FREE(tmp_eigen)
-   ABI_FREE(wdt)
-   call tetra%free()
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
@@ -5876,7 +5873,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 
  ! Build BZ mesh. Note that in the simplest case of unshifted mesh:
  ! 1) k-point coordinates are in [0, 1]
- ! 2) The mesh is closed i.e. (0,0,0) and (1,1,1) are included
+ ! 2) The mesh is closed i.e. (0, 0, 0) and (1, 1, 1) are included
  ngkpt(1) = kptrlatt(1, 1)
  ngkpt(2) = kptrlatt(2, 2)
  ngkpt(3) = kptrlatt(3, 3)

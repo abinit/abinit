@@ -636,7 +636,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
      isk = ikpt2 + (isppol-1)*nkpt2
-     !if (mod(isk, nprocs) /= my_rank) cycle  ! MPI parallelism
      if (isk < isk_start .or. isk > isk_stop) cycle
 
      ikpt2_done=0

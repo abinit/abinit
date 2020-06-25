@@ -4,12 +4,8 @@
 !! m_htetra
 !!
 !! FUNCTION
-!!  module for tetrahedron interpolation of DOS and similar quantities
-!!  depends on m_kpt_rank.
+!!  Module for tetrahedron integration of DOS and similar quantities
 !!  Uses some functions from a previous implementation by MJV
-!!  The new implementation if based on spglib and kpclib by Atsushi Togo
-!!  after a discussion with in on the APS 2019 where he provided
-!!  details of his implementation.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2010-2020 ABINIT group (HM,MJV)
@@ -18,7 +14,7 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
-!!  1) Test carefully the case of degenerate tethraedron
+!!  1) Test more carefully the case of degenerate tethraedron
 !!  2) Add options to get only delta and/or theta ?
 !!
 !! PARENTS
@@ -41,7 +37,7 @@ module m_htetra
  use m_xmpi
  use m_errors
 
- use m_fstrings,        only : sjoin, itoa
+ use m_fstrings,        only : sjoin, itoa, ftoa
  use m_numeric_tools,   only : linspace
  use m_simtet,          only : sim0onei, SIM0TWOI
 
@@ -228,6 +224,13 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! Use the shifts from kpclib developed by Atsushi Togo
  ! This part is produced by a python script
+ ! This implementation is based on spglib and kpclib by Atsushi Togo
+ ! after a discussion with in on the APS 2019 where he provided
+ ! details of his implementation.
+ ! Note that we don't use it in production as we found that is approach, although faster than the original
+ ! one proposed by Blochl (and implemented by MJV) does not preserve symmetries that is calculations done on the full BZ
+ ! and the IBZ do not produced the same result. The diff, however, decreases if the sampling is densified.
+
  tetra_shifts(:, 1, 1,1) = [  0,  0,  0]
  tetra_shifts(:, 2, 1,1) = [  1,  0,  0]
  tetra_shifts(:, 3, 1,1) = [  1,  1,  0]
@@ -896,7 +899,7 @@ end subroutine htetra_init
 !! htetra_init_mapping_ibz
 !!
 !! FUNCTION
-!!  The mapping to the IBZ is has its own allocation routine.
+!!  The mapping to the IBZ has its own allocation routine.
 !!  I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
 !!
 !! PARENTS
@@ -906,18 +909,25 @@ end subroutine htetra_init
 !! SOURCE
 
 subroutine htetra_init_mapping_ibz(tetra)
+
  class(htetra_t),intent(inout) :: tetra
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
+
+ !real(dp) :: mem_mb
 
  ! Only execute the following if not yet alocated
  if (allocated(tetra%ibz)) return
 
  ! Allocate IBZ to tetrahedron mapping
- ABI_MALLOC(tetra%ibz,(tetra%nkibz))
+ ABI_MALLOC(tetra%ibz, (tetra%nkibz))
+ !mem_mb = ABI_MEM_MB(tetra%ibz)
  do ikibz=1,tetra%nkibz
-   ABI_MALLOC(tetra%ibz(ikibz)%indexes,(2,tetra%tetra_count(ikibz)))
+   ABI_MALLOC(tetra%ibz(ikibz)%indexes, (2, tetra%tetra_count(ikibz)))
+   !mem_mb = mem_mb + 2 * tetra%tetra_count(ikibz) * 4 * b2Mb
  end do
+
+ !call wrtout(std_out, sjoin("Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " (Mb) <<< MEM"))
 
  ! Create mapping from IBZ to unique tetrahedra
  tetra_count = 0
@@ -953,7 +963,7 @@ end subroutine htetra_init_mapping_ibz
 !!
 !! SOURCE
 
-pure subroutine htetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
+pure subroutine htetra_get_ibz(tetra, ikibz, itetra, tetra_mibz)
 
  class(htetra_t), intent(in) :: tetra
  integer,intent(in) :: ikibz, itetra
@@ -963,6 +973,7 @@ pure subroutine htetra_get_ibz(tetra,ikibz,itetra,tetra_mibz)
  ihash  = tetra%ibz(ikibz)%indexes(1,itetra)
  jtetra = tetra%ibz(ikibz)%indexes(2,itetra)
  tetra_mibz = tetra%unique_tetra(ihash)%indexes(:,jtetra)
+
 end subroutine htetra_get_ibz
 !!***
 
@@ -1066,7 +1077,7 @@ end subroutine htetra_free
 !!
 !! SOURCE
 
-pure subroutine get_onetetra_blochl(eig,energies,nene,bcorr,tweight,dweight)
+pure subroutine get_onetetra_blochl(eig, energies, nene, bcorr, tweight, dweight)
 
 !Arguments ------------------------------------
 !scalars
@@ -1442,6 +1453,7 @@ end subroutine get_ontetra_lambinvigneron
 !! SOURCE
 
 pure subroutine get_ontetetra_lambinvigneron_imag(eig,energies,nene,wt)
+
  ! dispersion values at the corners of the tetrahedron
  real(dp), intent(in), dimension(4) :: eig
  ! number of energies
@@ -1645,6 +1657,7 @@ end subroutine htetra_get_onewk_wvals
 !! FUNCTION
 !! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 !! Same as above but different calling arguments.
+!! IBZ Weights are not included
 !! HM: The above is prefered but I keep this one to ease the transition
 !!
 !! INPUTS
@@ -1657,8 +1670,7 @@ end subroutine htetra_get_onewk_wvals
 !!
 !! SOURCE
 
-subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
-                           enemin,enemax,max_occ,weights)
+subroutine htetra_get_onewk(tetra, ik_ibz, bcorr, nw, nkibz, eig_ibz, enemin, enemax, max_occ, weights)
 
 !Arguments ------------------------------------
 !scalars
@@ -1676,7 +1688,7 @@ subroutine htetra_get_onewk(tetra,ik_ibz,bcorr,nw,nkibz,eig_ibz,&
 ! *********************************************************************
 
  weights = zero
- wvals = linspace(enemin,enemax,nw)
+ wvals = linspace(enemin, enemax, nw)
  call htetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, max_occ, nkibz, eig_ibz, weights)
 
 end subroutine htetra_get_onewk
@@ -1791,7 +1803,8 @@ end subroutine htetra_get_onewk_wvals_zinv
 !!  Get a mask for the kpoints where the delta is finite
 !!
 
-subroutine htetra_get_delta_mask(tetra,eig_ibz,wvals,nw,nkpt,kmask,comm)
+subroutine htetra_get_delta_mask(tetra, eig_ibz, wvals, nw, nkpt, kmask, comm)
+
 !Arguments
  integer,intent(in) :: nw,nkpt,comm
  class(htetra_t), intent(in) :: tetra
@@ -1875,7 +1888,7 @@ end subroutine htetra_get_delta_mask
 !!
 !! SOURCE
 
-subroutine htetra_wvals_weights(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,tweight,dweight,comm)
+subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, tweight, dweight, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -2049,6 +2062,7 @@ end subroutine htetra_wvals_weights_delta
 !!
 !! FUNCTION
 !!   Emulates the behaviour of the previous tetrahedron implementation.
+!!   IBZ weights are included.
 !!
 !! INPUTS
 !!
@@ -2133,12 +2147,12 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
    if (mod(ihash,nprocs) /= my_rank) cycle
 
    ! For each tetrahedron that belongs to this k-point
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
      do isummit=1,4
-       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit, itetra)
        eig(isummit) = eig_ibz(ind_ibz(isummit))
      end do
 
@@ -2210,7 +2224,7 @@ end subroutine htetra_weights_wvals_zinv
 !!
 !! SOURCE
 
-pure subroutine sort_4tetra(list,perm)
+pure subroutine sort_4tetra(list, perm)
 
  integer,  intent(inout) :: perm(4)
  real(dp), intent(inout) :: list(4)

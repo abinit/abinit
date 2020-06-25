@@ -516,7 +516,8 @@ In this computation, we consider only electrons and this explains why the values
 Note that the transport driver is automatically executed after the EPH run.
 You can run the transport driver in standalone mode by setting [[eph_task]] 7, 
 provided you already have the lifetimes in a SIGEPH.nc file,
-<!-- This task can be performed only in serial and is very fast. -->
+This task is relatively fast even in serial execution although some parts (in particular the computation of DOS-like quantities)
+can benefit from MPI.
 
 Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes,
 we can give more details about convergence and additional tricks that can be used
