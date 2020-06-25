@@ -632,15 +632,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
      ek_k(iband)=ar
 
-     ! Compute standard deviation of planeewaves
-     ! if(associated(hightemp)) then
-     !   if(hightemp%version==1) then
-     !     call hightemp%compute_pw_avg_std(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
-     !     & ek_k(iband),dtfil%filnam_ds(4),iband,ikpt,kinpw,npw_k,mpi_enreg,my_nspinor)
-     !   end if
-     ! end if
-
-
      if(paw_dmft%use_dmft==1) then
        do iband1=1,nband_k
          call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&

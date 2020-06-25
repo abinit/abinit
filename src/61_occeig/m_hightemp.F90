@@ -491,12 +491,12 @@ contains
   !
   ! SOURCE
   subroutine compute_pw_avg_std(this,cg,eig_k,ek_k,fnameabo,&
-  & gprimd,icg,ikpt,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
+  & gprimd,icg,ikpt,isppol,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
   & nkpt,npw_k,nspinor,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: icg,ikpt,mcg,nband_k,nkpt,npw_k,nspinor
+    integer,intent(in) :: icg,ikpt,isppol,mcg,nband_k,nkpt,npw_k,nspinor
     real(dp),intent(in) :: wtk
     class(hightemp_type),intent(inout) :: this
     type(MPI_type),intent(in) :: mpi_enreg
@@ -551,9 +551,6 @@ contains
 
     ! Loop over bands or blocks of bands. Note that in sequential mode
     ! iblock=iband, nblockbd=nband_k and blocksize=1
-    do ipw=1,npw_k
-      write(0,*) ikpt,ipw,kinpw(ipw)
-    end do
     do iblock=1,nblockbd
       do iblocksize=1,blocksize
         iband=(iblock-1)*blocksize+iblocksize
@@ -561,8 +558,6 @@ contains
           cgnk(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
           cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
           write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ikpt,'_b',iband
-          open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
-
           open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
           do ipw=1,npw_k
             write(23,'(i14,ES14.6,ES14.6,i14)') ipw,&
@@ -580,6 +575,8 @@ contains
           do ipw=1,npw_k
             avnk=avnk+kinpw(ipw)*cgnk2(ipw)
           end do
+          call xmpi_sum(avnk,mpi_enreg%comm_kptband,ierr)
+          if(iband==nband_k) write(0,*) ikpt,npw_k,sum(cgnk2(:)),avnk,mpi_enreg%me,mpi_enreg%me_band
           do ipw=1,npw_k
             tmp_std=tmp_std+(kinpw(ipw)-avnk)**2*cgnk2(ipw)
           end do
