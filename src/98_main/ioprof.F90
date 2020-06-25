@@ -185,7 +185,7 @@ program ioprof
            CYCLE
          end if
 
-         ABI_DT_MALLOC(Kvars, (hdr%nkpt))
+         ABI_MALLOC(Kvars, (hdr%nkpt))
 
          if (my_rank == master) then
            call wrtout(ount,"Calling wfk_create_wfkfile","COLL")
@@ -231,7 +231,7 @@ program ioprof
            end if
          end if
 
-         ABI_DT_FREE(Kvars)
+         ABI_FREE(Kvars)
        end do ! iomode
      end do ! formeig
 

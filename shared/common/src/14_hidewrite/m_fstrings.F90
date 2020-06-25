@@ -59,6 +59,7 @@ MODULE m_fstrings
  public :: itoa            ! Convert an integer into a string
  public :: ftoa            ! Convert a float into a string
  public :: ktoa            ! Convert a k-point into a string.
+ public :: stoa            ! Convert a spin index into a string
  public :: ltoa            ! Convert a list into a string.
  public :: atoi            ! Convert a string into a integer
  public :: atof            ! Convert a string into a floating-point number.
@@ -1288,6 +1289,38 @@ pure function ktoa(kpt,fmt)
  ktoa = ADJUSTL(ktoa)
 
 end function ktoa
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/stoa
+!! NAME
+!! stoa
+!!
+!! FUNCTION
+!!  Convert a spin index into a string
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+
+character(len=4) pure function stoa(spin)
+
+  integer,intent(in) :: spin
+
+! *********************************************************************
+
+ select case (spin)
+ case (1)
+   stoa = "UP"
+ case (2)
+   stoa = "DOWN"
+ case default
+   stoa = "????"
+ end select
+
+end function stoa
 !!***
 
 !----------------------------------------------------------------------

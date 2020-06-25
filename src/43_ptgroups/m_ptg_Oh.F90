@@ -36,31 +36,28 @@
 
 #include "abi_common.h"
 
-
 module m_ptg_Oh
-contains
-!!**
-
-
-
- subroutine ptg_Oh (nsym,nclass,sym,class_ids,class_names,Irr)
 
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
+
+contains
+!!**
+ subroutine ptg_Oh (nsym,nclass,sym,class_ids,class_names,Irr)
 
  use defs_basis
  use m_abicore
  use m_defs_ptgroups,  only : irrep_t
  implicit none
 !Arguments ------------------------------------
- integer,intent(out) :: nclass,nsym 
+ integer,intent(out) :: nclass,nsym
  !arrays
  integer,allocatable,intent(out) :: sym(:,:,:), class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irr(:)
  !Local variables-------------------------------
- complex(dpc) :: j=(0.0_dp,1.0_dp) 
+ complex(dpc) :: j=(0.0_dp,1.0_dp)
  ! ********************************************************************************
 ! List of symmetries packed in classes
  nsym = 48
@@ -139,19 +136,19 @@ contains
  class_ids(2,10) = 48
 
 ABI_MALLOC(class_names,(10))
- class_names(1) = "1+" 
- class_names(2) = "2+" 
- class_names(3) = "3+" 
- class_names(4) = "2+" 
- class_names(5) = "4+" 
- class_names(6) = "-2-" 
- class_names(7) = "-2+" 
- class_names(8) = "-6-" 
- class_names(9) = "-2+" 
- class_names(10) = "-4+" 
+ class_names(1) = "1+"
+ class_names(2) = "2+"
+ class_names(3) = "3+"
+ class_names(4) = "2+"
+ class_names(5) = "4+"
+ class_names(6) = "-2-"
+ class_names(7) = "-2+"
+ class_names(8) = "-6-"
+ class_names(9) = "-2+"
+ class_names(10) = "-4+"
 
 ! List of irreducible representations.
- ABI_DT_MALLOC(Irr, (10))
+ ABI_MALLOC(Irr, (10))
  Irr(1)%name = "A1g"
  Irr(1)%dim = 1
  Irr(1)%nsym = 48
@@ -684,7 +681,7 @@ ABI_MALLOC(class_names,(10))
 
  RETURN
   if (.FALSE.) write(std_out,*) j
- end subroutine ptg_Oh 
+ end subroutine ptg_Oh
 !!***
 
 end module m_ptg_Oh

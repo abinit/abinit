@@ -156,7 +156,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: cg_disk(:,:),eig_k(:),occ_k(:)
 #ifdef HAVE_NETCDF
- integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk, timrev
+ integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
  type(crystal_t) :: crystal
 #endif
@@ -346,8 +346,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
        ABI_MALLOC(kg_disk, (3, mpw_disk))
 
-       timrev = 2 ! FIXME: Use abinit convention for timrev
-       crystal = hdr%get_crystal(timrev)
+       crystal = hdr%get_crystal()
 
        ! For each k-point: read full G-vector list from file, compute KB data and write to file.
        do ikpt=1,nkpt
@@ -405,11 +404,9 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !crystal = hdr%get_crystal(2)
-     !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
+     !crystal = hdr%get_crystal()
+     !NCF_CHECK(ebands_ncwrite_path(gs_ebands, cryst, filname)
      !call crystal%free()
-     !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
-     !NCF_CHECK(ncerr)
 #else
      MSG_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
@@ -741,7 +738,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
  integer :: comm_cell,comm_fft,comm_bandfft,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
- integer :: timrev,paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
+ integer :: paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
  integer :: ipw,ispinor_index,npwso,npwsotot,npwtot,nspinortot,ikpt_this_proc,ispinor
  integer :: bandpp,nproc_band,nproc_fft,nproc_spinor,me_fft,nproc_cell,nwrites
  integer :: comm_mpiio,nranks,bstart,bcount !nbdblock,nblocks,
@@ -797,9 +794,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    ABI_CHECK(all(npwarr == hdr%npwarr), "npwarr != hdr%npwarr")
  end if
 
- ! FIXME: Use abinit convention for timrev
- timrev = 2
- crystal = hdr%get_crystal(timrev)
+ crystal = hdr%get_crystal()
 
  ! TODO
  ! Be careful with response == 1.

@@ -85,6 +85,7 @@ type, public :: dataset_type
  integer :: berryopt
  integer :: berrysav
  integer :: berrystep
+ integer :: brav = 1
  integer :: brvltt
  integer :: bs_nstates
  integer :: bs_hayd_term
@@ -1304,6 +1305,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%berryopt           = dtin%berryopt
  dtout%berrysav           = dtin%berrysav
  dtout%berrystep          = dtin%berrystep
+ dtout%brav               = dtin%brav
  dtout%brvltt             = dtin%brvltt
  dtout%bs_nstates         = dtin%bs_nstates
  dtout%builtintest        = dtin%builtintest
@@ -3046,7 +3048,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
- list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
+ list_vars=trim(list_vars)//' boxcenter boxcutmin brav brvltt builtintest'
  list_vars=trim(list_vars)//' bound_SPCoupling bound_anhaStrain bound_cell bound_cutoff'
  list_vars=trim(list_vars)//' bound_maxCoeff bound_model bound_rangePower bound_step bound_temp'
  list_vars=trim(list_vars)//' bs_algorithm bs_calctype bs_coulomb_term bs_coupling'

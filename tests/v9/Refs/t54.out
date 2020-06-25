@@ -550,10 +550,20 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T=    5.0 [K]
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t54o_DS2_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.90E+17        0.00E+00   3968561107.11            0.00
           300.00        0.90E+17        0.00E+00       105946.96            0.00
+
+
+
+- Writing RTA transport results to: t54o_DS2_RTA.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================

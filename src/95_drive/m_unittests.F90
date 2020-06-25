@@ -153,7 +153,7 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup) result(crystal)
  ABI_FREE(class_ids)
  ABI_FREE(class_names)
  call irrep_free(irr)
- ABI_DT_FREE(irr)
+ ABI_FREE(irr)
 
  ABI_MALLOC(symafm,(nsym))
  symafm = 1

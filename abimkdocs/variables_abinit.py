@@ -3735,7 +3735,7 @@ In the case of star-function interpolation:
   * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[cite:Uehara2000]].
     In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of
     the lattice vectors included in the star expansion
-  * einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9
+  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq 9
 
 """,
 ),
@@ -9479,12 +9479,12 @@ Variable(
     abivarname="mbpt_sciss",
     varset="gw",
     vartype="real",
-    topics=['GW_useful', 'Susceptibility_useful', 'SelfEnergy_useful'],
+    topics=['GW_useful', 'Susceptibility_useful', 'SelfEnergy_useful', 'ElPhonInt_expert'],
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Many Body Perturbation Theory SCISSor operator",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]] in [3,4,99]",
+    requires="[[optdriver]] in [3,4,7,99]",
     added_in_version="before_v9",
     text=r"""
 The scissor operator energy added to the conductions states. In some cases,
@@ -21579,7 +21579,6 @@ Momentum Relaxation Time (MRTA) when [[eph_task]] == -4
 By default, the code computes linewidths both with the SERTA and MRTA and results are stored to netcdf file.
 The calculation of the MRTA is relatively fast but if performance is critical and only SERTA is needed, one can use
 eph_mrta 0.
-
 """,
 ),
 
@@ -21597,6 +21596,20 @@ This variable defines the path of the SIGEPH file with the e-ph self-energy resu
 that should be used as input for further analysis.
 At present, it is used by the transport driver ([[eph_task]]  = 7) to read the lifetimes needed
 to compute carrier mobilities within the RTA.
+""",
+),
+
+Variable(
+    abivarname="brav",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="BRAVais",
+    added_in_version="9.1.4",
+    text=r"""
+    See [[brav@anaddb]]
 """,
 ),
 
