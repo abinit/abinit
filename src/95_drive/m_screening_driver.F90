@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screening_driver
 !! NAME
 !!  m_screening_driver
@@ -7,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -97,6 +96,8 @@ module m_screening_driver
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
+ use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier,&
+                             &fullbz_plowannier,destroy_plowannier 
 
  implicit none
 
@@ -183,7 +184,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
  type(Pawang_type),intent(inout) :: Pawang
@@ -243,7 +244,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: gmet(3,3),gprimd(3,3),k0(3),qtmp(3),rmet(3,3),rprimd(3,3),tsec(2),strsxc(6)
  real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),rspower(:)
  real(dp),allocatable :: nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:)
- real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taug(:,:),taur(:,:)
+ real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taur(:,:)
  real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
@@ -262,6 +263,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:),prev_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
+ type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
 !************************************************************************
 
@@ -377,9 +379,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    if (psp_gencond==1.or.call_pawinit) then
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
 &     Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
-&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,Dtset%usepotzero)
+&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%ixc,Dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
@@ -749,7 +751,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
 
    ABI_FREE(rhor_p)
-   ABI_DT_FREE(prev_Pawrhoij)
+   ABI_FREE(prev_Pawrhoij)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
@@ -878,11 +880,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end if
 
  ABI_MALLOC(rhog,(2,nfftf))
- ABI_MALLOC(taug,(2,nfftf*Dtset%usekden))
  call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp4)
- if(Dtset%usekden==1)then
-   call fourdp(1,taug,taur(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp4)
- end if
 
 !The following steps have been gathered in the setvtr routine:
 !- get Ewald energy and Ewald forces
@@ -919,7 +917,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 & moved_atm_inside,moved_rhor,MPI_enreg_seq, &
 & Cryst%nattyp,nfftf,ngfftf,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,Cryst%ntypat,&
 & Psps%n1xccc,n3xccc,optene,pawrad,Pawtab,ph1df,Psps,rhog,rhor,Cryst%rmet,Cryst%rprimd,strsxc,Cryst%ucvol,usexcnhat,&
-& ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl_dummy,xccc3d,Cryst%xred,taug=taug,taur=taur)
+& ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl_dummy,xccc3d,Cryst%xred,taur=taur)
 
  if (nkxc/=0)  then
    ABI_FREE(kxc)
@@ -1077,6 +1075,14 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(321,2,tsec) ! screening(2)
 
  iqcalc = 0
+ if(Dtset%plowan_compute >= 10) then
+   call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
+&Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
+&Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
+&Dtset%kptns,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz_in)
+   call get_plowannier(wanibz_in,wanibz,Dtset)
+   call fullbz_plowannier(Dtset,Kmesh,Cryst,Pawang,wanibz,wanbz)
+ endif
  do iqibz=1,Qmesh%nibz
    call timab(306,1,tsec)
    is_first_qcalc=(iqibz==1)
@@ -1116,7 +1122,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &     Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
-&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
 
      chihw = chi_new(ep%npwe, ep%nomega)
      chihw%head = chi0_head
@@ -1166,7 +1172,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0(use_tr,Dtset,Cryst,Qmesh%ibz(:,iqibz),Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftgw,ngfftf,nfftf_tot,chi0,ktabr,ktabrf,&
-&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
+
 
      call timab(308,2,tsec)
    end if
@@ -1458,8 +1465,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call timab(310,2,tsec)
  end do ! Loop over q-points
-
- !----------------------------- END OF THE CALCULATION ------------------------
+ if (Dtset%plowan_compute >=10)then
+   call destroy_plowannier(wanbz)
+ endif
+!----------------------------- END OF THE CALCULATION ------------------------
 
  ! Close Files.
  if (my_rank==master) then
@@ -1491,7 +1500,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(qp_vbik)
  ABI_FREE(ktabr)
  ABI_FREE(taur)
- ABI_FREE(taug)
  ABI_FREE(ks_vhartr)
  ABI_FREE(ks_vtrial)
  ABI_FREE(vpsp)
@@ -1515,13 +1523,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
  end if
 
- ABI_DT_FREE(Pawfgrtab)
- ABI_DT_FREE(Paw_pwff)
- ABI_DT_FREE(Pawrhoij)
- ABI_DT_FREE(Paw_ij)
- ABI_DT_FREE(Paw_an)
+ ABI_FREE(Pawfgrtab)
+ ABI_FREE(Paw_pwff)
+ ABI_FREE(Pawrhoij)
+ ABI_FREE(Paw_ij)
+ ABI_FREE(Paw_an)
  ABI_FREE(ktabrf)
- ABI_DT_FREE(Paw_onsite)
+ ABI_FREE(Paw_onsite)
 
  call wfd%free()
  call kmesh_free(Kmesh)
@@ -1537,7 +1545,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call ebands_free(QP_BSt)
  call littlegroup_free(Ltg_q)
  call destroy_mpi_enreg(MPI_enreg_seq)
- ABI_DT_FREE(Ltg_q)
+ ABI_FREE(Ltg_q)
 
  call timab(301,2,tsec)
 
@@ -1597,7 +1605,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: wfk_fname
  type(Dataset_type),intent(inout) :: Dtset !INOUT is due to setshells
  type(datafiles_type),intent(in) :: dtfil
@@ -2152,7 +2160,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)
- ABI_DT_FREE(Pawrhoij)
+ ABI_FREE(Pawrhoij)
 
  ! ==== Setup of extrapolar technique ====
  Ep%gwcomp = Dtset%gwcomp; Ep%gwencomp = Dtset%gwencomp

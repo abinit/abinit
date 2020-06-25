@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fock
 !! NAME
 !!  m_fock
@@ -9,7 +8,7 @@
 !!  and the procedures to perform this calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (CMartins,FJ,FA,MT)
+!!  Copyright (C) 2012-2020 ABINIT group (CMartins,FJ,FA,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +26,8 @@
 #include "abi_common.h"
 
 module m_fock
+
+ use m_vcoul 
 
  use defs_basis
  use m_abicore
@@ -510,7 +511,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
  DBG_ENTER("COLL")
 
- call timab(1500,1,tsec)
+ call timab(1501,1,tsec)
 
  if (dtset%nspinor/=1) then
    MSG_ERROR('Hartree-Fock option can be used only with option nspinor=1.')
@@ -1119,7 +1120,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  ABI_DEALLOCATE(phase1d)
  call fock_print(fockcommon,fockbz,unit=std_out)
 
- call timab(1500,2,tsec)
+ call timab(1501,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -2052,6 +2053,7 @@ end subroutine fock_print
 !! INPUTS
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!  icutcoul=Option for the Coulomb potential cutoff technique
 !!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  izero=if 1, unbalanced components of V(q,g) are set to zero
@@ -2077,11 +2079,11 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nfft,nkpt_bz
+ integer,intent(in) :: izero,nfft,nkpt_bz,icutcoul
  real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2096,7 +2098,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
- character(len=100) :: msg
+ character(len=100) :: msg,method
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
@@ -2107,6 +2109,10 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
    msg='SR mixing<>0 while range separation=0!'
    MSG_BUG(msg)
  end if
+
+! Re-use variable defined initially in m_vcoul
+if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
+if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
@@ -2190,10 +2196,16 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
          den=piinv/gs
 
-!        Spencer-Alavi screening
+         ! Treat the Coulomb potential cut-off by selected method
          if (abs(hyb_mixing)>tol8)then
-           vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&         vqg(ii)=vqg(ii)+hyb_mixing*den
+!           SELECT CASE ( trim(method) )
+!           CASE ('SPHERE')
+             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+             !& vqg(ii)=vqg(ii)+hyb_mixing*den
+!           CASE DEFAULT
+!             msg = sjoin('Cut-off method: ',method)
+!             MSG_ERROR(msg)
+!           END SELECT  
          endif
 !        Erfc screening
          if (abs(hyb_mixing_sr)>tol8) then

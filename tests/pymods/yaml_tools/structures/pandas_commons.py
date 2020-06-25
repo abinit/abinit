@@ -5,7 +5,10 @@ from .. import has_pandas
 
 if has_pandas:
     from pandas import read_csv, DataFrame
-    from pandas.compat import StringIO
+    try:
+        from pandas.compat import StringIO
+    except ImportError:
+        from io import StringIO
 
     @yaml_scalar
     class Table(DataFrame):

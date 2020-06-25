@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/anaddb
 !! NAME
 !! anaddb
@@ -7,7 +6,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,DCA,JCC,CL,XW,GA)
+!! Copyright (C) 1999-2019 ABINIT group (XG,DCA,JCC,CL,XW,GA,MR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,12 +76,14 @@ program anaddb
  use m_elphon,         only : elphon
  use m_harmonic_thermo,only : harmonic_thermo
  use m_thmeig,         only : thmeig
+ use m_symfind,        only : symanal
  use m_raman,          only : ramansus, electrooptic
  use m_ddb_diel,       only : ddb_diel
  use m_relaxpol,       only : relaxpol
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
+ use m_ddb_flexo
 
  implicit none
 
@@ -92,14 +93,14 @@ program anaddb
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
- integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
- integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
+ integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
+ integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr,ptgroupma,spgroup
  logical :: iam_master
- integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
+ integer :: bravais(11),rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer :: count_wminmax(2)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli !,cpu, wall, gflops
- real(dp) :: dielt(3,3)
+ real(dp) :: dielt(3,3),genafm(3)
  real(dp) :: compl(6,6),compl_clamped(6,6),compl_stress(6,6)
  real(dp) :: dielt_rlx(3,3),elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: epsinf(3,3),red_ptot(3),pel(3)
@@ -111,9 +112,9 @@ program anaddb
  real(dp),allocatable :: fred(:,:),lst(:),phfrq(:)
  real(dp),allocatable :: rsus(:,:,:)
  real(dp),allocatable :: zeff(:,:,:)
+ real(dp),allocatable :: qdrp_cart(:,:,:,:)
  character(len=10) :: procstr
- character(len=24) :: codename
- character(len=24) :: start_datetime
+ character(len=24) :: codename, start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename, phibz_prefix
  character(len=500) :: msg
@@ -122,6 +123,7 @@ program anaddb
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
  type(ddb_type) :: ddb
+ type(ddb_type) :: ddb_lw
  type(ddb_hdr_type) :: ddb_hdr
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
@@ -166,8 +168,8 @@ program anaddb
  call timab(1, 0, tsec)
 
  ! Initialise the code: write heading, and read names of files.
- if (iam_master) call anaddb_init(filnam)
- call xmpi_bcast (filnam, master, comm, ierr)
+ if (iam_master) call anaddb_init(args%input_path, filnam)
+ call xmpi_bcast(filnam, master, comm, ierr)
 
  ! make log file for non-master procs
  if (.not. iam_master) then
@@ -192,21 +194,22 @@ program anaddb
 
  call ddb_hdr_free(ddb_hdr)
 
- mpert=natom+6
+ mpert=natom+MPERT_MAX
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
- option=1
  if (iam_master) then
-   call instrng (filnam(1),lenstr,option,strlen,string)
-
+   call instrng(filnam(1), lenstr, 1, strlen, string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
  end if
 
  call xmpi_bcast(string, master, comm, ierr)
  call xmpi_bcast(lenstr, master, comm, ierr)
+
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ INPUT_STRING = string
 
  ! Read the inputs
  call invars9(inp, lenstr, natom, string)
@@ -218,6 +221,7 @@ program anaddb
 
  ! Open output files and ab_out (might change its name if needed)
  ! MJV 1/2010 : now output file is open, but filnam(2) continues unmodified
+
  ! so the other output files are overwritten instead of accumulating.
  if (iam_master) then
    tmpfilename = filnam(2)
@@ -243,6 +247,12 @@ program anaddb
 
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
+
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
+ ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+ if (mtyp==33) then
+   call ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
+ end if
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
@@ -288,21 +298,37 @@ program anaddb
    goto 50
  end if
 
- ABI_MALLOC(instrain, (3*natom,6))
- ABI_MALLOC(d2cart, (2,msize))
- ABI_MALLOC(displ, (2*3*natom*3*natom))
- ABI_MALLOC(eigval, (3,natom))
- ABI_MALLOC(eigvec, (2,3,natom,3,natom))
- ABI_MALLOC(phfrq, (3*natom))
- ABI_MALLOC(zeff, (3,3,natom))
- ABI_MALLOC(lst, (inp%nph2l))
+ ABI_MALLOC(instrain,(3*natom,6))
+ ABI_MALLOC(d2cart,(2,msize))
+ ABI_MALLOC(displ,(2*3*natom*3*natom))
+ ABI_MALLOC(eigval,(3,natom))
+ ABI_MALLOC(eigvec,(2,3,natom,3,natom))
+ ABI_MALLOC(phfrq,(3*natom))
+ ABI_MALLOC(zeff,(3,3,natom))
+ ABI_MALLOC(qdrp_cart,(3,3,3,natom))
+ ABI_MALLOC(lst,(inp%nph2l))
 
 !**********************************************************************
 !**********************************************************************
+
+ ! Get Quadrupole tensor
+ qdrp_cart=zero
+ if (mtyp==33) then
+   write(msg,'(2a,(80a),2a)') ch10,('=',ii=1,80)
+   call wrtout([ab_out,std_out],msg,'COLL')
+   lwsym=1
+   iblok = ddb_lw%get_quadrupoles(lwsym,33,qdrp_cart)
+   if ((inp%dipquad==1.or.inp%quadquad==1).and.iblok == 0) then
+     call wrtout(std_out, "--- !WARNING")
+     call wrtout(std_out, sjoin("- Cannot find Dynamical Quadrupoles tensor in DDB file:", filnam(3)))
+     call wrtout(std_out, "  dipquad=1 or quadquad=1 requires the DDB file to include the corresponding long wave 3rd derivatives")
+   end if
+ end if
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb%get_dielt_zeff(crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
+
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then
    iblok_tmp = ddb%get_dielt(inp%rfmeth,dielt)
@@ -462,20 +488,20 @@ program anaddb
        ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
-       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
-       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,dipquad=inp%dipquad,quadquad=inp%quadquad)
 
      ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
-      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-      inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
+      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
+      inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse,dipquad=inp%dipquad,quadquad=inp%quadquad)
      call Ifc_coarse%free()
 
    else
      call ifc_init(Ifc,Crystal,ddb,&
-       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
+       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,dipquad=inp%dipquad,quadquad=inp%quadquad)
    end if
 
    call ifc%print(unit=std_out)
@@ -614,10 +640,11 @@ program anaddb
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
+     call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,Ifc%dipdip,&
        Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
        Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
-       Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff, xmpi_comm_self)
+       Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,Ifc%ewald_option,xmpi_comm_self,&
+       dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
    else if (inp%ifcflag==0) then
 
@@ -638,6 +665,9 @@ program anaddb
 #ifdef HAVE_NETCDF
        iphl2 = 0
        call nctk_defwrite_nonana_terms(ana_ncid, iphl2, inp%nph2l, inp%qph2l, natom, phfrq, displ, "define")
+       if (inp%nlflag == 1) then
+         call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "define")
+       end if
 #endif
      end if
 
@@ -648,6 +678,7 @@ program anaddb
        qphon(:,1)=inp%qph2l(:,iphl2)
        qphnrm(1)=inp%qnrml2(iphl2)
 
+       !TODO: Quadrupole interactions need to be incorporated here (MR)
        ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
        call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
          mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,Crystal%rprimd,inp%symdynmat,&
@@ -665,12 +696,19 @@ program anaddb
 
        ! Determine the symmetries of the phonon modes at Gamma
        if (sum(abs(qphon(:,1)))<DDB_QTOL) then
+         call symanal(bravais,0,genafm,nsym,nsym,ptgroupma,Crystal%rprimd,spgroup,&
+&          Crystal%symafm,Crystal%symrel,Crystal%tnons,tol3,verbose=.TRUE.)
          call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
        end if
 
        ! Write Raman susceptibilities
        if (inp%nlflag == 1) then
          call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
+#ifdef HAVE_NETCDF
+         if (my_rank == master) then
+           call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
+         end if
+#endif
        end if
 
        ! Prepare the evaluation of the Lyddane-Sachs-Teller relation
@@ -759,6 +797,11 @@ program anaddb
 
    rsus = zero
    call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq(1),qphon,qphnrm(1),rsus,Crystal%ucvol)
+#ifdef HAVE_NETCDF
+   if (my_rank == master) then
+     call nctk_defwrite_raman_terms(ana_ncid, natom, rsus, phfrq(1))
+   end if
+#endif
 
    call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
  end if ! condition on nlflag
@@ -860,6 +903,18 @@ program anaddb
 
 !**********************************************************************
 
+ if (inp%flexoflag/=0 ) then
+   ! Here treating the flexoelectric tensor
+   write(msg, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+   ' Calculation of the tensors related to flexoelectric effect',ch10
+   call wrtout([std_out, ab_out], msg)
+
+   ! Compute and print the contributions to the flexoelectric tensor
+   call ddb_flexo(inp%asr,asrq0%d2asr,ddb,ddb_lw,crystal,filnam(3),inp%flexoflag,zeff)
+ end if
+
+!**********************************************************************
+
  ! Free memory
  ABI_FREE(displ)
  ABI_FREE(d2cart)
@@ -868,6 +923,7 @@ program anaddb
  ABI_FREE(lst)
  ABI_FREE(phfrq)
  ABI_FREE(zeff)
+ ABI_FREE(qdrp_cart)
  ABI_FREE(instrain)
 
  50 continue
@@ -878,6 +934,7 @@ program anaddb
  call ddb%free()
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
+ call ddb_lw%free()
 
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_FREE(thm_scells)

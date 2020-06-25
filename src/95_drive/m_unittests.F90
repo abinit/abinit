@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_unittests
 !! NAME
 !! m_unittests
@@ -7,7 +6,7 @@
 !! Module to implement unit tests
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (HM)
+!! Copyright (C) 1999-2020 ABINIT group (HM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

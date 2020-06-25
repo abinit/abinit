@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_interpolate
 !! NAME
 !!  m_ddb_interpolate
@@ -8,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (GA)
+!!  Copyright (C) 2008-2020 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -144,7 +143,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
  ddb_hdr%mblktyp = mtyp
 
- mpert = natom + 6
+ mpert = natom + MPERT_MAX
  msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
@@ -203,9 +202,10 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart, &
-&     crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
-&     qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
-&     Ifc%wghatm,crystal%xred,ifc%zeff, xmpi_comm_self)
+      crystal%gmet,ddb%gprim,ddb%mpert,natom,Ifc%nrpt,qptnrm(1), &
+      qpt, crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,crystal%ucvol, &
+      Ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self, &
+      dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
    end if
 

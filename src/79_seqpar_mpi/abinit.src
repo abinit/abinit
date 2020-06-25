@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,6 +18,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+ "m_dfpt_lw.F90",
  "m_lobpcgwf_old.F90",
  "m_inwffil.F90",
  "m_lobpcgwf.F90",

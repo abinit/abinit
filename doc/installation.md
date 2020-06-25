@@ -1,5 +1,7 @@
 # Installation notes for ABINIT
 
+THIS FILE SHOULD BE UPDATED FOR V9.
+
 This file provides a description of the operations needed to install the
 ABINIT package, to generate the executable and to make the tests. 
 It provides also the description of simple modifications of the package, for developers.
@@ -23,22 +25,17 @@ Simply contact the ABINIT group <https://forum.abinit.org/>
 For the vast majority of people willing to use ABINIT (Unix/Linux, not developers, but users), 
 here follows a short list of instructions needed to install it:
 
+  0. Prerequisite : Install the mandatory libraries on which ABINIT relies (Linalg, Netcdf, LibXC), and possibly other libraries (MPI, Wannier90, ...), and know where these libraries are located.
   1. Download, gunzip and untar the 
     [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz) 
     from the abinit Web site, then change the current directory to the top of the directory that was created. 
     If you do not know what all this means, go to [How to get a version of ABINIT? (Section 1B Normal users)](#1b-normal-user)
-  2. Issue configure or ./configure (or first create a tmp directory, then cd tmp, then ../configure)
-  3. Issue make (or make mj4 , or make multi multi_nprocs=n for using "n" processors on a SMP machine 
+  2. Prepare a file name <hostname>.ac9, that contains the information about libraries and compilation options. 
+     This is not mandatory, as ABINIT will try to detect the place where these are, but the detection procedure can fail.
+  3. Issue configure -q or ./configure -q (or first create a tmp directory, then cd tmp, then ../configure -q)
+  4. Issue make (or make mj4 , or make multi multi_nprocs=n for using "n" processors on a SMP machine 
     where you have to replace "n" by its value) 
-  4. Issue (optionally) "make install"
-
-Well, it might also be that information on the Fortran compiler is needed, in
-which case something like:
-
-    ./configure FC=your_F90_compiler 
-
-instead of the bare "configure", might work, where "your_F90_compiler" has to
-be replaced by the location of your F90 compiler, such as /usr/local/gcc472/bin/gfortran.
+  5. Issue (optionally) "make install"
 
 If you succeeded to download, gunzip and untar the ABINIT package, but failed
 with the next steps, please go to **2\. How to make the executables?**
@@ -198,14 +195,14 @@ slowly, or with downgraded capabilities.
 Supposing that you are in the lucky case where the build system is able to
 find all the information, then the build of ABINIT is very simple. Issue:
 
-  * configure or ./configure (or first create a tmp directory, then cd tmp, then ../configure)
+  * configure -q or ./configure -q (or first create a tmp directory, then cd tmp, then ../configure -q)
   * make (or make mj4 , or make multi multi_nprocs=n for using "n" processors on a SMP machine 
     where you have to replace "n" by its value) 
   * (optionally) make install
 
 Well, it might also be that only one additional information is needed, in which case something like:
 
-    configure FC=gcc
+    configure -q FC=gcc
     make 
 
 might work. In both cases, let's explain a bit what is done, and the further possibilities.
@@ -265,7 +262,7 @@ machine, e.g. abiref.pcpm.ucl.ac.be or my_machine ... , and taking the first
 word of the returned chain of character, e.g. abiref or my_machine ...
 
 There is a template for such a file, located in ~abinit/doc/config/. Its name
-is config-template.ac. Examples of such files, that have been used for testing
+is config-template.ac9. Examples of such files, that have been used for testing
 the package, can be found in ~abinit/doc/build/config-examples/. By the way,
 the known problems observed for these different tests are mentioned in the
 ~abinit/KNOWN_PROBLEMS file, and the hostname.ac files are correspondingly
@@ -302,7 +299,7 @@ command-line information), in case more than one possibility is used,
 
 When the hostname.ac file is ready, you have to issue, in the ~abinit directory:
 
-  * configure or ./configure (or first create a tmp directory, then cd tmp, create a hostname.ac file, then ../configure)
+  * configure -q or ./configure -q (or first create a tmp directory, then cd tmp, create a hostname.ac file, then ../configure -q)
   * make or make mj4 (or make multi for using several processors on a SMP machine)
   * (optionally) make install
 
@@ -624,7 +621,7 @@ directory as yours).
 If you work with the autotools, you have now to reissue:
     
     ./config/scripts/makemake
-    ./configure
+    ./configure -q
     make
 
 (see the section 2).

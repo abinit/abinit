@@ -1,8 +1,8 @@
 
-.Version 8.9.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 11 Jun 2018.
-- ( at 16h55 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h45 )
   
-- input  file    -> tgw1_2.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_2.in
 - output file    -> tgw1_2.out
 - root for input  files -> tgw1_2i
 - root for output files -> tgw1_2o
@@ -249,7 +249,16 @@ P           mkmem3          1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 10, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 295, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -267,8 +276,8 @@ P           mkmem3          1
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -292,12 +301,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.8670398817697    -8.867E+00 4.860E-03 5.720E+00
  ETOT  2  -8.8724786475015    -5.439E-03 2.762E-04 1.581E-01
  ETOT  3  -8.8725561766900    -7.753E-05 1.230E-05 2.939E-03
  ETOT  4  -8.8725570695145    -8.928E-07 8.033E-07 1.103E-05
- ETOT  5  -8.8725570746335    -5.119E-09 2.875E-07 2.949E-08
+ ETOT  5  -8.8725570746334    -5.119E-09 2.875E-07 2.949E-08
 
  At SCF step    5, etot is converged : 
   for the second time, diff in etot=  5.119E-09 < toldfe=  1.000E-06
@@ -306,6 +321,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   sigma(1 1)=  3.02554038E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.02554038E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.02554038E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae: -5.119E-09, res2:  2.949E-08, residm:  2.875E-07, diffor: null, }
+etotal    :  -8.87255707E+00
+entropy   :   0.00000000E+00
+fermie    :   2.06395932E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.02554038E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.02554038E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.02554038E-05, ]
+pressure_GPa:  -8.9014E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -316,7 +360,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.9017E-09; max=  2.8746E-07
+ Mean square residual over all n,k,spin=   59.017E-10; max=  28.746E-08
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -347,21 +391,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.02547828386183E+00
+hartree             :  5.37997916016503E-01
+xc                  : -3.53865658866448E+00
+Ewald energy        : -8.43581958561899E+00
+psp_core            :  8.60437873155177E-02
+local_psp           : -2.43058465668100E+00
+non_local_psp       :  1.88298376913718E+00
+total_energy        : -8.87255707463344E+00
+total_energy_eV     : -2.41434556377609E+02
+band_energy         :  2.31192775850796E-01
+...
 
-    Kinetic energy  =  3.02547828386183E+00
-    Hartree energy  =  5.37997916016500E-01
-    XC energy       = -3.53865658866449E+00
-    Ewald energy    = -8.43581958561899E+00
-    PspCore energy  =  8.60437873155177E-02
-    Loc. psp. energy= -2.43058465668100E+00
-    NL   psp  energy=  1.88298376913718E+00
-    >>>>>>>>> Etotal= -8.87255707463346E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.41434556377610E+02 ; Band energy (Ha)=   2.3119277585E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.02554038E-05  sigma(3 2)=  0.00000000E+00
@@ -375,7 +419,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 1, mband: 260, nsppol: 1, nspinor: 1, nspden: 1, mpw: 283, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -399,39 +452,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 ================================================================================
  prteigrs : about to open file tgw1_2o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  7.39E-20  5.73E-17  4.61E-17  5.60E-17  1.70E-20  1.37E-20  2.54E-21  1.41E-19
-  2.75E-20  6.66E-17  3.63E-18  4.96E-17  2.03E-17  1.73E-17  5.76E-20  4.03E-17
-  3.11E-17  4.69E-17  3.62E-20  1.58E-20  1.71E-20  1.28E-20  2.49E-20  6.61E-17
-  1.01E-18  7.34E-19  1.10E-20  1.32E-19  1.00E-20  6.46E-20  2.68E-17  3.76E-19
-  1.91E-20  3.66E-20  3.92E-20  2.12E-20  3.66E-20  1.45E-19  4.84E-20  8.39E-20
-  5.62E-21  3.43E-19  7.21E-17  1.51E-18  5.87E-20  8.09E-20  2.57E-20  6.01E-20
-  1.09E-18  8.70E-17  8.56E-18  1.04E-19  9.62E-17  9.20E-19  1.43E-19  4.99E-20
-  9.35E-20  8.22E-20  1.26E-19  1.92E-19  5.87E-20  4.36E-19  5.78E-20  1.96E-19
-  6.61E-20  6.08E-19  7.84E-20  3.04E-19  1.56E-19  1.52E-19  7.56E-20  2.07E-19
-  2.87E-19  2.40E-19  3.00E-19  2.03E-19  3.35E-19  1.82E-19  5.18E-20  2.72E-19
-  2.26E-19  2.90E-19  5.12E-19  5.95E-19  4.04E-19  1.21E-19  3.65E-19  6.03E-19
-  2.36E-19  2.63E-19  4.16E-19  3.92E-19  2.86E-19  3.53E-19  2.53E-19  1.81E-18
-  2.33E-19  5.10E-19  1.12E-18  9.20E-19  3.72E-19  4.60E-19  6.14E-19  5.40E-19
-  7.73E-19  1.69E-18  7.50E-19  9.76E-19  6.67E-19  9.79E-19  1.43E-18  1.19E-18
-  2.01E-19  2.61E-18  1.82E-18  2.41E-18  1.40E-18  4.88E-19  9.68E-18  4.18E-18
-  2.81E-18  3.71E-19  2.18E-18  2.45E-18  5.79E-18  8.39E-19  1.75E-18  3.60E-18
-  8.85E-19  2.19E-18  2.88E-18  1.55E-18  6.22E-19  4.39E-19  1.92E-18  1.84E-18
-  3.55E-18  8.32E-18  2.16E-17  3.30E-17  2.72E-17  1.61E-17  1.06E-17  3.01E-17
-  9.77E-17  1.17E-17  6.58E-18  8.99E-18  1.09E-17  4.21E-17  8.32E-18  6.82E-18
-  4.65E-18  4.42E-17  1.48E-17  1.24E-17  5.90E-18  2.42E-18  5.12E-18  4.95E-18
-  1.21E-17  4.33E-18  8.11E-18  1.78E-17  1.36E-17  1.01E-17  2.07E-17  2.57E-17
-  6.31E-17  1.42E-18  7.88E-19  6.53E-18  1.34E-18  1.96E-18  2.23E-18  8.75E-18
-  1.13E-18  6.98E-19  4.54E-18  4.29E-18  1.34E-18  4.30E-17  1.40E-17  1.36E-17
-  1.84E-17  5.57E-17  6.45E-17  7.65E-17  4.13E-19  4.06E-17  2.40E-19  9.57E-17
-  4.03E-19  2.65E-19  2.26E-18  1.15E-18  3.03E-18  1.56E-18  3.21E-18  1.93E-18
-  5.39E-19  1.31E-18  9.93E-19  2.14E-18  4.10E-18  7.88E-18  3.29E-18  1.06E-17
-  1.36E-17  1.83E-17  1.01E-17  3.22E-17  3.50E-17  4.06E-19  2.89E-19  1.50E-17
-  2.05E-18  1.55E-17  5.72E-18  1.51E-17  1.33E-17  9.93E-19  4.56E-17  8.66E-18
-  2.08E-17  8.44E-18  5.27E-17  2.60E-17  2.42E-17  1.59E-18  5.91E-19  7.41E-19
-  3.80E-18  3.63E-18  2.49E-18  3.47E-17  6.10E-17  1.65E-18  4.86E-17  1.74E-18
-  3.00E-19  4.70E-19  9.25E-19  2.97E-17  4.63E-18  7.21E-18  8.72E-18  8.54E-17
-  8.72E-18  9.70E-18  1.47E-17  5.25E-18  2.22E-18  3.44E-18  6.92E-18  2.74E-17
-  1.04E-17  1.19E-18  9.39E-19  1.13E-08
+  1.31E-19  1.95E-17  1.27E-18  3.61E-20  5.07E-17  1.49E-17  6.25E-17  8.38E-20
+  5.39E-20  8.61E-17  4.61E-18  1.84E-17  2.58E-17  1.55E-17  1.12E-19  3.29E-17
+  5.79E-18  3.00E-17  1.33E-17  1.59E-17  3.44E-18  2.66E-17  1.11E-18  2.39E-17
+  2.36E-17  4.62E-17  9.42E-21  1.52E-19  5.85E-21  1.05E-19  5.55E-20  2.76E-20
+  6.72E-20  2.15E-20  6.92E-20  1.43E-20  5.98E-20  2.94E-19  4.84E-20  2.01E-19
+  2.41E-17  2.58E-19  3.59E-17  1.04E-18  2.74E-19  6.57E-20  2.80E-20  5.26E-20
+  5.67E-17  2.10E-17  1.15E-17  4.61E-19  7.54E-20  1.17E-19  9.92E-20  6.06E-20
+  1.22E-19  4.36E-20  9.72E-20  1.04E-19  4.62E-20  1.01E-18  1.40E-19  8.14E-20
+  5.69E-20  9.83E-19  7.54E-20  1.78E-19  2.27E-19  3.07E-19  5.39E-19  2.00E-19
+  1.75E-19  5.08E-19  9.26E-19  7.92E-20  1.83E-19  3.25E-19  3.83E-19  3.83E-19
+  6.27E-19  3.98E-19  2.11E-19  6.04E-20  1.14E-19  2.84E-19  5.18E-19  1.26E-19
+  3.79E-19  1.90E-18  1.06E-19  2.42E-19  5.08E-19  1.98E-19  2.85E-19  1.58E-18
+  1.78E-19  2.04E-18  6.30E-19  3.48E-19  5.21E-19  2.84E-19  1.47E-18  1.12E-18
+  6.72E-19  1.72E-18  1.93E-19  7.20E-19  1.12E-18  2.79E-19  2.87E-19  2.25E-18
+  5.85E-18  1.52E-18  4.48E-18  7.95E-19  1.23E-18  5.07E-19  1.70E-17  2.35E-18
+  5.80E-18  2.34E-19  5.22E-19  5.76E-18  3.61E-18  2.13E-18  4.81E-18  1.38E-17
+  2.10E-19  2.70E-18  4.79E-18  1.21E-18  2.00E-18  7.20E-18  5.45E-19  7.86E-18
+  1.91E-18  1.66E-17  1.81E-17  1.93E-17  1.06E-17  3.26E-17  3.17E-17  3.84E-18
+  6.56E-17  1.74E-17  6.08E-18  4.09E-17  1.64E-17  2.19E-17  2.17E-17  5.53E-18
+  1.33E-17  3.02E-18  5.16E-18  1.37E-17  8.62E-18  3.18E-17  1.30E-17  1.64E-17
+  3.12E-17  8.06E-18  1.15E-17  3.56E-18  4.70E-17  3.47E-18  9.43E-18  3.76E-17
+  9.09E-18  4.83E-19  1.52E-18  6.16E-19  7.43E-19  6.26E-19  1.20E-18  4.62E-19
+  7.04E-19  6.00E-19  1.53E-18  1.83E-18  3.22E-18  1.31E-17  3.11E-17  2.28E-17
+  2.56E-17  6.11E-19  7.21E-19  9.63E-17  1.58E-17  3.51E-17  1.26E-17  6.57E-17
+  9.84E-17  1.32E-17  5.47E-19  2.67E-17  3.06E-19  6.60E-19  4.81E-17  4.39E-17
+  6.36E-17  5.33E-17  6.23E-17  2.40E-19  3.03E-17  6.66E-19  7.04E-19  6.29E-19
+  8.82E-19  1.18E-18  4.74E-19  3.34E-18  1.01E-18  1.78E-18  2.33E-18  9.39E-19
+  1.93E-18  2.99E-18  1.36E-18  7.97E-19  1.25E-18  6.40E-19  9.28E-19  2.44E-18
+  3.70E-18  5.99E-18  4.15E-17  1.28E-17  2.01E-18  9.02E-19  1.64E-17  1.02E-17
+  2.18E-17  1.65E-18  1.26E-17  6.50E-18  5.17E-18  1.54E-17  3.36E-17  2.28E-18
+  6.57E-18  5.64E-18  6.03E-18  1.68E-17  1.72E-17  1.62E-17  1.85E-17  2.40E-17
+  6.82E-17  4.84E-17  1.20E-18  1.75E-17  1.90E-17  1.17E-17  2.20E-18  9.41E-18
+  4.06E-18  9.62E-18  6.21E-18  1.48E-10
  -2.2678E-01  2.1738E-01  2.1738E-01  2.1738E-01  3.1036E-01  3.1036E-01
   3.1036E-01  3.3704E-01  4.9945E-01  5.0776E-01  5.0776E-01  6.2880E-01
   6.2880E-01  6.2880E-01  7.7142E-01  1.0765E+00  1.0765E+00  1.0765E+00
@@ -476,7 +529,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   6.6699E+00  6.6699E+00  6.6839E+00  6.6839E+00  6.6839E+00  6.6903E+00
   6.6903E+00  6.6903E+00  6.6970E+00  6.6970E+00  6.6970E+00  6.6982E+00
   6.6982E+00  7.1579E+00
-  prteigrs : nnsclo,ikpt=   20    1 max resid (incl. the buffer)=  1.13496E-08
+  prteigrs : nnsclo,ikpt=   20    1 max resid (incl. the buffer)=  1.48184E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.839E-17, diffor:  0.000E+00, }
+etotal    :  -8.87255707E+00
+entropy   :   0.00000000E+00
+fermie    :   2.06395932E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -487,7 +564,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.3652E-11; max=  9.7714E-17
+ Mean square residual over all n,k,spin=   99.660E-19; max=  98.385E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -536,7 +613,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 1, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -559,8 +645,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -627,16 +713,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
        -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -23.210  -0.000  -0.558   0.000  -0.669  -0.000  -0.701   0.000
-       -0.000   0.000 -16.635  -0.000  -0.363   0.000  -0.475  -0.000  -0.507
+    2   0.000 -23.210  -0.000  -0.558  -0.000  -0.669   0.000  -0.701   0.000
+       -0.000   0.000 -16.635   0.000  -0.363  -0.000  -0.475  -0.000  -0.507
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -5.689  -0.000  -0.102   0.000  -0.186  -0.000  -0.211   0.000
-       -0.000   0.000  -1.949  -0.000  -0.065   0.000  -0.149  -0.000  -0.173
+    2   0.000  -5.689  -0.000  -0.102  -0.000  -0.186   0.000  -0.211   0.000
+       -0.000   0.000  -1.949   0.000  -0.065  -0.000  -0.149  -0.000  -0.173
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  96.4963
@@ -648,10 +734,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
@@ -855,7 +941,24 @@ P           mkmem3          1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -867,47 +970,44 @@ P           mkmem3          1
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          7.2  wall=         14.7
+- Proc.   0 individual time (sec): cpu=          7.5  wall=         16.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.2  wall=         14.7
+.Delivered   4 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.5  wall=         16.3

@@ -3,9 +3,6 @@
 !Flags
  dieflag   2     ! 2=> electronic dielectric tensor only
 
-!Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-
 !Eigenvectors
   eivec    1
 

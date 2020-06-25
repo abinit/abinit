@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_parser
 !! NAME
 !! m_parser
@@ -7,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2020 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,10 +26,18 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
+ !use m_copy
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, itoa, inupper
- use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
+ use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, &
+                         endswith, char_count, find_digit !, startswith,
+ use m_geometry,  only : xcart2xred, det3r
+ !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
+ !use m_crystal,   only : crystal_t
 
  implicit none
 
@@ -105,9 +112,70 @@ module m_parser
  public :: chkint_ne      ! Checks the value of an input integer variable against a list.
  !public :: chkint_prt
 
- public :: prttagm        ! Print the content of intarr or dprarr.
- public :: prttagm_images ! Extension to prttagm to include the printing of images information.
- public :: chkvars_in_string   !  Analyze variable names in string. Abort if name is not recognized.
+ public :: prttagm             ! Print the content of intarr or dprarr.
+ public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
+ public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
+
+
+!----------------------------------------------------------------------
+
+!!****t* m_parser/geo_t
+!! NAME
+!! geo_t
+!!
+!! FUNCTION
+!!  Small object describing the crystalline structure read from an external file
+!!  or a string given in the input file.
+!!
+!! SOURCE
+
+ type,public :: geo_t
+
+  integer :: natom = 0
+  ! Number of atoms
+
+  integer :: ntypat = 0
+  ! Number of type of atoms
+
+  character(len=500) :: title = ""
+  ! Optional title read for external file e.g. POSCAR
+
+  character(len=500) :: fileformat = ""
+  ! (poscar, netcdf)
+
+  integer,allocatable :: typat(:)
+  ! typat(natom)
+  ! Type of each natom.
+
+  real(dp) :: rprimd(3,3)
+
+  real(dp),allocatable :: xred(:,:)
+  ! xred(3,natom)
+  ! Reduced coordinates.
+
+  real(dp),allocatable :: znucl(:)
+  ! znucl(ntypat)
+  ! Nuclear charge for each type of pseudopotential
+  ! Note that ntypat must be equal to npsp --> no alchemical mixing
+
+ contains
+
+   procedure :: free => geo_free
+   ! Free memory.
+
+   procedure :: malloc => geo_malloc
+   ! Allocate memory
+
+   procedure :: bcast => geo_bcast
+   ! Brodcast object
+
+   procedure :: print_abivars => geo_print_abivars
+   !  Print Abinit variables corresponding to POSCAR
+
+ end type geo_t
+
+ public :: geo_from_abivar_string   ! Build object form abinit variable
+ public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
 
 CONTAINS  !===========================================================
 !!***
@@ -139,7 +207,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
+subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: filnamin
@@ -149,8 +217,8 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
- integer :: option,marr,tread,lenstr_noxyz,ierr
+ integer,parameter :: master=0, option1= 1
+ integer :: marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw
  character(len=500) :: msg
 !arrays
@@ -163,14 +231,14 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
  ! Note: this is done only by me=0, and then string and other output vars are BCASTED
 
  if (xmpi_comm_rank(comm) == master) then
-   !strlen from defs_basis module
-   option=1
-   call instrng (filnamin,lenstr,option,strlen,string)
+
+   ! strlen from defs_basis module
+   call instrng(filnamin, lenstr, option1, strlen, string)
 
    ! Copy original file, without change of case
    string_raw=string
 
-   ! To make case-insensitive, map characters of string to upper case:
+   ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
 
    ! Might import data from xyz file(s) into string
@@ -178,26 +246,34 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    lenstr_noxyz = lenstr
    call importxyz(lenstr,string_raw,string,strlen)
 
-   !6) Take ndtset from the input string
+   ! Make sure we don't have unmatched quotation marks
+   if (mod(char_count(string, '"'), 2) /= 0) then
+     MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
+   end if
+
+   ! Take ndtset from the input string
    ndtset=0; marr=1
    call intagm(dprarr,intarr,0,marr,1,string(1:lenstr),"ndtset",tread,'INT')
    if (tread==1) ndtset=intarr(1)
-   ! Check that ndtset is not negative
+   ! Check that ndtset is within bounds
    if (ndtset<0 .or. ndtset>9999) then
      write(msg, '(a,i0,4a)' )&
      'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
-     'This is not allowed.',ch10,&
-     'Action: modify ndtset in the input file.'
+     'This is not allowed.',ch10,'Action: modify ndtset in the input file.'
      MSG_ERROR(msg)
    end if
  end if ! master
 
  if (xmpi_comm_size(comm) > 1) then
    ! Broadcast data.
-   call xmpi_bcast(lenstr,master,comm,ierr)
-   call xmpi_bcast(ndtset,master,comm,ierr)
-   call xmpi_bcast(string,master,comm,ierr)
+   call xmpi_bcast(lenstr, master, comm, ierr)
+   call xmpi_bcast(ndtset, master, comm, ierr)
+   call xmpi_bcast(string, master, comm, ierr)
+   call xmpi_bcast(string_raw, master, comm, ierr)
  end if
+
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ INPUT_STRING = string_raw
 
 end subroutine parsefile
 !!***
@@ -219,8 +295,7 @@ end subroutine parsefile
 !! INPUTS
 !!  string=character string.
 !!  ndig=length of field to be read (including signs, decimals, and exponents).
-!!  typevarphys=variable type (might indicate the physical meaning of
-!!   for dimensionality purposes)
+!!  typevarphys=variable type (might indicate the physical meaning for dimensionality purposes)
 !!   'INT'=>integer
 !!   'DPR','LEN','ENE'=>real(dp) (no special treatment)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
@@ -252,32 +327,33 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
  integer :: done,idig,index_slash,sign
  real(dp) :: den,num
  logical :: logi
- character(len=500) :: msg
+ character(len=500) :: msg,iomsg
 
 ! *************************************************************************
 
- !write(std_out,*)'inread: enter '
- !write(std_out,*)'string(1:ndig)=',string(1:ndig)
- !write(std_out,*)'typevarphys=',typevarphys
+ !write(std_out,*)'inread: enter with string(1:ndig): ',string(1:ndig)
+ !write(std_out,*)'typevarphys: ',typevarphys
 
  if (typevarphys=='INT') then
 
-!  integer input section
-   read (unit=string(1:ndig),fmt=*,iostat=errcod) outi
+   ! integer input section
+   read(unit=string(1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) outi
+
    if(errcod/=0)then
-!    integer reading error
-     write(std_out,'(/,a,/,a,i0,a)' ) &
-     ' inread: ERROR -',&
-     '  Attempted to read ndig=',ndig,' integer digits,'
-     write(std_out,'(3a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize an integer variable'
+     ! integer reading error
+     write(msg,'(a,i0,7a)' ) &
+       "Attempted to read ndig: ",ndig," integer digits", ch10, &
+       "from string(1:ndig)= `",string(1:ndig),"` to initialize an integer variable",ch10,&
+       "iomsg: ", trim(iomsg)
+     MSG_WARNING(msg)
      errcod=1
    end if
 
  else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
          .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
-!  real(dp) input section
-!  Special treatment of SQRT(xxx) or -SQRT(xxx) chains of characters, where xxx can be a fraction
+   ! real(dp) input section
+   ! Special treatment of SQRT(xxx) or -SQRT(xxx) chains of characters, where xxx can be a fraction
    done=0
    if (ndig>5) then
      if(string(1:5)=='SQRT(' .and. string(ndig:ndig)==')')then
@@ -285,14 +361,15 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      else if(string(1:6)=='-SQRT(' .and. string(ndig:ndig)==')')then
        done=1 ; sign=2
      end if
+
      if(done==1)then
        index_slash=index(string(5+sign:ndig-1),'/')
        if(index_slash==0)then
-         read (unit=string(5+sign:ndig-1),fmt=*,iostat=errcod) outr
+         read (unit=string(5+sign:ndig-1),fmt=*,iostat=errcod, iomsg=iomsg) outr
        else if(index_slash/=0)then
-         read (unit=string(5+sign:5+sign+index_slash-2),fmt=*,iostat=errcod) num
+         read (unit=string(5+sign:5+sign+index_slash-2),fmt=*,iostat=errcod, iomsg=iomsg) num
          if(errcod==0)then
-           read (unit=string(5+sign+index_slash:ndig-1),fmt=*,iostat=errcod) den
+           read (unit=string(5+sign+index_slash:ndig-1),fmt=*,iostat=errcod, iomsg=iomsg) den
            if(errcod==0)then
              if(abs(den)<tol12)then
                errcod=1
@@ -316,9 +393,9 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      index_slash=index(string(1:ndig),'/')
      if(index_slash/=0)then
        done=1
-       read (unit=string(1:index_slash-1),fmt=*,iostat=errcod) num
+       read (unit=string(1:index_slash-1), fmt=*, iostat=errcod, iomsg=iomsg) num
        if(errcod==0)then
-         read (unit=string(index_slash+1:ndig),fmt=*,iostat=errcod) den
+         read (unit=string(index_slash+1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) den
          if(errcod==0)then
            if(abs(den)<tol12)then
              errcod=1
@@ -331,31 +408,33 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    end if
 
    ! Normal treatment of floats
-   if(done==0)then ! Normal treatment of float numbers
-     read (unit=string(1:ndig),fmt=*,iostat=errcod) outr
-   end if
+   if(done==0) read (unit=string(1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) outr
 
-   !  Treatment of errors
+   ! Treatment of errors
    if(errcod/=0)then
      ! real(dp) data reading error
-     write(std_out,'(/,a,/,a,i0,a)' ) &
-      'inread : ERROR -',&
-      'Attempted to read ndig=',ndig,' floating point digits,'
-     write(std_out,'(a,a,a)' ) '   from string(1:ndig) ',string(1:ndig),', to initialize a floating variable.'
+     write(msg,'(a,i0,8a)' ) &
+        'Attempted to read ndig: ',ndig,' floating point digits,',ch10, &
+        'from string(1:ndig): `',string(1:ndig),'` to initialize a floating variable.',ch10, &
+        "iomsg: ", trim(iomsg)
+     MSG_WARNING(msg)
      errcod=2
    end if
 
  else if (typevarphys=='LOG') then
 
-   read (unit=string(1:ndig),fmt=*,iostat=errcod) logi
+   read (unit=string(1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) logi
+
    if(errcod/=0)then
      ! integer reading error
-     write(std_out,'(/,a,/,a,i0,a)' ) &
-     'inread: ERROR -',&
-     'Attempted to read ndig=',ndig,' integer digits,'
-     write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize a logical variable.'
+     write(msg,'(a,i0,8a)' ) &
+       "Attempted to read ndig: ",ndig," integer digits", ch10, &
+       "from string(1:ndig): `",string(1:ndig),"` to initialize a logical variable.",ch10,&
+       "iomsg: ", trim(iomsg)
+     MSG_WARNING(msg)
      errcod=3
    end if
+
    if(logi)outi=1
    if(.not.logi)outi=0
 
@@ -366,13 +445,13 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    MSG_ERROR(msg)
  end if
 
- if(errcod /= 0)then
+ if (errcod /= 0)then
    do idig=1,ndig
      if( string(idig:idig) == 'O' )then
-       write(std_out,'(/,a,/,a,a,a)' ) &
-       'inread: WARNING -',&
+       write(msg,'(3a)' ) &
        'Note that this string contains the letter O. ',ch10,&
        'It is likely that this letter should be replaced by the number 0.'
+       MSG_WARNING(msg)
        exit
      end if
    end do
@@ -389,7 +468,7 @@ end subroutine inread
 !! Read the input file, and product a string of character,
 !! with all data, to be analyzed in later routines. The length
 !! of this string is lenstr. This number is checked to be smaller
-!! than the dimension of the string of character, namely strln .
+!! than the dimension of the string of character, namely strln.
 !!
 !! INPUTS
 !!  filnam=name of the input file, to be read
@@ -427,7 +506,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 !scalars
  integer,save :: include_level=-1
  integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit
- logical :: include_found,ex
+ logical :: include_found, ex
  character(len=1) :: string1
  character(len=3) :: string3
  character(len=500) :: filnam_inc,msg
@@ -466,17 +545,17 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  mline=50000
  do iline=1,mline
 
-!  Keeps reading lines until end of input file
+   ! Keeps reading lines until end of input file
    read (unit=input_unit,fmt= '(a)' ,iostat=ios) line(1:fnlen+20)
-!  Hello ! This is a commentary. Please, do not remove me.
-!  In fact, this commentary protect tests_v4 t47 for miscopying
-!  the input file into the output string. It _is_ strange.
-!  The number of lines in the commentary is also resulting from
-!  a long tuning..
+   !  Hello ! This is a commentary. Please, do not remove me.
+   !  In fact, this commentary protect tests_v4 t47 for miscopying
+   !  the input file into the output string. It _is_ strange.
+   !  The number of lines in the commentary is also resulting from
+   !  a long tuning..
 
-!  DEBUG
-!  write(std_out,*)' instrng, iline=',iline,' ios=',ios,' echo :',trim(line(1:fnlen+20))
-!  ENDDEBUG
+   !  DEBUG
+   !  write(std_out,*)' instrng, iline=',iline,' ios=',ios,' echo :',trim(line(1:fnlen+20))
+   !  ENDDEBUG
 
    ! Exit the reading loop when arrived at the end
    if(ios/=0)then
@@ -495,6 +574,14 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
       'add the keyword ''end'' at the very beginning of the last line of your input file.'
      MSG_ERROR(msg)
    end if
+
+   ! TODO: Ignore sections inside TEST_INFO markers so that we don't need to prepend comment markers.
+   !in_testinfo = 0
+   !if startswith(line, "#%%<BEGIN TEST_INFO") in_testinfo = 1
+   !if (in_testinfo /= 0) cycle
+   !if startswith(line, "#%%<END TEST_INFO> ") then
+   !  in_testinfo = 0; cycle
+   !end if
 
    ! Find length of input line ignoring delimiter characters (# or !)
    ! and any characters beyond it (allows for comments beyond # or !)
@@ -548,23 +635,23 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
        MSG_ERROR(msg)
      end if
 
-!    Check for the occurence of a include statement
+     ! Check for the occurence of a include statement
      include_found=.false.
      if (option==1) then
-!      Look for include statement
+       ! Look for include statement
        ii1=index(line(1:ii),"include");ii2=index(line(1:ii),"INCLUDE")
        include_found=(ii1>0.or.ii2>0)
        if (include_found) then
          ij=max(ii1,ii2);ii1=0;ii2=0
-!        Look for quotes (ascii 34)
+         ! Look for quotes (ascii 34)
          ii1=index(line(ij+7:ii),char(34))
          if (ii1>1) ii2=index(line(ij+7+ii1:ii),char(34))
-!        Look for quotes (ascii 39)
+         ! Look for quotes (ascii 39)
          if (ii1==0.and.ii2==0) then
            ii1=index(line(ij+7:ii),char(39))
            if (ii1>1) ii2=index(line(ij+7+ii1:ii),char(39))
          end if
-!        Check if quotes are correctly set
+         ! Check if quotes are correctly set
          ex=(ii1<=1.or.ii2<=1)
          if (.not.ex) then
            msg=line(ij+7:ij+5+ii1)
@@ -637,16 +724,16 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
      ! Concatenate total string
      string(lenstr+1:lenstr+lenstr_inc)=string_inc(1:lenstr_inc)
      lenstr=lenstr+lenstr_inc
-     ABI_DEALLOCATE(string_inc)
+     ABI_FREE(string_inc)
    end if
 
    ! If mline is reached, something is wrong
    if (iline>=mline) then
      write(msg, '(a,i0,2a,i0,4a)' ) &
-     'The number of lines already read from input file=',iline,ch10,&
-     'is equal or greater than maximum allowed mline=',mline,ch10,&
+     'The number of lines already read from input file: ',iline,ch10,&
+     'is equal or greater than maximum allowed mline: ',mline,ch10,&
      'Action: you could decrease the length of the input file, or',ch10,&
-     'contact the ABINIT group.'
+     'increase mline in this routine.'
      MSG_ERROR(msg)
    end if
 
@@ -655,10 +742,16 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  nline1=iline-1
  close (unit=input_unit)
 
- write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
- call wrtout(std_out,msg,'COLL')
+ ! Make sure we don't have unmatched quotation marks
+ if (mod(char_count(string, '"'), 2) /= 0) then
+   MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
+ end if
 
- include_level=include_level-1
+ include_level = include_level - 1
+
+ write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
+ call wrtout(std_out,msg)
+ !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
 
  DBG_EXIT("COLL")
 
@@ -702,24 +795,14 @@ subroutine inreplsp(string)
 
 ! *************************************************************************
 
-!Get length of string
- length=len(string)
+ ! Get length of string. Proceed only if string has nonzero length
+ length=len(string); if (length == 0) return
 
-!Proceed only if string has nonzero length
- if (length>0) then
-
-!  Do replacement by going through input
-!  character string one character at a time
-   do ilenth=1,length
-     if (llt(string(ilenth:ilenth),' ')) then
-       string(ilenth:ilenth)=' '
-     end if
-     if(string(ilenth:ilenth)=='=')then
-       string(ilenth:ilenth)=' '
-     end if
-   end do
-
- end if
+ !  Do replacement by going through input character string one character at a time
+ do ilenth=1,length
+   if (llt(string(ilenth:ilenth),' ')) string(ilenth:ilenth)=' '
+   if (string(ilenth:ilenth)=='=') string(ilenth:ilenth)=' '
+ end do
 
 end subroutine inreplsp
 !!***
@@ -778,55 +861,52 @@ subroutine incomprs(string,length)
 
 ! *************************************************************************
 
-!
-!String length determined by calling program declaration of "string"
+ ! String length determined by calling program declaration of "string"
  stringlen=len(string)
  length=stringlen
-!
-!Only proceed if string has nonzero length
+
+ ! Only proceed if string has nonzero length
  if (length>0) then
-!  Find last nonblank character (i.e. nonblank and nontab length)
+   ! Find last nonblank character (i.e. nonblank and nontab length)
    length=len_trim(string)
    if (length==0) then
-!    Line is all blanks or tabs so do not proceed
-!    write(std_out,*)' incomprs: blank line encountered'
+     ! Line is all blanks or tabs so do not proceed
+     ! write(std_out,*)' incomprs: blank line encountered'
    else
 
-!    Replace all characters lexically less than SP, and '=', by SP (blank)
+     ! Replace all characters lexically less than SP, and '=', by SP (blank)
      call inreplsp(string(1:length))
 
-!    Continue with parsing
-!    l1 is set to last nonblank, nontab character position
+     ! Continue with parsing
+     ! l1 is set to last nonblank, nontab character position
      l1=length
      do ii=1,l1
        if (string(ii:ii)/=blank) exit
      end do
 
-!    f1 is set to first nonblank, nontab character position
+     ! f1 is set to first nonblank, nontab character position
      f1=ii
-!    lbef is number of characters in string starting at
-!    first nonblank, nontab and going to last
+     ! lbef is number of characters in string starting at
+     ! first nonblank, nontab and going to last
      lbef=l1-f1+1
 
-!    Process characters one at a time from right to left:
+     ! Process characters one at a time from right to left:
      bb=0
      lcut=lbef
      do ii=1,lbef
        jj=lbef+f1-ii
-!      set bb=position of next blank coming in from right
+       ! set bb=position of next blank coming in from right
        if (string(jj:jj)==blank) then
-         if (bb==0) then
-           bb=jj
-         end if
+         if (bb==0) bb=jj
        else
          if (bb/=0) then
-!          if several blanks in a row were found, cut from string
+           ! if several blanks in a row were found, cut from string
            if (jj<bb-1) then
-!            lold becomes string length before cutting blanks
+             ! lold becomes string length before cutting blanks
              lold=lcut
-!            lcut will be new string length
+             ! lcut will be new string length
              lcut=lcut-(bb-1-jj)
-!            redefine string with repeated blanks gone
+             ! redefine string with repeated blanks gone
              do kk=1,f1+lcut-1-jj
                string(jj+kk:jj+kk)=string(kk+bb-1:kk+bb-1)
              end do
@@ -835,13 +915,11 @@ subroutine incomprs(string,length)
          end if
        end if
      end do
-!
-!    Remove initial blanks in string if any
-     if (f1>1) then
-       string(1:lcut)=string(f1:f1+lcut-1)
-     end if
-!
-!    Add blank on end unless string had no extra space
+
+     ! Remove initial blanks in string if any
+     if (f1>1) string(1:lcut)=string(f1:f1+lcut-1)
+
+     ! Add blank on end unless string had no extra space
      if (lcut==stringlen) then
        write(msg,'(a,i7,a,a,a,a,a,a,a,a)')&
        'For input file, with data forming a string of',stringlen,' characters,',ch10,&
@@ -865,8 +943,7 @@ end subroutine incomprs
 !!
 !! FUNCTION
 !! Search input 'string' for specific 'token'. Search depends on
-!! input dataset through 'jdtset'. Then, return the information
-!! mentioned after 'token'.
+!! input dataset through 'jdtset'. Then, return the information mentioned after 'token'.
 !! See the "notes" section
 !!
 !! INPUTS
@@ -878,7 +955,7 @@ end subroutine incomprs
 !!  typevarphys= variable type (might indicate the physical meaning of for dimensionality purposes)
 !!   'INT'=>integer
 !!   'DPR'=>real(dp) (no special treatment)
-!!   'LEN'=>real(dp) (expect a "length", identify bohr, au or angstrom,
+!!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!       and return in au -atomic units=bohr- )
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
@@ -888,14 +965,16 @@ end subroutine incomprs
 !!  intarr(1:narr), dprarr(1:narr)
 !!   integer or real(dp) arrays, respectively (see typevarphys),
 !!   into which data is read if typevarphys/='KEY'. Use these arrays even for scalars.
-!!  tread is an integer : tread = 0 => no data was read
-!!                        tread = 1 => data was read
+!!  tread is an integer: tread = 0 => no data was read
+!!                       tread = 1 => data was read
 !!  ds_input is an optional integer flag:
 !!           ds_input = 0 => value was found which is not specific to jdtset
 !!           ds_input > 0 => value was found which is specific to jdtset
 !!   one could add more information, eg whether a ? or a : was used, etc...
-!!   [key_value]=Stores the value of key if typevarphys=="KEY"
-!!               String of len fnlen
+!!   [key_value]=Stores the value of key if typevarphys=="KEY".
+!!      The string must be large enough to contain the output. fnlen is OK in many cases
+!!      except when reading a list of files. The routine aborts is key_value cannot store the output.
+!!      Output string is left justified.
 !!
 !! NOTES
 !!
@@ -953,7 +1032,7 @@ end subroutine incomprs
 !! PARENTS
 !!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
 !!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_intagm_img
-!!      m_multibinit_dataset,macroin,mpi_setup,parsefile,ujdet
+!!      m_multibinit_dataset,m_scup_dataset,macroin,mpi_setup,parsefile,ujdet
 !!
 !! CHILDREN
 !!      appdig,inarray,inupper,wrtout
@@ -970,15 +1049,15 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: token
  character(len=*),intent(in) :: typevarphys
- character(len=fnlen),optional,intent(out) :: key_value
+ character(len=*),optional,intent(out) :: key_value
 !arrays
- integer,intent(inout) :: intarr(marr) !vz_i
- real(dp),intent(inout) :: dprarr(marr) !vz_i
+ integer,intent(inout) :: intarr(marr)
+ real(dp),intent(inout) :: dprarr(marr)
 
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
 !scalars
- integer :: b1,cs1len,cslen,dozens,ier,itoken,itoken1,itoken2,itoken2_1colon
+ integer :: b1,b2,b3,cs1len,cslen,dozens,ier,itoken,itoken1,itoken2,itoken2_1colon
  integer :: itoken2_1plus,itoken2_1times,itoken2_2colon,itoken2_2plus
  integer :: itoken2_2times,itoken2_colon,itoken2_plus,itoken2_times
  integer :: itoken_1colon,itoken_1plus,itoken_1times,itoken_2colon,itoken_2plus
@@ -996,27 +1075,26 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
 ! *************************************************************************
 
- ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr)))
+ ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr), "for token:", token))
 
  ds_input_ = -1
-
  dozens=jdtset/10
  unities=jdtset-10*dozens
 
  if(jdtset<0)then
-   write(msg,'(a,i0,a)')' jdtset=',jdtset,', while it should be non-negative.'
+   write(msg,'(a,i0,a)')' jdtset: ',jdtset,', while it should be non-negative.'
    MSG_ERROR(msg)
  end if
 
- if(jdtset>9999)then
-   write(msg,'(a,i0,a)')' jdtset=',jdtset,', while it must be lower than 10000.'
+ if(jdtset > 9999)then
+   write(msg,'(a,i0,a)')' jdtset: ',jdtset,', while it must be lower than 10000.'
    MSG_ERROR(msg)
  end if
 
-!Default values : nothing has been read
+ ! Default values: nothing has been read
  itoken=0
  opttoken=0
-!Initialise flags in case of opttoken >= 2 later.
+ ! Initialise flags in case of opttoken >= 2 later.
  itoken_times=0
  itoken_plus=0
  itoken_colon=0
@@ -1026,9 +1104,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    toklen=len_trim(token)
 
-!  --------------------------------------------------------------------------
-!  (1) try to find the token with dataset number appended
-   if(jdtset>0)then
+   ! --------------------------------------------------------------------------
+   ! (1) try to find the token with dataset number appended
+   if (jdtset > 0) then
 
      call appdig(jdtset,'',appen)
      cs=blank//token(1:toklen)//trim(appen)//blank
@@ -1041,11 +1119,11 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      else if(jdtset<10000)then
        cslen=toklen+6
      end if
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs)
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(msg, '(7a)' )&
@@ -1061,24 +1139,23 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
    end if
 
-!  --------------------------------------------------------------------------
-!  (2a) try to find the token appended with a string that contains the metacharacter "?".
+   ! --------------------------------------------------------------------------
+   ! (2a) try to find the token appended with a string that contains the metacharacter "?".
+   if (jdtset>0 .and. opttoken==0)then
 
-   if(jdtset>0 .and. opttoken==0)then
-
-!    Use the metacharacter for the dozens, and save in cs and itoken
+     ! Use the metacharacter for the dozens, and save in cs and itoken
      write(appen,'(i1)')unities
      cs=blank//token(1:toklen)//'?'//trim(appen)//blank
      cslen=toklen+4
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs)
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
      if(itoken/=itoken2)then
        write(msg, '(7a)' )&
-        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
+        'There are two occurences of the keyword: "',cs(1:cslen),'" in the input file.',ch10,&
         'This is confusing, so it has been forbidden.',ch10,&
         'Action: remove one of the two occurences.'
        MSG_ERROR(msg)
@@ -1088,14 +1165,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        ds_input_=jdtset
      end if
 
-!    Use the metacharacter for the unities, and save in cs1 and itoken1
+     ! Use the metacharacter for the units, and save in cs1 and itoken1
      write(appen,'(i1)')dozens
      cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken1=index(string,cs1(1:cslen))
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs1(1:cslen), BACK=.true. )
      if(itoken1/=itoken2)then
        write(msg, '(7a)' )&
@@ -1107,7 +1184,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(itoken/=0 .and. itoken1/=0)then
        write(msg, '(9a)' )&
-       'The keywords "',cs(1:cslen),'" and "',cs1(1:cslen),'"',ch10,&
+       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cslen),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
        MSG_ERROR(msg)
@@ -1122,9 +1199,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    end if
 
-!  --------------------------------------------------------------------------
-!  (2b) try to find the tokens defining a series
-   if(opttoken==0)then
+   ! --------------------------------------------------------------------------
+   ! (2b) try to find the tokens defining a series
+   if (opttoken==0) then
 
      cs=token(1:toklen)
 
@@ -1143,7 +1220,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      cs2plus=blank//token(1:toklen)//'+'//'?'//blank
      cs2times=blank//token(1:toklen)//'*'//'?'//blank
 
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cscolon)
      call inupper(csplus)
      call inupper(cstimes)
@@ -1154,7 +1231,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      call inupper(cs2plus)
      call inupper(cs2times)
 
-!    Absolute index of tokens in string:
+     ! Absolute index of tokens in string:
      itoken_colon=index(string,cscolon(1:cslen))
      itoken_plus=index(string,csplus(1:cslen))
      itoken_times=index(string,cstimes(1:cslen))
@@ -1165,7 +1242,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      itoken_2plus=index(string,cs2plus(1:cs1len))
      itoken_2times=index(string,cs2times(1:cs1len))
 
-!    Look for another occurence of the same tokens in string
+     ! Look for another occurence of the same tokens in string
      itoken2_colon=index(string,cscolon(1:cslen), BACK=.true. )
      itoken2_plus=index(string,csplus(1:cslen), BACK=.true. )
      itoken2_times=index(string,cstimes(1:cslen), BACK=.true. )
@@ -1178,7 +1255,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(jdtset==0)then
 
-!      If the multi-dataset mode is not used, no token should have been found
+       ! If the multi-dataset mode is not used, no token should have been found
        if(itoken_colon+itoken_plus+itoken_times+ itoken_2colon+itoken_2plus+itoken_2times > 0 ) then
          write(msg,'(a,a,a,a,a,a,a,a,a,a,a,a, a)' )&
          'Although the multi-dataset mode is not activated,',ch10,&
@@ -1202,7 +1279,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      else
 
-!      If the multi-dataset mode is used, exactly zero or two token must be found
+       ! If the multi-dataset mode is used, exactly zero or two token must be found
        sum_token=0
        if(itoken_colon/=0)sum_token=sum_token+1
        if(itoken_plus /=0)sum_token=sum_token+1
@@ -1217,15 +1294,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        if(sum_token/=0 .and. sum_token/=2) then
          write(msg, '(a,a,a,a,a,i0,a,a,a,a,a,a,a)' )&
          'The keyword "',trim(cs),'" has been found to take part',ch10,&
-         'to series definition in the multi-dataset mode',sum_token,' times.',ch10,&
+         'to series definition in the multi-dataset mode  ',sum_token,' times.',ch10,&
          'This is not allowed, since it should be used once with ":",',ch10,&
          'and once with "+" or "*".',ch10,&
          'Action: change the number of occurences of this keyword.'
          MSG_ERROR(msg)
        end if
 
-!      If the multi-dataset mode is used, make sure that
-!      no twice the same combined keyword happens
+       ! If the multi-dataset mode is used, make sure that no twice the same combined keyword happens
        ier=0
        if(itoken_colon/=itoken2_colon)then
          ier=1 ; cs=cscolon
@@ -1262,7 +1338,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          MSG_ERROR(msg)
        end if
 
-!      Select the series according to the presence of a colon flag
+       ! Select the series according to the presence of a colon flag
        if(itoken_colon>0)then
          opttoken=2
          ds_input_=jdtset
@@ -1282,7 +1358,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          ds_input_=jdtset
        end if
 
-!      Make sure that the proper combination of : + and * is found .
+       ! Make sure that the proper combination of : + and * is found .
        if(itoken_colon > 0 .and. (itoken_plus==0 .and. itoken_times==0) )then
          write(msg, '(13a)' )&
          'The keyword "',cscolon(1:cslen),'" initiate a series,',ch10,&
@@ -1308,33 +1384,30 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
          MSG_ERROR(msg)
        end if
 
-!      At this stage, either
-!      - itoken_colon vanish as well as itoken_plus and itoken_times
-!      - itoken_colon does not vanish,
-!      as well as one of itoken_plus or itoken_times
+       ! At this stage, either
+       !    - itoken_colon vanish as well as itoken_plus and itoken_times
+       !    - itoken_colon does not vanish,
+       ! as well as one of itoken_plus or itoken_times
 
-!      End the condition of multi-dataset mode
-     end if
+     end if ! End the condition of multi-dataset mode
+   end if ! End the check on existence of a series
 
-!    End the check on existence of a series
-   end if
-
-!  --------------------------------------------------------------------------
-!  (3) if not found, try to find the token with non-modified string
-   if(opttoken==0)then
+   ! --------------------------------------------------------------------------
+   ! (3) if not found, try to find the token with non-modified string
+   if (opttoken==0) then
 
      cs=blank//token(1:toklen)//blank
      cslen=toklen+2
 
-!    Map token to all upper case (make case-insensitive):
+     ! Map token to all upper case (make case-insensitive):
      call inupper(cs)
 
-!    Absolute index of blank//token//blank in string:
+     ! Absolute index of blank//token//blank in string:
      itoken=index(string,cs(1:cslen))
 
-!    Look for another occurence of the same token in string, if so, leaves:
+     ! Look for another occurence of the same token in string, if so, leaves:
      itoken2=index(string,cs(1:cslen), BACK=.true. )
-     if(itoken/=itoken2)then
+     if (itoken/=itoken2) then
        write(msg, '(a,a,a,a,a,a,a)' )&
        'There are two occurences of the keyword "',cs(1:cslen),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
@@ -1349,37 +1422,34 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    end if
 
-!  --------------------------------------------------------------------------
-!  If jdtset==0, means that the multi-dataset mode is not used, so
-!  checks whether the input file contains a multi-dataset keyword,
-!  and if this occurs, stop. Check also the forbidden occurence of
-!  use of 0 as a multi-dataset index.
-!  Note that the occurence of series initiators has already been checked.
+   ! --------------------------------------------------------------------------
+   ! If jdtset==0, means that the multi-dataset mode is not used, so
+   ! checks whether the input file contains a multi-dataset keyword,
+   ! and if this occurs, stop. Check also the forbidden occurence of
+   ! use of 0 as a multi-dataset index.
+   ! Note that the occurence of series initiators has already been checked.
 
    do trial_jdtset=0,9
      if(jdtset==0 .or. trial_jdtset==0)then
        write(appen,'(i1)')trial_jdtset
        trial_cs=blank//token(1:toklen)//trim(appen)
        trial_cslen=toklen+2
-!      Map token to all upper case (make case-insensitive):
+       ! Map token to all upper case (make case-insensitive):
        call inupper(trial_cs)
-!      Look for an occurence of this token in string, if so, leaves:
+       ! Look for an occurence of this token in string, if so, leaves:
        itoken2=index(string,trial_cs(1:trial_cslen))
-!      If itoken2/=0
        if(itoken2/=0)then
          if(trial_jdtset==0)then
            write(msg, '(a,a,a,a,a,a,a)' )&
            'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
            'This is forbidden.',ch10,&
            'Action: remove this occurence.'
-           call wrtout(std_out,msg,'COLL')
          else
            write(msg, '(a,a,a,a,a,i1,a,a,a,a,a)' )&
            'In the input file, there is an occurence of the ',ch10,&
            'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
            'This is forbidden when ndtset==0 .',ch10,&
            'Action: remove this occurence, or change ndtset.'
-           call wrtout(std_out,msg,'COLL')
          end if
          MSG_ERROR(msg)
        end if
@@ -1388,86 +1458,87 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
  end if
 
-!===========================================================================
-!At this stage, the location of the keyword string is known, as well
-!as its length. So, can read the data.
-!Usual reading if opttoken==1 (need itoken).
-!If opttoken>=2, the characteristics of a series must be read
-!(need itoken_colon and either itoken_plus or itoken_times)
+ !===========================================================================
+ ! At this stage, the location of the keyword string is known, as well
+ ! as its length. So, can read the data.
+ ! Usual reading if opttoken==1 (need itoken).
+ ! If opttoken>=2, the characteristics of a series must be read
+ ! (need itoken_colon and either itoken_plus or itoken_times)
 
  tread = 0
  typevar='INT'
+
  if(typevarphys=='LOG')typevar='INT'
  if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
-    typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
- if(typevarphys=='KEY')then
-   if(opttoken>=2)then
+    typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
+
+ if (typevarphys=='KEY') then
+   ! Consistency check for keyword (no multidataset, no series)
+   if (opttoken>=2) then
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'a series has been defined in the input file.',ch10,&
-     'This is forbidden.',ch10,&
-     'Action: check your input file.'
+     'This is forbidden.',ch10,'Action: check your input file.'
      MSG_ERROR(msg)
    end if
-   if(narr>=2)then
+   if (narr>=2) then
      write(msg, '(9a)' )&
      'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
      'the number of data requested is larger than 1.',ch10,&
-     'This is forbidden.',ch10,&
-     'Action: check your input file.'
+     'This is forbidden.',ch10,'Action: check your input file.'
      MSG_ERROR(msg)
    end if
-   typevar='KEY'
-!  write(std_out,*)' intagm : will read cs=',trim(cs)
-!  stop
  end if
 
-!There is something to be read if opttoken>=1
- if(opttoken==1)then
+ ! There is something to be read if opttoken>=1
+ if (opttoken==1) then
 
-!  DEBUG
-!  write(std_out,*)' intagm : opttoken==1 , token has been found, will read '
-!  ENDDEBUG
+   ! write(std_out,*)' intagm : opttoken==1 , token has been found, will read '
+   ! Absolute location in string of blank which follows token:
+   b1 = itoken + cslen - 1
 
-!  Absolute location in string of blank which follows token:
-   b1=itoken+cslen-1
-
-!  Read the array (or eventual scalar) that follows the blank
-!  In case of typevarphys='KEY', the chain of character will be returned in cs.
-   call inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
-
-   if(typevarphys=='KEY')then
-     if (.not. PRESENT(key_value)) then
-       MSG_ERROR("typevarphys == KEY requires the optional argument key_value")
+   if (typevarphys == 'KEY') then
+     ! In case of typevarphys='KEY', the chain of character will be returned in cs.
+     ABI_CHECK(present(key_value), "typevarphys == KEY requires optional argument key_value")
+     b2 = index(string(b1+1:), '"')
+     ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
+     b2 = b1 + b2 + 1
+     b3 = index(string(b2:), '"')
+     ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
+     b3 = b3 + b2 - 2
+     if ((b3 - b2 + 1) > len(key_value)) then
+       MSG_ERROR("Len of key_value too small to contain value parsed from file")
      end if
-     !token=trim(cs)
-     !write(std_out,*)' intagm : after inarray, token=',trim(token)
-     key_value = TRIM(cs)
+     key_value = adjustl(string(b2:b3))
+
+   else
+     ! Read the array (or eventual scalar) that follows the blank
+     call inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    end if
 
-!  if this point is reached then data has been read in successfully
+   ! if this point is reached then data has been read in successfully
    tread = 1
 
- else if(opttoken>=2)then
+ else if(opttoken>=2) then
 
-!  write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
+   ! write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
    ABI_ALLOCATE(dpr1,(narr))
    ABI_ALLOCATE(dpr2,(narr))
    ABI_ALLOCATE(int1,(narr))
    ABI_ALLOCATE(int2,(narr))
 
-!  Absolute location in string of blank which follows token//':':
+   ! Absolute location in string of blank which follows token//':':
    b1=itoken_colon+cslen-1
    call inarray(b1,cscolon,dpr1,int1,narr,narr,string,typevarphys)
 
-!  Initialise number even if the if series treat all cases.
+   ! Initialise number even if the if series treat all cases.
    number=1
-!  Define the number of the term in the series
+   ! Define the number of the term in the series
    if(opttoken==2)number=jdtset-1
    if(opttoken==3)number=unities-1
    if(opttoken==4)number=dozens-1
 
-!  Distinguish additive and multiplicative series
+   ! Distinguish additive and multiplicative series
    if(itoken_plus/=0)then
 
      b1=itoken_plus+cslen-1
@@ -1493,19 +1564,17 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
    tread = 1
 
-   ABI_DEALLOCATE(dpr1)
-   ABI_DEALLOCATE(dpr2)
-   ABI_DEALLOCATE(int1)
-   ABI_DEALLOCATE(int2)
+   ABI_FREE(dpr1)
+   ABI_FREE(dpr2)
+   ABI_FREE(int1)
+   ABI_FREE(int2)
  end if
 
- if(present(ds_input)) then
-   ds_input = ds_input_
- end if
+ if(present(ds_input)) ds_input = ds_input_
 
-!write(std_out,*) ' intagm : exit value tread=',tread
-!write(std_out,*) ' intarr =',intarr(1:narr)
-!write(std_out,*) ' dprarr =',dprarr(1:narr)
+ !write(std_out,*) ' intagm : exit value tread=',tread
+ !write(std_out,*) ' intarr =',intarr(1:narr)
+ !write(std_out,*) ' dprarr =',dprarr(1:narr)
 
 end subroutine intagm
 !!***
@@ -1515,10 +1584,8 @@ end subroutine intagm
 !! inarray
 !!
 !! FUNCTION
-!! Read the array of narr numbers located immediately after
-!! a specified blank in a string of character.
-!! Might read instead one word, after the specified blank.
-!! Takes care of multipliers.
+!! Read the array of narr numbers located immediately after a specified blank in a string of character.
+!! Might read instead one word, after the specified blank. Takes care of multipliers.
 !!
 !! INPUTS
 !!  cs=character token
@@ -1528,27 +1595,22 @@ end subroutine intagm
 !!  string=character string containing the data.
 !!  typevarphys=variable type (might indicate the physical meaning of
 !!   for dimensionality purposes)
-!!   'INT'=>integer
-!!   'DPR'=>real(dp) (no special treatment)
-!!   'LEN'=>real(dp) (expect a "length", identify bohr, au or angstrom,
-!!       and return in au -atomic units=bohr- )
-!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
-!!   'BFI'=>real(dp) (expect a "magnetic field", identify T, Tesla)
-!!   'TIM'=>real(dp) (expect a "time", identify S, Second)
-!!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
-!!   'KEY'=>character, returned in token cs
+!!   'INT' => integer
+!!   'DPR' => real(dp) (no special treatment)
+!!   'LEN' => real(dp) (expect a "length", identify bohr, au, nm or angstrom,
+!!            and return in au -atomic units=bohr- )
+!!   'ENE' => real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
+!!   'BFI' => real(dp) (expect a "magnetic field", identify T, Tesla)
+!!   'TIM' => real(dp) (expect a "time", identify S, Second)
+!!   'LOG' => integer, but read logical variable T,F,.true., or .false.
 !!
 !! OUTPUT
 !!  intarr(1:narr), dprarr(1:narr)
-!!   integer or real(dp) arrays, respectively,
-!!   into which data is read. Use these arrays even for scalars.
-!!  errcod: if /=0, then something went wrong in subroutine "inread"
+!!   integer or real(dp) arrays, respectively into which data is read. Use these arrays even for scalars.
+!!  errcod: if /= 0, then something went wrong in subroutine "inread"
 !!
 !! SIDE EFFECT
-!!   b1=absolute location in string of blank which follows the token
-!!             (will be modified in the execution)
-!!   cs=at input  : character token
-!!      at output : chain of character replacing the token (only if typevarphys='KEY')
+!!   b1=absolute location in string of blank which follows the token (will be modified in the execution)
 !!
 !! PARENTS
 !!      intagm
@@ -1566,7 +1628,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  integer,intent(inout) :: b1
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: typevarphys
- character(len=fnlen),intent(inout) :: cs
+ character(len=*),intent(in) :: cs
 !arrays
  integer,intent(inout) :: intarr(marr) !vz_i
  real(dp),intent(out) :: dprarr(marr)
@@ -1577,39 +1639,37 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  integer :: asciichar,b2,errcod,ii,integ,istar,nrep,strln
  real(dp) :: factor,real8
  character(len=3) :: typevar
- character(len=500) :: msg
+ character(len=500*4) :: msg
 
 ! *************************************************************************
 
-!write(std_out,'(2a)' )' inarray : token=',trim(cs)
-!write(std_out,'(a,i4)' )' inarray : narr=',narr
-!write(std_out,'(2a)' )' inarray : typevarphys=',typevarphys
+ !write(std_out,'(2a)' )' inarray: token: ',trim(cs)
+ !write(std_out,'(2a)' )'          string: ',trim(string(b1:))
+ !write(std_out,'(a,i0)' )'        narr: ',narr
+ !write(std_out,'(2a)' )'          typevarphys: ',typevarphys
 
- ii=0
+ ii = 0
  typevar='INT'
- if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  &
-&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
+ if(typevarphys=='LOG') typevar='INT'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
+    typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
+
  strln=len_trim(string)
 
- do while (ii<narr)
+ do while (ii < narr)
 
-!  Relative location of next blank after data
-   if(b1>=strln)exit   ! b1 is the last character of the string
-   b2=index(string(b1+1:),blank)
-!  If no second blank is found put the second blank just beyond strln
+   ! Relative location of next blank after data
+   ! b1 is the last character of the string
+   if (b1>=strln) exit
+
+   b2 = index(string(b1+1:),blank)
+   ! If no second blank is found put the second blank just beyond strln
    if(b2==0) b2=strln-b1+1
 
-   if(typevarphys=='KEY')then
-     cs=string(b1+1:b1+b2-1)
-     errcod=0
-     exit
-   end if
-
-!  nrep tells how many times to repeat input in array:
+   ! nrep tells how many times to repeat input in array:
    nrep=1
 
-!  Check for *, meaning repeated input (as in list-directed input):
+   ! Check for *, meaning repeated input (as in list-directed input):
    istar=index(string(b1+1:b1+b2-1),'*')
    if (istar/=0) then
      if (istar==1) then ! Simply fills the array with the data, repeated as many times as needed
@@ -1619,80 +1679,64 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        call inread(string(b1+1:b1+istar-1),istar-1,'INT',nrep,real8,errcod)
      end if
      if (errcod/=0) exit
-!    Shift starting position of input field:
+     ! Shift starting position of input field:
      b1=b1+istar
      b2=b2-istar
    end if
 
-!  Read data internally by calling inread at entry ini:
+   ! Read data internally by calling inread at entry ini:
    call inread(string(b1+1:b1+b2-1),b2-1,typevarphys,integ,real8,errcod)
    if (errcod/=0) exit
 
-!  Allow for list-directed input with repeat number nrep:
+   ! Allow for list-directed input with repeat number nrep:
    if(typevar=='INT')then
      intarr(1+ii:min(nrep+ii,narr))=integ
    else if(typevar=='DPR')then
      dprarr(1+ii:min(nrep+ii,narr))=real8
    else
-     MSG_BUG('Disallowed typevar='//typevar)
+     MSG_BUG('Disallowed typevar: '//typevar)
    end if
    ii=min(ii+nrep,narr)
 
-!  Find new absolute location of next element of array:
+   !  Find new absolute location of next element of array:
    b1=b1+b2
 
-!  End do while (ii<narr). Note "exit" instructions within loop.
- end do
+ end do ! while (ii<narr). Note "exit" instructions within loop.
 
-!if (ii>narr) then
-!write(msg, '(a,a,a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,a,a,a,a,a)' ) ch10,&
-!' inarray : ERROR -',ch10,&
-!&  '  Too many data are provided in the input file for',ch10,&
-!&  '  the keyword "',cs,'" :',ch10,&
-!&  '  attempted to read',ii,' elements for array length',narr,ch10,&
-!&  '  This might be due to an erroneous value for the size ',ch10,&
-!&  '  of this array, in the input file.',ch10,&
-!&  '  Action: check the data provided for this keyword,',ch10,&
-!&  '  as well as its declared dimension. They do not match.'
-!call wrtout(std_out,msg,'COLL')
-!end if
-
- if(errcod/=0)then
-   write(msg, '(5a,i0,10a)' ) &
-   'An error occurred reading data for keyword "',trim(cs),'",',ch10,&
-   'looking for ',narr,' array elements.', ch10, &
-   'There is a problem with the input file: maybe  ',ch10,&
-   'a disagreement between the declared dimension of the array,',ch10,&
-   'and the number of data actually provided. ',ch10,&
-   'Action: correct your input file, and especially the keyword', trim(cs)
+ if (errcod /= 0) then
+   write(msg, '(5a,i0,12a)' ) &
+   'An error occurred reading data for keyword `',trim(cs),'`,',ch10,&
+   'looking for ',narr,' elements.', ch10, &
+   'There is a problem with the input string:',ch10,trim(string(b1:)), ch10, &
+   'Maybe a disagreement between the declared dimension of the array,',ch10,&
+   'and the number of items provided. ',ch10,&
+   'Action: correct your input file and especially the keyword: ', trim(cs)
    MSG_ERROR(msg)
  end if
 
-!In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
-if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
+ ! In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
+ if (typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
    do
-
-!    Relative location of next blank after data
+     ! Relative location of next blank after data
      if(b1>=strln)exit   ! b1 is the last character of the string
      b2=index(string(b1+1:),blank)
-!    If no second blank is found put the second blank just beyond strln
+     ! If no second blank is found put the second blank just beyond strln
      if(b2==0) b2=strln-b1+1
 
-!    DEBUG
-!    write(std_out,*)' inarray : strln=',strln
-!    write(std_out,*)' inarray : b1=',b1
-!    write(std_out,*)' inarray : b2=',b2
-!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-!    write(std_out,*)' typevarphys==',typevarphys
-!    ENDDEBUG
+     ! write(std_out,*)' inarray : strln=',strln
+     ! write(std_out,*)' inarray : b1=',b1, b2=',b2
+     ! write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+     ! write(std_out,*)' typevarphys==',typevarphys
 
-!    Identify the presence of a non-digit character
+     ! Identify the presence of a non-digit character
      asciichar=iachar(string(b1+1:b1+1))
      if(asciichar<48 .or. asciichar>57)then
        factor=one
-       if(typevarphys=='LEN' .and. b2>=7)then
+       if(typevarphys=='LEN' .and. b2>=3)then
          if(string(b1+1:b1+6)=='ANGSTR')then
            factor=one/Bohr_Ang
+         else if(string(b1+1:b1+3)=='NM ')then
+           factor=ten/Bohr_Ang
          end if
        else if(typevarphys=='ENE' .and. b2>=3)then
          if(string(b1+1:b1+3)=='RY ')then
@@ -1701,22 +1745,17 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typev
            factor=one/Ha_eV
          end if
        else if(typevarphys=='ENE' .and. b2>=2)then
-         if(string(b1+1:b1+2)=='K ')then
-           factor=kb_HaK
-         end if
+         if(string(b1+1:b1+2)=='K ') factor=kb_HaK
        else if(typevarphys=='BFI' .and. b2>=2)then
-         if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE')then
-           factor=BField_Tesla
-         end if
+         if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE') factor=BField_Tesla
        else if (typevarphys=='TIM' .and. b2>=2) then
-         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
-           factor=one/Time_Sec
-         end if
+         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') factor=one/Time_Sec
        endif
+
        dprarr(1:narr)=dprarr(1:narr)*factor
        exit
      else
-!      A digit has been observed, go to the next sequence
+       ! A digit has been observed, go to the next sequence
        b1=b2
        cycle
      end if
@@ -1724,10 +1763,8 @@ if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typev
    end do
  end if
 
-!DEBUG
-!write(std_out,*)' inarray : exit '
 !write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
-!ENDDEBUG
+!write(std_out,*)' inarray : exit '
 
 end subroutine inarray
 !!***
@@ -1794,18 +1831,18 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    ixyz=ixyz+1
    if(ixyz==1)then
      write(msg,'(80a)')('=',ii=1,80)
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout(ab_out,msg)
    end if
 
-!  The xyzFILE token has been identified
+   ! The xyzFILE token has been identified
    index_xyz_token=index_already_done+index_xyz_token-1
 
-!  Find the related dataset tag, and length
+   ! Find the related dataset tag, and length
    dtset_char=string_upper(index_xyz_token+7:index_xyz_token+8)
    if(dtset_char(1:1)==blank)dtset_char(2:2)=blank
    dtset_len=len_trim(dtset_char)
 
-!  Find the name of the xyz file
+   ! Find the name of the xyz file
    index_xyz_fname=index_xyz_token+8+dtset_len
    index_xyz_fname_end=index(string_upper(index_xyz_fname:lenstr),blank)
 
@@ -1822,34 +1859,36 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
 
    index_already_done=index_xyz_fname_end
 
-   xyz_fname=repeat(blank,fnlen)                  ! Initialize xyz_fname to a blank line
+   ! Initialize xyz_fname to a blank line
+   xyz_fname=repeat(blank,fnlen)
    xyz_fname=string_raw(index_xyz_fname:index_xyz_fname_end-1)
 
    write(msg, '(3a)') ch10, ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
-   call wrtout([std_out, ab_out],msg,'COLL')
+   call wrtout([std_out, ab_out],msg)
 
-!  Append the data from the xyz file to the string, and update the length of the string
+   ! Append the data from the xyz file to the string, and update the length of the string
    call append_xyz(dtset_char,lenstr,string_upper,xyz_fname,strln)
 
-!  erase the file name from string_upper
+   ! erase the file name from string_upper
    string_upper(index_xyz_fname:index_xyz_fname_end-1) = blank
  end do
 
  if (index_already_done > 1) then
-   xyz_fname=repeat(blank,fnlen) ! Initialize xyz_fname to a blank line
+   ! Initialize xyz_fname to a blank line
+   xyz_fname=repeat(blank,fnlen)
    call append_xyz("-1",lenstr,string_upper,xyz_fname,strln)
  end if
 
  if(ixyz/=0)then
    call incomprs(string_upper,lenstr)
-!  A blank is needed at the beginning of the string
+   ! A blank is needed at the beginning of the string
    do kk=lenstr,1,-1
      string_upper(kk+1:kk+1)=string_upper(kk:kk)
    end do
    string_upper(1:1)=blank
    lenstr=lenstr+1
    write(msg,'(a,80a,a)')ch10,('=',ii=1,80),ch10
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(ab_out,msg)
  end if
 
 end subroutine importxyz
@@ -1906,7 +1945,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
- real(dp),allocatable :: xangst(:,:)
+ real(dp),allocatable :: xcart(:,:)
  integer, save :: atomspecies(200) = 0
  character(len=500), save :: znuclstring = ""
  character(len=2),allocatable :: elementtype(:)
@@ -1916,12 +1955,12 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  lenstr_new=lenstr
 
  if (dtset_char == "-1") then
-!  write znucl
+   ! write znucl
    lenstr_old=lenstr_new
    lenstr_new=lenstr_new+7+len_trim(znuclstring)+1
    string(lenstr_old+1:lenstr_new)=" ZNUCL"//blank//trim(znuclstring)//blank
 
-!  write ntypat
+   ! write ntypat
    ntypat = sum(atomspecies)
    write(string20,'(i10)') ntypat
    lenstr_old=lenstr_new
@@ -1931,14 +1970,14 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    return
  end if
 
-!open file with xyz data
+ ! open file with xyz data
  if (open_file(xyz_fname, msg, newunit=unitxyz, status="unknown") /= 0) then
    MSG_ERROR(msg)
  end if
  write(msg, '(3a)')' importxyz : Opened file ',trim(xyz_fname),'; content stored in string_xyz'
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
-!check number of atoms is correct
+ ! check number of atoms is correct
  read(unitxyz,*) natom
 
  write(string5,'(i5)')natom
@@ -1946,16 +1985,17 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  lenstr_new=lenstr_new+7+len_trim(dtset_char)+1+5
  string(lenstr_old+1:lenstr_new)=" _NATOM"//trim(dtset_char)//blank//string5
 
- ABI_ALLOCATE(xangst,(3,natom))
+ ABI_ALLOCATE(xcart,(3,natom))
  ABI_ALLOCATE(elementtype,(natom))
 
-!read dummy line
+ ! read dummy line
  read(unitxyz,*)
 
-!read atomic types and positions
+ ! read atomic types and positions
  do iatom = 1, natom
-   read(unitxyz,*) elementtype(iatom), xangst(:,iatom)
-!  extract znucl for each atom type
+   read(unitxyz,*) elementtype(iatom), xcart(:,iatom)
+   xcart(:,iatom)=xcart(:,iatom)/Bohr_Ang
+   ! extract znucl for each atom type
    call atomdata_from_symbol(atom,elementtype(iatom))
    znucl = atom%znucl
    if (znucl > 200) then
@@ -1964,7 +2004,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
      'Solution: increase size of atomspecies in append_xyz', ch10
      MSG_ERROR(msg)
    end if
-!  found a new atom type
+   ! found a new atom type
    if (atomspecies(int(znucl)) == 0) then
      write(string20,'(f10.2)') znucl
      znuclstring = trim(znuclstring) // " " // trim(string20) // " "
@@ -1974,7 +2014,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  close (unitxyz)
 
 
-!Write the element types
+ !Write the element types
  lenstr_old=lenstr_new
  lenstr_new=lenstr_new+7+len_trim(dtset_char)+1
  string(lenstr_old+1:lenstr_new)=" _TYPAX"//trim(dtset_char)//blank
@@ -1987,24 +2027,24 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
  lenstr_new=lenstr_new+3
  string(lenstr_old+1:lenstr_new)="XX " ! end card for TYPAX
 
-!Write the coordinates
+ !Write the coordinates
  lenstr_old=lenstr_new
  lenstr_new=lenstr_new+8+len_trim(dtset_char)+1
- string(lenstr_old+1:lenstr_new)=" _XANGST"//trim(dtset_char)//blank
+ string(lenstr_old+1:lenstr_new)=" _XCART"//trim(dtset_char)//blank
 
  do iatom=1,natom
    do mu=1,3
-     write(string20,'(f20.12)')xangst(mu,iatom)
+     write(string20,'(f20.12)')xcart(mu,iatom)
      lenstr_old=lenstr_new
      lenstr_new=lenstr_new+20
      string(lenstr_old+1:lenstr_new)=string20
    end do
  end do
 
- ABI_DEALLOCATE(elementtype)
- ABI_DEALLOCATE(xangst)
+ ABI_FREE(elementtype)
+ ABI_FREE(xcart)
 
-!Check the length of the string
+ !Check the length of the string
  if(lenstr_new>strln)then
    write(msg,'(3a)')&
    'The maximal size of the input variable string has been exceeded.',ch10,&
@@ -2012,7 +2052,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    MSG_BUG(msg)
  end if
 
-!Update the length of the string
+ !Update the length of the string
  lenstr=lenstr_new
 
 end subroutine append_xyz
@@ -2088,17 +2128,17 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 
 !Checks the allowed values
  ok=0
- if(minimal_flag==1 .and. input_value>=reference_value-tol10)              ok=1
- if(minimal_flag==-1 .and. input_value<=reference_value+tol10)             ok=1
+ if(minimal_flag==1 .and. input_value>=reference_value-tol10)      ok=1
+ if(minimal_flag==-1 .and. input_value<=reference_value+tol10)     ok=1
  if(minimal_flag==0 .and. abs(input_value-reference_value)<=tol10) ok=1
 
-!If there is something wrong, compose the message, and print it
+ ! If there is something wrong, compose the message, and print it
  if(ok==0)then
    ierr=1
    write(msg, '(a,a)' ) ch10,' chkdpr: ERROR -'
    if(cond_number/=0)then
      do icond=1,cond_number
-!      The following format restricts cond_values(icond) to be between -99 and 999
+       ! The following format restricts cond_values(icond) to be between -99 and 999
        write(msg, '(2a,a,a,a,i4,a)' ) trim(msg),ch10,&
        '  Context : the value of the variable ',trim(cond_string(icond)),' is',cond_values(icond),'.'
      end do
@@ -2106,14 +2146,11 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
    write(msg, '(2a,a,a,a,es20.12,a)' ) trim(msg),ch10,&
     '  The value of the input variable ',trim(input_name),' is',input_value,','
    if(minimal_flag==0)then
-     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,&
-     '  while it must be equal to ',reference_value,'.'
+     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,'  while it must be equal to ',reference_value,'.'
    else if(minimal_flag==1)then
-     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,&
-       '  while it must be larger or equal to',reference_value,'.'
+     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,'  while it must be larger or equal to',reference_value,'.'
    else if(minimal_flag==-1)then
-     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,&
-      '  while it must be smaller or equal to',reference_value,'.'
+     write(msg, '(2a,a,es20.12,a)' ) trim(msg),ch10,'  while it must be smaller or equal to',reference_value,'.'
    end if
 
    if(cond_number==0 .or. advice_change_cond==0)then
@@ -2132,8 +2169,7 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
      '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
    end if
 
-   call wrtout(unit,msg,'COLL')
-   !call wrtout(std_out,  msg,'COLL')
+   call wrtout(unit,msg)
    MSG_WARNING(msg)
  end if
 
@@ -2222,7 +2258,7 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
 
 !******************************************************************
 
-!Checks the allowed values
+ ! Checks the allowed values
  ok=0
  if(list_number>0)then
    do ilist=1,list_number
@@ -2232,14 +2268,14 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
  if(minmax_flag==1 .and. input_value>=minmax_value)ok=1
  if(minmax_flag==-1 .and. input_value<=minmax_value)ok=1
 
-!If there is something wrong, compose the message, and print it
+ ! If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
     ierr,input_name,input_value,&
     list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
-! reset all cond_strings
+ ! reset all cond_strings
  cond_string(:)='#####'
 
 end subroutine chkint
@@ -2308,7 +2344,7 @@ subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
 
 !******************************************************************
 
-!Checks the allowed values
+ !Checks the allowed values
  ok=0
  if(list_number>0)then
    do ilist=1,list_number
@@ -2318,7 +2354,7 @@ subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
  minmax_flag=0
  minmax_value=0
 
-!If there is something wrong, compose the message, and print it
+ !If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
      ierr,input_name,input_value,&
@@ -2394,7 +2430,7 @@ subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
 
 !******************************************************************
 
-!Checks the allowed values
+ !Checks the allowed values
  ok=0
  minmax_flag=1
  if(input_value>=minmax_value)ok=1
@@ -2402,16 +2438,16 @@ subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
  ABI_ALLOCATE(list_values,(1))
  list_values=minmax_value
 
-!If there is something wrong, compose the message, and print it
+ !If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
-&   ierr,input_name,input_value,&
-&   list_number,list_values,minmax_flag,minmax_value,unit)
+     ierr,input_name,input_value,&
+     list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
- ABI_DEALLOCATE(list_values)
+ ABI_FREE(list_values)
 
-! reset all cond_strings
+ ! reset all cond_strings
  cond_string(:)='#####'
 
 end subroutine chkint_ge
@@ -2480,25 +2516,25 @@ subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
 
 !******************************************************************
 
-!Checks the allowed values
+ !Checks the allowed values
  ok=0
  minmax_flag=-1
  if(input_value<=minmax_value)ok=1
-!write(std_out,*)' chkint_le : input_value,minmax_value=',input_value,minmax_value
+ !write(std_out,*)' chkint_le : input_value,minmax_value=',input_value,minmax_value
 
  list_number=1
  ABI_ALLOCATE(list_values,(1))
  list_values=minmax_value
 
-!If there is something wrong, compose the message, and print it
+ !If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
      ierr,input_name,input_value,list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
- ABI_DEALLOCATE(list_values)
+ ABI_FREE(list_values)
 
-! reset all cond_strings
+ ! reset all cond_strings
  cond_string(:)='#####'
 
 end subroutine chkint_le
@@ -2567,7 +2603,7 @@ subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
 
 !******************************************************************
 
-!Checks the allowed values
+ !Checks the allowed values
  ok=1
  if(list_number>0)then
    do ilist=1,list_number
@@ -2577,14 +2613,14 @@ subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
  minmax_flag=2
  minmax_value=0
 
-!If there is something wrong, compose the message, and print it
+ !If there is something wrong, compose the message, and print it
  if(ok==0)then
    call chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
-&   ierr,input_name,input_value,&
-&   list_number,list_values,minmax_flag,minmax_value,unit)
+     ierr,input_name,input_value,&
+     list_number,list_values,minmax_flag,minmax_value,unit)
  end if
 
-! reset all cond_strings
+ ! reset all cond_strings
  cond_string(:)='#####'
 
 end subroutine chkint_ne
@@ -2684,7 +2720,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
    MSG_BUG(msg)
  end if
 
-!Compose the message, and print it
+ !Compose the message, and print it
  ierr=1
  write(msg, '(2a)' ) ch10,' chkint_prt: ERROR -'
  if(cond_number/=0)then
@@ -2734,8 +2770,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
     '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
     '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
  end if
- call wrtout(unit   ,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout([unit, std_out], msg)
 
 end subroutine chkint_prt
 !!***
@@ -3090,7 +3125,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='ENE')out_unit=' Hartree'
            if(typevarphys=='LEN')out_unit=' Bohr   '
            if(typevarphys=='BFI')out_unit='   ' !EB remove Tesla unit
-           if(typevarphys=='TIM')out_unit=' Second' !EB remove Tesla unit
+           if(typevarphys=='TIM')out_unit=' Second'
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
              appen=' '
@@ -3098,13 +3133,11 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
              jdtset=jdtset_(idtset)
              call appdig(jdtset,'',appen)
            end if
-!          full_format=trim(long_beg)//trim(format_dp)
+           ! full_format=trim(long_beg)//trim(format_dp)
            full_format='("'//first_column//trim(format_1)//'("'// first_column//trim(format_2)//trim(format_dp)//")"
-!          DEBUG
-!          write(ab_out,*)' trim(long_beg)=',trim(long_beg)
-!          write(ab_out,*)' trim(format_dp)=',trim(format_dp)
-!          write(ab_out,*)' trim(full_format)=',trim(full_format)
-!          ENDDEBUG
+           ! write(ab_out,*)' trim(long_beg)=',trim(long_beg)
+           ! write(ab_out,*)' trim(format_dp)=',trim(format_dp)
+           ! write(ab_out,*)' trim(full_format)=',trim(full_format)
            if(typevarphys=='DPR')then
              if (print_out) write(iout,full_format) token,trim(appen),dprarr(1:narr_eff,idtset)*scale_factor
            else
@@ -3113,7 +3146,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 #ifdef HAVE_NETCDF
            if (print_netcdf) then
              call write_var_netcdf(intarr(1:narr_eff,idtset),dprarr(1:narr_eff,idtset),&
-&             marr,narr_eff,abs(ncid),'DPR',token//trim(appen))
+               marr,narr_eff,abs(ncid),'DPR',token//trim(appen))
            end if
 #endif
 
@@ -3193,8 +3226,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
  character(len=*), parameter :: format_1a ='",a16,a,t22,'
  character(len=*), parameter :: format_2  ='",t22,'
  character(len=*), parameter :: long_dpr  ='3es18.10)'
-!character(len=*), parameter :: format01160 ="(1x,a16,1x,(t22,3es18.10)) "
-!character(len=*), parameter :: format01160a="(1x,a16,a,1x,(t22,3es18.10)) "
 
 ! *************************************************************************
 
@@ -3246,8 +3277,8 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
      call prttagm(dprarr,intarr,iout,jdtset_,length,marr,narr,&
        narrm,ncid,ndtset_alloc,token,typevarphys,multi_narr)
    end if
-   ABI_DEALLOCATE(intarr)
-   ABI_DEALLOCATE(dprarr)
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
 
  else
 
@@ -3322,7 +3353,8 @@ end subroutine prttagm_images
 !!  chkvars_in_string
 !!
 !! FUNCTION
-!!  Analyze variable names in string. Abort if name is not recognized.
+!!  Analyze variable names in string. Ignore tokens withing double quotation marks.
+!!  Abort if name is not recognized.
 !!
 !! INPUTS
 !!  protocol=
@@ -3360,8 +3392,11 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 
 !************************************************************************
 
+ !write(std_out,"(3a)")"Checking vars in string:", ch10, trim(string)
+
  index_current=1
- do ! Infinite do-loop, to identify the presence of each potential variable names
+ do
+   ! Infinite do-loop, to identify the presence of each potential variable names
 
    if(len_trim(string)<=index_current)exit
    index_blank=index(string(index_current:),blank)+index_current-1
@@ -3414,27 +3449,28 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
            write(msg, '(8a)' )&
-            'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-            'This variable should be given a logical value (T or F), but the following string was found :',&
+            'Found token `',string(index_current:index_endword),'` in the input file.',ch10,&
+            'This variable should be given a logical value (T or F), but the following string was found:',&
             string(index_blank:index_blank+2),ch10,&
             'Action: check your input file. You likely misused the input variable.'
             MSG_ERROR(msg)
          else
            index_blank=index_blank+2
          end if
-!        Treat possible string input variables
+
        else if(index(list_strings,blank//string(index_current:index_endword)//blank)/=0)then
-!        Every following string is accepted
+         ! Treat possible string input variables
+         ! Every following string is accepted
          !write(std_out,*)"Found string variable: ",string(index_current:index_endword)
          !write(std_out,*)"in string: ",trim(string(index_current:))
          index_current=index(string(index_current:),blank)+index_current
          index_blank=index(string(index_current:),blank)+index_current-1
          !write(std_out,*)"next:: ",string(index_current:index_endword)
 
-!        If still not admitted, then there is a problem
        else
+         ! If still not admitted, then there is a problem
          write(msg, '(7a)' )&
-         'Found the token: ',string(index_current:index_endword),' in the input file.',ch10,&
+         'Found token: `',string(index_current:index_endword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
          'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(msg)
@@ -3443,9 +3479,602 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
    end if
 
    index_current=index_blank+1
+
+   if (string(index_current:index_current) == '"') then
+     do
+       index_current = index_current + 1
+       if (string(index_current:index_current) == '"') exit
+       if (index_current > len_trim(string)) then
+         MSG_ERROR('Cannot find closing quotation mark " in string. You likely forgot to close a string')
+       end if
+     end do
+
+   end if
+
  end do
 
 end subroutine chkvars_in_string
+!!***
+
+!!****f* m_parser/geo_from_abivar_string
+!! NAME
+!!  geo_from_abivars_string
+!!
+!! FUNCTION
+!!  Build object form abinit `structure` variable
+!!
+!! INPUTS
+!!  comm=MPI communicator. Used for performing IO.
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_abivar_string(string, comm) result(new)
+!type(geo_t) function geo_from_structure_string(string, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer :: ii
+ character(len=len(string)) :: prefix
+
+!************************************************************************
+
+ !print *, "in geo_from_abivar_string: `", trim(string), "`"
+
+ ii = index(string, ":")
+ ABI_CHECK(ii > 0, sjoin("Expecting string of the form `type:content`, got:", string))
+ prefix = adjustl(string(1:ii-1))
+
+ select case (prefix)
+
+ case ("poscar")
+   ! Get geo info from POSCAR from file.
+   new = geo_from_poscar_path(trim(string(ii+1:)), comm)
+
+ !case ("abigeo")
+ !  new = geo_from_abigeo_path(string(ii+1:), comm)
+
+ case ("abifile")
+   if (endswith(string(ii+1:), ".nc")) then
+     ! Get geo info from netcdf file.
+     new = geo_from_netcdf_path(trim(string(ii+1:)), comm)
+   else
+     ! Assume Fortran file with Abinit header.
+     MSG_ERROR("structure variable with Fortran file is not yet implemented.")
+     !new = geo_from_fortran_file_with_hdr(string(ii+1:), comm)
+     !cryst = crystal_from_file(string(ii+1:), comm)
+     !if (cryst%isalchemical()) then
+     !  MSG_ERROR("Alchemical mixing is not compatibile with `structure` input variable!")
+     !end if
+     !new%natom = cryst%natom
+     !new%ntypat = cryst%ntypat
+     !new%rprimd = cryst%rprimd
+     !call alloc_copy(cryst%typat, new%typat)
+     !call alloc_copy(cryst%xred, new%xred)
+     !call alloc_copy(cryst%znucl, new%znucl)
+     !call cryst%free()
+   end if
+
+ case default
+   MSG_ERROR(sjoin("Invalid prefix: `", prefix, "`"))
+ end select
+
+end function geo_from_abivar_string
+!!***
+
+!!!! !!****f* m_parser/geo_from_abigeo_path
+!!!! !! NAME
+!!!! !!  geo_from_abigeo_path
+!!!! !!
+!!!! !! FUNCTION
+!!!! !!
+!!!! !! SOURCE
+!!!!
+!!!! type(geo_t) function geo_from_abigeo_path(path, jdtset, iimage, comm) result(new)
+!!!!
+!!!! !Arguments ------------------------------------
+!!!!  character(len=*),intent(in) :: path
+!!!!  integer,intent(in) :: jdtset, iimage, comm
+!!!!
+!!!! !Local variables-------------------------------
+!!!!  integer,parameter :: master = 0, option1=1
+!!!!  integer :: my_rank, lenstr, ierr, ii, iatom, start, tread, marr !itypat,
+!!!!  !character(len=500) :: msg
+!!!!  character(len=strlen) :: string
+!!!! !arrays
+!!!!  integer,allocatable :: intarr(:)
+!!!!  real(dp),allocatable ::dprarr(:)
+!!!!  character(len=5),allocatable :: symbols(:)
+!!!!
+!!!!
+!!!! !************************************************************************
+!!!!
+!!!!  ! Master node reads string and broadcasts
+!!!!  my_rank = xmpi_comm_rank(comm)
+!!!!
+!!!!  if (my_rank == master) then
+!!!!     ! Below part copied from `parsefile`. strlen from defs_basis module
+!!!!     call instrng(path, lenstr, option1, strlen, string)
+!!!!
+!!!!    ! To make case-insensitive, map characters of string to upper case.
+!!!!    call inupper(string(1:lenstr))
+!!!!  end if
+!!!!
+!!!!  if (xmpi_comm_size(comm) > 1) then
+!!!!    call xmpi_bcast(string, master, comm, ierr)
+!!!!    call xmpi_bcast(lenstr, master, comm, ierr)
+!!!!  end if
+!!!!
+!!!!  ! ==============================
+!!!!  ! Now all procs parse the string
+!!!!  ! ==============================
+!!!!
+!!!!  ! Set up unit cell from acell, rprim, angdeg
+!!!!  !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
+!!!!
+!!!!  ! Get the number of atom in the unit cell. Read natom from string
+!!!!  marr = 1
+!!!!  ABI_MALLOC(intarr, (marr))
+!!!!  ABI_MALLOC(dprarr, (marr))
+!!!!  !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+!!!!  ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
+!!!!  new%natom = intarr(1)
+!!!!  ABI_FREE(intarr)
+!!!!  ABI_FREE(dprarr)
+!!!!
+!!!!  ! Parse atomic positions. Only xcart is supported here because it makes life easier
+!!!!  ! and we don't need to handle symbols + Units
+!!!!  ii = index(string(1:lenstr), "xred_symbols")
+!!!!  ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by atom symbol are supported")
+!!!!
+!!!!  new%fileformat = "abivars"
+!!!!  ABI_MALLOC(new%typat, (new%natom))
+!!!!  ABI_MALLOC(new%xred, (3, new%natom))
+!!!!
+!!!!  ABI_MALLOC(symbols, (new%natom))
+!!!!  start = ii + 4
+!!!!  do iatom=1,new%natom
+!!!!    !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
+!!!!    !read(string(cs:), *) symbols(iatom)
+!!!!  end do
+!!!!
+!!!!  !call find_unique(symbols, new%ntypat, new%typat)
+!!!!
+!!!!  ! Note that the first letter should be capitalized, rest must be lower case
+!!!!  ABI_MALLOC(new%znucl, (new%ntypat))
+!!!!  !do itypat=1,new%ntypat
+!!!!  !  !iatom = new%typat(iat
+!!!!  !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
+!!!!  !end do
+!!!!
+!!!!  ABI_FREE(symbols)
+!!!!  ABI_FREE(intarr)
+!!!!  ABI_FREE(dprarr)
+!!!!
+!!!! end function geo_from_abigeo_path
+!!!! !!***
+
+!!****f* m_parser/geo_from_poscar_path
+!! NAME
+!!  geo_from_poscar_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_poscar_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0
+ integer :: unt, my_rank
+ character(len=500) :: msg
+
+!************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) then
+   if (open_file(path, msg, newunit=unt, form='formatted', status='old', action="read") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   new = geo_from_poscar_unit(unt)
+   close(unt)
+ end if
+
+ if (xmpi_comm_size(comm) > 1) call new%bcast(master, comm)
+
+end function geo_from_poscar_path
+!!***
+
+!!****f* m_parser/geo_from_poscar_unit
+!! NAME
+!!  geo_from_poscar_unit
+!!
+!! FUNCTION
+!!  Build object from string with seperator `sep`. Usually sep = newline = ch10
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_poscar_unit(unit) result(new)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: unit
+
+!Local variables-------------------------------
+ !integer,parameter :: marr = 3
+ integer :: beg, iatom, itypat, ierr, ii, cnt
+ real(dp) :: scaling_constant
+ character(len=500) :: line, system, iomsg
+ character(len=5) :: symbol
+!arrays
+ integer,allocatable :: nattyp(:)
+ logical,allocatable :: duplicated(:)
+ character(len=5),allocatable :: symbols(:), dupe_symbols(:)
+ real(dp),allocatable :: xcart(:,:)
+
+!************************************************************************
+
+ ! Example of POSCAR (with 6 figures --> space group won't be recognized by Abinit
+ ! See also https://github.com/ExpHP/vasp-poscar/blob/master/doc/format.md
+
+ ! Mg1 B2
+ ! 1.0
+ ! 2.672554 1.543000 0.000000
+ ! -2.672554 1.543000 0.000000
+ ! 0.000000 0.000000 3.523000
+ ! Mg B
+ ! 1 2
+ ! direct
+ ! 0.000000 0.000000 0.000000 Mg
+ ! 0.333333 0.666667 0.500000 B
+ ! 0.666667 0.333333 0.500000 B
+
+ new%fileformat = "poscar"
+ read(unit, "(a)", err=10, iomsg=iomsg) new%title
+ read(unit, *, err=10, iomsg=iomsg) scaling_constant
+ do ii=1,3
+   read(unit, *, err=10, iomsg=iomsg) new%rprimd(:, ii)
+ end do
+
+ ! Read line with the names of the atoms.
+ read(unit, "(a)", err=10, iomsg=iomsg) line
+ !print *, "line:", trim(line)
+
+ new%ntypat = 0
+ do ii=1,2
+   if (ii == 2) then
+     ABI_MALLOC(symbols, (new%ntypat))
+   end if
+   itypat = 0; beg = 1
+   do
+     ierr = next_token(line, beg, symbol)
+     !print *, "ierr:", ierr, "beg:", beg, "symbol:", trim(symbol)
+     if (ierr /= 0) exit
+     if (ii == 1) new%ntypat = new%ntypat + 1
+     if (ii == 2) then
+       itypat = itypat + 1
+       symbols(itypat) = trim(symbol)
+     end if
+   end do
+ end do
+ !write(std_out, *)"ntypat: ", new%ntypat, "symbols: ", symbols
+
+ ! TODO: Handle case in which not all atoms are not grouped by type
+ ABI_MALLOC(duplicated, (new%ntypat))
+ duplicated = .False.
+ do itypat=1,new%ntypat-1
+   do ii=itypat+1, new%ntypat
+     if (symbols(itypat) == symbols(ii)) duplicated(ii) = .True.
+   end do
+ end do
+
+ ! number of atoms of each type.
+ ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported.
+ ! There's a check in the main parser though.
+ ABI_MALLOC(nattyp, (new%ntypat))
+ read(unit, *, err=10, iomsg=iomsg) nattyp
+ new%natom = sum(nattyp)
+ ABI_FREE(nattyp)
+
+ if (any(duplicated)) then
+   ! Need to recompute ntypat and symbols taking into account duplication.
+   MSG_WARNING("Found POSCAR with duplicated symbols")
+   ABI_MOVE_ALLOC(symbols, dupe_symbols)
+   new%ntypat = count(.not. duplicated)
+   ABI_MALLOC(symbols, (new%ntypat))
+   cnt = 0
+   do ii=1,size(duplicated)
+     if (.not. duplicated(ii)) then
+       cnt = cnt + 1; symbols(cnt) = dupe_symbols(ii)
+     end if
+   end do
+   ABI_FREE(dupe_symbols)
+ end if
+
+ ! At this point, we can allocate Abinit arrays.
+ call new%malloc()
+
+ ! Note that first letter should be capitalized, rest must be lower case
+ do itypat=1,new%ntypat
+   new%znucl(itypat) = symbol2znucl(symbols(itypat))
+ end do
+
+ read(unit, *, err=10, iomsg=iomsg) system
+ system = tolower(system)
+ if (system /= "cartesian" .and. system /= "direct") then
+   MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
+ end if
+
+ ! Parse atomic positions.
+ do iatom=1,new%natom
+
+   ! This should implement the POSCAR format.
+   read(unit, *, err=10, iomsg=iomsg) new%xred(:, iatom), symbol
+   if (len_trim(symbol) == 0) then
+     if (new%ntypat == 1) then
+       MSG_COMMENT("POTCAR without element symbol after coords but this is not critical because ntypat == 1")
+       symbol = symbols(1)
+     else
+       MSG_ERROR("POTCAR positions should be followed by element symbol.")
+     end if
+   end if
+
+   ! This to handle symbol + oxidation state e.g. Li1+
+   !print *, symbol
+   ii = find_digit(symbol)
+   if (ii /= 0) symbol = symbol(:ii-1)
+
+   do itypat=1, new%ntypat
+     if (symbols(itypat) == symbol) then
+       new%typat(iatom) = itypat; exit
+     end if
+   end do
+   if (itypat == new%ntypat + 1) then
+     MSG_ERROR(sjoin("Cannot find symbol:`", symbol, " `in initial symbol list. Typo or POSCAR without symbols?."))
+   end if
+ end do
+
+ ! Convert ang -> bohr
+ if (scaling_constant > zero) then
+   new%rprimd = scaling_constant * new%rprimd * Ang_Bohr
+ else if (scaling_constant < zero) then
+   ! A negative scale factor is treated as a volume. translate scaling_constant to a lattice vector scaling.
+   new%rprimd = Ang_Bohr * new%rprimd * (-scaling_constant / abs(det3r(new%rprimd))) ** (one / three)
+ else
+   ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be /= 0 but found:", ftoa(scaling_constant)))
+ end if
+
+ if (system == "cartesian") then
+   ! Go from cartesian to reduced.
+   ABI_MALLOC(xcart, (3, new%natom))
+   xcart = new%xred
+   call xcart2xred(new%natom, new%rprimd, xcart, new%xred)
+   ABI_FREE(xcart)
+ end if
+
+ ABI_FREE(symbols)
+ ABI_FREE(duplicated)
+ return
+
+ 10 MSG_ERROR(sjoin("Error while parsing POSCAR file,", ch10, "iomsg:", trim(iomsg)))
+
+end function geo_from_poscar_unit
+!!***
+
+!!****f* m_parser/geo_print_abivars
+!! NAME
+!!  geo_print_abivars
+!!
+!! FUNCTION
+!!  Print Abinit variables corresponding to POSCAR
+!!
+!! SOURCE
+
+subroutine geo_print_abivars(self, unit)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(in) :: self
+ integer,intent(in) :: unit
+
+!Local variables-------------------------------
+ integer :: ii, iatom, itypat
+
+!************************************************************************
+
+ if (unit == dev_null) return
+
+ write(unit, "(2a)")"# fileformat: ", trim(self%fileformat)
+ if (len_trim(self%title) > 0) write(unit, "(2a)")"# ",trim(self%title)
+ write(unit, "(a, i0)")" natom ", self%natom
+ write(unit, "(a, i0)")" ntypat ", self%ntypat
+ write(unit, sjoin("(a, ", itoa(self%natom), "(i0,1x))")) " typat ", self%typat
+ write(unit, sjoin("(a, ", itoa(self%ntypat), "(f5.1,1x))")) " znucl ", self%znucl
+ write(unit, "(a)")" acell 1 1 1 Bohr"
+ write(unit, "(a)")" rprim "
+ do ii=1,3
+   write(unit, "(2x, 3(f11.7,1x))") self%rprimd(:, ii)
+ end do
+ write(unit, "(a)")" xred"
+ do iatom=1,self%natom
+   itypat = self%typat(iatom)
+   write(unit, "(2x, 3(f11.7,1x),3x,2a)") self%xred(:, iatom) , " # ", trim(znucl2symbol(self%znucl(itypat)))
+ end do
+
+end subroutine geo_print_abivars
+!!***
+
+!!****f* m_parser/geo_from_netdf_path
+!! NAME
+!!  geo_from_netdf_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer, parameter :: master = 0
+ integer :: ncid, npsp, dimid, itime
+ logical :: has_nimage
+
+!************************************************************************
+
+ new%fileformat = "netcdf"
+
+#ifdef HAVE_NETCDF
+ if (xmpi_comm_rank(comm) == master) then
+   NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
+
+   if (endswith(path, "_HIST.nc")) then
+     ! See def_file_hist.
+     !MSG_ERROR("Cannot yet read structure from HIST.nc file")
+     NCF_CHECK(nctk_get_dim(ncid, "natom", new%natom))
+     NCF_CHECK(nctk_get_dim(ncid, "ntypat", new%ntypat))
+
+     NCF_CHECK(nctk_get_dim(ncid, "npsp", npsp))
+     ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
+     has_nimage = nf90_inq_dimid(ncid, "nimage", dimid) == nf90_noerr
+     ABI_CHECK(.not. has_nimage, "Cannot initialize structure from HIST.nc when file contains images.")
+
+     call new%malloc()
+
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "typat"), new%typat))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "znucl"), new%znucl))
+
+     ! time is NF90_UNLIMITED
+     NCF_CHECK(nctk_get_dim(ncid, "time", itime))
+
+     ! dim3 = [xyz_id, xyz_id, time_id]
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "rprimd"), new%rprimd, start=[1,1,itime]))
+
+     ! dim3 = [xyz_id, natom_id, time_id]
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xred"), new%xred, start=[1,1,itime]))
+
+   else
+     ! Assume netcdf file produced by calling crystal%ncwrite
+     NCF_CHECK(nctk_get_dim(ncid, "number_of_atoms", new%natom))
+     NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_species", new%ntypat))
+
+     ! Test if alchemical. NB: nsps added in crystal_ncwrite in v9.
+     if (nf90_inq_dimid(ncid, "number_of_pseudopotentials", dimid) == nf90_noerr) then
+       NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=npsp))
+       ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
+     end if
+
+     call new%malloc()
+
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "primitive_vectors"), new%rprimd))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atom_species"), new%typat))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_numbers"), new%znucl))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_atom_positions"), new%xred))
+   end if
+
+   NCF_CHECK(nf90_close(ncid))
+ end if
+#endif
+
+ call new%bcast(master, comm)
+ !call new%print_abivars(std_out)
+
+end function geo_from_netcdf_path
+!!***
+
+!!****f* m_parser/geo_bcast
+!! NAME
+!!  geo_bcast
+!!
+!! FUNCTION
+!!  Brodcast object
+!!
+!! SOURCE
+
+subroutine geo_bcast(self, master, comm)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(inout) :: self
+ integer,intent(in) :: master, comm
+
+!Local variables-------------------------------
+ integer :: ierr, my_rank, list_int(2)
+
+!************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) list_int = [self%natom, self%ntypat]
+ call xmpi_bcast(list_int, master, comm, ierr)
+
+ if (my_rank /= master) then
+   self%natom = list_int(1); self%ntypat = list_int(2)
+   call self%malloc()
+ end if
+
+ call xmpi_bcast(self%rprimd, master, comm, ierr)
+ call xmpi_bcast(self%xred, master, comm, ierr)
+ call xmpi_bcast(self%typat, master, comm, ierr)
+ call xmpi_bcast(self%znucl, master, comm, ierr)
+ call xmpi_bcast(self%title, master, comm, ierr)
+ call xmpi_bcast(self%fileformat, master, comm, ierr)
+
+end subroutine geo_bcast
+!!***
+
+!!****f* m_parser/geo_malloc
+!! NAME
+!!  geo_malloc
+!!
+!! FUNCTION
+!!  Allocate memory once %natom and %ntypat are know
+!!
+!! SOURCE
+
+subroutine geo_malloc(self)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(inout) :: self
+
+!************************************************************************
+
+ ABI_MALLOC(self%typat, (self%natom))
+ ABI_MALLOC(self%xred, (3, self%natom))
+ ABI_MALLOC(self%znucl, (self%ntypat))
+
+end subroutine geo_malloc
+!!***
+
+!!****f* m_parser/geo_free
+!! NAME
+!!  geo_free
+!!
+!! FUNCTION
+!!  Free memory.
+!!
+!! SOURCE
+
+subroutine geo_free(self)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(inout) :: self
+
+!************************************************************************
+
+ ABI_SFREE(self%typat)
+ ABI_SFREE(self%xred)
+ ABI_SFREE(self%znucl)
+
+end subroutine geo_free
 !!***
 
 end module m_parser

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dynmat
 !! NAME
 !!  m_dynmat
@@ -7,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2020 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -906,8 +905,8 @@ subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
      if(flg2(idir)==0)vec2(idir)=zero
    end do
 
-!  Treat electric field perturbation
- else if(ipert==natom+2) then
+!  Treat electric field and qvec perturbations
+ else if(ipert==natom+2.or.ipert==natom+8) then
 !  OCL SCALAR
    do idir=1,3
      vec2(idir)=zero
@@ -1265,10 +1264,10 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !and imposition of the charge neutrality condition
  if (chneut/=0)then
    write(message, '(a,a,a,a,a,a,a)' )&
-&   ' The violation of the charge neutrality conditions',ch10,&
-&   ' by the effective charges is as follows :',ch10,&
-&   '    atom        electric field',ch10,&
-&   ' displacement     direction   '
+    ' The violation of the charge neutrality conditions',ch10,&
+    ' by the effective charges is as follows :',ch10,&
+    '    atom        electric field',ch10,&
+    ' displacement     direction   '
    call wrtout(ab_out,message,'COLL')
    do idir1=1,3
      do idir2=1,3
@@ -1279,7 +1278,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
          do ipert1=1,natom
            d2cart(ii,idir1,ipert1,idir2,natom+2)=&
-&           d2cart(ii,idir1,ipert1,idir2,natom+2)-sumwght(ii)*wghtat(ipert1)
+           d2cart(ii,idir1,ipert1,idir2,natom+2)-sumwght(ii)*wghtat(ipert1)
          end do
        end do
        write(message, '(i8,i16,2f16.6)' ) idir1,idir2,sumwght(1),sumwght(2)
@@ -1299,7 +1298,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
          do ipert2=1,natom
            d2cart(ii,idir1,natom+2,idir2,ipert2)=&
-&           d2cart(ii,idir1,natom+2,idir2,ipert2)-sumwght(ii)*wghtat(ipert2)
+           d2cart(ii,idir1,natom+2,idir2,ipert2)-sumwght(ii)*wghtat(ipert2)
          end do
        end do
      end do
@@ -1374,16 +1373,15 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 
 !Write the effective charge tensor
  write(message, '(a,a,a,a,a,a,a)' )&
-& ' Effective charge tensors after ',ch10,&
-& ' imposition of the charge neutrality,',ch10,&
-& ' and eventual restriction to some part :',ch10,&
-& '   atom    displacement  '
+   ' Effective charge tensors after ',ch10,&
+   ' imposition of the charge neutrality,',ch10,&
+   ' and eventual restriction to some part :',ch10,&
+  '   atom    displacement  '
  call wrtout(ab_out,message,'COLL')
 
  do ipert1=1,natom
    do idir1=1,3
-     write(message, '(2i10,3es16.6)' )ipert1,idir1,&
-&     (d2cart(1,idir1,ipert1,idir2,natom+2),idir2=1,3)
+     write(message, '(2i10,3es16.6)' )ipert1,idir1,(d2cart(1,idir1,ipert1,idir2,natom+2),idir2=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end do
@@ -5437,6 +5435,8 @@ end subroutine nanal9
 !! xred(3,natom)= relative coords of atoms in unit cell (dimensionless)
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! comm=MPI communicator.
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
@@ -5449,17 +5449,20 @@ end subroutine nanal9
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,comm)
+& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
+  dipquad,quadquad)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dipdip,mpert,natom,nrpt,comm
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm
  real(dp),intent(in) :: qphnrm,ucvol
+ integer,optional,intent(in) :: dipquad, quadquad
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qpt(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),rpt(3,nrpt)
  real(dp),intent(in) :: trans(3,natom),wghatm(natom,natom,nrpt),xred(3,natom)
  real(dp),intent(in) :: zeff(3,3,natom)
+ real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
@@ -5468,6 +5471,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 !scalars
  integer,parameter :: nqpt1=1,option2=2,sumg0=0,plus1=1,iqpt1=1
  integer :: i1,i2,ib,nsize
+ integer :: dipquad_, quadquad_
 !arrays
  real(dp) :: qphon(3)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
@@ -5475,6 +5479,10 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 ! *********************************************************************
 
  ABI_ALLOCATE(dq,(2,3,natom,3,natom))
+
+ ! Define quadrupolar options
+ dipquad_=0; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=0; if(present(quadquad)) quadquad_=quadquad
 
  ! Get the normalized wavevector
  if(abs(qphnrm)<1.0d-7)then
@@ -5491,13 +5499,14 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  ! phase is modified, in order to recover the usual (xred) coordinate of atoms.
  call dymfz9(dq,natom,nqpt1,gprim,option2,qphon,trans)
 
- if (dipdip==1) then
+ if (dipdip==1.or.dipquad_==1.or.quadquad_==1) then
    ! Add the non-analytical part
    ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
    ! second energy derivative wrt xred(3,natom) in Hartrees (Denoted A-bar in the notes)
    ABI_ALLOCATE(dyew,(2,3,natom,3,natom))
 
-   call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
+   call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
+      qdrp_cart,ewald_option,dipquad=dipquad_,quadquad=quadquad_)
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
 

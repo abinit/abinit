@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ephwg
 !! NAME
 !! m_ephwg
@@ -12,7 +11,7 @@
 !!    2.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, HM)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,10 +135,6 @@ type, public :: ephwg_t
   ! (nibz, natom3)
   ! Phonon frequencies in the IBZ
 
-  real(dp),allocatable :: frohl_ibz(:,:)
-  ! (nibz, natom3)
-  ! Frohlich matrix elements in the IBZ
-
   real(dp),allocatable :: eigkbs_ibz(:, :, :)
   ! (nibz, nbcount, nsppol)
   ! Electron eigenvalues in the IBZ for nbcount states
@@ -235,15 +230,11 @@ type(ephwg_t) function ephwg_new( &
 !Local variables-------------------------------
 !scalars
  integer :: nprocs, my_rank, ik, ierr, out_nkibz
- integer :: nu, iatom
- real(dp) :: fqdamp, wqnu, inv_qepsq
- complex(dp) :: cnum, cdd(3)
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: rlatt(3,3)
  integer :: out_kptrlatt(3,3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom), phfrq(3*cryst%natom)
- real(dp) :: gkq2_lr(3*cryst%natom), qpt(3), qpt_cart(3)
  real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
 
 !----------------------------------------------------------------------
@@ -282,41 +273,14 @@ type(ephwg_t) function ephwg_new( &
 
  ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
- if (frohl_model == 3) then
-   ABI_CALLOC(new%frohl_ibz, (new%nibz, new%natom3))
- end if
 
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
    call ifc%fourq(cryst, new%ibz(:, ik), phfrq, displ_cart)
    new%phfrq_ibz(ik, :) = phfrq
-
-   if (frohl_model /= 3) cycle
-   ! Compute Frohlich matrix elements
-   qpt = new%ibz(:,ik)
-   qpt_cart = two_pi*matmul(cryst%gprimd, qpt)
-   if (sum(qpt_cart**2) < tol6) cycle
-   inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
-   fqdamp = (four_pi / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
-
-   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
-   gkq2_lr(:) = zero
-   do nu=1,new%natom3
-     wqnu = phfrq(nu); if (wqnu < tol8) cycle
-     cnum = zero
-     do iatom=1,cryst%natom
-       ! This is complex
-       cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
-             exp(-j_dpc * two_pi * dot_product(qpt, cryst%xred(:, iatom)))
-       cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
-     end do
-     gkq2_lr(nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
-   end do
-   new%frohl_ibz(ik,:) = gkq2_lr * fqdamp
  end do
 
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
- if (frohl_model == 3) call xmpi_sum(new%frohl_ibz, comm, ierr)
  call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
 end function ephwg_new
@@ -564,25 +528,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
    self%lgk2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
  enddo
 
-#if 0
-   ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
-   end if
-
-   !check if same results as listkk
-   do ii=1,self%nq_k
-      ABI_CHECK(self%lgk2ibz(ii)==indkk(ii,1),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-#endif
-
  ! calculate k+q
  do ii=1,self%nq_k
    self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
@@ -614,25 +559,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  enddo
  ABI_FREE(lgkibz2bz)
 
-#if 0
-   ! Get mapping (k + q) --> initial IBZ.
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
-   end if
-
-   !check if same results as listkk
-   do ii=1,self%nq_k
-      ABI_CHECK(self%kq2ibz(ii)==indkk(ii,1),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-#endif
-
  ! revert change
  do ii=1,self%nq_k
    self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
@@ -641,51 +567,12 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ! get self%bz --> dg%bz --> self%lgrp%ibz
  ABI_MALLOC(bz2lgkibz,(self%nbz))
 
-#if 0
-   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
-   ABI_MALLOC(bz2bz, (self%nbz * sppoldbl1))
-   call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,&
-      eph_doublegrid%dense_nbz, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   do ii=1,self%nbz
-      ! get self%bz --> self%bz
-      bz2bz(ii) = eph_doublegrid%get_index(self%bz(:,ii),2)
-   end do
-
-   !check if same results as listkk
-   do ii=1,self%nbz
-      ABI_CHECK(indkk(ii,1)==bz2bz(ii),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-   ABI_FREE(bz2bz)
-#endif
-
  do ii=1,self%nbz
     ! get self%bz --> dg%bz
     ik_idx = eph_doublegrid%get_index(self%bz(:,ii),2)
     ! dg%bz --> self%lgrp%ibz
     bz2lgkibz(ii) = eph_doublegrid%bz2lgkibz(ik_idx)
  end do
-
-#if 0
-   ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
-   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
-   end if
-
-   !check if same results as listkk
-   do ii=1,self%nbz
-      ABI_CHECK(indkk(ii,1)==bz2lgkibz(ii),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-#endif
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
@@ -736,8 +623,6 @@ subroutine ephwg_report_stats(self)
  mem_tot = mem_tot + self%nq_k * 2 * 4
  ! phonon frequencies
  mem_tot = mem_tot + self%nibz * self%natom3 * dp
- ! Frolich matrix elements
- if (self%frohl_model == 3) mem_tot = mem_tot + self%nibz * self%natom3 * dp
  ! eigenvalues
  mem_tot = mem_tot + self%nibz * self%nbcount * self%nsppol * dp
 
@@ -1129,7 +1014,6 @@ subroutine ephwg_free(self)
  ABI_SFREE(self%bz)
  ABI_SFREE(self%lgk2ibz)
  ABI_SFREE(self%phfrq_ibz)
- ABI_SFREE(self%frohl_ibz)
  ABI_SFREE(self%eigkbs_ibz)
 
  ! types

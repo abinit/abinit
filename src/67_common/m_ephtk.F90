@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ephtk
 !! NAME
 !!  m_ephtk
@@ -7,7 +6,7 @@
 !!  Helper functions common to e-ph calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,13 +59,13 @@ contains  !=====================================================
 !!  ephtk_set_phmodes_skip
 !!
 !! FUNCTION
- ! Setup a mask to skip accumulating the contribution of certain phonon modes.
+!! Setup a mask to skip accumulating the contribution of certain phonon modes.
 !!
 !! INPUT
 !!  dtset<dataset_type>=All input variables for this dataset.
 !!
 !! OUTPUT
-!!   phmodes_skip(natom3) For each mode: 1 to skip this contribution else 0
+!!   phmodes_skip(natom3) For each mode: 1 to skip the contribution given by this phonon branch else 0
 !!
 !! PARENTS
 !!
@@ -101,8 +100,8 @@ subroutine ephtk_set_phmodes_skip(dtset, phmodes_skip)
    end if
    call wrtout(std_out, sjoin(" Including phonon modes between [", &
                itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)), "]"))
-   phmodes_skip = 0
-   phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 1
+   phmodes_skip = 1
+   phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 0
  end if
 
 end subroutine ephtk_set_phmodes_skip

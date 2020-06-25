@@ -37,8 +37,9 @@
     getwfk2     1
 
      nband2    16
-      awtr2     0       # Note : the default awtr 1 is better
+      awtr2     0     # Note : the default awtr 1 is better
       symchi    0     # Note : the default symchi 1 is better
+      symsigma  0     # Note : the default symsigma 1 is better
 
 # Calculation of the HF corrections
  optdriver3     4

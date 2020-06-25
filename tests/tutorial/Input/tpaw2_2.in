@@ -10,7 +10,7 @@
 pawecutdg 40.
    ecutsm 0.5
 
-  nstep   30
+  nstep   50
  tolvrs   1.0d-12
  occopt   7
  tsmear   0.0075
@@ -38,14 +38,18 @@ nshiftk   4
  getwfk -1
  prteig 0 prtden 0
 
+ fftalg 112
+
+ pp_dirpath="../../Psps_for_tests"
+ pseudos = "Ni.GGA-PBE-paw.rrkj.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw2_2.out, tolnlines= 15, tolabs=  5.5e-4,    tolrel=  3.0e-1, fld_options=-easy
-#%% psp_files =  Ni.GGA-PBE-paw.abinit.rrkj 
+#%%   tpaw2_2.abo, tolnlines= 15, tolabs=  1.8e-3,    tolrel=  3.0e-1, fld_options=-easy
+#%% output_file = "tpaw2_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

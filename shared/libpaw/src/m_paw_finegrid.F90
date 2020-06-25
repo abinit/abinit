@@ -8,7 +8,7 @@
 !!  on the fine grid around a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2020 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

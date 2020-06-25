@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optic_tools
 !! NAME
 !! m_optic_tools
@@ -7,7 +6,7 @@
 !!  Helper functions used in the optic code
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (SSharma,MVer,VRecoules,TD,YG)
+!! Copyright (C) 2002-2020 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +56,7 @@ MODULE m_optic_tools
  public :: linopt           ! Compute dielectric function for semiconductors
  public :: nlinopt          ! Second harmonic generation susceptibility for semiconductors
  public :: linelop          ! Linear electro-optic susceptibility for semiconductors
- public :: nonlinopt
+ public :: nonlinopt        ! nonlinear electro-optic susceptibility for semiconductors
 
 CONTAINS  !===========================================================
 !!***
@@ -520,7 +519,7 @@ complex(dpc), allocatable :: eps(:)
      write(std_out,*) '---------------------------------------------'
      write(std_out,*) '    Error in linopt:                         '
      write(std_out,*) '    scissors shift is incorrect              '
-     write(std_out,*) '    number has to real greater than 0.0      '
+     write(std_out,*) '    number has to be greater than 0.0      '
      write(std_out,*) '---------------------------------------------'
      MSG_ERROR("Aborting now")
    end if
@@ -1708,7 +1707,7 @@ integer :: start4(4),count4(4)
 !step in energy
  if (de.le.0._dp) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in nlinopt:                        '
+   write(std_out,*) '    Error in linelop:                        '
    write(std_out,*) '    energy step is incorrect                 '
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
@@ -2082,7 +2081,7 @@ end subroutine linelop
 !! nonlinopt
 !!
 !! FUNCTION
-!! Compute optical frequency dependent linear electro-optic susceptibility for semiconductors
+!! Compute the frequency dependent nonlinear electro-optic susceptibility for semiconductors
 !!
 !! INPUTS
 !!  icomp=Sequential index associated to computed tensor components (used for netcdf output)
@@ -2112,7 +2111,7 @@ end subroutine linelop
 !!   fnam5=trim(fnam)//'-ChiAbs.out'
 !!
 !! OUTPUT
-!!  Calculates the second harmonic generation susceptibility on a desired energy mesh and
+!!  Calculates the nonlinear electro-optical susceptibility on a desired energy mesh and
 !!  for desired direction of polarisation. The output is in files named
 !!  ChiEOTot.out : Im\chi_{v1v2v3}(\omega,\omega,0) and Re\chi_{v1v2v3}(\omega,\omega,0)
 !!  ChiEOIm.out  : contributions to the Im\chi_{v1v2v3}(\omega,\omega,0) from various terms
@@ -2252,7 +2251,8 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
      abs(symcrys(3,1,isym)).lt.tst.and.abs(symcrys(3,2,isym)).lt.tst) then
        write(std_out,*) '-----------------------------------------'
        write(std_out,*) '    the crystal has inversion symmetry   '
-       write(std_out,*) '    the SHG susceptibility is zero       '
+       write(std_out,*) '    the nl electro-optical susceptibility'
+       write(std_out,*) '    is zero                              '
        write(std_out,*) '-----------------------------------------'
        MSG_ERROR("Aborting now")
      end if
@@ -2262,7 +2262,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 !check polarisation
  if (v1.le.0.or.v2.le.0.or.v3.le.0.or.v1.gt.3.or.v2.gt.3.or.v3.gt.3) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in linelop:                        '
+   write(std_out,*) '    Error in nonlinopt:                        '
    write(std_out,*) '    the polarisation directions incorrect    '
    write(std_out,*) '    1=x,  2=y  and 3=z                       '
    write(std_out,*) '---------------------------------------------'
@@ -2272,7 +2272,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 !number of energy mesh points
  if (nmesh.le.0) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in linelop:                        '
+   write(std_out,*) '    Error in nonlinopt:                        '
    write(std_out,*) '    number of energy mesh points incorrect   '
    write(std_out,*) '    number has to be integer greater than 0  '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
@@ -2283,7 +2283,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 !step in energy
  if (de.le.0._dp) then
    write(std_out,*) '---------------------------------------------'
-   write(std_out,*) '    Error in nlinopt:                        '
+   write(std_out,*) '    Error in nonlinopt:                        '
    write(std_out,*) '    energy step is incorrect                 '
    write(std_out,*) '    number has to real greater than 0.0      '
    write(std_out,*) '    nmesh*de = max energy for calculation    '
@@ -2681,7 +2681,7 @@ character(len=fnlen) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
    write(std_out,*) ' '
    write(std_out,*) 'information about calculation just performed:'
    write(std_out,*) ' '
-   write(std_out,*) 'calculated the component:',v1,v2,v3 ,'of second order susceptibility'
+   write(std_out,*) 'calculated the component:',v1,v2,v3 ,'of the nonlinear electro-optical susceptibility'
    write(std_out,*) 'tolerance:',tol
    if (tol.gt.0.008) write(std_out,*) 'ATTENTION: tolerance is too high'
    write(std_out,*) 'broadening:',brod,'Hartree'

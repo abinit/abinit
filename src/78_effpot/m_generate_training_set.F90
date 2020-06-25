@@ -1,13 +1,14 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_generate_training_set
 !! NAME
 !!  m_generate_training_set
 !!
 !! FUNCTION
+!! XG20200322 : Was initiated by Alexandre Martin, but not tested, not documented, perhaps not completed ?!? So, should
+!! be removed at some point ...
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -96,6 +97,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
  use m_supercell, only : supercell_type
  use m_geometry, only : xcart2xred
  use m_phonons ,only :thermal_supercell_make,thermal_supercell_free
+ use m_xmpi
 
 !Arguments ------------------------------------
   !scalars
@@ -119,10 +121,13 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   real(dp):: delta,rand
   integer :: ii,iconfig,natom_uc,direction
   character(len=500) :: message
+  INTEGER                            :: n
+  INTEGER                            :: i, iseed
+  INTEGER, DIMENSION(:), ALLOCATABLE :: seed
 
 !arrays
   real(dp) :: dielt(3,3)
-  real(dp),allocatable :: zeff(:,:,:)
+  real(dp),allocatable :: zeff(:,:,:),qdrp_cart(:,:,:,:)
   real(dp) :: acell_next(3),xred_next(3,natom),rprimd_next(3,3)
   type(ifc_type) :: ifc
   type(crystal_t) :: crystal
@@ -133,6 +138,14 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 
  ABI_UNUSED((/rprimd(1,1), xred(1,1)/))
 
+ if ( .not. DEBUG ) then
+    CALL RANDOM_SEED(size = n)
+    ABI_ALLOCATE(seed,(n))
+    seed =  iseed + (/ (i - 1, i = 1, n) /)
+
+    CALL RANDOM_SEED(PUT = seed+xmpi_comm_rank(xmpi_world))
+  end if
+
   write(message,'(a,(80a),a)') ch10,('=',ii=1,80),ch10
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
@@ -141,7 +154,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff,comm)
+  call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff,qdrp_cart,comm)
 
   write(message, '(a,I0,a,f10.2,02a)' )' Generation of ',nconfig,' at the temperature ',&
 &                            temperature_K,' K from the phonons',ch10
@@ -190,6 +203,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call thermal_supercell_free(nconfig,thm_scells)
   ABI_DATATYPE_DEALLOCATE(thm_scells)
   ABI_DEALLOCATE(zeff)
+  ABI_DEALLOCATE(qdrp_cart)
 
 end subroutine generate_training_set
 !!***

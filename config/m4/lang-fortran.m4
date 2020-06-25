@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -13,20 +13,20 @@
 
 
 
-# _ABI_CHECK_FC_ABSOFT(COMPILER)
+# _ABI_FC_CHECK_ABSOFT(COMPILER)
 # ------------------------------
 #
 # Checks whether the specified Fortran compiler is the ABSoft Fortran compiler.
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_ABSOFT],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_ABSOFT],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the ABSoft Fortran compiler])
   fc_info_string=`$1 -V 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep 'Pro Fortran'`
+  abi_result=`echo "${fc_info_string}" | grep '^Pro Fortran'`
   if test "${abi_result}" = ""; then
     abi_result="no"
     fc_info_string=""
@@ -36,26 +36,59 @@ AC_DEFUN([_ABI_CHECK_FC_ABSOFT],[
     AC_DEFINE([FC_ABSOFT],1,
       [Define to 1 if you are using the ABSOFT Fortran compiler.])
     abi_fc_vendor="absoft"
-    abi_fc_version=`echo "${abi_result}" | sed -e 's/.*Pro Fortran //'`
+    abi_fc_version=`echo "${abi_result}" | sed -e 's/Pro Fortran //'`
     if test "${abi_fc_version}" = "${abi_result}"; then
       abi_fc_version="unknown"
     fi
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_ABSOFT
+]) # _ABI_FC_CHECK_ABSOFT
+
+
+# _ABI_FC_CHECK_ARM(COMPILER)
+# ---------------------------
+#
+# Checks whether the specified Fortran compiler is the ARMFlang Fortran compiler.
+# If yes, tries to determine its version number and sets the abi_fc_vendor
+# and abi_fc_version variables accordingly.
+#
+AC_DEFUN([_ABI_FC_CHECK_ARM],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the ARM Fortran compiler])
+  fc_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${fc_info_string}" | grep '^Arm C/C++/Fortran Compiler'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    fc_info_string=""
+    abi_fc_vendor="unknown"
+    abi_fc_version="unknown"
+  else
+    AC_DEFINE([FC_ARM],1,
+      [Define to 1 if you are using the ARM Fortran compiler.])
+    abi_fc_vendor="arm"
+    abi_fc_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_fc_version}" = "${abi_result}"; then
+      abi_fc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_FC_CHECK_ARM
 
 
 
-# _ABI_CHECK_FC_GNU(COMPILER)
+# _ABI_FC_CHECK_GNU(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the GNU Fortran compiler.
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_GNU],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_GNU],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the GNU Fortran compiler])
@@ -76,19 +109,18 @@ AC_DEFUN([_ABI_CHECK_FC_GNU],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_GNU
+]) # _ABI_FC_CHECK_GNU
 
 
-
-# _ABI_CHECK_FC_IBM(COMPILER)
+# _ABI_FC_CHECK_IBM(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the IBM XL Fortran compiler.
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_IBM],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_IBM],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the IBM XL Fortran compiler])
@@ -121,19 +153,18 @@ AC_DEFUN([_ABI_CHECK_FC_IBM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_IBM
+]) # _ABI_FC_CHECK_IBM
 
 
-
-# _ABI_CHECK_FC_INTEL(COMPILER)
+# _ABI_FC_CHECK_INTEL(COMPILER)
 # -----------------------------
 #
 # Checks whether the specified Fortran compiler is the Intel Fortran compiler.
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_INTEL],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_INTEL],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the Intel Fortran compiler])
@@ -155,19 +186,51 @@ AC_DEFUN([_ABI_CHECK_FC_INTEL],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_INTEL
+]) # _ABI_FC_CHECK_INTEL
 
 
+# _ABI_FC_CHECK_LLVM(COMPILER)
+# ----------------------------
+#
+# Checks whether the specified Fortran compiler is the LLVM Flang compiler.
+# If yes, tries to determine its version number and sets the abi_fc_vendor
+# and abi_fc_version variables accordingly.
+#
+AC_DEFUN([_ABI_FC_CHECK_LLVM],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
-# _ABI_CHECK_FC_NAG(COMPILER)
+  dnl AC_MSG_CHECKING([if we are using the LLVM Flang Fortran compiler])
+  fc_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${fc_info_string}" | grep -e '^[[CcFf]]lang'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    fc_info_string=""
+    abi_fc_vendor="unknown"
+    abi_fc_version="unknown"
+  else
+    AC_DEFINE([FC_LLVM],1,
+      [Define to 1 if you are using the LLVM Flang Fortran compiler.])
+    abi_fc_vendor="llvm"
+    abi_fc_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_fc_version}" = "${abi_result}"; then
+      abi_fc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_FC_CHECK_LLVM
+
+
+# _ABI_FC_CHECK_NAG(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the NAGWare Fortran 95
 # compiler. If yes, tries to determine its version number and sets the
 # abi_fc_vendor and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_NAG],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_NAG],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the NAGWare Fortran 95 compiler])
@@ -189,11 +252,10 @@ AC_DEFUN([_ABI_CHECK_FC_NAG],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_NAG
+]) # _ABI_FC_CHECK_NAG
 
 
-
-# _ABI_CHECK_FC_PGI(COMPILER)
+# _ABI_FC_CHECK_PGI(COMPILER)
 # ---------------------------
 #
 # Checks whether the specified Fortran compiler is the Portland Group
@@ -201,8 +263,8 @@ AC_DEFUN([_ABI_CHECK_FC_NAG],[
 # If yes, tries to determine its version number and sets the abi_fc_vendor
 # and abi_fc_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_FC_PGI],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_FC_CHECK_PGI],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the Portland Group Fortran compiler])
@@ -224,24 +286,24 @@ AC_DEFUN([_ABI_CHECK_FC_PGI],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_FC_PGI
-
+]) # _ABI_FC_CHECK_PGI
 
 
  ##############################################################################
 
-# _ABI_CHECK_FC_ASYNC()
-# --------------------
+
+# _ABI_FC_CHECK_ASYNC()
+# ---------------------
 #
 # Checks whether the Fortran compiler supports the ASYNCHRONOUS attribute (F2003).
 #
-AC_DEFUN([_ABI_CHECK_FC_ASYNC],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_ASYNC],[
+  # Init
   fc_has_async="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts the ASYNCHRONOUS attribute])
 
-  dnl Try to compile a program using asynchronous arrays (F2003)
+  # Try to compile a program using asynchronous arrays (F2003)
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -255,23 +317,24 @@ AC_DEFUN([_ABI_CHECK_FC_ASYNC],[
   fi
 
   AC_MSG_RESULT(${fc_has_async})
-]) # _ABI_CHECK_FC_ASYNC
+]) # _ABI_FC_CHECK_ASYNC
 
 
  ##############################################################################
 
-# _ABI_CHECK_FC_BACKTRACE()
-# --------------------
+
+# _ABI_FC_CHECK_BACKTRACE()
+# -------------------------
 #
 # Checks whether the Fortran compiler supports BACKTRACE (gfortran extension added in 4.8)
 #
-AC_DEFUN([_ABI_CHECK_FC_BACKTRACE],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_BACKTRACE],[
+  # Init
   fc_has_backtrace="no"
 
   AC_MSG_CHECKING([whether the Gfortran compiler supports BACKTRACE])
 
-  dnl Try to compile a piece of code that calls BACKTRACE.
+  # Try to compile a piece of code that calls BACKTRACE.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -286,23 +349,24 @@ AC_DEFUN([_ABI_CHECK_FC_BACKTRACE],[
   fi
 
   AC_MSG_RESULT(${fc_has_backtrace})
-]) # _ABI_CHECK_FC_BACKTRACE
+]) # _ABI_FC_CHECK_BACKTRACE
 
 
  ##############################################################################
 
-# _ABI_CHECK_FC_COMMAND_ARGUMENT()
-# --------------------
+
+# _ABI_FC_CHECK_COMMAND_ARGUMENT()
+# --------------------------------
 #
 # Checks whether the Fortran compiler supports GET_COMMAND_ARGUMENT.
 #
-AC_DEFUN([_ABI_CHECK_FC_COMMAND_ARGUMENT],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_COMMAND_ARGUMENT],[
+  # Init
   fc_has_command_argument="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports GET_COMMAND_ARGUMENT])
 
-  dnl Try to compile a piece of code that calls get_command_argument.
+  # Try to compile a piece of code that calls get_command_argument.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -324,23 +388,24 @@ AC_DEFUN([_ABI_CHECK_FC_COMMAND_ARGUMENT],[
   fi
 
   AC_MSG_RESULT(${fc_has_command_argument})
-]) # _ABI_CHECK_FC_COMMAND_ARGUMENT
+]) # _ABI_FC_CHECK_COMMAND_ARGUMENT
 
 
  ##############################################################################
 
-# _ABI_CHECK_FC_COMMAND_LINE()
-# --------------------
+
+# _ABI_FC_CHECK_COMMAND_LINE()
+# ----------------------------
 #
 # Checks whether the Fortran compiler supports EXECUTE_COMMAND_LINE.
 #
-AC_DEFUN([_ABI_CHECK_FC_COMMAND_LINE],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_COMMAND_LINE],[
+  # Init
   fc_has_command_line="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports EXECUTE_COMMAND_LINE])
 
-  dnl Try to compile a piece of code that calls execute_command_line.
+  # Try to compile a piece of code that calls execute_command_line.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -360,23 +425,24 @@ AC_DEFUN([_ABI_CHECK_FC_COMMAND_LINE],[
   fi
 
   AC_MSG_RESULT(${fc_has_command_line})
-]) # _ABI_CHECK_FC_COMMAND_LINE
+]) # _ABI_FC_CHECK_COMMAND_LINE
 
 
  ##############################################################################
 
-# _ABI_CHECK_FC_SYSTEM()
-# --------------------
+
+# _ABI_FC_CHECK_SYSTEM()
+# ----------------------
 #
 # Checks whether the Fortran compiler supports SYSTEM.
 #
-AC_DEFUN([_ABI_CHECK_FC_SYSTEM],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_SYSTEM],[
+  # Init
   fc_has_system="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports SYSTEM])
 
-  dnl Try to compile a piece of code that calls system.
+  # Try to compile a piece of code that calls system.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -390,21 +456,21 @@ AC_DEFUN([_ABI_CHECK_FC_SYSTEM],[
   fi
 
   AC_MSG_RESULT(${fc_has_system})
-]) # _ABI_CHECK_FC_SYSTEM
+]) # _ABI_FC_CHECK_SYSTEM
 
 
-# _ABI_CHECK_FC_CONTIGUOUS()
-# --------------------
+# _ABI_FC_CHECK_CONTIGUOUS()
+# --------------------------
 #
 # Checks whether the Fortran compiler supports the CONTIGUOUS attribute (F2008).
 #
-AC_DEFUN([_ABI_CHECK_FC_CONTIGUOUS],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_CONTIGUOUS],[
+  # Init
   fc_has_contiguous="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts the CONTIGUOUS attribute])
 
-  dnl Try to compile a program using contiguous (F2008)
+  # Try to compile a program using contiguous (F2008)
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -423,21 +489,21 @@ AC_DEFUN([_ABI_CHECK_FC_CONTIGUOUS],[
   fi
 
   AC_MSG_RESULT(${fc_has_contiguous})
-]) # _ABI_CHECK_FC_CONTIGUOUS
+]) # _ABI_FC_CHECK_CONTIGUOUS
 
 
-# _ABI_CHECK_FC_EXIT()
+# _ABI_FC_CHECK_EXIT()
 # --------------------
 #
 # Checks whether the Fortran compiler supports the exit() subroutine.
 #
-AC_DEFUN([_ABI_CHECK_FC_EXIT],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_EXIT],[
+  # Init
   fc_has_exit="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts exit()])
 
-  dnl Try to compile a program calling exit()
+  # Try to compile a program calling exit()
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -451,22 +517,21 @@ AC_DEFUN([_ABI_CHECK_FC_EXIT],[
   fi
 
   AC_MSG_RESULT(${fc_has_exit})
-]) # _ABI_CHECK_FC_EXIT
+]) # _ABI_FC_CHECK_EXIT
 
 
-
-# _ABI_CHECK_FC_FLUSH()
+# _ABI_FC_CHECK_FLUSH()
 # ---------------------
 #
 # Checks whether the Fortran compiler supports the flush() subroutine.
 #
-AC_DEFUN([_ABI_CHECK_FC_FLUSH],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_FLUSH],[
+  # Init
   fc_has_flush="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts flush()])
 
-  dnl Try to compile a program calling flush()
+  # Try to compile a program calling flush()
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -480,21 +545,21 @@ AC_DEFUN([_ABI_CHECK_FC_FLUSH],[
   fi
 
   AC_MSG_RESULT(${fc_has_flush})
-]) # _ABI_CHECK_FC_FLUSH
+]) # _ABI_FC_CHECK_FLUSH
 
 
-# _ABI_CHECK_FC_FLUSH_()
+# _ABI_FC_CHECK_FLUSH_()
 # ----------------------
 #   
 # Checks whether the Fortran compiler supports the flush_() subroutine.
 # 
-AC_DEFUN([_ABI_CHECK_FC_FLUSH_],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_FLUSH_],[
+  # Init
   fc_has_flush_="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts flush_()])
 
-  dnl Try to compile a program calling flush_()
+  # Try to compile a program calling flush_()
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -508,22 +573,22 @@ AC_DEFUN([_ABI_CHECK_FC_FLUSH_],[
   fi
 
   AC_MSG_RESULT(${fc_has_flush_})
-]) # _ABI_CHECK_FC_FLUSH_
+]) # _ABI_FC_CHECK_FLUSH_
 
 
-# _ABI_CHECK_FC_GAMMA()
+# _ABI_FC_CHECK_GAMMA()
 # ---------------------
 #
 # Checks whether the Fortran compiler supports the gamma() intrinsic
 # (Fortran 2003 and later).
 #
-AC_DEFUN([_ABI_CHECK_FC_GAMMA],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_GAMMA],[
+  # Init
   fc_has_gamma="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts gamma()])
 
-  dnl Try to compile a program using gamma()
+  # Try to compile a program using gamma()
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -538,23 +603,54 @@ AC_DEFUN([_ABI_CHECK_FC_GAMMA],[
   fi
 
   AC_MSG_RESULT(${fc_has_gamma})
-]) # _ABI_CHECK_FC_GAMMA
+]) # _ABI_FC_CHECK_GAMMA
 
 
+# _ABI_FC_CHECK_SHIFTLR()
+# -----------------------
+#
+# Checks whether the Fortran compiler supports SHIFTL/SHIFTR
+# (Fortran 2008 and later).
+#
+AC_DEFUN([_ABI_FC_CHECK_SHIFTLR],[
+  # Init
+  fc_has_shiftlr="no"
 
-# _ABI_CHECK_FC_GETENV()
+  AC_MSG_CHECKING([whether the Fortran compiler accepts shiftl() and shiftr()])
+
+  # Try to compile a call to cpu_time
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: ii,ishft,res
+      res=shiftl(ii,ishft)
+      res=shiftr(ii,ishft)
+
+    ]])], [fc_has_shiftlr="yes"])
+  AC_LANG_POP()
+
+  if test "${fc_has_shiftlr}" = "yes"; then
+    AC_DEFINE([HAVE_FC_SHIFTLR],1,
+      [Define to 1 if your Fortran compiler supports shiftl() and shiftr().])
+  fi
+
+  AC_MSG_RESULT(${fc_has_shiftlr})
+]) # _ABI_FC_CHECK_SHIFTLR
+
+
+# _ABI_FC_CHECK_GETENV()
 # ----------------------
 #
 # Checks whether the Fortran compiler supports GET_ENVIRONMENT_VARIABLE
 # (Fortran 2003 and later).
 #
-AC_DEFUN([_ABI_CHECK_FC_GETENV],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_GETENV],[
+  # Init
   fc_has_getenv="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts getenv()])
 
-  dnl Try to compile a call to getenv
+  # Try to compile a call to getenv
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -570,28 +666,30 @@ AC_DEFUN([_ABI_CHECK_FC_GETENV],[
   fi
 
   AC_MSG_RESULT(${fc_has_getenv})
-]) # _ABI_CHECK_FC_GETENV
+]) # _ABI_FC_CHECK_GETENV
 
 
-
-# _ABI_CHECK_FC_INT_QUAD()
+# _ABI_FC_CHECK_INT_QUAD()
 # ------------------------
 #
 # Checks whether the Fortran compiler supports quadruple integers.
 #
-AC_DEFUN([_ABI_CHECK_FC_INT_QUAD],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_INT_QUAD],[
+  # Init
   fc_has_int_quad="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts quadruple integers])
 
-  dnl Try to compile a program defining a quadruple integer
-  dnl Note: xlf "works around" the problem by changing the integer length
+  # Try to compile a program defining a quadruple integer
+  # Note: xlf "works around" the problem by changing the integer length
+  # Note: need to test "integer*16" and "integer(kind=16)" (seems not
+  #       equivalent)
   if test "${abi_fc_vendor}" != "ibm"; then
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
               integer*16 my_int
+              integer(kind=16) :: my_int2
       ]])], [fc_has_int_quad="yes"])
     AC_LANG_POP()
   fi
@@ -602,21 +700,21 @@ AC_DEFUN([_ABI_CHECK_FC_INT_QUAD],[
   fi
 
   AC_MSG_RESULT(${fc_has_int_quad})
-]) # _ABI_CHECK_FC_INT_QUAD
+]) # _ABI_FC_CHECK_INT_QUAD
 
 
-# _ABI_CHECK_FC_ISO_FORTRAN_2008()
-# ------------------------
+# _ABI_FC_CHECK_ISO_FORTRAN_2008()
+# --------------------------------
 #
 # Checks whether the Fortran compiler supports 2008 standard in ISO_FORTRAN_ENV.
 #
-AC_DEFUN([_ABI_CHECK_FC_ISO_FORTRAN_2008],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_ISO_FORTRAN_2008],[
+  # Init
   fc_has_iso_fortran_2008="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports 2008 standard in ISO_FORTRAN_ENV])
 
-  dnl Try to compile a program using ISO_FORTRAN_ENV with int16,int32,int64
+  # Try to compile a program using ISO_FORTRAN_ENV with int16,int32,int64
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -630,21 +728,21 @@ AC_DEFUN([_ABI_CHECK_FC_ISO_FORTRAN_2008],[
   fi
 
   AC_MSG_RESULT(${fc_has_iso_fortran_2008})
-]) # _ABI_CHECK_FC_ISO_FORTRAN_2008
+]) # _ABI_FC_CHECK_ISO_FORTRAN_2008
 
 
-# _ABI_CHECK_FC_DTARRAYS()
-# --------------------
+# _ABI_FC_CHECK_DTARRAYS()
+# ------------------------
 #
 # Checks whether the Fortran compiler supports allocatable arrays in Fortran datatypes.
 #
-AC_DEFUN([_ABI_CHECK_FC_DTARRAYS],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_DTARRAYS],[
+  # Init
   fc_has_dtarrays="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports allocatable arrays in datatypes])
 
-  dnl Try to compile a type with an allocatable array
+  # Try to compile a type with an allocatable array
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -667,23 +765,59 @@ AC_DEFUN([_ABI_CHECK_FC_DTARRAYS],[
   fi
 
   AC_MSG_RESULT(${fc_has_dtarrays})
-]) # _ABI_CHECK_FC_DTARRAYS
+]) # _ABI_FC_CHECK_DTARRAYS
+
+
+# _ABI_FC_CHECK_IEEE_ARITHMETIC()
+# -------------------------------
+#
+# Checks whether the Fortran compiler supports the intrinsic module
+# IEEE_ARITHMETIC.
+#
+AC_DEFUN([_ABI_FC_CHECK_IEEE_ARITHMETIC],[
+  # Init
+  fc_has_ieee_arithmetic="no"
+
+  AC_MSG_CHECKING([whether the Fortran compiler supports IEEE_ARITHMETIC])
+
+  # Try to compile a piece of code that uses the module.
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
+    [[
+      use, intrinsic :: ieee_arithmetic
+      real :: val
+
+      if (ieee_is_nan(val)) then  ! NaN
+        write(*,*)"Hello NAN"
+      end if
+
+    ]])], [fc_has_ieee_arithmetic="yes"])
+  AC_LANG_POP([Fortran])
+
+  if test "${fc_has_ieee_arithmetic}" = "yes"; then
+    AC_DEFINE([HAVE_FC_IEEE_ARITHMETIC],1, 
+      [Define to 1 if your Fortran compiler supports IEEE_ARITHMETIC module.])
+  fi
+
+  AC_MSG_RESULT([${fc_has_ieee_arithmetic}])
+]) # _ABI_FC_CHECK_IEEE_ARITHMETIC
 
 
  ##############################################################################
 
-# _ABI_CHECK_FC_IEEE_EXCEPTIONS()
-# --------------------
+
+# _ABI_FC_CHECK_IEEE_EXCEPTIONS()
+# -------------------------------
 #
 # Checks whether the Fortran compiler supports the intrinsic module IEEE_EXCEPTIONS
 #
-AC_DEFUN([_ABI_CHECK_FC_IEEE_EXCEPTIONS],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_IEEE_EXCEPTIONS],[
+  # Init
   fc_has_ieee_exceptions="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports IEEE_EXCEPTIONS])
 
-  dnl Try to compile a piece of code that uses the module.
+  # Try to compile a piece of code that uses the module.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -703,21 +837,21 @@ AC_DEFUN([_ABI_CHECK_FC_IEEE_EXCEPTIONS],[
   fi
 
   AC_MSG_RESULT(${fc_has_ieee_exceptions})
-]) # _ABI_CHECK_FC_IEEE_EXCEPTIONS
+]) # _ABI_FC_CHECK_IEEE_EXCEPTIONS
 
 
-# _ABI_CHECK_FC_IOMSG()
-# --------------------
+# _ABI_FC_CHECK_IOMSG()
+# ---------------------
 #
 # Checks whether the Fortran compiler supports IOMSG.
 #
-AC_DEFUN([_ABI_CHECK_FC_IOMSG],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_IOMSG],[
+  # Init
   fc_has_iomsg="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports IOMSG])
 
-  dnl Try to compile a piece of code that opens, reads, writes and closes a file using iomsg.
+  # Try to compile a piece of code that opens, reads, writes and closes a file using iomsg.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -738,21 +872,21 @@ AC_DEFUN([_ABI_CHECK_FC_IOMSG],[
   fi
 
   AC_MSG_RESULT(${fc_has_iomsg})
-]) # _ABI_CHECK_FC_IOMSG
+]) # _ABI_FC_CHECK_IOMSG
 
 
-# _ABI_CHECK_FC_ISO_C_BINDING()
+# _ABI_FC_CHECK_ISO_C_BINDING()
 # -----------------------------
 #
 # Checks whether the Fortran compiler provides the intrinsic module ISO_C_BINDING.
 #
-AC_DEFUN([_ABI_CHECK_FC_ISO_C_BINDING],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_ISO_C_BINDING],[
+  # Init
   fc_has_iso_c_binding="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler provides the iso_c_binding module])
 
-  dnl Try to compile a simple piece of code using iso_c_binding
+  # Try to compile a simple piece of code using iso_c_binding
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -775,28 +909,32 @@ AC_DEFUN([_ABI_CHECK_FC_ISO_C_BINDING],[
   fi
 
   AC_MSG_RESULT(${fc_has_iso_c_binding})
-]) # _ABI_CHECK_FC_ISO_C_BINDING
+]) # _ABI_FC_CHECK_ISO_C_BINDING
 
 
-
-# _ABI_CHECK_FC_LONG_LINES()
+# _ABI_FC_CHECK_LONG_LINES()
 # --------------------------
 # 
 # Checks whether the Fortran compiler supports long lines.
 #
-AC_DEFUN([_ABI_CHECK_FC_LONG_LINES],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_LONG_LINES],[
+  # Init
   fc_has_long_lines="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts long lines])
 
-  dnl Try to compile a single line exceeding 136 columns.
+  # Try to compile a single line exceeding 136 columns.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
          write(*,*)"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" !142
     ]])], [fc_has_long_lines="yes"])
   AC_LANG_POP()
+
+  # This is not correctly implemented on LLVM
+  if test "${abi_fc_vendor}" = "llvm" -o "${abi_fc_vendor}" = "arm" ; then
+    fc_has_long_lines="no"
+  fi
 
   if test "${fc_has_long_lines}" = "yes"; then
     AC_DEFINE([HAVE_FC_LONG_LINES],1, 
@@ -805,24 +943,24 @@ AC_DEFUN([_ABI_CHECK_FC_LONG_LINES],[
 
   AC_MSG_RESULT(${fc_has_long_lines})
 
-  dnl Official macro added in autoconf ??
+  # Official macro added in autoconf ??
   dnl AC_FC_LINE_LENGTH ([length], [action-if-success], [action-if-failure = AC_MSG_FAILURE])
 
-]) # _ABI_CHECK_FC_LONG_LINES
+]) # _ABI_FC_CHECK_LONG_LINES
 
 
-# _ABI_CHECK_FC_MACRO_NEWLINE()
-# --------------------------
+# _ABI_FC_CHECK_MACRO_NEWLINE()
+# -----------------------------
 #
 # Checks whether the Fortran preprocessor supports \newline in macros.
 #
-AC_DEFUN([_ABI_CHECK_FC_MACRO_NEWLINE],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_MACRO_NEWLINE],[
+  # Init
   fc_has_macro_newline="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports \newline in CPP macros])
 
-  dnl Try to compile a piece of code that opens a file using \newline in a macro (has to use F90 ext).
+  # Try to compile a piece of code that opens a file using \newline in a macro (has to use F90 ext).
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -838,23 +976,22 @@ AC_DEFUN([_ABI_CHECK_FC_MACRO_NEWLINE],[
   fi
 
   AC_MSG_RESULT(${fc_has_macro_newline})
-]) # _ABI_CHECK_FC_MACRO_NEWLINE
-
- ##############################################################################
+]) # _ABI_FC_CHECK_MACRO_NEWLINE
 
 
-# _ABI_CHECK_FC_MOVE_ALLOC()
+
+# _ABI_FC_CHECK_MOVE_ALLOC()
 # --------------------------
 #
 # Checks whether the Fortran compile supports MOVE_ALLOC.
 #
-AC_DEFUN([_ABI_CHECK_FC_MOVE_ALLOC],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_MOVE_ALLOC],[
+  # Init
   fc_has_move_alloc="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports MOVE_ALLOC (F2003)])
 
-  dnl Try to compile a piece of code that uses move_alloc (F2003)
+  # Try to compile a piece of code that uses move_alloc (F2003)
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -871,23 +1008,22 @@ AC_DEFUN([_ABI_CHECK_FC_MOVE_ALLOC],[
   fi
 
   AC_MSG_RESULT(${fc_has_move_alloc})
-]) # _ABI_CHECK_FC_MOVE_ALLOC
+]) # _ABI_FC_CHECK_MOVE_ALLOC
 
 
- ##############################################################################
 
-# _ABI_CHECK_FC_PRIVATE()
-# --------------------
+# _ABI_FC_CHECK_PRIVATE()
+# -----------------------
 #
 # Checks whether the Fortran compiler supports the PRIVATE attribute (F2003).
 #
-AC_DEFUN([_ABI_CHECK_FC_PRIVATE],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_PRIVATE],[
+  # Init
   fc_has_private="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts the PRIVATE attribute])
 
-  dnl Try to compile a program using private entities (F2003)
+  # Try to compile a program using private entities (F2003)
   AC_LANG_PUSH([Fortran])
   AC_COMPILE_IFELSE([
      module foo
@@ -904,7 +1040,7 @@ AC_DEFUN([_ABI_CHECK_FC_PRIVATE],[
       [Define to 1 if your Fortran compiler supports the private attribute.])
   fi
 
-  dnl remove the module.
+  # remove the module.
   if test -f "FOO.${MODEXT}"; then
     rm -f "FOO.${MODEXT}"; 
   elif test -f "foo.${MODEXT}"; then
@@ -912,23 +1048,24 @@ AC_DEFUN([_ABI_CHECK_FC_PRIVATE],[
   fi
 
   AC_MSG_RESULT(${fc_has_private})
-]) # _ABI_CHECK_FC_PRIVATE
+]) # _ABI_FC_CHECK_PRIVATE
 
 
  ##############################################################################
 
-# _ABI_CHECK_FC_PROTECTED()
-# --------------------
+
+# _ABI_FC_CHECK_PROTECTED()
+# -------------------------
 #
 # Checks whether the Fortran compiler supports the PROTECTED attribute (F2003).
 #
-AC_DEFUN([_ABI_CHECK_FC_PROTECTED],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_PROTECTED],[
+  # Init
   fc_has_protected="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts the PROTECTED attribute])
 
-  dnl Try to compile a program using protected module entities (F2003)
+  # Try to compile a program using protected module entities (F2003)
   AC_LANG_PUSH([Fortran])
   AC_COMPILE_IFELSE([
     module foo
@@ -942,7 +1079,7 @@ AC_DEFUN([_ABI_CHECK_FC_PROTECTED],[
       [Define to 1 if your Fortran compiler supports the protected attribute.])
   fi
 
-  dnl remove the module.
+  # Remove the module
   if test -f "FOO.${MODEXT}"; then
     rm -f "FOO.${MODEXT}"; 
   elif test -f "foo.${MODEXT}"; then
@@ -950,21 +1087,21 @@ AC_DEFUN([_ABI_CHECK_FC_PROTECTED],[
   fi
 
   AC_MSG_RESULT(${fc_has_protected})
-]) # _ABI_CHECK_FC_PROTECTED
+]) # _ABI_FC_CHECK_PROTECTED
 
 
-# _ABI_CHECK_FC_STREAM_IO()
-# --------------------
+# _ABI_FC_CHECK_STREAM_IO()
+# -------------------------
 #
-# Checks whether the Fortran compiler supports stream IO (F2003)
+# Checks whether the Fortran compiler supports stream IO
 #
-AC_DEFUN([_ABI_CHECK_FC_STREAM_IO],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_STREAM_IO],[
+  # Init
   fc_has_stream_io="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler supports stream IO])
 
-  dnl Try to compile a piece of code that opens a file using unformatted stream access.
+  # Try to compile a piece of code that opens a file using unformatted stream access.
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -987,24 +1124,24 @@ AC_DEFUN([_ABI_CHECK_FC_STREAM_IO],[
   fi
 
   AC_MSG_RESULT(${fc_has_stream_io})
-]) # _ABI_CHECK_FC_STREAM_IO
+]) # _ABI_FC_CHECK_STREAM_IO
 
 
-# _ABI_CHECK_FC_TIMING()
+# _ABI_FC_CHECK_TIMING()
 # ----------------------
 #
-# Tries to determine which Fortran timing routines are available. (F95)
+# Tries to determine which Fortran timing routines are available.
 #
-AC_DEFUN([_ABI_CHECK_FC_TIMING],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_TIMING],[
+  # Init
   fc_timing="standard"
   fc_has_etime="no"
 
-  dnl Look for etime() support
+  # Look for etime() support
   if test "${fc_timing}" = "standard"; then
     AC_MSG_CHECKING([whether the Fortran compiler accepts etime()])
 
-    dnl Try to compile a program calling etime()
+    # Try to compile a program calling etime()
     AC_LANG_PUSH([Fortran])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],
       [[
@@ -1021,7 +1158,7 @@ AC_DEFUN([_ABI_CHECK_FC_TIMING],[
 
   fi
 
-  dnl Determine whether to use C clock for timings
+  # Determine whether to use C clock for timings
   AC_MSG_CHECKING([whether to use C clock for timings])
   AC_MSG_RESULT([${enable_cclock}])
   if test "${enable_cclock}" = "yes"; then
@@ -1030,24 +1167,24 @@ AC_DEFUN([_ABI_CHECK_FC_TIMING],[
   fi
   AM_CONDITIONAL(DO_BUILD_CCLOCK,[test "${enable_cclock}" = "yes"])
 
-  dnl Schedule info for substitution
+  # Schedule info for substitution
   AC_SUBST(fc_timing)
-]) # _ABI_CHECK_FC_TIMING
+]) # _ABI_FC_CHECK_TIMING
 
 
-# _ABI_CHECK_FC_CPUTIME()
-# ----------------------
+# _ABI_FC_CHECK_CPUTIME()
+# -----------------------
 #
 # Checks whether the Fortran compiler supports CPU_TIME 
 # (Fortran 95 and later).
 #
-AC_DEFUN([_ABI_CHECK_FC_CPUTIME],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_CPUTIME],[
+  # Init
   fc_has_cputime="no"
 
   AC_MSG_CHECKING([whether the Fortran compiler accepts cpu_time()])
 
-  dnl Try to compile a call to cpu_time
+  # Try to compile a call to cpu_time
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], 
     [[
@@ -1063,19 +1200,19 @@ AC_DEFUN([_ABI_CHECK_FC_CPUTIME],[
   fi
 
   AC_MSG_RESULT(${fc_has_cputime})
-]) # _ABI_CHECK_FC_CPUTIME
+]) # _ABI_FC_CHECK_CPUTIME
 
 
-# _ABI_CHECK_FC_GETPID()
+# _ABI_FC_CHECK_GETPID()
 # ----------------------
 #
-# Checks whether process IDs are available from Fortran. (F2003)
+# Checks whether process IDs are available from Fortran.
 #
-AC_DEFUN([_ABI_CHECK_FC_GETPID],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_GETPID],[
+  # Init
   fc_has_getpid="no"
 
-  dnl Look for getpid() support
+  # Look for getpid() support
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -1083,26 +1220,26 @@ AC_DEFUN([_ABI_CHECK_FC_GETPID],[
     ]])], [fc_has_getpid="yes"])
   AC_LANG_POP([Fortran])
 
-  dnl Determine whether to use getpid()
+  # Determine whether to use getpid()
   AC_MSG_CHECKING([whether the Fortran compiler accepts getpid()])
   AC_MSG_RESULT([${fc_has_getpid}])
   if test "${fc_has_getpid}" = "yes"; then
     AC_DEFINE([HAVE_FC_GETPID],1,
       [Define to 1 if your Fortran compiler supports getpid().])
   fi
-]) # _ABI_CHECK_FC_GETPID
+]) # _ABI_FC_CHECK_GETPID
 
 
-# _ABI_CHECK_FC_ON_THE_FLY_SHAPE()
+# _ABI_FC_CHECK_ON_THE_FLY_SHAPE()
 # --------------------------------
 #
 # Checks whether process IDs are available from Fortran. (F2003)
 #
-AC_DEFUN([_ABI_CHECK_FC_ON_THE_FLY_SHAPE],[
-  dnl Init
+AC_DEFUN([_ABI_FC_CHECK_ON_THE_FLY_SHAPE],[
+  # Init
   fc_has_getpid="no"
 
-  dnl Look for getpid() support
+  # Look for shape() in routine arguments support
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -1116,19 +1253,17 @@ AC_DEFUN([_ABI_CHECK_FC_ON_THE_FLY_SHAPE],[
     ]])], [fc_has_on_the_fly_shape="yes"], [fc_has_on_the_fly_shape="no"])
   AC_LANG_POP([Fortran])
 
-  dnl Determine whether to use getpid()
+  # Determine whether to use an enhanced Fortran shape()
   AC_MSG_CHECKING([whether the Fortran compiler can shape arrays on-the-fly])
   AC_MSG_RESULT([${fc_has_on_the_fly_shape}])
   if test "${fc_has_on_the_fly_shape}" = "yes"; then
     AC_DEFINE([HAVE_FC_ON_THE_FLY_SHAPE],1,
       [Define to 1 if your Fortran compiler can shape arrays on-the-fly.])
   fi
-]) # _ABI_CHECK_FC_ON_THE_FLY_SHAPE
-
+]) # _ABI_FC_CHECK_ON_THE_FLY_SHAPE
 
 
  #############################################################################
-
 
 
 # ABI_FC_EXTENSIONS()
@@ -1138,7 +1273,7 @@ AC_DEFUN([_ABI_CHECK_FC_ON_THE_FLY_SHAPE],[
 # whenever possible.
 #
 AC_DEFUN([ABI_FC_EXTENSIONS],[
-  dnl Set Fortran module extension
+  # Set Fortran module extension
   AX_F90_MODULE_EXTENSION
   if test "${ax_cv_f90_modext}" != ""; then
     MODEXT="${ax_cv_f90_modext}"
@@ -1147,7 +1282,7 @@ AC_DEFUN([ABI_FC_EXTENSIONS],[
     AC_MSG_NOTICE([setting Fortran module extension to ".${MODEXT}"])
   fi
 
-  dnl Change the default Fortran extension for tests
+  # Change the default Fortran extension for tests
   AC_FC_SRCEXT(F90,[abi_fc_src_ok="yes"],[abi_fc_src_ok="no"])
   if test "${abi_fc_src_ok}" != "yes"; then
     AC_MSG_WARN([Fortran file extension could not be changed])
@@ -1156,43 +1291,43 @@ AC_DEFUN([ABI_FC_EXTENSIONS],[
 ]) # ABI_FC_EXTENSIONS
 
 
-
 # ABI_FC_FEATURES()
 # -----------------
 #
 # Explores the capabilities of the Fortran compiler.
 #
 AC_DEFUN([ABI_FC_FEATURES],[
-  dnl Explore compiler peculiarities
-  _ABI_CHECK_FC_ASYNC
-  _ABI_CHECK_FC_BACKTRACE
-  _ABI_CHECK_FC_COMMAND_ARGUMENT
-  _ABI_CHECK_FC_COMMAND_LINE
-  _ABI_CHECK_FC_SYSTEM
-  _ABI_CHECK_FC_CONTIGUOUS
-  _ABI_CHECK_FC_DTARRAYS
-  _ABI_CHECK_FC_IEEE_EXCEPTIONS
-  _ABI_CHECK_FC_IOMSG
-  _ABI_CHECK_FC_ISO_C_BINDING
-  _ABI_CHECK_FC_EXIT
-  _ABI_CHECK_FC_FLUSH
-  _ABI_CHECK_FC_FLUSH_
-  _ABI_CHECK_FC_GAMMA
-  _ABI_CHECK_FC_GETENV
-  _ABI_CHECK_FC_GETPID
-  _ABI_CHECK_FC_INT_QUAD
-  _ABI_CHECK_FC_ISO_FORTRAN_2008
-  _ABI_CHECK_FC_LONG_LINES
-  _ABI_CHECK_FC_MACRO_NEWLINE
-  _ABI_CHECK_FC_MOVE_ALLOC
-  _ABI_CHECK_FC_PRIVATE
-  _ABI_CHECK_FC_PROTECTED
-  _ABI_CHECK_FC_STREAM_IO
-  _ABI_CHECK_FC_CPUTIME
-  _ABI_CHECK_FC_TIMING
-  _ABI_CHECK_FC_ON_THE_FLY_SHAPE
+  # Explore compiler peculiarities
+  _ABI_FC_CHECK_ASYNC
+  _ABI_FC_CHECK_BACKTRACE
+  _ABI_FC_CHECK_COMMAND_ARGUMENT
+  _ABI_FC_CHECK_COMMAND_LINE
+  _ABI_FC_CHECK_SYSTEM
+  _ABI_FC_CHECK_CONTIGUOUS
+  _ABI_FC_CHECK_DTARRAYS
+  _ABI_FC_CHECK_IEEE_ARITHMETIC
+  _ABI_FC_CHECK_IEEE_EXCEPTIONS
+  _ABI_FC_CHECK_IOMSG
+  _ABI_FC_CHECK_ISO_C_BINDING
+  _ABI_FC_CHECK_EXIT
+  _ABI_FC_CHECK_FLUSH
+  _ABI_FC_CHECK_FLUSH_
+  _ABI_FC_CHECK_GAMMA
+  _ABI_FC_CHECK_SHIFTLR
+  _ABI_FC_CHECK_GETENV
+  _ABI_FC_CHECK_GETPID
+  _ABI_FC_CHECK_INT_QUAD
+  _ABI_FC_CHECK_ISO_FORTRAN_2008
+  _ABI_FC_CHECK_LONG_LINES
+  _ABI_FC_CHECK_MACRO_NEWLINE
+  _ABI_FC_CHECK_MOVE_ALLOC
+  _ABI_FC_CHECK_PRIVATE
+  _ABI_FC_CHECK_PROTECTED
+  _ABI_FC_CHECK_STREAM_IO
+  _ABI_FC_CHECK_CPUTIME
+  _ABI_FC_CHECK_TIMING
+  _ABI_FC_CHECK_ON_THE_FLY_SHAPE
 ]) # ABI_FC_FEATURES
-
 
 
 # ABI_FC_MOD_CASE()
@@ -1204,12 +1339,12 @@ AC_DEFUN([ABI_FC_FEATURES],[
 AC_DEFUN([ABI_FC_MOD_CASE],[
   AC_REQUIRE([ABI_FC_EXTENSIONS])
 
-  dnl Init
+  # Init
   fc_mod_lowercase="yes"
   fc_mod_uppercase="no"
   AC_MSG_NOTICE([determining Fortran module case])
 
-  dnl Compile a dummy module
+  # Compile a dummy module
   AC_LANG_PUSH([Fortran])
   AC_COMPILE_IFELSE([[
     module conftest
@@ -1217,7 +1352,7 @@ AC_DEFUN([ABI_FC_MOD_CASE],[
   ]],[],[AC_MSG_FAILURE([unable to compile a simple Fortran module])])
   AC_LANG_POP([Fortran])
 
-  dnl Check module file existence
+  # Check module file existence
   if test -f "CONFTEST.${MODEXT}"; then
     fc_mod_lowercase="no"
     fc_mod_uppercase="yes"
@@ -1225,11 +1360,10 @@ AC_DEFUN([ABI_FC_MOD_CASE],[
     AC_MSG_WARN([conftest.${MODEXT} Fortran module could not be found])
   fi
 
-  dnl Output final outcome
+  # Output final outcome
   AC_MSG_CHECKING([whether Fortran modules are upper-case])
   AC_MSG_RESULT([${fc_mod_uppercase}])
 ]) # ABI_FC_MOD_CASE
-
 
 
 # ABI_FC_MOD_INCS(MODULE)
@@ -1245,45 +1379,55 @@ AC_DEFUN([ABI_FC_MOD_INCS],[
   if test "${abi_fc_mod_incs_ok}" = "" -o \
           "${abi_fc_mod_incs_ok}" = "unknown"; then
 
-    dnl Init
+    # Init
     fc_mod_incs=""
 
-    dnl Prepare environment
+    # Prepare environment
     tmp_saved_FCFLAGS="${FCFLAGS}"
-    AC_LANG_PUSH([Fortran])
 
-    dnl Look for module without includes
+    # Look for module without includes
+    AC_LANG_PUSH([Fortran])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
       [[
         use $1
-      ]])], [abi_fc_mod_incs_ok="none required"], [abi_fc_mod_incs_ok="unknown"])
+      ]])], [abi_fc_mod_incs_ok="yes"], [abi_fc_mod_incs_ok="unknown"])
+    AC_LANG_POP([Fortran])
 
-    dnl Look for module with includes
+    # Look for module with includes
     if test "${abi_fc_mod_incs_ok}" = "unknown"; then
       FCFLAGS="${FCFLAGS} -I/usr/include"
+      AC_LANG_PUSH([Fortran])
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
         [[
           use $1
         ]])],
-        [abi_fc_mod_incs_ok="-I/usr/include"; fc_mod_incs="-I/usr/include"],
+        [abi_fc_mod_incs_ok="yes"; fc_mod_incs="-I/usr/include"],
         [abi_fc_mod_incs_ok="unknown"])
+      AC_LANG_POP([Fortran])
     fi
-    AC_MSG_RESULT([${abi_fc_mod_incs_ok}])
+    if test "${abi_fc_mod_incs_ok}" = "yes" -a "${fc_mod_incs}" = ""; then
+      AC_MSG_RESULT([none required])
+    else
+      AC_MSG_RESULT([${fc_mod_incs}])
+    fi
 
-    dnl Restore environment
-    AC_LANG_POP([Fortran])
+    # Restore environment
     FCFLAGS="${tmp_saved_FCFLAGS}"
+    unset tmp_saved_FCFLAGS
 
   else
 
-    AC_MSG_RESULT([${abi_fc_mod_incs_ok} (cached)])
+    if test "${abi_fc_mod_incs_ok}" = "yes" -a "${fc_mod_incs}" = ""; then
+      AC_MSG_RESULT([none required (cached)])
+    else
+      AC_MSG_RESULT([${fc_mod_incs} (cached)])
+    fi
 
   fi
 
-  dnl Substitute variables
+  # Substitute variables
   AC_SUBST(fc_mod_incs)
 ]) # ABI_FC_MOD_INCS
-
 
 
 # ABI_PROG_FC()
@@ -1292,7 +1436,7 @@ AC_DEFUN([ABI_FC_MOD_INCS],[
 # Tries to determine which type of Fortran compiler is installed.
 #
 AC_DEFUN([ABI_PROG_FC],[
-  dnl Init
+  # Init
   abi_fc_vendor="${with_fc_vendor}"
   abi_fc_version="${with_fc_version}"
   tmp_fc_info_file="${abinit_builddir}/config.fc_info.tmp"
@@ -1305,62 +1449,104 @@ AC_DEFUN([ABI_PROG_FC],[
   fi
   abi_fc_wrap="no"
 
-  dnl Determine Fortran compiler type (the order is important)
+  # Preserve environment
+  ABI_ENV_BACKUP
+
+  # Look for the Fortran compiler
+  if test "${FC}" != "" -a ! -x "${FC}"; then
+    abi_fc_probe=`echo "${FC}" | sed -e 's/ .*//'`
+    if test ! -x "${abi_fc_probe}"; then
+      AC_PATH_PROG([abi_fc_path],[${abi_fc_probe}])
+      if test "${abi_fc_path}" = ""; then
+        AC_MSG_ERROR([could not run Fortran compiler "${FC}"])
+      fi
+    fi
+  fi
+  AC_PROG_FC
+
+  # Fail if no Fortran compiler is available
+  if test "${FC}" = ""; then
+    AC_MSG_ERROR([no Fortran compiler available])
+  fi
+
+  # Look for the Fortran preprocessor
+  if test "${FPP}" != "" -a ! -x "${FPP}"; then
+    AC_PATH_PROG([abi_fpp_path],[${FPP}])
+    if test "${abi_fpp_path}" = ""; then
+      AC_MSG_ERROR([could not run Fortran preprocessor "${FPP}"])
+    fi
+  fi
+  #AC_PROG_FPP
+
+  # Determine Fortran compiler type (the order is important)
   AC_MSG_CHECKING([which type of Fortran compiler we have])
 
-  dnl Clear temporary info file
+  # Clear temporary info file
   rm -f "${tmp_fc_info_file}"
 
-  dnl Get rid of that one as early as possible
+  # Get rid of that one as early as possible
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_IBM(${FC})
+    _ABI_FC_CHECK_IBM(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
-  dnl Should be checked before gfortran because it mimics its behaviour
+  # Should be checked before gfortran because it mimics its behaviour
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_INTEL(${FC})
-  fi
-  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
-
-  if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_GNU(${FC})
+    _ABI_FC_CHECK_INTEL(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_ABSOFT(${FC})
+    _ABI_FC_CHECK_ABSOFT(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_NAG(${FC})
+    _ABI_FC_CHECK_NAG(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
   if test "${abi_fc_vendor}" = "unknown"; then
-    _ABI_CHECK_FC_PGI(${FC})
+    _ABI_FC_CHECK_PGI(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 
-  dnl Fall back to generic when detection fails
+ if test "${abi_fc_vendor}" = "unknown"; then
+    _ABI_FC_CHECK_GNU(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  if test "${abi_fc_vendor}" = "unknown"; then
+    _ABI_FC_CHECK_LLVM(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  if test "${abi_fc_vendor}" = "unknown"; then
+    _ABI_FC_CHECK_ARM(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  # Fall back to generic when detection fails
   if test "${abi_fc_vendor}" = "unknown"; then
     abi_fc_vendor="generic"
-  else
-    rm -f "${tmp_fc_info_file}"
+  #else
+  #  rm -f "${tmp_fc_info_file}"
   fi
 
-  dnl Normalize Fortran compiler version
+  # Normalize Fortran compiler version
   if test "${abi_fc_version}" = "unknown"; then
     abi_fc_version="0.0"
   else
     abi_fc_version=`echo ${abi_fc_version} | cut -d. -f1-2`
   fi
 
-  dnl Display final result
+  # Display final result
   AC_MSG_RESULT([${abi_fc_vendor} ${abi_fc_version}])
 
-  dnl Schedule compiler info for substitution
+  # Restore back FCFLAGS
+  FCFLAGS="${abi_env_FCFLAGS}"
+
+  # Schedule compiler info for substitution
   AC_SUBST(abi_fc_vendor)
   AC_SUBST(abi_fc_version)
   AC_SUBST(abi_fc_wrap)

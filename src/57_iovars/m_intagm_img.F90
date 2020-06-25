@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_intagm_img
 !!
 !! NAME
@@ -7,14 +6,14 @@
 !! FUNCTION
 !! This module provides a generic interface that allows to
 !! initialize some of the geometry variables in the case of "images".
-!! Set up: acell, scalecart, rprim, angdeg, xred, xangst, xcart, vel
+!! Set up: acell, scalecart, rprim, angdeg, xred, xcart, vel
 !! These variables can be defined for a set of images of the cell.
 !! They also can be be defined along a path (in the configuration space).
 !! The path must be defined with its first and last points, but also
 !! with intermediate points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2019 ABINIT group (XG, MT)
+!! Copyright (C) 2012-2020 ABINIT group (XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,8 +93,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -229,8 +226,6 @@ end subroutine intagm_img_1D
 !! SOURCE
 
 subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

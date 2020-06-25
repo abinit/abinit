@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_init
 !! NAME
 !!  m_paw_init
@@ -7,7 +6,7 @@
 !!  This module contains routines related tp PAW calculations initialization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,8 +31,9 @@ MODULE m_paw_init
  use m_pawpsp,  only : pawpsp_nl
  use m_paw_atom,only : atompaw_shpfun
  use m_pawang,  only : pawang_type, pawang_init, pawang_free
- use m_pawrad,  only : pawrad_type, simp_gen, nderiv_gen, poisson
+ use m_pawrad,  only : pawrad_type, simp_gen, nderiv_gen, poisson, pawrad_deducer0
  use m_pawtab,  only : pawtab_type
+ use m_pawxc,   only : pawxc_get_usekden,pawxc_get_uselaplacian,pawxc_get_xclevel
  use m_paw_numeric, only : paw_derfc
 
  implicit none
@@ -76,17 +76,19 @@ CONTAINS  !=====================================================================
 !! 7-Compute Ex-correlation energy for the core density
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2020 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  gnt_option=flag activated if pawang%gntselect and pawang%realgnt have to be allocated
 !!             also determine the size of these pointers
 !!  gsqcut_shp=effective cut-off to determine shape functions in reciprocal space
 !!  hyb_range_fock=range coefficient for screened hybrid XC functionals
+!!  ixc=choice of exchange-correlation functional
 !!  lcutdens=max. l for densities/potentials moments computations
 !!  lmix=max. l for which spherical terms will be mixed durinf SCF cycle
 !!  mpsang=1+maximum angular momentum
@@ -117,7 +119,7 @@ CONTAINS  !=====================================================================
 !!     %shape_sigma=Sigma parameter in gaussian shape function
 !!     %tphi(mesh_size,basis_size)=PAW atomic pseudowavefunctions
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1=dev. on moments)
-!!  xclevel=XC functional level (1=LDA, 2=GGA)
+!!  usekden= 1 is kinetic energy density has to be computed, 0 otherwise
 !!
 !! OUTPUT
 !!  pawang
@@ -165,14 +167,14 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
-&                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
+subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,&
+&                  nphi,nsym,ntheta,pawang,pawrad,pawspnorb,pawtab,pawxcdev,ixc,usepotzero)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta
- integer,intent(in) :: pawspnorb,pawxcdev,xclevel,usepotzero
- real(dp),intent(in) :: gsqcut_eff,hyb_range_fock
+ integer,intent(in) :: gnt_option,ixc,lcutdens,lmix,mpsang,nphi,nsym,ntheta
+ integer,intent(in) :: pawspnorb,pawxcdev,usepotzero
+ real(dp),intent(in) :: effmass_free,gsqcut_eff,hyb_range_fock
  type(pawang_type),intent(inout) :: pawang
 !arrays
  type(pawrad_type),intent(in) :: pawrad(:)
@@ -184,14 +186,15 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  integer :: basis_size,i0lm,i0ln,ij_size,il,ilm,ilmn,iln,iloop,iq,isel,isel1
  integer :: itypat,j0lm,j0lmn,j0ln,jl,jlm,jlmn,jln,klm,klm1
  integer :: klmn,klmn1,kln,kln1,l_size,ll,lm0,lmax,lmax1,lmin,lmin1,lmn2_size
- integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,ntypat,usexcnhat,use_ls_ylm,use_ylm
+ integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,nabgnt_option,ngrad2_ylm,ntypat,pw_mesh_size
+ integer :: usexcnhat,use_angular_grid,use_ls_ylm,use_ylm,usekden
  real(dp) :: dq,gnrm,intg,ql,ql1,rg,rg1,vh1,yp1,ypn
  character(len=500) :: message
 !arrays
  integer,allocatable :: indl(:,:),klm_diag(:),kmix_tmp(:)
  integer, ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
+ real(dp),allocatable :: der(:),ff(:),gg(:),hh(:),indklmn_(:,:),intvhatl(:)
  real(dp),allocatable :: rad(:),rgl(:,:),vhatijl(:,:),vhatl(:),work(:)
  real(dp),pointer :: eijkl(:,:)
 
@@ -206,9 +209,11 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
    MSG_BUG('pawrad and pawtab should have the same size!')
  end if
 
- ! Immediately set the value of usepotzero
- ! it will be used later on in this subroutine
+!Immediately set the value of usepotzero
+!it will be used later on in this subroutine
  pawtab%usepotzero=usepotzero
+
+ usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
 
 !==================================================
 !1- INITIALIZE DATA RELATED TO ANGULAR MESH
@@ -216,12 +221,17 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 !* REAL SPHERICAL HARMONICS
 !* REAL GAUNT COEFFICIENTS
 
+!if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation
+ usekden=pawxc_get_usekden(ixc)
+ nabgnt_option=0;if (usekden>0) nabgnt_option=1
+ use_angular_grid=0;if (pawxcdev==0) use_angular_grid=1
  use_ylm=0;if (pawxcdev==0) use_ylm=1
  use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1
+ ngrad2_ylm=0;if (pawxc_get_xclevel(ixc)>=2) ngrad2_ylm=1
+ if (pawxc_get_uselaplacian(ixc)>0) ngrad2_ylm=2
  call pawang_free(pawang)
- call pawang_init(pawang,gnt_option,mpsang-1,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
-
- usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
+ call pawang_init(pawang,gnt_option,nabgnt_option,mpsang-1,nphi,ntheta,nsym,ngrad2_ylm,&
+&                 use_angular_grid,use_ylm,use_ls_ylm)
 
 !*******************
 !Loop on atom types
@@ -418,7 +428,54 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
    ABI_DEALLOCATE(kmix_tmp)
 
 !  ==================================================
-!  5- COMPUTE Qijl TERMS AND Sij MATRIX
+!  5- STORE SOME USEFUL QUANTITIES FROM PARTIAL WAVES
+
+   if (allocated(pawtab(itypat)%phiphj))  then
+     ABI_DEALLOCATE(pawtab(itypat)%phiphj)
+   end if
+   if (allocated(pawtab(itypat)%tphitphj))  then
+     ABI_DEALLOCATE(pawtab(itypat)%tphitphj)
+   end if
+   ABI_ALLOCATE(pawtab(itypat)%phiphj,(mesh_size,ij_size))
+   ABI_ALLOCATE(pawtab(itypat)%tphitphj,(mesh_size,ij_size))
+   do jln=1,basis_size
+     j0ln=jln*(jln-1)/2
+     do iln=1,jln
+       kln=j0ln+iln
+       pawtab(itypat)%phiphj(1:mesh_size,kln)=pawtab(itypat)%phi(1:mesh_size,iln)&
+&                                            *pawtab(itypat)%phi(1:mesh_size,jln)
+       pawtab(itypat)%tphitphj(1:mesh_size,kln)=pawtab(itypat)%tphi(1:mesh_size,iln)&
+&                                              *pawtab(itypat)%tphi(1:mesh_size,jln)
+     end do
+   end do
+
+   if (usekden==1)  then
+     pw_mesh_size=pawtab(itypat)%partialwave_mesh_size
+     if (allocated(pawtab(itypat)%nablaphi)) then
+       ABI_DEALLOCATE(pawtab(itypat)%nablaphi)
+     end if
+     ABI_ALLOCATE(pawtab(itypat)%nablaphi,(pw_mesh_size,basis_size))
+     if (allocated(pawtab(itypat)%tnablaphi)) then
+       ABI_DEALLOCATE(pawtab(itypat)%tnablaphi)
+     end if
+     ABI_ALLOCATE(pawtab(itypat)%tnablaphi,(pw_mesh_size,basis_size))
+     ABI_ALLOCATE(der,(pw_mesh_size))
+     do iln=1,basis_size
+       call nderiv_gen(der,pawtab(itypat)%phi(1:pw_mesh_size,iln),pawrad(itypat))
+       pawtab(itypat)%nablaphi(2:pw_mesh_size,iln)=der(2:pw_mesh_size) &
+&          -pawtab(itypat)%phi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
+       call nderiv_gen(der,pawtab(itypat)%tphi(1:pw_mesh_size,iln),pawrad(itypat))
+       pawtab(itypat)%tnablaphi(2:pw_mesh_size,iln)=der(2:pw_mesh_size) &
+&          -pawtab(itypat)%tphi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
+       call pawrad_deducer0(pawtab(itypat)%nablaphi(1:pw_mesh_size,iln),pw_mesh_size,pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%tnablaphi(1:pw_mesh_size,iln),pw_mesh_size,pawrad(itypat))
+     end do
+     ABI_DEALLOCATE(der)
+     pawtab(itypat)%has_nablaphi=2
+   end if
+
+!  ==================================================
+!  6- COMPUTE Qijl TERMS AND Sij MATRIX
 
 !  Store some usefull quantities
    if (allocated(pawtab(itypat)%phiphj))  then
@@ -576,7 +633,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
 
 !  ==================================================
 !  7- COMPUTE gamma_ij TERMS
-!  corrections to get the background right
+!  Corrections to get the background right
 
    if (pawtab(itypat)%usepotzero==1) then
      if (allocated(pawtab(itypat)%gammaij))  then
@@ -605,6 +662,23 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
        end if
      end do
      ABI_DEALLOCATE(work)
+   end if
+
+!  ==================================================
+!  8- TAKE into account a modified effective mass for the electrons
+
+   if (abs(effmass_free-one)>tol8) then
+     if (pawtab(itypat)%has_kij/=2) then
+       message='we need kij and has_kij/=2!'
+       MSG_BUG(message)
+     end if
+     if (allocated(pawtab(itypat)%dij0)) then
+       pawtab(itypat)%dij0(1:lmn2_size)=pawtab(itypat)%dij0(1:lmn2_size)-pawtab(itypat)%kij(1:lmn2_size)
+     end if
+     pawtab(itypat)%kij(1:lmn2_size)=pawtab(itypat)%kij(1:lmn2_size)/effmass_free
+     if (allocated(pawtab(itypat)%dij0)) then
+       pawtab(itypat)%dij0(1:lmn2_size)=pawtab(itypat)%dij0(1:lmn2_size)+pawtab(itypat)%kij(1:lmn2_size)
+     end if
    end if
 
 !  ***********************
@@ -679,7 +753,7 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
 
 !Local variables-------------------------------
 !scalars
- integer,save :: gencond(9)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1/)
+ integer,save :: gencond(10)=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
 
 ! *********************************************************************
 
@@ -687,19 +761,19 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
  select case (mode)
  case ("test")
 
-   if (gencond(1)/=Dtset%pawlcutd .or.gencond(2)/=Dtset%pawlmix  .or.&
-&   gencond(3)/=Dtset%pawnphi  .or.gencond(4)/=Dtset%pawntheta.or.&
-&   gencond(5)/=Dtset%pawspnorb.or.gencond(6)/=Dtset%pawxcdev.or.&
-&   gencond(7)/=Dtset%nsym     .or.gencond(8)/=gnt_option.or.&
-&   gencond(9)/=Dtset%usepotzero) call_pawinit = .True.
+   if (gencond(1)/=Dtset%pawlcutd  .or.gencond(2) /=Dtset%pawlmix  .or.&
+&      gencond(3)/=Dtset%pawnphi   .or.gencond(4) /=Dtset%pawntheta.or.&
+&      gencond(5)/=Dtset%pawspnorb .or.gencond(6) /=Dtset%pawxcdev .or.&
+&      gencond(7)/=Dtset%nsym      .or.gencond(8) /=gnt_option     .or.&
+&      gencond(9)/=Dtset%usepotzero.or.gencond(10)/=Dtset%usekden) call_pawinit = .True.
 
  case ("save")
     ! Update internal values
-   gencond(1)=Dtset%pawlcutd ; gencond(2)=Dtset%pawlmix
-   gencond(3)=Dtset%pawnphi  ; gencond(4)=Dtset%pawntheta
-   gencond(5)=Dtset%pawspnorb; gencond(6)=Dtset%pawxcdev
-   gencond(7)=Dtset%nsym     ; gencond(8)=gnt_option
-   gencond(9)=Dtset%usepotzero
+   gencond(1)=Dtset%pawlcutd  ; gencond(2) =Dtset%pawlmix
+   gencond(3)=Dtset%pawnphi   ; gencond(4) =Dtset%pawntheta
+   gencond(5)=Dtset%pawspnorb ; gencond(6) =Dtset%pawxcdev
+   gencond(7)=Dtset%nsym      ; gencond(8) =gnt_option
+   gencond(9)=Dtset%usepotzero; gencond(10)=Dtset%usekden
 
  case ("reset")
    gencond = -1

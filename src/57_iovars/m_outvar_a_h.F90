@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_a_h
 !! NAME
 !!  m_outvar_a_h
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -126,7 +125,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
- integer :: ntypalch,ntypat,size1,size2,tmpimg0
+ integer :: ntypalch,ntypat,print_constraint,size1,size2,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
@@ -522,6 +521,16 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%ddamp
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ddamp','DPR',0)
 
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%ddb_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_ngqpt','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ddb_shiftq(1)
+ dprarr(2,:)=dtsets(:)%ddb_shiftq(2)
+ dprarr(3,:)=dtsets(:)%ddb_shiftq(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_shiftq','DPR',0)
+
  intarr(1,:)=dtsets(:)%delayperm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'delayperm','INT',0)
 
@@ -657,6 +666,17 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dtion
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dtion','DPR',0,forceprint=2)
 
+ intarr(1,:)=dtsets(:)%dvdb_add_lr
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_add_lr','INT',0)
+
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'dvdb_ngqpt','INT',0)
+
+ dprarr(1,:)=dtsets(:)%dvdb_qcache_mb
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_qcache_mb','DPR',0)
+
 !dynimage
  intarr(1:marr,0)=1                 ! default value
  narr=nimage                        ! default size for all datasets
@@ -696,6 +716,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%d3e_pert2_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_phon','INT',0)
+
+ intarr(1,:)=dtsets(:)%d3e_pert2_strs
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_strs','INT',0)
 
  intarr(1,:)=dtsets(:)%d3e_pert3_atpol(1)
  intarr(2,:)=dtsets(:)%d3e_pert3_atpol(2)
@@ -751,17 +774,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%enunit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'enunit','INT',0)
 
-!eph variables
- dprarr(1,:)=dtsets(:)%eph_tols_idelta(1)
- dprarr(2,:)=dtsets(:)%eph_tols_idelta(2)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_tols_idelta','DPR',0)
-
- intarr(1,:)=dtsets(:)%eph_phrange(1)
- intarr(2,:)=dtsets(:)%eph_phrange(2)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange','INT',0)
-
- intarr(1,:)=dtsets(:)%eph_intmeth
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_intmeth','INT',0)
+ dprarr(1,:)=dtsets(:)%eph_ecutosc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_ecutosc','ENE',0)
 
  dprarr(1,:)=dtsets(:)%eph_extrael
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_extrael','DPR',0)
@@ -772,26 +786,17 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%eph_frohlichm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_frohlichm','INT',0)
 
- dprarr(1,:)=dtsets(:)%eph_fsmear
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_fsmear','ENE',0)
-
  dprarr(1,:)=dtsets(:)%eph_fsewin
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_fsewin','ENE',0)
 
- dprarr(1,:)=dtsets(:)%eph_ecutosc
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_ecutosc','ENE',0)
+ dprarr(1,:)=dtsets(:)%eph_fsmear
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_fsmear','ENE',0)
 
- !dprarr(1,:)=dtsets(:)%eph_alpha_gmin
- !call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_alpha_gmin','DPR',0)
+ intarr(1,:)=dtsets(:)%eph_intmeth
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_intmeth','INT',0)
 
  dprarr(1,:)=dtsets(:)%eph_mustar
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_mustar','DPR',0)
-
- intarr(1,:)=dtsets(:)%eph_restart
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_restart','INT',0)
-
- intarr(1,:)=dtsets(:)%eph_task
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_task','INT',0)
 
  do idtset=0,ndtset_alloc
    intarr(1:3,idtset)=dtsets(idtset)%eph_ngqpt_fine
@@ -804,64 +809,29 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'eph_np_pqbks','INT',0, firstchar="-")
 
+ intarr(1,:)=dtsets(:)%eph_phrange(1)
+ intarr(2,:)=dtsets(:)%eph_phrange(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange','INT',0)
+
+ intarr(1,:)=dtsets(:)%eph_restart
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_restart','INT',0)
+
  intarr(1,:)=dtsets(:)%eph_stern
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_stern','INT',0)
 
- intarr(1,:)=dtsets(:)%eph_use_ftinterp
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_use_ftinterp','INT',0)
+ intarr(1,:)=dtsets(:)%eph_task
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_task','INT',0)
+
+ dprarr(1,:)=dtsets(:)%eph_tols_idelta(1)
+ dprarr(2,:)=dtsets(:)%eph_tols_idelta(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_tols_idelta','DPR',0)
 
  intarr(1,:)=dtsets(:)%eph_transport
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_transport','INT',0)
 
- dprarr(1,:)=dtsets(:)%ph_wstep
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_wstep','ENE',0)
+ intarr(1,:)=dtsets(:)%eph_use_ftinterp
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_use_ftinterp','INT',0)
 
- intarr(1,:)=dtsets(:)%ph_intmeth
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_intmeth','INT',0)
-
- intarr(1,:)=dtsets(:)%ph_nqshift
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_nqshift','INT',0)
-
- dprarr(1,:)=dtsets(:)%ph_smear
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_smear','ENE',0)
-
- do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%ddb_ngqpt
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_ngqpt','INT',0)
-
- do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%ddb_qrefine
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_qrefine','INT',0)
-
- do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'dvdb_ngqpt','INT',0)
-
- dprarr(1,:)=dtsets(:)%ddb_shiftq(1)
- dprarr(2,:)=dtsets(:)%ddb_shiftq(2)
- dprarr(3,:)=dtsets(:)%ddb_shiftq(3)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_shiftq','DPR',0)
-
- dprarr(1,:)=dtsets(:)%dvdb_qcache_mb
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_qcache_mb','DPR',0)
-
- intarr(1,:)=dtsets(:)%dvdb_add_lr
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_add_lr','INT',0)
-
- intarr(1,:)=dtsets(:)%ph_ndivsm
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_ndivsm','INT',0)
-
- intarr(1,:)=dtsets(:)%ph_nqpath
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_nqpath','INT',0)
-
- do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%ph_ngqpt
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ph_ngqpt','INT',0)
-!end e-ph variables
 
  dprarr(1,:)=dtsets(:)%eshift
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eshift','ENE',0)
@@ -1136,6 +1106,80 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gpu_linalg_limit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
+
+!grchrg
+ print_constraint=0
+ do idtset=1,ndtset_alloc
+   if(any(dtsets(idtset)%constraint_kind(:)>=10))print_constraint=1
+ enddo
+ if(print_constraint==1)then
+!if(any(dtsets(1:ndtset_alloc)%constraint_kind(:)>=10))then
+   if(choice==2)then
+     prtimg(:,:)=1
+     do idtset=0,ndtset_alloc       ! specific size for each dataset
+       compute_static_images=(dtsets(idtset)%istatimg>0)
+       size2=dtsets(idtset)%natom
+       if(idtset==0)size2=0
+       narrm(idtset)=size2
+       if(dtsets(idtset)%iscf>=0 .or. idtset==0)then
+         do iimage=1,dtsets(idtset)%nimage
+           if (narrm(idtset)>0) then
+             dprarr_images(1:narrm(idtset),iimage,idtset)=&
+&             results_out(idtset)%intgres(1,1:size2,iimage)
+           end if
+           if(.not.(dtsets(idtset)%dynimage(iimage)==1.or.compute_static_images))then
+             prtimg(iimage,idtset)=0
+           end if
+         end do
+       else
+         narrm(idtset)=0
+       end if
+     end do
+!    This is a trick to force printing of fcart even if zero, still not destroying the value of nimagem(0).
+     tmpimg0=nimagem(0)
+     nimagem(0)=0
+     call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'grchrg','DPR',&
+       mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+     nimagem(0)=tmpimg0
+   end if
+ endif
+
+!grspin
+ print_constraint=0
+ do idtset=1,ndtset_alloc
+   if(any(mod(dtsets(idtset)%constraint_kind(:),10)>0))print_constraint=1
+ enddo
+ if(print_constraint==1)then
+!if(any(mod(dtsets(1:ndtset_alloc)%constraint_kind(:),10)/=0))then
+   if(choice==2)then
+     prtimg(:,:)=1
+     do idtset=0,ndtset_alloc       ! specific size for each dataset
+       compute_static_images=(dtsets(idtset)%istatimg>0)
+       size2=dtsets(idtset)%natom
+       if(idtset==0)size2=0
+       narrm(idtset)=3*size2
+       if(dtsets(idtset)%iscf>=0 .or. idtset==0)then
+         do iimage=1,dtsets(idtset)%nimage
+           if (narrm(idtset)>0) then
+             dprarr_images(1:narrm(idtset),iimage,idtset)=&
+&             reshape(results_out(idtset)%intgres(2:4,1:size2,iimage),(/ narrm(idtset) /) )
+           end if
+           if(.not.(dtsets(idtset)%dynimage(iimage)==1.or.compute_static_images))then
+             prtimg(iimage,idtset)=0
+           end if
+         end do
+       else
+         narrm(idtset)=0
+       end if
+     end do
+!    This is a trick to force printing of fcart even if zero, still not destroying the value of nimagem(0).
+     tmpimg0=nimagem(0)
+     nimagem(0)=0
+     call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'grspin','DPR',&
+       mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+     nimagem(0)=tmpimg0
+   end if
+ endif
 
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)

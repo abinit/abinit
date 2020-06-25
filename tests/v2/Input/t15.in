@@ -1,16 +1,16 @@
-!Input file for the anaddb code. Analysis of the SiO2 DDB
+#Input file for the anaddb code. Analysis of the SiO2 DDB
 
-!Flags
+#Flags
  dieflag   1     ! Frequency-dependent Dielectric tensor flag
  ifcflag   1     ! Interatomic force constant flag
  thmflag   1     ! Thermal flag. Gives Internal energy, entropy,
                  !   heat capacity, phonon DOS, Debye-Waller factor)
 
-!Effective charges
+#Effective charges
   chneut  2      ! Charge neutrality requirement for effective charges.
                  !        2=> imposed with weights proportional to screening)
 
-!Interatomic force constant info
+#Interatomic force constant info
   dipdip  1      ! Dipole-dipole interaction treatment
   ifcana  1      ! Analysis of the IFCs
   ifcout 16      ! Number of IFC's written in the output, per atom
@@ -18,24 +18,24 @@
    atifc  1 4    ! List of atoms
  prt_ifc  1      ! Print the interatomic force constants in file ifcinfo.out
 
-!Thermal information
+#Thermal information
   nchan   1250   ! # of channels for the DOS with channel width 1 cm-1
   nwchan  5      ! # of different channel widths from this integer down to 1 cm-1
   thmtol  0.060  ! Tolerance on thermodynamical function fluctuations
   dossum  1      ! Compute also the sum and difference DOS
 
-!Wavevector grid number 1 (coarse grid, from DDB)
+#Wavevector grid number 1 (coarse grid, from DDB)
   brav    4      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
   ngqpt   2  2  2   ! Monkhorst-Pack indices
   nqshft  1         ! number of q-points in repeated basic q-cell
   q1shft  0.0  0.0  0.5
 
-!Wavevector grid number 2 (series of fine grids, extrapolated from intrat forces)
+#Wavevector grid number 2 (series of fine grids, extrapolated from intrat forces)
   ng2qpt   12 12 12  ! sample the BZ up to ngqpt2
   ngrids   3         ! number of grids of increasing size
   q2shft   0.0  0.0  0.5
 
-!Wavevector list number 1 (Reduced coordinates and normalization factor)
+#Wavevector list number 1 (Reduced coordinates and normalization factor)
   nph1l    11      ! number of phonons in list 1
   qph1l 0.0 0.0 0.0    1.0
         0.0 0.0 0.5    1.0
@@ -49,8 +49,8 @@
         0.0 0.0 0.1    1.0
         0.0 0.0 0.05   1.0
 
-!Wavevector list number 2 (Gamma point only, with limiting direction
-!           in cartesian coordinates. )
+#Wavevector list number 2 (Gamma point only, with limiting direction
+#           in cartesian coordinates. )
   nph2l  1         ! number of phonons in list 2
   qph2l  0.0 0.0 1.0    0.0
 # Not the default value, to keep temporal continuity with older versions

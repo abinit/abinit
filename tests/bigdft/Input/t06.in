@@ -4,9 +4,9 @@ natom 3
 ntypat 2
 znucl 1 8
 typat 1 1 2
-xangst .7285 0.620919 1.5
+xcart  .7285 0.620919 1.5
       2.2715 0.620919 1.5
-      1.5    0.0      1.5
+      1.5    0.0      1.5   angstrom
 acell 3.0 3.0 3.0 angstrom
 
 usewvl 1
@@ -36,7 +36,6 @@ prtden 0
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
-#%% exclude_builders = ubu_intel_17.0_openmpi
 #%% [files]
 #%% files_to_test = 
 #%%   t06.out, tolnlines = 2, tolabs = 1.100e-07, tolrel = 5.000e-04

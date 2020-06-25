@@ -1,0 +1,50 @@
+##############################################################################
+#Test for multibinit, 1-D spin chain, with 1st nearest neighbor AFM exchange and DMI
+##############################################################################
+prt_model = 0
+
+#--------------------------------------------------------------
+#Monte carlo / molecular dynamics
+#--------------------------------------------------------------
+dynamics =  0    ! disable molecular dynamics
+
+ncell =   4 1 1  ! size of supercell.   
+#-------------------------------------------------------------
+#Spin dynamics
+#------------------------------------------------------------
+spin_dynamics= 2                ! enable spin dynamics. Depondt-Mertens algorithm.
+spin_ntime_pre =100000          ! warming up steps. 
+spin_ntime =100000              ! number of steps. 
+spin_nctime=1000                ! number of  time steps between two nc file write
+spin_dt=1e-16 s                 ! time step. 
+spin_init_state = 1             ! start from random 
+spin_temperature = 1e-9         ! spin temperature. It is usually better to avoid 0.
+
+spin_sia_add = 1                ! add a single ion anistropy (SIA) term.
+spin_sia_k1amp = 1e-4 eV        ! amplitude of SIA, 0.1 meV 
+spin_sia_k1dir = 1.0 0.0 0.0    ! direction of SIA, easy axis along x.
+
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% need_cpp_vars = HAVE_XML
+#%% system_xml = tmulti5_3.xml
+#%% exclude_hosts = nag@abiref
+#%% coeff_xml = no
+#%% [files]
+#%% files_to_test = 
+#%%   tmulti5_3.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. He
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   1-D spin chain, with 1st nearest neighbor AFM exchange and DMI.
+#%%   1NN J=5 meV, 1NN D=(0, 0, 2) meV with two neighboring D opposite.
+#%%   This is to show how to see the spin canting.
+#%%<END TEST_INFO>
+

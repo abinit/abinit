@@ -28,6 +28,7 @@ symsigma  1
 optdriver  7
 nband      8
 eph_task   -4
+eph_intmeth 1
 tmesh 0 30 11
 
 nkptgw 1
@@ -37,7 +38,7 @@ bdgw 1 8
 ###########
 # With the double-grid
 ###########
-getwfkfine_path2 "t50o_DS6_WFK"
+getwfkfine_filepath2 "t50o_DS6_WFK"
 
 ###########
 # Set the carrier concentration
@@ -48,7 +49,7 @@ occopt3 3
 ##########
 # Double-grid and carrier concentration
 ##########
-getwfkfine_path4 "t50o_DS6_WFK"
+getwfkfine_filepath4 "t50o_DS6_WFK"
 eph_extrael4 0.2
 occopt4 3
 

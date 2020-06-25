@@ -1,4 +1,4 @@
-#SLAB ending TiO2 double layer
+#BaTiO3 SLAB ending TiO2 double layer
 # N=9
 # paralelectric configuration
 #Supercell and atoms
@@ -43,7 +43,7 @@ nband 120
 
 #electronic structure
 ecut 15.0
-nstep 18
+nstep 30
 ngkpt 4 4 1
 kptopt 3
 tolwfr 1.0d-22

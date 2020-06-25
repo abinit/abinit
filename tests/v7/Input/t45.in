@@ -1,5 +1,5 @@
 # Crystalline AlAs: 
-# computation of the phonon frequencies at Gamma with psp8 pseudos and nc_xccc_gspace==1.
+# computation of the phonon frequencies at Gamma with psp8 pseudopotentials and nc_xccc_gspace==1.
 
 ndtset 2
 nband  4

@@ -10,7 +10,13 @@ keywords = [
 
 #: List of input files
 inp_files = [
-#Electron-phonon
+# Constrained DFT
+"t01.in",
+"t02.in",
+"t03.in",
+# Structure variable
+"t04.in",
+# Electron-phonon
 "t50.in",
 "t51.in",
 "t52.in",
@@ -23,4 +29,13 @@ inp_files = [
 "t59.in",
 "t60.in",
 "t61.in",
+# Spin dynamics in multibinit
+"t81.in", # set initial spin using rotation q-modulation
+"t82.in", # damping
+# New lattice mover in multibinit
+"t83.in", # Langevin NVT 
+"t84.in", # Berendsen NVT
+"t85.in", # Velocity Verlet NVE
+"t86.in", # Spin lattice coupling, Only Oiju term activated.
+"t87.in", # Spin lattice coupling, Oiju and Tijuv. 
 ]

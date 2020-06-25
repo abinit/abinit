@@ -1,9 +1,10 @@
-'''
-    Define classes and contants to represent the state of iteration of a document
-    as well as the operations possible on this state. This is used in filter
-    applications by the configuration handler.
-'''
+"""
+Define classes and contants to represent the state of iteration of a document
+as well as the operations possible on this state. This is used in filter
+applications by the configuration handler.
+"""
 from __future__ import print_function, division, unicode_literals
+
 from .errors import EmptySetError, NotOrderedOverlappingSetError
 
 ITERATORS = [  # order matters
@@ -19,9 +20,9 @@ ITERATOR_RANKS = {key: i for i, key in enumerate(ITERATORS)}
 
 
 class IntSet(object):
-    '''
-        Represent a subset of the natural integers.
-    '''
+    """
+    Represent a subset of the natural integers.
+    """
     def __init__(self, obj):
         if isinstance(obj, int):
             self._type = 'singleton'
@@ -137,14 +138,14 @@ class IntSet(object):
 
 
 class IterStateFilter(object):
-    '''
-        Represent a set of conditions on the iterator state of a document.
-        Alternatively it can be seen as a cartesian product of subsets of
-        the natural integers. The implicit subset for each component is N*
-        ({1, 2, 3, 4...}).
-        For example IterStateFilter({'dtset': 4, 'image': {1, 5}}) is
-        {4} x N* x {1, 2, 3, 4, 5} x N* x N*
-    '''
+    """
+    Represent a set of conditions on the iterator state of a document.
+    Alternatively it can be seen as a cartesian product of subsets of
+    the natural integers. The implicit subset for each component is N*
+    ({1, 2, 3, 4...}).
+    For example IterStateFilter({'dtset': 4, 'image': {1, 5}}) is
+    {4} x N* x {1, 2, 3, 4, 5} x N* x N*
+    """
     def __init__(self, d):
         self.filters = {}
         for it in ITERATORS:
@@ -152,20 +153,20 @@ class IterStateFilter(object):
                 self.filters[it] = IntSet(d[it])
 
     def match(self, state):
-        '''
-            Does a given state match this filter ?
-            Is a given tuple in this set ?
-        '''
+        """
+        Does a given state match this filter?
+        Is a given tuple in this set?
+        """
         for it, int_set in self.filters.items():
             if it in state and state[it] not in int_set:
                 return False
         return True
 
     def include(self, filt):
-        '''
-            Return True if filt is included (see the set interpretation
-            in class docstring) in self, False otherwise.
-        '''
+        """
+        Return True if filt is included (see the set interpretation
+        in class docstring) in self, False otherwise.
+        """
         for it in ITERATORS:
             if it in self.filters:
                 if it not in filt.filters:
@@ -185,10 +186,10 @@ class IterStateFilter(object):
                 + '})')
 
     def cmp(self, other):
-        '''
-            Return 1 or -1 if their is a relation of order between the two
-            members. Else raise an error.
-        '''
+        """
+        Return 1 or -1 if their is a relation of order between the two
+        members else raise an error.
+        """
         assert isinstance(other, IterStateFilter), (
             "IterStateFilter cannot be compared with {}".format(other)
         )

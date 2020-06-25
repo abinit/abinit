@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h57 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h55 )
   
-- input  file    -> t03.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t03_MPI1/t03.in
 - output file    -> t03_MPI1.out
 - root for input  files -> t03_MPI1i
 - root for output files -> t03_MPI1o
@@ -36,10 +36,10 @@
  For the susceptibility and dielectric matrices, or tddft :
    mgfft =        30  nbnd_in_blk=     6    nfft =      1920     npw =       133
 ================================================================================
-P This job should need less than                       4.176 Mbytes of memory.
+P This job should need less than                       4.154 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           15 blocks of mpw  integer numbers, for      0.016 Mbytes.
-P          199 blocks of mpw  real(dp)  numbers, for      0.437 Mbytes.
+P          189 blocks of mpw  real(dp)  numbers, for      0.415 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.049 Mbytes.
 P           35 blocks of nfft real(dp)  numbers, for      1.730 Mbytes.
 P              Additional     integer numbers, for      0.017 Mbytes.
@@ -47,8 +47,8 @@ P              Additional     real(dp)  numbers, for      0.953 Mbytes.
 P              With residue estimated to be             0.973 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 4.176 Mbytes.
-P Main chain + nonlop.f + opernl.f      4.034 Mbytes.
+P Main chain + fourwf.f                 4.154 Mbytes.
+P Main chain + nonlop.f + opernl.f      4.012 Mbytes.
 P XC chain                              4.041 Mbytes.
 P mkrho chain                           3.874 Mbytes.
 P fourdp chain                          3.811 Mbytes.
@@ -65,7 +65,7 @@ _ WF disk file :      0.354 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -145,7 +145,16 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 5, nkpt: 4, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 288, }
+cutoff_energies: {ecut:   3.5, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+01, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -163,8 +172,8 @@ P           mkmem           4
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.16250
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/42mo.pspnc
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/42mo.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/42mo.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/42mo.pspnc
 -  Troullier-Martins psp for element  Mo        Thu Oct 27 17:40:28 EDT 1994
 - 42.00000   6.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -175,7 +184,7 @@ P           mkmem           4
     2  11.774  15.725    1   2.1974630        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.63204696240783    0.28531456933550    4.53995799271176   rchrg,fchrg,qchrg
- pspatm : epsatm=   89.23647829
+  pspatm : epsatm=   89.23647829
          --- l  ekb(1:nproj) -->
              1    0.432305
              2   -4.457359
@@ -192,13 +201,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 4, nline: 4, wfoptalg: 0, }
+tolerances: {toldff: 5.00E-05, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
 
  ETOT  1  -42.488600810328    -4.249E+01 6.845E-03 4.406E+02 1.112E-01 1.112E-01
 
  cartesian forces (ha/bohr); non-corrected avg=  0.00E+00  0.00E+00  2.14E-04
     1     0.00000000000E+00    0.00000000000E+00   -7.60313755191E-03
-    2     0.00000000000E+00    0.00000000000E+00    4.17746781470E-02
+    2     0.00000000000E+00    0.00000000000E+00    4.17746781469E-02
     3     0.00000000000E+00    0.00000000000E+00    1.10025280056E-01
     4     0.00000000000E+00    0.00000000000E+00   -3.29842278045E-02
     5     0.00000000000E+00    0.00000000000E+00   -1.11212592847E-01
@@ -455,6 +470,41 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
   nstep=    4 was not enough SCF cycles to converge;
   maximum force difference=  1.800E-03 exceeds toldff=  5.000E-05
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  6.0400000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0400000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  24.1600000, ]
+lattice_lengths: [   6.04000,    6.04000,   24.16000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   8.8139546E+02
+convergence: {deltae: -9.806E-04, res2:  2.266E-02, residm:  6.339E-05, diffor:  1.800E-03, }
+etotal    :  -4.27599653E+01
+entropy   :   0.00000000E+00
+fermie    :  -6.94309785E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  4.54878874E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.54878874E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.14337201E-04, ]
+pressure_GPa:  -1.2005E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   1.0000E-03, Mo]
+- [  5.0000E-01,   5.0000E-01,   1.2500E-01, Mo]
+- [  0.0000E+00,   0.0000E+00,   2.5000E-01, Mo]
+- [  5.0000E-01,   5.0000E-01,  -1.2500E-01, Mo]
+- [  0.0000E+00,   0.0000E+00,  -2.5000E-01, Mo]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -1.29455319E-02, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   1.94076213E-02, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   1.99127034E-01, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -9.72498583E-03, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -1.95864138E-01, ]
+force_length_stats: {min:   9.72498583E-03, max:   1.99127034E-01, mean:   8.74138623E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -467,7 +517,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.7436E-06; max=  6.3393E-05
+ Mean square residual over all n,k,spin=   27.436E-07; max=  63.393E-06
    0.1250  0.1250  0.2500    1  6.33931E-05 kpt; spin; max resid(k); each band:
   1.49E-06 1.28E-06 2.90E-06 1.82E-06 1.44E-06 1.45E-06 1.03E-06 1.81E-06
   2.25E-06 1.49E-06 1.74E-06 1.53E-06 1.86E-06 1.36E-06 6.11E-07 1.08E-06
@@ -492,7 +542,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
        0.000000000000      0.000000000000     -0.250000000000
  rms dE/dt=  1.7495E+00; max dE/dt=  4.7321E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.312738438650
-    2       0.000000000000      0.000000000000     -0.468913743952
+    2       0.000000000000      0.000000000000     -0.468913743951
     3       0.000000000000      0.000000000000     -4.810934762630
     4       0.000000000000      0.000000000000      0.234930045592
     5       0.000000000000      0.000000000000      4.732051961578
@@ -513,11 +563,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
  frms,max,avg= 7.2412317E-02 1.9912703E-01   0.000E+00  0.000E+00  1.060E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.66568595962775
-    2     -0.00000000000000    -0.00000000000000     0.99797993143494
-    3     -0.00000000000000    -0.00000000000000    10.23952294486352
-    4     -0.00000000000000    -0.00000000000000    -0.50007883608814
-    5     -0.00000000000000    -0.00000000000000   -10.07173808058258
+    1     -0.00000000000000    -0.00000000000000    -0.66568595962774
+    2     -0.00000000000000    -0.00000000000000     0.99797993143493
+    3     -0.00000000000000    -0.00000000000000    10.23952294486354
+    4     -0.00000000000000    -0.00000000000000    -0.50007883608808
+    5     -0.00000000000000    -0.00000000000000   -10.07173808058264
  frms,max,avg= 3.7235907E+00 1.0239523E+01   0.000E+00  0.000E+00  5.451E-05 e/A
  length scales=  6.040000000000  6.040000000000 24.160000000000 bohr
               =  3.196230339884  3.196230339884 12.784921359534 angstroms
@@ -581,24 +631,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
  Next minimum=    4.5452E-04  at reduced coord.    0.5833    0.4167    0.5111
    Integrated=    3.0000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.64215506175016E+01
+hartree             :  3.74386233753810E+01
+xc                  : -2.07939538887122E+01
+Ewald energy        : -6.67573965170043E+00
+psp_core            :  1.51866811340446E+01
+local_psp           : -7.80585827224110E+01
+non_local_psp       : -6.27534515929057E+00
+internal            : -4.27567662951870E+01
+'-kT*entropy'       : -3.19899663025943E-03
+total_energy        : -4.27599652918172E+01
+total_energy_eV     : -1.16355782939592E+03
+band_energy         : -7.15993585903142E+00
+...
 
-    Kinetic energy  =  1.64215506175016E+01
-    Hartree energy  =  3.74386233753810E+01
-    XC energy       = -2.07939538887122E+01
-    Ewald energy    = -6.67573965170043E+00
-    PspCore energy  =  1.51866811340446E+01
-    Loc. psp. energy= -7.80585827224111E+01
-    NL   psp  energy= -6.27534515929057E+00
-    >>>>> Internal E= -4.27567662951870E+01
-
-    -kT*entropy     = -3.19899663025949E-03
-    >>>>>>>>> Etotal= -4.27599652918173E+01
-
- Other information on the energy :
-    Total energy(eV)= -1.16355782939592E+03 ; Band energy (Ha)=  -7.1599358590E+00
---------------------------------------------------------------------------------
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -609,10 +658,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
     5       0.000000000000      0.000000000000    206.810321827768
  nonlocal contribution to red. grads
     1      -0.000000000000     -0.000000000000     -0.036965182183
-    2       0.000000000000      0.000000000000      0.324469296271
+    2      -0.000000000000     -0.000000000000      0.324469296271
     3       0.000000000000      0.000000000000      2.884618617231
-    4       0.000000000000      0.000000000000     -0.281113386919
-    5       0.000000000000      0.000000000000     -2.888168235563
+    4       0.000000000000     -0.000000000000     -0.281113386919
+    5      -0.000000000000     -0.000000000000     -2.888168235563
  local psp contribution to red. grads
     1      -0.000000000000     -0.000000000000     -0.050517730594
     2       0.000000000000      0.000000000000    112.461324595779
@@ -620,16 +669,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     276.750     276.672
     4       0.000000000000      0.000000000000   -112.943842771925
     5      -0.000000000000     -0.000000000000   -197.469629378280
  core charge xc contribution to reduced grads
-    1      -0.000000000000     -0.000000000000     -0.047331773735
+    1      -0.000000000000      0.000000000000     -0.047331773735
     2      -0.000000000000     -0.000000000000      0.052514839681
     3       0.000000000000      0.000000000000      1.654455749166
     4      -0.000000000000     -0.000000000000     -0.015782796772
     5       0.000000000000      0.000000000000     -1.641927012670
  residual contribution to red. grads
-    1       0.000000000000     -0.000000000000     -0.016699791610
+    1       0.000000000000      0.000000000000     -0.016699791610
     2       0.000000000000      0.000000000000      0.096244490199
     3      -0.000000000000     -0.000000000000      0.073404779402
-    4      -0.000000000000      0.000000000000     -0.125200564789
+    4       0.000000000000      0.000000000000     -0.125200564789
     5      -0.000000000000     -0.000000000000     -0.078545239676
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -724,75 +773,61 @@ P           mkmem           4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         38.4        0.64      0.011
-- Total wall clock time (s,m,h):          3.9        0.06      0.001
+- Total cpu        time (s,m,h):          3.8        0.06      0.001
+- Total wall clock time (s,m,h):          3.9        0.07      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           38.4, wall_time =            3.9
+- cpu_time =            3.8, wall_time =            3.9
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops 
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  10.417  27.1      0.875  22.5           2399      -1.00    
-- vtowfk(ssdiag)                 5.167  13.4      0.418  10.8             -1      -1.00    
-- nonlop(apply)                  3.759   9.8      0.320   8.2           2399      -1.00    
-- projbd                         3.584   9.3      0.294   7.6           3838      -1.00    
-- dielmt                         2.641   6.9      0.112   2.9              1      -1.00    
-- getghc-other                   2.308   6.0      0.151   3.9             -1      -1.00    
-- fourwf%(den)                   1.274   3.3      0.103   2.7            320      -1.00    
-- nonlop(forces)                 0.820   2.1      0.078   2.0            320      -1.00    
-- pspini                         0.424   1.1      0.424  10.9              1      -1.00    
-- suskmm(loop2 except FFT)       0.398   1.0      0.080   2.0             16      -1.00    
-- fourwf%(r->G)                  0.309   0.8      0.103   2.7            840      -1.00    
-- vtowfk(contrib)                0.211   0.5      0.011   0.3             16      -1.00    
-- forces                         0.150   0.4      0.023   0.6              4      -1.00    
-- scfcv-scprqt                   0.139   0.4      0.043   1.1              4      -1.00    
-- invars2                        0.124   0.3      0.125   3.2              1      -1.00    
-- mkcore                         0.109   0.3      0.020   0.5              6      -1.00    
-- mkrho/=                        0.089   0.2      0.023   0.6              8      -1.00    
-- abinit(2)                      0.038   0.1      0.038   1.0              1      -1.00    
-- ewald                          0.035   0.1      0.036   0.9              1      -1.00    
-- stress                         0.024   0.1      0.024   0.6              1      -1.00    
-- ewald2 (+vdw_dftd)             0.020   0.1      0.020   0.5              1      -1.00    
-- others (91)                    0.492   1.3      0.074   1.9             -1      -1.00    
+- ewald                          1.361  35.9      1.366  34.6              1      -1.00        1.00       1.00
+- stress                         0.878  23.2      0.879  22.3              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.874  23.1      0.875  22.2              1      -1.00        1.00       1.00
+- fourwf%(pot)                   0.420  11.1      0.422  10.7           2399      -1.00        1.00       1.00
+- pspini                         0.415  10.9      0.415  10.5              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.131   3.5      0.132   3.3           2399      -1.00        1.00       1.00
+- projbd                         0.128   3.4      0.129   3.3           3838      -1.00        0.99       0.99
+- fourwf%(den)                   0.033   0.9      0.033   0.8            320      -1.00        1.00       1.00
+- invars2                        0.031   0.8      0.032   0.8              1      -1.00        0.98       0.98
+- fourwf%(r->G)                  0.028   0.7      0.027   0.7            840      -1.00        1.01       1.01
+- suskmm(loop2 except FFT)       0.027   0.7      0.027   0.7             16      -1.00        0.99       0.99
+- vtowfk(ssdiag)                 0.027   0.7      0.027   0.7             -1      -1.00        1.00       1.00
+- nonlop(forces)                 0.022   0.6      0.022   0.6            320      -1.00        1.00       1.00
+- dielmt                         0.020   0.5      0.020   0.5              1      -1.00        0.99       0.99
+- others (120)                   0.092   2.4      0.203   5.1             -1      -1.00        0.45       0.45
 -<END_TIMER>
 -
-- subtotal                      32.532  84.6      3.393  87.4
+- subtotal                       4.487 118.4      4.609 116.8                                  0.97       0.97
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          38.4, wall_time =           3.9
+- cpu_time =           3.8, wall_time =           3.9
 -
-- routine                         cpu     %       wall     %      number of calls Gflops 
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  10.417  27.1      0.875  22.5           2399      -1.00    
-- vtowfk(ssdiag)                 5.167  13.4      0.418  10.8             -1      -1.00    
-- nonlop(apply)                  3.759   9.8      0.320   8.2           2399      -1.00    
-- projbd                         3.584   9.3      0.294   7.6           3838      -1.00    
-- dielmt                         2.641   6.9      0.112   2.9              1      -1.00    
-- getghc-other                   2.308   6.0      0.151   3.9             -1      -1.00    
-- fourwf%(den)                   1.274   3.3      0.103   2.7            320      -1.00    
-- nonlop(forces)                 0.820   2.1      0.078   2.0            320      -1.00    
-- pspini                         0.424   1.1      0.424  10.9              1      -1.00    
-- suskmm(loop2 except FFT)       0.398   1.0      0.080   2.0             16      -1.00    
-- fourwf%(r->G)                  0.309   0.8      0.103   2.7            840      -1.00    
-- vtowfk(contrib)                0.211   0.5      0.011   0.3             16      -1.00    
-- forces                         0.150   0.4      0.023   0.6              4      -1.00    
-- scfcv-scprqt                   0.139   0.4      0.043   1.1              4      -1.00    
-- invars2                        0.124   0.3      0.125   3.2              1      -1.00    
-- mkcore                         0.109   0.3      0.020   0.5              6      -1.00    
-- mkrho/=                        0.089   0.2      0.023   0.6              8      -1.00    
-- abinit(2)                      0.038   0.1      0.038   1.0              1      -1.00    
-- ewald                          0.035   0.1      0.036   0.9              1      -1.00    
-- stress                         0.024   0.1      0.024   0.6              1      -1.00    
-- ewald2 (+vdw_dftd)             0.020   0.1      0.020   0.5              1      -1.00    
-- others (91)                    0.492   1.3      0.074   1.9             -1      -1.00    
+- ewald                          1.361  35.9      1.366  34.6              1      -1.00        1.00       1.00
+- stress                         0.878  23.2      0.879  22.3              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.874  23.1      0.875  22.2              1      -1.00        1.00       1.00
+- fourwf%(pot)                   0.420  11.1      0.422  10.7           2399      -1.00        1.00       1.00
+- pspini                         0.415  10.9      0.415  10.5              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.131   3.5      0.132   3.3           2399      -1.00        1.00       1.00
+- projbd                         0.128   3.4      0.129   3.3           3838      -1.00        0.99       0.99
+- fourwf%(den)                   0.033   0.9      0.033   0.8            320      -1.00        1.00       1.00
+- invars2                        0.031   0.8      0.032   0.8              1      -1.00        0.98       0.98
+- fourwf%(r->G)                  0.028   0.7      0.027   0.7            840      -1.00        1.01       1.01
+- suskmm(loop2 except FFT)       0.027   0.7      0.027   0.7             16      -1.00        0.99       0.99
+- vtowfk(ssdiag)                 0.027   0.7      0.027   0.7             -1      -1.00        1.00       1.00
+- nonlop(forces)                 0.022   0.6      0.022   0.6            320      -1.00        1.00       1.00
+- dielmt                         0.020   0.5      0.020   0.5              1      -1.00        0.99       0.99
+- others (120)                   0.092   2.4      0.203   5.1             -1      -1.00        0.45       0.45
 -<END_TIMER>
 
-- subtotal                      32.532  84.6      3.393  87.4
+- subtotal                       4.487 118.4      4.609 116.8                                  0.97       0.97
 
 ================================================================================
 
@@ -809,50 +844,78 @@ P           mkmem           4
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Preconditioning of self-consistent-field cycles in density functional theory : the extrapolar method
+- [1] Preconditioning of self-consistent-field cycles in density functional theory: the extrapolar method
 - P.-M. Anglade, X. Gonze, Phys. Rev. B 78, 045126 (2008).
-- Comment : to be cited in case the extrapolar conditioner is used, i.e. non-vanishing iprcel.
+- Comment: to be cited in case the extrapolar conditioner is used, i.e. non-vanishing iprcel.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#anglade2008
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
--
-- [3] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
+- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         38.5  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         38.5  wall=          3.9
++Overall time at end (sec) : cpu=          3.8  wall=          3.9

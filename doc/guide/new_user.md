@@ -203,24 +203,20 @@ input file, are listed below:
 
 [[typat]]([[natom]]):
 :   sequence of integers, specifying the type of each atom.
-    NOTE: the atomic coordinates ([[xangst]], [[xcart]] or [[xred]])
+    NOTE: the atomic coordinates ([[xcart]] or [[xred]])
     must be specified in the same order
 
 [[rprim]](3,3)
 :   unscaled primitive translations of periodic cell;
     each COLUMN of this array is one primitive translation
 
-[[xangst]](3,[[natom]])
-:   cartesian coordinates (Angstrom) of atoms in unit cell
-    NOTE: only used when [[xred]] and [[xcart]] are absent
-
 [[xcart]](3,[[natom]])
 :   cartesian coordinates (Bohr) of atoms in unit cell
-    NOTE: only used when [[xred]] and [[xangst]] are absent
+    NOTE: only used when [[xred]] is absent
 
 [[xred]](3,[[natom]])
 :   fractional coordinates for atomic locations;
-    NOTE: leave out if [[xangst]] or [[xcart]] is used
+    NOTE: leave out if [[xcart]] is used
 
 [[znucl]]([[ntypat]])
 :   Nuclear charge of each type of element; must agree with
@@ -354,4 +350,7 @@ capabilities, but the one with the largest last digit is more debugged than
 the other: version 8.8.3 is more debugged than 8.8.2, but no new features has
 been added (so likely, no additional bug!).
 
-In order to start using ABINIT, please follow [[tutorial:index|the tutorial]]
+In order to start using ABINIT, please follow [[tutorial:index|this tutorial.]]
+To learn how to compile the code from source, please consult the following guide:
+
+<embed src="https://wiki.abinit.org/lib/exe/fetch.php?media=build:installing_abinit.pdf" type="application/pdf" width="100%" height="480px">

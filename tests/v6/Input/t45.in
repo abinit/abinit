@@ -99,7 +99,7 @@ dmatpawu
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_19.0_.*
+#%% exclude_builders = .*_intel_19.[01]_.*
 #%% [files]
 #%% files_to_test = 
 #%%   t45.out, tolnlines = 61, tolabs = 1.0e-5, tolrel = 1.0e-3, fld_options = -easy
@@ -108,7 +108,7 @@ dmatpawu
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = DMFT
+#%% keywords = DMFT, PAW
 #%% description = 
 #%%   DMFT tests on ferromagnetic NiO (2 atoms), check DMFT for several
 #%%   values of dmft_solv : computes occupations and energy.

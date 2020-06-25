@@ -10,7 +10,7 @@
 !!  regions and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT, FJ, BA)
+!! Copyright (C) 2013-2020 ABINIT group (MT, FJ, BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ MODULE m_pawang
  USE_MPI_WRAPPERS
  USE_MEMORY_PROFILING
 
- use m_paw_sphharm, only : initylmr, mat_mlms2jmj, mat_slm2ylm
+ use m_paw_sphharm, only : initylmr, mat_mlms2jmj, mat_slm2ylm, realgaunt, nablarealgaunt
 
  implicit none
 
@@ -41,11 +41,9 @@ MODULE m_pawang
  public :: pawang_free        ! Free memory
  public :: pawang_lsylm       ! Compute the LS operator in the real spherical harmonics basis
  public :: initang            ! Initialize angular mesh for PAW calculations
- public :: make_angular_mesh  ! Build angular mesh from ntheta, nphi.
+ public :: make_angular_mesh  ! Build angular mesh from ntheta, nphi
 
  ! MGPAW: Private?
- public :: realgaunt          ! compute "real Gaunt coefficients" with "real spherical harmonics"
- public :: gaunt              ! Gaunt coeffients for complex Yml
  public :: gauleg
  public :: mat_mlms2jmj
  public :: mat_slm2ylm
@@ -83,11 +81,19 @@ MODULE m_pawang
   integer :: ngnt=0
    ! Number of non zero Gaunt coefficients
 
+  integer :: nnablagnt=0
+   ! Number of non zero Gaunt coefficient derivatives
+
   integer :: ntheta, nphi
    ! Dimensions of paw angular mesh
 
   integer :: nsym
    ! Number of symmetry elements in space group
+
+  integer :: nabgnt_option=-1
+   ! Option for nablarealgaunt coefficients:
+   ! nabgnt_option==0, nablarealgaunt coeffs are not computed (and not allocated)
+   ! nabgnt_option==1, nablarealgaunt coeffs are computed up to l_max
 
   integer :: gnt_option=-1
    ! Option for Gaunt coefficients:
@@ -108,6 +114,11 @@ MODULE m_pawang
    ! Selection rules for Gaunt coefficients stored as (LM,ij) where ij is in packed form.
    ! (if gntselect>0, Gaunt coeff. is non-zero)
 
+  integer, allocatable :: nablagntselect(:,:,:)
+  ! nablagntselect((l_max+1)**2,(l_max+1)**2,(l_max+1)**2)
+  ! Selection rules for nablaGaunt coefficients
+  ! (if nablagntselect>0, nablGaunt coeff. is non-zero)
+
 !Real (real(dp)) arrays
 
   real(dp), allocatable :: anginit(:,:)
@@ -125,6 +136,10 @@ MODULE m_pawang
    ! ls_ylm(2,l_max**2*(l_max**2+1)/2,2)
    ! LS operator in the real spherical harmonics basis
    ! ls_ylm(ilm1m2,ispin)= <sigma, y_lm1| LS |y_lm2, sigma_prime>
+
+  real(dp), allocatable :: nablarealgnt(:)
+   ! realgnt(2,nnablagnt)
+   ! Non zero real nablaGaunt coefficients
 
   real(dp), allocatable :: realgnt(:)
    ! realgnt(ngnt)
@@ -163,13 +178,17 @@ CONTAINS
 !! INPUTS
 !!  gnt_option=flag activated if pawang%gntselect and pawang%realgnt have to be allocated
 !!             also determine the size of these pointers
+!!  nabgnt_option=flag activated if pawang%nablagntselect and pawang%nablarealgnt have to be allocated
 !!  lmax=maximum value of angular momentum l
 !!  nphi,ntheta=dimensions of paw angular mesh
 !!  nsym=number of symetries
-!!  pawxcdev=choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
-!!  use_ls_ylm=flag activated if pawang%ls_ylm has to be allocated
-!!  use_ylm=flag activated if pawang%ylmr and pawang%ylmrgr have to be allocated
-!!  xclevel=XC functional level (1=LDA, 2=GGA)
+!!  ngrad2_ylm=order of spherical harmonics gradients to be stored (0, 1 or 2)
+!!  use_angular_grid=flag activated if angular grid data have to be allocated
+!!                   (pawang%angwgth, pawang%anginit)
+!!  use_ylm=flag activated if spherical harmonics have to be allocated and computed
+!!          (pawang%ylmr, pawang%ylmrgr)
+!!  use_ls_ylm=flag activated if LS operator has to be allocated and computed
+!!          (pawang%ls_ylm)
 !!
 !! OUTPUT
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
@@ -181,12 +200,13 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
+subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngrad2_ylm,&
+&                      use_angular_grid,use_ylm,use_ls_ylm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: gnt_option,lmax,nphi,nsym,ntheta
- integer,intent(in) :: pawxcdev,use_ls_ylm,use_ylm,xclevel
+ integer,intent(in) :: gnt_option,nabgnt_option,lmax,nphi,nsym,ntheta,ngrad2_ylm
+ integer,intent(in) :: use_angular_grid,use_ylm,use_ls_ylm
  type(Pawang_type),intent(inout) :: Pawang
 
 !Local variables-------------------------------
@@ -194,6 +214,7 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
  integer :: ll,sz1,sz2,sz3
 !arrays
  real(dp),allocatable :: rgnt_tmp(:)
+ real(dp),allocatable :: nablargnt_tmp(:)
 
 ! *************************************************************************
 
@@ -203,7 +224,7 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
  Pawang%l_size_max=2*Pawang%l_max-1
  Pawang%nsym=nsym
 
- if (pawxcdev==0) then
+ if (use_angular_grid==1) then
    Pawang%nphi=nphi
    Pawang%ntheta=ntheta
    Pawang%angl_size=ntheta*nphi
@@ -220,14 +241,17 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
  end if
 
  if (use_ylm>0.and.Pawang%angl_size>0) then
-   if (xclevel>=0) ll=Pawang%l_size_max
-   if (xclevel>=2) ll=ll+1
+   ll=Pawang%l_size_max+1
    Pawang%ylm_size=ll**2
    LIBPAW_ALLOCATE(Pawang%ylmr,(Pawang%ylm_size,Pawang%angl_size))
-   if (xclevel==2) then
-     LIBPAW_ALLOCATE(Pawang%ylmrgr,(3,Pawang%ylm_size,Pawang%angl_size))
-     call initylmr(ll,0,pawang%angl_size,pawang%angwgth,2,pawang%anginit,pawang%ylmr,&
+   if (ngrad2_ylm==2) then
+     LIBPAW_ALLOCATE(pawang%ylmrgr,(9,Pawang%ylm_size,Pawang%angl_size))
+     call initylmr(ll,0,pawang%angl_size,pawang%angwgth,3,pawang%anginit,pawang%ylmr,&
 &                  ylmr_gr=pawang%ylmrgr)
+   else if (ngrad2_ylm==1) then
+       LIBPAW_ALLOCATE(Pawang%ylmrgr,(3,Pawang%ylm_size,Pawang%angl_size))
+       call initylmr(ll,0,pawang%angl_size,pawang%angwgth,2,pawang%anginit,pawang%ylmr,&
+&                    ylmr_gr=pawang%ylmrgr)
    else
      call initylmr(ll,0,pawang%angl_size,pawang%angwgth,1,pawang%anginit,pawang%ylmr)
    end if
@@ -260,6 +284,21 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
    LIBPAW_DEALLOCATE(rgnt_tmp)
  end if
 
+ Pawang%nabgnt_option=nabgnt_option
+ if (Pawang%nabgnt_option==1) then
+   sz1=(Pawang%l_size_max)**6
+   sz2=(Pawang%l_size_max)**2
+   LIBPAW_ALLOCATE(nablargnt_tmp,(sz1))
+   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz2,sz2,sz2))
+   call nablarealgaunt(pawang%l_size_max,pawang%nnablagnt,pawang%nablagntselect,nablargnt_tmp)
+   if (allocated(pawang%nablarealgnt)) then
+     LIBPAW_DEALLOCATE(pawang%nablarealgnt)
+   end if
+   LIBPAW_ALLOCATE(pawang%nablarealgnt,(pawang%nnablagnt))
+   Pawang%nablarealgnt(1:Pawang%nnablagnt)=nablargnt_tmp(1:Pawang%nnablagnt)
+   LIBPAW_DEALLOCATE(nablargnt_tmp)
+ end if
+
  Pawang%use_ls_ylm=use_ls_ylm
  if (use_ls_ylm>0) then
    LIBPAW_ALLOCATE(pawang%ls_ylm,(2,Pawang%l_max**2*(Pawang%l_max**2+1)/2,2))
@@ -267,7 +306,9 @@ subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_y
  end if
 
  if (nsym>0) then
-   LIBPAW_ALLOCATE(Pawang%zarot,(Pawang%l_size_max,Pawang%l_size_max,Pawang%l_max,nsym))
+   if (.not.allocated(Pawang%zarot)) then
+     LIBPAW_ALLOCATE(Pawang%zarot,(Pawang%l_size_max,Pawang%l_size_max,Pawang%l_max,nsym))
+   end if
  end if
 
 end subroutine pawang_init
@@ -313,8 +354,14 @@ subroutine pawang_free(Pawang)
  if (allocated(pawang%gntselect))  then
    LIBPAW_DEALLOCATE(pawang%gntselect)
  end if
+  if (allocated(pawang%nablagntselect))  then
+   LIBPAW_DEALLOCATE(pawang%nablagntselect)
+ end if
  if (allocated(pawang%realgnt))    then
    LIBPAW_DEALLOCATE(pawang%realgnt)
+ end if
+ if (allocated(pawang%nablarealgnt))    then
+   LIBPAW_DEALLOCATE(pawang%nablarealgnt)
  end if
  if (allocated(pawang%ylmr))       then
    LIBPAW_DEALLOCATE(pawang%ylmr)
@@ -332,6 +379,7 @@ subroutine pawang_free(Pawang)
  pawang%l_max=-1
  pawang%l_size_max=-1
  pawang%gnt_option=-1
+ pawang%nabgnt_option=-1
  pawang%ngnt=0
 
 end subroutine pawang_free
@@ -699,286 +747,6 @@ subroutine make_angular_mesh(ntheta, nphi, angl_size, vers_cart, angwgth)
  LIBPAW_DEALLOCATE(wth)
 
 end subroutine make_angular_mesh
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawang/realgaunt
-!! NAME
-!! realgaunt
-!!
-!! FUNCTION
-!! This routine compute "real Gaunt coefficients", i.e. gaunt
-!! coefficients according to "real spherical harmonics"
-!!
-!! INPUTS
-!!  l_max= max. value of ang. momentum l+1;  Gaunt coeffs up to
-!!          [(2*l_max-1,m),(l_max,m),(l_max,m)] are computed
-!!
-!! OUTPUT
-!!  gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)=
-!!          selection rules for Gaunt coefficients
-!!          if Gaunt coeff. is zero, gntselect=0
-!!          if Gaunt coeff. is non-zero, gntselect is the index of
-!!                           the coeff. in realgnt(:) array
-!!  ngnt= number of non-zero Gaunt coefficients
-!!  realgnt((2*l_max-1)**2*l_max**4)= non-zero real Gaunt coefficients
-!!
-!! PARENTS
-!!      m_paw_slater,m_pawang,m_pawpwij
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine realgaunt(l_max,ngnt,gntselect,realgnt)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: l_max
- integer,intent(out) :: ngnt
-!arrays
- integer,intent(out) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
- real(dp),intent(out) :: realgnt((2*l_max-1)**2*(l_max)**4)
-
-!Local variables ------------------------------
-!scalars
- integer :: ilm1,ilm2,ilmp1,k0lm1,klm1,l1,l2,ll,lp1,m1,m2,mm,mm1,mm2,mm3,mp1
- real(dp) :: c11,c12,c21,c22,c31,c32,fact,realgnt_tmp
-!arrays
- integer,allocatable :: ssgn(:)
- type(coeff3_type), allocatable :: coeff(:)
-
-!************************************************************************
-
-! Initialize output arrays with zeros.
-gntselect = 0; realgnt = zero
-
-!Compute matrix cc where Sl=cc*Yl (Sl=real sph. harm.)
-!------------------------------------------------
- LIBPAW_DATATYPE_ALLOCATE(coeff,(4*l_max-3))
- do ll=1,4*l_max-3
-   LIBPAW_ALLOCATE(coeff(ll)%value,(2,2*ll-1,2*ll-1))
-   coeff(ll)%value(:,:,:)=zero
-   coeff(ll)%value(1,ll,ll)=one
-   do mm=1,ll-1
-     coeff(ll)%value(1,ll+mm,ll+mm)= (-1._dp)**mm/sqrt(2._dp)
-     coeff(ll)%value(1,ll-mm,ll+mm)= ( 1._dp)    /sqrt(2._dp)
-     coeff(ll)%value(2,ll+mm,ll-mm)=-(-1._dp)**mm/sqrt(2._dp)
-     coeff(ll)%value(2,ll-mm,ll-mm)= ( 1._dp)    /sqrt(2._dp)
-   end do
- end do
-
- LIBPAW_ALLOCATE(ssgn,(l_max**2))
- ssgn(:)=1
- if (l_max>0) then
-   do l1=1,l_max-1
-     ilm1=1+l1**2+l1
-     do m1=-l1,-1
-       ssgn(ilm1+m1)=-1
-     end do
-   end do
- end if
-
- ngnt=0
-
-!Loop on (lp1,mp1)
-!------------------------------------------------
- do lp1=0,l_max-1
-   do mp1=-lp1,lp1
-     ilmp1=1+lp1**2+lp1+mp1
-     k0lm1=ilmp1*(ilmp1-1)/2
-
-!    Loop on (l1,m1)<=(lp1,mp1)
-!    ------------------------------------------------
-     do l1=0,l_max-1
-       do m1=-l1,l1
-         ilm1=1+l1**2+l1+m1
-
-         if (ilm1<=ilmp1) then
-
-           klm1=k0lm1+ilm1
-           gntselect(:,klm1)=0
-
-!          Loop on (l2,m2)
-!          ------------------------------------------------
-           do l2=abs(l1-lp1),l1+lp1,2
-             do m2=-l2,l2
-               ilm2=1+l2**2+l2+m2
-
-!              Real Gaunt coeffs selection rules
-!              ------------------------------------------------
-               if ((l2<=l1+lp1).and.&
-&               (((m1== mp1).and.((m2==0).or.(m2==2*abs(mp1)))).or.&
-&               ((m1==-mp1).and.(m2==-abs(m1)-abs(mp1))).or.&
-&               ((abs(m1)/=(abs(mp1)).and.&
-&               ((m2==ssgn(ilm1)*ssgn(ilmp1)*   (abs(m1)+abs(mp1))).or.&
-&               (m2==ssgn(ilm1)*ssgn(ilmp1)*abs(abs(m1)-abs(mp1)))&
-               ))))) then
-
-!                Compute selected real Gaunt coefficient
-!                ------------------------------------------------
-                 realgnt_tmp=zero
-                 do mm1=-l1,l1
-                   c11=coeff(l1+1)%value(1,l1+mm1+1,l1+m1+1)
-                   c12=coeff(l1+1)%value(2,l1+mm1+1,l1+m1+1)
-                   do mm2= -lp1,lp1
-                     c21=coeff(lp1+1)%value(1,lp1+mm2+1,lp1+mp1+1)
-                     c22=coeff(lp1+1)%value(2,lp1+mm2+1,lp1+mp1+1)
-                     do mm3= -l2,l2
-                       c31=coeff(l2+1)%value(1,l2+mm3+1,l2+m2+1)
-                       c32=coeff(l2+1)%value(2,l2+mm3+1,l2+m2+1)
-                       fact=c11*c21*c31  -  c12*c22*c31&
-&                       -c11*c22*c32  -  c12*c21*c32
-                       if((abs(fact)>=tol12).and.(mm3==-mm2-mm1)) &
-&                       realgnt_tmp=realgnt_tmp+fact*(-1)**mm2 &
-&                       *gaunt(l2,mm3,l1,mm1,lp1,-mm2)
-                     end do
-                   end do
-                 end do
-
-!                Count additional non-zero real Gaunt coeffs
-!                ------------------------------------------------
-                 if (abs(realgnt_tmp)>=tol12) then
-                   ngnt=ngnt+1
-                   gntselect(ilm2,klm1)=ngnt
-                   realgnt(ngnt)=realgnt_tmp/sqrt(four_pi)
-                 end if
-
-!                End loops
-!                ------------------------------------------------
-               end if
-             end do
-           end do
-         end if
-       end do
-     end do
-   end do
- end do
-
-!Deallocate memory
-!------------------------------------------------
- do ll=1,4*l_max-3
-   LIBPAW_DEALLOCATE(coeff(ll)%value)
- end do
- LIBPAW_DATATYPE_DEALLOCATE(coeff)
- LIBPAW_DEALLOCATE(ssgn)
-
-end subroutine realgaunt
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawang/gaunt
-!! NAME
-!! gaunt
-!!
-!! FUNCTION
-!! Returns gaunt coefficient, i.e.
-!!   the integral of Sqrt[4 \pi] Y*(l_i,m_i) Y*(ll,mm) Y(l_j,m_j)
-!!   See the 3-j and 6-j symbols by Rotenberg, etc., (Technology Press, 1959), pg.5.
-!!
-!! INPUTS
-!!   ll,mm,l1,l2,m1,m2= six quantum numbers defining the Gaunt coef.
-!!
-!! OUTPUT
-!!   gaunt(ll,mm,l1,l2,m1,m2)=the value of the integral
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-function gaunt(ll,mm,l1,m1,l2,m2)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: l1,l2,ll,m1,m2,mm
- real(dp) :: gaunt
-
-!Local variables ------------------------------
-!scalars
- integer :: i1,i2,j1,j1half,j2,j2half,j3,j3half,j_half,jj,k1,k2,n1,n2
- real(dp) :: argument,sign,sum,xx,yy
- logical :: ok
-
-!************************************************************************
-
- gaunt=zero;sum=zero;ok =.true.
-
- if((-m1-mm+m2) /= 0) ok = .false.
- if(abs(m1) > l1) ok = .false.
- if(abs(mm) > ll) ok = .false.
- if(abs(m2) > l2) ok = .false.
-
- jj = l1 + ll + l2
- if (mod(jj,2)/=0) ok = .false.
- j1 = jj-2*l2
- j2 = jj-2*ll
- j3 = jj-2*l1
-
- if (j1<0 .or. j2<0 .or. j3<0) ok = .false.
-
- if (ok) then
-
-   xx = (2 * l1 + 1) * (2 * ll + 1) * (2 * l2 + 1)
-
-   j1half = j1/2
-   j2half = j2/2
-   j3half = j3/2
-   j_half = jj/2
-
-   gaunt = (-1)**j1half * sqrt(xx)
-   gaunt = gaunt * rfactorial(j2)*rfactorial(j3)/rfactorial(jj+1)
-   gaunt = gaunt * rfactorial(j_half)/(rfactorial(j1half)&
-&                * rfactorial(j2half)*rfactorial(j3half))
-
-   yy = rfactorial(l2 + m2) * rfactorial(l2 - m2)
-
-   if (mm>=0) then
-     yy = yy * perms(ll+mm,2*mm)
-   else
-     yy = yy / perms(ll-mm,-2*mm)
-   end if
-
-   if (m1>=0) then
-     yy = yy / perms(l1+m1,2*m1)
-   else
-     yy = yy * perms(l1-m1,-2*m1)
-   end if
-
-   gaunt = gaunt * sqrt(yy)
-
-   i1 = l2 - ll - m1
-   i2 = l2 - l1 + mm
-   k1 = -min(0, i1, i2)
-   n1 = l1 + m1
-   n2 = ll - mm
-   k2 = min(j1, n1, n2)
-
-   sign = 1._dp
-   if(k1>0) sign = (-1._dp)**k1
-
-   argument = sign     * perms(n1,k1)/rfactorial(k1)
-   argument = argument * perms(n2,k1)/rfactorial(i1 + k1)
-   argument = argument * perms(j1,k1)/rfactorial(i2 + k1)
-   sum = sum + argument
-
-   sign = -sign
-   k1 = k1 + 1
-   do while(k1 <= k2)
-     argument = sign     * perms(n1, k1)/rfactorial(k1)
-     argument = argument * perms(n2, k1)/rfactorial(i1 + k1)
-     argument = argument * perms(j1, k1)/rfactorial(i2 + k1)
-     sum = sum + argument
-     sign = -sign
-     k1 = k1 + 1
-   end do
-
- end if
-
- gaunt = gaunt * sum
-
- end function gaunt
 !!***
 
 !----------------------------------------------------------------------

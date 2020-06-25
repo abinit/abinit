@@ -76,7 +76,6 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t47.in, t48.in, t49.in
 #%% [files]
 #%% files_to_test = 

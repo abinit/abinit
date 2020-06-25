@@ -25,6 +25,7 @@
 
     ndtset      4
     gwpara      1   # gwpara 2 is much  better
+    symsigma    0
 
 # Self-consistent run to get the WFK File
     tolwfr1    1.00d-10

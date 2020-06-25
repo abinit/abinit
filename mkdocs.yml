@@ -15,7 +15,7 @@ use_directory_urls: True
 #use_directory_urls: False
 
 pages:
-#- Quick Start: 
+#- Quick Start:
 #- Home: index.md
 - User Guide:
     #- NewUser: guide/new_user.md
@@ -31,7 +31,7 @@ pages:
     - Optic: guide/optic.md
     - Respfn: guide/respfn.md
     - Spacegroup: guide/spacegroup.md
-    - Tdep: guide/tdep.md
+    - a-TDEP: guide/a-TDEP.md
     - Installation:
         - HowTo: installation.md
         - MacOSX: README_MacOSX.md
@@ -120,7 +120,7 @@ pages:
     - topics/STM.md
     - topics/Susceptibility.md
     - topics/TDDFT.md
-    - topics/Tdep.md
+    - topics/a-TDEP.md
     - topics/TDepES.md
     - topics/Temperature.md
     - topics/TransPath.md
@@ -156,13 +156,13 @@ pages:
     - Anaddb: variables/anaddb.md
     - Multibinit: variables/multibinit.md
     - Optic: variables/optic.md
-    - Tdep: variables/tdep.md
+    - a-TDEP: variables/atdep.md
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
-    - Base Tutorials: 
+    - Base Tutorials:
         - Base1: tutorial/base1.md
         - Base2: tutorial/base2.md
         - Base3: tutorial/base3.md
@@ -183,7 +183,7 @@ pages:
         - tutorial/ffield.md
         - tutorial/nlo.md
     - DMFT: tutorial/dmft.md
-    - EPH: 
+    - EPH:
         - tutorial/eph.md
         - tutorial/tdepes.md
     - Many-Body:
@@ -222,6 +222,8 @@ pages:
     - Acknowledgments: theory/acknowledgments.md
     - Bibliography: theory/bibliography.md
 - Developers:
+    - Git and Gitlab: developers/git_and_gitlab.md
+    - HowTo for developers: developers/developers_howto.md
     - Abimkdocs: developers/abimkdocs.md
     - Markdown: developers/markdown.md
     - Test Suite:
@@ -229,9 +231,8 @@ pages:
         - Test Suite Howto: developers/testsuite_howto.md
         - YAML-based test suite Howto: developers/new_testsuite.md
         - YAML-based test suite Python tools and API: developers/yaml_tools_api.md
-    - HowTo for developers: developers/developers_howto.md
     - XgType: developers/XgType.md
-    - Pseudos: 
+    - Pseudos:
         - psp1: developers/psp1_info.md
         - psp3: developers/psp3_info.md
         - psp45: developers/psp45_info.md
@@ -255,7 +256,7 @@ markdown_extensions:
         #permalink: "#"
         #separator: "_"
   - markdown.extensions.admonition
-  - markdown.extensions.fenced_code 
+  - markdown.extensions.fenced_code
   - markdown.extensions.codehilite
   - markdown.extensions.smarty
   - markdown.extensions.tables
@@ -284,7 +285,7 @@ markdown_extensions:
   - abimkdocs.preprocessor
   - abimkdocs.mdx_figcaption
   #- abimkdocs.treepreprocessor
-        
+
 #strict: true
 
 theme:
@@ -311,13 +312,13 @@ extra_javascript:
     - extra_javascript/jquery.dialogextend.min.js
     - extra_javascript/abidocs.js
 
-copyright: Copyright &copy; 2018-2019 The Abinit Group
+copyright: Copyright &copy; 2019-2020 The Abinit Group
 
 # Google Analytics
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 8.11.11
+    version: 9.1.2  
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt
@@ -342,7 +343,7 @@ extra:
         abiview: "[abiview](http://abinit.github.io/abipy/scripts/abiview.html)"
         abirun: "[abirun](http://abinit.github.io/abipy/scripts/abirun.html)"
         abidoc: "[abidoc](http://abinit.github.io/abipy/scripts/abidoc.html)"
-        # Links to abitutorials jupyter notebooks served at 
+        # Links to abitutorials jupyter notebooks served at
         # https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/index.ipynb?flush_cache=true
         AbipyStructureNb: "[AbiPy structure notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/structure.ipynb)"
         AbinitInputNb: "[AbinitInput notebook](https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/abinit_input.ipynb)"

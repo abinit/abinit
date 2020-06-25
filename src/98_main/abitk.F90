@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/abitk
 !! NAME
 !! abitk
@@ -8,7 +7,7 @@
 !!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MG)
+!! Copyright (C) 2013-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,6 +49,7 @@ program abitk
  use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
+ use m_parser,         only : geo_t, geo_from_poscar_path
 
  implicit none
 
@@ -66,6 +66,7 @@ program abitk
  type(ebands_t) :: ebands !, ebands_kpath
  type(edos_t) :: edos
  type(crystal_t) :: cryst
+ type(geo_t) :: geo
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
@@ -87,6 +88,7 @@ program abitk
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
+ !call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
  nargs = command_argument_count()
@@ -128,6 +130,15 @@ program abitk
  call get_command_argument(1, command)
 
  select case (command)
+ case ("poscar")
+   call get_command_argument(2, path)
+   geo = geo_from_poscar_path(path, comm)
+   call geo%print_abivars(std_out)
+   call geo%free()
+
+ !case ("wfk_downsample")
+ ! e.g. go from a 8x8x8 WFK to a 4x4x4
+
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)
@@ -191,6 +202,7 @@ program abitk
      call edos%free()
 
    else if (command == "ebands_jdos") then
+     NOT_IMPLEMENTED_ERROR()
      !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
      !call jdos%free()

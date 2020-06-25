@@ -17,6 +17,7 @@
  ecutsigx 2.54958951E+00 Hartree
  ecuteps  2.54958951E+00 Hartree
  gwpara   1
+ symsigma 0
 
 # wavefunction calculation
  nband1       15

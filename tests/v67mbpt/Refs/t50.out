@@ -1,8 +1,8 @@
 
-.Version 8.1.6 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 31 Oct 2016.
-- ( at 14h05 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h21 )
   
-- input  file    -> t50.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t50/t50.in
 - output file    -> t50.out
 - root for input  files -> t50i
 - root for output files -> t50o
@@ -34,7 +34,7 @@
 -    mband =          10        mffmem =           1         mkmem =          10
        mpw =         295          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       3.357 Mbytes of memory.
+P This job should need less than                       3.321 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          14        mffmem =           1         mkmem =           3
        mpw =         302          nfft =        8000          nkpt =           3
 ================================================================================
-P This job should need less than                       2.096 Mbytes of memory.
+P This job should need less than                       2.059 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          15        mffmem =           1         mkmem =           3
        mpw =         266          nfft =        5832          nkpt =           3
 ================================================================================
-P This job should need less than                       2.450 Mbytes of memory.
+P This job should need less than                       2.418 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           3
        mpw =         266          nfft =        5832          nkpt =           3
 ================================================================================
-P This job should need less than                       2.357 Mbytes of memory.
+P This job should need less than                       2.325 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -332,7 +332,16 @@ P           mkmem4          3
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 10, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 295, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -350,8 +359,8 @@ P           mkmem4          3
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -362,7 +371,7 @@ P           mkmem4          3
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -375,16 +384,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 500, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -8.8692010622503    -8.869E+00 2.063E-03 5.715E+00
- ETOT  2  -8.8755792189403    -6.378E-03 7.276E-08 1.576E-01
- ETOT  3  -8.8756561419833    -7.692E-05 3.172E-06 2.990E-03
- ETOT  4  -8.8756570364741    -8.945E-07 4.220E-08 1.086E-05
- ETOT  5  -8.8756570414108    -4.937E-09 1.945E-10 2.424E-08
- ETOT  6  -8.8756570414258    -1.503E-11 6.332E-13 1.671E-10
- ETOT  7  -8.8756570414260    -1.421E-13 2.197E-15 6.961E-13
- ETOT  8  -8.8756570414259     6.040E-14 1.502E-17 1.007E-15
- ETOT  9  -8.8756570414260    -1.208E-13 1.287E-20 1.653E-18
+ ETOT  1  -8.8692010622497    -8.869E+00 2.063E-03 5.715E+00
+ ETOT  2  -8.8755792189396    -6.378E-03 7.276E-08 1.576E-01
+ ETOT  3  -8.8756561419827    -7.692E-05 3.172E-06 2.990E-03
+ ETOT  4  -8.8756570364735    -8.945E-07 4.220E-08 1.086E-05
+ ETOT  5  -8.8756570414101    -4.937E-09 1.945E-10 2.424E-08
+ ETOT  6  -8.8756570414252    -1.503E-11 6.332E-13 1.671E-10
+ ETOT  7  -8.8756570414253    -1.421E-13 2.197E-15 6.961E-13
+ ETOT  8  -8.8756570414252     6.040E-14 1.502E-17 1.007E-15
+ ETOT  9  -8.8756570414254    -1.226E-13 1.287E-20 1.653E-18
 
  At SCF step    9       vres2   =  1.65E-18 < tolvrs=  1.00E-16 =>converged.
 
@@ -392,6 +407,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   sigma(1 1)=  3.38568146E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.38568146E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.38568146E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae: -1.226E-13, res2:  1.653E-18, residm:  1.287E-20, diffor: null, }
+etotal    :  -8.87565704E+00
+entropy   :   0.00000000E+00
+fermie    :   2.05995379E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.38568146E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.38568146E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.38568146E-05, ]
+pressure_GPa:  -9.9610E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -402,7 +446,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.1259E-12; max=  3.6808E-10
+ Mean square residual over all n,k,spin=   50.193E-22; max=  12.874E-21
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -434,21 +478,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.02587579971565E+00
+hartree             :  5.38306610799664E-01
+xc                  : -3.54190168818188E+00
+Ewald energy        : -8.43581958561899E+00
+psp_core            :  8.60437873155177E-02
+local_psp           : -2.43141062809014E+00
+non_local_psp       :  1.88324866263482E+00
+total_energy        : -8.87565704142536E+00
+total_energy_eV     : -2.41518910763937E+02
+band_energy         :  2.28143225508711E-01
+...
 
-    Kinetic energy  =  3.02587579971565E+00
-    Hartree energy  =  5.38306610799666E-01
-    XC energy       = -3.54190168818188E+00
-    Ewald energy    = -8.43581958561899E+00
-    PspCore energy  =  8.60437873148613E-02
-    Loc. psp. energy= -2.43141062809014E+00
-    NL   psp  energy=  1.88324866263482E+00
-    >>>>>>>>> Etotal= -8.87565704142602E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.41518910763955E+02 ; Band energy (Ha)=   2.2814322551E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.38568146E-05  sigma(3 2)=  0.00000000E+00
@@ -462,7 +506,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 3, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -486,14 +539,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 ================================================================================
  prteigrs : about to open file t50o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  6.85E-30  5.66E-29  1.85E-29  7.35E-29  1.05E-29  6.05E-29  6.55E-29  2.66E-29
-  6.97E-29  1.78E-29  4.33E-29  3.10E-29  7.85E-29  3.06E-29
+  5.72E-30  5.62E-29  1.90E-29  7.16E-29  9.79E-30  6.02E-29  6.52E-29  2.52E-29
+  6.88E-29  1.75E-29  4.36E-29  3.15E-29  7.73E-29  3.06E-29
  -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
   3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
   6.2852E-01  6.2852E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.82505E-28
+  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.81887E-28
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.859E-29, diffor:  0.000E+00, }
+etotal    :  -8.87565704E+00
+entropy   :   0.00000000E+00
+fermie    :   2.05995379E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -504,7 +581,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.2646E-29; max=  1.8250E-28
+ Mean square residual over all n,k,spin=   37.346E-30; max=  98.590E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -524,7 +601,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 3, mband: 15, nsppol: 1, nspinor: 1, nspden: 1, mpw: 266, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -547,8 +633,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -559,7 +645,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -623,12 +709,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
         0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000 -15.822  -0.000   0.036   0.000   0.036   0.000   0.036   0.000
-       -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254  -0.000  -0.254
+    2   0.000 -15.822  -0.000   0.036   0.000   0.036  -0.000   0.036  -0.000
+       -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254   0.000  -0.254
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  50.4453
-  dielectric constant without local fields =  58.9556
+  dielectric constant =  50.4477
+  dielectric constant without local fields =  58.9583
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     28.20  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -652,8 +738,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     1 -15.044  -2.218   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
        -0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
 
-    2  -2.218 -12.123  -0.000   0.100   0.000   0.100   0.000   0.100   0.000
-        2.218   0.000  -6.848   0.000   0.446   0.000   0.446   0.000   0.446
+    2  -2.218 -12.123  -0.000   0.100   0.000   0.100  -0.000   0.100   0.000
+        2.218   0.000  -6.848  -0.000   0.446  -0.000   0.446  -0.000   0.446
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     53.67  [%]
 
@@ -666,14 +752,23 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
     1 -19.733  -4.427  -0.402  -0.402  -4.427  -0.402  -4.427  -4.427  -0.402
        -0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
 
-    2  -4.427 -14.156   0.000   0.260   0.000   0.260   0.000  -1.040  -0.000
-        4.427   0.000  -4.842   0.000   1.478  -0.000   1.478   0.000  -0.988
+    2  -4.427 -14.156  -0.000   0.260   0.000   0.260   0.000  -1.040   0.000
+        4.427  -0.000  -4.842   0.000   1.478   0.000   1.478  -0.000  -0.988
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.10  [%]
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 3, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 266, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -771,10 +866,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Direct diagonalization of the resonant excitonic Hamiltonian, Matrix size= 96
 . Using LAPACK sequential version.
  Excitonic eigenvalues in eV up to n=   32
-   3.09861   3.09861   3.09882   3.15608   3.15622   3.15622   3.39208   3.39208
-   3.48139   3.48139   3.48245   3.53083   3.56231   3.56233   3.56233   3.56288
-   3.56288   4.09268   4.09268   4.09294   4.24499   4.24508   4.24508   4.28745
-   4.28746   4.28752   4.39452   4.39452   4.39612   4.44143   4.44293   4.44294
+   3.09862   3.09862   3.09883   3.15608   3.15623   3.15623   3.39209   3.39209
+   3.48140   3.48140   3.48246   3.53083   3.56231   3.56233   3.56234   3.56289
+   3.56289   4.09268   4.09268   4.09295   4.24499   4.24509   4.24509   4.28746
+   4.28746   4.28752   4.39452   4.39452   4.39612   4.44143   4.44294   4.44294
 
  First excitonic eigenvalue=    3.10 [eV]
  Last  excitonic eigenvalue=   18.93 [eV]
@@ -783,10 +878,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Direct diagonalization of the resonant excitonic Hamiltonian, Matrix size= 96
 . Using LAPACK sequential version.
  Excitonic eigenvalues in eV up to n=   32
-   2.88822   2.91273   2.91608   2.99327   3.00884   3.00995   3.20514   3.20539
-   3.27339   3.28146   3.28196   3.30482   3.33980   3.34007   3.38185   3.38219
-   3.39281   3.65193   3.65462   3.65478   4.00777   4.04634   4.10573   4.11130
-   4.14901   4.16247   4.18065   4.19988   4.23286   4.24129   4.25837   4.30388
+   2.88822   2.91273   2.91608   2.99328   3.00885   3.00995   3.20515   3.20539
+   3.27340   3.28147   3.28196   3.30482   3.33980   3.34008   3.38186   3.38219
+   3.39281   3.65194   3.65463   3.65479   4.00777   4.04635   4.10574   4.11130
+   4.14902   4.16248   4.18065   4.19989   4.23287   4.24129   4.25837   4.30389
 
  First excitonic eigenvalue=    2.89 [eV]
  Last  excitonic eigenvalue=   18.94 [eV]
@@ -806,16 +901,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  58.5961   0.0000  46.3625   0.0000  54.0349   0.0000
-   0.0100  58.5968   0.0000  46.3628   0.0000  54.0354   0.0000
-   0.0200  58.5989   0.0000  46.3638   0.0000  54.0370   0.0000
-   0.0300  58.6023   0.0000  46.3654   0.0000  54.0395   0.0000
-   0.0400  58.6071   0.0000  46.3676   0.0000  54.0431   0.0000
-   0.0500  58.6132   0.0000  46.3705   0.0000  54.0477   0.0000
-   0.0600  58.6207   0.0000  46.3741   0.0000  54.0533   0.0000
-   0.0700  58.6296   0.0000  46.3783   0.0000  54.0600   0.0000
-   0.0800  58.6398   0.0000  46.3831   0.0000  54.0677   0.0000
-   0.0900  58.6514   0.0000  46.3886   0.0000  54.0764   0.0000
+   0.0000  58.6093  -0.0000  46.3732  -0.0000  54.0474  -0.0000
+   0.0100  58.6100   0.0000  46.3735   0.0000  54.0479   0.0000
+   0.0200  58.6121   0.0000  46.3745   0.0000  54.0494   0.0000
+   0.0300  58.6155   0.0000  46.3761   0.0000  54.0520   0.0000
+   0.0400  58.6202   0.0000  46.3784   0.0000  54.0556   0.0000
+   0.0500  58.6264   0.0000  46.3813   0.0000  54.0602   0.0000
+   0.0600  58.6339   0.0000  46.3848   0.0000  54.0658   0.0000
+   0.0700  58.6427   0.0000  46.3890   0.0000  54.0725   0.0000
+   0.0800  58.6530   0.0000  46.3939   0.0000  54.0801   0.0000
+   0.0900  58.6646   0.0000  46.3994   0.0000  54.0888   0.0000
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_GW_NLF_MDF
@@ -823,16 +918,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.5509   0.0000  46.9450   0.0000  54.7847   0.1453
-   0.0100  59.5516   0.0043  46.9454   0.0021  54.7852   0.1478
-   0.0200  59.5538   0.0086  46.9464   0.0042  54.7868   0.1503
-   0.0300  59.5574   0.0130  46.9481   0.0063  54.7895   0.1529
-   0.0400  59.5624   0.0173  46.9504   0.0084  54.7932   0.1554
-   0.0500  59.5689   0.0216  46.9534   0.0105  54.7980   0.1580
-   0.0600  59.5768   0.0259  46.9571   0.0126  54.8039   0.1605
-   0.0700  59.5861   0.0303  46.9615   0.0147  54.8109   0.1631
-   0.0800  59.5969   0.0346  46.9665   0.0168  54.8189   0.1657
-   0.0900  59.6091   0.0389  46.9723   0.0189  54.8280   0.1683
+   0.0000  59.5642  -0.0000  46.9558  -0.0000  54.7973   0.1453
+   0.0100  59.5649   0.0043  46.9562   0.0021  54.7978   0.1478
+   0.0200  59.5671   0.0086  46.9572   0.0042  54.7994   0.1503
+   0.0300  59.5707   0.0130  46.9589   0.0063  54.8021   0.1529
+   0.0400  59.5757   0.0173  46.9612   0.0084  54.8058   0.1554
+   0.0500  59.5822   0.0216  46.9642   0.0105  54.8106   0.1580
+   0.0600  59.5901   0.0259  46.9679   0.0126  54.8165   0.1606
+   0.0700  59.5994   0.0303  46.9723   0.0147  54.8235   0.1631
+   0.0800  59.6102   0.0346  46.9773   0.0168  54.8315   0.1657
+   0.0900  59.6224   0.0389  46.9831   0.0189  54.8406   0.1683
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0001_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0001_GW_NLF_MDF
@@ -840,16 +935,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.6365   0.0000  46.9976   0.0000  54.8526   0.1564
-   0.0100  59.6373   0.0048  46.9979   0.0023  54.8531   0.1593
-   0.0200  59.6394   0.0095  46.9989   0.0046  54.8547   0.1621
-   0.0300  59.6430   0.0143  47.0006   0.0069  54.8574   0.1650
-   0.0400  59.6481   0.0191  47.0030   0.0092  54.8612   0.1678
-   0.0500  59.6546   0.0239  47.0060   0.0116  54.8660   0.1707
-   0.0600  59.6625   0.0286  47.0097   0.0139  54.8719   0.1736
-   0.0700  59.6719   0.0334  47.0141   0.0162  54.8789   0.1765
-   0.0800  59.6827   0.0382  47.0191   0.0185  54.8870   0.1794
-   0.0900  59.6950   0.0430  47.0249   0.0208  54.8961   0.1823
+   0.0000  59.6498  -0.0000  47.0084  -0.0000  54.8652   0.1564
+   0.0100  59.6506   0.0048  47.0087   0.0023  54.8657   0.1593
+   0.0200  59.6527   0.0095  47.0097   0.0046  54.8673   0.1621
+   0.0300  59.6563   0.0143  47.0114   0.0069  54.8700   0.1650
+   0.0400  59.6614   0.0191  47.0138   0.0092  54.8738   0.1679
+   0.0500  59.6679   0.0239  47.0168   0.0116  54.8786   0.1707
+   0.0600  59.6758   0.0286  47.0205   0.0139  54.8845   0.1736
+   0.0700  59.6852   0.0334  47.0249   0.0162  54.8915   0.1765
+   0.0800  59.6960   0.0382  47.0299   0.0185  54.8996   0.1794
+   0.0900  59.7083   0.0430  47.0357   0.0208  54.9087   0.1823
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0002_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0002_GW_NLF_MDF
@@ -857,16 +952,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.9320   0.0000  47.1783   0.0000  55.0850   0.2019
-   0.0100  59.9327   0.0063  47.1786   0.0031  55.0856   0.2058
-   0.0200  59.9349   0.0127  47.1796   0.0061  55.0872   0.2097
-   0.0300  59.9386   0.0190  47.1814   0.0092  55.0899   0.2137
-   0.0400  59.9437   0.0254  47.1837   0.0123  55.0937   0.2176
-   0.0500  59.9503   0.0317  47.1868   0.0153  55.0986   0.2215
-   0.0600  59.9584   0.0381  47.1906   0.0184  55.1046   0.2255
-   0.0700  59.9679   0.0444  47.1950   0.0215  55.1117   0.2295
-   0.0800  59.9789   0.0508  47.2001   0.0245  55.1199   0.2335
-   0.0900  59.9914   0.0571  47.2059   0.0276  55.1291   0.2375
+   0.0000  59.9453  -0.0000  47.1891  -0.0000  55.0977   0.2020
+   0.0100  59.9461   0.0063  47.1895   0.0031  55.0982   0.2059
+   0.0200  59.9483   0.0127  47.1905   0.0061  55.0998   0.2098
+   0.0300  59.9519   0.0190  47.1922   0.0092  55.1026   0.2137
+   0.0400  59.9571   0.0254  47.1946   0.0123  55.1064   0.2176
+   0.0500  59.9636   0.0317  47.1976   0.0153  55.1113   0.2216
+   0.0600  59.9717   0.0381  47.2014   0.0184  55.1173   0.2255
+   0.0700  59.9812   0.0444  47.2058   0.0215  55.1243   0.2295
+   0.0800  59.9922   0.0508  47.2110   0.0245  55.1325   0.2335
+   0.0900  60.0047   0.0572  47.2168   0.0276  55.1418   0.2375
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0003_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0003_GW_NLF_MDF
@@ -874,16 +969,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.3252   0.0000  47.4180   0.0000  55.3934   0.2623
-   0.0100  60.3259   0.0086  47.4183   0.0041  55.3940   0.2677
-   0.0200  60.3281   0.0171  47.4194   0.0082  55.3956   0.2731
-   0.0300  60.3319   0.0257  47.4211   0.0124  55.3984   0.2785
-   0.0400  60.3371   0.0342  47.4235   0.0165  55.4023   0.2840
-   0.0500  60.3438   0.0428  47.4266   0.0206  55.4072   0.2894
-   0.0600  60.3521   0.0514  47.4304   0.0248  55.4133   0.2949
-   0.0700  60.3618   0.0600  47.4350   0.0289  55.4205   0.3004
-   0.0800  60.3730   0.0686  47.4402   0.0330  55.4288   0.3059
-   0.0900  60.3857   0.0772  47.4461   0.0372  55.4382   0.3114
+   0.0000  60.3385  -0.0000  47.4288  -0.0000  55.4061   0.2624
+   0.0100  60.3393   0.0086  47.4292   0.0041  55.4067   0.2678
+   0.0200  60.3415   0.0171  47.4302   0.0082  55.4083   0.2732
+   0.0300  60.3453   0.0257  47.4320   0.0124  55.4111   0.2786
+   0.0400  60.3505   0.0342  47.4344   0.0165  55.4150   0.2840
+   0.0500  60.3572   0.0428  47.4375   0.0206  55.4199   0.2895
+   0.0600  60.3655   0.0514  47.4413   0.0248  55.4260   0.2949
+   0.0700  60.3752   0.0600  47.4458   0.0289  55.4332   0.3004
+   0.0800  60.3864   0.0686  47.4510   0.0330  55.4415   0.3059
+   0.0900  60.3991   0.0772  47.4569   0.0372  55.4509   0.3115
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0004_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0004_GW_NLF_MDF
@@ -891,16 +986,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.7625   0.0000  47.6840   0.0000  55.7370   0.3253
-   0.0100  60.7633   0.0112  47.6844   0.0054  55.7375   0.3325
-   0.0200  60.7656   0.0223  47.6854   0.0107  55.7392   0.3396
-   0.0300  60.7694   0.0335  47.6872   0.0161  55.7420   0.3468
-   0.0400  60.7747   0.0447  47.6897   0.0214  55.7459   0.3540
-   0.0500  60.7816   0.0559  47.6928   0.0268  55.7509   0.3613
-   0.0600  60.7900   0.0671  47.6967   0.0321  55.7571   0.3685
-   0.0700  60.8000   0.0783  47.7013   0.0375  55.7644   0.3758
-   0.0800  60.8114   0.0895  47.7066   0.0429  55.7728   0.3831
-   0.0900  60.8245   0.1007  47.7126   0.0482  55.7824   0.3905
+   0.0000  60.7759  -0.0000  47.6949  -0.0000  55.7497   0.3254
+   0.0100  60.7767   0.0112  47.6953   0.0054  55.7503   0.3325
+   0.0200  60.7790   0.0223  47.6963   0.0107  55.7519   0.3397
+   0.0300  60.7828   0.0335  47.6981   0.0161  55.7547   0.3469
+   0.0400  60.7882   0.0447  47.7006   0.0214  55.7586   0.3541
+   0.0500  60.7950   0.0559  47.7037   0.0268  55.7637   0.3614
+   0.0600  60.8035   0.0671  47.7076   0.0321  55.7698   0.3686
+   0.0700  60.8134   0.0783  47.7122   0.0375  55.7771   0.3759
+   0.0800  60.8249   0.0895  47.7175   0.0429  55.7856   0.3832
+   0.0900  60.8379   0.1007  47.7235   0.0482  55.7951   0.3905
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0005_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0005_GW_NLF_MDF
@@ -908,16 +1003,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.2221   0.0000  47.9632   0.0000  56.1003   0.3839
-   0.0100  61.2229   0.0141  47.9636   0.0067  56.1008   0.3931
-   0.0200  61.2252   0.0281  47.9647   0.0134  56.1024   0.4023
-   0.0300  61.2292   0.0422  47.9665   0.0201  56.1052   0.4115
-   0.0400  61.2346   0.0563  47.9690   0.0268  56.1091   0.4207
-   0.0500  61.2417   0.0703  47.9722   0.0335  56.1142   0.4300
-   0.0600  61.2503   0.0844  47.9762   0.0402  56.1205   0.4392
-   0.0700  61.2605   0.0985  47.9808   0.0469  56.1278   0.4486
-   0.0800  61.2722   0.1127  47.9862   0.0536  56.1364   0.4579
-   0.0900  61.2855   0.1268  47.9923   0.0604  56.1461   0.4673
+   0.0000  61.2356  -0.0000  47.9742  -0.0000  56.1131   0.3841
+   0.0100  61.2364   0.0141  47.9745   0.0067  56.1136   0.3932
+   0.0200  61.2387   0.0281  47.9756   0.0134  56.1152   0.4024
+   0.0300  61.2426   0.0422  47.9774   0.0201  56.1180   0.4116
+   0.0400  61.2481   0.0563  47.9799   0.0268  56.1220   0.4208
+   0.0500  61.2552   0.0703  47.9831   0.0335  56.1271   0.4301
+   0.0600  61.2638   0.0844  47.9871   0.0402  56.1333   0.4394
+   0.0700  61.2740   0.0985  47.9918   0.0469  56.1407   0.4487
+   0.0800  61.2857   0.1127  47.9972   0.0537  56.1492   0.4580
+   0.0900  61.2990   0.1268  48.0033   0.0604  56.1589   0.4674
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0006_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0006_GW_NLF_MDF
@@ -925,16 +1020,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.6942   0.0000  48.2498   0.0000  56.4726   0.4311
-   0.0100  61.6950   0.0172  48.2501   0.0081  56.4731   0.4425
-   0.0200  61.6974   0.0344  48.2512   0.0163  56.4747   0.4539
-   0.0300  61.7014   0.0516  48.2530   0.0244  56.4775   0.4654
-   0.0400  61.7070   0.0688  48.2556   0.0326  56.4814   0.4768
-   0.0500  61.7142   0.0860  48.2589   0.0407  56.4866   0.4883
-   0.0600  61.7231   0.1033  48.2629   0.0489  56.4929   0.4999
-   0.0700  61.7335   0.1205  48.2677   0.0570  56.5003   0.5114
-   0.0800  61.7455   0.1378  48.2732   0.0652  56.5090   0.5230
-   0.0900  61.7591   0.1551  48.2794   0.0734  56.5188   0.5347
+   0.0000  61.7078  -0.0000  48.2607  -0.0000  56.4855   0.4312
+   0.0100  61.7086   0.0172  48.2611   0.0081  56.4860   0.4426
+   0.0200  61.7110   0.0344  48.2622   0.0163  56.4876   0.4541
+   0.0300  61.7150   0.0516  48.2640   0.0244  56.4904   0.4655
+   0.0400  61.7206   0.0688  48.2666   0.0326  56.4944   0.4770
+   0.0500  61.7278   0.0860  48.2699   0.0407  56.4995   0.4885
+   0.0600  61.7366   0.1033  48.2739   0.0489  56.5058   0.5000
+   0.0700  61.7470   0.1205  48.2787   0.0570  56.5133   0.5116
+   0.0800  61.7591   0.1378  48.2841   0.0652  56.5219   0.5232
+   0.0900  61.7727   0.1551  48.2904   0.0734  56.5318   0.5348
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0007_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0007_GW_NLF_MDF
@@ -942,16 +1037,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.1738   0.0000  48.5407   0.0000  56.8448   0.4668
-   0.0100  62.1746   0.0206  48.5410   0.0097  56.8452   0.4806
-   0.0200  62.1771   0.0411  48.5422   0.0193  56.8468   0.4945
-   0.0300  62.1812   0.0617  48.5440   0.0290  56.8496   0.5084
-   0.0400  62.1869   0.0823  48.5466   0.0387  56.8536   0.5224
-   0.0500  62.1943   0.1029  48.5500   0.0484  56.8588   0.5363
-   0.0600  62.2033   0.1235  48.5541   0.0581  56.8652   0.5503
-   0.0700  62.2140   0.1441  48.5589   0.0678  56.8727   0.5644
-   0.0800  62.2263   0.1648  48.5645   0.0774  56.8815   0.5785
-   0.0900  62.2402   0.1854  48.5708   0.0872  56.8915   0.5926
+   0.0000  62.1874  -0.0000  48.5517  -0.0000  56.8578   0.4670
+   0.0100  62.1882   0.0206  48.5521   0.0097  56.8582   0.4808
+   0.0200  62.1907   0.0411  48.5532   0.0193  56.8598   0.4947
+   0.0300  62.1948   0.0617  48.5550   0.0290  56.8626   0.5086
+   0.0400  62.2005   0.0823  48.5576   0.0387  56.8666   0.5225
+   0.0500  62.2079   0.1029  48.5610   0.0484  56.8718   0.5365
+   0.0600  62.2169   0.1235  48.5651   0.0581  56.8782   0.5505
+   0.0700  62.2276   0.1441  48.5699   0.0678  56.8857   0.5646
+   0.0800  62.2399   0.1648  48.5755   0.0775  56.8945   0.5786
+   0.0900  62.2538   0.1855  48.5819   0.0872  56.9045   0.5928
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0008_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0008_GW_NLF_MDF
@@ -959,16 +1054,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.6578   0.0000  48.8343   0.0000  57.2144   0.4921
-   0.0100  62.6587   0.0241  48.8347   0.0113  57.2148   0.5086
-   0.0200  62.6612   0.0483  48.8358   0.0226  57.2164   0.5252
-   0.0300  62.6654   0.0725  48.8377   0.0339  57.2192   0.5417
-   0.0400  62.6712   0.0966  48.8404   0.0451  57.2233   0.5584
-   0.0500  62.6788   0.1208  48.8438   0.0564  57.2286   0.5750
-   0.0600  62.6880   0.1450  48.8480   0.0677  57.2350   0.5917
-   0.0700  62.6989   0.1693  48.8529   0.0790  57.2428   0.6084
-   0.0800  62.7115   0.1935  48.8586   0.0903  57.2517   0.6252
-   0.0900  62.7258   0.2178  48.8650   0.1017  57.2618   0.6420
+   0.0000  62.6715  -0.0000  48.8454  -0.0000  57.2274   0.4923
+   0.0100  62.6723   0.0242  48.8457   0.0113  57.2278   0.5088
+   0.0200  62.6748   0.0483  48.8469   0.0226  57.2295   0.5253
+   0.0300  62.6790   0.0725  48.8488   0.0339  57.2323   0.5419
+   0.0400  62.6849   0.0966  48.8514   0.0451  57.2364   0.5585
+   0.0500  62.6925   0.1208  48.8548   0.0564  57.2416   0.5752
+   0.0600  62.7017   0.1450  48.8590   0.0677  57.2481   0.5919
+   0.0700  62.7126   0.1693  48.8640   0.0790  57.2558   0.6086
+   0.0800  62.7252   0.1935  48.8696   0.0904  57.2648   0.6254
+   0.0900  62.7395   0.2178  48.8761   0.1017  57.2749   0.6422
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0009_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0009_GW_NLF_MDF
@@ -976,16 +1071,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  63.1443   0.0000  49.1296   0.0000  57.5780   0.5073
-   0.0100  63.1452   0.0280  49.1300   0.0130  57.5784   0.5267
-   0.0200  63.1477   0.0559  49.1312   0.0259  57.5801   0.5461
-   0.0300  63.1520   0.0839  49.1331   0.0389  57.5830   0.5656
-   0.0400  63.1580   0.1119  49.1358   0.0519  57.5872   0.5851
-   0.0500  63.1657   0.1399  49.1393   0.0649  57.5926   0.6046
-   0.0600  63.1752   0.1679  49.1435   0.0779  57.5992   0.6242
-   0.0700  63.1863   0.1960  49.1485   0.0909  57.6071   0.6438
-   0.0800  63.1992   0.2241  49.1543   0.1039  57.6162   0.6635
-   0.0900  63.2138   0.2522  49.1609   0.1169  57.6265   0.6832
+   0.0000  63.1580  -0.0000  49.1407  -0.0000  57.5911   0.5075
+   0.0100  63.1589   0.0280  49.1411   0.0130  57.5916   0.5269
+   0.0200  63.1615   0.0559  49.1423   0.0260  57.5932   0.5463
+   0.0300  63.1657   0.0839  49.1442   0.0389  57.5962   0.5658
+   0.0400  63.1717   0.1119  49.1469   0.0519  57.6003   0.5853
+   0.0500  63.1795   0.1399  49.1504   0.0649  57.6057   0.6048
+   0.0600  63.1889   0.1679  49.1546   0.0779  57.6123   0.6244
+   0.0700  63.2000   0.1960  49.1596   0.0909  57.6202   0.6440
+   0.0800  63.2129   0.2241  49.1654   0.1039  57.6293   0.6637
+   0.0900  63.2275   0.2522  49.1720   0.1169  57.6397   0.6834
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0010_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0010_GW_NLF_MDF
@@ -1152,7 +1247,7 @@ P           mkmem4          3
            shiftk3     0.00000000E+00  0.00000000E+00  0.00000000E+00
            shiftk4     0.00000000E+00  0.00000000E+00  0.00000000E+00
           spgroup         227
-           strten1     3.3856814641E-05  3.3856814641E-05  3.3856814641E-05
+           strten1     3.3856814639E-05  3.3856814639E-05  3.3856814639E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1251,7 +1346,24 @@ P           mkmem4          3
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1262,51 +1374,45 @@ P           mkmem4          3
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          6.3  wall=          9.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  67 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.1
-- MEMORY CONSUMPTION REPORT:
--   There were 212239 allocations and 212239 deallocations
--   Remaining memory at the end of the calculation is 0
+.Delivered  64 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.3  wall=          9.4

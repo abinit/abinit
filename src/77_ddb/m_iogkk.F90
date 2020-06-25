@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_iogkk
 !! NAME
 !!  m_iogkk
@@ -7,7 +6,7 @@
 !!  IO routines for GKK files
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MVer)
+!!  Copyright (C) 2008-2020 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -145,13 +144,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  use_sym   = 1
  nsppol    = elph_ds%nsppol
  nbranch   = elph_ds%nbranch
- if (ep_prt_yambo==1) then
-   nFSband = nband
-   minFSband = 1
- else
-   nFSband   = elph_ds%nFSband
-   minFSband = elph_ds%minFSband
- end if
+ nFSband   = elph_ds%nFSband
+ minFSband = elph_ds%minFSband
 
 !init values for parallelization
  comm = xmpi_world
@@ -1005,7 +999,7 @@ end subroutine prt_gkk_yambo
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2020 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1867,7 +1861,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
          sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)
          ibeff=ib2+(ib1-1)*elph_ds%nFSband
 
-         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,isppol,ik_this_proc),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,elph_ds%nbranch,elph_ds%nbranch/))
 
          call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
 
@@ -1931,7 +1925,6 @@ end subroutine nmsq_gam_sumFS
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/nmsq_pure_gkk
 !!
 !! NAME

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_elphon
 !!
 !! NAME
@@ -10,7 +9,7 @@
 !!  used, or be written to disk. All combinations should be feasible.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2020 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_anaddb_dataset
 !! NAME
 !!  m_anaddb_dataset
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +30,7 @@ module m_anaddb_dataset
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
  use m_symtk,     only : mati3det
- use m_parser,    only : intagm, chkvars_in_string
+ use m_parser,    only : intagm, chkvars_in_string, instrng
  use m_ddb,       only : DDB_QTOL
 
  implicit none
@@ -69,12 +68,14 @@ module m_anaddb_dataset
   integer :: chneut
   integer :: dieflag
   integer :: dipdip
+  integer :: dipquad
   integer :: dossum
   integer :: ep_scalprod
   integer :: eivec
   integer :: elaflag
   integer :: elphflag
   integer :: enunit
+  integer :: flexoflag
   integer :: gkk2write
   integer :: gkk_rptwrite
   integer :: gkqwrite
@@ -122,6 +123,7 @@ module m_anaddb_dataset
   integer :: telphint
   integer :: thmflag
   integer :: qgrid_type
+  integer :: quadquad
   integer :: ep_b_min
   integer :: ep_b_max
   integer :: ep_int_gkk
@@ -364,7 +366,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !C
 
- anaddb_dtset%chneut=0
+ anaddb_dtset%chneut=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
  if(tread==1) anaddb_dtset%chneut=intarr(1)
  if(anaddb_dtset%chneut<0.or.anaddb_dtset%chneut>2)then
@@ -389,10 +391,20 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
  if(tread==1) anaddb_dtset%dipdip=intarr(1)
- if(anaddb_dtset%dipdip<0.or.anaddb_dtset%dipdip>1)then
+ if(anaddb_dtset%dipdip<-1.or.anaddb_dtset%dipdip>1)then
    write(message, '(a,i0,5a)' )&
    'dipdip is ',anaddb_dtset%dipdip,', but the only allowed values',ch10,&
-   'are 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
+   'are -1, 0 or 1 .',ch10,'Action: correct dipdip in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ anaddb_dtset%dipquad=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
+ if(tread==1) anaddb_dtset%dipquad=intarr(1)
+ if(anaddb_dtset%dipquad<-1.or.anaddb_dtset%dipquad>1)then
+   write(message, '(a,i0,5a)' )&
+   'dipquad is ',anaddb_dtset%dipquad,', but the only allowed values',ch10,&
+   'are 0 or 1 .',ch10,'Action: correct dipquad in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -598,6 +610,17 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !F
+
+ anaddb_dtset%flexoflag=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'flexoflag',tread,'INT')
+ if(tread==1) anaddb_dtset%flexoflag=intarr(1)
+ if(anaddb_dtset%flexoflag<0.or.anaddb_dtset%flexoflag>4)then
+   write(message,'(3a,i0,5a)' )&
+   ' flexoflag is ',anaddb_dtset%flexoflag,', but the only allowed values',ch10,&
+   'are 0, 1,2,3,4  .',ch10,'Action: correct flexoflag in your input file.'
+   MSG_ERROR(message)
+ end if
+
  anaddb_dtset%freeze_displ = zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freeze_displ',tread,'DPR')
  if(tread==1) anaddb_dtset%freeze_displ=dprarr(1)
@@ -987,7 +1010,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !P
-
  anaddb_dtset%piezoflag=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'piezoflag',tread,'INT')
  if(tread==1) anaddb_dtset%piezoflag=intarr(1)
@@ -1144,6 +1166,16 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
      MSG_ERROR(message)
    end if
  end do
+
+ anaddb_dtset%quadquad=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
+ if(tread==1) anaddb_dtset%quadquad=intarr(1)
+ if(anaddb_dtset%quadquad<-1.or.anaddb_dtset%quadquad>1)then
+   write(message, '(a,i0,5a)' )&
+   'quadquad is ',anaddb_dtset%quadquad,', but the only allowed values',ch10,&
+   'are 0 or 1 .',ch10,'Action: correct quadquad in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !R
 
@@ -1538,8 +1570,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    anaddb_dtset%qpath(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*anaddb_dtset%nqpath,string(1:lenstr),'qpath',tread,'DPR')
    if(tread==1) then
-     anaddb_dtset%qpath(1:3,1:anaddb_dtset%nqpath)=&
-&     reshape(dprarr(1:3*anaddb_dtset%nqpath),(/3,anaddb_dtset%nqpath/))
+     anaddb_dtset%qpath(1:3,1:anaddb_dtset%nqpath)= reshape(dprarr(1:3*anaddb_dtset%nqpath),(/3,anaddb_dtset%nqpath/))
    else
      write(message,'(3a)')&
      'nqpath is non zero but qpath is absent ',ch10,&
@@ -1671,7 +1702,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
  if(any(anaddb_dtset%qrefine(1:3) > 1) .and. &
-&   any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(1:3)),one)) > tol10) ) then
+    any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(1:3)),one)) > tol10) ) then
    write(message, '(a,3i10,a,a,a,3i8,a,a)' )&
    'qrefine is',anaddb_dtset%qrefine(1:3),' The only allowed values',ch10,&
    'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt(1:3),ch10,&
@@ -1682,8 +1713,8 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !check that fermie and nelect are not both specified
  if(abs(anaddb_dtset%elph_fermie) > tol10 .and. abs(anaddb_dtset%ep_extrael) > tol10) then
    write(message, '(a,E10.2,a,E10.2,a,a,a)' )&
-&   'elph_fermie (',anaddb_dtset%elph_fermie,') and ep_extrael (',anaddb_dtset%ep_extrael, '), may not both be non 0',ch10,&
-&   'Action: remove one of the two in your input file.'
+    'elph_fermie (',anaddb_dtset%elph_fermie,') and ep_extrael (',anaddb_dtset%ep_extrael, '), may not both be non 0',ch10,&
+    'Action: remove one of the two in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1741,12 +1772,14 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
 
 !The flags
  if (anaddb_dtset%dieflag/=0 .or. anaddb_dtset%ifcflag/=0 .or. &
+     anaddb_dtset%flexoflag/=0 .or. &
      anaddb_dtset%nlflag/=0 .or. anaddb_dtset%thmflag/=0 .or. &
      anaddb_dtset%elaflag/=0 .or. anaddb_dtset%elphflag/=0 .or. &
      anaddb_dtset%polflag/=0 .or. anaddb_dtset%instrflag/=0 .or. &
      anaddb_dtset%piezoflag/=0) then
    write(nunit,'(a)')' Flags :'
    if(anaddb_dtset%dieflag/=0)write(nunit,'(3x,a9,3i10)')'  dieflag',anaddb_dtset%dieflag
+   if(anaddb_dtset%flexoflag/=0)write(nunit,'(3x,a9,3i10)')'flexoflag',anaddb_dtset%flexoflag
    if(anaddb_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',anaddb_dtset%ifcflag
    if(anaddb_dtset%nlflag/=0)write(nunit,'(3x,a9,3i10)')'   nlflag',anaddb_dtset%nlflag
    if(anaddb_dtset%thmflag/=0)write(nunit,'(3x,a9,3i10)')'  thmflag',anaddb_dtset%thmflag
@@ -1769,7 +1802,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    if(anaddb_dtset%enunit/=0)write(nunit,'(3x,a9,3i10)')'   enunit',anaddb_dtset%enunit
    if(anaddb_dtset%eivec/=0) write(nunit,'(3x,a9,3i10)')'    eivec',anaddb_dtset%eivec
    if(anaddb_dtset%asr/=0)   write(nunit,'(3x,a9,3i10)')'      asr',anaddb_dtset%asr
-   if(anaddb_dtset%chneut/=0)write(nunit,'(3x,a9,3i10)')'   chneut',anaddb_dtset%chneut
+   if(anaddb_dtset%chneut/=1)write(nunit,'(3x,a9,3i10)')'   chneut',anaddb_dtset%chneut
    if(anaddb_dtset%selectz/=0)write(nunit,'(3x,a9,3i10)')'  selectz',anaddb_dtset%selectz
    if(anaddb_dtset%symdynmat/=1)write(nunit,'(3x,a9,3i10)')'symdynmat',anaddb_dtset%symdynmat
  end if
@@ -1787,6 +1820,8 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
  if(anaddb_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Interatomic Force Constants Inputs :'
    write(nunit,'(3x,a9,3i10)')'   dipdip',anaddb_dtset%dipdip
+   write(nunit,'(3x,a9,3i10)')'   dipquad',anaddb_dtset%dipquad
+   write(nunit,'(3x,a9,3i10)')'   quadquad',anaddb_dtset%quadquad
    if(anaddb_dtset%nsphere/=0)write(nunit,'(3x,a9,3i10)')'  nsphere',anaddb_dtset%nsphere
    if(abs(anaddb_dtset%rifcsph)>tol10)write(nunit,'(3x,a9,E16.6)')'  nsphere',anaddb_dtset%rifcsph
    write(nunit,'(3x,a9,3i10)')'   ifcana',anaddb_dtset%ifcana
@@ -1915,21 +1950,10 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
      write(nunit, '(a)') '    linewidth comes from which phonon mode !!!'
    end if
 
-   if (anaddb_dtset%prtbltztrp== 1) then
-     write(nunit, '(a)') ' Will output input files for BoltzTraP'
-   end if
-
-   if (anaddb_dtset%prtfsurf == 1) then
-     write(nunit, '(a)') ' Will output fermi surface in XCrysDen format'
-   end if
-
-   if (anaddb_dtset%prt_ifc == 1) then
-     write(nunit, '(a)') ' Will output real space IFC in AI2PS and TDEP format'
-   end if
-
-   if (anaddb_dtset%prtnest == 1) then
-     write(nunit, '(a)') ' Will output nesting factor'
-   end if
+   if (anaddb_dtset%prtbltztrp== 1) write(nunit, '(a)') ' Will output input files for BoltzTraP'
+   if (anaddb_dtset%prtfsurf == 1) write(nunit, '(a)') ' Will output fermi surface in XCrysDen format'
+   if (anaddb_dtset%prt_ifc == 1) write(nunit, '(a)') ' Will output real space IFC in AI2PS and TDEP format'
+   if (anaddb_dtset%prtnest == 1) write(nunit, '(a)') ' Will output nesting factor'
 
    if (anaddb_dtset%ifltransport == 1) then
      write(nunit, '(a)') ' Will perform transport calculation in elphon to get'
@@ -1969,7 +1993,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9)')'    qph1l'
    do iph1=1,anaddb_dtset%nph1l
      write(nunit,'(19x,3es16.8,2x,es11.3)') &
-&     (anaddb_dtset%qph1l(ii,iph1),ii=1,3),anaddb_dtset%qnrml1(iph1)
+       (anaddb_dtset%qph1l(ii,iph1),ii=1,3),anaddb_dtset%qnrml1(iph1)
    end do
  end if
 
@@ -2012,6 +2036,7 @@ end subroutine outvars_anaddb
 !! Initialize the code ppddb9: write heading and make the first i/os
 !!
 !! INPUTS
+!!  input_path: String with input file path. Empty string activates files file legacy mode.
 !!
 !! OUTPUT
 !! character(len=fnlen) filnam(7)=character strings giving file names
@@ -2035,36 +2060,89 @@ end subroutine outvars_anaddb
 !!
 !! SOURCE
 
-subroutine anaddb_init(filnam)
+subroutine anaddb_init(input_path, filnam)
 
 !Arguments -------------------------------
 !arrays
+ character(len=*),intent(in) :: input_path
  character(len=*),intent(out) :: filnam(7)
+
+!Local variables -------------------------
+!scalars
+ integer :: lenstr, marr, jdtset, tread
+ character(len=strlen) :: string
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp),allocatable :: dprarr(:)
 
 ! *********************************************************************
 
-!Read the file names
- write(std_out,*)' Give name for formatted input file: '
- read(std_in, '(a)' ) filnam(1)
- write(std_out,'(a,a)' )'-   ',trim(filnam(1))
- write(std_out,*)' Give name for formatted output file: '
- read(std_in, '(a)' ) filnam(2)
- write(std_out,'(a,a)' )'-   ',trim(filnam(2))
- write(std_out,*)' Give name for input derivative database: '
- read(std_in, '(a)' ) filnam(3)
- write(std_out,'(a,a)' )'-   ',trim(filnam(3))
- write(std_out,*)' Give name for output molecular dynamics: '
- read(std_in, '(a)' ) filnam(4)
- write(std_out,'(a,a)' )'-   ',trim(filnam(4))
- write(std_out,*)' Give name for input elphon matrix elements (GKK file): '
- read(std_in, '(a)' ) filnam(5)
- write(std_out,'(a,a)' )'-   ',trim(filnam(5))
- write(std_out,*)' Give root name for elphon output files: '
- read(std_in, '(a)' ) filnam(6)
- write(std_out,'(a,a)' )'-   ',trim(filnam(6))
- write(std_out,*)' Give name for file containing ddk filenames for elphon/transport: '
- read(std_in, '(a)' ) filnam(7)
- write(std_out,'(a,a)' )'-   ',trim(filnam(7))
+ if (len_trim(input_path) == 0) then
+   ! Legacy Files file mode.
+   write(std_out, "(2a)")" DeprecationWarning: ",ch10
+   write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
+   write(std_out, "(2a)")"     Use the syntax `anaddb t01.abi` where t01.abi is an anaddb input with ddb_filepath.",ch10
+   write(std_out, "(3a)")'            ddb_filepath = "out_DDB"',ch10,ch10
+
+   write(std_out,*)' Give name for formatted input file: '
+   read(std_in, '(a)' ) filnam(1)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(1))
+   write(std_out,*)' Give name for formatted output file: '
+   read(std_in, '(a)' ) filnam(2)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(2))
+   write(std_out,*)' Give name for input derivative database: '
+   read(std_in, '(a)' ) filnam(3)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(3))
+   write(std_out,*)' Give name for output molecular dynamics: '
+   read(std_in, '(a)' ) filnam(4)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(4))
+   write(std_out,*)' Give name for input elphon matrix elements (GKK file): '
+   read(std_in, '(a)' ) filnam(5)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(5))
+   write(std_out,*)' Give root name for elphon output files: '
+   read(std_in, '(a)' ) filnam(6)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(6))
+   write(std_out,*)' Give name for file containing ddk filenames for elphon/transport: '
+   read(std_in, '(a)' ) filnam(7)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(7))
+
+ else
+   ! Read input
+   call instrng(input_path, lenstr, 1, strlen, string)
+   ! To make case-insensitive, map characters to upper case.
+   call inupper(string(1:lenstr))
+
+   filnam = ""
+   filnam(1) = input_path
+   filnam(2) = "run.abo"
+
+   marr = 3
+   ABI_MALLOC(intarr, (marr))
+   ABI_MALLOC(dprarr, (marr))
+   jdtset = 0
+
+   ! Allow user to override default values
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
+   write(std_out, "(2a)")'- Name for formatted output file: ', trim(filnam(2))
+
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_filepath", tread, 'KEY', key_value=filnam(3))
+   ABI_CHECK(tread == 1, "ddb_filepath variable must be specified in the input file")
+   write(std_out, "(2a)")'- Input derivative database: ', trim(filnam(3))
+
+   ! Nobody knows the scope of this line in the files file.
+   !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value=filnam(5))
+   if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
+
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
+   if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
+
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value=filnam(7))
+   if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
+
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+ end if
 
 end subroutine anaddb_init
 !!***
@@ -2114,13 +2192,13 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars=trim(list_vars)//' chneut'
 !D
- list_vars=trim(list_vars)//' dieflag dipdip dossum dosdeltae dossmear dostol'
+ list_vars=trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol'
 !E
  list_vars=trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars=trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
  list_vars=trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist'
 !F
- list_vars=trim(list_vars)//' freeze_displ frmax frmin'
+ list_vars=trim(list_vars)//' flexoflag freeze_displ frmax frmin'
 !G
  list_vars=trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
 !H
@@ -2141,7 +2219,7 @@ subroutine anaddb_chkvars(string)
  list_vars=trim(list_vars)//' piezoflag polflag prtddb prtdos prt_ifc prtmbm prtfsurf'
  list_vars=trim(list_vars)//' prtnest prtphbands prtsrlr prtvol prtbltztrp'
 !Q
- list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l'
+ list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l quadquad'
 !R
  list_vars=trim(list_vars)//' ramansr relaxat relaxstr rfmeth rifcsph'
 !S
@@ -2161,13 +2239,13 @@ subroutine anaddb_chkvars(string)
  list_logicals=' '
 
 !String input variables
- list_strings=' gruns_ddbs'
+ list_strings=' gruns_ddbs ddb_filepath output_file gkk_filepath eph_prefix ddk_filepath' ! md_output
 !</ANADDB_VARS>
 
 !Extra token, also admitted:
 !<ANADDB_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K Ry Rydberg Rydbergs T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs T Tesla'
 !</ANADDB_UNITS>
 
 !<ANADDB_OPERATORS>

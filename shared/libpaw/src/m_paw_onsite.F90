@@ -8,7 +8,7 @@
 !!  i.e. quantities expressed with <Phi_i|...|Phi_j> and/or <tild_Phi_i|...|tild_Phi_j>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2020 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -289,16 +289,15 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
    MSG_BUG(msg)
  end if
 
- if (mesh_size_cor/=pawrad(1)%mesh_size) then
-   write(msg,'(a)') 'Wrong mesh_size_cor value (1)!'
-   MSG_BUG(msg)
- end if
-
- if (any(mesh_size_cor/=pawtab(:)%mesh_size)) then
-   write(msg,'(3a)') 'Wrong mesh_size_cor value (2)!',ch10,&
-&                    'Should have only one type of atom.'
-   MSG_ERROR(msg)
- end if
+!if (mesh_size_cor/=pawrad(1)%mesh_size) then
+!  write(msg,'(a)') 'Wrong mesh_size_cor value (1)!'
+!  MSG_BUG(msg)
+!end if
+!if (any(mesh_size_cor/=pawtab(:)%mesh_size)) then
+!  write(msg,'(3a)') 'Wrong mesh_size_cor value (2)!',ch10,&
+!&                    'Should have only one type of atom.'
+!  MSG_ERROR(msg)
+!end if
 
 !Integration of the angular part: all angular integrals have been computed
 !outside Abinit and tabulated for each (l,m) value up to l=3
@@ -307,7 +306,8 @@ subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
  do itypat=1,ntypat
 
 !  COMPUTE nabla_ij := <phi_i|nabla|phi_cor> for this type
-   mesh_size=pawtab(itypat)%mesh_size
+   mesh_size=min(pawtab(itypat)%partialwave_mesh_size,pawrad(itypat)%mesh_size)
+   mesh_size=min(mesh_size_cor,mesh_size)
    lmn_size=pawtab(itypat)%lmn_size
    nln=pawtab(itypat)%basis_size
 

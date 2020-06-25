@@ -19,12 +19,12 @@
      ixc2   7
 
 #Dataset 3. Still other units or input variables
-  xangst3   0.0 0.0  0.55
-            0.0 0.0 -0.55
+  xcart3   0.0 0.0  0.55
+           0.0 0.0 -0.55   Angstrom
    acell3   2*3.704240458   4.7625948747  Angstrom
   toldfe3   2d-7 Ry
   SpinPolarized3     T     ! This is a SIESTA input variable
-  xcname3   PW92
+  xcname3   "PW92"
 
 
 #Common data

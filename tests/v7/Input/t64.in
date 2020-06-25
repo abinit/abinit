@@ -70,6 +70,6 @@ accuracy7 6
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = F. Jollet
-#%% keywords = XML
+#%% keywords = XML, PAW
 #%% description = Test of input variable "accuracy" (F. Jollet)
 #%%<END TEST_INFO>

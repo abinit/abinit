@@ -35,7 +35,11 @@ inp_files = [
 "t22.in",
 "t23.in",
 "t24.in",
-#"t25.in",
+"t25.in",
+"t26.in",
+"t27.in",
+"t28.in",
+"t29.in",
 "t30.in",
 "t31.in",
 "t32.in",
@@ -101,4 +105,12 @@ inp_files = [
 "t92.in",
 "t93.in",
 "t94.in",
+#Non-collinear magnetization + nspden=4
+"t95.in",
+"t96.in",
+"t97.in",
+#Additional-multibinit tests 
+"t98.in", 
+"t99.in",
+"t100.in",
 ]

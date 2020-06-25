@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_correlations/m_paw_correlations
 !! NAME
 !!  m_paw_correlations
@@ -8,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2020 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -195,7 +194,7 @@ CONTAINS  !=====================================================================
  if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
  if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
 &  write(message, '(3a)' ) trim(message),ch10," ******************************************"
- if(use_dmft==0) then
+ if(use_dmft==0 .and. abs(usepawu)<=4) then
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if

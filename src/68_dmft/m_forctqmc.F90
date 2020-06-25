@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forctqmc
 !! NAME
 !!  m_forctqmc
@@ -7,7 +6,7 @@
 !! Prepare CTQMC and call CTQMC
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon, VPlanes)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon, VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,6 +57,9 @@ MODULE m_forctqmc
  use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
  use m_special_funcs, only : sbf8
  use m_paw_numeric, only : jbessel=>paw_jbessel
+#ifdef HAVE_NETCDF
+  use netcdf !If calling TRIQS via python invocation, write a .nc file
+#endif
 
  implicit none
 
@@ -72,7 +74,6 @@ MODULE m_forctqmc
 !!***
 
 contains
-
 !!****f* m_forctqmc/qmc_prep_ctqmc
 !! NAME
 !! qmc_prep_ctqmc
@@ -103,12 +104,13 @@ contains
 !!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
 !!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
 !!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
-!!      jbessel,occup_green_tau,print_green,print_matlu,printocc_green
+!!      jbessel,nf_check,occup_green_tau,print_green,print_matlu,printocc_green
 !!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
 !!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
 !!      xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
+
 
 subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,weiss)
 
@@ -167,7 +169,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: unt,unt2
 ! Var added to the code for TRIQS_CTQMC test and default value -----------------------------------------------------------
  logical(kind=1) :: leg_measure = .true.
-
 ! ************************************************************************
  mbandc=paw_dmft%mbandc
  nkpt=paw_dmft%nkpt
@@ -1272,10 +1273,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call wrtout(std_out,message,'COLL')
      end if
 
-     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
-       !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
+     if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor))
-       open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
+       !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
+         open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
        if(paw_dmft%dmft_solv==5) then
          ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
@@ -1336,10 +1337,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        ! =================================================================
        !    CTQMC run TRIQS
        ! =================================================================
-       else if (paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7) then
+       else if ((paw_dmft%dmft_solv>=6.and.paw_dmft%dmft_solv<=7).or.paw_dmft%dmft_solv==9) then
        ! =================================================================
 
-         if ( paw_dmft%dmftqmc_l >= (2*paw_dmft%dmft_nwli)+1 ) then
+         if ( paw_dmft%dmft_solv==9.or.(paw_dmft%dmftqmc_l >= (2*paw_dmft%dmft_nwli)+1) ) then
 
            call ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
 
@@ -1386,7 +1387,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      ! Print green function is files directly from CTQMC
      ! --------------------------------------------------
-     call ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+     call ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 
      ! If the CTQMC code in ABINIT was used, then destroy it and deallocate arrays
@@ -2227,8 +2228,6 @@ end subroutine ctqmcoutput_to_green
 !!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
 !!  gtmp(dmftqmc_l,nflavor) = Green's fct in imag time (diag)
 !!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
-!!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!  iatom = atoms on which the calculation has been done
 !!
 !! OUTPUT
@@ -2245,7 +2244,7 @@ end subroutine ctqmcoutput_to_green
 !!
 !! SOURCE
 
-subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 !Arguments ------------------------------------
 !scalars
@@ -2254,16 +2253,12 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
  complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
  complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
- type(crystal_t),intent(in) :: cryst_struc
  integer, intent(in) :: iatom
- type(coeff2c_type), intent(inout) :: eigvectmatlu(:,:)
- type(pawang_type), intent(in) :: pawang
 
 !Local variables ------------------------------
  character(len=500) :: message
- type(matlu_type), allocatable :: matlu1(:)
- integer :: ifreq, itau,im1,im2,isppol,ispinor1,ispinor2,iflavor1
- integer :: iflavor2,tndim,iflavor,nflavor
+ integer :: ifreq, itau,iflavor1
+ integer :: tndim,iflavor,nflavor
  character(len=2) :: gtau_iter,iatomnb
  integer :: unt
 ! ************************************************************************
@@ -2320,47 +2315,47 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
         ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
       end do
       close(unt)
-      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
-        ABI_DATATYPE_ALLOCATE(matlu1,(paw_dmft%natom))
-        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
-        do itau=1,paw_dmft%dmftqmc_l
-          do isppol=1,paw_dmft%nsppol
-            do ispinor1=1,paw_dmft%nspinor
-              do im1=1,tndim
-                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-                do ispinor2=1,paw_dmft%nspinor
-                  do im2=1,tndim
-                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                    matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&                     gtmp_nd(itau,iflavor1,iflavor2)
-                  end do  ! im2
-                end do  ! ispinor2
-              end do  ! im1
-            end do  ! ispinor
-          end do ! isppol
-          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,0)
-          call slm2ylm_matlu(matlu1,paw_dmft%natom,2,0)
-          call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
-          call slm2ylm_matlu(matlu1,paw_dmft%natom,1,0)
-          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,1)
-          do isppol=1,paw_dmft%nsppol
-            do ispinor1=1,paw_dmft%nspinor
-              do im1=1,tndim
-                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-                do ispinor2=1,paw_dmft%nspinor
-                  do im2=1,tndim
-                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                    gtmp_nd(itau,iflavor1,iflavor2)=&
-                     matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
-                  end do  ! im2
-                end do  ! ispinor2
-              end do  ! im1
-            end do  ! ispinor
-          end do ! isppol
-        end do  !itau
-        call destroy_matlu(matlu1,paw_dmft%natom)
-        ABI_DATATYPE_DEALLOCATE(matlu1)
-      endif ! if natom=1
+!      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
+!        ABI_DATATYPE_ALLOCATE(matlu1,(paw_dmft%natom))
+!        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
+!        do itau=1,paw_dmft%dmftqmc_l
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+!&                     gtmp_nd(itau,iflavor1,iflavor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,0)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,2,0)
+!          call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,1,0)
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,1)
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    gtmp_nd(itau,iflavor1,iflavor2)=&
+!                     matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!        end do  !itau
+!        call destroy_matlu(matlu1,paw_dmft%natom)
+!        ABI_DATATYPE_DEALLOCATE(matlu1)
+!      endif ! if natom=1
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
         MSG_ERROR(message)
@@ -2430,6 +2425,9 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  use TRIQS_CTQMC !Triqs module
 #endif
+#if defined HAVE_PYTHON_INVOCATION
+ use INVOKE_PYTHON
+#endif
  use ISO_C_BINDING
 
 !Arguments ------------------------------------
@@ -2454,18 +2452,40 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  type(c_ptr) :: levels_ptr, fw1_nd_ptr, u_mat_ij_ptr, u_mat_ijkl_ptr, g_iw_ptr, gtau_ptr, gl_ptr
  real(dp), allocatable :: jbes(:)
  character(len=500) :: message
- integer :: ifreq, iflavor1
+ integer :: itau, ifreq, iflavor1
  integer :: iflavor2,iflavor,nflavor,iflavor3,itypat
  integer :: nfreq,ntau,nleg,ileg
  integer :: verbosity_solver ! min 0 -> max 3
  logical(kind=1) :: rot_inv = .false.
-#if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
  logical(kind=1) :: hist = .false.
  logical(kind=1) :: wrt_files = .true.
  logical(kind=1) :: tot_not = .true.
-#endif
  real(dp) :: beta,besp,bespp,xx
  complex(dpc) :: u_nl
+
+!----------
+!Variables for writing out the NETCDF file
+!----------
+ integer(kind=4) :: ncid
+ integer(kind=4) :: dim_one_id, dim_nflavor_id, dim_nwlo_id, dim_nwli_id
+ integer(kind=4) :: dim_qmc_l_id, dim_nleg_id
+ integer(kind=4), dimension(2) :: dim_u_mat_ij_id
+ integer(kind=4), dimension(3) :: dim_fw1_id, dim_g_iw_id, dim_gl_id, dim_gtau_id
+ integer(kind=4), dimension(4) :: dim_u_mat_ijkl_id
+ integer(kind=4) :: var_rot_inv_id, var_leg_measure_id, var_hist_id, var_wrt_files_id
+ integer(kind=4) :: var_tot_not_id, var_n_orbitals_id, var_n_freq_id, var_n_tau_id, var_n_l_id, var_n_cycles_id
+ integer(kind=4) :: var_cycle_length_id, var_ntherm_id, var_verbo_id, var_seed_id, var_beta_id
+ integer(kind=4) :: var_levels_id, var_u_mat_ij_id, var_u_mat_ijkl_id, var_real_fw1_nd_id, var_imag_fw1_nd_id
+ integer(kind=4) :: var_real_g_iw_id, var_imag_g_iw_id, var_gtau_id, var_gl_id, var_spacecomm_id
+
+ integer(kind=4) :: varid
+ logical :: file_exists
+ complex :: i
+ character(len=500) :: filename
+
+ real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
+ real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
+!----------
 ! ************************************************************************
 
  ! fw1_nd: Hybridation
@@ -2592,10 +2612,187 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  u_mat_ijkl_ptr = C_LOC( u_mat_ijkl )
  levels_ptr     = C_LOC( levels_ctqmc )
 
+ !Calling interfaced TRIQS solver subroutine from src/67_triqs_ext package
+ if (paw_dmft%dmft_solv==9) then
+#ifndef HAVE_NETCDF
+  write(message,'(2a)') ch10,' NETCDF requiered! ABINIT communicates with the python script through netcdf.'
+  call wrtout(std_out,message,'COLL')
+  MSG_ERROR(message)
+#else
+#ifndef HAVE_PYTHON_INVOCATION
+  write(message,'(23a)') ch10,' Python invocation flag requiered! You need to install ABINIT with ',&
+   'enable_python_invocation = yes" in your "configure.ac" file.'
+  call wrtout(std_out,message,'COLL')
+  MSG_ERROR(message)
+#else
+  ! Creating the NETCDF file
+  write(std_out, '(2a)') ch10, "    Creating NETCDF file: abinit_output_for_py.nc"
+  NCF_CHECK(nf90_create("abinit_output_for_py.nc", NF90_CLOBBER, ncid))
+ 
+  ! Defining the dimensions of the variables to write in the NETCDF file
+  NCF_CHECK(nf90_def_dim(ncid, "one", 1, dim_one_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nflavor", nflavor, dim_nflavor_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nwlo", paw_dmft%dmft_nwlo, dim_nwlo_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nwli", paw_dmft%dmft_nwli, dim_nwli_id))
+  NCF_CHECK(nf90_def_dim(ncid, "qmc_l", paw_dmft%dmftqmc_l, dim_qmc_l_id))
+  NCF_CHECK(nf90_def_dim(ncid, "nleg", nleg, dim_nleg_id))
+ 
+  dim_u_mat_ij_id = (/ dim_nflavor_id, dim_nflavor_id /)
+  dim_u_mat_ijkl_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nflavor_id, dim_nflavor_id /)
+  dim_fw1_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nwli_id /)
+  dim_g_iw_id = (/ dim_nwli_id, dim_nflavor_id, dim_nflavor_id /)
+  dim_gtau_id = (/ dim_qmc_l_id, dim_nflavor_id, dim_nflavor_id /)
+  dim_gl_id = (/ dim_nleg_id, dim_nflavor_id, dim_nflavor_id /)
+ 
+  ! Defining the variables
+  NCF_CHECK(nf90_def_var(ncid, "rot_inv",         NF90_INT, dim_one_id,           var_rot_inv_id))
+  NCF_CHECK(nf90_def_var(ncid, "leg_measure",     NF90_INT, dim_one_id,           var_leg_measure_id))
+  NCF_CHECK(nf90_def_var(ncid, "hist",            NF90_INT, dim_one_id,           var_hist_id))
+  NCF_CHECK(nf90_def_var(ncid, "wrt_files",       NF90_INT, dim_one_id,           var_wrt_files_id))
+  NCF_CHECK(nf90_def_var(ncid, "tot_not",         NF90_INT, dim_one_id,           var_tot_not_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_orbitals",      NF90_INT, dim_one_id,           var_n_orbitals_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_freq",          NF90_INT, dim_one_id,           var_n_freq_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_tau",           NF90_INT, dim_one_id,           var_n_tau_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_l",             NF90_INT, dim_one_id,           var_n_l_id))
+  NCF_CHECK(nf90_def_var(ncid, "n_cycles",        NF90_INT, dim_one_id,           var_n_cycles_id))
+  NCF_CHECK(nf90_def_var(ncid, "cycle_length",    NF90_INT, dim_one_id,           var_cycle_length_id))
+  NCF_CHECK(nf90_def_var(ncid, "ntherm",          NF90_INT, dim_one_id,           var_ntherm_id))
+  NCF_CHECK(nf90_def_var(ncid, "verbo",           NF90_INT, dim_one_id,           var_verbo_id))
+  NCF_CHECK(nf90_def_var(ncid, "seed",            NF90_INT, dim_one_id,           var_seed_id))
+  NCF_CHECK(nf90_def_var(ncid, "beta",            NF90_FLOAT, dim_one_id,         var_beta_id))
+  NCF_CHECK(nf90_def_var(ncid, "levels",          NF90_DOUBLE, dim_nflavor_id,    var_levels_id))
+  NCF_CHECK(nf90_def_var(ncid, "u_mat_ij",        NF90_DOUBLE, dim_u_mat_ij_id,   var_u_mat_ij_id))
+  NCF_CHECK(nf90_def_var(ncid, "u_mat_ijkl",      NF90_DOUBLE, dim_u_mat_ijkl_id, var_u_mat_ijkl_id))
+  NCF_CHECK(nf90_def_var(ncid, "real_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_real_fw1_nd_id))
+  NCF_CHECK(nf90_def_var(ncid, "imag_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_imag_fw1_nd_id))
+  NCF_CHECK(nf90_def_var(ncid, "real_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_real_g_iw_id))
+  NCF_CHECK(nf90_def_var(ncid, "imag_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_imag_g_iw_id))
+  NCF_CHECK(nf90_def_var(ncid, "gtau",            NF90_DOUBLE, dim_gtau_id,       var_gtau_id))
+  NCF_CHECK(nf90_def_var(ncid, "gl",              NF90_DOUBLE, dim_gl_id,         var_gl_id))
+  NCF_CHECK(nf90_def_var(ncid, "spacecomm",       NF90_INT, dim_one_id,           var_spacecomm_id))
+  NCF_CHECK(nf90_enddef(ncid))
+ 
+  ! Filling the variables with actual data
+  if (rot_inv) then 
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       1))  
+  else 
+   NCF_CHECK(nf90_put_var(ncid, var_rot_inv_id,       0))  
+  end if
+  if (leg_measure) then
+   NCF_CHECK(nf90_put_var(ncid, var_leg_measure_id,   1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_leg_measure_id,   0))
+  end if
+  if (hist) then
+   NCF_CHECK(nf90_put_var(ncid, var_hist_id,          1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_hist_id,          0))
+  end if
+  if (wrt_files) then
+   NCF_CHECK(nf90_put_var(ncid, var_wrt_files_id,     1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_wrt_files_id,     0))
+  end if
+  if (tot_not) then
+   NCF_CHECK(nf90_put_var(ncid, var_tot_not_id,       1))
+  else
+   NCF_CHECK(nf90_put_var(ncid, var_tot_not_id,       0))
+  end if
+  NCF_CHECK(nf90_put_var(ncid, var_n_orbitals_id,         nflavor))
+  NCF_CHECK(nf90_put_var(ncid, var_n_freq_id,             nfreq))
+  NCF_CHECK(nf90_put_var(ncid, var_n_tau_id,              ntau))
+  NCF_CHECK(nf90_put_var(ncid, var_n_l_id,                nleg))
+  NCF_CHECK(nf90_put_var(ncid, var_n_cycles_id,           int(paw_dmft%dmftqmc_n/paw_dmft%nproc)))
+  NCF_CHECK(nf90_put_var(ncid, var_cycle_length_id,       paw_dmft%dmftctqmc_meas*2*2*nflavor))
+  NCF_CHECK(nf90_put_var(ncid, var_ntherm_id,             paw_dmft%dmftqmc_therm))
+  NCF_CHECK(nf90_put_var(ncid, var_verbo_id,              verbosity_solver))
+  NCF_CHECK(nf90_put_var(ncid, var_seed_id,               paw_dmft%dmftqmc_seed))
+  NCF_CHECK(nf90_put_var(ncid, var_beta_id,               beta))
+  NCF_CHECK(nf90_put_var(ncid, var_levels_id,             levels_ctqmc))
+  NCF_CHECK(nf90_put_var(ncid, var_u_mat_ij_id,           u_mat_ij))
+  NCF_CHECK(nf90_put_var(ncid, var_u_mat_ijkl_id,         u_mat_ijkl))
+  NCF_CHECK(nf90_put_var(ncid, var_real_fw1_nd_id,        real(fw1_nd_tmp)))
+  NCF_CHECK(nf90_put_var(ncid, var_imag_fw1_nd_id,        aimag(fw1_nd_tmp)))
+  NCF_CHECK(nf90_put_var(ncid, var_real_g_iw_id,          real(gw_tmp_nd)))
+  NCF_CHECK(nf90_put_var(ncid, var_imag_g_iw_id,          aimag(gw_tmp_nd)))
+  NCF_CHECK(nf90_put_var(ncid, var_gtau_id,               gtmp_nd))
+  NCF_CHECK(nf90_put_var(ncid, var_gl_id,                 gl_nd))
+  NCF_CHECK(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
+  NCF_CHECK(nf90_close(ncid))
+
+  write(std_out, '(2a)') ch10, "    NETCDF file abinit_output_for_py.nc written; Launching python invocation"
+ 
+  ! Invoking python to execute the script
+  call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
+ 
+  ! Allocating the fortran variables for the results
+  ABI_ALLOCATE(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
+  ABI_ALLOCATE(new_im_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
+  ABI_ALLOCATE(new_g_tau,(nflavor,nflavor, paw_dmft%dmftqmc_l))
+  ABI_ALLOCATE(new_gl,(nflavor,nflavor, nleg))
+  i = (0, 1)
+  
+  ! Check if file exists
+  write(filename, '(a,i4.4,a)') "py_output_for_abinit_rank_", paw_dmft%myproc, ".nc"
+
+  INQUIRE(FILE=filename, EXIST=file_exists)
+  if(.not. file_exists) then
+   write(message,'(4a)') ch10,' Cannot find file ', filename, '! Make sure the python script writes it with the right name and at the right place!'
+   call wrtout(std_out,message,'COLL')
+   MSG_ERROR(message)
+  endif
+
+  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", filename
+
+  ! Opening the NETCDF file
+  NCF_CHECK(nf90_open(filename, nf90_nowrite, ncid))
+ 
+  ! Read from the file
+  ! Re{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Re[G(iw_n)]"
+  NCF_CHECK(nf90_inq_varid(ncid, "re_g_iw", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_re_g_iw))
+  ! Im{G_iw}
+  write(std_out, '(2a)') ch10, "    -- Im[G(iw_n)]"
+  NCF_CHECK(nf90_inq_varid(ncid, "im_g_iw", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_im_g_iw))
+  ! G_tau
+  write(std_out, '(2a)') ch10, "    -- G(tau)"
+  NCF_CHECK(nf90_inq_varid(ncid, "g_tau", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_g_tau))
+  ! G_l
+  write(std_out, '(2a)') ch10, "    -- G_l"
+  NCF_CHECK(nf90_inq_varid(ncid, "gl", varid))
+  NCF_CHECK(nf90_get_var(ncid, varid, new_gl))
+
+  ! Assigning data
+  do iflavor1=1, nflavor
+   do iflavor2=1, nflavor
+    do ifreq=1, paw_dmft%dmft_nwli
+     gw_tmp_nd(ifreq, iflavor1, iflavor2) = new_re_g_iw(iflavor1, iflavor2, ifreq) &
+&               + i*new_im_g_iw(iflavor1, iflavor2, ifreq)
+    end do
+    do itau=1, paw_dmft%dmftqmc_l
+     gtmp_nd(itau, iflavor1, iflavor2) = new_g_tau(iflavor1, iflavor2, itau)
+    end do
+    do ileg=1, nleg
+     gl_nd(ileg, iflavor1, iflavor2) = new_gl(iflavor1, iflavor2, ileg)
+    end do
+   end do
+  end do
+ 
+  ! Deallocating
+  ABI_DEALLOCATE(new_re_g_iw)
+  ABI_DEALLOCATE(new_im_g_iw)
+  ABI_DEALLOCATE(new_g_tau)
+  ABI_DEALLOCATE(new_gl) 
+#endif
+#endif
+ elseif(paw_dmft%dmft_solv == 6 .or. paw_dmft%dmft_solv == 7) then
   !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
   !----------------------------------------------------
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
- call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,                            &
+ call Ctqmc_triqs_run (     rot_inv, leg_measure, hist, wrt_files, tot_not,   &
 &  nflavor, nfreq, ntau , nleg, int(paw_dmft%dmftqmc_n/paw_dmft%nproc),       &
 &  paw_dmft%dmftctqmc_meas*2*2*nflavor, paw_dmft%dmftqmc_therm,               &
 &  verbosity_solver, paw_dmft%dmftqmc_seed,beta,                              &
@@ -2603,6 +2800,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 !&  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%spacecomm                             )
 &  g_iw_ptr, gtau_ptr, gl_ptr, paw_dmft%myproc                             )
 #endif
+ endif
 
   !WRITE(*,*) "Hello Debug"
   !call xmpi_barrier(paw_dmft%spacecomm) !Resynch all processus after calling Impurity solver from TRIQS

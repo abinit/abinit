@@ -7,21 +7,21 @@ prt_model = 2
 
 dipdip = 0
 dipdip_prt = 1
+ncell = 2 2 2
 
 #---------------------------------------------------------------
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
 fit_coeff = 1
-fit_rangePower = 3 4
-fit_cutoff = 7
-fit_ncoeff = 10
-fit_nfixcoeff  = 2
-fit_fixcoeff  = 48 50
+fit_rangePower = 3 3
+fit_cutoff = 5.4
+fit_ncoeff = 2
+fit_SPCoupling = 0
+fit_iatom = 0 
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t13.in,t14.in,t15.in
 #%% input_ddb = t13_ddb.in
 #%% md_hist = t13_HIST
@@ -33,7 +33,7 @@ fit_fixcoeff  = 48 50
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = A. MARTIN
+#%% authors = A. MARTIN, M.M. Schmitt
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and HIST, fit the anharmonic part and generate effective potential

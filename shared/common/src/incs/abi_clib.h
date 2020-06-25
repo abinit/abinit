@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2019 ABINIT group (MG)
+ * Copyright (C) 2009-2020 ABINIT group (MG)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,28 +123,8 @@ extern void debug(const char *format, ...);
 /* xmalloc.c: */
 
 void* xmalloc(size_t bytes);
-void* xrealloc(void* pointer, size_t bytes);
+/* void* xrealloc(void* pointer, size_t bytes); */
 void  xfree(void *ptr);
-
-#if 0
-void  xvfree(const int n, ...);
-
-#ifdef DEBUG_MODE
-
-void *malloc_debug(size_t n, enum malloc_tag what, const char *file, int line);
-#define MALLOC(n, what) malloc_debug(n, what, __FILE__, __LINE__)
-#define NATIVE_MALLOC(n, what) MALLOC(n, what)
-void malloc_print_minfo)(int vrbose);
-
-#else /* ! DEBUG_MODE */
-
-void *malloc_plain(size_t sz);
-#define MALLOC(n, what)  malloc_plain(n)
-#define NATIVE_MALLOC(n, what) malloc(n)
-
-#endif
-
-#endif
 
 /*-----------------------------------------------------------------------*/
 /* xexit.c */

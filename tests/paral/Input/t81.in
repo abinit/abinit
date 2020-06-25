@@ -11,14 +11,16 @@ dipdip_prt = 1
 #Inputs for the fitted coefficients
 #---------------------------------------------------------------
 fit_coeff = 1
-fit_rangePower = 3 4
-fit_cutoff = 7
-fit_ncoeff = 4
+fit_rangePower = 3 3
+fit_cutoff = 5.6
+fit_ncoeff = 2
+fit_SPCoupling = 1
+fit_iatom = 0 
+
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t81.in
 #%% [files]
 #%% [paral_info]

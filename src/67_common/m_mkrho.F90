@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_mkrho/m_mkrho
 !! NAME
 !!  m_mkrho
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -729,7 +728,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  select case (ioption)
  case(0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
    if(ioption==1)then
 !$OMP PARALLEL DO
      do ifft=1,dtset%nfft
@@ -1872,7 +1871,7 @@ end subroutine prtrhomxmn
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2020 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2083,7 +2082,7 @@ end subroutine read_atomden
 !! Units are atomic.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2020 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

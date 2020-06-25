@@ -4,6 +4,8 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import sys
 import os
+#os.environ["ABI_PSPDIR"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "Psps_for_tests"))
+#print("ABI_PSPDIR:", os.environ["ABI_PSPDIR"])
 import platform
 import time
 
@@ -119,8 +121,7 @@ def make_abinit(num_threads, touch_patterns=None):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
 
-    Returns:
-        Exit status of the subprocess.
+    Returns: Exit status of the subprocess.
     """
     top = find_top_build_tree(".", with_abinit=False)
 
@@ -419,7 +420,7 @@ def main():
                     raise RuntimeError("Cannot locate srun in $PATH. "
                                        "Please check your environment")
 
-                runner = JobRunner.srun(timebomb=timebomb)
+                runner = JobRunner.srun(timebomb=timebomb, mpi_args=options.mpi_args)
 
             else:
                 if options.use_mpiexec:
@@ -435,7 +436,7 @@ def main():
                             "Please check your environment")
 
                 runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb,
-                                              mpi_args=options.mpi_args)
+                                               mpi_args=options.mpi_args)
 
         if omp_nthreads > 0:
             omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)

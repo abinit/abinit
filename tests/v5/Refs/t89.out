@@ -1,8 +1,8 @@
 
-.Version 8.8.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  4 May 2018.
-- ( at 16h18 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h20 )
   
 
 ================================================================================
@@ -28,9 +28,12 @@
  Miscellaneous information :
        eivec         1
          asr         2
+      chneut         0
    symdynmat         0
  Interatomic Force Constants Inputs :
       dipdip         0
+      dipqua         0
+      quadqu         0
       ifcana         1
       ifcout         0
  Description of grid 1 :
@@ -87,7 +90,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.015  and twall      0.016 sec
+-begin at tcpu      0.030  and twall      0.030 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -119,9 +122,9 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.727490E-10    0.000000E+00
-       2        0.000000E+00    3.727490E-10    0.000000E+00
-       3        0.000000E+00    3.727490E-10    0.000000E+00
+       1        0.000000E+00    3.727545E-10    0.000000E+00
+       2        0.000000E+00    3.727545E-10    0.000000E+00
+       3        0.000000E+00    3.727545E-10    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -131,9 +134,9 @@
 
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    3.727490E-10    0.000000E+00
-       2        0.000000E+00    3.727490E-10    0.000000E+00
-       3        0.000000E+00    3.727490E-10    0.000000E+00
+       1        0.000000E+00    3.727545E-10    0.000000E+00
+       2        0.000000E+00    3.727545E-10    0.000000E+00
+       3        0.000000E+00    3.727545E-10    0.000000E+00
 
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
@@ -170,7 +173,7 @@
  mka2f: omegalog  =     6.231060E-04 (Ha)     1.967611E+02 (Kelvin)
  mka2f: input mustar =     1.360000E-01
 -mka2f: MacMillan Tc =     5.435764E-05 (Ha)     1.716476E+01 (Kelvin)
- mka2f_tr_lova: 1/3 trace of TRANSPORT lambda for isppol   1 =      3.507196E-01
+ mka2f_tr_lova: 1/3 trace of TRANSPORT lambda for isppol   1 =      3.507204E-01
 
 ================================================================================
 
@@ -190,12 +193,12 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  0.00000000E+00 -4.50906598E-03
+-  1  0.00000000E+00 -3.40607352E-07 -4.50906597E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
+-  1  0.00000000E+00  4.50906597E-03 -3.40607230E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -204,16 +207,18 @@
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
 
 ================================================================================
 
-+Total cpu time      1.497  and wall time      1.558 sec
++Total cpu time      1.252  and wall time      1.285 sec
 
  anaddb : the run completed succesfully.

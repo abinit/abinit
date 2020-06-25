@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !****m* ABINIT/m_wfd
 !! NAME
 !!  m_wfd
@@ -7,7 +6,7 @@
 !!  This module contains the declaration of the wfd_t object and its methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6056,7 +6055,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  ABI_MALLOC(rhog,(2,cplex*nfftf))
 
  call symrhg(cplex,Cryst%gprimd,irrzon,Wfd%MPI_enreg,nfftf,nfftotf,ngfftf,Wfd%nspden,Wfd%nsppol,&
-             Cryst%nsym,phnons,rhog,rhor,Cryst%rprimd,Cryst%symafm,Cryst%symrel)
+             Cryst%nsym,phnons,rhog,rhor,Cryst%rprimd,Cryst%symafm,Cryst%symrel,Cryst%tnons)
 
  ABI_FREE(rhog)
  ABI_FREE(phnons)

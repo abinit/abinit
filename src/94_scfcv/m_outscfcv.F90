@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outscfcv
 !! NAME
 !!  m_outscfcv
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2019 ABINIT group (XG)
+!!  Copyright (C) 2005-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,7 +77,7 @@ module m_outscfcv
  use m_multipoles,       only : multipoles_out, out1dm
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
  use m_paw_mkaewf,       only : pawmkaewf
- use m_dens,             only : mag_penalty_e, calcdensph
+ use m_dens,             only : mag_penalty_e, calcdenmagsph, prtdenmagsph
  use m_mlwfovlp,         only : mlwfovlp
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
@@ -127,6 +126,7 @@ contains
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  grhor(nfft,nspden,3)= gradient of electron density in electrons/bohr**4, real space
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
+!!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  lrhor(nfft,nspden)= Laplacian of electron density in electrons/bohr**5, real space
 !!  mband=maximum number of bands
@@ -197,7 +197,7 @@ contains
 !!      scfcv
 !!
 !! CHILDREN
-!!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
+!!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdenmagsph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
 !!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
@@ -206,14 +206,14 @@ contains
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
 !!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
-!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,prt_cif,prtfatbands
+!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,print_plowannier,prt_cif,prtfatbands
 !!      read_atomden,simpson_int,sort_dp,spline,splint,timab,wrtout,xmpi_sum
 !!      xmpi_sum_master
 !!
 !! SOURCE
 
 subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,dtset,&
-& ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,kg,&
+& ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,intgres,kg,&
 & lrhor,mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpsang,mpw,my_natom,natom,&
 & nattyp,nfft,ngfft,nhat,nkpt,npwarr,nspden,nsppol,nsym,ntypat,n3xccc,occ,&
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
@@ -242,6 +242,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer,intent(in) :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
  real(dp),intent(in) :: dmatpawu(:,:,:,:),eigen(mband*nkpt*nsppol)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3)
+ real(dp),intent(in) :: intgres(:,:) ! (nspden,natom) if constrainedDFT otherwise (nspden,0)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: rprimd(3,3),vhartr(nfft),xccc3d(n3xccc)
  real(dp),intent(in) :: vpsp(nfft)
@@ -284,9 +285,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !arrays
  integer, allocatable :: isort(:)
  integer, pointer :: my_atmtab(:)
- real(dp) :: tsec(2),nt_ntone_norm(nspden)
+ real(dp) :: tsec(2),nt_ntone_norm(nspden),rhomag(2,nspden)
  real(dp),allocatable :: eigen2(:)
- real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:)
+ real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:),gr_dum(:,:,:),intgden(:,:)
  real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vpaw(:,:),vwork(:,:)
  real(dp),allocatable :: rhor_n_one(:,:),rhor_nt_one(:,:),ps_norms(:,:,:)
  real(dp), allocatable :: doccde(:)
@@ -335,9 +336,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
  call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
-& dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
-& dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
-& dtset%symrel,dtset%tnons,dtset%symafm)
+   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
+   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+   dtset%symrel,dtset%tnons,dtset%symafm)
 
 !Electron band energies.
  bantot= dtset%mband*dtset%nkpt*dtset%nsppol
@@ -345,9 +346,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  doccde=zero
 
  call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
-& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-& hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+   hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+   hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 
  ABI_FREE(doccde)
 
@@ -381,7 +382,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! YAML output
  if (me == master) then
-  call results_gs%yaml_write(ab_out, dtset, crystal, comment="Summary of ground state results")
+   call results_gs%yaml_write(ab_out, crystal, dtset%nstep > 0, info="Summary of ground state results")
  end if
 
 !wannier interface
@@ -941,8 +942,23 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !Output of integrated density inside atomic spheres
  if (dtset%prtdensph==1.and.dtset%usewvl==0)then
-   call calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,&
-&   ntypat,ab_out,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,ucvol,xred,1,cplex1)
+   ABI_MALLOC(intgden,(nspden,natom))
+   ABI_MALLOC(gr_dum,(3,nspden,natom))
+   call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,ngfft,nspden,&
+&   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+   if(all(dtset%constraint_kind(:)==0))then
+     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+   else
+     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,ab_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
+     call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
+   endif
+   if(any(dtset%constraint_kind(:)/=0))then
+     call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+   endif
+   ABI_SFREE(intgden)
+   ABI_SFREE(gr_dum)
  end if
 
  call timab(960,2,tsec)
@@ -974,8 +990,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &         ' Compensation charge over fft grid         = ',compch_fft
        end if
      end if
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    end if
 !  Output of pseudopotential strength Dij and augmentation occupancies Rhoij
    call pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
@@ -1056,21 +1071,25 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
  call timab(963,2,tsec)
- if(dtset%plowan_compute>0) then
+ if(dtset%plowan_compute>0 .and. dtset%plowan_compute<10) then
    write(message,'(2a,i3)') ch10,&
 &   ' ====================================================================================== '
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    write(message,'(2a,i3)') ch10,&
 &   ' == Start computation of Projected Local Orbitals Wannier functions == ',dtset%nbandkss
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
 !  ==  compute psichi
 
-   call init_plowannier(dtset,wan)
+   call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,&
+&dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
+&dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
+&dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan)
    call compute_coeff_plowannier(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
 &   mpi_enreg,occ,wan,pawtab,psps,usecprj,dtfil%unpaw,pawrad,dtfil)
+   if (me==master) then 
+     call print_plowannier(wan)
+   endif
    call destroy_plowannier(wan)
  end if
 
@@ -1132,8 +1151,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
       !write(6,*) "compute green done"
        if(me==master) then
-         call print_green("from_realaxisself",greenr,5,paw_dmft,&
-&         pawprtvol=3,opt_wt=1)
+         if(dtset%kptopt<0) then
+           ! k-resolved Spectral function
+           call print_green("from_realaxisself",greenr,5,paw_dmft,&
+&           pawprtvol=3,opt_wt=1)
+         else
+           ! DOS Calculation
+           call print_green("from_realaxisself",greenr,4,paw_dmft,&
+&           pawprtvol=3,opt_wt=1)
+         endif
         !write(6,*) "print green done"
        endif
 
@@ -1224,8 +1250,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (me == master .and. dtset%prtnest>0 .and. dtset%ph_nqpath > 0) then
    call timab(968,1,tsec)
    ierr = ebands_write_nesting(ebands,crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
-&   dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),message)
-   if (ierr /=0) then
+     dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),message)
+   if (ierr /= 0) then
      MSG_WARNING(message)
      call wrtout(ab_out,message,'COLL')
    end if
@@ -1236,18 +1262,20 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  if (dtset%prtdipole == 1) then
    call multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,dtset%nspden,dtset%ntypat,rprimd,&
-&   dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
+     dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
  end if
 
  ! BoltzTraP output files in GENEric format
- if (dtset%prtbltztrp == 1 .and. me==master) then
-   call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
- end if
+ if (dtset%prtbltztrp == 1 .and. me==master) call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
  if (nint(dtset%einterp(1)) /= 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
+
+ ABI_SFREE_PTR(elfr)
+ ABI_SFREE_PTR(grhor)
+ ABI_SFREE_PTR(lrhor)
 
  call crystal%free()
  call ebands_free(ebands)

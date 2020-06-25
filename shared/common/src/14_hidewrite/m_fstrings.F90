@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on Fortran strings.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, XG, MT, DC)
+!! Copyright (C) 2008-2020 ABINIT group (MG, XG, MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +34,7 @@ MODULE m_fstrings
 
  public :: is_letter       ! Returns .TRUE. if ch is a letter and .FALSE. otherwise
  public :: is_digit        ! Returns .TRUE. if ch is a digit (0,1,...,9) and .FALSE. otherwise
+ public :: find_digit      ! Returns the position of the first digit in string. 0 if not found.
  public :: upper           ! Convert lower case letters to UPPER CASE
  public :: toupper         ! Convert lower case letters to UPPER CASE (function version)
  public :: lower           ! Convert UPPER CASE letters to lower case
@@ -115,19 +116,20 @@ MODULE m_fstrings
    module procedure ltoa_dp
  end interface ltoa
 
-  character(len=1),parameter :: BLANK=' '
-  character(len=1),parameter :: NCHAR = char(10)
-  character(len=1),parameter :: DIR_SEPARATOR = '/'
+ character(len=1),parameter :: BLANK=' '
+ character(len=1),parameter :: NCHAR = char(10)
+ character(len=1),parameter :: DIR_SEPARATOR = '/'
 
-  integer,parameter :: ASCII_A=ICHAR('A')
-  integer,parameter :: ASCII_Z=ICHAR('Z')
-  integer,parameter :: ASCII_aa=ICHAR('a')
-  integer,parameter :: ASCII_zz=ICHAR('z')
-  integer,parameter :: SHIFT=ASCII_aa-ASCII_A ! Capital letters have smaller Dec value in the ASCII table.
-  integer,parameter :: ASCII_0=ICHAR('0')
-  integer,parameter :: ASCII_9=ICHAR('9')
+ integer,parameter :: ASCII_A=ICHAR('A')
+ integer,parameter :: ASCII_Z=ICHAR('Z')
+ integer,parameter :: ASCII_aa=ICHAR('a')
+ integer,parameter :: ASCII_zz=ICHAR('z')
+ integer,parameter :: SHIFT=ASCII_aa-ASCII_A ! Capital letters have smaller Dec value in the ASCII table.
+ integer,parameter :: ASCII_0=ICHAR('0')
+ integer,parameter :: ASCII_9=ICHAR('9')
 
-  integer,parameter :: MAX_SLEN=500
+ integer,parameter :: MAX_SLEN = 500
+
 
 CONTAINS  !===========================================================
 !!***
@@ -181,6 +183,30 @@ pure function is_digit_0D(ch) result(ans)
  end select
 
 end function is_digit_0D
+!!***
+
+!!****f* m_fstrings/find_digit
+!! NAME
+!!  find_digit
+!!
+!! FUNCTION
+!!  Returns the position of the first digit in string. 0 if not found.
+!!
+!! SOURCE
+
+integer pure function find_digit(string) result(ii)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+
+! *********************************************************************
+
+ do ii=1,len_trim(string)
+   if (is_digit(string(ii:ii))) return
+ end do
+ ii = 0
+
+end function find_digit
 !!***
 
 !!****f* m_fstrings/upper
@@ -1515,9 +1541,8 @@ end function firstchar_1d
 !!
 !! SOURCE
 
-pure function startswith(string, prefix) result(ans)
+pure logical function startswith(string, prefix) result(ans)
 
- logical :: ans
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: prefix
 
@@ -1827,6 +1852,7 @@ integer pure function char_count(string, char)
  integer :: i
 
 ! *************************************************************************
+
  char_count = 0
  do i=1,len(string)
    if (string(i:i) == char) char_count = char_count + 1
@@ -1863,6 +1889,7 @@ integer function next_token(string, start, ostr) result(ierr)
  integer :: ii,beg
 
 ! *************************************************************************
+ !print *, "string:", trim(string(start:))
 
  ierr = 1; beg = 0
  ! Find first non-empty char.
@@ -1942,15 +1969,15 @@ subroutine inupper(string)
 !lower case and upper case letters stayed upper case
  if (first) then
    do ii=1,26
-!    Look for occurrence of each upper case character
-!    anywhere in string of all lower case letters
+     ! Look for occurrence of each upper case character
+     ! anywhere in string of all lower case letters
      indx=index(lolett,uplett(ii:ii))
-!    If found then print error message and quit
+     ! If found then print error message and quit
      if (indx>0) then
        write(std_out, '(a,a,a,a,a,a,a,a,a)' )&
-&       'Upper case string = ',uplett,ch10,&
-&       'Lower case string = ',lolett,ch10,&
-&       'Upper case character ',uplett(ii:ii),'found in supposedly lower case string.'
+        'Upper case string = ',uplett,ch10,&
+        'Lower case string = ',lolett,ch10,&
+        'Upper case character ',uplett(ii:ii),'found in supposedly lower case string.'
        stop
      end if
    end do
@@ -1959,7 +1986,7 @@ subroutine inupper(string)
 
  inquotes = 0
  do ii=1,len_trim(string)
-!  Pick off single character of string (one byte):
+   !  Pick off single character of string (one byte):
    cc=string(ii:ii)
 
    ! Ignore tokens between quotation marks.

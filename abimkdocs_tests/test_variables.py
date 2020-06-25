@@ -161,13 +161,13 @@ class VariablesTest(AbimkdocsTest):
         diff = anaddb_f90vnames - doc_vnames
         if diff:
             ierr += 1
-            print("The following variables are seen in anaddb F90 code but not in variables_anaddb.py")
+            print("\nThe following variables are found in anaddb F90 code but not in variables_anaddb.py")
             pprint(diff)
 
         diff = doc_vnames - anaddb_f90vnames
         if diff:
             ierr += 1
-            print("The following variables are seen in variables_anaddb.py but not in anaddb F90 code.")
+            print("\nThe following variables are found in variables_anaddb.py but not in anaddb F90 code.")
             pprint(diff)
 
         doc_vnames = codevars["abinit"].get_all_vnames(with_internal=False)
@@ -177,19 +177,18 @@ class VariablesTest(AbimkdocsTest):
         diff = abinit_f90vnames - doc_vnames
         if diff:
             ierr += 1
-            print("The following variables are seen in abinit F90 code but not in variables_abinit.py")
+            print("\nThe following variables are found in abinit F90 code but not in variables_abinit.py")
             pprint(diff)
 
         diff = doc_vnames - abinit_f90vnames
         if diff:
             ierr += 1
-            print("The following variables are seen in variables_abinit.py but not in abinit F90 code")
+            print("\nThe following variables are found in variables_abinit.py but not in abinit F90 code")
             pprint(diff)
-        #assert 0
 
         # TODO: should parse chkvars and
         black_list = set([
-            "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr", "tdep",
+            "atompaw", "cut3d", "multibinit", "fftprof", "conducti", "mrgscr", "a-TDEP",
             "mrgddb", "mrggkk", "mrgdv", "band2eps", "ujdet", "fold2Bloch", "macroave", "testtransposer",
         ])
         for test in tests:
@@ -209,18 +208,19 @@ class VariablesTest(AbimkdocsTest):
         for code in sorted(untested.keys()):
             untested[code] = sorted(untested[code])
             if untested[code]:
-                print("List of untested variables for code:", code)
+                print("\nList of untested variables for code:", code)
                 pprint(untested[code])
-        #assert 0
 
-        ref_json_path = os.path.join(os.path.dirname(__file__), "untested_variables.json")
-        update_ref = False
-        if update_ref:
-            with open(ref_json_path, "wt") as fh:
-                json.dump(untested, fh, indent=4)
-        else:
-            with open(ref_json_path, "rt") as fh:
-                ref_untested = json.load(fh)
+        #ref_json_path = os.path.join(os.path.dirname(__file__), "untested_variables.json")
+        #update_ref = False
+        #if update_ref:
+        #    with open(ref_json_path, "wt") as fh:
+        #        json.dump(untested, fh, indent=4)
+        #else:
+        #    with open(ref_json_path, "rt") as fh:
+        #        ref_untested = json.load(fh)
 
-            self.assertDictEqual(untested, ref_untested,
-                msg="Detected mismatch between reference file and new list of untested variables.")
+        #    self.assertDictEqual(untested, ref_untested,
+        #        msg="Detected mismatch between reference file and new list of untested variables.")
+
+        assert ierr == 0

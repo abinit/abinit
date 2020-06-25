@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_timana
 !! NAME
 !!  m_timana
@@ -7,7 +6,7 @@
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -806,7 +805,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(957)='outscfcv(prt geo misc.)         '
  names(958)='outscfcv(prt stm,vha,..)        '
  names(959)='outscfcv(prtdos)                '
- names(960)='outscfcv(calcdensph)            '
+ names(960)='outscfcv(calcdenmagsph)         '
  names(961)='outscfcv(pawprt)                '
  names(962)='outscfcv(optics)                '
  names(963)='outscfcv(pawmkaewf)             '
@@ -851,15 +850,18 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
  names(1502)='HF_updatecgocc                  '; basic(1502)=1
- names(1503)='HF_updatecgocc-MPI              '; basic(1503)=1
- names(1504)='HF_getghc                       '; basic(1504)=1
- names(1505)='HF_getghc-init                  '; basic(1505)=1
- names(1506)='HF_getghc-kmu_loop              '; basic(1506)=1
- names(1507)='HF_getghc-calc_vlocpsi          '; basic(1507)=1
- names(1508)='HF_getghc-mult-cwf*cwocc        '; basic(1508)=1
- names(1509)='HF_getghc-calc_rhog_munu        '; basic(1509)=1
- names(1510)='HF_getghc-calc_vloc             '; basic(1510)=1
- names(1511)='HF_getghc-calc_ghc              '; basic(1511)=1
+ !===START===containers used for testing purposes
+ names(1503)='HF_updatecgocc-MPI              ';! basic(1503)=1  ! 100 % nested inside 1502
+ names(1504)='HF_getghc                       ';! basic(1504)=1  !1504 = 1505 + 1506 + 1511 + extra_loops
+ names(1505)='HF_getghc-init                  ';! basic(1505)=1  ! 100 % nested inside 1504
+ names(1506)='HF_getghc-kmu_loop              ';! basic(1506)=1  ! 1506 = 1508 + 1509 + 1510 + 1507 + extra_loops
+ names(1507)='HF_getghc-calc_vlocpsi          ';! basic(1507)=1  ! 100 % nested inside 1506
+ names(1508)='HF_getghc-mult-cwf*cwocc        ';! basic(1508)=1  ! 100 % nested inside 1506
+ names(1509)='HF_getghc-calc_rhog_munu        ';! basic(1509)=1  ! 100 % nested inside 1506
+ names(1510)='HF_getghc-calc_vloc             ';! basic(1510)=1  ! 100 % nested inside 1506
+ names(1511)='HF_getghc-calc_ghc              ';! basic(1511)=1  ! 100 % nested inside 1504
+ !===STOP===containers used for testing purposes
+ names(1515)='HF_getghc_main                  ';  basic(1515)=1  ! ulterior slot for test
 
  ! Chebfi
  names(1600) = 'chebfi                        '; basic(1601) = 1
@@ -1594,7 +1596,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/)
          msg='initberry '
        case(50)
-         list(:12)=(/1500,1501,1502,1503,1504,1505,1506,1507,1508,1509,1510,1511/)          ; msg='hartreefock '
+         list(:3)=(/1501,1502,1515/)                           ; msg='hartreefock '
        case(60)
          list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/)
          msg = 'chebfi'

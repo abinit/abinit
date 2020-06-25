@@ -1,8 +1,8 @@
 
-.Version 8.9.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 19 May 2018.
-- ( at 16h03 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 21h29 )
   
-- input  file    -> t84.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t83-t84/t84.in
 - output file    -> t84.out
 - root for input  files -> t84i
 - root for output files -> t84o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
 
  DATASET    5 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -245,7 +245,16 @@ P          mk1mem          16
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 16, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -283,9 +292,9 @@ P          mk1mem          16
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
-- pspatm: opening atomic psp file    /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.LDA_PW-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -303,9 +312,9 @@ P          mk1mem          16
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/lucas/PROGRAM/abinit/nonlinear-pol/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -351,15 +360,21 @@ P          mk1mem          16
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF7
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   925.20893152805      9.252E+02 8.517E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  8.52E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   925.20893152805      9.252E+02 8.532E-29 0.000E+00
+
+ At SCF step    1   max residual=  8.53E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.4026E-29; max=  8.5168E-29
+ Mean square residual over all n,k,spin=   24.067E-30; max=  85.324E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -385,15 +400,21 @@ P          mk1mem          16
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   925.20893146738      9.252E+02 8.514E-29 0.000E+00
+-ETOT  1   925.20893146737      9.252E+02 8.510E-29 0.000E+00
 
  At SCF step    1   max residual=  8.51E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.2923E-29; max=  8.5141E-29
+ Mean square residual over all n,k,spin=   22.900E-30; max=  85.098E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -420,15 +441,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF9
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   249.07668637605      2.491E+02 9.657E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  9.66E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   249.07668637606      2.491E+02 9.670E-29 0.000E+00
+
+ At SCF step    1   max residual=  9.67E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.0851E-29; max=  9.6574E-29
+ Mean square residual over all n,k,spin=   30.862E-30; max=  96.696E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -455,15 +482,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF7
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   249.07668639080      2.491E+02 9.649E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  9.65E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   249.07668639080      2.491E+02 9.668E-29 0.000E+00
+
+ At SCF step    1   max residual=  9.67E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.0845E-29; max=  9.6490E-29
+ Mean square residual over all n,k,spin=   30.828E-30; max=  96.677E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -483,7 +516,16 @@ P          mk1mem          16
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 16, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -554,15 +596,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS4_1WF10
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF7
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -18955.682976953     -1.896E+04 9.778E-29 0.000E+00
+-ETOT  1  -18955.682976953     -1.896E+04 9.783E-29 0.000E+00
 
  At SCF step    1   max residual=  9.78E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.2059E-29; max=  9.7777E-29
+ Mean square residual over all n,k,spin=   41.673E-30; max=  97.831E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -590,15 +638,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS4_1WF11
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -18955.682977559     -1.896E+04 9.959E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  9.96E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -18955.682977558     -1.896E+04 9.822E-29 0.000E+00
+
+ At SCF step    1   max residual=  9.82E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.0658E-29; max=  9.9587E-29
+ Mean square residual over all n,k,spin=   40.945E-30; max=  98.222E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -627,15 +681,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF9
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6584.3812936791     -6.584E+03 9.462E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  9.46E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -6584.3812936791     -6.584E+03 9.364E-29 0.000E+00
+
+ At SCF step    1   max residual=  9.36E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.5011E-29; max=  9.4623E-29
+ Mean square residual over all n,k,spin=   25.300E-30; max=  93.636E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -664,15 +724,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF7
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6584.3812938177     -6.584E+03 9.916E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  9.92E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -6584.3812938177     -6.584E+03 9.858E-29 0.000E+00
+
+ At SCF step    1   max residual=  9.86E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.8489E-29; max=  9.9159E-29
+ Mean square residual over all n,k,spin=   28.473E-30; max=  98.578E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -701,15 +767,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF9
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6584.3812934566     -6.584E+03 9.868E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  9.87E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -6584.3812934567     -6.584E+03 9.954E-29 0.000E+00
+
+ At SCF step    1   max residual=  9.95E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.8565E-29; max=  9.8681E-29
+ Mean square residual over all n,k,spin=   28.652E-30; max=  99.536E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -738,15 +810,21 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF8
 -dfpt_looppert : read the wavefunctions from file: t84o_DS3_1WF7
 
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6584.3812935580     -6.584E+03 9.344E-29 0.000E+00
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-28, }
+...
 
- At SCF step    1   max residual=  9.34E-29 < tolwfr=  1.00E-28 =>converged.
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1  -6584.3812935580     -6.584E+03 9.323E-29 0.000E+00
+
+ At SCF step    1   max residual=  9.32E-29 < tolwfr=  1.00E-28 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.5237E-29; max=  9.3439E-29
+ Mean square residual over all n,k,spin=   25.216E-30; max=  93.229E-30
 
  Two components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -766,7 +844,16 @@ P          mk1mem          16
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 16, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 5, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1008,7 +1095,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    1    4   3    1   1    4          0.0000000000          0.0000000000
    1    4   3    1   2    4          0.0000000000          0.0000000000
    1    4   3    1   3    4         61.2510575078          5.7644394217
-   1    4   1    2   1    4        147.7821518985         -0.0000000000
+   1    4   1    2   1    4        147.7821518985          0.0000000000
    1    4   1    2   2    4        -73.8910759509         -6.3182864175
    1    4   1    2   3    4        -73.8910759509         -6.3182864175
    1    4   2    2   1    4          0.0000000000          0.0000000000
@@ -1057,7 +1144,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    2    4   1    2   2    4          0.0000000000          0.0000000000
    2    4   1    2   3    4          0.0000000000          0.0000000000
    2    4   2    2   1    4        -73.8910759476          6.3182864175
-   2    4   2    2   2    4        147.7821518985         -0.0000000000
+   2    4   2    2   2    4        147.7821518985          0.0000000000
    2    4   2    2   3    4        -73.8910759509         -6.3182864175
    2    4   3    2   1    4          0.0000000000          0.0000000000
    2    4   3    2   2    4          0.0000000000          0.0000000000
@@ -1106,7 +1193,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
    3    4   2    2   3    4          0.0000000000          0.0000000000
    3    4   3    2   1    4        -73.8910759509         -6.3182864175
    3    4   3    2   2    4        -73.8910759476          6.3182864175
-   3    4   3    2   3    4        147.7821518985         -0.0000000000
+   3    4   3    2   3    4        147.7821518985          0.0000000000
    3    4   1    4   1    1         18.1246752316         21.6803246824
    3    4   1    4   2    1          0.0000000000          0.0000000000
    3    4   1    4   3    1         18.1246752310         21.1374353653
@@ -1172,7 +1259,7 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
   susceptibility tensor (Bohr^-1)
   induced by an atomic displacement
    atom  displacement
-    1          1        0.000000000       -0.000000000       -0.000000000
+    1          1        0.000000000        0.000000000        0.000000000
                        -0.000000000       -0.000000000       -0.174523304
                        -0.000000000       -0.174523304       -0.000000000
     1          2       -0.000000000        0.000000000       -0.174523304
@@ -1182,9 +1269,9 @@ NONLINEAR :  perts :  4.1 /  4.2 /  4.3
                        -0.174523304       -0.000000000        0.000000000
                         0.000000000        0.000000000        0.000000000
 
-    2          1        0.000000000       -0.000000000        0.000000000
-                       -0.000000000       -0.000000000        0.181675010
-                       -0.000000000        0.181675010       -0.000000000
+    2          1        0.000000000        0.000000000        0.000000000
+                        0.000000000       -0.000000000        0.181675010
+                        0.000000000        0.181675010       -0.000000000
     2          2       -0.000000000        0.000000000        0.181675010
                         0.000000000        0.000000000        0.000000000
                         0.181675010        0.000000000        0.000000000
@@ -1382,21 +1469,42 @@ P          mk1mem          16
 - [1] Nonlinear optical susceptibilities, Raman efficiencies, and electrooptic tensors
 - from first principles density functional theory.
 - M. Veithen, X. Gonze, and Ph. Ghosez, Phys. Rev. B 71, 125107 (2005).
-- Comment : to be cited for non-linear response calculations, with optdriver=5.
+- Comment: to be cited for non-linear response calculations, with optdriver=5.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#veithen2005
 -
 - [2] Projector augmented-wave approach to density-functional perturbation theory.
 - C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 73, 235101 (2006).
 - Comparison between projector augmented-wave and ultrasoft pseudopotential formalisms
 - at the density-functional perturbation theory level.
 - C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 78, 035105 (2008).
-- Comment : to be cited in case the computation of response function with PAW, i.e. (rfphon=1 or rfelfd=1) and usepaw=1.
+- Comment: to be cited in case the computation of response function with PAW, i.e. (rfphon=1 or rfelfd=1) and usepaw=1.
 - Strong suggestion to cite these papers.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#audouze2006,
+- and https://docs.abinit.org/theory/bibliography/#audouze2008
 -
 - [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [4] Recent developments in the ABINIT software package.
+- [4] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1408,39 +1516,29 @@ P          mk1mem          16
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [6] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
--
-- Proc.   0 individual time (sec): cpu=          5.4  wall=          5.4
+- Proc.   0 individual time (sec): cpu=          7.3  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  33 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.4  wall=          5.4
+.Delivered   2 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.3  wall=          8.2

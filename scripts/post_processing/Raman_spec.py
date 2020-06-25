@@ -17,7 +17,6 @@ Version: 0.0 - Initial building of program
          0.1 - Additional for angle dependent calculation
          0.2 - Additional user input required and number of output files reduced
          0.3 - Moved all user prompted input to an input file
-         0.4 - Added help menu and better input file example and a small bug fix
 
 Output: Program will output a text file containing the raman spectrum vs frequency
         and an outfile which outlines what happens in the calculation.
@@ -58,7 +57,10 @@ def READ_INPUT(user_filein):
     if check == False:
         print('')
         print('The input file was not found in the directory. \n Please correct this.')
-        print('\n Remember the input file should be formated.  See help menu.')
+        print('\n Remember the input file should be formated as follows:\n\n '\
+                 'filename "name of file"\n outname "name of outfile"\n temp "temperature in Kelvin"\n'
+                 ' frequency "frequency in cm^-1"\n spread "spread of lorentz in cm^-1"\n '\
+                 'calctype "type of calculation 0- abort, 1- powder, 2-ij polarization, 3- angle"\n')
         sys.exit()
     else:
         for line in open(user_filein):
@@ -79,8 +81,6 @@ def READ_INPUT(user_filein):
                       vararray[3][0] = float(l[1])
                       if len(l)>2:
                           vararray[3][1] = GET_UNIT(l[2])
-                  elif l[0] == '':                # passes over spaces
-                      fill = 0
                   elif l[0] == 'calctype':        # calculation type
                       vararray[4] = int(l[1])
                   elif l[0] == 'outname':         # output file name
@@ -112,8 +112,17 @@ def READ_INPUT(user_filein):
         printout('Input file located and read in.\n')
                     
     #Now check that the user put a valid name in for the anaddb output file
-    check = CHECK_FILE(vararray[0])
-    if check == False:
+    # Sanity check...
+    if vararray[0] == '' : # no file name given
+        print('WARNING: No input file name given. Please try again.')
+        sys.exit()
+    elif vararray[0].endswith('.nc'):
+        print('WARNING: This program uses the output file and not a NetCDF file.')
+        sys.exit()
+    else:
+        check = CHECK_FILE(vararray[0])
+    
+    if not check:
         printout('')
         printout('The anaddb output file was not found in the directory.\n Please correct this.')
         sys.exit()
@@ -712,7 +721,7 @@ if __name__ == '__main__':
     __copyright__  = 'none'
     __credits__    = 'none'
     __license__    = 'none'
-    __version__    = '0.4'
+    __version__    = '0.3'
     __maintainer__ = 'Nicholas Pike'
     __email__      = 'Nicholas.pike@ulg.ac.be'
     __status__     = 'production'
@@ -748,60 +757,18 @@ if __name__ == '__main__':
     if any('SPYDER' in name for name in os.environ):
         user_inputfile = 'input_raman'
     else:
-        if len(sys.argv) == 1:
-            print('ERROR: Please see help menu for details about this program. ')
-            sys.exit()
-        elif sys.argv[1] == '--help':
-            print('--help\t\t  +Prints this help menu.')
-            print('--input\t\t  +Prints an example input file.')
-            print('--usage\t\t  +Prints an example of how to use this program.')
-            print('--author\t  +Prints the authors name.')
-            print('--email\t\t  +Prints the authors email address.')
-            print('--version\t  +Prints the version number of this program.')            
-            sys.exit()
-        elif sys.argv[1] == '--input':
-            print('The input file should be formated as follows:\n '\
-                  '\tNOTE! Do not use the quotation marks!\n'\
-                  'filename "name of file"\n'\
-                  'outname "name of outfile"\n'\
-                  'temp "temperature in Kelvin"\n'\
-                  'freq_unit cm1 # or Ha, Hz, cm1 (default: cm1)\n'\
-                  'laser_freq "frequency"\n'\
-                  'spread "spread of lorentz in Ha" \n\n'\
-                  '#additional input variables\n'\
-                  'freqstep "number of frequency steps (default 1000)"\n'\
-                  '#n_freq      1000 # (default value:1000)	\n'\
-                  '#min_freq    0    cm1 # minimum value (default:0.95 of the smallest active mode)\n'\
-                  '#max_freq    2000 cm1 # maximum value (default:1.05 of the greatest active mode)\n'\
-                  'relative_intensity # if present: compute relative intensities (greatest value is 1)\n'\
-                  'keep_file          # if present: keep the same output file (existing one will be deleted)\n')
-            sys.exit()
-        elif sys.argv[1] == '--usage':
-            print('Usage: python %s input_file or %s input_file'%(sys.argv[0],sys.argv[0]))
-            sys.exit()
-        elif sys.argv[1] == '--author':
-            print('Author: %s'%__author__)
-            sys.exit()            
-        elif sys.argv[1] == '--email':
-            print('Email bugs to: %s'%__email__)
-            sys.exit()    
-        elif sys.argv[1] == '--version':
-            print('Version %s'%__version__)
-            sys.exit()  
-        else:
-            #Determines what the program is to do if it is run from command line
-            user_inputfile = sys.argv[1] #input should be python program_name tfile 
+        #Determines what the program is to do if it is run from command line
+        user_inputfile = sys.argv[1] #input should be python program_name tfile 
           
-            #Name of default input file 
-            vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file
+    #Name of default input file
+    vararray = READ_INPUT(user_inputfile) #The program will look for the specified input file
     
        
-            #Print header file and start the calculation
-            PRINT_HEADER()
+    #Print header file and start the calculation
+    PRINT_HEADER()
     
-            #Read anaddb.out file and determine what type of calculation to run
-            DETER_MENU(vararray)
-   
+    #Read anaddb.out file and determine what type of calculation to run
+    DETER_MENU(vararray)
     
     
 #Ends program

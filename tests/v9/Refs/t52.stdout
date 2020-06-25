@@ -1,8 +1,8 @@
 
-.Version 8.9.2 of MRGDV 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of MRGDV 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MRGDV comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Sep 2018.
-- ( at 15h05 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h34 )
   
 >>> Enter name of output file: 
 >>> Enter total number of DFPT POT files: 
@@ -49,6 +49,7 @@ Merged successfully 4 files
  Have dielectric tensor: no
  Have Born effective charges: no
  Have quadrupoles: no
+ Have electric field: no
  Treatment of long-range part in V1scf: 1
  qdamp:  -1.0
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file

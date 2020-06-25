@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paral_pert
 !! NAME
 !!  m_paral_pert
@@ -8,7 +7,7 @@
 !!  over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT,FJ,MD)
+!! Copyright (C) 2013-2020 ABINIT group (MT,FJ,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

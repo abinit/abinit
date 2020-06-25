@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_phonons
 !! NAME
 !! m_phonons
@@ -9,7 +8,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG, MG, MJV, GMR)
+!! Copyright (C) 1999-2020 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +54,7 @@ module m_phonons
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
+ use m_symfind,         only : symanal
 
  implicit none
 
@@ -111,6 +111,12 @@ module m_phonons
   real(dp) :: dossmear
   ! Gaussian broadening.
 
+  integer :: qptrlatt(3,3) = 0
+  ! q-mesh as computed in getkgrid_low
+
+  real(dp) :: shiftq(3)
+  ! Shigt of Q-mesh computed by getkgrid_low (1 shift is enough)
+
   real(dp),allocatable :: atom_mass(:)
    ! atom_mass(natom)
 
@@ -165,6 +171,7 @@ module m_phonons
  end type phonon_dos_type
 
  public :: mkphdos
+ ! Constructor
 !!**
 
 CONTAINS  !===============================================================================
@@ -772,6 +779,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  !my_qptopt = 3 ! This to deactivate the use of symmetries for debugging purposes.
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, my_qptopt, nqshft, dos_qshift, &
    phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz_smap)
+
+ phdos%qptrlatt = new_qptrlatt
+ phdos%shiftq(:) = new_shiftq(:, 1) ! only one shift in output
 
  if (my_rank == master) then
    write(msg, "(3a, i0)")" DOS ngqpt: ", trim(ltoa(dos_ngqpt)), ", qptopt: ", my_qptopt
@@ -1706,7 +1716,8 @@ subroutine phdos_ncwrite(phdos, ncid)
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
  ncerr = nctk_def_dims(ncid, [nctkdim_t("three", 3), nctkdim_t("number_of_atoms", phdos%natom),&
-   nctkdim_t("number_of_atom_species", phdos%ntypat), nctkdim_t("number_of_frequencies", phdos%nomega)])
+   nctkdim_t("number_of_atom_species", phdos%ntypat), nctkdim_t("number_of_frequencies", phdos%nomega), &
+   nctkdim_t("nqibz", phdos%nqibz)])
  NCF_CHECK(ncerr)
 
 !scalars
@@ -1720,7 +1731,9 @@ subroutine phdos_ncwrite(phdos, ncid)
    nctkarr_t('pjdos', "dp", 'number_of_frequencies, three, number_of_atoms'),&
    nctkarr_t('pjdos_type', "dp", 'number_of_frequencies, number_of_atom_species'),&
    nctkarr_t('pjdos_rc_type', "dp", 'number_of_frequencies, three, number_of_atom_species'), &
-   nctkarr_t('msqd_dos_atom', "dp", 'number_of_frequencies, three, three, number_of_atoms') &
+   nctkarr_t('msqd_dos_atom', "dp", 'number_of_frequencies, three, three, number_of_atoms'), &
+   nctkarr_t('qptrlatt', "int", 'three, three'), &
+   nctkarr_t('shiftq', "dp", 'three') &
  ])
  NCF_CHECK(ncerr)
 
@@ -1734,6 +1747,8 @@ subroutine phdos_ncwrite(phdos, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_type'), phdos%pjdos_type/Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qptrlatt'), phdos%qptrlatt))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'shiftq'), phdos%shiftq))
 
 #else
  MSG_ERROR("netcdf support not enabled")
@@ -1789,17 +1804,17 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  integer,parameter :: master=0
  integer :: unt
  integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,natom,ncid,nprocs,my_rank
- integer :: natprj_bs,eivec,enunit,ifcflag
+ integer :: natprj_bs,eivec,enunit,ifcflag,ptgroupma,spgroup
  real(dp) :: freeze_displ
  real(dp) :: cfact
  character(500) :: msg
  character(len=8) :: unitname
 !arrays
- integer :: rfphon(4),rfelfd(4),rfstrs(4)
+ integer :: bravais(11),rfphon(4),rfelfd(4),rfstrs(4)
  integer :: nomega, imode, iomega
  integer,allocatable :: ndiv(:)
  real(dp) :: omega, omega_min, gaussmaxarg, gaussfactor, gaussprefactor, xx
- real(dp) :: speedofsound(3)
+ real(dp) :: speedofsound(3),genafm(3)
  real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
  real(dp) :: displ(2*3*crystal%natom*3*crystal%natom),eigval(3,crystal%natom)
@@ -1873,8 +1888,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
-      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff, &
-      xmpi_comm_self)
+      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
+      ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
    else if (ifcflag == 0) then
 
@@ -1924,6 +1939,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ! Determine the symmetries of the phonon mode at Gamma
    ! TODO: generalize for other q-point little groups.
    if (sum(abs(qphon)) < DDB_QTOL) then
+     call symanal(bravais,0,genafm,nsym,nsym,ptgroupma,Crystal%rprimd,spgroup,&
+&      Crystal%symafm,Crystal%symrel,Crystal%tnons,tol3,verbose=.TRUE.)
      call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
    end if
 
@@ -2812,6 +2829,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 !scalars
  integer,parameter :: master=0
  integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr,nph2l
+#ifdef HAVE_NETCDF
+ character(len=17) :: c17
+ character(len=22) :: c22
+#endif
  type(kpath_t) :: qpath
 !arrays
  real(dp),allocatable :: qph2l(:,:), qnrml2(:)
@@ -2880,12 +2901,13 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 #ifdef HAVE_NETCDF
    ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
    ! Should centralize everything in a single routine
+   c17='atomic_mass_units' ; c22='number_of_atom_species' ! To avoid long lines (>132)
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(cryst%ncwrite(ncid))
    call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t(c17,"dp",c22)], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid,c17), ifc%amu))
    if (nph2l /= 0) call ifc%calcnwrite_nana_terms(cryst, nph2l, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 #endif
@@ -3101,7 +3123,9 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
 
 !write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
 
- write(message,'(a,a,es8.2,a)')ch10,' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)'
+ write(message,'(a,a,es8.2,5a)')ch10,' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)',ch10,&
+  ' For each vibration mode, or group of modes if degenerate,',ch10,&
+  ' the characters are given for each symmetry operation (see the list in the log file).'
  call wrtout([std_out, iout], message)
 
  do imode=1,3*natom

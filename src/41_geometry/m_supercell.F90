@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_supercell
 !!
 !! NAME
@@ -10,7 +9,7 @@
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MJV, DJA)
+!! Copyright (C) 2010-2020 ABINIT group (MJV, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

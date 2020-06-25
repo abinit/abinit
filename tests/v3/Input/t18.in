@@ -214,7 +214,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t18.out, tolnlines = 3, tolabs = 5.0e-07, tolrel = 1.0e-08
+#%%   t18.out, tolnlines = 3, tolabs = 5.0e-07, tolrel = 2.0e-08
 #%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 1

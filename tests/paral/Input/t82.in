@@ -13,12 +13,14 @@ fit_coeff = 1
 fit_ncoeff = 2
 fit_nfixcoeff  = 2 
 fit_fixcoeff  = 1 2 
-fit_cutoff = 7
+fit_rangePower = 3 3 
+fit_SPCoupling = 1
+fit_cutoff = 3.8 
+fit_iatom = -1 
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% test_chain = t82.in
 #%% [files]
 #%% [paral_info]
@@ -53,7 +55,7 @@ fit_cutoff = 7
 #%%   t82_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%%   t82_MPI10_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [extra_info]
-#%% authors = A. MARTIN
+#%% authors = A. MARTIN, M.M. Schmitt
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and HIST, fit the anharmonic part and generate effective potential 
