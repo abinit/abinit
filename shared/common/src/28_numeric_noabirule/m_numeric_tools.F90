@@ -98,6 +98,7 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
+ public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -4936,7 +4937,6 @@ end function isordered_rdp
 
 pure function stats_eval(arr) result(stats)
 
-
 !Arguments ------------------------------------
 !scalars
  type(stats_t) :: stats
@@ -5398,7 +5398,7 @@ end subroutine simpson_int
 !!
 !! SOURCE
 
-function simpson(step,values) result(res)
+function simpson(step, values) result(res)
 
 
 !Arguments ------------------------------------
@@ -6462,11 +6462,11 @@ end subroutine invcb
 !!
 !! SOURCE
 
-elemental subroutine safe_div( n, d, altv, q )
+elemental subroutine safe_div(n, d, altv, q)
 
 !Arguments ----------------------------------------------
 !scalars
- real(dp), intent(in) :: n, d, altv
+ real(dp),intent(in) :: n, d, altv
  real(dp),intent(out) :: q
 
 ! *********************************************************************
@@ -6478,6 +6478,39 @@ elemental subroutine safe_div( n, d, altv, q )
  endif
 
 end subroutine safe_div
+!!***
+
+!!****f* ABINIT/bool2index
+!! NAME
+!! bool2index
+!!
+!! FUNCTION
+!!  Allocate and return array with the indices in the input boolean array `bool_list` that evaluates to .True.
+!!
+!! SOURCE
+
+subroutine bool2index(bool_list, out_index)
+
+!Arguments ----------------------------------------------
+!scalars
+ logical,intent(in) :: bool_list(:)
+ integer,allocatable,intent(inout) :: out_index(:)
+
+!Local variables-------------------------------
+ integer :: ii, cnt
+! *********************************************************************
+
+ cnt = count(bool_list)
+ ABI_REMALLOC(out_index, (cnt))
+ cnt = 0
+ do ii=1,size(bool_list)
+   if (bool_list(ii)) then
+     cnt = cnt + 1
+     out_index(cnt) = ii
+   end if
+ end do
+
+end subroutine bool2index
 !!***
 
 END MODULE m_numeric_tools

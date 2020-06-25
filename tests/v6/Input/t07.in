@@ -37,7 +37,7 @@ diemix 0.5
 kptopt 1
 kptrlatt 2 0 0 0 2 0 0 0 2
 
-# === LDA+U/LDA+DMFT options
+# === DFT+U/LDA+DMFT options
 usedmft1 0
 usedmft2 1
 dmftcheck2 -1

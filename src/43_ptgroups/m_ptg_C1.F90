@@ -71,7 +71,7 @@ ABI_MALLOC(class_names,(1))
  class_names(1) = "1+"
 
 ! List of irreducible representations.
- ABI_DT_MALLOC(Irr, (1))
+ ABI_MALLOC(Irr, (1))
  Irr(1)%name = "A"
  Irr(1)%dim = 1
  Irr(1)%nsym = 1

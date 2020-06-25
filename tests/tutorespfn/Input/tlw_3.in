@@ -17,5 +17,6 @@ flexoflag  1
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
 #%% description = anaddb input file for flexoelectric tensor calculation.
+##%% topics = longwave
 #%%<END TEST_INFO>
 

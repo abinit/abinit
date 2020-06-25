@@ -64,6 +64,10 @@ AC_DEFUN([SD_HDF5_INIT], [
       no-fortran)
         sd_hdf5_enable_fc="no"
         ;;
+      mandatory)
+        sd_hdf5_enable="yes"
+        sd_hdf5_enable_def="yes"
+        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg HDF5 option: '${kwd}'])
         ;;

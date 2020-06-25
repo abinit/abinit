@@ -1,0 +1,99 @@
+#Compute GaAs crystal, with nsppol=2 : ground-state with few bands,
+#then large number of bands, then ddk for different directions
+#
+
+ ndtset 6
+
+#First dataset : SCF run
+ prtden1  1     
+  nband1  4     
+ kptopt1  1
+ tolwfr1  1.0d-12
+
+#Second dataset : NSCF run with kptopt 1 (more bands)
+   iscf2 -2  
+ getwfk2  1   
+ getden2  1
+ kptopt2  1
+ tolwfr2  1.0d-12
+
+#Third dataset : NSCF run with kptopt 2 (nonlinear optics not possible)
+   iscf3 -2  
+ getwfk3  2   
+ getden3  1
+ tolwfr3  1.0d-12
+
+# ddk response function
+   iscf4 -3
+  nstep4  1  nline4 0  prtwf4 3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
+   nqpt4  1
+    qpt4  0.0d0 0.0d0 0.0d0
+  rfdir4  1 0 0
+ rfelfd4  2
+ getwfk4  3
+
+# ddk response function
+   iscf5 -3
+  nstep5  1  nline5 0  prtwf5 3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
+   nqpt5  1
+    qpt5  0.0d0 0.0d0 0.0d0
+  rfdir5  0 1 0
+ rfelfd5  2
+ getwfk5  3
+
+
+# ddk response function
+   iscf6 -3
+  nstep6  1  nline6 0  prtwf6 3   # Speed up the calculation : the first-order response wavefunction is not computed, only the matrix elements
+   nqpt6  1
+    qpt6  0.0d0 0.0d0 0.0d0
+  rfdir6  0 0 1
+ rfelfd6  2
+ getwfk6  3
+
+# Data common to datasets 3-6
+ kptopt   2      # Need points in the half BZ (use time-reversal symmetry - nonlinear optics not possible)
+
+
+#Common data
+ nshiftk 4
+ shiftk  0.5 0.5 0.5
+         0.5 0.0 0.0
+         0.0 0.5 0.0
+         0.0 0.0 0.5
+ ngkpt 2 2 2  # too small !
+
+ acell   3*10.60
+ diemac 10.0
+ ecut 6.00   # too small !
+ natom  2 
+ nband 20
+ nbdbuf 2
+ nsppol 2
+ nstep 100
+ ntypat  2
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ spinmagntarget 0.0
+ xred 3*0.00d0 3*0.25d0
+ typat  1 2  tolwfr  1.e-8
+ znucl  31 33
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t07.in, t08.in
+#%% [files]
+#%% files_to_test = 
+#%%   t07.out, tolnlines = 14, tolabs = 2.0e-09, tolrel = 2.0e-04
+#%% psp_files = Ga-low_r.psp8, As_r.psp8
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Y. Gillet, X. Gonze
+#%% keywords = NC, DFPT 
+#%% description = 
+#%%   GaAs, zinc-blende structure. GGA-PBE. Treated with nsppol=2.
+#%%   Generate the data for optic (linear coefficients).
+#%%   to be analysed in test 08 (netcdf files with h1 matrix elements).
+#%% topics = Optic
+#%%<END TEST_INFO>

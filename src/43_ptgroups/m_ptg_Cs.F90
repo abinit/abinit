@@ -49,13 +49,13 @@ contains
  use m_defs_ptgroups,  only : irrep_t
  implicit none
 !Arguments ------------------------------------
- integer,intent(out) :: nclass,nsym 
+ integer,intent(out) :: nclass,nsym
  !arrays
  integer,allocatable,intent(out) :: sym(:,:,:), class_ids(:,:)
  character(len=5),allocatable,intent(out) :: class_names(:)
  type(irrep_t),allocatable,intent(out) :: Irr(:)
  !Local variables-------------------------------
- complex(dpc) :: j=(0.0_dp,1.0_dp) 
+ complex(dpc) :: j=(0.0_dp,1.0_dp)
  ! ********************************************************************************
 ! List of symmetries packed in classes
  nsym = 2
@@ -72,11 +72,11 @@ contains
  class_ids(2,2) = 2
 
 ABI_MALLOC(class_names,(2))
- class_names(1) = "1+" 
- class_names(2) = "-2+" 
+ class_names(1) = "1+"
+ class_names(2) = "-2+"
 
 ! List of irreducible representations.
- ABI_DT_MALLOC(Irr, (2))
+ ABI_MALLOC(Irr, (2))
  Irr(1)%name = "A'"
  Irr(1)%dim = 1
  Irr(1)%nsym = 2
@@ -93,7 +93,7 @@ ABI_MALLOC(class_names,(2))
 
  RETURN
   if (.FALSE.) write(std_out,*) j
- end subroutine ptg_Cs 
+ end subroutine ptg_Cs
 !!***
 
 end module m_ptg_Cs

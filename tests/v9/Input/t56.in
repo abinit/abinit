@@ -24,6 +24,9 @@ ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with 
 # EPH related parameters
 ############
 symsigma  1
+dvdb_rspace_cell 1
+dvdb_qdamp 0.1
+eph_mrta 0
 
 optdriver  7
 nband      8
@@ -71,7 +74,6 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[789].0_.*
 #%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
 #%% [files]
 #%% files_to_test = 

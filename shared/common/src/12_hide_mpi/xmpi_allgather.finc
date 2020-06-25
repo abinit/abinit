@@ -118,6 +118,54 @@ subroutine xmpi_allgather_char(charval,recvbuf,spaceComm,ier)
 end subroutine xmpi_allgather_char
 !!***
 
+!!****f* ABINIT/xmpi_allgather_int1d_1b
+!! NAME
+!!  xmpi_allgather_int1d_1b
+!!
+!! FUNCTION
+!!  Gathers data from all tasks and distributes it to all.
+!!  Target: one-dimensional integer arrays.
+!!
+!! INPUTS
+!!  xval= buffer array
+!!  nelem= number of elements
+!!  spaceComm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  recvbuf= received elements
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_allgather
+!!
+!! SOURCE
+
+subroutine xmpi_allgather_int1d_1b(xval, nelem, recvbuf, spaceComm, ier)
+
+!Arguments-------------------------
+ integer(c_int8_t), DEV_CONTARRD intent(in) :: xval(:)
+ integer(c_int8_t), DEV_CONTARRD intent(inout) :: recvbuf(:)
+ integer ,intent(in) :: nelem,spaceComm
+ integer ,intent(out) :: ier
+
+! *************************************************************************
+ ier=0
+#if defined HAVE_MPI
+ if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
+!  allgather xval on all proc. in spaceComm
+   call MPI_ALLGATHER(xval,nelem,MPI_INTEGER1,recvbuf,nelem,MPI_INTEGER1,spaceComm,ier)
+ else if (spaceComm == MPI_COMM_SELF) then
+   recvbuf(1:nelem)=xval(1:nelem)
+ end if
+#else
+ recvbuf(1:nelem)=xval(1:nelem)
+#endif
+end subroutine xmpi_allgather_int1d_1b
+!!***
 
 !!****f* ABINIT/xmpi_allgather_int1d
 !! NAME
