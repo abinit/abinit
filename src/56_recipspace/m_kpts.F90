@@ -585,12 +585,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
    k1(:) = kptns1(:,ikpt1)  !; write(std_out,*)ikpt1,k1(:)
    k1int(:) = nint(k1(:) + tol12)
    k1(:) = k1(:) - k1int(:)
-   do ig1=-limit,limit
-     kpg1(1) = k1(1) + ig1
+   do ig3=-limit,limit
+     kpg1(3) = k1(3) + ig3
      do ig2=-limit,limit
        kpg1(2) = k1(2) + ig2
-       do ig3=-limit,limit
-         kpg1(3) = k1(3) + ig3
+       do ig1=-limit,limit
+         kpg1(1) = k1(1) + ig1
 
          ikpg1 = ig1 + limit + 1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
          ! Compute the norm of the vector (also taking into account possible umklapp)
@@ -606,8 +606,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  end do
 
  if (nprocs > 1) then
-   call xmpi_sum(lkpg1, comm, ierr)
    call xmpi_sum(lkpg1_sorted, comm, ierr)
+   call xmpi_sum(lkpg1, comm, ierr)
    call xmpi_sum(isort, comm, ierr)
  end if
  call cwtime_report(" listkk_loop1", cpu, wall, gflops)
