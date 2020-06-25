@@ -1,5 +1,5 @@
 
-.Version 9.0.2 of ABINIT 
+.Version 9.1.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 20 Mar 2020.
-- ( at 07h56 )
+.Starting date : Thu  7 May 2020.
+- ( at 23h37 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
@@ -139,7 +139,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
               amu      1.20110000E+01
              bdgw           1       8
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
+ dvdb_rspace_cell        1
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
       eph_extrael1     0.00000000E+00
@@ -155,6 +155,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
       eph_intmeth           1
+         eph_mrta           0
          eph_task          -4
 -          fftalg         312
            getddb          20
@@ -363,7 +364,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -435,10 +436,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -484,7 +485,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS1_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -497,6 +504,10 @@ Transport calculation results
           240.00        0.33E-22        0.00E+00            0.00            0.00
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
+
+
+
+- Writing RTA transport results to: t56o_DS1_RTA.nc
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -537,7 +548,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -594,10 +605,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -643,7 +654,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS2_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -656,6 +673,10 @@ Transport calculation results
           240.00        0.28E-12        0.00E+00            0.00            0.00
           270.00        0.13E-08        0.00E+00            0.00            0.00
           300.00        0.12E-05        0.00E+00            0.00            0.00
+
+
+
+- Writing RTA transport results to: t56o_DS2_RTA.nc
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -700,7 +721,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -754,10 +775,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -803,7 +824,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS3_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.25E+23        0.00E+00            0.00            0.00
            30.00        0.18E+23        0.00E+00            0.00            0.00
@@ -816,6 +843,10 @@ Transport calculation results
           240.00        0.18E+23        0.00E+00            0.00            0.00
           270.00        0.18E+23        0.00E+00            0.00            0.00
           300.00        0.18E+23        0.00E+00            0.00            0.00
+
+
+
+- Writing RTA transport results to: t56o_DS3_RTA.nc
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -862,7 +893,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -919,10 +950,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -968,7 +999,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS4_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.34E+23        0.00E+00            0.00            0.00
            30.00        0.34E+23        0.00E+00            0.00            0.00
@@ -981,6 +1018,10 @@ Transport calculation results
           240.00        0.34E+23        0.00E+00            0.00            0.00
           270.00        0.34E+23        0.00E+00            0.00            0.00
           300.00        0.34E+23        0.00E+00            0.00            0.00
+
+
+
+- Writing RTA transport results to: t56o_DS4_RTA.nc
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1026,7 +1067,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -1080,10 +1121,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -1129,7 +1170,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS5_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.17E+23        0.00E+00            0.00            0.00
            30.00        0.17E+23        0.00E+00            0.00            0.00
@@ -1142,6 +1189,10 @@ Transport calculation results
           240.00        0.17E+23        0.00E+00            0.00            0.00
           270.00        0.17E+23        0.00E+00            0.00            0.00
           300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
+
+- Writing RTA transport results to: t56o_DS5_RTA.nc
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1234,10 +1285,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -1283,7 +1334,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS6_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -1297,6 +1354,10 @@ Transport calculation results
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
 
+
+
+- Writing RTA transport results to: t56o_DS6_RTA.nc
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1305,7 +1366,7 @@ Transport calculation results
               amu      1.20110000E+01
              bdgw           1       8
         ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
+ dvdb_rspace_cell        1
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
       eph_extrael1     0.00000000E+00
@@ -1321,6 +1382,7 @@ Transport calculation results
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
       eph_intmeth           1
+         eph_mrta           0
          eph_task          -4
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00

@@ -53,7 +53,7 @@ module m_gstate
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init
  use m_fstrings,         only : strcat, sjoin
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
@@ -80,7 +80,6 @@ module m_gstate
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
- use m_dtfil,            only : dtfil_init_time
  use m_jellium,          only : jellium
  use m_iowf,             only : outwf
  use m_outqmc,           only : outqmc
@@ -1485,9 +1484,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
 &   nblok,xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_open_write(ddb_hdr,ddbnm,dtfil%unddb,fullinit=0)
+   call ddb_hdr%open_write(ddbnm,dtfil%unddb,fullinit=0)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
    choice=2
    mpert = dtset%natom + 6 ; msize = 3*mpert

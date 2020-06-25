@@ -17,16 +17,16 @@
 .Starting date : Mon 24 Feb 2020.
 - ( at 21h35 )
   
->>> Enter name of output file: 
->>> Enter total number of DFPT POT files: 
->>> Enter name of POT file 1 : 
->>> Enter name of POT file 2 : 
->>> Enter name of POT file 3 : 
->>> Enter name of POT file 4 : 
->>> Enter name of POT file 5 : 
->>> Enter name of POT file 6 : 
->>> Enter name of POT file 7 : 
->>> Enter name of POT file 8 : 
+->> Enter name of output file: 
+->> Enter total number of DFPT POT files: 
+->> Enter name of POT file 1 : 
+->> Enter name of POT file 2 : 
+->> Enter name of POT file 3 : 
+->> Enter name of POT file 4 : 
+->> Enter name of POT file 5 : 
+->> Enter name of POT file 6 : 
+->> Enter name of POT file 7 : 
+->> Enter name of POT file 8 : 
 - Reading header of file [1]: t57o_DS4_POT1
 - Merging file [1]: t57o_DS4_POT1
 - Reading header of file [2]: t57o_DS4_POT4
@@ -68,8 +68,8 @@ Merged successfully 8 files
  Have Born effective charges: no
  Have quadrupoles: no
  Have electric field: no
- Treatment of long-range part in V1scf: 1
- qdamp:  -1.0
+ Treatment of long-range part in V1scf (add_lr): 1
+ Damping factor for Gaussian filter (qdamp):   0.1
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
