@@ -1185,7 +1185,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
      write(ount, "(a)")"# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
      do iw=1,self%nw
-       write(ount, "(10(es16.6))")self%edos%mesh(iw), values(iw, :, :, itemp, 1)
+       write(ount, "(10(es16.6))")self%edos%mesh(iw), tmp_values(iw, :, :, itemp, 1)
      end do
    end do
   write(ount, "(a)")""
@@ -1195,7 +1195,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
      write(ount, "(a)") &
        "# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
      do iw=1,self%nw
-       write(ount, "(19(es16.6))")self%edos%mesh(iw), values(iw, :, :, itemp, 1), values(iw, :, :, itemp, 2)
+       write(ount, "(19(es16.6))")self%edos%mesh(iw), tmp_values(iw, :, :, itemp, 1), tmp_values(iw, :, :, itemp, 2)
      end do
    end do
   write(ount, "(a)")""
