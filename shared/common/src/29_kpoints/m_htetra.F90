@@ -914,20 +914,20 @@ subroutine htetra_init_mapping_ibz(tetra)
  integer :: ikibz, itetra, isummit, ihash, ntetra
  integer :: tetra_count(tetra%nkibz),tetra_mibz(0:4)
 
- !real(dp) :: mem_mb
+ real(dp) :: mem_mb
 
  ! Only execute the following if not yet alocated
  if (allocated(tetra%ibz)) return
 
  ! Allocate IBZ to tetrahedron mapping
  ABI_MALLOC(tetra%ibz, (tetra%nkibz))
- !mem_mb = ABI_MEM_MB(tetra%ibz)
+ mem_mb = ABI_MEM_MB(tetra%ibz)
  do ikibz=1,tetra%nkibz
    ABI_MALLOC(tetra%ibz(ikibz)%indexes, (2, tetra%tetra_count(ikibz)))
-   !mem_mb = mem_mb + 2 * tetra%tetra_count(ikibz) * 4 * b2Mb
+   mem_mb = mem_mb + 2 * tetra%tetra_count(ikibz) * 4 * b2Mb
  end do
 
- !call wrtout(std_out, sjoin("Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " (Mb) <<< MEM"))
+ call wrtout(std_out, sjoin("Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " (Mb) <<< MEM"))
 
  ! Create mapping from IBZ to unique tetrahedra
  tetra_count = 0
@@ -938,15 +938,14 @@ subroutine htetra_init_mapping_ibz(tetra)
      do isummit=1,4
        ikibz = tetra_mibz(isummit)
        tetra_count(ikibz) = tetra_count(ikibz) + 1
-       tetra%ibz(ikibz)%indexes(1,tetra_count(ikibz)) = ihash
-       tetra%ibz(ikibz)%indexes(2,tetra_count(ikibz)) = itetra
+       tetra%ibz(ikibz)%indexes(1, tetra_count(ikibz)) = ihash
+       tetra%ibz(ikibz)%indexes(2, tetra_count(ikibz)) = itetra
      end do
    end do
  end do
 
 end subroutine htetra_init_mapping_ibz
 !!***
-
 
 !----------------------------------------------------------------------
 

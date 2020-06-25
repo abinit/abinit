@@ -94,9 +94,13 @@ nband 8
 #%% files_to_test =
 #%%   teph4mob_7.out, tolnlines= 57, tolabs=  30, tolrel= 0.03;
 #%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 20.0, tolrel= 1.2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines= 50, tolabs= 20.0, tolrel= 1.2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 4.0e+03, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 3.678e+03, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_SIGMA, tolnlines= 50, tolabs= 3.678e+03, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%% psp_files =  13al.981214.fhi, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4

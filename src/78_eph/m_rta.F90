@@ -55,7 +55,7 @@ module m_rta
  private
 !!****
 
- public :: rta_driver ! main entry point for transport calculations withing RTA
+ public :: rta_driver ! Main entry point for transport calculations withing RTA
 !!****
 
 !----------------------------------------------------------------------
@@ -65,7 +65,7 @@ module m_rta
 !! rta_t
 !!
 !! FUNCTION
-!! Container for transport quantities in the relaxation time approximation
+!! Container for transport quantities in the RTA
 !!
 !! SOURCE
 
@@ -255,8 +255,7 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
  call wrtout([std_out, ab_out], ch10//' Entering transport RTA computation driver.')
  call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1)
 
- sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, &
-                        keep_open=.true., extrael_fermie=extrael_fermie)
+ sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
 
  ! Initialize RTA object
@@ -402,6 +401,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    ! Map the points of the downsampled bands to dense ebands
    timrev = kpts_timrev_from_kptopt(ebands%kptopt)
    ABI_MALLOC(indkk, (tmp_ebands%nkpt, 6))
+
    call listkk(dksqmax, cryst%gmet, indkk, new%ebands%kptns, tmp_ebands%kptns, &
                new%ebands%nkpt, tmp_ebands%nkpt, cryst%nsym, &
                sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
@@ -506,7 +506,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
 !Local variables ------------------------------
  integer,parameter :: nvecs0 = 0, master = 0
- integer :: nsppol, nkpt, mband, ib, ik, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
+ integer :: nsppol, nkpt, mband, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, linewidth, fact0
  real(dp) :: cpu, wall, gflops
@@ -530,31 +530,32 @@ subroutine rta_compute(self, cryst, dtset, comm)
  nvals = self%ntemp * self%nrta
  ABI_CALLOC(tau_vals, (self%ntemp, self%nrta, mband, nkpt, nsppol))
 
- ! FIXME: The memory explodes it natom is large
+ ! FIXME: The memory explodes if natom is large
  ntens = (1 + self%ntemp) * self%nrta
  ABI_CALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, mband, nkpt, nsppol))
 
  cnt = 0
  do spin=1,nsppol
-   do ik=1,nkpt
+   do ik_ibz=1,nkpt
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      do ib=1,mband
 
-       vr(:) = self%velocity(:, ib, ik, spin)
+       vr(:) = self%velocity(:, ib, ik_ibz, spin)
        ! Store outer product (v_bks x v_bks) in vv_tens. This part does not depend on T and irta.
        do ii=1,3
          do jj=1,3
-           vv_tens(ii, jj, 1, 1:self%nrta, ib, ik, spin) = vr(ii) * vr(jj)
+           vv_tens(ii, jj, 1, 1:self%nrta, ib, ik_ibz, spin) = vr(ii) * vr(jj)
          end do
        end do
 
        ! Multiply by the lifetime (SERTA and MRTA)
        do irta=1,self%nrta
          do itemp=1,self%ntemp
-           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin))
-           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, spin))
-           call safe_div(vv_tens(:, :, 1, irta, ib, ik, spin), linewidth, zero, vv_tens(:, :, 1+itemp, irta, ib, ik, spin))
-           call safe_div(one / two, linewidth, zero, tau_vals(itemp, irta, ib, ik, spin))
+           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik_ibz, spin))
+           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik_ibz, spin))
+           call safe_div(vv_tens(:,:, 1, irta, ib, ik_ibz, spin), linewidth, zero, &
+                         vv_tens(:,:, 1+itemp, irta, ib, ik_ibz, spin))
+           call safe_div(one / two, linewidth, zero, tau_vals(itemp, irta, ib, ik_ibz, spin))
          end do
        end do
 
@@ -828,7 +829,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkpt, mband, ib, ik, spin, ii, jj, itemp, ielhol, nvalence, cnt, nprocs, irta
+ integer :: nsppol, nkpt, mband, ib, ik_ibz, spin, ii, jj, itemp, ielhol, nvalence, cnt, nprocs, irta
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
  real(dp) :: cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
@@ -856,12 +857,12 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Compute carrier concentration
  do spin=1,nsppol
-   do ik=1,nkpt
-     wtk = self%ebands%wtk(ik)
+   do ik_ibz=1,nkpt
+     wtk = self%ebands%wtk(ik_ibz)
 
      ! number of holes
      do ib=1,nvalence
-       eig_nk = self%ebands%eig(ib, ik, spin)
+       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
          mu_e = self%transport_mu_e(itemp)
@@ -871,7 +872,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
      ! number of electrons
      do ib=nvalence+1,mband
-       eig_nk = self%ebands%eig(ib, ik, spin)
+       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
          mu_e = self%transport_mu_e(itemp)
@@ -891,16 +892,16 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  self%mobility_mu = zero
  cnt = 0
  do spin=1,nsppol
-   do ik=1,nkpt
+   do ik_ibz=1,nkpt
      !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-     wtk = self%ebands%wtk(ik)
+     wtk = self%ebands%wtk(ik_ibz)
 
      do ib=1,mband
        ielhol = 2; if (ib > nvalence) ielhol = 1
-       eig_nk = self%ebands%eig(ib, ik, spin)
+       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
 
        ! Store outer product in vv_tens
-       vr(:) = self%velocity(:,ib,ik,spin)
+       vr(:) = self%velocity(:, ib, ik_ibz, spin)
        do ii=1,3
          do jj=1,3
            vv_tens(ii, jj) = vr(ii) * vr(jj)
@@ -914,8 +915,8 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
          do itemp=1,self%ntemp
            mu_e = self%transport_mu_e(itemp)
            kT = self%kTmesh(itemp)
-           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin))
-           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik, spin))
+           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik_ibz, spin))
+           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik_ibz, spin))
            call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk, kT, mu_e), linewidth, zero, vv_tenslw(:, :))
            self%mobility_mu(ielhol, :, :, itemp, spin, irta) = self%mobility_mu(ielhol, :, :, itemp, spin, irta) &
              + vv_tenslw(:, :)
@@ -1153,6 +1154,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 !Local variables --------------------------------
  integer :: itemp, iw, ount
  character(len=500) :: msg, rta_type
+ real(dp),allocatable :: tmp_values(:,:,:,:,:)
 
 !************************************************************************
 
@@ -1169,6 +1171,13 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
  ! TODO: Units ?
  write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
  write(ount, "(a)")"#"
+
+ call alloc_copy(values, tmp_values)
+ where (abs(values) > tol30)
+   tmp_values = values
+ else where
+   tmp_values = zero
+ end where
 
  ! (nw, 3, 3, ntemp, nsppol)
  if (self%nsppol == 1) then
@@ -1193,6 +1202,8 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
  end if
 
  close(ount)
+
+ ABI_FREE(tmp_values)
 
 end subroutine rta_write_tensor
 !!***
