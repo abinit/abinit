@@ -49,8 +49,7 @@ module m_hightemp
     real(dp) :: gcut,std_init,nfreeel,e_shiftfactor,ucvol
     logical :: prt_cg
   contains
-    procedure :: compute_efreeel
-    procedure :: compute_e_ent_freeel,compute_e_kin_freeel_approx
+    procedure :: compute_efreeel,compute_e_ent_freeel
     procedure :: compute_nfreeel,compute_pw_avg_std
     procedure :: compute_e_shiftfactor,init,destroy
   end type hightemp_type
@@ -384,60 +383,6 @@ contains
 
   end subroutine compute_efreeel
 
-  !!****f* ABINIT/m_hightemp/compute_e_kin_freeel_approx
-  !! NAME
-  !! compute_e_kin_freeel_approx
-  !!
-  !! FUNCTION
-  !!
-  !! INPUTS
-  !!
-  !! OUTPUT
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine compute_e_kin_freeel_approx(this,fermie,nfftf,nspden,tsmear,vtrial)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    class(hightemp_type),intent(inout) :: this
-    real(dp),intent(in) :: fermie,tsmear
-    integer,intent(in) :: nfftf,nspden
-    ! Arrays
-    real(dp),intent(in) :: vtrial(nfftf,nspden)
-
-    ! Local variables -------------------------
-    ! Scalars
-    real(dp) :: factor,xcut,gamma
-    integer :: ispden,ifft
-
-    ! *********************************************************************
-
-    factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-    if(this%version==2) then
-      xcut=(this%ebcut-this%e_shiftfactor)/tsmear
-    else if(this%version==1) then
-      xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
-    end if
-    gamma=(fermie-this%e_shiftfactor)/tsmear
-
-    this%e_kin_freeel=factor*djp32(xcut,gamma)
-    ! write(0,*) "e_kin_freeel=",this%e_kin_freeel
-
-    ! Computation of edc_kin_freeel
-    this%edc_kin_freeel=zero
-    do ispden=1,nspden
-      do ifft=1,nfftf
-        this%edc_kin_freeel=this%edc_kin_freeel+vtrial(ifft,ispden)
-      end do
-    end do
-    ! Verifier la constante (/nspden**2)
-    this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
-    if(this%e_kin_freeel<tol16) this%e_kin_freeel=zero
-  end subroutine compute_e_kin_freeel_approx
 
   !!****f* ABINIT/m_hightemp/compute_e_ent_freeel
   !! NAME
