@@ -40,7 +40,8 @@ MODULE m_ppmodel
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, get_bz_item
  use m_gsphere,        only : gsphere_t
- use m_vcoul,          only : vcoul_t, cmod_qpg
+ use m_vcoul,          only : vcoul_t
+ use m_qplusg,         only : cmod_qpg
  use m_fft_mesh,       only : g2ifft
  use m_fft,            only : fourdp
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
@@ -431,21 +432,21 @@ subroutine ppm_free(PPm)
    do iq_ibz=1,dim_q
      call array_free(PPm%bigomegatwsq(iq_ibz))
    end do
-   ABI_DT_FREE(PPm%bigomegatwsq)
+   ABI_FREE(PPm%bigomegatwsq)
  end if
  !
  if (allocated(PPm%omegatw)) then
    do iq_ibz=1,dim_q
      call array_free(PPm%omegatw(iq_ibz))
    end do
-   ABI_DT_FREE(PPm%omegatw)
+   ABI_FREE(PPm%omegatw)
  end if
  !
  if (allocated(PPm%eigpot)) then
    do iq_ibz=1,dim_q
      call array_free(PPm%eigpot(iq_ibz))
    end do
-   ABI_DT_FREE(PPm%eigpot)
+   ABI_FREE(PPm%eigpot)
  end if
 #endif
 
@@ -604,9 +605,9 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
  ! Full q-mesh is stored or out-of-memory solution.
  dim_q=PPm%nqibz; if (PPm%mqmem==0) dim_q=1
 
- ABI_DT_MALLOC(PPm%bigomegatwsq, (dim_q))
- ABI_DT_MALLOC(PPm%omegatw,(dim_q))
- ABI_DT_MALLOC(PPm%eigpot,(dim_q))
+ ABI_MALLOC(PPm%bigomegatwsq, (dim_q))
+ ABI_MALLOC(PPm%omegatw,(dim_q))
+ ABI_MALLOC(PPm%eigpot,(dim_q))
 
  SELECT CASE (PPm%model)
 

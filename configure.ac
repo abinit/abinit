@@ -19,6 +19,7 @@
 
 # ---------------------------------------------------------------------------- #
 
+
 #
 # Autoconf & Automake startup
 #
@@ -37,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.0.0],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.1.5],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -653,7 +654,9 @@ ABI_GPU_DETECT
 ABI_MSG_SECTION([Initialization of optional features])
 
 # Init HDF5
-SD_HDF5_INIT([optional fail no-fortran])
+#SD_HDF5_INIT([optional fail no-fortran])
+#SD_HDF5_INIT([optional warn no-fortran])
+SD_HDF5_INIT([mandatory warn no-fortran])
 
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
@@ -662,16 +665,20 @@ SD_FFTW3_INIT([optional skip])
 SD_LEVMAR_INIT([optional fail])
 
 # Init LibPSML
-SD_LIBPSML_INIT([optional fail])
+#SD_LIBPSML_INIT([optional fail])
+SD_LIBPSML_INIT([optional warn])
 
 # Init LibXC
-SD_LIBXC_INIT([no-fortran optional fail])
+#SD_LIBXC_INIT([no-fortran optional fail])
+SD_LIBXC_INIT([no-fortran optional warn])
 
 # Init NetCDF
-SD_NETCDF_INIT([optional fail])
+#SD_NETCDF_INIT([optional fail])
+SD_NETCDF_INIT([optional warn])
 
 # Init NetCDF-Fortran
-SD_NETCDF_FORTRAN_INIT([optional fail])
+#SD_NETCDF_FORTRAN_INIT([optional fail])
+SD_NETCDF_FORTRAN_INIT([optional warn])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
@@ -683,10 +690,12 @@ SD_PFFT_INIT([optional skip])
 SD_TRIQS_INIT([optional fail])
 
 # Init Wannier90
-SD_WANNIER90_INIT([optional fail], [-lwannier90])
+#SD_WANNIER90_INIT([optional fail], [-lwannier90])
+SD_WANNIER90_INIT([optional warn], [-lwannier90])
 
 # Init XMLF90
-SD_XMLF90_INIT([optional fail])
+#SD_XMLF90_INIT([optional fail])
+SD_XMLF90_INIT([optional warn])
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -697,10 +706,15 @@ SD_XMLF90_INIT([optional fail])
 
 ABI_MSG_SECTION([Linear algebra support])
 
-SD_LINALG_INIT([required fail])
+#SD_LINALG_INIT([required fail])
+SD_LINALG_INIT([required warn])
 SD_LINALG_INIT_FLAVOR
 
 SD_LINALG_DETECT
+
+# the minimum needed to declare linalg working...
+sd_linalg_ok="no"
+test "${sd_linalg_has_blas}" = "yes" -a "${sd_linalg_has_lapack}" = "yes" && sd_linalg_ok="yes"
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -711,9 +725,13 @@ SD_LINALG_DETECT
 
 ABI_MSG_SECTION([Optimized FFT support])
 
-SD_FFT_INIT
+if test "${sd_linalg_enable}" = "yes"; then
+  SD_FFT_INIT
 
-SD_FFT_DETECT
+  SD_FFT_DETECT
+else
+  echo "Skip FFT setting : linalg not enabled..."
+fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -756,24 +774,57 @@ fi
 # HDF5 library support
 SD_HDF5_DETECT
 
-# Parallel NetCDF requires a few conditions to work
-if test "${abi_netcdf_mpi_enable}" = "yes"; then
-  if test "${sd_mpi_ok}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but MPI is not available])
-  fi
-  if test "${abi_mpi_io_enable}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but MPI I/O is disabled])
-  fi
-  if test "${sd_hdf5_mpi_ok}" != "yes"; then
-    AC_MSG_ERROR([parallel NetCDF requested but parallel HDF5 is not available])
-  fi
-fi
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([dumping HDF5 parameters for diagnostics])
+AC_MSG_NOTICE([---------------------------------------])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([   * sd_hdf5_enable = ${sd_hdf5_enable}])
+AC_MSG_NOTICE([   * sd_hdf5_status = ${sd_hdf5_status}])
+AC_MSG_NOTICE([   * sd_hdf5_h5cc = ${sd_hdf5_h5cc}])
+AC_MSG_NOTICE([   * sd_hdf5_has_mpi = ${sd_hdf5_has_mpi}])
+AC_MSG_NOTICE([])
+
+## Parallel NetCDF requires a few conditions to work
+# TODO abi_netcdf_mpi_enable not defined
+#if test "${abi_netcdf_mpi_enable}" = "yes"; then
+#  if test "${sd_mpi_ok}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but MPI is not available])
+#  fi
+#  if test "${abi_mpi_io_enable}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but MPI I/O is disabled])
+#  fi
+#  if test "${sd_hdf5_mpi_ok}" != "yes"; then
+#    AC_MSG_ERROR([parallel NetCDF requested but parallel HDF5 is not available])
+#  fi
+#fi
 
 # NetCDF library support (must be done after HDF5)
 SD_NETCDF_DETECT
 
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([dumping NetCDF parameters for diagnostics])
+AC_MSG_NOTICE([-----------------------------------------])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([   * sd_netcdf_ok = ${sd_netcdf_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_mpi_ok = ${sd_netcdf_mpi_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_enable = ${sd_netcdf_enable}])
+AC_MSG_NOTICE([   * sd_netcdf_prefix = ${sd_netcdf_prefix}])
+AC_MSG_NOTICE([])
+
+
 # NetCDF library support (must be done after HDF5)
 SD_NETCDF_FORTRAN_DETECT
+
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([dumping NetCDFF parameters for diagnostics])
+AC_MSG_NOTICE([------------------------------------------])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_ok = ${sd_netcdf_fortran_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_mpi_ok = ${sd_netcdf_fortran_mpi_ok}])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_enable = ${sd_netcdf_fortran_enable}])
+AC_MSG_NOTICE([   * sd_netcdf_fortran_prefix = ${sd_netcdf_fortran_prefix}])
+AC_MSG_NOTICE([])
+
 
 # XMLF90 library support
 SD_XMLF90_DETECT
@@ -786,7 +837,8 @@ else
     sd_libpsml_enable="no"
   else
     if test "${sd_libpsml_enable}" != "no"; then
-      AC_MSG_ERROR([LibPSML support has been requested but XMLF90 does not work
+      #AC_MSG_ERROR([LibPSML support has been requested but XMLF90 does not work
+      AC_MSG_WARN([LibPSML support has been requested but XMLF90 does not work
                   Please point the configuration to a working XMLF90
                   installation or disable LibPSML support])
     fi
@@ -816,6 +868,9 @@ AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT],
 # Wannier90 library support
 SD_WANNIER90_DETECT
 
+# AtomPAW integration support
+ABI_CHECK_ATOMPAW_BINS
+
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
@@ -838,10 +893,15 @@ SD_LIBPAW_DETECT
                        # ------------------------------ #
 
 # Init BigDFT (requires knowledge about ABINIT Common and LibPAW)
-SD_BIGDFT_INIT([optional fail])
+if test "${sd_libxc_enable}" = "yes" -a "${sd_linalg_enable}" = "yes"; then
+  #SD_BIGDFT_INIT([optional fail])
+  SD_BIGDFT_INIT([optional warn])
 
-# BigDFT library support (requires linear algebra and LibXC)
-SD_BIGDFT_DETECT
+  # BigDFT library support (requires linear algebra and LibXC)
+  SD_BIGDFT_DETECT
+else
+  echo "Skip BIGDFT setting : libxc not enabled..."
+fi
 
                        # ------------------------------ #
 
@@ -895,18 +955,127 @@ ABI_MSG_SECTION([Feature triggers summary])
 # Display summary table
 ABI_TRIGGERS_SUMMARY
 
+#------------------------ START JMB --------------------------------------#
+# Check status of mandatory fallbacks
+
+status=""
+mandatory=""
+
+# Check linalg
+if test "${sd_linalg_flavor_req}" != "auto"; then
+   if test "${sd_linalg_flavor}" != "${sd_linalg_flavor_req}"; then
+      ABI_MSG_NOTICE_L([linalg-flavor],[__INFO__ : the linalg flavor is not the one requested!])
+   fi
+fi
+
+if test "${sd_linalg_enable}" != "yes"; then
+      ABI_MSG_NOTICE_L([linalg-mandatory],[__CAUTION__ : linalg is __MANDATORY__ !])
+      mandatory="#"
+fi
+
+# Check HDF5 serial
+if test "${sd_hdf5_enable}" = "no"; then
+      ABI_MSG_NOTICE_L([hdf5-mandatory],[__CAUTION__ : HDF5 is __MANDATORY__ !])
+      mandatory="#"
+else
+  if test "${sd_hdf5_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([hdf5-nw],[__WARNING__ : HDF5 is not __WORKING__ !])
+      status="#"
+  fi
+fi
+
+if test "${sd_hdf5_ok}" = "yes";then
+# Check NetCDF
+  if test "${sd_netcdf_enable}" = "no"; then
+      ABI_MSG_NOTICE_L([netcdf-mandatory],[__CAUTION__ : NetCDF is __MANDATORY__ !])
+      mandatory="#"
+  else
+     if test "${sd_netcdf_ok}" != "yes";then
+        ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not __WORKING__ !])
+        status="#"
+     fi
+  fi
+
+# Check NetCDF_fortran
+  if test "${sd_netcdf_fortran_enable}" = "no"; then
+      ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[__CAUTION__ : NetCDF Fortran is __MANDATORY__ !])
+      mandatory="#"
+  else
+    if test "${sd_netcdf_fortran_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([netcdf_fortran-nw],[__WARNING__ : NetCDF Fortran is not __WORKING__ !])
+      status="#"
+    fi
+  fi
+fi
+
+# Check LibXC
+if test "${sd_libxc_enable}" = "no"; then
+      ABI_MSG_NOTICE_L([libxc-mandatory],[__CAUTION__ : LibXC is __MANDATORY__ !])
+      mandatory="#"
+else
+  if test "${sd_libxc_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([libxc-nw],[__WARNING__ : LibXC is not __WORKING__ !])
+      status="#"
+  fi
+fi
+
+# Check Wannier90
+if test "${sd_wannier90_enable}" = "yes"; then
+   if test "${sd_wannier90_ok}" != "yes"; then
+      ABI_MSG_NOTICE_S([__CAUTION__ : Wannier90 is not __WORKING__ !],
+                       [   Action : check your Wannier90 installation])
+      status="#"
+   fi
+fi
+
+# Check libPSML
+if test "${sd_libpsml_enable}" = "yes"; then
+   if test "${sd_libpsml_ok}" != "yes"; then
+      ABI_MSG_NOTICE_S([__CAUTION__ : libPSML is not __WORKING__ !],
+                       [   Action : check your libPSML installation])
+      status="#"
+   fi
+fi
+
+# Check xmlf90
+if test "${sd_xmlf90_enable}" = "yes"; then
+   if test "${sd_xmlf90_ok}" != "yes"; then
+      ABI_MSG_NOTICE_S([__CAUTION__ : xmlf90 is not __WORKING__ !],
+                       [   Action : check your xmlf90 installation])
+      status="#"
+   fi
+fi
+
+# Help to produce libraires
+if test ! -z "${mandatory}"; then
+      ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
+fi 
+
+if test ! -z "${status}" -o ! -z "${mandatory}"; then
+      ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
+fi
+
 # Always generate a build script for required fallbacks
-AC_OUTPUT([fallbacks/build-abinit-fallbacks.sh])
+AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 
+
 # Report situation
-if test "${abi_fbk_required}" = ""; then
-  AC_MSG_NOTICE([no fallback required - you may run production calculations])
-else
-  AC_MSG_NOTICE([fallbacks required - you should not run production calculations])
+#if test "${abi_fbk_required}" = ""; then
+#  AC_MSG_NOTICE([no fallback required - you may run production calculations])
+#else
+#  AC_MSG_NOTICE([fallbacks required - you should not run production calculations])
+#fi
+
+# Check exit
+if test ! -z "${status}" -o ! -z "${mandatory}"; then
+      exit
 fi
+
+
+#-------------------- END JMB --------------------------------------------#
 
 # FIXME: copying linear algebra tarball for now,
 #        ensuring ~/.abinit/tarballs/ exists
@@ -1035,6 +1204,12 @@ ABI_MSG_SECTION([Output])
 # Output files
 # Note: later, add tests/atconfig and tests/atlocal for test suite
 ABI_OUTPUT
+
+# FIXME: Generate fake makefile for the fallbacks until the test farm is
+#        updated
+test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
+${INSTALL} -m 644 "${abinit_srcdir}/config/makefiles/fallbacks.mf" \
+  "fallbacks/Makefile"
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #

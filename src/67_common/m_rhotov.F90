@@ -122,6 +122,7 @@ contains
 !!   | e_localpsp=local psp energy (hartree)
 !!  ==== if optene==1.or.2
 !!   | e_xcdc=exchange-correlation double-counting energy (hartree)
+!!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
 !!  intgres(nspden,ngrcondft)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if optxc==2.
 !!  strsxc(6)=xc contribution to stress tensor (hartree/bohr^3)
@@ -162,7 +163,7 @@ contains
 !!
 !! SOURCE
 
-subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc,mpi_enreg,nfft,ngfft,&
+subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
 &  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
@@ -189,6 +190,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft),vpsp(nfft)
  real(dp),intent(inout) :: vtrial(nfft,dtset%nspden),vxc(nfft,dtset%nspden)
  real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(out) :: grcondft(:,:) ! (3,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: intgres(:,:) ! (nspden,ngrcondft) ngrcondft=natom when condft is activated
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
@@ -260,6 +262,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
      call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
+
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
      if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%auxc_ixc
@@ -485,7 +488,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
 
      !If constrained_dft, must take into account the constraints, and recompute the residual and the new potential
      if( any(dtset%constraint_kind(:)/=0))then
-       call constrained_residual(constrained_dft,energies%e_constrained_dft,intgres,mpi_enreg,rhor,vresidnew,xred)
+       call constrained_residual(constrained_dft,energies%e_constrained_dft,grcondft,intgres,mpi_enreg,rhor,vresidnew,xred)
        vnew(:,1:dtset%nspden)=vtrial(:,1:dtset%nspden)+vresidnew(:,1:dtset%nspden)
      endif
 

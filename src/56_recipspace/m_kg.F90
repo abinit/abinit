@@ -50,6 +50,8 @@ MODULE m_kg
  public :: kpgstr       ! Derivative of kinetic energy operator in reciprocal space.
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
  public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
+ public :: mkkpgcart    ! Compute all (k+G) vectors (dp, in cartesian coordinates) for given k point
+ public :: mkkin_metdqdq ! Compute the second q-gradient of the derivative of the kinetic energy operator w.r.t a metric
 
 contains
 !!***
@@ -118,7 +120,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 !scalars
  integer :: plane
  real(dp) :: boxsq,cutrad,ecut_pw,effcut,largesq,sphsq
- character(len=500) :: message
+ character(len=1000) :: message
 !arrays
  integer :: gbound(3)
 
@@ -167,12 +169,15 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,f12.6)' )&
+       write(message, '(9a,f12.6,6a)' )&
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Actio: try larger ngfft or smaller ecut.',ch10,&
-&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
+&       '  Action: try larger ngfft or smaller ecut.',ch10,&
+&       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8,ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        MSG_ERROR(message)
      end if
@@ -189,11 +194,14 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      end if
 
      if (boxcut<1.5_dp) then
-       write(message, '(a,a,a,a,a,a,a,a,a,a)' ) ch10,&
+       write(message, '(15a)' ) ch10,&
 &       ' getcut : WARNING -',ch10,&
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
-&       '  Be sure to test with larger ngfft(1:3) values.',ch10
+&       '  Be sure to test with larger ngfft(1:3) values.',ch10,&
+&       '  This situation might happen when optimizing the cell parameters.',ch10,&
+&       '  Your starting geometry might be crazy.',ch10,&
+&       '  See https://wiki.abinit.org/doku.php?id=howto:troubleshooting#incorrect_initial_geometry .'
        if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
@@ -1167,6 +1175,197 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   ABI_DEALLOCATE(kg1_k)
 
 end subroutine mkpwind_k
+!!***
+
+!!****f* m_kg/mkkpgcart
+!! NAME
+!! mkkpgcart
+!!
+!! FUNCTION
+!! Compute all (k+G) vectors (dp, in cartesian coordinates) for given k point,
+!! from integer coordinates of G vectors.
+!!
+!! INPUTS
+!!  gprimd(3,3)=dimensional reciprocal space primitive translations
+!!  kg(3,npw)=integer coords of planewaves in basis sphere
+!!  kpt(3)=k point in terms of recip. translations
+!!  nkpg=second dimension of array kpg
+!!  npw=number of plane waves in reciprocal space
+!!
+!! OUTPUT
+!!  kpg(npw,3)= (k+G) components
+!!
+!! PARENTS
+!!  nonlop_ylm  
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+subroutine mkkpgcart(gprimd,kg,kpgcar,kpt,nkpg,npw)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpg,npw
+!arrays
+ real(dp),intent(in) :: gprimd(3,3)
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(out) :: kpgcar(npw,nkpg)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ipw,mu
+ character(len=500) :: message
+!arrays
+ real(dp),allocatable :: kpg(:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ if (nkpg==0) return
+
+!-- Test nkpg --
+ if (nkpg/=3) then
+   write(message, '(a,i0)' )' Bad value for nkpg !',nkpg
+   MSG_BUG(message)
+ end if
+
+!-- Compute (k+G) --
+ ABI_ALLOCATE(kpg,(npw,nkpg))
+!$OMP PARALLEL DO COLLAPSE(2) &
+!$OMP PRIVATE(mu,ipw)
+ do ipw=1,npw
+   do mu=1,3
+     kpg(ipw,mu)=kpt(mu)+dble(kg(mu,ipw))
+   end do
+ end do
+!$OMP END PARALLEL DO
+
+!$OMP PARALLEL DO &
+!$OMP PRIVATE(ipw)
+ do ipw=1,npw
+   kpgcar(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
+   kpgcar(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
+   kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
+ end do
+!$OMP END PARALLEL DO
+ ABI_DEALLOCATE(kpg)
+
+ DBG_EXIT("COLL")
+
+end subroutine mkkpgcart
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mkkin_metdqdq
+!! NAME
+!! mkkin_metdqdq
+!!
+!! FUNCTION
+!! Compute elements of the second q-gradient of the metric
+!! kinetic energy operator in reciprocal
+!! space at given k point wrt cartesian q components.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2017 ABINIT group (DRH, XG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  effmass=effective mass for electrons (1. in common case)
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  idir= strain perturbation direction
+!!  kg(3,npw) = integer coordinates of planewaves in basis sphere.
+!!  kpt(3)    = reduced coordinates of k point
+!!  npw       = number of plane waves at kpt.
+!!  qdir      = direction of the first q-gradient
+!!
+!! OUTPUT
+!!  dqdqkinpw(npw)=d/deps(istr) ( (1/2)*(2 pi)**2 * (k+G)**2 )
+!!
+!! NOTES
+!!
+!!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
+!!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
+!!    in the reduced to cartesian derivative conversion process) is here
+!!    explicictly included in the formulas.
+!!
+!!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
+!!    because this term is not symmetric w.r.t permutations of the two strain
+!!    indices.
+!!
+!!  **A -i factor has been factorized out in all the contributions of the second
+!!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
+!!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
+!!
+!! PARENTS
+!!      getgh1dqc_setup
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: idir,npw,qdir
+ real(dp),intent(in) :: effmass
+!arrays
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: gprimd(3,3),kpt(3)
+ real(dp),intent(out) :: dqdqkinpw(npw)
+
+!Local variables -------------------------
+!scalars
+ integer :: beta,delta,gamma,ig,ka,kb
+ real(dp) :: delbd,delbg,deldg
+ real(dp) :: dkinetic,gpk1,gpk2,gpk3,htpi
+ real(dp) :: gpkc(3)
+!arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+
+! *********************************************************************
+
+!htpi is (1/2) (2 Pi):
+ htpi=0.5_dp*two_pi
+
+ ka=idx(2*idir-1);kb=idx(2*idir)
+
+!For easier formula implementation
+ beta=ka
+ delta=kb
+ gamma=qdir
+
+!Kronecker deltas
+ delbd=0.0_dp; delbg=0.0_dp; deldg=0.0_dp
+ if (beta==delta) delbd=1.0_dp
+ if (beta==gamma) delbg=1.0_dp
+ if (delta==gamma) deldg=1.0_dp
+
+ do ig=1,npw
+   gpk1=dble(kg(1,ig))+kpt(1)
+   gpk2=dble(kg(2,ig))+kpt(2)
+   gpk3=dble(kg(3,ig))+kpt(3)
+
+!  Obtain G in cartesian coordinates
+   gpkc(1)=gprimd(1,1)*gpk1+gprimd(1,2)*gpk2+gprimd(1,3)*gpk3
+   gpkc(2)=gprimd(2,1)*gpk1+gprimd(2,2)*gpk2+gprimd(2,3)*gpk3
+   gpkc(3)=gprimd(3,1)*gpk1+gprimd(3,2)*gpk2+gprimd(3,3)*gpk3
+
+   dkinetic=htpi*(2.0_dp*deldg*gpkc(beta)+delbg*gpkc(delta)+ &
+ & delbd*gpkc(gamma))
+
+   dqdqkinpw(ig)=dkinetic/effmass
+ end do
+
+end subroutine mkkin_metdqdq
 !!***
 
 end module m_kg

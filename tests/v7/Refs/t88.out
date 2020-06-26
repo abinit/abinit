@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ABINIT 
+.Version 9.0.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h31 )
+.Starting date : Fri 20 Mar 2020.
+- ( at 07h52 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v7_t85-t86-t87-t88-t89/t88.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t88.in
 - output file    -> t88.out
 - root for input  files -> t88i
 - root for output files -> t88o
@@ -105,36 +105,27 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
               amu      2.69815390E+01
               asr           2
            chneut           0
+        ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
-      eph_intmeth1          2
-      eph_intmeth2          1
-      eph_intmeth3          2
-      eph_intmeth4          2
+       eph_fsewin      2.93994603E-02 Hartree
        eph_fsmear1     9.99999978E-03 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
        eph_fsmear3     9.99999978E-03 Hartree
        eph_fsmear4     9.99999978E-03 Hartree
-       eph_fsewin      2.93994603E-02 Hartree
+      eph_intmeth1          2
+      eph_intmeth2          1
+      eph_intmeth3          2
+      eph_intmeth4          2
        eph_mustar      1.20000000E-01
-         eph_task1          1
-         eph_task2          1
-         eph_task3          5
-         eph_task4          1
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       0    0    0
    eph_ngqpt_fine3       8    8    8
    eph_ngqpt_fine4       8    8    8
+         eph_task1          1
+         eph_task2          1
+         eph_task3          5
+         eph_task4          1
     eph_transport           1
-         ph_wstep      3.67493254E-06 Hartree
-       ph_intmeth1       2
-       ph_intmeth2       1
-       ph_intmeth3       2
-       ph_intmeth4       2
-         ph_smear      3.67493254E-05 Hartree
-        ddb_ngqpt        4    4    4
-       dvdb_ngqpt        4    4    4
-        ph_nqpath           3
-         ph_ngqpt       16   16   16
 -          fftalg         312
            getddb          20
           getdvdb1          0
@@ -217,6 +208,14 @@ P           mkmem          29
                        2.000000  1.000000  0.000000  0.000000  0.000000
            occopt           7
         optdriver           7
+       ph_intmeth1       2
+       ph_intmeth2       1
+       ph_intmeth3       2
+       ph_intmeth4       2
+         ph_ngqpt       16   16   16
+        ph_nqpath           3
+         ph_smear      3.67493254E-05 Hartree
+         ph_wstep      3.67493254E-06 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
@@ -288,7 +287,16 @@ P           mkmem          29
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 29, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 78, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 7, eph_task: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -315,6 +323,8 @@ P           mkmem          29
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
@@ -437,8 +447,8 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -455,10 +465,15 @@ All the independent perturbations are available
    1.58563817E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+
+
+ Linear tetrahedron method.
+ Mesh step:  10.0 (meV) with npts: 3100
+ From emin:  -4.8 to emax:  26.2 (eV)
+ Number of k-points in the IBZ29
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
- Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS1_EDOS 
 
@@ -523,7 +538,16 @@ All the independent perturbations are available
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 29, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 78, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 7, eph_task: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -548,6 +572,8 @@ All the independent perturbations are available
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
@@ -667,10 +693,15 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+
+
+ Linear tetrahedron method.
+ Mesh step:  10.0 (meV) with npts: 3100
+ From emin:  -4.8 to emax:  26.2 (eV)
+ Number of k-points in the IBZ29
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
- Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS2_EDOS 
 
@@ -735,7 +766,16 @@ All the independent perturbations are available
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 1, nkpt: 29, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 78, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 7, eph_task: 5, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -759,6 +799,8 @@ All the independent perturbations are available
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
@@ -888,7 +930,16 @@ Interpolation of the electron-phonon coupling potential completed
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 1, nkpt: 29, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 78, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 7, eph_task: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -915,6 +966,8 @@ Interpolation of the electron-phonon coupling potential completed
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
@@ -1034,10 +1087,15 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+
+
+ Linear tetrahedron method.
+ Mesh step:  10.0 (meV) with npts: 3100
+ From emin:  -4.8 to emax:  26.2 (eV)
+ Number of k-points in the IBZ29
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
- Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS4_EDOS 
 
@@ -1234,36 +1292,27 @@ All the independent perturbations are available
               amu      2.69815390E+01
               asr           2
            chneut           0
+        ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
-      eph_intmeth1          2
-      eph_intmeth2          1
-      eph_intmeth3          2
-      eph_intmeth4          2
+       eph_fsewin      2.93994603E-02 Hartree
        eph_fsmear1     9.99999978E-03 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
        eph_fsmear3     9.99999978E-03 Hartree
        eph_fsmear4     9.99999978E-03 Hartree
-       eph_fsewin      2.93994603E-02 Hartree
+      eph_intmeth1          2
+      eph_intmeth2          1
+      eph_intmeth3          2
+      eph_intmeth4          2
        eph_mustar      1.20000000E-01
-         eph_task1          1
-         eph_task2          1
-         eph_task3          5
-         eph_task4          1
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       0    0    0
    eph_ngqpt_fine3       8    8    8
    eph_ngqpt_fine4       8    8    8
+         eph_task1          1
+         eph_task2          1
+         eph_task3          5
+         eph_task4          1
     eph_transport           1
-         ph_wstep      3.67493254E-06 Hartree
-       ph_intmeth1       2
-       ph_intmeth2       1
-       ph_intmeth3       2
-       ph_intmeth4       2
-         ph_smear      3.67493254E-05 Hartree
-        ddb_ngqpt        4    4    4
-       dvdb_ngqpt        4    4    4
-        ph_nqpath           3
-         ph_ngqpt       16   16   16
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -1322,6 +1371,14 @@ P           mkmem          29
                        2.000000  1.000000  0.000000  0.000000  0.000000
            occopt           7
         optdriver           7
+       ph_intmeth1       2
+       ph_intmeth2       1
+       ph_intmeth3       2
+       ph_intmeth4       2
+         ph_ngqpt       16   16   16
+        ph_nqpath           3
+         ph_smear      3.67493254E-05 Hartree
+         ph_wstep      3.67493254E-06 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
@@ -1474,10 +1531,10 @@ P           mkmem          29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          8.6  wall=          8.6
+- Proc.   0 individual time (sec): cpu=         10.3  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.6  wall=          8.6
++Overall time at end (sec) : cpu=         10.3  wall=         13.8

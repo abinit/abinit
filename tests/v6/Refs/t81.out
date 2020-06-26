@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ANADDB 
+.Version 9.0.0 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h25 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h21 )
   
 
 ================================================================================
@@ -27,8 +27,11 @@
  Miscellaneous information :
       enunit         2
          asr         1
+      chneut         0
  Interatomic Force Constants Inputs :
       dipdip         0
+      dipqua         0
+      quadqu         0
       ifcana         1
       ifcout        20
       natifc         1
@@ -80,7 +83,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.027  and twall      0.027 sec
+-begin at tcpu      0.034  and twall      0.035 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       16
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -460,6 +463,8 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -653,6 +658,8 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -728,10 +735,10 @@
  Phonon energies in Kelvin  :
 -  1.258274E+02  1.258274E+02  4.234511E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.101  and wall time      0.129 sec
++Total cpu time      0.126  and wall time      0.168 sec
 
  anaddb : the run completed succesfully.

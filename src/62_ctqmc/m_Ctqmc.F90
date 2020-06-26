@@ -1272,6 +1272,17 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
     CALL GreenHyb_backFourier(F_tmp)
     F(1:samples+1,iflavor) = (/ (-F_tmp%oper(samples+1-itau),itau=0,samples) /)
   END DO
+  IF ( this%rank .EQ. 0 ) THEN
+    open (unit=346,file='Hybridization.dat',status='unknown',form='formatted')
+    DO iflavor = 1, flavors
+      write(346,*) "#",iflavor
+      do  itau=1,this%samples+1
+        write(346,*) itau,real(F(itau,iflavor))
+      enddo
+      write(346,*) 
+    END DO
+    close(346)
+  ENDIF
   FREE(F_omega)
   CALL GreenHyb_destroy(F_tmp)
 END SUBROUTINE Ctqmc_computeF
@@ -1636,9 +1647,13 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
     
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       CALL ImpurityOperator_measDE(this%Impurity,this%measDE)
-      IF ( this%opt_spectra .GE. 1 .AND. MOD(isweep,measurements*this%opt_spectra) .EQ. 0 ) THEN
-        this%density(1:flavors,indDensity) = this%measN(3,1:flavors)
-        indDensity = indDensity+1
+      IF ( this%opt_spectra .GE. 1) THEN
+        IF ( measurements*this%opt_spectra /= 0) THEN
+          IF ( MOD(isweep,measurements*this%opt_spectra) .EQ. 0 ) THEN
+             this%density(1:flavors,indDensity) = this%measN(3,1:flavors)
+             indDensity = indDensity+1
+          END IF
+        END IF
       END IF
     END IF
 

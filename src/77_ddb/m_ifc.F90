@@ -89,6 +89,12 @@ MODULE m_ifc
    integer :: dipdip
      ! dipole dipole interaction flag.
 
+   integer :: dipquad
+     ! dipole quadrupole interaction flag.
+
+   integer :: quadquad
+     ! dipole quadrupole interaction flag.
+
    integer :: symdynmat
      ! If equal to 1, the dynamical matrix is symmetrized in dfpt_phfrq before the diagonalization.
 
@@ -106,6 +112,9 @@ MODULE m_ifc
 
    integer :: ngqpt(3)
     ! Number of division in the Q mesh.
+
+   integer :: ewald_option
+    ! Option for the ewald sum
 
    real(dp) :: rprim(3,3),gprim(3,3),acell(3)
      ! These values are used to call anaddb routines that don't use rprimd, gprimd
@@ -167,6 +176,11 @@ MODULE m_ifc
    real(dp),allocatable :: zeff(:,:,:)
      ! zeff(3,3,natom)
      ! Effective charge on each atom, versus electric field and atomic displacement.
+     ! Cartesian coordinates
+
+   real(dp),allocatable :: qdrp_cart(:,:,:,:)
+     ! qdrp_cart(3,3,3,natom)
+     ! Quadrupole tensor on each atom
      ! Cartesian coordinates
 
    real(dp),allocatable :: qibz(:,:)
@@ -268,6 +282,7 @@ subroutine ifc_free(ifc)
  ABI_SFREE(ifc%wtq)
  ABI_SFREE(ifc%qbz)
  ABI_SFREE(ifc%zeff)
+ ABI_SFREE(ifc%qdrp_cart)
  ABI_SFREE(ifc%dynmat)
  !ABI_SFREE(ifc%dynmat_lr)
 
@@ -282,12 +297,13 @@ end subroutine ifc_free
 !!
 !! FUNCTION
 !!  Initialize the dynamical matrix as well as the IFCs.
-!!  taking into account the dipole-dipole interaction.
+!!  taking into account the dipole-dipole, dipole-quadrupole and quadrupole-quadrupole
+!!  interaction.
 !!
 !! INPUTS
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
 !! ddb<type(ddb_type)> = Database with derivatives.
-!! brav=bravais lattice (1 or -1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
+!! brav=bravais lattice (1 or -1=simple lattice, 2=face centered lattice, 3=centered lattice, 4=hexagonal lattice)
 !! asr= Option for the imposition of the ASR
 !!   0 => no ASR,
 !!   1 => modify "asymmetrically" the diagonal element
@@ -316,6 +332,8 @@ end subroutine ifc_free
 !! rifcsph=radius for cutoff of IFC.
 !! comm=MPI communicator.
 !! [Ifc_coarse]=Optional.
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
@@ -328,10 +346,10 @@ end subroutine ifc_free
 !! SOURCE
 
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
-  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,nsphere,rifcsph,&
+  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit, & ! TODO: TO BE REMOVED
   comm, &
-  Ifc_coarse) ! Optional
+  Ifc_coarse,dipquad,quadquad) ! Optional
 
 !Arguments ------------------------------------
  integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
@@ -340,10 +358,13 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
+ integer,optional,intent(in) :: dipquad, quadquad
+
 !arrays
  integer,intent(in) :: ngqpt_in(3)
  real(dp),intent(in) :: q1shft(3,nqshft)
  real(dp),intent(in) :: dielt(3,3),zeff(3,3,Crystal%natom)
+ real(dp),intent(in) :: qdrp_cart(3,3,3,Crystal%natom)
 !anaddb variables (TO BE REMOVED)
  integer,intent(in) :: prtsrlr,enunit
 !end anaddb variables
@@ -357,7 +378,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
  real(dp) :: r_inscribed_sphere,toldist
- character(len=500) :: msg
+ character(len=500*4) :: msg
  type(ifc_type) :: ifc_tmp
 !arrays
  integer :: ngqpt(9),qptrlatt(3,3)
@@ -378,7 +399,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ! TODO: This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
- mpert = Crystal%natom + 6; iout = ab_out
+ mpert = Crystal%natom + MPERT_MAX; iout = ab_out
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -394,7 +415,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%mpert = mpert
  Ifc%asr = asr
  Ifc%brav = brav
- Ifc%dipdip = dipdip
+ Ifc%dipdip = abs(dipdip)
+ Ifc%dipquad=0; if (present(dipquad)) Ifc%dipquad = dipquad
+ Ifc%quadquad=0; if (present(quadquad)) Ifc%quadquad = quadquad
  Ifc%symdynmat = symdynmat
  Ifc%nqshft = nqshft
  call alloc_copy(q1shft(:,1:Ifc%nqshft),Ifc%qshft)
@@ -402,17 +425,25 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%rprim = ddb%rprim
  Ifc%gprim = ddb%gprim
  Ifc%acell = ddb%acell
+ Ifc%ewald_option = 0; if (dipdip<0) Ifc%ewald_option = 1 !HM TODO: expose this in the init?
 
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
  call chkrp9(Ifc%brav,rprim)
 
  dyewq0 = zero
- if (Ifc%dipdip==1 .and. (Ifc%asr==1.or.Ifc%asr==2)) then
+ if ((Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1).and. (Ifc%asr==1.or.Ifc%asr==2)) then
    ! Calculation of the non-analytical part for q=0
    sumg0=0
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
-   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
+   if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
+   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+   else
+   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+   end if
+
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
@@ -496,7 +527,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_MALLOC(dynmatfull,(2,3,natom,3,natom,nqbz))
  dynmatfull=Ifc%dynmat
 
- if (Ifc%dipdip==1) then
+ if (Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
    call wrtout(std_out, " Will extract the dipole-dipole part for every wavevector")
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
@@ -507,7 +538,13 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      end if
      qpt(:)=qbz(:,iqpt)
      sumg0=0
-     call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
+     if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
+       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
+     else
+       call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
+                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
+     end if
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
@@ -560,7 +597,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
     'Action: make input atomic positions more symmetric.',ch10,&
     'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine and recompile.',ch10,&
     'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
-    'if abs(brav) /= 1, in which case you should change brav to 1.'
+    'if abs(brav) /= 1, in this case you should change brav to 1. If brav is already set to 1 (default) try -1.'
    MSG_ERROR(msg)
  end if
 
@@ -627,6 +664,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call alloc_copy(dyewq0, Ifc%dyewq0)
  call alloc_copy(qbz(:,1:nqbz), Ifc%qbz)
  call alloc_copy(zeff, Ifc%zeff)
+ call alloc_copy(qdrp_cart, Ifc%qdrp_cart)
  call alloc_copy(ddb%amu, Ifc%amu)
 
  call ifc_free(ifc_tmp)
@@ -700,7 +738,7 @@ end subroutine ifc_init
 !!
 !! SOURCE
 
-subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,comm)
+subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -713,6 +751,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  type(ifc_type),intent(out) :: Ifc
  real(dp),intent(inout) :: dielt(3,3)
  real(dp),allocatable,intent(inout) :: zeff(:,:,:)
+ real(dp),allocatable,intent(inout) :: qdrp_cart(:,:,:,:)
  type(crystal_t),intent(out) :: ucell_ddb
 
 !Local variables -------------------------
@@ -739,14 +778,16 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
    do i=1,ddb_hdr%natom
      atifc(i)=i
    end do
+   call ddb_hdr%free()
 
-   call ddb_from_file(ddb,filename,1,ddb_hdr%natom,ddb_hdr%natom,atifc,ucell_ddb,comm)
+   call ddb_from_file(ddb,filename,1,natom,natom,atifc, ddb_hdr, ucell_ddb,comm)
 
  else
    MSG_ERROR(sjoin("File:", filename, "is not present in the directory"))
  end if
 
  ! Get Dielectric Tensor and Effective Charges
+ ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  ABI_ALLOCATE(zeff,(3,3,natom))
  iblok = ddb%get_dielt_zeff(ucell_ddb,1,1,0,dielt,zeff)
 
@@ -754,6 +795,9 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  if (iblok == 0) then
    iblok_tmp = ddb%get_dielt(1,dielt)
  end if
+
+ ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
+ iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
 
  ! ifc to be calculated for interpolation
  write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,' Calculation of the interatomic forces ',ch10
@@ -764,12 +808,12 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  else
    dipdip=1
  end if
- call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,0,0.0_dp,0,1,comm)
+ call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
 
  ! Free them all
  ABI_DEALLOCATE(atifc)
  call ddb%free()
- call ddb_hdr_free(ddb_hdr)
+ call ddb_hdr%free()
 
  end subroutine ifc_init_fromFile
 !!***
@@ -807,7 +851,7 @@ subroutine ifc_print(ifc, header, unit, prtvol)
  class(ifc_type),intent(in) :: ifc
 
 !Local variables-------------------------------
- integer :: unt,my_prtvol,iatom,ii
+ integer :: unt,my_prtvol,iatom,ii,idir
  character(len=500) :: msg
 ! *********************************************************************
 
@@ -834,6 +878,12 @@ subroutine ifc_print(ifc, header, unit, prtvol)
  call wrtout(unt, " Effective charges:")
  do iatom=1,ifc%natom
    call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f10.2"))
+ end do
+ call wrtout(unt, " Quadrupolar terms:")
+ do iatom=1,ifc%natom
+   do idir=1,3
+     call wrtout(unt, ltoa(reshape(ifc%qdrp_cart(:,:,idir,iatom), [3*3]), fmt="f10.2"))
+   end do
  end do
 
  call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
@@ -945,7 +995,8 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 
  ! The dynamical matrix d2cart is calculated here:
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
-   Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,comm_)
+   Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
+   Ifc%qdrp_cart,Ifc%ewald_option,comm_,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
  ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(Ifc%amu,displ_cart,d2cart,eigval,eigvec,Crystal%indsym,&
@@ -1047,7 +1098,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
    dddq(:,:,:,ii) = dddq(:,:,:,ii) * ifc%acell(ii)
  end do
 
- if (ifc%dipdip == 1) then
+ if (ifc%dipdip == 1.or.ifc%dipquad == 1.or.ifc%quadquad == 1) then
    ! Add the gradient of the non-analytical part.
    ! Note that we dddq is in cartesian cordinates.
    ! For the time being, the gradient is computed with finite difference and step hh.
@@ -1064,7 +1115,8 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
        qfd = qpt + hh * qfd
 
        call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
-          cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff)
+          cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff,ifc%qdrp_cart,&
+          ifc%ewald_option,dipquad=ifc%dipquad,quadquad=ifc%quadquad)
        call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew)
        dddq(:,:,:,ii) = dddq(:,:,:,ii) + (jj * half / hh) * dyew
      end do
@@ -1681,7 +1733,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
  if (iout > 0) then
    write(iout, '(/,a,/)' )' Analysis of interatomic force constants '
-   if(Ifc%dipdip==1)then
+   if(Ifc%dipdip==1.and.Ifc%dipquad==0.and.Ifc%quadquad==0)then
      write(iout, '(a)' )' Are given : column(1-3), the total force constant'
      write(iout, '(a)' )'       then  column(4-6), the Ewald part'
      write(iout, '(a)' )'       then  column(7-9), the short-range part'
@@ -1691,6 +1743,14 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
      write(iout, '(a)' )'       of the generic atom along y,               '
      write(iout, '(a)' )' column 3, 6 and 9 are related to the displacement'
      write(iout, '(a)')'       of the generic atom along z.               '
+   else if(Ifc%dipquad==1.or.Ifc%quadquad==1)then
+     write(iout, '(a)' )' Are given : column(1-3), ONLY the short-range part!!!!'
+     write(iout, '(a)' )' column 1 is related to the displacement'
+     write(iout, '(a)' )'        of the generic atom along x,    '
+     write(iout, '(a)' )' column 2 is related to the displacement'
+     write(iout, '(a)' )'        of the generic atom along y,    '
+     write(iout, '(a)' )' column 3 is related to the displacement'
+     write(iout, '(a)' )'        of the generic atom along z,    '
    else if(Ifc%dipdip==0)then
      write(iout, '(a)' )' column 1 is related to the displacement'
      write(iout, '(a)' )'        of the generic atom along x,    '
@@ -2070,7 +2130,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
      vect1(3)=(posngb(3,ii)-ra(3))/dist1
    end if
 
-   if(Ifc%dipdip==0)then
+   if(Ifc%dipdip==0.or.Ifc%dipquad==1.or.Ifc%quadquad==1)then
      ! Get the "total" force constants (=real space FC)
      ! without taking into account the dipole-dipole interaction
      do mu=1,3
@@ -2718,7 +2778,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
    ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
    ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
-   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff, xmpi_comm_self)
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff,ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self)
 
 #ifdef HAVE_NETCDF
  if (present(ncid)) then

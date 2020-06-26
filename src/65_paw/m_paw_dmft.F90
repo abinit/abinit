@@ -249,7 +249,7 @@ MODULE m_paw_dmft
   real(dp) :: fermie
 
 
-  real(dp) :: fermie_lda
+  real(dp) :: fermie_dft
 
   real(dp) :: nelectval
 
@@ -293,7 +293,7 @@ MODULE m_paw_dmft
 
   complex(dpc), allocatable :: psichi(:,:,:,:,:,:)
 
-  real(dp), allocatable :: eigen_lda(:,:,:)
+  real(dp), allocatable :: eigen_dft(:,:,:)
 
   real(dp), pointer :: wtk(:) => null()
   real(dp), pointer :: fixed_self(:,:,:,:) => null()
@@ -494,7 +494,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
    else if(dmft_solv==1) then
      write(message, '(a,a)') ch10,' DMFT check: static solver'
    else if(dmft_solv==-1) then
-     write(message, '(a,a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover LDA+U'
+     write(message, '(a,a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
    else if(dmft_solv==2) then
      write(message, '(a,a)') ch10,' DMFT uses the Hubbard one solver'
    else if(dmft_solv==4) then
@@ -523,13 +523,13 @@ end subroutine init_sc_dmft
 !! init_dmft
 !!
 !! FUNCTION
-!!  Allocate variables and setup lda hamiltonian and related data
+!!  Allocate variables and setup DFT hamiltonian and related data
 !!  (init_sc_dmft has to been called before)
 !!
 !! INPUTS
 !!  dmatpawu   = fixed occupation matrix of correlated orbitals
-!!  eigen      = LDA eigenvalues
-!!  fermie_lda = LDA Fermi level
+!!  eigen      = DFT eigenvalues
+!!  fermie_dft = DFT Fermi level
 !!  psichi     = <chi|Psi> projection of KS states over atomic !wavefunction
 !!  nkpt       = number of k-points
 !!  nsppol     = number of spin polarisation
@@ -553,7 +553,7 @@ end subroutine init_sc_dmft
 !! G.Kotliar,  S.Y.Savrasov, K.Haule, V.S.Oudovenko, O.Parcollet, C.A.Marianetti.
 !!
 
-subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
+subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
 
  use m_splines
  !use m_CtqmcInterface
@@ -561,7 +561,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)  :: nspinor
- real(dp), intent(in) :: fermie_lda
+ real(dp), intent(in) :: fermie_dft
 !type
  type(pseudopotential_type), intent(in) :: psps
  type(dataset_type),target,intent(in) :: dtset
@@ -615,8 +615,8 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
 !=======================
 !==  Define integers and reals
 !=======================
- paw_dmft%fermie_lda=fermie_lda ! in Ha
- paw_dmft%fermie= fermie_lda
+ paw_dmft%fermie_dft=fermie_dft ! in Ha
+ paw_dmft%fermie= fermie_dft
  if(nspinor==1) then
    if(paw_dmft%nsppol==2) then
      paw_dmft%nelectval= dtset%nelect-float(paw_dmft%dmftbandi-1)*paw_dmft%nsppol
@@ -657,9 +657,9 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
    paw_dmft%dmft_solv=2
    paw_dmft%dmft_blockdiag=1
  endif
-!  0: LDA, no solver
-!  1: LDA+U
-! -1: LDA+U but LDA values are not renormalized !
+!  0: DFT, no solver
+!  1: DFT+U
+! -1: DFT+U but DFT values are not renormalized !
 ! if((paw_dmft%dmft_solv==0.and.paw_dmft%prtvol>4).or.&
 !&   (paw_dmft%dmft_solv>=-1.and.paw_dmft%dmft_solv<=2)) then
 !   call wrtout(std_out,message,'COLL')
@@ -711,7 +711,10 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmftqmc_seed=dtset%dmftqmc_seed
  paw_dmft%dmftqmc_therm=dtset%dmftqmc_therm
  paw_dmft%dmftqmc_t2g=dtset%dmft_t2g
- paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
+
+!paw_dmft%dmftqmc_x2my2d=dtset%dmft_x2my2d
+ paw_dmft%dmftqmc_x2my2d=0
+
  paw_dmft%dmftctqmc_basis =dtset%dmftctqmc_basis
  paw_dmft%dmftctqmc_check =dtset%dmftctqmc_check
  paw_dmft%dmftctqmc_correl=dtset%dmftctqmc_correl
@@ -736,8 +739,8 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
 
  mbandc = paw_dmft%mbandc
 
- ABI_ALLOCATE(paw_dmft%eigen_lda,(paw_dmft%nsppol,paw_dmft%nkpt,paw_dmft%mbandc))
- paw_dmft%eigen_lda=zero
+ ABI_ALLOCATE(paw_dmft%eigen_dft,(paw_dmft%nsppol,paw_dmft%nkpt,paw_dmft%mbandc))
+ paw_dmft%eigen_dft=zero
 
 ! allocate(paw_dmft%wtk(paw_dmft%nkpt))
  paw_dmft%wtk=>dtset%wtk
@@ -776,6 +779,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
      tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
      inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    !  write(6,*) "inquire",lexist
+   grid_unt=2000
      if((.not.lexist)) then
        iexist2=0
        write(message,'(4x,a,i5,3a)') "File number",grid_unt,&
@@ -1277,8 +1281,8 @@ subroutine destroy_dmft(paw_dmft)
 !   if (associated(paw_dmft%wtk)) deallocate(paw_dmft%wtk)
    paw_dmft%wtk => null()
    paw_dmft%fixed_self => null()
-   if (allocated(paw_dmft%eigen_lda))  then
-     ABI_DEALLOCATE(paw_dmft%eigen_lda)
+   if (allocated(paw_dmft%eigen_dft))  then
+     ABI_DEALLOCATE(paw_dmft%eigen_dft)
    endif
    if (associated(paw_dmft%omega_lo))  then
      ABI_DEALLOCATE(paw_dmft%omega_lo)
@@ -1388,7 +1392,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 &   "  -------------------------------------------------",ch10,&
 &   "  --- Data for DMFT ",ch10,&
 &   "  --- paw_dmft%fermie     = ",paw_dmft%fermie    ,ch10,&
-&   "  --- paw_dmft%fermie_lda = ",paw_dmft%fermie_lda,ch10,&
+&   "  --- paw_dmft%fermie_dft = ",paw_dmft%fermie_dft,ch10,&
 &   "  --- paw_dmft%temp       = ",paw_dmft%temp      ,ch10
   call wrtout(std_out,message,'COLL')
   write(message,'(7(a,15x,i8,a),a,2x,e21.14,2a)') &
@@ -1406,7 +1410,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 !  write(message,'(4a,3(a,2x,f8.3,a),8(a,2x,i8,a),a)') "-----------------------------------------------",ch10,&
 !&   "--- Data for DMFT ",ch10,&
 !&   "--- paw_dmft%fermie     = ",paw_dmft%fermie    ,ch10,&
-!&   "--- paw_dmft%fermie_lda = ",paw_dmft%fermie_lda,ch10,&
+!&   "--- paw_dmft%fermie_dft = ",paw_dmft%fermie_dft,ch10,&
 !&   "--- paw_dmft%temp       = ",paw_dmft%temp      ,ch10,&
 !&   "--- paw_dmft%natpawu    = ",paw_dmft%natpawu   ,ch10,&
 !&   "--- paw_dmft%dmft_iter  = ",paw_dmft%dmft_iter ,ch10,&
@@ -1419,7 +1423,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 !&   "-----------------------------------------------"
   if(abs(pawprtvol)>10) then
    call wrtout(std_out,message,'COLL')
-   write(message, '(a)') " LDA Eigenvalues "
+   write(message, '(a)') " DFT Eigenvalues "
    do isppol=1,paw_dmft%nsppol
     write(message, '(a,i4)') "--isppol--",isppol
     call wrtout(std_out,message,'COLL')
@@ -1428,7 +1432,7 @@ subroutine print_dmft(paw_dmft,pawprtvol)
 
      call wrtout(std_out,message,'COLL')
      do iband=1,paw_dmft%mbandc
-      write(message, '(a,i4,f10.5)') "   -iband--",iband,paw_dmft%eigen_lda(isppol,ikpt,iband)
+      write(message, '(a,i4,f10.5)') "   -iband--",iband,paw_dmft%eigen_dft(isppol,ikpt,iband)
       call wrtout(std_out,message,'COLL')
      enddo
     enddo

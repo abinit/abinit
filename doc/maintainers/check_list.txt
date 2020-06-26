@@ -9,7 +9,7 @@ A.2 Update shared/common/src/14_hidewrite/m_specialmsg.F90, lines 237-238
 A.3 Update KNOWN_PROBLEMS
 A.4 Run the "On-demand only slaves"
 A.5 Check manually that "make tests_in" works (on one of the slaves)
-A.6 On abiref, under buildbot, possibly clean content of scripts/bbtools/LinkChecker_rm_false_errors.py, in "url_string_to_skip" [likely supercededby new procedure from JMB when ready]
+A.6 On abiref, under buildbot, possibly clean content of scripts/bbtools/LinkChecker_rm_false_errors.py, in "url_string_to_skip" [likely superceded by new procedure from JMB when ready]
 A.7 Issue ./mksite.py build, then ./mksite.py validate [generate lots of errors, but can be ignored at present]
 A.8 Issue pytest abimkdocs_tests/test_variables.py [generate lots of errors, can be ignored at present]
 A.9 Run abilint (to avoid source files be updated by each separate developer)
@@ -43,7 +43,7 @@ D.10 Update topics mirroring the most noticeable achievements.
 
 E. For the first release of a production version
 -----------------------------------------------
-E.1 Collect the stats, complete doc/main*/statistics.txt and doc/dev*/statistics.json
+E.1 Collect the stats, complete doc/main*/statistics.txt (and doc/dev*/statistics.json ? Not present in v9)
 
 F. For the first release and other merges of a production version
 -----------------------------------------------

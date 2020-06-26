@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h23 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h46 )
   
-- input  file    -> tgw1_5.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_5.in
 - output file    -> tgw1_5.out
 - root for input  files -> tgw1_5i
 - root for output files -> tgw1_5o
@@ -416,7 +416,16 @@ P           mkmem           1
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 11, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -439,8 +448,8 @@ P           mkmem           1
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -547,7 +556,16 @@ P           mkmem           1
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 12, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -640,13 +658,14 @@ P           mkmem           1
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 12, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
 QP_gap     :    2.984
 Delta_QP_KS:    0.454
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.915 -11.652 -17.103   4.560   0.787  -0.271 -12.353  -0.700   5.215
         3   5.915 -11.652 -17.103   4.560   0.787  -0.271 -12.353  -0.700   5.215
         4   5.915 -11.652 -17.103   4.560   0.787  -0.271 -12.353  -0.700   5.215
@@ -654,6 +673,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.789   0.794  -0.259  -9.947  -0.247   8.198
         7   8.445  -9.700  -3.222  -6.789   0.794  -0.259  -9.947  -0.247   8.198
 ...
+
 
  New Fermi energy :        2.464588E-01 Ha ,    6.706484E+00 eV
 
@@ -665,7 +685,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 21, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -775,7 +804,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 22, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -868,13 +906,14 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 22, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
 QP_gap     :    3.079
 Delta_QP_KS:    0.549
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.915 -11.652 -17.103   4.430   0.785  -0.273 -12.454  -0.802   5.113
         3   5.915 -11.652 -17.103   4.430   0.785  -0.273 -12.454  -0.802   5.113
         4   5.915 -11.652 -17.103   4.430   0.785  -0.273 -12.454  -0.802   5.113
@@ -882,6 +921,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
         7   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.252   8.193
 ...
+
 
  New Fermi energy :        2.444994E-01 Ha ,    6.653167E+00 eV
 
@@ -893,7 +933,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 31 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 31, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1003,7 +1052,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 32 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 32, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1096,13 +1154,14 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 32, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
 QP_gap     :    3.099
 Delta_QP_KS:    0.569
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.915 -11.652 -17.103   4.405   0.785  -0.274 -12.473  -0.821   5.094
         3   5.915 -11.652 -17.103   4.405   0.785  -0.274 -12.473  -0.821   5.094
         4   5.915 -11.652 -17.103   4.405   0.785  -0.274 -12.473  -0.821   5.094
@@ -1110,6 +1169,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.795   0.794  -0.260  -9.952  -0.251   8.194
         7   8.445  -9.700  -3.222  -6.795   0.794  -0.260  -9.952  -0.251   8.194
 ...
+
 
  New Fermi energy :        2.441671E-01 Ha ,    6.644124E+00 eV
 
@@ -1121,7 +1181,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 41 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 41, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1231,7 +1300,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 42 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 42, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1324,13 +1402,14 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 42, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
 QP_gap     :    3.114
 Delta_QP_KS:    0.584
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
         3   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
         4   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
@@ -1338,6 +1417,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
         7   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
 ...
+
 
  New Fermi energy :        2.438588E-01 Ha ,    6.635735E+00 eV
 
@@ -1349,7 +1429,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 51 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 51, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1459,7 +1548,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 52 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 52, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1552,13 +1650,14 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 52, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
 QP_gap     :    3.123
 Delta_QP_KS:    0.593
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.915 -11.652 -17.103   4.374   0.785  -0.275 -12.497  -0.845   5.071
         3   5.915 -11.652 -17.103   4.374   0.785  -0.275 -12.497  -0.845   5.071
         4   5.915 -11.652 -17.103   4.374   0.785  -0.275 -12.497  -0.845   5.071
@@ -1566,6 +1665,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.796   0.794  -0.260  -9.952  -0.252   8.193
         7   8.445  -9.700  -3.222  -6.796   0.794  -0.260  -9.952  -0.252   8.193
 ...
+
 
  New Fermi energy :        2.437216E-01 Ha ,    6.632002E+00 eV
 
@@ -1577,7 +1677,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 61 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 61, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1687,7 +1796,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 62 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 62, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1780,13 +1898,14 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 62, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.530
 QP_gap     :    3.124
 Delta_QP_KS:    0.593
 data: !SigmaeeData |
-     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+     Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         2   5.915 -11.652 -17.103   4.373   0.784  -0.275 -12.498  -0.845   5.070
         3   5.915 -11.652 -17.103   4.373   0.784  -0.275 -12.498  -0.845   5.070
         4   5.915 -11.652 -17.103   4.373   0.784  -0.275 -12.498  -0.845   5.070
@@ -1794,6 +1913,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.796   0.793  -0.260  -9.952  -0.252   8.193
         7   8.445  -9.700  -3.222  -6.796   0.793  -0.260  -9.952  -0.252   8.193
 ...
+
 
  New Fermi energy :        2.437018E-01 Ha ,    6.631463E+00 eV
 
@@ -2103,10 +2223,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         21.0  wall=         21.1
+- Proc.   0 individual time (sec): cpu=         24.0  wall=         28.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  52 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.4  wall=         12.4
+.Delivered  52 WARNINGs and  18 COMMENTs to log file.
++Overall time at end (sec) : cpu=         24.0  wall=         28.4

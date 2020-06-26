@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h41 )
   
-- input  file    -> t43.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t43/t43.in
 - output file    -> t43.out
 - root for input  files -> t43i
 - root for output files -> t43o
@@ -322,7 +322,16 @@ P           mkmem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 169, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -340,8 +349,8 @@ P           mkmem           8
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -362,6 +371,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 250, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-15, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -11.914455359638    -1.191E+01 1.581E-02 7.772E+00
  ETOT  2  -11.923041916400    -8.587E-03 2.737E-06 2.619E-02
@@ -377,6 +392,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
   sigma(1 1)=  3.64680539E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.64680539E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.64680539E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.3703265,   3.3703265, ]
+- [  3.3703265,   0.0000000,   3.3703265, ]
+- [  3.3703265,   3.3703265,   0.0000000, ]
+lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6567759E+01
+convergence: {deltae: -6.217E-14, res2:  2.533E-16, residm:  8.008E-15, diffor: null, }
+etotal    :  -1.19230561E+01
+entropy   :   0.00000000E+00
+fermie    :   4.77221031E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.64680539E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.64680539E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.64680539E-03, ]
+pressure_GPa:  -1.0729E+02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -418,22 +462,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.94866477294909E+00
-    Hartree energy  =  9.20987980662237E-01
-    XC energy       = -4.30830942436298E+00
-    Ewald energy    = -1.27864121744519E+01
-    PspCore energy  =  1.93481650847052E-01
-    Loc. psp. energy= -5.26446316291861E+00
-    NL   psp  energy=  1.37299428334597E+00
-    >>>>>>>>> Etotal= -1.19230560739291E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.24442855611990E+02 ; Band energy (Ha)=   1.1513103441E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.94866477294909E+00
+hartree             :  9.20987980662237E-01
+xc                  : -4.30830942436298E+00
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.93481650847052E-01
+local_psp           : -5.26446316291861E+00
+non_local_psp       :  1.37299428334597E+00
+total_energy        : -1.19230560739291E+01
+total_energy_eV     : -3.24442855611990E+02
+band_energy         :  1.15131034408477E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -448,7 +490,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 126, }
+cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 25, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -471,8 +522,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -581,13 +632,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.891     151.843
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.557
 QP_gap     :    7.059
 Delta_QP_KS:    1.502
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.946   -14.837    -8.946    -5.968    -5.586     0.000     1.000     0.000    -5.586    -2.609   -11.554   -11.554
         2    12.986   -16.717    12.986    16.303    -4.060     0.000     1.000     0.000    -4.060    -0.743    12.243    12.242
         3    12.986   -16.717    12.986    16.303    -4.060     0.000     1.000     0.000    -4.060    -0.743    12.243    12.242
@@ -598,14 +650,16 @@ data: !SigmaeeData |
         8    25.740   -16.216    25.740    29.000    -1.999     0.000     1.000     0.000    -1.999     1.261    27.001    27.001
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.250,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    9.560
 QP_gap     :   11.328
 Delta_QP_KS:    1.769
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -7.177   -14.965    -7.177    -4.178    -5.481     0.000     1.000     0.000    -5.481    -2.482    -9.659    -9.662
         2     6.344   -15.671     6.344     9.466    -4.354     0.000     1.000     0.000    -4.354    -1.232     5.111     5.107
         3    11.407   -16.415    11.407    14.661    -4.110     0.000     1.000     0.000    -4.110    -0.856    10.551    10.549
@@ -616,14 +670,16 @@ data: !SigmaeeData |
         8    27.670   -15.531    27.670    30.801    -1.694     0.000     1.000     0.000    -1.694     1.438    29.107    29.108
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   11.163
 QP_gap     :   13.039
 Delta_QP_KS:    1.876
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.091   -15.631    -3.091     0.022    -5.386     0.000     1.000     0.000    -5.386    -2.273    -5.364    -5.365
         2    -0.646   -14.684    -0.646     2.302    -4.687     0.000     1.000     0.000    -4.687    -1.739    -2.385    -2.389
         3    10.278   -16.370    10.278    13.522    -4.215     0.000     1.000     0.000    -4.215    -0.971     9.307     9.307
@@ -634,14 +690,16 @@ data: !SigmaeeData |
         8    28.483   -13.666    28.483    31.281    -1.227     0.000     1.000     0.000    -1.227     1.570    30.054    30.055
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    8.480
 QP_gap     :   10.222
 Delta_QP_KS:    1.742
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -6.587   -15.003    -6.587    -3.582    -5.443     0.000     1.000     0.000    -5.443    -2.438    -9.025    -9.028
         2     8.420   -16.394     8.420    11.670    -4.450     0.000     1.000     0.000    -4.450    -1.200     7.220     7.220
         3     8.919   -15.958     8.919    12.088    -4.177     0.000     1.000     0.000    -4.177    -1.008     7.911     7.908
@@ -652,14 +710,16 @@ data: !SigmaeeData |
         8    25.137   -16.200    25.137    28.337    -2.033     0.000     1.000     0.000    -2.033     1.168    26.304    26.307
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   10.648
 QP_gap     :   12.621
 Delta_QP_KS:    1.974
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -2.782   -15.386    -2.782     0.289    -5.243     0.000     1.000     0.000    -5.243    -2.172    -4.954    -4.958
         2     2.027   -15.408     2.027     5.101    -4.730     0.000     1.000     0.000    -4.730    -1.656     0.371     0.365
         3     6.182   -15.584     6.182     9.287    -4.333     0.000     1.000     0.000    -4.333    -1.227     4.954     4.956
@@ -670,14 +730,16 @@ data: !SigmaeeData |
         8    26.522   -15.947    26.522    29.700    -1.908     0.000     1.000     0.000    -1.908     1.270    27.792    27.794
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   10.730
 QP_gap     :   12.648
 Delta_QP_KS:    1.918
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -4.377   -15.209    -4.377    -1.336    -5.319     0.000     1.000     0.000    -5.319    -2.278    -6.656    -6.660
         2     4.088   -15.799     4.088     7.230    -4.677     0.000     1.000     0.000    -4.677    -1.535     2.553     2.550
         3     5.262   -15.233     5.262     8.306    -4.263     0.000     1.000     0.000    -4.263    -1.219     4.043     4.041
@@ -688,14 +750,16 @@ data: !SigmaeeData |
         8    26.935   -15.454    26.935    30.036    -1.721     0.000     1.000     0.000    -1.721     1.380    28.315    28.316
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   10.662
 QP_gap     :   12.695
 Delta_QP_KS:    2.033
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -0.045   -15.547    -0.045     3.054    -5.033     0.000     1.000     0.000    -5.033    -1.934    -1.979    -1.984
         2    -0.045   -15.547    -0.045     3.054    -5.033     0.000     1.000     0.000    -5.033    -1.934    -1.979    -1.983
         3     6.718   -15.755     6.718     9.846    -4.343     0.000     1.000     0.000    -4.343    -1.215     5.503     5.503
@@ -706,14 +770,16 @@ data: !SigmaeeData |
         8    30.794   -16.696    30.794    34.079    -1.653     0.000     1.000     0.000    -1.653     1.632    32.426    32.426
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   19.047
 QP_gap     :   21.378
 Delta_QP_KS:    2.331
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1     0.765   -15.901     0.765     3.924    -5.100     0.000     1.000     0.000    -5.100    -1.940    -1.176    -1.176
         2     0.765   -15.901     0.765     3.924    -5.100     0.000     1.000     0.000    -5.100    -1.940    -1.176    -1.175
         3     4.541   -14.911     4.541     7.527    -4.201     0.000     1.000     0.000    -4.201    -1.215     3.326     3.319
@@ -723,6 +789,7 @@ data: !SigmaeeData |
         7    25.392   -15.893    25.392    28.544    -1.910     0.000     1.000     0.000    -1.910     1.242    26.634    26.633
         8    25.392   -15.893    25.392    28.544    -1.910     0.000     1.000     0.000    -1.910     1.243    26.634    26.635
 ...
+
 
  New Fermi energy :        5.581947E-01 Ha ,    1.518925E+01 eV
  New Exchange energy :    -6.779055E-01 Ha ,   -1.844675E+01 eV
@@ -748,7 +815,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 126, }
+cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 25, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -864,13 +940,14 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.557
 QP_gap     :    7.616
 Delta_QP_KS:    2.059
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.946   -14.837    -8.946    -4.821    -7.821     0.000     1.000     0.000    -7.821    -3.697   -12.642   -12.642
         2    12.986   -16.717    12.986    17.694    -5.684     0.000     1.000     0.000    -5.684    -0.976    12.010    12.010
         3    12.986   -16.717    12.986    17.694    -5.684     0.000     1.000     0.000    -5.684    -0.976    12.010    12.010
@@ -881,14 +958,16 @@ data: !SigmaeeData |
         8    25.740   -16.216    25.740    30.310    -2.799     0.000     1.000     0.000    -2.799     1.771    27.511    27.511
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.250,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    9.560
 QP_gap     :   12.005
 Delta_QP_KS:    2.445
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -7.177   -14.965    -7.177    -3.015    -7.673     0.000     1.000     0.000    -7.673    -3.511   -10.688   -10.691
         2     6.344   -15.671     6.344    10.723    -6.096     0.000     1.000     0.000    -6.096    -1.716     4.627     4.621
         3    11.407   -16.415    11.407    16.015    -5.754     0.000     1.000     0.000    -5.754    -1.145    10.262    10.258
@@ -899,14 +978,16 @@ data: !SigmaeeData |
         8    27.670   -15.531    27.670    32.031    -2.371     0.000     1.000     0.000    -2.371     1.990    29.660    29.662
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   11.163
 QP_gap     :   13.716
 Delta_QP_KS:    2.554
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -3.091   -15.631    -3.091     1.270    -7.540     0.000     1.000     0.000    -7.540    -3.178    -6.270    -6.271
         2    -0.646   -14.684    -0.646     3.435    -6.562     0.000     1.000     0.000    -6.562    -2.481    -3.127    -3.133
         3    10.278   -16.370    10.278    14.871    -5.901     0.000     1.000     0.000    -5.901    -1.309     8.969     8.969
@@ -917,14 +998,16 @@ data: !SigmaeeData |
         8    28.483   -13.666    28.483    32.281    -1.718     0.000     1.000     0.000    -1.718     2.080    30.563    30.564
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    8.480
 QP_gap     :   10.833
 Delta_QP_KS:    2.353
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -6.587   -15.003    -6.587    -2.413    -7.620     0.000     1.000     0.000    -7.620    -3.447   -10.034   -10.037
         2     8.420   -16.394     8.420    13.019    -6.230     0.000     1.000     0.000    -6.230    -1.631     6.788     6.788
         3     8.919   -15.958     8.919    13.385    -5.847     0.000     1.000     0.000    -5.847    -1.382     7.538     7.533
@@ -935,14 +1018,16 @@ data: !SigmaeeData |
         8    25.137   -16.200    25.137    29.668    -2.846     0.000     1.000     0.000    -2.846     1.685    26.822    26.826
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   10.648
 QP_gap     :   13.290
 Delta_QP_KS:    2.642
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -2.782   -15.386    -2.782     1.508    -7.340     0.000     1.000     0.000    -7.340    -3.051    -5.833    -5.839
         2     2.027   -15.408     2.027     6.324    -6.622     0.000     1.000     0.000    -6.622    -2.325    -0.298    -0.305
         3     6.182   -15.584     6.182    10.534    -6.066     0.000     1.000     0.000    -6.066    -1.713     4.468     4.471
@@ -953,14 +1038,16 @@ data: !SigmaeeData |
         8    26.522   -15.947    26.522    30.991    -2.671     0.000     1.000     0.000    -2.671     1.797    28.320    28.325
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   10.730
 QP_gap     :   13.311
 Delta_QP_KS:    2.581
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -4.377   -15.209    -4.377    -0.141    -7.447     0.000     1.000     0.000    -7.447    -3.211    -7.588    -7.593
         2     4.088   -15.799     4.088     8.504    -6.547     0.000     1.000     0.000    -6.547    -2.132     1.956     1.953
         3     5.262   -15.233     5.262     9.509    -5.968     0.000     1.000     0.000    -5.968    -1.721     3.541     3.539
@@ -971,14 +1058,16 @@ data: !SigmaeeData |
         8    26.935   -15.454    26.935    31.261    -2.410     0.000     1.000     0.000    -2.410     1.916    28.851    28.851
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   10.662
 QP_gap     :   13.367
 Delta_QP_KS:    2.705
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -0.045   -15.547    -0.045     4.293    -7.046     0.000     1.000     0.000    -7.046    -2.707    -2.753    -2.758
         2    -0.045   -15.547    -0.045     4.293    -7.046     0.000     1.000     0.000    -7.046    -2.707    -2.753    -2.758
         3     6.718   -15.755     6.718    11.119    -6.081     0.000     1.000     0.000    -6.081    -1.680     5.038     5.038
@@ -989,14 +1078,16 @@ data: !SigmaeeData |
         8    30.794   -16.696    30.794    35.475    -2.314     0.000     1.000     0.000    -2.314     2.367    33.161    33.161
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   19.047
 QP_gap     :   22.258
 Delta_QP_KS:    3.211
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1     0.765   -15.901     0.765     5.208    -7.140     0.000     1.000     0.000    -7.140    -2.696    -1.932    -1.932
         2     0.765   -15.901     0.765     5.208    -7.140     0.000     1.000     0.000    -7.140    -2.696    -1.932    -1.931
         3     4.541   -14.911     4.541     8.690    -5.881     0.000     1.000     0.000    -5.881    -1.732     2.809     2.801
@@ -1006,6 +1097,7 @@ data: !SigmaeeData |
         7    25.392   -15.893    25.392    29.831    -2.674     0.000     1.000     0.000    -2.674     1.765    27.156    27.156
         8    25.392   -15.893    25.392    29.831    -2.674     0.000     1.000     0.000    -2.674     1.765    27.156    27.157
 ...
+
 
  New Fermi energy :        5.583158E-01 Ha ,    1.519254E+01 eV
  New Exchange energy :    -9.490678E-01 Ha ,   -2.582545E+01 eV
@@ -1366,19 +1458,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          5.7  wall=         12.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.7  wall=          5.8
++Overall time at end (sec) : cpu=          5.7  wall=         12.3

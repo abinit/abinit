@@ -1,0 +1,85 @@
+################################################
+# TEST STRUCTURE VARIABLE. SEE DESCRIPTION BELOW
+################################################
+ndtset  4
+
+# This is just to test the prefix variables replacing the old files file.
+# Note the `varname = ""` format that will be searched by runtests.py to decide whether
+# prefix variables should be added to the initial input file before running.
+#
+indata_prefix = "t04.indata"
+outdata_prefix = "t04.outdata"
+tmpdata_prefix = "t04.tmpdata"
+output_file = "t04.output"
+pseudos = "12mg.pspnc, 05b.soft_tm"
+
+# MgB2 lattice structure.
+## ntypat  2
+## znucl   12 5
+## natom   3
+## typat   1*1 2*2
+## acell   2*3.086  3.523 Angstrom
+## rprim   0.866025403784439  0.5  0.0
+##        -0.866025403784439  0.5  0.0
+##         0.0                0.0  1.0
+## # Atomic positions
+## xred
+##  0.0  0.0  0.0 # Mg
+##  1/3  2/3  0.5 # B
+##  2/3  1/3  0.5 # B
+
+
+# Test POSCAR format
+# Remember that positions and lattice vectors must be given with enough digits
+structure1 "poscar:t04_POSCAR"
+
+structure2 "abifile:t04.outdata_DS1_GSR.nc"
+
+structure3 "abifile:t04.outdata_DS1_HIST.nc"
+
+structure4 "abivars:mgb2.ucell"
+
+# Global variables
+ngkpt   4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
+occopt  4
+tsmear  0.03
+tolvrs  1.0e-10
+ecut    28/2 Hartree
+nband   8
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% exec_args = --dry-run
+#%% [files]
+#%% files_to_test =
+#%%   t04.output, tolnlines = 0, tolabs = 1.1e-06, tolrel = 1.1e-04
+#%% psp_files = 12mg.pspnc, 05b.soft_tm
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [shell]
+#%% pre_commands =
+#%%   pw_cp 12mg.pspnc 12mg.pspnc;
+#%%   pw_cp 05b.soft_tm 05b.soft_tm;
+#%%   iw_cp t04_POSCAR t04_POSCAR;
+#%%   iw_cp mgb2.ucell mgb2.ucell;
+#%%   iw_cp t04.outdata_DS1_GSR.nc t04.outdata_DS1_GSR.nc;
+#%%   iw_cp t04.outdata_DS1_HIST.nc t04.outdata_DS1_HIST.nc;
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = POSCAR
+#%% description =
+#%%  Test the `structure` variable used to specify the crystalline structure
+#%%  without having to enter explicitly natom, ntypat, typat and znucl.
+#%%  Different options are tested. Initialize structure from:
+#%%
+#%%    1) An external POSCAR file with symbols (VASP5 format)
+#%%    2) An external netcdf file produced by Abinit.
+#%%    3) An external txt file with Abinit variables.
+#%%
+#%%  Test also the prefix variables that replace the old files file.
+#%%
+#%% topics = UnitCell
+#%%<END TEST_INFO>

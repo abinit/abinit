@@ -462,7 +462,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !  Convert back to xred (reduced coordinates)
    call xcart2xred(ab_mover%natom,rprimd_next,xcart_next,xred_next)
 !  Computation of the forces for the new positions
-!  Compute LDA forces (big loop)
+!  Compute DFT forces (big loop)
 
 !  COMMENTED
 !  This should be in mover.F90

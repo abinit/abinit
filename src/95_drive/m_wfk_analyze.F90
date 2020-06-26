@@ -147,7 +147,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,brav1=1,timrev2=2
+ integer,parameter :: master=0
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
@@ -211,7 +211,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
  call wfk0_hdr%vs_dtset(dtset)
 
- cryst = wfk0_hdr%get_crystal(timrev2)
+ cryst = wfk0_hdr%get_crystal()
  call cryst%print(header="crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
@@ -308,7 +308,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    cplex_dij=dtset%nspinor; cplex=1; ndij=1
 
-   ABI_DT_MALLOC(pawrhoij,(cryst%natom))
+   ABI_MALLOC(pawrhoij,(cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
 &              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
    call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
@@ -324,7 +324,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      gsqcut_shp = two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
-&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
+&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values
@@ -346,7 +346,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    call setsym_ylm(cryst%gprimd,pawang%l_max-1,cryst%nsym,dtset%pawprtvol,cryst%rprimd,cryst%symrec,pawang%zarot)
 
-   ! Initialize and compute data for LDA+U
+   ! Initialize and compute data for DFT+U
    !paw_dmft%use_dmft=dtset%usedmft
    !call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
    !    .false.,dtset%jpawu,dtset%lexexch,dtset%lpawu,cryst%ntypat,pawang,dtset%pawprtvol,&
@@ -360,7 +360,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    call pawrhoij_copy(wfk0_hdr%pawrhoij,pawrhoij)
 
    ! Variables/arrays related to the fine FFT grid.
-   ABI_DT_MALLOC(pawfgrtab,(cryst%natom))
+   ABI_MALLOC(pawfgrtab,(cryst%natom))
    call pawtab_get_lsize(pawtab,l_size_atm,cryst%natom,cryst%typat)
    cplex=1
    call pawfgrtab_init(pawfgrtab,cplex,l_size_atm,dtset%nspden,dtset%typat)
@@ -384,7 +384,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    !ABI_MALLOC(ks_nhat,(nfftf,dtset%nspden))
    !ks_nhat=zero
  else
-   ABI_DT_MALLOC(pawfgrtab,(0))
+   ABI_MALLOC(pawfgrtab,(0))
  end if !End of PAW Initialization
 
  select case (dtset%wfk_task)
@@ -417,7 +417,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ! Band classification.
    call read_wfd()
 
-   ABI_DT_MALLOC(esymm,(wfd%nkibz,wfd%nsppol))
+   ABI_MALLOC(esymm,(wfd%nkibz,wfd%nsppol))
    use_paw_aeur=.False. ! should pass ngfftf but the dense mesh is not forced to be symmetric
 
    do spin=1,wfd%nsppol
@@ -430,7 +430,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end do
 
    call esymm_free(esymm)
-   ABI_DT_FREE(esymm)
+   ABI_FREE(esymm)
 
  !case (WFK_TASK_UR)
  !  ! plot KSS wavefunctions. Change bks_mask to select particular states.
@@ -444,7 +444,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    call read_wfd()
 
    ABI_CHECK(wfd%usepaw == 1, "Not a PAW run")
-   ABI_DT_MALLOC(paw_onsite, (cryst%natom))
+   ABI_MALLOC(paw_onsite, (cryst%natom))
    call paw_pwaves_lmn_init(paw_onsite,cryst%natom,cryst%natom,cryst%ntypat,&
    cryst%rprimd,cryst%xcart,pawtab,pawrad,pawfgrtab)
 
@@ -457,7 +457,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ABI_FREE(ur_ae)
 
    call paw_pwaves_lmn_free(paw_onsite)
-   ABI_DT_FREE(paw_onsite)
+   ABI_FREE(paw_onsite)
 
  !case ("paw_aeden")
 
@@ -476,14 +476,14 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then
    call pawrhoij_free(pawrhoij)
-   ABI_DT_FREE(pawrhoij)
+   ABI_FREE(pawrhoij)
    call pawfgrtab_free(pawfgrtab)
    !call paw_ij_free(paw_ij)
-   !ABI_DT_FREE(paw_ij)
+   !ABI_FREE(paw_ij)
    !call paw_an_free(paw_an)
-   !ABI_DT_FREE(paw_an)
+   !ABI_FREE(paw_an)
  end if
- ABI_DT_FREE(pawfgrtab)
+ ABI_FREE(pawfgrtab)
 
  DBG_EXIT('COLL')
 

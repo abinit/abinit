@@ -1,6 +1,6 @@
 # Exercise IO routines in parallel with different combination 
 # of parameters in the GS eigensolvers
-# similar to t26.in but with NC pseudos
+# similar to t26.in but with NC pseudopotentials
 
 #use_slk 1
 #iomode 1

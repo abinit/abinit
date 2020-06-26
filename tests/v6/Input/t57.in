@@ -14,9 +14,6 @@
           0.5 0.0 0.5
           0.5 0.5 0.0
 
-!Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-
 !Interatomic force constant info
   dipdip  0      ! Dipole-dipole interaction treatment
 

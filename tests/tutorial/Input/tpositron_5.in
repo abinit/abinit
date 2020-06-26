@@ -67,7 +67,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   tpositron_5.out, tolnlines= 3, tolabs= 2.6e-2, tolrel= 3.8e-2, fld_options= -easy
+#%%   tpositron_5.out, tolnlines= 5, tolabs= 2.6e-2, tolrel= 3.8e-2, fld_options= -easy
 #%% psp_files = Si.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 10

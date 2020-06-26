@@ -33,24 +33,32 @@
 #include "config.h"
 #endif
 
+#include "abi_common.h"
+
 module m_pair_list
 
   use iso_c_binding
   use m_type_pair_list
+  use m_errors
+
+  use m_fstrings, only : sjoin
+
   implicit none
 
-  integer,parameter :: TC_EMPTY=-2, TC_NOTFOUND=-1, TC_INT=0, TC_REAL=1, TC_STRING=2
+  ! Similar constants used in C code.
+  integer,public,parameter :: TC_EMPTY=-2, TC_NOTFOUND=-1, TC_INT=0, TC_REAL=1, TC_STRING=2
 
   private
   public :: pair_list_set, pair_list_get, pair_list_free
   public :: pair_list_next, pair_list_look, pair_list_iter, pair_list_restart
   public :: pair_list
-  public :: TC_EMPTY, TC_NOTFOUND, TC_INT, TC_REAL, TC_STRING
 
   type :: pair_list
     type(c_pair_list) :: plc
     contains
       procedure :: set => pair_list_set
+      procedure :: set_keys => pair_list_set_keys
+      procedure :: set_keys_to_null => pair_list_set_keys_to_null
       procedure :: get => pair_list_get
       procedure :: free => pair_list_free
       procedure :: next => pair_list_next
@@ -138,18 +146,17 @@ module m_pair_list
 !!
 !! OUTPUT
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  function pair_list_length(pl) result(length)
-    class(pair_list),intent(in) :: pl
-    integer :: length
-    length = pl%plc%length
-  end function pair_list_length
+
+function pair_list_length(pl) result(length)
+  class(pair_list),intent(in) :: pl
+  integer :: length
+  length = pl%plc%length
+end function pair_list_length
 !!***
 
 !!****f* m_pair_list/pair_list_get
@@ -157,7 +164,7 @@ module m_pair_list
 !! pair_list_get
 !!
 !! FUNCTION
-!!  get the value associated with a key, only one of i and r is modified
+!!  Get the value associated with a key, only one of i and r is modified
 !!
 !! INPUTS
 !!  pl <class(pair_list)>=
@@ -174,20 +181,19 @@ module m_pair_list
 !!     -2 if the list is empty (neither i nor r are setted)
 !!  r <real(kind=c_double)>=
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine pair_list_get(pl, key, type_code, i, r, s)
-    class(pair_list),intent(in) :: pl
-    character(kind=c_char,len=*),intent(in) :: key, s
-    integer(kind=c_int),intent(out) :: i, type_code
-    real(kind=c_double),intent(out) :: r
-    call pair_list_get_c(pl%plc, trim(key), type_code, i, r, s, len_trim(key), len(s))
-  end subroutine pair_list_get
+
+subroutine pair_list_get(pl, key, type_code, i, r, s)
+  class(pair_list),intent(in) :: pl
+  character(kind=c_char,len=*),intent(in) :: key, s
+  integer(kind=c_int),intent(out) :: i, type_code
+  real(kind=c_double),intent(out) :: r
+  call pair_list_get_c(pl%plc, trim(key), type_code, i, r, s, len_trim(key), len(s))
+end subroutine pair_list_get
 !!***
 
 !!****f* m_pair_list/pair_list_look
@@ -216,21 +222,20 @@ module m_pair_list
 !!  i <integer(kind=c_int)>=
 !!  r <real(kind=c_double)>=
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine pair_list_look(pl, key, type_code, i, r, s)
-    use m_type_pair_list
-    class(pair_list),intent(in) :: pl
-    character(kind=c_char,len=*),intent(out) :: key, s
-    integer(kind=c_int),intent(out) :: type_code, i
-    real(kind=c_double),intent(out) :: r
-    call pair_list_look_c(pl%plc, key, type_code, i, r, s, len(key), len(s))
-  end subroutine pair_list_look
+
+subroutine pair_list_look(pl, key, type_code, i, r, s)
+  use m_type_pair_list
+  class(pair_list),intent(in) :: pl
+  character(kind=c_char,len=*),intent(out) :: key, s
+  integer(kind=c_int),intent(out) :: type_code, i
+  real(kind=c_double),intent(out) :: r
+  call pair_list_look_c(pl%plc, key, type_code, i, r, s, len(key), len(s))
+end subroutine pair_list_look
 !!***
 
 !!****f* m_pair_list/pair_list_next
@@ -244,8 +249,6 @@ module m_pair_list
 !!  pl <class(pair_list)>=
 !!
 !! OUTPUT
-!!
-!! NOTES
 !!
 !! PARENTS
 !!
@@ -266,23 +269,16 @@ module m_pair_list
 !!  free memory occupied by the list (not the pair_list variable itself !)
 !!  and reset the pair_list variable (it can be reused as an empty list)
 !!
-!! INPUTS
-!!  pl <class(pair_list)>=
-!!
-!! OUTPUT
-!!  pl <class(pair_list)>=
-!!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-    subroutine pair_list_free(pl)
-      class(pair_list),intent(inout) :: pl
-      call pair_list_free_c(pl%plc)
-    end subroutine pair_list_free
+
+subroutine pair_list_free(pl)
+  class(pair_list),intent(inout) :: pl
+  call pair_list_free_c(pl%plc)
+end subroutine pair_list_free
 !!***
 
 !!****f* m_pair_list/pair_list_set
@@ -304,27 +300,148 @@ module m_pair_list
 !!
 !! OUTPUT
 !!
-!! NOTES
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pair_list_set(pl, key, i, r, s)
+
+ class(pair_list),intent(in) :: pl
+ character(len=*),intent(in) :: key
+ integer,intent(in),optional :: i
+ real(kind=c_double),intent(in),optional :: r
+ character(len=*),intent(in),optional :: s
+
+ if (present(i)) then
+   call pair_list_seti(pl%plc, trim(key), i, len_trim(key))
+ else if (present(r)) then
+   call pair_list_setr(pl%plc, trim(key), r, len_trim(key))
+ else if (present(s)) then
+   call pair_list_sets(pl%plc, trim(key), s, len_trim(key), len_trim(s))
+ end if
+
+end subroutine pair_list_set
+!!***
+
+!!****f* m_pair_list/pair_list_set_keys
+!! NAME
+!! pair_list_set_keys
+!!
+!! FUNCTION
+!!  Set the value of a list of comma-separated keys.
+!!
+!!  Example
+!!
+!!  d%set_keys("foo, bar", ivals=[1, 2])
+!!
+!! INPUTS
+!!  pl <class(pair_list)>=
+!!  keylist <character(len=*)>=
+!!  i <integer>=optional
+!!  r <real(kind=c_double)>=optional
+!!  s <character(len=*)>=optional
+!!
+!! OUTPUT
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine pair_list_set(pl, key, i, r, s)
-    class(pair_list),intent(in) :: pl
-    character(len=*),intent(in) :: key
-    integer,intent(in),optional :: i
-    real(kind=c_double),intent(in),optional :: r
-    character(len=*),intent(in),optional :: s
-    if(present(i)) then
-      call pair_list_seti(pl%plc, trim(key), i, len_trim(key))
-    elseif(present(r)) then
-        call pair_list_setr(pl%plc, trim(key), r, len_trim(key))
-    elseif(present(s)) then
-        call pair_list_sets(pl%plc, trim(key), s, len_trim(key), len_trim(s))
-    end if
-  end subroutine pair_list_set
+
+subroutine pair_list_set_keys(pl, keylist, ivals, rvals) !, svals)
+
+ class(pair_list),intent(in) :: pl
+ character(len=*),intent(in) :: keylist
+ integer,intent(in),optional :: ivals(:)
+ real(kind=c_double),intent(in),optional :: rvals(:)
+ !character(len=*),intent(in),optional :: svals(:)
+
+!Local variables-------------------------------
+ integer :: i, n, start, stp
+ character(len=len(keylist)) :: key
+! *************************************************************************
+
+ n = 1
+ do i=1,len_trim(keylist)
+   if (keylist(i:i) == ",") n = n + 1
+ end do
+
+ start = 1
+ do i=1,n
+   stp = index(keylist(start:), ",")
+   if (stp == 0) then
+     key = keylist(start:)
+   else
+     key = keylist(start: start + stp - 2)
+     start = start + stp
+     ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
+   end if
+   key = adjustl(key)
+
+   if (present(ivals)) then
+     ABI_CHECK(size(ivals) == n, "size(ivals) != n")
+     call pair_list_seti(pl%plc, trim(key), ivals(i), len_trim(key))
+
+   else if (present(rvals)) then
+     ABI_CHECK(size(rvals) == n, "size(rvals) != n")
+     call pair_list_setr(pl%plc, trim(key), rvals(i), len_trim(key))
+
+   !else if (present(svals)) then
+   !  TODO: Pass single string with comma-separated tokens.
+   !  ABI_CHECK(size(svals) == n, "size(svals) != n")
+   !  call pair_list_sets(pl%plc, trim(key), svals(i), len_trim(key), len_trim(svals(i)))
+   end if
+ end do
+
+end subroutine pair_list_set_keys
+!!***
+
+!!****f* m_pair_list/pair_list_set_keys_to_null
+!! NAME
+!! pair_list_set_keys_to_null
+!!
+!! FUNCTION
+!!  Set the value of a list of comma-separated keys to null
+!!
+!!  Example:
+!!
+!!      dict%set_keys_to_null("foo, bar")
+!!
+!! INPUTS
+!!  keylist: List of comma-separated keys
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pair_list_set_keys_to_null(pl, keylist)
+
+ class(pair_list),intent(in) :: pl
+ character(len=*),intent(in) :: keylist
+
+!Local variables-------------------------------
+ integer :: start, stp
+! *************************************************************************
+
+ start = 1
+ do
+   stp = index(keylist(start:), ",")
+   if (stp == 0) then
+     call pl%set(adjustl(trim(keylist(start:))), s="null")
+     exit
+   else
+     call pl%set(adjustl(trim(keylist(start:start+stp-2))), s="null")
+     start = start + stp
+     ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
+   end if
+ end do
+
+end subroutine pair_list_set_keys_to_null
 !!***
 
 !!****f* m_pair_list/pair_list_restart
@@ -334,23 +451,18 @@ module m_pair_list
 !! FUNCTION
 !!  have the cursor going back to the first element (cf: pair_list_next)
 !!
-!! INPUTS
-!!  pl <class(pair_list)>=
-!!
-!! OUTPUT
-!!  pl <class(pair_list)>=
-!!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine pair_list_restart(pl)
-    class(pair_list),intent(inout) :: pl
-    pl%plc%cursor = pl%plc%first;
-  end subroutine pair_list_restart
+
+subroutine pair_list_restart(pl)
+
+  class(pair_list),intent(inout) :: pl
+  pl%plc%cursor = pl%plc%first;
+
+end subroutine pair_list_restart
 !!***
 
 !!****f* m_pair_list/pair_list_iter
@@ -370,25 +482,25 @@ module m_pair_list
 !!  r <real(kind=c_double)>=
 !!  s <character(len=*)>=
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine pair_list_iter(pl, key, type_code, i, r, s)
-    class(pair_list),intent(in) :: pl
-    character(len=*),intent(out) :: key
-    integer,intent(out) :: type_code
-    integer,intent(out) :: i
-    real(kind=c_double),intent(out) :: r
-    character(len=*),intent(out) :: s
-    call pair_list_look(pl, key, type_code, i, r, s)
-    if(type_code >= 0) then
-      call pair_list_next_c(pl%plc);
-    end if
-  end subroutine pair_list_iter
+
+subroutine pair_list_iter(pl, key, type_code, i, r, s)
+
+  class(pair_list),intent(in) :: pl
+  character(len=*),intent(out) :: key
+  integer,intent(out) :: type_code
+  integer,intent(out) :: i
+  real(kind=c_double),intent(out) :: r
+  character(len=*),intent(out) :: s
+
+  call pair_list_look(pl, key, type_code, i, r, s)
+  if(type_code >= 0) call pair_list_next_c(pl%plc)
+
+end subroutine pair_list_iter
 !!***
 
 end module m_pair_list

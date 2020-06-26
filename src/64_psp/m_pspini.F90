@@ -394,7 +394,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
      ! Allocate NC tables used for mixing.
      if (psps%usepaw == 0) then
-       ABI_DT_MALLOC(nctab_alch, (npspalch))
+       ABI_MALLOC(nctab_alch, (npspalch))
        do ipspalch=1,npspalch
          call nctab_init(nctab_alch(ipspalch), psps%mqgrid_vl, .False., .False.)
        end do
@@ -558,7 +558,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        do ipspalch=1,npspalch
          call nctab_free(nctab_alch(ipspalch))
        end do
-       ABI_DT_FREE(nctab_alch)
+       ABI_FREE(nctab_alch)
      end if
    end if ! mtypalch
 
@@ -922,11 +922,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 ! the following is probably useless - already read in everything in inpspheads
 #if defined HAVE_LIBPSML
-!     write(message,'(a,a)') &
-!&     '- pspatm: Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
-!     call wrtout(ab_out,message,'COLL')
-!     call wrtout(std_out,  message,'COLL')
-
      call psxml2abheader( psps%filpsp(ipsp), psphead, atmsymb, creator, 0 )
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp

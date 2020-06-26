@@ -28,6 +28,7 @@ ngqpt 2 2 2
 
 # Use standard set of temperatures (default for ntemper, tempermin, temperinc)
 dipdip 0
+chneut 0
 
 #  bravais lattice necessary
 brav -1        # This is calling the old algorithm to compute the weights of the Fourier interpolation

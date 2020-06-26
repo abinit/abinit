@@ -7,9 +7,6 @@ elaflag  4  !the flag for the elastic constant
 piezoflag 7
 instrflag 1  !the flag for the internal strain tensor
 
-!the effective charge part
-chneut  1
-
 ! Wavevector list number 1
 
 nph1l 1 !number of phonons in list 1

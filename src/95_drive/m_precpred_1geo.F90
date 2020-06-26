@@ -59,7 +59,7 @@ module m_precpred_1geo
  use m_pred_steepdesc,     only : pred_steepdesc
  use m_pred_simple,        only : pred_simple, prec_simple
  use m_pred_hmc,           only : pred_hmc
- use m_generate_training_set, only : generate_training_set
+!use m_generate_training_set, only : generate_training_set
 
  implicit none
 
@@ -102,7 +102,7 @@ contains
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! Rest of i/o is related to lda
+!! Rest of i/o is related to DFT
 !!  xred(3,natom)=reduced dimensionless atomic coordinates; updated on output
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!

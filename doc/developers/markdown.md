@@ -7,11 +7,11 @@ plotly: true
 
 This page is intended as a quick reference to the Markdown syntax and the extensions
 available in the Abinit documentation.
-Markdown can be used *almost everywhere*: user-guide, tutorials, release notes, theory notes, the 
-description of the input variables stored in python files inside `abimkdocs` as well as 
+Markdown can be used *almost everywhere*: user guides, tutorials, release notes, theory notes, the 
+description of the input variables stored in python files inside `abimkdocs`, as well as 
 in the `TEST_INFO` section of the automatic tests.
 
-As the [original/official Markdown syntax rules](https://daringfireball.net/projects/markdown/syntax#html)
+As the [original/official Markdown syntax rules](https://daringfireball.net/projects/markdown/syntax#html) &nbsp;
 state:
 
 > Markdown’s syntax is intended for one purpose: to be used as a format for writing for the web.
@@ -25,8 +25,8 @@ state:
 > For any markup that is not covered by Markdown’s syntax, you simply use HTML itself.
 
 Basic Markdown syntax already covers most of our needs and the *Abinit extensions* 
-([wiki links](#wiki-links) and [Abinit plugins](#abinit-extensions))
-facilitate the integration between the documentation on the website and the new developments done in the gilab branch.
+([wikilinks](#wikilinks) and [Abinit extensions](#abinit-extensions))
+facilitate the integration between the documentation on the website and the new developments done in the gitlab branch.
 This page, for example, is entirely written in Markdown with the exception of the last 
 two sections in which we discuss advanced features requiring some HTML code.
 
@@ -45,8 +45,8 @@ two sections in which we discuss advanced features requiring some HTML code.
 | `==highlight==` | ==highlight== | [Mark](http://facelessuser.github.io/pymdown-extensions/extensions/mark/)
 | `^^underline me^^` | ^^underline me^^ | [Caret](https://facelessuser.github.io/pymdown-extensions/extensions/caret/)
 
-As Markdown is not a "publishing format" providing a way to color text is out-of-scope for Markdown
-but it's possible to use raw HTML code.
+As Markdown is not a "publishing format", providing a way to color text is out-of-scope for Markdown,
+but it is possible to use raw HTML code.
 For example, the following Markdown text:
 
 ```md
@@ -58,29 +58,54 @@ produces: Some Markdown text with <span style="color:red">some *red* text</span>
 For a more complete introduction to Markdown, please consult the
 [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 
+### Lists
+
+Unnumbered lists are created by a **blank line** followed by a star (or a dash) for each line in the list.
+For example, after a blank line, the following Markdown text:
+```md
+* List item A
+* List item B
+```
+
+This produces
+
+* List item A
+* List item B
+
+For numbered list, start with the numbers instead of stars:
+
+```md
+1. List item 1
+2. List item 2
+```
+
+This produces
+
+1. List item 1
+2. List item 2
 
 ### Code and syntax highlighting
 
 Blocks of code are either fenced by lines with three back-ticks ``` or are indented with **four spaces**.
-For example, the Markdown text:
+For example, the Markdown text
 ~~~text
 ```
 Fenced code has three back-ticks around it.
 ```
 ~~~
 
-produces: 
+produces  
 ```
 Fenced code has three back-ticks around it.
 ```
 
-Alternatively, one can indent the code with four space such as in:
+while indenting the code with four space, such as in
 
 ```md
     abinit < tbase1_x.files 2> log &
 ```
 
-that produces:
+produces
 
     abinit < tbase1_x.files 2> log &
 
@@ -134,7 +159,7 @@ Content Cell  | Content Cell
 
 
 !!! warning
-    If the text inside the colum contains pipes (|), enclose it with back-ticks.
+    If the text inside the colum contains pipes (|), enclose it with back-ticks,
     or use a `\` before the pipe.
 
 
@@ -160,7 +185,7 @@ For figures with a caption use the [markdown-figures extension](https://github.c
 :   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 
-The caption can contain Latex equations as well as [Abinit wiki links](#wiki-links).
+The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks).
 `#!html <img>` and `#!html <figure>` elements are automatically centered via CSS directives declared in `extra.css`.
 
 <!--
@@ -175,11 +200,22 @@ The caption can contain Latex equations as well as [Abinit wiki links](#wiki-lin
     [here](https://mor10.com/html-basics-hyperlink-syntax-absolute-relative-and-root-relative/).
 -->
 
+If you need to customize the height and width of the image, use
+
+```md
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+```
+
+![](../tutorial/eph4mob_assets/workflow.png ){: style="height:500px;width:400px"}
+
+Note that this is not standard markdown but an extension provided by 
+[Attribute Lists extension](https://python-markdown.github.io/extensions/attr_list/)
+that adds a syntax to define attributes on the various HTML elements in markdown’s output.
 
 ### Pdf Files
 
 Links to internal pdf files shipped with the Abinit documentation are inserted using the
-base name of the pdf file and the [wikilink syntax](#wiki-links):
+base name of the pdf file and the [wikilink syntax](#wikilinks):
 
 ```
     Please consult the [[pdf:howto_chebfi]] document.
@@ -239,8 +275,8 @@ The Markdown syntax for links is:
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
 This is the **recommended** approach to create links to external resources, or internal links to other pages 
-of the website, especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
-Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) icon:
+of the website, especially when there is no shortcut available based on the [wikilink syntax](#wikilinks).
+Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) &nbsp; icon:
 <i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
 
 Note that linking to a page that is located in the same directory is trivial in Markdown.
@@ -252,18 +288,18 @@ To refer to the first PAW tutorial from the second tutorial, use:
 There are however cases in which we would like to have an even simpler syntax to generate automatically
 links within our documentation, in particular links to:
 
-* The input variables declared in `abinit_vars.yml`.
+* The input variables declared in the `abimkdocs` directory.
 * The bibliographic citations declared in `abiref.bib`.
 * Input files or pseudopotentials used in the Abinit test suite.
 * Website pages commonly mentioned such as e.g. the [[topic:index|topics page]].
 
-For this reason, we use the [extentions API](https://python-markdown.github.io/extensions/api)
+For this reason, we use the [extensions API](https://python-markdown.github.io/extensions/api) &nbsp;
 provided by python Markdown to extend the syntax of the parser, using the "Wikilink" syntax.
 Typical cases are discussed in the next sections.
 
 ### Wikilinks
 
-The wikilink syntax is used with two pairs of square brackets and possible separators (:, # and |).
+The [wikilink syntax](https://python-markdown.github.io/extensions/wikilinks) &nbsp; is used with two pairs of square brackets and possible separators (:, # and |).
 In the simple case, this gives <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [name] &#93;</span> although the more general form is
 
 <span style="background-color: #E0E0E0;font-size:90%;"> &#91; [namespace:name#section|text] &#93;</span>
@@ -276,7 +312,7 @@ The namespace is not echoed in the Web page, while if a `text` is given, it will
 
     Do not use parentheses within the pair of double brackets, the whole expression will not be recognized.
 
-When an internal link is recognized, the dokuwiki string is replaced by the adequate HTML link
+When an internal link is recognized, the wikilink string is replaced by the adequate HTML link
 There are a couple of names immediately recognized:
 
 * the name of an Abinit input variable e.g. "ecut"  (provided it is mentioned in `variables_abinit.py`)
@@ -416,7 +452,7 @@ that produces: Fix https://github.com/abinit/abinit/issues/1
 
 ### External links
 
-As for dokuwiki, some external links are also recognized. The following case are treated:
+As for the internal wikilinks, some external links are also recognized. The following case are treated:
 
 * a link that starts with `www.`
 * the namespaces `http`, `https`, `ftp`, `file`
@@ -426,7 +462,7 @@ As for dokuwiki, some external links are also recognized. The following case are
 | `[[https://www.abinit.org]]` | [[https://www.abinit.org]]
 | `https://www.abinit.org` | https://www.abinit.org
 
-It's also possible to specify the name of the link with the `|` separator:
+It is also possible to specify the name of the link with the `|` separator:
 For example, `[[https://wiki.abinit.org|The ABINIT Wiki]]` produces [[https://wiki.abinit.org|The ABINIT Wiki]]
 
 The markdown parser supports aliases for commonly used links.
@@ -443,21 +479,21 @@ The aliases are defined in the `mkdocs.yml` configuration file (`abimkdocs_alias
 
 ### Permalinks
 
-Permalinks are a feature of the [Table of Contents extension](https://python-markdown.github.io/extensions/toc),
+Permalinks are a feature of the [Table of Contents extension](https://python-markdown.github.io/extensions/toc) &nbsp;,
 which is part of the standard Markdown library.
 The extension inserts an anchor at the end of each headline, which makes it possible to directly link to a subpart of the document.
 
 By default, all headers will automatically have unique id attributes generated based upon the text of the header.
 The name of the anchor is constructed from the header by converting the string to lower-case ASCII, 
 removing dots and other symbols such as `&` and replacing white spaces with a dash `-`.
-For instance, `#wiki-links` is the anchor associated to the "Wiki Links" section
+For instance, `#pdf-files` is the anchor associated to the "Pdf Files" section
 in this page and we can thus refer to it with the Markdown syntax:
 
 ```md
-As we have seen in the [previous section](#wiki-links)
+As we have seen in the [previous section](#pdf-files)
 ```
 
-that produces: As we have seen in the [previous section](#wiki-links)
+that produces: As we have seen in the [previous section](#pdf-files)
 
 !!! tip
     Hover with the mouse on the header in the HTML page to show the permalink in the browser.
@@ -505,7 +541,7 @@ in their editor (provided the editor is Markdown-aware).
 
 ### SmartSymbols
 
-[SmartSymbols](https://facelessuser.github.io/pymdown-extensions/extensions/smartsymbols/)
+[SmartSymbols](https://facelessuser.github.io/pymdown-extensions/extensions/smartsymbols/) &nbsp;
 adds syntax for creating special characters such as trademarks, arrows, fractions, etc.
 The list of symbols supported by the extension is:
 
@@ -526,7 +562,7 @@ Markdown       | Result
 
 ### Definition Lists
 
-The [Definition Lists](https://python-markdown.github.io/extensions/definition_lists) extension 
+The [Definition Lists](https://python-markdown.github.io/extensions/definition_lists) &nbsp; extension 
 adds the ability to create definition lists in Markdown documents.
 This extension is included in the standard Markdown library.
 The following text:
@@ -553,7 +589,7 @@ Orange
 ### Admonitions
 
 [Admonitions](
-https://python-markdown.github.io/extensions/admonition) are useful
+https://python-markdown.github.io/extensions/admonition) &nbsp; are useful
 to stress important sections (useful e.g. in the Abinit tutorials).
 Admonition are created using the Markdown syntax:
 
@@ -572,7 +608,7 @@ and
 for an admonition with a custom title (make sure to quote the title).
 
 The types of admonitions available for use in MkDocs depend on the theme being used.
-The Material theme [supports](http://squidfunk.github.io/mkdocs-material/extensions/admonition/#types) the following types:
+The Material theme [supports](http://squidfunk.github.io/mkdocs-material/extensions/admonition/#types) &nbsp; the following types:
 
 !!! note
     I am a "note" admonition and look the same as "seealso".
@@ -600,11 +636,11 @@ The Material theme [supports](http://squidfunk.github.io/mkdocs-material/extensi
 
 
 For the complete list, please consult the mkdocs-material
-[documentation](http://squidfunk.github.io/mkdocs-material/extensions/admonition/)
+[documentation](http://squidfunk.github.io/mkdocs-material/extensions/admonition/).
 
 ### Details
 
-[Detail](https://facelessuser.github.io/pymdown-extensions/extensions/details/)
+[Detail](https://facelessuser.github.io/pymdown-extensions/extensions/details/) &nbsp;
 is an extension that creates collapsible elements that hide their content.
 It uses the HTML5 `#!html <details><summary>` tags to accomplish this.
 It supports nesting and you can also force the default state to be open.
@@ -640,7 +676,7 @@ creates a *closed* element:
 
 ## Abinit extensions
 
-To create a button that opens a dialog containing the input file, use:
+To create a button that opens a ==dialog== containing an **input file**, use:
 
 ```
     {% dialog tests/v1/Input/t01.in %}
@@ -659,7 +695,7 @@ a modal window with tabs is produced:
 {% dialog tests/v1/Input/t01.in tests/v1/Input/t02.in tests/v1/Input/t03.in %}
 
 
-To create a button that opens a modal window containing the input file, use:
+To create a ==button== that opens a modal window containing an **input file**, use:
 
 ```
     {% modal tests/v1/Input/t01.in %}
@@ -683,7 +719,7 @@ a modal window with tabs is produced
 ## MathJax
 
 Formulas written in LaTeX are interpreted automatically (at visualization time) thanks to the
-[MathJax](http://docs.mathjax.org/en/latest/mathjax.html) on-the-flight processor
+[MathJax](http://docs.mathjax.org/en/latest/mathjax.html) &nbsp; on-the-flight processor
 while the math extension for Python-Markdown is provided by
 [python-markdown-math](https://github.com/mitya57/python-markdown-math).
 
@@ -746,7 +782,7 @@ Please consult the preamble in `abinit_theme/main.html` for the complete list of
 ## Unicode
 
 Unicode characters in particular Greek symbols and accented characters can be used in the documentation.
-The websites uses the [Google's Roboto font](https://fonts.google.com/specimen/Roboto) so Greek symbols
+The websites uses the [Google's Roboto font](https://fonts.google.com/specimen/Roboto) &nbsp; so Greek symbols
 can be included without using MathJax either by specifying the HTML entity or by copying the unicode character
 given in the two tables below.
 This could be useful if the page does not contain Latex equations and there are just a few Greek symbols to be inserted.
@@ -812,7 +848,7 @@ Taken from <https://sites.psu.edu/symbolcodes/languages/ancient/greek/greekchart
 
 ## Plotly
 
-[plotly](https://plot.ly/api/) is a high-level, declarative charting library built on top of d3.js and stack.gl.
+[plotly](https://plot.ly/api/) &nbsp; is a high-level, declarative charting library built on top of d3.js and stack.gl.
 plotly.js ships with over 20 chart types, including scientific charts, 3D graphs, statistical charts, SVG maps,
 financial charts, and more.
 Note that plotly is deactivated by default so you have to activate it inside the Markdown page by adding

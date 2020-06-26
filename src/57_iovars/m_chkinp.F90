@@ -36,7 +36,7 @@ module m_chkinp
 
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
- use m_numeric_tools,  only : iseven
+ use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : chkgrp, chkorthsy
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
@@ -167,9 +167,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &   .or.dt%d3e_pert2_phon/=0.or.dt%d3e_pert3_phon/=0) response=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
    nproc=mpi_enregs(idtset)%nproc
-   mgga=0;if(dt%ixc>=31.and.dt%ixc<=34)mgga=1
+   mgga=0;if(dt%ixc>=31.and.dt%ixc<=35)mgga=1
    if (dt%ixc<0.and.libxc_functionals_ismgga()) mgga=1
-   need_kden=mgga;if (dt%ixc==31.or.dt%ixc==34) need_kden=0
+   need_kden=mgga;if (dt%ixc==32.or.dt%ixc==33) need_kden=0
 
 !  =====================================================================================================
 !  Check the values of variables, using alphabetical order
@@ -422,7 +422,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &             '   tnons is ',dt%tnons(1:3,isym),ch10,&
 &             '   Please, read the description of the input variable chksymbreak,',ch10,&
 &             '   then, if you feel confident, you might switch it to zero, or consult with the forum.'
-             call wrtout(iout,msg,'COLL')
+             !call wrtout(iout,msg,'COLL')
              call wrtout(std_out,msg,'COLL')
              !ierr=ierr+1 ! moved this to a warning: for slab geometries arbitrary tnons can appear along the vacuum direction
            end if
@@ -437,10 +437,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),8,(/0,1,2,3,10,11,12,13/),iout)
      !Only potential self-consistency is currently allowed with constrained_dft
      if (dt%iscf>10) then
+       cond_string(1)='itypat';cond_values(1)=itypat
        cond_string(2)='iscf';cond_values(2)=dt%iscf
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
      endif
      if (dt%ionmov==4) then
+       cond_string(1)='itypat';cond_values(1)=itypat
        cond_string(2)='ionmov';cond_values(2)=dt%ionmov
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
      endif
@@ -559,8 +561,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
-       cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
+!      cond_string(1)='usedmft' ; cond_values(1)=1
+!      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
        if (dt%dmft_solv>=4.and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
@@ -789,6 +791,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      MSG_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
 
+!  effmass_free
+   if(abs(dt%effmass_free-one)>tol8.and.(dt%ixc/=31.and.dt%ixc/=35).and.mgga==1)then
+     write(msg, '(5a)' )&
+&     'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
+&     'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
+&     'effmass should be included in kinetic energy density (tau).'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
+
 !  efmas
    if(optdriver==RUNL_RESPFN) then !.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1
@@ -848,8 +859,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
+
      if (dt%eph_task == 1 .and. dt%ph_nqpath <= 0) then
        MSG_ERROR("When eph_task == 1, the q-path for the linewidth must be specified via ph_nqpath and ph_qpath")
+     end if
+     if (dt%eph_task == 1 .and. dt%nshiftk <= 0) then
+       MSG_ERROR_NOSTOP('phgamma does not work with multiple k-shifts ', ierr)
+     end if
+     if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
+       MSG_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
 
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
@@ -858,6 +876,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%eph_task == [-5, -14])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5, -14]")
      end if
+     !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
+     !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
+     !end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
@@ -865,8 +886,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%eph_stern /= 0) then
        ! Check requirements for Sternheimer.
        MSG_ERROR_NOSTOP_IF(dt%tolwfr == zero, "tolwfr must be specified when eph_stern /= 0", ierr)
-       if (dt%getpot_path == ABI_NOFILE) then
-         MSG_ERROR_NOSTOP(" getpot_path is required when eph_stern /= 0", ierr)
+       if (dt%getpot_filepath == ABI_NOFILE) then
+         MSG_ERROR_NOSTOP(" getpot_filepath is required when eph_stern /= 0", ierr)
        end if
        if (all(dt%sigma_bsum_range /= 0)) then
          MSG_ERROR_NOSTOP("sigma_bsum_range cannot be used when eph_stern /= 0", ierr)
@@ -892,13 +913,23 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        if (dt%nspinor == 2) then
          MSG_ERROR_NOSTOP("Spin parallelism cannot be used when nspinor == 2", ierr)
        else if (dt%nspinor == 1 .and. dt%eph_np_pqbks(5) > dt%nsppol) then
-         MSG_ERROR_NOSTOP("Number of procs for spin cannot be greater than nsppol", ierr)
+         MSG_ERROR_NOSTOP("nproc for spin parallelism cannot be greater than nsppol", ierr)
        end if
      end if
 
     if (dt%eph_np_pqbks(1) /= 0 .and. dt%eph_np_pqbks(1) > 3 * dt%natom ) then
-      MSG_ERROR_NOSTOP("Number of procs for perturbation parallelism  cannot be greater than 3 * natom", ierr)
+      MSG_ERROR_NOSTOP("nproc for pert parallelism cannot be greater than 3 * natom", ierr)
     end if
+
+    if (mod(3 * dt%natom, dt%eph_np_pqbks(1)) /= 0) then
+      MSG_ERROR_NOSTOP("nproc for pert parallelism must divide 3 * natom.", ierr)
+    end if
+
+#ifndef HAVE_NETCDF_MPI
+    if (abs(dt%eph_task) == 4 .and. (dt%eph_np_pqbks(4) /= 1 .or. dt%eph_np_pqbks(5) /= 1)) then
+      MSG_ERROR_NOSTOP("k-point and/or spin parallelism in EPH code requires Netcdf4 with MPI-IO support!", ierr)
+    end if
+#endif
    end if
 
    ! exchmix
@@ -982,7 +1013,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (optdriver==RUNL_SCREENING .and. (dt%awtr /=1 .or. dt%spmeth /=0)) then
        write(msg,'(3a)' )&
         'When gwcomp /= 0, the Adler-Wiser formula with time-reversal should be used',ch10,&
-         'Action: set awtr to 1 or/and spmeth to 0'
+        'Action: set awtr to 1 or/and spmeth to 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
@@ -1083,6 +1114,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,1,(/0/),iout)
    end if
 
+   ! icsing
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icsing,6,(/3,6,7,14,15,16/),iout)
+
+   ! icutcoul
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,8,(/0,1,2,3,4,5,6,7/),iout)
+
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1
@@ -1134,7 +1171,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-     dt%ionmov,24,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27/),iout)
+     dt%ionmov,23,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26/),iout)
 
    ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25 (except if imgmov>0)
    if(dt%optcell/=0)then
@@ -1182,19 +1219,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='wvl_bigdft_comp' ; cond_values(1)=dt%wvl_bigdft_comp
      if(wvlbigdft) then
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
+        'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
      else
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+        'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
 !    If wvl+metal, iscf cannot be 0
      if (dt%occopt>2) then
        cond_string(1)='occopt' ; cond_values(1)=dt%occopt
        call chkint_eq(1,1,cond_string,cond_values,ierr,&
-&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+        'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
    end if
-!  If ionmov==4, iscf must be 2, 12, 5 or 6.
+
+   ! If ionmov==4, iscf must be 2, 12, 5 or 6.
    if(dt%ionmov==4)then
      cond_string(1)='ionmov' ; cond_values(1)=4
      call chkint_eq(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,4,(/2,12,5,6/),iout)
@@ -1281,7 +1319,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ixc
    call chkint(0,0,cond_string,cond_values,ierr,&
-&   'ixc',dt%ixc,33,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,40,41,42,50/),-1,0,iout) ! One of the values, or negative
+&   'ixc',dt%ixc,34,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,35,40,41,42,50/),-1,0,iout) ! One of the values, or negative
    if(dt%iscf==-1)then
      cond_string(1)='iscf' ; cond_values(1)=-1
 !    Make sure that ixc is 1, 7, 8, 20, 21 or 22 or negative
@@ -1297,7 +1335,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='nspden' ; cond_values(1)=nspden
 !    Make sure that ixc is 0, 1 , the gga, or Fermi-Amaldi, or negative
      call chkint(1,1,cond_string,cond_values,ierr,&
-&     'ixc',dt%ixc,24,(/0,1,7,8,9,11,12,13,14,15,16,17,20,23,24,26,27,31,32,33,34,40,41,42/),-1,0,iout)
+&     'ixc',dt%ixc,25,(/0,1,7,8,9,11,12,13,14,15,16,17,20,23,24,26,27,31,32,33,34,35,40,41,42/),-1,0,iout)
    end if
    if(dt%usepaw>0.and.dt%ixc<0) then
      if (libxc_functionals_is_hybrid()) then
@@ -1452,6 +1490,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'lotf_version',dt%lotf_version,1,(/2/),iout)
    end if
 #endif
+
+! lw_flexo
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_flexo',dt%lw_flexo,5,(/0,1,2,3,4/),iout)
+  if(dt%lw_flexo/=0)then
+    cond_string(1)='lw_flexo' ; cond_values(1)=dt%lw_flexo
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
+
+! lw_qdrpl
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_qdrpl',dt%lw_qdrpl,2,(/0,1/),iout)
+  if(dt%lw_qdrpl/=0)then
+    cond_string(1)='lw_qdrpl' ; cond_values(1)=dt%lw_qdrpl
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
 
 !  magconon
    call chkint_eq(0,0,cond_string,cond_values,ierr,'magconon',dt%magconon,3,(/0,1,2/),iout)
@@ -2120,9 +2172,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  end if
 
 !  optdriver
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,9,&
-&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE, RUNL_GWLS, RUNL_WFK,RUNL_EPH],iout)
-   if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR])) then
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,10,&
+&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE, RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
+   if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
 &     'This is in conflict with the values of the other input variables,',ch10,&
@@ -2134,16 +2186,23 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      MSG_ERROR_NOSTOP(msg, ierr)
    end if
-   if ((response==1 .and. dt%kptopt/=3)) then
-! TODO: check ddk case, which should accept kptopt 2
-     if (dt%rfddk/=0 .and. dt%kptopt/=2) then
-       write(msg,'(a,i3,4a)' )&
-&        'The input variable optdriver=',dt%optdriver,ch10,&
-&        'which implies response functions, and requires kptopt 3.',&
-&        'Set kptopt to 3 to let the code reduce the k with the correct small group of symmetries.', &
-&        'The only exception is a DDK calculation with kptopt 2 '
+   if (response==1 .and. (sum(dt%qptn(:)**2)>tol12 .or. nspden==4) .and. &
+&      .not.(dt%kptopt==3 .or. dt%kptopt==0 .or. dt%nsym==1 .or. dt%iscf<0)) then
+     write(msg,'(a,i3,2a,a,3f16.6,2a,2a,a)' )&
+&      'The input variable optdriver=',dt%optdriver,' which implies response functions.',ch10,&
+&      'Also qptn=',dt%qptn(:),' that is non-zero, or one has a calculation with non-collinear magnetism.',ch10,&
+&      'This requires kptopt 3 (or 0 for expert users) or nsym=1, or non-self-consistent calculation (iscf<0).',ch10,&
+&      'Set kptopt to 3 to let the code reduce the k with the correct small group of symmetries.'
        MSG_ERROR_NOSTOP(msg, ierr)
-     end if
+   end if
+   if (response==1 .and. (sum(dt%qptn(:)**2)<tol12 .and. nspden/=4) .and. &
+&      .not.(dt%kptopt==3 .or. dt%kptopt==0 .or. dt%kptopt==2 .or. dt%nsym==1 .or. dt%iscf<0)) then
+     write(msg,'(a,i3,2a,2a,2a,a)' )&
+&      'The input variable optdriver=',dt%optdriver,' which implies response functions.',ch10,&
+&      'Also qptn is null, and there is no non-collinear magnetism.',ch10,&
+&      'This requires kptopt 3 or 2 (or 0 for expert users) or nsym=1, or non-self-consistent calculation (iscf<0).',ch10,&
+&      'Set kptopt to 2 to let the code reduce the k with the correct small group of symmetries.'
+       MSG_ERROR_NOSTOP(msg, ierr)
    end if
    if(usepaw==1)then
      ! Is optdriver compatible with PAW?
@@ -2156,17 +2215,22 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !Non-linear response not compatible with spinors
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
    !Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
    !Non-linear response not compatible with mkmem=0
    if(dt%mkmem==0)then
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+   end if
+   !Longwave needs all k-points
+   if(dt%kptopt==1 .or. dt%kptopt==4) then
+     cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
    !dkdk and dkde non-linear response only for occopt=1 (insulators)
    if (dt%rf2_dkdk==1) then
@@ -2246,6 +2310,45 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(allow)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+   end if
+   !Longwave calculation not compatible with nonlinear core corrections
+   if(dt%optdriver==RUNL_LONGWAVE)then
+     do ipsp=1,npsp
+  !    Check that xccc is zero
+       if (pspheads(ipsp)%xccc/=0) then
+         write(msg, '(5a,i0,3a)' )&
+  &     'For a longwave calculation it is not possible to use norm-conserving pseudopotentials',ch10,&
+  &     'with a non-linear core correction.',ch10,&
+  &     'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
+  &     'Action: change this pseudopotential file.'
+         MSG_ERROR_NOSTOP(msg, ierr)
+       end if
+     end do
+   end if
+   !Longwave calculation function only for LDA
+   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
+   if(allow)then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
+   end if
+   !Longwave calculation function only for useylm=1
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
+    write(msg, '(3a,i0,2a)' )&
+  & 'A longwave calculation requires the input variable "useylm" to be 1,',ch10 ,&
+  & 'while in your input useylm=',dt%useylm,ch10,&
+  & 'Action: change "useylm" value in your input file.'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
+   !Longwave calculation not compatible with PAW
+   if(dt%optdriver==RUNL_LONGWAVE)then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
+   endif
+   !Longwave calculation not compatible with spin-dependent calculations
+   if(dt%nsppol/=1.or.dt%nspden/=1)then
+     cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
+     cond_string(2)='nspden' ; cond_values(2)=dt%nspden
+     call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
 !  optforces
@@ -2371,7 +2474,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%usepawu/=0.and.nspinor==2.and.dt%pawcpxocc==1) then
        write(msg, '(5a)' )&
 &       'When non-collinear magnetism is activated ,',ch10,&
-&       'and LDA+U activated ',ch10,&
+&       'and DFT+U activated ',ch10,&
 &       'PAW occupancies must be complex !'
        MSG_ERROR_NOSTOP(msg, ierr)
      else if (dt%pawspnorb==1.and.(dt%kptopt==0.or.dt%kptopt>=3).and.dt%pawcpxocc==1) then
@@ -2557,14 +2660,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  plowan_compute
    cond_string(1)='usepaw' ; cond_values(1)=1
-   call chkint_eq(1,1,cond_string,cond_values,ierr,'plowan_compute',dt%plowan_compute,3,(/0,1,2/),iout)
+   call chkint_eq(1,1,cond_string,cond_values,ierr,'plowan_compute',dt%plowan_compute,4,(/0,1,2,10/),iout)
    if(dt%plowan_compute>0) then
 !    plowan_bandi/plowan_bandf
-     call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,              1,iout)
-     call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandf',dt%plowan_bandf,dt%plowan_bandi,iout)
+     !call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,              1,iout)
+     !call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandf',dt%plowan_bandf,dt%plowan_bandi,iout)
 
-     call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,dt%plowan_bandf,iout)
-     call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandf,dt%mband       ,iout)
+     !call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,dt%plowan_bandf,iout)
+     !call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandf,dt%mband       ,iout)
 
      call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_natom',dt%plowan_natom,              0,iout)
 
@@ -2733,22 +2836,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  prtfsurf only one shift allowed (gamma)
    if (dt%prtfsurf == 1) then
 
-     if (abs(dt%kptrlatt(1,2))+abs(dt%kptrlatt(1,3))+abs(dt%kptrlatt(2,3))+&
-         abs(dt%kptrlatt(2,1))+abs(dt%kptrlatt(3,1))+abs(dt%kptrlatt(3,2)) /= 0 ) then
+     if (.not. isdiagmat(dt%kptrlatt)) then
        write(msg,'(4a)')ch10,&
          'prtfsurf does not work with non-diagonal kptrlatt ', ch10,&
          'Action: set nshift 1 and shiftk 0 0 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
      if (dt%nshiftk > 1) then
-       write(msg,'(4a)') ch10,&
-        'prtfsurf does not work with multiple kpt shifts ', ch10, &
-        'Action: set nshift 1 and shiftk 0 0 0'
-       MSG_ERROR_NOSTOP(msg, ierr)
+       MSG_ERROR_NOSTOP('prtfsurf does not work with multiple kpt shifts ', ierr)
      end if
      if (sum(abs(dt%shiftk(:,1:dt%nshiftk))) > tol8) then
        write(msg,'(4a)')ch10,&
-        'prtfsurf does not work with non-zero kpt shift ',ch10,&
+        'prtfsurf does not work with non-zero k-shifts ',ch10,&
         'Action: set nshift 1 and shiftk 0 0 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
@@ -3160,7 +3259,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        do itypat=1,dt%ntypat
          if (dt%lpawu(itypat)/=-1.and.dt%lpawu(itypat)/=maxval(dt%lpawu(:))) then
            write(msg, '(3a)' )&
-&           'When usedmatpu/=0 (use of an initial density matrix for LDA+U),',ch10,&
+&           'When usedmatpu/=0 (use of an initial density matrix for DFT+U),',ch10,&
 &           'lpawu must be equal for all types of atoms on which +U is applied !'
            MSG_ERROR_NOSTOP(msg,ierr)
          end if
@@ -3213,7 +3312,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-     if(mgga/=need_kden)then
+     if(dt%usekden<need_kden)then
        write(msg, '(3a)' )&
 &       'The functional is a MGGA, but the kinetic energy density',ch10, &
 &       'is not present. Please set "usekden 1" in the input file.'
@@ -3251,7 +3350,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do
      if(dt%pawspnorb>0) then
        write(msg,'(3a)' ) &
-&       '  LDA+U+SpinOrbit is still on test ',ch10,&
+&       '  DFT+U+SpinOrbit is still on test ',ch10,&
 &       '  (not yet in production)'
        MSG_WARNING(msg)
      end if
@@ -3261,8 +3360,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  Restriction when use together
    if(dt%useexexch/=0.and.dt%usepawu/=0)then
      do itypat=1,dt%ntypat
-       if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.&
-&       dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
+       if (dt%lpawu(itypat)/=dt%lexexch(itypat).and.dt%lpawu(itypat)/=-1.and.dt%lexexch(itypat)/=-1) then
          write(msg, '(5a,i2,3a)' )&
 &         'When PAW+U (usepawu/=0) and local exact-exchange (useexexch/=0)',ch10,&
 &         'are selected together, they must apply on the same',ch10,&
@@ -3378,10 +3476,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
    end if
-
-!  use_yaml
-   dt%use_yaml = 1
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_yaml',dt%use_yaml,2,(/0,1/),iout)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)
@@ -3764,6 +3858,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     'Put iomode to 3 to use ETSF retart files.'
      MSG_WARNING(msg)
    end if
+ end if
+
+ ! ===========================================================
+ ! Write COMMENTs if some combination of input vars look weird
+ ! ===========================================================
+ if (dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
+   MSG_COMMENT("dipdip can be set to 0 in case of metals whereas dipdip 1 should be used in polar materials.")
  end if
 
  ! If there was a problem, then stop.

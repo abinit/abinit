@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !!  This module is used for tracing memory allocations/deallocations
-!!  when we compile the code with --enable-memory-profiling="yes" that, 
+!!  when we compile the code with --enable-memory-profiling="yes" that,
 !!  in turn, defines the CPP macro HAVE_MEM_PROFILE in abi_common.h
 !!  The main entry point is abimem_init. abimem_record is interfaced via CPP macros
 !!  defined in abi_common
@@ -28,7 +28,8 @@
 module m_profiling_abi
 
  use defs_basis
- !use m_clib
+ use iso_c_binding
+ use m_clib
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -77,7 +78,7 @@ module m_profiling_abi
    integer(i8b) :: peak = 0
    ! Memory peak in bytes.
 
-   integer :: peak_fileline = -1 
+   integer :: peak_fileline = -1
    ! Line in peak_file
 
    integer(i8b) :: num_alloc = 0
@@ -125,6 +126,13 @@ module m_profiling_abi
  type(abimem_t),private,save :: minfo
  ! Internal datastructure storing memory profiling data.
 
+  interface
+    subroutine clib_get_meminfo(nalloc_c, nfree_c) bind(C, name="clib_get_meminfo")
+      import
+      integer(c_long),intent(out) :: nalloc_c, nfree_c
+    end subroutine clib_get_meminfo
+  end interface
+
 contains
 
 !!****f* m_profiling_abi/abimem_init
@@ -158,6 +166,8 @@ subroutine abimem_init(level, delta_time, filename, limit_mb)
  logical :: file_exists
  character(len=500) :: msg
 ! *************************************************************************
+
+ !write(std_out, "(a,i0)")"Initializing abimem profiling with level: ", level
 
  minfo%level = level
  !start_time = abimem_wtime()
@@ -221,7 +231,7 @@ subroutine abimem_init(level, delta_time, filename, limit_mb)
    _ABORT(msg)
  end select
 
- contains 
+ contains
 
  subroutine write_header(info)
    character(len=*),intent(in) :: info
@@ -296,7 +306,7 @@ end subroutine abimem_shutdown
 !!  Add mallinfo values if `with_mallinfo` (default: False)
 !!
 !! INPUT
-!!  
+!!
 
 subroutine abimem_report(unt, with_mallinfo)
 
@@ -335,20 +345,27 @@ end subroutine abimem_report
 !!
 !! FUNCTION
 !!  Function that returns the number of allocations and deallocations that have
-!!  been done and the memory currently used
+!!  been performed in Fortran and the memory currently used
 !!
 !! OUTPUT
-!!  nalloc: number of allocations that have been done
-!!  nfree:  number of deallocations that have been done
-!!  allocmemory:  total memory used
+!!  nalloc: number of allocations that have been performed in Fortran
+!!  nfree:  number of deallocations that have been performed in Fortran
+!!  allocmemory:  total memory used (Fortran)
+!!  nalloc_c, nfree_c: Similar to nalloc and nfree but for the C code.
 
-subroutine abimem_get_info(nalloc, nfree, allocmemory)
+subroutine abimem_get_info(nalloc, nfree, allocmemory, nalloc_c, nfree_c)
 
 !Arguments ------------------------------------
- integer(i8b),intent(out) :: nalloc, nfree, allocmemory
+ integer(i8b),intent(out) :: nalloc, nfree, allocmemory, nalloc_c, nfree_c
+
+!Local variables-------------------------------
+ integer(c_long) :: long_nalloc_c, long_nfree_c
 ! *************************************************************************
 
  nalloc = minfo%num_alloc; nfree = minfo%num_free; allocmemory = minfo%memory
+
+ call clib_get_meminfo(long_nalloc_c, long_nfree_c)
+ nalloc_c = long_nalloc_c; nfree_c = long_nfree_c
 
 end subroutine abimem_get_info
 !!***
@@ -435,7 +452,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  !  end if
  !end if
 
- ! IMPORTANT: 
+ ! IMPORTANT:
  ! Remember to change the pyton code in ~abinit/tests/pymods/memprof.py to account for changes in the format
  if (do_log) then
    select case (minfo%level)

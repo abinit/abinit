@@ -30,6 +30,7 @@ sources = [
  "m_gstate.F90",
  "m_gstateimg.F90",
  "m_gwls_sternheimer.F90",
+ "m_longwave.F90",
  "m_mover.F90",
  "m_mover_effpot.F90",
  "m_multibinit_driver.F90",

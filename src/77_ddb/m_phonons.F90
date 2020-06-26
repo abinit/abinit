@@ -54,6 +54,7 @@ module m_phonons
  use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
+ use m_symfind,         only : symanal
 
  implicit none
 
@@ -1301,8 +1302,9 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
      sigma = sqrt( (bose_einstein(phfrq_allq(imode), temperature) + half)/phfrq_allq(imode) )
 
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
-     freeze_displ = modesign * sigma
-     call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+       freeze_displ = modesign * sigma
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+
    end do !itemper
 
    ! this is the prescription: flip sign for each successive mode in full
@@ -1803,17 +1805,17 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  integer,parameter :: master=0
  integer :: unt
  integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,natom,ncid,nprocs,my_rank
- integer :: natprj_bs,eivec,enunit,ifcflag
+ integer :: natprj_bs,eivec,enunit,ifcflag,ptgroupma,spgroup
  real(dp) :: freeze_displ
  real(dp) :: cfact
  character(500) :: msg
  character(len=8) :: unitname
 !arrays
- integer :: rfphon(4),rfelfd(4),rfstrs(4)
+ integer :: bravais(11),rfphon(4),rfelfd(4),rfstrs(4)
  integer :: nomega, imode, iomega
  integer,allocatable :: ndiv(:)
  real(dp) :: omega, omega_min, gaussmaxarg, gaussfactor, gaussprefactor, xx
- real(dp) :: speedofsound(3)
+ real(dp) :: speedofsound(3),genafm(3)
  real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
  real(dp) :: displ(2*3*crystal%natom*3*crystal%natom),eigval(3,crystal%natom)
@@ -1887,8 +1889,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
-      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff, &
-      xmpi_comm_self)
+      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff,&
+      ifc%qdrp_cart,ifc%ewald_option,xmpi_comm_self,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
 
    else if (ifcflag == 0) then
 
@@ -1938,6 +1940,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ! Determine the symmetries of the phonon mode at Gamma
    ! TODO: generalize for other q-point little groups.
    if (sum(abs(qphon)) < DDB_QTOL) then
+     call symanal(bravais,0,genafm,nsym,nsym,ptgroupma,Crystal%rprimd,spgroup,&
+&      Crystal%symafm,Crystal%symrel,Crystal%tnons,tol3,verbose=.TRUE.)
      call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
    end if
 
@@ -3120,7 +3124,9 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
 
 !write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
 
- write(message,'(a,a,es8.2,a)')ch10,' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)'
+ write(message,'(a,a,es8.2,5a)')ch10,' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)',ch10,&
+  ' For each vibration mode, or group of modes if degenerate,',ch10,&
+  ' the characters are given for each symmetry operation (see the list in the log file).'
  call wrtout([std_out, iout], message)
 
  do imode=1,3*natom

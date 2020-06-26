@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ANADDB 
+.Version 9.0.0 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h23 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h46 )
   
 
 ================================================================================
@@ -27,9 +27,10 @@
      thmflag         1
  Miscellaneous information :
          asr         1
-      chneut         1
  Interatomic Force Constants Inputs :
       dipdip         1
+      dipqua         0
+      quadqu         0
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -101,7 +102,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.014  and twall      0.014 sec
+-begin at tcpu      0.026  and twall      0.027 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -310,10 +311,10 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
   1.800E+02  5.3732223E+03  1.1749439E+04  3.5423427E+01  3.7183864E+01  2.0022938E+02
   2.000E+02  4.6241910E+03  1.2512641E+04  3.9442251E+01  3.9069448E+01  2.0495243E+02
 -
-- Proc.   0 individual time (sec): cpu=          7.3  wall=          7.3
+- Proc.   0 individual time (sec): cpu=          7.5  wall=          7.5
 
 ================================================================================
 
-+Total cpu time      7.309  and wall time      7.331 sec
++Total cpu time      7.476  and wall time      7.497 sec
 
  anaddb : the run completed succesfully.

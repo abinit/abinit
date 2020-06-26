@@ -912,7 +912,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 
 !Local variables-------------------------------
 !!scalars
- integer :: timrev,mband
+ integer :: mband
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
 !arrays
@@ -920,8 +920,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 
 ! *************************************************************************
 
- timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
- crystal = hdr%get_crystal(timrev)
+ crystal = hdr%get_crystal()
 
  if (present(eigen)) then
      mband = maxval(hdr%nband)
@@ -1150,7 +1149,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    ! Read PAW Rhoij
    if (ohdr%usepaw == 1) then
-     ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
+     ABI_MALLOC(pawrhoij_file, (ohdr%natom))
      call pawrhoij_nullify(pawrhoij_file)
      call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
          ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
@@ -1182,7 +1181,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    ! Eventually copy (or distribute) PAW data
    if (ohdr%usepaw == 1 .and. pawread == 1) then
      if (my_rank /= master) then
-       ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
+       ABI_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
        call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
             ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
@@ -1243,7 +1242,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
  if (allocated(pawrhoij_file)) then
    call pawrhoij_free(pawrhoij_file)
-   ABI_DT_FREE(pawrhoij_file)
+   ABI_FREE(pawrhoij_file)
  end if
 
 ! Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities

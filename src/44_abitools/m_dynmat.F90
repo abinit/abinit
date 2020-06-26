@@ -905,8 +905,8 @@ subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
      if(flg2(idir)==0)vec2(idir)=zero
    end do
 
-!  Treat electric field perturbation
- else if(ipert==natom+2) then
+!  Treat electric field and qvec perturbations
+ else if(ipert==natom+2.or.ipert==natom+8) then
 !  OCL SCALAR
    do idir=1,3
      vec2(idir)=zero
@@ -2784,7 +2784,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
  integer :: my_ierr, ierr, ii, irpt, all_nrpt
  real(dp) :: toldist
  integer :: ngqpt9(9)
- character(len=500) :: msg
+ character(len=500*4) :: msg
 !arrays
  integer,allocatable :: all_cell(:,:)
  real(dp),allocatable :: all_rpt(:,:), all_wghatm(:,:,:)
@@ -2823,7 +2823,7 @@ subroutine get_bigbox_and_weights(brav, natom, nqbz, ngqpt, nqshift, qshift, rpr
     'Action: make input atomic positions more symmetric.',ch10,&
     'Otherwise, you might increase "buffer" in m_dynmat.F90 see bigbx9 subroutine and recompile.',ch10,&
     'Actually, this can also happen when ngqpt is 0 0 0,',ch10,&
-    'if abs(brav) /= 1, in which case you should change brav to 1.'
+    'if abs(brav) /= 1, in this case you should change brav to 1. If brav is already set to 1 (default) try -1.'
    MSG_ERROR(msg)
  end if
 
@@ -5435,6 +5435,8 @@ end subroutine nanal9
 !! xred(3,natom)= relative coords of atoms in unit cell (dimensionless)
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! comm=MPI communicator.
+!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
+!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
@@ -5447,17 +5449,20 @@ end subroutine nanal9
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,comm)
+& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
+  dipquad,quadquad)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dipdip,mpert,natom,nrpt,comm
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,ewald_option,comm
  real(dp),intent(in) :: qphnrm,ucvol
+ integer,optional,intent(in) :: dipquad, quadquad
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qpt(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),rpt(3,nrpt)
  real(dp),intent(in) :: trans(3,natom),wghatm(natom,natom,nrpt),xred(3,natom)
  real(dp),intent(in) :: zeff(3,3,natom)
+ real(dp),intent(in) :: qdrp_cart(3,3,3,natom)
  real(dp),intent(in) :: atmfrc(3,natom,3,natom,nrpt)
  real(dp),intent(in) :: dyewq0(3,3,natom)
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
@@ -5466,6 +5471,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 !scalars
  integer,parameter :: nqpt1=1,option2=2,sumg0=0,plus1=1,iqpt1=1
  integer :: i1,i2,ib,nsize
+ integer :: dipquad_, quadquad_
 !arrays
  real(dp) :: qphon(3)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
@@ -5473,6 +5479,10 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 ! *********************************************************************
 
  ABI_ALLOCATE(dq,(2,3,natom,3,natom))
+
+ ! Define quadrupolar options
+ dipquad_=0; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=0; if(present(quadquad)) quadquad_=quadquad
 
  ! Get the normalized wavevector
  if(abs(qphnrm)<1.0d-7)then
@@ -5489,13 +5499,14 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  ! phase is modified, in order to recover the usual (xred) coordinate of atoms.
  call dymfz9(dq,natom,nqpt1,gprim,option2,qphon,trans)
 
- if (dipdip==1) then
+ if (dipdip==1.or.dipquad_==1.or.quadquad_==1) then
    ! Add the non-analytical part
    ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
    ! second energy derivative wrt xred(3,natom) in Hartrees (Denoted A-bar in the notes)
    ABI_ALLOCATE(dyew,(2,3,natom,3,natom))
 
-   call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
+   call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
+      qdrp_cart,ewald_option,dipquad=dipquad_,quadquad=quadquad_)
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
 
@@ -5899,7 +5910,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
    end if
    call wrtout(std_out,message,'COLL')
  end do
- write(message,'(a,es17.9)')' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
+ write(message,'(a,a,es17.9)') ch10,' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
  call wrtout(std_out,message,'COLL')
 
 !Put the wavevector in nice format

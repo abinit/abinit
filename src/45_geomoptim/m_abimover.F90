@@ -30,6 +30,7 @@ module m_abimover
  use m_dtfil
 
  use m_geometry,  only : acrossb
+ !use m_fstrings,  only : sjoin, itoa
 
  implicit none
 
@@ -82,12 +83,6 @@ integer  :: jellslab
 integer  :: natom
 ! Number of CONstraint EQuations
 integer  :: nconeq
-! Option to add strain when FREEZe DISPlacement
-integer :: ph_freez_disp_addStrain
-! Option for the PHonon FREEZe DISPlacement AMPLitude
-integer :: ph_freez_disp_option
-! Number of PHonon FREEZe DISPlacement AMPLitude
-integer :: ph_freez_disp_nampl
 ! number of Shifts for the Qpoint Grid  (used for ionmov 26 and 27)
 integer  :: ph_nqshift
 ! Use by pred_isothermal only
@@ -135,8 +130,6 @@ integer,pointer  :: typat(:)            ! typat(natom)
 integer,pointer  :: prtatlist(:)        ! prtatlist(natom)
 ! Qpoint grid (used for ionmov 26 and 27)
 integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
-! List of PHonon FREEZe DISPlacement AMPLitude
-real(dp),pointer :: ph_freez_disp_ampl(:,:)
 ! shift of the Qpoint Grid (used for ionmov 26 and 27)
 real(dp),pointer :: ph_qshift(:,:)       !
 ! amu input var for the current image
@@ -448,8 +441,7 @@ type(abimover_specs),intent(out) :: specs
 !###########################################################
 !### 01. Initialization of ab_mover
 
-!Copy or create pointers for the information from the Dataset (dtset)
-!to the ab_mover structure
+!Copy or create pointers for the information from the Dataset (dtset) to the ab_mover structure
  natom=dtset%natom
 
  ab_mover%delayperm   =dtset%delayperm
@@ -473,9 +465,6 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%ph_nqshift  =dtset%ph_nqshift
  ab_mover%strprecon   =dtset%strprecon
  ab_mover%vis         =dtset%vis
- ab_mover%ph_freez_disp_addStrain =dtset%ph_freez_disp_addStrain
- ab_mover%ph_freez_disp_option    =dtset%ph_freez_disp_option
- ab_mover%ph_freez_disp_nampl     =dtset%ph_freez_disp_nampl
 
  ab_mover%iatfix      =>dtset%iatfix(:,1:natom)
  ab_mover%symafm      =>dtset%symafm
@@ -483,7 +472,6 @@ type(abimover_specs),intent(out) :: specs
  ab_mover%tnons       =>dtset%tnons
  ab_mover%ph_ngqpt    =>dtset%ph_ngqpt
  ab_mover%ph_qshift   =>dtset%ph_qshift
- ab_mover%ph_freez_disp_ampl      =>dtset%ph_freez_disp_ampl
  ab_mover%typat       =>dtset%typat(1:natom)
  ab_mover%prtatlist   =>dtset%prtatlist(1:natom)
  ab_mover%goprecprm   =>dtset%goprecprm
@@ -503,9 +491,7 @@ type(abimover_specs),intent(out) :: specs
 !Filename for _HIST file
  ab_mover%filnam_ds    =>dtfil%filnam_ds
 
-!!DEBUG
 !call abimover_print(ab_mover,ab_out)
-!!DEBUG
 
 !write(std_out,*) 'mover 02'
 !###########################################################
@@ -521,7 +507,7 @@ type(abimover_specs),intent(out) :: specs
    specs%isARused=.FALSE.
  end if
 
-!Velocities are never change except for ionmov=1,6,7,8
+!Velocities are never changed excepts for ionmov=1,6,7,8
  specs%isVused=.FALSE.
 
 !In general convergence is needed
@@ -571,7 +557,7 @@ type(abimover_specs),intent(out) :: specs
 !  This is the initialization for ionmov==4,5
 !  -------------------------------------------
  case (4,5)
-!  Values use in XML Output
+!  Values used in XML Output
    specs%type4xml='simple'
    specs%crit4xml='tolmxf'
 !  Name of specs%method
@@ -795,9 +781,11 @@ case (15)
    specs%method = 'training set generator'
 !  Number of history
    specs%nhist = -1
-case default
+ case default
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
+   !MSG_ERROR(msg)
  end select
+
 end subroutine abimover_ini
 !!***
 
@@ -829,7 +817,6 @@ subroutine abimover_destroy(ab_mover)
  nullify(ab_mover%iatfix)
  nullify(ab_mover%mdtemp)
  nullify(ab_mover%ph_ngqpt)
- nullify(ab_mover%ph_freez_disp_ampl)
  nullify(ab_mover%ph_qshift)
 
  nullify(ab_mover%prtatlist)

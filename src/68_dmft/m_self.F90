@@ -115,7 +115,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  self <type(self_type)>= variables related to self-energy
-!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
+!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent DFT+DMFT calculations.
 !!  opt_oper = 1  Allocate only quantities in the KS basis.
 !!             2  Allocate only quantities in the local basis.
 !!             3  Allocate quantities in both the KS and local basis.
@@ -194,7 +194,7 @@ end subroutine alloc_self
 !! INPUTS
 !!  cryst_struc <type(crystal_t)>=variables related to crystal structure
 !!  self <type(self_type)>= variables related to self-energy
-!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
+!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent DFT+DMFT calculations.
 !!  opt_read =  not used for the moment
 !!  wtype = "real" Self energy will be computed for real frequencies
 !!        = "imag" Self energy will be computed for imaginary frequencies
@@ -308,7 +308,7 @@ end subroutine destroy_self
 !!  self <type(self_type)>= variables related to self-energy
 !!  option = 1 Do not print double counting.
 !!           2 Print double counting
-!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent LDA+DMFT calculations.
+!!  paw_dmft <type(paw_dmft_type)> =  variables related to self-consistent DFT+DMFT calculations.
 !!  prtopt = integer which precises the amount of printing in the subroutine called
 !!
 !! OUTPUT
@@ -1619,6 +1619,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
  &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                  self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
+  !&                       =cmplx(0.d0,selftemp_imag(ifreq),kind=dp)/two
 !  &                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
   !               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   !&                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two

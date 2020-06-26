@@ -61,8 +61,8 @@ dmft_mxsf 0.3
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
 
-##### LDA+U
-usepawu1    1   # LDA+U is not used.
+##### DFT+U
+usepawu1    1   # DFT+U is not used.
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00  0.0   # values in Hartree
@@ -81,7 +81,7 @@ jpawu2  0.0000 0.0  # values in Hartree
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = DMFT
+#%% keywords = DMFT, PAW
 #%% description = 
 #%%   DMFT tests on Antiferromagnetic NiO (4 atoms), check DMFT loop with Hubbard I, DMFT
 #%%   self-consistency and density self-consistency : computes occupations and energy.

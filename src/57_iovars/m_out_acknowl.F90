@@ -240,9 +240,9 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008'
  priority(14)=15
 
- ref(15)=' Gamma and beta cerium: LDA+U calculations of ground-state parameters.'//ch10//&
+ ref(15)=' Gamma and beta cerium: DFT+U calculations of ground-state parameters.'//ch10//&
   ' B. Amadon, F. Jollet and M. Torrent, Phys. Rev. B 77, 155104 (2008).'
- comment(15)=' Comment: LDA+U calculations, usepawu/=0. Strong suggestion to cite this paper.'//ch10//&
+ comment(15)=' Comment: DFT+U calculations, usepawu/=0. Strong suggestion to cite this paper.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#amadon2008a'
  priority(15)=18
 

@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h41 )
   
-- input  file    -> t41.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t41/t41.in
 - output file    -> t41.out
 - root for input  files -> t41i
 - root for output files -> t41o
@@ -417,7 +417,16 @@ P           mkmem          19
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 169, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -435,8 +444,8 @@ P           mkmem          19
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -457,6 +466,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 250, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -11.919417260526    -1.192E+01 2.335E-02 7.522E+00
  ETOT  2  -11.928629543974    -9.212E-03 2.455E-04 2.972E-02
@@ -471,6 +486,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
   sigma(1 1)=  3.65049667E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.65049667E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.65049667E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.3703265,   3.3703265, ]
+- [  3.3703265,   0.0000000,   3.3703265, ]
+- [  3.3703265,   3.3703265,   0.0000000, ]
+lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6567759E+01
+convergence: {deltae: -3.482E-13, res2:  4.704E-13, residm:  1.259E-08, diffor: null, }
+etotal    :  -1.19286481E+01
+entropy   :   0.00000000E+00
+fermie    :   4.75943539E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.65049667E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.65049667E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.65049667E-03, ]
+pressure_GPa:  -1.0740E+02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -512,22 +556,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.90757594059972E+00
-    Hartree energy  =  9.12620399800157E-01
-    XC energy       = -4.30515893499945E+00
-    Ewald energy    = -1.27864121744519E+01
-    PspCore energy  =  1.93481650847052E-01
-    Loc. psp. energy= -5.24205111134754E+00
-    NL   psp  energy=  1.39129614197111E+00
-    >>>>>>>>> Etotal= -1.19286480875808E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.24595022042017E+02 ; Band energy (Ha)=   1.1381837655E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.90757594059972E+00
+hartree             :  9.12620399800157E-01
+xc                  : -4.30515893499945E+00
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.93481650847052E-01
+local_psp           : -5.24205111134754E+00
+non_local_psp       :  1.39129614197111E+00
+total_energy        : -1.19286480875808E+01
+total_energy_eV     : -3.24595022042017E+02
+band_energy         :  1.13818376545444E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -542,7 +584,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 127, }
+cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 15, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -565,8 +616,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -701,13 +752,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
  Self-Consistent on Energies only
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.568
 QP_gap     :    6.973
 Delta_QP_KS:    1.405
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.965   -14.841    -8.965    -5.988    -5.580     0.000     1.000     0.000    -5.580    -2.602   -11.567   -11.567
         2    12.951   -16.710    12.951    16.267    -3.993     0.000     1.000     0.000    -3.993    -0.677    12.274    12.274
         3    12.951   -16.710    12.951    16.267    -3.993     0.000     1.000     0.000    -3.993    -0.677    12.274    12.274
@@ -718,6 +770,7 @@ data: !SigmaeeData |
         8    25.707   -16.219    25.707    28.967    -2.023     0.000     1.000     0.000    -2.023     1.237    26.944    26.944
 ...
 
+
  writing QP data on file : t41o_DS2_QPS
 
  Convergence of QP corrections
@@ -726,7 +779,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 127, }
+cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 15, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -868,13 +930,14 @@ data: !SigmaeeData |
  Self-Consistent on Energies only
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.568
 QP_gap     :    7.710
 Delta_QP_KS:    2.143
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.965   -14.841    -8.965    -5.623    -6.420     0.000     1.000     0.000    -6.420    -3.077   -12.042   -12.042
         2    12.951   -16.710    12.951    16.678    -4.785     0.000     1.000     0.000    -4.785    -1.057    11.894    11.894
         3    12.951   -16.710    12.951    16.678    -4.785     0.000     1.000     0.000    -4.785    -1.057    11.894    11.894
@@ -885,6 +948,7 @@ data: !SigmaeeData |
         8    25.707   -16.219    25.707    29.364    -2.036     0.000     1.000     0.000    -2.036     1.622    27.329    27.329
 ...
 
+
  writing QP data on file : t41o_DS3_QPS
 
  Convergence of QP corrections
@@ -893,7 +957,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 19, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 127, }
+cutoff_energies: {ecut:  10.4, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 15, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1035,13 +1108,14 @@ data: !SigmaeeData |
  Self-Consistent on Energies only
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.568
 QP_gap     :    7.473
 Delta_QP_KS:    1.906
 data: !SigmaeeData |
-     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+     Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
         1    -8.965   -14.841    -8.965    -5.995    -5.136     0.000     1.000     0.000    -5.136    -2.166   -11.131   -11.131
         2    12.951   -16.710    12.951    15.885    -3.828     0.000     1.000     0.000    -3.828    -0.894    12.057    12.057
         3    12.951   -16.710    12.951    15.885    -3.828     0.000     1.000     0.000    -3.828    -0.894    12.057    12.057
@@ -1051,6 +1125,7 @@ data: !SigmaeeData |
         7    18.519   -15.395    18.519    21.404    -1.874     0.000     1.000     0.000    -1.874     1.011    19.530    19.530
         8    25.707   -16.219    25.707    28.751    -1.628     0.000     1.000     0.000    -1.628     1.416    27.123    27.123
 ...
+
 
  writing QP data on file : t41o_DS4_QPS
 
@@ -1476,10 +1551,10 @@ P           mkmem          19
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          3.9  wall=         12.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          4.0
++Overall time at end (sec) : cpu=          3.9  wall=         12.5

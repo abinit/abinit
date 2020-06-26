@@ -399,7 +399,6 @@ abinit_options = {
     "enable_hints": "${enable_hints}",
     "enable_libtetra": "${enable_libtetra}",
     "enable_lotf": "${enable_lotf}",
-    "enable_macroave": "${enable_macroave}",
     "enable_maintainer_checks": "${enable_maintainer_checks}",
     "enable_memory_profiling": "${enable_memory_profiling}",
     "enable_mpi_inplace": "${enable_mpi_inplace}",

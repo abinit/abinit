@@ -341,6 +341,29 @@ contains
  intarr(1,:)=dtsets(:)%pawxcdev
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pawxcdev','INT',0)
 
+ intarr(1,:)=dtsets(:)%ph_intmeth
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_intmeth','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_ndivsm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_ndivsm','INT',0)
+
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%ph_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ph_ngqpt','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_nqpath
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_nqpath','INT',0)
+
+ intarr(1,:)=dtsets(:)%ph_nqshift
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_nqshift','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ph_smear
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_smear','ENE',0)
+
+ dprarr(1,:)=dtsets(:)%ph_wstep
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_wstep','ENE',0)
+
 !pimass
  icount=0
  do idtset=0, ndtset_alloc
@@ -358,11 +381,6 @@ contains
 
  intarr(1,:)=dtsets(:)%pitransform
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'pitransform','INT',0)
-
- dprarr(1,:)=dtsets(:)%polcen(1)
- dprarr(2,:)=dtsets(:)%polcen(2)
- dprarr(3,:)=dtsets(:)%polcen(3)
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'polcen','DPR',0)
 
  intarr(1,:)=dtsets(:)%plowan_bandi
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'plowan_bandi','INT',0)
@@ -387,19 +405,20 @@ contains
  narr=100
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=3*dtsets(idtset)%plowan_nt
-   if(idtset==0)narrm(idtset)=100
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=100
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_it(1:narrm(idtset))
    end if
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_it','INT',1) 
+
 
 !plowan_iatom
  narr=mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%plowan_natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_iatom(1:narrm(idtset))
    end if
  end do
@@ -409,8 +428,8 @@ contains
  narr=mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%plowan_natom
-   if(idtset==0)narrm(idtset)=mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_nbl(1:narrm(idtset))
    end if
  end do
@@ -420,8 +439,8 @@ contains
  narr=12*mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=sum(dtsets(idtset)%plowan_nbl(1:dtsets(idtset)%plowan_natom))
-   if(idtset==0)narrm(idtset)=12*mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=12*mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_lcalc(1:narrm(idtset))
    end if
  end do
@@ -431,13 +450,17 @@ contains
  narr=12*mxvals%natom
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=sum(dtsets(idtset)%plowan_nbl(1:dtsets(idtset)%plowan_natom))
-   if(idtset==0)narrm(idtset)=12*mxvals%natom
-   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>0) then
+   !if(idtset==0)narrm(idtset)=12*mxvals%natom
+   if (narrm(idtset)>0.and.dtsets(idtset)%plowan_compute>=0) then
      intarr(1:narrm(idtset),idtset)=dtsets(idtset)%plowan_projcalc(1:narrm(idtset))
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'plowan_projcalc','INT',1)
 
+ dprarr(1,:)=dtsets(:)%polcen(1)
+ dprarr(2,:)=dtsets(:)%polcen(2)
+ dprarr(3,:)=dtsets(:)%polcen(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'polcen','DPR',0)
 
  intarr(1,:)=dtsets(:)%posdoppler
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'posdoppler','INT',0)
@@ -463,6 +486,8 @@ contains
  intarr(1,:)=dtsets(:)%ppmodel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ppmodel','INT',0)
 
+ intarr(1,:)=dtsets(:)%prepalw
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepalw','INT',0)
 
  intarr(1,:)=dtsets(:)%prepanl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepanl','INT',0)
@@ -1142,6 +1167,9 @@ contains
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
 
+ intarr(1,:)=dtsets(:)%use_yaml
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
+
  intarr(1,:)=dtsets(:)%use_nonscf_gkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_nonscf_gkk','INT',0)
 
@@ -1195,9 +1223,6 @@ contains
 
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
-
- intarr(1,:)=dtsets(:)%use_yaml
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
 
 
 !###########################################################

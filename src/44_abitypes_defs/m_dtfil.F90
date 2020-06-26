@@ -152,7 +152,7 @@ module m_dtfil
 
   character(len=fnlen) :: filpotin
    ! Filename used to read POT file.
-   ! Initialize via getpot_path
+   ! Initialize via getpot_filepath
 
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
@@ -164,8 +164,9 @@ module m_dtfil
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'PAWDEN'
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'PAWDEN'
 
-! character(len=fnlen) :: filpsp(ntypat)
-   ! the filenames of the pseudopotential files, from the standard input.
+  character(len=fnlen) :: filsigephin
+   ! Filename used to read SIGEPH file.
+   ! Initialize via getsigeph_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -539,7 +540,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
  stringvar='wfk'
  call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                 getpath=dtset%getwfk_path)
+                 getpath=dtset%getwfk_filepath)
 
  if (dtset%optdriver /= RUNL_RESPFN) ireadwf = will_read
  if(ndtset/=0 .and. dtset%optdriver==RUNL_RESPFN .and. will_read==0)then
@@ -552,13 +553,13 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    MSG_ERROR(msg)
  end if
 
- ! Treatment of the other get wavefunction variable, if response function case or nonlinear case
- if (ANY(dtset%optdriver == [RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH])) then
+!Treatment of the other get wavefunction variable, if response function case or nonlinear case
+ if (ANY(dtset%optdriver == [RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH, RUNL_LONGWAVE])) then
 
    ! According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
    call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                   getpath=dtset%getwfq_path)
+                   getpath=dtset%getwfq_filepath)
    ! If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
    if(will_read==0) fnamewffq = fnamewffk
 
@@ -590,18 +591,25 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getddb_path)
+                  getpath=dtset%getddb_filepath)
 
  ! According to getpot, build _POT file name
  stringfile='_POT'; stringvar='pot'
  call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                  getpath=dtset%getpot_path)
+                  getpath=dtset%getpot_filepath)
 
  ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getdvdb_path)
+                  getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
+
+ ! According to getsigeph_filepath, build _SIGEPH file name
+ stringfile='_SIGEPH.nc'; stringvar='sigeph'
+ call mkfilename(filnam, dtfil%filsigephin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                  getpath=dtset%getsigeph_filepath)
+ ! If getsigeph_filepath is not used, will read the output as assumed in the transport driver when called after sigeph
+ if (will_read == 0) dtfil%filsigephin = strcat(filnam_ds(4), "_SIGEPH.nc")
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -617,7 +625,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
  stringvar='den'
  call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar, will_read, &
-                 getpath=dtset%getden_path)
+                 getpath=dtset%getden_filepath)
 
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read
@@ -678,7 +686,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! A default is available if getscr is 0
  stringfile='_SCR' ; stringvar='scr'
  call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                 getpath=dtset%getscr_path)
+                 getpath=dtset%getscr_filepath)
  if(will_read==0)filscr=trim(filnam_ds(3))//'_SCR'
 
  ! According to getsuscep and irdsuscep, build _SUS file name, referred as filsus
@@ -721,7 +729,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! A default is avaible if getwfkfine is 0
  stringfile='_WFK' ; stringvar='wfkfine'
  call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                 getpath=dtset%getwfkfine_path)
+                 getpath=dtset%getwfkfine_filepath)
  if(will_read==0)filwfkfine=trim(filnam_ds(3))//'_WFK'
 
  dtfil%ireadden      =ireadden
@@ -1646,7 +1654,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
    if (len_trim(input_path) == 0) then
      ! Legacy Files file mode.
-     write(std_out, "(2a)")"DeprecationWarning: ",ch10
+     write(std_out, "(2a)")" DeprecationWarning: ",ch10
      write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
      write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotenials.",ch10
      write(std_out, "(3a)")'            pseudos = "al.psp8, as.psp8"',ch10,ch10
@@ -1677,7 +1685,8 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
      fname = basename(input_path)
      i1 = index(fname, ".")
-     if (i1 /= 0) then
+     !if (i1 /= 0) then
+     if (i1 > 1) then
        ! file ext is present --> use prefix to initialize filnam
        i2 = index(input_path, ".", back=.True.)
        filnam(2) = input_path(:i2) // "abo"

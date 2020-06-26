@@ -180,6 +180,9 @@ subroutine echo_xc_name (ixc)
    case (34)
      message = 'Meta-GGA fake4 - ixc=34'
      citation = ''
+   case (35)
+     message = 'Meta-GGA fake5 - ixc=35'
+     citation = ''
    case (40)
      message = 'Hartree-Fock with mixing coefficient alpha=1'
      citation = ''
@@ -364,14 +367,14 @@ subroutine size_dvxc(ixc,order,nspden,&
 
 !Do we use the gradient?
  need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
-&               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=34).or. &
+&               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=35).or. &
 &               (ixc==41.or.ixc==42).or.ixc==1402000)
  if (ixc<0.and.(libxc_isgga.or.libxc_ismgga.or.libxc_ishybrid)) need_gradient=.true.
  if (my_add_tfw) need_gradient=.true.
  if (present(usegradient)) usegradient=merge(1,0,need_gradient)
 
 !Do we use the laplacian?
- need_laplacian=(ixc==32)
+ need_laplacian=(ixc==32.or.ixc==35)
  if (ixc<0) then
    if(present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian(xc_functionals=xc_funcs)
    if(.not.present(xc_funcs)) need_laplacian=libxc_functionals_needs_laplacian()
@@ -379,7 +382,7 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(uselaplacian)) uselaplacian=merge(1,0,need_laplacian)
 
 !Do we use the kinetic energy density?
- need_kden=(ixc==31.or.ixc==34)
+ need_kden=(ixc==31.or.ixc==34.or.ixc==35)
  if (ixc<0) need_kden=libxc_ismgga
  if (present(usekden)) usekden=merge(1,0,need_kden)
 
@@ -413,9 +416,10 @@ subroutine size_dvxc(ixc,order,nspden,&
  if (present(ndvxc)) then
    ndvxc=0
    if (abs(order)>=2) then
-     if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
-       ndvxc=min(nspden,2)+1
-     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=34).or.ixc==50) then
+     if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
+&        ixc==21.or.ixc==22) then
+       ndvxc=min(nspden,2)+1  
+     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
        ndvxc=8
@@ -423,7 +427,8 @@ subroutine size_dvxc(ixc,order,nspden,&
 &             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
      else if (ixc<0) then
-       ndvxc=3 ; if (need_gradient) ndvxc=15
+       ndvxc=2*min(nspden,2)+1 ; if (order==-2) ndvxc=2
+       if (need_gradient) ndvxc=15
      end if
    end if
  end if
@@ -799,7 +804,7 @@ end subroutine mkdenpos
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! PARENTS
-!!      drivexc_main
+!!    rhotoxc,m_pawxc
 !!
 !! CHILDREN
 !!      invcb,libxc_functionals_end,libxc_functionals_getvxc
@@ -835,7 +840,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
  integer :: my_exexch,need_ndvxc,need_nd2vxc,need_nvxcgrho,need_nvxclrho,need_nvxctau
  integer :: need_gradient,need_laplacian,need_kden,optpbe
  logical :: has_gradient,has_laplacian,has_kden,libxc_test
- real(dp) :: alpha,my_hyb_mixing
+ real(dp) :: alpha,beta,my_hyb_mixing
  real(dp),parameter :: rsfac=0.6203504908994000e0_dp
  character(len=500) :: message
 !arrays
@@ -883,7 +888,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !Check value of order
  if( (order<1.and.order/=-2).or.order>4)then
    write(message, '(a,i0)' )&
-&   'The only allowed values for order are 1,2,-2 or 3, while it is found to be ',order
+&   'The only allowed values for order are 1, 2, -2 or 3, while it is found to be ',order
    MSG_BUG(message)
  end if
 
@@ -1201,7 +1206,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
    call xchcth(vxcgrho,exc,grho2_updn,ixc,npts,nspden,order,rho_updn,vxcrho)
 
 !>>>>> Only for test purpose (test various part of MGGA implementation)
- else if(ixc==31 .or. ixc==32 .or. ixc==33 .or. ixc==34) then
+ else if(ixc==31 .or. ixc==32 .or. ixc==33 .or. ixc==34 .or. ixc==35) then
    exc(:)=zero ; vxcrho(:,:)=zero
    if (present(vxcgrho).and.nvxcgrho>0) vxcgrho(:,:)=zero
    if (present(vxclrho).and.nvxclrho>0) vxclrho(:,:)=zero
@@ -1217,9 +1222,10 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !    Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
      call xcpbe(exc,npts,nspden,optpbe,1,rho_updn,vxcrho,0,0)
      if (nspden==1) then
-!        it should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up but this applies to tau and rho (so it cancels)
        exc(:)=exc(:)+alpha*tau_updn(:,1)/rho_updn(:,1)
      else
+!      It should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up
+!       but this applies to tau and rho (so it cancels)
        do ispden=1,nspden
          exc(:)=exc(:)+alpha*tau_updn(:,ispden)/(rho_updn(:,1)+rho_updn(:,2))
        end do
@@ -1270,6 +1276,23 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
          vxctau(:,ispden)=8.0d0*alpha*(rho_updn(:,1)+rho_updn(:,2))
        end do
      end if
+   case (35)
+     alpha=0.01d0 ; beta=1.00d0-(1.00d0/1.01d0)
+!    Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
+     call xcpbe(exc,npts,nspden,optpbe,1,rho_updn,vxcrho,0,0)
+     if (nspden==1) then
+       exc(:)=exc(:)+2.0d0*alpha*lrho_updn(:,1)+beta*tau_updn(:,1)/rho_updn(:,1)
+       vxcrho(:,1) =vxcrho(:,1)+2.0d0*alpha*lrho_updn(:,1)
+       vxclrho(:,1)=alpha*2.0d0*rho_updn(:,1)
+     else
+       do ispden=1,nspden
+         exc(:)=exc(:)+alpha*lrho_updn(:,ispden) &
+&                     +beta*tau_updn(:,ispden)/(rho_updn(:,1)+rho_updn(:,2))
+         vxcrho(:,ispden) =vxcrho(:,ispden)+alpha*(lrho_updn(:,1)+lrho_updn(:,2))
+         vxclrho(:,ispden)=alpha*(rho_updn(:,1)+rho_updn(:,2))
+       end do
+     end if
+     vxctau(:,:)=beta
    end select
 
 !>>>>> Hybrid PBE0 (1/4 and 1/3)

@@ -35,13 +35,13 @@ xred 3*0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t36.out, tolnlines = 1, tolabs = 1.001e-03, tolrel = 5.000e-04, fld_options = -medium 
+#%%   t36.out, tolnlines = 2, tolabs = 1.1e-03, tolrel = 5.0e-04, fld_options = -medium 
 #%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = J. Zwanziger
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   BCC iron, ferromagnetic, computation of Fermi contact term with two spin densities.
 #%%   Coded and contributed by J. Zwanziger.

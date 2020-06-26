@@ -1,0 +1,113 @@
+# Linear response function and long-wave magnitudes calculation 
+# for a 5% distorted 2 atom Silicon cell
+# (M. Royo, 7.11.2019)
+
+ndtset 5
+
+#Set 1 : ground state self-consistency
+#*************************************
+getwfk1   0          
+kptopt1   1         
+tolvrs1   1.0d-18 
+
+#Set 2: Response function calculation of d/dk wave function
+#**********************************************************
+iscf2    -3       
+rfelfd2   2      
+tolwfr2   1.0d-20 
+rfdir2   1 1 1   
+                
+#Set 3: Response function calculation of d2/dkdk wave function
+#*************************************************************
+getddk3   2 
+iscf3    -3 
+rf2_dkdk3 1 
+tolwfr3   1.0d-20  
+
+#Set 4 : Response function calculation to q=0 phonons, electric field and strain
+#*******************************************************************************
+getddk4   2          
+rfelfd4   3         
+rfphon4   1        
+rfatpol4  1 2     
+rfdir4   1 1 1   
+rfstrs4   3      
+tolvrs4   1.0d-8 
+prepalw4  1      
+
+#Set 5 : Long-wave magnitudes calculation
+#****************************************
+optdriver5 10        
+get1wf5   4         
+get1den5  4        
+getddk5   2       
+getdkdk5  3      
+lw_flexo5 1  
+
+#######################################################################
+
+#Common input variables
+#**********************
+getwfk  1  
+useylm  1
+kptopt 2
+
+#Definition of the unit cell
+#***************************
+acell 10.102 10.6 9.4
+rprim   0.0000000000    0.5000000000   0.500000000
+        0.5000000000    0.0000000000   0.500000000
+        0.5000000000    0.5000000000   0.000000000
+
+
+#Definition of the atom types and positions
+#******************************************
+ntypat 1          
+znucl 14         
+natom 2         
+typat 2*1      
+xred          
+        0.0500000     -0.0500000      0.0000000
+        0.2000000      0.3000000      0.2000000
+
+#Gives the number of band, explicitely (do not take the default)
+#**************************************************************
+nband  4
+
+#Exchange-correlation functional
+#*******************************
+ixc   7           
+
+#Definition of the planewave basis set and k-point grid
+#******************************************************
+ecut   4.0      
+ngkpt 4 4 4
+nshiftk 4 
+shiftk 0.5 0.5 0.5
+       0.5 0.0 0.0
+       0.0 0.5 0.0
+       0.0 0.0 0.5
+
+#Definition of the SCF procedure
+#*******************************
+nstep 100    
+diemac 13.0  
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  tlw_1.in, tlw_2.in, tlw_3.in
+#%% [files]
+#%% files_to_test =
+#%%   tlw_1.out, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
+#%% psp_files =  14si.fhi
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Royo
+#%% keywords = DFPT, LONGWAVE
+#%% description = Linear response function and long-wave magnitudes calculation for Silicon
+#%% topics = longwave
+#%%<END TEST_INFO>
+

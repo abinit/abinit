@@ -153,7 +153,7 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup) result(crystal)
  ABI_FREE(class_ids)
  ABI_FREE(class_names)
  call irrep_free(irr)
- ABI_DT_FREE(irr)
+ ABI_FREE(irr)
 
  ABI_MALLOC(symafm,(nsym))
  symafm = 1
@@ -199,12 +199,13 @@ subroutine tetra_unittests(comm)
  integer,parameter :: brav1=1,bcorr0=0,bcorr1=1,qptopt1=1,nqshft1=1,space_group0=0
  real(dp),parameter :: max_occ1=1.d0
  integer :: nqibz,iqibz,nqbz,ierr,nw
+ logical :: use_old_tetra
  real(dp) :: cpu, wall, gflops
  real(dp) :: dosdeltae, emin, emax, qnorm, dos_int
  character(len=80) :: errstr
  type(t_tetrahedron) :: tetraq
  type(htetra_t) :: htetraq
- integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
+ integer :: in_qptrlatt(3,3),new_qptrlatt(3,3), ngqpt(3)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: dos_qshift(3,nqshft1)
  real(dp) :: rlatt(3,3),qlatt(3,3)
@@ -222,32 +223,39 @@ subroutine tetra_unittests(comm)
  call wrtout(std_out,'DOS unit tests')
  !
  ! 0. Intialize
- !
  call wrtout(std_out,'0. Initialize')
 
  ! Create fake crystal
  crystal = crystal_from_ptgroup('m-3m')
 
  ! Create a regular grid
- in_qptrlatt(:,1) = [ 20, 0, 0]
- in_qptrlatt(:,2) = [ 0, 20, 0]
- in_qptrlatt(:,3) = [ 0, 0, 20]
- dos_qshift(:,1) = [0.0,0.0,0.0]
+ ngqpt = [20, 20, 20]
+ !ngqpt = [200, 200, 200]
+ !ngqpt = [288, 288, 288]
+ in_qptrlatt = 0
+ in_qptrlatt(1,1) = ngqpt(1)
+ in_qptrlatt(2,2) = ngqpt(2)
+ in_qptrlatt(3,3) = ngqpt(3)
+ dos_qshift = zero
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  ! Initialize old tetrahedra
  rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
- call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
- call cwtime_report(" init_tetra ", cpu, wall, gflops)
+
+ use_old_tetra = .False.
+ if (use_old_tetra) then
+   call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
+   call cwtime_report(" init_tetra ", cpu, wall, gflops)
+ end if
 
  ! Initialize new tetrahedra
  call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, &
                   nqibz, ierr, errstr, comm)
+ call htetraq%print(std_out)
  call cwtime_report(" init_htetra", cpu, wall, gflops)
 
- !
  ! 1. Compute energies of a parabolic band
  !
  call wrtout(std_out,'1. Parabolic Band')
@@ -276,18 +284,21 @@ subroutine tetra_unittests(comm)
  ! Compute DOS using tetrahedron implementation
  ABI_CALLOC(tweight,(nw,nqibz))
  ABI_CALLOC(dweight,(nw,nqibz))
- call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dweight,comm)
- do iqibz=1,nqibz
-   dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
-   tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
- end do
- dos(:)  = sum(dweight,2)
- idos(:) = sum(tweight,2)
- call ctrap(nw,dos,dosdeltae,dos_int)
- write(std_out,*) "dos_int", dos_int, idos(nw)
- call cwtime_report(" tetra_blochl   ", cpu, wall, gflops)
- call write_file('parabola_tetra.dat', nw, energies, idos, dos)
+
+ if (use_old_tetra) then
+   call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
+                             nqibz,bcorr0,tweight,dweight,comm)
+   do iqibz=1,nqibz
+     dweight(:,iqibz) = dweight(:,iqibz)*mat(iqibz)
+     tweight(:,iqibz) = tweight(:,iqibz)*mat(iqibz)
+   end do
+   dos(:)  = sum(dweight,2)
+   idos(:) = sum(tweight,2)
+   call ctrap(nw,dos,dosdeltae,dos_int)
+   write(std_out,*) "dos_int", dos_int, idos(nw)
+   call cwtime_report(" tetra_blochl   ", cpu, wall, gflops)
+   call write_file('parabola_tetra.dat', nw, energies, idos, dos)
+ end if
 
  ! Compute blochl weights
  call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&
@@ -379,21 +390,22 @@ subroutine tetra_unittests(comm)
  write(std_out,*) "dos_int", dos_int, idos(nw)
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
  call write_file('parabola_htetra_onewk.dat', nw, energies, idos, dos)
- call htetraq%print()
+ call htetraq%print(std_out)
 
- !
  ! 2. Compute energies for a flat band
  !
  call wrtout(std_out,'2. Flat Band')
  eig = 0.5
 
  ! Compute DOS using old tetrahedron implementation
- call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
-                           nqibz,bcorr0,tweight,dweight,comm)
- dos(:)  = sum(dweight,2)
- idos(:) = sum(tweight,2)
- call cwtime_report(" tetra_blochl", cpu, wall, gflops)
- call write_file('flat_tetra.dat', nw, energies, idos, dos)
+ if (use_old_tetra) then
+   call tetra_blochl_weights(tetraq,eig,emin,emax,max_occ1,nw,&
+                             nqibz,bcorr0,tweight,dweight,comm)
+   dos(:)  = sum(dweight,2)
+   idos(:) = sum(tweight,2)
+   call cwtime_report(" tetra_blochl", cpu, wall, gflops)
+   call write_file('flat_tetra.dat', nw, energies, idos, dos)
+ end if
 
  ! Compute DOS using new tetrahedron implementation
  call htetraq%blochl_weights(eig,emin,emax,max_occ1,nw,&

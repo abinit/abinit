@@ -73,8 +73,8 @@ dmft_mxsf 0.3
 # for historical reasons, do not use this elsewhere
 dmft_occnd_imag2 0
 
-##### LDA+U
-usepawu1    1   # LDA+U is not used.
+##### DFT+U
+usepawu1    1   # DFT+U is not used.
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00  0.0   # values in Hartree

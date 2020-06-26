@@ -25,7 +25,6 @@
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
-#%% need_cpp_vars = HAVE_NETCDF
 #%% executable = optic
 #%% test_chain = t47.in, t48.in, t49.in
 #%% [files]

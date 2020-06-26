@@ -47,9 +47,9 @@ natsph 1
 iatsph 1
 pawprtdos 2
 
-# LDA+U
+# DFT+U
 usepawu    1
-lpawu   3    # LDA+U CORRECTION ON f-ORBITALS
+lpawu   3    # DFT+U CORRECTION ON f-ORBITALS
 upawu  0.22
 jpawu  0.0368
 dmatpuopt 2  # CHOOSE EXPRESSION OF THE DENSITY MATRIX.
@@ -83,7 +83,7 @@ dmatpawu  1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%   FCC Gadolinium. PAW + U calculation
 #%%   Test the imposition of the density matrix (10 first steps) and related variables.

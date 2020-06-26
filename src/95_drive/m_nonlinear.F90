@@ -44,7 +44,7 @@ module m_nonlinear
  use m_symtk,    only : symmetrize_xred, littlegroup_q
  use m_dynmat,   only : d3sym, sytens
  use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
- use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getcut, kpgio, getph
  use m_fft,      only : fourdp
@@ -675,7 +675,7 @@ end if
      call timab(553,1,tsec)
      call pawinit(dtset%effmass_free,gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
      call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
@@ -964,7 +964,7 @@ end if
 & nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
  if (psps%usepaw==1) then
 !  Allocate/initialize only zarot in pawang1 datastructure
-   call pawang_init(pawang1,0,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+   call pawang_init(pawang1,0,0,pawang%l_max-1,0,0,nsym1,0,0,0,0)
    call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  end if
 
@@ -1071,9 +1071,9 @@ end if
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Call main output routine
    call dfptnl_doutput(blkflg,d3etot,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)

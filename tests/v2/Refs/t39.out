@@ -31,6 +31,8 @@
    symdynmat         0
  Interatomic Force Constants Inputs :
       dipdip         1
+      dipqua         0
+      quadqu         0
       ifcana         0
       ifcout        20
       natifc         3
@@ -598,6 +600,8 @@
 -  4.176556E+02  4.799741E+02  4.799741E+02  4.799741E+02  7.634232E+02
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -1.0 -1.0 -1.0 -0.0 -0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0 -1.0  1.0  1.0 -1.0
@@ -716,6 +720,9 @@
 -  2.764498E+02  2.768513E+02  2.914559E+02  3.250365E+02  3.250365E+02
 -  3.262711E+02  3.262711E+02  4.387467E+02  4.387467E+02  4.439683E+02
 -  4.439683E+02  4.481924E+02  4.718971E+02  7.079162E+02  7.095362E+02
+
+================================================================================
+
 
  Electronic dielectric tensor
       6.53658080     -0.00000000     -0.00000000

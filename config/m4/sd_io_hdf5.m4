@@ -64,6 +64,10 @@ AC_DEFUN([SD_HDF5_INIT], [
       no-fortran)
         sd_hdf5_enable_fc="no"
         ;;
+      mandatory)
+        sd_hdf5_enable="yes"
+        sd_hdf5_enable_def="yes"
+        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg HDF5 option: '${kwd}'])
         ;;
@@ -276,7 +280,11 @@ AC_DEFUN([SD_HDF5_DETECT], [
         sd_hdf5_ldflags=""
         sd_hdf5_libs=""
       else
-        AC_MSG_FAILURE([invalid HDF5 configuration])
+        if test "${sd_hdf5_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid HDF5 configuration])
+        else
+              AC_MSG_WARN([invalid HDF5 configuration])
+        fi
       fi
     fi
   else
@@ -312,7 +320,7 @@ AC_DEFUN([_SD_HDF5_CHECK_USE], [
   # Look for hdf5.h
   AC_CHECK_HEADERS([hdf5.h], [sd_hdf5_hdr_ok="yes"], [sd_hdf5_hdr_ok="no"])
   if test "${sd_hdf5_hdr_ok}" != "yes"; then
-    AC_MSG_ERROR([could not find the HDF5 C header
+    AC_MSG_WARN([could not find the HDF5 C header
                   Detecting HDF5 is a complex task due to the very high number
                   of possible configurations. If you do want to use HDF5,
                   please help the build system by pointing correctly the

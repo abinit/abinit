@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ABINIT 
+.Version 9.1.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h43 )
+.Starting date : Thu  7 May 2020.
+- ( at 23h37 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
 - root for input  files -> t56i
 - root for output files -> t56o
@@ -138,9 +138,10 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
              bdgw           1       8
+        ddb_ngqpt        2    2    2
+ dvdb_rspace_cell        1
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
-      eph_intmeth           1
       eph_extrael1     0.00000000E+00
       eph_extrael2     0.00000000E+00
       eph_extrael3     2.00000000E-01
@@ -153,9 +154,9 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        eph_fermie4     0.00000000E+00 Hartree
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
+      eph_intmeth           1
+         eph_mrta           0
          eph_task          -4
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
 -          fftalg         312
            getddb          20
            getwfk          20
@@ -328,7 +329,16 @@ P           mkmem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 332, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -353,6 +363,8 @@ P           mkmem           8
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -396,8 +408,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -424,10 +436,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -473,7 +485,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS1_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -487,9 +505,22 @@ Transport calculation results
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
 
+
+
+- Writing RTA transport results to: t56o_DS1_RTA.nc
+
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 332, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -516,6 +547,8 @@ Transport calculation results
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -572,10 +605,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -621,7 +654,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS2_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -635,9 +674,22 @@ Transport calculation results
           270.00        0.13E-08        0.00E+00            0.00            0.00
           300.00        0.12E-05        0.00E+00            0.00            0.00
 
+
+
+- Writing RTA transport results to: t56o_DS2_RTA.nc
+
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 332, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -668,6 +720,8 @@ Transport calculation results
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -721,10 +775,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -770,7 +824,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS3_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.25E+23        0.00E+00            0.00            0.00
            30.00        0.18E+23        0.00E+00            0.00            0.00
@@ -784,9 +844,22 @@ Transport calculation results
           270.00        0.18E+23        0.00E+00            0.00            0.00
           300.00        0.18E+23        0.00E+00            0.00            0.00
 
+
+
+- Writing RTA transport results to: t56o_DS3_RTA.nc
+
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 332, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -819,6 +892,8 @@ Transport calculation results
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -875,10 +950,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -924,7 +999,13 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS4_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.34E+23        0.00E+00            0.00            0.00
            30.00        0.34E+23        0.00E+00            0.00            0.00
@@ -938,9 +1019,22 @@ Transport calculation results
           270.00        0.34E+23        0.00E+00            0.00            0.00
           300.00        0.34E+23        0.00E+00            0.00            0.00
 
+
+
+- Writing RTA transport results to: t56o_DS4_RTA.nc
+
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 332, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -973,148 +1067,7 @@ Transport calculation results
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
 Values initialized with zeros
-       Homogeneous q point set in the B.Z.
- Grid q points  :        8
-  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
-  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
-  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
-  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
-  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
-  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
-  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
-  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
- The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
---------------------------------------------------------------------------------
-
- Number of bands in e-ph self-energy sum: 8
- From bsum_start: 1 to bsum_stop: 8
- Symsigma: 1 Timrev: 1
- Imaginary shift in the denominator (zcut): 0.100 [eV]
- Method for q-space integration:  Standard quadrature
- Only the Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
- Number of frequency in generalized Eliashberg functions: 0
- Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
- Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
- No special treatment of Frohlich divergence in gkq for q --> 0
- Number of k-points for self-energy corrections: 1
- List of K-points for self-energy corrections:
-   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
- === MPI parallelism ===
-P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
-P Number of CPUs for parallelism over perturbations: 1
-P Number of perturbations treated by this CPU: 6
-P Number of CPUs for parallelism over q-points: 1
-P Number of q-points in the IBZ treated by this proc: 3 of 3
-P Number of CPUs for parallelism over bands: 1
-P Number of CPUs for parallelism over spins: 1
-P Number of CPUs for parallelism over k-points: 1
-P Number of k-point in Sigma_nk treated by this proc: 1 of 1
- DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
-================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
- 
- 
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
-   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1  -8.789   -0.001    557.2    0.000
-   2  12.800   -0.333      1.0   21.589
-   3  12.800   -0.333      1.0    0.000
-   4  12.800   -0.333      1.0    0.000
-   5  18.426   -0.315      1.0    5.626
-   6  18.426   -0.315      1.0    0.000
-   7  18.426   -0.315      1.0    0.000
-   8  26.686   -0.006     52.0    8.260
- 
- KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- 
-============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
-
-Transport calculation results
- Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-            0.00        0.17E+23        0.00E+00            0.00            0.00
-           30.00        0.17E+23        0.00E+00            0.00            0.00
-           60.00        0.17E+23        0.00E+00            0.00            0.00
-           90.00        0.17E+23        0.00E+00            0.00            0.00
-          120.00        0.17E+23        0.00E+00            0.00            0.00
-          150.00        0.17E+23        0.00E+00            0.00            0.00
-          180.00        0.17E+23        0.00E+00            0.00            0.00
-          210.00        0.17E+23        0.00E+00            0.00            0.00
-          240.00        0.17E+23        0.00E+00            0.00            0.00
-          270.00        0.17E+23        0.00E+00            0.00            0.00
-          300.00        0.17E+23        0.00E+00            0.00            0.00
-
-================================================================================
-== DATASET  6 ==================================================================
--   nproc =    1
-
- mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
- mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
- Exchange-correlation functional for the present dataset will be:
-  LDA: new Teter (4/93) with spin-polarized option - ixc=1
- Citation for XC functional:
-  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
-- Reading GS states from WFK file: t56o_DS20_WFK
-- Reading DDB from file: t56o_DS20_DDB
-- Reading DVDB from file: t56o_DS20_DVDB
-
-
-
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
- R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
- R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
- Unit cell volume ucvol=  7.5307571E+01 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
-- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t56o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
@@ -1168,10 +1121,10 @@ All the independent perturbations are available
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
  Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 1
  List of K-points for self-energy corrections:
@@ -1217,7 +1170,177 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS5_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            0.00        0.17E+23        0.00E+00            0.00            0.00
+           30.00        0.17E+23        0.00E+00            0.00            0.00
+           60.00        0.17E+23        0.00E+00            0.00            0.00
+           90.00        0.17E+23        0.00E+00            0.00            0.00
+          120.00        0.17E+23        0.00E+00            0.00            0.00
+          150.00        0.17E+23        0.00E+00            0.00            0.00
+          180.00        0.17E+23        0.00E+00            0.00            0.00
+          210.00        0.17E+23        0.00E+00            0.00            0.00
+          240.00        0.17E+23        0.00E+00            0.00            0.00
+          270.00        0.17E+23        0.00E+00            0.00            0.00
+          300.00        0.17E+23        0.00E+00            0.00            0.00
+
+
+
+- Writing RTA transport results to: t56o_DS5_RTA.nc
+
+================================================================================
+== DATASET  6 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 332, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
+
+ mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t56o_DS20_WFK
+- Reading DDB from file: t56o_DS20_DDB
+- Reading DVDB from file: t56o_DS20_DVDB
+
+
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
+ R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
+ R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
+ Unit cell volume ucvol=  7.5307571E+01 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+- Cannot find dielectric tensor and Born effective charges in DDB file: t56o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t156o_DS20_DDB
+Values initialized with zeros
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=symmetric, found=No
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=symmetric, found=No
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+    4)  idir= 1, ipert=   2, type=symmetric, found=No
+    5)  idir= 2, ipert=   2, type=symmetric, found=No
+    6)  idir= 3, ipert=   2, type=symmetric, found=No
+
+All the independent perturbations are available
+--------------------------------------------------------------------------------
+
+ Number of bands in e-ph self-energy sum: 8
+ From bsum_start: 1 to bsum_stop: 8
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Only the Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequency in generalized Eliashberg functions: 0
+ Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2,2,2]
+ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Number of q-points in the IBZ: 3
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 1
+ List of K-points for self-energy corrections:
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 1 of 1
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
+================================================================================
+Final results in eV.
+Notations:
+   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+   eQP - eKS: Difference between the QP and the KS energy.
+   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+   Z(eKS): Renormalization factor.
+   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ 
+ 
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
+   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
+   1  -8.789   -0.001    557.2    0.000
+   2  12.800   -0.333      1.0   21.589
+   3  12.800   -0.333      1.0    0.000
+   4  12.800   -0.333      1.0    0.000
+   5  18.426   -0.315      1.0    5.626
+   6  18.426   -0.315      1.0    0.000
+   7  18.426   -0.315      1.0    0.000
+   8  26.686   -0.006     52.0    8.260
+ 
+ KS gap:    5.626 (assuming bval:4 ==> bcond:5)
+ 
+============================================================================================
+No more than 1 temperatures are written to the main output file.
+Please use SIGEPH.nc file and AbiPy to analyze the results.
+
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: t56o_DS6_SIGEPH.nc
+
+
+ Transport (RTA) calculation results:
+
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
            30.00        0.00E+00        0.00E+00            0.00            0.00
@@ -1231,6 +1354,10 @@ Transport calculation results
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
 
+
+
+- Writing RTA transport results to: t56o_DS6_RTA.nc
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1238,9 +1365,10 @@ Transport calculation results
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
              bdgw           1       8
+        ddb_ngqpt        2    2    2
+ dvdb_rspace_cell        1
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
-      eph_intmeth           1
       eph_extrael1     0.00000000E+00
       eph_extrael2     0.00000000E+00
       eph_extrael3     2.00000000E-01
@@ -1253,9 +1381,9 @@ Transport calculation results
        eph_fermie4     0.00000000E+00 Hartree
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
+      eph_intmeth           1
+         eph_mrta           0
          eph_task          -4
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -1516,10 +1644,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         69.5  wall=         69.6
+- Proc.   0 individual time (sec): cpu=         76.1  wall=         78.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         69.5  wall=         69.6
++Overall time at end (sec) : cpu=         76.1  wall=         78.0

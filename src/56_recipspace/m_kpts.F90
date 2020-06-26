@@ -931,12 +931,11 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  real(dp),optional,intent(out) :: kpthf(:,:)
 
 !Local variables-------------------------------
- real(dp),allocatable :: kpt_tmp(:,:)
- real(dp),allocatable :: wtk_tmp(:)
+ real(dp),allocatable :: kpt_tmp(:,:), wtk_tmp(:)
 
  call getkgrid_low(chksymbreak,iout,iscf,kpt_tmp,kptopt,kptrlatt,kptrlen,&
-& msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk_tmp,indkpt,bz2ibz_smap,&
-& fullbz,nkpthf,kpthf,downsampling)
+   msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk_tmp,indkpt,bz2ibz_smap,&
+   fullbz,nkpthf,kpthf,downsampling)
 
  if (nkpt>0) then
    kpt(:,1:nkpt) = kpt_tmp(:,1:nkpt)

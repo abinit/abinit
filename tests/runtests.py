@@ -209,11 +209,6 @@ def main():
     parser.add_option("-j", "--jobs", dest="py_nprocs", type="int", default=1,
                       help="Number of python processes.")
 
-    parser.add_option("-r", "--regenerate", dest="regenerate", default=False, action="store_true",
-                      help=("Regenerate the test suite database"
-                            "(use this option after any change of the input files of the test suite or"
-                            " any change of the python scripts)."))
-
     parser.add_option("--use-cache", default=False, action="store_true",
                       help=("Load database from pickle file."
                             "WARNING: This could lead to unexpected behaviour if the pickle database "
@@ -488,18 +483,6 @@ def main():
         test_suite = reload_test_suite(status_list=parse_stats(options.rerun))
 
     else:
-        if options.regenerate:
-             cprint("""
-`--regenerate` option has been removed in version 0.5.4
-
-Now the input files of the test farm are always analyzed when the script is executed and
-a new database is constructed from scratch. Developers can now `git checkout` a new
-branch containing changes in the test suite and runtests.py will run the new version of the tests.
-
-Use `--use-cache` to reload the database from the pickle file but remember that this could lead to
-unexpected behaviour if the pickle database is not up-to-date with the tests available in the active git branch.
-""", "red")
-
         regenerate = not options.use_cache
         try:
             test_suite = abitests.select_tests(suite_args, regenerate=regenerate,

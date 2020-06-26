@@ -52,7 +52,7 @@ prtwf 0
 #%% max_nprocs = 18
 #%% [extra_info]
 #%% authors = J. Zwanziger
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Electric field gradient of indium metal, body-centered tetragonal, included to
 #%%   check EFG symmetry in this case.

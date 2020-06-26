@@ -56,7 +56,7 @@ natsph2 4
 iatsph2 1 2 3 4
 
 
-# === LDA+U options
+# === DFT+U options
 
 usepawu  1          # Activate PAW+U
 lpawu   2 -1        # Applied on d electrons of Nickel
@@ -100,7 +100,7 @@ prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 #%% max_nprocs = 3
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
 #%%   NiO antiferromagnetic. Test of prtfatbnd==2
 #%%   2 Ni and 2 O atoms in an fcc supercell.

@@ -367,6 +367,14 @@ if ( opts.run_clean ):
         run_script(my_name, "Sluicing out the %s subsystem (subdir: %s)" % \
           (subsys, subdir),
           "cd %s && ./wipeout.sh" % subdir, indent_output=False)
+    elif ( bcnf.get(subsys, "type") == "data" ):
+      for subdir in bcnf.get(subsys, "subdirs").split():
+        run_script(my_name, "Removing Makefile.am files in %s/" % subdir,
+          "rm -f %s/Makefile.am" % subdir)
+        run_script(my_name, "Removing Makefile.in files in %s/" % subdir,
+          "rm -f %s/Makefile.in" % subdir)
+        run_script(my_name, "Removing Makefile files in %s/" % subdir,
+          "rm -f %s/Makefile" % subdir)
 
   run_script(my_name, "Removing byte-compiled ABINIT files",
     "find . -name 'abinit.srcc' -exec rm {} \;")

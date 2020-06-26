@@ -35,7 +35,7 @@ module m_spacepar
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
- use m_geometry,        only : metric, symredcart,wedge_basis,wedge_product
+ use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -53,6 +53,7 @@ public :: hartrestr         ! FFT of (rho(G)/pi)*[d(1/G**2)/d(strain) - delta(di
 public :: symrhg            ! Symmetrize rhor(r)
 public :: irrzg             ! Find the irreducible zone in reciprocal space (used by symrhg)
 public :: setsym            ! Set up irreducible zone in  G space by direct calculation.
+public :: hartredq          ! Compute the q-gradient of the Hartree potential (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 )
 
 ! MG FIXME This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
 public :: rotate_rho
@@ -336,11 +337,14 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 !scalars
  integer,intent(in) :: cplex,izero,nfft
  real(dp),intent(in) :: gsqcut
+! REMEMBER to define the V_Coulomb type first before you uncomment this
+! For the moment we will leave optional the choice of cut-off technique 
+! type(vcoul_type), intent(in), optional :: icutcoul 
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(in),optional :: divgq0
+ real(dp),intent(inout),optional :: divgq0
  real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -351,7 +355,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
+ real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol,rcut
  character(len=500) :: message
 !arrays
  integer :: id(3)
@@ -426,6 +430,37 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 
  ABI_ALLOCATE(work1,(2,nfft))
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! If there is a special treatment for the Coulomb singularity: 
+ ! Calculate it here only once before entering the loop over the grid points
+  if (PRESENT(divgq0)) then
+   rcut = (three*nfft*ucvol/four_pi)**(one/three)
+
+! SELECT CASE (singularity_mode)
+
+!   CASE('SPHERE') ! 0D 
+   ! Treatment of the divergence at the Gamma point
+   ! Spencer-Alavi scheme !!! ATT: Other methods will be gradually included
+   ! I am not completely convinced that this should be purely attributed to Spencer-Alavi  2008
+   ! since in Rozzi et al. 2006 they propose the same treatment for 0D case
+   divgq0 = two_pi*rcut**two
+
+!   CASE('CYLINDER') ! According to Rozzi et al 2006
+!     divgq0 = -pi*rcut**two*(2*log(rcut)-1)
+
+!   CASE('SURFACE') ! According to Rozzi et al 2006
+!     divgq0 = -two_pi*rcut**two
+
+!   CASE DEFAULT
+!     
+!     DEBUG
+!       call wrtout(std_out,"!!!No divergence treatment chosen!!!")
+!     ENDDEBUG
+
+! END SELECT
+ 
+ end if 
+
 
  ! Triple loop on each dimension
  do i3=1,n3
@@ -2449,6 +2484,143 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  call timab(6,2,tsec)
 
 end subroutine setsym
+!!***
+
+!!****f* ABINIT/hartredq.F90
+!! NAME
+!!  hartredq.F90
+!!
+!! FUNCTION
+!!  Given rho(G), compute the q-gradient of the Hartree potential at q=0
+!!  (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 ) -> Cartesian coordinates
+!!  The calculation is performed in reduced reciprocal space coordinates.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2017 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  cplex= if 1, vqgradhartr is REAL, if 2, vqgradhartr is COMPLEX
+!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!         (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
+!!  qdir= indicates the direction of the q-gradient (1,2 or 3)
+!!  rhog(2,nfft)=electron density in G space
+!!  
+!! OUTPUT
+!!  vqgradhart(cplex*nfft)=q-gradient of the Hartree potential at q=0in real space, either REAL or COMPLEX
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      dfpt_flexo,dfpt_qdrpole
+!!
+!! CHILDREN
+!!      fourdp,ptabs_fourdp
+!!
+!! SOURCE
+
+subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,nfft,qdir
+ real(dp),intent(in) :: gsqcut
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: gmet(3,3),rhog(2,nfft)
+ real(dp),intent(out) :: vqgradhart(cplex*nfft)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: im=2,re=1
+ integer :: i1,i2,i23,i2_local,i3
+ integer :: id1,id2,id3,ig1,ig2,ig3,ii,ii1,me_fft,n1,n2,n3,nproc_fft
+ real(dp) :: cutoff,gfact,gnorm,num
+ real(dp), parameter :: piinv2= piinv*two
+ real(dp),parameter :: tolfix=1.000000001e0_dp
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp),allocatable :: work1(:,:)
+ real(dp) :: gvec(3)
+ 
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+ 
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+ nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
+
+!Get the distrib associated with this fft_grid 
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+!Initialize a few quantities
+ cutoff=gsqcut*tolfix
+ ABI_ALLOCATE(work1,(2,nfft))
+ id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+!Triple loop on each dimension
+ do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
+
+   do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
+
+     if (fftn2_distrib(i2) == me_fft) then
+       i2_local = ffti2_local(i2)
+       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
+       !Do the test that eliminates the Gamma point outside of the inner loop
+       ii1=1
+       if(i23==0 .and. ig2==0 .and. ig3==0)then
+         ii1=2
+         work1(re,1+i23)=zero
+         work1(im,1+i23)=zero
+       end if
+
+       ! Final inner loop on the first dimension (note the lower limit)
+       do i1=ii1,n1
+         ig1=i1-(i1/id1)*n1-1
+         ii=i1+i23
+
+         gvec=(/ig1,ig2,ig3/)
+         gnorm=normv(gvec,gmet,'r') !'r' is to avoid the 2pi scalling
+   
+         if (gnorm**2<=cutoff) then
+           num=dot_product(gmet(qdir,:),gvec(:))
+           gfact=piinv2*num/gnorm**4
+           work1(re,ii)=-rhog(re,ii)*gfact
+           work1(im,ii)=-rhog(im,ii)*gfact
+         else
+           work1(re,ii)=zero
+           work1(im,ii)=zero
+         end if
+
+       end do ! End loop on i1
+     end if
+
+   end do ! End loop on i2
+ end do ! End loop on i3
+
+ ! Fourier Transform the q-gradient of the hartree potential, in reciprocal space it was stored in work1
+ call fourdp(cplex,work1,vqgradhart,1,mpi_enreg,nfft,1,ngfft,0)
+
+ ABI_DEALLOCATE(work1)
+
+ DBG_EXIT("COLL")
+
+end subroutine hartredq
 !!***
 
 end module m_spacepar
