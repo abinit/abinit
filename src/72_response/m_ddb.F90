@@ -169,15 +169,12 @@ MODULE m_ddb
      ! Return object used to enforce the acoustic sum rule
 
     procedure :: write_block => ddb_write_block
-    !procedure :: write_blok => ddb_write_blok
      ! Writes blocks of data in the DDBs.
 
-    !procedure :: read_blok => ddb_read_block
     procedure :: read_block => ddb_read_block
      ! This routine reads blocks of data in the DDBs.
 
     procedure :: get_block => ddb_get_block
-    !procedure :: gtblk9 => ddb_get_block
      ! Finds the block containing the derivatives of the total energy.
 
  end type ddb_type
@@ -480,7 +477,7 @@ end subroutine ddb_bcast
 !! ddb_get_block
 !!
 !! FUNCTION
-!! This routine (get block) finds the block that contains the
+!! This routine finds the block that contains the
 !! information on the derivatives of the total energy specified
 !! by the parameters rfphon,rfelfd,rfstrs,rftyp and
 !! the phonon wavevectors qphon (and their normalisation).
@@ -554,7 +551,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
  mpert = ddb%mpert
  natom = ddb%natom
 
-!Get the number of derivative
+ ! Get the number of derivative
  if(rftyp==1.or.rftyp==2)then
    nder=2
  else if(rftyp==3.or.rftyp==33)then
@@ -570,7 +567,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
 
  rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
 
-!In case of a second-derivative, a second phonon wavevector is provided.
+ ! In case of a second-derivative, a second phonon wavevector is provided.
  if(nder==2)then
    do ii=1,3
      qphon(ii,2)=-qphon(ii,1)
@@ -578,19 +575,19 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
    qphnrm(2)=qphnrm(1)
  end if
 
-!In case of a third derivative, the sum of wavevectors to gamma is checked
+ ! In case of a third derivative, the sum of wavevectors to gamma is checked
  if (nder == 3) then
    qpt(:) = qphon(:,1)/qphnrm(1) + qphon(:,2)/qphnrm(2) + qphon(:,3)/qphnrm(3)
    call gamma9(gamma(nder),qpt,qphnrm(1),DDB_QTOL)
    if (gamma(nder) == 0) then
      write(message,'(a,a,a)')&
-&     'the sum of the wavevectors of the third-order energy is ',ch10,&
-&     'not equal to zero'
+      'the sum of the wavevectors of the third-order energy is ',ch10,&
+      'not equal to zero'
      MSG_ERROR(message)
    end if
  end if
 
-!Check the validity of the requirement
+ ! Check the validity of the requirement
  do ider=1,nder
    ! Identifies if qphon is at gamma
    call gamma9(gamma(ider),qphon(1:3,ider),qphnrm(ider),DDB_QTOL)
@@ -598,57 +595,47 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
    if(gamma(ider)==0)then
      if(rfstrs(ider)/=0.or.rfelfd(ider)/=0.or.rfqvec_(ider)/=0)then
        write(message, '(a,a)' )&
-&       'Not yet able to handle stresses or electric fields',ch10,&
-&       'with non-zero wavevector.'
+        'Not yet able to handle stresses or electric fields',ch10,&
+        'with non-zero wavevector.'
        MSG_BUG(message)
      end if
    end if
  end do
 
-!Initialise the perturbation table
+ ! Initialise the perturbation table
  ABI_MALLOC(worki,(mpert,4))
  worki(:,1:nder)=0
 
-!Build the perturbation table
+ ! Build the perturbation table
  do ider=1,nder
-!  First the phonons
+   ! First the phonons
    if(rfphon(ider)==1)then
      do ipert=1,natom
        worki(ipert,ider)=1
      end do
    end if
-!  Then the d/dk
-   if(rfelfd(ider)==1.or.rfelfd(ider)==3)then
-     worki(natom+1,ider)=1
-   end if
-!  Then the electric field
-   if(rfelfd(ider)==2.or.rfelfd(ider)==3)then
-     worki(natom+2,ider)=1
-   end if
-!  Then the ddq
-   if(rfqvec_(ider)==1)then
-     worki(natom+8,ider)=1
-   end if
-!  Then the uniaxial stress
-   if(rfstrs(ider)==1.or.rfstrs(ider)==3)then
-     worki(natom+3,ider)=1
-   end if
-!  At last, the shear stress
-   if(rfstrs(ider)==2.or.rfstrs(ider)==3)then
-     worki(natom+4,ider)=1
-   end if
+   ! Then the d/dk
+   if (rfelfd(ider)==1.or.rfelfd(ider)==3) worki(natom+1,ider)=1
+   ! Then the electric field
+   if (rfelfd(ider)==2.or.rfelfd(ider)==3) worki(natom+2,ider)=1
+   ! Then the ddq
+   if (rfqvec_(ider)==1) worki(natom+8,ider)=1
+   ! Then the uniaxial stress
+   if (rfstrs(ider)==1.or.rfstrs(ider)==3) worki(natom+3,ider)=1
+   ! At last, the shear stress
+   if(rfstrs(ider)==2.or.rfstrs(ider)==3) worki(natom+4,ider)=1
  end do
 
-!Examine every blok :
+ ! Examine every blok:
  do iblok=1,ddb%nblok
 
-!  If this variable is still 1 at the end of the examination, the blok is the good one...
+   ! If this variable is still 1 at the end of the examination, the blok is the good one...
    ok=1
 
-!  Check the type
+   ! Check the type
    if(rftyp/=ddb%typ(iblok)) ok=0
 
-!  Check the wavevector
+   ! Check the wavevector
    if( ok==1 )then
 
      if (nder == 2) then
@@ -664,8 +651,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
      else if (nder == 3) then
        do ider = 1, nder
          do idir=1,3
-           if( abs( ddb%qpt(idir+3*(ider-1),iblok)/ddb%nrm(ider,iblok) - &
-&           qphon(idir,ider)/qphnrm(ider) )>DDB_QTOL )then
+           if( abs( ddb%qpt(idir+3*(ider-1),iblok)/ddb%nrm(ider,iblok) - qphon(idir,ider)/qphnrm(ider) )>DDB_QTOL )then
              ok=0
            end if ! qphon
          end do ! idir
@@ -674,7 +660,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
 
    end if ! ok
 
-!  Check if there is enough information in this blok
+   ! Check if there is enough information in this blok
    if( ok==1 )then
 
      if (nder == 0) then
@@ -682,8 +668,8 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
          ok = 0
          if (ddb%prtvol > 1) then
            write(message,'(a,i0,3a)' )&
-           'The block ',iblok,' does not match the requirement',ch10,&
-           'because it lacks the total energy'
+            'The block ',iblok,' does not match the requirement',ch10,&
+            'because it lacks the total energy'
            MSG_COMMENT(message)
          end if
        end if
@@ -713,8 +699,8 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
                      if (worki(ipert3,3) == 1 .and. ok == 1) then
                        do idir3 = 1, 3
                          index = idir1 + &
-&                         3*((ipert1 - 1) + mpert*((idir2 - 1) + &
-&                         3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
+                           3*((ipert1 - 1) + mpert*((idir2 - 1) + &
+                           3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
                          if (ddb%flg(index,iblok) /= 1) ok = 0
                        end do  ! idir3
                      end if ! worki(ipert3,3)
@@ -729,7 +715,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
      end do
    end if
 
-!  Now that everything has been checked, eventually end the search
+   ! Now that everything has been checked, eventually end the search
    if(ok==1)exit
  end do
 
@@ -738,8 +724,8 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqve
 
    if (ddb%prtvol > 1) then
      write(message, '(3a)' )&
-&     ' gtblk9 : ',ch10,&
-&     '  Unable to find block corresponding to the following specifications :'
+      ' gtblk9 : ',ch10,&
+      '  Unable to find block corresponding to the following specifications :'
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i3)' )' Type (rfmeth) =',rftyp
      call wrtout(std_out,message,'COLL')
@@ -861,7 +847,7 @@ end subroutine gamma9
 !! SOURCE
 
 subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
-&     blkval2,kpt) !optional
+                          blkval2,kpt) !optional
 
 !Arguments -------------------------------
 !scalars
@@ -881,12 +867,12 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
 ! *********************************************************************
 
-!Zero every flag
+ ! Zero every flag
  ddb%flg(1:msize, iblok)=0
  if(present(blkval2))blkval2(:,:,:,:)=zero
  if(present(kpt))kpt(:,:)=zero
 
-!Read the block type and number of elements
+ ! Read the block type and number of elements
  read(nunit,*)
  read(nunit, '(a32,12x,i8)' )name,nelmts
 
@@ -912,10 +898,10 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    MSG_ERROR(message)
  end if
 
-!Read the 2nd derivative block
+ ! Read the 2nd derivative block
  if(ddb%typ(iblok)==1.or.ddb%typ(iblok)==2)then
 
-!  First check if there is enough space to read it
+   ! First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert))then
      write(message,'(3a)')&
      'There is not enough space to read a second-derivative block.',ch10,&
@@ -923,10 +909,10 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      MSG_ERROR(message)
    end if
 
-!  Read the phonon wavevector
+   ! Read the phonon wavevector
    read(nunit, '(4x,3es16.8,f6.1)' )(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
-!  Read every element
+   ! Read every element
    do ii=1,nelmts
      read(nunit,*)idir1,ipert1,idir2,ipert2,ar,ai
      index=idir1+3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
@@ -935,10 +921,10 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      ddb%val(2,index,iblok)=ai
    end do
 
-!  Read the 3rd derivative block
  else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
+   ! Read the 3rd derivative block
 
-!  First check if there is enough space to read it
+   ! First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert*3*mpert))then
      write(message, '(a,a,a,i10,a,i10,a,a,a)' )&
      'There is not enough space to read a third-derivative block.',ch10,&
@@ -947,44 +933,44 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      MSG_ERROR(message)
    end if
 
-!  Read the perturbation wavevectors
+   ! Read the perturbation wavevectors
    read(nunit,'(4x,3es16.8,f6.1)')(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
    read(nunit,'(4x,3es16.8,f6.1)')(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
    read(nunit,'(4x,3es16.8,f6.1)')(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
 
-!  Read every element
+   ! Read every element
    do ii=1,nelmts
      read(nunit,'(6i4,2d22.14)')idir1,ipert1,idir2,ipert2,idir3,ipert3,ar,ai
      index=idir1+                     &
-&     3*((ipert1-1)+mpert*((idir2-1)+ &
-&     3*((ipert2-1)+mpert*((idir3-1)+3*(ipert3-1)))))
+       3*((ipert1-1)+mpert*((idir2-1)+ &
+       3*((ipert2-1)+mpert*((idir3-1)+3*(ipert3-1)))))
      ddb%flg(index,iblok)=1
      ddb%val(1,index,iblok)=ar
      ddb%val(2,index,iblok)=ai
    end do
 
-!  Read the total energy
- else if(ddb%typ(iblok)==0)then
 
-!  First check if there is enough space to read it
+ else if(ddb%typ(iblok)==0)then
+   ! Read the total energy
+   ! First check if there is enough space to read it
    if(msize<1)then
      write(message, '(3a,i0,3a)' )&
-&     'There is not enough space to read a total energy block.',ch10,&
-&     'The size provided is only ',msize,' although 1 is needed.',ch10,&
-&     'Action: increase msize and recompile.'
+      'There is not enough space to read a total energy block.',ch10,&
+      'The size provided is only ',msize,' although 1 is needed.',ch10,&
+      'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if
 
-!  Read the total energy
+   ! Read the total energy
    read(nunit,'(2d22.14)')ar,ai
    ddb%flg(1,iblok)=1
    ddb%val(1,1,iblok)=ar
    ddb%val(2,1,iblok)=ai
 
-!  Read the 1st derivative block
- else if (ddb%typ(iblok) == 4) then
 
-!  First check if there is enough space to read it
+ else if (ddb%typ(iblok) == 4) then
+   !  Read the 1st derivative block
+   !  First check if there is enough space to read it
    if (msize < (3*mpert)) then
      write(message, '(3a,i0,a,i0,3a)' )&
      'There is not enough space to read a first-derivative block.',ch10,&
@@ -993,7 +979,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      MSG_ERROR(message)
    end if
 
-!  Read every element
+   ! Read every element
    do ii=1,nelmts
      read(nunit,'(2i4,2d22.14)')idir1,ipert1,ar,ai
      index=idir1 + 3*(ipert1 - 1)
@@ -1002,10 +988,11 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      ddb%val(2,index,iblok)=ai
    end do
 
-!  Read the 2nd eigenvalue derivative block
+
  else if(ddb%typ(iblok)==5)then
 
-!  First check if there is enough space to read it
+   ! Read the 2nd eigenvalue derivative block
+   ! First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert))then
      write(message, '(3a,i0,a,i0,3a)' )&
      'There is not enough space to read a second-derivative block.',ch10,&
@@ -1014,16 +1001,16 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      MSG_ERROR(message)
    end if
 
-!  Read the phonon wavevector
+   ! Read the phonon wavevector
    read(nunit, '(4x,3es16.8,f6.1)' )(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
-!  Read the K point and band
+   ! Read the K point and band
    if(present(blkval2).and.present(kpt))then
      do ikpt=1,nkpt
        read(nunit, '(9x,3es16.8)')(kpt(ii,ikpt),ii=1,3)
        do iband=1,mband
          read(nunit, '(6x,i3)') band
-!        Read every element
+         ! Read every element
          do ii=1,nelmts
            read(nunit,*)idir1,ipert1,idir2,ipert2,ar,ai
            index=idir1+3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
@@ -1110,8 +1097,8 @@ end subroutine ddb_read_block
 !! SOURCE
 
 subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
-& mband,mpert,msize,msym,natifc,natom,nkpt,nsym,ntypat,&
-& rmet,rprim,symrec,symrel,symafm,tnons,typat,ucvol,xcart,xred,zion,znucl)
+                  mband,mpert,msize,msym,natifc,natom,nkpt,nsym,ntypat,&
+                  rmet,rprim,symrec,symrel,symafm,tnons,typat,ucvol,xcart,xred,zion,znucl)
 
 !Arguments ------------------------------------
 ! NOTE: these are used for dimensioning and then re-assigned in ioddb8.
@@ -1157,7 +1144,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 
  DBG_ENTER("COLL")
 
-!Open the input derivative database file and read the header
+ ! Open the input derivative database file and read the header
  call ddb_hdr_open_read(ddb_hdr, filnam, ddbun, DDB_VERSION, msym=msym, mband=mband)
 
  !nkpt = ddb_hdr%nkpt
@@ -1179,32 +1166,32 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 
  call ddb_hdr%free()
 
-!Compute different matrices in real and reciprocal space, also
-!checks whether ucvol is positive.
+ ! Compute different matrices in real and reciprocal space, also
+ ! checks whether ucvol is positive.
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
-!Obtain reciprocal space primitive transl g from inverse trans of r
-!(Unlike in abinit, gprim is used throughout ifc; should be changed, later)
+ ! Obtain reciprocal space primitive transl g from inverse trans of r
+ ! (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
  call matr3inv(rprim,gprim)
 
-!Generate atom positions in cartesian coordinates
+ ! Generate atom positions in cartesian coordinates
  call xred2xcart(natom,rprimd,xcart,xred)
 
-!Transposed inversion of the symmetry matrices, for use in the reciprocal space
+ ! Transposed inversion of the symmetry matrices, for use in the reciprocal space
  do isym=1,nsym
    call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
  end do
 
-!SYMATM generates for all the atoms and all the symmetries, the atom
-!on which the referenced one is sent and also the translation bringing
-!back this atom to the referenced unit cell
+ ! SYMATM generates for all the atoms and all the symmetries, the atom
+ ! on which the referenced one is sent and also the translation bringing
+ ! back this atom to the referenced unit cell
  call symatm(indsym,natom,nsym,symrec,tnons,tolsym8,typat,xred)
 
-!Check the correctness of some input parameters, and perform small treatment if needed.
+ ! Check the correctness of some input parameters, and perform small treatment if needed.
  call chkin9(atifc,natifc,natom)
 
-!Read the blocks from the input database, and close it.
+ ! Read the blocks from the input database, and close it.
  write(message, '(3a,i0,a)' )ch10,ch10,' rdddb9: read ',ddb%nblok,' blocks from the input DDB '
  call wrtout(std_out,message,'COLL')
 
@@ -1258,8 +1245,8 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
 
-!    Set the elements that are zero by symmetry for raman and
-!    non-linear optical susceptibility tensors
+     ! Set the elements that are zero by symmetry for raman and
+     ! non-linear optical susceptibility tensors
      rfpert = 0
      rfpert(:,natom+2,:,natom+2,:,natom+2) = 1
      rfpert(:,1:natom,:,natom+2,:,natom+2) = 1
@@ -1273,7 +1260,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
              do i2dir=1,3
                do i3dir=1,3
                  if ((rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) .and. &
-&                  (tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)) then
+                     (tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)) then
                    tmpval(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
                    tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
                  end if
@@ -1388,9 +1375,9 @@ subroutine chkin9(atifc,natifc,natom)
 
  if(natifc>natom)then
    write(message, '(a,i0,3a,i0,3a)' )&
-&   'The number of atom ifc in the input files',natifc,',',ch10,&
-&   'is larger than the number of atoms',natom,'.',ch10,&
-&   'Action: change natifc in the input file.'
+    'The number of atom ifc in the input files',natifc,',',ch10,&
+    'is larger than the number of atoms',natom,'.',ch10,&
+    'Action: change natifc in the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1401,10 +1388,10 @@ subroutine chkin9(atifc,natifc,natom)
    do iatifc=1,natifc
      if(atifc(iatifc)<=0.or.atifc(iatifc)>natom)then
        write(message, '(a,i0,5a,i0,3a)' )&
-&       'For iatifc=',iatifc,', the number of the atom ifc to be ',ch10,&
-&       'analysed is not valid : either negative, ',ch10,&
-&       'zero, or larger than natom =',natom,'.',ch10,&
-&       'Action: change atifc in your input file.'
+        'For iatifc=',iatifc,', the number of the atom ifc to be ',ch10,&
+        'analysed is not valid : either negative, ',ch10,&
+        'zero, or larger than natom =',natom,'.',ch10,&
+        'Action: change atifc in your input file.'
        MSG_ERROR(message)
      end if
      work(atifc(iatifc))=1
@@ -1488,19 +1475,19 @@ subroutine nlopt(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
 !            Check if all elements are available
 
              if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=0).and. &
-&             (blkflg(i1dir,i1pert,i3dir,i3pert,i2dir,i2pert)/=0).and. &
-&             (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=0).and. &
-&             (blkflg(i2dir,i2pert,i3dir,i3pert,i1dir,i1pert)/=0).and. &
-&             (blkflg(i3dir,i3pert,i1dir,i1pert,i2dir,i2pert)/=0).and. &
-&             (blkflg(i3dir,i3pert,i2dir,i2pert,i1dir,i1pert)/=0)) then
+                 (blkflg(i1dir,i1pert,i3dir,i3pert,i2dir,i2pert)/=0).and. &
+                 (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=0).and. &
+                 (blkflg(i2dir,i2pert,i3dir,i3pert,i1dir,i1pert)/=0).and. &
+                 (blkflg(i3dir,i3pert,i1dir,i1pert,i2dir,i2pert)/=0).and. &
+                 (blkflg(i3dir,i3pert,i2dir,i2pert,i1dir,i1pert)/=0)) then
 
                d3cart(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
-&               (  d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
-&               d3(:,i1dir,i1pert,i3dir,i3pert,i2dir,i2pert) + &
-&               d3(:,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) + &
-&               d3(:,i2dir,i2pert,i3dir,i3pert,i1dir,i1pert) + &
-&               d3(:,i3dir,i3pert,i1dir,i1pert,i2dir,i2pert) + &
-&               d3(:,i3dir,i3pert,i2dir,i2pert,i1dir,i1pert))*sixth
+               (  d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
+                  d3(:,i1dir,i1pert,i3dir,i3pert,i2dir,i2pert) + &
+                  d3(:,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) + &
+                  d3(:,i2dir,i2pert,i3dir,i3pert,i1dir,i1pert) + &
+                  d3(:,i3dir,i3pert,i1dir,i1pert,i2dir,i2pert) + &
+                  d3(:,i3dir,i3pert,i2dir,i2pert,i1dir,i1pert))*sixth
 
              end if
            end do
@@ -1553,15 +1540,13 @@ subroutine nlopt(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
    end do
  end do
 
-!Compute non linear-optical coefficients d_ijk (atomic units)
-
+ ! Compute non linear-optical coefficients d_ijk (atomic units)
  i1pert = natom+2
  d3cart(:,:,i1pert,:,i1pert,:,i1pert) = -3._dp*d3cart(:,:,i1pert,:,i1pert,:,i1pert)/(ucvol*2._dp)
 
-!Compute first-order change in the electronic dielectric
-!susceptibility (Bohr^-1) induced by an atomic displacement
- d3cart(1:2,1:3,1:natom,1:3,natom + 2,1:3,natom + 2) = &
-& -6._dp*d3cart(1:2,1:3,1:natom,1:3,natom + 2,1:3,natom + 2)/ucvol
+ ! Compute first-order change in the electronic dielectric
+ ! susceptibility (Bohr^-1) induced by an atomic displacement
+ d3cart(1:2,1:3,1:natom,1:3,natom + 2,1:3,natom + 2) = -6._dp*d3cart(1:2,1:3,1:natom,1:3,natom + 2,1:3,natom + 2)/ucvol
 
 end subroutine nlopt
 !!***
@@ -1754,7 +1739,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, ddb_hdr, cry
  ! Initialize crystal_t object.
  call mkrdim(acell,rprim,rprimd)
 
-!FIXME: These variables are hardcoded
+ ! FIXME: These variables are hardcoded
  npsp = ntypat; space_group = 0; timrev = 2
  use_antiferro=.FALSE. !;  use_antiferro=(nspden==2.and.nsppol==1)
  ABI_MALLOC(title, (ntypat))
@@ -1822,8 +1807,7 @@ end subroutine ddb_from_file
 !!
 !! SOURCE
 
-subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
-& mpert,msize,natom,nblok,nkpt,rprimd)
+subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband, mpert,msize,natom,nblok,nkpt,rprimd)
 
 !Arguments ------------------------------------
 !scalars
@@ -1839,23 +1823,20 @@ subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
 
 !Local variables-------------------------------
 !scalars
-integer :: iatom1,iatom2,iband,idir1,idir2,ikpt
-integer :: index
+integer :: iatom1,iatom2,iband,idir1,idir2,ikpt, index
 !arrays
-real(dp),allocatable :: blkflgtmp(:,:,:,:,:)
-real(dp),allocatable :: blkval2tmp(:,:,:,:,:,:)
-real(dp),allocatable :: d2cart(:,:,:,:,:)
+real(dp),allocatable :: blkflgtmp(:,:,:,:,:), blkval2tmp(:,:,:,:,:,:), d2cart(:,:,:,:,:)
 
 ! *********************************************************************
 
-!Start by allocating local arrays
+ ! Start by allocating local arrays
  ABI_MALLOC(blkflgtmp,(3,mpert,3,mpert,1))
  ABI_MALLOC(blkval2tmp,(2,3,mpert,3,mpert,1))
  ABI_MALLOC(d2cart,(2,3,mpert,3,mpert))
 
-!Begin by formating the arrays to be compatible with cart29
-!Then call cart29 to transform the arrays in cartesian coordinates
-!Finally reformat the cartesian arrays in old format
+ ! Begin by formating the arrays to be compatible with cart29
+ ! Then call cart29 to transform the arrays in cartesian coordinates
+ ! Finally reformat the cartesian arrays in old format
  do ikpt=1,nkpt
    do iband=1,mband
 
@@ -1871,7 +1852,7 @@ real(dp),allocatable :: d2cart(:,:,:,:,:)
        end do
      end do
 
-!    The 1sin the argument of cart29 are respectively iblok and nblok. We are doing only one blok.
+     ! The 1sin the argument of cart29 are respectively iblok and nblok. We are doing only one blok.
      call carteig2d(blkflg(:,iqpt),blkval2tmp,carflg,d2cart,gprimd,1,mpert,natom,1,rprimd)
 
      do idir1=1,3
@@ -1888,7 +1869,6 @@ real(dp),allocatable :: d2cart(:,:,:,:,:)
    end do
  end do
 
-!Deallocating local arrays
  ABI_FREE(blkflgtmp)
  ABI_FREE(blkval2tmp)
  ABI_FREE(d2cart)
@@ -1933,8 +1913,7 @@ end subroutine carttransf
 !!
 !! SOURCE
 
-subroutine carteig2d(blkflg,blkval,carflg,d2cart,&
-& gprimd,iblok,mpert,natom,nblok,rprimd)
+subroutine carteig2d(blkflg,blkval,carflg,d2cart,gprimd,iblok,mpert,natom,nblok,rprimd)
 
 !Arguments -------------------------------
 !scalars
@@ -1954,24 +1933,24 @@ subroutine carteig2d(blkflg,blkval,carflg,d2cart,&
 
 ! *********************************************************************
 
-!First, copy the data blok in place.
+ ! First, copy the data blok in place.
  d2cart(:,:,:,:,:)=blkval(:,:,:,:,:,iblok)
 
-!Cartesian coordinates transformation (in two steps)
-!First step
+ ! Cartesian coordinates transformation (in two steps)
+ ! First step
  do ipert1=1,mpert
    do ipert2=1,mpert
      do ii=1,2
        do idir1=1,3
          do idir2=1,3
            vec1(idir2)=d2cart(ii,idir1,ipert1,idir2,ipert2)
-!          Note here blkflg
+           ! Note here blkflg
            flg1(idir2)=blkflg(idir1,ipert1,idir2,ipert2,iblok)
          end do
          call cart39(flg1,flg2,gprimd,ipert2,natom,rprimd,vec1,vec2)
          do idir2=1,3
            d2cart(ii,idir1,ipert1,idir2,ipert2)=vec2(idir2)
-!          And here carflg
+           ! And here carflg
            carflg(idir1,ipert1,idir2,ipert2)=flg2(idir2)
          end do
        end do
@@ -1979,20 +1958,20 @@ subroutine carteig2d(blkflg,blkval,carflg,d2cart,&
    end do
  end do
 
-!Second step
+ ! Second step
  do ipert1=1,mpert
    do ipert2=1,mpert
      do ii=1,2
        do idir2=1,3
          do idir1=1,3
            vec1(idir1)=d2cart(ii,idir1,ipert1,idir2,ipert2)
-!          Note here carflg
+           ! Note here carflg
            flg1(idir1)=carflg(idir1,ipert1,idir2,ipert2)
          end do
          call cart39(flg1,flg2,gprimd,ipert1,natom,rprimd,vec1,vec2)
          do idir1=1,3
            d2cart(ii,idir1,ipert1,idir2,ipert2)=vec2(idir1)
-!          And here carflg again
+           ! And here carflg again
            carflg(idir1,ipert1,idir2,ipert2)=flg2(idir1)
          end do
        end do
@@ -2150,7 +2129,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
-!Extraction of non-linear optical coefficients
+ ! Extraction of non-linear optical coefficients
  do elfd1 = 1,3
    do elfd2 = 1,3
      do elfd3 = 1,3
@@ -2159,7 +2138,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
    end do
  end do
 
-!Transform to Voigt notations
+ ! Transform to Voigt notations
  voigtindex(:,1) = (/1,2,3,2,1,1/)
  voigtindex(:,2) = (/1,2,3,3,3,2/)
  do ivoigt = 1, 6
@@ -2170,10 +2149,10 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
    end do
  end do
 
-!Transform to pm/V
+ ! Transform to pm/V
  dvoigt(:,:) = dvoigt(:,:)*16*(pi**2)*(Bohr_Ang**2)*1.0d-8*eps0/e_Cb
 
-!Extraction of $\frac{d \chi}{d \tau}$
+ ! Extraction of $\frac{d \chi}{d \tau}$
  if (nlflag < 3) then
    do iatom = 1, natom
      do depl = 1,3
@@ -2231,12 +2210,10 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
      do elfd1 = 1,3
        do depl = 1,3
          do iatom = 1, natom
-           sumrule(depl,elfd1,elfd2) = sumrule(depl,elfd1,elfd2) + &
-&           dchidt(iatom,depl,elfd1,elfd2)
+           sumrule(depl,elfd1,elfd2) = sumrule(depl,elfd1,elfd2) + dchidt(iatom,depl,elfd1,elfd2)
          end do
          do iatom = 1, natom
-           dchidt(iatom,depl,elfd1,elfd2) = dchidt(iatom,depl,elfd1,elfd2) - &
-&           wghtat(iatom)*sumrule(depl,elfd1,elfd2)
+           dchidt(iatom,depl,elfd1,elfd2) = dchidt(iatom,depl,elfd1,elfd2) - wghtat(iatom)*sumrule(depl,elfd1,elfd2)
          end do
        end do
      end do
@@ -2508,10 +2485,10 @@ integer function ddb_get_dielt(ddb, rftyp, dielt) result(iblok)
    dielt=tmpval(1:3,ddb%natom+2,1:3,ddb%natom+2)
 
    write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
-&   ' Dielectric Tensor ',&
-&   dielt(1,1),dielt(1,2),dielt(1,3),&
-&   dielt(2,1),dielt(2,2),dielt(2,3),&
-&   dielt(3,1),dielt(3,2),dielt(3,3)
+       ' Dielectric Tensor ',&
+       dielt(1,1),dielt(1,2),dielt(1,3),&
+       dielt(2,1),dielt(2,2),dielt(2,3),&
+       dielt(3,1),dielt(3,2),dielt(3,3)
 
    call wrtout(std_out,message,'COLL')
 
@@ -2910,8 +2887,8 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
 
  ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
-&  ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),my_qpt,&
-&  crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+   ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),my_qpt,&
+   crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
 
  ! Return the dynamical matrix and the eigenvector for this q-point
  !if (present(out_d2cart)) out_d2cart = d2cart(:,:3*natom,:3*natom)
@@ -3071,7 +3048,7 @@ end subroutine asrq0_free
 !! SOURCE
 
 subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
-&     blkval2,kpt) !optional
+                           blkval2,kpt) !optional
 
 !Arguments -------------------------------
 !scalars
@@ -3089,14 +3066,13 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 
 ! *********************************************************************
 
-
-!Count the number of elements
+ ! Count the number of elements
  nelmts=0
  do ii=1,msize
    if(ddb%flg(ii,iblok)==1)nelmts=nelmts+1
  end do
 
-!Write the block type and number of elements
+ ! Write the block type and number of elements
  write(nunit,*)' '
  if (ddb%typ(iblok) == 0) then
    write(nunit, '(a,i8)' )' Total energy                 - # elements :',nelmts
@@ -3114,13 +3090,13 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
  end if
 
-!Write the 2nd derivative block
+ ! Write the 2nd derivative block
  if(ddb%typ(iblok)==1.or.ddb%typ(iblok)==2)then
 
-!  Write the phonon wavevector
+   ! Write the phonon wavevector
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
-!  Write the matrix elements
+   ! Write the matrix elements
    if(choice==2)then
      ii=0
      do ipert2=1,mpert
@@ -3137,15 +3113,16 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
      end do
    end if
 
-!  Write the 3rd derivative block
- else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
 
-!  Write the phonon wavevectors
+ else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
+   ! Write the 3rd derivative block
+
+   ! Write the phonon wavevectors
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
 
-!  Write the matrix elements
+   ! Write the matrix elements
    if(choice==2)then
      ii=0
      do ipert3=1,mpert
@@ -3157,7 +3134,7 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
                  ii=ii+1
                  if(ddb%flg(ii,iblok)==1)then
                    write(nunit, '(6i4,2d22.14)' )&
-&                   idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
+                    idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
                  end if
                end do
              end do
@@ -3167,14 +3144,14 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
      end do
    end if
 
-!  Write total energy
- else if (ddb%typ(iblok) == 0) then
-   if (choice == 2) then
-     write(nunit,'(2d22.14)')ddb%val(1,1,iblok),ddb%val(2,1,iblok)
-   end if
 
-!  Write the 1st derivative blok
+ else if (ddb%typ(iblok) == 0) then
+   !  Write total energy
+   if (choice == 2) write(nunit,'(2d22.14)')ddb%val(1,1,iblok),ddb%val(2,1,iblok)
+
+
  else if (ddb%typ(iblok) == 4) then
+   !  Write the 1st derivative blok
    if (choice == 2) then
      ii = 0
      do ipert1 = 1, mpert
@@ -3188,9 +3165,9 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    end if
 
  else if (ddb%typ(iblok)==5) then
-!  Write the phonon wavevector
+   ! Write the phonon wavevector
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
-!  Write the matrix elements
+   ! Write the matrix elements
    if(choice==2)then
      if(present(blkval2).and.present(kpt))then
        do ikpt=1,nkpt
@@ -3204,8 +3181,7 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
                  do idir1=1,3
                    ii=ii+1
                    if(ddb%flg(ii,iblok)==1)then
-                     write(nunit,'(4i4,2d22.14)')idir1,ipert1,idir2,ipert2,&
-&                     blkval2(1,ii,iband,ikpt),blkval2(2,ii,iband,ikpt)
+                     write(nunit,'(4i4,2d22.14)')idir1,ipert1,idir2,ipert2,blkval2(1,ii,iband,ikpt),blkval2(2,ii,iband,ikpt)
                    end if
                  end do !idir1
                end do  !ipert1
@@ -3273,14 +3249,13 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
  ddb%typ = 3
  ddb%nrm = one
  ddb%qpt = zero   ! this has to be changed in case anharmonic
-!force constants have been computed
+ ! force constants have been computed
 
-
-!Write blok of third-order derivatives to ouput file
+ ! Write blok of third-order derivatives to ouput file
 
  write(message,'(a,a,a,a,a)')ch10,&
-& ' Matrix of third-order derivatives (reduced coordinates)',ch10,&
-& ' before computing the permutations of the perturbations',ch10
+  ' Matrix of third-order derivatives (reduced coordinates)',ch10,&
+  ' before computing the permutations of the perturbations',ch10
  call wrtout(ab_out,message,'COLL')
 
  write(ab_out,*)'    j1       j2       j3              matrix element'
@@ -3294,17 +3269,16 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
            do i3dir=1,3
 
              index = i1dir + &
-&             3*((i1pert-1)+mpert*((i2dir-1) + &
-&             3*((i2pert-1)+mpert*((i3dir-1) + 3*(i3pert-1)))))
+               3*((i1pert-1)+mpert*((i2dir-1) + &
+               3*((i2pert-1)+mpert*((i3dir-1) + 3*(i3pert-1)))))
              ddb%flg(index,1) = blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
              ddb%val(:,index,1)= d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
              if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=0) then
 
                write(ab_out,'(3(i4,i5),2f22.10)')&
-&               i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,&
-&               d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-
+                 i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,&
+                 d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
              end if
 
            end do
@@ -3314,7 +3288,7 @@ subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
    end do
  end do
 
-!Write blok of third-order derivatives to DDB
+ ! Write blok of third-order derivatives to DDB
  call ddb%write_block(1,choice,mband,mpert,msize,nkpt,unddb)
 
  call ddb_free(ddb)
@@ -3343,7 +3317,7 @@ end subroutine dfptnl_doutput
 !! SOURCE
 
 
-subroutine ddb_to_dtset(comm,dtset,filename,psps)
+subroutine ddb_to_dtset(comm, dtset, filename, psps)
 
  !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -3583,11 +3557,11 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
    write(message, '(a,a,a,a,a)' )&
-&   'The initialisation mode of MRGDDB, that uses nddb=1,',&
-&   'has been disabled in version 2.1 of ABINIT.',&
-&   'Action: you should use DDBs that include the symmetry',&
-&   'information (and that can be used and merged without',&
-&   'initialisation), or you should use ABINITv2.0.'
+    'The initialisation mode of MRGDDB, that uses nddb=1,',&
+    'has been disabled in version 2.1 of ABINIT.',&
+    'Action: you should use DDBs that include the symmetry',&
+    'information (and that can be used and merged without',&
+    'initialisation), or you should use ABINITv2.0.'
    MSG_ERROR(message)
  end if
 
@@ -3620,25 +3594,25 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  call ddb%malloc(msize, mblok, matom, mtypat)
 
-!Allocate arrays
+ ! Allocate arrays
  ABI_ALLOCATE(mgblok,(mblok))
 
 !**********************************************************************
 
-!Read the first database
+ ! Read the first database
 
  write(std_out,*)' read the input derivative database information'
  call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
-& matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-& msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+                        matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+                        msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
  if(ddb_hdr%nblok>=1)then
-!  Read the blocks from the input database.
+   ! Read the blocks from the input database.
    write(message, '(a,i5,a)' ) ' read ',ddb_hdr%nblok, ' blocks from the input DDB '
    call wrtout(std_out,message,'COLL')
    do iblok=1,ddb_hdr%nblok
      call ddb%read_block(iblok,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
-!    Setup merged indicator
+     ! Setup merged indicator
      mgblok(iblok)=0
    end do
  else
@@ -3646,43 +3620,43 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    call wrtout(std_out,message,'COLL')
  end if
 
-!Close the first ddb
+ ! Close the first ddb
  close(ddbun)
 
 !*********************************************
 
  nblok = ddb_hdr%nblok
-!In case of merging of DDBs, iterate the reading
+ ! In case of merging of DDBs, iterate the reading
  do iddb=2,nddb
 
-!  Open the corresponding input DDB, and read the database file information
+   ! Open the corresponding input DDB, and read the database file information
    write(message, '(a,a,i6)' )ch10,' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
 
    call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
-&   matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&   msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+                          matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+                          msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
    if (chkopt==1)then
-!    Compare the current DDB and input DDB information.
-!    In case of an inconsistency, halt the execution.
+     ! Compare the current DDB and input DDB information.
+     ! In case of an inconsistency, halt the execution.
      call wrtout(std_out, ' compare the current and input DDB information', 'COLL')
      call ddb_hdr%compare(ddb_hdr8)
 
    else if(chkopt==0)then
-!    No comparison between the current DDB and input DDB information.
+     ! No comparison between the current DDB and input DDB information.
      write(message, '(a)' )' no comparison between the current and input DDB information'
      call wrtout(std_out,message,'COLL')
      write(message, '(5a)' )&
-&     'No comparison/check is performed for the current and input DDB information ',ch10,&
-&     'because argument --nostrict was passed to the command line. ',ch10,&
-&     'Use at your own risk!'
+       'No comparison/check is performed for the current and input DDB information ',ch10,&
+       'because argument --nostrict was passed to the command line. ',ch10,&
+       'Use at your own risk!'
      MSG_COMMENT(message)
    end if
 
    call wrtout(std_out,' Will try to merge this input DDB with the current one.','COLL')
 
-!  First estimate of the total number of bloks, and sto with error message if too large.
+   ! First estimate of the total number of bloks, and sto with error message if too large.
    write(message, '(a,i5)' ) ' Current number of bloks =',nblok
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i5,a)' )' Will read ',ddb_hdr8%nblok,' blocks from the input DDB '
@@ -3695,8 +3669,8 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      MSG_ERROR(message)
    end if
 
-!  Read the bloks from the temporary database, and close it.
-!  Also setup the merging indicator
+   ! Read the bloks from the temporary database, and close it.
+   ! Also setup the merging indicator
    do iblok=nblok+1,nblokt
      call ddb%read_block(iblok,ddb_hdr8%nband(1),mpert,msize,ddb_hdr8%nkpt,ddbun)
      mgblok(iblok)=0
@@ -3722,7 +3696,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !*********************************************************
 
-!Check the equality of blocks, and eventually merge them
+ ! Check the equality of blocks, and eventually merge them
 
  if (nblok>=1) then
    call wrtout(std_out,' check the equality of blocks, and eventually merge ','COLL')
@@ -3730,15 +3704,15 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      do iblok1=1,iblok2-1
        tmerge=0
 
-!      Check the block type identity
+       ! Check the block type identity
        if(ddb%typ(iblok1)==ddb%typ(iblok2))then
 
-!        Check the wavevector identities
+         ! Check the wavevector identities
          tmerge=1
          if(ddb%typ(iblok1)==1.or.ddb%typ(iblok1)==2)then
            nq=1
          else if(ddb%typ(iblok1)==3.or.ddb%typ(iblok1)==33)then
-!          Note : do not merge permutation related elements ....
+           ! Note: do not merge permutation related elements ....
            nq=3
          else if(ddb%typ(iblok1)==4 .or. ddb%typ(iblok1)==0)then
            nq=0
@@ -3754,7 +3728,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
            end do ! ii
          end if
 
-!        Now merges,
+         ! Now merges,
          if (tmerge == 1) then
            write(message, '(a,i5,a,i5)' )' merge block #',iblok2,' to block #',iblok1
            call wrtout(std_out,message,'COLL')
@@ -3772,17 +3746,17 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      end do
    end do
 
-!  Count the final number of bloks
+   ! Count the final number of bloks
    tmerge=0
    do ii=1,nblok
      if(mgblok(ii)==1)tmerge=tmerge+1
    end do
    nblok=nblok-tmerge
 
-!  Summarize the merging phase
+   ! Summarize the merging phase
    write(message, '(i6,a,i6,a)' )tmerge,' blocks are merged; the new DDB will have ',nblok,' blocks.'
    call wrtout(std_out,message,'COLL')
- end if !  End the condition on existence of more than one blok in current DDB
+ end if ! End the condition on existence of more than one blok in current DDB
 
 !**********************************************************************
 
@@ -3795,9 +3769,9 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  call ddb_hdr%open_write(filnam(1), ddbun, fullinit=1)
 
- if(nddb>1)then
+ if (nddb > 1) then
 
-!  Write the whole database
+   ! Write the whole database
    call wrtout(std_out,' write the DDB ','COLL')
    choice=2
    do iblok=1,nblok+tmerge
@@ -3805,13 +3779,12 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
        write(std_out,'(a,i4)' ) ' Write bloc number',iblok
        call ddb%write_block(iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
      else
-       write(message, '(a,i4,a)' )&
-&       ' Bloc number',iblok,' was merged, so do not write it'
+       write(message, '(a,i4,a)' )' Bloc number',iblok,' was merged, so do not write it'
        call wrtout(std_out,message,'COLL')
      end if
    end do
 
-!  Also write summary of bloks at the end
+   ! Also write summary of bloks at the end
    write(ddbun, '(/,a)' )' List of bloks and their characteristics '
    choice=3
    do iblok=1,nblok+tmerge
@@ -3824,10 +3797,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  close (ddbun)
 
-!*********************************************************************
-
-!Deallocate arrays
-
+ ! Deallocate arrays
  ABI_DEALLOCATE(mgblok)
 
  call ddb_hdr%free()
@@ -3908,11 +3878,11 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
    write(message, '(a,a,a,a,a)' )&
-&   'The initialisation mode of MRGDDB, that uses nddb=1,',&
-&   'has been disabled in version 2.1 of ABINIT.',&
-&   'Action: you should use DDBs that include the symmetry',&
-&   'information (and that can be used and merged without',&
-&   'initialisation), or you should use ABINITv2.0.'
+    'The initialisation mode of MRGDDB, that uses nddb=1,',&
+    'has been disabled in version 2.1 of ABINIT.',&
+    'Action: you should use DDBs that include the symmetry',&
+    'information (and that can be used and merged without',&
+    'initialisation), or you should use ABINITv2.0.'
    MSG_ERROR(message)
  end if
 
@@ -3955,8 +3925,8 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  write(std_out,*)' read the input derivative database information'
  call ddb_hdr_open_read(ddb_hdr, filnam(2), ddbun, vrsddb, &
-& matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-& msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+                        matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+                        msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
  ABI_ALLOCATE(blkval2,(2,msize,ddb_hdr%nband(1),mkpt))
  ABI_ALLOCATE(kpnt,(3,mkpt,mblok))
@@ -3969,55 +3939,53 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    call wrtout(std_out,message,'COLL')
    choice=1
    do iblok=1,nblok
-     call ddb%read_block(iblok,ddb_hdr%nband(1),mpert,&
-&     msize,ddb_hdr%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
-!    Setup merged indicator
+     call ddb%read_block(iblok,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
+     ! Setup merged indicator
      mgblok(iblok)=1
    end do
  else
    call wrtout(std_out,' No bloks in the first ddb ','COLL')
  end if
-!Close the first ddb
+
+ ! Close the first ddb
  close(ddbun)
 
 !*********************************************
 
-!In case of merging of DDBs, iterate the reading
+ ! In case of merging of DDBs, iterate the reading
  do iddb=2,nddb
 
-!  Open the corresponding input DDB,
-!  and read the database file information
-   write(message, '(a,a,i6)' )ch10,&
-&   ' read the input derivative database number',iddb
+   ! Open the corresponding input DDB,
+   ! and read the database file information
+   write(message, '(a,a,i6)' )ch10,' read the input derivative database number',iddb
    call wrtout(std_out,message,'COLL')
 
    call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbun, vrsddb, &
-&   matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-&   msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+                          matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+                          msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
 
    if (chkopt==1)then
-!    Compare the current DDB and input DDB information.
-!    In case of an inconsistency, halt the execution.
+     ! Compare the current DDB and input DDB information.
+     ! In case of an inconsistency, halt the execution.
      write(message, '(a)' )' compare the current and input DDB information'
      call wrtout(std_out,message,'COLL')
 
      call ddb_hdr%compare(ddb_hdr8)
 
    else if(chkopt==0)then
-!    No comparison between the current DDB and input DDB information.
+     ! No comparison between the current DDB and input DDB information.
      write(message, '(a)' )' no comparison between the current and input DDB information'
      call wrtout(std_out,message,'COLL')
      write(message, '(a,a,a)' )&
-&     'No comparison/check is performed for the current and input DDB information ',&
-&     'because argument --nostrict was passed to the command line. ',&
-&     'Use at your own risk !'
+       'No comparison/check is performed for the current and input DDB information ',&
+       'because argument --nostrict was passed to the command line. ',&
+       'Use at your own risk !'
      MSG_COMMENT(message)
    end if
 
    call wrtout(std_out,' Will try to merge this input DDB with the current one.','COLL')
 
-!  First estimate of the total number of bloks, and error
-!  message if too large
+   ! First estimate of the total number of bloks, and error message if too large
    write(message, '(a,i5)' ) ' Current number of bloks =',nblok
    call wrtout(std_out,message,'COLL')
    write(message, '(a,i5,a)' )' Will read ',ddb_hdr8%nblok,' blocks from the input DDB '
@@ -4025,17 +3993,16 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    nblokt=nblok+ddb_hdr8%nblok
    if(nblokt>mblok)then
      write(message, '(a,i0,a,a,a,i0,a)' )&
-&     'The expected number of blocks',nblokt,' is larger than',ch10,&
-&     'the maximum number of blocks',mblok,'.'
+      'The expected number of blocks',nblokt,' is larger than',ch10,&
+      'the maximum number of blocks',mblok,'.'
      MSG_ERROR(message)
    end if
 
-!  Read the bloks from the temporary database, and close it.
-!  Also setup the merging indicator
+   ! Read the bloks from the temporary database, and close it.
+   ! Also setup the merging indicator
    choice=1
    do iblok=nblok+1,nblokt
-     call ddb%read_block(iblok,ddb_hdr8%nband(1),mpert,&
-&     msize,ddb_hdr8%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
+     call ddb%read_block(iblok,ddb_hdr8%nband(1),mpert,msize,ddb_hdr8%nkpt,ddbun,blkval2(1,1,1,1),kpnt(1,1,iblok))
      mgblok(iblok)=1
    end do
    close(ddbun)
@@ -4059,15 +4026,15 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 !*********************************************************
 
-!Check the equality of blocks, and eventually merge them
+ ! Check the equality of blocks, and eventually merge them
 
  if(nblok>=1)then
    call wrtout(std_out,' check the equality of blocks, and eventually merge ','COLL')
    do iblok2=2,nblok
      do iblok1=1,iblok2-1
-!      Check the block type identity
+       ! Check the block type identity
        if(ddb%typ(iblok1)==ddb%typ(iblok2))then
-!        Check the wavevector identities
+         ! Check the wavevector identities
          diff=abs(ddb%qpt(1,iblok1)-ddb%qpt(1,iblok2))
          diff=diff+abs(ddb%qpt(2,iblok1)-ddb%qpt(2,iblok2))
          diff=diff+abs(ddb%qpt(3,iblok1)-ddb%qpt(3,iblok2))
@@ -4076,7 +4043,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      end do
    end do
 
-!  Count the final number of bloks
+   ! Count the final number of bloks
    tmerge=0
    do ii=1,nblok
      if(mgblok(ii)==1)tmerge=tmerge+1
@@ -4084,9 +4051,8 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
    temp = nblok-tmerge
    nblok=tmerge
 
-!  Summarize the merging phase
-   write(message, '(i6,a,i6,a)' )&
-&   temp,' blocks are merged; the new DDB will have ',nblok,' blocks.'
+   ! Summarize the merging phase
+   write(message, '(i6,a,i6,a)' )temp,' blocks are merged; the new DDB will have ',nblok,' blocks.'
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -4103,24 +4069,23 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  if(nddb>1)then
 
-!  Write the whole database
+   ! Write the whole database
    call wrtout(std_out,' write the DDB ','COLL')
    ii = 1 !unit indicator of what will be merged
-!  Create a temporary file to decrease memory need.
+   ! Create a temporary file to decrease memory need.
    do iddb=1,nddb
      call ddb_hdr_open_read(ddb_hdr8, filnam(iddb+1), ddbuntmp, vrsddb)
 
      do iblok=1,ddb_hdr8%nblok
        if(mgblok(ii)==1) then
          call ddb%read_block(ii,ddb_hdr8%nband(1),mpert,&
-&         msize,ddb_hdr8%nkpt,ddbuntmp,blkval2(:,:,:,:),kpnt(:,:,ii))
+                             msize,ddb_hdr8%nkpt,ddbuntmp,blkval2(:,:,:,:),kpnt(:,:,ii))
          choice=2
          call ddb%write_block(ii,choice,ddb_hdr%nband(1),mpert,&
-&         msize,ddb_hdr8%nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,ii))
+                              msize,ddb_hdr8%nkpt,ddbun,blkval2(:,:,:,:),kpnt(:,:,ii))
        else
          write(message, '(a,i4,a,i4,a)' )&
-&         ' Bloc number',iblok,' of DDB ',iddb,&
-&         ' was merged, so do not write it'
+          ' Bloc number',iblok,' of DDB ',iddb,' was merged, so do not write it'
          call wrtout(std_out,message,'COLL')
        end if
        ii = ii+1
@@ -4129,13 +4094,12 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
      call ddb_hdr8%free()
    end do !iddb=1,nddb
 
-!  Also write summary of bloks at the end
+   !Also write summary of bloks at the end
    write(ddbun, '(/,a)' )' List of bloks and their characteristics '
    choice=3
    do iblok=1,nblokt
      if(mgblok(iblok)==1)then
-       call ddb%write_block(iblok,choice,ddb_hdr%nband(1),mpert,&
-&       msize,ddb_hdr%nkpt,ddbun)
+       call ddb%write_block(iblok,choice,ddb_hdr%nband(1),mpert,msize,ddb_hdr%nkpt,ddbun)
      end if
    end do
 
@@ -4228,22 +4192,22 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
 
 !########  Write blok of third-order derivatives to DDB
 
-!Count the number of elements
+ ! Count the number of elements
  nelmts=0
  do ii=1,msize
    if(ddb%flg(ii,1)==1)nelmts=nelmts+1
  end do
 
-!Write the block type and number of elements
+ ! Write the block type and number of elements
  write(unddb,*)' '
  write(unddb, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
 
-!Write the phonon wavevectors
+ ! Write the phonon wavevectors
  write(unddb, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,1),ii=1,3),ddb%nrm(1,1)
  write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=4,6),ddb%nrm(2,1)
  write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=7,9),ddb%nrm(3,1)
 
-!Write the matrix elements
+ ! Write the matrix elements
  index=0
  do ipert3=1,mpert
    do idir3=1,3
@@ -4254,7 +4218,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
              index=index+1
              if (ddb%flg(index,1)==1)then
                write(unddb, '(6i4,2d22.14)' )&
-&              idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,index,1),ddb%val(2,index,1)
+                idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,index,1),ddb%val(2,index,1)
              end if
            end do
          end do

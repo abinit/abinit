@@ -849,13 +849,14 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  !  1) Should add nelect0 to ebands to keep track of intrinsic
  !  2) Generalize expression to metals using mu_e
  max_occ = two / (self%nspinor * self%nsppol)
- nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
 
  ABI_MALLOC(self%mobility_mu, (2, 3, 3, self%ntemp, self%nsppol, self%nrta))
  ABI_CALLOC(self%ne, (self%ntemp))
  ABI_CALLOC(self%nh, (self%ntemp))
 
  ! Compute carrier concentration
+ nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
+#if 1
  do spin=1,nsppol
    do ik_ibz=1,nkpt
      wtk = self%ebands%wtk(ik_ibz)
@@ -882,6 +883,35 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
    end do
  end do
+
+#else
+
+ do spin=1,nsppol
+   do ik_ibz=1,nkpt
+     wtk = self%ebands%wtk(ik_ibz)
+     do ib=1, self%ebands%nband(ik_ibz + (spin-1)* self%ebands%nkpt)
+       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
+
+       do itemp=1,self%ntemp
+         kT = self%kTmesh(itemp)
+         mu_e = self%transport_mu_e(itemp)
+         ! Accmulate the numer of electrons/holes depending of the position wrt mu.
+         ! The logic is OK as long as the Fermi level is inside the gap.
+         if (eig_nk >= mu_e) then
+           self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
+         else
+           self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk, kT, mu_e)) * max_occ
+         !else
+         !  ! This only if metals or highly degenerate semiconductors.
+         !  self%nh(itemp) = self%nh(itemp) + wtk * half * max_occ
+         !  self%ne(itemp) = self%ne(itemp) + wtk * half * max_occ
+         end if
+       end do
+
+     end do
+   end do
+ end do
+#endif
 
  ! Get units conversion factor and spin degeneracy
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
@@ -913,8 +943,9 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
        ! Multiply by the lifetime (SERTA or MRTA)
        do irta=1,self%nrta
          do itemp=1,self%ntemp
-           mu_e = self%transport_mu_e(itemp)
            kT = self%kTmesh(itemp)
+           mu_e = self%transport_mu_e(itemp)
+           !ielhol = 2; if (eig_nk >= mu_e) ielhol = 1
            if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik_ibz, spin))
            if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik_ibz, spin))
            call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk, kT, mu_e), linewidth, zero, vv_tenslw(:, :))
@@ -924,7 +955,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
        end do
      end do
 
-   end do ! kpt
+   end do ! ik_ibz
  end do ! spin
 
  !call xmpi_sum(self%mobility_mu, comm, ierr)
@@ -958,6 +989,7 @@ end subroutine rta_compute_mobility
 !!
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure
+!! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
 !!
 !! SOURCE
