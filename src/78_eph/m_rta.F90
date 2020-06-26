@@ -829,7 +829,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkpt, mband, ib, ik_ibz, spin, ii, jj, itemp, ielhol, nvalence, cnt, nprocs, irta
+ integer :: nsppol, nkpt, mband, ib, ik_ibz, spin, ii, jj, itemp, ielhol, cnt, nprocs, irta !nvalence,
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
  real(dp) :: cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
@@ -847,7 +847,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ! Compute index of valence band
  ! TODO:
  !  1) Should add nelect0 to ebands to keep track of intrinsic
- !  2) Generalize expression to metals using mu_e
  max_occ = two / (self%nspinor * self%nsppol)
 
  ABI_MALLOC(self%mobility_mu, (2, 3, 3, self%ntemp, self%nsppol, self%nrta))
@@ -855,36 +854,33 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_CALLOC(self%nh, (self%ntemp))
 
  ! Compute carrier concentration
- nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
-#if 1
- do spin=1,nsppol
-   do ik_ibz=1,nkpt
-     wtk = self%ebands%wtk(ik_ibz)
+ !nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
+ !do spin=1,nsppol
+ !  do ik_ibz=1,nkpt
+ !    wtk = self%ebands%wtk(ik_ibz)
 
-     ! number of holes
-     do ib=1,nvalence
-       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
-       do itemp=1,self%ntemp
-         kT = self%kTmesh(itemp)
-         mu_e = self%transport_mu_e(itemp)
-         self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk, kT, mu_e)) * max_occ
-       end do
-     end do
+ !    ! number of holes
+ !    do ib=1,nvalence
+ !      eig_nk = self%ebands%eig(ib, ik_ibz, spin)
+ !      do itemp=1,self%ntemp
+ !        kT = self%kTmesh(itemp)
+ !        mu_e = self%transport_mu_e(itemp)
+ !        self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk, kT, mu_e)) * max_occ
+ !      end do
+ !    end do
 
-     ! number of electrons
-     do ib=nvalence+1,mband
-       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
-       do itemp=1,self%ntemp
-         kT = self%kTmesh(itemp)
-         mu_e = self%transport_mu_e(itemp)
-         self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
-       end do
-     end do
+ !    ! number of electrons
+ !    do ib=nvalence+1,mband
+ !      eig_nk = self%ebands%eig(ib, ik_ibz, spin)
+ !      do itemp=1,self%ntemp
+ !        kT = self%kTmesh(itemp)
+ !        mu_e = self%transport_mu_e(itemp)
+ !        self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
+ !      end do
+ !    end do
 
-   end do
- end do
-
-#else
+ !  end do
+ !end do
 
  do spin=1,nsppol
    do ik_ibz=1,nkpt
@@ -911,7 +907,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
      end do
    end do
  end do
-#endif
 
  ! Get units conversion factor and spin degeneracy
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
@@ -927,7 +922,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
      wtk = self%ebands%wtk(ik_ibz)
 
      do ib=1,mband
-       ielhol = 2; if (ib > nvalence) ielhol = 1
+       !ielhol = 2; if (ib > nvalence) ielhol = 1
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
 
        ! Store outer product in vv_tens
@@ -945,7 +940,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
          do itemp=1,self%ntemp
            kT = self%kTmesh(itemp)
            mu_e = self%transport_mu_e(itemp)
-           !ielhol = 2; if (eig_nk >= mu_e) ielhol = 1
+           ielhol = 2; if (eig_nk >= mu_e) ielhol = 1
            if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik_ibz, spin))
            if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik_ibz, spin))
            call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk, kT, mu_e), linewidth, zero, vv_tenslw(:, :))

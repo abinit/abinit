@@ -270,6 +270,9 @@ MODULE m_ebands
    real(dp) :: fermie
     ! Fermi energy taken from ebands.
 
+   real(dp) :: nelect
+    ! Number of electrons taken from ebands.
+
    integer,allocatable :: ierr(:)
     ! ierr(nsppol
     !   0 if the gap has been computed.
@@ -449,6 +452,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
 
  ! Initialize gaps_t
  gaps%nsppol = nsppol
+ gaps%nelect = ebands%nelect
  ABI_MALLOC(gaps%fo_kpos, (3, nsppol))
  ABI_MALLOC(gaps%ierr, (nsppol))
  ABI_MALLOC(gaps%fo_values, (2, nsppol))
@@ -475,7 +479,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
    ismetal = ANY(val_idx(:,spin) /= val_idx(1,spin))
    if (ismetal) then
      gaps%ierr(spin) = 1
-     write(gaps%errmsg_spin(spin), "(a,i0)")"Metallic system for spin channel ", spin
+     write(gaps%errmsg_spin(spin), "(a,i0)")" Detected metallic system for spin channel: ", spin
      cycle
    endif
 
@@ -624,11 +628,11 @@ subroutine gaps_print(gaps, unit, header)
    end if
 
    ! Get minimum of the direct Gap.
-   fun_gap = gaps%fo_values(1,spin)
-   opt_gap = gaps%fo_values(2,spin)
+   fun_gap = gaps%fo_values(1, spin)
+   opt_gap = gaps%fo_values(2, spin)
 
    if (any(gaps%fo_kpos(:,spin) == 0)) then
-     call wrtout(my_unt, sjoin("Cannot detect gap for spin: ", itoa(spin)))
+     call wrtout(my_unt, sjoin(" Cannot detect gap for spin: ", itoa(spin)))
      cycle
    end if
 
@@ -648,7 +652,7 @@ subroutine gaps_print(gaps, unit, header)
    call wrtout(my_unt, msg)
  end do ! spin
 
- write(msg, "((a,f6.2,a))")  "   Fermi level:", gaps%fermie * Ha_eV, " (eV)"
+ write(msg, "((2(a,f6.2)))")  "   Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
  call wrtout(my_unt, msg, newlines=1)
 
 end subroutine gaps_print
