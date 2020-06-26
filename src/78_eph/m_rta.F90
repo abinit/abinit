@@ -48,7 +48,7 @@ module m_rta
  use m_numeric_tools,  only : bisect, simpson_int, safe_div
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
  use m_kpts,           only : listkk, kpts_timrev_from_kptopt
- use m_occ,            only : occ_fd, occ_dfd
+ use m_occ,            only : occ_fd, occ_dfde
 
  implicit none
 
@@ -551,11 +551,11 @@ subroutine rta_compute(self, cryst, dtset, comm)
        ! Multiply by the lifetime (SERTA and MRTA)
        do irta=1,self%nrta
          do itemp=1,self%ntemp
-           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik_ibz, spin))
-           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik_ibz, spin))
-           call safe_div(vv_tens(:,:, 1, irta, ib, ik_ibz, spin), linewidth, zero, &
+           if (irta == 1) linewidth = self%linewidth_serta(itemp, ib, ik_ibz, spin)
+           if (irta == 2) linewidth = self%linewidth_mrta(itemp, ib, ik_ibz, spin)
+           call safe_div(vv_tens(:,:, 1, irta, ib, ik_ibz, spin), two * linewidth, zero, &
                          vv_tens(:,:, 1+itemp, irta, ib, ik_ibz, spin))
-           call safe_div(one / two, linewidth, zero, tau_vals(itemp, irta, ib, ik_ibz, spin))
+           call safe_div(one, two * linewidth, zero, tau_vals(itemp, irta, ib, ik_ibz, spin))
          end do
        end do
 
@@ -581,6 +581,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  emax = maxval(self%eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
  ! If sigma_erange is set, get emin and emax from this variable
+ ! MG: TODO This value should be read from SIGPEH
  do spin=1,self%ebands%nsppol
    if (dtset%sigma_erange(1) >= zero) emin = self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
    if (dtset%sigma_erange(2) >= zero) emax = self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
@@ -625,7 +626,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
    end do
  end do
 
- ! Transfer tau(e)
+ ! Transfer data for tau(e)
  do irta=1,self%nrta
    do spin=1,nsppol
      do itemp=1,self%ntemp
@@ -643,6 +644,12 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ABI_SFREE(vv_tens)
 
  ! Compute Onsager coefficients. Eq 9 of [[cite:Madsen2018]]
+ ! See also Eqs 41, page 11 of https://arxiv.org/pdf/1402.6979.pdf
+ !
+ ! L^\alpha(\mu, T) = \int de \sigma(e, T) (e - mu)^\alpha (-df/de)
+ !
+ !  with \sigma(e, T) stored in vvtau_dos
+
  ABI_MALLOC(self%l0, (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))
  ABI_MALLOC(self%l1, (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))
  ABI_MALLOC(self%l2, (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))
@@ -653,27 +660,38 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
  call cwtime_report(" rta_compute_onsanger", cpu, wall, gflops)
 
- ! Compute transport quantities, Eqs 12-15 of [[cite:Madsen2018]]
+ ! Compute transport tensors, Eqs 12-15 of [[cite:Madsen2018]] and convert to SI units.
+ !
+ ! sigma = L0
+ ! S = -1/T L0^-1 L1
+ ! PI =
+ ! kappa = 1/T [L2 - L1 L0^-1 L1]
  ABI_MALLOC(self%sigma,   (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))
  ABI_CALLOC(self%seebeck, (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))
  ABI_CALLOC(self%kappa,   (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))
  ABI_MALLOC(self%pi,      (self%nw, 3, 3, self%ntemp, self%nsppol, self%nrta))
 
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
-
  self%sigma = fact0 * self%l0
- call safe_div(volt_SI * self%l1, self%l0, zero, self%pi)
+
+ call safe_div(-volt_SI * self%l1, self%l0, zero, self%pi)
 
  do irta=1,self%nrta
    do spin=1,nsppol
      do itemp=1,self%ntemp
        kT = self%kTmesh(itemp) / kb_HaK
-       call safe_div(volt_SI * self%l1(:,:,:,itemp,spin,irta), kT * self%l0(:,:,:,itemp,spin,irta), zero, &
+       call safe_div(-volt_SI * self%l1(:,:,:,itemp,spin,irta), kT * self%l0(:,:,:,itemp,spin,irta), zero, &
                      self%seebeck(:,:,:,itemp,spin,irta))
 
        ! HM: to write it as a single division I do: kappa = L1^2/L0 + L2 = (L1^2 + L2*L0)/L0
        ! Check why do we need minus sign here to get consistent results with Boltztrap!
+
+       !call safe_div( -volt_SI**2 * fact0 * &
+       !  (self%l1(:,:,:,itemp,spin,irta)**2 - self%l2(:,:,:,itemp,spin,irta) * self%l0(:,:,:,itemp,spin,irta)), &
+       !  kT * self%l0(:,:,:,itemp,spin,irta), zero, self%kappa(:,:,:,itemp,spin,irta))
+
        ! MG: Very likely because we don't use the same conventions in the defintion of the Onsager coefficients.
+       ! to write it as a single division I do: kappa = L1^2/L0 - L2 = (L1^2 - L2*L0)/L0
        call safe_div( -volt_SI**2 * fact0 * &
          (self%l1(:,:,:,itemp,spin,irta)**2 - self%l2(:,:,:,itemp,spin,irta) * self%l0(:,:,:,itemp,spin,irta)), &
          kT * self%l0(:,:,:,itemp,spin,irta), zero, self%kappa(:,:,:,itemp,spin,irta))
@@ -698,6 +716,8 @@ subroutine rta_compute(self, cryst, dtset, comm)
    do itemp=1,self%ntemp
      ! Compute carrier density
      kT = self%kTmesh(itemp)
+
+     ! MG: I think that here we should use mu_e instead of ifermi.
 
      ! Compute carrier density of electrons (ifermi:self%nw)
      do iw=1,self%nw ! doping
@@ -762,27 +782,26 @@ contains
 
  !Local variables -------------------------------------
  integer :: spin, iw, imu, irta
- real(dp) :: fact, mu, ee, kT
+ real(dp) :: mu, ee, kT
  real(dp) :: kernel(self%nw,3,3,self%nsppol), integral(self%nw)
 
  ! Get spin degeneracy
  max_occ = two / (self%nspinor*self%nsppol)
- ! 2 comes from linewidth-lifetime relation because we divided by the linewidth and now by (2 * linewidth)
- fact = max_occ / two
 
  do irta=1,self%nrta
    do itemp=1,self%ntemp
      kT = self%kTmesh(itemp)
+     ! Loop over chemical potentials mu
      do imu=1,self%nw
        mu = self%edos%mesh(imu)
 
-       ! Build integrand for mu
+       ! Build integrand for given mu
        do iw=1,self%nw
          ee = self%edos%mesh(iw)
          if (order > 0) then
-           kernel(iw,:,:,:) = fact * self%vvtau_dos(iw,:,:,itemp,:,irta) * (mu - ee)**order * occ_dfd(ee, kT, mu)
+           kernel(iw,:,:,:) = - max_occ * self%vvtau_dos(iw,:,:,itemp,:,irta) * (ee - mu)**order * occ_dfde(ee, kT, mu)
          else
-           kernel(iw,:,:,:) = fact * self%vvtau_dos(iw,:,:,itemp,:,irta) * occ_dfd(ee, kT, mu)
+           kernel(iw,:,:,:) = - max_occ * self%vvtau_dos(iw,:,:,itemp,:,irta) * occ_dfde(ee, kT, mu)
          end if
        end do
 
@@ -829,7 +848,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkpt, mband, ib, ik_ibz, spin, ii, jj, itemp, ielhol, cnt, nprocs, irta !nvalence,
+ integer :: nsppol, nkpt, mband, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
  real(dp) :: cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
@@ -841,7 +860,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_UNUSED(dtset%natom)
  nprocs = xmpi_comm_size(comm)
 
- ! create alias for dimensions
+ ! Aalias for important dimensions
  mband = self%ebands%mband; nkpt = self%ebands%nkpt; nsppol = self%ebands%nsppol
 
  ! Compute index of valence band
@@ -854,34 +873,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_CALLOC(self%nh, (self%ntemp))
 
  ! Compute carrier concentration
- !nvalence = nint((self%ebands%nelect - self%eph_extrael) / max_occ)
- !do spin=1,nsppol
- !  do ik_ibz=1,nkpt
- !    wtk = self%ebands%wtk(ik_ibz)
-
- !    ! number of holes
- !    do ib=1,nvalence
- !      eig_nk = self%ebands%eig(ib, ik_ibz, spin)
- !      do itemp=1,self%ntemp
- !        kT = self%kTmesh(itemp)
- !        mu_e = self%transport_mu_e(itemp)
- !        self%nh(itemp) = self%nh(itemp) + wtk * (one - occ_fd(eig_nk, kT, mu_e)) * max_occ
- !      end do
- !    end do
-
- !    ! number of electrons
- !    do ib=nvalence+1,mband
- !      eig_nk = self%ebands%eig(ib, ik_ibz, spin)
- !      do itemp=1,self%ntemp
- !        kT = self%kTmesh(itemp)
- !        mu_e = self%transport_mu_e(itemp)
- !        self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
- !      end do
- !    end do
-
- !  end do
- !end do
-
  do spin=1,nsppol
    do ik_ibz=1,nkpt
      wtk = self%ebands%wtk(ik_ibz)
@@ -891,7 +882,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
          mu_e = self%transport_mu_e(itemp)
-         ! Accmulate the numer of electrons/holes depending of the position wrt mu.
+         ! Accmulate the number of electrons/holes depending of the position wrt mu.
          ! The logic is OK as long as the Fermi level is inside the gap.
          if (eig_nk >= mu_e) then
            self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
@@ -910,10 +901,12 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Get units conversion factor and spin degeneracy
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
- fact = max_occ * fact0 / e_Cb / two * 100**2
+ fact = max_occ * fact0 / e_Cb * 100**2
 
  ! Compute mobility_mu i.e. results in which lifetimes have been computed in a consistent way
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
+ !
+ ! TODO: Implement other tensors.
  self%mobility_mu = zero
  cnt = 0
  do spin=1,nsppol
@@ -922,7 +915,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
      wtk = self%ebands%wtk(ik_ibz)
 
      do ib=1,mband
-       !ielhol = 2; if (ib > nvalence) ielhol = 1
        eig_nk = self%ebands%eig(ib, ik_ibz, spin)
 
        ! Store outer product in vv_tens
@@ -940,11 +932,11 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
          do itemp=1,self%ntemp
            kT = self%kTmesh(itemp)
            mu_e = self%transport_mu_e(itemp)
-           ielhol = 2; if (eig_nk >= mu_e) ielhol = 1
-           if (irta == 1) linewidth = abs(self%linewidth_serta(itemp, ib, ik_ibz, spin))
-           if (irta == 2) linewidth = abs(self%linewidth_mrta(itemp, ib, ik_ibz, spin))
-           call safe_div( wtk * vv_tens(:, :) * occ_dfd(eig_nk, kT, mu_e), linewidth, zero, vv_tenslw(:, :))
-           self%mobility_mu(ielhol, :, :, itemp, spin, irta) = self%mobility_mu(ielhol, :, :, itemp, spin, irta) &
+           ieh = 2; if (eig_nk >= mu_e) ieh = 1
+           if (irta == 1) linewidth = self%linewidth_serta(itemp, ib, ik_ibz, spin)
+           if (irta == 2) linewidth = self%linewidth_mrta(itemp, ib, ik_ibz, spin)
+           call safe_div( - wtk * vv_tens(:, :) * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw(:, :))
+           self%mobility_mu(ieh, :, :, itemp, spin, irta) = self%mobility_mu(ieh, :, :, itemp, spin, irta) &
              + vv_tenslw(:, :)
          end do
        end do
@@ -1089,6 +1081,8 @@ end subroutine rta_ncwrite
 !!
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure
+!! dtset<dataset_type>=All input variables for this dataset.
+!! dtfil<datafiles_type>=variables related to files.
 !!
 !! SOURCE
 

@@ -69,7 +69,7 @@ module m_sigmaph
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
- use m_occ,            only : occ_fd, occ_dfd, occ_be
+ use m_occ,            only : occ_fd, occ_be !occ_dfde,
  use m_kg,             only : getph
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
@@ -3561,6 +3561,11 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ABI_FREE(indkk)
 
+ ! This so that output linewidths are always positive independently of the kind of self-energy used
+ ! (retarded or advanced)
+ linewidth_serta = abs(linewidth_serta)
+ if (self%mrta > 0) linewidth_mrta = abs(linewidth_mrta)
+
 end function sigmaph_get_ebands
 !!***
 
@@ -4929,7 +4934,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, prtvol,
          nqnu = nqnu_tlist(it)
          ! f_{k+q} = df/dek vk.q
          f_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
-         !dfde_nk = occ_dfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
+         !dfde_nk = occ_dfde(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
          ! TODO: I got NAN for T --> 0
          !dfde_nk = zero
 

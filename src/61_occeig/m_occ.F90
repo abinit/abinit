@@ -51,7 +51,7 @@ module m_occ
  public :: newocc        ! Compute new occupation numbers at each k point,
  public :: occeig        ! (occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$,
  public :: occ_fd        ! Fermi-Dirac statistics 1 / [(exp((e - mu)/ KT) + 1]
- public :: occ_dfd       ! Derivative of Fermi-Dirac statistics: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
+ public :: occ_dfde      ! Derivative of Fermi-Dirac statistics wrt e: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
  public :: occ_be        ! Bose-Einstein statistics  1 / [(exp((e - mu)/ KT) - 1]
  public :: occ_dbe       ! Derivative of Bose-Einstein statistics  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
  public :: dos_hdr_write
@@ -1424,12 +1424,12 @@ end function occ_fd
 
 !----------------------------------------------------------------------
 
-!!****f* m_occ/occ_dfd
+!!****f* m_occ/occ_dfde
 !! NAME
-!!  occ_dfd
+!!  occ_dfde
 !!
 !! FUNCTION
-!!  Derivative of Fermi-Dirac statistics: (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
+!!  Derivative of Fermi-Dirac statistics: - (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) + 1]^2
 !!  Note that kT is given in Hartree so the derivative as well
 !!
 !! INPUTS
@@ -1443,7 +1443,7 @@ end function occ_fd
 !!
 !! SOURCE
 
-elemental real(dp) function occ_dfd(ee, kT, mu)
+elemental real(dp) function occ_dfde(ee, kT, mu)
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: ee, kT, mu
@@ -1459,17 +1459,17 @@ elemental real(dp) function occ_dfd(ee, kT, mu)
  if (kT > tol6) then
    arg = ee_mu / kT
    if (arg > maxDFDarg) then
-     occ_dfd = zero
+     occ_dfde = zero
    else if (arg < -maxDFDarg) then
-     occ_dfd = zero
+     occ_dfde = zero
    else
-     occ_dfd = exp(arg) / (exp(arg) + one)**2 / kT
+     occ_dfde = - exp(arg) / (exp(arg) + one)**2 / kT
    end if
  else
-   occ_dfd = zero
+   occ_dfde = zero
  end if
 
-end function occ_dfd
+end function occ_dfde
 !!***
 
 !----------------------------------------------------------------------
