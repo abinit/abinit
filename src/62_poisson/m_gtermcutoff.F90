@@ -157,6 +157,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  integer            :: my_start,my_stop
  integer            :: n1,n2,n3,nfft
  integer            :: test,opt_surface !opt_cylinder
+ real(dp)           :: alpha_fac, ap1sqrt, log_alpha
  real(dp)           :: cutoff,rcut_loc,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
  real(dp)           :: gcart_para,gcart_perp,gcart_xy,gcart_z
@@ -245,11 +246,8 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
    CASE('SPHERE') ! Spencer-Alavi method
 
      ! Calculate rcut for each method
-     if(rcut>tol4) then
-         rcut_loc = rcut
-     else
-         rcut_loc= (three*nkpt*ucvol/four_pi)**(one/three)
-     endif
+     rcut_loc = (three*nkpt*ucvol/four_pi)**(one/three)
+
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
           gcutoff(ig)=zero !two_pi*rcut_loc**2 !- value for the V_coul
@@ -481,9 +479,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      a2=rprimd(:,2); b2=two_pi*gprimd(:,2)
      a3=rprimd(:,3); b3=two_pi*gprimd(:,3)
 
-     ! Calculate rcut for each method !
-     rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
-
      !SURFACE Default - Beigi
      opt_surface=1; alpha(:)=zero
      ! Otherwsise use Rozzi's method
@@ -499,8 +494,15 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      SELECT CASE (opt_surface)
 
-     !CASE SURFACE 1 - Beigi
+       !CASE SURFACE 1 - Beigi
        CASE(1)
+
+       ! Calculate rcut for each method !
+       if(rcut>tol4) then
+          rcut_loc = rcut
+       else
+          rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
+       endif
  
        do i3=1,n3
         do i2=1,n2
@@ -521,7 +523,20 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        !CASE SURFACE 2 - Rozzi
        CASE(2)
 
-       !!BG: Trigger needed - use the available input value for this 
+       !Set the cut-off radius
+       if(rcut>tol4) then
+          rcut_loc = rcut
+       else
+          rcut_loc = two*SQRT(DOT_PRODUCT(a3,a3))
+       endif
+
+       !In the case of finite, Rozzi's method provide another parameter
+       !for the cut-off: alpha
+       !!! ATT: alpha = L_x/L_y --> in-plane geometry dependence
+       alpha_fac=SQRT(DOT_PRODUCT(a1,a1))/SQRT(DOT_PRODUCT(a2,a2))
+       ap1sqrt=SQRT(one+alpha_fac**2)
+       log_alpha=LOG((alpha_fac+ap1sqrt)*(one+ap1sqrt)/alpha_fac)
+
        do i3=1,n3
         do i2=1,n2
          i23=n1*(i2-1 + n2*(i3-1))
@@ -529,12 +544,13 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if (ABS(gcart_perp)<tol4.and.ABS(gcart_para)<tol4) then
-             gcutoff(ii)=one
-           else if (ABS(gcart_perp)>tol4.and.ABS(gcart_para)<tol4) then
-             gcutoff(ii)=one-COS(gcart_perp*rcut_loc)-gcart_perp/rcut_loc*SIN(gcart_perp*rcut_loc)
+           if (gcart_para>tol4) then
+             gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut_loc)-COS(ABS(gcart_perp)*rcut_loc))
+           else if (ABS(gcart_perp)>tol4) then
+             gcutoff(ii)=one-COS(gcart_perp*rcut_loc)-gcart_perp*rcut_loc*SIN(gcart_perp*rcut_loc) !&
+!&           + 8*rcut_loc*SIN(gcart_perp*rcut_loc)/gcart_perp*log_alpha ! contribution due to finite surface
            else
-             gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*SIN(gcart_perp*rcut_loc)-COS(gcart_perp*rcut_loc))
+             gcutoff(ii)=zero
            end if
          end do !i1
         end do !i2
