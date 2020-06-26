@@ -275,7 +275,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:) ! MRM
+ real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:),gw_taur(:,:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -873,9 +873,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
  if(Dtset%gwcalctyp==21 .and. gw1rdm>0) then ! MRM print initial density
-   gw1rdm_fname='initial_DEN'
+   gw1rdm_fname='gs_DEN'
    call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
    Cryst,ngfftf,cplex1,nfftf,dtset%nspden,ks_rhor,mpi_enreg_seq,ebands=KS_BSt)
+   !ABI_MALLOC(gw_taur,(nfftf,Dtset%nspden))
+   !gw1rdm_fname='gs_ELF'
+   !call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_taur,1)
+   !ABI_FREE(gw_taur)
+   !MAU
+
  end if
 
  if (Dtset%usekden==1) then
@@ -2284,6 +2290,43 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
           write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
           call wrtout(std_out,msg,'COLL')
         enddo
+        !MAU
+        write(msg,'(a4)') 'MEL0'
+        call wrtout(std_out,msg,'COLL')
+        do ib1dm=1,10
+          write(msg,'(*(f10.5))') REAL(Sr%x_mat(ib1dm,1:11,ikcalc,1))
+          call wrtout(std_out,msg,'COLL')
+        enddo
+        !write(msg,'(a5)') 'MEL0i'
+        !call wrtout(std_out,msg,'COLL')
+        !do ib1dm=1,10
+        !  write(msg,'(*(f10.5))') AIMAG(Sr%x_mat(ib1dm,1:11,ikcalc,1))
+        !  call wrtout(std_out,msg,'COLL')
+        !enddo
+        write(msg,'(a4)') 'MEL1'
+        call wrtout(std_out,msg,'COLL')
+        do ib1dm=1,10
+          write(msg,'(*(f10.5))') REAL(KS_me%vxcval(ib1dm,1:11,ikcalc,1))
+          call wrtout(std_out,msg,'COLL')
+        enddo
+        !write(msg,'(a5)') 'MEL1i'
+        !call wrtout(std_out,msg,'COLL')
+        !do ib1dm=1,10
+        !  write(msg,'(*(f10.5))') AIMAG(KS_me%vxcval(ib1dm,1:11,ikcalc,1))
+        !  call wrtout(std_out,msg,'COLL')
+        !enddo
+        write(msg,'(a4)') 'MEL2'
+        call wrtout(std_out,msg,'COLL')
+        do ib1dm=1,10
+          write(msg,'(*(f10.5))') REAL(KS_me%vhartree(ib1dm,1:11,ikcalc,1))
+          call wrtout(std_out,msg,'COLL')
+        enddo
+        !write(msg,'(a5)') 'MEL2i'
+        !call wrtout(std_out,msg,'COLL')
+        !do ib1dm=1,10
+        !  write(msg,'(*(f10.5))') AIMAG(KS_me%vhartree(ib1dm,1:11,ikcalc,1))
+        !  call wrtout(std_out,msg,'COLL')
+        !enddo
         !
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange (k-point) one
@@ -2292,7 +2335,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
         do ib1dm=ib1,ib2
           dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ikcalc,1) ! Only restricted calcs 
         enddo
-        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted calcs 
+        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0,1) ! Only restricted calcs 
       endif 
    end do
 
@@ -2372,7 +2415,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
 !        Compute nat orbs and occ numbers at k-point ikcalc
-         call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1) ! Only restricted calcs 
+         call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1,1) ! Only restricted calcs 
        endif
        ABI_DEALLOCATE(sigcme_k)
      end do
@@ -2384,9 +2427,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if(gwcalctyp==21 .and. gw1rdm>0) then
      ABI_MALLOC(delta_band,(b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
+     ABI_MALLOC(gw_taur,(nfftf,Dtset%nspden))
      ABI_MALLOC(gw_rhog,(2,nfftf))
      ABI_MALLOC(gw_vhartr,(nfftf))
      gw_rhor=0.0_dp
+     gw_taur=0.0_dp
      gw_rhog=0.0_dp
      gw_vhartr(:)=0.0_dp
      delta_band(:,:)=czero
@@ -2402,6 +2447,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
+       !MAU
+       !gw1rdm_fname=dtfil%fnameabo_eelf
+       !call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_taur,1)         ! Construct tau(r) 
+
      endif
      ! MRM start broadcast gw_rhor 
      call xmpi_barrier(Wfd%comm)
@@ -2496,7 +2545,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        write(msg,'(a1)')  ' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       write(msg,'(a105)')  ' Band corrections Delta eik = <KS_i|K[NO]-K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik + Delta eik'
+       write(msg,'(a108)') ' Band corrections Delta eik = <KS_i|K[NO]-K[KS]+vH[NO]-vH[KS]-Vxc[KS]|KS_i> and eik^new = eik^GS + Delta eik'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        write(msg,'(a1)')  ' '
@@ -2561,6 +2610,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      endif
      ABI_FREE(delta_band)
      ABI_FREE(gw_rhor)
+     ABI_FREE(gw_taur)
      ABI_FREE(gw_rhog)
      ABI_FREE(gw_vhartr)
    endif  
@@ -3690,7 +3740,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
-!    Now compute the residual Coulomb interaction
+!    Now compute the residual Coulomb interaction. MRM added hyb_tmp
      if(present(hyb_tmp)) then
        Vcp%vc_sqrt_resid=Vcp%vc_sqrt
        Vcp%i_sz_resid=Vcp%i_sz

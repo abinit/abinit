@@ -35,7 +35,7 @@ module m_gwrdm
 
  use defs_datatypes,   only : ebands_t
  use m_sigma,          only : sigma_t
- 
+ use m_xctk,           only : xcden  
  implicit none
 
  private
@@ -81,12 +81,12 @@ subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
 !scalars
  character(len=500) :: msg,msg2
  integer :: ib1dm,ib2dm
- real(dp) :: sgn_spin
+ real(dp) :: sgn_spin,tol8
 !arrays
-
 !************************************************************************
 
  DBG_ENTER("COLL")
+ tol8=1.0e-8
 
  if(isgn==0) then ! Sigma_x - Vxc
    sgn_spin=2.0d0
@@ -95,6 +95,8 @@ subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
    sgn_spin=-2.0d0       
    msg2='Vxc    '
  endif
+ 
+ call printdm1(1,65,pot) !MAU Uncomment for debug 
 
  if(iinfo==0) then 
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
@@ -104,7 +106,7 @@ subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  endif
- 
+
  do ib1dm=ib1,ib2-1  
    do ib2dm=ib1dm+1,ib2
      if((BSt%occ(ib1dm,kpoint,1)>tol8) .and. (BSt%occ(ib2dm,kpoint,1)<tol8)) then
@@ -135,6 +137,7 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
 !Local variables ------------------------------
 !scalars
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197
+ real(dp) :: tol8
  character(len=500) :: msg,msg2
  integer :: ib1dm,ib2dm,iquad 
  complex(dpc) :: denominator,fact,division,dm1_mel
@@ -146,6 +149,7 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
 
  msg2='Sc     '
  fact=cmplx(1.0d0/pi,0.0d0)
+ tol8=1.0e-8
 
  if(iinfo==0) then
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
@@ -167,7 +171,7 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
    do ib2dm=ib1dm,ib2 
      dm1_mel=0.0d0
      do iquad=1,nomega_sigc
-       denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) ! As in FHI-aims for RPA
+       denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) 
        if(abs(denominator)>tol8) then 
          ! Sigma_pq/[(denominator)]
            division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
@@ -188,19 +192,21 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
 end subroutine calc_rdmc
 !!***
 
-subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
+subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2,ikpoint,iinfo
+ integer,intent(in),optional::verbose
  type(ebands_t),target,intent(in) :: BSt
 !arrays
  real(dp),intent(inout) :: occs_ks(:,:)
  complex(dpc),intent(inout) :: dm1(:,:),nateigv(:,:,:,:)
 !Local variables ------------------------------
 !scalars
- integer::ndim,ib1dm,ib2dm,lwork,info
+ integer::ndim,ib1dm,ib2dm,ib3dm,lwork,info
  character(len=500) :: msg,msg2
  real(dp) :: toccs_k,tol10
+ complex(dp) :: Sib1k_ib2k
 !arrays
  real(dp),allocatable :: occs(:),rwork(:),occs_tmp(:)
  complex(dpc),allocatable :: work(:),dm1_tmp(:,:),eigenvect(:,:)
@@ -227,7 +233,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
      dm1_tmp(ib2dm,ib1dm)=conjg(dm1_tmp(ib1dm,ib2dm))
    enddo
  enddo
- !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
+ call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
 
  work=0.0d0
  occs=0.0d0
@@ -237,6 +243,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
    MSG_WARNING("Failed the diagonalization of the updated GW 1-RDM")
  endif
 
+ write(msg,'(a6)') 'Eigvec'
+ call wrtout(std_out,msg,'COLL')
  !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
  !eigenvect=dm1_tmp
  !occs_tmp=occs
@@ -250,6 +258,28 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
     occs_tmp(ib1dm)=0.0_dp
   endif
  enddo
+ call printdm1(1,ndim,eigenvect) ! Uncomment for debug 
+ if(verbose==1) then 
+   do ib1dm=1,ndim
+     do ib2dm=1,ib1dm
+       Sib1k_ib2k=czero
+       do ib3dm=1,ndim
+         Sib1k_ib2k=Sib1k_ib2k+conjg(eigenvect(ib3dm,ib1dm))*eigenvect(ib3dm,ib2dm)
+       enddo
+       if(ib1dm==ib2dm) then
+         if(abs(Sib1k_ib2k-cmplx(1.0d0,0.0d0))>tol10) then
+           write(msg,'(a45,i5,a1,i5,f10.5)') 'Large deviation from identity for bands ',ib1dm,' ',ib2dm,real(Sib1k_ib2k) 
+           call wrtout(std_out,msg,'COLL')
+         endif
+       else
+         if(abs(Sib1k_ib2k)>tol10) then
+           write(msg,'(a45,i5,a1,i5,f10.5)') 'Large deviation from identity for bands ',ib1dm,' ',ib2dm,real(Sib1k_ib2k) 
+           call wrtout(std_out,msg,'COLL')
+         endif
+       endif
+     enddo
+   enddo
+ endif
 
  if(info==0) then
    if(iinfo==0) then       
@@ -275,7 +305,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo)
    call wrtout(ab_out,msg,'COLL')
  endif
 
- ! Store natural orbital eigenvectors matrix and occs. Also compute total number of electrons for this k value
+ ! Store natural orbital eigenvectors matrix and occs. Also compute total number of electrons for this k-point
  toccs_k=0.0d0
  do ib1dm=1,ndim
    do ib2dm=1,ndim
@@ -326,7 +356,7 @@ subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
 
  ! BSt occ are changed and never recoverd
  do ikpoint=1,BSt%nkpt
-   BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
+   BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! Spins summed occ in [0:2] 
  enddo
  MSG_COMMENT("QP_BSt occupancies correctly updated with nat. orb. ones")
  if((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
@@ -364,8 +394,8 @@ subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use 
  character(len=500) :: msg
 !arrays
 !************************************************************************
- do ib1dm=ib1,ib2
-   write(msg,'(a2,*(f10.5))') '  ',dm1(ib1dm,ib1:)
+ do ib1dm=ib1,10!ib2
+   write(msg,'(a2,*(f10.5))') '  ',Real(dm1(ib1dm,ib1:ib1+10))!MAU
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  enddo
@@ -400,8 +430,8 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  enddo
 
  ! <KS|K[NO]|KS> = U <NO|K[NO]|NO> (U^t)*
- res=matmul(Umat,Kex_tmp)
- Kex_tmp=matmul(res,conjg(transpose(Umat)))
+ !MAU res=matmul(Umat,Kex_tmp)
+ !MAU Kex_tmp=matmul(res,conjg(transpose(Umat)))
 
  do ib1dm=1,ndim
    do ib2dm=1,ndim
