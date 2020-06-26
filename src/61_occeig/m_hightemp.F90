@@ -354,7 +354,6 @@ contains
           this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
           ! entropy=simpson(step,valuesent)
         end if
-        write(0,*) 'gau',simpson(step,valueseel)
         ABI_DEALLOCATE(valuesent)
         ABI_DEALLOCATE(valueseel)
 
@@ -366,8 +365,6 @@ contains
     else if(this%version==2) then
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
     end if
-
-    write(0,*) 'dir',factor*djp32(xcut,gamma)
     this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
 
     ! Computation of edc_kin_freeel
