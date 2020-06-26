@@ -491,12 +491,12 @@ contains
   !
   ! SOURCE
   subroutine compute_pw_avg_std(this,cg,eig_k,ek_k,fnameabo,&
-  & gprimd,icg,ikpt,isppol,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
+  & gprimd,icg,ikpt,isppol,istwfk,kg_k,kinpw,kpt,mcg,mpi_enreg,nband_k,&
   & nkpt,npw_k,nspinor,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: icg,ikpt,isppol,mcg,nband_k,nkpt,npw_k,nspinor
+    integer,intent(in) :: icg,ikpt,isppol,istwfk,mcg,nband_k,nkpt,npw_k,nspinor
     real(dp),intent(in) :: wtk
     class(hightemp_type),intent(inout) :: this
     type(MPI_type),intent(in) :: mpi_enreg
@@ -575,6 +575,15 @@ contains
           do ipw=1,npw_k
             avnk=avnk+kinpw(ipw)*cgnk2(ipw)
           end do
+          if(istwfk>1)then
+            write(0,*) "SHOULD MERGE", ikpt,mpi_enreg%me
+            if(istwfk==2)then
+              ! npwtot(ikpt)=2*npwtot(ikpt)-1
+            else
+              ! npwtot(ikpt)=2*npwtot(ikpt)
+            end if
+          end if
+
           call xmpi_sum(avnk,mpi_enreg%comm_kptband,ierr)
           if(iband==nband_k) write(0,*) ikpt,npw_k,sum(cgnk2(:)),avnk,mpi_enreg%me,mpi_enreg%me_band
           do ipw=1,npw_k

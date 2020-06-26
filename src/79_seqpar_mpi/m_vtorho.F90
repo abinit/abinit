@@ -970,7 +970,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(associated(hightemp)) then
          if(hightemp%version==1) then
            call hightemp%compute_pw_avg_std(cg,eig_k,ek_k,dtfil%filnam_ds(4),&
-&           gprimd,icg,ikpt,isppol,kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
+&           gprimd,icg,ikpt,isppol,dtset%istwfk(ikpt),kg_k,kinpw,dtset%kptns,mcg,mpi_enreg,nband_k,&
 &           dtset%nkpt,npw_k,my_nspinor,dtset%wtk(ikpt))
          else if((hightemp%version==2).and.(hightemp%prt_cg)) then
            call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,ek_k,0,dtfil%filnam_ds(4),&
