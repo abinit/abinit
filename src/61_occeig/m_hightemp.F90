@@ -46,9 +46,10 @@ module m_hightemp
   type,public :: hightemp_type
     integer :: bcut,nbcut,version
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,e_ent_freeel
-    real(dp) :: std_init,nfreeel,e_shiftfactor,ucvol
+    real(dp) :: gcut,std_init,nfreeel,e_shiftfactor,ucvol
     logical :: prt_cg
   contains
+    procedure :: compute_efreeel
     procedure :: compute_e_ent_freeel,compute_e_kin_freeel_approx
     procedure :: compute_nfreeel,compute_pw_avg_std
     procedure :: compute_e_shiftfactor,init,destroy
@@ -58,7 +59,7 @@ module m_hightemp
   public :: dip12,djp12,dip32,djp32,hightemp_e_heg
   public :: hightemp_gaussian_jintegral,hightemp_gaussian_kintegral
   public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
-  public :: hightemp_get_nfreeel_approx,hightemp_prt_eigocc
+  public :: hightemp_get_nfreeel,hightemp_prt_eigocc
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -83,12 +84,13 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,prt_cg,rprimd,version)
+  subroutine init(this,gcut,mband,nbcut,prt_cg,rprimd,version)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,version,prt_cg
+    real(dp),intent(in) :: gcut
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
@@ -105,6 +107,7 @@ contains
     this%edc_kin_freeel=zero
     this%e_kin_freeel=zero
     this%e_ent_freeel=zero
+    this%gcut=gcut
     this%std_init=zero
     this%nfreeel=zero
     this%e_shiftfactor=zero
@@ -273,88 +276,113 @@ contains
     real(dp),intent(in) :: fermie,tsmear
     class(hightemp_type),intent(inout) :: this
 
-    ! *********************************************************************
+    ! Local variables -------------------------
+    ! Scalars
+    real(dp) :: entropy
 
-    call hightemp_get_nfreeel_approx(this%e_shiftfactor,this%ebcut,&
-    & fermie,this%bcut,this%nfreeel,tsmear,this%ucvol,this%version)
-    ! write(0,*) "nfreeel=",this%nfreeel
-    ! write(0,*) this%nfreeel, factor*djp12(xcut,gamma), abs(factor*djp12(xcut,gamma)-this%nfreeel)
+    ! *********************************************************************
+    entropy=zero
+    this%nfreeel=zero
+
+    call hightemp_get_nfreeel(this%bcut,this%ebcut,this%e_shiftfactor,&
+    & entropy,fermie,this%gcut,this%nfreeel,tsmear,this%ucvol,this%version)
   end subroutine compute_nfreeel
 
-  !!****f* ABINIT/m_hightemp/compute_e_kin_freeel
+  !!****f* ABINIT/m_hightemp/compute_efreeel
   !! NAME
-  !! compute_e_kin_freeel
+  !! compute_efreeel
   !!
   !! FUNCTION
-  !! Compute the value of the integral corresponding to the residual of energy after the band cut
-  !! $I = \Omega\int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}}{\pi^2}(\epsilon - U_0)^{3/2}d \epsilon$
   !!
   !! INPUTS
-  !! this=hightemp_type object concerned
-  !! fermie=fermi energy (Hartree)
-  !! mrgrid=number of grid points to compute the integral
-  !! tsmear=smearing width (or temperature)
   !!
   !! OUTPUT
-  !! this=hightemp_type object concerned
   !!
   !! PARENTS
   !!
   !! CHILDREN
   !!
   !! SOURCE
-  ! subroutine compute_e_kin_freeel(this,fermie,mrgrid,nfftf,nspden,tsmear,vtrial)
-  !
-  !   ! Arguments -------------------------------
-  !   ! Scalars
-  !   class(hightemp_type),intent(inout) :: this
-  !   integer,intent(in) :: mrgrid,nfftf,nspden
-  !   real(dp),intent(in) :: fermie,tsmear
-  !   ! Arrays
-  !   real(dp),intent(in) :: vtrial(nfftf,nspden)
-  !
-  !   ! Local variables -------------------------
-  !   ! Scalars
-  !   integer :: ii,ifft,ispden
-  !   real(dp) :: ix,step
-  !   ! Arrays
-  !   real(dp),dimension(:),allocatable :: values
-  !
-  !   ! *********************************************************************
-  !   step=1e-5
-  !
-  !   ! Dynamic array find size
-  !   ix=this%ebcut
-  !   ii=0
-  !   do while(fermi_dirac(ix,fermie,tsmear)>tol16)
-  !     ii=ii+1
-  !     ix=ix+step
-  !   end do
-  !   ABI_ALLOCATE(values,(ii))
-  !
-  !   ! Computation of e_kin_freeel
-  !   ix=this%ebcut
-  !   ii=0
-  !   do while(fermi_dirac(ix,fermie,tsmear)>tol16)
-  !     ii=ii+1
-  !     values(ii)=fermi_dirac(ix,fermie,tsmear)*&
-  !     & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*(ix-this%e_shiftfactor)
-  !     ix=ix+step
-  !   end do
-  !   if (ii>1) then
-  !     this%e_kin_freeel=simpson(step,values)
-  !   end if
-  !
-  !   ! Computation of edc_kin_freeel
-  !   this%edc_kin_freeel=zero
-  !   do ispden=1,nspden
-  !     do ifft=1,nfftf
-  !       this%edc_kin_freeel=this%edc_kin_freeel+vtrial(ifft,ispden)
-  !     end do
-  !   end do
-  !   ! Verifier la constante (/nspden**2)
-  !   this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
-  ! end subroutine compute_e_kin_freeel
+  subroutine compute_efreeel(this,fermie,nfftf,nspden,tsmear,vtrial)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    class(hightemp_type),intent(inout) :: this
+    real(dp),intent(in) :: fermie,tsmear
+    integer,intent(in) :: nfftf,nspden
+    ! Arrays
+    real(dp),intent(in) :: vtrial(nfftf,nspden)
+
+    ! Local variables -------------------------
+    ! Scalars
+    real(dp) :: factor,ix,gamma,step,xcut
+    integer :: ii,ifft,ispden
+    ! Arrays
+    real(dp),dimension(:),allocatable :: valueseel,valuesent
+
+    ! *********************************************************************
+    step=1e-1
+    factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+    gamma=(fermie-this%e_shiftfactor)/tsmear
+    this%e_kin_freeel=zero
+
+    if(this%version==1) then
+      if(this%gcut>dble(this%bcut)) then
+
+        ! Dynamic array find size
+        ix=dble(this%bcut)
+        ii=0
+        do while(ix<=this%gcut)
+          ii=ii+1
+          ix=ix+step
+        end do
+
+        ABI_ALLOCATE(valueseel,(ii))
+        ABI_ALLOCATE(valuesent,(ii))
+        ix=dble(this%bcut)
+        ii=0
+        do while(ix<=this%gcut)
+          ii=ii+1
+          valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
+          & hightemp_gaussian_kintegral(this%std_init,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+          & hightemp_gaussian_jintegral(this%std_init,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+          ! valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
+          ! & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
+          ! & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+          ix=ix+step
+        end do
+        if (ii>1) then
+          this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
+          ! entropy=simpson(step,valuesent)
+        end if
+        write(0,*) 'gau',simpson(step,valueseel)
+        ABI_DEALLOCATE(valuesent)
+        ABI_DEALLOCATE(valueseel)
+
+        ! Change Fermi-Dirac integral lower bound.
+        xcut=hightemp_e_heg(dble(this%gcut),this%ucvol)/tsmear
+      else
+        xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
+      end if
+    else if(this%version==2) then
+      xcut=(this%ebcut-this%e_shiftfactor)/tsmear
+    end if
+
+    write(0,*) 'dir',factor*djp32(xcut,gamma)
+    this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
+
+    ! Computation of edc_kin_freeel
+    this%edc_kin_freeel=zero
+    do ispden=1,nspden
+      do ifft=1,nfftf
+        this%edc_kin_freeel=this%edc_kin_freeel+vtrial(ifft,ispden)
+      end do
+    end do
+
+    ! Verifier la constante (/nspden**2)
+    this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
+
+  end subroutine compute_efreeel
 
   !!****f* ABINIT/m_hightemp/compute_e_kin_freeel_approx
   !! NAME
@@ -519,23 +547,22 @@ contains
     ! Debug : Priting Eigenvalues, Kinetic and PW grid if requested
     if(this%prt_cg.and.(mpi_enreg%me==mpi_enreg%me_kpt)) then
 
-      if(istwf_k==1) then
-        write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ikpt
-        open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
-        do ipw=1,npw_k
-          kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
-          kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
-          kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
+      ! Not sure of this debug block if istwf_k>1
+      write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ikpt
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+      do ipw=1,npw_k
+        kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
+        kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
+        kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
 
-          write(23,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
-          & ipw,&
-          & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
-          & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
-          & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
-          & kinpw(ipw)
-        end do
-        close(23)
-      end if
+        write(23,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
+        & ipw,&
+        & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
+        & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
+        & gprimd(3,1)*kpg1+gprimd(3,2)*kpg2+gprimd(3,3)*kpg3,&
+        & kinpw(ipw)
+      end do
+      close(23)
 
       write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ikpt
       open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
@@ -558,7 +585,8 @@ contains
       do iblocksize=1,blocksize
         iband=(iblock-1)*blocksize+iblocksize
 
-        if(this%prt_cg.and.istwf_k==1) then
+        ! Not sure of this debug block if istwf_k>1
+        if(this%prt_cg) then
           cgnk(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
           cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
           write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ikpt,'_b',iband
@@ -570,7 +598,7 @@ contains
           close(23)
         end if
 
-        ! Computing planewaves standard deviation over lasts bands.
+        ! Computing planewaves energy standard deviation over lasts bands.
         if(iband>=nband_k-this%nbcut+1) then
           tmp_std=zero
           call meanvalue_g(tmp_std,(kinpw(:)-ek_k(iband))**2,0,&
@@ -578,7 +606,7 @@ contains
           & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),&
           & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),0)
 
-          this%std_init=this%std_init+wtk*half*sqrt(tmp_std)/this%nbcut
+          this%std_init=this%std_init+wtk*sqrt(tmp_std)/this%nbcut
         end if
       end do
     end do
@@ -1206,119 +1234,83 @@ contains
     ABI_DEALLOCATE(eknk)
   end subroutine hightemp_get_e_shiftfactor
 
-  !!****f* ABINIT/m_hightemp/hightemp_getnfreeel
-  !! NAME
-  !! hightemp_getnfreeel
-  !!
-  !! FUNCTION
-  !! Compute the value of the integral corresponding to the missing free electrons after energy cut.
-  !! $I = \int_{Ec}^{\Infty}f(\epsilon)\frac{\sqrt{2}\Omega}{\pi^2}\sqrt{\epsilon - U_0}d \epsilon$
-  !!
-  !! INPUTS
-  !! this=hightemp_type object concerned
-  !! fermie=fermi energy (Hartree)
-  !! mrgrid=number of grid points to compute the integral
-  !! tsmear=smearing width (or temperature)
-  !! e_shiftfactor=energy shift factor
-  !! ucvol=unit cell volume (bohr^3)
-  !!
-  !! OUTPUT
-  !! nfreeel=number of free electrons after the energy cut with given fermi level
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  ! subroutine hightemp_getnfreeel(ebcut,entropy,fermie,mrgrid,nfreeel,tsmear,e_shiftfactor,ucvol)
+  !****f* ABINIT/m_hightemp/hightemp_get_nfreeel
+  ! NAME
+  ! hightemp_get_nfreeel
   !
-  !   ! Arguments -------------------------------
-  !   ! Scalars
-  !   integer,intent(in) :: mrgrid
-  !   real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor,ucvol
-  !   real(dp),intent(out) :: entropy,nfreeel
+  ! FUNCTION
+  ! Compute the value of the integral corresponding to the missing electrons in
+  ! the gaussian or dirac regimen.
   !
-  !   ! Local variables -------------------------
-  !   ! Scalars
-  !   integer :: ii
-  !   real(dp) :: ix,step
-  !   ! Arrays
-  !   real(dp),dimension(:),allocatable :: valuesnel,valuesent
+  ! INPUTS
   !
-  !   ! *********************************************************************
-  !   step=1e-5
-  !   nfreeel=zero
-  !   entropy=zero
+  ! OUTPUT
   !
-  !   ! Dynamic array find size
-  !   ix=ebcut
-  !   ii=0
-  !   do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
-  !     ii=ii+1
-  !     ix=ix+step
-  !   end do
+  ! PARENTS
   !
-  !   ABI_ALLOCATE(valuesnel,(ii))
-  !   ABI_ALLOCATE(valuesent,(ii))
+  ! CHILDREN
   !
-  !   ix=ebcut
-  !   ii=0
-  !   do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
-  !     ii=ii+1
-  !     valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-  !     valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
-  !     & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
-  !     & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-  !     ix=ix+step
-  !   end do
-  !   if (ii>1) then
-  !     nfreeel=simpson(step,valuesnel)
-  !     entropy=simpson(step,valuesent)
-  !   end if
-  ! end subroutine hightemp_getnfreeel
-
-  !!****f* ABINIT/m_hightemp/hightemp_get_nfreeel_approx
-  !! NAME
-  !! hightemp_get_nfreeel_approx
-  !!
-  !! FUNCTION
-  !!
-  !! INPUTS
-  !!
-  !! OUTPUT
-  !!
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine hightemp_get_nfreeel_approx(e_shiftfactor,ebcut,fermie,bcut,&
-  & nfreeel,tsmear,ucvol,version)
+  ! SOURCE
+  subroutine hightemp_get_nfreeel(bcut,ebcut,e_shiftfactor,entropy,fermie,gcut,nelect,tsmear,ucvol,version)
 
     ! Arguments -------------------------------
     ! Scalars
     integer :: bcut,version
-    real(dp),intent(inout) :: nfreeel
-    real(dp),intent(in) :: e_shiftfactor,ebcut,fermie,tsmear,ucvol
+    real(dp),intent(in) :: ebcut,fermie,gcut,tsmear,e_shiftfactor,ucvol
+    real(dp),intent(inout) :: entropy,nelect
 
     ! Local variables -------------------------
     ! Scalars
-    real(dp) :: factor,xcut,gamma
+    integer :: ii
+    real(dp) :: factor,gamma,ix,step,xcut
+    ! Arrays
+    real(dp),dimension(:),allocatable :: valuesnel,valuesent
 
     ! *********************************************************************
 
-    nfreeel=0.
+    step=1e-1
     factor=sqrt(2.)/(PI*PI)*ucvol*tsmear**(1.5)
-    if(version==0) then
-      xcut=(ebcut-e_shiftfactor)/tsmear
-    else if(version==1) then
-      xcut=hightemp_e_heg(dble(bcut),ucvol)/tsmear
-    end if
     gamma=(fermie-e_shiftfactor)/tsmear
+    if(version==1) then
+      if(gcut>dble(bcut)) then
 
-    nfreeel=factor*djp12(xcut,gamma)
-    if(nfreeel<tol16) nfreeel=zero
-  end subroutine hightemp_get_nfreeel_approx
+        ! Dynamic array find size
+        ix=dble(bcut)
+        ii=0
+        do while(ix<=gcut)
+          ii=ii+1
+          ix=ix+step
+        end do
+
+        ABI_ALLOCATE(valuesnel,(ii))
+        ABI_ALLOCATE(valuesent,(ii))
+        ix=dble(bcut)
+        ii=0
+        do while(ix<=gcut)
+          ii=ii+1
+          valuesnel(ii)=2*fermi_dirac(hightemp_e_heg(ix,ucvol)+e_shiftfactor,fermie,tsmear)
+          ! valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
+          ! & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
+          ! & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+          ix=ix+step
+        end do
+        if (ii>1) then
+          nelect=nelect+simpson(step,valuesnel)
+          ! entropy=simpson(step,valuesent)
+        end if
+        ABI_DEALLOCATE(valuesent)
+        ABI_DEALLOCATE(valuesnel)
+
+        ! Change Fermi-Dirac integral lower bound.
+        xcut=hightemp_e_heg(dble(gcut),ucvol)/tsmear
+      else
+        xcut=hightemp_e_heg(dble(bcut),ucvol)/tsmear
+      end if
+    else if(version==2) then
+      xcut=(ebcut-e_shiftfactor)/tsmear
+    end if
+    nelect=nelect+factor*djp12(xcut,gamma)
+  end subroutine hightemp_get_nfreeel
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
   !! NAME

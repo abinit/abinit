@@ -1233,7 +1233,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Compute u0 energy shift factor from eigenvalues and kinetic energy.
      if(associated(hightemp)) then
-       write(0,*) hightemp%std_init
        call hightemp%compute_e_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg,dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        if(dtset%userra/=zero) hightemp%e_shiftfactor=dtset%userra
      end if
@@ -1250,7 +1249,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Blanchet Once we have occupation, compute number of free electrons
      if(associated(hightemp)) then
        call hightemp%compute_nfreeel(energies%e_fermie,dtset%tsmear)
-       call hightemp%compute_e_kin_freeel_approx(energies%e_fermie,nfftf,dtset%nspden,&
+       call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
        call hightemp%compute_e_ent_freeel(energies%e_fermie,dtset%tsmear)
 

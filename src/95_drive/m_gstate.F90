@@ -852,7 +852,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     " < ht_nbcut=",dtset%ht_nbcut,". Action: Increase nband or decrease ht_nbcut."
      MSG_ERROR(message)
    else
-     call hightemp%init(dtset%mband,dtset%ht_nbcut,dtset%ht_prt_cg,rprimd,&
+     call hightemp%init(dtset%ht_gcut,dtset%mband,dtset%ht_nbcut,dtset%ht_prt_cg,rprimd,&
 &     dtset%use_hightemp)
    end if
  end if
@@ -898,9 +898,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      vtrial(:,:)=zero
 
      call hightemp%compute_nfreeel(results_gs%energies%e_fermie,dtset%tsmear)
-!      call hightemp%compute_e_kin_freeel(results_gs%energies%e_fermie,1024,nfftf,dtset%nspden,&
-! &     dtset%tsmear,vtrial)
-     call hightemp%compute_e_kin_freeel_approx(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
+     call hightemp%compute_efreeel(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
 &     dtset%tsmear,vtrial)
 
      ABI_DEALLOCATE(vtrial)
