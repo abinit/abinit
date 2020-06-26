@@ -1,5 +1,5 @@
 
-.Version 9.1.4 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 18 Jun 2020.
-- ( at 10h37 )
+.Starting date : Fri 26 Jun 2020.
+- ( at 11h50 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.in
 - output file    -> teph4mob_6.out
@@ -683,7 +683,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
                                      Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Fermi level:  3.09 (eV)
+   Fermi level:  3.09 (eV) with nelect:  8.00
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1043,7 +1043,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
                                      Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Fermi level:  3.09 (eV)
+   Fermi level:  3.09 (eV) with nelect:  8.00
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1403,7 +1403,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
                                      Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Fermi level:  3.09 (eV)
+   Fermi level:  3.09 (eV) with nelect:  8.00
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1773,7 +1773,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
                                      Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Fermi level:  3.09 (eV)
+   Fermi level:  3.09 (eV) with nelect:  8.00
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -2148,7 +2148,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
                                      Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Fermi level:  3.09 (eV)
+   Fermi level:  3.09 (eV) with nelect:  8.00
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -2523,7 +2523,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:    5.0 [K], mu_e:    3.523
                                      Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
    Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
-   Fermi level:  3.09 (eV)
+   Fermi level:  3.09 (eV) with nelect:  8.00
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 

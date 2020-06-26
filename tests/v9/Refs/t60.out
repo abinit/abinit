@@ -1,5 +1,5 @@
 
-.Version 9.1.4 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 18 Jun 2020.
-- ( at 10h36 )
+.Starting date : Fri 26 Jun 2020.
+- ( at 11h50 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
@@ -1245,7 +1245,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
                                      Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fermi level:  4.07 (eV)
+   Fermi level:  4.07 (eV) with nelect:  8.00
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1657,7 +1657,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
                                      Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fermi level:  4.07 (eV)
+   Fermi level:  4.07 (eV) with nelect:  8.00
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1906,7 +1906,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
                                      Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fermi level:  4.07 (eV)
+   Fermi level:  4.07 (eV) with nelect:  8.00
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
