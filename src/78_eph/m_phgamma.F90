@@ -2,13 +2,24 @@
 !! NAME
 !!
 !! FUNCTION
-!!  Computation of phonon linewidths, isotropic superconducting properties and transport in metals with the LOVA.
+!!  Computation of phonon linewidths, isotropic superconducting properties
+!!  and transport in metals withing the LOVA approximation to the linearized Boltzmann equation.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! TODO
+!!  1) Implement restart capabilities (eph_restart)
+!!  2) Sum over the IBZ(q) on the FS instead of full BZ
+!!  3) Gaussian adaptive smearing for double delta (tetra version from libtetrabz really slow!)
+!!  4) Automatic detections of energy window, improve filtering techniques.
+!!  5) Interface with KERANGE trick
+!!  6) More examples and tutorials (using precomputed Netcd files)
+!!  7) SKW interpolation for ph linewidths and/or linear interpolation (I don't trust plain Fourier interpolation).
+!!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks
 !!
 !! PARENTS
 !!
@@ -3530,7 +3541,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
  integer :: indkk_kq(1,6)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
- integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
+ integer,allocatable :: my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
  real(dp) :: wminmax(2), n0(ebands%nsppol)
  real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom)
@@ -3597,7 +3608,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    call edos%write(path)
  end if
 
- ! Find Fermi surface k points
+ ! Find Fermi surface k-points
  ! TODO: support kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface!
  ABI_MALLOC(fstab, (nsppol))
  call fstab_init(fstab, ebands, cryst, dtset, comm)
@@ -3710,6 +3721,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  call xmpi_split_cyclic(gams%nqibz, qpt_comm%value, gams%my_nqibz, gams%my_iqibz)
  ABI_CHECK(gams%my_nqibz > 0, sjoin("nqibz (", itoa(gams%nqibz), ") < qpt_comm_nproc (", itoa(qpt_comm%nproc), ")"))
 
+ !ABI_CALLOC(qibz_done, (gams%nqibz))
+
  path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
  ncid = nctk_noid
 #ifdef HAVE_NETCDF
@@ -3740,6 +3753,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
      nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t('qibz', "dp", "number_of_reduced_dimensions, nqibz"), &
      nctkarr_t('wtq', "dp", "nqibz"), &
+     !nctkarr_t('qibz_done', "int", "nqibz"), &
      nctkarr_t('phfreq_qibz', "dp", "natom3, nqibz"), &
      nctkarr_t('phdispl_cart_qibz', "dp", "two, natom3, natom3, nqibz"), &
      nctkarr_t('phgamma_qibz', "dp", "natom3, nqibz, number_of_spins"), &
@@ -3763,6 +3777,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), gams%qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wtq'), gams%wtq))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), qibz_done))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
@@ -3968,6 +3983,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Loop over my q-point in the IBZ.
  do imyq=1,gams%my_nqibz
    iq_ibz = gams%my_iqibz(imyq)
+
+   ! Check if this (kpoint, spin) was already calculated
+   !if (all(sigma%qp_done(ikcalc, :) == 1)) cycle
+
    call cwtime(cpu_q, wall_q, gflops_q, "start")
 
    qpt = gams%qibz(:, iq_ibz)
@@ -4191,6 +4210,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
        !call ephtk_gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
+       ! Compute group velocities if we are in transport mode or adaptive gaussian or
+       ! tetrahedron with libtetrabz returning nesting condition.
        need_velocities = dtset%eph_transport > 0 .or. fs%eph_fsmear < zero .or. nesting /= 0
 
        if (need_velocities) then
@@ -4377,6 +4398,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(tgam)
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
+ !ABI_FREE(qibz_done)
 
  if (dtset%eph_transport > 0) then
    ABI_FREE(tgamvv_in)
@@ -4564,6 +4586,7 @@ subroutine phgamma_setup_qpoint(gams, fs, cryst, ebands, spin, ltetra, qpt, nest
  end if
 
  if (fs%eph_intmeth == 1 .or. nesting == 1) then
+   ! Gaussian method
    ! Distribute k-points within the FS window inside comm.
    ! 1) Select k-points such that k+q is stil inside the FS window
    ! 2) Distribute effective k-points assuming all procs in comm have all FS k-points (no filtering)

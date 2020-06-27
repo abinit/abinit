@@ -3873,8 +3873,10 @@ Variable(
     requires="[[eph_intmeth]] == 1",
     added_in_version="before_v9",
     text=r"""
-This variable defines the gaussian broadening used for the integration over
-the Fermi surface when [[eph_intmeth]] == 1.
+This variable defines the gaussian broadening used for the integration over the double delta
+over the Fermi surface when [[eph_intmeth]] == 1.
+A negative value, activates the adaptive gaussian broadening proposed in [[cite:Li2015]]
+in which the broadening is automatically computed from the group velocities.
 """,
 ),
 
@@ -3900,11 +3902,16 @@ Phonon linewidths in metals (**eph_task** = 1):
 
 :   The default approach for the integration of the double-delta over the Fermi surface is 2 (tetrahedron).
     When the gaussian method is used, the broadening is given by [[eph_fsmear]].
+    A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
-Electron-phonon self-energy
+Electron-phonon self-energy with **eph_task** = 4):
 
-:   The default is gaussian method with broadening specified by [[zcut]].
+:   The default is Lorentzian method with broadening specified by [[zcut]].
+
+Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
+
+:   The default is Tetrahedron method
 """,
 ),
 

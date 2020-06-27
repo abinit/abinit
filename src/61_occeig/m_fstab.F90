@@ -470,8 +470,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    !end do
  end do
 
- ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
  if (dtset%eph_intmeth == 2) then
+   ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
    ABI_MALLOC(bz2ibz, (nkbz))
    bz2ibz = full2ebands(1, :)
 
@@ -619,7 +619,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 
  wtk = zero
  if (fs%eph_intmeth == 1 .or. nesting /= 0) then
-   ! Gaussian method (constant or adaptive method from group velocities)
+   ! Gaussian method (constant or adaptive method from group velocities if eph_fsmear is negative)
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
