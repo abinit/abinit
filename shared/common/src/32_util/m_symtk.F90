@@ -288,8 +288,8 @@ subroutine symdet(determinant, nsym, sym)
    call mati3det(sym(:,:,isym),det)
    determinant(isym)=det
    if (abs(det)/=1) then
-     write(msg,'(a,i5,a,i10,a,a,a,a,a)')&
-      'Abs(determinant) for symmetry number',isym,' is',det,' .',ch10,&
+     write(msg,'(a,i0,a,i0,a,a,a,a,a)')&
+      'Abs(determinant) for symmetry number ',isym,' is ',det,' .',ch10,&
       'For a legitimate symmetry, abs(determinant) must be 1.',ch10,&
       'Action: check your symmetry operations (symrel) in input file.'
      MSG_ERROR(msg)
