@@ -401,12 +401,14 @@ we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ elect
 
 !!! tip
 
-    The computational cost increases with the number of temperatures.
+    The computational cost increases with the number of temperatures although not necessarly in a linear fashion.
     For the initial convergence studies, we suggest to start from a relatively small number
-    of temperatures covering the region of interest. 
-    The T-mesh can be densified aftwerwards when  converged parameters are found.
-    Note that the convergence might be different depending on the temperature.
-    Low temperatures are more difficult to converge.
+    of temperatures **covering the T-region of interest**. 
+    The T-mesh can be densified aftwerwards while keeping the same range once converged parameters are found.
+    Note also that transport properties at low temperatures are much more difficult to converge as the
+    derivative of the Fermi-Dirac distribution is strongly peaked around the Fermi level and a very dense sampling 
+    is needed to convergence the BZ integrals.
+    
 
 The [[sigma_erange]] variable defines the energy window, below the VBM and above the
 CBM where the lifetimes will be computed.

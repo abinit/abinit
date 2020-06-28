@@ -80,10 +80,6 @@ type,public :: rta_t
    integer :: ntemp
    ! number of temperatures.
 
-   integer :: ndop
-   ! number of carrier concentrations at which to evaluate chemical potential energy
-   ! TODO: Not used
-
    integer :: nw
    ! number of energies (chemical potentials) at which transport quantities are computed
    ! Same number of energies used in DOS.
@@ -108,11 +104,11 @@ type,public :: rta_t
    ! a list of temperatures at which to compute the transport
 
    real(dp),allocatable :: eph_mu_e(:)
-   ! (%ntemp, %ndop)
+   ! (%ntemp)
    ! Chemical potential at this carrier concentration and temperature from sigeph (lifetime)
 
    real(dp),allocatable :: transport_mu_e(:)
-   ! (%ntemp, %ndop)
+   ! (%ntemp)
    ! Chemical potential at this carrier concentration and temperature
 
    real(dp),allocatable :: eminmax_spin(:,:)
@@ -430,7 +426,6 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  end if
 
  ! Same doping case as sigmaph
- new%ndop = 1
  ABI_MALLOC(new%eph_mu_e, (new%ntemp))
  ABI_MALLOC(new%transport_mu_e, (new%ntemp))
 
