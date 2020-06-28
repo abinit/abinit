@@ -2343,7 +2343,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
  else
 
-   if (any(dtset%sigma_erange > zero)) then
+   if (any(abs(dtset%sigma_erange) > zero)) then
      call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks, comm)
 
    else
@@ -4639,7 +4639,7 @@ subroutine sigmaph_print(self, dtset, unt)
  end select
 
  write(unt,"(a, i0)")" Number of k-points for self-energy corrections: ", self%nkcalc
- if (all(dtset%sigma_erange /= -one)) then
+ if (any(abs(dtset%sigma_erange) /= zero)) then
    write(unt, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
  end if
  write(unt,"(a)")" List of K-points for self-energy corrections:"

@@ -20563,7 +20563,9 @@ Variable(
     text=r"""
 This variable defines the linear mesh of temperatures used in the EPH code ([[optdriver]] = 7).
 The first entry gives the initial temperature in Kelvin, the second entry the linear step in Kelvin,
-the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
+the third entry is the number of points in the mesh.
+The default value corresponds to 6 points between 5 K and 300 K.
+The code will refuse to run calculations with T = 0.
 """,
 ),
 
@@ -20731,25 +20733,31 @@ Variable(
     varset="eph",
     topics=['SelfEnergy_expert'],
     vartype="real",
-    defaultval=[-1.0, -1.0],
+    defaultval=[0.0, 0.0],
     dimensions=[2],
     mnemonics="SIGMA Energy-range.",
     characteristics=['[[ENERGY]]'],
     added_in_version="9.0.0",
     text=r"""
-This variable selects the k-points and the bands in the self-energy matrix elements on the basis
-of their position with respect to the band edges (energy differences are **always positive**, even for holes).
+This variable consists of two entries that allow one to select the k-points and the bands
+in the e-ph self-energy $\Sigma_\nk$ on the basis of their KS energy $\ee_\nk$.
 
-Only the k-points and the bands whose energy difference if less than this value will be included in the calculation.
-The first entry refers to holes, the second one to electrons.
-A negative entry can be used to exclude either holes or electrons from the calculation.
+If both entries in [[sigma_erange]] are negative, the code assumes a metal and only states within the energy
+window [efermi - abs(sigma_erange(1)), efermi + abs(sigma_erange(2)] are included in the calculation.
+
+Positive (or zero) values are used in semiconductors
+to define an energy range with respect to the band edges
+In this case, the first entry given the position of the holes with respect to the CBM while the second entry
+gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
+A zero entry can be used to exclude either holes or electrons from the calculation.
+
 This variable is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
 
 !!! important
 
-    By default, this variable is given in Hartree. Use
+    By default, this variable is given in Hartree. Use e.g.
 
-        sigma_erange 1 1 eV
+        sigma_erange 0.0 0.5 eV
 
     to specify the energy intervals in eV units.
 """,

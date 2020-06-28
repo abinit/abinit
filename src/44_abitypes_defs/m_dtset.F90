@@ -885,7 +885,7 @@ type, public :: dataset_type
 
  integer :: sigma_bsum_range(2) = 0
 
- real(dp) :: sigma_erange(2) = -one
+ real(dp) :: sigma_erange(2) = zero
 
  integer :: transport_ngkpt(3) = 0
  ! K-mesh for Transport calculation.

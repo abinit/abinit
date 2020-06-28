@@ -324,16 +324,16 @@ P           mkmem           8
  sigma_bsum_range8       2    4
  sigma_bsum_range9       0    0
  sigma_bsum_range10      0    0
-     sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange4    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange5    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange1     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange2     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
      sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
-     sigma_erange8    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange9    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange10   -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange8     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange9     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange10    0.00000000E+00  0.00000000E+00 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2
@@ -2569,16 +2569,16 @@ P           mkmem           8
  sigma_bsum_range8       2    4
  sigma_bsum_range9       0    0
  sigma_bsum_range10      0    0
-     sigma_erange1    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange2    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange3    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange4    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange5    -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange1     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange2     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange4     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange5     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange6     1.83746627E-02  1.83746627E-02 Hartree
      sigma_erange7     1.83746627E-02  1.83746627E-02 Hartree
-     sigma_erange8    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange9    -1.00000000E+00 -1.00000000E+00 Hartree
-     sigma_erange10   -1.00000000E+00 -1.00000000E+00 Hartree
+     sigma_erange8     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange9     0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange10    0.00000000E+00  0.00000000E+00 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2

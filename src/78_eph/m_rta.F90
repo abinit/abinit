@@ -578,15 +578,19 @@ subroutine rta_compute(self, cryst, dtset, comm)
  edos_broad = dtset%tsmear
 
  ! Set default energy range for DOS
- emin = minval(self%eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
- emax = maxval(self%eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
+ emin = minval(self%eminmax_spin(1,:)); emin = emin - tol1 * abs(emin)
+ emax = maxval(self%eminmax_spin(2,:)); emax = emax + tol1 * abs(emax)
 
  ! If sigma_erange is set, get emin and emax from this variable
  ! MG: TODO This value should be read from SIGPEH
- do spin=1,self%ebands%nsppol
-   if (dtset%sigma_erange(1) >= zero) emin = self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
-   if (dtset%sigma_erange(2) >= zero) emax = self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
- end do
+ ! Recheck metals
+ if (any(abs(dtset%sigma_erange) > zero)) then
+   emin = huge(one); emax = -huge(one)
+   do spin=1,self%ebands%nsppol
+     if (dtset%sigma_erange(1) >= zero) emin = min(emin, self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1))
+     if (dtset%sigma_erange(2) >= zero) emax = max(emax, self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2))
+   end do
+ end if
 
  ! Compute DOS, vv_dos and vvtau_DOS (v x v tau)
  !    out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
@@ -736,7 +740,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
      ! Compute carrier density
      kT = self%kTmesh(itemp)
 
-     ! MG: I think that here we should use mu_e instead of ifermi.
+     ! MG TODO: I think that here we should use mu_e instead of ifermi.
      ! Compute carrier density of electrons (ifermi:self%nw)
      do iw=1,self%nw ! doping
        self%n(iw,itemp,1) = carriers(self%edos%mesh, self%edos%dos(:,spin) * max_occ, ifermi, self%nw, &
@@ -789,7 +793,7 @@ pure subroutine inv33(aa, ait)
  t1 = aa(2,2) * aa(3,3) - aa(3,2) * aa(2,3)
  t2 = aa(3,2) * aa(1,3) - aa(1,2) * aa(3,3)
  t3 = aa(1,2) * aa(2,3) - aa(2,2) * aa(1,3)
- det  = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
+ det = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
 
  ! Make sure matrix is not singular
  if (abs(det) > 100 * tiny(one)) then
@@ -917,10 +921,8 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_UNUSED(dtset%natom)
  nprocs = xmpi_comm_size(comm)
 
- ! Aalias for important dimensions
+ ! Copy important dimensions
  mband = self%ebands%mband; nkpt = self%ebands%nkpt; nsppol = self%ebands%nsppol
-
- ! Compute index of valence band
  max_occ = two / (self%nspinor * self%nsppol)
 
  ABI_MALLOC(self%mobility_mu, (3, 3, 2, self%ntemp, self%nsppol, self%nrta))
@@ -957,7 +959,9 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ! Compute mobility_mu i.e. results in which lifetimes have been computed in a consistent way
  ! with the same the Fermi level. In all the other cases, indeed, we assume that tau does not depend on ef.
  !
- ! TODO: Implement other tensors.
+ ! TODO: Implement other tensors. Compare these results with the ones obtained with spectral sigma
+ ! In principle, they should be the same, in practice the integration of sigma requires enough resolution
+ ! around the band edge.
  self%mobility_mu = zero
  cnt = 0
  do spin=1,nsppol
@@ -1247,6 +1251,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
  write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
  write(ount, "(a)")"#"
 
+ ! This to improve portability of the unit tests.
  call alloc_copy(values, tmp_values)
  where (abs(values) > tol30)
    tmp_values = values

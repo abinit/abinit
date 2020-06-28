@@ -38,7 +38,7 @@ module m_sigtk
  use m_hdr
  use m_dtset
 
- use m_fstrings,     only : sjoin, ltoa, strcat, itoa
+ use m_fstrings,     only : sjoin, ltoa, strcat, itoa, ftoa
  use m_io_tools,     only : open_file
  use defs_datatypes, only : ebands_t, pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
@@ -573,7 +573,8 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
- assume_gap = .True.
+ ! (-num, -num) activate treatment of metals with energy window around Efermi.
+ assume_gap = .not. all(dtset%sigma_erange < zero)
  unts = [std_out, ab_out]
 
  if (my_rank == master) then
@@ -598,7 +599,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    !call ebands_print(ebands, header, unit=std_out, prtvol=dtset%prtvol)
 
    ! Consistency check.
-   if (.not. any(dtset%sigma_erange > zero)) then
+   if (all(dtset%sigma_erange == zero)) then
      MSG_ERROR("sigma_erange must be specified in input when calling sigtk_kpts_in_erange.")
    end if
    if (all(dtset%sigma_ngkpt == 0)) then
@@ -619,7 +620,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    end if
    call gaps%free()
  else
-   !call wrtout(unts, "Using Fermi level:", ftoa(ebands%fermie * Ha_eV), " (eV)"
+   call wrtout(unts, sjoin("Using Fermi level:", ftoa(ebands%fermie * Ha_eV, fmt="f6.2"), " (eV)"))
  end if
 
  ! Interpolate band energies with star functions.
@@ -672,7 +673,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
      vmax = fine_gaps%vb_max(spin) + tol2 * eV_Ha
      cmin = fine_gaps%cb_min(spin) - tol2 * eV_Ha
    else
-     ! Use Fermi level from ebands instead of fine_ebands
+     ! Note that we wse the Fermi level from ebands instead of fine_ebands
      vmax = ebands%fermie
      cmin = ebands%fermie
    end if
@@ -681,14 +682,14 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
      do band=1,ebands%mband
        ee = fine_ebands%eig(band, ikf_ibz, spin)
        ! Check whether the interpolated eigenvalue is inside the sigma_erange window.
-       if (dtset%sigma_erange(1) > zero) then
-         if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
+       if (abs(dtset%sigma_erange(1)) > zero) then
+         if (ee <= vmax .and. vmax - ee <= abs(dtset%sigma_erange(1))) then
            kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1)  + 1
            exit
          end if
        end if
-       if (dtset%sigma_erange(2) > zero) then
-         if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
+       if (abs(dtset%sigma_erange(2)) > zero) then
+         if (ee >= cmin .and. ee - cmin <= abs(dtset%sigma_erange(2))) then
            kshe_mask(ikf_ibz, spin, 2) = kshe_mask(ikf_ibz, spin, 2)  + 1
            exit
          end if
