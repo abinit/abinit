@@ -4470,7 +4470,7 @@ end subroutine wfd_sym_ug_kg
 !!
 !! SOURCE
 
-subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
+subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
 
 !Arguments ------------------------------------
 !scalars
@@ -4478,6 +4478,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  class(wfd_t),intent(in) :: Wfd
  type(Hdr_type),intent(in) :: Hdr 
  type(ebands_t),intent(in) :: Bands
+ logical,intent(in),optional :: wfknocheck 
 
 !Local variables ------------------------------
 !scalars
@@ -4485,7 +4486,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  integer :: nprocs,my_rank,iomode,cgsize,npw_k,ik_ibz,spin,nband_k,band,ii
  integer :: blk,nblocks,how_many,ierr,how_manyb
  real(dp) :: cpu,wall,gflops
- logical :: iam_master
+ logical :: iam_master,nocheck ! MRM
  character(len=500) :: msg
  type(wfk_t) :: Wfkfile
 !arrays
@@ -4496,6 +4497,8 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 !************************************************************************
 
  DBG_ENTER("COLL")
+ nocheck=.false.
+ if(present(wfknocheck)) nocheck=.true.
 
  nprocs = xmpi_comm_size(Wfd%comm); my_rank = xmpi_comm_rank(Wfd%comm)
  iam_master = (my_rank == master)
@@ -4567,9 +4570,11 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
-     ! MRM Check 
-     if (.not. wfd%ihave_ug(band, ik_ibz, spin, how="Stored")) cycle
-     !if (.not. wave%has_ug == WFD_STORED) then
+     ! MRM FIXME ? Indeed, it works! 
+     if(.not.nocheck) then
+       if (.not. wfd%ihave_ug(band, ik_ibz, spin, how="Stored")) cycle
+     endif
+
      nband_k = Wfd%nband(ik_ibz,spin)
      npw_k   = Wfd%npwarr(ik_ibz)
 

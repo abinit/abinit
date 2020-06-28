@@ -248,7 +248,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  real(dp):: gwalpha,gwbeta,wmin,wmax,coef_hyb_tmp,eik_new  ! MRM
  complex(dpc) :: max_degw,cdummy,delta_band_ibik   ! MRM
- logical :: hyb_tmp                                ! MRM
+ logical :: hyb_tmp,wfknocheck                     ! MRM
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname ! MRM
@@ -356,6 +356,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  gw1rdm=Dtset%gw1rdm ! MRM input variable
  x1rdm=Dtset%x1rdm   ! MRM input variable
  verbose=0           ! MRM change to verbose=1 for debug mode and recompile 
+ wfknocheck=.true.   ! MRM used for printing WFK file
 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
@@ -2496,40 +2497,41 @@ endif
         write(msg,'(a4)') 'MAU0'
         call wrtout(std_out,msg,'COLL')
         do ib1dm=ib1,ib2
-          write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+          !write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+          write(msg,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
           call wrtout(std_out,msg,'COLL')
         enddo
         !MAU
-        write(msg,'(a4)') 'MEL0'
-        call wrtout(std_out,msg,'COLL')
-        do ib1dm=1,10
-          write(msg,'(*(f10.5))') REAL(Sr%x_mat(ib1dm,1:11,ikcalc,1))
-          call wrtout(std_out,msg,'COLL')
-        enddo
+        !write(msg,'(a4)') 'MEL0'
+        !call wrtout(std_out,msg,'COLL')
+        !do ib1dm=1,10
+        !  write(msg,'(*(f10.5))') REAL(Sr%x_mat(ib1dm,1:11,ikcalc,1))
+        !  call wrtout(std_out,msg,'COLL')
+        !enddo
         !write(msg,'(a5)') 'MEL0i'
         !call wrtout(std_out,msg,'COLL')
         !do ib1dm=1,10
         !  write(msg,'(*(f10.5))') AIMAG(Sr%x_mat(ib1dm,1:11,ikcalc,1))
         !  call wrtout(std_out,msg,'COLL')
         !enddo
-        write(msg,'(a4)') 'MEL1'
-        call wrtout(std_out,msg,'COLL')
-        do ib1dm=1,10
-          write(msg,'(*(f10.5))') REAL(KS_me%vxcval(ib1dm,1:11,ikcalc,1))
-          call wrtout(std_out,msg,'COLL')
-        enddo
+        !write(msg,'(a4)') 'MEL1'
+        !call wrtout(std_out,msg,'COLL')
+        !do ib1dm=1,10
+        !  write(msg,'(*(f10.5))') REAL(KS_me%vxcval(ib1dm,1:11,ikcalc,1))
+        !  call wrtout(std_out,msg,'COLL')
+        !enddo
         !write(msg,'(a5)') 'MEL1i'
         !call wrtout(std_out,msg,'COLL')
         !do ib1dm=1,10
         !  write(msg,'(*(f10.5))') AIMAG(KS_me%vxcval(ib1dm,1:11,ikcalc,1))
         !  call wrtout(std_out,msg,'COLL')
         !enddo
-        write(msg,'(a4)') 'MEL2'
-        call wrtout(std_out,msg,'COLL')
-        do ib1dm=1,10
-          write(msg,'(*(f10.5))') REAL(KS_me%vhartree(ib1dm,1:11,ikcalc,1))
-          call wrtout(std_out,msg,'COLL')
-        enddo
+        !write(msg,'(a4)') 'MEL2'
+        !call wrtout(std_out,msg,'COLL')
+        !do ib1dm=1,10
+        !  write(msg,'(*(f10.5))') REAL(KS_me%vhartree(ib1dm,1:11,ikcalc,1))
+        !  call wrtout(std_out,msg,'COLL')
+        !enddo
         !write(msg,'(a5)') 'MEL2i'
         !call wrtout(std_out,msg,'COLL')
         !do ib1dm=1,10
@@ -2544,7 +2546,7 @@ endif
         do ib1dm=ib1,ib2
           dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ikcalc,1) ! Only restricted calcs 
         enddo
-        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0,1) ! Only restricted calcs 
+        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted calcs 
       endif 
    end do
 
@@ -2624,7 +2626,7 @@ endif
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
 !        Compute nat orbs and occ numbers at k-point ikcalc
-         call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1,1) ! Only restricted calcs 
+         call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1) ! Only restricted calcs 
        endif
        ABI_DEALLOCATE(sigcme_k)
      end do
@@ -2651,7 +2653,7 @@ endif
        call update_hdr_bst(Wfd_dm,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
        call Wfd_dm%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs 
        gw1rdm_fname=dtfil%fnameabo_wfk                                         
-       call Wfd_dm%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname)                   ! Print WFK file, QP_BSt contains nat. orbs.
+       call Wfd_dm%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)        ! Print WFK file, QP_BSt contains nat. orbs.
        gw1rdm_fname=dtfil%fnameabo_den
        call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
@@ -2727,6 +2729,13 @@ endif
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+    !MAU
+    write(msg,'(a4)') 'MAU1'
+    call wrtout(std_out,msg,'COLL')
+    do ib1dm=ib1,ib2
+      write(msg,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
+      call wrtout(std_out,msg,'COLL')
+    enddo
          do ib=b1gw,b2gw
            delta_band(ib,ikcalc)=coef_hyb_tmp*Sr%x_mat(ib,ib,ikcalc,1)
          enddo
@@ -2789,6 +2798,13 @@ endif
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          call rotate_hartree(ikcalc,ib1,ib2,GW1RDM_me,nateigv) ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
+    !MAU
+    write(msg,'(a4)') 'MAU2'
+    call wrtout(std_out,msg,'COLL')
+    do ib1dm=ib1,ib2
+      write(msg,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
+      call wrtout(std_out,msg,'COLL')
+    enddo
        end do
        eh_energy=me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        write(msg,'(a1)')' '

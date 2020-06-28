@@ -204,6 +204,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
 !Local variables ------------------------------
 !scalars
  integer::ndim,ib1dm,ib2dm,ib3dm,lwork,info
+ logical::check_Sijmat
  character(len=500) :: msg,msg2
  real(dp) :: toccs_k,tol10
  complex(dp) :: Sib1k_ib2k
@@ -214,6 +215,10 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
 
  DBG_ENTER("COLL")
  
+ check_Sijmat=.false.
+ if(present(verbose)) then
+  check_Sijmat=.true.
+ endif
  tol10=1.0d-10
 
  ndim=ib2-ib1+1
@@ -233,7 +238,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
      dm1_tmp(ib2dm,ib1dm)=conjg(dm1_tmp(ib1dm,ib2dm))
    enddo
  enddo
- call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
+ call printdm1(1,ndim,dm1_tmp) ! MAU Uncomment for debug 
 
  work=0.0d0
  occs=0.0d0
@@ -258,8 +263,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
     occs_tmp(ib1dm)=0.0_dp
   endif
  enddo
- call printdm1(1,ndim,eigenvect) ! Uncomment for debug 
- if(verbose==1) then 
+ call printdm1(1,ndim,eigenvect) ! MAU Uncomment for debug 
+ if(check_Sijmat) then 
    do ib1dm=1,ndim
      do ib2dm=1,ib1dm
        Sib1k_ib2k=czero
@@ -430,21 +435,13 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  enddo
 
  ! <KS|K[NO]|KS> = U <NO|K[NO]|NO> (U^t)*
- !MAU res=matmul(Umat,Kex_tmp)
- !MAU Kex_tmp=matmul(res,conjg(transpose(Umat)))
+ res=matmul(Umat,Kex_tmp)
+ Kex_tmp=matmul(res,conjg(transpose(Umat)))
 
  do ib1dm=1,ndim
    do ib2dm=1,ndim
      Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Kex_tmp(ib1dm,ib2dm)
    enddo
- enddo
-
- ! Print diagonal elements for debug
- write(msg,'(a4)') 'MAU1'
- call wrtout(std_out,msg,'COLL')
- do ib1dm=ib1,ib2
-   write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikpoint,1))
-   call wrtout(std_out,msg,'COLL')
  enddo
 
  ABI_FREE(res)
