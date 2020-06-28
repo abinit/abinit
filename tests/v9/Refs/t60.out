@@ -1245,7 +1245,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
                                      Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fermi level:  4.07 (eV) with nelect:  8.00
+
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1657,7 +1657,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
                                      Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fermi level:  4.07 (eV) with nelect:  8.00
+
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1906,7 +1906,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
                                      Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fermi level:  4.07 (eV) with nelect:  8.00
+
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 

@@ -788,7 +788,7 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
                                      Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fermi level:  4.07 (eV) with nelect:  8.00
+
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 

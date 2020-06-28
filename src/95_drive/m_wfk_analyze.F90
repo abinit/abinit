@@ -249,7 +249,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
-& gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
+                  gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 
  call print_ngfft(ngfftc,header='Coarse FFT mesh used for the wavefunctions')
  call print_ngfft(ngfftf,header='Dense FFT mesh used for densities and potentials')
@@ -274,7 +274,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    ABI_MALLOC(pawrhoij,(cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+                             nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
    call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
 
    ! Initialize values for several basic arrays
@@ -287,8 +287,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      call timab(553,1,tsec)
      gsqcut_shp = two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
-&     psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
-&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
+                  psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
+                  dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values
@@ -341,7 +341,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    optcut=1; optgr0=1; optgr1=1; optgr2=1; optrad=1
 
    call nhatgrid(cryst%atindx1,cryst%gmet,cryst%natom,cryst%natom,cryst%nattyp,ngfftf,cryst%ntypat,&
-&   optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,cryst%rprimd,cryst%typat,cryst%ucvol,cryst%xred)
+                optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,cryst%rprimd,cryst%typat,cryst%ucvol,cryst%xred)
 
    call pawfgrtab_print(pawfgrtab,cryst%natom,unit=std_out,prtvol=dtset%pawprtvol)
 
@@ -364,9 +364,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
 
- !case (WFK_TASK_EBANDS)
-   !call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
- !case (WFK_TASK_PJDOS)
  !case (WFK_TASK_LDOS)
 
  case (WFK_TASK_DDK, WFK_TASK_DDK_DIAGO)

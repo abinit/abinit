@@ -2616,6 +2616,36 @@ meta: {optdriver: 8, wfk_task: 8, }
 --------------------------------------------------------------------------------
 
 
+ ============================================================================================
+ Using SKW interpolation to interpolate KS energies onto dense k-mesh.
+ defined by sigma_ngkpt: [8, 8, 8]
+1 [   0.0000E+00,    0.0000E+00,    0.0000E+00]
+ Finding k-points inside (electron/hole) pockets (assuming semiconductor).
+ Using sigma_erange:  0.200  0.200  (eV)
+ SKW parameters (einterp): [   1.0000E+00,    5.0000E+00,    0.0000E+00,    0.0000E+00]
+============================================================================================ 
+
+
+ === Gaps from input WFK ===
+  >>>> For spin  1
+   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+
+ === Gaps from SKW interpolated eigenvalues ===
+  >>>> For spin  1
+   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   8.52 (eV), Top of valence bands at: [ 1.2500E-01,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Valence Max:     -0.18 (eV) at: [ 1.2500E-01,  0.0000E+00,  0.0000E+00]
+   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
   

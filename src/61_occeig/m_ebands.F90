@@ -652,8 +652,12 @@ subroutine gaps_print(gaps, unit, header)
    call wrtout(my_unt, msg)
  end do ! spin
 
- write(msg, "((2(a,f6.2)))")  "   Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
- call wrtout(my_unt, msg, newlines=1)
+ if (any(gaps%fo_kpos == 0)) then
+   write(msg, "((2(a,f6.2)))")  "   Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
+   call wrtout(my_unt, msg, newlines=1)
+ else
+   call wrtout(my_unt, "", newlines=1)
+ end if
 
 end subroutine gaps_print
 !!***

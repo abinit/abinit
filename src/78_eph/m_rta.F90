@@ -511,7 +511,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, Tkelv, linewidth, fact0
  real(dp) :: cpu, wall, gflops
- real(dp) :: vr(3), dummy_vecs(1,1,1,1,1), work_33(3,3), S33(3,3)
+ real(dp) :: vr(3), dummy_vecs(1,1,1,1,1), work_33(3,3), S_33(3,3)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:,:), out_valsdos(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
  real(dp),allocatable :: out_tensdos(:,:,:,:,:,:), tau_vals(:,:,:,:,:), l0inv_33nw(:,:,:)
  !character(len=500) :: msg
@@ -706,10 +706,10 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
        ! ZT:  S^T sigma S k^-1 T (tensor form with k=k_electronic only):
        do iw=1,self%nw
-         S33 = self%seebeck(:,:,iw,itemp,spin,irta)
-         S33 = matmul(matmul(transpose(S33), self%sigma(:,:,iw,itemp,spin,irta)), S33)
+         S_33 = self%seebeck(:,:,iw,itemp,spin,irta)
+         S_33 = matmul(matmul(transpose(S_33), self%sigma(:,:,iw,itemp,spin,irta)), S_33)
          call inv33(self%kappa(:,:,iw,itemp,spin,irta), work_33)
-         self%zte(:,:,iw,itemp,spin,irta) = matmul(S33, work_33) * TKelv
+         self%zte(:,:,iw,itemp,spin,irta) = matmul(S_33, work_33) * TKelv
        end do
 
      end do
@@ -773,7 +773,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 contains
 
 ! Invert 3x3 matrix, copied from matr3inv
-subroutine inv33(aa, ait)
+pure subroutine inv33(aa, ait)
 
 !Arguments ------------------------------------
 !arrays
@@ -792,8 +792,8 @@ subroutine inv33(aa, ait)
  det  = aa(1,1) * t1 + aa(2,1) * t2 + aa(3,1) * t3
 
  ! Make sure matrix is not singular
- if (abs(det)> 100 * tiny(one)) then
-   dd = one/det
+ if (abs(det) > 100 * tiny(one)) then
+   dd = one / det
    ait(1,1) = t1 * dd
    ait(2,1) = t2 * dd
    ait(3,1) = t3 * dd
