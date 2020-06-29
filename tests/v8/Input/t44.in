@@ -106,7 +106,8 @@ getdvdb_filepath6 "t44o_DS20_DVDB"
 getpot_filepath6 "t41o_DS1_POT"
 symsigma6 1
 eph_intmeth6 2
-nfreqsp6 0
+#nband     20
+#nfreqsp6 0
 
 #########
 # Global

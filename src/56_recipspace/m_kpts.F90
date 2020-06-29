@@ -542,7 +542,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime
  integer :: nsym_used,timrev_used
  real(dp) :: dksq,dksqmn,lk2,llarger,ldiff,lsmaller,ltrial,min_l
- real(dp) :: cpu,wall,gflops
+ !real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
 !arrays
  integer :: dkint(3),jdkint(3),k1int(3),k2int(3)
@@ -555,7 +555,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 ! *************************************************************************
 
  call timab(1021, 1, tsec)
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -610,11 +610,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
    call xmpi_sum(lkpg1, comm, ierr)
    call xmpi_sum(isort, comm, ierr)
  end if
- call cwtime_report(" listkk_loop1", cpu, wall, gflops)
+ !call cwtime_report(" listkk_loop1", cpu, wall, gflops)
 
  call sort_dp(l3*nkpt1, lkpg1_sorted, isort, tol12)
  ! From "precompute" to "sort_dp" represents more than 50% of the overall wall time for large meshes.
- call cwtime_report(" listkk_sort", cpu, wall, gflops)
+ !call cwtime_report(" listkk_sort", cpu, wall, gflops)
 
  !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
  !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
@@ -850,7 +850,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  end if
 
  call timab(1021, 2, tsec)
- call cwtime_report(" listkk_end", cpu, wall, gflops)
+ !call cwtime_report(" listkk_end", cpu, wall, gflops)
 
 end subroutine listkk
 !!***

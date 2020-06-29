@@ -206,7 +206,7 @@ P           mkmem           8
           nfreqsp3        100
           nfreqsp4        100
           nfreqsp5          0
-          nfreqsp6          0
+          nfreqsp6        100
             ngfft          20      20      20
              nkpt           8
            nkptgw           2
@@ -1382,7 +1382,7 @@ All the independent perturbations are available
  Method for q-space integration:  Tetrahedron method
  Tolerance for integration weights <     1.000000E-12     1.000000E-12
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -1454,8 +1454,27 @@ For band:4
    0.003     0.000    -6.085     6.233
    0.003     0.000    -6.060     6.209
 For band:5
-   0.003     0.082    -6.223     5.364
-   0.003     0.081    -6.195     5.344
+   0.003     0.082    -6.222     5.364
+   0.003     0.081    -6.195     5.343
+
+
+
+ omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+For band:1
+  -8.799    -0.055    -0.001
+  -8.789    -0.055    -0.001
+For band:2
+  12.790     0.112    -0.005
+  12.800     0.111    -0.005
+For band:3
+  12.790     0.112    -0.005
+  12.800     0.111    -0.005
+For band:4
+  12.790     0.112    -0.005
+  12.800     0.111    -0.005
+For band:5
+  18.416    -0.315    -0.121
+  18.426    -0.316    -0.123
 
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
@@ -1559,7 +1578,7 @@ P           mkmem           8
           nfreqsp3        100
           nfreqsp4        100
           nfreqsp5          0
-          nfreqsp6          0
+          nfreqsp6        100
             ngfft          20      20      20
              nkpt           8
            nkptgw           2

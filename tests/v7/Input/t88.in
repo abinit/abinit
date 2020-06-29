@@ -1,5 +1,6 @@
 # Calculation of phonon linewidths and e-ph coupling parameter lambda
-ndtset 4
+ndtset 5
+
 optdriver 7
 #nsppol  2
 prtvol 1  # This to activate the output of PHDOS in text format (slow!)
@@ -82,6 +83,12 @@ eph_ngqpt_fine3  8 8 8 # Interpolate DFPT potentials (used in the dataset 4)
 ###############
 getdvdb4 -1
 eph_ngqpt_fine4 8 8 8 
+
+###############
+## DATASET 5 ##
+###############
+eph_intmeth5  1       # FS integration with Adaptive Gaussians
+eph_fsmear5  -1 eV    # Adaptive Gaussian broadening (negative value)
 
 # Geometry
 acell 3*7.5
