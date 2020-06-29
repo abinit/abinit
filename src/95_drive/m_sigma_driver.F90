@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
  use m_spacepar,          only : hartre
- use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,rotate_hartree,me_get_haene!,rot2
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks2no,rotate_no2ks,me_get_haene ! MRM
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -2494,51 +2494,13 @@ endif
         potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
         ! Debug print full exchange (Sr%x_mat)
-        write(msg,'(a4)') 'MAU0'
+        ! MAU
+        write(msg,'(a13)') '<ks|Kx_ks|ks>'
         call wrtout(std_out,msg,'COLL')
         do ib1dm=ib1,ib2
-          !write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-          write(msg,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
+          write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
           call wrtout(std_out,msg,'COLL')
         enddo
-        !MAU
-        !write(msg,'(a4)') 'MEL0'
-        !call wrtout(std_out,msg,'COLL')
-        !do ib1dm=1,10
-        !  write(msg,'(*(f10.5))') REAL(Sr%x_mat(ib1dm,1:11,ikcalc,1))
-        !  call wrtout(std_out,msg,'COLL')
-        !enddo
-        !write(msg,'(a5)') 'MEL0i'
-        !call wrtout(std_out,msg,'COLL')
-        !do ib1dm=1,10
-        !  write(msg,'(*(f10.5))') AIMAG(Sr%x_mat(ib1dm,1:11,ikcalc,1))
-        !  call wrtout(std_out,msg,'COLL')
-        !enddo
-        !write(msg,'(a4)') 'MEL1'
-        !call wrtout(std_out,msg,'COLL')
-        !do ib1dm=1,10
-        !  write(msg,'(*(f10.5))') REAL(KS_me%vxcval(ib1dm,1:11,ikcalc,1))
-        !  call wrtout(std_out,msg,'COLL')
-        !enddo
-        !write(msg,'(a5)') 'MEL1i'
-        !call wrtout(std_out,msg,'COLL')
-        !do ib1dm=1,10
-        !  write(msg,'(*(f10.5))') AIMAG(KS_me%vxcval(ib1dm,1:11,ikcalc,1))
-        !  call wrtout(std_out,msg,'COLL')
-        !enddo
-        !write(msg,'(a4)') 'MEL2'
-        !call wrtout(std_out,msg,'COLL')
-        !do ib1dm=1,10
-        !  write(msg,'(*(f10.5))') REAL(KS_me%vhartree(ib1dm,1:11,ikcalc,1))
-        !  call wrtout(std_out,msg,'COLL')
-        !enddo
-        !write(msg,'(a5)') 'MEL2i'
-        !call wrtout(std_out,msg,'COLL')
-        !do ib1dm=1,10
-        !  write(msg,'(*(f10.5))') AIMAG(KS_me%vhartree(ib1dm,1:11,ikcalc,1))
-        !  call wrtout(std_out,msg,'COLL')
-        !enddo
-        !
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange (k-point) one
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2723,19 +2685,12 @@ endif
        !  ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
        !  ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
        !  ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-       !  call rot2(ikcalc,ib1,ib2,GW1RDM_me,nateigv) ! <NO_i|J[NO]|NO_j> -> <KS_i|J[NO]|KS_j>
+       !  call rotate_no2ks(ikcalc,ib1,ib2,Sr,GW1RDM_me,nateigv,1) ! <NO_i|J[NO]|NO_j> -> <KS_i|J[NO]|KS_j>
        !enddo
        do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-    !MAU
-    write(msg,'(a4)') 'MAU1'
-    call wrtout(std_out,msg,'COLL')
-    do ib1dm=ib1,ib2
-      write(msg,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
-      call wrtout(std_out,msg,'COLL')
-    enddo
          do ib=b1gw,b2gw
            delta_band(ib,ikcalc)=coef_hyb_tmp*Sr%x_mat(ib,ib,ikcalc,1)
          enddo
@@ -2749,7 +2704,7 @@ endif
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-         call rotate_exchange(ikcalc,ib1,ib2,Sr,nateigv) ! <KS_i|K[NO]|KS_j>
+         call rotate_no2ks(ikcalc,ib1,ib2,Sr,GW1RDM_me,nateigv,0) ! <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>  
        end do
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating Wfd_natorb
        Wfd_natorb%bks_comm = xmpi_comm_null
@@ -2797,14 +2752,16 @@ endif
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-         call rotate_hartree(ikcalc,ib1,ib2,GW1RDM_me,nateigv) ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
-    !MAU
-    write(msg,'(a4)') 'MAU2'
-    call wrtout(std_out,msg,'COLL')
-    do ib1dm=ib1,ib2
-      write(msg,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
-      call wrtout(std_out,msg,'COLL')
-    enddo
+         call rotate_ks2no(ikcalc,ib1,ib2,Sr,GW1RDM_me,nateigv,1) ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
+
+!MAU
+write(msg,'(a14)') '<ks|Kx_no|ks>'
+call wrtout(std_out,msg,'COLL')
+do ib1dm=ib1,ib2
+  write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+  call wrtout(std_out,msg,'COLL')
+enddo
+
        end do
        eh_energy=me_get_haene(Sr,GW1RDM_me,Kmesh,QP_BSt)
        write(msg,'(a1)')' '

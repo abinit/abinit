@@ -38,10 +38,10 @@ module m_gwrdm
  use m_xctk,           only : xcden  
  implicit none
 
- private
+ private :: no2ks,ks2no
 !!***
-
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_exchange,rotate_hartree,me_get_haene!,rot2  
+ 
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_no2ks,rotate_ks2no,me_get_haene 
 !!***
 
 contains
@@ -407,11 +407,12 @@ subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use 
 end subroutine printdm1
 !!***
 
-subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of this file, do not use it with large arrays
+subroutine rotate_no2ks(ikpoint,ib1,ib2,Sr,Mels,nateigv,option) 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,ikpoint 
- type(sigma_t) :: Sr
+ integer,intent(in) :: ib1,ib2,ikpoint,option
+ type(sigma_t),intent(inout) :: Sr
+ type(melements_t),intent(inout) :: Mels
 !arrays
  complex(dpc),intent(in) :: nateigv(:,:,:,:)
 !Local variables ------------------------------
@@ -419,42 +420,55 @@ subroutine rotate_exchange(ikpoint,ib1,ib2,Sr,nateigv) ! Only used for debug of 
  integer::ib1dm,ib2dm,ndim
  character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: res(:,:),Umat(:,:),Kex_tmp(:,:)
+ complex(dpc),allocatable :: Umat(:,:),Mat_tmp(:,:)
 !************************************************************************
  ndim=ib2-ib1+1
- ABI_MALLOC(res,(ndim,ndim))
  ABI_MALLOC(Umat,(ndim,ndim))
- ABI_MALLOC(Kex_tmp,(ndim,ndim))
- res=czero
+ ABI_MALLOC(Mat_tmp,(ndim,ndim))
 
- do ib1dm=1,ndim
-   do ib2dm=1,ndim
-     Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-     Kex_tmp(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+ if(option==0) then
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+       Mat_tmp(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+     enddo
    enddo
- enddo
-
- ! <KS|K[NO]|KS> = U <NO|K[NO]|NO> (U^t)*
- res=matmul(Umat,Kex_tmp)
- Kex_tmp=matmul(res,conjg(transpose(Umat)))
-
- do ib1dm=1,ndim
-   do ib2dm=1,ndim
-     Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Kex_tmp(ib1dm,ib2dm)
+ else
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+       Mat_tmp(ib1dm,ib2dm)=Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+     enddo
    enddo
- enddo
+ endif
 
- ABI_FREE(res)
+ call no2ks(ndim,Mat_tmp,Umat) 
+
+ if(option==0) then
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
+     enddo
+   enddo
+ else
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
+     enddo
+   enddo
+ endif
+
  ABI_FREE(Umat)
- ABI_FREE(Kex_tmp)
-end subroutine rotate_exchange
+ ABI_FREE(Mat_tmp)
+end subroutine rotate_no2ks
 !!***
 
-subroutine rotate_hartree(ikpoint,ib1,ib2,GW1RDM_me,nateigv) ! Only used for debug of this file, do not use it with large arrays
+subroutine rotate_ks2no(ikpoint,ib1,ib2,Sr,Mels,nateigv,option) 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,ikpoint 
- type(melements_t),intent(inout) :: GW1RDM_me
+ integer,intent(in) :: ib1,ib2,ikpoint,option
+ type(sigma_t),intent(inout) :: Sr
+ type(melements_t),intent(inout) :: Mels
 !arrays
  complex(dpc),intent(in) :: nateigv(:,:,:,:)
 !Local variables ------------------------------
@@ -462,35 +476,48 @@ subroutine rotate_hartree(ikpoint,ib1,ib2,GW1RDM_me,nateigv) ! Only used for deb
  integer::ib1dm,ib2dm,ndim
  character(len=500) :: msg
 !arrays
- complex(dpc),allocatable :: res(:,:),Umat(:,:),Har_tmp(:,:)
+ complex(dpc),allocatable :: Umat(:,:),Mat_tmp(:,:)
 !************************************************************************
  ndim=ib2-ib1+1
- ABI_MALLOC(res,(ndim,ndim))
  ABI_MALLOC(Umat,(ndim,ndim))
- ABI_MALLOC(Har_tmp,(ndim,ndim))
- res=czero
+ ABI_MALLOC(Mat_tmp,(ndim,ndim))
 
- do ib1dm=1,ndim
-   do ib2dm=1,ndim
-     Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-     Har_tmp(ib1dm,ib2dm)=GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+ if(option==0) then
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+       Mat_tmp(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+     enddo
    enddo
- enddo
-
- ! <NO|J[NO]|NO> =  (U^t)* <KS|J[NO]|KS> U
- res=matmul(conjg(transpose(Umat)),Har_tmp)
- Har_tmp=matmul(res,Umat)
-
- do ib1dm=1,ndim
-   do ib2dm=1,ndim
-     GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Har_tmp(ib1dm,ib2dm)
+ else
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+       Mat_tmp(ib1dm,ib2dm)=Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
+     enddo
    enddo
- enddo
+ endif
 
- ABI_FREE(res)
+ call ks2no(ndim,Mat_tmp,Umat) 
+
+ if(option==0) then
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
+     enddo
+   enddo
+ else
+   do ib1dm=1,ndim
+     do ib2dm=1,ndim
+       Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
+     enddo
+   enddo
+ endif
+
  ABI_FREE(Umat)
- ABI_FREE(Har_tmp)
-end subroutine rotate_hartree
+ ABI_FREE(Mat_tmp)
+
+end subroutine rotate_ks2no
 !!***
 
 pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
@@ -528,48 +555,53 @@ pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
 end function me_get_haene
 !!***
 
-!subroutine rot2(ikpoint,ib1,ib2,GW1RDM_me,nateigv) ! Only used for debug of this file, do not use it with large arrays
-!!Arguments ------------------------------------
-!!scalars
-! integer,intent(in) :: ib1,ib2,ikpoint 
-! type(melements_t),intent(inout) :: GW1RDM_me
-!!arrays
-! complex(dpc),intent(in) :: nateigv(:,:,:,:)
-!!Local variables ------------------------------
-!!scalars
-! integer::ib1dm,ib2dm,ndim
-! character(len=500) :: msg
-!!arrays
-! complex(dpc),allocatable :: res(:,:),Umat(:,:),Har_tmp(:,:)
-!!************************************************************************
-! ndim=ib2-ib1+1
-! ABI_MALLOC(res,(ndim,ndim))
-! ABI_MALLOC(Umat,(ndim,ndim))
-! ABI_MALLOC(Har_tmp,(ndim,ndim))
-! res=czero
-!
-! do ib1dm=1,ndim
-!   do ib2dm=1,ndim
-!     Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-!     Har_tmp(ib1dm,ib2dm)=GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-!   enddo
-! enddo
-!
-! ! <KS|J[NO]|KS> = U <NO|J[NO]|NO> (U^t)*
-! res=matmul(Umat,Har_tmp)
-! Har_tmp=matmul(res,conjg(transpose(Umat)))
-!
-! do ib1dm=1,ndim
-!   do ib2dm=1,ndim
-!     GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Har_tmp(ib1dm,ib2dm)
-!   enddo
-! enddo
-!
-! ABI_FREE(res)
-! ABI_FREE(Umat)
-! ABI_FREE(Har_tmp)
-!end subroutine rot2
-!!!***
+subroutine ks2no(ndim,mat,rot) 
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndim 
+!arrays
+ complex(dpc),dimension(:,:),intent(in) :: rot
+ complex(dpc),dimension(:,:),intent(inout) :: mat
+!Local variables ------------------------------
+!scalars
+!arrays
+ complex(dpc),allocatable :: res(:,:)
+!************************************************************************
+ ABI_MALLOC(res,(ndim,ndim))
+ res=czero
+
+ ! <NO|Op|NO> =  (U^t)* <KS|Op|KS> U
+ res=matmul(conjg(transpose(rot)),mat)
+ mat=matmul(res,rot)
+
+ ABI_FREE(res)
+
+end subroutine ks2no
+!!***
+
+subroutine no2ks(ndim,mat,rot) 
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndim 
+!arrays
+ complex(dpc),dimension(:,:),intent(in) :: rot
+ complex(dpc),dimension(:,:),intent(inout) :: mat
+!Local variables ------------------------------
+!scalars
+!arrays
+ complex(dpc),allocatable :: res(:,:)
+!************************************************************************
+ ABI_MALLOC(res,(ndim,ndim))
+ res=czero
+
+ ! <KS|Op|KS> = U <NO|Op|NO> (U^t)*
+ res=matmul(rot,mat)
+ mat=matmul(res,conjg(transpose(rot)))
+
+ ABI_FREE(res)
+
+end subroutine no2ks
+!!***
 
 end module m_gwrdm
 !!***
