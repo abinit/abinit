@@ -679,7 +679,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
    do spin=1,nsppol
      do itemp=1,self%ntemp
 
-       TKelv = self%kTmesh(itemp) / kb_HaK
+       TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
 
        ! S = -1/T L0^-1 L1 = -1/T sigma L1
        do iw=1,self%nw
@@ -694,7 +694,8 @@ subroutine rta_compute(self, cryst, dtset, comm)
        do iw=1,self%nw
          work_33 = self%l1(:, :, iw, itemp, spin, irta)
          work_33 = self%l2(:, :, iw, itemp, spin, irta) - matmul(work_33, matmul(l0inv_33nw(:, :, iw), work_33))
-         self%kappa(:,:,iw,itemp,spin,irta) = - (volt_SI**2 * fact0 / TKelv) * work_33
+         !self%kappa(:,:,iw,itemp,spin,irta) = - (volt_SI**2 * fact0 / TKelv) * work_33
+         self%kappa(:,:,iw,itemp,spin,irta) = + (volt_SI**2 * fact0 / TKelv) * work_33
        end do
 
        ! Peltier pi = -L1 L0^-1
