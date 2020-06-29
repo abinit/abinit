@@ -20550,7 +20550,7 @@ For a "dummy" atom, with [[znucl]] = 0, as used in the case of calculations
 with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
 """,
 ),
-#{"abinit_version": "8.7.3"}
+
 Variable(
     abivarname="tmesh",
     varset="eph",
@@ -20562,8 +20562,9 @@ Variable(
     added_in_version="8.7.3",
     text=r"""
 This variable defines the linear mesh of temperatures used in the EPH code ([[optdriver]] = 7).
-The first entry gives the initial temperature in Kelvin, the second entry the linear step in Kelvin,
-the third entry is the number of points in the mesh.
+The first entry gives the **initial** temperature in Kelvin,
+the second entry the **linear step** in Kelvin,
+the third entry is the **number of points** in the mesh.
 The default value corresponds to 6 points between 5 K and 300 K.
 """,
 ),
@@ -20740,6 +20741,7 @@ Variable(
     text=r"""
 This variable consists of two entries that allow one to select the k-points and the bands
 in the e-ph self-energy $\Sigma_\nk$ on the basis of their KS energy $\ee_\nk$.
+This variable is used in [eph_task]] = -4 to compute phonon-limited mobilities in the energy region relevant for transport.
 
 If both entries in [[sigma_erange]] are negative, the code assumes a metal and only states within the energy
 window [efermi - abs(sigma_erange(1)), efermi + abs(sigma_erange(2)] are included in the calculation.
@@ -20750,7 +20752,8 @@ In this case, the first entry given the position of the holes with respect to th
 gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
 A zero entry can be used to exclude either holes or electrons from the calculation.
 
-This variable is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
+If both entries are zero, the variable is ignored.
+Note that [[sigma_erange]] is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
 
 !!! important
 

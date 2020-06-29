@@ -5,7 +5,7 @@ authors: GB, MG
 # Phonon-limited mobility in AlAs
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
-the relaxation time approximation.
+the relaxation time approximation (RTA).
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
@@ -27,13 +27,13 @@ The SERTA is more accurate than the constant relaxation time approximation (CRTA
 microscopic e-ph scattering is now included thus leading to linewidths that depend on the band index $n$
 and the wavevector $\kk$.
 Keep in mind, however, that the SERTA is still an approximation and that a more rigorous approach would require
-to find the iterative solution of the BTE and/or the inclusion of many-body effects at different levels.
-For a review of the different possible approaches see [[cite:Ponce2020]].
+to find the iterative solution of the BTE and/or including many-body effects at different levels.
+For a review of the different possible approaches see the review paper by [[cite:Ponce2020]].
 
 In the SERTA, the transport linewidth is given by
 the imaginary part of the electron-phonon (e-ph) self-energy evaluated at the KS energy.
 Only the Fan-Migdal (FM) part contributes to the linewidth as the Debye-Waller is Hermitian.
-The linewidth of the electron state $n\kk$ due to the scattering with phonons are obtained from
+The linewidth of the electron state $n\kk$ due to the scattering with phonons is obtained from
 
 \begin{equation}
 \begin{split}
@@ -62,7 +62,7 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 !!! important
 
     Note that this formalism does not take into account possibile contributions to the lifetime given by
-    other scattering processes such as defects, ionized impurities in doped semiconductors, grain boundary scattering.
+    other scattering processes such as defects, ionized impurities in doped semiconductors, grain boundary scattering etc.
     These effects may be relevant depending on the system and/or the temperature under investigation
     but they are not treated in this tutorial.
 
@@ -136,7 +136,7 @@ These steps can be summarized by the following graph:
 -->
 
 All the results of the calculation are saved in netcdf format,
-while the log and output files are used to report selected quantities, mainly for testing purposes.
+while the log and output files are used to output selected quantities, mainly for testing purposes.
 Post-processing and visualisation tools are **not covered** in this tutorial.
 Powerful tools based on python and matplotlib are provided by AbiPy.
 See e.g. the README of [AbiPy](https://github.com/abinit/abipy)

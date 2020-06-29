@@ -26,11 +26,9 @@
 module m_rta
 
  use defs_basis
- use iso_c_binding
  use m_abicore
  use m_xmpi
  use m_errors
- use m_hide_blas
  use m_copy
  use m_ebands
  use m_nctk
@@ -243,14 +241,16 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
  type(sigmaph_t) :: sigmaph
  type(rta_t) :: rta
 !arrays
+ integer :: unts(2)
  real(dp) :: extrael_fermie(2)
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm)
+ unts = [std_out, ab_out]
 
- call wrtout([std_out, ab_out], ch10//' Entering transport RTA computation driver.')
- call wrtout([std_out, ab_out], sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1)
+ call wrtout(unts, ch10//' Entering transport RTA computation driver.')
+ call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1)
 
  sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
@@ -276,7 +276,7 @@ subroutine rta_driver(dtfil, dtset, ebands, cryst, comm)
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
    path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
-   call wrtout([std_out, ab_out], ch10//sjoin("- Writing RTA transport results to:", path))
+   call wrtout(unts, ch10//sjoin("- Writing RTA transport results to:", path))
    NCF_CHECK(nctk_open_create(ncid, path , xmpi_comm_self))
    call rta_ncwrite(rta, cryst, dtset, ncid)
    NCF_CHECK(nf90_close(ncid))
@@ -319,19 +319,19 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  real(dp),intent(in) :: extrael_fermie(2)
 
 !Local variables ------------------------------
- integer,parameter :: occopt3 = 3, sppoldbl1 = 1, master = 0
+ integer,parameter :: sppoldbl1 = 1, master = 0
  integer :: ierr, spin, nprocs, my_rank, timrev
- real(dp) :: dksqmax
- real(dp) :: cpu, wall, gflops
+ real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
  type(ebands_t) :: tmp_ebands
 !arrays
- integer :: kptrlatt(3,3)
+ integer :: kptrlatt(3,3), unts(2)
  integer,allocatable :: indkk(:,:)
 
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ unts = [std_out, ab_out]
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -366,7 +366,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
-   call wrtout([std_out, ab_out], sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
+   call wrtout(unts, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
 
@@ -387,8 +387,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
 
  if (any(dtset%transport_ngkpt /= 0)) then
    ! Perform further downsampling (usefull for debugging purposes)
-   call wrtout([std_out, ab_out], " Downsampling the k-mesh before computing transport:")
-   call wrtout([std_out, ab_out], sjoin(" Using transport_ngkpt: ", ltoa(dtset%transport_ngkpt)))
+   call wrtout(unts, " Downsampling the k-mesh before computing transport:")
+   call wrtout(unts, sjoin(" Using transport_ngkpt: ", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%transport_ngkpt(1)
    kptrlatt(2,2) = dtset%transport_ngkpt(2)
@@ -565,8 +565,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
  ! Compute DOS and VV_DOS and VV_TAU_DOS
  ! Define integration method and mesh step.
- edos_intmeth = 2
- if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
+ edos_intmeth = 2; if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
  edos_step = dtset%dosdeltae
  if (edos_step == zero) edos_step = 0.001
  !if (edos_step == zero) edos_step = ten / Ha_meV
@@ -935,8 +934,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
          mu_e = self%transport_mu_e(itemp)
-         ! Accumulate the number of electrons/holes depending of the position wrt mu.
-         ! The logic is OK as long as the Fermi level is inside the gap.
          if (eig_nk >= mu_e) then
            self%ne(itemp) = self%ne(itemp) + wtk * occ_fd(eig_nk, kT, mu_e) * max_occ
          else
@@ -1170,7 +1167,7 @@ subroutine rta_print(self, cryst, dtset, dtfil)
      call wrtout(unts, msg)
 
      do spin=1,self%nsppol
-       if (self%nsppol == 2) call wrtout([std_out, ab_out], sjoin(" For spin:", stoa(spin)), newlines=1)
+       if (self%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
        do itemp=1,self%ntemp
          write(msg,"(f16.2,2e16.2,2f16.2)") &
            self%kTmesh(itemp) / kb_HaK, &
