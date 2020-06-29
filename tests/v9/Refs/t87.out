@@ -34,6 +34,7 @@
      strcpli        -1
  Molecular Dynamics :
     dynamics       101
+    dyn_chks         0
         temp      50.0
        ntime     10000
       nctime        10

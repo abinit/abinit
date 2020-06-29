@@ -44,7 +44,7 @@ module m_nonlinear
  use m_symtk,    only : symmetrize_xred, littlegroup_q
  use m_dynmat,   only : d3sym, sytens
  use m_ddb,      only : nlopt, DDB_VERSION, dfptnl_doutput
- use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init
  use m_ioarr,    only : read_rhor
  use m_kg,       only : getcut, kpgio, getph
  use m_fft,      only : fourdp
@@ -1071,9 +1071,9 @@ end if
 
    call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Call main output routine
    call dfptnl_doutput(blkflg,d3etot,dtset%mband,mpert,dtset%nkpt,dtset%natom,dtset%ntypat,dtfil%unddb)

@@ -53,7 +53,6 @@ module m_mover
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
@@ -360,10 +359,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then 
+     if(present(effective_potential))then
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
+       hist%ihist = 1 
+     end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     !xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
      call abihist_free(hist_prev)
    end if
 
@@ -543,7 +547,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-
+     
      call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
 &     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
 
@@ -621,7 +625,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !          (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
+               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -776,6 +780,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if(specs%isFconv)then
        if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5).or.mod(itime,2)==1)then
          if (scfcv_args%dtset%tolmxf/=0)then
+
            call fconv(hist%fcart(:,:,hist%ihist),&
 &           scfcv_args%dtset%iatfix, &
 &           iexit,itime,&

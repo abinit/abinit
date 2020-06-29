@@ -246,7 +246,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
    CASE('SPHERE') ! Spencer-Alavi method
 
      ! Calculate rcut for each method
-     rcut_loc = (three*nkpt*ucvol/four_pi)**(one/three)
+     if(rcut>tol4) then
+         rcut_loc = rcut
+     else
+         rcut_loc = (three*nkpt*ucvol/four_pi)**(one/three)
+     endif
 
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then

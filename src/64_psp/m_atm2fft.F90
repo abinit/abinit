@@ -37,7 +37,6 @@ module m_atm2fft
  use defs_datatypes,only : pseudopotential_type
  use m_gtermcutoff, only : termcutoff
  use m_pawtab,      only : pawtab_type
- use m_distribfft,  only : distribfft_type
  use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
 
@@ -879,7 +878,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  DBG_EXIT("COLL")
 
-   contains 
+   contains
 
    function gsq_atm(i1,i2,i3)
 

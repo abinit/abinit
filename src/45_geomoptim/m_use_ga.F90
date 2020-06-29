@@ -72,13 +72,12 @@ MODULE m_use_ga
  use m_geometry,       only : mkradim, mkrdim, metric, dist2
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
-
+ 
  implicit none
 
  private
 
  public :: predict_ga
-
 
 CONTAINS
 
@@ -693,7 +692,7 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion
+  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
   integer :: chkprim,nsym
 ! Arrays
   integer :: bravais(11),ptsymrel(3,3,msym)

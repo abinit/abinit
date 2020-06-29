@@ -26,18 +26,16 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
- !use m_copy
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
+ !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, &
+ use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, toupper, next_token, &
                          endswith, char_count, find_digit !, startswith,
- use m_geometry,  only : xcart2xred, det3r
- !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
- !use m_crystal,   only : crystal_t
+ use m_geometry,  only : xcart2xred, det3r, mkrdim
 
  implicit none
 
@@ -115,6 +113,7 @@ module m_parser
  public :: prttagm             ! Print the content of intarr or dprarr.
  public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
  public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
+ public :: get_acell_rprim     ! Get acell and rprim from string
 
 
 !----------------------------------------------------------------------
@@ -176,6 +175,14 @@ module m_parser
 
  public :: geo_from_abivar_string   ! Build object form abinit variable
  public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
+
+ public :: intagm_img   !  Read input file variables according to images path definition (1D array)
+
+ interface intagm_img
+   module procedure intagm_img_1D
+   module procedure intagm_img_2D
+ end interface intagm_img
+
 
 CONTAINS  !===========================================================
 !!***
@@ -492,7 +499,7 @@ end subroutine inread
 !!
 !! SOURCE
 
-recursive subroutine instrng(filnam,lenstr,option,strln,string)
+recursive subroutine instrng(filnam, lenstr, option, strln, string)
 
 !Arguments ------------------------------------
 !scalars
@@ -542,7 +549,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  lenstr=1
 
  ! Set maximum number lines to be read to some large number
- mline=50000
+ mline=500000
  do iline=1,mline
 
    ! Keeps reading lines until end of input file
@@ -1031,7 +1038,7 @@ end subroutine incomprs
 !!
 !! PARENTS
 !!      ingeo,ingeobld,inkpts,inqpt,invacuum,invars0,invars1,invars2
-!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_intagm_img
+!!      m_ab7_invars_f90,m_anaddb_dataset,m_band2eps_dataset,m_parser
 !!      m_multibinit_dataset,m_scup_dataset,macroin,mpi_setup,parsefile,ujdet
 !!
 !! CHILDREN
@@ -1577,6 +1584,295 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  !write(std_out,*) ' dprarr =',dprarr(1:narr)
 
 end subroutine intagm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_parser/ingeo_img_1D
+!! NAME
+!!  intagm_img_1D
+!!
+!! FUNCTION
+!!  Read input file variables according to images path definition (1D array)
+!!
+!!  This function is exposed through generic interface that allows to
+!!  initialize some of the geometry variables in the case of "images".
+!!  Set up: acell, scalecart, rprim, angdeg, xred, xcart, vel
+!!  These variables can be defined for a set of images of the cell.
+!!  They also can be be defined along a path (in the configuration space).
+!!  The path must be defined with its first and last points, but also
+!!  with intermediate points.
+!!
+!! INPUTS
+!!  iimage=index of the current image
+!!  jdtset=number of the dataset looked for
+!!  lenstr=actual length of the input string
+!!  nimage=number of images
+!!  size1,size2, ...: size of array to be read (dp_data)
+!!  string=character string containing 'tags' and data.
+!!  token=character string for tagging the data to be read in input string
+!!  typevarphys= variable type (for dimensionality purposes)
+!!
+!! SIDE EFFECTS
+!!  dp_data(size1,size2,...)=data to be read (double precision)
+!!  tread_ok=flag to be set to 1 if the data have been found in input string
+!!
+!! NOTES
+!! The routine is a generic interface calling subroutine according to the
+!! number of arguments of the variable to be read
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      intagm
+!!
+!! SOURCE
+
+subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iimage,jdtset,lenstr,nimage,size1
+ integer,intent(inout) :: tread_ok
+ real(dp),intent(inout) :: dp_data(size1)
+ character(len=*),intent(in) :: typevarphys
+ character(len=*),intent(in) :: token
+ character(len=*),intent(in) :: string
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ integer :: iimage_after,iimage_before,marr,tread_after,tread_before,tread_current
+ real(dp) :: alpha
+ character(len=10) :: stringimage
+ character(len=3*len(token)+10) :: token_img
+!arrays
+ integer, allocatable :: intarr(:)
+ real(dp),allocatable :: dprarr(:),dp_data_after(:),dp_data_before(:)
+
+! *************************************************************************
+
+!Nothing to do in case of a single image
+ if (nimage<=1) return
+
+ marr=size1
+ ABI_ALLOCATE(intarr,(marr))
+ ABI_ALLOCATE(dprarr,(marr))
+
+!First, try to read data for current image
+ tread_current=0
+ write(stringimage,'(i10)') iimage
+ token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
+ call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
+&            token_img,tread_current,typevarphys)
+ if (tread_current==1)then
+   dp_data(1:size1)=dprarr(1:size1)
+   tread_ok=1
+ end if
+ if (tread_current==0.and.iimage==nimage) then
+!  If the image is the last one, try to read data for last image (_lastimg)
+   token_img=trim(token)//'_lastimg'
+   call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
+&              token_img,tread_current,typevarphys)
+   if (tread_current==1)then
+     dp_data(1:size1)=dprarr(1:size1)
+     tread_ok=1
+   end if
+ end if
+
+ if (tread_current==0) then
+
+!  The current image is not directly defined in the input string
+   ABI_ALLOCATE(dp_data_before,(size1))
+   ABI_ALLOCATE(dp_data_after,(size1))
+
+!  Find the nearest previous defined image
+   tread_before=0;iimage_before=iimage
+   do while (iimage_before>1.and.tread_before/=1)
+     iimage_before=iimage_before-1
+     write(stringimage,'(i10)') iimage_before
+     token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
+     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
+&                token_img,tread_before,typevarphys)
+     if (tread_before==1) dp_data_before(1:size1)=dprarr(1:size1)
+   end do
+   if (tread_before==0) then
+     iimage_before=1
+     dp_data_before(1:size1)=dp_data(1:size1)
+   end if
+
+!  Find the nearest following defined image
+   tread_after=0;iimage_after=iimage
+   do while (iimage_after<nimage.and.tread_after/=1)
+     iimage_after=iimage_after+1
+     write(stringimage,'(i10)') iimage_after
+     token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
+     call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
+&                token_img,tread_after,typevarphys)
+     if (tread_after==1) dp_data_after(1:size1)=dprarr(1:size1)
+     if (tread_after==0.and.iimage_after==nimage) then
+       token_img=trim(token)//'_lastimg'
+       call intagm(dprarr,intarr,jdtset,marr,size1,string(1:lenstr),&
+&                  token_img,tread_after,typevarphys)
+       if (tread_after==1) dp_data_after(1:size1)=dprarr(1:size1)
+     end if
+   end do
+   if (tread_after==0) then
+     iimage_after=nimage
+     dp_data_after(1:size1)=dp_data(1:size1)
+   end if
+
+!  Interpolate image data
+   if (tread_before==1.or.tread_after==1) then
+     alpha=real(iimage-iimage_before,dp)/real(iimage_after-iimage_before,dp)
+     dp_data(1:size1)=dp_data_before(1:size1) &
+&                    +alpha*(dp_data_after(1:size1)-dp_data_before(1:size1))
+     tread_ok=1
+   end if
+
+   ABI_DEALLOCATE(dp_data_before)
+   ABI_DEALLOCATE(dp_data_after)
+
+ end if
+
+ ABI_DEALLOCATE(intarr)
+ ABI_DEALLOCATE(dprarr)
+
+end subroutine intagm_img_1D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_parser/ingeo_img_2D
+!! NAME
+!!  intagm_img_2D
+!!
+!! FUNCTION
+!!  Read input file variables according to images path definition (2D array)
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      intagm
+!!
+!! SOURCE
+
+subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iimage,jdtset,lenstr,nimage,size1,size2
+ integer,intent(inout) :: tread_ok
+ real(dp),intent(inout) :: dp_data(size1,size2)
+ character(len=*),intent(in) :: typevarphys
+ character(len=*),intent(in) :: token
+ character(len=*),intent(in) :: string
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ integer :: iimage_after,iimage_before,marr,tread_after,tread_before,tread_current
+ real(dp) :: alpha
+ character(len=10) :: stringimage
+ character(len=3*len(token)+10) :: token_img
+!arrays
+ integer, allocatable :: intarr(:)
+ real(dp),allocatable :: dprarr(:),dp_data_after(:,:),dp_data_before(:,:)
+
+! *************************************************************************
+
+!Nothing to do in case of a single image
+ if (nimage<=1) return
+
+ marr=size1*size2
+ ABI_ALLOCATE(intarr,(marr))
+ ABI_ALLOCATE(dprarr,(marr))
+
+!First, try to read data for current image
+ tread_current=0
+ write(stringimage,'(i10)') iimage
+ token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
+ call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
+&            token_img,tread_current,typevarphys)
+ if (tread_current==1)then
+   dp_data(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+   tread_ok=1
+ end if
+ if (tread_current==0.and.iimage==nimage) then
+!  In the image is the last one, try to read data for last image (_lastimg)
+   token_img=trim(token)//'_lastimg'
+   call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
+&              token_img,tread_current,typevarphys)
+   if (tread_current==1)then
+     dp_data(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+     tread_ok=1
+   end if
+ end if
+
+ if (tread_current==0) then
+
+!  The current image is not directly defined in the input string
+   ABI_ALLOCATE(dp_data_before,(size1,size2))
+   ABI_ALLOCATE(dp_data_after,(size1,size2))
+
+!  Find the nearest previous defined image
+   tread_before=0;iimage_before=iimage
+   do while (iimage_before>1.and.tread_before/=1)
+     iimage_before=iimage_before-1
+     write(stringimage,'(i10)') iimage_before
+     token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
+     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
+&                token_img,tread_before,typevarphys)
+     if (tread_before==1) &
+&      dp_data_before(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+   end do
+   if (tread_before==0) then
+     iimage_before=1
+     dp_data_before(1:size1,1:size2)=dp_data(1:size1,1:size2)
+   end if
+
+!  Find the nearest following defined image
+   tread_after=0;iimage_after=iimage
+   do while (iimage_after<nimage.and.tread_after/=1)
+     iimage_after=iimage_after+1
+     write(stringimage,'(i10)') iimage_after
+     token_img=trim(token)//'_'//trim(adjustl(stringimage))//'img'
+     call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
+&                token_img,tread_after,typevarphys)
+     if (tread_after==1) &
+&      dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+     if (tread_after==0.and.iimage_after==nimage) then
+       token_img=trim(token)//'_lastimg'
+       call intagm(dprarr,intarr,jdtset,marr,size1*size2,string(1:lenstr),&
+&                  token_img,tread_after,typevarphys)
+       if (tread_after==1) &
+&        dp_data_after(1:size1,1:size2)=reshape( dprarr(1:size1*size2),(/size1,size2/) )
+     end if
+   end do
+   if (tread_after==0) then
+     iimage_after=nimage
+     dp_data_after(1:size1,1:size2)=dp_data(1:size1,1:size2)
+   end if
+
+!  Interpolate image data
+   if (tread_before==1.or.tread_after==1) then
+     alpha=real(iimage-iimage_before,dp)/real(iimage_after-iimage_before,dp)
+     dp_data(1:size1,1:size2)=dp_data_before(1:size1,1:size2) &
+&       +alpha*(dp_data_after(1:size1,1:size2)-dp_data_before(1:size1,1:size2))
+     tread_ok=1
+   end if
+
+   ABI_DEALLOCATE(dp_data_before)
+   ABI_DEALLOCATE(dp_data_after)
+
+ end if
+
+ ABI_DEALLOCATE(intarr)
+ ABI_DEALLOCATE(dprarr)
+
+end subroutine intagm_img_2D
 !!***
 
 !!****f* m_parser/inarray
@@ -3530,15 +3826,16 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
  select case (prefix)
 
  case ("poscar")
-   ! Get geo info from POSCAR from file.
+   ! Build geo ifrom POSCAR from file.
    new = geo_from_poscar_path(trim(string(ii+1:)), comm)
 
- !case ("abigeo")
- !  new = geo_from_abigeo_path(string(ii+1:), comm)
+ case ("abivars")
+   ! Build geo from from file with Abinit variables.
+   new = geo_from_abivars_path(trim(string(ii+1:)), comm)
 
  case ("abifile")
    if (endswith(string(ii+1:), ".nc")) then
-     ! Get geo info from netcdf file.
+     ! Build geo from netcdf file.
      new = geo_from_netcdf_path(trim(string(ii+1:)), comm)
    else
      ! Assume Fortran file with Abinit header.
@@ -3564,97 +3861,147 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 end function geo_from_abivar_string
 !!***
 
-!!!! !!****f* m_parser/geo_from_abigeo_path
-!!!! !! NAME
-!!!! !!  geo_from_abigeo_path
-!!!! !!
-!!!! !! FUNCTION
-!!!! !!
-!!!! !! SOURCE
-!!!!
-!!!! type(geo_t) function geo_from_abigeo_path(path, jdtset, iimage, comm) result(new)
-!!!!
-!!!! !Arguments ------------------------------------
-!!!!  character(len=*),intent(in) :: path
-!!!!  integer,intent(in) :: jdtset, iimage, comm
-!!!!
-!!!! !Local variables-------------------------------
-!!!!  integer,parameter :: master = 0, option1=1
-!!!!  integer :: my_rank, lenstr, ierr, ii, iatom, start, tread, marr !itypat,
-!!!!  !character(len=500) :: msg
-!!!!  character(len=strlen) :: string
-!!!! !arrays
-!!!!  integer,allocatable :: intarr(:)
-!!!!  real(dp),allocatable ::dprarr(:)
-!!!!  character(len=5),allocatable :: symbols(:)
-!!!!
-!!!!
-!!!! !************************************************************************
-!!!!
-!!!!  ! Master node reads string and broadcasts
-!!!!  my_rank = xmpi_comm_rank(comm)
-!!!!
-!!!!  if (my_rank == master) then
-!!!!     ! Below part copied from `parsefile`. strlen from defs_basis module
-!!!!     call instrng(path, lenstr, option1, strlen, string)
-!!!!
-!!!!    ! To make case-insensitive, map characters of string to upper case.
-!!!!    call inupper(string(1:lenstr))
-!!!!  end if
-!!!!
-!!!!  if (xmpi_comm_size(comm) > 1) then
-!!!!    call xmpi_bcast(string, master, comm, ierr)
-!!!!    call xmpi_bcast(lenstr, master, comm, ierr)
-!!!!  end if
-!!!!
-!!!!  ! ==============================
-!!!!  ! Now all procs parse the string
-!!!!  ! ==============================
-!!!!
-!!!!  ! Set up unit cell from acell, rprim, angdeg
-!!!!  !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
-!!!!
-!!!!  ! Get the number of atom in the unit cell. Read natom from string
-!!!!  marr = 1
-!!!!  ABI_MALLOC(intarr, (marr))
-!!!!  ABI_MALLOC(dprarr, (marr))
-!!!!  !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
-!!!!  ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
-!!!!  new%natom = intarr(1)
-!!!!  ABI_FREE(intarr)
-!!!!  ABI_FREE(dprarr)
-!!!!
-!!!!  ! Parse atomic positions. Only xcart is supported here because it makes life easier
-!!!!  ! and we don't need to handle symbols + Units
-!!!!  ii = index(string(1:lenstr), "xred_symbols")
-!!!!  ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by atom symbol are supported")
-!!!!
-!!!!  new%fileformat = "abivars"
-!!!!  ABI_MALLOC(new%typat, (new%natom))
-!!!!  ABI_MALLOC(new%xred, (3, new%natom))
-!!!!
-!!!!  ABI_MALLOC(symbols, (new%natom))
-!!!!  start = ii + 4
-!!!!  do iatom=1,new%natom
-!!!!    !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
-!!!!    !read(string(cs:), *) symbols(iatom)
-!!!!  end do
-!!!!
-!!!!  !call find_unique(symbols, new%ntypat, new%typat)
-!!!!
-!!!!  ! Note that the first letter should be capitalized, rest must be lower case
-!!!!  ABI_MALLOC(new%znucl, (new%ntypat))
-!!!!  !do itypat=1,new%ntypat
-!!!!  !  !iatom = new%typat(iat
-!!!!  !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
-!!!!  !end do
-!!!!
-!!!!  ABI_FREE(symbols)
-!!!!  ABI_FREE(intarr)
-!!!!  ABI_FREE(dprarr)
-!!!!
-!!!! end function geo_from_abigeo_path
-!!!! !!***
+!!****f* m_parser/geo_from_abivars_path
+!! NAME
+!!  geo_from_abivars_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_abivars_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0, option1 = 1
+ integer :: jdtset, iimage, nimage, iatom, itypat
+ integer :: my_rank, lenstr, ierr, ii, start, tread, marr
+ !character(len=500) :: msg
+ character(len=strlen) :: string
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp) :: acell(3), rprim(3,3)
+ real(dp),allocatable :: dprarr(:)
+ character(len=5),allocatable :: symbols(:)
+
+!************************************************************************
+
+ ! Master node reads string and broadcasts
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) then
+   ! Below part copied from `parsefile`. strlen from defs_basis module
+   call instrng(path, lenstr, option1, strlen, string)
+   ! To make case-insensitive, map characters of string to upper case.
+   call inupper(string(1:lenstr))
+   !call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
+ end if
+
+ if (xmpi_comm_size(comm) > 1) then
+   call xmpi_bcast(string, master, comm, ierr)
+   call xmpi_bcast(lenstr, master, comm, ierr)
+ end if
+
+ ! ==============================
+ ! Now all procs parse the string
+ ! ==============================
+
+ jdtset = 0; iimage = 0; nimage = 0
+
+ ! Get the number of atom in the unit cell. Read natom from string
+ marr = 1
+ ABI_MALLOC(intarr, (marr))
+ ABI_MALLOC(dprarr, (marr))
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+ ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
+ new%natom = intarr(1)
+
+ marr = max(12, 3*new%natom)
+ ABI_REMALLOC(intarr, (marr))
+ ABI_REMALLOC(dprarr, (marr))
+
+ ! Set up unit cell from acell, rprim, angdeg
+ call get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, rprim)
+
+ ! Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
+ call mkrdim(acell, rprim, new%rprimd)
+
+ ! Parse atomic positions.
+ ! Only xcart is supported here because it makes life easier and we don't need to handle symbols + Units
+ ii = index(string(1:lenstr), "XRED_SYMBOLS")
+ ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by element symbol are supported")
+
+ new%fileformat = "abivars"
+ ABI_MALLOC(new%xred, (3, new%natom))
+
+ ABI_MALLOC(symbols, (new%natom))
+ start = ii + len("XRED_SYMBOLS")
+ do iatom=1,new%natom
+   call inarray(start, "xred_symbols", dprarr, intarr, marr, 3, string, "DPR")
+   new%xred(:, iatom) = dprarr(1:3)
+   ABI_CHECK(next_token(string, start, symbols(iatom)) == 0, "Error while reading element symbol.")
+   symbols(iatom) = tolower(symbols(iatom))
+   symbols(iatom)(1:1) = toupper(symbols(iatom)(1:1))
+   !write(std_out, *)"xred", new%xred(:, iatom), "symbol:", trim(symbols(iatom))
+ end do
+
+ call typat_from_symbols(symbols, new%ntypat, new%typat)
+
+ ! Note that the first letter should be capitalized, rest must be lower case
+ ABI_MALLOC(new%znucl, (new%ntypat))
+ do iatom=1,new%natom
+   itypat = new%typat(iatom)
+   new%znucl(itypat) = symbol2znucl(symbols(iatom))
+ end do
+
+ ABI_FREE(symbols)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+
+ !call new%print_abivars(std_out)
+
+contains
+
+subroutine typat_from_symbols(symbols, ntypat, typat)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: symbols(:)
+ integer,intent(out) :: ntypat
+ integer,allocatable,intent(out) :: typat(:)
+
+!Local variables-------------------------------
+ integer :: ii, jj, nstr, found
+
+!************************************************************************
+
+ nstr = size(symbols)
+ ABI_ICALLOC(typat, (nstr))
+
+ typat(1) = 1
+ ntypat = 1
+ do ii=2, nstr
+   found = 0
+   do jj=1, ntypat
+     if (symbols(ii) == symbols(typat(jj))) then
+       found = jj; exit
+     end if
+   end do
+   if (found == 0) then
+     ntypat = ntypat + 1
+     typat(ii) = ntypat
+   else
+     typat(ii) = found
+   end if
+ end do
+
+end subroutine typat_from_symbols
+
+end function geo_from_abivars_path
+!!***
 
 !!****f* m_parser/geo_from_poscar_path
 !! NAME
@@ -4075,6 +4422,134 @@ subroutine geo_free(self)
  ABI_SFREE(self%znucl)
 
 end subroutine geo_free
+!!***
+
+!!****f* m_parser/get_acell_rprim
+!! NAME
+!!  get_acell_rprim
+!!
+!! FUNCTION
+!!  Get acell and rprim from string
+!!
+!! INPUTS
+!! string*(*)=character string containing all the input data. Initialized previously in instrng.
+!! jdtset=number of the dataset looked for
+!! iimage= index of the current image
+!! nimage=Number of images.
+!! marr=dimension of the intarr and dprarr arrays, as declared in the calling subroutine.
+!!
+!! OUTPUT
+!! acell(3)=length of primitive vectors
+!! rprim(3,3)=dimensionless real space primitive translations
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, rprim)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: lenstr, jdtset, iimage, nimage, marr
+ character(len=*),intent(in) :: string
+ real(dp),intent(out) :: acell(3)
+ real(dp),intent(out) :: rprim(3,3)
+
+!Local variables-------------------------------
+ integer :: tacell, tangdeg, tread, trprim, mu
+ real(dp) :: a2, aa, cc, cosang
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp) :: angdeg(3)
+ real(dp),allocatable :: dprarr(:)
+
+!************************************************************************
+
+ ABI_MALLOC(intarr, (marr))
+ ABI_MALLOC(dprarr, (marr))
+
+ acell(1:3) = one
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
+ if(tacell==1) acell(1:3)=dprarr(1:3)
+ call intagm_img(acell,iimage,jdtset,lenstr,nimage,3,string,"acell",tacell,'LEN')
+
+ ! Check that input length scales acell(3) are > 0
+ do mu=1,3
+   if(acell(mu) <= zero) then
+     write(msg, '(a,i0,a, 1p,e14.6,4a)' )&
+      'Length scale ',mu,' is input as acell: ',acell(mu),ch10,&
+      'However, length scales must be > 0 ==> stop',ch10,&
+      'Action: correct acell in input file.'
+     MSG_ERROR(msg)
+   end if
+ end do
+
+ ! Initialize rprim, or read the angles
+ tread=0
+ call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',trprim,'DPR')
+ if (trprim==1) rprim(:,:) = reshape( dprarr(1:9), [3, 3])
+ call intagm_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
+
+ if(trprim==0)then
+   ! If none of the rprim were read ...
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'angdeg',tangdeg,'DPR')
+   angdeg(:)=dprarr(1:3)
+   call intagm_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
+
+   if(tangdeg==1)then
+     !call wrtout(std_out,' ingeo: use angdeg to generate rprim.')
+
+     ! Check that input angles are positive
+     do mu=1,3
+       if(angdeg(mu)<=0.0_dp) then
+         write(msg, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
+          'Angle number ',mu,' is input as angdeg: ',angdeg(mu),ch10,&
+          'However, angles must be > 0 ==> stop',ch10,&
+          'Action: correct angdeg in the input file.'
+         MSG_ERROR(msg)
+       end if
+     end do
+
+     ! Check that the sum of angles is smaller than 360 degrees
+     if(angdeg(1)+angdeg(2)+angdeg(3)>=360.0_dp) then
+       write(msg, '(a,a,a,es14.4,a,a,a)' )&
+        'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
+        'while it is: ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
+        'Action: correct angdeg in the input file.'
+       MSG_ERROR(msg)
+     end if
+
+     if( abs(angdeg(1)-angdeg(2))<tol12 .and. &
+         abs(angdeg(2)-angdeg(3))<tol12 .and. &
+         abs(angdeg(1)-90._dp)+abs(angdeg(2)-90._dp)+abs(angdeg(3)-90._dp)>tol12 )then
+       ! Treat the case of equal angles (except all right angles):
+       ! generates trigonal symmetry wrt third axis
+       cosang=cos(pi*angdeg(1)/180.0_dp)
+       a2=2.0_dp/3.0_dp*(1.0_dp-cosang)
+       aa=sqrt(a2)
+       cc=sqrt(1.0_dp-a2)
+       rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
+       rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
+       rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
+       ! write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
+     else
+       ! Treat all the other cases
+       rprim(:,:)=0.0_dp
+       rprim(1,1)=1.0_dp
+       rprim(1,2)=cos(pi*angdeg(3)/180.0_dp)
+       rprim(2,2)=sin(pi*angdeg(3)/180.0_dp)
+       rprim(1,3)=cos(pi*angdeg(2)/180.0_dp)
+       rprim(2,3)=(cos(pi*angdeg(1)/180.0_dp)-rprim(1,2)*rprim(1,3))/rprim(2,2)
+       rprim(3,3)=sqrt(1.0_dp-rprim(1,3)**2-rprim(2,3)**2)
+     end if
+
+   end if
+ end if ! No problem if neither rprim nor angdeg are defined: use default rprim
+
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+
+end subroutine get_acell_rprim
 !!***
 
 end module m_parser

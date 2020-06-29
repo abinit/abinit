@@ -104,7 +104,7 @@ subroutine mati3inv(mm, mit)
 !Local variables-------------------------------
 !scalars
  integer :: dd
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: tt(3,3)
 
@@ -125,16 +125,14 @@ subroutine mati3inv(mm, mit)
  if (dd/=0) then
    mit(:,:)=tt(:,:)/dd
  else
-   write(message, '(2a,2x,9i5,a)' )&
-&   'Attempting to invert integer array',ch10,mm(:,:),'   ==> determinant is zero.'
-   MSG_BUG(message)
+   write(msg, '(2a,2x,9i5,a)' )'Attempting to invert integer array',ch10,mm(:,:),'   ==> determinant is zero.'
+   MSG_BUG(msg)
  end if
 
 !If matrix is orthogonal, determinant must be 1 or -1
  if (abs(dd)/=1) then
-   write(message, '(2a,2x,9i5,a)' )&
-&   'Absolute value of determinant should be one',ch10,'but determinant= ',dd
-   MSG_BUG(message)
+   write(msg, '(2a,2x,9i5,a)' )'Absolute value of determinant should be one',ch10,'but determinant= ',dd
+   MSG_BUG(msg)
  end if
 
 end subroutine mati3inv
@@ -216,7 +214,7 @@ subroutine matr3inv(aa, ait)
 !Local variables-------------------------------
 !scalars
  real(dp) :: dd,det,t1,t2,t3
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -229,9 +227,9 @@ subroutine matr3inv(aa, ait)
  if (abs(det)>tol16) then
    dd=one/det
  else
-   write(message, '(2a,2x,9es16.8,a,a,es16.8,a)' )&
-&   'Attempting to invert real(8) 3x3 array',ch10,aa(:,:),ch10,'   ==> determinant=',det,' is zero.'
-   MSG_BUG(message)
+   write(msg, '(2a,2x,9es16.8,a,a,es16.8,a)' )&
+     'Attempting to invert real(8) 3x3 array',ch10,aa(:,:),ch10,'   ==> determinant=',det,' is zero.'
+   MSG_BUG(msg)
  end if
 
  ait(1,1) = t1 * dd
@@ -282,7 +280,7 @@ subroutine symdet(determinant, nsym, sym)
 !Local variables-------------------------------
 !scalars
  integer :: det,isym
- character(len=500) :: message
+ character(len=500) :: msg
 
 ! *************************************************************************
 
@@ -290,11 +288,11 @@ subroutine symdet(determinant, nsym, sym)
    call mati3det(sym(:,:,isym),det)
    determinant(isym)=det
    if (abs(det)/=1) then
-     write(message,'(a,i5,a,i10,a,a,a,a,a)')&
-&     'Abs(determinant) for symmetry number',isym,' is',det,' .',ch10,&
-&     'For a legitimate symmetry, abs(determinant) must be 1.',ch10,&
-&     'Action: check your symmetry operations (symrel) in input file.'
-     MSG_ERROR(message)
+     write(msg,'(a,i5,a,i10,a,a,a,a,a)')&
+      'Abs(determinant) for symmetry number',isym,' is',det,' .',ch10,&
+      'For a legitimate symmetry, abs(determinant) must be 1.',ch10,&
+      'Action: check your symmetry operations (symrel) in input file.'
+     MSG_ERROR(msg)
    end if
  end do
 
@@ -598,7 +596,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
  integer :: ii,isym,jj
  real(dp),parameter :: tol=2.0d-8
  real(dp) :: residual,rmet2
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: prods(3,3),rmet_sym(3,3),rprimd_sym(3,3)
 
@@ -617,16 +615,16 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 !  Compute symmetric of primitive vectors under point symmetry operations
    do ii=1,3
      rprimd_sym(:,ii)=symrel(1,ii,isym)*rprimd(:,1)+&
-&     symrel(2,ii,isym)*rprimd(:,2)+&
-&     symrel(3,ii,isym)*rprimd(:,3)
+                      symrel(2,ii,isym)*rprimd(:,2)+&
+                      symrel(3,ii,isym)*rprimd(:,3)
    end do
 
 !  If the new lattice is the same as the original one,
 !  the lengths and angles are preserved
    do ii=1,3
      rmet_sym(ii,:)=rprimd_sym(1,ii)*rprimd_sym(1,:)+&
-&     rprimd_sym(2,ii)*rprimd_sym(2,:)+&
-&     rprimd_sym(3,ii)*rprimd_sym(3,:)
+                    rprimd_sym(2,ii)*rprimd_sym(2,:)+&
+                    rprimd_sym(3,ii)*rprimd_sym(3,:)
    end do
 
    residual=zero
@@ -636,16 +634,16 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
      end do
    end do
 
-   if(sqrt(residual)>tol*sqrt(rmet2))then
+   if(sqrt(residual) > tol*sqrt(rmet2))then
      if(iexit==0)then
-       write(message, '(a,i5,a,a,a,a,a,es12.4,a,a,a,a,a,a,a)' )&
-&       'The symmetry operation number ',isym,' does not preserve',ch10,&
-&       'vector lengths and angles.',ch10,&
-&       'The value of the residual is ',residual,'.',ch10,&
-&       'Action: modify rprim, acell and/or symrel so that',ch10,&
-&       'vector lengths and angles are preserved.',ch10,&
-&       'Beware, the tolerance on symmetry operations is very small.'
-       MSG_ERROR(message)
+       write(msg, '(a,i0,5a,es12.4,a,es12.4,6a)' )&
+        'The symmetry operation number ',isym,' does not preserve',ch10,&
+        'vector lengths and angles.',ch10,&
+        'The value of the residual is: ',residual, 'that is greater than threshold:', (tol*sqrt(rmet2))**2,ch10,&
+        'Action: modify rprim, acell and/or symrel so that',ch10,&
+        'vector lengths and angles are preserved.',ch10,&
+        'Beware, the tolerance on symmetry operations is very small.'
+       MSG_ERROR(msg)
      else
        iexit=-1
      end if
@@ -654,8 +652,8 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 !  Also, the scalar product of rprimd_sym and gprimd must give integer numbers
    do ii=1,3
      prods(ii,:)=rprimd_sym(1,ii)*gprimd(1,:)+ &
-&     rprimd_sym(2,ii)*gprimd(2,:)+ &
-&     rprimd_sym(3,ii)*gprimd(3,:)
+                 rprimd_sym(2,ii)*gprimd(2,:)+ &
+                 rprimd_sym(3,ii)*gprimd(3,:)
    end do
 
    do ii=1,3
@@ -663,12 +661,13 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
        residual=prods(ii,jj)-anint(prods(ii,jj))
        if(abs(residual)>tol)then
          if(iexit==0)then
-           write(message, '(a,i0,a,a,a,a,a,a,a)' )&
-&           'The symmetry operation number ',isym,' generates',ch10,&
-&           'a different lattice.',ch10,&
-&           'Action: modify rprim, acell and/or symrel so that',ch10,&
-&           'the lattice is preserved.'
-           MSG_ERROR(message)
+           write(msg, '(a,i0,5a,es12.4,a,es12.4,4a)' )&
+            'The symmetry operation number ',isym,' generates',ch10,&
+            'a different lattice.',ch10,&
+            'The value of the residual is: ',residual, 'that is greater than the threshold:', tol, ch10,&
+            'Action: modify rprim, acell and/or symrel so that',ch10,&
+            'the lattice is preserved.'
+           MSG_ERROR(msg)
          else
            iexit=-1
          end if
@@ -721,7 +720,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
 !Local variables-------------------------------
 !scalars
  integer :: isym
- character(len=500) :: message
+ character(len=500) :: msg
 
 !**************************************************************************
 
@@ -744,20 +743,20 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
 !Check whether the cell is primitive
  if(multi>1)then
    if(chkprim/=0)then
-     write(message,'(a,a,a,i0,a,a,a,a,a,a,a,a,a)')&
-&     'According to the symmetry finder, the unit cell is',ch10,&
-&     'NOT primitive. The multiplicity is ',multi,' .',ch10,&
-&     'The use of non-primitive unit cells is allowed',ch10,&
-&     'only when the input variable chkprim is 0.',ch10,&
-&     'Action: either change your unit cell (rprim or angdeg),',ch10,&
-&     'or set chkprim to 0.'
-     MSG_ERROR(message)
+     write(msg,'(a,a,a,i0,a,a,a,a,a,a,a,a,a)')&
+     'According to the symmetry finder, the unit cell is',ch10,&
+     'NOT primitive. The multiplicity is ',multi,' .',ch10,&
+     'The use of non-primitive unit cells is allowed',ch10,&
+     'only when the input variable chkprim is 0.',ch10,&
+     'Action: either change your unit cell (rprim or angdeg),',ch10,&
+     'or set chkprim to 0.'
+     MSG_ERROR(msg)
    else
-     write(message,'(3a,i0,a,a,a)')&
-&     'According to the symmetry finder, the unit cell is',ch10,&
-&     'not primitive, with multiplicity= ',multi,'.',ch10,&
-&     'This is allowed, as the input variable chkprim is 0.'
-     MSG_COMMENT(message)
+     write(msg,'(3a,i0,a,a,a)')&
+      'According to the symmetry finder, the unit cell is',ch10,&
+      'not primitive, with multiplicity= ',multi,'.',ch10,&
+      'This is allowed, as the input variable chkprim is 0.'
+     MSG_COMMENT(msg)
    end if
  end if
 
@@ -807,7 +806,7 @@ subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
 !scalars
  integer :: ii,isym,jj
  real(dp) :: val
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: coord(3,3),coordinvt(3,3),matr1(3,3),matr2(3,3),rprimd_invt(3,3)
 
@@ -841,13 +840,13 @@ subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
        val=matr2(ii,jj)
 !      Need to allow for twice tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
        if(abs(val-nint(val))>two*tolsym)then
-         write(message,'(2a,a,i3,a,a,3es14.6,a,a,3es14.6,a,a,3es14.6)')&
-&         'One of the components of symrel is non-integer,',ch10,&
-&         '  for isym=',isym,ch10,&
-&         '  symrel=',matr2(:,1),ch10,&
-&         '         ',matr2(:,2),ch10,&
-&         '         ',matr2(:,3)
-         MSG_ERROR_CLASS(message, "TolSymError")
+         write(msg,'(2a,a,i3,a,a,3es14.6,a,a,3es14.6,a,a,3es14.6)')&
+         'One of the components of symrel is non-integer,',ch10,&
+         '  for isym=',isym,ch10,&
+         '  symrel=',matr2(:,1),ch10,&
+         '         ',matr2(:,2),ch10,&
+         '         ',matr2(:,3)
+         MSG_ERROR_CLASS(msg, "TolSymError")
        end if
        symrel(ii,jj,isym)=nint(val)
      end do
@@ -921,7 +920,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
  integer :: ii,isign,isym,itirev,my_prtvol
  real(dp),parameter :: tol=2.d-8
  real(dp) :: reduce
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: difq(3),qsym(3),shift(3)
 
@@ -974,9 +973,9 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 !    If the operation succeded, change shift from real(dp) to integer, then exit loop
      if(symq(4,itirev,isym)/=0)then
        if (my_prtvol>0) then
-         if(itirev==1)write(message,'(a,i4,a)')' littlegroup_q : found symmetry',isym,' preserves q '
-         if(itirev==2)write(message,'(a,i4,a)')' littlegroup_q : found symmetry ',isym,' + TimeReversal preserves q '
-         call wrtout(std_out,message,'COLL')
+         if(itirev==1)write(msg,'(a,i4,a)')' littlegroup_q : found symmetry',isym,' preserves q '
+         if(itirev==2)write(msg,'(a,i4,a)')' littlegroup_q : found symmetry ',isym,' + TimeReversal preserves q '
+         call wrtout(std_out,msg)
        end if
 !      Uses the mathematical function NINT = nearest integer
        do ii=1,3
@@ -998,10 +997,10 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
  end do
 
  if(timrev==1.and.my_prtvol>0)then
-   write(message, '(a,a,a)' )&
-&   ' littlegroup_q : able to use time-reversal symmetry. ',ch10,&
-&   '  (except for gamma, not yet able to use time-reversal symmetry)'
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,a,a)' )&
+   ' littlegroup_q : able to use time-reversal symmetry. ',ch10,&
+   '  (except for gamma, not yet able to use time-reversal symmetry)'
+   call wrtout(std_out,msg)
  end if
 
 end subroutine littlegroup_q
@@ -1772,7 +1771,7 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 !scalars
  integer :: eatom,errout,iatom,ii,isym,mu
  real(dp) :: difmax,err
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: transl(3)
  real(dp) :: difmin(3),tratom(3)
@@ -1806,33 +1805,33 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
      err=max(err,difmax)
 
      if (difmax>tolsym) then ! Print warnings if differences exceed tolerance
-       write(message, '(3a,i3,a,i6,a,i3,a,a,3es12.4,3a)' )&
-&       'Trouble finding symmetrically equivalent atoms',ch10,&
-&       'Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
-&       'gives tratom=',tratom(1:3),'.',ch10,&
-&       'This is further away from every atom in crystal than the allowed tolerance.'
-       MSG_WARNING(message)
+       write(msg, '(3a,i3,a,i6,a,i3,a,a,3es12.4,3a)' )&
+       'Trouble finding symmetrically equivalent atoms',ch10,&
+       'Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
+       'gives tratom=',tratom(1:3),'.',ch10,&
+       'This is further away from every atom in crystal than the allowed tolerance.'
+       MSG_WARNING(msg)
 
-       write(message, '(a,3i3,a,a,3i3,a,a,3i3)' ) &
-&       '  The inverse symmetry matrix is',symrec(1,1:3,isym),ch10,&
-&       '                                ',symrec(2,1:3,isym),ch10,&
-&       '                                ',symrec(3,1:3,isym)
-       call wrtout(std_out,message,'COLL')
-       write(message, '(a,3f13.7)' )'  and the nonsymmorphic transl. tnons =',(tnons(mu,isym),mu=1,3)
+       write(msg, '(a,3i3,a,a,3i3,a,a,3i3)' ) &
+       '  The inverse symmetry matrix is',symrec(1,1:3,isym),ch10,&
+       '                                ',symrec(2,1:3,isym),ch10,&
+       '                                ',symrec(3,1:3,isym)
+       call wrtout(std_out,msg)
+       write(msg, '(a,3f13.7)' )'  and the nonsymmorphic transl. tnons =',(tnons(mu,isym),mu=1,3)
 
-       call wrtout(std_out,message,'COLL')
-       write(message, '(a,1p,3e11.3,a,a,i5)' ) &
-&       '  The nearest coordinate differs by',difmin(1:3),ch10,&
-&       '  for indsym(nearest atom)=',indsym(4,isym,iatom)
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,msg)
+       write(msg, '(a,1p,3e11.3,a,a,i5)' ) &
+        '  The nearest coordinate differs by',difmin(1:3),ch10,&
+        '  for indsym(nearest atom)=',indsym(4,isym,iatom)
+       call wrtout(std_out,msg)
 !
 !      Use errout to reduce volume of error diagnostic output
        if (errout==0) then
-         write(message,'(6a)') ch10,&
-&         '  This indicates that when symatm attempts to find atoms  symmetrically',ch10, &
-&         '  related to a given atom, the nearest candidate is further away than some',ch10,&
-&         '  tolerance.  Should check atomic coordinates and symmetry group input data.'
-         call wrtout(std_out,message,'COLL')
+         write(msg,'(6a)') ch10,&
+          '  This indicates that when symatm attempts to find atoms  symmetrically',ch10, &
+          '  related to a given atom, the nearest candidate is further away than some',ch10,&
+          '  tolerance.  Should check atomic coordinates and symmetry group input data.'
+         call wrtout(std_out,msg)
          errout=1
        end if
 
@@ -1842,31 +1841,31 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 
  if (natom<=50) then
    do iatom=1,natom
-     write(message, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
-     call wrtout(std_out,message,'COLL')
+     write(msg, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
+     call wrtout(std_out,msg)
      do ii=1,(nsym-1)/24+1
        if(natom<100)then
-         write(message, '(1x,24i3)' ) (indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+         write(msg, '(1x,24i3)' ) (indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
        else
-         write(message, '(1x,24i6)' ) (indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
+         write(msg, '(1x,24i6)' ) (indsym(4,isym,iatom),isym=1+(ii-1)*24,min(nsym,ii*24))
        end if
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,msg)
      end do
    end do
  end if
 
  if (err>tolsym) then
-   write(message, '(1x,a,1p,e14.5,a,e12.4)' )'symatm: maximum (delta t)=',err,' is larger than tol=',tolsym
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(1x,a,1p,e14.5,a,e12.4)' )'symatm: maximum (delta t)=',err,' is larger than tol=',tolsym
+   call wrtout(std_out,msg)
  end if
 
 !Stop execution if error is really big
  if (err>0.01d0) then
-   write(message,'(5a)')&
-&   'Largest error (above) is so large (0.01) that either input atomic coordinates (xred)',ch10,&
-&   'are wrong or space group symmetry data is wrong.',ch10,&
-&   'Action: correct your input file.'
-   MSG_ERROR(message)
+   write(msg,'(5a)')&
+    'Largest error (above) is so large (0.01) that either input atomic coordinates (xred)',ch10,&
+    'are wrong or space group symmetry data is wrong.',ch10,&
+    'Action: correct your input file.'
+   MSG_ERROR(msg)
  end if
 
 end subroutine symatm
@@ -1915,7 +1914,7 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
  !scalars
  logical,parameter :: verbose=.FALSE.
  integer :: tnons_order, identified, ii, order, iorder
- character(len=500) :: message
+ character(len=500) :: msg
  !arrays
  integer :: identity(3,3),matrix(3,3),trial(3,3)
  real(dp) :: reduced(3),trialt(3)
@@ -2013,8 +2012,8 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
      end if
 
      if (verbose) then
-       write(message,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(label)
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(label)
+       call wrtout(std_out,msg)
      end if
 
    case(2,3,4,6)                 ! point symmetry 2,3,4,6 - rotations
@@ -2043,8 +2042,8 @@ subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons
    end select
 
    if (order /= 2 .and. verbose) then
-     write(message,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(label)
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(a,i3,2a)')' symspgr : the symmetry operation no. ',isym,' is ',trim(label)
+     call wrtout(std_out,msg)
    end if
 
  end if ! determinant==1 or -1
@@ -2176,7 +2175,7 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
 !Local variables-------------------------------
 !scalars
  logical,parameter :: verbose=.FALSE.
- character(len=500) :: message
+ character(len=500) :: msg
  integer :: direction,directiontype
  real(dp),parameter :: nzero=1.0d-6
 
@@ -2301,11 +2300,9 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
      type_axis=29                ! 6_3
      write(label,'(a)') 'a 6_3-axis '
    else if(tnons_order==3)then
-!      DEBUG
-!      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
-!      write(std_out,*)'trialt=',trialt(:)
-!      ENDDEBUG
-!      Must recognize 6_2 or 6_4
+     !write(std_out,*)'isymrelconv=',isymrelconv(:,:)
+     !write(std_out,*)'trialt=',trialt(:)
+     !Must recognize 6_2 or 6_4
      if(isymrelconv(1,1)==1)then  ! 6+
        if(abs(trialt(3)-third)<nzero)type_axis=28   ! 6_2
        if(abs(trialt(3)+third)<nzero)type_axis=30   ! 6_4
@@ -2315,11 +2312,9 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
      end if
      write(label,'(a)') 'a 6_2 or 6_4-axis '
    else
-!      DEBUG
-!      write(std_out,*)'isymrelconv=',isymrelconv(:,:)
-!      write(std_out,*)'trialt=',trialt(:)
-!      ENDDEBUG
-!      Must recognize 6_1 or 6_5
+     !write(std_out,*)'isymrelconv=',isymrelconv(:,:)
+     !write(std_out,*)'trialt=',trialt(:)
+     !Must recognize 6_1 or 6_5
      if(isymrelconv(1,1)==1)then  ! 6+
        if(abs(trialt(3)-sixth)<nzero)type_axis=27   ! 6_1
        if(abs(trialt(3)+sixth)<nzero)type_axis=31   ! 6_5
@@ -2333,8 +2328,8 @@ subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order
  end select
 
  if (verbose) then
-   write(message,'(a,i3,a,a)')' symaxes : the symmetry operation no. ',isym,' is ', trim(label)
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i3,a,a)')' symaxes : the symmetry operation no. ',isym,' is ', trim(label)
+   call wrtout(std_out,msg)
  end if
 
 end subroutine symaxes
@@ -2438,7 +2433,7 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
 !Local variables-------------------------------
 !scalars
  logical,parameter :: verbose=.FALSE.
- character(len=500) :: message
+ character(len=500) :: msg
  integer :: directiontype,sum_elements
  real(dp),parameter :: nzero=1.0d-6
 !arrays
@@ -2537,7 +2532,7 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
 !enddo
 !endif
 
- write(message,'(a)') ' symplanes...'
+ write(msg,'(a)') ' symplanes...'
 
 !Must use the convention of table 1.3 of the international
 !tables for crystallography, see also pp 788 and 789.
@@ -2553,8 +2548,7 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
      type_axis=18  ! primary n
      write(label,'(a)') 'a primary n plane'
    else if(directiontype==2)then
-     if(sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. &
-&     sum(abs(trialt(:)-(/zero,half,zero/)))<nzero       )then
+     if(sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. sum(abs(trialt(:)-(/zero,half,zero/)))<nzero)then
        type_axis=16  ! secondary a or b
        write(label,'(a)') 'a secondary a or b plane'
      else if(sum(abs(trialt(:)-(/zero,zero,half/)))<nzero)then
@@ -2578,13 +2572,13 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
 
    if(directiontype==1 .or. directiontype==2)then
      if(sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. &
-&     sum(abs(trialt(:)-(/zero,half,zero/)))<nzero .or. &
-&     sum(abs(trialt(:)-(/zero,zero,half/)))<nzero      )then
+        sum(abs(trialt(:)-(/zero,half,zero/)))<nzero .or. &
+        sum(abs(trialt(:)-(/zero,zero,half/)))<nzero      )then
        type_axis=16    ! a, b, or c
        write(label,'(a)') 'an a, b or c plane'
      else if(sum(abs(trialt(:)-(/half,half,zero/)))<nzero .or. &
-&       sum(abs(trialt(:)-(/zero,half,half/)))<nzero .or. &
-&       sum(abs(trialt(:)-(/half,zero,half/)))<nzero       )then
+             sum(abs(trialt(:)-(/zero,half,half/)))<nzero .or. &
+             sum(abs(trialt(:)-(/half,zero,half/)))<nzero       )then
        type_axis=15    ! n plane, equivalent to m
        write(label,'(a)') 'a m plane'
      end if ! directiontype==1 or 2
@@ -2603,8 +2597,7 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
    if( abs(sum(abs(trialt(:)))-one) < nzero) then
      type_axis=15    ! secondary m
      write(label,'(a)') 'a secondary m plane'
-   else if( abs(sum(abs(trialt(:)))-half) < nzero .or. &
-&     abs(sum(abs(trialt(:)))-three*half) < nzero )then
+   else if( abs(sum(abs(trialt(:)))-half) < nzero .or. abs(sum(abs(trialt(:)))-three*half) < nzero )then
      type_axis=16    ! secondary c
      write(label,'(a)') 'a secondary c plane'
    end if
@@ -2639,11 +2632,11 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
 
    if(directiontype==1)then
      if((sum(abs(isymrelconv(:,:)-mirrorx(:,:)))==0 .and.  &
-&     sum(abs(two*abs(trialt(:))-(/zero,half,half/)))<nzero   ).or. &
-&     (sum(abs(isymrelconv(:,:)-mirrory(:,:)))==0 .and.  &
-&     sum(abs(two*abs(trialt(:))-(/half,zero,half/)))<nzero   ).or. &
-&     (sum(abs(isymrelconv(:,:)-mirrorz(:,:)))==0 .and.  &
-&     sum(abs(two*abs(trialt(:))-(/half,half,zero/)))<nzero   )    ) then
+         sum(abs(two*abs(trialt(:))-(/zero,half,half/)))<nzero   ).or. &
+         (sum(abs(isymrelconv(:,:)-mirrory(:,:)))==0 .and.  &
+         sum(abs(two*abs(trialt(:))-(/half,zero,half/)))<nzero   ).or. &
+         (sum(abs(isymrelconv(:,:)-mirrorz(:,:)))==0 .and.  &
+         sum(abs(two*abs(trialt(:))-(/half,half,zero/)))<nzero   )    ) then
        type_axis=17     ! d
        write(label,'(a)') 'a d plane'
      else
@@ -2654,8 +2647,7 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
      if(sum(abs(two*abs(trialt(:))-(/half,half,half/)))<nzero       )then
        type_axis=17     ! d
        write(label,'(a)') 'a d plane'
-     else if( abs(sum(abs(trialt(:)))-half) < nzero .or. &
-&       abs(sum(abs(trialt(:)))-three*half) < nzero ) then
+     else if( abs(sum(abs(trialt(:)))-half) < nzero .or. abs(sum(abs(trialt(:)))-three*half) < nzero ) then
        type_axis=18    ! tertiary n
        write(label,'(a)') 'a tertiary n plane'
      else if( abs(sum(abs(trialt(:)))-one) < nzero )then
@@ -2665,31 +2657,29 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
    end if
 
 !  Now, treat all other cases (including other centered Bravais lattices)
- else if( sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. &
-&   sum(abs(trialt(:)-(/zero,half,zero/)))<nzero .or. &
-&   sum(abs(trialt(:)-(/zero,zero,half/)))<nzero       )then
+ else if(sum(abs(trialt(:)-(/half,zero,zero/)))<nzero .or. &
+         sum(abs(trialt(:)-(/zero,half,zero/)))<nzero .or. &
+         sum(abs(trialt(:)-(/zero,zero,half/)))<nzero       )then
    type_axis=16     ! a, b or c
    write(label,'(a)') 'an a,b, or c plane'
  else if( (directiontype==1 .or. directiontype==2) .and. &
-&   (sum(abs(trialt(:)-(/half,half,zero/)))<nzero .or. &
-&   sum(abs(trialt(:)-(/zero,half,half/)))<nzero .or. &
-&   sum(abs(trialt(:)-(/half,zero,half/)))<nzero     ) )then
+          (sum(abs(trialt(:)-(/half,half,zero/)))<nzero .or. &
+           sum(abs(trialt(:)-(/zero,half,half/)))<nzero .or. &
+           sum(abs(trialt(:)-(/half,zero,half/)))<nzero     ) )then
    type_axis=18     ! n
    write(label,'(a)') 'an n plane'
- else if( directiontype==3 .and. &
-&   sum(abs(trialt(:)-(/half,half,half/)))<nzero )then
+ else if( directiontype==3 .and. sum(abs(trialt(:)-(/half,half,half/)))<nzero )then
    type_axis=18     ! n
    write(label,'(a)') 'an n plane'
  else if((sum(abs(isymrelconv(:,:)-mirrorx(:,:)))==0 .and.  &
-&   sum(abs(two*abs(trialt(:))-(/zero,half,half/)))<nzero   ).or. &
-&   (sum(abs(isymrelconv(:,:)-mirrory(:,:)))==0 .and.  &
-&   sum(abs(two*abs(trialt(:))-(/half,zero,half/)))<nzero   ).or. &
-&   (sum(abs(isymrelconv(:,:)-mirrorz(:,:)))==0 .and.  &
-&   sum(abs(two*abs(trialt(:))-(/half,half,zero/)))<nzero   )    ) then
+          sum(abs(two*abs(trialt(:))-(/zero,half,half/)))<nzero   ).or. &
+          (sum(abs(isymrelconv(:,:)-mirrory(:,:)))==0 .and.  &
+          sum(abs(two*abs(trialt(:))-(/half,zero,half/)))<nzero   ).or. &
+          (sum(abs(isymrelconv(:,:)-mirrorz(:,:)))==0 .and.  &
+          sum(abs(two*abs(trialt(:))-(/half,half,zero/)))<nzero   )    ) then
    type_axis=17     ! d
    write(label,'(a)') 'a d plane'
- else if( directiontype==3 .and. &
-&   sum(abs(two*abs(trialt(:))-(/half,half,half/)))<nzero       )then
+ else if( directiontype==3 .and. sum(abs(two*abs(trialt(:))-(/half,half,half/)))<nzero)then
    type_axis=17     ! d
    write(label,'(a)') 'a d plane'
  else
@@ -2699,8 +2689,8 @@ subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_ax
  end if
 
  if (verbose) then
-   write(message,'(a,i3,a,a)')' symplanes : the symmetry operation no. ',isym,' is ', trim(label)
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,i3,a,a)')' symplanes : the symmetry operation no. ',isym,' is ', trim(label)
+   call wrtout(std_out,msg)
  end if
 
 end subroutine symplanes
@@ -2751,7 +2741,7 @@ subroutine smallprim(metmin,minim,rprimd)
  integer :: ia,ib,ii,itrial,minimal
  integer :: iiter, maxiter = 100000
  real(dp) :: determinant,length2,metsum
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: nvecta(3),nvectb(3)
  real(dp) :: rmet(3,3),scprod(3),tmpvect(3)
@@ -2824,8 +2814,8 @@ subroutine smallprim(metmin,minim,rprimd)
  end do
 
  if (iiter >= maxiter) then
-   write(message,'(a,i0,a)') 'the loop has failed to find a set of minimal vectors in ',maxiter,' iterations.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a)') 'the loop has failed to find a set of minimal vectors in ',maxiter,' iterations.'
+   MSG_BUG(msg)
  end if
 
 !At this stage, the three vectors have angles between each other that are
@@ -2855,8 +2845,8 @@ subroutine smallprim(metmin,minim,rprimd)
  end do
 
  if (iiter >= maxiter) then
-   write(message, '(a,i0,a)') 'the second loop has failed to find a set of minimal vectors in ',maxiter, 'iterations.'
-   MSG_BUG(message)
+   write(msg, '(a,i0,a)') 'the second loop has failed to find a set of minimal vectors in ',maxiter, 'iterations.'
+   MSG_BUG(msg)
  end if
 
 !DEBUG
@@ -2928,9 +2918,7 @@ subroutine smallprim(metmin,minim,rprimd)
 
 !Final computation of metmin
  do ii=1,3
-   metmin(ii,:)=minim(1,ii)*minim(1,:)+&
-&   minim(2,ii)*minim(2,:)+&
-&   minim(3,ii)*minim(3,:)
+   metmin(ii,:)=minim(1,ii)*minim(1,:)+ minim(2,ii)*minim(2,:)+ minim(3,ii)*minim(3,:)
  end do
 
 !DEBUG

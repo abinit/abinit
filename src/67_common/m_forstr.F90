@@ -1150,8 +1150,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      call timab(65,1,tsec)
      call xmpi_sum(kinstr,spaceComm,ierr)
      call xmpi_sum(npsstr,spaceComm,ierr)
-     if ((usefock_loc).and.(fockcommon%optstr)) then
-       call xmpi_sum(fockcommon%stress,spaceComm,ierr)
+     if (usefock_loc) then
+       if (fockcommon%optstr) then
+         call xmpi_sum(fockcommon%stress,spaceComm,ierr)
+       end if
      end if
      call timab(65,2,tsec)
    end if
@@ -1166,8 +1168,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    if (nsym>1) then
      call stresssym(gs_hamk%gprimd,nsym,kinstr,symrec)
      call stresssym(gs_hamk%gprimd,nsym,npsstr,symrec)
-     if ((usefock_loc).and.(fockcommon%optstr)) then
-       call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+     if (usefock_loc) then
+       if (fockcommon%optstr) then
+         call stresssym(gs_hamk%gprimd,nsym,fockcommon%stress,symrec)
+       end if
      end if
    end if
  end if

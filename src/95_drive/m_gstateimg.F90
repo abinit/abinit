@@ -54,7 +54,6 @@ module m_gstateimg
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type
- use m_dtfil,        only : dtfil_init
  use m_gstate,       only : gstate
  use m_predtk,       only : prtxvf
  use m_precpred_1geo, only : precpred_1geo

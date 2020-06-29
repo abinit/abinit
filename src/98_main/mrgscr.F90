@@ -94,7 +94,7 @@ program mrgscr
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0,rdwr2=2,prtvol=0,cplex1=1
- integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles,timrev
+ integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles
  integer :: unt_dump,idx,ig1,ig2,iomega,ppmodel,npwe_asked,mqmem,io,unt_dump2
  integer :: id_required,ikxc,approx_type,option_test,dim_kxcg,usexcnhat,usefinegrid
  integer :: mgfft,nqlwl,nfft,igmax,comm,nq_selected,kptopt
@@ -274,8 +274,7 @@ program mrgscr
    fname = fname_out
  end if
 
- timrev=2 ! This should be read from kptopt
- cryst = HScr0%Hdr%get_crystal(timrev,remove_inv=.FALSE.)
+ cryst = HScr0%Hdr%get_crystal(remove_inv=.FALSE.)
 
  kptopt=1
  call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)

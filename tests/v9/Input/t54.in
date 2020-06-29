@@ -57,7 +57,6 @@ znucl 6
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[789].0_.*
 #%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
 #%% [files]
 #%% files_to_test = 

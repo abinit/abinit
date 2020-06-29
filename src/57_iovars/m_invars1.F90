@@ -292,8 +292,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end if
    ! Compute the multiplicity of the supercell
    multiplicity=dtsets(idtset)%supercell_latt(1)  &
-&   *dtsets(idtset)%supercell_latt(2)  & 
-&   *dtsets(idtset)%supercell_latt(3)  
+&   *dtsets(idtset)%supercell_latt(2)  &
+&   *dtsets(idtset)%supercell_latt(3)
 !  call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
 
    ! Read natom from string
@@ -383,7 +383,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
-   
+
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -746,7 +746,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    write(std_out,'(2a)') ch10,'======================================================= '
-   write(std_out,'(a,i0)') 'invars1m : enter jdtset= ',jdtset
+   write(std_out,'(a,i0)') ' invars1m : enter jdtset= ',jdtset
 
    ! Input default values
    dtsets(idtset)%bravais(:)=0
@@ -1129,7 +1129,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: tfband,tnband,tread,tread_alt, my_rank, nprocs
- real(dp) :: charge,fband,kptnrm,kptrlen,zelect,zval
+ real(dp) :: charge,fband,kptnrm,kptrlen,sum_spinat,zelect,zval
  character(len=1) :: blank=' ',string1
  character(len=2) :: string2,symbol
  character(len=500) :: msg
@@ -1827,13 +1827,15 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !     mband_upper=nspinor*((nint(zion_max)*natom+1)/2 - floor(charge/2.0_dp)&
 !&     + ceiling(fband*natom-1.0d-10))
-     zval=0.0_dp
+     zval=zero
+     sum_spinat=zero
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
+       sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
      end do
      zelect=zval-charge
-     mband_upper=nspinor * ((ceiling(zelect-1.0d-10)+1)/2 + ceiling( fband*natom - 1.0d-10 ))
-
+     mband_upper=nspinor * ((ceiling(zelect-tol10)+1)/2 + ceiling( fband*natom - tol10 )) &
+&     + (nsppol-1)*(ceiling(half*(sum_spinat -tol10)))
      nband(:)=mband_upper
 
 !    write(std_out,*)' invars1 : zion_max,natom,fband,mband_upper '
@@ -2823,7 +2825,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ph_nqshift = 1
    dtsets(idtset)%ph_smear = 0.00002_dp
    dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
-   dtsets(idtset)%dvdb_ngqpt = [0, 0, 0]
    dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)

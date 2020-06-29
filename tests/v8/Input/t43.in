@@ -8,7 +8,6 @@ t41o_DS5_POT1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 
