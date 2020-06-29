@@ -41,7 +41,7 @@ module m_gwrdm
  private :: no2ks,ks2no
 !!***
  
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_no2ks,rotate_ks2no,me_get_haene 
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene 
 !!***
 
 contains
@@ -96,7 +96,7 @@ subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
    msg2='Vxc    '
  endif
  
- call printdm1(1,65,pot) !MAU Uncomment for debug 
+ !call printdm1(1,65,pot) ! Uncomment for debug 
 
  if(iinfo==0) then 
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
@@ -238,7 +238,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
      dm1_tmp(ib2dm,ib1dm)=conjg(dm1_tmp(ib1dm,ib2dm))
    enddo
  enddo
- call printdm1(1,ndim,dm1_tmp) ! MAU Uncomment for debug 
+ !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
 
  work=0.0d0
  occs=0.0d0
@@ -248,9 +248,10 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
    MSG_WARNING("Failed the diagonalization of the updated GW 1-RDM")
  endif
 
- write(msg,'(a6)') 'Eigvec'
- call wrtout(std_out,msg,'COLL')
- !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
+ ! Uncomment for debug 
+ !write(msg,'(a6)') 'Eigvec'
+ !call wrtout(std_out,msg,'COLL')
+ !call printdm1(1,ndim,dm1_tmp) 
  !eigenvect=dm1_tmp
  !occs_tmp=occs
  !Order from highest occ to lowest occ
@@ -263,7 +264,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
     occs_tmp(ib1dm)=0.0_dp
   endif
  enddo
- call printdm1(1,ndim,eigenvect) ! MAU Uncomment for debug 
+ !call printdm1(1,ndim,eigenvect) ! Uncomment for debug
+
  if(check_Sijmat) then 
    do ib1dm=1,ndim
      do ib2dm=1,ib1dm
@@ -399,125 +401,32 @@ subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use 
  character(len=500) :: msg
 !arrays
 !************************************************************************
- do ib1dm=ib1,10!ib2
-   write(msg,'(a2,*(f10.5))') '  ',Real(dm1(ib1dm,ib1:ib1+10))!MAU
+ do ib1dm=ib1,ib2
+   write(msg,'(a2,*(f10.5))') '  ',Real(dm1(ib1dm,ib1:ib2))
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  enddo
 end subroutine printdm1
 !!***
 
-subroutine rotate_no2ks(ikpoint,ib1,ib2,Sr,Mels,nateigv,option) 
+subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option) 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ib1,ib2,ikpoint,option
- type(sigma_t),intent(inout) :: Sr
- type(melements_t),intent(inout) :: Mels
+ integer,intent(in) :: ib1,ib2,option
 !arrays
- complex(dpc),intent(in) :: nateigv(:,:,:,:)
+ complex(dpc),intent(inout) :: Mat(:,:),Umat(:,:)
 !Local variables ------------------------------
 !scalars
- integer::ib1dm,ib2dm,ndim
- character(len=500) :: msg
+ integer:: ndim
 !arrays
- complex(dpc),allocatable :: Umat(:,:),Mat_tmp(:,:)
 !************************************************************************
  ndim=ib2-ib1+1
- ABI_MALLOC(Umat,(ndim,ndim))
- ABI_MALLOC(Mat_tmp,(ndim,ndim))
-
  if(option==0) then
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-       Mat_tmp(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-     enddo
-   enddo
+   call no2ks(ndim,Mat,Umat) 
  else
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-       Mat_tmp(ib1dm,ib2dm)=Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-     enddo
-   enddo
+   call ks2no(ndim,Mat,Umat) 
  endif
-
- call no2ks(ndim,Mat_tmp,Umat) 
-
- if(option==0) then
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
-     enddo
-   enddo
- else
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
-     enddo
-   enddo
- endif
-
- ABI_FREE(Umat)
- ABI_FREE(Mat_tmp)
-end subroutine rotate_no2ks
-!!***
-
-subroutine rotate_ks2no(ikpoint,ib1,ib2,Sr,Mels,nateigv,option) 
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: ib1,ib2,ikpoint,option
- type(sigma_t),intent(inout) :: Sr
- type(melements_t),intent(inout) :: Mels
-!arrays
- complex(dpc),intent(in) :: nateigv(:,:,:,:)
-!Local variables ------------------------------
-!scalars
- integer::ib1dm,ib2dm,ndim
- character(len=500) :: msg
-!arrays
- complex(dpc),allocatable :: Umat(:,:),Mat_tmp(:,:)
-!************************************************************************
- ndim=ib2-ib1+1
- ABI_MALLOC(Umat,(ndim,ndim))
- ABI_MALLOC(Mat_tmp,(ndim,ndim))
-
- if(option==0) then
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-       Mat_tmp(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-     enddo
-   enddo
- else
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-       Mat_tmp(ib1dm,ib2dm)=Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)
-     enddo
-   enddo
- endif
-
- call ks2no(ndim,Mat_tmp,Umat) 
-
- if(option==0) then
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
-     enddo
-   enddo
- else
-   do ib1dm=1,ndim
-     do ib2dm=1,ndim
-       Mels%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikpoint,1)=Mat_tmp(ib1dm,ib2dm)
-     enddo
-   enddo
- endif
-
- ABI_FREE(Umat)
- ABI_FREE(Mat_tmp)
-
-end subroutine rotate_ks2no
+end subroutine rotate_ks_no
 !!***
 
 pure function me_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)

@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
  use m_spacepar,          only : hartre
- use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks2no,rotate_no2ks,me_get_haene ! MRM
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst,rotate_ks_no,me_get_haene ! MRM
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
  use m_plowannier,only : operwan_realspace_type,plowannier_type,init_plowannier,get_plowannier,&
                          &fullbz_plowannier,init_operwan_realspace,reduce_operwan_realspace,&
@@ -239,7 +239,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose ! MRM new gw1rdm and verbose
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose ! MRM new gw1rdm and verbose
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy ! MRM 
@@ -297,7 +297,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hdft(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:,:),delta_band(:,:)  ! MRM
+ complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:,:),delta_band(:,:),mat2rot(:,:),Umat(:,:)  ! MRM
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
 !complex(dpc),pointer :: sigcme_p(:,:,:,:)
@@ -2676,17 +2676,6 @@ endif
          Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                       ! Build new Wfd_natorb
        call Wfd_natorb%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))        ! Read WFK and store it in Wfd_natorb
        call Wfd_natorb%rotate(Cryst,nateigv)                                   ! Let rotate build the NOs in Wfd_natorb (KS->NO)
-       !Debug test for Vhartree rotation uncomment the 10 lines below and comment from call calc_vhxc_me to ABI_FREE above.
-       !call calc_vhxc_me(Wfd_natorb,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&    ! Build matrix elements from gw_vhartr -> GW1RDM_me
-       !& ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
-       !& gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
-       !ABI_FREE(tmp_kstab)
-       !do ikcalc=1,Sigp%nkptgw                                                 
-       !  ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
-       !  ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
-       !  ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-       !  call rotate_no2ks(ikcalc,ib1,ib2,Sr,GW1RDM_me,nateigv,1) ! <NO_i|J[NO]|NO_j> -> <KS_i|J[NO]|KS_j>
-       !enddo
        do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
@@ -2704,7 +2693,22 @@ endif
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-         call rotate_no2ks(ikcalc,ib1,ib2,Sr,GW1RDM_me,nateigv,0) ! <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>  
+         ABI_MALLOC(mat2rot,(ib2-ib1+1,ib2-ib1+1))
+         ABI_MALLOC(Umat,(ib2-ib1+1,ib2-ib1+1))
+         do ib1dm=1,ib2-ib1+1
+           do ib2dm=1,ib2-ib1+1
+             Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+             mat2rot(ib1dm,ib2dm)=Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+           enddo
+         enddo
+         call rotate_ks_no(ib1,ib2,mat2rot,Umat,0) ! <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>  
+         do ib1dm=1,ib2-ib1+1
+           do ib2dm=1,ib2-ib1+1
+             Sr%x_mat(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
+           enddo
+         enddo
+         ABI_FREE(Umat)
+         ABI_FREE(mat2rot)
        end do
        call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating Wfd_natorb
        Wfd_natorb%bks_comm = xmpi_comm_null
@@ -2752,8 +2756,22 @@ endif
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-         call rotate_ks2no(ikcalc,ib1,ib2,Sr,GW1RDM_me,nateigv,1) ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>
-
+         ABI_MALLOC(mat2rot,(ib2-ib1+1,ib2-ib1+1))
+         ABI_MALLOC(Umat,(ib2-ib1+1,ib2-ib1+1))
+         do ib1dm=1,ib2-ib1+1
+           do ib2dm=1,ib2-ib1+1
+             Umat(ib1dm,ib2dm)=nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+             mat2rot(ib1dm,ib2dm)=GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)
+           enddo
+         enddo
+         call rotate_ks_no(ib1,ib2,mat2rot,Umat,1) ! <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>  
+         do ib1dm=1,ib2-ib1+1
+           do ib2dm=1,ib2-ib1+1
+             GW1RDM_me%vhartree(ib1+(ib1dm-1),ib1+(ib2dm-1),ikcalc,1)=mat2rot(ib1dm,ib2dm)
+           enddo
+         enddo
+         ABI_FREE(Umat)
+         ABI_FREE(mat2rot)
 !MAU
 write(msg,'(a14)') '<ks|Kx_no|ks>'
 call wrtout(std_out,msg,'COLL')
