@@ -90,9 +90,9 @@ jpawu  0.0000  # values in Hartree
 #%%                  t29.out,     tolnlines =150, tolabs = 2e-6, tolrel = 2.2e-6, fld_options=-easy
 #%% psp_files = 58ce.paw
 #%% [paral_info]
-#%% max_nprocs = 10
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon
-#%% keywords = PAW, DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = PAW, DMFT, CTQMC
 #%% description = Test CT-QMC options only. Not realistic
 #%%<END TEST_INFO>
