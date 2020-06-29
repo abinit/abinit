@@ -186,7 +186,6 @@ contains
 
     ! *********************************************************************
 
-
     ! U_{K_0}
     ! this%e_shiftfactor=zero
     ! band_index=0
@@ -203,7 +202,7 @@ contains
     ! write(0,*) 'eknk_new', this%e_shiftfactor
 
     ! U_{HEG_0}
-    if(this%version==1) then
+    ! if(this%version==1) then
       this%e_shiftfactor=zero
       band_index=0
       do isppol=1,nsppol
@@ -217,33 +216,30 @@ contains
       end do
       this%e_shiftfactor=this%e_shiftfactor/this%nbcut
       this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
-      ! write(0,*) this%ebcut, eigen(this%bcut*nkpt*nsppol)
-      ! write(0,*) 'eheg_new', this%e_shiftfactor
-    end if
+    ! end if
 
     ! U_{LEGACY_0}
-    if(this%version==2) then
-      eigentemp(:)=zero
-      eknktemp(:)=zero
-      mk(:)=.true.
-      ! Sorting eigen and eknk in ascending energy order.
-      do ii=1,this%bcut*nkpt*nsppol
-        krow=minloc(eigen,dim=1,mask=mk)
-        mk(minloc(eigen,dim=1,mask=mk))=.false.
-        eigentemp(ii)=eigen(krow)
-        eknktemp(ii)=eknk(krow)
-      end do
-      ! Doing the average over the this%nbcut lasts states...
-      niter=0
-      this%e_shiftfactor=zero
-      do ii=this%bcut*nkpt*nsppol-this%nbcut+1,this%bcut*nkpt*nsppol
-        this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
-        niter=niter+1
-      end do
-      this%e_shiftfactor=this%e_shiftfactor/niter
-      this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
-      ! write(0,*) 'eknk_legacy', this%e_shiftfactor
-    end if
+    ! if(this%version==2) then
+    !   eigentemp(:)=zero
+    !   eknktemp(:)=zero
+    !   mk(:)=.true.
+    !   ! Sorting eigen and eknk in ascending energy order.
+    !   do ii=1,this%bcut*nkpt*nsppol
+    !     krow=minloc(eigen,dim=1,mask=mk)
+    !     mk(minloc(eigen,dim=1,mask=mk))=.false.
+    !     eigentemp(ii)=eigen(krow)
+    !     eknktemp(ii)=eknk(krow)
+    !   end do
+    !   ! Doing the average over the this%nbcut lasts states...
+    !   niter=0
+    !   this%e_shiftfactor=zero
+    !   do ii=this%bcut*nkpt*nsppol-this%nbcut+1,this%bcut*nkpt*nsppol
+    !     this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
+    !     niter=niter+1
+    !   end do
+    !   this%e_shiftfactor=this%e_shiftfactor/niter
+    !   this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
+    ! end if
   end subroutine compute_e_shiftfactor
 
   !!****f* ABINIT/m_hightemp/compute_nfreeel
@@ -314,10 +310,10 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    real(dp) :: factor,ix,gamma,step,xcut
+    real(dp) :: factor,ix,gamma,sigma,step,xcut
     integer :: ii,ifft,ispden
     ! Arrays
-    real(dp),dimension(:),allocatable :: valueseel,valuesent
+    real(dp),dimension(:),allocatable :: valueseel
 
     ! *********************************************************************
     step=1e-1
@@ -337,24 +333,20 @@ contains
         end do
 
         ABI_ALLOCATE(valueseel,(ii))
-        ABI_ALLOCATE(valuesent,(ii))
         ix=dble(this%bcut)
         ii=0
         do while(ix<=this%gcut)
+          sigma=this%std_init/(ix-this%bcut+1)
           ii=ii+1
           valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
-          & hightemp_gaussian_kintegral(this%std_init,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-          & hightemp_gaussian_jintegral(this%std_init,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
-          ! valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
-          ! & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
-          ! & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
           ix=ix+step
         end do
         if (ii>1) then
           this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
-          ! entropy=simpson(step,valuesent)
         end if
-        ABI_DEALLOCATE(valuesent)
+        write(0,*) "GIntegral=",dble(this%bcut),this%gcut,this%std_init,sqrt(2*hightemp_e_heg(ix,this%ucvol)),simpson(step,valueseel)
         ABI_DEALLOCATE(valueseel)
 
         ! Change Fermi-Dirac integral lower bound.
@@ -366,6 +358,7 @@ contains
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
     end if
     this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
+    write(0,*) factor*djp32(xcut,gamma),"total=",this%e_kin_freeel
 
     ! Computation of edc_kin_freeel
     this%edc_kin_freeel=zero
@@ -377,7 +370,6 @@ contains
 
     ! Verifier la constante (/nspden**2)
     this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
-
   end subroutine compute_efreeel
 
 
@@ -405,35 +397,65 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: ii
-    real(dp) :: ix,step
+    real(dp) :: ix,step,fn
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
 
     ! *********************************************************************
-    step=1e-4
+
+    step=1e-1
     this%e_ent_freeel=zero
 
-    ! Dynamic array find size
-    ix=this%ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>tol14)
-      ii=ii+1
-      ix=ix+step
-    end do
+    if(this%version==1) then
+      ! Dynamic array find size
+      ix=dble(this%bcut)
+      ii=0
+      fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      do while(fn>tol14)
+        fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        ii=ii+1
+        ix=ix+step
+      end do
+      ABI_ALLOCATE(valuesent,(ii))
+      ix=dble(this%bcut)
+      ii=0
+      fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      do while(fn>tol14)
+        fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        ii=ii+1
+        valuesent(ii)=fn*log(fn)+(1.-fn)*log(1.-fn)
+        ix=ix+step
+      end do
+      if (ii>1) then
+        this%e_ent_freeel=simpson(step,valuesent)
+      end if
+      ABI_DEALLOCATE(valuesent)
+    else if(this%version == 2) then
+      ! Dynamic array find size
+      ix=this%ebcut
+      ii=0
+      fn=fermi_dirac(ix,fermie,tsmear)
+      do while(fn>tol14)
+        fn=fermi_dirac(ix,fermie,tsmear)
+        ii=ii+1
+        ix=ix+step
+      end do
 
-    ABI_ALLOCATE(valuesent,(ii))
-
-    ix=this%ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>tol14)
-      ii=ii+1
-      valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
-      & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
-      & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
-      ix=ix+step
-    end do
-    if (ii>1) then
-      this%e_ent_freeel=simpson(step,valuesent)
+      ABI_ALLOCATE(valuesent,(ii))
+      ix=this%ebcut
+      ii=0
+      fn=fermi_dirac(ix,fermie,tsmear)
+      do while(fn>tol14)
+        fn=fermi_dirac(ix,fermie,tsmear)
+        ii=ii+1
+        valuesent(ii)=(fn*log(fn)+(1.-fn)*log(1.-fn))*&
+        & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
+        ix=ix+step
+      end do
+      if (ii>1) then
+        this%e_ent_freeel=simpson(step,valuesent)
+      end if
+      ABI_DEALLOCATE(valuesent)
     end if
   end subroutine compute_e_ent_freeel
 
