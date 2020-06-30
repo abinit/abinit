@@ -202,7 +202,7 @@ contains
     ! write(0,*) 'eknk_new', this%e_shiftfactor
 
     ! U_{HEG_0}
-    ! if(this%version==1) then
+    if(this%version==1) then
       this%e_shiftfactor=zero
       band_index=0
       do isppol=1,nsppol
@@ -216,30 +216,30 @@ contains
       end do
       this%e_shiftfactor=this%e_shiftfactor/this%nbcut
       this%ebcut=hightemp_e_heg(dble(this%bcut),this%ucvol)+this%e_shiftfactor
-    ! end if
+    end if
 
     ! U_{LEGACY_0}
-    ! if(this%version==2) then
-    !   eigentemp(:)=zero
-    !   eknktemp(:)=zero
-    !   mk(:)=.true.
-    !   ! Sorting eigen and eknk in ascending energy order.
-    !   do ii=1,this%bcut*nkpt*nsppol
-    !     krow=minloc(eigen,dim=1,mask=mk)
-    !     mk(minloc(eigen,dim=1,mask=mk))=.false.
-    !     eigentemp(ii)=eigen(krow)
-    !     eknktemp(ii)=eknk(krow)
-    !   end do
-    !   ! Doing the average over the this%nbcut lasts states...
-    !   niter=0
-    !   this%e_shiftfactor=zero
-    !   do ii=this%bcut*nkpt*nsppol-this%nbcut+1,this%bcut*nkpt*nsppol
-    !     this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
-    !     niter=niter+1
-    !   end do
-    !   this%e_shiftfactor=this%e_shiftfactor/niter
-    !   this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
-    ! end if
+    if(this%version==2) then
+      eigentemp(:)=zero
+      eknktemp(:)=zero
+      mk(:)=.true.
+      ! Sorting eigen and eknk in ascending energy order.
+      do ii=1,this%bcut*nkpt*nsppol
+        krow=minloc(eigen,dim=1,mask=mk)
+        mk(minloc(eigen,dim=1,mask=mk))=.false.
+        eigentemp(ii)=eigen(krow)
+        eknktemp(ii)=eknk(krow)
+      end do
+      ! Doing the average over the this%nbcut lasts states...
+      niter=0
+      this%e_shiftfactor=zero
+      do ii=this%bcut*nkpt*nsppol-this%nbcut+1,this%bcut*nkpt*nsppol
+        this%e_shiftfactor=this%e_shiftfactor+(eigentemp(ii)-eknktemp(ii))
+        niter=niter+1
+      end do
+      this%e_shiftfactor=this%e_shiftfactor/niter
+      this%ebcut=eigentemp(this%bcut*nkpt*nsppol)
+    end if
   end subroutine compute_e_shiftfactor
 
   !!****f* ABINIT/m_hightemp/compute_nfreeel
