@@ -1421,6 +1421,17 @@ class BaseTest(object):
 
         self._authors_snames = set(second_names)
 
+        if self.executable == "abinit" and self.psp_files and not self.use_files_file:
+            raise RuntimeError("""
+In: %s
+
+The `psp_files` entry in the TEST_INFO section is needed only if `use_files_file = 'yes'`
+In all the other cases use the Abinit input variables:
+
+pseudos "foo.psp8, bar.psp8"
+pp_dirpath $ABI_PSPDIR
+""" % self.inp_fname )
+
     def __repr__(self):
         return self.full_id
 
@@ -2540,38 +2551,15 @@ class AbinitTest(BaseTest):
         if 'output_file = "' not in line:
             app('output_file = "%s"' % (self.id + ".out"))
 
-        # This is needed for ATOMPAW as the pseudo will be generated at runtime.
-        #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
-        #if dirname is not None:
-        #    app('pp_dirpath = "%s"' % (dirname))
-        #    app('pseudos = "%s"' % (",".join(pp_names)))
-        #else:
-        #    app('pseudos = "%s"' % (",\n".join(pp_names)))
-
-        # This is to check whether the parser supports "long strings"
-        #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
-
-        # Need to add pseudopotential info to input.
-        #if 'pseudos = ' not in line:
-        #    app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
-
-        #pp_paths = self.get_pseudo_paths()
-        #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
-        #app('pp_dirpath = "$ABI_PSPDIR"')
-        #app('pp_dirpath = %s' % self.abenv.psps_dir)
-
         # Prefix for input/output/temporary files
         i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
         o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
         # FIXME: Use temp prefix and change iofn
         t_prefix = self.id  + "t"
 
-        if 'indata_prefix = ' not in line:
-            app('indata_prefix = "%s"' % i_prefix)
-        if 'outdata_prefix = ' not in line:
-            app('outdata_prefix = "%s"' % o_prefix)
-        if 'tmpdata_prefix = ' not in line:
-            app('tmpdata_prefix = "%s"' % t_prefix)
+        if 'indata_prefix = ' not in line: app('indata_prefix = "%s"' % i_prefix)
+        if 'outdata_prefix = ' not in line: app('outdata_prefix = "%s"' % o_prefix)
+        if 'tmpdata_prefix = ' not in line: app('tmpdata_prefix = "%s"' % t_prefix)
 
         app("# end runtests.py section\n\n")
 
@@ -3175,8 +3163,6 @@ class AbinitTestSuite(object):
             assert keywords is None, ("keywords argument is not expected with test_list")
             assert need_cpp_vars is None, ("need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
-
-        self.update_inputs()
 
     def __str__(self):
         return "\n".join(str(t) for t in self.tests)
@@ -3873,46 +3859,6 @@ class AbinitTestSuite(object):
               </html>""" % (_MY_NAME, time.asctime())
 
             return header + body + footer
-
-    def update_inputs(self):
-        return
-
-        seen = set()
-        def change(test):
-            if test.executable != "abinit": return
-            pseudos = 'pseudos "%s"' % ", ".join(test.psp_files)
-            #print(pseudos, test.inp_fname)
-            if test.inp_fname in seen: return
-            seen.add(test.inp_fname)
-            print(test.inp_fname)
-            lines = open(test.inp_fname, "rt").readlines()
-
-            i = lines.index("#%%<BEGIN TEST_INFO>\n")
-            for j, l in enumerate(lines[i:]):
-                if l.startswith("#%% psp_files"):
-                    pos = j + i
-                    break
-            else:
-                raise ValueError("Cannot find psp_files string")
-
-            #print(lines[pos])
-            new_string = f"""
- pp_dirpath "$ABI_PSPDIR"
- {pseudos}
-"""
-
-            del lines[pos]
-            lines.insert(i-1, new_string)
-
-            #print("".join(lines))
-            #with open(test.inp_fname, "wt") as fh:
-            #    fh.writelines(lines)
-
-        for test in self:
-            if isinstance(test, ChainOfTests):
-                for t in test: change(t)
-            else:
-                change(test)
 
 
 class Results(object):

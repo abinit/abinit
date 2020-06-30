@@ -11,6 +11,7 @@ indata_prefix = "t04.indata"
 outdata_prefix = "t04.outdata"
 tmpdata_prefix = "t04.tmpdata"
 output_file = "t04.output"
+pp_dirpath "$ABI_PSPDIR"
 pseudos = "12mg.pspnc, 05b.soft_tm"
 
 # MgB2 lattice structure.
@@ -48,9 +49,6 @@ tsmear  0.03
 tolvrs  1.0e-10
 ecut    28/2 Hartree
 nband   8
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "12mg.pspnc, 05b.soft_tm"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
