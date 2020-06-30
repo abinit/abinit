@@ -1,4 +1,4 @@
-[submodule "tests/submodules_with_data/test_submodule"]
-	path = tests/submodules_with_data/test_submodule
+[submodule "tests/modules_with_data/test_submodule"]
+	path = tests/modules_with_data/test_submodule
 	url = https://github.com/gmatteo/test_submodule.git
 	branch = master
