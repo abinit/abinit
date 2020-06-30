@@ -1,0 +1,74 @@
+#
+ndtset  1
+optdriver 7
+eph_task  0
+
+getddb_filepath "test_submodule/mgb2_121212k_0.01tsmear_DDB"
+ddb_ngqpt 4 4 4
+
+# Dataset 1: GS calculation
+ngkpt   18 18 18
+nshiftk 1
+shiftk  0.0 0.0 0.0    # This choice preserves the hexagonal symmetry of the grid
+occopt  4              # Marzari smearing
+tsmear  0.03
+tolvrs  1.0d-10
+
+#Dataset 2: Band structure calculation.
+#iscf2  -2
+#getden2 1
+#kptopt2 -5
+#tolwfr2  1.0d-8
+#ndivsm2  10    
+#               
+#kptbounds2     
+#           0.0 0.0 0.0   # Gamma
+#           0.5 0.0 0.0   # M
+#           1/3 1/3 0.0   # K
+#           0.0 0.0 0.0   # Gamma
+#           0.0 0.0 0.5   # A
+#           0.5 0.0 0.5   # L
+#           #1/3 1/3 0.5  # H
+
+#COMMON INPUT DATA###########################################################
+ecut    14.0  
+nband   8
+
+# MgB2 lattice structure
+structure "abivars:test_submodule/mgb2.ucell"
+#ntypat  2
+#znucl   12 5
+#natom   3
+#typat   1*1 2*2
+#
+#acell   2*3.086  3.523 Angstrom
+#
+#rprim   0.866025403784439  0.5  0.0
+#       -0.866025403784439  0.5  0.0
+#        0.0                0.0  1.0
+#
+## Atomic positions
+#xred
+# 0.0000000000E+00  0.0000000000E+00  0.0 #Mg
+# 1/3               2/3               0.5 #B
+# 2/3               1/3               0.5 #B
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos = "12mg.pspnc, 05b.soft_tm"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = teph4isotc_1.in
+#%% [files]
+#%% use_git_submodule = test_submodule
+#%% files_to_test =
+#%%   teph4isotc_1.out, tolnlines= 10, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description =
+#%%   Computation of isotropic Migdal-Eliashberg Tc
+#%%<END TEST_INFO>
