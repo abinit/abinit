@@ -1923,9 +1923,13 @@ pp_dirpath $ABI_PSPDIR
             dst = os.path.join(self.workdir, self.use_git_submodule)
             src = os.path.join(self.abenv.tests_dir, "modules_with_data", self.use_git_submodule)
             #print("dst", dst, " --> ", "src", src)
-            #if os.path.exists(dst)
-            is_empty = len(os.listdir(src)) == 0
-            os.symlink(src, dst)
+            if not os.path.exists(os.path.join(src, "README.md"):
+                self._status = "skipped"
+                msg = self.full_id + ": Skipped: this test requires files in git submodule: %s" % src
+                self.cprint(msg, status2txtcolor[self._status])
+                can_run = False
+            else:
+                os.symlink(src, dst)
 
         self.run_etime = 0.0
 

@@ -34,27 +34,11 @@ tolvrs  1.0d-10
 ecut    14.0  
 nband   8
 
-# MgB2 lattice structure
+# MgB2 structure
 structure "abivars:test_submodule/mgb2.ucell"
-#ntypat  2
-#znucl   12 5
-#natom   3
-#typat   1*1 2*2
-#
-#acell   2*3.086  3.523 Angstrom
-#
-#rprim   0.866025403784439  0.5  0.0
-#       -0.866025403784439  0.5  0.0
-#        0.0                0.0  1.0
-#
-## Atomic positions
-#xred
-# 0.0000000000E+00  0.0000000000E+00  0.0 #Mg
-# 1/3               2/3               0.5 #B
-# 2/3               1/3               0.5 #B
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos = "12mg.pspnc, 05b.soft_tm"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "12mg.pspnc, 05b.soft_tm"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -67,7 +51,7 @@ structure "abivars:test_submodule/mgb2.ucell"
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = Giantomassi
+#%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description =
 #%%   Computation of isotropic Migdal-Eliashberg Tc
