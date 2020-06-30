@@ -346,7 +346,6 @@ contains
         if (ii>1) then
           this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
         end if
-        write(0,*) "GIntegral=",dble(this%bcut),this%gcut,this%std_init,sqrt(2*hightemp_e_heg(ix,this%ucvol)),simpson(step,valueseel)
         ABI_DEALLOCATE(valueseel)
 
         ! Change Fermi-Dirac integral lower bound.
@@ -358,7 +357,6 @@ contains
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
     end if
     this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
-    write(0,*) factor*djp32(xcut,gamma),"total=",this%e_kin_freeel
 
     ! Computation of edc_kin_freeel
     this%edc_kin_freeel=zero
@@ -410,20 +408,20 @@ contains
       ! Dynamic array find size
       ix=dble(this%bcut)
       ii=0
-      fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
       do while(fn>tol14)
-        fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
         ii=ii+1
         ix=ix+step
       end do
       ABI_ALLOCATE(valuesent,(ii))
       ix=dble(this%bcut)
       ii=0
-      fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+      fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
       do while(fn>tol14)
-        fn=2*fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)
         ii=ii+1
-        valuesent(ii)=fn*log(fn)+(1.-fn)*log(1.-fn)
+        valuesent(ii)=2*(fn*log(fn)+(1.-fn)*log(1.-fn))
         ix=ix+step
       end do
       if (ii>1) then
