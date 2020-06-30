@@ -1481,6 +1481,8 @@ end subroutine mag_penalty_e
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
 !!  gr_intgden(3,nspden,natom)=grad wrt atomic positions, of integrated density (magnetization...) for each atom in a sphere. Should be Optional arg
 !!  rhomag(2,nspden)=integrated complex density (magnetization...) over full u.c. vol, optional argument
+!!    in collinear case component 1 is total density and 2 is _magnetization_ up-down
+!!    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
 !!  intgf2(natom,natom)=overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
