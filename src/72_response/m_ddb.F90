@@ -3415,7 +3415,7 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
  ABI_REMALLOC(dtset%tnons,(3,dtset%nsym))
  dtset%tnons(:,:) = ddb_hdr%tnons(1:3,1:ddb_hdr%msym)
 
- ABI_REMALLOCA(dtset%kpt,(3,dtset%nkpt))
+ ABI_REMALLOC(dtset%kpt,(3,dtset%nkpt))
  dtset%kpt(:,:) = ddb_hdr%kpt(1:3,1:ddb_hdr%mkpt)
 
  ABI_REMALLOC(dtset%wtk,(dtset%nkpt))
