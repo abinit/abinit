@@ -4677,9 +4677,9 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
      write(msg, '(a,a,a,i0,a,a,a,3es16.6,a,a,a,a)' )&
       'Information is missing in the DDB.',ch10,&
       'The dynamical matrix number ',iqpt,' cannot be built,',ch10,&
-      'since no block with wavevector',spqpt(1:3,iqpt),ch10,&
+      'since no block with qpt:',spqpt(1:3,iqpt),ch10,&
       'has been found.',ch10,&
-      'Action: add the required blok in the DDB, or modify your input file.'
+      'Action: add the required block in the DDB, or modify the q-mesh your input file.'
      if (.not.allow_qmiss) then
        MSG_ERROR(msg)
      else

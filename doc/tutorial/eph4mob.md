@@ -9,7 +9,7 @@ the relaxation time approximation (RTA).
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
-It goes without saying that you should have read the [introduction page for the EPH code](eph_intro) 
+It goes without saying that one should have read the [introduction page for the EPH code](eph_intro) 
 before running these examples.
 
 This lesson should take about 1 hour.
@@ -31,9 +31,9 @@ to find the iterative solution of the BTE and/or including many-body effects at 
 For a review of the different possible approaches see the review paper by [[cite:Ponce2020]].
 
 In the SERTA, the transport linewidth is given by
-the imaginary part of the electron-phonon (e-ph) self-energy evaluated at the KS energy.
+the imaginary part of the electron-phonon (e-ph) self-energy evaluated at the KS energy [[cite:Giustino2017]].
 Only the Fan-Migdal (FM) part contributes to the linewidth as the Debye-Waller is Hermitian.
-The linewidth of the electron state $n\kk$ due to the scattering with phonons is obtained from
+The linewidth of the electron state $n\kk$ due to the scattering with phonons is given by
 
 \begin{equation}
 \begin{split}
@@ -48,7 +48,7 @@ The linewidth of the electron state $n\kk$ due to the scattering with phonons is
 \end{equation}
 
 In this equation, $\nu$ is the phonon mode, $m$ the final electron state (after the scattering),
-$n_\qnu$ is the Bose-Einstein occupation number, $f_{m\kk+\qq}$ is the Fermi-Dirac occupation function,
+$n_\qnu(T)$ is the Bose-Einstein occupation number, $f_{m\kk+\qq}(T, \ef)$ is the Fermi-Dirac occupation function,
 $\enk$ is the energy of the electron state, $\wqnu$ is the phonon frequency for the phonon wavevector $\qq$.
 The integration is performed over the BZ for the phonon wavectors and $\gkkp$ is the e-ph matrix element.
 The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the linewidth:
@@ -61,10 +61,12 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 
 !!! important
 
-    Note that this formalism does not take into account possibile contributions to the lifetime given by
-    other scattering processes such as defects, ionized impurities in doped semiconductors, grain boundary scattering etc.
+    Note that this formalism does not take into account contributions to the lifetime given by
+    other scattering processes such as defects, ionized impurities in doped semiconductors, e-e interactio, 
+    grain boundary scattering etc.
     These effects may be relevant depending on the system and/or the temperature under investigation
-    but they are not treated in this tutorial.
+    but they are not treated in this tutorial in which we mainly focus on room temperature in which e-ph 
+    is one of the most important contributions.
 
 The generalized transport coefficients are given by [[cite:Madsen2018]]
 
@@ -81,9 +83,9 @@ where $\vnka$ is the $\alpha$-th Cartesian component of the matrix element the v
 $$\vnk = \PDER{\enk}{\kk} = \langle \nk | \dfrac{\partial{H}}{\partial{\kk}} | \nk \rangle.$$
 
 that can be computed with DFPT.
-The generalized transport coefficients can be used to obtain different transport properties such as
-the electrical conductivity, Peltier and Seebeck coefficients, and charge carrier contribution to the
-thermal conductivity tensors [[cite:Madsen2018]].
+The generalized transport coefficients can be used to obtain different transport tensors such as
+the electrical conductivity $\sigma$, Peltier ($\Pi$) and Seebeck coefficient (S), 
+and charge carrier contribution to the thermal conductivity tensors [[cite:Madsen2018]].
 The electrical conductivity tensor is given by
 
 \begin{equation}
@@ -110,7 +112,8 @@ For electrons,
 \end{split}
 \end{equation}
 
-where $n\in\text{CB}$ denotes states in the conduction bands. Similar expressions hold for holes.
+where $n\in\text{CB}$ denotes states in the conduction bands. 
+Similar expressions hold for holes.
 At zero total carrier concentration, the Fermi level $\ef$ is located inside the band gap so that $n_e = n_h$.
 
 A typical computation of mobilities requires different steps that are summarized 
@@ -714,7 +717,7 @@ but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if the memory requirements are under control
 and you want to boost the calculation.
 
-### How to reduce memory requirements
+### How to reduce the memory requirements
 
 As mentioned above, the memory should scale with the number of MPI processors used for the $\qq$-point and
 the perturbation distribution.

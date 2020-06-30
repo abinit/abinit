@@ -232,7 +232,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dvdb_filepath == ABI_NOFILE) then
    dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
- use_wfk = all(dtset%eph_task /= [5, -5, 6, +15, -15, -16, 16])
+ use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
  ! If eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then

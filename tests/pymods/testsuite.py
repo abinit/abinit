@@ -489,6 +489,7 @@ TESTCNF_KEYWORDS = {
                                                            ),
     "psp_files"      : (_str2list,        "", "files", "List of pseudopotential files (located in the Psps_for_tests directory)."),
     "extra_inputs"   : (_str2list,        "", "files", "List of extra input files."),
+    "use_git_submodule"   : (str,        "", "files", "Take input files from git submodule in ~/abinit/tests/modules_with_data/."),
     # [shell]
     "pre_commands"   : (_str2cmds, "", "shell", "List of commands to execute before starting the test"),
     "post_commands"  : (_str2cmds, "", "shell", "List of commands to execute after the test is completed"),
@@ -1916,6 +1917,15 @@ pp_dirpath $ABI_PSPDIR
             msg = self.full_id + ": Skipped: this buildbot builder has been excluded."
             self.cprint(msg, status2txtcolor[self._status])
             can_run = False
+
+        if self.use_git_submodule:
+            # Create link in workdir pointing to ~abinit/tests/modules_with_data/MODULE_DIRNAME
+            dst = os.path.join(self.workdir, self.use_git_submodule)
+            src = os.path.join(self.abenv.tests_dir, "modules_with_data", self.use_git_submodule)
+            #print("dst", dst, " --> ", "src", src)
+            #if os.path.exists(dst)
+            is_empty = len(os.listdir(src)) == 0
+            os.symlink(src, dst)
 
         self.run_etime = 0.0
 
