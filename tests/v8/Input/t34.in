@@ -38,6 +38,9 @@
   nshiftk  1
   shiftk   0.0  0.0  0.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -46,7 +49,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t34.out, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
-#%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

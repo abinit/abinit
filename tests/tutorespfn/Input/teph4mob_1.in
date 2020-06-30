@@ -107,6 +107,9 @@
                        # is described in the "dielng" input variable section.
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -114,7 +117,6 @@
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_1.out, tolnlines= 90, tolabs=  3.000e-02, tolrel=  6.000e-03
-#%% psp_files =  13al.981214.fhi, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

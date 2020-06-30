@@ -86,6 +86,9 @@ nband 8
             0.25 0.25 0.25
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -101,7 +104,6 @@ nband 8
 #%%   teph4mob_7o_DS1_MRTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 4e+3, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_MRTA_SIGMA, tolnlines= 50, tolabs= 100, tolrel= 5.0e-2, fld_options = -ridiculous;
-#%% psp_files =  13al.981214.fhi, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -61,13 +61,15 @@ berryopt35  4       efield35  -0.0005 -0.0005 -0.0005    getwfk35  34
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tffield_6.out, tolnlines=  0, tolabs=  1.001e-04, tolrel=  5.000e-04, fld_options = -ridiculous
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

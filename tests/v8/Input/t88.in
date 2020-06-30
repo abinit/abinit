@@ -161,6 +161,9 @@ optdriver7    5 # for nonlinear calculation
   d3e_pert3_elfd7   1
    d3e_pert3_dir7   1 1 1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al.LDA_PW-JTH.xml, As.LDA_PW-JTH_sp.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -193,7 +196,6 @@ optdriver7    5 # for nonlinear calculation
 #%% [files]
 #%% files_to_test = 
 #%%    t88.out, tolnlines =0 , tolabs =1.0E-8, tolrel = 1.0E-8, fld_options = -medium;
-#%% psp_files = Al.LDA_PW-JTH.xml,As.LDA_PW-JTH_sp.xml
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

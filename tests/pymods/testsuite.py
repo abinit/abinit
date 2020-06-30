@@ -2552,8 +2552,8 @@ class AbinitTest(BaseTest):
         #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
 
         # Need to add pseudopotential info to input.
-        if 'pseudos = ' not in line:
-            app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
+        #if 'pseudos = ' not in line:
+        #    app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
 
         #pp_paths = self.get_pseudo_paths()
         #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
@@ -3875,11 +3875,15 @@ class AbinitTestSuite(object):
             return header + body + footer
 
     def update_inputs(self):
+        return
 
+        seen = set()
         def change(test):
             if test.executable != "abinit": return
             pseudos = 'pseudos "%s"' % ", ".join(test.psp_files)
             #print(pseudos, test.inp_fname)
+            if test.inp_fname in seen: return
+            seen.add(test.inp_fname)
             print(test.inp_fname)
             lines = open(test.inp_fname, "rt").readlines()
 
@@ -3895,16 +3899,14 @@ class AbinitTestSuite(object):
             new_string = f"""
  pp_dirpath "$ABI_PSPDIR"
  {pseudos}
-
-#%%<BEGIN TEST_INFO>\n
 """
 
             del lines[pos]
-            lines.insert(i, new_string)
+            lines.insert(i-1, new_string)
 
-            print("".join(lines))
+            #print("".join(lines))
             #with open(test.inp_fname, "wt") as fh:
-            #    fh.write_lines(lines)
+            #    fh.writelines(lines)
 
         for test in self:
             if isinstance(test, ChainOfTests):

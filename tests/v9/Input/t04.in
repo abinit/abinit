@@ -49,6 +49,9 @@ tolvrs  1.0e-10
 ecut    28/2 Hartree
 nband   8
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "12mg.pspnc, 05b.soft_tm"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -56,7 +59,6 @@ nband   8
 #%% [files]
 #%% files_to_test =
 #%%   t04.output, tolnlines = 0, tolabs = 1.1e-06, tolrel = 1.1e-04
-#%% psp_files = 12mg.pspnc, 05b.soft_tm
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [shell]

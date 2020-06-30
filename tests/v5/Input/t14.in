@@ -41,13 +41,15 @@ lpawu 2
 xred 3*0
 znucl 28
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t14.out, tolnlines = 9, tolabs = 1.010e-05, tolrel = 1.100e-03
-#%% psp_files = 28ni.paw
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

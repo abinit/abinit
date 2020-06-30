@@ -103,6 +103,9 @@ xred   0.00 0.00 0.00
 ntypat 1
 znucl  13
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al-psval.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -130,7 +133,6 @@ znucl  13
 #%%   t88o_DS2_EBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHBANDS.data, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%% psp_files = Al-psval.psp8
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

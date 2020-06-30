@@ -73,6 +73,9 @@ nband 8
             0.25 0.25 0.25
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -80,7 +83,6 @@ nband 8
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_6.out, tolnlines= 210, tolabs=  140, tolrel=  6.000e-03
-#%% psp_files =  13al.981214.fhi, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

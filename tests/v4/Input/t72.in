@@ -56,6 +56,9 @@ jdtset 11
 
   chksymbreak 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -63,7 +66,6 @@ jdtset 11
 #%% [files]
 #%% files_to_test = 
 #%%   t72.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -97,6 +97,9 @@
  typat  1 1  tolwfr  1.e-20
  znucl  14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -105,7 +108,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t41.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

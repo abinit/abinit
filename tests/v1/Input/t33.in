@@ -23,12 +23,14 @@
  xcart   0.0 0.0 0.0
  znucl  6.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t33.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

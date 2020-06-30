@@ -31,11 +31,13 @@ spinat  1.0 0.0 0.0
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "83bi.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files= 83bi.psphgh
 #%% files_to_test = t00.out, tolnlines=0, tolabs=0.0, tolrel=0.0
 #%% [paral_info]
 #%% max_nprocs = 2

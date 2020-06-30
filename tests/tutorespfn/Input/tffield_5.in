@@ -66,13 +66,15 @@ rprim3     0.                     0.70710678118654757    0.70710678118654757
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tffield_5.out, tolnlines=  4, tolabs=  1.100e-08, tolrel=  4.500e-04
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

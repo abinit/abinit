@@ -39,13 +39,15 @@ vel
   2.5e-5 -6.5e-5  0.5e-5
  -4.5e-5  2.5e-5 -1.5e-5
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
