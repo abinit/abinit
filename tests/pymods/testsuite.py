@@ -3176,6 +3176,8 @@ class AbinitTestSuite(object):
             assert need_cpp_vars is None, ("need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
 
+        self.update_inputs()
+
     def __str__(self):
         return "\n".join(str(t) for t in self.tests)
 
@@ -3871,6 +3873,44 @@ class AbinitTestSuite(object):
               </html>""" % (_MY_NAME, time.asctime())
 
             return header + body + footer
+
+    def update_inputs(self):
+
+        def change(test):
+            if test.executable != "abinit": return
+            pseudos = 'pseudos "%s"' % ", ".join(test.psp_files)
+            #print(pseudos, test.inp_fname)
+            print(test.inp_fname)
+            lines = open(test.inp_fname, "rt").readlines()
+
+            i = lines.index("#%%<BEGIN TEST_INFO>\n")
+            for j, l in enumerate(lines[i:]):
+                if l.startswith("#%% psp_files"):
+                    pos = j + i
+                    break
+            else:
+                raise ValueError("Cannot find psp_files string")
+
+            #print(lines[pos])
+            new_string = f"""
+ pp_dirpath "$ABI_PSPDIR"
+ {pseudos}
+
+#%%<BEGIN TEST_INFO>\n
+"""
+
+            del lines[pos]
+            lines.insert(i, new_string)
+
+            print("".join(lines))
+            #with open(test.inp_fname, "wt") as fh:
+            #    fh.write_lines(lines)
+
+        for test in self:
+            if isinstance(test, ChainOfTests):
+                for t in test: change(t)
+            else:
+                change(test)
 
 
 class Results(object):
