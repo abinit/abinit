@@ -96,7 +96,7 @@ subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
    msg2='Vxc    '
  endif
  
- !call printdm1(1,65,pot) ! Uncomment for debug 
+ !call printdm1(1,10,pot) ! Uncomment for debug 
 
  if(iinfo==0) then 
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
@@ -238,7 +238,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
      dm1_tmp(ib2dm,ib1dm)=conjg(dm1_tmp(ib1dm,ib2dm))
    enddo
  enddo
- !call printdm1(1,ndim,dm1_tmp) ! Uncomment for debug 
+ !call printdm1(1,10,dm1_tmp) ! Uncomment for debug 
 
  work=0.0d0
  occs=0.0d0
@@ -251,7 +251,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
  ! Uncomment for debug 
  !write(msg,'(a6)') 'Eigvec'
  !call wrtout(std_out,msg,'COLL')
- !call printdm1(1,ndim,dm1_tmp) 
+ !call printdm1(1,10,dm1_tmp) 
  !eigenvect=dm1_tmp
  !occs_tmp=occs
  !Order from highest occ to lowest occ
@@ -264,7 +264,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
     occs_tmp(ib1dm)=0.0_dp
   endif
  enddo
- !call printdm1(1,ndim,eigenvect) ! Uncomment for debug
+ !call printdm1(1,10,eigenvect) ! Uncomment for debug
 
  if(check_Sijmat) then 
    do ib1dm=1,ndim
@@ -321,7 +321,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,ikpoint,iinfo,verbose)
    occs_ks(ib1+(ib1dm-1),ikpoint)=occs_tmp(ib1dm)
    toccs_k=toccs_k+occs_tmp(ib1dm)
  enddo
- !call printdm1(1,ndim,eigenvect) ! Uncomment for debug 
+ !call printdm1(1,10,eigenvect) ! Uncomment for debug 
 
  write(msg,'(a22,i5,a3,i5,a21,f10.5)') ' Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
  call wrtout(std_out,msg,'COLL')
