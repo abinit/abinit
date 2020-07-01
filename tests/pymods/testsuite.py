@@ -1922,10 +1922,11 @@ pp_dirpath $ABI_PSPDIR
             # Create link in workdir pointing to ~abinit/tests/modules_with_data/MODULE_DIRNAME
             dst = os.path.join(self.workdir, self.use_git_submodule)
             src = os.path.join(self.abenv.tests_dir, "modules_with_data", self.use_git_submodule)
-            #print("dst", dst, " --> ", "src", src)
-            if not os.path.exists(os.path.join(src, "README.md"):
+
+            if not os.path.exists(os.path.join(src, "README.md")):
                 self._status = "skipped"
-                msg = self.full_id + ": Skipped: this test requires files in git submodule: %s" % src
+                msg = self.full_id + ": Skipped: this test requires files in the git submodule: %s\n" % src
+                msg += "Use `git submodule update --recursive --remote` to fetch the last version from the remote url"
                 self.cprint(msg, status2txtcolor[self._status])
                 can_run = False
             else:

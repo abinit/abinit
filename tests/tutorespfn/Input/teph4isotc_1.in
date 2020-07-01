@@ -5,6 +5,7 @@ eph_task  0
 
 getddb_filepath "test_submodule/mgb2_121212k_0.01tsmear_DDB"
 ddb_ngqpt 4 4 4
+dipdip 0         # No treatment of the dipole-dipole part. OK for metals
 
 # Dataset 1: GS calculation
 ngkpt   18 18 18

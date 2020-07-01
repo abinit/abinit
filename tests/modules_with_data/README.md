@@ -14,3 +14,4 @@ directly to fetch the repository.
 
 The ABINIT test suite is submodule-aware ...
 
+git submodule update --remote --init

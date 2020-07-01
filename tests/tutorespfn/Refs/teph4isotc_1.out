@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  1 Jul 2020.
-- ( at 00h46 )
+- ( at 14h44 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4isotc_1/teph4isotc_1.in
 - output file    -> teph4isotc_1.out
@@ -53,6 +53,7 @@ _ WF disk file :     23.308 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      2.43050000E+01  1.08110000E+01
         ddb_ngqpt        4    4    4
+           dipdip           0
              ecut      1.40000000E+01 Hartree
          eph_task           0
 -          fftalg         312
@@ -426,6 +427,7 @@ Values initialized with zeros
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      2.43050000E+01  1.08110000E+01
         ddb_ngqpt        4    4    4
+           dipdip           0
              ecut      1.40000000E+01 Hartree
          eph_task           0
            etotal1     0.0000000000E+00
