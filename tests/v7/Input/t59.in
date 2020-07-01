@@ -106,6 +106,9 @@
  nstep  50
  istwfk *1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -115,7 +118,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t59.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 8.0e-4, fld_options = -medium
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -85,6 +85,7 @@ type, public :: dataset_type
  integer :: berryopt
  integer :: berrysav
  integer :: berrystep
+ integer :: brav = 1
  integer :: brvltt
  integer :: bs_nstates
  integer :: bs_hayd_term
@@ -145,7 +146,6 @@ type, public :: dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
- integer :: eph_mrta = 1
  integer :: eph_restart = 0
  integer :: eph_task
  integer :: exchn2n3d
@@ -885,7 +885,7 @@ type, public :: dataset_type
 
  integer :: sigma_bsum_range(2) = 0
 
- real(dp) :: sigma_erange(2) = -one
+ real(dp) :: sigma_erange(2) = zero
 
  integer :: transport_ngkpt(3) = 0
  ! K-mesh for Transport calculation.
@@ -1214,17 +1214,17 @@ subroutine dtset_chkneu(dtset, charge, occopt)
          ' This is not the case. '
        else
 !        The discrepancy is not so severe
-         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
+         write(msg, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than: ',tol11
        end if
        MSG_WARNING(msg)
 
-       write(msg, '(a,a,a,a,a,a)' ) &
+       write(msg, '(6a)' ) &
        'Action: check input file for occ,wtk, and charge.',ch10,&
        'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
        'but IS automatically normalized otherwise.',ch10
        call wrtout(std_out,msg)
 
-!      If the discrepancy is severe, stop
+       ! If the discrepancy is severe, stop
        if (abs(nelect_occ-dtset%nelect)>tol8)then
          MSG_ERROR(msg)
        end if
@@ -1304,6 +1304,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%berryopt           = dtin%berryopt
  dtout%berrysav           = dtin%berrysav
  dtout%berrystep          = dtin%berrystep
+ dtout%brav               = dtin%brav
  dtout%brvltt             = dtin%brvltt
  dtout%bs_nstates         = dtin%bs_nstates
  dtout%builtintest        = dtin%builtintest
@@ -1386,7 +1387,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  !dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
- dtout%eph_mrta           = dtin%eph_mrta
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_stern          = dtin%eph_stern
@@ -2390,7 +2390,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_MALLOC(indsym,(4,dtset%nsym,dtset%natom))
 !Obtain a list of rotated atom labels:
  tolsym8=tol8
- call symatm(indsym,dtset%natom,dtset%nsym,symrec,dtset%tnons,tolsym8,dtset%typat,dtset%xred_orig)
+ call symatm(indsym,dtset%natom,dtset%nsym,symrec,dtset%tnons,tolsym8,dtset%typat,dtset%xred_orig, print_indsym=50)
 
  ABI_MALLOC(symq,(4,2,dtset%nsym))
  timrev=1
@@ -3046,7 +3046,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
- list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
+ list_vars=trim(list_vars)//' boxcenter boxcutmin brav brvltt builtintest'
  list_vars=trim(list_vars)//' bound_SPCoupling bound_anhaStrain bound_cell bound_cutoff'
  list_vars=trim(list_vars)//' bound_maxCoeff bound_model bound_rangePower bound_step bound_temp'
  list_vars=trim(list_vars)//' bs_algorithm bs_calctype bs_coulomb_term bs_coupling'
@@ -3088,7 +3088,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
- list_vars=trim(list_vars)//' eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
+ list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
  list_vars=trim(list_vars)//' eph_np_pqbks'
   ! XG20200321, please provide testing for eph_np_pqbks
   ! Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
@@ -3096,7 +3096,7 @@ subroutine chkvars(string)
   ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
- list_vars=trim(list_vars)//' eph_mrta eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'

@@ -51,11 +51,13 @@ nbdbuf 0
 paral_kgb 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "41nb_001023.pspfhi, 03li.pspfhi, 08o_001023.pspfhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 41nb_001023.pspfhi,  03li.pspfhi, 08o_001023.pspfhi
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10

@@ -41,8 +41,8 @@ The EPH code bypasses this bottleneck by **interpolating the DFPT potentials** i
 while Bloch states are computed non-self-consistently on arbitrarily dense $\kk$-meshes.
 As a net result, the three problems (electrons, phonons and electron-phonon) are now partly
 decoupled and can be converged separately.
-Keep in mind, however, that the fact that one can easily densify the sampling in the EPH code does not 
-mean one can use under-converged values for the GS/DFPT part. 
+Keep in mind, however, that the fact that one can easily densify the sampling in the EPH code does not
+mean one can use under-converged values for the GS/DFPT part.
 Indeed, the quality of the ingredients used for the interpolation depends on the initial $\kk$- and $\qq$-meshes.
 For further information about the difference between EPH and ANADDB, see also [[cite:Gonze2019]].
 Further details about the EPH implementation are available in [[cite:Brunin2020]].
@@ -156,10 +156,11 @@ These two variables are **mandatory** when performing EPH calculations.
 
 By default, the EPH code computes the phonon DOS by interpolating the IFCs on the *dense* $\qq$-mesh
 specified by [[ph_ngqpt]].
-The default $\qq$ grid is 20×20×20, you may want to increase this value for more accurate results. 
+The default $\qq$ grid is 20×20×20, you may want to increase this value for more accurate results.
 The step of the (linear) frequency mesh is governed by [[ph_wstep]].
 The linear tetrahedron integration method [[cite:Bloechl1994]] is used by default.
-The Gaussian method can be activated via [[ph_intmeth]] with [[ph_smear]] defining the Gaussian smearing (in Hartree units by default).
+The Gaussian method can be activated via [[ph_intmeth]] with [[ph_smear]] defining
+the Gaussian smearing (in Hartree units by default).
 The final results are stored in the PHDOS.nc file (same format at the one produced by ANADDB).
 The computation of the PHDOS can be disabled by setting [[prtphdos]] = 0.
 
@@ -326,7 +327,7 @@ in semiconductors.
 In non-polar materials, the Born effective charges are zero but the scattering potentials are still non-analytic
 due to presence of jump discontinuities.
 As discussed in [[cite:Brunin2020]] the non-analytic behaviour is fully captured by using:
-<!-- 
+<!--
 In this case the leading term is associated to the dynamical quadrupoles [[cite:Royo2019]].
 The expression for the LR model including both dipole and quadrupole terms reads:
 -->
@@ -377,13 +378,8 @@ From a more practical point of view, this implies that one should always monitor
 physical properties with respect to the initial DFPT $\qq$-mesh.
 The LR model implemented in ABINIT facilitates the convergence as the non-analytic behaviour for
 $\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduce oscillations
-between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the 
+between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the
 physical results [[cite:Brunin2020]].
-
-<!--
-Note that the same consideration holds for Wannier-based approaches
-independently on the degree of localization of the (maximally-localized) Wannier functions.
--->
 
 ## Tricks to accelerate the computation and reduce the memory requirements
 
@@ -391,55 +387,161 @@ Each sub-driver implements tricks to accelerate the calculation and reduce the m
 Here we focus on the techniques that are common to the different EPH sub-drivers.
 Additional tricks specific to [[eph_task]] are discussed in more detail in the associated lesson.
 
-First of all, note that the memory requirements for the $W_{\kappa\alpha}(\rr,\RR)$ array 
-scales as [[nfft]] × product([[ddb_ngqpt]]). 
+First of all, note that the memory requirements for the $W_{\kappa\alpha}(\rr,\RR)$ array
+scales as [[nfft]] × product([[ddb_ngqpt]]).
 This quantity should be multiplied by 3 * [[natom]] if each MPI process stores all the perturbations in memory.
-The MPI parallelism over perturbations (see [[eph_np_pqbks]]) allows one to decrease this prefactor from 
+The MPI parallelism over perturbations (see [[eph_np_pqbks]]) allows one to decrease this prefactor from
 *3 × natom* to *3 × natom / nprocs_pert*.
 
-Also, the total number of $\rr$-points ([[nfft]]) plays an important role both at the level of memory 
-as well as the level of wall-time.
+Also, the total number of $\rr$-points ([[nfft]]) plays an important role both at the level of memory
+as well as the level of the wall-time.
 To optimize this part, one can decrease the value [[boxcutmin]] in the EPH calculation
 to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1.
 You are not obliged to run the GS/DFPT part with the same [[boxcutmin]].
 An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2,
-but we found that using a value of 1.1 does not change the result
-but allows one to decrease the cost of the calculation and the memory by a factor ~8.
+but we found that using a value of 1.1 does not significantly affect the result
+while allowing one to decrease the cost of the calculation and the memory by a factor ~8.
 
 A significant fraction of the wall-time in EPH is spent for performing the FFTs required to apply $H^1$.
-The use of single precision in the FFT routines allows one to decrease the computational cost without losing precision. 
-This trick is activated by setting [[mixprec]] = 1 (support for FFTW3 or DFPT-MKL is required to take advantage 
+The use of single precision in the FFT routines allows one to decrease the computational cost without losing precision.
+This trick is activated by setting [[mixprec]] = 1 (support for FFTW3 or DFPT-MKL is required to take advantage
 of mixed precision FFTs).
 
 !!! important
 
-    The [[boxcutmin]] and [[mixprec]] tricks **are not activated by default** 
+    The [[boxcutmin]] and [[mixprec]] tricks **are not activated by default**
     because users are supposed to perform preliminary tests
     to make sure the quality of the results is not affected by these options.
 
-We terminate the discussion with another trick that is not directly related to the EPH code but 
+We terminate the discussion with another trick that is not directly related to the EPH code but
 to the DFPT computation.
 Since EPH does not need the first order change of the wavefunctions (1WF files)
 we suggest to avoid the output of these files by using [[prtwf]] = -1 in the DFPT part
 as these files are quite large and the overall space on disk scales as **nqpt × 3 × natom**.
-When [[prtwf]] is set to -1, the DFPT code writes the 1WF only if the DFPT SCF cycle is not converged 
-so that one can still restart from these wavefunctions if really needed 
+When [[prtwf]] is set to -1, the DFPT code writes the 1WF only if the DFPT SCF cycle is not converged
+so that one can still restart from these wavefunctions if needed
 (restarting a DFPT run from the 1WF file is more effective than restarting from the first order density).
 
+
+## Star-function interpolation of the KS eigenvalues
+
+As mentioned in the introduction, in the EPH implementation Bloch states are computed
+non-self-consistently on arbitrarily dense $\kk$-meshes without having to resort to interpolation schemes.
+The advantage of such approach is that calculations can be easily automated.
+The drawback is that the computational cost of the NSCF quickly increases with the density
+of the $\kk$-mesh and [[nband]] hence for "big calculations" the cost
+of the NSCF part may be even greater than the e-ph computation.
+
+There are however physical properties whose description does not require the computation of the KS states for each
+$\kk$-point in the IBZ.
+For instance, the computation of mobilities in semiconductors require the knowledge of the KS states whose energy
+is slight above (below) the CMB (VBM), let's say ~0.2 eV.
+In metals, only states close the Fermi level are needed to compute superconducting properties with the standard formalism.
+In other words, several EPH calculations require extremely dense BZ meshes to converge but as a matter of fact
+only a relatively small fraction of the IBZ is nededed.
+
+At this point a question naturally arises: can we avoid the NSCF computation of $\kk$-points that are supposed to give negligible
+contribution to the final physical results?
+The answer is yes provided we are able to predict in some easy way and with some reasonable accuracy the
+eigenvalues $\ee_{nk}$ without actually solving the KS equations.
+
+The aproach used in the EPH code is based on the
+star-function interpolation by Shankland-Koelling-Wood Fourier (SKW) interpolation scheme [[cite:Pickett1988]].
+The single-particle energies are expressed in terms of the (symmetrized) Fourier sum
+
+\begin{equation}
+\label{eq:skw_expansion}
+  \enk = \sum_\RR c_{n\RR} S_\RR(\kk).
+\end{equation}
+
+where the star function, $S_\RR(\kk)$, is defined by
+
+\begin{equation}
+\label{eq:star_function}
+S_\RR(\kk) = \dfrac{1}{N}\sum_\mcO e^{i\kk\cdot \mcO \RR},
+\end{equation}
+
+$\RR$ is a lattice vector and the sum is over the $N$ rotations of the crystallographic point group.
+By construction, the expansion in Eq.\eqref{eq:skw_expansion} fulfills the basic symmetry properties
+of the single-particle energies:
+
+\begin{align}
+\label{eq:eigen_properties}
+  \enk = \epsilon_{n\kG}, \\
+  \enk = \epsilon_{n\mcO\kk}.
+\end{align}
+
+In principle, the expansion coefficients in Eq.\eqref{eq:skw_expansion} can be uniquely determined
+by using a number of star functions equal to the number of *ab initio* $\kk$-points
+but this usually leads to sharp oscillations between the input eigenvalues.
+To avoid this problem, one uses more star functions than *ab initio* $\kk$-points and constrains the
+fit so that the interpolant function passes through the input energies and a roughness function is minimized.
+
+This [[einterp]] variable activates the interpolation of the electronic eigenvalues.
+The user can specify the number of star functions per
+*ab initio* $\kk$-point and an optional Fourier filtering as proposed in [[cite:Uehara2000]].
+
 <!--
-On the one hand, this approach was relatively easy to implement as most of the work,
-in particular the computation of the EPH matrix elements, was already performed by the DFPT code.
-On the other hand, the resulting implementation was too rigid
-as several important dimensions such as the number of $\kk$-points, $\qq$-points and bands
-in the EPH matrix elements had to be fixed at the level of the DFPT calculation.
-Performing convergence studies with respect to the $\kk$-point sampling, for instance,
-required performing new (and more expensive) DFPT calculations with denser $\kk$-meshes.
-Similarly, convergence studies for the $\qq$-points required additional DFPT computations, possibly
-on meshes that were multiples of the initial sampling so to reuse the $\qq$-points computed previously.
-A different philosophy is used, in which EPH matrix elements are computed directly starting from the basic ingredients, namely,
-the GS wavefunctions stored in the WFK file, and the first-order change of the Kohn-Sham (KS) potential produced by the DFPT code.
-This approach allows for more flexibility because electron and phonon calculations are now partly decoupled:
-the $\kk$-mesh can be densified by performing non-self-consistent calculations,
-thus bypassing the DFPT part, and interpolation schemes for the linear-response in $\qq$-space can be readily implemented.
-Unlike the previous algorithms implemented in ANADDB, the new driver is directly interfaced with  the ABINIT executable.
+%In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion
+ [[einterp]] can be used to interpolate KS eigenvalues at
+ the end of the ground state calculation (\href{https://docs.abinit.org/tests/v8/Input/t04.in}{{\texttt{v8\#42}}})
+ or to interpolate GW energies (\href{https://docs.abinit.org/tests/libxc/Input/t42.in}{{\texttt{libxc\#42}}}) when {\bf optdriver} = 4.
+
+In this case, one can employ the Python interface provided by \ABIPY to
+automate the procedure.
+An example can be found in this
+\href{https://nbviewer.jupyter.org/github/abinit/abitutorials/blob/master/abitutorials/g0w0/lesson_g0w0.ipynb}{jupyter notebook}.
+
+%einterp consists of 4 entries. The first element specificies the interpolation method.
+%
+%1 → Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [Pickett1988]
+%2 → B-spline interpolation.
+%The meaning of the other entries depend on the interpolation technique selected.
+%In the case of star-function interpolation:
+%
+%einterp(2): Number of star-functions per {\it ab initio} k-point
+%einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [Uehara2000]. In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion
+%einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9
+
+%It is worth noting that the QP energies must fulfill the symmetry properties of the point group of the crystal:
+%and
+%where G is a reciprocal lattice vector and is an operation of the point group.
+%Therefore it is possible to employ the star-function interpolation by Shankland, Koelling and Wood in the improved version proposed by Pickett to fit the {\it ab initio} results. This interpolation technique, by construction, passes through the initial points and satisfies the basic symmetry property of the band energies.
+%It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings that may cause unphysical oscillations between the {\it ab initio} points.
 -->
+
+Without entering into details (that will be discussed more in the specialized lessons)
+one can use the SKW algorithm to find the relevant $\kk$-points, perform an *ab-initio* for these wavevectors only
+and produce a WFK file that can be used by the EPH code.
+
+The entire procedure is performed in an automatic way inside ABINIT but before running big EPH calculations, 
+we strongly recommend to check whether the SKW interpolation gives reasonable results.
+A typical test would be:
+
+1) Compute a WFK file on the IBZ
+2) Perform a NSCF band structure calculation along a high-symmetry path that covers the most important 
+   regions of the BZ (e.g. band edges in semiconductors). KPATH_WKF
+3) Compare the ab-initio band structure with the SKW interpolation obtained using the WKF file produced in step (1).
+
+```sh
+abitk skw_compare IBZ_WFK KPATH_WFK [--lpratio 5] [--rcut 0.0] [--rsigma]
+```
+
+To compare the bands with AbiPy.
+
+```sh
+abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot
+```
+
+If the fit is not good, try the following:
+
+1) Increase the IBZ mesh (you may want to shift the mesh)
+2) Increase the value of lpratio
+3) Play with rcut and rsigma to damp oscillations
+
+Note that sometimes is difficult to get rid of spurious oscillation or artifacts in the SKW interpolation
+but remember that we are not trying to get perfect agreement between SKW and ab-initio results.
+As long as the SKW interpolant is close enough
+
+
+

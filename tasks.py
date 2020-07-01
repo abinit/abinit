@@ -288,6 +288,44 @@ def vimt(ctx, tagname):
 
 
 @task
+def lldb(ctx, input_name, exec_name="abinit"):
+    """
+    Execute `lldb` debugger with the given `input_name`.
+    """
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main", exec_name)
+    cprint(f"Using binpath: {binpath}", "green")
+    cmd = f"lldb {binpath} --one-line 'settings set target.run-args {input_name}'"
+    cprint(f"Executing lldb command: {cmd}", color="green")
+    cprint("Type run to start lldb debugger\n\n", color="green")
+    ctx.run(cmd, pty=True)
+
+
+@task
+def abinit(ctx, input_name):
+    """
+    Execute `abinit` with the given `input_name`.
+    """
+    _run(ctx, input_name, exec_name="abinit")
+
+
+@task
+def anaddb(ctx, input_name):
+    """"execute `anaddb` with the given `input_name`."""
+    _run(ctx, input_name, exec_name="anaddb")
+
+
+def _run(ctx, input_name, exec_name):
+    """"Execute `exec_name input_name`"""
+    top = find_top_build_tree(".", with_abinit=True)
+    binpath = os.path.join(top, "src", "98_main", exec_name)
+    cprint(f"Using binpath: {binpath}", "green")
+    cmd = f"{binpath} {input_name}"
+    cprint(f"Executing {cmd}", color="green")
+    ctx.run(cmd, pty=True)
+
+
+@task
 def pull_trunk(ctx):
     """"Execute `git stash && git pull trunk develop && git stash apply`"""
     ctx.run("git stash")
@@ -304,7 +342,7 @@ def branchoff(ctx, start_point):
         remote = "trunk"
 
     def run(cmd):
-        cprint(f"Executing: `{cmd}`", "green")
+        cprint(f"Executing: `{cmd}`", "green", color="green")
         ctx.run(cmd)
 
     run(f"git fetch {remote}")
@@ -322,10 +360,10 @@ def watchdog(ctx, jobs="auto", sleep_time = 5):
     """
     Start watchdog service to watch F90 files and execute `make` when changes are detected.
     """
-    cprint("Starting watchdog service to watch F90 files and execute `make` when changes are detected", "green")
-    cprint("Enter <CTRL + C> in the terminal to kill the service.", "green")
+    cprint("Starting watchdog service to watch F90 files and execute `make` when changes are detected", color="green")
+    cprint("Enter <CTRL + C> in the terminal to kill the service.", color="green")
 
-    cprint(f"Start watching F90 files with sleep_time {sleep_time} s ....", "green")
+    cprint(f"Start watching F90 files with sleep_time {sleep_time} s ....", color="green")
     top = find_top_build_tree(".", with_abinit=True)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
@@ -346,16 +384,16 @@ def watchdog(ctx, jobs="auto", sleep_time = 5):
     def on_modified(event):
         print(f"hey buddy, {event.src_path} has been modified")
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
-        cprint("Executing: %s" % cmd, "yellow")
+        cprint("Executing: %s" % cmd, color="yellow")
         with cd(top):
             try:
                 result = ctx.run(cmd, pty=True)
                 if result.ok:
-                    cprint("Make completed successfully", "green")
-                    cprint("Watching for changes ...", "green")
+                    cprint("Make completed successfully", color="green")
+                    cprint("Watching for changes ...", color="green")
             except Exception:
-                cprint(f"Make returned non-zero exit status", "red")
-                cprint(f"Keep on watching for changes hoping you get it right ...", "red")
+                cprint(f"Make returned non-zero exit status", color="red")
+                cprint(f"Keep on watching for changes hoping you get it right ...", color="red")
 
     def on_moved(event):
         print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")

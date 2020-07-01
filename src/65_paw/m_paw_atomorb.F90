@@ -147,18 +147,18 @@ MODULE m_paw_atomorb
    ! klm_diag(lmn2_size)
    ! 1 il==jl and im==jm, 0 otherwise.
 
-  integer, allocatable :: klmntomn(:,:) 
+  integer, allocatable :: klmntomn(:,:)
    ! klmntomn(4,lmn2_size)
    ! Array giving im, jm ,in, and jn for each klmn=(ilmn,jlmn)
    ! Note: ilmn=(il,im,in) and ilmn<=jlmn
    ! NB: klmntomn is an application and not a bijection
 
-  integer, allocatable :: kln2ln(:,:) 
+  integer, allocatable :: kln2ln(:,:)
    ! kln2ln(6,ln2_size)
    ! Table giving il, jl ,in, jn, iln, jln for each kln=(iln,jln)
    ! where iln=(il,in) and iln<=jln. NB: kln2ln is an application and not a bijection
 
-  integer, allocatable :: mode(:,:) 
+  integer, allocatable :: mode(:,:)
   ! mode(ln_size,nsppol)
   ! Flag defining how the orbital is treated.
   ! During the pseudopotential generation we can have: ORB_FROZEN or ORB_VALENCE
@@ -168,7 +168,7 @@ MODULE m_paw_atomorb
   ! a relaxed core calculation.
   ! TODO define function to test the type, much safer!
 
-  real(dp), allocatable :: eig(:,:) 
+  real(dp), allocatable :: eig(:,:)
   ! eig(ln_size,nsppol)
   ! Eigenvalues for each ln channel and spin.
 
@@ -444,7 +444,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
 
  ! 7)
  read(unt,*)nmesh
- ABI_DT_MALLOC(Radmesh,(nmesh))
+ ABI_MALLOC(Radmesh,(nmesh))
  do imsh=1,nmesh
    lstep=zero
    read(unt,'(a80)') line
@@ -584,7 +584,7 @@ subroutine init_atomorb(Atm,Atmrad,rcut,filename,prtvol,ierr)
  ! Free temporary allocated space
 
  call pawrad_free(Radmesh)
- ABI_DT_FREE(Radmesh)
+ ABI_FREE(Radmesh)
 
  ! * Setup of indlmn
  ABI_MALLOC(Atm%indlmn,(6,Atm%lmn_size))

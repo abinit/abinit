@@ -107,13 +107,15 @@ rprim11
          0.25  0.25  0.25
  znucl  14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t61.out, tolnlines = 0, tolabs = 9.984e-09, tolrel = 6.000e-04, fld_options =  -medium
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

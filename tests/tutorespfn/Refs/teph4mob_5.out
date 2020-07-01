@@ -1,5 +1,5 @@
 
-.Version 9.1.2 of ABINIT 
+.Version 9.1.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 30 Mar 2020.
-- ( at 23h38 )
+.Starting date : Fri 26 Jun 2020.
+- ( at 11h49 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.in
 - output file    -> teph4mob_5.out
@@ -55,7 +55,7 @@ _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
+      eph_extrael      9.99995378E-07
    eph_ngqpt_fine       24   24   24
          eph_task          -4
 -          fftalg         312
@@ -304,6 +304,7 @@ meta: {optdriver: 7, eph_task: -4, }
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
+ Adding eph_extrael: 9.999954E-07 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134760E-01, with nelect:     8.000001E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -516,8 +517,8 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [4,4,4]
- Q-mesh used for self-energy integration [ngqpt]: [24,24,24]
+ Ab-initio q-mesh from DDB file: [4, 4, 4]
+ Q-mesh used for self-energy integration [ngqpt]: [24, 24, 24]
  Number of q-points in the IBZ: 413
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
@@ -540,34 +541,60 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
+K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.573    0.000  31934.9    0.000
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    5   3.608    0.001    482.1    0.000
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.523
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.525    0.000 783695.0    0.000
+   5   3.525    0.000 783698.3    0.000
 ============================================================================================
-Transport calculation results
+
+ Entering transport RTA computation driver.
+- Reading carrier lifetimes from: teph4mob_5o_SIGEPH.nc
+
+
+
+  >>>> For spin  1
+   Minimum direct gap =   2.36 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Fundamental gap    =   1.17 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+                                     Bottom of conduction at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+   Valence Max:      2.36 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   Conduction min:   3.53 (eV) at: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+
+
+
+ === Computation of DOS, VV_DOS and VVTAU_DOS === 
+ Linear tetrahedron method.
+ Mesh step:  27.2 (meV) with npts: 49
+ From emin:   2.4 to emax:   3.7 (eV)
+ Number of k-points in the IBZ: 413
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
+
+
+ Transport (RTA) calculation results:
+
+Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.23E+17        0.00E+00            0.00            0.00
            64.00        0.23E+17        0.00E+00           38.53            0.00
@@ -575,6 +602,64 @@ Transport calculation results
           182.00        0.23E+17        0.00E+00          423.94            0.00
           241.00        0.23E+17        0.00E+00          419.47            0.00
           300.00        0.23E+17        0.00E+00          363.87            0.00
+
+
+Cartesian component of SERTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.23E+17        0.00E+00            0.00            0.00
+           64.00        0.23E+17        0.00E+00           38.53            0.00
+          123.00        0.23E+17        0.00E+00          345.87            0.00
+          182.00        0.23E+17        0.00E+00          423.94            0.00
+          241.00        0.23E+17        0.00E+00          419.47            0.00
+          300.00        0.23E+17        0.00E+00          363.87            0.00
+
+
+Cartesian component of SERTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.23E+17        0.00E+00            0.00            0.00
+           64.00        0.23E+17        0.00E+00           38.53            0.00
+          123.00        0.23E+17        0.00E+00          345.87            0.00
+          182.00        0.23E+17        0.00E+00          423.94            0.00
+          241.00        0.23E+17        0.00E+00          419.47            0.00
+          300.00        0.23E+17        0.00E+00          363.87            0.00
+
+
+
+
+Cartesian component of MRTA mobility tensor: xx
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.23E+17        0.00E+00            0.00            0.00
+           64.00        0.23E+17        0.00E+00           37.46            0.00
+          123.00        0.23E+17        0.00E+00          363.77            0.00
+          182.00        0.23E+17        0.00E+00          460.73            0.00
+          241.00        0.23E+17        0.00E+00          459.74            0.00
+          300.00        0.23E+17        0.00E+00          401.89            0.00
+
+
+Cartesian component of MRTA mobility tensor: yy
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.23E+17        0.00E+00            0.00            0.00
+           64.00        0.23E+17        0.00E+00           37.46            0.00
+          123.00        0.23E+17        0.00E+00          363.77            0.00
+          182.00        0.23E+17        0.00E+00          460.73            0.00
+          241.00        0.23E+17        0.00E+00          459.74            0.00
+          300.00        0.23E+17        0.00E+00          401.89            0.00
+
+
+Cartesian component of MRTA mobility tensor: zz
+ Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
+            5.00        0.23E+17        0.00E+00            0.00            0.00
+           64.00        0.23E+17        0.00E+00           37.46            0.00
+          123.00        0.23E+17        0.00E+00          363.77            0.00
+          182.00        0.23E+17        0.00E+00          460.73            0.00
+          241.00        0.23E+17        0.00E+00          459.74            0.00
+          300.00        0.23E+17        0.00E+00          401.89            0.00
+
+
+
+
+
+- Writing RTA transport results to: teph4mob_5o_RTA.nc
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -585,7 +670,7 @@ Transport calculation results
         boxcutmin      1.10000000E+00
         ddb_ngqpt        4    4    4
              ecut      3.00000000E+00 Hartree
-      eph_extrael      1.00000000E-06
+      eph_extrael      9.99995378E-07
    eph_ngqpt_fine       24   24   24
          eph_task          -4
            etotal      0.0000000000E+00
@@ -825,10 +910,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         23.5  wall=         24.0
+- Proc.   0 individual time (sec): cpu=         21.3  wall=         22.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.5  wall=         24.0
+.Delivered   4 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         21.3  wall=         22.0

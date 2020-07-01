@@ -57,6 +57,9 @@
  istwfk   2*1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -64,7 +67,6 @@
 #%% test_chain = t87.in, t88.in, t89.in, t90.in, t91.in
 #%% [files]
 #%% files_to_test = t87.out, tolnlines=  3, tolabs=  1.100e-03, tolrel=  1.000e-02
-#%% psp_files=14si.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

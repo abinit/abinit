@@ -44,7 +44,7 @@ module m_cohsex
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
- use m_wfd,           only : wfd_t
+ use m_wfd,           only : wfd_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
@@ -202,6 +202,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
  complex(dpc) :: ctmp,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
+ type(wave_t),pointer :: wave_sum, wave_jb
 !arrays
  integer :: g0(3),spinor_padc(2,4),nbv_ks(Kmesh%nibz,Wfd%nsppol)
  integer,allocatable :: proc_distrb(:,:,:),coh_distrb(:,:,:,:),degtab(:,:,:)
@@ -615,8 +616,10 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
              npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwc+1, jb) = zero
              if (ib == jb) then
-               cg_sum => Wfd%Wave(ib, ik_ibz, spin)%ug
-               cg_jb  => Wfd%Wave(jb, jk_ibz, spin)%ug
+               ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, spin, wave_sum, msg) == 0, msg)
+               cg_sum => wave_sum%ug
+               ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+               cg_jb => wave_jb%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                rhotwg_ki(1,jb) = CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
                ctmp = xdotc(npw_k, cg_sum(npw_k+1:), 1, cg_jb(npw_k+1:), 1)

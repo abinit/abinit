@@ -56,13 +56,15 @@ xred 3*0 3*1/4
 
 diemac 12.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
-#%% psp_files = si_ps.736.lda
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

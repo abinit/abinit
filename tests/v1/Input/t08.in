@@ -25,12 +25,14 @@
  znucl  8.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "8o.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit 
 #%% [files]
 #%% files_to_test = t08.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

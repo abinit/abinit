@@ -73,6 +73,9 @@
  typat  1 2  tolwfr  1.e-8
  znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Ga-low_r.psp8, As_r.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -80,7 +83,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out, tolnlines = 14, tolabs = 1.1e-04, tolrel = 4.0e-04
-#%% psp_files = Ga-low_r.psp8, As_r.psp8
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

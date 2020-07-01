@@ -349,7 +349,7 @@ MODULE m_gwdefs
   real(dp) :: omegasimax                 ! Max omega for Sigma along the imag axis in case of analytic continuation
   real(dp) :: omegasimin                 ! min omega for Sigma along the imag axis in case of analytic continuation
 
-  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element. 
+  real(dp) :: sigma_mixing               ! Global factor that multiplies Sigma to give the final matrix element.
                                          ! Usually one, except for the hybrid functionals.
 
   real(dp) :: zcut                       ! Value of $\delta$ used to avoid the divergences (see related input variable)
@@ -475,7 +475,7 @@ subroutine sigijtab_free(Sigijtab)
       do kk=ilow,iup
         ABI_FREE(Sigijtab(ii,jj)%col(kk)%bidx)
       end do
-      ABI_DT_FREE(Sigijtab(ii,jj)%col)
+      ABI_FREE(Sigijtab(ii,jj)%col)
 
     end do
   end do

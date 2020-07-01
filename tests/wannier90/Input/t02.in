@@ -41,6 +41,9 @@ istwfk 8*1
  typat  1 2  tolwfr  1.e-10
  znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31Ga_LDA_abinit, 33As_LDA_abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -48,7 +51,6 @@ istwfk 8*1
 #%% files_to_test = 
 #%%   t02.out, tolnlines = 15, tolabs = 3.50e-02, tolrel = 9.50e-01
 #%% extra_inputs = t02o_w90.win
-#%% psp_files = 31Ga_LDA_abinit, 33As_LDA_abinit
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

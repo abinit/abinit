@@ -470,8 +470,8 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
    !end do
  end do
 
- ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
  if (dtset%eph_intmeth == 2) then
+   ! TODO: compute weights on the fly to reduce memory? nene should be set to zero if not used!
    ABI_MALLOC(bz2ibz, (nkbz))
    bz2ibz = full2ebands(1, :)
 
@@ -619,7 +619,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
 
  wtk = zero
  if (fs%eph_intmeth == 1 .or. nesting /= 0) then
-   ! Gaussian method (constant or adaptive method from group velocities)
+   ! Gaussian method (constant or adaptive method from group velocities if eph_fsmear is negative)
    sigma = fs%eph_fsmear
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
@@ -707,10 +707,18 @@ subroutine fstab_print(fstab, header, unit, prtvol)
  write(my_unt, "(a)")trim(msg)
 
  if (fstab(1)%eph_intmeth == 1) then
-   write(my_unt,"(a)")" FS integration done with gaussian method"
+   if (fstab(1)%eph_fsmear > zero) then
+     write(my_unt,"(a,f5.1,a)")" FS integration done with gaussian method and broadening:", &
+       fstab(1)%eph_fsmear * Ha_eV, " (meV)"
+   else
+     write(my_unt,"(a)")" FS integration done with adaptive gaussian method"
+   end if
  else if (fstab(1)%eph_intmeth == 2) then
    write(my_unt,"(a)")" FS integration done with tetrahedron method"
+ else
+   MSG_ERROR(sjoin("Invalid value for eph_intmeth:", itoa(fstab(1)%eph_intmeth)))
  end if
+
  write(my_unt,"(a,i0)")" Total number of k-points in the full mesh: ",fstab(1)%nktot
  !write(my_unt,"(a,f5.1)")" Energy window: ",fstab(1)%eph_fsewin * Ha_eV, " (eV)
 

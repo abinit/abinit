@@ -59,6 +59,7 @@ MODULE m_fstrings
  public :: itoa            ! Convert an integer into a string
  public :: ftoa            ! Convert a float into a string
  public :: ktoa            ! Convert a k-point into a string.
+ public :: stoa            ! Convert a spin index into a string
  public :: ltoa            ! Convert a list into a string.
  public :: atoi            ! Convert a string into a integer
  public :: atof            ! Convert a string into a floating-point number.
@@ -1292,6 +1293,38 @@ end function ktoa
 
 !----------------------------------------------------------------------
 
+!!****f* m_fstrings/stoa
+!! NAME
+!! stoa
+!!
+!! FUNCTION
+!!  Convert a spin index into a string
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+
+character(len=4) pure function stoa(spin)
+
+  integer,intent(in) :: spin
+
+! *********************************************************************
+
+ select case (spin)
+ case (1)
+   stoa = "UP"
+ case (2)
+   stoa = "DOWN"
+ case default
+   stoa = "????"
+ end select
+
+end function stoa
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_fstrings/ltoa_int
 !! NAME
 !! ltoa_int
@@ -1335,9 +1368,9 @@ pure function ltoa_int(list) result(str)
      write(temp, "(i0,a)")list(ii),", "
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)//" "
+     base = len_trim(str) + 2
    else
      return
    end if
@@ -1394,9 +1427,9 @@ pure function ltoa_dp(list, fmt) result(str)
      write(temp, fa) list(ii),","
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)// " "
+     base = len_trim(str) + 2
    else
      return
    end if

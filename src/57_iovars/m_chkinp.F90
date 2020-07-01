@@ -36,7 +36,7 @@ module m_chkinp
 
  use defs_datatypes,   only : pspheader_type
  use defs_abitypes,    only : MPI_type
- use m_numeric_tools,  only : iseven
+ use m_numeric_tools,  only : iseven, isdiagmat
  use m_symtk,          only : chkgrp, chkorthsy
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
@@ -859,8 +859,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
+
      if (dt%eph_task == 1 .and. dt%ph_nqpath <= 0) then
        MSG_ERROR("When eph_task == 1, the q-path for the linewidth must be specified via ph_nqpath and ph_qpath")
+     end if
+     if (dt%eph_task == 1 .and. dt%nshiftk <= 0) then
+       MSG_ERROR_NOSTOP('phgamma does not work with multiple k-shifts ', ierr)
+     end if
+     if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
+       MSG_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
      end if
 
      if (dt%eph_task == 2 .and. dt%irdwfq == 0 .and. dt%getwfq == 0) then
@@ -872,6 +879,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
      !end if
+     ! TODO: Activate this test
+     if (dt%eph_fermie /= zero .and. nint(dt%tmesh(3)) /= 1) then
+       MSG_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
+     end if
+     if (dt%eph_fermie /= zero .and. dt%eph_extrael /= zero) then
+       MSG_ERROR_NOSTOP("eph_fermie and (eph_extrael|eph_doping) are mutually exclusive", ierr)
+     end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
@@ -906,12 +920,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        if (dt%nspinor == 2) then
          MSG_ERROR_NOSTOP("Spin parallelism cannot be used when nspinor == 2", ierr)
        else if (dt%nspinor == 1 .and. dt%eph_np_pqbks(5) > dt%nsppol) then
-         MSG_ERROR_NOSTOP("Number of procs for spin cannot be greater than nsppol", ierr)
+         MSG_ERROR_NOSTOP("nproc for spin parallelism cannot be greater than nsppol", ierr)
        end if
      end if
 
     if (dt%eph_np_pqbks(1) /= 0 .and. dt%eph_np_pqbks(1) > 3 * dt%natom ) then
-      MSG_ERROR_NOSTOP("Number of procs for perturbation parallelism  cannot be greater than 3 * natom", ierr)
+      MSG_ERROR_NOSTOP("nproc for pert parallelism cannot be greater than 3 * natom", ierr)
+    end if
+
+    if (mod(3 * dt%natom, dt%eph_np_pqbks(1)) /= 0) then
+      MSG_ERROR_NOSTOP("nproc for pert parallelism must divide 3 * natom.", ierr)
     end if
 
 #ifndef HAVE_NETCDF_MPI
@@ -2825,22 +2843,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  prtfsurf only one shift allowed (gamma)
    if (dt%prtfsurf == 1) then
 
-     if (abs(dt%kptrlatt(1,2))+abs(dt%kptrlatt(1,3))+abs(dt%kptrlatt(2,3))+&
-         abs(dt%kptrlatt(2,1))+abs(dt%kptrlatt(3,1))+abs(dt%kptrlatt(3,2)) /= 0 ) then
+     if (.not. isdiagmat(dt%kptrlatt)) then
        write(msg,'(4a)')ch10,&
          'prtfsurf does not work with non-diagonal kptrlatt ', ch10,&
          'Action: set nshift 1 and shiftk 0 0 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
      if (dt%nshiftk > 1) then
-       write(msg,'(4a)') ch10,&
-        'prtfsurf does not work with multiple kpt shifts ', ch10, &
-        'Action: set nshift 1 and shiftk 0 0 0'
-       MSG_ERROR_NOSTOP(msg, ierr)
+       MSG_ERROR_NOSTOP('prtfsurf does not work with multiple kpt shifts ', ierr)
      end if
      if (sum(abs(dt%shiftk(:,1:dt%nshiftk))) > tol8) then
        write(msg,'(4a)')ch10,&
-        'prtfsurf does not work with non-zero kpt shift ',ch10,&
+        'prtfsurf does not work with non-zero k-shifts ',ch10,&
         'Action: set nshift 1 and shiftk 0 0 0'
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
@@ -3857,7 +3871,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  ! Write COMMENTs if some combination of input vars look weird
  ! ===========================================================
  if (dt%dipdip /= 0 .and. any(dt%occopt == [3, 4, 5, 6, 7])) then
-   MSG_COMMENT("dipdip can be set to 0 in case of metals. The default value is required for polar materials.")
+   MSG_COMMENT("dipdip can be set to 0 in case of metals whereas dipdip 1 should be used in polar materials.")
  end if
 
  ! If there was a problem, then stop.

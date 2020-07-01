@@ -78,13 +78,15 @@ upawu2  3.1333333333333333  0.0  0.0  eV
 f4of2_sla3  0.0  0.0  0.0 
 jpawu2  0.7583333333333333  0.0  0.0  eV
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%                  t31o_DS2_EntropyDMFT,  tolnlines =8, tolabs =7.0e-4, tolrel = 2e-2, fld_options=-medium ;
-#%% psp_files =  23v.paw, 38sr.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

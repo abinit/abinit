@@ -44,12 +44,14 @@
  znucl  1.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% no_check = yes
 #%% executable = abinit
 #%% [files]
-#%% psp_files= 01h.pspgth
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

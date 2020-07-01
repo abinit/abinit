@@ -44,12 +44,14 @@ kptrlatt 2 2 -2
         -2 2  2
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31Ga_LDA_abinit, 33As_LDA_abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% exclude_hosts = nag@abiref
 #%% [files]
-#%% psp_files = 31Ga_LDA_abinit, 33As_LDA_abinit
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

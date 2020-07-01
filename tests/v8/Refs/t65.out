@@ -233,7 +233,7 @@ All the independent perturbations are available
 
  Interpolation of the electron-phonon coupling potential
 
- From coarse q-mesh: [2,2,2] to: [4,4,4]
+ From coarse q-mesh: [2, 2, 2] to: [4, 4, 4]
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed

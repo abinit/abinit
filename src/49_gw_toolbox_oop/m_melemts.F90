@@ -764,7 +764,7 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
    my_keys = ANAMES
  end if
 
- ABI_DT_MALLOC(data_p,(my_nkeys))
+ ABI_MALLOC(data_p,(my_nkeys))
  ABI_MALLOC(tab,(my_nkeys))
  tab=0
 
@@ -849,7 +849,7 @@ subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
 
 10 continue
  ABI_FREE(my_keys)
- ABI_DT_FREE(data_p)
+ ABI_FREE(data_p)
  ABI_FREE(tab)
 
 end subroutine melements_print

@@ -58,13 +58,15 @@ xred
  0.75  0.75  0.25
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.psp"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%    t02.out,  tolnlines =0, tolabs =1.1e-11, tolrel = 2.0e-12, fld_options=-medium ;
-#%% psp_files = 14si.psp
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

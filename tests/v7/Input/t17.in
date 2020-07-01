@@ -36,6 +36,9 @@ nshiftk   4
     xred  0.0  0.0  0.0
    znucl  78
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pt-sp_r.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -44,7 +47,6 @@ nshiftk   4
 #%%   t17.out, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00;
 #%%   t17o_DS1_DOS , tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options=-ridiculous;
 #####%%   t17o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options=-ridiculous;
-#%% psp_files = Pt-sp_r.psp8
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

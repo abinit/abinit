@@ -34,13 +34,15 @@
             znucl       82.00000   22.00000    8.00000
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "82pb.960808c_mod, 22ti.psp_mod, 8o.psp_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tsv6_125.out, tolnlines=  9, tolabs=  6.000e+00, tolrel=  1.100e+00, fld_options=-ridiculous
-#%% psp_files= 82pb.960808c_mod, 22ti.psp_mod, 8o.psp_mod 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

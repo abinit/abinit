@@ -126,11 +126,13 @@
   .01171875000000  .01171875000000  .01171875000000  .02343750000000
   .02343750000000  .01171875000000  .00390625000000  .01171875000000
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.psp"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 14si.psp
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10

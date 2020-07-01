@@ -288,8 +288,8 @@ subroutine symdet(determinant, nsym, sym)
    call mati3det(sym(:,:,isym),det)
    determinant(isym)=det
    if (abs(det)/=1) then
-     write(msg,'(a,i5,a,i10,a,a,a,a,a)')&
-      'Abs(determinant) for symmetry number',isym,' is',det,' .',ch10,&
+     write(msg,'(a,i0,a,i0,a,a,a,a,a)')&
+      'Abs(determinant) for symmetry number ',isym,' is ',det,' .',ch10,&
       'For a legitimate symmetry, abs(determinant) must be 1.',ch10,&
       'Action: check your symmetry operations (symrel) in input file.'
      MSG_ERROR(msg)
@@ -615,16 +615,16 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 !  Compute symmetric of primitive vectors under point symmetry operations
    do ii=1,3
      rprimd_sym(:,ii)=symrel(1,ii,isym)*rprimd(:,1)+&
-&     symrel(2,ii,isym)*rprimd(:,2)+&
-&     symrel(3,ii,isym)*rprimd(:,3)
+                      symrel(2,ii,isym)*rprimd(:,2)+&
+                      symrel(3,ii,isym)*rprimd(:,3)
    end do
 
 !  If the new lattice is the same as the original one,
 !  the lengths and angles are preserved
    do ii=1,3
      rmet_sym(ii,:)=rprimd_sym(1,ii)*rprimd_sym(1,:)+&
-&     rprimd_sym(2,ii)*rprimd_sym(2,:)+&
-&     rprimd_sym(3,ii)*rprimd_sym(3,:)
+                    rprimd_sym(2,ii)*rprimd_sym(2,:)+&
+                    rprimd_sym(3,ii)*rprimd_sym(3,:)
    end do
 
    residual=zero
@@ -634,12 +634,12 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
      end do
    end do
 
-   if(sqrt(residual)>tol*sqrt(rmet2))then
+   if(sqrt(residual) > tol*sqrt(rmet2))then
      if(iexit==0)then
-       write(msg, '(a,i5,a,a,a,a,a,es12.4,a,a,a,a,a,a,a)' )&
+       write(msg, '(a,i0,5a,es12.4,a,es12.4,6a)' )&
         'The symmetry operation number ',isym,' does not preserve',ch10,&
         'vector lengths and angles.',ch10,&
-        'The value of the residual is ',residual,'.',ch10,&
+        'The value of the residual is: ',residual, 'that is greater than threshold:', (tol*sqrt(rmet2))**2,ch10,&
         'Action: modify rprim, acell and/or symrel so that',ch10,&
         'vector lengths and angles are preserved.',ch10,&
         'Beware, the tolerance on symmetry operations is very small.'
@@ -652,8 +652,8 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 !  Also, the scalar product of rprimd_sym and gprimd must give integer numbers
    do ii=1,3
      prods(ii,:)=rprimd_sym(1,ii)*gprimd(1,:)+ &
-&     rprimd_sym(2,ii)*gprimd(2,:)+ &
-&     rprimd_sym(3,ii)*gprimd(3,:)
+                 rprimd_sym(2,ii)*gprimd(2,:)+ &
+                 rprimd_sym(3,ii)*gprimd(3,:)
    end do
 
    do ii=1,3
@@ -661,9 +661,10 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
        residual=prods(ii,jj)-anint(prods(ii,jj))
        if(abs(residual)>tol)then
          if(iexit==0)then
-           write(msg, '(a,i0,a,a,a,a,a,a,a)' )&
+           write(msg, '(a,i0,5a,es12.4,a,es12.4,4a)' )&
             'The symmetry operation number ',isym,' generates',ch10,&
             'a different lattice.',ch10,&
+            'The value of the residual is: ',residual, 'that is greater than the threshold:', tol, ch10,&
             'Action: modify rprim, acell and/or symrel so that',ch10,&
             'the lattice is preserved.'
            MSG_ERROR(msg)
@@ -1736,6 +1737,8 @@ end subroutine symchk
 !! xred(3,natom)=reduced coordinates of atoms in terms of real space
 !!               primitive translations
 !! tolsym=tolerance for the symmetries
+!! [print_indsym]: Print indsym table to std_out if the number of atoms is smaller that print_indsym
+!!  Default: -1 i.e. no output is provided.
 !!
 !! OUTPUT
 !! indsym(4,nsym,natom)=indirect indexing array described above: for each
@@ -1754,12 +1757,12 @@ end subroutine symchk
 !!
 !! SOURCE
 
-
-subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
+subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print_indsym)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
+ integer,optional,intent(in) :: print_indsym
  real(dp), intent(in) :: tolsym
 !arrays
  integer,intent(in) :: symrec(3,3,nsym),typat(natom)
@@ -1768,7 +1771,7 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 
 !Local variables-------------------------------
 !scalars
- integer :: eatom,errout,iatom,ii,isym,mu
+ integer :: eatom,errout,iatom,ii,isym,mu,print_indsym_
  real(dp) :: difmax,err
  character(len=500) :: msg
 !arrays
@@ -1838,7 +1841,12 @@ subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
    end do !iatom
  end do !isym
 
- if (natom<=50) then
+ ! MG: Do not change this behaviour. symatm is called many times in the EPH code in which we have tons of q-points
+ ! and it's really annoying to see this output repeated over and over again.
+ ! If you need to print the indsym table at the beginning of the calculation, find the call to symatm
+ ! and pass the optional argument print_indsym_ or use `abitk crystal_print FILE --prtvol 1`
+ print_indsym_ = -1; if (present(print_indsym)) print_indsym_ = print_indsym
+ if (natom <= print_indsym_) then
    do iatom=1,natom
      write(msg, '(a,i0,a)' )' symatm: atom number ',iatom,' is reached starting at atom'
      call wrtout(std_out,msg)

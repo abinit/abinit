@@ -57,6 +57,7 @@ module m_hdr
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
  use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust, strcat, atoi
  use m_symtk,         only : print_symmetries
+ !use m_kpts,          only : kpts_timrev_from_kptopt
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_pawtab,        only : pawtab_type
@@ -3361,7 +3362,7 @@ end function hdr_backspace
 !! FUNCTION
 !! This subroutine deals with the output of the hdr_type structured variables in ETSF+NETCDF fornat.
 !! It handles variables according to the ETSF format, whenever possible and uses new variables
-!!  when not available in the ETSF format.
+!! when not available in the ETSF format.
 !!
 !! INPUTS
 !!  fform=kind of the array in the file
@@ -3462,7 +3463,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    ])
    NCF_CHECK(ncerr)
 
-   ! Define states section. TODO: write smearing_scheme
+   ! Define states section.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("number_of_states", "int", "number_of_kpoints, number_of_spins"), &
      nctkarr_t("eigenvalues", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
@@ -3669,7 +3670,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
    "nelect", "charge"],[hdr%nelect, hdr%charge])
  NCF_CHECK(ncerr)
 
- ! FIXME: in etsf_io the number of electrons is declared as integer!!!
+ ! NB: In etsf_io the number of electrons is declared as integer.
+ ! We use abinit nelect to store the value as real(dp).
  NCF_CHECK(nf90_put_var(ncid, vid("number_of_electrons"), nint(hdr%nelect)))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt_orig"), hdr%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid("kptrlatt"), hdr%kptrlatt))
@@ -3854,7 +3856,7 @@ end subroutine hdr_get_occ3d
 !!
 !! SOURCE
 
-subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
+subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
 
 !Arguments ------------------------------------
 !scalars
@@ -4976,10 +4978,12 @@ end subroutine hdr_vs_dtset
 !!
 !! INPUTS
 !!  hdr<hdr_type>=the abinit header
-!!  timrev ==2 => take advantage of time-reversal symmetry
-!!         ==1 ==> do not use time-reversal symmetry
-!!  remove_inv [optional]= if .TRUE. the inversion symmetry is removed from the set of operations
-!!  even if it is present in the header
+!!  [gw_timrev] ==2 => take advantage of time-reversal symmetry
+!!              ==1 ==> do not use time-reversal symmetry
+!!    Default: 2
+!!    NOTE THAT HERE WE USE THE GW CONVENTIONS  I.E ABINIT_TIMREV + !
+!!  [remove_inv] = if .TRUE. the inversion symmetry is removed from the set of operations
+!!      even if it is present in the header
 !!
 !! OUTPUT
 !!  cryst<crystal_t>= the data type filled with data reported in the abinit header
@@ -4996,23 +5000,32 @@ end subroutine hdr_vs_dtset
 !!
 !! SOURCE
 
-type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
+type(crystal_t) function hdr_get_crystal(hdr, gw_timrev, remove_inv) result(cryst)
 
 !Arguments ------------------------------------
  class(hdr_type),intent(in) :: hdr
- integer,intent(in) :: timrev
+ integer,optional,intent(in) :: gw_timrev
  logical,optional,intent(in) :: remove_inv
 
 !Local variables-------------------------------
- integer :: space_group
- logical :: rinv,use_antiferro
+ integer :: my_timrev, space_group
+ logical :: rinv, use_antiferro
 ! *********************************************************************
 
  rinv=.FALSE.; if (PRESENT(remove_inv)) rinv=remove_inv
  use_antiferro = hdr%nspden == 2 .and. hdr%nsppol ==1
 
+ if (.not. present(gw_timrev)) then
+   ! Get it from kptopt
+   !my_timrev = kpts_timrev_from_kptopt(hdr%kptopt) + 1
+   my_timrev = 1; if (any(hdr%kptopt == [3, 4])) my_timrev = 0
+   my_timrev = my_timrev + 1
+ else
+   my_timrev = gw_timrev
+ end if
+
  ! Consistency check
- ABI_CHECK(any(timrev == [1, 2]), "timrev should be in (1|2)")
+ ABI_CHECK(any(my_timrev == [1, 2]), "timrev should be in (1|2)")
  if (use_antiferro) then
    ABI_CHECK(ANY(hdr%symafm == -1), "Wrong nspden, nsppol, symafm.")
  end if
@@ -5020,7 +5033,7 @@ type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
  space_group = 0 ! FIXME not known at this level.
 
  call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
-   hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
+   hdr%zionpsp,hdr%znuclpsp,my_timrev,use_antiferro,rinv,hdr%title,&
    symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
 
 end function hdr_get_crystal

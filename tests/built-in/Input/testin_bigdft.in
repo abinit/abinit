@@ -54,13 +54,15 @@ ecut   50           # This cut-off is too low for real calculations
                     
                     
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% no_check = yes
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_BIGDFT
 #%% [files]
-#%% psp_files= 01h.pspgth
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

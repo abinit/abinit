@@ -76,6 +76,9 @@ xred              # Reduced coordinate of atoms
 ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -83,7 +86,6 @@ ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 4.0e-2, fld_options =  -medium
-#%% psp_files = 6c.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

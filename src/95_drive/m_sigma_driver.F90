@@ -59,9 +59,9 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gftt, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
+ use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
                              ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
-                             enclose_degbands, get_gaps, gaps_t
+                             ebands_enclose_degbands, ebands_get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
@@ -261,6 +261,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(sigparams_t) :: Sigp
  type(sigma_t) :: Sr
  type(wfd_t),target :: Wfd,Wfdf
+ type(wave_t),pointer :: wave
  type(wvl_data) :: Wvl
 !arrays
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)
@@ -452,7 +453,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(qp_vbik,(KS_BSt%nkpt,KS_BSt%nsppol))
 
  !call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=0)
- ks_vbik(:,:) = get_valence_idx(KS_BSt)
+ ks_vbik(:,:) = ebands_get_valence_idx(KS_BSt)
 
  ! ============================
  ! ==== PAW initialization ====
@@ -1141,7 +1142,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (nscf==0) prev_rhor=ks_rhor
    if (nscf==0 .and. Dtset%usekden==1) prev_taur=ks_taur
 
-   if (nscf>0.and.gwcalctyp>=20.and.wfd%iam_master()) then
+   if (nscf>0.and.gwcalctyp>=20.and. wfd%my_rank == master) then
      ! Print the unitary transformation on std_out.
      call show_QP(QP_BSt,Sr%m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    end if
@@ -1164,7 +1165,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Compute QP occupation numbers.
    call wrtout(std_out,'sigma: calculating QP occupation numbers:','COLL')
    call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
-   qp_vbik(:,:) = get_valence_idx(QP_BSt)
+   qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
 !  #ifdef DEV_HAVE_SCGW_SYM
    ! Calculate the irreducible representations of the new QP amplitdues.
@@ -1252,7 +1253,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! ===========================================
    ! ==== Optional output of the QP density ====
    ! ===========================================
-   if (Dtset%prtden/=0.and.wfd%iam_master()) then
+   if (Dtset%prtden/=0.and. wfd%my_rank == master) then
      call fftdatar_write("qp_rhor",dtfil%fnameabo_qp_den,dtset%iomode,hdr_sigma,&
      cryst,ngfftf,cplex1,nfftf,dtset%nspden,qp_rhor,mpi_enreg_seq,ebands=qp_bst)
    end if
@@ -1351,10 +1352,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
    call wrtout(ab_out,msg,'COLL')
    write(msg,'(5a,f9.4,3a,es21.14,2a,es21.14)')ch10,&
-&   ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
-&   '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
-&   '  QP Band energy    [Ha] = ',get_bandenergy(QP_BSt),ch10,&
-&   '  QP Hartree energy [Ha] = ',ehartree
+    ' QP results after the unitary transformation in the KS subspace: ',ch10,ch10,&
+    '  Number of electrons    = ',qp_rhog(1,1)*Cryst%ucvol,ch10,ch10,&
+    '  QP Band energy    [Ha] = ',ebands_get_bandenergy(QP_BSt),ch10,&
+    '  QP Hartree energy [Ha] = ',ehartree
    call wrtout(ab_out,msg,'COLL')
    write(msg,'(a,80a)')ch10,('-',ii=1,80)
    call wrtout(ab_out,msg,'COLL')
@@ -1397,7 +1398,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        npw_k = Wfd%npwarr(ik_ibz)
        do ii=1,my_nband  ! ib=b1gw,b2gw in sequential
          ib = my_band_list(ii)
-         ug1  => Wfd%Wave(ib,ik_ibz,spin)%ug
+         ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, spin, wave, msg) == 0, msg)
+         ug1  => wave%ug
          cdummy = xdotc(npw_k*Wfd%nspinor,ug1,1,ug1,1)
          ovlp(1) = REAL(cdummy); ovlp(2) = AIMAG(cdummy)
 
@@ -1969,7 +1971,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call timab(409,2,tsec) ! getW
 
- if (wfd%iam_master()) then
+ if (wfd%my_rank == master) then
    ! Write info on the run on ab_out, then open files to store final results.
    call ebands_report_gap(KS_BSt,header='KS Band Gaps',unit=ab_out)
    if(dtset%ucrpa==0) then
@@ -2242,7 +2244,7 @@ endif
      !     enddo!ispinor2
      !     enddo!ispinor1
      !   enddo!spin
-     ! enddo!ibz  
+     ! enddo!ibz
      ! enddo!pwx
      ! call xmpi_barrier(Wfd%comm)
      ! call xmpi_sum(buffer,Wfd%comm,ierr)
@@ -2280,7 +2282,7 @@ endif
      ! enddo!pwx
      ! ABI_DEALLOCATE(buffer)
    endif
-   
+
    !close(67)
    ! call xmpi_barrier(Wfd%comm)
    ! call cwtime(cpu,wall,gflops,"stop")!reduction of rhot1
@@ -2343,7 +2345,7 @@ endif
    endif
    ABI_FREE(rhot1_q_m)
    ABI_FREE(M1_q_m)
-   
+
  else
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
@@ -2431,7 +2433,7 @@ endif
        end if
      end do
 
-     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
+     if (wfd%my_rank == master) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
@@ -2454,7 +2456,7 @@ endif
 
      ! Recalculate new occupations and Fermi level.
      call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
-     qp_vbik(:,:) = get_valence_idx(QP_BSt)
+     qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
 
      write(msg,'(2a,3x,2(es16.6,a))')ch10,' New Fermi energy : ',QP_BSt%fermie,' Ha ,',QP_BSt%fermie*Ha_eV,' eV'
      call wrtout(std_out,msg,'COLL')
@@ -2488,9 +2490,9 @@ endif
      ! Calculate the new m_ks_to_qp
      call updt_m_ks_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_ks_to_qp)
 
-     if (wfd%iam_master()) then
+     if (wfd%my_rank == master) then
        call wrqps(Dtfil%fnameabo_qps,Sigp,Cryst,Kmesh,Psps,Pawtab,QP_Pawrhoij,&
-&       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_ks_to_qp,qp_rhor)
+         Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_ks_to_qp,qp_rhor)
      end if
 
      ! Report the MAX variation for each kptgw and spin
@@ -2515,7 +2517,7 @@ endif
    ! ==== Save the GW results in NETCDF file ====
    ! ============================================
 #ifdef HAVE_NETCDF
-   if (wfd%iam_master()) then
+   if (wfd%my_rank == master) then
      NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), '_SIGRES.nc'), xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
@@ -2535,7 +2537,7 @@ endif
  !=====================
  !==== Close Files ====
  !=====================
- if (wfd%iam_master()) then
+ if (wfd%my_rank == master) then
    close(unt_gw )
    close(unt_gwdiag)
    close(unt_sig)
@@ -2963,7 +2965,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  ! Create crystal_t data type
- cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ cryst = Hdr_wfk%get_crystal(gw_timrev=timrev, remove_inv=remove_inv)
  call cryst%print()
 
  if (Sigp%npwwfn > ng_kss) then ! cannot use more G"s for the wfs than those stored on file
@@ -3062,12 +3064,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! spinmagntarget is passed to fermi.F90 to fix the problem with newocc in case of magnetic metals
  call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=0)
 
- gap_err = get_gaps(KS_BSt, gaps)
+ gaps = ebands_get_gaps(KS_BSt, gap_err)
  call gaps%print(unit=std_out)
  call ebands_report_gap(KS_BSt, unit=std_out)
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
- val_indeces = get_valence_idx(KS_BSt)
+ val_indeces = ebands_get_valence_idx(KS_BSt)
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
@@ -3231,7 +3233,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      do ikcalc=1,Sigp%nkptgw
 
        if (has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikibz,G0)) then
-         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
+         call ebands_enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
             "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&
@@ -3386,7 +3388,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
  Sigp%ecuteps = Gsph_c%ecut
  Dtset%ecuteps = Sigp%ecuteps
- 
+
 ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
  call gsph_init(Gsph_Max,Cryst,Sigp%npwvec,gvec=gvec_kss)

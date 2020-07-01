@@ -85,13 +85,15 @@ xred
    0.0  0.0  0.0
    0.25 0.25 0.25
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si_r.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%  t92.out, tolnlines = 20, tolabs = 0.30, tolrel = 0.13;
-#%% psp_files = Si_r.psp8
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

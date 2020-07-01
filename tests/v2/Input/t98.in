@@ -88,13 +88,15 @@ dilatmx2   1.0d0
  typat  1 2
  znucl  31 33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t98.out, tolnlines = 33, tolabs = 1.1e-03, tolrel = 6.0e-02
-#%% psp_files = 31ga.SGS_mod, 33as.SGS_mod
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
