@@ -414,7 +414,8 @@ subroutine rotate_ks_no(ib1,ib2,Mat,Umat,option)
 !scalars
  integer,intent(in) :: ib1,ib2,option
 !arrays
- complex(dpc),intent(inout) :: Mat(:,:),Umat(:,:)
+ complex(dpc),intent(in) :: Umat(:,:)
+ complex(dpc),intent(inout) :: Mat(:,:)
 !Local variables ------------------------------
 !scalars
  integer:: ndim
