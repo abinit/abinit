@@ -133,12 +133,14 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 # -- Parallelism
  gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "V.LDA_PW-JTH.xml, Sr.LDA_PW-JTH.xml, O.LDA_PW-JTH.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = tucrpa_2.in
 #%% [files]
-#%% psp_files= V.LDA_PW-JTH.xml,  Sr.LDA_PW-JTH.xml, O.LDA_PW-JTH.xml
 #%% [shell] 
 #%% [paral_info]
 #%% max_nprocs = 24

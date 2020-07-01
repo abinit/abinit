@@ -50,13 +50,15 @@
     prtwf 0 prteig 0           ! To save disk space
     optforces 0 optstress 0    ! Not relevant here
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si.LDA-PW-paw.abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   tpositron_1.out, tolnlines=  0, tolabs= 0.0, tolrel= 0.0, fld_options= -easy
-#%% psp_files = Si.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

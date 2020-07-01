@@ -91,13 +91,15 @@
  nomegasrd  5       # Number of frequencies to calculate sigma derivatives, default is 9
  omegasrdmax   0.5 eV  # The Max distance from the KS energy to evaluate sigma derivatives.
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc, 14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t01.out, tolnlines = 12, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
-#%% psp_files = 6c.pspnc, 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

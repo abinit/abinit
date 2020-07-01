@@ -61,6 +61,9 @@
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -68,7 +71,6 @@
 #%% files_to_test = 
 #%%   t79.out,      tolnlines = 0, tolabs = 1.000e-09, tolrel = 1.000e-10, fld_options = -medium;
 #%%   t79o_LOG.xml, tolnlines = 0, tolabs = 1.000e-09, tolrel = 1.000e-10, fld_options = -medium
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

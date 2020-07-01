@@ -3190,7 +3190,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !    In case of electric field pert1, read ddk wfs file
 !    Note that the symmetries are not used for ddk, so read each k point
-!    Also take into account implicitely the parallelism over k points
+!    Also take into account implicitly the parallelism over k points
 
      do idir1=1,3
        if (ddkfil(idir1)/=0) then

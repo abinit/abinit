@@ -65,7 +65,6 @@ qph1l
 #%% [files]
 #%% files_to_test = 
 #%%   teph_5.out, tolnlines= 20, tolabs=  3.000e-01, tolrel=  3.000e-02
-#%% psp_files =  13al.981214.fhi 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

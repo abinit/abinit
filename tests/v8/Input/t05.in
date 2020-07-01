@@ -59,6 +59,9 @@ shiftk 0.0 0.0 0.0
 prtwf 0  prtden 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "H.LDA-PW-paw.abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -66,7 +69,6 @@ prtwf 0  prtden 0
 #%% files_to_test =
 #%%   t05.out, tolnlines = 140, tolabs = 2.e-5, tolrel = 5.e-2
 #%% extra_inputs = t05o_HIST.nc
-#%% psp_files = H.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

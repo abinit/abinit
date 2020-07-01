@@ -4,70 +4,65 @@ authors: MG
 
 # How to compile ABINIT
 
-This tutorial explains how to compile ABINIT and the required external dependencies
+This tutorial explains how to compile ABINIT including the required external dependencies
 without relying on pre-compiled libraries, package managers and root privileges.
-You will learn how to use the standard **configure** and **make** approach
+You will learn how to use the standard **configure** and **make** Unix tools
 to build and install your own software stack including the MPI library and the associated 
-*mpif90* and *mpicc* wrappers required to compile parallel applications.
+*mpif90* and *mpicc* wrappers required to compile parallel MPI applications.
 
-It is assumed that you already have a standard Linux installation 
-providing the basic tools needed to build software from source (Fortran/C compilers and *make*).
-The changes required for MacOsX are briefly mentioned if needed.
+It is assumed that you already have a standard Unix-like installation 
+that provides the basic tools needed to build software from source (Fortran/C compilers and *make*).
+The changes required for MacOsX are briefly mentioned when needed.
 Windows users should install [cygwin](https://cygwin.com/index.html) that 
 provides a POSIX-compatible environment 
-or alternatively use a [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about).
-In the last part, we treat more advanced topics related to the usage of modules in supercomputing centers.
+or, alternatively, use a [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about).
+In the last part of the tutorial, we treat more advanced topics related to the usage of modules in supercomputing centers.
 We also explain how to link ABINIT with the intel MKL library and how to activate support for OpenMP threads. 
 
-We will make extensive use of the bash shell hence familiarity with the terminal is assumed.
-For a quick guide to the command line, please consult 
+Note that we will make extensive use of the bash shell hence familiarity with the terminal is assumed.
+For a quick introduction to the command line, please consult 
 this [Ubuntu tutorial](https://ubuntu.com/tutorials/command-line-for-beginners#1-overview).
 If this is the first time you use the **configure && make** approach to build software, 
 we **strongly** recommended to read this 
-[introduction](https://www.codecoffee.com/software-installation-configure-make-install/)
+[guide](https://www.codecoffee.com/software-installation-configure-make-install/)
 before proceeding with the next steps.
+
+If you are not interested in compiling everything from source, you may want to consider the following alternatives:
+
+* Compilation with external libraries provided by apt-get (Linux users)
+
+* Precompiled versions provided by conda-forge (Linux and MacOsX)
+
+* Homebrew bottles (MacOsX)
 
 !!! important 
 
-    Unfortunately, in this tutorial we cannot cover all possible cases.
-    The aim is to teach you how to compile code from source but we cannot guarantee
-    that these recipes will work out of the box on every possible machine.
-    Fortunately, the internet provides lots of resources and remember that search engines are your best friend!
-    In several cases, one can find the solution by just copying the
-    error message in the search bar.
+    The aim of this tutorial is to teach you how to compile code from source but we cannot guarantee
+    that these recipes will work out of the box on every possible architecture.
+    We will do our best to explain how to setup your environment and how to avoid the typical pitfalls but 
+    we cannot cover all the possible cases.
+    Fortunately, the internet provides lots of resources, search engines are your best friends and in some cases
+    one can find the solution by just copying the error message in the search bar.
+    For more complicated situations, you can ask for help on the Abinit forum but keep in mind but 
+    one should always provide enough information about the problem.
 
-<!--
-A list of useful commands and options is also available 
-[here](https://www3.ntu.edu.sg/home/ehchua/programming/cpp/gcc_make.html)
-For users who are already familiar with these tools, the present tutorial may be
-## Useful concepts
-### Semantic version
-### Dynamic linkage
--->
-
-If you are not interested in compiling ABINIT from source, consider the following alternatives:
-
-* Precompiled versions provided by conda-forge for Linux and MacOsX users
-
-* Homebrew bottles for MacOsX users
-
-* Compilation with external libraries provided by apt-get
 
 ## Getting started
 
 Since ABINIT is written in Fortran, we need a **recent** Fortran compiler 
 that supports the **F2003 specifications** as well as a C compiler.
-At the time of writing ( |today| ) the C++ compiler is optional and required only for advanced features 
-such as the interface with the TRIQS library (not treated in this lesson).
+At the time of writing ( |today| ), the C++ compiler is optional and required only for advanced features 
+such as the interface with the TRIQS library that won't be treated in this lesson.
 
 In what follows, we will be focusing on the GNU toolchain i.e. *gcc* for C and *gfortran* for Fortran.
 These "sequential" compilers are adequate if you don't need to compile parallel MPI applications.
 The compilation of MPI code, indeed, requires the installation of additional libraries 
-and ispecialized wrappers for the compilers (*mpif90* and *mpicc*).
-This very important scenario is covered in more details in the next sections.
+and specialized wrappers for the compilers (*mpif90*, *mpicc*) that "replace" the sequential ones.
+This very important case scenario is covered in more details in the next sections.
+For the time, we mainly focus on the compilation of sequential applications/libraries.
 
 First of all, let's make sure the **gfortran** compiler is installed on your machine
-by issuing in the terminal the command:
+by issuing in the terminal the following command:
 
 ```sh
 which gfortran
@@ -75,10 +70,10 @@ which gfortran
 ```
 
 The **which** command, returns the absolute path of the executable.
-This tool is extremely useful to pinpoint possible problems and we will use it 
+This Unix tool is extremely useful to pinpoint possible problems and we will use it 
 a lot in the rest of this tutorial.
 
-To get the version of the compiler, use:
+To get the version of the compiler, use the `--version` option:
 
 ```sh
 gfortran --version
@@ -90,7 +85,7 @@ At present, ABINIT requires version >= ??.
 
 If gfortran is not installed, you may want to use the package manager 
 provided by your Linux distribution to install it.
-On Ubuntu, for instance, use:
+On Ubuntu, for instance, one can use:
 
 ```sh
 sudo apt-get install gfortran
@@ -114,16 +109,16 @@ which make
 
 ## How to compile BLAS and LAPACK 
 
-BLAS/LAPACK represents the workhorse of many scientific codes and an optimized implementation 
+BLAS/LAPACK represent the workhorse of many scientific codes and an optimized implementation 
 is crucial for achieving **good performance**.
 In principle this step can be skipped as any decent Linux distribution already provides
 pre-compiled versions but, as already mentioned in the introduction, we are geeks and we 
 prefer to compile everything from source.
 Moreover the compilation of BLAS/LAPACK represents an excellent exercise 
 that gives us the opportunity to discuss some basic concepts that 
-will reveal useful in other parts of this tutorial.
+will reveal useful in the other parts of this tutorial.
 
-First of all, let's create a new directory inside your `$HOME` (let's call it **local**):
+First of all, let's create a new directory inside your `$HOME` (let's call it **local**) with the following command:
 
 ```sh    
 cd $HOME && mkdir local
@@ -138,12 +133,12 @@ cd $HOME && mkdir local
     echo My home directory is $HOME
     ```
 
-    to print the value of this variable.
+    to print the value of the variable.
 
     The **&&** syntax is used to chain commands together, such that the next command is executed if and only 
     if the preceding command exited without errors (or, more accurately, exits with a return code of 0).
-    We wil use this trick a lot in the other examples to save lines in the terminal so that one can also easily cut and 
-    paste the examples.
+    We wil use this trick a lot in the other examples to reduce the number of lines we have to type 
+    in the terminal so that one can easily cut and paste the examples.
 
 
 Now create the `src` subdirectory inside $HOME/local with:
@@ -152,7 +147,7 @@ Now create the `src` subdirectory inside $HOME/local with:
 cd $HOME/local && mkdir src && cd src
 ```
 
-The *src* directory will be used to store the packages with the source files and compile the code, 
+Note that the *src* directory will be used to store the packages with the source files and compile the code, 
 whereas executables and libraries will be installed in `$HOME/local/bin` and`$HOME/local/lib`, respectively.
 
 Download the tarball from the [openblas website](https://www.openblas.net/) with:
@@ -161,7 +156,7 @@ Download the tarball from the [openblas website](https://www.openblas.net/) with
 wget https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
 ```
 
-If *wget* is not available, use *curl* with the `-o` option to specify the name of the output file:
+If *wget* is not available, use *curl* with the `-o` option to specify the name of the output file as in:
 
 ```sh
 curl https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz -o v0.3.7.tar.gz 
@@ -197,9 +192,10 @@ make -j2 USE_THREAD=0 USE_LOCKING=1
 
 to build the single thread version.
 By default, openblas activates threads (see [FAQ page](https://github.com/xianyi/OpenBLAS/wiki/Faq#multi-threaded))
-but here we prefer to use the sequential version as Abinit is optimized for MPI.
+but here we prefer to use the sequential version as Abinit is mainly optimized for MPI.
 
 <!--
+OpenMP threads are supported by Abinit but, for the time being, we prefer to focus 
 and execute the *configure* script with:
 
 ```sh
@@ -218,7 +214,7 @@ different versions without affecting the OS installation.
 
 Now issue:
 -->
-The `-j2` option tells make to use 2 processes to build the package in order to speed up the compilation. 
+The `-j2` option tells make to use 2 processes to build the code in order to speed up the compilation. 
 Adjust this value according to the number of (physical) cores available on your machine.
 
 At the end, you should get the following output:
@@ -267,7 +263,7 @@ ls $HOME/local/lib/libopenblas*
 
 Files ending with `.so` are shared libraries (`.so` stands for *shared object*) whereas 
 `.a` files are static libraries.
-In this tutorial, we will mainly use dynamic linking as this is the most common scenario 
+In this tutorial, we will mainly use dynamic linking as this is the most common scenario,
 but this also means that we need to set the value of the LD_LIBRARY_PATH environment variable.
 
 <!--
@@ -318,15 +314,16 @@ echo $LD_LIBRARY_PATH
 ```
 
 If this is the first time you hear about $PATH and $LD_LIBRARY_PATH, please take some time to learn
-about the meaning of this environment variables.
+about the meaning of these environment variables.
 More information about `$PATH` is available [here](http://www.linfo.org/path_env_var.html)
 
 !!! tip
 
     MaxOsx users should replace `LD_LIBRARY_PATH` with `DYLD_LIBRARY_PATH`
 
-    Remember that one can use `env` to print all the environment variables defined in your session and pipe
-    the results to other Unix tools. Try e.g.:
+    Remember that one can use `env` to print all the environment variables defined 
+    in your session and pipe the results to other Unix tools. 
+    Try e.g.:
 
     ```sh
     env | grep LD_
@@ -342,9 +339,8 @@ TODO
 
 At this point, it should not be that difficult to compile and install the libxc library for the XC functional.
 Libxc is written in C and can be built using the standard `configure && make` approach.
-No external dependency is needed except for basic C libraries that are available
+No external dependency is needed, except for basic C libraries that are available
 on every decent Linux distribution.
-<!-- The only thing worth noticing is that you will need to activate the Fortran interface -->
 
 Also in this case, you are supposed to configure the package with the *--prefix* option, 
 run the tests to validate the build and finally execute `make install`.
@@ -382,7 +378,7 @@ ls ~/local/lib/libxc*
 
 libxc is the C library.
 libxcf90 is the F90 library 
-libxcf03  is the F2003 library
+libxcf03 is the F2003 library
 
 At present, the Fortran interface is not required by Abinit, only the C library.
 We made this choice, because one can easily use the C library with Abinit compiled with different Fortran compilers/version
@@ -404,11 +400,15 @@ TODO: Discuss FCFLAGS and FCDFLAGS
 
 FFTW is a C library for computing the Fast Fourier transform in one or more dimensions.
 ABINIT already provides an internal implementation of the FFT algorithm
-hence FFTW is considered an optional dependency although it is highly recommended 
-if you really care about **performance**. 
-Indeed, FFTW (or, even better, the intel DFTI library provided by MKL) 
-is usually faster than the internal ABINIT version.
-The [[fftalg]] variable defines the implementation to be used and 312 corresponds to the FFTW implementation.
+hence FFTW is considered an optional dependency although it is **highly recommended**
+if you really care about performance.
+The reason is that FFTW (or, even better, the intel DFTI library provided by MKL) 
+is usually much faster than the internal ABINIT version.
+
+!!! important
+
+    FFTW is easy to install on Linux machines
+    The [[fftalg]] variable defines the implementation to be used and 312 corresponds to the FFTW implementation.
 
 The FFTW source code can be downloaded from [fftw.org](http://www.fftw.org/), 
 and the tarball of the latest version is available at <http://www.fftw.org/fftw-3.3.8.tar.gz>.
@@ -419,12 +419,11 @@ wget http://www.fftw.org/fftw-3.3.8.tar.gz
 tar -zxvf fftw-3.3.8.tar.gz && cd fftw-3.3.8
 ```
 
-The compilation procedure is very similar to the one we used for libxc. 
+The compilation procedure is very similar to the one already used for the libxc package. 
 Note, however, that ABINIT needs both the **single-precision** and the **double-precision** version.
-This means that you need to configure, build and install the package twice.
+This means that we need to configure, build and install the fftw package twice.
 
 To build the single precision version, use:
-
 
 ```sh
 ./configure --prefix=$HOME/local --enable-single
@@ -482,32 +481,32 @@ to get the list of symbols provided by the library and then use *grep* to search
 
     At present, there's no need to compile FFTW with MPI support because ABINIT implements its own
     version of the MPI-FFT algorithm using the sequential FFTW version.
-    The MPI-algorithm implemented in ABINIT is rather advanced and optimized for plane-waves codes 
+    The MPI-algorithm implemented in ABINIT is optimized for plane-waves codes 
     as it supports zero-padding and composite transforms for the applications of the local part of the KS potential. 
 
 
 ## Installing MPI
 
 In this section, we discuss how to compile and install the MPI library.
-This step is required if you need to compile MPI-based libraries such as
-Scalapack or HDF5 with support for parallel IO (MPI-IO)
-and/or you plan to run ABINIT with multiple processes.
+This step is required if you 
+wnat to run ABINIT with multiple processes and/or youneed to compile MPI-based libraries such as
+PBLAS/Scalapack or the HDF5 library with parallel MPI-IO support.
 
 It is worth to stress that the MPI installation provides two scripts (**mpif90** and **mpicc**)
 wrapping the Fortran and the C compiler, respectively.
-These scripts must be used to compile parallel software using MPI instead 
+These scripts **must be used** to compile parallel software using MPI instead 
 of the "sequential" compilers e.g. `gfortran` and `gcc`. 
 The MPI library also provides launcher scripts installed in the *bin* directory (*mpirun* or *mpiexec*)
-to execute MPI applications with NUM_PROCS processes and the syntax:
+to execute MPI applications with NUM_PROCS MPI processes with the syntax:
 
 ```sh
 mpirun -n NUM_PROCS EXECUTABLE [ARGS]
 ```
 
 Keep in mind that there are several MPI implementations available around
-(*openmpi*, *mpich*, *intel mpi*, etc) so you must **choose one and stick to it** 
+(e.g. *openmpi*, *mpich*, *intel mpi*, etc) so you must **choose one implementation and stick to it** 
 when building your software stack.
-In other words, all the libraries and executables requiring MPI should be compiled, linked and executed 
+In other words, all the libraries and executables requiring MPI must be compiled, linked and executed 
 with the **same MPI library**.
 Don't try to link a library compiled with e.g. *mpich* if you are building the code with 
 the *mpif90* wrapper provided by e.g. *openmpi*.
@@ -555,7 +554,7 @@ more information, such as the ld(1) and ld.so(8) manual pages.
 ----------------------------------------------------------------------
 ```
 
-Let's have a look at the MPI executables we just installed in $HOME/local/bin:
+Let's have a look at the MPI executables we've just installed in $HOME/local/bin:
 
 ```sh
 ls $HOME/local/bin/mpi*
@@ -602,38 +601,38 @@ ls $HOME/local/include/mpi*
 !!! important
 
     The `.mod` files are Fortran modules produced by the Fortran compiler.
-    These modules must be *passed* to the Fortran compiler when compiling e.g ABINIT.
-    Note that these `.mod` files are **compiler-dependent** and the format may depend on the version of the compiler.
-    In other words, one cannot use these module files to compile Fortran code with another compiler.
-    and you should not expect to be able to use modules compiled with a different version of the different compiler.
+    The location of these modules must be *passed* to the Fortran compiler when compiling ABINIT.
+    Note also that these `.mod` files are **compiler- and version-dependent**.
+    In other words, one cannot use these `.mod` files to compile code with a different Fortran compiler.
+    Moreover, you should not expect to be able to use modules compiled with a different version of the different compiler.
     This is one of the reasons why the version of the Fortran compiler at hand really matters.
 
 
 ## Installing HDF5 and netcdf4
 
-Netcdf4 is built on top of HDF5 and consists of two different parts: 
+Netcdf4 is built on top of HDF5 and consists of two different layers: 
 
 * The low-level C library
+
 * The Fortran bindings i.e. Fortran routines calling the C implementation.
   This is the high-level API/ABI used by ABINIT to perform all the IO operations on netcdf files.
 
-To build the libraries required by ABINIT, we will compile the different parts
+To build the libraries required by ABINIT, we will compile the different layers
 in a bottom-up fashion starting from the HDF5 package.
 Since we want to activate support for parallel IO, we need to compile the library using the wrappers
 provided by our MPI installation instead of using *gcc* or *gfortran* directly.
 
 Let's start by downloading the HDF5 tarball from this [download page](https://www.hdfgroup.org/downloads/hdf5/source-code/)
-Uncompress the archive with *tar* as usual. 
-To configure the package, use:
+Uncompress the archive with *tar* as usual, then configure the package with:
 
 ```sh
 ./configure --prefix=$HOME/local/ CC=$HOME/local/bin/mpicc --enable-parallel --enable-shared
 ```
 
 where we've used *CC* variable to specify the C compiler.
-This step is important to enable support for parallel IO.
+This step is important in order to enable support for parallel IO.
 
-At the end of the configuration step, you should get:
+At the end of the configuration step, you should get the following output:
 
 ```sh
                      AM C Flags:
@@ -810,22 +809,13 @@ See also <https://www.unidata.ucar.edu/software/netcdf/docs/building_netcdf_fort
 
 In this section, we discuss how to compile and install ABINIT 
 using the (MPI) compilers and the libraries we have installed previously.
-<!--
-There are two ways of getting the source code of ABINIT:
-
-  * directly from the ABINIT web site ([abinit.org/](https://www.abinit.org/)) by 
-
-  * from the ABINIT gitlab git repository. This is favored, as it allows easier integration and merging, testing, etc...
-   ([abinit.org/](https://www.abinit.org/)) by 
--->
-
-Download the tarball from [this page](https://www.abinit.org/packages)
+Download the tarball from [this page](https://www.abinit.org/packages) using
 
 ```sh
 wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.2.tar.gz
 ```
 
-In this case, we are using version "9.0.2" but you may want to download 
+In this case, we are using version "9.0.2" but you may want to download the
 latest production version to take advantage of new features and benefit from bug fixes.
 Once you got the tarball, uncompress it by typing:
 
@@ -835,14 +825,14 @@ tar -xvzf abinit-9.0.2.tar.gz
 
 Then go into the newly created *abinit-9.0.2* directory and take some time to read the `INSTALL` file.
 
-Now let's try to build ABINIT. 
+Now let's try to build ABINIT from source.
 Before actually starting the compilation, type:
 
 ```sh
 ./configure --help
 ```
 
-and read carefully the output. 
+and read carefully the documentaton of the different options. 
 You might then find useful to have a look at the template for the configuration files 
 stored in _~abinit/doc/build/config-template.ac9_
 which will provide you with more details on the configuration. 
@@ -862,8 +852,8 @@ https://www.cprogramming.com/tutorial/shared-libraries-linux-gcc.html
 
 In this example, we will be taking advantage of the high-level interface provided by the *with_XXX* options
 to tell the build system where external dependencies are located instead of passing options explicitly.
-This is the easiest approach but if configure cannot detect the dependency properly, you may need to set some options 
-manually.
+This is the easiest approach but if configure cannot detect the dependency properly, you may need to set 
+some options manually.
 
 ```sh
 # -------------------------------------------------------------------------- #
@@ -1008,8 +998,8 @@ that can lead to a significant speedup while simplifying considerably the compil
 
 In what follows, we assume a cluster in which the sysadmin has already installed all the modules 
 (compilers, MPI and libs) required to compile ABINIT.
-If some required libraries are lacking, it should not be that difficult to reuse the expertise acquired 
-in this tutorial to build and install your own libs inside $HOME/local although the best solution is 
+If some of the required libraries are lacking, it should not be that difficult to reuse the expertise acquired 
+in this tutorial to build and install your own libraries inside $HOME/local although the best solution is 
 to ask the syadmin to provide modules with the dependencies requiered by Abinit or, even better, 
 an Abinit module.
 

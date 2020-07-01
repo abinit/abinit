@@ -164,6 +164,9 @@ bs_loband8         2
 nband8   8
 bs_freq_mesh8      0 10.0 0.1 eV
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -181,7 +184,6 @@ bs_freq_mesh8      0 10.0 0.1 eV
 #%%  t11o_DS6_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t11o_DS7_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t11o_DS8_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous
-#%% psp_files = 14si.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

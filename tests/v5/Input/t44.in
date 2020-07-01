@@ -38,13 +38,15 @@
   toldfe   1.0d-7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "83bi_halfso.psphgh, 83bi.psphgh, 83bi.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t44.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 83bi_halfso.psphgh, 83bi.psphgh, 83bi.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

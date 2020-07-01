@@ -62,12 +62,14 @@ kptbounds2  1/4 1/4 1/4 #R'
             1/2 1/2 0.0 #M
             0.0 0.0 0.0 #Gamma
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "V.LDA_PW-JTH.xml, Sr.LDA_PW-JTH.xml, O.LDA_PW-JTH.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = tucrpa_1.in
 #%% [files]
-#%% psp_files= V.LDA_PW-JTH.xml,  Sr.LDA_PW-JTH.xml, O.LDA_PW-JTH.xml
 #%% [shell] 
 #%% [paral_info]
 #%% max_nprocs = 24

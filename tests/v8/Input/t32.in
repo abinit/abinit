@@ -51,13 +51,15 @@ prtvol 2
 ldaminushalf2 1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si_KJ_mod.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t32.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -easy
-#%% psp_files = Si_KJ_mod.xml
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

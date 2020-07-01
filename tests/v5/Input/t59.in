@@ -36,13 +36,15 @@ toldfe 1.0d-6     # Will stop when, twice in a row, the difference
 diemix 0.7   diemac 7.0
 prtwf 0   prtden 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "11na.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t59.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 11na.pspnc
 #%% [paral_info]
 #%% max_nprocs = 3
 #%% [extra_info]

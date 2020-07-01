@@ -3796,8 +3796,10 @@ Variable(
     mnemonics="Electron-PHonon: EXTRA ELectrons",
     added_in_version="before_v9",
     text=r"""
-Number of electrons per unit cell to be added to the initial value computed
-from the pseudopotentials and unit cell.
+Number of electrons per unit cell to be added/subtracted to the initial value computed
+from the pseudopotentials and the unit cell.
+Can be used to simulate doping within the rigid band approximation.
+See also [[eph_doping]] to specify the same quantity in terms of charge/cm^3
 """,
 ),
 
@@ -3812,9 +3814,11 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-This variable can be used to change the value of the Fermi level when
-performing electron-phonon calculations with [[optdriver]] == 7. This variable
-has effect only if set to a non-zero value. See also [[eph_extrael]].
+This variable can be used to change artificially the value of the Fermi level when
+performing e-ph calculations.
+The variable has effect only if set to a non-zero value.
+This option is mutually exclusive with [[eph_extrael]] and [[eph_doping]].
+When [[eph_fermie]] is used the number of temperatures specified by [[tmesh]] cannot be greater than one.
 """,
 ),
 
@@ -3869,8 +3873,10 @@ Variable(
     requires="[[eph_intmeth]] == 1",
     added_in_version="before_v9",
     text=r"""
-This variable defines the gaussian broadening used for the integration over
-the Fermi surface when [[eph_intmeth]] == 1.
+This variable defines the gaussian broadening used for the integration over the double delta
+over the Fermi surface when [[eph_intmeth]] == 1.
+A negative value, activates the adaptive gaussian broadening proposed in [[cite:Li2015]]
+in which the broadening is automatically computed from the group velocities.
 """,
 ),
 
@@ -3896,11 +3902,16 @@ Phonon linewidths in metals (**eph_task** = 1):
 
 :   The default approach for the integration of the double-delta over the Fermi surface is 2 (tetrahedron).
     When the gaussian method is used, the broadening is given by [[eph_fsmear]].
+    A negative value activates the adaptive Gaussian broadening.
     See also [[eph_fsewin]].
 
-Electron-phonon self-energy
+Electron-phonon self-energy with **eph_task** = 4):
 
-:   The default is gaussian method with broadening specified by [[zcut]].
+:   The default is Lorentzian method with broadening specified by [[zcut]].
+
+Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
+
+:   The default is Tetrahedron method
 """,
 ),
 
@@ -20539,7 +20550,7 @@ For a "dummy" atom, with [[znucl]] = 0, as used in the case of calculations
 with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
 """,
 ),
-#{"abinit_version": "8.7.3"}
+
 Variable(
     abivarname="tmesh",
     varset="eph",
@@ -20551,8 +20562,10 @@ Variable(
     added_in_version="8.7.3",
     text=r"""
 This variable defines the linear mesh of temperatures used in the EPH code ([[optdriver]] = 7).
-The first entry gives the initial temperature in Kelvin, the second entry the linear step in Kelvin,
-the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
+The first entry gives the **initial** temperature in Kelvin,
+the second entry the **linear step** in Kelvin,
+the third entry is the **number of points** in the mesh.
+The default value corresponds to 6 points between 5 K and 300 K.
 """,
 ),
 
@@ -20720,25 +20733,33 @@ Variable(
     varset="eph",
     topics=['SelfEnergy_expert'],
     vartype="real",
-    defaultval=[-1.0, -1.0],
+    defaultval=[0.0, 0.0],
     dimensions=[2],
     mnemonics="SIGMA Energy-range.",
     characteristics=['[[ENERGY]]'],
     added_in_version="9.0.0",
     text=r"""
-This variable selects the k-points and the bands in the self-energy matrix elements on the basis
-of their position with respect to the band edges (energy differences are **always positive**, even for holes).
+This variable consists of two entries that allow one to select the k-points and the bands
+in the e-ph self-energy $\Sigma_\nk$ on the basis of their KS energy $\ee_\nk$.
+This variable is used in [eph_task]] = -4 to compute phonon-limited mobilities in the energy region relevant for transport.
 
-Only the k-points and the bands whose energy difference if less than this value will be included in the calculation.
-The first entry refers to holes, the second one to electrons.
-A negative entry can be used to exclude either holes or electrons from the calculation.
-This variable is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
+If both entries in [[sigma_erange]] are negative, the code assumes a metal and only states within the energy
+window [efermi - abs(sigma_erange(1)), efermi + abs(sigma_erange(2)] are included in the calculation.
+
+Positive (or zero) values are used in semiconductors
+to define an energy range with respect to the band edges
+In this case, the first entry given the position of the holes with respect to the CBM while the second entry
+gives the position of electrons with respect to the VBM (energy differences are **always positive**, even for holes).
+A zero entry can be used to exclude either holes or electrons from the calculation.
+
+If both entries are zero, the variable is ignored.
+Note that [[sigma_erange]] is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
 
 !!! important
 
-    By default, this variable is given in Hartree. Use
+    By default, this variable is given in Hartree. Use e.g.
 
-        sigma_erange 1 1 eV
+        sigma_erange 0.0 0.5 eV
 
     to specify the energy intervals in eV units.
 """,
@@ -20862,8 +20883,12 @@ Variable(
     mnemonics="KERANGE PATH",
     added_in_version="9.0.0",
     text=r"""
-This variable defines the path of the external KERANGE.nc file with the list of k-points in the electron/hole pockets.
-The tables stored in the file are used for the calculation of the imaginary part of the e-ph self-energy ([[eph_task]] == -4).
+This variable defines the path of the external KERANGE.nc file with the list of k-points in the
+electron/hole pockets for semiconductors or the k-points withing an energy window around the Fermi level
+as specified by [[sigma_erange]].
+
+The tables stored in the netcdf file are used for the calculation of the imaginary part of
+the e-ph self-energy ([[eph_task]] == -4).
 This file is generated by running a preliminary step with [[wfk_task]] = "wfk_kpts_erange".
 For an example, see [[test:v9_57]]
 """,
@@ -21565,24 +21590,6 @@ is not relevant for the definition of the LR model.
 ),
 
 Variable(
-    abivarname="eph_mrta",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_expert'],
-    dimensions="scalar",
-    defaultval=1,
-    mnemonics="activate Momentum Relaxation Time Approximation",
-    added_in_version="9.1.0",
-    text=r"""
-This **advanced** variable can be used to deactivate the computation of the electron linewidths with the
-Momentum Relaxation Time (MRTA) when [[eph_task]] == -4
-By default, the code computes linewidths both with the SERTA and MRTA and results are stored to netcdf file.
-The calculation of the MRTA is relatively fast but if performance is critical and only SERTA is needed, one can use
-eph_mrta 0.
-""",
-),
-
-Variable(
     abivarname="getsigeph_filepath",
     varset="files",
     vartype="string",
@@ -21610,6 +21617,22 @@ Variable(
     added_in_version="9.1.4",
     text=r"""
     See [[brav@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="eph_doping",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="EPH doping",
+    added_in_version="9.2.0",
+    text=r"""
+Gives the doping charge in units of |e_charge| / cm^3.
+Negative for n-doping, positive for p-doping.
+Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
 """,
 ),
 

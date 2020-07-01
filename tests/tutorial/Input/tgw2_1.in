@@ -54,6 +54,9 @@ prtvol     5
 enunit     1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -61,7 +64,6 @@ enunit     1
 #%% [files]
 #%% files_to_test = 
 #%%   tgw2_1.out, tolnlines=0, tolabs=0.000e+00, tolrel=3.000e-02
-#%% psp_files = 13al.981214.fhi
 #%% [shell] 
 #%% post_commands = 
 #%%   ww_cp tgw2_1o_DS2_WFK tgw2_2i_WFK;

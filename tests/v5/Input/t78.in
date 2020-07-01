@@ -46,13 +46,15 @@ nstep 2
 tolwfr 1.e-8
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.pspnc, 6c.pspnc, 8o.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t78.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 26fe.pspnc, 6c.pspnc, 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

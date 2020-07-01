@@ -72,6 +72,9 @@ typat 1           # For the first dataset, both numbers will be read,
 nstep 40          # Maximal number of SCF cycles
 diemac 2.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.fakesmooth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -79,7 +82,6 @@ diemac 2.0
 #%% [files]
 #%% files_to_test = 
 #%%   t50.out, tolnlines = 9, tolabs = 3.0e-5, tolrel = 4.0e-2, fld_options =  -easy
-#%% psp_files = 02he.fakesmooth
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

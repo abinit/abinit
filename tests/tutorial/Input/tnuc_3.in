@@ -32,6 +32,9 @@ typat    1 1
 znucl    50  
 xred     0.000000000000000   0.000000000000000   0.000000000000000 
          0.250000000000000   0.250000000000000   0.250000000000000 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Sn-GGA-PBE-rpaw-2.70.abinit"
       
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -39,7 +42,6 @@ xred     0.000000000000000   0.000000000000000   0.000000000000000
 #%% [files]
 #%% files_to_test = 
 #%%   tnuc_3.out, tolnlines=  2, tolabs=  6.000e-10, tolrel=  3.000e-10
-#%% psp_files = Sn-GGA-PBE-rpaw-2.70.abinit
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

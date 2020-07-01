@@ -78,6 +78,9 @@ nstep 800
 ntypat 1
 znucl 28
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -85,7 +88,6 @@ znucl 28
 #%% [files]
 #%% files_to_test = 
 #%%   t96.out, tolnlines = 3, tolabs = 2.1e-02, tolrel = 1.001e+00, fld_options = -easy
-#%% psp_files = 28ni.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

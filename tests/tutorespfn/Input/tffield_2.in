@@ -71,6 +71,9 @@ ndtset 3
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -78,7 +81,6 @@ ndtset 3
 #%% [files]
 #%% files_to_test = 
 #%%   tffield_2.out, tolnlines=  2, tolabs=  5.000e-07, tolrel=  3.000e-04, fld_options=-medium
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

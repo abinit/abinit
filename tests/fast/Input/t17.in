@@ -26,6 +26,9 @@
  xcart -2.122 0 0 2.122 0 0
  znucl  14.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -33,7 +36,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t17.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 14si.pspnc
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t17o_WFK t23i_WFK;
