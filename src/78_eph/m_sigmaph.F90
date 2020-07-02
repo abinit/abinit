@@ -3452,8 +3452,7 @@ end function sigmaph_read
 !!
 !! SOURCE
 
-type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta, linewidth_mrta, &
-                                           velocity, comm, ierr, indq2ebands) result(new)
+type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidths, velocity, comm, ierr, indq2ebands) result(new)
 
 !Arguments -----------------------------------------------
  integer,intent(in) :: comm
@@ -3461,7 +3460,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  integer, intent(out) :: ierr
- real(dp), allocatable, intent(out) :: linewidth_serta(:,:,:,:), linewidth_mrta(:,:,:,:), velocity(:,:,:,:)
+ real(dp), allocatable, intent(out) :: linewidths(:,:,:,:,:), velocity(:,:,:,:)
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
 
 
@@ -3520,10 +3519,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  ! so that only the relevant k-points are stored on file.
 
  ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
- ABI_CALLOC(linewidth_serta, (self%ntemp, mband, nkpt, nsppol))
- if (self%mrta > 0) then
-   ABI_CALLOC(linewidth_mrta, (self%ntemp, mband, nkpt, nsppol))
- end if
+ ABI_CALLOC(linewidths, (self%ntemp, mband, nkpt, nsppol, 2))
 
  do spin=1,nsppol
    do ikcalc=1,self%nkcalc
@@ -3538,13 +3534,13 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
        do itemp=1,self%ntemp
          ! Read SERTA lifetimes
          ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), &
-                 linewidth_serta(itemp, band_ks, ikpt, spin), start=[2, itemp, iband, ikcalc, spin])
+                 linewidths(itemp, band_ks, ikpt, spin, 1), start=[2, itemp, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
 
          ! Read MRTA lifetimes
          if (self%mrta > 0) then
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
-                                linewidth_mrta(itemp, band_ks, ikpt, spin), start=[itemp, iband, ikcalc, spin])
+                                linewidths(itemp, band_ks, ikpt, spin, 2), start=[itemp, iband, ikcalc, spin])
            NCF_CHECK(ncerr)
          end if
        end do
@@ -3563,8 +3559,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ! This so that output linewidths are always positive independently of the kind of self-energy used
  ! (retarded or advanced)
- linewidth_serta = abs(linewidth_serta)
- if (self%mrta > 0) linewidth_mrta = abs(linewidth_mrta)
+ linewidths = abs(linewidths)
 
 end function sigmaph_get_ebands
 !!***

@@ -75,7 +75,7 @@ MODULE m_ddk
  end type ham_targets_t
 
 
- !!****t* m_ddk/ddkop_t
+!!****t* m_ddk/ddkop_t
 !! NAME
 !!  ddkop_t
 !!
@@ -150,6 +150,34 @@ MODULE m_ddk
  !end interface ddkop_t
 !!***
 
+!!****t* m_ddk/ddkstore_t
+!! NAME
+!!  ddkstore_t
+!!
+!! FUNCTION
+!!  This object stores the matrix elements of the velocity operator computed with the DFPT routines.
+!!
+!! SOURCE
+
+ type,public :: ddkstore_t
+
+   integer :: bmin, bmax
+   ! Min and max band index
+
+   logical :: only_diago
+   ! True if we are computing only the diagonal elements
+
+   real(dp),allocatable :: dipoles(:,:,:,:,:,:), vdiago(:,:,:,:), vmat(:,:,:,:,:,:)
+
+ contains
+
+   procedure :: free => ddkstore_free
+    ! Free memory.
+
+ end type ddkstore_t
+
+ !public :: ddkop_new   ! Build object
+
 CONTAINS
 
 !----------------------------------------------------------------------
@@ -185,42 +213,29 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0
- integer :: mband, nbcalc, nsppol, ib_v, ib_c
- integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
- integer :: ii, jj, ik, bandmin, bandmax, istwf_k, idir, edos_intmeth
- integer :: my_rank, nproc, ierr, bstop
+ integer,parameter :: master = 0
+ integer :: mband, nbcalc, nsppol, ib_v, ib_c, mpw, spin, nspinor, nkpt, nband_k, npw_k
+ integer :: ii, jj, ik, bmin, bmax, istwf_k, idir, my_rank, nproc, ierr, bstop
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
- real(dp) :: edos_step, edos_broad
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
  character(len=500) :: msg
  character(len=fnlen) :: fname
- logical :: only_diago, is_kmesh
  type(wfd_t) :: wfd
  type(vkbr_t) :: vkbr
- type(ebands_t) :: ebands, ebands_tmp
- type(edos_t)  :: edos
- type(gaps_t)  :: gaps
+ type(ebands_t) :: ebands
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp, hdr
  type(ddkop_t) :: ddkop
  type(wave_t),pointer :: wave_v, wave_c
+ type(ddkstore_t) :: ds
 !arrays
- integer,parameter :: voigt2ij(2, 6) = reshape([1, 1, 2, 2, 3, 3, 2, 3, 1, 3, 1, 2], [2, 6])
- integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:),nband(:,:), kg_k(:,:)
+ !integer,parameter :: voigt2ij(2, 6) = reshape([1, 1, 2, 2, 3, 3, 2, 3, 1, 3, 1, 2], [2, 6])
+ integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:), nband(:,:), kg_k(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  real(dp) :: kpt(3), vv(2, 3), vred(2,3), vcar(2,3)
- real(dp) :: dummy_vals(1,1,1,1),dummy_vecs(1,1,1,1,1)
- real(dp) :: eminmax_spin(2,2)
- real(dp) :: emin, emax
- real(dp),allocatable :: dipoles(:,:,:,:,:,:)
- real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:), vvdos_tens(:,:,:,:,:,:)
- real(dp),allocatable :: vv_tens(:,:,:,:,:,:)
- real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
- !real(dp),allocatable :: vvdos_mesh(:) !, vvdos_vals(:,:,:,:)
  complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -243,22 +258,29 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  nspinor = hdr%nspinor
  mband   = hdr%mband
 
- only_diago = .False.; if (dtset%wfk_task == WFK_TASK_DDK_DIAGO) only_diago = .True.
+ ds%only_diago = .False.; if (dtset%wfk_task == WFK_TASK_DDK_DIAGO) ds%only_diago = .True.
 
  ! Define band range.
  !TODO: hardcoded for now but should be an argument.
- bandmin = 1; bandmax = mband
- nbcalc  = bandmax - bandmin + 1
+ bmin = 1; bmax = mband
+ nbcalc  = bmax - bmin + 1
 
  if (my_rank == master) then
    write(ab_out, "(a)")" Parameters extracted from the Abinit header:"
-   write(ab_out, "(a, f5.1)") 'ecut:    ', hdr%ecut
-   write(ab_out, "(a, i0)")   'nkpt:    ', nkpt
-   write(ab_out, "(a, i0)")   'mband:   ', mband
-   write(ab_out, "(a, i0)")   'nsppol:  ', nsppol
-   write(ab_out, "(a, i0)")   'nspinor: ', nspinor
-   write(ab_out, "(a, i0)")   'useylm:  ', dtset%useylm
-   write(ab_out, "(a, i0)")   'inclvkb: ', dtset%inclvkb
+   write(ab_out, "(a, f5.1)") '    ecut:    ', hdr%ecut
+   write(ab_out, "(a, i0)")   '    nkpt:    ', nkpt
+   write(ab_out, "(a, i0)")   '    mband:   ', mband
+   write(ab_out, "(a, i0)")   '    nsppol:  ', nsppol
+   write(ab_out, "(a, i0)")   '    nspinor: ', nspinor
+   write(ab_out, "(a, i0)")   '    useylm:  ', dtset%useylm
+   write(ab_out, "(a, i0)")   '    inclvkb: ', dtset%inclvkb
+   write(ab_out, "(2(a, i0))")'    bmin: ', bmin, ", bmax: ", bmax
+   if (ds%only_diago) then
+     write(ab_out, "(a)")'    Computing diagonal matrix elements only'
+   else
+     write(ab_out, "(a)")'    Computing diagonal and off-diagonal matrix elements'
+   end if
+   write(ab_out, "(2(a, i0))")'    Between band index bmin: ', bmin, ", bmax: ", bmax
    write(ab_out, "(a)")""
  end if
 
@@ -267,19 +289,18 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkpt, nsppol))
 
- keep_ur = .false.; bks_mask = .false.
- nband = mband
+ keep_ur = .false.; bks_mask = .false.; nband = mband
 
- if (only_diago) then
-   ! Distribute k-points, spin and (b, b) diago over the processors.
-   ABI_MALLOC(distrib_diago, (bandmin:bandmax, nkpt, nsppol))
+ if (ds%only_diago) then
+   ! Distribute k-points, spin and (b, b) diagonal over MPIR processors.
+   ABI_MALLOC(distrib_diago, (bmin:bmax, nkpt, nsppol))
    distrib_diago = -1
 
    ! Create bks_mask to load the wavefunctions.
    ii = 0
    do spin=1,nsppol
      do ik=1,nkpt
-       do ib_v=bandmin,bandmax
+       do ib_v=bmin,bmax
           ii = ii + 1; if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism.
           distrib_diago(ib_v, ik, spin) = my_rank
           bks_mask(ib_v, ik, spin) = .true.
@@ -290,16 +311,16 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  else
    ! Distribute k-points, spin and (b, b') pairs over the processors
-   ABI_MALLOC(distrib_mat, (bandmin:bandmax, bandmin:bandmax, nkpt, nsppol))
+   ABI_MALLOC(distrib_mat, (bmin:bmax, bmin:bmax, nkpt, nsppol))
    call xmpi_distab(nproc, distrib_mat)
 
    ! Create bks_mask to load the wavefunctions
    do spin=1,nsppol
      do ik=1,nkpt
        ! Loop over v bands
-       do ib_v=bandmin,bandmax
+       do ib_v=bmin,bmax
         ! Loop over c bands
-         do ib_c=bandmin,bandmax
+         do ib_c=bmin,bmax
            if (distrib_mat(ib_c, ib_v, ik, spin) == my_rank) then
              bks_mask(ib_v, ik, spin) = .true.
              bks_mask(ib_c, ik, spin) = .true.
@@ -332,18 +353,18 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_MALLOC(ug_c, (mpw*nspinor))
  ABI_MALLOC(ug_v, (mpw*nspinor))
  if (dtset%useria /= 666) then
-   ABI_MALLOC(cg_c, (2,mpw*nspinor))
-   ABI_MALLOC(cg_v, (2,mpw*nspinor))
+   ABI_MALLOC(cg_c, (2, mpw*nspinor))
+   ABI_MALLOC(cg_v, (2, mpw*nspinor))
  end if
 
  ABI_MALLOC(cwaveprj, (0, 0))
- ABI_CALLOC(dipoles, (3, 2, mband, mband, nkpt, nsppol))
+ ABI_CALLOC(ds%dipoles, (3, 2, mband, mband, nkpt, nsppol))
  ABI_MALLOC(ihrc,    (3, nspinor**2))
 
- if (only_diago) then
-   ABI_CALLOC(vdiago, (3, mband, nkpt, nsppol))
+ if (ds%only_diago) then
+   ABI_CALLOC(ds%vdiago, (3, mband, nkpt, nsppol))
  else
-   ABI_CALLOC(vmat, (2, 3, mband, mband, nkpt, nsppol))
+   ABI_CALLOC(ds%vmat, (2, 3, mband, mband, nkpt, nsppol))
  end if
 
  if (dtset%useria /= 666) then
@@ -357,10 +378,10 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    do ik=1,nkpt
 
      ! Only do a subset a k-points
-     if (only_diago) then
+     if (ds%only_diago) then
        if (all(distrib_diago(:, ik, spin) /= my_rank)) cycle
      else
-       if (all(distrib_mat(bandmin:bandmax, bandmin:bandmax, ik, spin) /= my_rank)) cycle
+       if (all(distrib_mat(bmin:bmax, bmin:bmax, ik, spin) /= my_rank)) cycle
      end if
      call cwtime(cpu, wall, gflops, "start")
 
@@ -379,8 +400,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      end if
 
      ! Loop over bands
-     do ib_v=bandmin,bandmax
-       if (only_diago) then
+     do ib_v=bmin,bmax
+       if (ds%only_diago) then
          if (distrib_diago(ib_v,ik,spin) /= my_rank) cycle
        else
          if (all(distrib_mat(:,ib_v,ik,spin) /= my_rank)) cycle
@@ -395,9 +416,9 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
        end if
 
        ! Loop over bands
-       bstop = bandmax; if (only_diago) bstop = ib_v
+       bstop = bmax; if (ds%only_diago) bstop = ib_v
        do ib_c=ib_v,bstop
-         if (.not. only_diago) then
+         if (.not. ds%only_diago) then
            if (distrib_mat(ib_c, ib_v, ik, spin) /= my_rank) cycle
          end if
 
@@ -406,21 +427,21 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
            vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode="reduced")
            !if (ib_v == ib_c) vv(2, :) = zero
 
-           if (only_diago) then
-             vdiago(:,ib_c,ik,spin) = vv(1, :)
+           if (ds%only_diago) then
+             ds%vdiago(:,ib_c,ik,spin) = vv(1, :)
            else
-             vmat(:,:,ib_c,ib_v,ik,spin) = vv
+             ds%vmat(:,:,ib_c,ib_v,ik,spin) = vv
              ! Hermitian conjugate
              if (ib_v /= ib_c) then
-               vmat(1,:,ib_v,ib_c,ik,spin) = vv(1, :)
-               vmat(2,:,ib_v,ib_c,ik,spin) = -vv(2, :)
+               ds%vmat(1,:,ib_v,ib_c,ik,spin) = vv(1, :)
+               ds%vmat(2,:,ib_v,ib_c,ik,spin) = -vv(2, :)
              end if
            end if
 
            do idir=1,3
-             dipoles(idir,:,ib_c,ib_v,ik,spin) = vv(:, idir)
+             ds%dipoles(idir,:,ib_c,ib_v,ik,spin) = vv(:, idir)
              ! Hermitian conjugate
-             if (ib_v /= ib_c) dipoles(idir,:,ib_v,ib_c,ik,spin) = [vv(1, idir), -vv(2, idir)]
+             if (ib_v /= ib_c) ds%dipoles(idir,:,ib_v,ib_c,ik,spin) = [vv(1, idir), -vv(2, idir)]
            end do
 
          else
@@ -444,14 +465,14 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
            vg(3) = dot_product(Cryst%gmet(3,:), vr)
 
            ! Save matrix elements of i*r in the IBZ
-           dipoles(:,1,ib_c,ib_v,ik,spin) = real(vg, kind=dp)
-           dipoles(:,1,ib_v,ib_c,ik,spin) = real(vg, kind=dp) ! Hermitian conjugate
+           ds%dipoles(:,1,ib_c,ib_v,ik,spin) = real(vg, kind=dp)
+           ds%dipoles(:,1,ib_v,ib_c,ik,spin) = real(vg, kind=dp) ! Hermitian conjugate
            if (ib_v == ib_c) then
-              dipoles(:,2,ib_c,ib_v,ik,spin) = zero
-              dipoles(:,2,ib_v,ib_c,ik,spin) = zero
+             ds%dipoles(:,2,ib_c,ib_v,ik,spin) = zero
+             ds%dipoles(:,2,ib_v,ib_c,ik,spin) = zero
            else
-              dipoles(:,2,ib_c,ib_v,ik,spin) =  aimag(vg)
-              dipoles(:,2,ib_v,ib_c,ik,spin) = -aimag(vg) ! Hermitian conjugate
+             ds%dipoles(:,2,ib_c,ib_v,ik,spin) =  aimag(vg)
+             ds%dipoles(:,2,ib_v,ib_c,ik,spin) = -aimag(vg) ! Hermitian conjugate
            end if
          end if
 
@@ -484,75 +505,17 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  end if
 
  ! Gather the k-points computed by all processes
- call xmpi_sum_master(dipoles, master, comm, ierr)
+ call xmpi_sum_master(ds%dipoles, master, comm, ierr)
 
- if (only_diago) then
-   call xmpi_sum_master(vdiago, master, comm, ierr)
+ if (ds%only_diago) then
+   call xmpi_sum_master(ds%vdiago, master, comm, ierr)
  else
-   call xmpi_sum_master(vmat, master, comm, ierr)
+   call xmpi_sum_master(ds%vmat, master, comm, ierr)
  end if
 
- is_kmesh = hdr%kptopt > 0
-
- if (is_kmesh .and. only_diago) then
-   ! Compute electron DOS with tetra.
-   edos_intmeth = 2
-   if (dtset%prtdos /= 0) edos_intmeth = dtset%prtdos
-   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
-   if (edos_step == 0) edos_step = 0.001
-   !edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
-
-   ! Compute (v x v) DOS. Upper triangle in Voigt format.
-   ABI_MALLOC(vv_tens, (3, 3, 1, mband, nkpt, nsppol))
-   do spin=1,nsppol
-     do ik=1,nkpt
-       do ib_v=bandmin,bandmax
-         !vr = vdiago(:,ib_v,ik,spin)
-         ! Go to cartesian coordinates (same as pmat2cart routine).
-         vred(1,:) = vdiago(:,ib_v,ik,spin)
-         call ddk_red2car(cryst%rprimd,vred,vcar)
-         vr = vcar(1,:)
-         do ii=1,3
-           do jj=1,3
-             vv_tens(ii, jj, 1, ib_v, ik, spin) = vr(ii) * vr(jj)
-           end do
-         end do
-       end do
-     end do
-   end do
-
-   !set default erange
-   eminmax_spin(:,:ebands%nsppol) = ebands_get_minmax(ebands, "eig")
-   emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
-   emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
-
-   ! If sigma_erange is set, get emin and emax
-   gaps = ebands_get_gaps(ebands, ierr)
-   if (ierr /=0 .and. ebands%occopt .eq. 1) then
-     call ebands_copy(ebands,ebands_tmp)
-     call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
-     call gaps%free()
-     gaps = ebands_get_gaps(ebands_tmp, ierr)
-     call ebands_free(ebands_tmp)
-   end if
-   do spin=1,ebands%nsppol
-     if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
-     if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
-   end do
-   call gaps%free()
-
-   edos = ebands_get_edos_matrix_elements(ebands, cryst, &
-                                          0, dummy_vals, 0, dummy_vecs, 1, vv_tens, &
-                                          edos_intmeth, edos_step, edos_broad, comm, &
-                                          dummy_dosvals, dummy_dosvecs, vvdos_tens, &
-                                          emin=emin, emax=emax)
-   ABI_SFREE(dummy_dosvals)
-   ABI_SFREE(dummy_dosvecs)
-   ABI_SFREE(vv_tens)
- end if
-
- ! Write the matrix elements
+ ! Write matrix elements to disk.
 #ifdef HAVE_NETCDF
+
  ! Output EVK file in netcdf format.
  if (my_rank == master) then
    ! Have to build hdr on k-grid with info about perturbation.
@@ -566,7 +529,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   if (only_diago) then
+   if (ds%only_diago) then
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t('vred_diagonal', "dp", "three, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
    else
@@ -575,18 +538,10 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    end if
    NCF_CHECK(ncerr)
    NCF_CHECK(nctk_set_datamode(ncid))
-   if (only_diago) then
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_diagonal"), vdiago))
+   if (ds%only_diago) then
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_diagonal"), ds%vdiago))
    else
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_matrix"), vmat))
-   end if
-   if (is_kmesh .and. only_diago) then
-     NCF_CHECK(edos%ncwrite(ncid))
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")], defmode=.True.)
-     NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), edos%mesh))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_tens(:,1,:,:,:,1)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_matrix"), ds%vmat))
    end if
    NCF_CHECK(nf90_close(ncid))
 
@@ -603,7 +558,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
         "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
      NCF_CHECK(ncerr)
      NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), ds%dipoles(ii,:,:,:,:,:)))
      NCF_CHECK(nf90_close(ncid))
    end do
    call hdr_tmp%free()
@@ -615,33 +570,60 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    do spin=1,nsppol
      do ik=1,min(nkpt, 4)
        write(ab_out, "(2(a,1x,i0),2x,2a)")"For spin: ", spin, ", ikbz: ", ik, ", kpt: ", trim(ktoa(wfd%kibz(:,ik)))
-       do ib_c=bandmin,min(bandmin+8, bandmax)
-         write(ab_out, "(3(es16.6,2x))") dipoles(:,1,ib_c,ib_c,ik,spin)
+       do ib_c=bmin,min(bmin+8, bmax)
+         write(ab_out, "(3(es16.6,2x))") ds%dipoles(:,1,ib_c,ib_c,ik,spin)
        end do
        write(ab_out,*)""
-       !do ib_c=bandmin,min(bandmin+8, bandmax)
-       !  write(ab_out, "(a, 6(es16.6,2x))")"Sum_k: ", sum(dipoles(:,:,ib_c,ib_c,:,spin), dim=3) / nkpt
+       !do ib_c=bmin,min(bmin+8, bmax)
+       !  write(ab_out, "(a, 6(es16.6,2x))")"Sum_k: ", sum(ds%dipoles(:,:,ib_c,ib_c,:,spin), dim=3) / nkpt
        !end do
      end do
    end do
  end if
 
  ! Free memory
- ABI_SFREE(dipoles)
- ABI_SFREE(vdiago)
- ABI_SFREE(vmat)
- ABI_SFREE(vvdos_tens)
-
- call edos%free()
  call wfd%free()
  call ebands_free(ebands)
  call cryst%free()
  call hdr%free()
+ call ds%free()
 
  ! Block all procs here so that we know output files are available when code returns.
  call xmpi_barrier(comm)
 
 end subroutine ddk_compute
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddkstore_free
+!! NAME
+!!  ddkstore_free
+!!
+!! FUNCTION
+!!  Free memory
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ddkstore_free(self)
+
+!Arguments ------------------------------------
+!scalars
+ class(ddkstore_t),intent(inout) :: self
+
+!************************************************************************
+
+ ABI_SFREE(self%vdiago)
+ ABI_SFREE(self%vmat)
+ ABI_SFREE(self%dipoles)
+
+end subroutine ddkstore_free
 !!***
 
 !----------------------------------------------------------------------

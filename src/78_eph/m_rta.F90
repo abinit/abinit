@@ -113,23 +113,16 @@ type,public :: rta_t
    ! (2, %nsppol))
    ! min/Max energy of the original ebands object
 
-   real(dp),allocatable :: linewidth_serta(:,:,:,:)
-   ! Linewidth computed in the self-energy relaxation time aproximation
-
-   real(dp),allocatable :: linewidth_mrta(:,:,:,:)
-   ! Linewidth computed in the momentum relaxation time approximation
+   real(dp),allocatable :: linewidths(:,:,:,:,:)
+   ! (self%ntemp, mband, nkpt, nsppol, nrta)
+    ! Linewidth computed in the SERTA/MRTA
 
    real(dp),allocatable :: velocity(:,:,:,:)
+   ! (3, mband, nkpt, nsppol))
    ! band velocity in Cartesian coordinates.
 
    type(gaps_t) :: gaps
    ! gaps of original ebands object
-
-   !integer :: nmu
-   ! number of dopings
-
-   !real(dp) :: nmesh(:)
-   ! a list of carrier concentrations at which to compute transport
 
    type(ebands_t) :: ebands
    ! bandstructure object used to compute the transport properties
@@ -323,7 +316,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  integer :: ierr, spin, nprocs, my_rank, timrev
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
- type(ebands_t) :: tmp_ebands
+ character(len=fnlen) :: wfk_fname_dense
+ type(ebands_t) :: tmp_ebands  ! ebands_dense
 !arrays
  integer :: kptrlatt(3,3), unts(2)
  integer,allocatable :: indkk(:,:)
@@ -363,9 +357,7 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    call new%gaps%print(unit=ab_out)
  end if
 
- !call ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
-
- ! Read lifetimes to ebands object
+ ! Read lifetimes and new%ebands from SIGEPH.nc file
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
    call wrtout(unts, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
@@ -373,16 +365,38 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
 
    tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, 1, [zero, zero, zero])
-   new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, new%linewidth_serta, new%linewidth_mrta, &
-                                   new%velocity, xmpi_comm_self, ierr)
+   new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, new%linewidths, new%velocity, xmpi_comm_self, ierr)
    call ebands_free(tmp_ebands)
  else
-   new%ebands = sigmaph%get_ebands(cryst, ebands, new%linewidth_serta, new%linewidth_mrta, &
-                                   new%velocity, xmpi_comm_self, ierr)
+   new%ebands = sigmaph%get_ebands(cryst, ebands, new%linewidths, new%velocity, xmpi_comm_self, ierr)
  end if
 
- !print *, "linewidth_serta", maxval(abs(new%linewidth_serta))
- !print *, "linewidth_mrta", maxval(abs(new%linewidth_mrta))
+ !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
+ !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
+
+ ! At this point we have
+ ! velocity(3, mband, nkpt, nsppol)
+ ! linewidths(self%ntemp, mband, nkpt, nsppol, 2)
+
+ ! TODO: Should only check the value of getwfkfine_filepath
+ !if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
+ !  wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
+ !  if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
+ !    MSG_ERROR(msg)
+ !  end if
+ !  call wrtout(unts, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
+
+ !  ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
+ !  call ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
+ !  new%velocity
+
+ !  Linear interpolation of linewidths from SIGEPH to fine IBZ.
+ !  type(klinterp_t) :: klinterp
+ !  klinterp = klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt, kibz, &
+ !                          mband, nkibz, nsppol, ndat, values_ibz, comm)
+ !  new%linewidths
+ !  call klinterp%free()
+ !end if
 
  ! FIXME: I think transport_ngkpt is buggy, wrong ne(T), weird zeros if MRTA ...
  ! Do we really need this option?
@@ -413,12 +427,12 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    end if
 
    ! Downsampling linewidths and velocities.
-   call downsample_array(new%linewidth_serta, indkk, tmp_ebands%nkpt)
-   call downsample_array(new%linewidth_mrta,  indkk, tmp_ebands%nkpt)
-   call downsample_array(new%velocity,        indkk, tmp_ebands%nkpt)
+   call downsample_array5(new%linewidths, indkk, tmp_ebands%nkpt)
+   call downsample_array4(new%velocity,        indkk, tmp_ebands%nkpt)
 
-   !print *, "after downsamplinglinewidth_serta", maxval(abs(new%linewidth_serta))
-   !print *, "fter downsamplinglinewidth_mrta", maxval(abs(new%linewidth_mrta))
+   !print *, "after downsampling linewidths"
+   !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
+   !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
 
    ABI_SFREE(indkk)
    call ebands_free(new%ebands)
@@ -456,8 +470,10 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
  call cwtime_report(" rta_new", cpu, wall, gflops)
 
  contains
- subroutine downsample_array(array, indkk, nkpt)
 
+ subroutine downsample_array4(array, indkk, nkpt)
+
+   !(ntemp, max_nbcalc, nkcalc, nsppol)
    real(dp),allocatable,intent(inout) :: array(:,:,:,:)
    integer,intent(in) :: indkk(:,:)
 
@@ -474,7 +490,28 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    end do
    ABI_FREE(tmp_array)
 
- end subroutine downsample_array
+ end subroutine downsample_array4
+
+ subroutine downsample_array5(array, indkk, nkpt)
+
+   !(ntemp, max_nbcalc, nkcalc, nsppol,:)
+   real(dp),allocatable,intent(inout) :: array(:,:,:,:,:)
+   integer,intent(in) :: indkk(:,:)
+
+   integer :: ikpt, nkpt
+   integer :: tmp_shape(5)
+   real(dp),allocatable :: tmp_array(:,:,:,:,:)
+
+   ABI_MOVE_ALLOC(array, tmp_array)
+   tmp_shape = shape(array)
+   tmp_shape(3) = nkpt
+   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4), tmp_shape(5)))
+   do ikpt=1,nkpt
+     array(:,:,ikpt,:,:) = tmp_array(:,:,indkk(ikpt,1),:,:)
+   end do
+   ABI_FREE(tmp_array)
+
+ end subroutine downsample_array5
 
 end function rta_new
 !!***
@@ -549,8 +586,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
        ! Multiply by the lifetime (SERTA and MRTA)
        do irta=1,self%nrta
          do itemp=1,self%ntemp
-           if (irta == 1) linewidth = self%linewidth_serta(itemp, ib, ik_ibz, spin)
-           if (irta == 2) linewidth = self%linewidth_mrta(itemp, ib, ik_ibz, spin)
+           linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
            call safe_div(vv_tens(:,:, 1, irta, ib, ik_ibz, spin), two * linewidth, zero, &
                          vv_tens(:,:, 1+itemp, irta, ib, ik_ibz, spin))
            call safe_div(one, two * linewidth, zero, tau_vals(itemp, irta, ib, ik_ibz, spin))
@@ -983,8 +1019,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
            kT = self%kTmesh(itemp)
            mu_e = self%transport_mu_e(itemp)
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
-           if (irta == 1) linewidth = self%linewidth_serta(itemp, ib, ik_ibz, spin)
-           if (irta == 2) linewidth = self%linewidth_mrta(itemp, ib, ik_ibz, spin)
+           linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
            call safe_div( - wtk * vv_tens(:, :) * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw(:, :))
            self%mobility_mu(:, :, ieh, itemp, spin, irta) = self%mobility_mu(:, :, ieh, itemp, spin, irta) &
              + vv_tenslw(:, :)
@@ -1310,8 +1345,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%eph_mu_e)
  ABI_SFREE(self%transport_mu_e)
  ABI_SFREE(self%velocity)
- ABI_SFREE(self%linewidth_mrta)
- ABI_SFREE(self%linewidth_serta)
+ ABI_SFREE(self%linewidths)
  ABI_SFREE(self%l0)
  ABI_SFREE(self%l1)
  ABI_SFREE(self%l2)
