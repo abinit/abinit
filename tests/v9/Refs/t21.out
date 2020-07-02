@@ -15,12 +15,12 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu  2 Jul 2020.
-- ( at 08h07 )
+- ( at 14h19 )
   
-- input  file    -> t91.in
-- output file    -> t91.abo
-- root for input  files -> t91i
-- root for output files -> t91o
+- input  file    -> /home/bruneval/devel/abinit/tests/Test_suite/v9_t21/t21.in
+- output file    -> t21.out
+- root for input  files -> t21i
+- root for output files -> t21o
 
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
@@ -405,7 +405,7 @@ force_length_stats: {min:   1.10086068E-24, max:   1.10086068E-24, mean:   1.100
  frms,max,avg= 3.2682949E-23 4.4407382E-23   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
               =  5.406603540164  5.406603540164  5.406603540164 angstroms
- prteigrs : about to open file t91o_DS1_EIG
+ prteigrs : about to open file t21o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.17515   Average Vxc (hartree)=  -0.33627
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -464,7 +464,7 @@ meta: {optdriver: 4, gwcalctyp: 5, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -583,8 +583,8 @@ data: !SigmaeeData |
      Band     E0 <VxcDFT>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
         1  -4.966 -10.902 -16.542   0.000   1.000   0.000 -16.542  -5.640 -10.606
         2  -2.345 -10.158 -14.240   0.000   1.000   0.000 -14.240  -4.082  -6.427
-        3   3.522 -11.154 -13.842   0.000   1.000   0.000 -13.842  -2.689   0.833
-        4   3.522 -11.154 -13.842   0.000   1.000   0.000 -13.842  -2.689   0.833
+        3   3.522 -11.154 -13.842   0.000   1.000   0.000 -13.842  -2.689   0.834
+        4   3.522 -11.154 -13.842   0.000   1.000   0.000 -13.842  -2.689   0.834
         5   6.295 -10.044  -5.216   0.000   1.000   0.000  -5.216   4.828  11.123
         6   7.958  -9.582  -4.608   0.000   1.000   0.000  -4.608   4.975  12.932
         7   7.958  -9.582  -4.608   0.000   1.000   0.000  -4.608   4.975  12.932
@@ -612,8 +612,8 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.200015E-01 Ha ,    5.986545E+00 eV
- New Exchange energy :    -2.151707E+00 Ha ,   -5.855092E+01 eV
+ New Fermi energy :        2.200015E-01 Ha ,    5.986546E+00 eV
+ New Exchange energy :    -2.151707E+00 Ha ,   -5.855091E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -645,7 +645,7 @@ meta: {optdriver: 4, gwcalctyp: 5, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -776,7 +776,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.890767E-01 Ha ,    7.866178E+00 eV
+ New Fermi energy :        2.890768E-01 Ha ,    7.866180E+00 eV
  New Exchange energy :    -1.604050E+00 Ha ,   -4.364842E+01 eV
 
  === QP Band Gaps ===
@@ -809,7 +809,7 @@ meta: {optdriver: 4, gwcalctyp: 5, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using single precision arithmetic ; gwpc =  4
+.Using double precision arithmetic ; gwpc =  8
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761

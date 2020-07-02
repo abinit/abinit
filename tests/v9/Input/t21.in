@@ -81,7 +81,7 @@ xred
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
-#%% authors = M. Giantomassi
+#%% authors = F. Bruneval
 #%% keywords = NC, GW
 #%% description = 
 #%%  HF in GW code with the miniBZ integration of the coulomb singularity
