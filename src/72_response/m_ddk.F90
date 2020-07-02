@@ -62,7 +62,7 @@ MODULE m_ddk
 !!***
 
  public :: ddk_red2car           ! Convert band velocities from cartesian to reduced coordinates
- public :: ddk_compute           ! Calculate ddk matrix elements. Save result to disk.
+ public :: ddk_compute           ! Calculate DDK matrix elements. Save result to disk.
 !!***
 
  type, private :: ham_targets_t
@@ -229,13 +229,9 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- if (my_rank == master) then
-   call wrtout([std_out, ab_out], "Computation of velocity matrix elements (ddk)", newlines=1)
- end if
+ if (my_rank == master) call wrtout([std_out, ab_out], "Computation of velocity matrix elements (ddk)", newlines=1)
 
- if (psps%usepaw == 1) then
-   MSG_ERROR("PAW not implemented")
- end if
+ ABI_CHECK(psps%usepaw == 0, "PAW not implemented")
 
  ! Get ebands and hdr from WFK file.
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
@@ -255,7 +251,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  nbcalc  = bandmax - bandmin + 1
 
  if (my_rank == master) then
-   call wrtout(ab_out, "Parameters extracted from Abinit header:")
+   write(ab_out, "(a)")" Parameters extracted from the Abinit header:"
    write(ab_out, "(a, f5.1)") 'ecut:    ', hdr%ecut
    write(ab_out, "(a, i0)")   'nkpt:    ', nkpt
    write(ab_out, "(a, i0)")   'mband:   ', mband

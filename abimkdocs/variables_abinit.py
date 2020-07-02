@@ -21366,14 +21366,39 @@ String defining the list of pseudopotential files when Abinit is executed with t
 
 The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
 
-    pseudos = "al.psp8, as.psp8"
+    pseudos "al.psp8, as.psp8"
 
-The **mandatory** list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
-The directory where all pseudos are located can be specified with [[pp_dirpath]].
+This variable is **mandatory** and the list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
+
+Relative and absolute paths are allowed as in:
+
+    pseudos "../pseudos/al.psp8, ..//pseudos/as.psp8"
+
+
+or
+
+    pseudos "/home/user/pseudos/al.psp8, /home/user/pseudos/as.psp8"
+
+
+If all the pseudos are located in the same directory, it is much easier to use a common prefix with [[pp_dirpath]].
+For instance, the previous example is equivalent to:
+
+    pp_dirpath "/home/user/pseudos"
+    pseudos "al.psp8, as.psp8"
 
 !!! important
 
-    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
+    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported in pseudopotential names.
+    The only exception is the shell variable `$ABI_PSPDIR` that can be used in conjunction with [[pp_dirpath]]
+
+        pp_dirpath = "$ABI_PSPDIR"
+        pseudos "al.psp8, as.psp8"
+
+    Before running the calculation, one should set the value of $ABI_PSPDIR inside the terminal using:
+
+        ```sh
+        export ABI_PSPDIR="/home/user/pseudos"
+        ```
 """
 ),
 

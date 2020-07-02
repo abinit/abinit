@@ -363,6 +363,8 @@ type(rta_t) function rta_new(dtset, sigmaph, cryst, ebands, extrael_fermie, comm
    call new%gaps%print(unit=ab_out)
  end if
 
+ !call ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
+
  ! Read lifetimes to ebands object
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.

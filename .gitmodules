@@ -1,6 +1,5 @@
 [submodule "tests/modules_with_data/test_submodule"]
 	path = tests/modules_with_data/test_submodule
-	url = https://github.com/gmatteo/test_submodule.git
+    #url = https://github.com/gmatteo/test_submodule.git
+    url = git@github.com:gmatteo/test_submodule.git
 	branch = master
-    # http://www.nils-haldenwang.de/frameworks-and-tools/git/how-to-ignore-changes-in-git-submodules
-    #ignore = dirty
