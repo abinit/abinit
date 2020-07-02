@@ -2222,7 +2222,12 @@ pp_dirpath $ABI_PSPDIR
                         os.remove(entry)
                     except OSError:
                         pass
+                elif os.path.islink(entry):
+                    # directory is a link.
+                    pass
                 else:
+                    # real directory that should be removed
+                    # At present no test copies directories so we leave this raise.
                     raise NotImplementedError("Found directory: %s in workdir!!" % entry)
 
     def patch(self, patcher=None):

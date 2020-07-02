@@ -684,13 +684,13 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
        ! Check whether the interpolated eigenvalue is inside the sigma_erange window.
        if (abs(dtset%sigma_erange(1)) > zero) then
          if (ee <= vmax .and. vmax - ee <= abs(dtset%sigma_erange(1))) then
-           kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1)  + 1
+           kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1) + 1
            exit
          end if
        end if
        if (abs(dtset%sigma_erange(2)) > zero) then
          if (ee >= cmin .and. ee - cmin <= abs(dtset%sigma_erange(2))) then
-           kshe_mask(ikf_ibz, spin, 2) = kshe_mask(ikf_ibz, spin, 2)  + 1
+           kshe_mask(ikf_ibz, spin, 2) = kshe_mask(ikf_ibz, spin, 2) + 1
            exit
          end if
        end if

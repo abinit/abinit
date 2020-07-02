@@ -17,7 +17,7 @@ It goes without saying that one should have read the
 [fourth lesson on Al](base4) as well as the [introduction page for the EPH code](eph_intro)
 before running these examples.
 
-This lesson should take about 1 hour.
+This lesson should take about 1.5 hour.
 
 ## Formalism and connection with the implementation
 
@@ -30,7 +30,7 @@ to the interaction of the ${\qq\nu}$ phonon with electrons is given by
 \end{equation}
 
 where $\ww_{\qq\nu}$ is the phonon frequency,
-the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the Fermi level at T = 0
+the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the Fermi level
 and $g_{mn\nu}(\kk, \qq)$ are the e-ph matrix elements discussed in the [EPH introduction](eph_intro).
 For a given phonon wavevector $\qq$, the double delta restricts the BZ integration to
 transitions between $\kk$ and $\kq$ electron states on the Fermi surface (FS).
@@ -123,8 +123,8 @@ Finally, the isotropic superconducting temperature $T_c$ can be estimated using 
     \Biggr ]
 \end{equation}
 
-where $\mu^*$ is a semi-empirical variable that descrives the (screened) e-e intercation while
-$\ww_{\text{log}}$ is  the *logarithmic* average of the phonon frequencies given by:
+where $\mu^*$ is a semi-empirical variable that descrives the (screened) e-e interaction while
+$\ww_{\text{log}}$ is the *logarithmic* average of the phonon frequencies given by:
 
 \begin{equation}
     \ww_{\text{log}} = \exp \Biggl [ \dfrac{2}{\lambda} \int \dfrac{\alpha^2F(\ww)}{\ww}\log(\ww)\dd\ww \Biggr ]

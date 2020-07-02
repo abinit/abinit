@@ -12,10 +12,10 @@ then we discuss how to compute the ZPR, temperature-dependent band gaps and spec
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
-It goes without saying that you should have read the [introduction page for the EPH code](eph_intro) 
+It goes without saying that one should have read the [introduction page for the EPH code](eph_intro) 
 before running these examples.
 
-This lesson should take about 1 hour.
+This lesson should take about 1.5 hour.
 
 ## Formalism
 
@@ -32,7 +32,7 @@ provided the system has an energy gap much larger than $kT$.
 
 In state-of-the-art *ab-initio* methods, the e-ph coupling is described
 within DFT by expanding the KS effective potential in the nuclear displacements,
-and the vibrational properties are obtained with  (DFPT) [[cite:Gonze1997]], [[cite:Baroni2001]].
+and the vibrational properties are obtained with (DFPT) [[cite:Gonze1997]], [[cite:Baroni2001]].
 The e-ph self-energy consists of two terms: the Fan-Migdal (FM)  
 and the Debye-Waller (DW) contribution [[cite:Giustino2017]]:
 
@@ -64,7 +64,8 @@ For the sake of simplicity, the temperature and Fermi level are considered as pa
 The integral is performed over the $\qq$-points in the BZ of volume $\Omega_\BZ$ and $\eta$
 is a positive real infinitesimal.
 From a mathematical point of view, one should take the limit $\eta \rightarrow 0^+$.
-At the level of the implementation, $\eta$ is set to a (small) finite value given by the [[zcut]] variable.
+At the level of the implementation, $\eta$ is set to a (small) finite value given by the [[zcut]] variable that 
+should be subject to convergence studies.
 
 !!! tips
 
@@ -176,8 +177,8 @@ A typical workflow requires the following steps:
 
 ## Calculation of the ZPR for XXX
 
-In this tutorial, we prefer to focus on the EPH part so we skip completely the DFPT computation 
-and provide pre-computed DDB and POT1 files obtained with a xxx $\qq$-mesh.
+In this tutorial, we prefer to focus on the EPH part so we bypass the DFPT computation 
+by providing pre-computed DDB and POT1 files obtained with a xxx $\qq$-mesh.
 We also provide a DEN.nc file that can be used to perform a NSCF calculation including empty states.
 
 First of all, let's merge the DDB files using the following input file:
@@ -222,11 +223,9 @@ matrix elements.
 Each approach has pros and cons.
 
 The most direct way consists in listing the $\kk$-points and the bands explicitly via
-
 [[nkptgw]], [[kptgw]], [[bdgw]]
 
 Alternatively, one can use [[sigma_erange]] 
-
 or [[gw_qprange]]
 
 ### Convergence wrt nband
@@ -237,20 +236,20 @@ An example of input file is given in
 
 grep something gives
 
-So XXX bands are needed to convergece the ZPR
+So XXX bands are needed to convergence the ZPR.
 
-### How to reduce the number of bands with the Sternheimer approach
+### How to reduce the number of bands with the Sternheimer method
 
 In this section, we discuss how to take advantange of the Sternheimer equation 
 to accelerate the convergence with [[nband]].
 To activate the Sternheimer method, use [[eph_stern]] = 1 
-and pass the file with the GS KS potential file via the [[getpot_filepath]] input variable.
+and specify the file with the GS KS potential with the [[getpot_filepath]] input variable.
 
 The non-self-consistent Sternheimer equation is solved on-the-fly
 using max [[nline]] iterations and the NSCF iteration stops when 
 the solution is convergenced within [[tolwfr]].
 In this example, we use the default values. 
-You might need to adjust the values for more complicaed systems.
+You might need to adjust the values for more complicated systems.
 
 Note that [[nband]]
 
@@ -263,5 +262,5 @@ Note that [[nband]]
 Last but not least, one can estimate the correction to the zero-point renormalization
 of the band gap in polar materials using a generalized Fr\"ohlich model based on
 *ab initio** effective masses computed with DFPT [[cite:Laflamme2016]]
-For formalism is detailed in XXX.
+The formalism is detailed in XXX.
 An example input file is available in [[test:v7_88]].
