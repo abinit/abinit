@@ -2488,12 +2488,12 @@ endif
         potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
         ! MAU
-        !write(msg,'(a13)') '<ks|Kx_ks|ks>'
-        write(msg,'(a13)') '<ks|Vh_ks|ks>'
+        write(msg,'(a13)') '<ks|Kx_ks|ks>'
+        !write(msg,'(a13)') '<ks|Vh_ks|ks>'
         call wrtout(std_out,msg,'COLL')
         do ib1dm=ib1,ib2
-          !write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-          write(msg,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
+          write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+          !write(msg,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
           call wrtout(std_out,msg,'COLL')
         enddo
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
@@ -2751,12 +2751,12 @@ endif
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          ! MAU
-         !write(msg,'(a13)') '<ks|Kx_no|ks>'
-         write(msg,'(a13)') '<ks|Vh_no|ks>'
+         write(msg,'(a13)') '<ks|Kx_no|ks>'
+         !write(msg,'(a13)') '<ks|Vh_no|ks>'
          call wrtout(std_out,msg,'COLL')
          do ib1dm=ib1,ib2
-          !write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-          write(msg,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
+          write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+          !write(msg,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
           !write(msg,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
           call wrtout(std_out,msg,'COLL')
          enddo
