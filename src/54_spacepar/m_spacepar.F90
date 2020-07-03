@@ -430,37 +430,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  ABI_ALLOCATE(work1,(2,nfft))
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
- ! If there is a special treatment for the Coulomb singularity: 
- ! Calculate it here only once before entering the loop over the grid points
-  if (PRESENT(divgq0)) then
-   rcut = (three*nfft*ucvol/four_pi)**(one/three)
-
-! SELECT CASE (singularity_mode)
-
-!   CASE('SPHERE') ! 0D 
-   ! Treatment of the divergence at the Gamma point
-   ! Spencer-Alavi scheme !!! ATT: Other methods will be gradually included
-   ! I am not completely convinced that this should be purely attributed to Spencer-Alavi  2008
-   ! since in Rozzi et al. 2006 they propose the same treatment for 0D case
-   divgq0 = two_pi*rcut**two
-
-!   CASE('CYLINDER') ! According to Rozzi et al 2006
-!     divgq0 = -pi*rcut**two*(2*log(rcut)-1)
-
-!   CASE('SURFACE') ! According to Rozzi et al 2006
-!     divgq0 = -two_pi*rcut**two
-
-!   CASE DEFAULT
-!     
-!     DEBUG
-!       call wrtout(std_out,"!!!No divergence treatment chosen!!!")
-!     ENDDEBUG
-
-! END SELECT
- 
- end if 
-
-
  ! Triple loop on each dimension
  do i3=1,n3
    ig3=i3-(i3/id3)*n3-1

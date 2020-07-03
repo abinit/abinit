@@ -47,48 +47,40 @@ module m_gtermcutoff
  private
 !!***
 
-!!****t* m_gtermcutoff/gcut_t
+!!****t* m_gtermcutoff/gtermcut_t
 !! NAME
-!!  gcut_t
+!!  gtermcut_t
 !!
 !! FUNCTION
 !!
 !! SOURCE
 
-! type,public :: gcut_t
+!!! type,public :: gtermcut_t
 
-!  integer  :: nfft
-!  ! Number of points in FFT grid
+!!!  integer  :: nfft
+!!!   ! Number of points in FFT grid
 
-!  integer  :: ng
-!   ! Number of G-vectors
+!!!  integer  :: ng
+!!!   ! Number of G-vectors
 
-!  real(dp) :: ucvol
-!    ! Volume of the unit cell
+!!!  real(dp) :: ucvol
+!!!  ! Volume of the unit cell
 
-!   ! character(len=50) :: mode
-!   ! String defining the cutoff mode, possible values are: sphere,cylinder,surface,crystal
+!!!   ! integer :: pdir(3)
+!!!   ! 1 if the system is periodic along this direction
 
-!   ! integer :: pdir(3)
-!   ! 1 if the system is periodic along this direction
+!!!   ! real(dp) :: boxcenter(3)
+!!!   ! 1 if the point in inside the cutoff region 0 otherwise
+!!!   ! Reduced coordinates of the center of the box (input variable)
 
-!   ! real(dp) :: boxcenter(3)
-!   ! 1 if the point in inside the cutoff region 0 otherwise
-!   ! Reduced coordinates of the center of the box (input variable)
+!!!  real(dp) :: rprimd(3,3)
+!!!    ! Lattice vectors in real space.
 
-!  real(dp) :: vcutgeo(3)
-!    ! For each reduced direction gives the length of the finite system
-!    ! 0 if the system is infinite along that particular direction
-!    ! negative value to indicate that a finite size has to be used
+!!!  real(dp),allocatable :: gtermcuoff(:)
+!!!    ! gtermcuoff(nfft)
+!!!    ! G cut-off array on the FFT grid
 
-!  real(dp) :: rprimd(3,3)
-!    ! Lattice vectors in real space.
-
-!    ! real(dp),allocatable :: barev(:)
-!    ! gtermcuoff(nfft)
-!    ! G cut-off array on the FFT grid
-
-! end type gcut_t
+!!! end type gtermcut_t
 
  public :: termcutoff
 !!***
@@ -254,8 +246,8 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
-          gcutoff(ig)=zero !two_pi*rcut_loc**2 !- value for the V_coul
-       else !if(gpq(ig)<=cutoff) then
+          gcutoff(ig)=zero
+       else
           gcutoff(ig)=one-cos(rcut_loc*sqrt(four_pi/gpq2(ig)))
       end if
      end do
@@ -515,7 +507,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if(ABS(gcart_para)<tol4) then !.and.ABS(gcart_perp)<tol4) then
+           if(ABS(gcart_para)<tol4.and.ABS(gcart_perp)<tol4) then
              gcutoff(ii)=zero
            else
              gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)
@@ -531,7 +523,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        if(rcut>tol4) then
           rcut_loc = rcut
        else
-          rcut_loc = two*SQRT(DOT_PRODUCT(a3,a3))
+          rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
        endif
 
        !In the case of finite, Rozzi's method provide another parameter
@@ -548,15 +540,15 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if (gcart_para>tol4) then
-             gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*&
-&                        SIN(gcart_perp*rcut_loc)-COS(ABS(gcart_perp)*rcut_loc))
-           else if (ABS(gcart_perp)>tol4) then
-             gcutoff(ii)=one-COS(gcart_perp*rcut_loc)-gcart_perp*rcut_loc*SIN(gcart_perp*rcut_loc) !&
-!&           + 8*rcut_loc*SIN(gcart_perp*rcut_loc)/gcart_perp*log_alpha ! contribution due to finite surface
-           else
+           if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
              gcutoff(ii)=zero
-           end if
+           else if (gcart_para<tol4) then
+             gcutoff(ii)=one-COS(gcart_perp*rcut_loc)-gcart_perp*rcut_loc*SIN(gcart_perp*rcut_loc)
+           else
+             gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*&
+&                        SIN(gcart_perp*rcut_loc)-COS(ABS(gcart_perp)*rcut_loc)) !&
+!&           + 8*rcut_loc*SIN(gcart_perp*rcut_loc)/gcart_perp*log_alpha ! contribution due to finite surface
+           endif
          end do !i1
         end do !i2
        end do !i3

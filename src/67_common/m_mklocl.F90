@@ -598,8 +598,6 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
  end if
 
- !write(*,*)'This is the sum of vpsp ',SUM(vpsp(:)), icutcoul
-
  ABI_DEALLOCATE(gcutoff) 
 
  if(option==2)then
