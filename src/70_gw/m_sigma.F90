@@ -1628,7 +1628,6 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
 
    else
      ! No symmetries for this spin. Divide the full BZ among procs.
-     write(*,*) 'MAU'
      do ik_bz=1,Kmesh%nbz
        ik_ibz = Kmesh%tab(ik_bz)
        bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
