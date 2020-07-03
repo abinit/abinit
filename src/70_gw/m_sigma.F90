@@ -1617,7 +1617,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
      do ik_bz=1,Kmesh%nbz
        ik_ibz = Kmesh%tab(ik_bz)
        kgwmk= kptgw-Kmesh%bz(:,ik_bz) ! kptgw must be inside the BZ
-       call findqg0(iq_bz,g0,kgwmk,Qmesh%nbz,Qmesh%bz,mG0) ! Identify q_bz and G0 where q_bz+G0=k_gw-k_bz
+       call findqg0(iq_bz,g0,kgwmk,Qmesh%nbz,Qmesh%bz,mG0) ! <- (mg0=mG0) Identify q_bz and G0 where q_bz+G0=k_gw-k_bz
        if (Ltg_kgw%ibzq(iq_bz)==1) then
          bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
          if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
@@ -1628,6 +1628,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
 
    else
      ! No symmetries for this spin. Divide the full BZ among procs.
+     write(*,*) 'MAU'
      do ik_bz=1,Kmesh%nbz
        ik_ibz = Kmesh%tab(ik_bz)
        bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
