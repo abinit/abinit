@@ -78,7 +78,8 @@ MODULE m_ebands
  public :: ebands_from_hdr         ! Init object from the abinit header.
  public :: ebands_from_dtset       ! Init object from the abinit dataset.
  public :: ebands_free             ! Destruction method.
- public :: ebands_copy             ! Deep copy of the ebands_t.
+ public :: ebands_copy             ! Copy of the ebands_t.
+ public :: ebands_move_alloc       ! Transfer allocation.
  public :: ebands_print            ! Printout basic info on the data type.
  public :: ebands_get_bandenergy   ! Returns the band energy of the system.
  public :: ebands_get_valence_idx  ! Gives the index of the (valence|bands at E_f).
@@ -968,9 +969,6 @@ end subroutine ebands_free
 !!
 !! FUNCTION
 !! This subroutine performs a deep copy of an ebands_t datatype.
-!! All the associated pointers in the input object will be copied preserving the shape.
-!! If a pointer in ibands happens to be not associated, the corresponding
-!! pointer in the copied object will be nullified.
 !!
 !! INPUTS
 !!  ibands<ebands_t>=The data type to be copied.
@@ -986,7 +984,7 @@ end subroutine ebands_free
 !!
 !! SOURCE
 
-subroutine ebands_copy(ibands,obands)
+subroutine ebands_copy(ibands, obands)
 
 !Arguments ------------------------------------
 !scalars
@@ -1034,6 +1032,34 @@ subroutine ebands_copy(ibands,obands)
  if (allocated(ibands%linewidth)) call alloc_copy(ibands%linewidth, obands%linewidth)
 
 end subroutine ebands_copy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_move_alloc
+!! NAME
+!!  ebands_move_alloc
+!!
+!! FUNCTION
+!!  Transfer allocate from `from_ebands` to `to_ebands`.
+!!  `from_ebands` is destroyed when the routine returns.
+!!
+!! SOURCE
+
+subroutine ebands_move_alloc(from_ebands, to_ebands)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(inout)  :: from_ebands
+ class(ebands_t),intent(inout) :: to_ebands
+
+! *********************************************************************
+
+ call ebands_free(to_ebands)
+ call ebands_copy(from_ebands, to_ebands)
+ call ebands_free(from_ebands)
+
+end subroutine ebands_move_alloc
 !!***
 
 !----------------------------------------------------------------------
@@ -5950,7 +5976,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    do band=1,mband
      !if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
 
-     ! Build array in full bz to prepare call to interpol3d.
+     ! Build array in the full BZ to prepare call to interpol3d.
      ikf = 0
      do iz=1,nkz
        do iy=1,nky

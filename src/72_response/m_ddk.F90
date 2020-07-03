@@ -161,13 +161,20 @@ MODULE m_ddk
 
  type,public :: ddkstore_t
 
-   integer :: bmin, bmax
+   integer :: bmin = 1, bmax = -1
    ! Min and max band index
 
-   logical :: only_diago
+   logical :: only_diago = .False.
    ! True if we are computing only the diagonal elements
 
-   real(dp),allocatable :: dipoles(:,:,:,:,:,:), vdiago(:,:,:,:), vmat(:,:,:,:,:,:)
+   real(dp),allocatable :: dipoles(:,:,:,:,:,:)
+    ! (3, 2, mband, mband, nkpt, nsppol))
+
+   real(dp),allocatable :: vdiago(:,:,:,:)
+    ! (3, mband, nkpt, nsppol)
+
+   real(dp),allocatable :: vmat(:,:,:,:,:,:)
+    ! (2, 3, mband, mband, nkpt, nsppol))
 
  contains
 
@@ -175,6 +182,7 @@ MODULE m_ddk
     ! Free memory.
 
  end type ddkstore_t
+!!***
 
  !public :: ddkop_new   ! Build object
 
@@ -190,7 +198,7 @@ CONTAINS
 !!  Calculate the DDK matrix elements using the commutator formulation.
 !!
 !! INPUTS
-!!  prefix: Prefix for output EVK file.
+!!  prefix: Prefix for output EVK file. Empty if output files are not wanted
 !!
 !! PARENTS
 !!      wfk_analyse
@@ -199,10 +207,11 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
+subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
 !Arguments ------------------------------------
 !scalars
+ type(ddkstore_t),intent(inout) :: ds
  character(len=*),intent(in) :: wfk_path, prefix
  integer,intent(in) :: comm
  type(dataset_type),intent(in) :: dtset
@@ -215,13 +224,14 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 !scalars
  integer,parameter :: master = 0
  integer :: mband, nbcalc, nsppol, ib_v, ib_c, mpw, spin, nspinor, nkpt, nband_k, npw_k
- integer :: ii, jj, ik, bmin, bmax, istwf_k, idir, my_rank, nproc, ierr, bstop
+ integer :: ii, ik, bmin, bmax, istwf_k, idir, my_rank, nproc, ierr, bstop
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
 #endif
  character(len=500) :: msg
  character(len=fnlen) :: fname
+ logical :: write_ncfile
  type(wfd_t) :: wfd
  type(vkbr_t) :: vkbr
  type(ebands_t) :: ebands
@@ -229,12 +239,11 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  type(hdr_type) :: hdr_tmp, hdr
  type(ddkop_t) :: ddkop
  type(wave_t),pointer :: wave_v, wave_c
- type(ddkstore_t) :: ds
 !arrays
  !integer,parameter :: voigt2ij(2, 6) = reshape([1, 1, 2, 2, 3, 3, 2, 3, 1, 3, 1, 2], [2, 6])
  integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:), nband(:,:), kg_k(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
- real(dp) :: kpt(3), vv(2, 3), vred(2,3), vcar(2,3)
+ real(dp) :: kpt(3), vv(2, 3)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
  complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
@@ -258,12 +267,18 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  nspinor = hdr%nspinor
  mband   = hdr%mband
 
- ds%only_diago = .False.; if (dtset%wfk_task == WFK_TASK_DDK_DIAGO) ds%only_diago = .True.
+ ! Define band range
+ ! TODO: Perhaps one should allocate output arrays using bmin:bmax
+ ! and allow for nc output only if bmin == 1 and bmax == mband
+ if (ds%bmax == -1) ds%bmax = mband
 
- ! Define band range.
- !TODO: hardcoded for now but should be an argument.
- bmin = 1; bmax = mband
+ if (ds%bmin < 1 .or. ds%bmin > mband .or. ds%bmax > mband .or. ds%bmin > ds%bmax) then
+   MSG_ERROR(sjoin("Invalid value for bmin, bmax", itoa(ds%bmin), itoa(ds%bmax), "with mband:", itoa(mband)))
+ end if
+
+ bmin = ds%bmin; bmax = ds%bmax
  nbcalc  = bmax - bmin + 1
+ write_ncfile = len_trim(prefix) > 0
 
  if (my_rank == master) then
    write(ab_out, "(a)")" Parameters extracted from the Abinit header:"
@@ -359,7 +374,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  ABI_MALLOC(cwaveprj, (0, 0))
  ABI_CALLOC(ds%dipoles, (3, 2, mband, mband, nkpt, nsppol))
- ABI_MALLOC(ihrc,    (3, nspinor**2))
+ ABI_MALLOC(ihrc, (3, nspinor**2))
 
  if (ds%only_diago) then
    ABI_CALLOC(ds%vdiago, (3, mband, nkpt, nsppol))
@@ -517,7 +532,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 #ifdef HAVE_NETCDF
 
  ! Output EVK file in netcdf format.
- if (my_rank == master) then
+ if (my_rank == master .and. write_ncfile) then
    ! Have to build hdr on k-grid with info about perturbation.
    call hdr_copy(hdr, hdr_tmp)
    hdr_tmp%qptn = zero
@@ -586,7 +601,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  call ebands_free(ebands)
  call cryst%free()
  call hdr%free()
- call ds%free()
+ !call ds%free()
 
  ! Block all procs here so that we know output files are available when code returns.
  call xmpi_barrier(comm)

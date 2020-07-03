@@ -46,7 +46,7 @@ module m_wfk_analyze
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_esymm,           only : esymm_t, esymm_free
- use m_ddk,             only : ddk_compute
+ use m_ddk,             only : ddk_compute, ddkstore_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -168,6 +168,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !type(paw_dmft_type) :: paw_dmft
  type(mpi_type) :: mpi_enreg
  type(wfd_t) :: wfd
+ type(ddkstore_t) :: ds
 !arrays
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: l_size_atm(:)
@@ -368,7 +369,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  case (WFK_TASK_DDK, WFK_TASK_DDK_DIAGO)
    ! Calculate the DDK matrix elements from the WFK file
-   call ddk_compute(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+   ds%only_diago = .False.; if (dtset%wfk_task == WFK_TASK_DDK_DIAGO) ds%only_diago = .True.
+   call ddk_compute(ds, wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+   call ds%free()
 
  case (WFK_TASK_EINTERP)
    ! Band structure interpolation from eigenvalues computed on the k-mesh.
