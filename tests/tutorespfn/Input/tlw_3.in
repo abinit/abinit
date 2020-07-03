@@ -1,7 +1,6 @@
 !anaddb calculation of flexoelectric tensor
 
 flexoflag  1  
-chneut  1  
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -11,12 +10,12 @@ chneut  1
 #%% [files]
 #%% files_to_test =
 #%%   tlw_3.out, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
-#%% psp_files =  14si.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
 #%% description = anaddb input file for flexoelectric tensor calculation.
+##%% topics = longwave
 #%%<END TEST_INFO>
 

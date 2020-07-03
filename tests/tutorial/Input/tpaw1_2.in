@@ -39,14 +39,17 @@ ndtset 9   ecut: 8. ecut+  2.
  prtwf 1 prtden 0  prteig 0
  getwfk -1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_19.1_bdir.*
 #%% [files]
 #%% files_to_test = 
-#%%   tpaw1_2.out, tolnlines=  2, tolabs=  1.001e-08, tolrel=  2.000e-04
-#%% psp_files =  6c.pspnc
+#%%   tpaw1_2.abo, tolnlines=  2, tolabs=  1.001e-08, tolrel=  2.000e-04
+#%% output_file = "tpaw1_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -73,8 +73,8 @@ dmft_mxsf 0.1
 dmft_dc 1
 
 
-# == LDA+U
-usepawu     1   # LDA+U is used.
+# == DFT+U
+usepawu     1   # DFT+U is used.
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   3   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00     # values in Hartree
@@ -82,11 +82,13 @@ upawu2  6 eV     # values in Hartree
 jpawu  0.0000  # values in Hartree
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "58ce.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 58ce.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4,10
 #%% max_nprocs = 10

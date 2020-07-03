@@ -4,9 +4,9 @@ natom 3
 ntypat 2
 znucl 1 8
 typat 1 1 2
-xangst .7285 0.620919 1.5
+xcart  .7285 0.620919 1.5
       2.2715 0.620919 1.5
-      1.5    0.0      1.5
+      1.5    0.0      1.5   angstrom
 acell 3.0 3.0 3.0 angstrom
 
 usewvl 1
@@ -32,6 +32,9 @@ istwfk 1
 prtden 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "HGH/1h.1.hgh, HGH/8o.6.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -39,7 +42,6 @@ prtden 0
 #%% [files]
 #%% files_to_test = 
 #%%   t06.out, tolnlines = 2, tolabs = 1.100e-07, tolrel = 5.000e-04
-#%% psp_files = HGH/1h.1.hgh, HGH/8o.6.hgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

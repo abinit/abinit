@@ -4,7 +4,7 @@
 
 ndtset 4
 
-#Dataset 1 :  LDA+U is not used
+#Dataset 1 :  DFT+U is not used
 usepawu1   0
 #Dataset 2 :  double counting used is: FLL
 usepawu2   1
@@ -45,11 +45,14 @@ rprim 0.0 1/2 1/2
 kptrlatt 2 0 0 0 2 0 0 0 2
 chksymbreak 0
 
-##### LDA+U
+##### DFT+U
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu  0.30  0.0   # values in Hartree
 jpawu  0.0350 0.0  # values in Hartree
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -57,17 +60,16 @@ jpawu  0.0350 0.0  # values in Hartree
 #%% [files]
 #%% files_to_test = 
 #%%   t08.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -easy
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
-#%%   Simple test for LDA+U implementation.
+#%%   Simple test for DFT+U implementation.
 #%%   no forces, 2 Ni and 2 O atoms in an fcc supercell.
 #%%   The cut-off is unrealistic. This test tests the
 #%%   following part of the code :
-#%%   * paw LDA+U (pawpupot, pawpuenergy, pawpuinit)
+#%%   * paw DFT+U (pawpupot, pawpuenergy, pawpuinit)
 #%% topics = DFT+U
 #%%<END TEST_INFO>

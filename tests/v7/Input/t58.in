@@ -109,11 +109,13 @@
  nstep  50
  istwfk *1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t58.in, t59.in
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [shell] 
 #%% post_commands = 
 #%%   ww_mv t58o_DS3_DDB t59i_DS7_DDB;
@@ -122,7 +124,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t58.out, tolnlines = 40, tolabs = 1.1e-3, tolrel = 8.0e-4, fld_options = -medium
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

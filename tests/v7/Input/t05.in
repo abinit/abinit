@@ -34,7 +34,7 @@ nstep3 52
 magconon4 2
 magcon_lambda4 0.01
 spinat4 0 1.5 0 
-toldfe4 1.e-12
+toldfe4 1.e-14
 prtvol4 1   # Turn off printing of minimum magnetization location, because not portable
 nstep4 10
 
@@ -88,13 +88,15 @@ rprim
  0.5 -0.5  0.5
  0.5  0.5 -0.5
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out,      tolnlines = 46, tolabs = 1.1e+1, tolrel = 1.1e+0, fld_options = -easy
-#%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

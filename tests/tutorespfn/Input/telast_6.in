@@ -94,13 +94,15 @@ nshiftk   4              # Use one copy of grid only (default)
  optforces 1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   telast_6.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -medium
-#%% psp_files =  13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -1302,8 +1302,9 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
      sigma = sqrt( (bose_einstein(phfrq_allq(imode), temperature) + half)/phfrq_allq(imode) )
 
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
-     freeze_displ = modesign * sigma
-     call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+       freeze_displ = modesign * sigma
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+
    end do !itemper
 
    ! this is the prescription: flip sign for each successive mode in full

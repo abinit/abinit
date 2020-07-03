@@ -36,8 +36,8 @@
        0 1 0
        0 0 1
  typat  2*1
- xangst -0.385  0 0
-         0.385  0 0
+ xcart  -0.385  0 0
+         0.385  0 0   Angstrom
  znucl  1.0
 
 # Structure Optimization
@@ -72,13 +72,15 @@
  getwfk -1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  t75.out, tolnlines = 0, tolabs = 3.811e-12, tolrel = 5.000e-08
-#%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

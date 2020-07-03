@@ -39,6 +39,9 @@
  wtk 2*0.5
  znucl  32
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "32ge.SJ_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -47,7 +50,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 32ge.SJ_mod
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

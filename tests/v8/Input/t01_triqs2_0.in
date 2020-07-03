@@ -68,7 +68,7 @@ dmftqmc_therm 10000
 dmft_tolfreq 0.01
 dmftctqmc_triqs_nleg 30
 
-# == LDA+U
+# == DFT+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1
@@ -76,6 +76,9 @@ upawu1  0.00  0.0  0.0  eV
 upawu2  3.1333333333333333  0.0  0.0  eV
 f4of2_sla3  0.0  0.0  0.0 
 jpawu2  0.7583333333333333  0.0  0.0  eV
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.2.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -85,7 +88,6 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% files_to_test = 
 #%%    t01_triqs2_0.out,  tolnlines =6, tolabs =2e-6, tolrel = 2e-5, fld_options=-medium ;
 #%%    t01_triqs2_0o_DS2_Legendre_coefficients.dat,  tolnlines =6, tolabs =5e-7, tolrel = 5e-7, fld_options=-medium 
-#%% psp_files = 23v.paw, 38sr.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

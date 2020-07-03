@@ -11,7 +11,7 @@
 # === Datasets
 ndtset 2
 nsppol1 1  nspden1 2  nspinor1 1  ! antiferro-magnetic
-nsppol2 1  nspden2 4  nspinor2 2 pawspnorb2 0 ! non-collinear magnetism LDA+U without spin-orbit
+nsppol2 1  nspden2 4  nspinor2 2 pawspnorb2 0 ! non-collinear magnetism DFT+U without spin-orbit
 
 # === Structure and cell
 natom 4 ntypat 2 typat 1 1 2 2
@@ -39,7 +39,7 @@ kptopt1 1  kptopt2 4
 kptrlatt 2 0 0 0 2 0 0 0 2
 chksymbreak 0
 
-# === LDA+U options
+# === DFT+U options
 usepawu 1
 lpawu   2 -1        # Applied on d electrons of Nickel
 upawu  0.30   0.0   # Value of U parameter
@@ -105,20 +105,22 @@ dmatpawu2
 # === Other options
 prtden 0  prteig 0  prtwf 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 64, tolabs = 7.0e-4, tolrel = 8.5e-2
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
-#%%   NiO - LDA+U - fcc structure
+#%%   NiO - DFT+U - fcc structure
 #%%   Test the use of GPU within Projector Augmented-Wave formalism.
 #%%   Test ferromagnetic and non-collinear magnetism.
 #%%   ABINIT v7.0: GPU is not used when nspinor=2

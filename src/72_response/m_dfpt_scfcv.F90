@@ -3236,7 +3236,7 @@ print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_dist
 
 !    In case of electric field pert1, read ddk wfs file
 !    Note that the symmetries are not used for ddk, so read each k point
-!    Also take into account implicitely the parallelism over k points
+!    Also take into account implicitly the parallelism over k points
 
      do idir1=1,3
        if (ddkfil(idir1)/=0) then

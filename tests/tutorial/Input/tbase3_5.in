@@ -20,10 +20,10 @@ toldfe1  1.0d-6    # This value is way too large for most realistic studies of m
 #Dataset 2 : the band structure
 iscf2    -2
 getden2  -1
-kptopt2  -3
+kptopt2  -3  # will have three segments in the band structure
 nband2   8
-ndivk2   10 12 17      # 10, 12 and 17 divisions of the 3 segments, delimited
-                       # by 4 points.
+ndivsm2   10   # 10 divisions of the smallest of the 3 segments, delimited
+                       # by the 4 points defined by kptbounds.
 kptbounds2  0.5  0.0  0.0 # L point
             0.0  0.0  0.0 # Gamma point
             0.0  0.5  0.5 # X point
@@ -66,13 +66,15 @@ diemac 12.0       # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tbase3_5.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
-#%% psp_files =  14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

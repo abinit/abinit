@@ -40,13 +40,15 @@ nloc_alg  2
           0.543  0.493  0.508
    znucl  57  33
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "57la.drh, 33as.drh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t62.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
-#%% psp_files = 57la.drh, 33as.drh
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

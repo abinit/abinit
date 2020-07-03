@@ -98,6 +98,7 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
+ public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -358,16 +359,14 @@ pure function arth_rdp(start, step, nn)
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  arth_rdp(1)=start
-  do ii=2,nn
-   arth_rdp(ii)=arth_rdp(ii-1)+step
-  end do
+   arth_rdp(1)=start
+   do ii=2,nn
+    arth_rdp(ii)=arth_rdp(ii-1)+step
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function arth_rdp
@@ -387,31 +386,28 @@ end function arth_rdp
 !!
 !! SOURCE
 
-pure function linspace(start,stop,nn)
-
+pure function linspace(start, stop, nn)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
- real(dp),intent(in) :: start,stop
- real(dp) :: length
+ real(dp),intent(in) :: start, stop
  real(dp) :: linspace(nn)
 
 !Local variables-------------------------------
+ real(dp) :: length
  integer :: ii
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  length = stop-start
-  do ii=1,nn
-   linspace(ii)=start+length*(ii-1)/(nn-1)
-  end do
+   length = stop-start
+   do ii=1,nn
+     linspace(ii)=start+length*(ii-1)/(nn-1)
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function linspace
@@ -4936,7 +4932,6 @@ end function isordered_rdp
 
 pure function stats_eval(arr) result(stats)
 
-
 !Arguments ------------------------------------
 !scalars
  type(stats_t) :: stats
@@ -5009,8 +5004,7 @@ end function stats_eval
 !!
 !! SOURCE
 
-elemental subroutine wrap2_zero_one(num,red,shift)
-
+elemental subroutine wrap2_zero_one(num, red, shift)
 
 !Arguments ------------------------------------
 !scalars
@@ -5108,12 +5102,11 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
-
+pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
- integer,intent(in) :: nr1,nr2,nr3
+ integer,intent(in) :: nr1, nr2, nr3
  real(dp) :: res
 !arrays
  real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)
@@ -5398,7 +5391,7 @@ end subroutine simpson_int
 !!
 !! SOURCE
 
-function simpson(step,values) result(res)
+function simpson(step, values) result(res)
 
 
 !Arguments ------------------------------------
@@ -6462,11 +6455,11 @@ end subroutine invcb
 !!
 !! SOURCE
 
-elemental subroutine safe_div( n, d, altv, q )
+elemental subroutine safe_div(n, d, altv, q)
 
 !Arguments ----------------------------------------------
 !scalars
- real(dp), intent(in) :: n, d, altv
+ real(dp),intent(in) :: n, d, altv
  real(dp),intent(out) :: q
 
 ! *********************************************************************
@@ -6478,6 +6471,39 @@ elemental subroutine safe_div( n, d, altv, q )
  endif
 
 end subroutine safe_div
+!!***
+
+!!****f* ABINIT/bool2index
+!! NAME
+!! bool2index
+!!
+!! FUNCTION
+!!  Allocate and return array with the indices in the input boolean array `bool_list` that evaluates to .True.
+!!
+!! SOURCE
+
+subroutine bool2index(bool_list, out_index)
+
+!Arguments ----------------------------------------------
+!scalars
+ logical,intent(in) :: bool_list(:)
+ integer,allocatable,intent(inout) :: out_index(:)
+
+!Local variables-------------------------------
+ integer :: ii, cnt
+! *********************************************************************
+
+ cnt = count(bool_list)
+ ABI_REMALLOC(out_index, (cnt))
+ cnt = 0
+ do ii=1,size(bool_list)
+   if (bool_list(ii)) then
+     cnt = cnt + 1
+     out_index(cnt) = ii
+   end if
+ end do
+
+end subroutine bool2index
 !!***
 
 END MODULE m_numeric_tools

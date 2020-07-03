@@ -181,7 +181,7 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
  ! Prepare the spline. Calculate 2nd derivatives of partial waves for each atom type.
- ABI_DT_MALLOC(Paw_lmn_spline,(ntypat))
+ ABI_MALLOC(Paw_lmn_spline,(ntypat))
 
  do itypat=1,ntypat
    ln_size  =Pawtab(itypat)%basis_size

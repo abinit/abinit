@@ -94,11 +94,13 @@ dtion 100
 ntime 2
 mdtemp 3600 3600
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Au.lda.atompaw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = Au.lda.atompaw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

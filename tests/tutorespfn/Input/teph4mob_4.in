@@ -1,0 +1,87 @@
+# Crystalline AlAs : computation of the dense WFK
+ndtset   3
+
+#
+# General input data for GS and WFK
+#
+ecut   3
+nband  8
+
+
+# Ground state
+ngkpt1  4 4 4
+nshiftk 1
+shiftk  0.0 0.0 0.0
+
+tolvrs1   1.0d-18
+prtwf    1       # need GS wavefunctions for further runs
+kptopt   1
+prtden1  1
+kptopt1   1      # Automatic generation of k points, taking
+                 # into account the symmetry
+# Dense WFK
+iscf2 -2
+getden2 1
+ngkpt2 24 24 24
+tolwfr2 1.0d-20
+
+# Denser WFK for the double-grid
+iscf3 -2
+getden3 1
+ngkpt3 48 48 48
+tolwfr3 1.0d-20
+
+#######################################################################
+#Common input variables
+
+#Definition of the unit cell
+    acell   3*10.61         # This is equivalent to   10.61 10.61 10.61
+    rprim   0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors
+            0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1
+            0.5  0.5  0.0   # that is, the default.
+
+#Definition of the atom types
+   ntypat   2         # There are two types of atom
+    znucl   13 33     # The keyword "znucl" refers to the atomic number of the
+                      # possible type(s) of atom. The pseudopotential(s)
+                      # mentioned in the "files" file must correspond
+                      # to the type(s) of atom. Here, type 1 is the Aluminum,
+                      # type 2 is the Arsenic.
+
+#Definition of the atoms
+    natom   2         # There are two atoms
+    typat   1 2       # The first is of type 1 (Al), the second is of type 2 (As).
+     xred   0.0  0.0  0.0
+            0.25 0.25 0.25
+
+#Exchange-correlation functional
+
+      ixc   1             # LDA Teter Pade parametrization
+
+#Definition of the SCF procedure
+    nstep   25         # Maximal number of SCF cycles
+   diemac   9.0        # Although this is not mandatory, it is worth to
+                       # precondition the SCF cycle. The model dielectric
+                       # function used as the standard preconditioner
+                       # is described in the "dielng" input variable section.
+                       # The dielectric constant of AlAs is smaller that the one of Si (=12).
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, 33as.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
+#%% [files]
+#%% files_to_test =
+#%%   teph4mob_4.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = G. Brunin, M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description =
+#%%   E-ph for the mobility in semiconductors
+#%%<END TEST_INFO>

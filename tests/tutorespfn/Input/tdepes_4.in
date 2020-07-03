@@ -132,14 +132,15 @@
  nstep 50
  istwfk *1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [files]
 #%% files_to_test = 
 #%%   tdepes_4.out,  tolnlines= 0, tolabs=  0.000e-00, tolrel=  0.000e-00, fld_options=-easy
-#%% psp_files =  6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -67,7 +67,7 @@ dmftctqmc_order 50
 dmft_solv 2 # H1
 dmft_charge_prec 1e-10
 
-# == LDA+U
+# == DFT+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1
@@ -83,11 +83,13 @@ npband2 4
 npfft2 1
 bandpp2 8
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 23v.paw, 38sr.paw, 8o.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

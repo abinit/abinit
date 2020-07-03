@@ -90,13 +90,15 @@
 # Ground-state calculation variables:
   diemac   2.0            # model DIElectric MACroscopic constant
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t02.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
-#%% psp_files = 01h.pspgth
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

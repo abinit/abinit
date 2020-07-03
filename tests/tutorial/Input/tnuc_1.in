@@ -32,13 +32,15 @@ xred # here come the fractional coordinates from the cif file
 0.3062 0.3062 0 # second atom type
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si.GGA-PBE-rpaw-1.55.abinit, O.GGA-PBE-rpaw-1.45.abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tnuc_1.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
-#%% psp_files = Si.GGA-PBE-rpaw-1.55.abinit, O.GGA-PBE-rpaw-1.45.abinit
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

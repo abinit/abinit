@@ -99,6 +99,9 @@ optdriver    5
 nbdbuf 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -106,7 +109,6 @@ nbdbuf 0
 #%% [files]
 #%% files_to_test = 
 #%%   tnlo_11.out, tolnlines=  1, tolabs=  3.0e-10, tolrel=  2.0e-9
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

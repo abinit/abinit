@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h42 )
+.Starting date : Tue 28 Apr 2020.
+- ( at 02h05 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t72/t72.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/TestBot_MPI1/libxc_t72/t72.in
 - output file    -> t72.out
 - root for input  files -> t72i
 - root for output files -> t72o
@@ -554,7 +554,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    hyb_range_dft 14    1.8898800000E-01
    hyb_range_dft 15    1.0000000000E-03
    hyb_range_dft 16    1.1000000000E-01
-   hyb_range_dft 17    1.0000000000E+02
+   hyb_range_dft 17    5.0000000000E+00
    hyb_range_dft 18    1.1000000000E-01
    hyb_range_dft 19    0.0000000000E+00
    hyb_range_dft 20    0.0000000000E+00
@@ -579,7 +579,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    hyb_range_fock14    1.0606600000E-01
    hyb_range_fock15    1.0000000000E-03
    hyb_range_fock16    1.1000000000E-01
-   hyb_range_fock17    1.0000000000E+02
+   hyb_range_fock17    5.0000000000E+00
    hyb_range_fock18    1.1000000000E-01
    hyb_range_fock19    0.0000000000E+00
    hyb_range_fock20    0.0000000000E+00
@@ -763,7 +763,7 @@ P           mkmem           6
             nstep12        30
             nstep13        30
             nstep14        30
-            nstep15        22
+            nstep15        21
             nstep16        30
             nstep17        30
             nstep18        30
@@ -923,8 +923,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1091,8 +1091,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1256,8 +1256,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1754,8 +1754,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2097,8 +2097,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2279,8 +2279,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2464,8 +2464,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2646,8 +2646,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2828,8 +2828,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3012,8 +3012,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3217,8 +3217,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3406,7 +3406,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 --- !BeginCycle
 iteration_state: {dtset: 15, }
-solver: {iscf: 7, nstep: 22, nline: 4, wfoptalg: 0, }
+solver: {iscf: 7, nstep: 21, nline: 4, wfoptalg: 0, }
 tolerances: {toldfe: 1.00E-08, }
 ...
 
@@ -3432,7 +3432,6 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 19  -393.40102983899    -1.719E-08 2.303E-07 5.652E-09
  ETOT 20  -393.40102985606    -1.707E-08 2.292E-07 1.013E-08
  ETOT 21  -393.40102987162    -1.556E-08 2.282E-07 5.298E-09
- ETOT 22  -393.40102989148    -1.986E-08 2.271E-07 6.190E-09
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.56636188E+00  sigma(3 2)=  0.00000000E+00
@@ -3441,8 +3440,8 @@ tolerances: {toldfe: 1.00E-08, }
 
 
  scprqt:  WARNING -
-  nstep=   22 was not enough SCF cycles to converge;
-  maximum energy difference=  1.986E-08 exceeds toldfe=  1.000E-08
+  nstep=   21 was not enough SCF cycles to converge;
+  maximum energy difference=  1.556E-08 exceeds toldfe=  1.000E-08
 
 
 --- !ResultsGS
@@ -3455,10 +3454,10 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae: -1.986E-08, res2:  6.190E-09, residm:  2.271E-07, diffor: null, }
+convergence: {deltae: -1.556E-08, res2:  5.298E-09, residm:  2.282E-07, diffor: null, }
 etotal    :  -3.93401030E+02
 entropy   :   0.00000000E+00
-fermie    :   3.58383406E-01
+fermie    :   3.58383473E-01
 cartesian_stress_tensor: # hartree/bohr^3
 - [  3.56636188E+00,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   3.56636188E+00,   0.00000000E+00, ]
@@ -3474,12 +3473,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.87603039
+    1        2.00000          0.87603080
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.668E-09; max=  22.711E-08
+ Mean square residual over all n,k,spin=   19.756E-09; max=  22.815E-08
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3510,29 +3509,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.89485001575567E-01
-hartree             :  4.12869190506992E-03
-xc                  : -6.37292346500322E-01
+kinetic             :  8.89485966873550E-01
+hartree             :  4.12874018827683E-03
+xc                  : -6.37292397758566E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            : -1.63774509167489E-01
-local_psp           :  3.45965678429613E-01
-non_local_psp+x     : -3.91117087980897E+02
-internal            : -3.93393296429590E+02
-'-kT*entropy'       : -7.73346189083626E-03
-total_energy        : -3.93401029891481E+02
+local_psp           :  3.45966534183539E-01
+non_local_psp+x     : -3.91117089783662E+02
+internal            : -3.93393296414279E+02
+'-kT*entropy'       : -7.73345734236833E-03
+total_energy        : -3.93401029871621E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 15, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -7.82192620604446E+02
+band_energy         : -7.82192620559358E+02
 Ewald energy        : -2.71472096493581E+00
 psp_core            : -1.63774509167489E-01
-xc_dc               :  3.91677819539320E+02
-internal            : -3.93393296539229E+02
-'-kT*entropy'       : -7.73346189083626E-03
-total_energy_dc     : -3.93401030001120E+02
+xc_dc               :  3.91677819526514E+02
+internal            : -3.93393296506948E+02
+'-kT*entropy'       : -7.73345734236833E-03
+total_energy_dc     : -3.93401029964290E+02
 ...
 
 
@@ -3737,17 +3736,18 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0775495884685    -2.078E+00 2.528E-08 2.740E-05
- ETOT  2  -2.0775495877347     7.339E-10 1.415E-09 1.128E-06
- ETOT  3  -2.0775495841573     3.577E-09 3.187E-10 4.196E-08
+ ETOT  1  -2.0776502479818    -2.078E+00 2.403E-08 3.190E-05
+ ETOT  2  -2.0776502863036    -3.832E-08 1.198E-09 1.480E-06
+ ETOT  3  -2.0776502876478    -1.344E-09 4.678E-10 3.616E-08
+ ETOT  4  -2.0776502877770    -1.293E-10 7.660E-11 6.764E-11
 
- At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  3.577E-09 < toldfe=  1.000E-08
+ At SCF step    4, etot is converged : 
+  for the second time, diff in etot=  1.293E-10 < toldfe=  1.000E-08
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.18327859E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.18327859E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.18327859E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.21841991E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.21841991E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.21841991E-04  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -3760,15 +3760,15 @@ lattice_vectors:
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
-convergence: {deltae:  3.577E-09, res2:  4.196E-08, residm:  3.187E-10, diffor: null, }
-etotal    :  -2.07754958E+00
+convergence: {deltae: -1.293E-10, res2:  6.764E-11, residm:  7.660E-11, diffor: null, }
+etotal    :  -2.07765029E+00
 entropy   :   0.00000000E+00
-fermie    :   3.50617966E-01
+fermie    :   3.54080544E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  3.18327859E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.18327859E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.18327859E-04, ]
-pressure_GPa:  -9.3655E+00
+- [  2.21841991E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.21841991E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.21841991E-04, ]
+pressure_GPa:  -6.5268E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 cartesian_forces: # hartree/bohr
@@ -3779,12 +3779,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.87913434
+    1        2.00000          0.87918299
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.812E-12; max=  31.873E-11
+ Mean square residual over all n,k,spin=   43.941E-13; max=  76.602E-12
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3803,10 +3803,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
               =  4.021746785284  4.021746785284  4.021746785284 angstroms
  prteigrs : about to open file t72o_DS17_EIG
- Fermi (or HOMO) energy (hartree) =   0.35062   Average Vxc (hartree)=  -0.34789
+ Fermi (or HOMO) energy (hartree) =   0.35408   Average Vxc (hartree)=  -0.34398
  Eigenvalues (hartree) for nkpt=   6  k points:
  kpt#   1, nband=  3, wtk=  0.18750, kpt= -0.2500 -0.2500  0.0000 (reduced coord)
-   0.01342    0.62000    0.62000
+   0.01689    0.62346    0.62346
       occupation numbers for kpt#   1
    2.00000    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
@@ -3815,41 +3815,41 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.97031896011290E-01
-hartree             :  4.67109717562189E-03
-xc                  : -8.07394464902366E-01
+kinetic             :  8.96943790331286E-01
+hartree             :  4.65776422394607E-03
+xc                  : -8.06719015073721E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            : -1.63774509167489E-01
-local_psp           :  3.46509688421815E-01
-non_local_psp+x     :  3.70973642059243E-01
-internal            : -2.06670361533769E+00
-'-kT*entropy'       : -1.08459688196151E-02
-total_energy        : -2.07754958415731E+00
+local_psp           :  3.46352830516980E-01
+non_local_psp+x     :  3.70455445754505E-01
+internal            : -2.06680465835030E+00
+'-kT*entropy'       : -1.08456294267274E-02
+total_energy        : -2.07765028777703E+00
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 17, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  5.61669742579435E-01
+band_energy         :  5.72090540532832E-01
 Ewald energy        : -2.71472096493581E+00
 psp_core            : -1.63774509167489E-01
-xc_dc               :  2.50121492150058E-01
-internal            : -2.06670423937381E+00
-'-kT*entropy'       : -1.08459688196151E-02
-total_energy_dc     : -2.07755020819342E+00
+xc_dc               :  2.39600257081331E-01
+internal            : -2.06680467648914E+00
+'-kT*entropy'       : -1.08456294267274E-02
+total_energy_dc     : -2.07765030591586E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  3.18327859E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.18327859E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.18327859E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.21841991E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.21841991E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.21841991E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -9.3655E+00 GPa]
-- sigma(1 1)=  9.36552738E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  9.36552738E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  9.36552738E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -6.5268E+00 GPa]
+- sigma(1 1)=  6.52681562E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.52681562E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.52681562E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 18 ==================================================================
@@ -3877,8 +3877,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4062,8 +4062,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4583,8 +4583,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5101,8 +5101,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/torrent_libxc5-k3xc/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5278,9 +5278,9 @@ total_energy_dc     : -2.08119343440050E+00
            etotal12   -2.0522404400E+00
            etotal13   -1.9668879800E+00
            etotal14   -2.1231166921E+00
-           etotal15   -3.9340102989E+02
+           etotal15   -3.9340102987E+02
            etotal16   -2.0775493956E+00
-           etotal17   -2.0775495842E+00
+           etotal17   -2.0776502878E+00
            etotal18   -2.0955386730E+00
            etotal19   -2.0824639298E+00
            etotal20   -2.0947830101E+00
@@ -5407,7 +5407,7 @@ total_energy_dc     : -2.08119343440050E+00
    hyb_range_dft 14    1.8898800000E-01
    hyb_range_dft 15    1.0000000000E-03
    hyb_range_dft 16    1.1000000000E-01
-   hyb_range_dft 17    1.0000000000E+02
+   hyb_range_dft 17    5.0000000000E+00
    hyb_range_dft 18    1.1000000000E-01
    hyb_range_dft 19    0.0000000000E+00
    hyb_range_dft 20    0.0000000000E+00
@@ -5432,7 +5432,7 @@ total_energy_dc     : -2.08119343440050E+00
    hyb_range_fock14    1.0606600000E-01
    hyb_range_fock15    1.0000000000E-03
    hyb_range_fock16    1.1000000000E-01
-   hyb_range_fock17    1.0000000000E+02
+   hyb_range_fock17    5.0000000000E+00
    hyb_range_fock18    1.1000000000E-01
    hyb_range_fock19    0.0000000000E+00
    hyb_range_fock20    0.0000000000E+00
@@ -5616,7 +5616,7 @@ P           mkmem           6
             nstep12        30
             nstep13        30
             nstep14        30
-            nstep15        22
+            nstep15        21
             nstep16        30
             nstep17        30
             nstep18        30
@@ -5716,7 +5716,7 @@ P           mkmem           6
               occ15    2.000000  0.000000  0.000000
                        2.000000  0.035830  0.000048
                        2.000000  2.000000  0.000000
-                       1.870501  1.870501  1.187243
+                       1.870502  1.870502  1.187240
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ16    2.000000  0.000000  0.000000
@@ -5726,9 +5726,9 @@ P           mkmem           6
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ17    2.000000  0.000000  0.000000
-                       2.000000  0.167811  0.000789
-                       1.999971  1.977197  0.000000
-                       1.839806  1.839806  0.994603
+                       2.000000  0.167367  0.000793
+                       1.999971  1.977291  0.000000
+                       1.839368  1.839368  0.996313
                        2.000000  2.000000  0.000000
                        2.000000  0.000000  0.000000
               occ18    2.000000  0.000000  0.000000
@@ -5812,11 +5812,11 @@ P           mkmem           6
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten14    4.5146866830E-04  4.5146866830E-04  4.5146866830E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten15    3.5663618818E+00  3.5663618818E+00  3.5663618818E+00
+           strten15    3.5663618821E+00  3.5663618821E+00  3.5663618821E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten16    2.2104868774E-04  2.2104868774E-04  2.2104868774E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten17    3.1832785897E-04  3.1832785897E-04  3.1832785897E-04
+           strten17    2.2184199117E-04  2.2184199117E-04  2.2184199117E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten18    4.0532010622E-04  4.0532010622E-04  4.0532010622E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -5980,10 +5980,10 @@ P           mkmem           6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         14.2  wall=         15.6
+- Proc.   0 individual time (sec): cpu=         16.0  wall=         32.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered 203 WARNINGs and 132 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.2  wall=         15.6
++Overall time at end (sec) : cpu=         16.0  wall=         32.8

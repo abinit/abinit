@@ -67,13 +67,15 @@ nshiftk1  2
  znucl 42.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "42mo.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t43.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 42mo.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

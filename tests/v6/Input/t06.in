@@ -20,8 +20,8 @@ natom     2
 ntypat    2
 znucl     11 17
 typat     1 2
-xangst    -1.25  0.0 0.0
-          1.25  0.0 0.0
+xcart    -1.25  0.0 0.0
+          1.25  0.0 0.0   Angstrom
 
 #k-point mesh
 #first dataset : only 1 k-point
@@ -47,13 +47,15 @@ rfdir 1 1 0  # there is polarisation in the first direction only ;
              # no meaning in computing the polarisation in the third direction for testing purpose.
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "11na.pspnc, 17cl.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t06.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
-#%% psp_files = 11na.pspnc, 17cl.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

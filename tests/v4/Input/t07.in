@@ -59,13 +59,15 @@
   kpt 0 0 0
   wtk 1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "8o.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t07.out ,tolnlines = 4, tolabs = 1.010e-02, tolrel = 3.000e-03, fld_options = -easy
-#%% psp_files = 8o.paw 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

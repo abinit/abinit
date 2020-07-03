@@ -32,13 +32,15 @@ xred
 ntypat 2
 znucl 14 14
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14-Si.nlcc.fhi, 14-Si.nlcc.UPF"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t45.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
-#%% psp_files = 14-Si.nlcc.fhi, 14-Si.nlcc.UPF
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

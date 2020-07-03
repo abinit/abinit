@@ -78,15 +78,16 @@
  ntypat  1
  znucl 6
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[789].0_.*
 #%% test_chain = t50.in, t51.in, t52.in, t53.in, t54.in, t55.in, t56.in
 #%% [files]
 #%% files_to_test = 
 #%%   t50.out, tolnlines = 30, tolabs = 1.1e-3, tolrel = 1.1
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]

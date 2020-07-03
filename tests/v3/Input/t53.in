@@ -19,8 +19,8 @@
      ixc2   7
 
 #Dataset 3. Still other units or input variables
-  xangst3   0.0 0.0  0.55
-            0.0 0.0 -0.55
+  xcart3   0.0 0.0  0.55
+           0.0 0.0 -0.55   Angstrom
    acell3   2*3.704240458   4.7625948747  Angstrom
   toldfe3   2d-7 Ry
   SpinPolarized3     T     ! This is a SIESTA input variable
@@ -48,13 +48,15 @@
  wtk  1
  znucl  8.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "8o.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t53.out, tolnlines = 2, tolabs = 2.0e-10, tolrel = 2.0e-9
-#%% psp_files = 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

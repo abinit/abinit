@@ -69,7 +69,7 @@ dmftqmc_therm 10000
 dmft_entropy 3
 dmft_nlambda 4  # previous run (t30) was 3 -> should restart at lambda number 2
 
-# == LDA+U
+# == DFT+U
 usepawu     1  #  For density matrix printout.
 dmatpuopt  1   # The density matrix: the simplest expression.
 lpawu  2 -1 -1
@@ -78,17 +78,19 @@ upawu2  3.1333333333333333  0.0  0.0  eV
 f4of2_sla3  0.0  0.0  0.0 
 jpawu2  0.7583333333333333  0.0  0.0  eV
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%                  t31o_DS2_EntropyDMFT,  tolnlines =8, tolabs =7.0e-4, tolrel = 2e-2, fld_options=-medium ;
-#%% psp_files =  23v.paw, 38sr.paw, 8o.2.paw
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = B. Amadon, J. Bieder 
-#%% keywords = DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = DMFT, CTQMC
 #%% description = Test restart of entropy calculation for SrVO3 within DMFT
 #%%<END TEST_INFO>

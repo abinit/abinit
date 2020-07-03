@@ -2,6 +2,7 @@
 
 elaflag 5
 instrflag 1
+chneut 0
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

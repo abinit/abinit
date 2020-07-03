@@ -1,5 +1,5 @@
 # Crystalline alpha-quartz. 
-# GW calculations with istwfk /= 1 and NC pseudos with multiple projectors.
+# GW calculations with istwfk /= 1 and NC pseudopotentials with multiple projectors.
 
 ndtset 3
 #istwfk *1
@@ -74,13 +74,15 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-GGA.psp8, O-GGA.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t40.out, tolnlines = 25, tolabs = 1.010e-03, tolrel = 6.000e-03, fld_options = -medium
-#%% psp_files = Si-GGA.psp8, O-GGA.psp8 
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]
@@ -88,5 +90,5 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% keywords = NC, psp8, GW
 #%% description = 
 #%%   Crystalline alpha-quartz
-#%%   GW calculations with istwfk /= 1 and NC pseudos with multiple projectors.
+#%%   GW calculations with istwfk /= 1 and NC pseudopotentials with multiple projectors.
 #%%<END TEST_INFO>

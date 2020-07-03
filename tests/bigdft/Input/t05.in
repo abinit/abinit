@@ -43,13 +43,15 @@
  prtden 0
  prtwf  0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.hgh, HGH/5b.3.hgh, 1h.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t05.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
-#%% psp_files = 31ga.hgh, HGH/5b.3.hgh, 1h.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

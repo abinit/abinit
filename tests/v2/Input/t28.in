@@ -5,6 +5,7 @@
 
 !Effective charges
  enunit    2
+ chneut    0
 
 !Interatomic force constant info
   dipdip  0      ! Dipole-dipole interaction treatment

@@ -29,13 +29,14 @@ acell 8.0 8.0 11.0 # Box size
 natom 6 ntypat 1
 typat 6*1
 znucl 1  amu 1
-xangst # Initial positions
+xcart  # Initial positions
   -1.3219886799E-02  0.0  0.0
    7.6321988680E-01  0.0  0.0
   -1.3219886799E-02  0.0  2.0
    7.6321988680E-01  0.0  2.0
   -1.3219886799E-02  0.0  4.0
    7.6321988680E-01  0.0  4.0
+   Angstrom
 nband 3 occopt 1
 nsym 1 # No symmetry (molecular dynamics)
 pawovlp 15. # Allow for PAW overlap (testing)
@@ -58,15 +59,16 @@ shiftk 0.0 0.0 0.0
 prtwf 0  prtden 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "H.LDA-PW-paw.abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [files]
 #%% files_to_test =
 #%%   t05.out, tolnlines = 140, tolabs = 2.e-5, tolrel = 5.e-2
 #%% extra_inputs = t05o_HIST.nc
-#%% psp_files = H.LDA-PW-paw.abinit
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

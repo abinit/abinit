@@ -4,9 +4,6 @@
 piezoflag  3  !the flag for the piezoelectric constant
 instrflag  1  !the flag for the internal strain tensor
 
-!the effective charge part
-   chneut  1  !enforce Born effective charge neutrality
-
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
@@ -15,7 +12,6 @@ instrflag  1  !the flag for the internal strain tensor
 #%% [files]
 #%% files_to_test = 
 #%%   telast_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

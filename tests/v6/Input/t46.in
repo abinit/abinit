@@ -61,8 +61,8 @@ dmft_mxsf 0.3
 # For historical purposes only, do not use outside of tests
 dmft_occnd_imag 0
 
-##### LDA+U
-usepawu1    1   # LDA+U is not used.
+##### DFT+U
+usepawu1    1   # DFT+U is not used.
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00  0.0   # values in Hartree
@@ -70,13 +70,15 @@ jpawu1  0.0000 0.0  # values in Hartree
 upawu2  0.30  0.0   # values in Hartree
 jpawu2  0.0000 0.0  # values in Hartree
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t46.out, tolnlines = 17, tolabs = 2.0e-5, tolrel = 4.0e-3, fld_options = -medium
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

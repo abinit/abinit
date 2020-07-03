@@ -481,7 +481,7 @@ MODULE m_pawtab
 
   real(dp), allocatable :: phiphjint(:)
    ! phiphjint(ij_proj)
-   ! Integration of Phi(:,i)*Phi(:,j) for LDA+U/local exact-exchange occupation matrix
+   ! Integration of Phi(:,i)*Phi(:,j) for DFT+U/local exact-exchange occupation matrix
 
   real(dp), allocatable :: ph0phiint(:)
    ! ph0phjint(ij_proj)
@@ -1234,7 +1234,7 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,i4)')'  Option for the use of hat density in XC terms .. ',Pawtab(ityp)%usexcnhat
   call wrtout(my_unt,msg,my_mode)
-  write(msg,'(a,i4)')'  Use LDA+U ...................................... ',Pawtab(ityp)%usepawu
+  write(msg,'(a,i4)')'  Use DFT+U ...................................... ',Pawtab(ityp)%usepawu
   call wrtout(my_unt,msg,my_mode)
   if (Pawtab(ityp)%usepawu/=0) then
     write(msg,'(a,i4)')'  L on which U is applied ........................ ',Pawtab(ityp)%lpawu

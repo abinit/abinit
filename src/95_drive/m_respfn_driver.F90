@@ -52,7 +52,7 @@ module m_respfn_driver
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
                            asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : DDB_VERSION
- use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init
  use m_ddb_interpolate, only : outddbnc
  use m_occ,         only : newocc
  use m_efmas,       only : efmasdeg_free_array, efmasval_free_array
@@ -1474,9 +1474,9 @@ print *, 'respfn dtset%mkmem ', dtset%mkmem
 &   1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Open the formatted derivative database file, and write the header
-   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+   call ddb_hdr%open_write(dtfil%fnameabo_ddb, dtfil%unddb)
 
-   call ddb_hdr_free(ddb_hdr)
+   call ddb_hdr%free()
 
 !  Output of the dynamical matrix (master only)
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
@@ -3426,7 +3426,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 & dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
-& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion) 
+& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars

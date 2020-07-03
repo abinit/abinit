@@ -53,7 +53,6 @@ module m_mover
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
@@ -72,7 +71,7 @@ module m_mover
  use m_pred_steepdesc,     only : pred_steepdesc
  use m_pred_simple,        only : pred_simple, prec_simple
  use m_pred_hmc,           only : pred_hmc
- use m_generate_training_set, only : generate_training_set
+!use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
@@ -242,7 +241,7 @@ character(len=500) :: message
 !character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
-character(len=fnlen) :: filename,fname_ddb, name_file
+character(len=fnlen) :: filename,fname_ddb,name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
@@ -251,8 +250,8 @@ logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
-real(dp) :: minE,wtime_step,now,prev
 logical :: file_exists
+real(dp) :: minE,wtime_step,now,prev
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
 real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
@@ -360,10 +359,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then 
+     if(present(effective_potential))then
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
+       hist%ihist = 1 
+     end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     !xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
      call abihist_free(hist_prev)
    end if
 
@@ -430,26 +434,31 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !### 07. Fill the history of the first SCFCV
 
  if (ab_mover%ionmov==26)then
+
 !Tdep call need to merge with adewandre branch
- else if (ab_mover%ionmov==27)then
-   if(present(filename_ddb))then
-     fname_ddb = trim(filename_ddb)
-   else
-     fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
-   end if
-   INQUIRE(FILE=filename, EXIST=file_exists)
+  else if (ab_mover%ionmov==27)then
+    if(present(filename_ddb))then
+      fname_ddb = trim(filename_ddb)
+    else
+      fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
+    end if
+    INQUIRE(FILE=filename, EXIST=file_exists)
 
-   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
-&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
-&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
-&                             ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
-&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
+    MSG_ERROR("This section has been disabled, ph_freez_disp is not defined in main ABINIT")
+
+! XG 20200322 : The input variables ph_freez_disp are not documented neither tested, so they
+! have been removed from the allowed list in the parser. Also, you should not be here !
+!   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
+!&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
+!&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
+!&                             ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
+!&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
 
 
-   !Fill history with the values of xred, acell and rprimd of the first configuration
-   acell(:)   =hist%acell(:,1)
-   rprimd(:,:)=hist%rprimd(:,:,1)
-   xred(:,:)  =hist%xred(:,:,1)
+    !Fill history with the values of xred, acell and rprimd of the first configuration
+    acell(:)   =hist%acell(:,1)
+    rprimd(:,:)=hist%rprimd(:,:,1)
+    xred(:,:)  =hist%xred(:,:,1)
 
  else
 
@@ -538,7 +547,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-
+     
      call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
 &     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
 
@@ -616,7 +625,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !          (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
+               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -771,6 +780,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if(specs%isFconv)then
        if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5).or.mod(itime,2)==1)then
          if (scfcv_args%dtset%tolmxf/=0)then
+
            call fconv(hist%fcart(:,:,hist%ihist),&
 &           scfcv_args%dtset%iatfix, &
 &           iexit,itime,&

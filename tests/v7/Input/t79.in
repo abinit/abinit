@@ -83,8 +83,8 @@ ucrpa_window  -5.0 5.0 eV  # Exclude a large window of energy
 dmftbandi3 12       # Precise the definition of Wannier functions (also used for DMFT calculations)
 dmftbandf3 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
 
-# -- LDAU: 1st dataset and definition of correlated angular momentum
-usepawu    1        # LDA+U is used just for printing usefull quantities.
+# -- DFTU: 1st dataset and definition of correlated angular momentum
+usepawu    1        # DFT+U is used just for printing usefull quantities.
 dmatpuopt  1        # choose expression of the density matrix
 lpawu      2 -1 -1
 jpawu      0.0 0.0 0.0 eV
@@ -149,13 +149,15 @@ dmft_solv3 2         # usefull to avoid supplementary variables in the input fil
  mqgrid5 300        # Reduced but fine at least for SrVO3
  mqgriddg5 300
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT, !HAVE_NETCDF_DEFAULT
 #%% [files]
 #%% files_to_test = t79.out, tolnlines=17, tolabs=1.5e-3, tolrel= 8.0e-3, fld_options = -medium
-#%% psp_files= 23v.paw, 38sr.paw, 8o.paw 
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

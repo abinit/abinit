@@ -52,13 +52,15 @@
  xred 3*0.00d0 3*0.50d0
  znucl 19 17
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "19k.pspnc, 17cl.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t24.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  
-#%% psp_files = 19k.pspnc, 17cl.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

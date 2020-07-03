@@ -93,12 +93,14 @@
 nbdbuf 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = tsv3_04.out, tolnlines=2, tolabs=1.1e-7, tolrel=1.2e-3, fld_options = -medium
-#%% psp_files= 31ga.SGS_mod, 33as.SGS_mod 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -4,9 +4,6 @@
  dieflag   2     ! 2=> electronic dielectric tensor only
  ifcflag   1     ! Interatomic force constant flag
 
-!Effective charges
-  chneut   1     ! Charge neutrality requirement for effective charges.
-
 !Interatomic force constant info
   dipdip  1      ! Dipole-dipole interaction treatment
   ifcana  1      ! Analysis of the IFCs

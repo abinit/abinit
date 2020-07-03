@@ -51,6 +51,9 @@ xcart         4.4575393774E+00  1.9054055331E+00  1.1215044142E+01
 ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "HGH/1h.1.hgh, HGH/53i.7.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -58,7 +61,6 @@ ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 #%% [files]
 #%% files_to_test = 
 #%%   t18.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  -medium
-#%% psp_files = HGH/1h.1.hgh, HGH/53i.7.hgh
 #%% [shell]
 #%% post_commands = ww_cp t18o_DEN t19i_DEN
 #%% [paral_info]

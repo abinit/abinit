@@ -54,11 +54,13 @@ ntypat 1
 typat  1 1  
 natom 2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
@@ -68,7 +70,7 @@ natom 2
 #%% keywords = NC, DFPT
 #%% authors = M. Giantomassi
 #%% description = 
-#%%   C-diamond, Bulk, 2 atoms, NC pseudos.
+#%%   C-diamond, Bulk, 2 atoms, NC pseudopotentials.
 #%%   Test the IO routines for a typical DFPT calculation
 #&&   Use paral_kgb==1 in the GS part in band-fft mode.
 #&&   Read the WFK part to perform phonon calculations at Gamma.

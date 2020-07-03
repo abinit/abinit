@@ -7,6 +7,7 @@ tolwfr 1e-16
 #mixprec 1
 boxcutmin 1.7
 prtphdos 0
+brav 1
 
 # K-mesh (must equal the one used to produce the WFK file)
 ngkpt    4 4 4
@@ -80,15 +81,16 @@ natom 2
 ntypat 2
 znucl 3 9
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "03-Li.psp, 09-F.psp"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t57.in, t58.in, t59.in, t60.in, t61.in
 #%% [files]
 #%% files_to_test = 
 #%%   t61.out, tolnlines = 30, tolabs = 20.0, tolrel = 5.0e-2
-#%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

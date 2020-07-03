@@ -1,6 +1,6 @@
 # Exercise IO routines in parallel with different combination 
 # of parameters in the GS eigensolvers
-# similar to t26.in but with NC pseudos
+# similar to t26.in but with NC pseudopotentials
 
 #use_slk 1
 #iomode 1
@@ -90,11 +90,13 @@ ntypat 1
 typat  1 1  
 natom 2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = C.psp8
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

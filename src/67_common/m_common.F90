@@ -63,6 +63,7 @@ module m_common
  use defs_abitypes,       only : MPI_type
  use defs_datatypes,      only : pspheader_type, ebands_t
  use m_pspheads,          only : inpspheads, pspheads_comm
+ use m_kpts,              only : kpts_timrev_from_kptopt
 
  implicit none
 
@@ -114,9 +115,9 @@ contains
 !!   | prteig=
 !!   | prtstm=print STM input variable
 !!   | prtvol= control print volume
-!!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
+!!   | usedmatpu=DFT+U: number of SCF steps keeping occ. matrix fixed
 !!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
-!!   | usepawu=0 if no LDA+U; /=0 if LDA+U
+!!   | usepawu=0 if no DFT+U; /=0 if DFT+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
 !!  etotal=total energy (hartree)
@@ -1922,7 +1923,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform, ncid
+ integer :: ncid, fform
  type(hdr_type) :: hdr
 !arrays
  real(dp),pointer :: gs_eigen(:,:,:)
@@ -1931,8 +1932,6 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 
  ! NOTE: Assume file with header. Must use wfk_read_eigenvalues to handle Fortran WFK
  if (endswith(path, "_WFK") .or. endswith(path, "_WFK.nc")) then
-   call hdr_read_from_fname(hdr, path, fform, comm)
-   ABI_CHECK(fform /= 0, "fform == 0")
    call wfk_read_eigenvalues(path, gs_eigen, hdr, comm)
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
 
@@ -1940,6 +1939,7 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(ncid, path, comm))
    call hdr_ncread(hdr, ncid, fform)
+   ABI_CHECK(fform /= 0, "fform == 0")
    ABI_MALLOC(gs_eigen, (hdr%mband, hdr%nkpt, hdr%nsppol))
    NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), gs_eigen))
    new = ebands_from_hdr(hdr, maxval(hdr%nband), gs_eigen)
@@ -1981,16 +1981,16 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform, timrev
+ integer :: fform
  type(hdr_type) :: hdr
 
 ! *************************************************************************
 
  ! Assume file with Abinit header
+ ! TODO: Should add routine to read crystal from structure without hdr
  call hdr_read_from_fname(hdr, path, fform, comm)
  ABI_CHECK(fform /= 0, "fform == 0")
- timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
- new = hdr%get_crystal(timrev)
+ new = hdr%get_crystal()
  call hdr%free()
 
 end function crystal_from_file

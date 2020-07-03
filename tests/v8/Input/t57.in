@@ -124,6 +124,9 @@ diemac 6
 #ecut 15
 nstep 100
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Ca.psp8, O.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -134,7 +137,6 @@ nstep 100
 #%% [files]
 #%% files_to_test =
 #%%   t57.out, tolnlines = 45, tolabs = 1.1e-6, tolrel = 2.0e-4, fld_options=-medium;
-#%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

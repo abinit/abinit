@@ -235,6 +235,8 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem_rbz,mpi_enreg
  call wrtout(std_out,message,'COLL')
 
 !find the related k points to every k point in full BZ-----------------
+!TODO: import hash tables for k-points, to make lookup fast and check for missing 
+! matches
 
 !loop over three reciprocal directions
  do idir = 1, 3

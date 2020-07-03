@@ -79,8 +79,10 @@ MODULE m_nctk
 #endif
 
 #ifdef HAVE_NETCDF
- ! netcdf4-hdf5
+ ! netcdf4-hdf5 is the default
  integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
+ ! netcdf4 classic
+ !integer,save,private :: def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
 #endif
 
  character(len=5),private,parameter :: NCTK_IMPLICIT_DIMS(10) = [ &
@@ -257,7 +259,7 @@ MODULE m_nctk
  ! If cache_preemption is provided when opening a netCDF-4/HDF5 file, it will be used
  ! instead of the default (0.75) as the preemption value for the HDF5 chunk cache.
 
- logical, save ABI_PROTECTED, public :: nctk_has_mpiio = .False.
+ logical, save ABI_PROTECTED, public :: nctk_has_mpiio = .false.
  ! This flag is set to true if the netcdf library supports parallel IO.
  ! Cannot use CPP flags because nf90_open_par and other similar functions are always
  ! exported by netcdf. As a consequence we have to check at run-time if we can
@@ -600,7 +602,7 @@ end subroutine nctk_test_mpiio
 !! FUNCTION
 !!  Return the netcdf type from a string. Possible values:
 !!    c or ch   for NF90_CHAR
-!!    i or int  for NF90_INT
+!!    i or int  for NF90_INTtrue
 !!   sp         for NF90_FLOAT
 !!   dp         for NF90_DOUBLE
 !!
@@ -1059,7 +1061,7 @@ integer function nctk_set_collective(ncid, varid) result(ncerr)
 !Arguments ------------------------------------
  integer,intent(in) :: ncid,varid
 
-! *********************************************************************
+! *********************************************************************true
 
   ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI

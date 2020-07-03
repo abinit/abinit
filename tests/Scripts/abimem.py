@@ -20,6 +20,9 @@ except ImportError:
 import logging
 logger = logging.getLogger(__name__)
 
+
+from pprint import pprint
+
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
 # TODO: Use Absolute imports and rename tests --> abitests to
 # avoid possible conflicts with the packages in PYTHONPATH
@@ -42,6 +45,9 @@ except ImportError:
     raise
 
 
+from tests.pymods.termcolor import cprint
+
+
 def summarize(options):
     """Print basic info to terminal."""
     for memfile in options.memfiles:
@@ -53,7 +59,7 @@ def leaks(options):
     """Find possible memory leaks."""
     retcode = 0
     for memfile in options.memfiles:
-        memfile.find_memleaks()
+        retcode += memfile.find_memleaks()
     return retcode
 
 
@@ -87,10 +93,12 @@ def intense(options):
 def peaks(options):
     """Find memory peaks."""
     retcode = 0
+    maxlen = 20
     for memfile in options.memfiles:
-        for i, peak in enumerate(memfile.get_peaks(maxlen=30)):
+        #print(memfile.get_peaks(maxlen=maxlen, as_dataframe=True))
+        for i, peak in enumerate(memfile.get_peaks(maxlen=maxlen)):
             print("[%d] %s" % (i, peak))
-        memfile.plot_peaks()
+        memfile.plot_peaks(maxlen=maxlen, title="Memory peaks")
 
     return retcode
 
@@ -107,7 +115,15 @@ def zerosized(options):
     """Find zero-sized allocations."""
     retcode = 0
     for memfile in options.memfiles:
-        memfile.find_zerosized()
+        elist = memfile.find_zerosized()
+
+        if elist:
+            print("Found %d zero-sized entries:" % len(elist))
+            pprint(elist)
+        else:
+            print("No zero-sized found")
+
+
     return retcode
 
 
@@ -115,6 +131,24 @@ def plot(options):
     """Plot data with matplotlib."""
     for memfile in options.memfiles:
         memfile.expose()
+    return 0
+
+
+def panel(options):
+    """
+    Open GUI in web browser, requires panel package
+    """
+    try:
+        import panel  # noqa: F401
+    except ImportError as exc:
+        cprint("Use `conda install panel` or `pip install panel` to install the python package.", "red")
+        raise exc
+
+    import matplotlib
+    matplotlib.use("Agg")
+
+    for memfile in options.memfiles:
+       memfile.get_panel().show()
     return 0
 
 
@@ -197,6 +231,9 @@ def get_parser(with_epilog=False):
     # Subparser for plot command.
     p_plot = subparsers.add_parser('plot', parents=[copts_parser], help=plot.__doc__)
 
+    # Subparser for panel command.
+    p_panel = subparsers.add_parser('panel', parents=[copts_parser], help=panel.__doc__)
+
     # Subparser for ipython command.
     p_ipython = subparsers.add_parser('ipython', parents=[copts_parser], help=ipython.__doc__)
 
@@ -250,6 +287,12 @@ def main():
     if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % options.loglevel)
     logging.basicConfig(level=numeric_level)
+
+    if options.seaborn:
+        # Use seaborn settings.
+        import seaborn as sns
+        sns.set(context=options.seaborn, style='darkgrid', palette='deep',
+                font='sans-serif', font_scale=1, color_codes=False, rc=None)
 
     if os.path.isfile(options.paths[0]):
         options.memfiles = [AbimemFile(path) for path in options.paths]

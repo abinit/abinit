@@ -211,7 +211,7 @@ for bin in main_bins:
       bin_libs += " @%s_%s_libs@" % (dep_pfx, dep)
     else:
       raise ValueError("invalid external dependency: '%s'" % dep)
-  bin_fcflags += "@sd_sys_fcflags@"
+  bin_fcflags += " @sd_sys_fcflags@"
 
   # Finish setting build-time parameters
   bin_libs += " $(FC_LIBS)"

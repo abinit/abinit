@@ -1014,6 +1014,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
    NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
    NCF_CHECK(nf90_inq_varid(unt, varname, varid))
    ! [cplex, n1, n2, n3, nspden]
+   ! WARNING: if POT/RHO is complex (e.g. DFPT) we only read the REAL part.
    NCF_CHECK(nf90_get_var(unt, varid, grid_full, start=[1,1,1,1,1], count=[1, nr1,nr2,nr3,nspden]))
    NCF_CHECK(nf90_close(unt))
 #else
@@ -2646,6 +2647,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        do ir1 = 1,3
          write(unout,'(3(ES17.10,2X))') (Bohr_Ang*rprimd(ir2,ir1), ir2=1,3)
        end do
+
+       !subroutine fftpac(ispden, mpi_enreg, nspden, n1, n2, n3, n4, n5, n6, ngfft, aa, fofr, option)
 
        do ir3=gridshift3+1,nr3+1
          ii3=mod(ir3-1,nr3) + 1

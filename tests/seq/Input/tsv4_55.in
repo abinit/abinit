@@ -50,13 +50,15 @@ nbdbuf 0
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "41nb_001023.pspfhi, 03li.pspfhi, 08o_001023.pspfhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  tsv4_55.out,      tolnlines=  2, tolabs=  1.1e-03, tolrel=  4.0e-04, fld_options=-easy
-#%% psp_files= 41nb_001023.pspfhi, 03li.pspfhi, 08o_001023.pspfhi 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -17,8 +17,8 @@
 .Starting date : Mon 24 Feb 2020.
 - ( at 16h22 )
   
->>>  Enter the number of files to merge: 
->>>  Enter the name of the file to be analyzed: 
+->>  Enter the number of files to merge: 
+->>  Enter the name of the file to be analyzed: 
 
  Running single-file mode:
  Checking the integrity of file: t37o_DS3_SCR
@@ -145,7 +145,7 @@
 
  11 real frequencies will be kept.
  Finally, we have 16 frequencies. 11 real, and 5 imaginary.
->>>  Enter the full name of the final output file: 
+->>  Enter the full name of the final output file: 
  ==== Header of the final file ====
  SCR file: epsilon^-1 , calculated using inclvkb = 2
  TESTPARTICLE RPA

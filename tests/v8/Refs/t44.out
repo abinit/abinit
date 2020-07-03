@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h32 )
+.Starting date : Wed 17 Jun 2020.
+- ( at 13h23 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t41-t42-t43-t44/t44.in
 - output file    -> t44.out
@@ -116,12 +116,12 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
     occopt =       1   xclevel =       1
--    mband =          54        mffmem =           1         mkmem =           8
+-    mband =          20        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.106 Mbytes of memory.
+P This job should need less than                       3.641 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+_ WF disk file :      0.803 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -138,6 +138,13 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
              bdgw           1       8       1       8
+        ddb_ngqpt        2    2    2
+   dvdb_qcache_mb1    -1.00000000E+00
+   dvdb_qcache_mb2     0.00000000E+00
+   dvdb_qcache_mb3     1.02400000E+03
+   dvdb_qcache_mb4     1.02400000E+03
+   dvdb_qcache_mb5     1.02400000E+03
+   dvdb_qcache_mb6     1.02400000E+03
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
       eph_intmeth1          1
@@ -146,12 +153,6 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
       eph_intmeth4          1
       eph_intmeth5          2
       eph_intmeth6          2
-         eph_task1          4
-         eph_task2          4
-         eph_task3          5
-         eph_task4          4
-         eph_task5          4
-         eph_task6          4
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       0    0    0
    eph_ngqpt_fine3       4    4    4
@@ -164,18 +165,12 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
         eph_stern4          0
         eph_stern5          0
         eph_stern6          1
-         ph_wstep      3.67493254E-06 Hartree
-         ph_smear      3.67493254E-05 Hartree
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-   dvdb_qcache_mb1    -1.00000000E+00
-   dvdb_qcache_mb2     0.00000000E+00
-   dvdb_qcache_mb3     1.02400000E+03
-   dvdb_qcache_mb4     1.02400000E+03
-   dvdb_qcache_mb5     1.02400000E+03
-   dvdb_qcache_mb6     1.02400000E+03
-        ph_nqpath           3
-         ph_ngqpt       16   16   16
+         eph_task1          4
+         eph_task2          4
+         eph_task3          5
+         eph_task4          4
+         eph_task5          4
+         eph_task6          4
 -          fftalg         312
         freqspmax      3.67493254E-02 Hartree
         freqspmin     -3.67493254E-02 Hartree
@@ -204,20 +199,25 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
           mixprec        1
 P           mkmem           8
             natom           2
-            nband          54
+            nband1         54
+            nband2         54
+            nband3         54
+            nband4         54
+            nband5         54
+            nband6         20
            ndtset           6
           nfreqsp1        100
           nfreqsp2        100
           nfreqsp3        100
           nfreqsp4        100
           nfreqsp5          0
-          nfreqsp6          0
+          nfreqsp6        100
             ngfft          20      20      20
              nkpt           8
            nkptgw           2
              nsym          48
            ntypat           1
-              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
@@ -226,7 +226,51 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ6     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
         optdriver           7
+         ph_ngqpt       16   16   16
+        ph_nqpath           3
+         ph_smear      3.67493254E-05 Hartree
+         ph_wstep      3.67493254E-06 Hartree
         prteliash           1
            prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -430,11 +474,11 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 2
  List of K-points for self-energy corrections:
@@ -452,19 +496,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.840   -0.051   -0.052   -0.001    0.994   -0.088    0.036    0.000    0.000
    2  12.800   13.050    0.250    0.652   -0.333    0.383    0.053    0.599   21.589   21.890
@@ -480,10 +525,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  QP_gap - KS_gap:   -0.354 (OTMS:   -0.938)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+ omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
    0.003     0.000    -0.000     0.000
    0.003     0.000    -0.000     0.000
@@ -502,7 +547,7 @@ For band:5
 
 
 
-omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+ omega and Sigma_nk(omega, T=1) in eV for testing purposes:
 For band:1
   -8.799    -0.051    -0.001
   -8.789    -0.052    -0.001
@@ -520,7 +565,7 @@ For band:5
   18.426    -0.287    -0.316
 
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.782    0.045    0.066   -0.115    0.677   -0.011    0.077    0.000    0.000
    2  -0.746   -0.714    0.032    0.050   -0.102    0.651   -0.195    0.245    2.081    2.068
@@ -636,11 +681,11 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
  Number of q-points in the IBZ: 3
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 2
  List of K-points for self-energy corrections:
@@ -658,19 +703,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.840   -0.051   -0.052   -0.001    0.994   -0.088    0.036    0.000    0.000
    2  12.800   13.050    0.250    0.652   -0.333    0.383    0.053    0.598   21.589   21.890
@@ -686,10 +732,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  QP_gap - KS_gap:   -0.354 (OTMS:   -0.938)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+ omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
    0.003     0.000    -0.000     0.000
    0.003     0.000    -0.000     0.000
@@ -708,7 +754,7 @@ For band:5
 
 
 
-omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+ omega and Sigma_nk(omega, T=1) in eV for testing purposes:
 For band:1
   -8.799    -0.051    -0.001
   -8.789    -0.052    -0.001
@@ -726,7 +772,7 @@ For band:5
   18.426    -0.286    -0.316
 
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.782    0.045    0.066   -0.115    0.677   -0.011    0.077    0.000    0.000
    2  -0.746   -0.714    0.032    0.050   -0.102    0.651   -0.195    0.245    2.081    2.069
@@ -834,7 +880,7 @@ All the independent perturbations are available
 
  Interpolation of the electron-phonon coupling potential
 
- From coarse q-mesh: [2,2,2] to: [4,4,4]
+ From coarse q-mesh: [2, 2, 2] to: [4, 4, 4]
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
@@ -960,11 +1006,11 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 2
  List of K-points for self-energy corrections:
@@ -982,19 +1028,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.851   -0.062   -0.063   -0.001    0.987   -0.104    0.041    0.000    0.000
    2  12.800   12.932    0.132    0.165   -0.047    0.798   -0.509    0.674   21.589   21.783
@@ -1010,10 +1057,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  QP_gap - KS_gap:   -0.347 (OTMS:   -0.499)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+ omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
    0.003     0.000    -2.652     0.328
    0.003     0.000    -2.854     0.351
@@ -1032,7 +1079,7 @@ For band:5
 
 
 
-omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+ omega and Sigma_nk(omega, T=1) in eV for testing purposes:
 For band:1
   -8.799    -0.063    -0.001
   -8.789    -0.063    -0.001
@@ -1050,7 +1097,7 @@ For band:5
   18.426    -0.334    -0.074
 
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.647    0.180   -0.198   -0.378   -0.906   -0.285    0.087    0.000    0.000
    2  -0.746   -0.735    0.012    0.013   -0.016    0.907   -0.263    0.275    2.081    1.913
@@ -1188,11 +1235,11 @@ All the independent perturbations are available
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 2
  List of K-points for self-energy corrections:
@@ -1210,19 +1257,20 @@ P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.847   -0.058   -0.059   -0.001    0.987   -0.100    0.041    0.000    0.000
    2  12.800   12.873    0.072    0.091   -0.005    0.798   -0.583    0.674   21.589   21.720
@@ -1238,10 +1286,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
  QP_gap - KS_gap:   -0.300 (OTMS:   -0.445)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+ omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
    0.003     0.000    -0.411     0.378
    0.003     0.000    -0.410     0.377
@@ -1259,7 +1307,7 @@ For band:5
    0.003     0.082    -6.201     5.344
 
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.809    0.019   -0.020   -0.087   -0.906   -0.107    0.087    0.000    0.000
    2  -0.746   -0.709    0.037    0.041   -0.036    0.907   -0.235    0.275    2.081    2.100
@@ -1283,7 +1331,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
 
 --- !DatasetInfo
 iteration_state: {dtset: 6, }
-dimensions: {natom: 2, nkpt: 8, mband: 54, nsppol: 1, nspinor: 1, nspden: 1, mpw: 328, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 328, }
 cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
 electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 4, }
@@ -1370,8 +1418,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
- Number of bands in e-ph self-energy sum: 54
- From bsum_start: 1 to bsum_stop: 54
+ Number of bands in e-ph self-energy sum: 20
+ From bsum_start: 1 to bsum_stop: 20
  Treating high-energy bands with Sternheimer and static self-energy.
  Tolwfr:    1.000000E-16, nline: 4
  Symsigma: 1 Timrev: 1
@@ -1379,21 +1427,21 @@ All the independent perturbations are available
  Method for q-space integration:  Tetrahedron method
  Tolerance for integration weights <     1.000000E-12     1.000000E-12
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
+ Number of frequencies along the real axis: 101 , Step: 0.010 [eV]
  Number of frequency in generalized Eliashberg functions: 1749
  Number of temperatures: 6 From: 5.000000E+00 to 3.000000E+02 [K]
- Ab-initio q-mesh from DDB file: [2,2,2]
- Ab-initio q-mesh from DVDB file: [2,2,2]
- Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
- asr: 1 dipdip: 1 symdynmat: 1
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
  No special treatment of Frohlich divergence in gkq for q --> 0
  Number of k-points for self-energy corrections: 2
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
-P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 20
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
@@ -1405,69 +1453,89 @@ P Number of k-point in Sigma_nk treated by this proc: 2 of 2
  Reading GS KS potential for Sternheimer from: t41o_DS1_POT
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
-Final results in eV.
-Notations:
-   eKS: Kohn-Sham energy. eQP: quasi-particle energy.
-   eQP - eKS: Difference between the QP and the KS energy.
-   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
-   Z(eKS): Renormalization factor.
-   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
-   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
-   OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
-   TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.843   -0.054   -0.055   -0.001    0.988   -0.115    0.060    0.000    0.000
-   2  12.800   12.889    0.089    0.111   -0.005    0.798   -0.959    1.070   21.589   21.732
-   3  12.800   12.889    0.089    0.111   -0.005    0.798   -0.959    1.070    0.000    0.000
-   4  12.800   12.889    0.089    0.111   -0.005    0.798   -0.959    1.070    0.000    0.000
-   5  18.426   18.223   -0.203   -0.316   -0.123    0.643   -1.263    0.947    5.626    5.334
-   6  18.426   18.223   -0.203   -0.316   -0.123    0.643   -1.263    0.947    0.000    0.000
-   7  18.426   18.223   -0.203   -0.316   -0.123    0.643   -1.263    0.947    0.000    0.000
-   8  26.686   26.657   -0.030   -0.084   -0.537    0.355   -0.177    0.093    8.260    8.434
+   2  12.800   12.889    0.089    0.111   -0.005    0.801   -0.960    1.070   21.589   21.732
+   3  12.800   12.889    0.089    0.111   -0.005    0.801   -0.960    1.070    0.000    0.000
+   4  12.800   12.889    0.089    0.111   -0.005    0.801   -0.960    1.070    0.000    0.000
+   5  18.426   18.222   -0.204   -0.317   -0.123    0.645   -1.264    0.947    5.626    5.333
+   6  18.426   18.222   -0.204   -0.317   -0.123    0.645   -1.264    0.947    0.000    0.000
+   7  18.426   18.222   -0.204   -0.317   -0.123    0.645   -1.264    0.947    0.000    0.000
+   8  26.686   26.657   -0.029   -0.083   -0.537    0.356   -0.176    0.093    8.260    8.435
  
  KS gap:    5.626 (assuming bval:4 ==> bcond:5)
- QP gap:    5.334 (OTMS:    5.198)
- QP_gap - KS_gap:   -0.292 (OTMS:   -0.427)
+ QP gap:    5.333 (OTMS:    5.199)
+ QP_gap - KS_gap:   -0.293 (OTMS:   -0.427)
  
 ============================================================================================
-No more than 1 temperatures are written to the main output file.
-Please use SIGEPH.nc file and AbiPy to analyze the results.
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-omega and Eliashberg function gf_{nk}(omega) for testing purposes:
+ omega and Eliashberg function gf_{nk}(omega) for testing purposes:
 For band:1
-   0.003     0.000    -0.405     0.378
-   0.003     0.000    -0.405     0.377
+   0.003     0.000    -0.251     0.311
+   0.003     0.000    -0.251     0.309
 For band:2
-   0.003     0.000    -6.085     6.233
-   0.003     0.000    -6.060     6.209
+   0.003     0.000    -2.399     2.774
+   0.003     0.000    -2.388     2.763
 For band:3
-   0.003     0.000    -6.085     6.233
-   0.003     0.000    -6.060     6.209
+   0.003     0.000    -2.399     2.774
+   0.003     0.000    -2.388     2.763
 For band:4
-   0.003     0.000    -6.085     6.233
-   0.003     0.000    -6.060     6.209
+   0.003     0.000    -2.399     2.774
+   0.003     0.000    -2.388     2.763
 For band:5
-   0.003     0.082    -6.223     5.364
-   0.003     0.081    -6.195     5.344
+   0.003     0.082    -2.379     2.044
+   0.003     0.081    -2.367     2.035
 
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
+
+ omega and Sigma_nk(omega, T=1) in eV for testing purposes:
+For band:1
+  -8.799    -0.055    -0.001
+  -8.789    -0.055    -0.001
+For band:2
+  12.790     0.111    -0.005
+  12.800     0.111    -0.005
+For band:3
+  12.790     0.111    -0.005
+  12.800     0.111    -0.005
+For band:4
+  12.790     0.111    -0.005
+  12.800     0.111    -0.005
+For band:5
+  18.416    -0.316    -0.121
+  18.426    -0.317    -0.123
+
+
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    5.0 [K], mu_e:   16.736
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1  -2.827   -2.813    0.014   -0.015   -0.084   -0.933   -0.154    0.138    0.000    0.000
-   2  -0.746   -0.736    0.010    0.011   -0.035    0.907   -0.375    0.385    2.081    2.077
-   3   9.967   10.066    0.099    0.153   -0.107    0.646   -0.808    0.961   10.714   10.803
-   4   9.967   10.066    0.099    0.153   -0.107    0.646   -0.808    0.961    0.000    0.000
-   5  21.328   20.649   -0.678   -0.049   -0.213   13.862   -0.923    0.874   11.360   10.583
-   6  21.328   20.649   -0.678   -0.049   -0.213   13.862   -0.923    0.874    0.000    0.000
-   7  22.066   21.869   -0.196   -0.257   -0.165    0.763   -0.367    0.110    0.738    1.220
-   8  28.462   28.683    0.222    0.289   -0.057    0.765   -0.645    0.934    6.396    6.814
+   1  -2.827   -2.813    0.014   -0.015   -0.084   -0.932   -0.154    0.138    0.000    0.000
+   2  -0.746   -0.737    0.010    0.011   -0.035    0.908   -0.375    0.385    2.081    2.076
+   3   9.967   10.066    0.099    0.152   -0.107    0.647   -0.808    0.961   10.714   10.803
+   4   9.967   10.066    0.099    0.152   -0.107    0.647   -0.808    0.961    0.000    0.000
+   5  21.328   20.593   -0.734   -0.050   -0.213   14.795   -0.924    0.874   11.360   10.527
+   6  21.328   20.593   -0.734   -0.050   -0.213   14.795   -0.924    0.874    0.000    0.000
+   7  22.066   21.870   -0.196   -0.257   -0.165    0.764   -0.367    0.110    0.738    1.276
+   8  28.462   28.683    0.222    0.288   -0.056    0.768   -0.646    0.934    6.396    6.814
  
  KS gap:   11.360 (assuming bval:4 ==> bcond:5)
- QP gap:   10.583 (OTMS:   11.158)
- QP_gap - KS_gap:   -0.777 (OTMS:   -0.202)
+ QP gap:   10.527 (OTMS:   11.158)
+ QP_gap - KS_gap:   -0.833 (OTMS:   -0.202)
  
 ============================================================================================
 
@@ -1478,6 +1546,13 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
              bdgw           1       8       1       8
+        ddb_ngqpt        2    2    2
+   dvdb_qcache_mb1    -1.00000000E+00
+   dvdb_qcache_mb2     0.00000000E+00
+   dvdb_qcache_mb3     1.02400000E+03
+   dvdb_qcache_mb4     1.02400000E+03
+   dvdb_qcache_mb5     1.02400000E+03
+   dvdb_qcache_mb6     1.02400000E+03
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
       eph_intmeth1          1
@@ -1486,12 +1561,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
       eph_intmeth4          1
       eph_intmeth5          2
       eph_intmeth6          2
-         eph_task1          4
-         eph_task2          4
-         eph_task3          5
-         eph_task4          4
-         eph_task5          4
-         eph_task6          4
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       0    0    0
    eph_ngqpt_fine3       4    4    4
@@ -1504,18 +1573,12 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
         eph_stern4          0
         eph_stern5          0
         eph_stern6          1
-         ph_wstep      3.67493254E-06 Hartree
-         ph_smear      3.67493254E-05 Hartree
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-   dvdb_qcache_mb1    -1.00000000E+00
-   dvdb_qcache_mb2     0.00000000E+00
-   dvdb_qcache_mb3     1.02400000E+03
-   dvdb_qcache_mb4     1.02400000E+03
-   dvdb_qcache_mb5     1.02400000E+03
-   dvdb_qcache_mb6     1.02400000E+03
-        ph_nqpath           3
-         ph_ngqpt       16   16   16
+         eph_task1          4
+         eph_task2          4
+         eph_task3          5
+         eph_task4          4
+         eph_task5          4
+         eph_task6          4
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -1553,20 +1616,25 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
           mixprec        1
 P           mkmem           8
             natom           2
-            nband          54
+            nband1         54
+            nband2         54
+            nband3         54
+            nband4         54
+            nband5         54
+            nband6         20
            ndtset           6
           nfreqsp1        100
           nfreqsp2        100
           nfreqsp3        100
           nfreqsp4        100
           nfreqsp5          0
-          nfreqsp6          0
+          nfreqsp6        100
             ngfft          20      20      20
              nkpt           8
            nkptgw           2
              nsym          48
            ntypat           1
-              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
@@ -1575,7 +1643,51 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+              occ6     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
         optdriver           7
+         ph_ngqpt       16   16   16
+        ph_nqpath           3
+         ph_smear      3.67493254E-05 Hartree
+         ph_wstep      3.67493254E-06 Hartree
         prteliash           1
            prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -1743,10 +1855,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         33.9  wall=         34.0
+- Proc.   0 individual time (sec): cpu=         32.6  wall=         35.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         33.9  wall=         34.0
+.Delivered   7 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         32.6  wall=         35.1

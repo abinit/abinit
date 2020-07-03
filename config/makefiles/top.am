@@ -3,11 +3,13 @@ EXTRA_DIST += \
 	KNOWN_PROBLEMS \
 	PACKAGING \
 	README_MacOSX.md \
+        README_Ubuntu.md \
 	README_gpu.md \
 	README_xlf.md \
 	RELNOTES \
 	autogen.sh \
-	wipeout.sh
+	wipeout.sh \
+	upgrade-build-config-file.sh
 
 # Additional files to clean
 CLEANFILES += \

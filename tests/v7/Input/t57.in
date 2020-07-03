@@ -61,16 +61,17 @@
  tolwfr 1.0d-8
  istwfk *1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
 #%% [shell] 
 #%% post_commands = 
 #%% [files]
 #%% files_to_test = 
 #%%   t57.out, tolnlines = 7, tolabs = 1.1e-3, tolrel = 2.0e-4, fld_options = -medium
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -82,12 +82,14 @@ ndtset 3 jdtset 1 2 3
  prtwf 0 prteig 0 prtden 0
  prtvol 10
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "al_ps.abinit.paw, as_ps.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t95.in,t96.in,t97.in,t98.in
 #%% [files]
-#%% psp_files = al_ps.abinit.paw, as_ps.paw
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10

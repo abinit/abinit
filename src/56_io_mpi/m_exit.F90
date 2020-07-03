@@ -331,6 +331,7 @@ subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
      iexit=0
 
      ! Is it worth to test the cpu time ?
+     tsec = zero
      if (abs(cpus)>1.0d-5 .or. openexit==1) then
        call timein(tsec(1),tsec(2))
      end if

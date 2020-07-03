@@ -61,7 +61,7 @@
  znucl 8.0 7.0 1.0               # Z of atoms
  natfix 2  iatfix 1 4            # Keep O and N atoms fixed
  charge 1.0                      # Charge of the simulation cell
- xangst                          # Atom positions in reduced coord
+ xcart                           # Atom positions in reduced coord
  0.000E+00  0.000E+00  0.000E+00 # O (H2O)
 -3.759E-01 -2.859E-01  8.710E-01 # H (H2O)
 -3.844E-01  8.676E-01 -2.854E-01 # H (H2O)
@@ -70,13 +70,16 @@
  4.319E+00 -7.867E-01  5.670E-01 # H (NH3)
  4.341E+00  8.736E-01  4.023E-01 # H (NH3)
  1.028E+00  2.270E-02  1.568E-02 # H (proton)
+    Angstrom
 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "8o_hard.paw, 7n.paw, 1h.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 8o_hard.paw, 7n.paw, 1h.paw
 #%% [NCPU_20]
 #%% files_to_test = 
 #%%   tstring_01_MPI20.out, tolnlines = 0, tolabs = 1.100e-03, tolrel = 3.000e-03

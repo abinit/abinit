@@ -29,7 +29,7 @@ occopt 7 tsmear 5.0d-3
 kptrlatt 2 0 0 0 2 0 0 0 2
 nsym 0
 
-# === LDA+U options
+# === DFT+U options
 
 usepawu  1          # Activate PAW+U
 lpawu   2 -1        # Applied on d electrons of Nickel
@@ -61,20 +61,22 @@ dmatpawu            # The initial density matrix
 # === Other options
 prtdensph 1  ratsph 2*2.3 ! Printing of local magnetic moment
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t37.out, tolnlines = 9, tolabs = 5.410e-02, tolrel = 3.500e-02, fld_options = -easy
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 3
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = PAW, LDAU
+#%% keywords = PAW, DFTU
 #%% description = 
-#%%   Simple test for LDA+U features.
+#%%   Simple test for DFT+U features.
 #%%   2 Ni and 2 O atoms in an fcc supercell.
 #%%   The cut-offs are unrealistic.
 #%%   The aim of this test is to verify:

@@ -43,7 +43,7 @@ module m_vhxc_me
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_denpot,  only : paw_mknewh0
  use m_hide_blas,   only : xdotc
- use m_wfd,         only : wfd_t
+ use m_wfd,         only : wfd_t, wave_t
  use m_crystal,     only : crystal_t
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
@@ -67,7 +67,7 @@ contains
 !!
 !! FUNCTION
 !!  Evaluate the matrix elements of $v_H$ and $v_{xc}$ and $v_U$
-!!  both in case of NC pseudopotentials and PAW (LDA+U, presently, is only available in PAW)
+!!  both in case of NC pseudopotentials and PAW (DFT+U, presently, is only available in PAW)
 !!  The matrix elements of $v_{xc}$ are calculated with and without the core contribution.
 !!  The later quantity is required in case of GW calculations.
 !!
@@ -175,6 +175,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
  type(xcdata_type) :: xcdata,xcdata_hybrid
+ type(wave_t),pointer :: wave_jb, wave_ib
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE([1,1,2,2,1,2,2,1], [2,4])
  integer :: got(Wfd%nproc)
@@ -415,8 +416,10 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
      do jb=b_start,b_stop
        if (ALL(bbp_ks_distrb(:,jb,ikc,is)/=rank)) CYCLE
 
+       ABI_CHECK(wfd%get_wave_ptr(jb, ik_ibz, is, wave_jb, msg) == 0, msg)
+
        if (Mflags%has_hbare==1) then
-         cg2 => Wfd%Wave(jb,ik_ibz,is)%ug  ! Wfd contains 1:nkptgw wave functions
+         cg2 => wave_jb%ug
          kinwf2(1:npw_k)=cg2(1:npw_k)*kinpw(:)
          if (nspinor==2) kinwf2(npw_k+1:)=cg2(npw_k+1:)*kinpw(:)
        end if
@@ -454,14 +457,15 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
          end if
 
          if (Mflags%has_hbare==1) then
-           cg1 => Wfd%Wave(ib, ik_ibz, is)%ug(1:npw_k)
+           ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, is, wave_ib, msg) == 0, msg)
+           cg1 => wave_ib%ug(1:npw_k)
            cdot = DOT_PRODUCT(cg1, kinwf2(1:npw_k))
            !if (istwf_k /= 1) then
            !  cdot = two * cdot; if (istwf_k == 2) cdot = cdot - GWPC_CONJG(cg1(1)) * kinwf2(1)
            !end if
            Mels%hbare(ib, jb, ik_ibz, is) = cdot + SUM(u1cjg_u2dpc(1:nfftf) * veffh0(1:nfftf, is)) * nfftfm1
            if (wfd%nspinor == 2 .and. wfd%nspden == 1) then
-             cg1 => Wfd%Wave(ib, ik_ibz, is)%ug(npw_k+1:)
+             cg1 => wave_ib%ug(npw_k+1:)
              Mels%hbare(ib, jb, ik_ibz, 2) = &
                DOT_PRODUCT(cg1, kinwf2(npw_k+1:)) + SUM(u1cjg_u2dpc(nfftf+1:) * veffh0(1:nfftf, is)) * nfftfm1
            end if
@@ -475,7 +479,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
            ur2_dwn => ur2(nfftf+1:2*nfftf)
 
            if (Mflags%has_hbare==1) then
-             cg1 => Wfd%Wave(ib,ik_ibz,is)%ug(npw_k+1:)
+             cg1 => wave_ib%ug(npw_k+1:)
              tmp(1)=SUM(CONJG(ur1_dwn)*veffh0(:,2)*ur2_dwn)*nfftfm1 + DOT_PRODUCT(cg1,kinwf2(npw_k+1:))
              tmp(2)=SUM(CONJG(ur1_dwn)*      veffh0_ab(:) *ur2_dwn)*nfftfm1
              tmp(3)=SUM(CONJG(ur1_dwn)*CONJG(veffh0_ab(:))*ur2_dwn)*nfftfm1
@@ -548,12 +552,12 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
    ABI_CHECK(ltest,"dijxc, dijxc_hat or dijxc_val not allocated")
    ABI_CHECK(nspinor == 1, "PAW with nspinor not tested")
 
-   ! For LDA+U
+   ! For DFT+U
    do iat=1,Cryst%natom
      itypat=Cryst%typat(iat)
      if (Pawtab(itypat)%usepawu/=0) then
        ltest=(allocated(Paw_ij(iat)%dijU))
-       ABI_CHECK(ltest,"LDA+U but dijU not allocated")
+       ABI_CHECK(ltest,"DFT+U but dijU not allocated")
      end if
    end do
 
@@ -722,7 +726,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
                        end if
                      end if
 
-                     ! TODO "ADD LDA+U and SO"
+                     ! TODO "ADD DFT+U and SO"
                      ! check this part
                      if (Mflags%has_vu==1) then
                        if (Pawtab(itypat)%usepawu/=0) then

@@ -4061,11 +4061,11 @@ end subroutine cg_zprecon_block
 !! fxphas_seq
 !!
 !! FUNCTION
-!! Fix phase of all bands. Keep normalization but maximize real part
-!! (minimize imag part). Also fix the sign of real part
-!! by setting the first non-zero element to be positive.
+!! Fix phase of all bands. Keep normalization but maximize real part (minimize imag part).
+!! Also fix the sign of real part by setting the first non-zero element to be positive.
 !!
 !! This version has been stripped of all the mpi_enreg junk by MJV
+!! MG: Many thanks to MJV
 !!
 !! INPUTS
 !!  cg(2,mcg)= contains the wavefunction |c> coefficients.
@@ -4080,8 +4080,8 @@ end subroutine cg_zprecon_block
 !!  nband_k=number of bands
 !!  npw_k=number of planewaves
 !!  useoverlap=describe the overlap of wavefunctions:
-!!               0: no overlap (S=Identi0,ty_matrix)
-!!               1: wavefunctions are overlapping
+!!               0: no overlap (S=Identity_matrix)
+!!               1: PAW wavefunctions
 !!
 !! OUTPUT
 !!  cg(2,mcg)=same array with altered phase.
@@ -4099,7 +4099,7 @@ end subroutine cg_zprecon_block
 !!
 !! SOURCE
 
-subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
+subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, useoverlap)
 
 !Arguments ------------------------------------
 !scalars

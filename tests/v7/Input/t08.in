@@ -12,11 +12,11 @@ prtwf 0
 toldff 1.0d-08 
 
 #geometry
-xangst 0.0  0.0 0.0
-       0.75 0.0 0.0
-xangst_lastimg
+xcart  0.0  0.0 0.0
+       0.75 0.0 0.0  Angstrom
+xcart_lastimg
        0.0  0.0 0.0
-       0.75 0.0 0.0
+       0.75 0.0 0.0  Angstrom
 acell 3*5.0
 acell_lastimg 3*5.0
 
@@ -80,12 +80,14 @@ nnos6 5
 qmass6 5*10.0
 pitransform6 2  #staging
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.atompaw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t08.out, tolnlines=5, tolabs=2.0e-4, tolrel=6.0e-4, fld_options = -easy
-#%% psp_files = 1h.atompaw
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

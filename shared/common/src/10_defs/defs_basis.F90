@@ -137,6 +137,9 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
+ !real(dp), parameter :: zero_sp=0._sp
+ !real(dp), parameter :: one_sp=1._sp
+
 !Fractionary real constants
  real(dp), parameter :: half=0.50_dp
  real(dp), parameter :: onehalf=1.50_dp
@@ -294,7 +297,7 @@ module defs_basis
  integer, parameter, public :: RUNL_WFK        = 8
  integer, parameter, public :: RUNL_GWLS       = 66
  integer, parameter, public :: RUNL_BSE        = 99 !9
- integer, parameter, public :: RUNL_LONGWAVE   = 10 
+ integer, parameter, public :: RUNL_LONGWAVE   = 10
 
  ! Integer flags defining the task to be performed in wfk_analyze
  integer,public,parameter :: WFK_TASK_NONE      = 0
@@ -510,7 +513,7 @@ CONTAINS  !=====================================================================
 
   write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
-  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8,/),a,e15.8)')&
+  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
     ' REAL:      Data type name: REAL(DP) ',&
     '            Kind value: ',KIND(0.0_dp),&
     '            Precision:  ',PRECISION(0.0_dp),&

@@ -11,7 +11,7 @@ rprim
     0.5  0.5  0.0
 
 # K-points
-ngkpt 8 8 8
+ngkpt 12 12 12
 nshiftk 4
 shiftk
    0.5 0.5 0.5
@@ -31,16 +31,18 @@ xred
 nband  4
 
 # SCF procedure
-nstep   3
+nstep   10
 tolvrs  1.0d-10
 
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "HGH/82pb.4.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = tbasepar_1.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= HGH/82pb.4.hgh
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

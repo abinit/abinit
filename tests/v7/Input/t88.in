@@ -1,5 +1,6 @@
 # Calculation of phonon linewidths and e-ph coupling parameter lambda
-ndtset 4
+ndtset 5
+
 optdriver 7
 #nsppol  2
 prtvol 1  # This to activate the output of PHDOS in text format (slow!)
@@ -83,6 +84,12 @@ eph_ngqpt_fine3  8 8 8 # Interpolate DFPT potentials (used in the dataset 4)
 getdvdb4 -1
 eph_ngqpt_fine4 8 8 8 
 
+###############
+## DATASET 5 ##
+###############
+eph_intmeth5  1       # FS integration with Adaptive Gaussians
+eph_fsmear5  -1 eV    # Adaptive Gaussian broadening (negative value)
+
 # Geometry
 acell 3*7.5
 rprim
@@ -96,10 +103,12 @@ xred   0.00 0.00 0.00
 ntypat 1
 znucl  13
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al-psval.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t85.in, t86.in, t87.in, t88.in
 #%% [files]
 #%% files_to_test = 
@@ -124,7 +133,6 @@ znucl  13
 #%%   t88o_DS2_EBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHBANDS.data, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%% psp_files = Al-psval.psp8
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

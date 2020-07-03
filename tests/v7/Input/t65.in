@@ -64,12 +64,14 @@ nbandhf 6
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t65.out, tolnlines=5, tolabs=1.000e-08, tolrel=5.000e-04
-#%% psp_files= 14si.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

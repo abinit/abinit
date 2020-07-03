@@ -8,10 +8,10 @@ ntypat 2
 znucl 1 8
 typat 1 1 2
 # eventually add 1/2 box size to center molecule
-xangst
+xcart
 0.610145  0.730174 0.
 0.610145 -0.730174 0.
-0. 0. 0.
+0. 0. 0.                Angstrom
 
 nstep 100
 #tolwfr 1.0e-20
@@ -42,13 +42,15 @@ istwfk 1
  prtden 0
  prtwf  0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "HGH/1h.1.hgh, HGH/8o.6.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t22.out, tolnlines = 1, tolabs = 1.000e-04, tolrel = 7.600e-05
-#%% psp_files = HGH/1h.1.hgh, HGH/8o.6.hgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
