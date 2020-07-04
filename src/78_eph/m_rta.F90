@@ -254,7 +254,7 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  unts = [std_out, ab_out]
 
  call wrtout(unts, ch10//' Entering transport RTA computation driver.')
- call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1)
+ call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1, do_flush=.True.)
 
  sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
  ABI_CHECK(ierr == 0, msg)
@@ -340,7 +340,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 !arrays
  integer :: kptrlatt(3,3), unts(2)
  integer,allocatable :: indkk(:,:)
- real(dp),allocatable :: values_bksd(:,:,:,:), values(:,:,:)
+ real(dp),allocatable :: values_bksd(:,:,:,:), vals_bsd(:,:,:)
 
 !************************************************************************
 
@@ -401,11 +401,11 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  !      velocity(3, mband, nkpt, nsppol)
  !      linewidths(self%ntemp, mband, nkpt, nsppol, 2)
 
- if (.False.) then
- !if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
+ !if (.False.) then
+ if (dtset%useria == 666 .and. dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
    ! In principle only getwfkfine_filepath is used here
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
-   ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0, msg)
+   ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
    call wrtout(unts, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
    mband = new%ebands%mband
 
@@ -465,15 +465,15 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    ! And now interpolate linewidths on the fine k-mesh
    !mband = new%ebands%mband
    ABI_REMALLOC(new%linewidths, (new%ntemp, mband, new%ebands%nkpt, nsppol, new%nrta))
-   ABI_MALLOC(values, (mband, nsppol, ndat))
+   ABI_MALLOC(vals_bsd, (mband, nsppol, ndat))
 
    ierr = 0
    do ik_ibz=1,new%ebands%nkpt
-     call klinterp%eval_bsd(new%ebands%kptns(:, ik_ibz), values)
+     call klinterp%eval_bsd(new%ebands%kptns(:, ik_ibz), vals_bsd)
 
-     if (any(values < zero)) then
+     if (any(vals_bsd < zero)) then
        ierr = ierr + 1
-       where (values < zero) values = zero
+       where (vals_bsd < zero) vals_bsd = zero
      end if
 
      ! Transfer data.
@@ -483,9 +483,9 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
          do itemp=1,new%ntemp
            idat = itemp + new%ntemp * (irta - 1)
            do ib=1,mband
-             !print *, "values:", values(ib, idat, spin)
-             !print *, new%linewidths(itemp, ib, ik_ibz, spin, irta), values(ib, spin, idat)
-             new%linewidths(itemp, ib, ik_ibz, spin, irta) = values(ib, spin, idat)
+             !print *, "vals_bsd:", vals_bsd(ib, idat, spin)
+             !print *, new%linewidths(itemp, ib, ik_ibz, spin, irta), vals_bsd(ib, spin, idat)
+             new%linewidths(itemp, ib, ik_ibz, spin, irta) = vals_bsd(ib, spin, idat)
            end do
          end do
        end do
@@ -498,7 +498,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
      MSG_ERROR(sjoin("Linear interpolation produced:", itoa(ierr), "negative linewidths"))
    end if
 
-   ABI_FREE(values)
+   ABI_FREE(vals_bsd)
 #endif
 
    call klinterp%free()

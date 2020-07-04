@@ -5168,7 +5168,6 @@ end function interpol3d
 
 pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
 
-
 !Arguments-------------------------------------------------------------
 !scalars
  integer,intent(in) :: nr1,nr2,nr3

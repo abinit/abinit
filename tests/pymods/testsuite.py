@@ -1925,8 +1925,8 @@ pp_dirpath $ABI_PSPDIR
 
             if not os.path.exists(os.path.join(src, "README.md")):
                 self._status = "skipped"
-                msg = self.full_id + ": Skipped: this test requires files in the git submodule: %s\n" % src
-                msg += "Use `git submodule update --recursive --remote` to fetch the last version from the remote url"
+                msg = self.full_id + ": Skipped:\n\tThis test requires files in the git submodule:\n\t\t%s\n" % src
+                msg += "\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url."
                 self.cprint(msg, status2txtcolor[self._status])
                 can_run = False
             else:

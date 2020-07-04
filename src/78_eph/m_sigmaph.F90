@@ -2168,6 +2168,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! This to make sure that the parallel output of SIGEPH is completed
  call xmpi_barrier(comm)
+ call cwtime_report(" sigmaph: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 end subroutine sigmaph
 !!***
@@ -2750,7 +2751,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
       if (my_rank == master) then
         call wrtout([std_out, ab_out], &
           sjoin("- Using parallelism over k-points/spins. Cannot write full results to main output", ch10, &
-                "- All proc except master will write to dev_null. Use SIGEPH.nc to analyze results"))
+                "- All procs except master will write to dev_null. Use SIGEPH.nc to analyze results."))
         !write(std_out, *)"ncwrite_comm_me:", new%ncwrite_comm%me, "ncwrite_comm%nproc:", new%ncwrite_comm%nproc
       end if
       if (.not. is_open(ab_out)) then
@@ -2861,9 +2862,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
    ! In principle only getwfkfine_filepath is used
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
-   if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
-     MSG_ERROR(msg)
-   end if
+   ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
    call wrtout([std_out, ab_out], " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
 
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
@@ -2917,6 +2916,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  bstart = new%bsum_start
 
  if (new%qint_method > 0) then
+   ! Tetra
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
      new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
@@ -2933,7 +2933,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
        new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
      end if
    end if
+
  else
+   ! Standard quadrature.
    if (new%use_doublegrid) then
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
      new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)

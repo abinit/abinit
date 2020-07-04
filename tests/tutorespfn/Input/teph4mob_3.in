@@ -42,6 +42,5 @@ teph4mob_1o_DS10_POT5
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = 
-#%%   E-ph for the mobility in semiconductors
+#%% description = Merge DFPT potentials to generate DVDB database.
 #%%<END TEST_INFO>

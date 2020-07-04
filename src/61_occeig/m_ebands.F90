@@ -5879,8 +5879,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1 = 1
- integer :: ierr, nkfull, ikf
- integer :: spin, band, ik_ibz, timrev, ix, iy, iz, nkx, nky, nkz, ii, idat
+ integer :: ierr, nkfull, ikf, spin, band, ik_ibz, timrev, ix, iy, iz, nkx, nky, nkz, ii, idat
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
@@ -6057,13 +6056,13 @@ end subroutine klinterp_free
 !!
 !! SOURCE
 
-subroutine klinterp_eval_bsd(self, kpt, values)
+subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
 
 !Arguments ------------------------------------
 !scalars
  class(klinterp_t),intent(in) :: self
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(out) :: values(self%mband, self%nsppol, self%ndat)
+ real(dp),intent(out) :: vals_bsd(self%mband, self%nsppol, self%ndat)
 
 !Local variables-------------------------------
  integer :: spin, idat, band
@@ -6076,7 +6075,7 @@ subroutine klinterp_eval_bsd(self, kpt, values)
  do idat=1,self%ndat
    do spin=1,self%nsppol
       do band=1,self%mband
-        values(band, spin, idat) = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:, band, spin, idat))
+        vals_bsd(band, spin, idat) = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:, band, spin, idat))
       end do
    end do
  end do
