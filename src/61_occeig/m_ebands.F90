@@ -328,15 +328,15 @@ MODULE m_ebands
    integer :: nkx, nky, nkz
    ! Number of divisions of the grid enclosing the first unit cell
 
-   real(dp),allocatable :: bzdata(:,:,:,:,:,:)
-    ! (nkx, nky, nkz, mband, ndat, nsppol)
+   real(dp),allocatable :: data_uk_bsd(:,:,:,:,:,:)
+    ! (nkx, nky, nkz, mband, nsppol, ndat)
 
  contains
 
    procedure :: free => klinterp_free
     ! Free dynamic memory
 
-   procedure :: eval => klinterp_eval
+   procedure :: eval_bsd => klinterp_eval_bsd
     ! Interpolate values at an arbitrary k-point.
 
  end type klinterp_t
@@ -1050,7 +1050,7 @@ subroutine ebands_move_alloc(from_ebands, to_ebands)
 
 !Arguments ------------------------------------
 !scalars
- class(ebands_t),intent(inout)  :: from_ebands
+ class(ebands_t),intent(inout) :: from_ebands
  class(ebands_t),intent(inout) :: to_ebands
 
 ! *********************************************************************
@@ -3921,8 +3921,7 @@ end function ebands_downsample
 !! ebands_chop
 !!
 !! FUNCTION
-!!  Return a new ebands_t object of type ebands_t with only a selected number of bands
-!!  between bstart and bstop
+!!  Return a new ebands_t object with a selected number of bands between bstart and bstop
 !!
 !! INPUTS
 !!
@@ -3944,6 +3943,10 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
 
 ! *********************************************************************
 
+ ABI_CHECK_IRANGE(bstart, 1, self%mband, "Invalid bstart")
+ ABI_CHECK_IRANGE(bstop,  1, self%mband, "Invalid bstop")
+ ABI_CHECK_ILEQ(bstart, bstop, "bstart should be <= bstop")
+
  ! First copy the bands
  call ebands_copy(self, new)
 
@@ -3955,6 +3958,7 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
  mband  = bstop - bstart + 1
  nkpt   = self%nkpt
  nsppol = self%nsppol
+
  ABI_MALLOC(new%eig, (mband, nkpt, nsppol))
  ABI_MALLOC(new%occ, (mband, nkpt, nsppol))
  ABI_MALLOC(new%doccde, (mband, nkpt, nsppol))
@@ -3964,6 +3968,8 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
  new%eig    = self%eig(bstart:bstop,:,:)
  new%occ    = self%occ(bstart:bstop,:,:)
  new%doccde = self%doccde(bstart:bstop,:,:)
+
+ new%bantot = sum(new%nband)
 
 end function ebands_chop
 !!***
@@ -4138,8 +4144,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  ! Build SKW object for all bands.
  if (itype == 1 .or. itype == 2) then
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
-   skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
-                 ebands%kptns, ebands%eig, my_bblock, comm)
+   skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, my_bblock, comm)
    if (itype == 2) then
      ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
    end if
@@ -4159,8 +4164,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
        case (1)
          call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case (2)
-         call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, &
-                           new%eig(ib,ik_ibz,spin), new%velocity(:,ib,ik_ibz,spin))
+         call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin), new%velocity(:,ib,ik_ibz,spin))
        case default
          MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
        end select
@@ -4374,7 +4378,7 @@ end function ebands_interp_kpath
 !!  out_vecsdos: (nw, 2, 3, nvecs, nsppol)) array with DOS weighted by vectorial terms if nvecs > 0
 !!  out_tensdos: (nw, 2,3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
 !!
-!!   All these arrays allocated by the routine. The number of points is available in edos%nw.
+!!   All these arrays are allocated by the routine. The number of points is available in edos%nw.
 !!   (nw, 1, ...) stores the weighted DOS (w-DOS)
 !!   (nw, 2, ...) stores the integrated w-DOS
 !!
@@ -4756,7 +4760,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  case (2, -2)
    ! Tetrahedron method
    if (any(ebands%nband /= ebands%nband(1)) ) then
-     MSG_WARNING('for tetrahedrons, nband(:) must be constant')
+     MSG_WARNING('For tetrahedra, nband(:) must be constant')
      ierr = ierr + 1
    end if
    if (ierr/=0) return
@@ -5845,9 +5849,9 @@ end subroutine ebands_interpolate_kpath
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspl_new
+!!****f* m_ebands/klinterp_new
 !! NAME
-!! ebspl_new
+!! klinterp_new
 !!
 !! FUNCTION
 !!
@@ -5862,7 +5866,7 @@ end subroutine ebands_interpolate_kpath
 !! SOURCE
 
 type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt, kibz, &
-                                       mband, nkibz, nsppol, ndat, values_ibz, comm) result(new)
+                                       mband, nkibz, nsppol, ndat, values_bksd, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -5870,7 +5874,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  integer,intent(in) :: nshiftk, kptopt, mband, nkibz, nsppol, ndat, comm
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
- real(dp),intent(in) :: kibz(3, nkibz), shiftk(3,nshiftk), values_ibz(mband, nkibz, nsppol, ndat)
+ real(dp),intent(in) :: kibz(3, nkibz), shiftk(3,nshiftk), values_bksd(mband, nkibz, nsppol, ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -5914,9 +5918,13 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 
  ! Multiple shifts are not supported here.
  shifted(:) = abs(shiftk(:, 1)) > tol8
- nkx = ngkpt(1) + 1; if (shifted(1)) nkx = nkx + 1
- nky = ngkpt(2) + 1; if (shifted(2)) nky = nky + 1
- nkz = ngkpt(3) + 1; if (shifted(3)) nkz = nkz + 1
+ !nkx = ngkpt(1) + 1; if (shifted(1)) nkx = nkx + 1
+ !nky = ngkpt(2) + 1; if (shifted(2)) nky = nky + 1
+ !nkz = ngkpt(3) + 1; if (shifted(3)) nkz = nkz + 1
+
+ nkx = ngkpt(1)
+ nky = ngkpt(2)
+ nkz = ngkpt(3)
 
  new%nkx = nkx; new%nky = nky; new%nkz = nkz
  new%mband = mband; new%nsppol = nsppol; new%ndat = ndat
@@ -5938,7 +5946,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    zvec(iz) = (ii - 1 + shiftk(3, 1)) / ngkpt(3)
  end do
 
- ! Build list of k-points in full BZ (ordered as required by B-spline routines)
+ ! Build list of k-points in full BZ ((x,y,z) ordered as required by interpolation routine)
  nkfull = nkx * nky * nkz
  ABI_MALLOC(kfull, (3, nkfull))
  ikf = 0
@@ -5946,50 +5954,50 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    do iy=1,nky
      do ix=1,nkx
        ikf = ikf + 1
-       kfull(:,ikf) = [xvec(ix), yvec(iy), zvec(iz)]
+       kfull(:, ikf) = [xvec(ix), yvec(iy), zvec(iz)]
      end do
    end do
  end do
 
  ! Build mapping kfull --> IBZ
- ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1, 6))
-
  timrev = kpts_timrev_from_kptopt(kptopt)
+ ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1, 6))
 
  call listkk(dksqmax, cryst%gmet, bz2ibz, kibz, kfull, nkibz, nkfull, cryst%nsym,&
    sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+
  ABI_FREE(kfull)
 
  if (dksqmax > tol12) then
    write(msg, '(3a,es16.6,4a)' )&
    'At least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
+   'dksqmax: ',dksqmax,ch10,&
    'Action: check k-point input variables',ch10,&
    '        e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
    MSG_ERROR(msg)
  end if
 
- ABI_MALLOC(new%bzdata, (nkx, nky, nkz, mband, ndat, nsppol))
+ ABI_CALLOC(new%data_uk_bsd, (nkx, nky, nkz, mband, nsppol, ndat))
  !new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, mband]
 
- do spin=1,nsppol
-   do band=1,mband
-     !if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
+ !do spin=1,nsppol
+ !do band=1,mband
+ !if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
 
-     ! Build array in the full BZ to prepare call to interpol3d.
-     ikf = 0
-     do iz=1,nkz
-       do iy=1,nky
-         do ix=1,nkx
-           ikf = ikf + 1
-           ik_ibz = bz2ibz(ikf, 1)
-           new%bzdata(ix, iy, iz, 1:mband, idat, spin) = values_ibz(1:mband, ik_ibz, spin, idat)
-         end do
-       end do
+ ! Build array in the full BZ to prepare call to interpol3d.
+ ikf = 0
+ do iz=1,nkz
+   do iy=1,nky
+     do ix=1,nkx
+       ikf = ikf + 1
+       ik_ibz = bz2ibz(ikf, 1)
+       new%data_uk_bsd(ix, iy, iz, 1:mband, 1:nsppol, 1:ndat) = values_bksd(1:mband, ik_ibz, 1:nsppol, 1:ndat)
      end do
-
    end do
  end do
+
+ !end do
+ !end do
 
  ABI_FREE(xvec)
  ABI_FREE(yvec)
@@ -6026,16 +6034,16 @@ subroutine klinterp_free(self)
 
 ! *********************************************************************
 
- ABI_SFREE(self%bzdata)
+ ABI_SFREE(self%data_uk_bsd)
 
 end subroutine klinterp_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/klinterp_eval
+!!****f* m_ebands/klinterp_eval_bsd
 !! NAME
-!! klinterp_eval
+!! klinterp_eval_bsd
 !!
 !! FUNCTION
 !!
@@ -6049,13 +6057,13 @@ end subroutine klinterp_free
 !!
 !! SOURCE
 
-subroutine klinterp_eval(self, kpt, values)
+subroutine klinterp_eval_bsd(self, kpt, values)
 
 !Arguments ------------------------------------
 !scalars
  class(klinterp_t),intent(in) :: self
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(out) :: values(self%mband, self%ndat, self%nsppol)
+ real(dp),intent(out) :: values(self%mband, self%nsppol, self%ndat)
 
 !Local variables-------------------------------
  integer :: spin, idat, band
@@ -6064,15 +6072,16 @@ subroutine klinterp_eval(self, kpt, values)
 ! *********************************************************************
 
  call wrap2_zero_one(kpt, kwrap, shift)
- do spin=1,self%nsppol
-   do idat=1,self%ndat
+ !write(std_out, *)"kwrap:", kwrap
+ do idat=1,self%ndat
+   do spin=1,self%nsppol
       do band=1,self%mband
-        values(band, idat, spin) = interpol3d(kwrap, self%nkz, self%nkz, self%nkz, self%bzdata(:,:,:, band, idat, spin))
+        values(band, spin, idat) = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:, band, spin, idat))
       end do
    end do
  end do
 
-end subroutine klinterp_eval
+end subroutine klinterp_eval_bsd
 !!***
 
 end module m_ebands

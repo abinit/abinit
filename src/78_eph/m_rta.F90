@@ -32,6 +32,8 @@ module m_rta
  use m_copy
  use m_ebands
  use m_nctk
+ use m_wfk
+ use m_ephtk
  use m_sigmaph
  use m_dtset
  use m_dtfil
@@ -48,7 +50,7 @@ module m_rta
  use m_kpts,           only : listkk, kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
- use m_ddk,            only : ddkstore_t
+ use m_ddk,            only : ddkstore_t, ddk_compute
 
  implicit none
 
@@ -338,7 +340,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 !arrays
  integer :: kptrlatt(3,3), unts(2)
  integer,allocatable :: indkk(:,:)
- real(dp),allocatable :: values_ibz(:,:,:,:), values(:,:,:)
+ real(dp),allocatable :: values_bksd(:,:,:,:), values(:,:,:)
 
 !************************************************************************
 
@@ -395,39 +397,42 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
  !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
 
- ! At this point we have
- ! velocity(3, mband, nkpt, nsppol)
- ! linewidths(self%ntemp, mband, nkpt, nsppol, 2)
+ ! At this point we have:
+ !      velocity(3, mband, nkpt, nsppol)
+ !      linewidths(self%ntemp, mband, nkpt, nsppol, 2)
 
- !if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
  if (.False.) then
-   ! In principle only getwfkfine_filepath is used
+ !if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
+   ! In principle only getwfkfine_filepath is used here
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
-   if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
-     MSG_ERROR(msg)
-   end if
+   ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0, msg)
    call wrtout(unts, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
+   mband = new%ebands%mband
 
    !ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
-   !if (abs(dtset%mbpt_sciss) > tol6) then
-   !  ! Apply the scissor operator to the dense mesh
-   !  call wrtout(std_out, sjoin(" Apply the scissor operator to the dense CB with:",ftoa(dtset%mbpt_sciss)))
-   !  call ebands_apply_scissors(ebands_dense, dtset%mbpt_sciss)
-   !end if
+   tmp_ebands = wfk_read_ebands(wfk_fname_dense, comm)
+   ebands_dense = ebands_chop(tmp_ebands, 1, mband)
+   call ebands_free(tmp_ebands)
+   if (my_rank == master) then
+     write(std_out, *)" Using kptrlatt: ", ebands_dense%kptrlatt
+     write(std_out, *)"       shiftk: ", ebands_dense%shiftk
+   end if
+   ABI_CHECK_IEQ(mband, ebands_dense%mband, "Inconsistent number of bands for the fine and dense grid:")
 
-   ds%only_diago = .True.
-   !ds%bmin
-   !ds%bmax
-   call ddk_compute(ds, wfk_fname_dense, "foobar", dtset, psps, pawtab, ngfftc, comm)
+   ! Compute v_{nk} on the dense grid in Cartesian coordinates.
+   ds%only_diago = .True.; ds%bmin = 1; ds%bmax = mband; ds%mode = "cart"
 
-   !call ddk_red2car(self%rprimd, vk_red, vk)
+   call ddk_compute(ds, wfk_fname_dense, "", dtset, psps, pawtab, ngfftc, comm)
+
+   ! Transfer data to new%velocity
    ABI_MOVE_ALLOC(ds%vdiago, new%velocity)
    call ds%free()
+   !print *, "velocity:", new%velocity
 
-   ! Linear interpolation in k-space of the linewidths from SIGEPH to fine IBZ.
-   ! First of all transfer linewidths to values_ibz to prepare call to klinterp_new
+   ! Linear interpolation in k-space of the linewidths from SIGEPH to dense IBZ.
+   ! First of all transfer linewidths to values_bksd to prepare call to klinterp_new.
    ndat = new%ntemp * new%nrta
-   ABI_MALLOC(values_ibz, (new%ebands%mband, new%ebands%nkpt, nsppol, ndat))
+   ABI_MALLOC(values_bksd, (new%ebands%mband, new%ebands%nkpt, nsppol, ndat))
 
    do irta=1,new%nrta
      do spin=1,nsppol
@@ -435,42 +440,67 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
          do ib=1,new%ebands%mband
            do itemp=1,new%ntemp
              idat = itemp + new%ntemp * (irta - 1)
-             values_ibz(ib, ik_ibz, spin, idat) = new%linewidths(itemp, ib, ik_ibz, spin, irta)
+             values_bksd(ib, ik_ibz, spin, idat) = new%linewidths(itemp, ib, ik_ibz, spin, irta)
            end do
          end do
        end do
      end do
    end do
 
-   ! Build linear interpolator.
+   ! Build linear interpolator for e-linewidths.
    mband = new%ebands%mband
    klinterp = klinterp_new(cryst, new%ebands%kptrlatt, new%ebands%nshiftk, new%ebands%shiftk, new%ebands%kptopt, &
-                           new%ebands%kptns, mband, new%ebands%nkpt, nsppol, ndat, values_ibz, comm)
-   ABI_FREE(values_ibz)
+                           new%ebands%kptns, mband, new%ebands%nkpt, nsppol, ndat, values_bksd, comm)
+   ABI_FREE(values_bksd)
 
-   ! Note how we re-malloc new%ebands and %linewidths on the fine k-mesh.
+   ! HERE we re-malloc new%ebands and %linewidths on the fine k-mesh.
+   ! The call must be executed here, once klinterp has been built.
    call ebands_move_alloc(ebands_dense, new%ebands)
-   ABI_REMALLOC(new%linewidths, (new%ntemp, mband, new%ebands%nkpt, nsppol, new%nrta))
 
+   ! Unlinke the ebands stored in SIGEPH, the eigens read from WFK_FINE have not been
+   ! shifted with the scissors operator or updated according to extrael_fermie so do it now.
+   call ephtk_update_ebands(dtset, new%ebands)
+
+#if 1
    ! And now interpolate linewidths on the fine k-mesh
-   ABI_MALLOC(values, (mband, ndat, nsppol))
+   !mband = new%ebands%mband
+   ABI_REMALLOC(new%linewidths, (new%ntemp, mband, new%ebands%nkpt, nsppol, new%nrta))
+   ABI_MALLOC(values, (mband, nsppol, ndat))
+
+   ierr = 0
    do ik_ibz=1,new%ebands%nkpt
-     call klinterp%eval(ebands%kptns(:, ik_ibz), values)
+     call klinterp%eval_bsd(new%ebands%kptns(:, ik_ibz), values)
+
+     if (any(values < zero)) then
+       ierr = ierr + 1
+       where (values < zero) values = zero
+     end if
 
      ! Transfer data.
+     ierr = 0
      do spin=1,nsppol
        do irta=1,new%nrta
          do itemp=1,new%ntemp
            idat = itemp + new%ntemp * (irta - 1)
            do ib=1,mband
-             new%linewidths(itemp, ib, ik_ibz, spin, irta) = values(ib, idat, spin)
+             !print *, "values:", values(ib, idat, spin)
+             !print *, new%linewidths(itemp, ib, ik_ibz, spin, irta), values(ib, spin, idat)
+             new%linewidths(itemp, ib, ik_ibz, spin, irta) = values(ib, spin, idat)
            end do
          end do
        end do
      end do
-   end do
+
+   end do ! ik_ibz
+
+   if (ierr /= 0) then
+     ! This should never happen for linear interpolation.
+     MSG_ERROR(sjoin("Linear interpolation produced:", itoa(ierr), "negative linewidths"))
+   end if
 
    ABI_FREE(values)
+#endif
+
    call klinterp%free()
  end if
 
@@ -482,9 +512,9 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    call wrtout(unts, " Downsampling the k-mesh before computing transport:")
    call wrtout(unts, sjoin(" Using transport_ngkpt: ", ltoa(dtset%transport_ngkpt)))
    kptrlatt = 0
-   kptrlatt(1,1) = dtset%transport_ngkpt(1)
-   kptrlatt(2,2) = dtset%transport_ngkpt(2)
-   kptrlatt(3,3) = dtset%transport_ngkpt(3)
+   kptrlatt(1, 1) = dtset%transport_ngkpt(1)
+   kptrlatt(2, 2) = dtset%transport_ngkpt(2)
+   kptrlatt(3, 3) = dtset%transport_ngkpt(3)
    tmp_ebands = ebands_downsample(new%ebands, cryst, kptrlatt, 1, [zero, zero, zero])
 
    ! Map the points of the downsampled bands to dense ebands
@@ -514,7 +544,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    call ebands_move_alloc(tmp_ebands, new%ebands)
  end if
 
- ! Same doping case as sigmaph
+ ! Same doping case as in sigmaph file.
  ABI_MALLOC(new%eph_mu_e, (new%ntemp))
  ABI_MALLOC(new%transport_mu_e, (new%ntemp))
 
@@ -559,7 +589,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    tmp_shape(3) = nkpt
    ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4)))
    do ikpt=1,nkpt
-     array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt,1),:)
+     array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt, 1),:)
    end do
    ABI_FREE(tmp_array)
 
@@ -580,7 +610,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    tmp_shape(3) = nkpt
    ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4), tmp_shape(5)))
    do ikpt=1,nkpt
-     array(:,:,ikpt,:,:) = tmp_array(:,:,indkk(ikpt,1),:,:)
+     array(:,:,ikpt,:,:) = tmp_array(:,:,indkk(ikpt, 1),:,:)
    end do
    ABI_FREE(tmp_array)
 
@@ -661,7 +691,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
          do itemp=1,self%ntemp
            linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
            call safe_div(vv_tens(:,:, 1, irta, ib, ik_ibz, spin), two * linewidth, zero, &
-                         vv_tens(:,:, 1+itemp, irta, ib, ik_ibz, spin))
+                         vv_tens(:,:, 1 + itemp, irta, ib, ik_ibz, spin))
            call safe_div(one, two * linewidth, zero, tau_vals(itemp, irta, ib, ik_ibz, spin))
          end do
        end do
@@ -835,11 +865,9 @@ subroutine rta_compute(self, cryst, dtset, comm)
  end if
 
  ! Mobility
+ max_occ = two / (self%nspinor * self%nsppol)
  ABI_MALLOC(self%n, (self%nw, self%ntemp, 2))
  ABI_MALLOC(self%mobility, (3, 3, self%nw, self%ntemp, 2, self%nsppol, self%nrta))
-
- self%mobility = zero
- max_occ = two / (self%nspinor * self%nsppol)
 
  do spin=1,self%nsppol
    do itemp=1,self%ntemp

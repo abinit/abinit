@@ -2870,7 +2870,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    ! TODO add consistency check: number of bands and kpoints (commensurability)
    !if (ebands_dense%is_commensurate(msg) /= 0)
-   ABI_CHECK(ebands_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
+   ABI_CHECK_IEQ(ebands_dense%mband, ebands%mband, "Inconsistent number of bands for the fine and dense grid:")
    new%use_doublegrid = .True.
 
  else if (any(dtset%bs_interp_kmult /= 0)) then

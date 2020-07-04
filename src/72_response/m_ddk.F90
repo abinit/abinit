@@ -164,6 +164,9 @@ MODULE m_ddk
    integer :: bmin = 1, bmax = -1
    ! Min and max band index
 
+   character(len=50) :: mode = "reduced"
+    ! "cart" or "reduced"
+
    logical :: only_diago = .False.
    ! True if we are computing only the diagonal elements
 
@@ -253,7 +256,7 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- if (my_rank == master) call wrtout([std_out, ab_out], "Computation of velocity matrix elements (ddk)", newlines=1)
+ if (my_rank == master) call wrtout([std_out, ab_out], " Computation of velocity matrix elements (DDK)", newlines=1)
 
  ABI_CHECK(psps%usepaw == 0, "PAW not implemented")
 
@@ -439,7 +442,7 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
          if (dtset%useria /= 666) then
            call wfd%copy_cg(ib_c, ik, spin, cg_c)
-           vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode="reduced")
+           vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
            !if (ib_v == ib_c) vv(2, :) = zero
 
            if (ds%only_diago) then
@@ -448,7 +451,7 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
              ds%vmat(:,:,ib_c,ib_v,ik,spin) = vv
              ! Hermitian conjugate
              if (ib_v /= ib_c) then
-               ds%vmat(1,:,ib_v,ib_c,ik,spin) = vv(1, :)
+               ds%vmat(1,:,ib_v,ib_c,ik,spin) =  vv(1, :)
                ds%vmat(2,:,ib_v,ib_c,ik,spin) = -vv(2, :)
              end if
            end if
@@ -497,7 +500,7 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      ! Free KB form factors
      call vkbr_free(vkbr)
 
-     write(msg,'(2(a,i0),a)')"k-point [", ik, "/", nkpt, "]"
+     write(msg,'(2(a,i0),a)')" k-point [", ik, "/", nkpt, "]"
      call cwtime_report(msg, cpu, wall, gflops)
 
    end do ! k-points

@@ -334,7 +334,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Read WFQ and construct ebands on the shifted grid.
  if (use_wfq) then
    call wfk_read_eigenvalues(wfq_path, gs_eigen, wfq_hdr, comm)
-   ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against file.
+   ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against dtset.
    !call wfq_hdr%vs_dtset(dtset)
    ebands_kq = ebands_from_hdr(wfq_hdr, maxval(wfq_hdr%nband), gs_eigen)
    call wfq_hdr%free()
@@ -345,6 +345,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! All the modifications to ebands should be done here.
  ! FIXME: This part should be rationalized!
  if (use_wfk) then
+
+   !call ephtk_update_ebands(dtset, ebands)
+   !call ephtk_update_ebands(dtset, ebands_kq)
 
    if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
      write(msg,"(2a,2(a,i0,a,f14.6,a))")&

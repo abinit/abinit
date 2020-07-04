@@ -28,12 +28,14 @@ module m_ephtk
  use m_errors
  use m_xmpi
  use m_dtset
+ use m_ebands
  use m_crystal
  use m_krank
  use m_xmpi
 
- use m_fstrings,     only : itoa, sjoin, ltoa, ktoa
+ use m_fstrings,     only : itoa, sjoin, ltoa, ftoa, ktoa
  use m_bz_mesh,      only : isamek
+ use defs_datatypes, only : ebands_t
 
  implicit none
 
@@ -44,6 +46,7 @@ module m_ephtk
  public :: ephtk_mkqtabs              ! Build tables with correspondence between q-points as needed by complete_gamma.
  public :: ephtk_gam_atm2qnu          ! Compute phonon linewidths from gamma matrix in reduced coordinates.
  public :: ephtk_gkknu_from_atm       ! Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
+ public :: ephtk_update_ebands
 !!***
 
  real(dp),public,parameter :: EPHTK_WTOL = tol6
@@ -390,6 +393,82 @@ subroutine ephtk_gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, 
  end do
 
 end subroutine ephtk_gkknu_from_atm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ephtk/ephtk_update_ebands
+!! NAME
+!!  ephtk_update_ebands
+!!
+!! FUNCTION
+!!  Update ebands
+!!
+!! INPUTS
+!!  dtset<dataset_type>=All input variables for this dataset.
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephtk_update_ebands(dtset, ebands)
+
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(inout) :: ebands
+
+!Local variables-------------------------
+!scalars
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
+   write(msg,"(2a,2(a,i0,a,f14.6,a))")&
+   " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
+   "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
+   "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
+   call wrtout([std_out, ab_out], msg)
+   call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+
+   if (abs(dtset%mbpt_sciss) > tol6) then
+     ! Apply the scissor operator
+     call wrtout([std_out, ab_out], &
+       sjoin(" Applying scissors operator to the conduction states with value: ", &
+       ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
+     call ebands_apply_scissors(ebands, dtset%mbpt_sciss)
+   end if
+ end if
+
+ ! Default value of eph_fermie is zero hence no tolerance is used!
+ if (dtset%eph_fermie /= zero) then
+   ABI_CHECK(dtset%eph_extrael == zero, "eph_fermie and eph_extrael are mutually exclusive")
+   call wrtout([std_out, ab_out], &
+      sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
+   call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
+   call wrtout([std_out, ab_out], msg)
+
+ else if (abs(dtset%eph_extrael) > zero) then
+   call wrtout([std_out, ab_out], &
+               sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
+   call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
+   call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
+   call wrtout([std_out, ab_out], msg)
+ end if
+
+ ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
+ ! since occ are set to zero, and fermie is taken from the previous density.
+ if (dtset%kptopt > 0) then
+   call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands_print(ebands, header="Ground state energies", prtvol=dtset%prtvol)
+ end if
+
+end subroutine ephtk_update_ebands
 !!***
 
 end module m_ephtk
