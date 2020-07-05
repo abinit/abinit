@@ -2027,6 +2027,11 @@ pp_dirpath $ABI_PSPDIR
                     if self.exclude_hosts: print("\texclude_hosts:", self.exclude_hosts)
                     if self.exclude_builders: print("\texclude_builder:", self.exclude_builders)
 
+                if status == "failed" and self.use_git_submodule:
+                    print("\tTest %s failed. Note, however, that this requires external files in " % (
+                          self.full_id, self.use_git_submodule))
+                    print("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.")
+
             # Check if the test is expected to fail.
             if runner.retcode == 124:
                 self._status = "failed"
