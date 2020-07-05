@@ -146,7 +146,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-   if (ANY(dtsets(idtset)%optdriver == [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE])) then
+   if (ANY(dtsets(idtset)%optdriver == [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_RDMFT])) then   ! MRM
     ! For GW or BSE calculations, we only use (npwwfn|ecutwfn) G-vectors read from the KSS file,
     ! therefore the FFT box for the density should be defined according to ecut=ecutwfn.
 
@@ -171,7 +171,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
      nshsigx=0
      call setshells(dtsets(idtset)%ecutsigx,dtsets(idtset)%npwsigx,nshsigx,&
       dtsets(idtset)%nsym,gmet,gprimd,dtsets(idtset)%symrel,'sigx',ucvol)
-   end if ! (SIGMA|SCREENING|SCGW|BSE)
+   end if ! (SIGMA|SCREENING|SCGW|BSE|RDFTM)
 
  end do
 
@@ -961,7 +961,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) then
    dtset%ecutwfn=dprarr(1)
  else
-   if(dtset%optdriver==RUNL_SCREENING .or. dtset%optdriver==RUNL_SIGMA) dtset%ecutwfn=dtset%ecut
+   if(dtset%optdriver==RUNL_SCREENING .or. dtset%optdriver==RUNL_SIGMA .or. dtset%optdriver==RUNL_RDMFT) dtset%ecutwfn=dtset%ecut
  end if
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'omegasimax',tread,'ENE')
  if(tread==1) dtset%omegasimax=dprarr(1)
@@ -3132,7 +3132,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
 
    ! Test bdgw values.
-   if (dtset%optdriver == RUNL_SIGMA) then
+   if (dtset%optdriver == RUNL_SIGMA) then  
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
        MSG_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if

@@ -2488,13 +2488,11 @@ endif
         potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
         ! MAU
-        write(msg,'(a13)') '<ks|Kx_ks|ks>'
-        !write(msg,'(a13)') '<ks|Vh_ks|ks>'
-        call wrtout(std_out,msg,'COLL')
+        !write(1000+my_rank,'(a13)') '<ks|Kx_ks|ks>'
+        write(1000+my_rank,'(a13)') '<ks|Vh_ks|ks>'
         do ib1dm=ib1,ib2
-          write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-          !write(msg,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
-          call wrtout(std_out,msg,'COLL')
+          !write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+          write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
         enddo
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange corrected one for this k-point
@@ -2612,8 +2610,8 @@ endif
        call Wfd_no_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)        ! Print WFK file, QP_BSt contains nat. orbs.
        gw1rdm_fname=dtfil%fnameabo_den
        call Wfd_no_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
-       write(100+my_rank,*) ks_rhor(:,1) ! MAU
-       write(200+my_rank,*) gw_rhor(:,1) ! MAU 
+       write(66,*) ks_rhor(:,1) ! MAU
+       write(67,*) gw_rhor(:,1) ! MAU 
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&        ! Print DEN file  
        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
      endif
@@ -2648,14 +2646,14 @@ endif
          Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                   ! Build new Wfd_no_all
        call Wfd_no_all%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))    ! Read WFK and store it in Wfd_no_all
 
-       call Wfd_no_all%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
-       write(300+my_rank,*) gw_rhor(:,1)                                     ! MAU
+       !call Wfd_no_all%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
+       !write(100+my_rank,*) gw_rhor(:,1)                                     ! MAU
 
        call Wfd_no_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_no_all (KS->NO)
 
-       call Wfd_no_all%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)  ! MAU 
-       write(400+my_rank,*) gw_rhor(:,1)                                    ! MAU 
-       write(900+my_rank,'(2(es14.6,1x))') nateigv                          ! MAU 
+       !call Wfd_no_all%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
+       write(200+my_rank,*) gw_rhor(:,1)                                     ! MAU 
+       write(900+my_rank,'(2(es14.6,1x))') nateigv                           ! MAU 
 
        call xmpi_barrier(Wfd%comm)
        !
@@ -2757,14 +2755,12 @@ endif
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          ! MAU
-         !write(msg,'(a13)') '<ks|Kx_no|ks>'
-         write(msg,'(a13)') '<ks|Vh_no|ks>'
-         call wrtout(std_out,msg,'COLL')
+         !write(2000+my_rank,'(a13)') '<ks|Kx_no|ks>'
+         write(2000+my_rank,'(a13)') '<ks|Vh_no|ks>'
          do ib1dm=ib1,ib2
-           !write(msg,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-           write(msg,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
-           !write(msg,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
-           call wrtout(std_out,msg,'COLL')
+           !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+           write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
+           !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
          enddo
        end do
        !

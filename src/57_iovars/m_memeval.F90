@@ -288,7 +288,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
        ! Don't perform memory tests if MBPT.
        mem_test = dtsets(idtset)%mem_test
-       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE, RUNL_EPH])) mem_test = 0
+       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE, RUNL_EPH, RUNL_RDMFT])) mem_test = 0
 
        call memory(n1xccc,extrapwf,getcell,idtset,dtsets(idtset)%icoulomb,&
 &       intxc,dtsets(idtset)%ionmov,iout,densfor_pred,&
