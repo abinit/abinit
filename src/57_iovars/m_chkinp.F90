@@ -1120,6 +1120,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! icutcoul
    call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,6,(/0,1,2,3,4,5/),iout)
 
+   ! icutcoul_fock
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul_fock,6,(/0,1,2,3,4,5/),iout)
+
+   ! icutcoul_gw
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul_gw,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
+
    ! icutcoul&icsing relation 
    !if (dt%icutcoul >= 0 .and. dt%icutcoul <= 5) then
    !  cond_string(1)='icutcoul' ; cond_values(1)=dt%icutcoul
