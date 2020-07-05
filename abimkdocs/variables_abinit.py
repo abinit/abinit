@@ -20596,7 +20596,6 @@ The option is ignored if PAW.
 """,
 ),
 
-#{"abinit_version": "9.0.0"}
 Variable(
     abivarname="sigma_ngkpt",
     varset="gw",
@@ -20609,16 +20608,17 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable allows the user to specify the list of k-points in the self-energy $\Sigma_{n\kk}$
-in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
-on [[nkptgw]], [[kptgw]], [[bdgw]].
+in terms of a homogeneous mesh in the IBZ instead of the traditional approach based on [[nkptgw]], [[kptgw]], [[bdgw]].
 
 The specification in terms of sigma_ngkpt is easier to use in particular when
-the self-energy is needed on a sub-mesh.
-The use of this variables requires a range of bands specified via [[gw_qprange]].
+the self-energy is needed on a sub-mesh used to generate the input WFK file.
+
+The set of bands can be specified either with [[sigma_erange]] or [[gw_qprange]].
+[[sigma_erange]] is the recommended approach when computing transport properties.
 
 !!! important
 
-    sigma_ngkpt and [[nkptgw]] and [[sigma_erange]] are mutually exclusive.
+    sigma_ngkpt and [[nkptgw]] and are mutually exclusive.
 """,
 ),
 

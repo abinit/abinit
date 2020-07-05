@@ -86,6 +86,8 @@ type,public :: rta_t
    ! number of energies (chemical potentials) at which transport quantities are computed
    ! Same number of energies used in DOS.
 
+   integer :: bmin, bmax
+
    integer :: nrta
    ! Number of relaxation-time approximations used (1 for SERTA, 2 for MRTA)
 
@@ -100,6 +102,8 @@ type,public :: rta_t
 
    real(dp) :: transport_fermie
    ! Fermi level from input file
+
+   logical :: assume_gap
 
    real(dp),allocatable :: kTmesh(:)
    ! (%ntemp)
@@ -349,6 +353,8 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
  call cwtime(cpu, wall, gflops, "start")
 
+ new%assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
+
  ! Allocate temperature arrays (same as the ones used in the SIGEPH calculation).
  new%ntemp = sigmaph%ntemp
  ABI_MALLOC(new%kTmesh, (new%ntemp))
@@ -364,21 +370,25 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  ABI_MALLOC(new%eminmax_spin, (2, nsppol))
  new%eminmax_spin = ebands_get_minmax(ebands, "eig")
 
- new%gaps = ebands_get_gaps(ebands, ierr)
- if (ierr /= 0) then
-   do spin=1, nsppol
-     MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
-     new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
-     new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
-   end do
-   MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+ if (new%assume_gap) then
+   new%gaps = ebands_get_gaps(ebands, ierr)
+   if (ierr /= 0) then
+     do spin=1, nsppol
+       MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
+       new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
+       new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
+     end do
+     MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+   end if
+
+   if (my_rank == master) then
+     call new%gaps%print(unit=std_out); call new%gaps%print(unit=ab_out)
+   end if
  end if
 
- if (my_rank == master) then
-   call new%gaps%print(unit=std_out); call new%gaps%print(unit=ab_out)
- end if
-
+ ! =================================================
  ! Read lifetimes and new%ebands from SIGEPH.nc file
+ ! =================================================
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with sigma_ngkpt k-mesh, we need to downsample ebands.
    call wrtout(unts, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
@@ -447,7 +457,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
      end do
    end do
 
-   ! Build linear interpolator for e-linewidths.
+   ! Build linear interpolator for linewidths.
    mband = new%ebands%mband
    klinterp = klinterp_new(cryst, new%ebands%kptrlatt, new%ebands%nshiftk, new%ebands%shiftk, new%ebands%kptopt, &
                            new%ebands%kptns, mband, new%ebands%nkpt, nsppol, ndat, values_bksd, comm)
@@ -504,7 +514,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  end if
 
  ! FIXME: I think transport_ngkpt is buggy, wrong ne(T), weird zeros if MRTA ...
- ! Do we really need this option?
+ ! Do we really need this option? Can't we replace it with sigma_ngkpt and eph_task 7?
 
  if (any(dtset%transport_ngkpt /= 0)) then
    ! Perform further downsampling (usefull for debugging purposes)
@@ -526,7 +536,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
    if (dksqmax > tol12) then
       write(msg, '(3a,es16.6,a)' ) &
-       "Error while downsampling ebands in transport driver",ch10, &
+       "Error while downsampling ebands in the transport driver",ch10, &
        "The k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
       MSG_ERROR(msg)
    end if
@@ -542,6 +552,9 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    ABI_SFREE(indkk)
    call ebands_move_alloc(tmp_ebands, new%ebands)
  end if
+
+ ! Define band range for linewidths
+ new%bmin = 1; new%bmax = new%ebands%mband
 
  ! Same doping case as in sigmaph file.
  ABI_MALLOC(new%eph_mu_e, (new%ntemp))
@@ -667,7 +680,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  nvals = self%ntemp * self%nrta
  ABI_CALLOC(tau_vals, (self%ntemp, self%nrta, mband, nkpt, nsppol))
 
- ! FIXME: The memory explodes if natom is large. should reduce mband to the states in the window
+ ! FIXME: The memory explodes if natom is large. Should reduce mband to the states in the energy window
  ntens = (1 + self%ntemp) * self%nrta
  ABI_CALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, mband, nkpt, nsppol))
 
@@ -718,7 +731,8 @@ subroutine rta_compute(self, cryst, dtset, comm)
  ! If sigma_erange is set, get emin and emax from this variable
  ! MG: TODO This value should be read from SIGPEH
  ! Recheck metals
- if (any(abs(dtset%sigma_erange) > zero)) then
+ !if (any(abs(dtset%sigma_erange) > zero)) then
+ if (self%assume_gap) then
    emin = huge(one); emax = -huge(one)
    do spin=1,self%ebands%nsppol
      if (dtset%sigma_erange(1) >= zero) emin = min(emin, self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1))
@@ -1177,6 +1191,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 !Local variables --------------------------------
  integer :: ncerr
  real(dp) :: cpu, wall, gflops
+ real(dp) :: work(dtset%nsppol)
 
 !************************************************************************
 
@@ -1233,8 +1248,15 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_ngkpt"), dtset%transport_ngkpt))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), self%gaps%vb_max))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min"), self%gaps%cb_min))
+ if (self%assume_gap) then
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), self%gaps%vb_max))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min"), self%gaps%cb_min))
+ else
+   ! Set vbm and cbm to fermie if metal.
+   work(:) = self%ebands%fermie
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), work))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min"), work))
+ end if
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_mu_e"), self%eph_mu_e))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_mu_e"), self%transport_mu_e))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vv_dos"), self%vv_dos))
