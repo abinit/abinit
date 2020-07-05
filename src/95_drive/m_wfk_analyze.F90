@@ -131,7 +131,7 @@ contains
 !!
 !! SOURCE
 
-subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
+subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -202,16 +202,16 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
  end if
  call xmpi_bcast(wfk0_path, master, comm, ierr)
- call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path) )
+ call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
 
  !call cwtime(cpu,wall,gflops,"start")
 
  ! Costruct crystal and ebands from the GS WFK file.
- call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
+ call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm) !,gs_occ)
  call wfk0_hdr%vs_dtset(dtset)
 
  cryst = wfk0_hdr%get_crystal()
- call cryst%print(header="crystal structure from WFK file")
+ call cryst%print(header="Crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
 
@@ -248,7 +248,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
  ABI_FREE(gs_eigen)
 
- ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
                   gsqcutc_eff=gsqcutc_eff,gsqcutf_eff=gsqcutf_eff,gmet=cryst%gmet,k0=k0)
 

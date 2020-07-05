@@ -402,7 +402,7 @@ end subroutine ephtk_gkknu_from_atm
 !!  ephtk_update_ebands
 !!
 !! FUNCTION
-!!  Update ebands
+!!  Update ebands according to dtset%occopt, tsmear, mbpt_sciss, eph_fermie, eph_extrael
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
@@ -415,12 +415,13 @@ end subroutine ephtk_gkknu_from_atm
 !!
 !! SOURCE
 
-subroutine ephtk_update_ebands(dtset, ebands)
+subroutine ephtk_update_ebands(dtset, ebands, header)
 
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(inout) :: ebands
+ character(len=*),intent(in) :: header
 
 !Local variables-------------------------
 !scalars
@@ -465,7 +466,7 @@ subroutine ephtk_update_ebands(dtset, ebands)
  ! since occ are set to zero, and fermie is taken from the previous density.
  if (dtset%kptopt > 0) then
    call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   call ebands_print(ebands, header="Ground state energies", prtvol=dtset%prtvol)
+   call ebands_print(ebands, header=header, prtvol=dtset%prtvol)
  end if
 
 end subroutine ephtk_update_ebands

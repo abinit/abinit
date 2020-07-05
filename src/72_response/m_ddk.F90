@@ -239,11 +239,10 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  type(vkbr_t) :: vkbr
  type(ebands_t) :: ebands
  type(crystal_t) :: cryst
- type(hdr_type) :: hdr_tmp, hdr
+ type(hdr_type) :: tmp_hdr, hdr
  type(ddkop_t) :: ddkop
  type(wave_t),pointer :: wave_v, wave_c
 !arrays
- !integer,parameter :: voigt2ij(2, 6) = reshape([1, 1, 2, 2, 3, 3, 2, 3, 1, 3, 1, 2], [2, 6])
  integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:), nband(:,:), kg_k(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  real(dp) :: kpt(3), vv(2, 3)
@@ -500,8 +499,10 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      ! Free KB form factors
      call vkbr_free(vkbr)
 
-     write(msg,'(2(a,i0),a)')" k-point [", ik, "/", nkpt, "]"
-     call cwtime_report(msg, cpu, wall, gflops)
+     if (nkpt < 1000 .or. (nkpt > 1000 .and. mod(ik, 200) == 0) .or. ik <= nproc) then
+       write(msg,'(2(a,i0),a)')" k-point [", ik, "/", nkpt, "]"
+       call cwtime_report(msg, cpu, wall, gflops)
+     end if
 
    end do ! k-points
  end do ! spin
@@ -537,38 +538,38 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ! Output EVK file in netcdf format.
  if (my_rank == master .and. write_ncfile) then
    ! Have to build hdr on k-grid with info about perturbation.
-   call hdr_copy(hdr, hdr_tmp)
-   hdr_tmp%qptn = zero
+   call hdr_copy(hdr, tmp_hdr)
+   tmp_hdr%qptn = zero
 
-   fname = strcat(prefix, "NEW_EVK.nc")
-   call wrtout(ab_out, sjoin("- Writing file: ", fname))
-   NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
-   hdr_tmp%pertcase = 0
-   NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
-   NCF_CHECK(cryst%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   if (ds%only_diago) then
-     ncerr = nctk_def_arrays(ncid, [ &
-       nctkarr_t('vred_diagonal', "dp", "three, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
-   else
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vred_matrix', "dp", &
-         "two, three, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
-   end if
-   NCF_CHECK(ncerr)
-   NCF_CHECK(nctk_set_datamode(ncid))
-   if (ds%only_diago) then
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_diagonal"), ds%vdiago))
-   else
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_matrix"), ds%vmat))
-   end if
-   NCF_CHECK(nf90_close(ncid))
+   !fname = strcat(prefix, "NEW_EVK.nc")
+   !call wrtout(ab_out, sjoin("- Writing file: ", fname))
+   !NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
+   !tmp_hdr%pertcase = 0
+   !NCF_CHECK(tmp_hdr%ncwrite(ncid, 43, nc_define=.True.))
+   !NCF_CHECK(cryst%ncwrite(ncid))
+   !NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   !if (ds%only_diago) then
+   !  ncerr = nctk_def_arrays(ncid, [ &
+   !    nctkarr_t('vred_diagonal', "dp", "three, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
+   !else
+   !  ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vred_matrix', "dp", &
+   !      "two, three, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
+   !end if
+   !NCF_CHECK(ncerr)
+   !NCF_CHECK(nctk_set_datamode(ncid))
+   !if (ds%only_diago) then
+   !  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_diagonal"), ds%vdiago))
+   !else
+   !  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_matrix"), ds%vmat))
+   !end if
+   !NCF_CHECK(nf90_close(ncid))
 
    do ii=1,3
      fname = strcat(prefix, '_', itoa(ii), "_EVK.nc")
-     !call wrtout(ab_out, sjoin("- Writing file: ", fname))
+     !call wrtout(ab_out, sjoin("- Writing EVK file: ", fname))
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
-     hdr_tmp%pertcase = 3 * cryst%natom + ii
-     NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
+     tmp_hdr%pertcase = 3 * cryst%natom + ii
+     NCF_CHECK(tmp_hdr%ncwrite(ncid, 43, nc_define=.True.))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands, ncid))
      ncerr = nctk_def_arrays(ncid, [ &
@@ -579,7 +580,7 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), ds%dipoles(ii,:,:,:,:,:)))
      NCF_CHECK(nf90_close(ncid))
    end do
-   call hdr_tmp%free()
+   call tmp_hdr%free()
  end if
 #endif
 
@@ -604,7 +605,6 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  call ebands_free(ebands)
  call cryst%free()
  call hdr%free()
- !call ds%free()
 
  ! Block all procs here so that we know output files are available when code returns.
  call xmpi_barrier(comm)

@@ -72,6 +72,7 @@ module m_eph_driver
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
+ use m_ephtk,           only : ephtk_update_ebands
 
  implicit none
 
@@ -232,6 +233,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dvdb_filepath == ABI_NOFILE) then
    dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
+
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
  ! If eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
@@ -346,8 +348,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! FIXME: This part should be rationalized!
  if (use_wfk) then
 
-   !call ephtk_update_ebands(dtset, ebands)
-   !call ephtk_update_ebands(dtset, ebands_kq)
+#if 1
+   call ephtk_update_ebands(dtset, ebands, "Ground state energies")
+   if (use_wfq) then
+     call ephtk_update_ebands(dtset, ebands_kq, "Ground state energies (K+Q)")
+   end if
+#else
 
    if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
      write(msg,"(2a,2(a,i0,a,f14.6,a))")&
@@ -413,6 +419,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        call ebands_print(ebands_kq, header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
      end if
    end if
+#endif
  end if ! use_wfk
 
  call cwtime_report(" eph%init", cpu, wall, gflops)
@@ -578,8 +585,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb%qdamp = dtset%dvdb_qdamp
 
    ! Set quadrupoles
-   dvdb%qstar = qdrp_cart
-   if (iblock_quadrupoles /= 0) dvdb%has_quadrupoles = .True.
+   dvdb%qstar = qdrp_cart; if (iblock_quadrupoles /= 0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.
    ! This flag activates automatically the treatment of the long-range term in the Fourier interpolation
@@ -605,9 +611,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
-    gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
+                  gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
  call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
  call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
@@ -652,29 +657,29 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (2, -2)
    ! Compute e-ph matrix elements.
    call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+               pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (3)
    ! Compute phonon self-energy.
    call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (4, -4)
    ! Compute electron self-energy (phonon contribution)
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
    if (dtset%eph_task == -4) call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (5, -5)
    ! Interpolate the phonon potential.
    call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
-     ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
+                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model

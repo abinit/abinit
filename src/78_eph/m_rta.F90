@@ -375,8 +375,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  end if
 
  if (my_rank == master) then
-   call new%gaps%print(unit=std_out)
-   call new%gaps%print(unit=ab_out)
+   call new%gaps%print(unit=std_out); call new%gaps%print(unit=ab_out)
  end if
 
  ! Read lifetimes and new%ebands from SIGEPH.nc file
@@ -401,11 +400,12 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  !      velocity(3, mband, nkpt, nsppol)
  !      linewidths(self%ntemp, mband, nkpt, nsppol, 2)
 
- !if (.False.) then
- if (dtset%useria == 666 .and. dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
+ if (dtset%useria == 888 .and. &
+     (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE)) then
    ! In principle only getwfkfine_filepath is used here
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
+
    call wrtout(unts, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
    mband = new%ebands%mband
 
@@ -459,10 +459,11 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
    ! Unlinke the ebands stored in SIGEPH, the eigens read from WFK_FINE have not been
    ! shifted with the scissors operator or updated according to extrael_fermie so do it now.
-   call ephtk_update_ebands(dtset, new%ebands)
+   call ephtk_update_ebands(dtset, new%ebands, "GS energies read from WFK_FINE")
 
-#if 1
    ! And now interpolate linewidths on the fine k-mesh
+   ! Note: k-points that close to the edge of the pocket may get zero linewidths
+   ! One may fix the problem by using tau(e).
    !mband = new%ebands%mband
    ABI_REMALLOC(new%linewidths, (new%ntemp, mband, new%ebands%nkpt, nsppol, new%nrta))
    ABI_MALLOC(vals_bsd, (mband, nsppol, ndat))
@@ -499,8 +500,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    end if
 
    ABI_FREE(vals_bsd)
-#endif
-
    call klinterp%free()
  end if
 

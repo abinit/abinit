@@ -195,7 +195,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
     kptrlatt = 0
     kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
     call kpts_ibz_from_kptrlatt(cryst, kptrlatt, dtset%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
-      nkcalc, kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
+                                nkcalc, kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
     ABI_FREE(sigma_kbz)
     ABI_FREE(sigma_wtk)
  else
@@ -331,8 +331,8 @@ end subroutine sigtk_kcalc_from_gaps
 !!
 !! FUNCTION
 !!  Select list of k-points and bands for self-energy matrix elements on the basis of their positions
-!!  wrt to the band edges and the value of sigma_erange. Useful when computing electron-lifetimes
-!!  for transport calculations.
+!!  wrt to the (band edges|fermi level) and the value of sigma_erange.
+!!  Useful when computing electron-lifetimes for transport calculations.
 !!
 !! INPUT
 !!  dtset<dataset_type>=All input variables for this dataset.
@@ -373,9 +373,10 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz, my_rank
  logical :: found
  real(dp) :: cmin, vmax, ee, dksqmax
+ logical :: assume_gap
  character(len=500) :: msg
 !arrays
- integer :: kptrlatt(3,3)
+ integer :: kptrlatt(3,3), unts(1)
  integer,allocatable :: ib_work(:,:,:), sigmak2ebands(:), indkk(:,:)
  integer :: kpos(ebands%nkpt)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),tmp_kcalc(:,:)
@@ -383,13 +384,17 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
- if (my_rank == master) then
-   write(std_out, "(a)")" Selecting k-points and bands according to their position wrt band edges (sigma_erange)."
-   write(std_out, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
-   call gaps%print(unit=std_out)
- end if
+ unts = [std_out]
+ assume_gap = .not. all(dtset%sigma_erange < zero)
 
- ABI_CHECK(maxval(gaps%ierr) == 0, "sigma_erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
+ if (my_rank == master) then
+   write(std_out, "(a)")" Selecting k-points and bands according to their position wrt the band edges (sigma_erange)."
+   write(std_out, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+   if (assume_gap) then
+     call gaps%print(unit=std_out)
+     ABI_CHECK(maxval(gaps%ierr) == 0, "sigma_erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
+   end if
+ end if
 
  if (any(dtset%sigma_ngkpt /= 0)) then
     call wrtout(std_out, sjoin(" Generating initial list of k-points from sigma_nkpt:", ltoa(dtset%sigma_ngkpt)))
@@ -397,7 +402,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     kptrlatt = 0
     kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
     call kpts_ibz_from_kptrlatt(cryst, kptrlatt, dtset%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
-      tmp_nkpt, tmp_kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
+                                tmp_nkpt, tmp_kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
 
     ABI_FREE(sigma_kbz)
     ABI_FREE(sigma_wtk)
@@ -405,8 +410,9 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     ! Map tmp_kcalc to ebands%kpts
     timrev = kpts_timrev_from_kptopt(ebands%kptopt)
     ABI_MALLOC(indkk, (tmp_nkpt,  6))
+
     call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, tmp_kcalc, ebands%nkpt, tmp_nkpt, cryst%nsym, &
-         1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+                1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
 
     if (dksqmax > tol12) then
       write(msg, '(a,es16.6,2a)' )&
@@ -419,6 +425,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     sigmak2ebands = indkk(:, 1)
     ABI_FREE(tmp_kcalc)
     ABI_FREE(indkk)
+
  else
    ! Include all the k-points in the IBZ in the initial list.
    call wrtout(std_out, " Generating initial list of k-points from input ebands%kptns.")
@@ -432,9 +439,16 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  ABI_MALLOC(ib_work, (2, tmp_nkpt, nsppol))
 
  do spin=1,nsppol
-   ! Get cmb and vbm with some tolerance
-   vmax = gaps%vb_max(spin) + tol2 * eV_Ha
-   cmin = gaps%cb_min(spin) - tol2 * eV_Ha
+
+   if (assume_gap) then
+     ! Get CBM and VBM with some tolerance
+     vmax = gaps%vb_max(spin) + tol2 * eV_Ha
+     cmin = gaps%cb_min(spin) - tol2 * eV_Ha
+   else
+     vmax = ebands%fermie
+     cmin = ebands%fermie
+   end if
+
    do ii=1,tmp_nkpt
      ! Index of k-point in ebands.
      ik = sigmak2ebands(ii)
@@ -442,15 +456,15 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
      ib_work(2, ii, spin) = -huge(1)
      do band=1,ebands%nband(ik + (spin-1) * ebands%nkpt)
         ee = ebands%eig(band, ik, spin)
-        if (dtset%sigma_erange(1) > zero) then
-          if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
+        if (abs(dtset%sigma_erange(1)) > zero) then
+          if (ee <= vmax .and. vmax - ee <= abs(dtset%sigma_erange(1))) then
             ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
             ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)
             !write(std_out, *), "Adding valence band", band, " with ee [eV]: ", ee * Ha_eV
           end if
         end if
-        if (dtset%sigma_erange(2) > zero) then
-          if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
+        if (abs(dtset%sigma_erange(2)) > zero) then
+          if (ee >= cmin .and. ee - cmin <= abs(dtset%sigma_erange(2))) then
             ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
             ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)
             !write(std_out, *)"Adding conduction band", band, " with ee [eV]: ", ee * Ha_eV
@@ -482,7 +496,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  ABI_MALLOC(nbcalc_ks, (nkcalc, nsppol))
 
  do ic=1,nkcalc
-   ! Index in ib_work array
+   ! Index in the ib_work array
    ii = kpos(ic)
    ! Index in ebands.
    ik = sigmak2ebands(ii)
@@ -501,9 +515,15 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  end do
 
  if (my_rank == master) then
-   write(std_out, "(a, i0, a, 2(f6.3, 1x), a)") &
+   ! Write info about k-points used in the calculation.
+   write(msg, "(a, i0, a, 2(f6.3, 1x), a)") &
      " Found ", nkcalc, " k-points within sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
-   write(std_out, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " MAX(nbcalc_ks): ", maxval(nbcalc_ks)
+   call wrtout(unts, msg)
+   if (any(dtset%sigma_ngkpt /= 0)) then
+     call wrtout(unts, sjoin(" These k-points belong to the sigma_ngkpt k-mesh:", ltoa(dtset%sigma_ngkpt)))
+   end if
+   write(msg, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " Max(nbcalc_ks): ", maxval(nbcalc_ks)
+   call wrtout(unts, msg)
  end if
 
  ABI_FREE(ib_work)
@@ -673,7 +693,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
      vmax = fine_gaps%vb_max(spin) + tol2 * eV_Ha
      cmin = fine_gaps%cb_min(spin) - tol2 * eV_Ha
    else
-     ! Note that we wse the Fermi level from ebands instead of fine_ebands
+     ! Note that we use the Fermi level from ebands instead of fine_ebands.
      vmax = ebands%fermie
      cmin = ebands%fermie
    end if
@@ -684,14 +704,12 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
        ! Check whether the interpolated eigenvalue is inside the sigma_erange window.
        if (abs(dtset%sigma_erange(1)) > zero) then
          if (ee <= vmax .and. vmax - ee <= abs(dtset%sigma_erange(1))) then
-           kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1) + 1
-           exit
+           kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1) + 1; exit
          end if
        end if
        if (abs(dtset%sigma_erange(2)) > zero) then
          if (ee >= cmin .and. ee - cmin <= abs(dtset%sigma_erange(2))) then
-           kshe_mask(ikf_ibz, spin, 2) = kshe_mask(ikf_ibz, spin, 2) + 1
-           exit
+           kshe_mask(ikf_ibz, spin, 2) = kshe_mask(ikf_ibz, spin, 2) + 1; exit
          end if
        end if
      end do

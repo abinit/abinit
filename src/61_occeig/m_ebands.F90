@@ -328,8 +328,8 @@ MODULE m_ebands
    integer :: nkx, nky, nkz
    ! Number of divisions of the grid enclosing the first unit cell
 
-   real(dp),allocatable :: data_uk_bsd(:,:,:,:,:,:)
-    ! (nkx, nky, nkz, mband, nsppol, ndat)
+   real(dp),allocatable :: data_uk_bsd(:,:,:,:)
+    ! (nkx*nky*nkz, mband, nsppol, ndat)
 
  contains
 
@@ -5879,47 +5879,39 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1 = 1
- integer :: ierr, nkfull, ikf, spin, band, ik_ibz, timrev, ix, iy, iz, nkx, nky, nkz, ii, idat
+ integer :: ierr, nkfull, ikf, spin, band, ik_ibz, timrev, ix, iy, iz, nkx, nky, nkz, idat
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
  integer :: ngkpt(3)
  integer,allocatable :: bz2ibz(:,:)
- logical :: shifted(3)
- real(dp),allocatable :: xvec(:), yvec(:), zvec(:), kfull(:,:)
+ real(dp) :: kpt(3)
+ real(dp),allocatable :: kfull(:,:)
 
 ! *********************************************************************
 
  ! Check input parameters
  ierr = 0
  if (nkibz == 1) then
-   MSG_WARNING("Cannot interpolate with a single k-point")
-   ierr = ierr + 1
+   MSG_ERROR_NOSTOP("Cannot interpolate with a single k-point", ierr)
  end if
  if (.not. isdiagmat(kptrlatt)) then
-   MSG_WARNING('kptrlatt is not diagonal. Multiple shifts are not allowed')
-   ierr = ierr + 1
+   MSG_ERROR_NOSTOP('kptrlatt is not diagonal. Multiple shifts are not allowed', ierr)
  end if
  if (nshiftk /= 1) then
-   MSG_WARNING('Multiple shifts not allowed')
-   ierr = ierr + 1
+   MSG_ERROR_NOSTOP('Multiple shifts not allowed', ierr)
  end if
+ if (any(abs(shiftk(:, 1)) > tol8)) then
+   MSG_ERROR_NOSTOP("shifted k-mesh not implented", ierr)
+ end if
+
  if (ierr /= 0) then
    MSG_ERROR("Linear interpolation cannot be performed. See messages above.")
  end if
 
- ! Build BZ mesh. Note that in the simplest case of unshifted mesh:
- ! 1) k-point coordinates are in [0, 1]
- ! 2) The mesh is closed i.e. (0, 0, 0) and (1, 1, 1) are included
  ngkpt(1) = kptrlatt(1, 1)
  ngkpt(2) = kptrlatt(2, 2)
  ngkpt(3) = kptrlatt(3, 3)
-
- ! Multiple shifts are not supported here.
- shifted(:) = abs(shiftk(:, 1)) > tol8
- !nkx = ngkpt(1) + 1; if (shifted(1)) nkx = nkx + 1
- !nky = ngkpt(2) + 1; if (shifted(2)) nky = nky + 1
- !nkz = ngkpt(3) + 1; if (shifted(3)) nkz = nkz + 1
 
  nkx = ngkpt(1)
  nky = ngkpt(2)
@@ -5928,32 +5920,19 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  new%nkx = nkx; new%nky = nky; new%nkz = nkz
  new%mband = mband; new%nsppol = nsppol; new%ndat = ndat
 
- ABI_MALLOC(xvec, (nkx))
- ABI_MALLOC(yvec, (nky))
- ABI_MALLOC(zvec, (nkz))
-
- do ix=1,nkx
-   ii = ix; if (shifted(1)) ii = ii - 1
-   xvec(ix) = (ii - 1 + shiftk(1, 1)) / ngkpt(1)
- end do
- do iy=1,nky
-   ii = iy; if (shifted(2)) ii = ii - 1
-   yvec(iy) = (ii - 1 + shiftk(2, 1)) / ngkpt(2)
- end do
- do iz=1,nkz
-   ii = iz; if (shifted(3)) ii = ii - 1
-   zvec(iz) = (ii - 1 + shiftk(3, 1)) / ngkpt(3)
- end do
-
- ! Build list of k-points in full BZ ((x,y,z) ordered as required by interpolation routine)
+ ! Build list of k-points in the conventional unit cell.
+ ! (x,y,z) ordered as required by interpolation routine
  nkfull = nkx * nky * nkz
  ABI_MALLOC(kfull, (3, nkfull))
  ikf = 0
  do iz=1,nkz
+   kpt(3) = (iz - 1 + shiftk(3, 1)) / ngkpt(3)
    do iy=1,nky
+     kpt(2) = (iy - 1 + shiftk(2, 1)) / ngkpt(2)
      do ix=1,nkx
+       kpt(1) = (ix - 1 + shiftk(1, 1)) / ngkpt(1)
        ikf = ikf + 1
-       kfull(:, ikf) = [xvec(ix), yvec(iy), zvec(iz)]
+       kfull(:, ikf) = kpt
      end do
    end do
  end do
@@ -5976,7 +5955,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    MSG_ERROR(msg)
  end if
 
- ABI_CALLOC(new%data_uk_bsd, (nkx, nky, nkz, mband, nsppol, ndat))
+ ABI_CALLOC(new%data_uk_bsd, (nkx*nky*nkz, mband, nsppol, ndat))
  !new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, mband]
 
  !do spin=1,nsppol
@@ -5990,7 +5969,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
      do ix=1,nkx
        ikf = ikf + 1
        ik_ibz = bz2ibz(ikf, 1)
-       new%data_uk_bsd(ix, iy, iz, 1:mband, 1:nsppol, 1:ndat) = values_bksd(1:mband, ik_ibz, 1:nsppol, 1:ndat)
+       new%data_uk_bsd(ikf, 1:mband, 1:nsppol, 1:ndat) = values_bksd(1:mband, ik_ibz, 1:nsppol, 1:ndat)
      end do
    end do
  end do
@@ -5998,9 +5977,6 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  !end do
  !end do
 
- ABI_FREE(xvec)
- ABI_FREE(yvec)
- ABI_FREE(zvec)
  ABI_FREE(bz2ibz)
 
 end function klinterp_new
@@ -6075,7 +6051,7 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  do idat=1,self%ndat
    do spin=1,self%nsppol
       do band=1,self%mband
-        vals_bsd(band, spin, idat) = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:, band, spin, idat))
+        vals_bsd(band, spin, idat) = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:, band, spin, idat))
       end do
    end do
  end do
