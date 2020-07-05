@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h48 )
+.Starting date : Sun  5 Jul 2020.
+- ( at 18h33 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
@@ -481,12 +481,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.266
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 166
+ From emin:  12.8 to emax:  17.3 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -751,12 +749,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   15.739
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 166
+ From emin:  12.8 to emax:  17.3 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -1019,12 +1015,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   17.595
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 74
+ From emin:  16.5 to emax:  18.5 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.86047941E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   3.98393583E-01
- Total number of electrons at eF:    8.2
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -1292,12 +1286,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:   18.045
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 74
+ From emin:  16.5 to emax:  18.5 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.86047941E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   3.98393583E-01
- Total number of electrons at eF:    8.2
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -1557,12 +1549,10 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.500
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 74
+ From emin:  16.5 to emax:  18.5 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.86047941E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   3.98393583E-01
- Total number of electrons at eF:    8.2
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -1882,10 +1872,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         90.9  wall=         91.9
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          5.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         90.9  wall=         91.9
+.Delivered  18 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          5.3

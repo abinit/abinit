@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h47 )
+.Starting date : Sun  5 Jul 2020.
+- ( at 18h33 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t57.in
 - output file    -> t57.out

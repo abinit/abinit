@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h50 )
+.Starting date : Sun  5 Jul 2020.
+- ( at 18h36 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
@@ -1251,12 +1251,10 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 3768
- From emin: -21.7 to emax:  80.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 314
+ From emin:  -0.2 to emax:   8.3 (eV)
  Number of k-points in the IBZ: 3
- Fermi level:   8.68615077E+00 (eV)
- Total electron DOS at Fermi level in states/eV:   2.20305172E-02
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -2731,10 +2729,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         29.0  wall=         31.3
+- Proc.   0 individual time (sec): cpu=         18.8  wall=         20.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.0  wall=         31.3
+.Delivered  14 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=         18.8  wall=         20.5

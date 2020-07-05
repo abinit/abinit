@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h47 )
+.Starting date : Sun  5 Jul 2020.
+- ( at 18h33 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t53.in
 - output file    -> t53.out
@@ -432,12 +432,10 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    5.0 [K], mu_e:   15.265
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 166
+ From emin:  12.8 to emax:  17.3 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -727,12 +725,10 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    5.0 [K], mu_e:   15.265
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 166
+ From emin:  12.8 to emax:  17.3 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
@@ -970,10 +966,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         11.2  wall=         13.4
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          4.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.2  wall=         13.4
+.Delivered   5 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.6  wall=          4.3
