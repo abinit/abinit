@@ -289,6 +289,23 @@ def vimt(ctx, tagname):
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
+#@task
+#def gdb(ctx, input_name, exec_name="abinit", run_make=False):
+#    """
+#    Execute `lldb` debugger with the given `input_name`.
+#    """
+#    if run_make: make(ctx)
+#
+#    top = find_top_build_tree(".", with_abinit=True)
+#    binpath = os.path.join(top, "src", "98_main", exec_name)
+#    cprint(f"Using binpath: {binpath}", "green")
+#    cmd = f"gdb {binpath} --one-line 'settings set target.run-args {input_name}'"
+#    cprint(f"Executing gdb command: {cmd}", color="green")
+#    # mpirun -np 2 xterm -e gdb fftprof --command=dbg_file
+#    #cprint("Type run to start lldb debugger", color="green")
+#    #cprint("Then use `bt` to get the backtrace\n\n", color="green")
+#    ctx.run(cmd, pty=True)
+
 
 @task
 def lldb(ctx, input_name, exec_name="abinit", run_make=False):

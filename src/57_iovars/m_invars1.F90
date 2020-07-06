@@ -485,7 +485,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      shell_var = pp_dirpath(2:)
      call get_environment_variable(shell_var, pp_dirpath, status=ierr)
      if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
-     if (ierr == +1) MSG_ERROR(sjoin(shell_var, "does not exist"))
+     if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
      if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
      call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
    end if
