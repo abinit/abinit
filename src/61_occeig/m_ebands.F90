@@ -3065,7 +3065,7 @@ end function ebands_ncwrite_path
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
-!!    No meaning for tetrahedrons
+!!    No meaning for tetrahedra
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -4349,13 +4349,15 @@ end function ebands_interp_kpath
 !!  ebands_get_edos_matrix_elements
 !!
 !! FUNCTION
-!!  Compute e-DOS and weighted DOS with weights given by precomputed scalar, vectorial
+!!  Compute electron DOS and weighted e-DOS with weights given by precomputed scalar, vectorial
 !!  or tensorial matrix elements.
-!!  Weights are provided in input as (..., num_entries, mband, nkpt, nsppol) tables.
+!!  Weights are provided in input as (..., num_entries, bsize, nkpt, nsppol) tables, see below.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
+!!  bsize=Number of bands in bks_vals, bks_vecs and bks_tens
+!!    Not necessarily equal to ebands%mband when brange is used.
 !!  nvals=Number of scalar entries. Maybe zero
 !!  bks_vals=Scalar matrix elements
 !!  nvecs=Number of 3d-vectorial entries. Maybe zero
@@ -4364,14 +4366,16 @@ end function ebands_interp_kpath
 !!  bks_tens= Tensorial matrix elements (3x3) in Cartesian Coordinates
 !!  intmeth=
 !!    1 for Gaussian,
-!!    2 or -2 for tetrahedrons (-2 if Blochl corrections must be included).
+!!    2 or -2 for tetrahedra (-2 if Blochl corrections must be included).
 !!    If nkpt == 1 (Gamma only), the routine fallbacks to the Gaussian method.
 !!  step=Step on the linear mesh in Ha. If < 0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
-!!    No meaning for tetrahedrons
+!!    No meaning for tetrahedra
 !!  comm=MPI communicator
-!!  [emin, emax]=Minimum and maximum energy to be considered. Default: full range.
+!!  [brange(2)]=Minimum and maximum band index. Default if not present is `full band range`.
+!!    If given bsize must be equal: to brange(2) - brange(1) + 1
+!!  [erange(2)]=Minimum and maximum energy to be considered. Default if not present is `full energy range`.
 !!
 !! OUTPUT
 !!  out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
@@ -4388,22 +4392,23 @@ end function ebands_interp_kpath
 !!
 !! SOURCE
 
-type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
+type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
                                                       nvals, bks_vals, nvecs, bks_vecs, ntens, bks_tens, &
-                                                      intmeth, step, broad, comm, &
-                                                      out_valsdos, out_vecsdos, out_tensdos, emin, emax) result(edos)
+                                                      intmeth, step, broad, out_valsdos, out_vecsdos, out_tensdos, comm, &
+                                                      brange, erange) result(edos)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nvals, nvecs, ntens, intmeth, comm
+ integer,intent(in) :: bsize, nvals, nvecs, ntens, intmeth, comm
  real(dp),intent(in) :: step, broad
- real(dp),optional,intent(in) :: emin, emax
  class(ebands_t),intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
- real(dp),intent(in) :: bks_vals(nvals, ebands%mband, ebands%nkpt, ebands%nsppol)
- real(dp),intent(in) :: bks_vecs(3, nvecs, ebands%mband, ebands%nkpt, ebands%nsppol)
- real(dp),intent(in) :: bks_tens(3, 3, ntens, ebands%mband, ebands%nkpt, ebands%nsppol)
+ integer,optional,intent(in) :: brange(2)
+ real(dp),optional,intent(in) :: erange(2)
+ real(dp),intent(in) :: bks_vals(nvals, bsize, ebands%nkpt, ebands%nsppol)
+ real(dp),intent(in) :: bks_vecs(3, nvecs, bsize, ebands%nkpt, ebands%nsppol)
+ real(dp),intent(in) :: bks_tens(3, 3, ntens, bsize, ebands%nkpt, ebands%nsppol)
  real(dp),allocatable,intent(out) :: out_valsdos(:,:,:,:), out_vecsdos(:,:,:,:,:), out_tensdos(:,:,:,:,:,:)
 
 !Local variables-------------------------------
@@ -4411,8 +4416,9 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
  integer :: nproc, my_rank, nw, spin, band, ib, ik_ibz, cnt, idat, ierr, bcorr
  integer :: ii, jj, ief, bmin_, bmax_
  real(dp),parameter :: max_occ1 = one
- real(dp) :: max_ene,min_ene,wtk,max_occ
+ real(dp) :: emax, emin, wtk, max_occ
  real(dp) :: cpu, wall, gflops
+ logical :: check_erange
  character(len=500) :: msg
  type(htetra_t) :: tetra
 !arrays
@@ -4437,24 +4443,32 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 
  ! Define band range.
  bmin_ = 1; bmax_ = ebands%mband
- !if (present(bmin) bmin_ = bmin
- !if (present(bmax) bmax_ = bmax
- !ABI_CHECK_IRANGE(bmin_, 1, ebands%mband, "Wrong bmin")
- !ABI_CHECK_IRANGE(bmax_, bmin_, ebands%mband, "Wrong bmax")
+ if (present(brange)) then
+   bmin_ = brange(1); bmax_ = brange(2)
+ end if
 
- ! Compute the linear mesh so that it encloses all bands.
- eminmax_spin = ebands_get_minmax(ebands, "eig")
- min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
- max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
- ! or use optional args if provided.
- if (present(emin)) min_ene = emin
- if (present(emax)) max_ene = emax
+ ABI_CHECK_IRANGE(bmin_, 1, ebands%mband, "Wrong bmin:")
+ ABI_CHECK_IRANGE(bmax_, bmin_, ebands%mband, "Wrong bmax:")
+ ABI_CHECK_IRANGE(bsize, 1, ebands%mband, "Wrong bsize:")
 
- nw = nint((max_ene - min_ene) / edos%step) + 1
+ if (present(erange)) then
+   ! use optional args if provided.
+   emin = erange(1)
+   emax = erange(2)
+   check_erange = .True.
+ else
+   ! Compute the linear mesh so that it encloses all bands.
+   eminmax_spin = ebands_get_minmax(ebands, "eig")
+   emin = minval(eminmax_spin(1, :)); emin = emin - 0.1_dp * abs(emin)
+   emax = maxval(eminmax_spin(2, :)); emax = emax + 0.1_dp * abs(emax)
+   check_erange = .False.
+ end if
+
+ nw = nint((emax - emin) / edos%step) + 1
  edos%nw = nw
 
  ABI_MALLOC(edos%mesh, (nw))
- edos%mesh = arth(min_ene, edos%step, nw)
+ edos%mesh = arth(emin, edos%step, nw)
 
  ABI_CALLOC(edos%gef, (0:edos%nsppol))
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
@@ -4482,12 +4496,10 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
        wtk = ebands%wtk(ik_ibz)
        do band=bmin_,bmax_
-         !ib = band - bmin_ + 1
+         ib = band - bmin_ + 1
 
-         if (present(emin)) then
+         if (check_erange) then
            if (ebands%eig(band, ik_ibz, spin) < emin - five * broad) cycle
-         end if
-         if (present(emax)) then
            if (ebands%eig(band, ik_ibz, spin) > emax + five * broad) cycle
          end if
 
@@ -4497,14 +4509,15 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 
          ! scalars
          do idat=1,nvals
-           out_valsdos(:, 1, idat, spin) = out_valsdos(:,1, idat, spin) + wme0(:) * bks_vals(idat,band,ik_ibz,spin)
+           out_valsdos(:, 1, idat, spin) = out_valsdos(:,1, idat, spin) + wme0(:) * bks_vals(idat, ib, ik_ibz, spin)
+           ! FIXME: This is quite inefficient! Integration should be performed outside!
            call simpson_int(nw, step, out_valsdos(:,1, idat, spin), out_valsdos(:,2,idat,spin))
          end do
 
          ! vectors
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ik_ibz, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin))
            do ii=1,3
              out_vecsdos(:, 1, ii, idat, spin) = out_vecsdos(:, 1, ii, idat, spin) + wme0(:) * vsum(ii)
              call simpson_int(nw, step, out_vecsdos(:,1,ii,idat,spin), out_vecsdos(:,2,ii,idat,spin))
@@ -4514,7 +4527,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          ! tensor
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ik_ibz, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin))
            do ii=1,3
              do jj=1,3
                out_tensdos(:,1,jj,ii,idat,spin) = out_tensdos(:,1,jj,ii,idat,spin) + wme0(:) * tsum(jj,ii)
@@ -4535,7 +4548,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 
  case (2, -2)
    ! Consistency test
-   ABI_CHECK(all(ebands%nband == ebands%nband(1)), 'For tetrahedrons, nband(:) must be constant')
+   ABI_CHECK(all(ebands%nband == ebands%nband(1)), 'For tetrahedra, nband(:) must be constant')
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
@@ -4555,19 +4568,17 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
      do band=bmin_,bmax_
        ! For each band get its contribution
        tmp_eigen = ebands%eig(band,:,spin)
-       !ib = band - bmin_ + 1
+       ib = band - bmin_ + 1
 
-       if (present(emin)) then
+       if (check_erange) then
          if (all(tmp_eigen < emin)) cycle
-       end if
-       if (present(emax)) then
          if (all(tmp_eigen > emax)) cycle
        end if
 
        do ik_ibz=1,ebands%nkpt
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism
 
-         call tetra%get_onewk(ik_ibz, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, max_occ1, weights)
+         call tetra%get_onewk(ik_ibz, bcorr, nw, ebands%nkpt, tmp_eigen, emin, emax, max_occ1, weights)
          weights = weights * ebands%wtk(ik_ibz)
 
          ! Compute DOS
@@ -4576,14 +4587,14 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
          ! scalar
 !$OMP PARALLEL DO
          do idat=1,nvals
-           out_valsdos(:, :, idat, spin) = out_valsdos(:, :, idat, spin) + weights(:, :) * bks_vals(idat, band, ik_ibz, spin)
+           out_valsdos(:, :, idat, spin) = out_valsdos(:, :, idat, spin) + weights(:, :) * bks_vals(idat, ib, ik_ibz, spin)
          end do
 
          ! vector
 !$OMP PARALLEL DO PRIVATE(vsum)
          do idat=1,nvecs
            ! get components, symmetrize and accumulate.
-           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, band, ik_ibz, spin))
+           vsum = cryst%symmetrize_cart_vec3(bks_vecs(:, idat, ib, ik_ibz, spin))
            do ii=1,3
              out_vecsdos(:, :, ii, idat, spin) = out_vecsdos(:, :, ii, idat, spin) + weights(:, :) * vsum(ii)
            end do
@@ -4593,7 +4604,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 !$OMP PARALLEL DO PRIVATE(tsum)
          do idat=1,ntens
            ! get components, symmetrize and accumulate.
-           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, band, ik_ibz, spin))
+           tsum = cryst%symmetrize_cart_tens33(bks_tens(:, :, idat, ib, ik_ibz, spin))
            do ii=1,3
              do jj=1,3
                out_tensdos(:, :, jj, ii, idat, spin) = out_tensdos(:, :, jj, ii, idat, spin) + weights(:, :) * tsum(jj,ii)
@@ -4635,7 +4646,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, &
 
  ! Handle out of range condition.
  if (ief == 0 .or. ief == nw) then
-   write(msg,"(a, f14.2, 4a)")&
+   write(msg,"(a, f14.2, 4a)") &
     "Bisection could not find an initial guess for the Fermi level with nelect:",ebands%nelect, ch10, &
     "Possible reasons: not enough bands in DOS or wrong number of electrons.", ch10, &
     "Returning from ebands_get_edos_matrix_elements without setting edos%ief !"
@@ -4666,7 +4677,7 @@ end function ebands_get_edos_matrix_elements
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  intmeth= 1 for gaussian, 2 or -2 for tetrahedrons (-2 if Blochl corrections must be included).
+!!  intmeth= 1 for gaussian, 2 or -2 for tetrahedra (-2 if Blochl corrections must be included).
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
@@ -4736,7 +4747,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
  jdos%broad = broad
 
  !if (ebands%nkpt == 1) then
- !  MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
+ !  MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
  !  jdos%intmeth = 1
  !end if
 

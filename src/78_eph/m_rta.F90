@@ -86,7 +86,7 @@ type,public :: rta_t
    ! number of energies (chemical potentials) at which transport quantities are computed
    ! Same number of energies used in DOS.
 
-   integer :: bmin, bmax
+   integer :: bmin, bmax, bsize
 
    integer :: nrta
    ! Number of relaxation-time approximations used (1 for SERTA, 2 for MRTA)
@@ -191,7 +191,7 @@ type,public :: rta_t
 
     procedure :: compute => rta_compute
     procedure :: compute_mobility => rta_compute_mobility
-    procedure :: print => rta_print
+    procedure :: print_txt_files => rta_print_txt_files
     procedure :: write_tensor => rta_write_tensor
     procedure :: free => rta_free
 
@@ -279,7 +279,7 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  if (my_rank == master) then
    ! Print RTA results to stdout and other external txt files (for the test suite)
-   call rta%print(cryst, dtset, dtfil)
+   call rta%print_txt_files(cryst, dtset, dtfil)
 
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
@@ -363,8 +363,9 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  ! How many RTA approximations have we computed in sigmaph? (SERTA, MRTA)
  new%nrta = 2; if (sigmaph%mrta == 0) new%nrta = 1
 
- !new%bmin = minval(sigmaph%bstart_ks)
- !new%bmax = maxval(sigmaph%bstop_ks)
+ !new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
+ new%bmin = 1; new%bmax = ebands%mband
+ new%bsize = new%bmax - new%bmin + 1
 
  ! Information about the gaps
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
@@ -435,9 +436,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    ABI_CHECK_IEQ(mband, ebands_dense%mband, "Inconsistent number of bands for the fine and dense grid:")
 
    ! Compute v_{nk} on the dense grid in Cartesian coordinates.
-   ds%only_diago = .True.; ds%bmin = 1; ds%bmax = mband; ds%mode = "cart"
-   !ds%only_diago = .True.; ds%bmin = self%bmin; ds%bmax = self%bmax; ds%mode = "cart"
-
+   ds%only_diago = .True.; ds%bmin = new%bmin; ds%bmax = new%bmax; ds%mode = "cart"
    call ddk_compute(ds, wfk_fname_dense, "", dtset, psps, pawtab, ngfftc, comm)
 
    ! Transfer data to new%velocity
@@ -561,6 +560,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
  ! Define band range for arrays
  new%bmin = 1; new%bmax = new%ebands%mband
+ new%bsize = new%bmax - new%bmin + 1
 
  ! Same doping case as in sigmaph file.
  ABI_MALLOC(new%eph_mu_e, (new%ntemp))
@@ -731,33 +731,36 @@ subroutine rta_compute(self, cryst, dtset, comm)
  edos_broad = dtset%tsmear
 
  ! Set default energy range for DOS
- emin = minval(self%eminmax_spin(1,:)); emin = emin - tol1 * abs(emin)
- emax = maxval(self%eminmax_spin(2,:)); emax = emax + tol1 * abs(emax)
-
  ! If sigma_erange is set, get emin and emax from this variable
  ! MG: TODO This value should be read from SIGPEH
  ! Recheck metals
- !if (any(abs(dtset%sigma_erange) > zero)) then
  if (self%assume_gap) then
    emin = huge(one); emax = -huge(one)
    do spin=1,self%ebands%nsppol
      if (dtset%sigma_erange(1) >= zero) emin = min(emin, self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1))
      if (dtset%sigma_erange(2) >= zero) emax = max(emax, self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2))
    end do
+   ABI_CHECK(emin /=  huge(one), "Cannot initialize emin")
+   ABI_CHECK(emax /= -huge(one), "Cannot initialize emax")
+ else
+   emin = minval(self%eminmax_spin(1, :)); emin = emin - tol1 * abs(emin)
+   emax = maxval(self%eminmax_spin(2, :)); emax = emax + tol1 * abs(emax)
  end if
 
  ! Compute DOS, vv_dos and vvtau_DOS (v x v tau)
  !    out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
  !    out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
+ !
  !  Vectors and tensors are in Cartesian coordinates.
  !  Note how we compute the DOS only between [emin, emax] to save time and memory
  !  this implies that IDOS and edos%ifermi are ill-defined
 
  ! TODO: pass bmin:bmax instead of emin:max
- self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, &
+ self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, self%ebands%mband, &
                                              nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
-                                             edos_intmeth, edos_step, edos_broad, comm, &
-                                             out_valsdos, dummy_dosvecs, out_tensdos, emin=emin, emax=emax)
+                                             edos_intmeth, edos_step, edos_broad, &
+                                             out_valsdos, dummy_dosvecs, out_tensdos, comm, &
+                                             brange=[self%bmin, self%bmax], erange=[emin, emax])
 
  if (my_rank == master) then
    call self%edos%print(unit=std_out, header="Computation of DOS, VV_DOS and VVTAU_DOS")
@@ -776,13 +779,14 @@ subroutine rta_compute(self, cryst, dtset, comm)
  do irta=1,self%nrta
    do spin=1,nsppol
      do itemp=1,self%ntemp+1
-       itens = itemp + (irta - 1) * (self%ntemp + 1)
 
+       itens = itemp + (irta - 1) * (self%ntemp + 1)
        if (itemp == 1) then
          self%vv_dos(:,:,:,spin) = out_tensdos(:, 1, :, :, itens, spin)
        else
          self%vvtau_dos(:,:,:, itemp-1, spin, irta) = out_tensdos(:, 1, :, :, itens, spin)
        end if
+
      end do
    end do
  end do
@@ -1290,9 +1294,9 @@ end subroutine rta_ncwrite
 
 !----------------------------------------------------------------------
 
-!!****f* m_rta/rta_print
+!!****f* m_rta/rta_print_txt_files
 !! NAME
-!! rta_print
+!! rta_print_txt_files
 !!
 !! FUNCTION
 !!
@@ -1303,7 +1307,7 @@ end subroutine rta_ncwrite
 !!
 !! SOURCE
 
-subroutine rta_print(self, cryst, dtset, dtfil)
+subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
 
 !Arguments --------------------------------------
  class(rta_t),intent(in) :: self
@@ -1366,7 +1370,7 @@ subroutine rta_print(self, cryst, dtset, dtfil)
    call self%write_tensor(dtset, irta, "pi", self%pi(:,:,:,:,:,irta), strcat(dtfil%filnam_ds(4), pre, "_PI"))
  end do
 
-end subroutine rta_print
+end subroutine rta_print_txt_files
 !!***
 
 !----------------------------------------------------------------------
