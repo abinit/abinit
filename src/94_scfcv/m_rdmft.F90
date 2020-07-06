@@ -41,13 +41,12 @@ module m_rdmft
  use netcdf
 #endif
  use m_hdr
- use libxc_functionals
  use m_wfd
  use m_dtfil
  use m_crystal
 
- use defs_datatypes, only : pseudopotential_type, ebands_t
- use defs_abitypes, only : MPI_type
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_numeric_tools, only : imax_loc
  use m_fstrings,      only : strcat, sjoin, itoa, basename, ktoa, ltoa
@@ -71,11 +70,8 @@ module m_rdmft
  use m_xcdata,        only : get_xclevel
  use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
- use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
- use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
                              write_sigma_header, write_sigma_results
- use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_reset, melements_print, melements_free, melflags_t, melements_t, melements_zero
  use m_pawang,        only : pawang_type
@@ -103,17 +99,12 @@ module m_rdmft
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
  use m_vhxc_me,       only : calc_vhxc_me
- use m_cohsex,        only : cohsex_me
  use m_sigx,          only : calc_sigx_me
- use m_sigc,          only : calc_sigc_me
  use m_setvtr,        only : setvtr
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
- use m_calc_ucrpa,    only : calc_ucrpa
- use m_prep_calc_ucrpa,only : prep_calc_ucrpa
- use m_paw_correlations,only : pawpuxinit
-! MRM hartre from m_spacepar, density matrix module and Gaussian quadrature one
- use m_spacepar,          only : hartre
+ !use m_paw_correlations,only : pawpuxinit
+ use m_spacepar,      only : hartre
 
  implicit none
 
@@ -150,7 +141,6 @@ contains
 !! rprim(3,3)=dimensionless real space primitive translations
 !!
 !! OUTPUT
-!!  Converged=.TRUE. if degw are within the user-specified tolerance.
 !!  Output is written on the main abinit output file. Some results are stored in external files
 !!
 !! PARENTS
@@ -213,9 +203,12 @@ subroutine rdmft(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp),intent(in) :: acell(3),rprim(3,3)
  type(Pawrad_type),intent(inout) :: Pawrad(Psps%ntypat*Psps%usepaw)
  type(Pawtab_type),intent(inout) :: Pawtab(Psps%ntypat*Psps%usepaw)
+!Local variables ------------------------------
+!scalars
+!arrays
+!************************************************************************
 
-
-  write(*,*) 'HELLO WORLD'
+  write(*,*) 'HELLO WORLD MAU'
 
 end subroutine rdmft
 !!***

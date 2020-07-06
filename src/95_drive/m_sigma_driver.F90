@@ -268,7 +268,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(ppmodel_t) :: PPm
  type(sigparams_t) :: Sigp
  type(sigma_t) :: Sr
- type(wfd_t),target :: Wfd,Wfdf,Wfd_no_master,Wfd_no_all ! MRM use Wfd_no_master 
+ type(wfd_t),target :: Wfd,Wfdf,Wfd_nato_master,Wfd_nato_all ! MRM use Wfd_nato_master and Wfd_nato_all 
  type(wave_t),pointer :: wave
  type(wvl_data) :: Wvl
 !arrays
@@ -764,13 +764,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
- ! MRM also initialize the Wfd_no_master for GW 1-RDM if required.
+ ! MRM also initialize the Wfd_nato_master for GW 1-RDM if required.
  ! Warning, this should be replaced by copy but copy fails. Do it in the future! FIXME 
  if (gwcalctyp==21 .and. gw1rdm>0) then
-   call wfd_init(Wfd_no_master,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
+   call wfd_init(Wfd_nato_master,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,xmpi_comm_self)!comm)  ! MPI_COMM_SELF 
-   call Wfd_no_master%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
+   call Wfd_nato_master%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
    if(gw1rdm>3) then
      bdm2_mask=bks_mask
      keep_ur_dm2=keep_ur
@@ -2601,15 +2601,15 @@ endif
      old_purex(:,:)=czero
      new_hartr(:,:)=czero
      !
-     ! MRM only the master has bands on Wfd_no_master so let it print everything and prepare gw_rhor 
+     ! MRM only the master has bands on Wfd_nato_master so let it print everything and prepare gw_rhor 
      !
      if(my_rank==0) then
-       call update_hdr_bst(Wfd_no_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
-       call Wfd_no_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs 
+       call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
+       call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs 
        gw1rdm_fname=dtfil%fnameabo_wfk                                         
-       call Wfd_no_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)        ! Print WFK file, QP_BSt contains nat. orbs.
+       call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)        ! Print WFK file, QP_BSt contains nat. orbs.
        gw1rdm_fname=dtfil%fnameabo_den
-       call Wfd_no_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
+       call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
        write(66,*) ks_rhor(:,1) ! MAU
        write(67,*) gw_rhor(:,1) ! MAU 
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&        ! Print DEN file  
@@ -2634,24 +2634,24 @@ endif
        write(msg,'(a1)')  ' '
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-       ! We reorganize the memory distribution on the Wfd_no_master. So, we deallocate it and reallocate it again
+       ! We reorganize the memory distribution on the Wfd_nato_master. So, we deallocate it and reallocate it again
 
-       ! Deallocate Wfd_no_master
-       Wfd_no_master%bks_comm = xmpi_comm_null
-       call Wfd_no_master%free()
+       ! Deallocate Wfd_nato_master
+       Wfd_nato_master%bks_comm = xmpi_comm_null
+       call Wfd_nato_master%free()
        call xmpi_barrier(Wfd%comm)
-       ! Allocate Wfd_no_all
-       call wfd_init(Wfd_no_all,Cryst,Pawtab,Psps,keep_ur_dm2,mband,nband_dm,Kmesh%nibz,Sigp%nsppol,bdm2_mask,&
+       ! Allocate Wfd_nato_all
+       call wfd_init(Wfd_nato_all,Cryst,Pawtab,Psps,keep_ur_dm2,mband,nband_dm,Kmesh%nibz,Sigp%nsppol,bdm2_mask,&
          Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-         Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                   ! Build new Wfd_no_all
-       call Wfd_no_all%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))    ! Read WFK and store it in Wfd_no_all
+         Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                   ! Build new Wfd_nato_all
+       call Wfd_nato_all%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))    ! Read WFK and store it in Wfd_nato_all
 
-       !call Wfd_no_all%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
+       !call Wfd_nato_all%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
        !write(100+my_rank,*) gw_rhor(:,1)                                     ! MAU
 
-       call Wfd_no_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_no_all (KS->NO)
+       call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
 
-       !call Wfd_no_all%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
+       !call Wfd_nato_all%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
        write(200+my_rank,*) gw_rhor(:,1)                                     ! MAU 
        write(900+my_rank,'(2(es14.6,1x))') nateigv                           ! MAU 
 
@@ -2670,7 +2670,7 @@ endif
            tmp_kstab(2,ik_ibz,spin)=Sigp%maxbnd(ikcalc,spin)
          end do
        end do
-       !call calc_vhxc_me(Wfd_no_all,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&    ! Build matrix elements from gw_vhartr -> GW1RDM_me
+       !call calc_vhxc_me(Wfd_nato_all,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&    ! Build matrix elements from gw_vhartr -> GW1RDM_me
        call calc_vhxc_me(Wfd,KS_mflags,GW1RDM_me,Cryst,Dtset,nfftf,ngfftf,&           ! Build matrix elements from gw_vhartr -> GW1RDM_me
        & ks_vtrial,gw_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
        & gw_rhor,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taur=ks_taur)
@@ -2688,7 +2688,7 @@ endif
            new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)    ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
          enddo
          call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),& 
-         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_no_all,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
+         & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
        end do
        call xmpi_barrier(Wfd%comm)
@@ -2743,7 +2743,7 @@ endif
          ABI_FREE(Umat)
          ABI_FREE(mat2rot)
        end do
-       call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating Wfd_no_all
+       call xmpi_barrier(Wfd%comm) ! Wait for all Sigma_x to be ready before deallocating Wfd_nato_all
        ABI_FREE(keep_ur_dm2)
        ABI_FREE(bdm2_mask)
        ABI_FREE(nband_dm)
@@ -2839,8 +2839,8 @@ endif
      ABI_FREE(keep_ur_dm)
      ABI_FREE(bdm_mask)
      if(gw1rdm>3) then
-       Wfd_no_all%bks_comm = xmpi_comm_null
-       call Wfd_no_all%free()
+       Wfd_nato_all%bks_comm = xmpi_comm_null
+       call Wfd_nato_all%free()
      endif
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 
