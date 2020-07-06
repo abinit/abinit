@@ -2488,11 +2488,11 @@ endif
         potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
         ! MAU
-        !write(1000+my_rank,'(a13)') '<ks|Kx_ks|ks>'
-        write(1000+my_rank,'(a13)') '<ks|Vh_ks|ks>'
+        write(1000+my_rank,'(a13)') '<ks|Kx_ks|ks>'
+        !write(1000+my_rank,'(a13)') '<ks|Vh_ks|ks>'
         do ib1dm=ib1,ib2
-          !write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-          write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
+          write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+          !write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
         enddo
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange corrected one for this k-point
@@ -2603,15 +2603,13 @@ endif
      !
      ! MRM only the master has bands on Wfd_nato_master so let it print everything and prepare gw_rhor 
      !
+     call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
      if(my_rank==0) then
-       call update_hdr_bst(Wfd_nato_master,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
        call Wfd_nato_master%rotate(Cryst,nateigv,bdm_mask)                             ! Let it use bdm_mask and build NOs 
        gw1rdm_fname=dtfil%fnameabo_wfk                                         
        call Wfd_nato_master%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname,wfknocheck)        ! Print WFK file, QP_BSt contains nat. orbs.
        gw1rdm_fname=dtfil%fnameabo_den
        call Wfd_nato_master%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
-       write(66,*) ks_rhor(:,1) ! MAU
-       write(67,*) gw_rhor(:,1) ! MAU 
        call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&        ! Print DEN file  
        Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
      endif
@@ -2635,7 +2633,6 @@ endif
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
        ! We reorganize the memory distribution on the Wfd_nato_master. So, we deallocate it and reallocate it again
-
        ! Deallocate Wfd_nato_master
        Wfd_nato_master%bks_comm = xmpi_comm_null
        call Wfd_nato_master%free()
@@ -2643,18 +2640,9 @@ endif
        ! Allocate Wfd_nato_all
        call wfd_init(Wfd_nato_all,Cryst,Pawtab,Psps,keep_ur_dm2,mband,nband_dm,Kmesh%nibz,Sigp%nsppol,bdm2_mask,&
          Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-         Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                   ! Build new Wfd_nato_all
+         Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)                     ! Build new Wfd_nato_all
        call Wfd_nato_all%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))    ! Read WFK and store it in Wfd_nato_all
-
-       !call Wfd_nato_all%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
-       !write(100+my_rank,*) gw_rhor(:,1)                                     ! MAU
-
        call Wfd_nato_all%rotate(Cryst,nateigv)                               ! Let rotate build the NOs in Wfd_nato_all (KS->NO)
-
-       !call Wfd_nato_all%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)   ! MAU 
-       write(200+my_rank,*) gw_rhor(:,1)                                     ! MAU 
-       write(900+my_rank,'(2(es14.6,1x))') nateigv                           ! MAU 
-
        call xmpi_barrier(Wfd%comm)
        !
        ! Coulomb <KS_i|Vh[NO]|KS_j>
@@ -2755,11 +2743,11 @@ endif
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
          ! MAU
-         !write(2000+my_rank,'(a13)') '<ks|Kx_no|ks>'
-         write(2000+my_rank,'(a13)') '<ks|Vh_no|ks>'
+         write(2000+my_rank,'(a13)') '<ks|Kx_no|ks>'
+         !write(2000+my_rank,'(a13)') '<ks|Vh_no|ks>'
          do ib1dm=ib1,ib2
-           !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-           write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
+           write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+           !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
            !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
          enddo
        end do
