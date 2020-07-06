@@ -862,6 +862,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if(associated(hightemp)) then
    energies%entropy=energies%entropy-hightemp%e_ent_freeel
    energies%e_kin_freeel=hightemp%e_kin_freeel
+   energies%e_shiftfactor=hightemp%e_shiftfactor
    energies%edc_kin_freeel=hightemp%edc_kin_freeel
    if(optene==0.or.optene==2) etotal=etotal+energies%e_kin_freeel
    if(optene==1.or.optene==3) etotal=etotal+energies%e_kin_freeel+energies%edc_kin_freeel

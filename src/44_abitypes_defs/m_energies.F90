@@ -120,7 +120,7 @@ MODULE m_energies
    ! Hartree part of total energy (hartree units)
 
   real(dp) :: e_kin_freeel=zero
-   ! Kinetic energy of free electrons gas
+   ! Kinetic energy of free electrons gas hightemp contribution
 
   real(dp) :: edc_kin_freeel=zero
    ! Double counting term of kinetic energy of free electrons gas
@@ -158,6 +158,9 @@ MODULE m_energies
 
   real(dp) :: e_pawdc=zero
    ! PAW spherical part double-counting energy
+
+  real(dp) :: e_shiftfactor=zero
+   ! Energy shift factor relative to homogeneous electron gas model
 
   real(dp) :: e_sicdc=zero
    ! Self-interaction energy double-counting
@@ -252,6 +255,7 @@ subroutine energies_init(energies)
  energies%e_nlpsp_vfock = zero
  energies%e_paw         = zero
  energies%e_pawdc       = zero
+ energies%e_shiftfactor = zero
  energies%e_sicdc       = zero
  energies%e_vdw_dftd    = zero
  energies%e_xc          = zero
@@ -326,6 +330,7 @@ end subroutine energies_init
  energies_out%e_nlpsp_vfock        = energies_in%e_nlpsp_vfock
  energies_out%e_paw                = energies_in%e_paw
  energies_out%e_pawdc              = energies_in%e_pawdc
+ energies_out%e_shiftfactor        = energies_in%e_shiftfactor
  energies_out%e_sicdc              = energies_in%e_sicdc
  energies_out%e_vdw_dftd           = energies_in%e_vdw_dftd
  energies_out%e_xc                 = energies_in%e_xc
@@ -408,12 +413,13 @@ end subroutine energies_copy
    energies_array(28)=energies%e_nlpsp_vfock
    energies_array(29)=energies%e_paw
    energies_array(30)=energies%e_pawdc
-   energies_array(31)=energies%e_sicdc
-   energies_array(32)=energies%e_vdw_dftd
-   energies_array(33)=energies%e_xc
-   energies_array(34)=energies%e_xcdc
-   energies_array(35)=energies%e_xc_vdw
-   energies_array(36)=energies%h0
+   energies_array(31)=energies%e_shiftfactor
+   energies_array(32)=energies%e_sicdc
+   energies_array(33)=energies%e_vdw_dftd
+   energies_array(34)=energies%e_xc
+   energies_array(35)=energies%e_xcdc
+   energies_array(36)=energies%e_xc_vdw
+   energies_array(37)=energies%h0
  end if
 
  if (option==-1) then
@@ -447,12 +453,13 @@ end subroutine energies_copy
    energies%e_nlpsp_vfock        = energies_array(28)
    energies%e_paw                = energies_array(29)
    energies%e_pawdc              = energies_array(30)
-   energies%e_sicdc              = energies_array(31)
-   energies%e_vdw_dftd           = energies_array(32)
-   energies%e_xc                 = energies_array(33)
-   energies%e_xcdc               = energies_array(34)
-   energies%e_xc_vdw             = energies_array(35)
-   energies%h0                   = energies_array(36)
+   energies%e_shiftfactor        = energies_array(31)
+   energies%e_sicdc              = energies_array(32)
+   energies%e_vdw_dftd           = energies_array(33)
+   energies%e_xc                 = energies_array(34)
+   energies%e_xcdc               = energies_array(35)
+   energies%e_xc_vdw             = energies_array(36)
+   energies%h0                   = energies_array(37)
  end if
 
 end subroutine energies_to_array
@@ -614,7 +621,7 @@ subroutine energies_ncwrite(enes,ncid)
 &  "e_kin_freeel", "edc_kin_freeel", "e_hybcomp_E0", "e_hybcomp_v0",&
 &  "e_hybcomp_v", "e_kinetic",&
 &  "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
-&  "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd",&
+&  "e_paw", "e_pawdc", "e_shiftfactor", "e_sicdc", "e_vdw_dftd",&
 &  "e_xc", "e_xcdc", "e_xc_vdw",&
 &  "h0"],&
 !
@@ -625,7 +632,7 @@ subroutine energies_ncwrite(enes,ncid)
 &   enes%e_kin_freeel, enes%edc_kin_freeel, enes%e_hybcomp_E0, enes%e_hybcomp_v0,&
 &   enes%e_hybcomp_v, enes%e_kinetic,&
 &   enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
-&   enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
+&   enes%e_paw, enes%e_pawdc, enes%e_shiftfactor, enes%e_sicdc, enes%e_vdw_dftd,&
 &   enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
 &   enes%h0])
 

@@ -91,6 +91,9 @@ MODULE m_results_gs
   real(dp) :: diffor
    ! maximal absolute value of changes in the components of force
 
+  real(dp) :: nfreeel
+   ! hightemp extended moodel number of free electrons
+
 ! All the energies are in Hartree, obtained "per unit cell".
   type(energies_type) :: energies
 !!!  real(dp) :: eei      ! local pseudopotential energy (Hartree)
@@ -278,6 +281,7 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%entropy=zero
  results_gs%etotal =zero
  results_gs%fermie =zero
+ results_gs%nfreeel=zero
  results_gs%residm =zero
  results_gs%res2   =zero
  results_gs%vxcavg =zero
@@ -383,6 +387,7 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%entropy=zero
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
+       results_gs(jj,ii)%nfreeel=zero
        results_gs(jj,ii)%residm =zero
        results_gs(jj,ii)%res2   =zero
        results_gs(jj,ii)%vxcavg =zero
@@ -658,6 +663,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%entropy=results_gs_in%entropy
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
+ results_gs_out%nfreeel=results_gs_in%nfreeel
  results_gs_out%residm =results_gs_in%residm
  results_gs_out%res2   =results_gs_in%res2
  results_gs_out%vxcavg =results_gs_in%vxcavg
@@ -733,7 +739,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Define variables.
 ! scalars passed in input (not belonging to results_gs) as well as scalars defined in results_gs
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "residm", "res2"])
+   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "nfreeel", "residm", "res2"])
  NCF_CHECK(ncerr)
 
  ! arrays
@@ -757,8 +763,8 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Write data.
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'residm', 'res2'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'nfreeel', 'residm', 'res2'],&
+&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%nfreeel, res%residm, res%res2],&
 &  datamode=.True.)
  NCF_CHECK(ncerr)
 
@@ -850,8 +856,8 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
  ! so print zero if residm < tol30 or allow the caller not to write the convergence dict.
  if (with_conv) then
    call ydoc%add_reals( &
-     "deltae, res2, residm, diffor", &
-     [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
+     "deltae, nfreeel, res2, residm, diffor", &
+     [results%deltae, results%nfreeel, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
      real_fmt="(es10.3)", dict_key="convergence")
  else
    call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
