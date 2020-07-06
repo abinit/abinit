@@ -679,8 +679,8 @@ complex(dpc), allocatable :: eps(:)
      abs_eps=abs(eps(iw))
      re_eps=dble(eps(iw))
      write(fout1, '(2es16.6)' ) ene,abs_eps
-     re_refract(iw)=sqrt(half(abs_eps+re_eps))
-     im_refract(iw)=sqrt(half(abs_eps-re_eps))
+     re_refract(iw)=sqrt(half*(abs_eps+re_eps))
+     im_refract(iw)=sqrt(half*(abs_eps-re_eps))
    end do
    write(fout1,*)
    write(fout1,*)
@@ -731,7 +731,8 @@ complex(dpc), allocatable :: eps(:)
 
  ABI_FREE(chi)
  ABI_FREE(eps)
- ABI_FREE(refract)
+ ABI_FREE(im_refract)
+ ABI_FREE(re_refract)
 
 end subroutine linopt
 !!***
