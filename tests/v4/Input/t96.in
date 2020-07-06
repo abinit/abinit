@@ -28,6 +28,9 @@ nstep 20
 tolvrs 1.0d-9
 iscf 17 # Needed for electron-positron
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13alpos.psppos"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -35,7 +38,6 @@ iscf 17 # Needed for electron-positron
 #%% [files]
 #%% files_to_test = 
 #%%   t96.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 13alpos.psppos
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

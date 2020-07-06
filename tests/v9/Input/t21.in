@@ -1,0 +1,88 @@
+# HF in GW code with the miniBZ integration of the coulomb singularity
+ndtset 4
+
+ecut     12
+ecutsigx 8 
+
+nshiftk  1
+shiftk   3*0.
+ngkpt    3*2
+istwfk   *1
+
+symsigma   1
+gwcalctyp  5
+ixc_sigma 40
+
+nkptgw    3
+kptgw
+0.00000000E+00  0.00000000E+00  0.00000000E+00 
+5.00000000E-01  0.00000000E+00  0.00000000E+00 
+5.00000000E-01  5.00000000E-01  0.00000000E+00 
+
+bdgw  1 8 1 8 1 8
+
+#################
+### DATASET 1 ###
+#################
+tolwfr   1e-16
+nbdbuf     4
+
+#################
+### DATASET 2 ###
+#################
+optdriver2  4
+getwfk2     1
+icutcoul2   16
+
+#################
+### DATASET 3 ###
+#################
+optdriver3  4
+getwfk3     1
+icutcoul3   15
+rcut3       8.
+
+#################
+### DATASET 4 ###
+#################
+optdriver4  4
+getwfk4     1
+icutcoul4   14
+rcut4       8.
+
+# Definition of the unit cell: fcc
+acell  3*10.217        
+rprim  0.0  0.5  0.5   # FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+nband 12
+
+# Definition of the atom types
+ntypat 1          
+znucl 14         
+
+# Definition of the atoms
+natom 2           
+typat 1 1         
+xred              
+   0.0  0.0  0.0
+   0.25 0.25 0.25
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-GGA.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%  t21.out, tolnlines = 65, tolabs = 0.15, tolrel = 4.0e-2;
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = F. Bruneval
+#%% keywords = NC, GW
+#%% description = 
+#%%  HF in GW code with the miniBZ integration of the coulomb singularity
+#%%<END TEST_INFO>

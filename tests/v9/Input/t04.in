@@ -11,6 +11,7 @@ indata_prefix = "t04.indata"
 outdata_prefix = "t04.outdata"
 tmpdata_prefix = "t04.tmpdata"
 output_file = "t04.output"
+pp_dirpath "$ABI_PSPDIR"
 pseudos = "12mg.pspnc, 05b.soft_tm"
 
 # MgB2 lattice structure.
@@ -56,7 +57,6 @@ nband   8
 #%% [files]
 #%% files_to_test =
 #%%   t04.output, tolnlines = 0, tolabs = 1.1e-06, tolrel = 1.1e-04
-#%% psp_files = 12mg.pspnc, 05b.soft_tm
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [shell]

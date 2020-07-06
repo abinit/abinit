@@ -69,13 +69,15 @@
     nstep5 48 # For portability reasons
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t02.out, tolnlines = 30, tolabs = 2.0e+03, tolrel = 1.1 , fld_options= -ridiculous;
-#%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 28
 #%% [extra_info]

@@ -57,8 +57,8 @@ dmatpawu
     -0.00001    0.00001    0.00006    0.89677    0.00010
      0.00000   -0.00010    0.00000    0.00010    0.11580
 
-pseudos = "Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
-pp_dirpath = "../../Psps_for_tests"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -67,7 +67,6 @@ pp_dirpath = "../../Psps_for_tests"
 #%% [files]
 #%% files_to_test = 
 #%%   tdftu_3.abo, tolnlines=  8, tolabs=  7.001e-02, tolrel=  5.000e-03, fld_options = -easy  
-#%% psp_files = Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml 
 #%% output_file = "tdftu_3.abo"
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -190,7 +190,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !************************************************************************
 
- ! This part performs the initialization of basic objects used to perform e-ph calculations:
+ ! This part performs the initialization of the basic objects used to perform e-ph calculations:
  !
  !     1) Crystal structure `cryst`
  !     2) Ground state band energies: `ebands`
@@ -259,7 +259,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        MSG_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, msg))
      end if
    end if
-
  end if ! master
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -320,8 +319,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! Construct crystal and ebands from the GS WFK file.
  if (use_wfk) then
+   ! Construct crystal and ebands from the GS WFK file.
    call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm)
    call wfk0_hdr%vs_dtset(dtset)
 
@@ -344,6 +343,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Here we change the GS bands (Fermi level, scissors operator ...)
  ! All the modifications to ebands should be done here.
+ ! FIXME: This part should be rationalized!
  if (use_wfk) then
 
    if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
@@ -352,26 +352,34 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
      "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
      call wrtout([std_out, ab_out], msg)
-     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
-     ! Apply the scissor operator
+     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+
      if (abs(dtset%mbpt_sciss) > tol6) then
-       call wrtout(std_out, sjoin(" Apply the scissor operator to the CB with:",ftoa(dtset%mbpt_sciss)))
-       call apply_scissor(ebands,dtset%mbpt_sciss)
-     end if
-     if (use_wfq) then
-       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, prtvol=dtset%prtvol)
        ! Apply the scissor operator
+       call wrtout([std_out, ab_out], &
+         sjoin(" Applying scissors operator to the conduction states with value: ", &
+         ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
+       call ebands_apply_scissors(ebands, dtset%mbpt_sciss)
+     end if
+
+     if (use_wfq) then
+       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+
        if (abs(dtset%mbpt_sciss) > tol6) then
-         call wrtout(std_out, sjoin(" Apply the scissor operator to the shifted CB with:",ftoa(dtset%mbpt_sciss)))
-         call apply_scissor(ebands_kq,dtset%mbpt_sciss)
+         ! Apply the scissor operator
+         call wrtout([std_out, ab_out], &
+           sjoin(" Applying scissors operator to the k+q conduction with value:", &
+           ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
+         call ebands_apply_scissors(ebands_kq, dtset%mbpt_sciss)
        end if
      end if
    end if
 
    ! Default value of eph_fermie is zero hence no tolerance is used!
    if (dtset%eph_fermie /= zero) then
-     ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
-     call wrtout([std_out, ab_out], sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie)))
+     ABI_CHECK(dtset%eph_extrael == zero, "eph_fermie and eph_extrael are mutually exclusive")
+     call wrtout([std_out, ab_out], &
+        sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
      call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
      call wrtout([std_out, ab_out], msg)
      if (use_wfq) then
@@ -379,14 +387,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        call wrtout(ab_out, msg)
      end if
 
-   else if (abs(dtset%eph_extrael) > tol12) then
-     !call wrtout([std_out, ab_out], &
-     !            sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:, ftoa(ebands%nelect)))
-     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+   else if (abs(dtset%eph_extrael) > zero) then
+     call wrtout([std_out, ab_out], &
+                 sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
+     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
      call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
      call wrtout([std_out, ab_out], msg)
      if (use_wfq) then
-       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
+       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
        call ebands_set_nelect(ebands_kq, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
        call wrtout(ab_out, msg)
      end if
@@ -396,10 +404,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! since occ are set to zero, and fermie is taken from the previous density.
    if (dtset%kptopt > 0) then
      call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-     call ebands_print(ebands,header="Ground state energies", prtvol=dtset%prtvol)
+     call ebands_print(ebands, header="Ground state energies", prtvol=dtset%prtvol)
      if (use_wfq) then
        call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
-       call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
+       call ebands_print(ebands_kq, header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
      end if
    end if
  end if ! use_wfk
@@ -410,6 +418,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Output useful info on electronic bands
  ! =======================================
  call cwtime(cpu, wall, gflops, "start")
+
  if (my_rank == master) then
    ! Fermi Surface
    if (dtset%prtfsurf /= 0) then
@@ -443,13 +452,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (use_wfk) then
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
-                     prtvol=dtset%prtvol)
+                      prtvol=dtset%prtvol)
    call cryst_ddb%free()
  else
    ! Get crystal from DDB.
    ! Warning: We may loose precision in rprimd and xred because DDB does not have enough significant digits.
    call ddb_from_file(ddb, ddb_filepath, dtset%brav, dtset%natom, natifc0, dummy_atifc, ddb_hdr, cryst, comm, &
-                     prtvol=dtset%prtvol)
+                      prtvol=dtset%prtvol)
  end if
  call ddb_hdr%free()
  ABI_FREE(dummy_atifc)
@@ -629,7 +638,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (dtset%eph_task /= 6) call dtset%free_nkpt_arrays()
 
  ! ====================================================
- ! === This is the real epc stuff once all is ready ===
+ ! === This is the real EPH stuff once all is ready ===
  ! ====================================================
 
  select case (dtset%eph_task)

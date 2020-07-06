@@ -84,6 +84,9 @@ nstep  50      # Maximal number of SCF cycles
 diemac 12.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -91,7 +94,6 @@ diemac 12.0
 #%% [files]
 #%% files_to_test = 
 #%%   tbs_1.out,  tolnlines= 20, tolabs=  1.1e-2,    tolrel=  4.0e-2
-#%% psp_files = 14si.pspnc
 #%% [shell]
 #%% post_commands =
 #%%  ww_cp tbs_1o_DS3_WFK tbs_2i_WFK;

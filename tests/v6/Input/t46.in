@@ -70,13 +70,15 @@ jpawu1  0.0000 0.0  # values in Hartree
 upawu2  0.30  0.0   # values in Hartree
 jpawu2  0.0000 0.0  # values in Hartree
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t46.out, tolnlines = 17, tolabs = 2.0e-5, tolrel = 4.0e-3, fld_options = -medium
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

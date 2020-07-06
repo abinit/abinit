@@ -55,13 +55,15 @@ nloc_alg  2
           0.5  0.5  0.5
   znucl   20  8
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "20ca_sic.drh, 8o_sic.drh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t20.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
-#%% psp_files = 20ca_sic.drh, 8o_sic.drh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

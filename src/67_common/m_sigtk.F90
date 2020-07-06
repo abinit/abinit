@@ -38,7 +38,7 @@ module m_sigtk
  use m_hdr
  use m_dtset
 
- use m_fstrings,     only : sjoin, ltoa, strcat
+ use m_fstrings,     only : sjoin, ltoa, strcat, itoa, ftoa
  use m_io_tools,     only : open_file
  use defs_datatypes, only : ebands_t, pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
@@ -186,7 +186,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
 
  mband = ebands%mband
 
- val_indeces = get_valence_idx(ebands)
+ val_indeces = ebands_get_valence_idx(ebands)
 
  if (any(dtset%sigma_ngkpt /= 0)) then
     call wrtout(std_out, " Generating list of k-points for self-energy from sigma_ngkpt and qprange.")
@@ -286,7 +286,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  ABI_CHECK(maxval(gaps%ierr) == 0, "qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  nsppol = ebands%nsppol
- val_indeces = get_valence_idx(ebands)
+ val_indeces = ebands_get_valence_idx(ebands)
 
  ! Include the direct and the fundamental KS gap.
  ! The problem here is that kptgw and nkptgw do not depend on the spin and therefore
@@ -392,7 +392,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  ABI_CHECK(maxval(gaps%ierr) == 0, "sigma_erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  if (any(dtset%sigma_ngkpt /= 0)) then
-    call wrtout(std_out, sjoin(" Generating initial list of k-points from sigma_nkpt.", ltoa(dtset%sigma_ngkpt)))
+    call wrtout(std_out, sjoin(" Generating initial list of k-points from sigma_nkpt:", ltoa(dtset%sigma_ngkpt)))
     ! Get tentative tmp_nkpt and tmp_kcalc from sigma_ngkpt.
     kptrlatt = 0
     kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
@@ -407,6 +407,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     ABI_MALLOC(indkk, (tmp_nkpt,  6))
     call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, tmp_kcalc, ebands%nkpt, tmp_nkpt, cryst%nsym, &
          1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+
     if (dksqmax > tol12) then
       write(msg, '(a,es16.6,2a)' )&
         "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
@@ -461,7 +462,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
  ! Now we can define the list of k-points and the bands range.
  ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
- ! we have compute the union of the k-points.
+ ! we have to compute the union of the k-points.
  nkcalc = 0
  do ii=1,tmp_nkpt
    found = .False.
@@ -501,7 +502,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
  if (my_rank == master) then
    write(std_out, "(a, i0, a, 2(f6.3, 1x), a)") &
-   " Found ", nkcalc, " k-points within erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+     " Found ", nkcalc, " k-points within sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
    write(std_out, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " MAX(nbcalc_ks): ", maxval(nbcalc_ks)
  end if
 
@@ -516,11 +517,11 @@ end subroutine sigtk_kcalc_from_erange
 !!  sigtk_kpts_in_erange
 !!
 !! FUNCTION
-!!  Use star functions and [[einterp]] to interpolate electron energies onto fine dense defined
-!!  by [[sigma_ngkpt]] and [[sigma_shiftk]].
-!!  Find k-points inside (electron/hole) pockets according to the values specifed in [[sigma_erange]].
-!!  Write KERANGE.nc file with the tables required by the code to automate NSCF band structure calculations
-!!  and electron lifetime computation in the EPH code.
+!!  Use star functions interpolation and [[einterp]] to interpolate KS energies onto dense k-mesh
+!!  defined by [[sigma_ngkpt]] and [[sigma_shiftk]].
+!!  find k-points inside (electron/hole) pockets according to the values specifed by [[sigma_erange]].
+!!  write kerange.nc file with the tables required by abinit to automate nscf band structure calculations
+!!  mainly used to prepare eph calculations in which only selected k-points are nededed (imaginary part of self-energies).
 !!
 !! INPUTS
 !!  dtset <dataset_type>=all input variables for this dataset
@@ -554,16 +555,17 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 !scalars
  integer,parameter :: master = 0, pertcase0 = 0, image1 = 1
  integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, nkpt_inerange, gap_err, unt, ncid, cnt, ncerr
+ logical :: assume_gap
  real(dp) :: ee, cmin, vmax
- character(len=8) :: codvsn
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(ebands_t) :: fine_ebands
  type(gaps_t) :: gaps, fine_gaps
  type(wvl_internal_type) :: dummy_wvl
  type(hdr_type) :: fine_hdr
+ character(len=8) :: codvsn
 !arrays
- integer :: fine_kptrlatt(3,3), band_block(2)
+ integer :: fine_kptrlatt(3,3), band_block(2), unts(2)
  integer,allocatable :: kshe_mask(:,:,:), krange2ibz(:)
  real(dp) :: params(4)
 
@@ -571,21 +573,33 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ ! (-num, -num) activate treatment of metals with energy window around Efermi.
+ assume_gap = .not. all(dtset%sigma_erange < zero)
+ unts = [std_out, ab_out]
+
  if (my_rank == master) then
-   write(std_out, "(2a)")ch10, repeat("=", 92)
-   write(std_out, "(a)") " Finding k-points inside (electron/hole) pockets."
-   write(std_out, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
-   write(std_out, "(2a)") "  Interpolating eigenvalues onto dense K-mesh using sigma_ngkpt: ", trim(ltoa(dtset%sigma_ngkpt))
-   write(std_out, "(2a)") "  and sigma_shiftk shifts:"
-   ABI_CHECK(allocated(dtset%sigma_shiftk), "sigma_shiftk and sigma_nshiftk must be specified in input.")
+   call wrtout(unts, sjoin(ch10, repeat("=", 92)))
+   call wrtout(unts, " Using SKW interpolation to interpolate KS energies onto dense k-mesh.")
+   call wrtout(unts, sjoin(" defined by sigma_ngkpt:", trim(ltoa(dtset%sigma_ngkpt))))
+   ABI_CHECK(allocated(dtset%sigma_shiftk), "sigma_nshiftk must be specified in input.")
+   write(std_out, "(2a)") " and sigma_shiftk shifts:"
    do ii=1,dtset%nshiftk
-     write(std_out, "(a, 3(f2.1, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
+     call wrtout(unts, sjoin(itoa(ii), ltoa(dtset%sigma_shiftk(:, ii))))
    end do
-   write(std_out, "(2a)")repeat("=", 92),ch10
+
+   if (assume_gap) then
+     call wrtout(unts, " Finding k-points inside (electron/hole) pockets (assuming semiconductor).")
+   else
+     call wrtout(unts, " Finding k-points inside energy window around Fermi level (assuming metal).")
+   end if
+   write(msg, "(a, 2(f6.3, 1x), a)")" Using sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+   call wrtout(unts, msg)
+   call wrtout(unts, sjoin(" SKW parameters (einterp): ", ltoa(dtset%einterp)))
+   call wrtout(unts, sjoin(repeat("=", 92), ch10))
    !call ebands_print(ebands, header, unit=std_out, prtvol=dtset%prtvol)
 
    ! Consistency check.
-   if (.not. any(dtset%sigma_erange > zero)) then
+   if (all(dtset%sigma_erange == zero)) then
      MSG_ERROR("sigma_erange must be specified in input when calling sigtk_kpts_in_erange.")
    end if
    if (all(dtset%sigma_ngkpt == 0)) then
@@ -593,13 +607,21 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    end if
  end if
 
- ! Compute gaps using input ebands.
- gap_err = get_gaps(ebands, gaps)
- if (gap_err /= 0) then
-   MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+ if (assume_gap) then
+   ! Compute gaps using input ebands.
+   gaps = ebands_get_gaps(ebands, gap_err)
+   if (gap_err /= 0) then
+     MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+   end if
+
+   if (my_rank == master) then
+     call gaps%print(header="Gaps from input WFK", unit=std_out)
+     call gaps%print(header="Gaps from input WFK", unit=ab_out)
+   end if
+   call gaps%free()
+ else
+   call wrtout(unts, sjoin("Using Fermi level:", ftoa(ebands%fermie * Ha_eV, fmt="f6.2"), " (eV)"))
  end if
- call gaps%print(header="Gaps from input ebands", unit=std_out)
- call gaps%free()
 
  ! Interpolate band energies with star functions.
  ! In the EPH code, we will need eigens in the IBZ to compute efermi not just energies inside pockets.
@@ -617,22 +639,21 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
  call ebands_print(fine_ebands, header="FINE EBANDS", unit=std_out, prtvol=dtset%prtvol)
 
- ! Interpolate bands on k-path.
- !if (nint(dtset%einterp(1)) == 0)
- !  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
- !end do
+ if (assume_gap) then
+   ! Compute gaps using fine_ebands.
+   fine_gaps = ebands_get_gaps(fine_ebands, gap_err)
+   if (gap_err /= 0) then
+     MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+   end if
 
- ! Compute gaps using fine_ebands.
- gap_err = get_gaps(fine_ebands, fine_gaps)
- if (gap_err /= 0) then
-   MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+   if (my_rank == master) then
+     call fine_gaps%print(header="Gaps from SKW interpolated eigenvalues", unit=std_out)
+     call fine_gaps%print(header="Gaps from SKW interpolated eigenvalues", unit=ab_out)
+   end if
  end if
- call fine_gaps%print(header="Gaps from interpolated eigenvalues", unit=std_out)
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
- codvsn="        "
- codvsn(1:min(len_trim(ABINIT_VERSION),8))=ABINIT_VERSION(1:min(len_trim(ABINIT_VERSION),8))
-
+ codvsn = ABINIT_VERSION
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
@@ -648,20 +669,27 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  do spin=1,ebands%nsppol
    ! Get CBM and VBM with some tolerance.
-   vmax = fine_gaps%vb_max(spin) + tol2 * eV_Ha
-   cmin = fine_gaps%cb_min(spin) - tol2 * eV_Ha
+   if (assume_gap) then
+     vmax = fine_gaps%vb_max(spin) + tol2 * eV_Ha
+     cmin = fine_gaps%cb_min(spin) - tol2 * eV_Ha
+   else
+     ! Note that we wse the Fermi level from ebands instead of fine_ebands
+     vmax = ebands%fermie
+     cmin = ebands%fermie
+   end if
+
    do ikf_ibz=1,fine_ebands%nkpt
      do band=1,ebands%mband
        ee = fine_ebands%eig(band, ikf_ibz, spin)
        ! Check whether the interpolated eigenvalue is inside the sigma_erange window.
-       if (dtset%sigma_erange(1) > zero) then
-         if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
+       if (abs(dtset%sigma_erange(1)) > zero) then
+         if (ee <= vmax .and. vmax - ee <= abs(dtset%sigma_erange(1))) then
            kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1)  + 1
            exit
          end if
        end if
-       if (dtset%sigma_erange(2) > zero) then
-         if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
+       if (abs(dtset%sigma_erange(2)) > zero) then
+         if (ee >= cmin .and. ee - cmin <= abs(dtset%sigma_erange(2))) then
            kshe_mask(ikf_ibz, spin, 2) = kshe_mask(ikf_ibz, spin, 2)  + 1
            exit
          end if
@@ -670,8 +698,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    end do
  end do
 
- ! Build list of k-points inside pockets.
- ! Use overdimensioned array.
+ ! Build list of k-points inside pockets. Use overdimensioned array.
  cnt = count(kshe_mask /= 0)
  ABI_MALLOC(krange2ibz, (cnt))
  cnt = 0
@@ -702,11 +729,11 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    write(unt, "(a, i0)")"nkpt ", nkpt_inerange
    write(unt, "(a)")"kpt"
    do ii=1,nkpt_inerange
-     write(unt, "(3(es16.8,1x))")fine_ebands%kptns(:, krange2ibz(ii))
+     write(unt, "(3(es16.8,1x))") fine_ebands%kptns(:, krange2ibz(ii))
    end do
    write(unt, "(a, i0)")"wtk"
    do ii=1,nkpt_inerange
-     write(unt, "(es16.8)")fine_ebands%wtk(krange2ibz(ii))
+     write(unt, "(es16.8)") fine_ebands%wtk(krange2ibz(ii))
    end do
    close(unt)
 
@@ -719,8 +746,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    NCF_CHECK(fine_hdr%ncwrite(ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
-   ncerr = nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.)
-   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nkpt_inerange", nkpt_inerange)], defmode=.True.))
    ! Define extra arrays.
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("kshe_mask", "int", "number_of_kpoints, number_of_spins, two"), &

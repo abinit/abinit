@@ -36,13 +36,15 @@
    0.5 0.5 0.5
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t95.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 28ni.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

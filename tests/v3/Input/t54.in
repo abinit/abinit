@@ -39,13 +39,15 @@
  xcart    3*0.0       2 0 0
  znucl  2 1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "2he.psphgh, 1h.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t54.out, tolnlines = 1, tolabs = 1.010e-06, tolrel = 1.000e-04
-#%% psp_files = 2he.psphgh, 1h.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

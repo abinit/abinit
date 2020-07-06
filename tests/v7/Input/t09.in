@@ -46,13 +46,15 @@
  nband 12                 ! Number of bands
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t09.out, tolnlines = 10, tolabs = 6.0e-08, tolrel = 3.0e-02, fld_options = -medium
-#%% psp_files = si_ps.736.lda
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

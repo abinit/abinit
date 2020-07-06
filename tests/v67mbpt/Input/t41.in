@@ -63,13 +63,15 @@ xred
    0.803779258   0.196220742   0.500000000
    0.196220742   0.803779258   0.500000000
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "HGH/22ti.12.hgh, HGH/8o.6.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t41.out, tolnlines = 1, tolabs = 1.010e-03, tolrel = 4.000e-05, fld_options = -medium
-#%% psp_files = HGH/22ti.12.hgh, HGH/8o.6.hgh 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

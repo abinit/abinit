@@ -104,6 +104,9 @@ optdriver?5    5
 nbdbuf 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "02he.bare"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -111,7 +114,6 @@ nbdbuf 0
 #%% [files]
 #%% files_to_test = 
 #%%   t66.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
-#%% psp_files = 02he.bare
 #%% [paral_info]
 #%% max_nprocs = 5
 #%% [extra_info]

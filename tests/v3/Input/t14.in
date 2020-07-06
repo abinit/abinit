@@ -37,13 +37,15 @@
  znucl 83.d0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "83bi.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t14.out, tolnlines = 6, tolabs = 2.000e-01, tolrel = 3.000e-01, fld_options = -easy 
-#%% psp_files = 83bi.psphgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

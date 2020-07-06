@@ -90,13 +90,15 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tgw1_6.out, tolnlines= 70, tolabs=  7.000e-02, tolrel=  3.000e-02, fld_options= -ridiculous
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

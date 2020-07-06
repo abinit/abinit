@@ -61,13 +61,15 @@ diemac 2.0        # Although this is not mandatory, it is worth to
                   # in a big box
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tbase1_3.out, tolnlines=  3, tolabs=  3.0e-10,   tolrel=  2.000e-08
-#%% psp_files =  01h.pspgth
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -43,7 +43,7 @@ MODULE m_qparticles
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t
- use m_ebands,         only : get_valence_idx
+ use m_ebands,         only : ebands_get_valence_idx
  use m_sigma,          only : sigma_t
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type, pawrhoij_alloc, pawrhoij_io, pawrhoij_inquire_dim
@@ -801,7 +801,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
    end if
 
    ABI_MALLOC(vbik,(BSt%nkpt,BSt%nsppol))
-   vbik(:,:) = get_valence_idx(BSt)
+   vbik(:,:) = ebands_get_valence_idx(BSt)
 
    do is=1,Bst%nsppol
      do ik=1,Bst%nkpt

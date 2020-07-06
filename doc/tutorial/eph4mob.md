@@ -5,7 +5,7 @@ authors: GB, MG
 # Phonon-limited mobility in AlAs
 
 This tutorial shows how to compute phonon-limited carrier mobilities in semiconductors within
-the relaxation time approximation.
+the relaxation time approximation (RTA).
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
 in particular phonons, Born effective charges and dielectric tensor.
@@ -27,13 +27,13 @@ The SERTA is more accurate than the constant relaxation time approximation (CRTA
 microscopic e-ph scattering is now included thus leading to linewidths that depend on the band index $n$
 and the wavevector $\kk$.
 Keep in mind, however, that the SERTA is still an approximation and that a more rigorous approach would require
-to find the iterative solution of the BTE and/or the inclusion of many-body effects at different levels.
-For a review of the different possible approaches see [[cite:Ponce2020]].
+to find the iterative solution of the BTE and/or including many-body effects at different levels.
+For a review of the different possible approaches see the review paper by [[cite:Ponce2020]].
 
 In the SERTA, the transport linewidth is given by
 the imaginary part of the electron-phonon (e-ph) self-energy evaluated at the KS energy.
 Only the Fan-Migdal (FM) part contributes to the linewidth as the Debye-Waller is Hermitian.
-The linewidth of the electron state $n\kk$ due to the scattering with phonons are obtained from
+The linewidth of the electron state $n\kk$ due to the scattering with phonons is obtained from
 
 \begin{equation}
 \begin{split}
@@ -62,7 +62,7 @@ The electron lifetime $\tau_{n\mathbf{k}}$ is inversely proportional to the line
 !!! important
 
     Note that this formalism does not take into account possibile contributions to the lifetime given by
-    other scattering processes such as defects, ionized impurities in doped semiconductors, grain boundary scattering.
+    other scattering processes such as defects, ionized impurities in doped semiconductors, grain boundary scattering etc.
     These effects may be relevant depending on the system and/or the temperature under investigation
     but they are not treated in this tutorial.
 
@@ -136,7 +136,7 @@ These steps can be summarized by the following graph:
 -->
 
 All the results of the calculation are saved in netcdf format,
-while the log and output files are used to report selected quantities, mainly for testing purposes.
+while the log and output files are used to output selected quantities, mainly for testing purposes.
 Post-processing and visualisation tools are **not covered** in this tutorial.
 Powerful tools based on python and matplotlib are provided by AbiPy.
 See e.g. the README of [AbiPy](https://github.com/abinit/abipy)
@@ -394,19 +394,21 @@ It is possible to change this behaviour by using [[eph_intmeth]] albeit not reco
 as the calculation will become significantly slower.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
-The carrier concentration is deduced from the number of extra electrons in the unit cell,
-specified by [[eph_extrael]].
+The carrier concentration is specified by [[eph_doping]] is |electron_charge| / cm^3 units so negative for electron-doping,
+positive for hole doping.
 To obtain results that are representative of the intrinsic mobility,
 we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
 
 !!! tip
 
-    The computational cost increases with the number of temperatures.
+    The computational cost increases with the number of temperatures although not necessarly in a linear fashion.
     For the initial convergence studies, we suggest to start from a relatively small number
-    of temperatures covering the region of interest. 
-    The T-mesh can be densified aftwerwards when  converged parameters are found.
-    Note that the convergence might be different depending on the temperature.
-    Low temperatures are more difficult to converge.
+    of temperatures **covering the T-region of interest**. 
+    The T-mesh can be densified aftwerwards while keeping the same range once converged parameters are found.
+    Note also that transport properties at low temperatures are much more difficult to converge as the
+    derivative of the Fermi-Dirac distribution is strongly peaked around the Fermi level and a very dense sampling 
+    is needed to convergence the BZ integrals.
+    
 
 The [[sigma_erange]] variable defines the energy window, below the VBM and above the
 CBM where the lifetimes will be computed.
@@ -516,7 +518,8 @@ In this computation, we consider only electrons and this explains why the values
 Note that the transport driver is automatically executed after the EPH run.
 You can run the transport driver in standalone mode by setting [[eph_task]] 7, 
 provided you already have the lifetimes in a SIGEPH.nc file,
-<!-- This task can be performed only in serial and is very fast. -->
+This task is relatively fast even in serial execution although some parts (in particular the computation of DOS-like quantities)
+can benefit from MPI.
 
 Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes,
 we can give more details about convergence and additional tricks that can be used
@@ -558,6 +561,11 @@ This means that, when increasing [[sigma_erange]], sometimes
 no additional $\kk$-point is considered.
 It is the case here for the first 3 datasets (3 $\kk$-points), and the last two datasets (6 $\kk$-points).
 If a finer mesh was used, the number of $\kk$-points would have increased in a more monotonic way.
+
+<!-- 
+TODO: Discuss how to dope the system! 
+Other quantities (Seebeck etc may have a different convergence behaviour
+-->
 
 ### Convergence w.r.t. the k- and q-meshes
 
@@ -705,13 +713,6 @@ The MPI parallelism over $\kk$-points and spins is very efficient
 but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if the memory requirements are under control
 and you want to boost the calculation.
-
-If performance is really of concern, you can also try to set [[eph_mrta]] to 0.
-By default, the code computes transport lifetimes both with the SERTA and the MRTA.
-The MRTA requires the computation of the group velocities at $\kk$ and $\kk+\qq$.
-This part is relatively fast yet it does not come for free.
-If you know in advance that you don't need MRTA results, it is possible to gain some speedup
-by avoiding the computation of $v_{m\kq}$
 
 ### How to reduce memory requirements
 

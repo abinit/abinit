@@ -67,12 +67,14 @@ paral_atom 0
 prtvol 10
 istwfk 4*1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.GGA_X_PBE+GGA_C_PBE-paw.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t53.out, tolnlines=7, tolabs=1.000e-08, tolrel=5.000e-04
-#%% psp_files= C.GGA_X_PBE+GGA_C_PBE-paw.xml
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

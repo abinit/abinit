@@ -49,6 +49,9 @@ pawecutdg 16.0
 w90prtunk2 1   #Prints UNK files (for plotting the Wannier functions)
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-LDA.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -57,7 +60,6 @@ w90prtunk2 1   #Prints UNK files (for plotting the Wannier functions)
 #%% [files]
 #%% files_to_test = 
 #%%   tw90_2.out, tolnlines=5, tolabs=6.0e-05, tolrel=1.10e+00, fld_options=-medium
-#%% psp_files =  Si-LDA.paw
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
