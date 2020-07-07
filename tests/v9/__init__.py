@@ -27,6 +27,8 @@ inp_files = [
 "t12.in", # optic
 "t13.in", # metallinc iron GGA-PBE PAW nsppol=2
 "t14.in", # optic
+# GW/BSE
+"t21.in", # HF exchange checking q->0 terms
 # DFPT
 "t41.in",
 "t42.in",
