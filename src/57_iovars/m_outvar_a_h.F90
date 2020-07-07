@@ -938,6 +938,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(3,:)=dtsets(:)%fockdownsampling(3)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'fockdownsampling','INT',0)
 
+ intarr(1,:)=dtsets(:)%fock_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fock_icsing','INT',0)
+
  dprarr(1,:)=dtsets(:)%freqim_alpha
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'freqim_alpha','DPR',0)
 
@@ -1230,6 +1233,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gw_frqre_tangrid
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_frqre_tangrid','INT',0)
+
+ intarr(1,:)=dtsets(:)%gw_icsing
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icsing','INT',0)
+
+ intarr(1,:)=dtsets(:)%gw_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)
 
  intarr(1,:)=dtsets(:)%gw_invalid_freq
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_invalid_freq','INT',0)

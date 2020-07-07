@@ -2165,10 +2165,10 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp_dense,Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%icsing,&
+   call vcoul_init(Vcp_dense,Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icsing,&
 &    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
  else
-   call vcoul_init(Vcp_dense,Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%icsing,&
+   call vcoul_init(Vcp_dense,Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icsing,&
 &    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
  end if
 

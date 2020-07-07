@@ -190,8 +190,9 @@ type, public :: dataset_type
  integer :: gwgamma
  integer :: gwrpacorr
  integer :: gw_customnfreqsp
- integer :: gw_invalid_freq
+ integer :: gw_icsing
  integer :: gw_icutcoul
+ integer :: gw_invalid_freq
  integer :: gw_qprange
  integer :: gw_nqlwl
  integer :: gw_nstep
@@ -1486,6 +1487,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
+ dtout%gw_icsing          = dtin%gw_icsing
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -3128,7 +3130,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
  list_vars=trim(list_vars)//' gw_invalid_freq'
- list_vars=trim(list_vars)//' gw_icutcoul'
+ list_vars=trim(list_vars)//' gw_icsing gw_icutcoul'
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'

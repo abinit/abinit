@@ -165,6 +165,9 @@ MODULE m_io_screening
   integer :: icsing
   ! Input variable (Coulomb cutoff)
 
+  integer :: gw_icsing
+  ! Input variable (Coulomb cutoff)
+
   integer :: gwcomp
   ! Input variable (GW compensation energy technique)
 
@@ -517,7 +520,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
          NCF_CHECK(nf90_get_var(ncid, vid("test_type"), hscr%test_type))
          NCF_CHECK(nf90_get_var(ncid, vid("tordering"), hscr%tordering))
          NCF_CHECK(nf90_get_var(ncid, vid("awtr"), hscr%awtr))
-         NCF_CHECK(nf90_get_var(ncid, vid("icsing"), hscr%icsing))
+         NCF_CHECK(nf90_get_var(ncid, vid("gw_icsing"), hscr%icsing))
          NCF_CHECK(nf90_get_var(ncid, vid("gwcomp"), hscr%gwcomp))
          NCF_CHECK(nf90_get_var(ncid, vid("gwgamma"), hscr%gwgamma))
          NCF_CHECK(nf90_get_var(ncid, vid("mbpt_sciss"), hscr%mbpt_sciss))
@@ -643,7 +646,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
      ncerr = nctk_defnwrite_ivars(ncid, [character(len=nctk_slen) :: &
        "id", "ikxc", "inclvkb", "headform", "fform", "gwcalctyp", &
-       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "icsing", &
+       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "gw_icsing", &
        "gwcomp", "gwgamma" &
       ],&
       [ hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp, &
@@ -916,7 +919,7 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
 
 ! HSCR_NEW
  hscr%awtr = dtset%awtr
- hscr%icsing = dtset%icsing
+ hscr%icsing = dtset%gw_icsing
  hscr%vcutgeo = dtset%vcutgeo
  hscr%gwcomp = dtset%gwcomp
  hscr%gwgamma = dtset%gwgamma
@@ -1181,7 +1184,7 @@ subroutine hscr_copy(Hscr_in,Hscr_cp)
 
 ! HSCR_NEW
  hscr_cp%awtr      =  hscr_in%awtr
- hscr_cp%icsing  =  hscr_in%icsing
+ hscr_cp%icsing    =  hscr_in%icsing
  hscr_cp%vcutgeo   =  hscr_in%vcutgeo
  hscr_cp%gwcomp    =  hscr_in%gwcomp
  hscr_cp%gwgamma   =  hscr_in%gwgamma

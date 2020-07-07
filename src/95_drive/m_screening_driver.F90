@@ -1908,7 +1908,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ABI_FREE(gvec_kss)
 
  ! FIXME this wont work if nqptdm/=0
- call vcoul_init(Vcp,Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icsing,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
+ call vcoul_init(Vcp,Gsph_epsG0,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icsing,Dtset%vcutgeo,Dtset%ecuteps,Ep%npwe,Ep%nqlwl,&
 &  Ep%qlwl,ngfftf,comm)
 
 #if 0
