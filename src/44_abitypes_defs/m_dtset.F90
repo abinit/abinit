@@ -191,6 +191,7 @@ type, public :: dataset_type
  integer :: gwrpacorr
  integer :: gw_customnfreqsp
  integer :: gw_invalid_freq
+ integer :: gw_icutcoul
  integer :: gw_qprange
  integer :: gw_nqlwl
  integer :: gw_nstep
@@ -229,7 +230,6 @@ type, public :: dataset_type
  integer :: icsing
  integer :: icutcoul
  integer :: icutcoul_fock
- integer :: icutcoul_gw
  integer :: ieig2rf
  integer :: imgmov
  integer :: imgwfstor
@@ -1487,6 +1487,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
+ dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
  dtout%gw_frqim_inzgrid   = dtin%gw_frqim_inzgrid
@@ -1523,7 +1524,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%icsing             = dtin%icsing
  dtout%icutcoul           = dtin%icutcoul
  dtout%icutcoul_fock      = dtin%icutcoul_fock
- dtout%icutcoul_gw        = dtin%icutcoul_gw
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
  dtout%imgwfstor          = dtin%imgwfstor
@@ -3129,7 +3129,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
- list_vars=trim(list_vars)//' gw_invalid_freq '
+ list_vars=trim(list_vars)//' gw_invalid_freq'
+ list_vars=trim(list_vars)//' gw_icutcoul'
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
@@ -3141,7 +3142,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
- list_vars=trim(list_vars)//' iboxcut icoulomb icsing icutcoul icutcoul_fock icutcoul_gw ieig2rf'
+ list_vars=trim(list_vars)//' iboxcut icoulomb icsing icutcoul icutcoul_fock ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'

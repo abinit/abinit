@@ -1000,6 +1000,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! gw_invalid_freq
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,(/0,1,2/),iout)
 
+   ! gw_icutcoul
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
+
    ! gw_sctype
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sctype',dt%gw_sctype,&
      4,(/GWSC_one_shot,GWSC_only_W,GWSC_only_G,GWSC_both_G_and_W/),iout)
@@ -1121,17 +1124,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,6,(/0,1,2,3,4,5/),iout)
 
    ! icutcoul_fock
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul_fock,6,(/0,1,2,3,4,5/),iout)
-
-   ! icutcoul_gw
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul_gw,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
-
-   ! icutcoul&icsing relation 
-   !if (dt%icutcoul >= 0 .and. dt%icutcoul <= 5) then
-   !  cond_string(1)='icutcoul' ; cond_values(1)=dt%icutcoul
-   !  cond_string(2)='icsing'   ; cond_values(2)=dt%icsing
-   !  call chkint_eq(1,2,cond_string,cond_values,ierr,'icsing',dt%icsing,6,(/0,1,2,3,4,5/),iout) 
-   !end if     
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul_fock',dt%icutcoul_fock,6,(/0,1,2,3,4,5/),iout)
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then
