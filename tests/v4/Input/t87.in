@@ -49,7 +49,7 @@
     getscr3     2
     getqps3    -1
      nband3    12
-  icsing3     3   # old deprecated value of icsing, only used for legacy
+ gw_icsing3     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the HF corrections - iteration 2
  optdriver4     4
@@ -58,7 +58,7 @@
     getscr4     2
     getqps4    -1
      nband4    12
-  icsing4     3   # old deprecated value of icsing, only used for legacy
+ gw_icsing4     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the HF corrections - iteration 3
  optdriver5     4
@@ -67,7 +67,7 @@
     getscr5     2
     getqps5    -1
      nband5    12
-  icsing5     3   # old deprecated value of icsing, only used for legacy
+ gw_icsing5     3   # old deprecated value of icutcoul, only used for legacy
 
 #Common to all HF calculations
      nkptgw     8

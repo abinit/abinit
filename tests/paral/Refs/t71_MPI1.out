@@ -135,10 +135,10 @@ _ WF disk file :      0.444 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk3         -1
            getwfk4         -2
 -          gwpara           1
-         icsing1          6
-         icsing2          6
-         icsing3          6
-         icsing4          3
+        gw_icsing1          6
+        gw_icsing2          6
+        gw_icsing3          6
+        gw_icsing4          3
           inclvkb           0
              iscf1          7
              iscf2         -2
@@ -1423,10 +1423,10 @@ data: !SigmaeeData |
            getwfk3         -1
            getwfk4         -2
 -          gwpara           1
-         icsing1          6
-         icsing2          6
-         icsing3          6
-         icsing4          3
+        gw_icsing1          6
+        gw_icsing2          6
+        gw_icsing3          6
+        gw_icsing4          3
           inclvkb           0
              iscf1          7
              iscf2         -2

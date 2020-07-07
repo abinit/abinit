@@ -41,7 +41,8 @@
                     -2.50000000E-01  0.00000000E+00  0.00000000E+00
  bdgw3    2  8
           2  8
- icsing3  6
+
+gw_icsing3  6
 
 # valid for all datasets
  tolwfr    1.0d-16

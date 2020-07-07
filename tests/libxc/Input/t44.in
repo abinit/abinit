@@ -39,7 +39,7 @@ gwcalctyp   25
 getqps     -1
 ixc_sigma  -428
 pawecutdg  40
-icsing      6
+gw_icsing   6
 
 # Dataset2: Calculation of the 1st HSE06 iteration
 optdriver2  4 

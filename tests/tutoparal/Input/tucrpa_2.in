@@ -42,7 +42,7 @@ istwfk *1
 
 #For all the dataset
 nsym     1
-icsing 6
+gw_icsing 6
 symchi   0
 symsigma 0             # Default in v9 is 1 but I don't think UCPRA supports it (MG)
 

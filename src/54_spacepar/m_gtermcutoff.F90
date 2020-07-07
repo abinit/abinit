@@ -540,15 +540,29 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            ii=i1+i23
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
-           if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
-             gcutoff(ii)=zero
-           else if (gcart_para<tol4) then
-             gcutoff(ii)=one-COS(gcart_perp*rcut_loc)-gcart_perp*rcut_loc*SIN(gcart_perp*rcut_loc)
-           else
+           if(gcart_para>tol4.and.ABS(gcart_perp)>tol4) then
              gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*&
-&                        SIN(gcart_perp*rcut_loc)-COS(ABS(gcart_perp)*rcut_loc)) !&
-!&           + 8*rcut_loc*SIN(gcart_perp*rcut_loc)/gcart_perp*log_alpha ! contribution due to finite surface
+&                        SIN(gcart_perp*rcut_loc)-COS(ABS(gcart_perp)*rcut_loc)) 
+           else if (ABS(gcart_perp)>tol4) then
+             gcutoff(ii)=one-COS(-gcart_perp*rcut_loc)-gcart_perp*rcut_loc*SIN(gcart_perp*rcut_loc)
+           else
+             gcutoff(ii)=zero
            endif
+
+
+
+!           if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
+!             gcutoff(ii)=zero
+!           else if (gcart_para<tol4) then
+!             gcutoff(ii)=one-COS(gcart_perp*rcut_loc)-gcart_perp*rcut_loc*SIN(gcart_perp*rcut_loc)
+!           else
+!             gcutoff(ii)=one+EXP(-gcart_para*rcut_loc)*(gcart_perp/gcart_para*&
+!&                        SIN(gcart_perp*rcut_loc)-COS(ABS(gcart_perp)*rcut_loc)) !&
+!!&           + 8*rcut_loc*SIN(gcart_perp*rcut_loc)/gcart_perp*log_alpha ! contribution due to finite surface
+!           endif
+
+
+
          end do !i1
         end do !i2
        end do !i3

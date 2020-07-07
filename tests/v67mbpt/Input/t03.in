@@ -19,30 +19,30 @@ prtsuscep2 1                # _SUSC file will be produced
 
 # Dataset 3: Sigma calculation with "true" Coulomb interaction.
 optdriver3  4
-getwfk3    1
+getwfk3     1
 nband3     20
-getscr3    2   # SCR file is always obtained using the "true" Coulomb interaction.
-ecutwfn3   6.0
-ecutsigx3  3.0
-icsing3  3   # old deprecated value of icsing, only used for legacy
+getscr3     2   # SCR file is always obtained using the "true" Coulomb interaction.
+ecutwfn3    6.0
+ecutsigx3   3.0
+gw_icsing3  3   # old deprecated value of icutcoul, only used for legacy
 
 # Dataset 4: Sigma calculation with a cutoff in Vcoul (Beigi's method)
 optdriver4  4
 getwfk4     1
 nband4     20
 getsuscep4  2            # Get SUSC file from dataset 2, new screening is calculated with the modified Coulombian
-icsing4  1             # Cylindrical cutoff
-vcutgeo4  0.0 0.0  1.0   # Beigi's method (infinite cylinder along z, cutoff region in the x-y plane is given by acell, rcut is not needed.
-ecutwfn4   6.0
-ecutsigx4  3.0
+gw_icsing4  1             # Cylindrical cutoff
+vcutgeo4    0.0 0.0  1.0   # Beigi's method (infinite cylinder along z, cutoff region in the x-y plane is given by acell, rcut is not needed.
+ecutwfn4    6.0
+ecutsigx4   3.0
 
 # Sigma calculation with cutoff (Rozzi's method)
 optdriver5  4
 getwfk5     1
 nband5     20
 getsuscep5  2            # Get SUSC file from dataset 2, screening is calculated with the modified Coulombian
-icsing5   1            # Cylindrical cutoff
-vcutgeo5  0.0 0.0 -4.0   # Rozzi's method (cylinder of finite extent along z (8 in lattice units) and radius rcut.
+gw_icsing5  1            # Cylindrical cutoff
+vcutgeo5    0.0 0.0 -4.0 # Rozzi's method (cylinder of finite extent along z (8 in lattice units) and radius rcut.
 rcut5       5.0          # Radius of the cylinder, in Bohr.
 ecutwfn5    6.0
 ecutsigx5   3.0
@@ -106,5 +106,5 @@ enunit 2
 #%% description = 
 #%%   Isolated H chain: GW calculation with cylindrical cutoff in the Coulomb interaction in order to
 #%%   speed up the convergence wrt the size of the super cell. The following variables are tested
-#%%   icsing=1, rcut, vcutgeo, gw_nqlwl and gw_qlwl. 
+#%%   gw_icsing=1, rcut, vcutgeo, gw_nqlwl and gw_qlwl. 
 #%%<END TEST_INFO>

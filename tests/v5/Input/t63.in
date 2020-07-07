@@ -64,7 +64,7 @@ bdgw
        1  2
        1  2
 
-icsing   3            # old deprecated value of icsing, only used for legacy
+gw_icsing 3  # old deprecated value of icsing, only used for legacy
 
 
 ############################################################

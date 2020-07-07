@@ -40,10 +40,10 @@ shiftk
 istwfk *1
 
 #For all the dataset
-nsym     0
-icsing 6
-symchi   0
-symsigma 0
+nsym      0
+gw_icsing 6
+symchi    0
+symsigma  0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets

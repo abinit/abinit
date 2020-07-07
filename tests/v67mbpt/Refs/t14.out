@@ -152,7 +152,7 @@ _ WF disk file :      0.100 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
            getwfk2          0
            getwfk3          2
            getwfk4          2
-         icsing           3
+        gw_icsing           3
              iscf1         17
              iscf2         -2
              iscf3         17
@@ -1383,7 +1383,7 @@ meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
            getwfk2          0
            getwfk3          2
            getwfk4          2
-         icsing           3
+        gw_icsing           3
              iscf1         17
              iscf2         -2
              iscf3         17

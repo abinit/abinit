@@ -41,8 +41,8 @@ shiftk
 istwfk *1
 
 #For all the dataset
-nsym     1
-icsing 6
+nsym      1
+gw_icsing 6
 #symchi   0
 
 #----------------------------------------------------------------------------

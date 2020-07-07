@@ -174,11 +174,11 @@ _ WF disk file :      4.728 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
       gw_sigxcore3          0
       gw_sigxcore4          0
       gw_sigxcore5          1
-         icsing1          6
-         icsing2          6
-         icsing3          6
-         icsing4          3
-         icsing5          3
+        gw_icsing1          6
+        gw_icsing2          6
+        gw_icsing3          6
+        gw_icsing4          3
+        gw_icsing5          3
           inclvkb1          2
           inclvkb2          2
           inclvkb3          0
@@ -2224,11 +2224,11 @@ data: !SigmaeeData |
       gw_sigxcore3          0
       gw_sigxcore4          0
       gw_sigxcore5          1
-         icsing1          6
-         icsing2          6
-         icsing3          6
-         icsing4          3
-         icsing5          3
+        gw_icsing1          6
+        gw_icsing2          6
+        gw_icsing3          6
+        gw_icsing4          3
+        gw_icsing5          3
           inclvkb1          2
           inclvkb2          2
           inclvkb3          0

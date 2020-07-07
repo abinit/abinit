@@ -48,7 +48,7 @@
     getwfk3     1
     getscr3     2
      nband3    10
-  icsing3     3   # old deprecated value of icsing, only used for legacy
+ gw_icsing3     3   # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the dielectric matrix - iteration 2
  optdriver4     3
@@ -68,7 +68,7 @@
     getqps5     3
     getscr5     4
      nband5    10
-  icsing5     3   # old deprecated value of icsing, only used for legacy
+ gw_icsing5     3   # old deprecated value of icutcoul, only used for legacy
 
 #Common to all model GW calculations
    rhoqpmix     0.5
