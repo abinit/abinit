@@ -2229,6 +2229,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
+   dtsets(idtset)%fock_icutcoul=3
    dtsets(idtset)%freqim_alpha=five
    dtsets(idtset)%freqremin=zero
    dtsets(idtset)%freqremax=zero
@@ -2330,7 +2331,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%iboxcut=0
    dtsets(idtset)%icsing=6
    dtsets(idtset)%icutcoul=3
-   dtsets(idtset)%icutcoul_fock=3
    dtsets(idtset)%ieig2rf=0
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%inclvkb=2

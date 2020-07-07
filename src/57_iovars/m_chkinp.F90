@@ -960,6 +960,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'fockoptmix',dt%fockoptmix,3,(/0,1,11/),iout)
    end if
 
+   ! fock_icutcoul
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fock_icutcoul',dt%fock_icutcoul,6,(/0,1,2,3,4,5/),iout)
+
    ! frzfermi
    call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,(/0,1/),iout)
 
@@ -1122,9 +1125,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! icutcoul
    call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,6,(/0,1,2,3,4,5/),iout)
-
-   ! icutcoul_fock
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul_fock',dt%icutcoul_fock,6,(/0,1,2,3,4,5/),iout)
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then

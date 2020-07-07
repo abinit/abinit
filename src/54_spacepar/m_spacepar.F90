@@ -36,6 +36,7 @@ module m_spacepar
  use defs_abitypes,     only : MPI_type
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
+ use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -331,11 +332,12 @@ end subroutine make_vectornd
 !! SOURCE
 
 subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
-&  divgq0,qpt) ! Optional argument
+                 &qpt,icutcoul,nkpt,vcutgeo) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,izero,nfft
+ integer,intent(in),optional ::icutcoul,nkpt
  real(dp),intent(in) :: gsqcut
 ! REMEMBER to define the V_Coulomb type first before you uncomment this
 ! For the moment we will leave optional the choice of cut-off technique 
@@ -343,8 +345,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(inout),optional :: divgq0
- real(dp),intent(in),optional :: qpt(3)
+ real(dp),intent(in),optional :: qpt(3),vcutgeo(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
 !Local variables-------------------------------
@@ -361,6 +362,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),qpt_(3),rmet(3,3),tsec(2)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
@@ -414,6 +416,10 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
    MSG_ERROR(message)
  end if
 
+ !Initialize Gcut-off array from m_gtermcutoff
+ ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
+ !call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
@@ -454,10 +460,10 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
          work1(re,1+i23)=zero
          work1(im,1+i23)=zero
          ! If the value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq is given, use it
-         if (PRESENT(divgq0)) then
-           work1(re,1+i23)=rhog(re,1+i23)*divgq0*piinv
-           work1(im,1+i23)=rhog(im,1+i23)*divgq0*piinv
-         end if
+!         if (PRESENT(divgq0)) then
+!           work1(re,1+i23)=rhog(re,1+i23)*divgq0*piinv
+!           work1(im,1+i23)=rhog(im,1+i23)*divgq0*piinv
+!         end if
        end if
 
        ! Final inner loop on the first dimension (note the lower limit)
@@ -522,6 +528,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  ! Fourier Transform Vhartree. Vh in reciprocal space was stored in work1
  call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,1,ngfft,0)
 
+ ABI_DEALLOCATE(gcutoff) 
  ABI_DEALLOCATE(work1)
 
  call timab(10,2,tsec)

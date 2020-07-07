@@ -153,6 +153,7 @@ type, public :: dataset_type
  integer :: extrapwf
  integer :: fftgw
  integer :: fockoptmix
+ integer :: fock_icutcoul
  integer :: frzfermi
  integer :: ga_algor
  integer :: ga_fitness
@@ -229,7 +230,6 @@ type, public :: dataset_type
  integer :: icoulomb
  integer :: icsing
  integer :: icutcoul
- integer :: icutcoul_fock
  integer :: ieig2rf
  integer :: imgmov
  integer :: imgwfstor
@@ -1432,6 +1432,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%fftgw              = dtin%fftgw
  dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
+ dtout%fock_icutcoul      = dtin%fock_icutcoul
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -1523,7 +1524,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%icoulomb           = dtin%icoulomb
  dtout%icsing             = dtin%icsing
  dtout%icutcoul           = dtin%icutcoul
- dtout%icutcoul_fock      = dtin%icutcoul_fock
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
  dtout%imgwfstor          = dtin%imgwfstor
@@ -3111,7 +3111,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_EFS'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'
  list_vars=trim(list_vars)//' fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
@@ -3142,7 +3142,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
- list_vars=trim(list_vars)//' iboxcut icoulomb icsing icutcoul icutcoul_fock ieig2rf'
+ list_vars=trim(list_vars)//' iboxcut icoulomb icsing icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'
