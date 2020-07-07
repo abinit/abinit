@@ -402,7 +402,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  if (usekden==1) then
    if (.not.present(taur)) then
      message=' For mGGA functionals, kinetic energy density is needed. Set input variable usekden to 1.' 
-     message=message//' Also use NC pseudopotentials without non-linear XC core correction.'
+     message=trim(message)//' Also use NC pseudopotentials without non-linear XC core correction.'
      MSG_BUG(message)
    else if (size(taur)/=nfft*nspden) then
      message=' Invalid size for taur!'
