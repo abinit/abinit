@@ -52,7 +52,7 @@ MODULE m_ebands
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
-                              isdiagmat, interpol3d
+                              isdiagmat, interpol3d, interpol3d_indices
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -328,7 +328,7 @@ MODULE m_ebands
    integer :: nkx, nky, nkz
    ! Number of divisions of the grid enclosing the first unit cell
 
-   real(dp),allocatable :: data_uk_bsd(:,:,:,:)
+   real(dp),allocatable :: data_uk_bsd(:,:,:,:,:,:)
     ! (nkx*nky*nkz, mband, nsppol, ndat)
 
  contains
@@ -5871,7 +5871,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    MSG_ERROR(msg)
  end if
 
- ABI_CALLOC(new%data_uk_bsd, (nkx*nky*nkz, bsize, nsppol, ndat))
+ ABI_CALLOC(new%data_uk_bsd, (nkx, nky, nkz, bsize, nsppol, ndat))
 
  ! Build array in the full BZ to prepare call to interpol3d.
  ikf = 0
@@ -5880,7 +5880,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
      do ix=1,nkx
        ikf = ikf + 1
        ik_ibz = bz2ibz(ikf, 1)
-       new%data_uk_bsd(ikf, 1:bsize, 1:nsppol, 1:ndat) = values_bksd(1:bsize, ik_ibz, 1:nsppol, 1:ndat)
+       new%data_uk_bsd(ix, iy, iz, 1:bsize, 1:nsppol, 1:ndat) = values_bksd(1:bsize, ik_ibz, 1:nsppol, 1:ndat)
      end do
    end do
  end do
@@ -5950,6 +5950,8 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
 
 !Local variables-------------------------------
  integer :: spin, idat, band
+ integer :: ir1, ir2, ir3, pr1, pr2, pr3
+ real(dp) :: val, vv(8)
  real(dp) :: kwrap(3), shift(3)
 
 ! *********************************************************************
@@ -5959,7 +5961,24 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  do idat=1,self%ndat
    do spin=1,self%nsppol
       do band=1,self%bsize
-        vals_bsd(band, spin, idat) = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:, band, spin, idat))
+        val = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
+
+        if (val <= zero) then
+          ! ir1,ir2,ir3 = bottom left neighbor
+          ! pr1,pr2,pr3 = top right neighbor
+          call interpol3d_indices(kwrap, self%nkx, self%nky, self%nkz, ir1, ir2, ir3, pr1, pr2, pr3)
+          vv(1) = self%data_uk_bsd(ir1, ir2, ir3, band, spin, idat)
+          vv(2) = self%data_uk_bsd(pr1, ir2, ir3, band, spin, idat)
+          vv(3) = self%data_uk_bsd(ir1, pr2, ir3, band, spin, idat)
+          vv(4) = self%data_uk_bsd(ir1, ir2, pr3, band, spin, idat)
+          vv(5) = self%data_uk_bsd(pr1, pr2, ir3, band, spin, idat)
+          vv(6) = self%data_uk_bsd(ir1, pr2, pr3, band, spin, idat)
+          vv(7) = self%data_uk_bsd(pr1, ir2, pr3, band, spin, idat)
+          vv(8) = self%data_uk_bsd(pr1, pr2, pr3, band, spin, idat)
+          val = maxval(vv)
+        end if
+
+        vals_bsd(band, spin, idat) = val
       end do
    end do
  end do

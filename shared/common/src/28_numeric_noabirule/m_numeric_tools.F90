@@ -5127,14 +5127,14 @@ pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
 
 !calculation of the density value
  res=zero
- res=res + grid(ir1,ir2,ir3)*(one-x1)*(one-x2)*(one-x3)
- res=res + grid(pr1,ir2,ir3)*x1*(one-x2)*(one-x3)
- res=res + grid(ir1,pr2,ir3)*(one-x1)*x2*(one-x3)
- res=res + grid(ir1,ir2,pr3)*(one-x1)*(one-x2)*x3
- res=res + grid(pr1,pr2,ir3)*x1*x2*(one-x3)
- res=res + grid(ir1,pr2,pr3)*(one-x1)*x2*x3
- res=res + grid(pr1,ir2,pr3)*x1*(one-x2)*x3
- res=res + grid(pr1,pr2,pr3)*x1*x2*x3
+ res=res + grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+ res=res + grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+ res=res + grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+ res=res + grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+ res=res + grid(pr1, pr2, ir3) * x1*x2*(one-x3)
+ res=res + grid(ir1, pr2, pr3) * (one-x1)*x2*x3
+ res=res + grid(pr1, ir2, pr3) * x1*(one-x2)*x3
+ res=res + grid(pr1, pr2, pr3) * x1*x2*x3
 
 end function interpol3d
 !!***

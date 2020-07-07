@@ -448,6 +448,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    call ds%free()
    !print *, "velocity:", new%velocity
 
+
    ! Linear interpolation in k-space of the linewidths from input SIGEPH to the dense IBZ provided by fine WFK file.
    ! First of all transfer linewidths to values_bksd to prepare call to klinterp_new.
    ndat = new%ntemp * new%nrta
@@ -514,7 +515,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
    if (ierr /= 0) then
      ! This should never happen for linear interpolation.
-     MSG_ERROR(sjoin("Linear interpolation produced:", itoa(ierr), "negative linewidths"))
+     MSG_WARNING(sjoin("Linear interpolation produced:", itoa(ierr), "negative linewidths"))
    end if
 
    ABI_FREE(vals_bsd)

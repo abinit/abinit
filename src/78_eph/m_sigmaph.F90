@@ -813,7 +813,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This table is needed when computing the imaginary part:
  ! k+q states outside energy window are not read hence their contribution won't be included.
  ! Error is small provided calculation is close to convergence.
- ! TODO: Store min/max energy difference ...
+ ! To reduce the error one should increase the value of winfact
+ ! TODO: 1) Introduce input variable to define winfact?
+ !       2) Store min/max energy difference
  ABI_MALLOC(ihave_ikibz_spin, (nkpt, nsppol))
  ihave_ikibz_spin = .False.
  do spin=1,sigma%nsppol
