@@ -71,12 +71,14 @@ nbandhf2 4         # number of occupied states
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.GGA_X_PBE+GGA_C_PBE-paw.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t71.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= C.GGA_X_PBE+GGA_C_PBE-paw.xml
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

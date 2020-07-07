@@ -69,13 +69,15 @@ kptrlatt -4  4  4      # In cartesian coordinates, this grid is simple cubic, an
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "33as.SGS_mod, 13al.981214.fhi, 31ga.SGS_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t28.out, tolnlines = 3, tolabs = 1.1e-7, tolrel = 2.0e-4, fld_options = -medium
-#%% psp_files = 33as.SGS_mod, 13al.981214.fhi, 31ga.SGS_mod
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

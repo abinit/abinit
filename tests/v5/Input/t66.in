@@ -129,13 +129,15 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
 tolwfr  1.0d-10
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.lda"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t66.out, tolnlines = 15, tolabs = 1.010e-02, tolrel = 6.000e-03, fld_options = -medium
-#%% psp_files = si_ps.736.lda
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

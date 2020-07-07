@@ -89,13 +89,15 @@ ecut 6.0
 nstep 50
 enunit 2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h_WC.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options =  -medium
-#%% psp_files = 01h_WC.fhi
 #%% [paral_info]
 #%% max_nprocs = 5
 #%% [extra_info]

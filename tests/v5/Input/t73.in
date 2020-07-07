@@ -44,13 +44,15 @@ toldfe 1.0d-11
 prtwf 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "79au.1.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t73.out, tolnlines = 23, tolabs = 4.0e-06, tolrel = 1.1e-05, fld_options = -medium
-#%% psp_files = 79au.1.hgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

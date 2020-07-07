@@ -46,13 +46,15 @@ nline 1
 nstep 1
 toldfe 1.0d-6
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t16.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
-#%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

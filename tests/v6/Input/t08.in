@@ -35,13 +35,15 @@ xred
 ntypat 1
 znucl 22  # Titanium
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "22ti.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t08.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
-#%% psp_files = 22ti.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

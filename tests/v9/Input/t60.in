@@ -172,6 +172,9 @@ getdvdb_filepath10  "t60o_DS20_DVDB"
  ntypat 2
  znucl 3 9
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "03-Li.psp, 09-F.psp"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -179,7 +182,6 @@ getdvdb_filepath10  "t60o_DS20_DVDB"
 #%% [files]
 #%% files_to_test = 
 #%%   t60.out, tolnlines = 45, tolabs = 0.4, tolrel = 0.1
-#%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

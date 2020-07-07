@@ -38,13 +38,15 @@
  znucl 13.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t52.out, tolnlines = 3, tolabs = 1.100e-09, tolrel = 8.000e-05
-#%% psp_files = 13al.pspgth
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -67,13 +67,15 @@ berryopt35  4       efield35  -0.0005 -0.0005 -0.0005    getwfk35  34
 
 bfield 3*0.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "al_ps.abinit.paw, as_ps.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t43.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
-#%% psp_files = al_ps.abinit.paw, as_ps.paw
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -83,12 +83,14 @@ xcart
  nshiftk 1
  shiftk  0.0 0.0 0.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspgth, 01h.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%% psp_files = 14si.pspgth, 01h.pspgth
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

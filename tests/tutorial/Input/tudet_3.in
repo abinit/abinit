@@ -49,7 +49,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   tudet_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -medium
-#%% psp_files =  Fe.GGA_PBE-JTH.xml
 #%% [shell]
 #%% pre_commands = iw_cp tudet_3.in ujdet.in
 #%% post_commands = ww_mv ujdet.out tudet_3.out

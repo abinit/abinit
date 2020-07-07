@@ -40,13 +40,15 @@ ngkpt 4 4 4
  mep_mxstep 100.
  string_algo 1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.pspnc, 1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t24.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
-#%% psp_files = 1h.pspnc, 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 20
 #%% [extra_info]

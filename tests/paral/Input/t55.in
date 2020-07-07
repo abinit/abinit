@@ -96,12 +96,14 @@
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.SGS_mod, 33as.SGS_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
 #%% [files]
-#%% psp_files = 31ga.SGS_mod, 33as.SGS_mod
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10

@@ -54,6 +54,9 @@
            0.0 0.0 0.5
  istwfk    *1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "18ar.revpbe"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -61,7 +64,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t12.out, tolnlines = 20, tolabs = 2.0e-3, tolrel = 6.0e-3, fld_options =  -medium
-#%% psp_files = 18ar.revpbe
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

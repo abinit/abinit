@@ -74,13 +74,15 @@
           0.0 0.0 -0.55
           Angstrom
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "7n.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  t68.out, tolnlines = 0, tolabs = 1.451e-08, tolrel = 2.000e-10, fld_options = -medium
-#%% psp_files = 7n.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -359,16 +359,14 @@ pure function arth_rdp(start, step, nn)
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  arth_rdp(1)=start
-  do ii=2,nn
-   arth_rdp(ii)=arth_rdp(ii-1)+step
-  end do
+   arth_rdp(1)=start
+   do ii=2,nn
+    arth_rdp(ii)=arth_rdp(ii-1)+step
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function arth_rdp
@@ -388,31 +386,28 @@ end function arth_rdp
 !!
 !! SOURCE
 
-pure function linspace(start,stop,nn)
-
+pure function linspace(start, stop, nn)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
- real(dp),intent(in) :: start,stop
- real(dp) :: length
+ real(dp),intent(in) :: start, stop
  real(dp) :: linspace(nn)
 
 !Local variables-------------------------------
+ real(dp) :: length
  integer :: ii
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  length = stop-start
-  do ii=1,nn
-   linspace(ii)=start+length*(ii-1)/(nn-1)
-  end do
+   length = stop-start
+   do ii=1,nn
+     linspace(ii)=start+length*(ii-1)/(nn-1)
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function linspace
@@ -5009,8 +5004,7 @@ end function stats_eval
 !!
 !! SOURCE
 
-elemental subroutine wrap2_zero_one(num,red,shift)
-
+elemental subroutine wrap2_zero_one(num, red, shift)
 
 !Arguments ------------------------------------
 !scalars
@@ -5108,12 +5102,11 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
-
+pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
- integer,intent(in) :: nr1,nr2,nr3
+ integer,intent(in) :: nr1, nr2, nr3
  real(dp) :: res
 !arrays
  real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)

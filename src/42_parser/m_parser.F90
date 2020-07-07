@@ -348,7 +348,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
    if(errcod/=0)then
      ! integer reading error
-     write(msg,'(a,i0,7a)' ) &
+     write(msg,'(a,i0,8a)' ) &
        "Attempted to read ndig: ",ndig," integer digits", ch10, &
        "from string(1:ndig)= `",string(1:ndig),"` to initialize an integer variable",ch10,&
        "iomsg: ", trim(iomsg)

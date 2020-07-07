@@ -879,6 +879,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
      !end if
+     ! TODO: Activate this test
+     if (dt%eph_fermie /= zero .and. nint(dt%tmesh(3)) /= 1) then
+       MSG_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
+     end if
+     if (dt%eph_fermie /= zero .and. dt%eph_extrael /= zero) then
+       MSG_ERROR_NOSTOP("eph_fermie and (eph_extrael|eph_doping) are mutually exclusive", ierr)
+     end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
@@ -1124,7 +1131,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'icsing',dt%icsing,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
 
    ! icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,6,(/0,1,2,3,4,5/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
 
    ! ieig2rf
    if(optdriver==RUNL_RESPFN.and.usepaw==1)then

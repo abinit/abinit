@@ -96,13 +96,15 @@ icsing3   3            # old deprecated value of icsing, only used for legacy
  istwfk    2*1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t30.out, tolnlines = 6, tolabs = 1.100e-03, tolrel = 3.000e-03
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

@@ -35,12 +35,14 @@ nstep   10
 tolvrs  1.0d-10
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "HGH/82pb.4.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = tbasepar_1.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= HGH/82pb.4.hgh
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

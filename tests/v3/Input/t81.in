@@ -51,13 +51,15 @@
            0.10639   0.35639   0.75000
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "01h.pspgth, 8o.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t81.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
-#%% psp_files = 01h.pspgth, 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

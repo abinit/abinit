@@ -71,6 +71,9 @@ dmatpawu  1.0 0.0 0.0 0.0 0.0 0.0 0.0
           0.0 0.0 0.0 0.0 0.0 0.0 0.0
           0.0 0.0 0.0 0.0 0.0 0.0 0.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "64gd.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -78,7 +81,6 @@ dmatpawu  1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%% files_to_test = 
 #%%  t19.out,         tolnlines = 40,  tolabs = 1.000e-01, tolrel = 7.000e-01, fld_options = -medium;
 #%%  t19o_DOS_AT0001, tolnlines = 100, tolabs = 5.100e-01, tolrel = 3.000e-03, fld_options = -medium
-#%% psp_files = 64gd.paw 
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]

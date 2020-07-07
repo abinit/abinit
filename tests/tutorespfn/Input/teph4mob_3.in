@@ -37,7 +37,6 @@ teph4mob_1o_DS10_POT5
 #%% [files]
 #%% files_to_test = 
 #%%   teph4mob_3.stdout, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
-#%% psp_files =  13al.981214.fhi, 33as.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -46,6 +46,9 @@ typat 1
 znucl 2
 xred 3*0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "2he_ca_30t.psp"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -54,7 +57,6 @@ xred 3*0
 #%%   t35.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t35o_DS2_DOS, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t35o_DS3_DOS_AT0001, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 2he_ca_30t.psp 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

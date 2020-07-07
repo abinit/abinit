@@ -55,6 +55,9 @@
      prtden  1                    # This is the default value
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -62,7 +65,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t38.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
-#%% psp_files = 26fe.paw
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t38o_WFK t39i_WFK;

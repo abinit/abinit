@@ -55,13 +55,15 @@
  nband  20
  densfor_pred 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "2he.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t76.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -ridiculous
-#%% psp_files = 2he.psphgh
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

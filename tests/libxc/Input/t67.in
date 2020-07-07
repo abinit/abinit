@@ -38,13 +38,15 @@
  znucl  7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "N.xml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t67.out, tolnlines = 5, tolabs = 1.100e-3, tolrel = 3.000e-01, fld_options = -easy
-#%% psp_files = N.xml
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

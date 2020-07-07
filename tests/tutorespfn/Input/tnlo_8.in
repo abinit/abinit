@@ -99,6 +99,9 @@
 nbdbuf 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.pspnc, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -106,7 +109,6 @@ nbdbuf 0
 #%% [files]
 #%% files_to_test = 
 #%%   tnlo_8.out, tolnlines=  0, tolabs=  1.010e-26, tolrel=  6.000e-05
-#%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [shell]
 #%% post_commands = 
 #%%   ww_mv tnlo_8o_WFK tnlo_9i_WFK;

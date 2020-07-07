@@ -88,6 +88,9 @@ jdtset 1 2 3 4
 
 #Definition of the SCF procedure
   nstep 100              # Maximal number of SCF cycles
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Si-LDA.paw"
   
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -97,7 +100,6 @@ jdtset 1 2 3 4
 #%% [files]
 #%% files_to_test = 
 #%%   t81.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
-#%% psp_files = Si-LDA.paw
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

@@ -35,11 +35,13 @@
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 6c_lda.paw
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

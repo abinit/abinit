@@ -84,6 +84,9 @@ upawu2  6 eV     # values in Hartree
 jpawu  0.0000  # values in Hartree
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "58ce.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -92,15 +95,14 @@ jpawu  0.0000  # values in Hartree
 #%% files_to_test =
 ###%%                  t28.out,      tolnlines =7, tolabs =2.0e-6 , tolrel = 1.4e-05, fld_options=-medium ;
 #%%                  t28.out,      tolnlines =7, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-easy ;
-#%% psp_files = 58ce.paw
 #%% [shell] 
 #%% post_commands = 
 #%%    ww_cp t28o_DS1_WFK t29i_DS2_WFK;
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon
-#%% keywords = PAW, DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = PAW, DMFT, CTQMC
 #%% description = Test CT-QMC options only. Not realistic
 #%% topics = DMFT
 #%%<END TEST_INFO>
