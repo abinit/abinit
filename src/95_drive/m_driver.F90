@@ -693,8 +693,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  ****************************************************************************
 !  Exchange-correlation
-
-   call echo_xc_name(dtset%ixc)
+   
+   if (dtset%optdriver/=RUNL_RDMFT) then
+     call echo_xc_name(dtset%ixc)
+   endif
 
    if (dtset%ixc<0) then
      call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)

@@ -260,7 +260,7 @@ subroutine rdmft(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  !
  ! === Define FFT grid(s) sizes ===
  ! * Be careful! This mesh is only used for densities, potentials and the matrix elements of v_Hxc. It is NOT the
- ! (usually coarser) GW FFT mesh employed for the oscillator matrix elements that is defined in setmesh.F90.
+ ! (usually coarser) FFT mesh employed for the oscillator matrix elements that is defined in setmesh.F90.
  ! See also NOTES in the comments at the beginning of this file.
  ! NOTE: This mesh is defined in invars2m using ecutwfn, in GW Dtset%ecut is forced to be equal to Dtset%ecutwfn.
 
