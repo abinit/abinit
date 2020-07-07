@@ -3306,6 +3306,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
 
  ! Open netcdf file
  msg = "Netcdf not activated at configure time!"
+ ierr = 1
 #ifdef HAVE_NETCDF
  ierr = 0
 
@@ -3365,12 +3366,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("eta"), eta))
  new%ieta = j_dpc * eta
 
- ! Try to read the done array used to implement restart capabilities.
+ ! Read the done array used to implement restart capabilities.
  ABI_ICALLOC(new%qp_done, (new%nkcalc, new%nsppol))
- !ncerr = nf90_inq_varid(ncid, "qp_done", varid)
- !if (ncerr == nf90_noerr) then
- !NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
- !end if
  NCF_CHECK(nf90_get_var(ncid, vid("qp_done"), new%qp_done))
 
  ! ============================================================
@@ -3445,7 +3442,7 @@ end function sigmaph_read
 !!  sigmaph_get_ebands
 !!
 !! FUNCTION
-!!  Read quantities from the sigmaph to a ebands structure and return mapping
+!!  Read quantities from the sigmaph to an ebands_t structure and return mapping
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
@@ -3457,23 +3454,22 @@ end function sigmaph_read
 !!
 !! SOURCE
 
-type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidths, velocity, comm, ierr, indq2ebands) result(new)
+type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidths, velocity, comm, indq2ebands) result(new)
 
 !Arguments -----------------------------------------------
  integer,intent(in) :: comm
  class(sigmaph_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- integer, intent(out) :: ierr
+ integer,intent(in) :: brange(2)
  real(dp), allocatable, intent(out) :: linewidths(:,:,:,:,:), velocity(:,:,:,:)
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
-
 
 !Local variables -----------------------------------------
 !scalars
  integer,parameter :: sppoldbl1 = 1
- integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev
- integer :: band_ks, bstart_ks, nbcalc_ks, mband
+ integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev, band_ks, bstart_ks, nbcalc_ks, mband
+ integer :: bmin, bmax
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
@@ -3484,13 +3480,10 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidths, velo
 
 ! *************************************************************************
 
- ierr = 0
-
  ! copy useful dimensions
- nsppol = self%nsppol
- nkpt = ebands%nkpt
+ nsppol = self%nsppol; nkpt = ebands%nkpt
 
- ! Map ebands kpoints to sigmaph
+ ! Map input ebands kpoints to kcalc k-points stored in sigmaph file.
  ABI_MALLOC(indkk, (self%nkcalc, 6))
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
@@ -3498,9 +3491,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidths, velo
              sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
-    write(msg, '(3a,es16.6,a)' ) &
-     "Error mapping ebands to sigmaph",ch10,&
-     "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
+    write(msg, '(3a,es16.6)' ) &
+     "Error mapping input ebands%kptns to sigmaph kcalc",ch10,&
+     "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax
     MSG_ERROR(msg)
  end if
 
@@ -3517,14 +3510,16 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidths, velo
  new = ebands_chop(ebands, 1, mband)
  !mband = ebands%mband
  !call ebands_copy(ebands, new)
+ !bmin = 1; bmax = mband
+ bmin = brange(1); bmax = brange(2)
 
 #ifdef HAVE_NETCDF
  ! Read linewidths from sigmaph file.
  ! Use global array (mband, nkpt, nsppol) but keep in mind that results in SIGPEPH are packed
  ! so that only the relevant k-points are stored on file.
 
- ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
- ABI_CALLOC(linewidths, (self%ntemp, mband, nkpt, nsppol, 2))
+ ABI_CALLOC(velocity, (3, bmin:bmax, nkpt, nsppol))
+ ABI_CALLOC(linewidths, (self%ntemp, bmin:bmax, nkpt, nsppol, 2))
 
  do spin=1,nsppol
    do ikcalc=1,self%nkcalc
@@ -3562,8 +3557,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidths, velo
 
  ABI_FREE(indkk)
 
- ! This so that output linewidths are always positive independently of the kind of self-energy used
- ! (retarded or advanced)
+ ! This so that output linewidths are always positive independently of the kind of self-energy used (retarded or advanced)
  linewidths = abs(linewidths)
 
 end function sigmaph_get_ebands
@@ -3592,36 +3586,41 @@ subroutine sigmaph_compare(self, other)
 !Arguments ------------------------------------
  class(sigmaph_t),intent(in) :: self, other
 
-! *************************************************************************
+!Local variables-------------------------------
+ integer :: ierr
 
- ABI_CHECK(self%nkcalc == other%nkcalc, "Difference found in nkcalc.")
- ABI_CHECK(self%max_nbcalc == other%max_nbcalc, "Difference found in max_nbcalc.")
- ABI_CHECK(self%nsppol == other%nsppol, "Difference found in nsppol.")
- ABI_CHECK(self%ntemp == other%ntemp, "Difference found in ntemp.")
- !ABI_CHECK(natom3 == natom3, "")
- ABI_CHECK(self%nqibz == other%nqibz, "Difference found in nqibz.")
- ABI_CHECK(self%nqbz == other%nqbz, "Difference found in nqbz.")
+! *************************************************************************
+ ierr = 0
+
+ ABI_CHECK_NOSTOP(self%nkcalc == other%nkcalc, "Difference found in nkcalc.", ierr)
+ ABI_CHECK_NOSTOP(self%max_nbcalc == other%max_nbcalc, "Difference found in max_nbcalc.", ierr)
+ ABI_CHECK_NOSTOP(self%nsppol == other%nsppol, "Difference found in nsppol.", ierr)
+ ABI_CHECK_NOSTOP(self%ntemp == other%ntemp, "Difference found in ntemp.", ierr)
+ ABI_CHECK_NOSTOP(self%nqibz == other%nqibz, "Difference found in nqibz.", ierr)
+ ABI_CHECK_NOSTOP(self%nqbz == other%nqbz, "Difference found in nqbz.", ierr)
 
  ! ======================================================
  ! Read data that does not depend on the (kpt, spin) loop.
  ! ======================================================
- ABI_CHECK(self%symsigma == other%symsigma, "Different value found for symsigma.")
- ABI_CHECK(self%nbsum == other%nbsum, "Different value found for nbsum.")
- ABI_CHECK(self%bsum_start == other%bsum_start, "Different value found for bsum_start.")
- ABI_CHECK(self%bsum_stop == other%bsum_stop, "Different value found for bsum_stop.")
- ABI_CHECK(self%qint_method == other%qint_method, "Different value found for qint_method.")
- !ABI_CHECK(self%frohl_model == other%frohl_model, "Different value found for frohl_model.")
- ABI_CHECK(self%imag_only .eqv. other%imag_only, "Difference found in imag_only")
- ABI_CHECK(self%wr_step == other%wr_step, "Different value found for wr_step")
- ABI_CHECK(self%ieta == other%ieta, "Different value found for zcut.")
+ ABI_CHECK_NOSTOP(self%symsigma == other%symsigma, "Different value found for symsigma.", ierr)
+ ABI_CHECK_NOSTOP(self%nbsum == other%nbsum, "Different value found for nbsum.", ierr)
+ ABI_CHECK_NOSTOP(self%bsum_start == other%bsum_start, "Different value found for bsum_start.", ierr)
+ ABI_CHECK_NOSTOP(self%bsum_stop == other%bsum_stop, "Different value found for bsum_stop.", ierr)
+ ABI_CHECK_NOSTOP(self%qint_method == other%qint_method, "Different value found for qint_method", ierr)
+ !ABI_CHECK_NOSTOP(self%frohl_model == other%frohl_model, "Different value found for frohl_model.", ierr)
+ ABI_CHECK_NOSTOP(self%imag_only .eqv. other%imag_only, "Difference found in imag_only", ierr)
+ ABI_CHECK_NOSTOP(self%wr_step == other%wr_step, "Different value found for wr_step", ierr)
+ ABI_CHECK_NOSTOP(self%ieta == other%ieta, "Different value found for zcut.", ierr)
 
- ABI_CHECK(all(self%ngqpt == other%ngqpt), "Different value found for ngqpt")
- ABI_CHECK(all(self%bstart_ks == other%bstart_ks), "Different value found for bstart_ks")
- ABI_CHECK(all(self%nbcalc_ks == other%nbcalc_ks), "Different value found for bstop_ks")
- ABI_CHECK(all(self%kcalc == other%kcalc), "Different value found for kcalc")
- ABI_CHECK(all(self%kcalc2ibz == other%kcalc2ibz), "Different value found for kcalc2ibz")
- ABI_CHECK(all(self%kTmesh == other%kTmesh), "Different value found for kTmesh")
- ABI_CHECK(all(self%mu_e == other%mu_e), "Different value found for mu_e")
+ ABI_CHECK_NOSTOP(all(self%ngqpt == other%ngqpt), "Different value found for ngqpt", ierr)
+ ABI_CHECK_NOSTOP(all(self%bstart_ks == other%bstart_ks), "Different value found for bstart_ks", ierr)
+ ABI_CHECK_NOSTOP(all(self%nbcalc_ks == other%nbcalc_ks), "Different value found for bstop_ks", ierr)
+ ABI_CHECK_NOSTOP(all(self%kcalc == other%kcalc), "Different value found for kcalc", ierr)
+ ABI_CHECK_NOSTOP(all(self%kcalc2ibz == other%kcalc2ibz), "Different value found for kcalc2ibz", ierr)
+ ABI_CHECK_NOSTOP(all(self%kTmesh == other%kTmesh), "Different value found for kTmesh", ierr)
+ ABI_CHECK_NOSTOP(all(self%mu_e == other%mu_e), "Different value found for mu_e", ierr)
+
+ ABI_CHECK(ierr == 0, "Fatal error in sigmaph_compare, see previous messages!")
 
 end subroutine sigmaph_compare
 !!***

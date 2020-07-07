@@ -322,7 +322,7 @@ MODULE m_ebands
 
  type,public :: klinterp_t
 
-   integer :: mband, nsppol, ndat
+   integer :: bsize, nsppol, ndat
    ! Max number of bands, number of independent spin polarization, size of "extra" dimension.
 
    integer :: nkx, nky, nkz
@@ -5787,15 +5787,15 @@ end subroutine ebands_interpolate_kpath
 !! SOURCE
 
 type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt, kibz, &
-                                       mband, nkibz, nsppol, ndat, values_bksd, comm) result(new)
+                                       bsize, nkibz, nsppol, ndat, values_bksd, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: nshiftk, kptopt, mband, nkibz, nsppol, ndat, comm
+ integer,intent(in) :: nshiftk, kptopt, bsize, nkibz, nsppol, ndat, comm
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
- real(dp),intent(in) :: kibz(3, nkibz), shiftk(3,nshiftk), values_bksd(mband, nkibz, nsppol, ndat)
+ real(dp),intent(in) :: kibz(3, nkibz), shiftk(3,nshiftk), values_bksd(bsize, nkibz, nsppol, ndat)
 
 !Local variables-------------------------------
 !scalars
@@ -5804,7 +5804,6 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
- integer :: ngkpt(3)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: kpt(3)
  real(dp),allocatable :: kfull(:,:)
@@ -5830,16 +5829,12 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    MSG_ERROR("Linear interpolation cannot be performed. See messages above.")
  end if
 
- ngkpt(1) = kptrlatt(1, 1)
- ngkpt(2) = kptrlatt(2, 2)
- ngkpt(3) = kptrlatt(3, 3)
-
- nkx = ngkpt(1)
- nky = ngkpt(2)
- nkz = ngkpt(3)
+ nkx = kptrlatt(1, 1)
+ nky = kptrlatt(2, 2)
+ nkz = kptrlatt(3, 3)
 
  new%nkx = nkx; new%nky = nky; new%nkz = nkz
- new%mband = mband; new%nsppol = nsppol; new%ndat = ndat
+ new%bsize = bsize; new%nsppol = nsppol; new%ndat = ndat
 
  ! Build list of k-points in the conventional unit cell.
  ! (x,y,z) ordered as required by interpolation routine
@@ -5847,11 +5842,11 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  ABI_MALLOC(kfull, (3, nkfull))
  ikf = 0
  do iz=1,nkz
-   kpt(3) = (iz - 1 + shiftk(3, 1)) / ngkpt(3)
+   kpt(3) = (iz - 1 + shiftk(3, 1)) / nkz
    do iy=1,nky
-     kpt(2) = (iy - 1 + shiftk(2, 1)) / ngkpt(2)
+     kpt(2) = (iy - 1 + shiftk(2, 1)) / nky
      do ix=1,nkx
-       kpt(1) = (ix - 1 + shiftk(1, 1)) / ngkpt(1)
+       kpt(1) = (ix - 1 + shiftk(1, 1)) / nkx
        ikf = ikf + 1
        kfull(:, ikf) = kpt
      end do
@@ -5876,12 +5871,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
    MSG_ERROR(msg)
  end if
 
- ABI_CALLOC(new%data_uk_bsd, (nkx*nky*nkz, mband, nsppol, ndat))
- !new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, mband]
-
- !do spin=1,nsppol
- !do band=1,mband
- !if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
+ ABI_CALLOC(new%data_uk_bsd, (nkx*nky*nkz, bsize, nsppol, ndat))
 
  ! Build array in the full BZ to prepare call to interpol3d.
  ikf = 0
@@ -5890,13 +5880,10 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
      do ix=1,nkx
        ikf = ikf + 1
        ik_ibz = bz2ibz(ikf, 1)
-       new%data_uk_bsd(ikf, 1:mband, 1:nsppol, 1:ndat) = values_bksd(1:mband, ik_ibz, 1:nsppol, 1:ndat)
+       new%data_uk_bsd(ikf, 1:bsize, 1:nsppol, 1:ndat) = values_bksd(1:bsize, ik_ibz, 1:nsppol, 1:ndat)
      end do
    end do
  end do
-
- !end do
- !end do
 
  ABI_FREE(bz2ibz)
 
@@ -5959,7 +5946,7 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
 !scalars
  class(klinterp_t),intent(in) :: self
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(out) :: vals_bsd(self%mband, self%nsppol, self%ndat)
+ real(dp),intent(out) :: vals_bsd(self%bsize, self%nsppol, self%ndat)
 
 !Local variables-------------------------------
  integer :: spin, idat, band
@@ -5971,7 +5958,7 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  !write(std_out, *)"kwrap:", kwrap
  do idat=1,self%ndat
    do spin=1,self%nsppol
-      do band=1,self%mband
+      do band=1,self%bsize
         vals_bsd(band, spin, idat) = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:, band, spin, idat))
       end do
    end do

@@ -62,7 +62,7 @@ MODULE m_ddk
 !!***
 
  public :: ddk_red2car           ! Convert band velocities from cartesian to reduced coordinates
- public :: ddk_compute           ! Calculate DDK matrix elements. Save result to disk.
+
 !!***
 
  type, private :: ham_targets_t
@@ -174,12 +174,16 @@ MODULE m_ddk
     ! (3, 2, mband, mband, nkpt, nsppol))
 
    real(dp),allocatable :: vdiago(:,:,:,:)
-    ! (3, mband, nkpt, nsppol)
+    ! (3, bmin:bmax, nkpt, nsppol)
 
    real(dp),allocatable :: vmat(:,:,:,:,:,:)
-    ! (2, 3, mband, mband, nkpt, nsppol))
+    ! (2, 3, bmin:bmax, bmin:bmax, nkpt, nsppol))
 
  contains
+
+   procedure :: compute_ddk => ddkstore_compute_ddk
+    ! Calculate DDK matrix elements (diago or full b,b' matrix).
+    ! Return results in datatype. Optionally, save results to disk in EVK format.
 
    procedure :: free => ddkstore_free
     ! Free memory.
@@ -193,9 +197,9 @@ CONTAINS
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddk_compute
+!!****f* m_ddk/ddkstore_compute_ddk
 !! NAME
-!!  ddk_compute
+!!  ddkstore_compute_ddk
 !!
 !! FUNCTION
 !!  Calculate the DDK matrix elements using the commutator formulation.
@@ -210,11 +214,11 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
+subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
 !Arguments ------------------------------------
 !scalars
- type(ddkstore_t),intent(inout) :: ds
+ class(ddkstore_t),intent(inout) :: ds
  character(len=*),intent(in) :: wfk_path, prefix
  integer,intent(in) :: comm
  type(dataset_type),intent(in) :: dtset
@@ -281,6 +285,10 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  bmin = ds%bmin; bmax = ds%bmax
  nbcalc  = bmax - bmin + 1
  write_ncfile = len_trim(prefix) > 0
+ if (write_ncfile .and. .not. (bmin == 1 .and. bmax == mband) ) then
+   write_ncfile = .False.
+   MSG_WARNING("Cannot write ncfile if .not. (bmin == 1 .and. bmax == mband)")
+ end if
 
  if (my_rank == master) then
    write(ab_out, "(a)")" Parameters extracted from the Abinit header:"
@@ -305,7 +313,6 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkpt, nsppol))
-
  keep_ur = .false.; bks_mask = .false.; nband = mband
 
  if (ds%only_diago) then
@@ -375,13 +382,13 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  end if
 
  ABI_MALLOC(cwaveprj, (0, 0))
- ABI_CALLOC(ds%dipoles, (3, 2, mband, mband, nkpt, nsppol))
+ ABI_CALLOC(ds%dipoles, (3, 2, bmin:bmax, bmin:bmax, nkpt, nsppol))
  ABI_MALLOC(ihrc, (3, nspinor**2))
 
  if (ds%only_diago) then
-   ABI_CALLOC(ds%vdiago, (3, mband, nkpt, nsppol))
+   ABI_CALLOC(ds%vdiago, (3, bmin:bmax, nkpt, nsppol))
  else
-   ABI_CALLOC(ds%vmat, (2, 3, mband, mband, nkpt, nsppol))
+   ABI_CALLOC(ds%vmat, (2, 3, bmin:bmax, bmin:bmax, nkpt, nsppol))
  end if
 
  if (dtset%useria /= 666) then
@@ -402,7 +409,7 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      end if
      call cwtime(cpu, wall, gflops, "start")
 
-     nband_k  = wfd%nband(ik,spin)
+     nband_k  = wfd%nband(ik, spin)
      istwf_k  = wfd%istwfk(ik)
      npw_k    = wfd%npwarr(ik)
      kpt      = wfd%kibz(:,ik)
@@ -609,7 +616,7 @@ subroutine ddk_compute(ds, wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ! Block all procs here so that we know output files are available when code returns.
  call xmpi_barrier(comm)
 
-end subroutine ddk_compute
+end subroutine ddkstore_compute_ddk
 !!***
 
 !----------------------------------------------------------------------

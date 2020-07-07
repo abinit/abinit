@@ -50,7 +50,7 @@ module m_rta
  use m_kpts,           only : listkk, kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
- use m_ddk,            only : ddkstore_t, ddk_compute
+ use m_ddk,            only : ddkstore_t
 
  implicit none
 
@@ -363,11 +363,10 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  ! How many RTA approximations have we computed in sigmaph? (SERTA, MRTA)
  new%nrta = 2; if (sigmaph%mrta == 0) new%nrta = 1
 
- !new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
- new%bmin = 1; new%bmax = ebands%mband
+ new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
+ !new%bmin = 1; new%bmax = ebands%mband  ! This for debugging purposes
  new%bsize = new%bmax - new%bmin + 1
 
- ! Information about the gaps
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
  nsppol = new%nsppol
 
@@ -375,6 +374,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  new%eminmax_spin = ebands_get_minmax(ebands, "eig")
 
  if (new%assume_gap) then
+   ! Information about the gaps
    new%gaps = ebands_get_gaps(ebands, ierr)
    if (ierr /= 0) then
      do spin=1, nsppol
@@ -394,11 +394,10 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  ! Read lifetimes and new%ebands from SIGEPH.nc file
  ! =================================================
  ! After this point we have:
- !      velocity(3, mband, nkpt, nsppol)
- !      linewidths(self%ntemp, mband, nkpt, nsppol, 2)
  !
- ! where mband is the max number of bands.
-
+ !      velocity(3, bmin:bmax, nkpt, nsppol)
+ !      linewidths(self%ntemp, bmin:bmax, nkpt, nsppol, 2)
+ !
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with the sigma_ngkpt k-mesh, we need to downsample ebands.
    call wrtout(unts, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
@@ -406,18 +405,20 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
 
    tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk)
-   new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, new%linewidths, new%velocity, xmpi_comm_self, ierr)
+   new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, [new%bmin, new%bmax], new%linewidths, new%velocity, xmpi_comm_self)
    call ebands_free(tmp_ebands)
  else
-   new%ebands = sigmaph%get_ebands(cryst, ebands, new%linewidths, new%velocity, xmpi_comm_self, ierr)
+   new%ebands = sigmaph%get_ebands(cryst, ebands, [new%bmin, new%bmax], new%linewidths, new%velocity, xmpi_comm_self)
    kptrlatt = ebands%kptrlatt
  end if
 
  !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
  !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
 
- if (dtset%useria == 888 .and. &
+ if ( &
+     dtset%useria == 888 .and. &
      (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE)) then
+
    ! In principle only getwfkfine_filepath is used here
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
@@ -426,6 +427,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    mband = new%ebands%mband
 
    !ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
+
    tmp_ebands = wfk_read_ebands(wfk_fname_dense, comm)
    ebands_dense = ebands_chop(tmp_ebands, 1, mband)
    call ebands_free(tmp_ebands)
@@ -436,40 +438,42 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    ABI_CHECK_IEQ(mband, ebands_dense%mband, "Inconsistent number of bands for the fine and dense grid:")
 
    ! Compute v_{nk} on the dense grid in Cartesian coordinates.
+   ! vdiago(3, bmin:bmax, nkpt, nsppol)
+   ! NB: We select states in [bmin:bmax] but all k-points in the IBZ are computed!
    ds%only_diago = .True.; ds%bmin = new%bmin; ds%bmax = new%bmax; ds%mode = "cart"
-   call ddk_compute(ds, wfk_fname_dense, "", dtset, psps, pawtab, ngfftc, comm)
+   call ds%compute_ddk(wfk_fname_dense, "", dtset, psps, pawtab, ngfftc, comm)
 
    ! Transfer data to new%velocity
    ABI_MOVE_ALLOC(ds%vdiago, new%velocity)
    call ds%free()
    !print *, "velocity:", new%velocity
 
-   ! Linear interpolation in k-space of the linewidths from SIGEPH to dense IBZ.
+   ! Linear interpolation in k-space of the linewidths from input SIGEPH to the dense IBZ provided by fine WFK file.
    ! First of all transfer linewidths to values_bksd to prepare call to klinterp_new.
    ndat = new%ntemp * new%nrta
-   ABI_MALLOC(values_bksd, (new%ebands%mband, new%ebands%nkpt, nsppol, ndat))
+   ABI_MALLOC(values_bksd, (new%bmin:new%bmax, new%ebands%nkpt, nsppol, ndat))
 
    do irta=1,new%nrta
      do spin=1,nsppol
        do ik_ibz=1,new%ebands%nkpt
-         do ib=1,new%ebands%mband
+         do ib=new%bmin,new%bmax
            do itemp=1,new%ntemp
              idat = itemp + new%ntemp * (irta - 1)
-             values_bksd(ib, ik_ibz, spin, idat) = new%linewidths(itemp, ib, ik_ibz, spin, irta)
+             values_bksd(ib, ik_ibz, spin, idat) = new%linewidths(itemp, ib, ik_ibz, spin, irta) ! - t(e)
            end do
          end do
        end do
      end do
    end do
 
-   ! Build linear interpolator for linewidths.
-   mband = new%ebands%mband
+   ! Build linear interpolator for linewidths (use only bsize bands)
    klinterp = klinterp_new(cryst, new%ebands%kptrlatt, new%ebands%nshiftk, new%ebands%shiftk, new%ebands%kptopt, &
-                           new%ebands%kptns, mband, new%ebands%nkpt, nsppol, ndat, values_bksd, comm)
+                           new%ebands%kptns, new%bsize, new%ebands%nkpt, nsppol, ndat, values_bksd, comm)
    ABI_FREE(values_bksd)
 
    ! HERE we re-malloc new%ebands and %linewidths on the fine k-mesh.
    ! The call must be executed here, once klinterp has been built.
+   ! After this point we can use new%ebands to allocate stuff.
    call ebands_move_alloc(ebands_dense, new%ebands)
 
    ! Unlinke the ebands stored in SIGEPH, the eigens read from WFK_FINE have not been
@@ -478,14 +482,14 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
    ! And now interpolate linewidths on the fine k-mesh
    ! Note: k-points that close to the edge of the pocket may get zero linewidths
-   ! One may fix the problem by using tau(e).
-   !mband = new%ebands%mband
-   ABI_REMALLOC(new%linewidths, (new%ntemp, mband, new%ebands%nkpt, nsppol, new%nrta))
-   ABI_MALLOC(vals_bsd, (mband, nsppol, ndat))
+   ! One may fix the problem by using lw(e).
+   ABI_REMALLOC(new%linewidths, (new%ntemp, new%bmin:new%bmax, new%ebands%nkpt, nsppol, new%nrta))
+   ABI_MALLOC(vals_bsd, (new%bmin:new%bmax, nsppol, ndat))
 
    ierr = 0
    do ik_ibz=1,new%ebands%nkpt
      call klinterp%eval_bsd(new%ebands%kptns(:, ik_ibz), vals_bsd)
+     !vals_bsd = vals_bsd + lw(e)
 
      if (any(vals_bsd < zero)) then
        ierr = ierr + 1
@@ -493,12 +497,11 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
      end if
 
      ! Transfer data.
-     ierr = 0
      do spin=1,nsppol
        do irta=1,new%nrta
          do itemp=1,new%ntemp
            idat = itemp + new%ntemp * (irta - 1)
-           do ib=1,mband
+           do ib=new%bmin,new%bmax
              !print *, "vals_bsd:", vals_bsd(ib, idat, spin)
              !print *, new%linewidths(itemp, ib, ik_ibz, spin, irta), vals_bsd(ib, spin, idat)
              new%linewidths(itemp, ib, ik_ibz, spin, irta) = vals_bsd(ib, spin, idat)
@@ -557,10 +560,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    ABI_SFREE(indkk)
    call ebands_move_alloc(tmp_ebands, new%ebands)
  end if
-
- ! Define band range for arrays
- new%bmin = 1; new%bmax = new%ebands%mband
- new%bsize = new%bmax - new%bmin + 1
 
  ! Same doping case as in sigmaph file.
  ABI_MALLOC(new%eph_mu_e, (new%ntemp))
@@ -662,7 +661,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
 
 !Local variables ------------------------------
  integer,parameter :: nvecs0 = 0, master = 0
- integer :: nsppol, nkpt, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt !mband,
+ integer :: nsppol, nkpt, ib, ik_ibz, iw, spin, ii, jj, itemp, irta, itens, iscal, cnt
  integer :: ntens, edos_intmeth, ifermi, iel, nvals, my_rank
  real(dp) :: emin, emax, edos_broad, edos_step, max_occ, kT, Tkelv, linewidth, fact0
  real(dp) :: cpu, wall, gflops
@@ -677,16 +676,17 @@ subroutine rta_compute(self, cryst, dtset, comm)
  my_rank = xmpi_comm_rank(comm)
 
  ! Basic dimensions
- nsppol = self%ebands%nsppol; nkpt = self%ebands%nkpt !; mband = self%ebands%mband
+ nsppol = self%ebands%nsppol; nkpt = self%ebands%nkpt
 
  ! Allocate vv tensors with and without the lifetimes. Eq 8 of [[cite:Madsen2018]]
  ! The total number of tensorial entries is ntens and accounts for nrta
  ! Remember that we haven't computed all the k-points in the IBZ hence we can have zero linewidths
  ! or very small values when the states is at the band edge so use safe_dif to avoid SIGFPE.
+ ! Also, note how we store only the states in the energy window
+
  nvals = self%ntemp * self%nrta
  ABI_CALLOC(tau_vals, (self%ntemp, self%nrta, self%bmin:self%bmax, nkpt, nsppol))
 
- ! FIXME: The memory explodes if natom is large. Should reduce mband to the states in the energy window
  ntens = (1 + self%ntemp) * self%nrta
  ABI_CALLOC(vv_tens, (3, 3, 1 + self%ntemp, self%nrta, self%bmin:self%bmax, nkpt, nsppol))
 
@@ -755,8 +755,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  !  Note how we compute the DOS only between [emin, emax] to save time and memory
  !  this implies that IDOS and edos%ifermi are ill-defined
 
- ! TODO: pass bmin:bmax instead of emin:max
- self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, self%ebands%mband, &
+ self%edos = ebands_get_edos_matrix_elements(self%ebands, cryst, self%bsize, &
                                              nvals, tau_vals, nvecs0, dummy_vecs, ntens, vv_tens, &
                                              edos_intmeth, edos_step, edos_broad, &
                                              out_valsdos, dummy_dosvecs, out_tensdos, comm, &
@@ -1067,7 +1066,7 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
- integer :: nsppol, nkpt, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta !mband,
+ integer :: nsppol, nkpt, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk
  real(dp) :: cpu, wall, gflops
  real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
@@ -1080,7 +1079,6 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  nprocs = xmpi_comm_size(comm)
 
  ! Copy important dimensions
- !mband = self%ebands%mband;
  nkpt = self%ebands%nkpt; nsppol = self%ebands%nsppol
  max_occ = two / (self%nspinor * self%nsppol)
 
@@ -1333,7 +1331,7 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
    if (irta == 2) rta_type = "MRTA"
 
    do ii=1,3
-     call wrtout(unts, sjoin("Cartesian component of", rta_type, "mobility tensor:", components(ii)))
+     call wrtout(unts, sjoin(" Cartesian component of", rta_type, "mobility tensor:", components(ii)))
      write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
      call wrtout(unts, msg)
 
@@ -1345,6 +1343,7 @@ subroutine rta_print_txt_files(self, cryst, dtset, dtfil)
            self%ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
            self%nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
            self%mobility_mu(ii, ii, 1, itemp, spin, irta), self%mobility_mu(ii, ii, 2, itemp, spin, irta)
+           !self%transport_mu_e(itemp) * Ha_eV
          call wrtout(unts, msg)
        end do ! itemp
      end do ! spin
