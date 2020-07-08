@@ -1130,9 +1130,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'icoulomb',dt%icoulomb,1,(/0/),iout)
    end if
 
-   ! icsing
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'icsing',dt%icsing,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
-
    ! icutcoul
    call chkint_eq(0,0,cond_string,cond_values,ierr,'icutcoul',dt%icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
 
