@@ -332,20 +332,18 @@ end subroutine make_vectornd
 !! SOURCE
 
 subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
-                 &qpt,icutcoul,nkpt,vcutgeo) ! Optional arguments
+                 &qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,izero,nfft
- integer,intent(in),optional ::icutcoul,nkpt
+ !integer,intent(in),optional ::icutcoul,nkpt
  real(dp),intent(in) :: gsqcut
-! REMEMBER to define the V_Coulomb type first before you uncomment this
-! For the moment we will leave optional the choice of cut-off technique 
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(in),optional :: qpt(3),vcutgeo(3)
+ real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
 !Local variables-------------------------------
@@ -355,7 +353,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol,rcut
+ real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
  character(len=500) :: message
 !arrays
  integer :: id(3)
@@ -366,6 +364,12 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
+
+ !BG: Need to be brought back
+! rcut=ten
+! icutcoul=3
+! nkpt=1
+! vcutgeo(:)=zero
 
  ! Keep track of total time spent in hartre
  call timab(10,1,tsec)

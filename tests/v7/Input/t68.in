@@ -91,7 +91,7 @@ gw_qprange9 0
 # Dataset10: Computation of the dielectric matrix on top of scPBE0-1/3 in the Kohn-Sham basis
 optdriver10  3
 gwcalctyp10  20
-gw_getqps10  6
+   getqps10  6
 
 # Dataset11: One-shot G0W0 on top of scPBE0-1/3 in the Kohn-Sham basis 
 # (note however that all the bands and k points are considered, in orer to perform the correct rotation).

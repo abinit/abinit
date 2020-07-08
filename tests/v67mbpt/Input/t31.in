@@ -71,6 +71,7 @@ nband3             8
 bs_freq_mesh3 0 6 0.1 eV
 bs_hayd_term3      0      # No terminator
 
+
 # Preparation of interpolation
 bs_interp_prep3    1
 

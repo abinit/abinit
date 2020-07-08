@@ -162,9 +162,6 @@ MODULE m_io_screening
   integer :: awtr
   ! Input variable (time-reversal symmetry in RPA expression)
 
-  integer :: icsing
-  ! Input variable (Coulomb cutoff)
-
   integer :: gw_icsing
   ! Input variable (Coulomb cutoff)
 

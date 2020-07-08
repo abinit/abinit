@@ -5756,6 +5756,75 @@ function which decays as $1/x^2$. To be used in conjunction with [[nfreqre]],
 """,
 ),
 
+
+
+Variable(
+    abivarname="gw_icsing",
+    varset="gw",
+    vartype="integer",
+    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=6,
+    mnemonics="GW Integration technique for Coulomb SINGularity",
+    requires="[[optdriver]] in [3,4]",
+    added_in_version="v9.1",
+    text=r"""
+TO BE CHECKED ! (Also the information above)
+Many-body calculations
+for fully periodic systems are problematic due to the presence of the
+integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
+respect to the number of q-points used to sample the Brillouin zone. The
+convergence can be accelerated by integrating accurately the zone in the neighborhood of $\mathbf{G}=0$.
+
+[[gw_icsing]] defines the particular expression to be used for such integration,
+in case [[icutcoul]]==3 (3-dimensional system).
+  
+  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
+  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
+  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+""",
+),
+
+Variable(
+    abivarname="gw_icutcoul",
+    varset="gw",
+    vartype="integer",
+    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
+    dimensions="scalar",
+    defaultval=6,
+    mnemonics="GW Integration technique for Coulomb SINGularity",
+    requires="[[optdriver]] in [3,4]",
+    added_in_version="v9.1",
+    text=r"""
+TO BE CHECKED ! (Also the information above)
+Many-body calculations
+for fully periodic systems are problematic due to the presence of the
+integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
+respect to the number of q-points used to sample the Brillouin zone. The
+convergence can be accelerated by integrating accurately the zone in the neighborhood of $\mathbf{G}=0$.
+
+[[gw_icsing]] defines the particular expression to be used for such integration,
+in case [[icutcoul]]==3 (3-dimensional system).
+  
+  * 0 --> sphere (molecules, but also 3D-crystals, see below).
+  * 1 --> cylinder (nanowires, nanotubes).
+  * 2 --> surface.
+  * 3 --> 3D crystal (Coulomb interaction without cut-off).
+  * 4 --> ERF, long-range only Coulomb interaction.
+  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
+
+  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
+  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
+  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
+  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
+  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
+  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+""",
+),
+
 Variable(
     abivarname="gw_invalid_freq",
     varset="gw",
@@ -6812,46 +6881,6 @@ pseudo-potential and ion-ion interaction:
 ),
 
 Variable(
-    abivarname="icsing",
-    varset="gw",
-    vartype="integer",
-    topics=['GWls_compulsory', 'Susceptibility_basic', 'Coulomb_useful', 'SelfEnergy_basic'],
-    dimensions="scalar",
-    defaultval=6,
-    mnemonics="Integration technique for Coulomb SINGularity",
-    requires="[[optdriver]] in [3,4]",
-    added_in_version="v9.1",
-    text=r"""
-TO BE CHECKED ! (Also the information above)
-Many-body calculations
-for fully periodic systems are problematic due to the presence of the
-integrable Coulomb singularity at $\mathbf{G}=0$ that hinders the convergence with
-respect to the number of q-points used to sample the Brillouin zone. The
-convergence can be accelerated by integrating accurately the zone in the neighborhood of $\mathbf{G}=0$.
-
-[[icsing]] defines the particular expression to be used for such integration,
-in case [[icutcoul]]==3 (3-dimensional system).
-<<<<<<< HEAD
-  
-  * 0 --> sphere (molecules, but also 3D-crystals, see below).
-  * 1 --> cylinder (nanowires, nanotubes).
-  * 2 --> surface.
-  * 3 --> 3D crystal (Coulomb interaction without cut-off).
-  * 4 --> ERF, long-range only Coulomb interaction.
-  * 5 --> ERFC, short-range only Coulomb interaction (e.g. as used in the HSE functional).
-=======
-
-  * 3 --> Integration in a spherical mini-Brillouin Zone, legacy value.
->>>>>>> ff1405eadae992f40bfd85fe900ccef6536d7905
-  * 6 --> auxiliary function integration for 3D systems from [[cite:Carrier2007]].
-  * 7 --> auxiliary function for 3D systems of Gygi and Baldereschi [[cite:Gygi1986]].
-  * 14 --> Monte-Carlo integration in the mini-Brillouin zone for ERF, long-range only Coulomb interaction.
-  * 15 --> Monte-Carlo integration in the mini-Brillouin zone for ERFC, short-range only Coulomb interaction.
-  * 16 --> Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
-""",
-),
-
-Variable(
     abivarname="icutcoul",
     varset="gw",
     vartype="integer",
@@ -6872,7 +6901,7 @@ Also, even in the ground-state case, a cut-off Coulomb interaction might prove u
 in reciprocal space. The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 5. The
 corresponding influential variables are [[vcutgeo]] and [[rcut]].
-Also, in the GW case, the related variable [[icsing]] allows one to treat the integration
+Also, in the GW case, the related variable [[gw_icsing]] allows one to treat the integration
 of the $\mathbf{G}=0$ Coulomb singularity.
 
   * 0 --> sphere (molecules, but also 3D-crystals, see below).
@@ -19289,7 +19318,7 @@ planes of constant reduced coordinates in the investigated direction, must be em
 
 Variable(
     abivarname="vcutgeo",
-    varset="gw",
+    varset="gstate,gw",
     vartype="real",
     topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions=[3],
@@ -19298,7 +19327,7 @@ Variable(
     requires="[[icutcoul]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
-[[vcutgeo]] is used in conjunction with [[icutcoul]](and [[icsing]]) to specify
+[[vcutgeo]] is used in conjunction with [[icutcoul]](and [[gw_icutcoul]]) to specify
 the geometry used to truncate the Coulomb interaction, as well as the particular
 approach to be used. It has a meaning only for the cylindrical symmetry
 ([[icutcoul]] = 1) or in the case of surfaces ([[icutcoul]] = 2). For each
