@@ -246,11 +246,9 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 #endif
  character(len=500) :: msg
  character(len=fnlen) :: path
- type(sigmaph_t) :: sigmaph
  type(rta_t) :: rta
 !arrays
  integer :: unts(2)
- real(dp) :: extrael_fermie(2)
 
 ! *************************************************************************
 
@@ -260,16 +258,9 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  call wrtout(unts, ch10//' Entering transport RTA computation driver.')
  call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1, do_flush=.True.)
 
- sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
- ABI_CHECK(ierr == 0, msg)
-
  ! Initialize RTA object
  ! TODO: Should store more metadata: energy window, nkcalc ....
- rta = rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawtab, psps, extrael_fermie, comm)
-
- ! sigmaph is not needed anymore. Free it.
- sigmaph%ncid = nctk_noid
- call sigmaph%free()
+ rta = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
 
  ! Compute RTA transport quantities
  call rta%compute(cryst, dtset, comm)
@@ -309,27 +300,23 @@ end subroutine rta_driver
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
 !!  dtfil<datafiles_type>=variables related to files.
-!!  sigmaph<sigmaph_t>=Object with e-ph self-energy results.
 !!  cryst<crystal_t>=Crystalline structure
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!!  extrael_fermie
 !!  comm=MPI communicator.
 !!
 !! SOURCE
 
-type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawtab, psps, extrael_fermie, comm) result (new)
+type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm) result (new)
 
 !Arguments -------------------------------------
  integer, intent(in) :: comm
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
- type(sigmaph_t),intent(in) :: sigmaph
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: ngfftc(18)
- real(dp),intent(in) :: extrael_fermie(2)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
@@ -341,18 +328,22 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(klinterp_t) :: klinterp
  type(ddkstore_t) :: ds
+ type(sigmaph_t) :: sigmaph
 !arrays
  integer :: kptrlatt(3,3), unts(2)
  integer,allocatable :: indkk(:,:)
- real(dp),allocatable :: values_bksd(:,:,:,:), vals_bsd(:,:,:)
- real(dp),allocatable :: tmp_array4(:,:,:,:), tmp_array5(:,:,:,:,:)
+ real(dp) :: extrael_fermie(2)
+ real(dp),allocatable :: values_bksd(:,:,:,:), vals_bsd(:,:,:), tmp_array4(:,:,:,:), tmp_array5(:,:,:,:,:)
 
 !************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  unts = [std_out, ab_out]
 
- call cwtime(cpu, wall, gflops, "start")
+ sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
+ ABI_CHECK(ierr == 0, msg)
 
  new%assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
@@ -440,7 +431,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
    ! Compute v_{nk} on the dense grid in Cartesian coordinates.
    ! vdiago(3, bmin:bmax, nkpt, nsppol)
-   ! NB: We select states in [bmin:bmax] but all k-points in the IBZ are computed!
+   ! NB: We select bands in [bmin:bmax] but all k-points in the IBZ are computed!
    ds%only_diago = .True.; ds%bmin = new%bmin; ds%bmax = new%bmax; ds%mode = "cart"
    call ds%compute_ddk(wfk_fname_dense, "", dtset, psps, pawtab, ngfftc, comm)
 
@@ -514,7 +505,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
    if (ierr /= 0) then
      ! This should never happen for linear interpolation.
-     MSG_WARNING(sjoin("Linear interpolation produced:", itoa(ierr), "negative linewidths"))
+     MSG_WARNING(sjoin("Linear interpolation produced:", itoa(ierr), " k-points with negative linewidths"))
    end if
 
    ABI_FREE(vals_bsd)
@@ -564,9 +555,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    end do
    ABI_FREE(tmp_array4)
 
-   !call downsample_array5(new%linewidths, indkk, tmp_ebands%nkpt)
-   !call downsample_array4(new%velocity, indkk, tmp_ebands%nkpt)
-
    !print *, "after downsampling linewidths"
    !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
    !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
@@ -601,51 +589,11 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    call ebands_get_muT_with_fd(ebands, new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
  end if
 
- call cwtime_report(" rta_new", cpu, wall, gflops)
+ ! sigmaph is not needed anymore. Free it.
+ sigmaph%ncid = nctk_noid
+ call sigmaph%free()
 
-! contains
-!
-! subroutine downsample_array4(array, indkk, nkpt)
-!
-!   ! (ntemp, max_nbcalc, nkcalc, nsppol)
-!   real(dp),allocatable,intent(inout) :: array(:,:,:,:)
-!   integer,intent(in) :: indkk(:,:)
-!
-!   integer :: ikpt, nkpt
-!   integer :: tmp_shape(4)
-!   real(dp),allocatable :: tmp_array(:,:,:,:)
-!
-!   ABI_MOVE_ALLOC(array, tmp_array)
-!   tmp_shape = shape(array)
-!   tmp_shape(3) = nkpt
-!   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4)))
-!   do ikpt=1,nkpt
-!     array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt, 1),:)
-!   end do
-!   ABI_FREE(tmp_array)
-!
-! end subroutine downsample_array4
-!
-! subroutine downsample_array5(array, indkk, nkpt)
-!
-!   ! (ntemp, max_nbcalc, nkcalc, nsppol,:)
-!   real(dp),allocatable,intent(inout) :: array(:,:,:,:,:)
-!   integer,intent(in) :: indkk(:,:)
-!
-!   integer :: ikpt, nkpt
-!   integer :: tmp_shape(5)
-!   real(dp),allocatable :: tmp_array(:,:,:,:,:)
-!
-!   ABI_MOVE_ALLOC(array, tmp_array)
-!   tmp_shape = shape(array)
-!   tmp_shape(3) = nkpt
-!   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4), tmp_shape(5)))
-!   do ikpt=1,nkpt
-!     array(:,:,ikpt,:,:) = tmp_array(:,:,indkk(ikpt, 1),:,:)
-!   end do
-!   ABI_FREE(tmp_array)
-!
-! end subroutine downsample_array5
+ call cwtime_report(" rta_new", cpu, wall, gflops)
 
 end function rta_new
 !!***

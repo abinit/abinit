@@ -841,9 +841,9 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
 
  ! Have to use ugly 1d vectors to call ebands_init
  ABI_CALLOC(ugly_doccde, (hdr%bantot))
- ABI_MALLOC(ugly_ene,(hdr%bantot))
+ ABI_MALLOC(ugly_ene, (hdr%bantot))
 
- call pack_eneocc(hdr%nkpt,hdr%nsppol,mband,hdr%nband,hdr%bantot,ene3d,ugly_ene)
+ call pack_eneocc(hdr%nkpt, hdr%nsppol, mband, hdr%nband, hdr%bantot, ene3d, ugly_ene)
 
  call ebands_init(hdr%bantot,ebands,my_nelect,ugly_doccde,ugly_ene,hdr%istwfk,hdr%kptns,hdr%nband,hdr%nkpt,&
    hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
@@ -893,7 +893,7 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
 !scalars
  integer :: bantot
 !arrays
- real(dp),allocatable :: ugly_doccde(:),ugly_ene(:),ugly_occ(:)
+ real(dp),allocatable :: ugly_doccde(:), ugly_ene(:), ugly_occ(:)
 ! *************************************************************************
 
  ! Have to use ugly 1d vectors to call ebands_init
@@ -1050,7 +1050,6 @@ end subroutine ebands_copy
 subroutine ebands_move_alloc(from_ebands, to_ebands)
 
 !Arguments ------------------------------------
-!scalars
  class(ebands_t),intent(inout) :: from_ebands
  class(ebands_t),intent(inout) :: to_ebands
 
@@ -1219,9 +1218,9 @@ subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d,val)
  ! elements in vect are packed in the first positions.
  do spin=1,nsppol
    do ikpt=1,nkpt
-     do band=1,nband(ikpt+(spin-1)*nkpt)
-      idx=idx+1
-      array3d(band,ikpt,spin)=vect(idx)
+     do band=1,nband(ikpt + (spin-1)*nkpt)
+      idx = idx + 1
+      array3d(band, ikpt, spin) = vect(idx)
      end do
    end do
  end do
@@ -2012,7 +2011,7 @@ pure function ebands_nelect_per_spin(ebands) result(nelect_per_spin)
    do spin=1,ebands%nsppol
      do ikpt=1,ebands%nkpt
        do iband=1,ebands%nband(ikpt+ebands%nkpt*(spin-1))
-         nelect_per_spin(spin) = nelect_per_spin(spin) + ebands%wtk(ikpt)*ebands%occ(iband, ikpt, spin)
+         nelect_per_spin(spin) = nelect_per_spin(spin) + ebands%wtk(ikpt) * ebands%occ(iband, ikpt, spin)
        end do
      end do
    end do
@@ -2446,10 +2445,10 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option1=1, unitdos0=0
- integer :: mband,nkpt,nsppol
- real(dp),parameter :: dosdeltae0=zero
- real(dp) :: prev_fermie,prev_nelect,maxocc
+ integer,parameter :: option1=1, unitdos0 = 0
+ integer :: mband, nkpt, nsppol
+ real(dp),parameter :: dosdeltae0 = zero
+ real(dp) :: prev_fermie, prev_nelect, maxocc
 !arrays
  real(dp),allocatable :: doccde(:),occ(:),eigen(:)
 
@@ -2465,12 +2464,12 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
  mband  = ebands%mband
  nkpt   = ebands%nkpt
  nsppol = ebands%nsppol
- maxocc = two/(nsppol*ebands%nspinor)
+ maxocc = two / (nsppol*ebands%nspinor)
 
  ABI_MALLOC(eigen,(mband*nkpt*nsppol))
- call get_eneocc_vect(ebands,'eig',eigen)
- ABI_MALLOC(occ,(mband*nkpt*nsppol))
- ABI_MALLOC(doccde,(mband*nkpt*nsppol))
+ call get_eneocc_vect(ebands, 'eig', eigen)
+ ABI_MALLOC(occ, (mband*nkpt*nsppol))
+ ABI_MALLOC(doccde, (mband*nkpt*nsppol))
 
  ! Get the total number of electrons nelect, given the new fermi energy.
  call getnel(doccde,dosdeltae0,eigen,ebands%entropy,fermie,maxocc,mband,ebands%nband,&
@@ -2480,6 +2479,7 @@ subroutine ebands_set_fermie(ebands, fermie, msg)
  ebands%fermie = fermie
  call put_eneocc_vect(ebands,'occ'   ,occ)
  call put_eneocc_vect(ebands,'doccde',doccde)
+
  ABI_FREE(eigen)
  ABI_FREE(occ)
  ABI_FREE(doccde)
@@ -2589,8 +2589,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
 !scalars
  integer,parameter :: occopt3 = 3
  integer :: ierr, it, nprocs, my_rank
- real(dp) :: nelect
- real(dp) :: cpu, wall, gflops
+ real(dp) :: nelect, cpu, wall, gflops
  type(ebands_t) :: tmp_ebands
  character(len=500) :: msg
 
@@ -5951,33 +5950,35 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
 
 !Local variables-------------------------------
  integer :: spin, idat, band
- integer :: ir1, ir2, ir3, pr1, pr2, pr3
- real(dp) :: val, vv(8)
+ !integer :: ir1, ir2, ir3, pr1, pr2, pr3
+ real(dp) :: val !, vv(8)
  real(dp) :: kwrap(3), shift(3)
 
 ! *********************************************************************
 
  call wrap2_zero_one(kpt, kwrap, shift)
  !write(std_out, *)"kwrap:", kwrap
+
+ ! ir1,ir2,ir3 = bottom left neighbor
+ ! pr1,pr2,pr3 = top right neighbor
+ !call interpol3d_indices(kwrap, self%nkx, self%nky, self%nkz, ir1, ir2, ir3, pr1, pr2, pr3)
+
  do idat=1,self%ndat
    do spin=1,self%nsppol
       do band=1,self%bsize
         val = interpol3d(kwrap, self%nkx, self%nky, self%nkz, self%data_uk_bsd(:,:,:,band, spin, idat))
 
-        if (val <= zero) then
-          ! ir1,ir2,ir3 = bottom left neighbor
-          ! pr1,pr2,pr3 = top right neighbor
-          call interpol3d_indices(kwrap, self%nkx, self%nky, self%nkz, ir1, ir2, ir3, pr1, pr2, pr3)
-          vv(1) = self%data_uk_bsd(ir1, ir2, ir3, band, spin, idat)
-          vv(2) = self%data_uk_bsd(pr1, ir2, ir3, band, spin, idat)
-          vv(3) = self%data_uk_bsd(ir1, pr2, ir3, band, spin, idat)
-          vv(4) = self%data_uk_bsd(ir1, ir2, pr3, band, spin, idat)
-          vv(5) = self%data_uk_bsd(pr1, pr2, ir3, band, spin, idat)
-          vv(6) = self%data_uk_bsd(ir1, pr2, pr3, band, spin, idat)
-          vv(7) = self%data_uk_bsd(pr1, ir2, pr3, band, spin, idat)
-          vv(8) = self%data_uk_bsd(pr1, pr2, pr3, band, spin, idat)
-          val = maxval(vv)
-        end if
+        !if (val <= zero) then
+        !  vv(1) = self%data_uk_bsd(ir1, ir2, ir3, band, spin, idat)
+        !  vv(2) = self%data_uk_bsd(pr1, ir2, ir3, band, spin, idat)
+        !  vv(3) = self%data_uk_bsd(ir1, pr2, ir3, band, spin, idat)
+        !  vv(4) = self%data_uk_bsd(ir1, ir2, pr3, band, spin, idat)
+        !  vv(5) = self%data_uk_bsd(pr1, pr2, ir3, band, spin, idat)
+        !  vv(6) = self%data_uk_bsd(ir1, pr2, pr3, band, spin, idat)
+        !  vv(7) = self%data_uk_bsd(pr1, ir2, pr3, band, spin, idat)
+        !  vv(8) = self%data_uk_bsd(pr1, pr2, pr3, band, spin, idat)
+        !  val = maxval(vv)
+        !end if
 
         vals_bsd(band, spin, idat) = val
       end do
