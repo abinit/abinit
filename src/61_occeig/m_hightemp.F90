@@ -335,8 +335,8 @@ contains
         ABI_ALLOCATE(valueseel,(ii))
         ix=dble(this%bcut)
         ii=0
-        do while(ix<=this%gcut)
-          sigma=this%std_init/(ix-this%bcut+1)
+        do while(ix<this%gcut)
+          sigma=this%std_init
           ii=ii+1
           valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
           & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
@@ -349,7 +349,7 @@ contains
         ABI_DEALLOCATE(valueseel)
 
         ! Change Fermi-Dirac integral lower bound.
-        xcut=hightemp_e_heg(dble(this%gcut),this%ucvol)/tsmear
+        xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
       else
         xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       end if
@@ -369,7 +369,6 @@ contains
     ! Verifier la constante (/nspden**2)
     this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
   end subroutine compute_efreeel
-
 
   !!****f* ABINIT/m_hightemp/compute_e_ent_freeel
   !! NAME
@@ -572,7 +571,6 @@ contains
         end if
       end do
     end do
-
   end subroutine compute_pw_avg_std
 
   ! *********************************************************************
