@@ -19318,7 +19318,7 @@ planes of constant reduced coordinates in the investigated direction, must be em
 
 Variable(
     abivarname="vcutgeo",
-    varset="gstate,gw",
+    varset="gw",
     vartype="real",
     topics=['GWls_compulsory', 'Susceptibility_basic', 'SelfEnergy_basic'],
     dimensions=[3],
