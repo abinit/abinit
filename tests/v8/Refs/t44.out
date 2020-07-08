@@ -270,7 +270,6 @@ P           mkmem           8
          ph_ngqpt       16   16   16
         ph_nqpath           3
          ph_smear      3.67493254E-05 Hartree
-         ph_wstep      3.67493254E-06 Hartree
         prteliash           1
            prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
@@ -1687,7 +1686,6 @@ P           mkmem           8
          ph_ngqpt       16   16   16
         ph_nqpath           3
          ph_smear      3.67493254E-05 Hartree
-         ph_wstep      3.67493254E-06 Hartree
         prteliash           1
            prtvol           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01

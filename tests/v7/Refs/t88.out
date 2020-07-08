@@ -125,10 +125,10 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
         ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
        eph_fsewin      2.93994603E-02 Hartree
-       eph_fsmear1     9.99999978E-03 Hartree
+       eph_fsmear1     1.00000000E-02 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
-       eph_fsmear3     9.99999978E-03 Hartree
-       eph_fsmear4     9.99999978E-03 Hartree
+       eph_fsmear3     1.00000000E-02 Hartree
+       eph_fsmear4     1.00000000E-02 Hartree
        eph_fsmear5    -3.67493254E-02 Hartree
       eph_intmeth1          2
       eph_intmeth2          1
@@ -238,7 +238,6 @@ P           mkmem          29
          ph_ngqpt       16   16   16
         ph_nqpath           3
          ph_smear      3.67493254E-05 Hartree
-         ph_wstep      3.67493254E-06 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0
@@ -1553,10 +1552,10 @@ All the independent perturbations are available
         ddb_ngqpt        4    4    4
              ecut      6.00000000E+00 Hartree
        eph_fsewin      2.93994603E-02 Hartree
-       eph_fsmear1     9.99999978E-03 Hartree
+       eph_fsmear1     1.00000000E-02 Hartree
        eph_fsmear2     7.34986508E-03 Hartree
-       eph_fsmear3     9.99999978E-03 Hartree
-       eph_fsmear4     9.99999978E-03 Hartree
+       eph_fsmear3     1.00000000E-02 Hartree
+       eph_fsmear4     1.00000000E-02 Hartree
        eph_fsmear5    -3.67493254E-02 Hartree
       eph_intmeth1          2
       eph_intmeth2          1
@@ -1644,7 +1643,6 @@ P           mkmem          29
          ph_ngqpt       16   16   16
         ph_nqpath           3
          ph_smear      3.67493254E-05 Hartree
-         ph_wstep      3.67493254E-06 Hartree
        prtbltztrp1          1
        prtbltztrp2          0
        prtbltztrp3          0

@@ -334,7 +334,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
 !Local variables ------------------------------
  integer,parameter :: sppoldbl1 = 1, master = 0
- integer :: ierr, spin, nprocs, my_rank, timrev, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband
+ integer :: ierr, spin, nprocs, my_rank, timrev, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname_dense
@@ -345,6 +345,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
  integer :: kptrlatt(3,3), unts(2)
  integer,allocatable :: indkk(:,:)
  real(dp),allocatable :: values_bksd(:,:,:,:), vals_bsd(:,:,:)
+ real(dp),allocatable :: tmp_array4(:,:,:,:), tmp_array5(:,:,:,:,:)
 
 !************************************************************************
 
@@ -448,7 +449,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    call ds%free()
    !print *, "velocity:", new%velocity
 
-
    ! Linear interpolation in k-space of the linewidths from input SIGEPH to the dense IBZ provided by fine WFK file.
    ! First of all transfer linewidths to values_bksd to prepare call to klinterp_new.
    ndat = new%ntemp * new%nrta
@@ -489,6 +489,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
    ierr = 0
    do ik_ibz=1,new%ebands%nkpt
+
      call klinterp%eval_bsd(new%ebands%kptns(:, ik_ibz), vals_bsd)
      !vals_bsd = vals_bsd + lw(e)
 
@@ -503,8 +504,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
          do itemp=1,new%ntemp
            idat = itemp + new%ntemp * (irta - 1)
            do ib=new%bmin,new%bmax
-             !print *, "vals_bsd:", vals_bsd(ib, idat, spin)
-             !print *, new%linewidths(itemp, ib, ik_ibz, spin, irta), vals_bsd(ib, spin, idat)
              new%linewidths(itemp, ib, ik_ibz, spin, irta) = vals_bsd(ib, spin, idat)
            end do
          end do
@@ -551,14 +550,28 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
    end if
 
    ! Downsampling linewidths and velocities.
-   call downsample_array5(new%linewidths, indkk, tmp_ebands%nkpt)
-   call downsample_array4(new%velocity, indkk, tmp_ebands%nkpt)
+   ABI_MOVE_ALLOC(new%linewidths, tmp_array5)
+   ABI_REMALLOC(new%linewidths, (new%ntemp, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol, new%nrta))
+   do ikpt=1,tmp_ebands%nkpt
+     new%linewidths(:,:,ikpt,:,:) = tmp_array5(:,:,indkk(ikpt, 1),:,:)
+   end do
+   ABI_FREE(tmp_array5)
+
+   ABI_MOVE_ALLOC(new%velocity, tmp_array4)
+   ABI_REMALLOC(new%velocity, (3, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol))
+   do ikpt=1,tmp_ebands%nkpt
+     new%velocity(:,:,ikpt,:) = tmp_array4(:,:,indkk(ikpt, 1),:)
+   end do
+   ABI_FREE(tmp_array4)
+
+   !call downsample_array5(new%linewidths, indkk, tmp_ebands%nkpt)
+   !call downsample_array4(new%velocity, indkk, tmp_ebands%nkpt)
 
    !print *, "after downsampling linewidths"
    !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
    !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
 
-   ABI_SFREE(indkk)
+   ABI_FREE(indkk)
    call ebands_move_alloc(tmp_ebands, new%ebands)
  end if
 
@@ -590,49 +603,49 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, sigmaph, cryst, ebands, pawta
 
  call cwtime_report(" rta_new", cpu, wall, gflops)
 
- contains
-
- subroutine downsample_array4(array, indkk, nkpt)
-
-   ! (ntemp, max_nbcalc, nkcalc, nsppol)
-   real(dp),allocatable,intent(inout) :: array(:,:,:,:)
-   integer,intent(in) :: indkk(:,:)
-
-   integer :: ikpt, nkpt
-   integer :: tmp_shape(4)
-   real(dp),allocatable :: tmp_array(:,:,:,:)
-
-   ABI_MOVE_ALLOC(array, tmp_array)
-   tmp_shape = shape(array)
-   tmp_shape(3) = nkpt
-   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4)))
-   do ikpt=1,nkpt
-     array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt, 1),:)
-   end do
-   ABI_FREE(tmp_array)
-
- end subroutine downsample_array4
-
- subroutine downsample_array5(array, indkk, nkpt)
-
-   ! (ntemp, max_nbcalc, nkcalc, nsppol,:)
-   real(dp),allocatable,intent(inout) :: array(:,:,:,:,:)
-   integer,intent(in) :: indkk(:,:)
-
-   integer :: ikpt, nkpt
-   integer :: tmp_shape(5)
-   real(dp),allocatable :: tmp_array(:,:,:,:,:)
-
-   ABI_MOVE_ALLOC(array, tmp_array)
-   tmp_shape = shape(array)
-   tmp_shape(3) = nkpt
-   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4), tmp_shape(5)))
-   do ikpt=1,nkpt
-     array(:,:,ikpt,:,:) = tmp_array(:,:,indkk(ikpt, 1),:,:)
-   end do
-   ABI_FREE(tmp_array)
-
- end subroutine downsample_array5
+! contains
+!
+! subroutine downsample_array4(array, indkk, nkpt)
+!
+!   ! (ntemp, max_nbcalc, nkcalc, nsppol)
+!   real(dp),allocatable,intent(inout) :: array(:,:,:,:)
+!   integer,intent(in) :: indkk(:,:)
+!
+!   integer :: ikpt, nkpt
+!   integer :: tmp_shape(4)
+!   real(dp),allocatable :: tmp_array(:,:,:,:)
+!
+!   ABI_MOVE_ALLOC(array, tmp_array)
+!   tmp_shape = shape(array)
+!   tmp_shape(3) = nkpt
+!   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4)))
+!   do ikpt=1,nkpt
+!     array(:,:,ikpt,:) = tmp_array(:,:,indkk(ikpt, 1),:)
+!   end do
+!   ABI_FREE(tmp_array)
+!
+! end subroutine downsample_array4
+!
+! subroutine downsample_array5(array, indkk, nkpt)
+!
+!   ! (ntemp, max_nbcalc, nkcalc, nsppol,:)
+!   real(dp),allocatable,intent(inout) :: array(:,:,:,:,:)
+!   integer,intent(in) :: indkk(:,:)
+!
+!   integer :: ikpt, nkpt
+!   integer :: tmp_shape(5)
+!   real(dp),allocatable :: tmp_array(:,:,:,:,:)
+!
+!   ABI_MOVE_ALLOC(array, tmp_array)
+!   tmp_shape = shape(array)
+!   tmp_shape(3) = nkpt
+!   ABI_MALLOC(array, (tmp_shape(1), tmp_shape(2), tmp_shape(3), tmp_shape(4), tmp_shape(5)))
+!   do ikpt=1,nkpt
+!     array(:,:,ikpt,:,:) = tmp_array(:,:,indkk(ikpt, 1),:,:)
+!   end do
+!   ABI_FREE(tmp_array)
+!
+! end subroutine downsample_array5
 
 end function rta_new
 !!***

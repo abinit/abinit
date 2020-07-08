@@ -1014,7 +1014,6 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
- dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0
  dtset%typat(:)=0  ! This init is important because dimension of typat is mx%natom (and not natom).
@@ -2000,8 +1999,8 @@ end subroutine invars1
 !! The outputs of this routine are the defaults values of input
 !! variables, stored at the index 0 of the last dimension of their multi-dataset representation.
 !!
-!!  Scalars and static arrays can be initialized directly at the level of the datatype declaration
-!!  provided the value does not depend on runtime conditions.
+!! NOTE that Scalars and static arrays can be initialized directly at the level of the datatype declaration
+!! provided the value does not depend on runtime conditions.
 !!
 !! PARENTS
 !!      m_ab7_invars_f90
@@ -2097,7 +2096,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%atvshift(:,:,:)=zero
    dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
-   dtsets(idtset)%awtr=1
 !  B
    dtsets(idtset)%bdberry(1:4)=0
    dtsets(idtset)%bdeigrf=-1
@@ -2108,7 +2106,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%boxcutmin=two
    dtsets(idtset)%brvltt=0
    dtsets(idtset)%bs_nstates=0
-!  dtsets(idtset)%bs_hayd_term=0
    dtsets(idtset)%bs_hayd_term=1
    dtsets(idtset)%builtintest=0
    dtsets(idtset)%bxctmindg=two
@@ -2131,10 +2128,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%delayperm=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
-!XG170502 : This section is completely useless, as ionmov is NOT know at present !
-!#ifdef HAVE_LOTF
-!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
-!#endif
    dtsets(idtset)%dfpt_sciss=zero
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
@@ -2333,14 +2326,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%inclvkb=2
    dtsets(idtset)%intxc=0
-!  if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
+   ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
-!This section is completely useless, as ionmov is NOT know at present !
-!#ifdef HAVE_LOTF
-!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
-!#endif
    dtsets(idtset)%iprcel=0
    dtsets(idtset)%iprcfc=0
    dtsets(idtset)%irandom=3
@@ -2544,10 +2533,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
-   dtsets(idtset)%ph_nqshift = 0
-   if(dtsets(idtset)%ph_nqshift > 0)then
-     dtsets(idtset)%ph_qshift = zero
-   end if
    dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
@@ -2681,8 +2666,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%string_algo=1
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
-   dtsets(idtset)%symchi=1
-   dtsets(idtset)%symsigma=1
 !  T
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
@@ -2700,7 +2683,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
-   dtsets(idtset)%tmesh=[5._dp, 59._dp, 6._dp]
    dtsets(idtset)%tsmear=0.01_dp
 !  U
    dtsets(idtset)%ucrpa_bands(:)=-1
@@ -2781,13 +2763,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%bs_coulomb_term=11
    dtsets(idtset)%bs_calctype=1
    dtsets(idtset)%bs_coupling=0
-
-   dtsets(idtset)%bs_haydock_tol=(/0.02_dp,zero/)
-
+   dtsets(idtset)%bs_haydock_tol = [0.02_dp, zero]
    dtsets(idtset)%bs_loband=0
 !  Take big absolute value numbers, but the the biggest ones, otherwise overflow can happen
-   dtsets(idtset)%bs_eh_cutoff = [smallest_real*tol6,greatest_real*tol6]
-   dtsets(idtset)%bs_freq_mesh = [zero,zero,0.01_dp/Ha_eV]
+   dtsets(idtset)%bs_eh_cutoff = [smallest_real*tol6, greatest_real*tol6]
+   dtsets(idtset)%bs_freq_mesh = [zero,zero, 0.01_dp/Ha_eV]
 
 !  Interpolation
    dtsets(idtset)%bs_interp_method = 1 ! YG interpolation
@@ -2796,40 +2776,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%bs_interp_kmult = 0
    dtsets(idtset)%bs_interp_m3_width = one
    dtsets(idtset)%bs_interp_rl_nb = 1
-
 !  END VARIABLES FOR @Bethe-Salpeter.
-
-! EPH variables
-   dtsets(idtset)%asr = 1
-   dtsets(idtset)%dipdip = 1
-   dtsets(idtset)%chneut = 1
-   dtsets(idtset)%symdynmat = 1
-
-   dtsets(idtset)%ph_ndivsm = 20
-   dtsets(idtset)%ph_nqpath = 0
-   dtsets(idtset)%ph_ngqpt = [20, 20, 20]
-
-   dtsets(idtset)%eph_mustar = 0.1_dp
-   dtsets(idtset)%eph_intmeth = 2
-   dtsets(idtset)%eph_extrael = zero
-   dtsets(idtset)%eph_fermie = zero
-   dtsets(idtset)%eph_frohlichm = 0
-   dtsets(idtset)%eph_fsmear = 0.01
-   dtsets(idtset)%eph_fsewin = 0.04
-   dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]
-   dtsets(idtset)%eph_task = 1
-   dtsets(idtset)%eph_transport  = 0
-
-   dtsets(idtset)%ph_wstep = 0.1/Ha_meV
-   dtsets(idtset)%ph_intmeth = 2
-   dtsets(idtset)%ph_nqshift = 1
-   dtsets(idtset)%ph_smear = 0.00002_dp
-   dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
-   dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.
-! That might cause unitialized error with valgrind depending on the compilo
+! That might cause unitialized error with valgrind depending on the compiler
 ! chkprim
 ! maxnsym
 ! nsym

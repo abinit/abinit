@@ -2022,15 +2022,16 @@ pp_dirpath $ABI_PSPDIR
                 # Print message for users running the test suite on their machine
                 # if the test failed and we have exclusion rules on the ABINIT testfarm.
                 if status == "failed" and (self.exclude_hosts or self.exclude_builders):
-                    print("\tTest %s failed but note that the feature being tested is not portable" % self.full_id)
-                    print("\tas this test is partly disabled on the Abinit testfarm.")
-                    if self.exclude_hosts: print("\texclude_hosts:", self.exclude_hosts)
-                    if self.exclude_builders: print("\texclude_builder:", self.exclude_builders)
+                    cprint("\tTest `%s` failed but note that this feature is not portable" % self.full_id, color="yellow")
+                    cprint("\tas this test is partly disabled on the Abinit testfarm.", color="yellow")
+                    if self.exclude_hosts: cprint("\texclude_hosts: %s" % str(self.exclude_hosts), color="yellow")
+                    if self.exclude_builders: cprint("\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
 
                 if status == "failed" and self.use_git_submodule:
-                    print("\tTest %s failed. Note, however, that this requires external files in " % (
-                          self.full_id, self.use_git_submodule))
-                    print("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.")
+                    cprint("\tTest %s failed. Note, however, that this requires external files in %s" % (
+                          self.full_id, self.use_git_submodule), color="yellow")
+                    cprint("\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url.",
+                           color="yellow")
 
             # Check if the test is expected to fail.
             if runner.retcode == 124:

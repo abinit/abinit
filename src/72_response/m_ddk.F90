@@ -573,7 +573,7 @@ subroutine ddkstore_compute_ddk(ds, wfk_path, prefix, dtset, psps, pawtab, ngfft
 
    do ii=1,3
      fname = strcat(prefix, '_', itoa(ii), "_EVK.nc")
-     !call wrtout(ab_out, sjoin("- Writing EVK file: ", fname))
+     call wrtout(ab_out, sjoin("- Writing EVK file: ", fname, "for reduced direction:", itoa(ii)))
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
      tmp_hdr%pertcase = 3 * cryst%natom + ii
      NCF_CHECK(tmp_hdr%ncwrite(ncid, 43, nc_define=.True.))

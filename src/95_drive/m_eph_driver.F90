@@ -227,15 +227,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  wfk0_path = dtfil%fnamewffk
  wfq_path = dtfil%fnamewffq
  ddb_filepath = dtfil%filddbsin
+
  ! Use the ddb file as prefix if getdvdb or irddvb are not given in the input.
  dvdb_filepath = dtfil%fildvdbin
  if (dvdb_filepath == ABI_NOFILE) then
-   dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
+   dvdb_filepath = dtfil%filddbsin; ii = len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
- ! If eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
+
+ ! If eph_task is needed and ird/get variables are not provided, assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
    wfq_path = wfk0_path
    use_wfq = .True.
@@ -244,6 +246,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
    MSG_COMMENT(msg)
  end if
+
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. dtset%eph_task /= 7)
 
  if (my_rank == master) then

@@ -438,7 +438,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
 !Local variables-------------------------------
 !scalars
  integer :: ikibz,nband_k,spin,nsppol,ikopt,ivk,ick,ivb,icb
- real(dp),parameter :: tol_fermi=tol6
+ real(dp),parameter :: tol_fermi = tol6
  real(dp) :: fun_gap,opt_gap
  logical :: ismetal
  !type(ebands_t)  :: tmp_ebands
@@ -471,7 +471,8 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
 
  my_kmask=.TRUE.; if (PRESENT(kmask)) my_kmask=kmask
 
- val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi)
+ ! Compute "valence index" using efermi
+ val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi=tol_fermi)
 
  spin_loop: &
 &  do spin=1,nsppol
@@ -1503,8 +1504,8 @@ pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
        end if
      end do
      val_idx(ikpt,spin) = idx - 1
-     if (idx==1) val_idx(ikpt,spin) = idx
-     if (idx==0) val_idx(ikpt,spin) = nband_k
+     if (idx == 1) val_idx(ikpt, spin) = idx
+     if (idx == 0) val_idx(ikpt, spin) = nband_k
    end do
  end do
 
@@ -5800,7 +5801,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1 = 1
- integer :: ierr, nkfull, ikf, spin, band, ik_ibz, timrev, ix, iy, iz, nkx, nky, nkz, idat
+ integer :: ierr, nkfull, ikf, ik_ibz, timrev, ix, iy, iz, nkx, nky, nkz !spin, band, idat
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays

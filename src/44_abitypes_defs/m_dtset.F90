@@ -63,9 +63,9 @@ MODULE m_dtset
 !! WARNING: if you modify this datatype, please check whether there might be
 !! creation/destruction/copy routines, declared in another part of ABINIT,
 !! that might need to take into account your modification.
-!
+!!
 !! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
-!
+!!
 !! Since all these input variables are described in the abinit_help.html and
 !! associated html files they are not described in length here ...
 !!
@@ -79,7 +79,7 @@ type, public :: dataset_type
  integer :: adpimd
  integer :: autoparal
  integer :: auxc_ixc
- integer :: awtr
+ integer :: awtr = 1
  integer :: bandpp
  integer :: bdeigrf
  integer :: berryopt
@@ -88,7 +88,7 @@ type, public :: dataset_type
  integer :: brav = 1
  integer :: brvltt
  integer :: bs_nstates
- integer :: bs_hayd_term
+ integer :: bs_hayd_term = 0
  integer :: builtintest
  integer :: cd_full_grid
  integer :: cd_frqim_method
@@ -147,7 +147,7 @@ type, public :: dataset_type
  integer :: efmas_ntheta
  integer :: enunit
  integer :: eph_restart = 0
- integer :: eph_task
+ integer :: eph_task = 1
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
@@ -192,6 +192,7 @@ type, public :: dataset_type
  integer :: gw_invalid_freq
  integer :: gw_qprange
  integer :: gw_nqlwl
+ ! TODO: REMOVE?
  integer :: gw_nstep
  integer :: gw_sigxcore
 
@@ -484,9 +485,9 @@ type, public :: dataset_type
  integer :: spgroup
  integer :: spmeth
  integer :: string_algo
- integer :: symmorphi
- integer :: symchi
- integer :: symsigma
+ integer :: symmorphi = 1
+ integer :: symchi = 1
+ integer :: symsigma = 1
  integer :: td_mexcit
  integer :: tfkinfunc
  integer :: tim1rev
@@ -807,7 +808,6 @@ type, public :: dataset_type
  real(dp), allocatable :: ziontypat(:)        ! ziontypat(ntypat)
  real(dp), allocatable :: znucl(:)            ! znucl(npsp)
 
-
 !BEGIN VARIABLES FOR @Bethe-Salpeter
  integer :: bs_algorithm
  integer :: bs_haydock_niter
@@ -835,16 +835,16 @@ type, public :: dataset_type
 
 !EPH variables
 ! ifc variables
- integer :: asr
- integer :: dipdip
- integer :: chneut
- integer :: symdynmat
+ integer :: asr = 1
+ integer :: dipdip = 1
+ integer :: chneut = 1
+ integer :: symdynmat = 1
 
 ! Phonon variables.
- integer :: ph_ndivsm    ! = 20
- integer :: ph_nqpath    ! = 0
- integer :: ph_ngqpt(3)  ! = 0
- integer :: ph_nqshift
+ integer :: ph_ndivsm = 20
+ integer :: ph_nqpath = 0
+ integer :: ph_ngqpt(3) = 20
+ integer :: ph_nqshift = 1
 
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
@@ -852,31 +852,31 @@ type, public :: dataset_type
   ! ph_qpath(3, nqpath)
 
 ! e-ph variables
- real(dp) :: eph_mustar
- integer :: eph_intmeth ! = 2
- real(dp) :: eph_extrael != zero
- real(dp) :: eph_fermie != huge(one)
- integer :: eph_frohlichm != 0
- real(dp) :: eph_fsmear != 0.01
- real(dp) :: eph_fsewin != 0.04
+ real(dp) :: eph_mustar = 0.1_dp
+ integer :: eph_intmeth = 2
+ real(dp) :: eph_extrael = zero
+ real(dp) :: eph_fermie = zero
+ integer :: eph_frohlichm = 0
+ real(dp) :: eph_fsmear = 0.01_dp
+ real(dp) :: eph_fsewin = 0.04_dp
  real(dp) :: eph_ecutosc = zero
  !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 
- integer :: eph_ngqpt_fine(3)
+ integer :: eph_ngqpt_fine(3) = 0
  integer :: eph_np_pqbks(5) = 0
 
  integer :: eph_stern = 0
  integer :: eph_transport = 0
  integer :: eph_use_ftinterp = 0
 
- integer :: ph_intmeth
+ integer :: ph_intmeth = 2
  integer :: prteliash = 0
- real(dp) :: ph_wstep
- real(dp) :: ph_smear
- integer :: ddb_ngqpt(3)
- real(dp) :: ddb_shiftq(3)
+ real(dp) :: ph_wstep = 0.1_dp / Ha_meV
+ real(dp) :: ph_smear = 0.00002_dp
+ integer :: ddb_ngqpt(3) = 0
+ real(dp) :: ddb_shiftq(3) = zero
 
  integer :: mixprec = 0
  integer :: symv1scf = 0
@@ -905,7 +905,7 @@ type, public :: dataset_type
  integer :: nkpath = 0
  real(dp) :: einterp(4) = zero
  real(dp),allocatable :: kptbounds(:,:)
- real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
+ real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]
 
  character(len=fnlen) :: getddb_filepath = ABI_NOFILE
  character(len=fnlen) :: getden_filepath = ABI_NOFILE

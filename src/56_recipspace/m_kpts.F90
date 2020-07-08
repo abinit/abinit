@@ -169,7 +169,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkib
 
  ! Copy kptrlatt and shifts because getkgrid can change them
  ! Be careful as getkgrid expects shiftk(3,MAX_NSHIFTK).
- ABI_CHECK(nshiftk > 0 .and. nshiftk <= MAX_NSHIFTK, sjoin("nshiftk must be between 1 and", itoa(MAX_NSHIFTK)))
+ ABI_CHECK_IRANGE(nshiftk, 1, MAX_NSHIFTK, "Invalid value of nshiftk")
  my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
  my_kptrlatt = kptrlatt
 
