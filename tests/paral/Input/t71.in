@@ -57,7 +57,7 @@ nkptgw4      1                # number of k-point where to calculate the GW corr
 kptgw4                       # k-points
   0.000    0.000    0.000    # (Gamma)
 bdgw4       4  5             # calculate GW corrections for bands from 4 to 5
-gw_icsing4  3   #  old deprecated value of icutcoul, only used for legacy
+gw_icutcoul4  3   #  old deprecated value of icutcoul, only used for legacy
 
 
 

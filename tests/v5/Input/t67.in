@@ -44,7 +44,7 @@
  kptgw3       0.250  0.750  0.250
  bdgw3        4  5
  zcut3        0.1 eV
- gw_icsing3   3         # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul3   3         # old deprecated value of icutcoul, only used for legacy
 
 # sigma calculation  GW0
  optdriver4   4
@@ -56,7 +56,7 @@
  bdgw4        4  5
  zcut4        0.1 eV
  mbpt_sciss4  1.0 eV
- gw_icsing4   3         # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul4   3         # old deprecated value of icutcoul, only used for legacy
 
 # W calculation
  optdriver5 3
@@ -73,7 +73,7 @@
  kptgw6      0.250  0.750  0.250
  bdgw6       4  5
  zcut6       0.1 eV
- gw_icsing6  3          # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul6  3          # old deprecated value of icutcoul, only used for legacy
 
 # sigma calculation  GW
  optdriver7  4
@@ -85,7 +85,7 @@
  bdgw7       4  5
  zcut7       0.1 eV
  mbpt_sciss7 1.0 eV
- gw_icsing7  3          # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul7  3          # old deprecated value of icutcoul, only used for legacy
 
 # valid for all datasets
  nband     10

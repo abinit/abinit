@@ -1010,8 +1010,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! gw_invalid_freq
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_invalid_freq',dt%gw_invalid_freq,3,(/0,1,2/),iout)
 
-   ! gw_icsing
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icsing',dt%gw_icsing,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
+   ! gw_icutcoul
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
 
    ! gw_icutcoul
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)

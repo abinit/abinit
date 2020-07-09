@@ -31,7 +31,7 @@ ppmodel3      1    #G-N
 getwfk3       1
 getscr3       2
 nband3       20
-gw_icsing3    3         # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3    3         # old deprecated value of icutcoul, only used for legacy
 
 #k Points for GW corrections
 nkptgw        3

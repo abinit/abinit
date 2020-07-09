@@ -25,7 +25,7 @@
    nshiftk      1
     shiftk      0.00   0.00   0.00
     enunit      2
- gw_icsing      6 # To preserve the results of older tests: current default gw_icsing=3
+ gw_icutcoul      6 # To preserve the results of older tests: current default gw_icutcoul=3
 
     ndtset      7
     gwpara      1
@@ -56,7 +56,7 @@
     getscr4     3
      nband4    10
    ecutwfn4     1.49923969E+00 Hartree
- gw_icsing4     3  # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul4     3  # old deprecated value of icutcoul, only used for legacy
 
 
 # Calculation of the dielectric matrix - iteration 2
@@ -78,7 +78,7 @@
     getscr6     5
      nband6    10
    ecutwfn6     1.49923969E+00 Hartree
- gw_icsing6     3  # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul6     3  # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the quasiparticle Wannier functions
 

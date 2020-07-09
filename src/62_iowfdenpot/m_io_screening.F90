@@ -162,7 +162,7 @@ MODULE m_io_screening
   integer :: awtr
   ! Input variable (time-reversal symmetry in RPA expression)
 
-  integer :: gw_icsing
+  integer :: icsing
   ! Input variable (Coulomb singularity treatment)
 
   integer :: gwcomp
@@ -457,7 +457,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
            hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp,&
            hscr%nI, hscr%nJ, hscr%nqibz, hscr%nqlwl, hscr%nomega, hscr%nbnds_used,&
            hscr%npwe, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering,&
-           hscr%awtr, hscr%gw_icsing, hscr%gwgamma, hscr%vcutgeo(1:3)
+           hscr%awtr, hscr%icsing, hscr%gwgamma, hscr%vcutgeo(1:3)
 
          ! Read real scalars
          read(unt, err=10, iomsg=errmsg)&
@@ -517,7 +517,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
          NCF_CHECK(nf90_get_var(ncid, vid("test_type"), hscr%test_type))
          NCF_CHECK(nf90_get_var(ncid, vid("tordering"), hscr%tordering))
          NCF_CHECK(nf90_get_var(ncid, vid("awtr"), hscr%awtr))
-         NCF_CHECK(nf90_get_var(ncid, vid("gw_icsing"), hscr%gw_icsing))
+         NCF_CHECK(nf90_get_var(ncid, vid("gw_icutcoul"), hscr%icsing))
          NCF_CHECK(nf90_get_var(ncid, vid("gwcomp"), hscr%gwcomp))
          NCF_CHECK(nf90_get_var(ncid, vid("gwgamma"), hscr%gwgamma))
          NCF_CHECK(nf90_get_var(ncid, vid("mbpt_sciss"), hscr%mbpt_sciss))
@@ -564,7 +564,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
        hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp,&
        hscr%nI, hscr%nJ, hscr%nqibz, hscr%nqlwl, hscr%nomega, hscr%nbnds_used,&
        hscr%npwe, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering,&
-       hscr%awtr, hscr%gw_icsing, hscr%gwgamma, hscr%vcutgeo(1:3)
+       hscr%awtr, hscr%icsing, hscr%gwgamma, hscr%vcutgeo(1:3)
 
      ! Write real scalars
      write(unt, err=10, iomsg=errmsg)&
@@ -643,11 +643,11 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
      ncerr = nctk_defnwrite_ivars(ncid, [character(len=nctk_slen) :: &
        "id", "ikxc", "inclvkb", "headform", "fform", "gwcalctyp", &
-       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "gw_icsing", &
+       "nbands_used", "npwwfn_used", "spmeth", "test_type", "tordering", "awtr", "gw_icutcoul", &
        "gwcomp", "gwgamma" &
       ],&
       [ hscr%id, hscr%ikxc, hscr%inclvkb, hscr%headform, hscr%fform, hscr%gwcalctyp, &
-       hscr%nbnds_used, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering, hscr%awtr, hscr%gw_icsing, &
+       hscr%nbnds_used, hscr%npwwfn_used, hscr%spmeth, hscr%test_type, hscr%tordering, hscr%awtr, hscr%icsing, &
        hscr%gwcomp, hscr%gwgamma &
      ])
      NCF_CHECK(ncerr)
@@ -916,7 +916,7 @@ type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,torder
 
 ! HSCR_NEW
  hscr%awtr = dtset%awtr
- hscr%gw_icsing = dtset%gw_icsing
+ hscr%icsing = dtset%gw_icutcoul
  hscr%vcutgeo = dtset%vcutgeo
  hscr%gwcomp = dtset%gwcomp
  hscr%gwgamma = dtset%gwgamma
@@ -1018,7 +1018,7 @@ subroutine hscr_bcast(hscr,master,my_rank,comm)
 
 ! HSCR_NEW
  call xmpi_bcast(hscr%awtr, master, comm, ierr)
- call xmpi_bcast(hscr%gw_icsing, master, comm, ierr)
+ call xmpi_bcast(hscr%icsing, master, comm, ierr)
  call xmpi_bcast(hscr%vcutgeo, master, comm, ierr)
  call xmpi_bcast(hscr%gwcomp, master, comm, ierr)
  call xmpi_bcast(hscr%gwgamma, master, comm, ierr)
@@ -1181,7 +1181,7 @@ subroutine hscr_copy(Hscr_in,Hscr_cp)
 
 ! HSCR_NEW
  hscr_cp%awtr      =  hscr_in%awtr
- hscr_cp%gw_icsing =  hscr_in%gw_icsing
+ hscr_cp%icsing    =  hscr_in%icsing
  hscr_cp%vcutgeo   =  hscr_in%vcutgeo
  hscr_cp%gwcomp    =  hscr_in%gwcomp
  hscr_cp%gwgamma   =  hscr_in%gwgamma

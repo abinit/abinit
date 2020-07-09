@@ -503,8 +503,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_invalid_freq',tread,'INT')
  if(tread==1) dtset%gw_invalid_freq=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_icsing',tread,'INT')
- if(tread==1) dtset%gw_icsing=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_icutcoul',tread,'INT')
+ if(tread==1) dtset%gw_icutcoul=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_qprange',tread,'INT')
  if(tread==1) dtset%gw_qprange=intarr(1)

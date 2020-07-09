@@ -29,7 +29,7 @@ ndtset 3
  gw_freqsp3 -0.5558150504  # These are the frequencies at which the matrix element of the Self-energy is requested.
  gwls_stern_kmax3 8  # This controls the convergence with respect to the size of the dielectric matrix.
  gwls_kmax_complement3 8   # This controls the convergence with respect to the size of the MODEL dielectric matrix.
- gw_icsing3 0              # For molecules, the coulomb potential needs to be spherically truncated.
+ gw_icutcoul3 0              # For molecules, the coulomb potential needs to be spherically truncated.
  rcut3 9.0                 # The spherical truncation has this radius. 
 
  prtwf3 0                  # By default, WFs would be printed with mpiio. However, the NAG compiler (on petrus) takes forever to do so. Since these WFs are totally unuseful and this is not a mpiio test, printing WFs is disabled. 

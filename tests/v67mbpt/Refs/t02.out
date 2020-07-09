@@ -170,11 +170,11 @@ _ WF disk file :      1.674 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
  gw_customnfreqsp4          0
  gw_customnfreqsp5          8
         gw_freqsp5      -0.01102   -0.00367    0.01213    0.03675    0.18375    0.36749    1.83747    3.67493 Hartree
-        gw_icsing1          6
-        gw_icsing2          6
-        gw_icsing3          3
-        gw_icsing4          3
-        gw_icsing5          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          3
            istwfk        1    0    0    1    0    0    0    0    0    0
                          0    0    1    0    0    0
            jdtset        1    2    3    4    5
@@ -1568,11 +1568,11 @@ data: !SigmaeeData |
  gw_customnfreqsp4          0
  gw_customnfreqsp5          8
         gw_freqsp5      -0.01102   -0.00367    0.01213    0.03675    0.18375    0.36749    1.83747    3.67493 Hartree
-        gw_icsing1          6
-        gw_icsing2          6
-        gw_icsing3          3
-        gw_icsing4          3
-        gw_icsing5          3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          3
+        gw_icutcoul4          3
+        gw_icutcoul5          3
            istwfk        1    0    0    1    0    0    0    0    0    0
                          0    0    1    0    0    0
            jdtset        1    2    3    4    5

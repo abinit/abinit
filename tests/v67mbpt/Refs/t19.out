@@ -163,11 +163,11 @@ _ WF disk file :      0.367 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
         gwrpacorr3          8
         gwrpacorr4          1
         gwrpacorr5          1
-        gw_icsing1          6
-        gw_icsing2          6
-        gw_icsing3          6
-        gw_icsing4          6
-        gw_icsing5          4
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          6
+        gw_icutcoul5          4
           inclvkb1          2
           inclvkb2          0
           inclvkb3          0
@@ -1951,11 +1951,11 @@ meta: {optdriver: 3, gwcalctyp: 1, }
         gwrpacorr3          8
         gwrpacorr4          1
         gwrpacorr5          1
-        gw_icsing1          6
-        gw_icsing2          6
-        gw_icsing3          6
-        gw_icsing4          6
-        gw_icsing5          4
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          6
+        gw_icutcoul5          4
           inclvkb1          2
           inclvkb2          0
           inclvkb3          0

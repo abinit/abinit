@@ -59,7 +59,7 @@ _ WF disk file :     29.555 Mbytes ; DEN or POT disk file :      0.744 Mbytes.
          ecutsigx      1.99927569E+01 Hartree
           ecutwfn      2.39922335E+01 Hartree
 -          fftalg         312
-        gw_icsing           3
+        gw_icutcoul           3
            irdscr           1
            irdwfk           1
            istwfk        1    0    1    0    0    0    0    0    0
@@ -374,7 +374,7 @@ data: !SigmaeeData |
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
-        gw_icsing           3
+        gw_icutcoul           3
            irdscr           1
            irdwfk           1
            istwfk        1    0    1    0    0    0    0    0    0

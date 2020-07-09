@@ -2023,7 +2023,7 @@ if(dtset%optdriver==66) then
 
   call print_gsphere(Gsphere)
 
-  call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icsing,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
+  call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
   &               dtset%nkpt,dtset%kptns,dtset%ngfft,mpi_enreg%comm_world)
 
   ! Since Vcp%vc_sqrt is sorted according to the KSS convention for G vectors

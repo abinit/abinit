@@ -342,16 +342,16 @@ _ WF disk file :      0.288 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  gw_frqre_inzgrid8          0
  gw_frqre_inzgrid9          0
  gw_frqre_inzgrid10         0
-        gw_icsing1          6
-        gw_icsing2          6
-        gw_icsing3          6
-        gw_icsing4          3
-        gw_icsing5          6
-        gw_icsing6          3
-        gw_icsing7          3
-        gw_icsing8          3
-        gw_icsing9          3
-        gw_icsing10         3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          3
+        gw_icutcoul5          6
+        gw_icutcoul6          3
+        gw_icutcoul7          3
+        gw_icutcoul8          3
+        gw_icutcoul9          3
+        gw_icutcoul10         3
              iscf1          7
              iscf2         -2
              iscf3         -2
@@ -3979,16 +3979,16 @@ data: !SigmaeeData |
  gw_frqre_inzgrid8          0
  gw_frqre_inzgrid9          0
  gw_frqre_inzgrid10         0
-        gw_icsing1          6
-        gw_icsing2          6
-        gw_icsing3          6
-        gw_icsing4          3
-        gw_icsing5          6
-        gw_icsing6          3
-        gw_icsing7          3
-        gw_icsing8          3
-        gw_icsing9          3
-        gw_icsing10         3
+        gw_icutcoul1          6
+        gw_icutcoul2          6
+        gw_icutcoul3          6
+        gw_icutcoul4          3
+        gw_icutcoul5          6
+        gw_icutcoul6          3
+        gw_icutcoul7          3
+        gw_icutcoul8          3
+        gw_icutcoul9          3
+        gw_icutcoul10         3
              iscf1          7
              iscf2         -2
              iscf3         -2

@@ -48,7 +48,7 @@ istwfk *1
 
 #For all the dataset
 nsym 1
-gw_icsing 6
+gw_icutcoul 6
 nband 27
 
 #==================================================================================

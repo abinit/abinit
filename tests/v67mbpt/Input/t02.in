@@ -41,7 +41,7 @@ ecutsigx3    3.0    # Dimension of the G sum in Sigma_x (the dimension in Sigma_
 nfreqsp3     500      # No. of frequencies for the spectral function.
 freqspmax3   20 eV    # Frequency interval for spectral function is [-50,50]
 
-gw_icsing3   3        # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul3   3        # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the Self-Energy matrix elements (test of freqspmin)
 optdriver4  4        # Self-Energy calculation
@@ -60,7 +60,7 @@ nfreqsp4     50      # No. of frequencies for the spectral function.
 freqspmin4  -8 eV    # Frequency interval for spectral function is [-8,5]
 freqspmax4   5 eV    # Frequency interval for spectral function is [-8,5]
 
-gw_icsing4   3       # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul4   3       # old deprecated value of icutcoul, only used for legacy
 
 # Calculation of the Self-Energy matrix elements (test of freqspmin)
 optdriver5  4        # Self-Energy calculation
@@ -82,7 +82,7 @@ gw_freqsp5        -0.3 -0.1  0.33  1.0  5.0  10.0  50.0  100.0  eV
 # The analytic continuation is expected to be unstable for freqsp > 5.0 eV
 # furthermore all other parameters are set very low
 
-gw_icsing5  3      # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul5  3      # old deprecated value of icutcoul, only used for legacy
 
 ###############################################
 # Data common to the three different datasets

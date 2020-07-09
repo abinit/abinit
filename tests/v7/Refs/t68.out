@@ -376,19 +376,19 @@ _ WF disk file :      0.092 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
        gw_qprange11       -14
        gw_qprange12       -14
        gw_qprange13         0
-        gw_icsing1          6
-        gw_icsing2          0
-        gw_icsing3          0
-        gw_icsing4          0
-        gw_icsing5          0
-        gw_icsing6          0
-        gw_icsing7          6
-        gw_icsing8          6
-        gw_icsing9          0
-        gw_icsing10         6
-        gw_icsing11         0
-        gw_icsing12         6
-        gw_icsing13         0
+        gw_icutcoul1          6
+        gw_icutcoul2          0
+        gw_icutcoul3          0
+        gw_icutcoul4          0
+        gw_icutcoul5          0
+        gw_icutcoul6          0
+        gw_icutcoul7          6
+        gw_icutcoul8          6
+        gw_icutcoul9          0
+        gw_icutcoul10         6
+        gw_icutcoul11         0
+        gw_icutcoul12         6
+        gw_icutcoul13         0
            istwfk        0    0    1    0    1    1
               ixc1         11
               ixc2         11
@@ -4386,19 +4386,19 @@ data: !SigmaeeData |
        gw_qprange11       -14
        gw_qprange12       -14
        gw_qprange13         0
-        gw_icsing1          6
-        gw_icsing2          0
-        gw_icsing3          0
-        gw_icsing4          0
-        gw_icsing5          0
-        gw_icsing6          0
-        gw_icsing7          6
-        gw_icsing8          6
-        gw_icsing9          0
-        gw_icsing10         6
-        gw_icsing11         0
-        gw_icsing12         6
-        gw_icsing13         0
+        gw_icutcoul1          6
+        gw_icutcoul2          0
+        gw_icutcoul3          0
+        gw_icutcoul4          0
+        gw_icutcoul5          0
+        gw_icutcoul6          0
+        gw_icutcoul7          6
+        gw_icutcoul8          6
+        gw_icutcoul9          0
+        gw_icutcoul10         6
+        gw_icutcoul11         0
+        gw_icutcoul12         6
+        gw_icutcoul13         0
            istwfk        0    0    1    0    1    1
               ixc1         11
               ixc2         11

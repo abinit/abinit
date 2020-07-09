@@ -3455,7 +3455,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  do ivcoul_init=1,nvcoul_init
    rcut = Dtset%rcut
-   icsing_eff=Dtset%gw_icsing
+   icsing_eff=Dtset%gw_icutcoul
    Sigp%sigma_mixing=one
    if( mod(Dtset%gwcalctyp,10)==5 .or. ivcoul_init==2)then
      if(abs(Dtset%hyb_mixing)>tol8)then

@@ -9,7 +9,7 @@ ecuteps   2.1
 pawecutdg 24
 
 istwfk *1
-#gw_icsing 0      # Spherical cutoff
+#gw_icutcoul 0      # Spherical cutoff
 #rcut 0.0        # the cutoff is automatically calculated so to enclose 
 #                # the same volume inside the cutoff as the volume of the solid. 
 

@@ -1267,8 +1267,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gw_qlwl','DPR',multivals%gw_nqlwl)
 
- intarr(1,:)=dtsets(:)%gw_icsing
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icsing','INT',0)
+ intarr(1,:)=dtsets(:)%gw_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)
 
  intarr(1,:)=dtsets(:)%gw_icutcoul
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)

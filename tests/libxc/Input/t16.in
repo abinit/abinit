@@ -11,7 +11,7 @@ irdscr     1
 awtr       1
 symsigma   0
 inclvkb    2
-gw_icsing  3   #  old deprecated value of icutcoul, only used for legacy
+gw_icutcoul  3   #  old deprecated value of icutcoul, only used for legacy
 
 ecutsigx   4.0
 nband      16
