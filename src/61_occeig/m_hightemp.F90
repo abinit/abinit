@@ -335,8 +335,8 @@ contains
         ABI_ALLOCATE(valueseel,(ii))
         ix=dble(this%bcut)
         ii=0
-        do while(ix<this%gcut)
-          sigma=this%std_init
+        sigma=this%std_init
+        do while(ix<=this%gcut)
           ii=ii+1
           valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
           & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
@@ -350,6 +350,16 @@ contains
 
         ! Change Fermi-Dirac integral lower bound.
         xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
+        open(file='FUNCTION.dat',unit=50)
+        ix=zero
+        step=1.d-6
+        do while(ix**2/2<=5)
+          write(50,*) ix**2/2, 0.5*sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))**4*&
+          & exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) - ix)**2/(2*sigma**2))/&
+          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
+          ix=ix+step
+        end do
+        close(50)
       else
         xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       end if
