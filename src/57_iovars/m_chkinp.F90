@@ -1013,9 +1013,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! gw_icutcoul
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
 
-   ! gw_icutcoul
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_icutcoul',dt%gw_icutcoul,11,(/0,1,2,3,4,5,6,7,14,15,16/),iout)
-
    ! gw_sctype
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sctype',dt%gw_sctype,&
      4,(/GWSC_one_shot,GWSC_only_W,GWSC_only_G,GWSC_both_G_and_W/),iout)

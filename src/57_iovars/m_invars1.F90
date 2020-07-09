@@ -2261,7 +2261,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gw_frqre_tangrid=0
    dtsets(idtset)%gw_invalid_freq=0
    dtsets(idtset)%gw_icutcoul=6
-   dtsets(idtset)%gw_icutcoul=3
    dtsets(idtset)%gw_qprange=0
    dtsets(idtset)%gw_sigxcore=0
    dtsets(idtset)%gw_sctype = GWSC_one_shot
