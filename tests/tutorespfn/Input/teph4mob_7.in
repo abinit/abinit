@@ -108,7 +108,7 @@ nband 8
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description =
 #%%   E-ph for the mobility in semiconductors
 #%%<END TEST_INFO>

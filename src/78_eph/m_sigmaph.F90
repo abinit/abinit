@@ -56,6 +56,7 @@ module m_sigmaph
  use m_rf2
  use m_dtset
  use m_dtfil
+ use m_clib
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -646,8 +647,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  character(len=500) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
- integer :: g0_k(3),g0_kq(3)
- integer :: work_ngfft(18),gmax(3)
+ integer :: g0_k(3),g0_kq(3), unts(2), work_ngfft(18), gmax(3)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
@@ -688,6 +688,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
+ unts = [std_out, ab_out]
+
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
  nspden = dtset%nspden; nkpt = ebands%nkpt
@@ -721,14 +723,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Get list of QP states that have been computed.
        sigma%qp_done = sigma_restart%qp_done
        restart = 1
-       call wrtout([std_out, ab_out], "- Restarting from previous SIGEPH.nc file")
-       call wrtout([std_out, ab_out], &
-           sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
+       call wrtout(unts, "- Restarting from previous SIGEPH.nc file")
+       call wrtout(unts, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
      else
        restart = 0; sigma%qp_done = 0
-       msg = "Found SIGEPH.nc file with all QP entries already computed. Will overwrite file."
+       msg = sjoin(" Found SIGEPH.nc file with all QP entries already computed.", ch10, &
+                   " Will overwrite:", sigeph_filepath, ch10, &
+                   " Keeping backup copy in:", strcat(sigeph_filepath, ".bkp"))
        call wrtout(ab_out, sjoin("WARNING: ", msg))
        MSG_WARNING(msg)
+       ! keep backup copy
+       ABI_CHECK(clib_rename(sigeph_filepath, strcat(sigeph_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
      end if
    end if
    call sigma_restart%free()
@@ -985,7 +990,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (dtset%eph_stern == 1) then
    ! Read GS POT (vtrial) from input POT file
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
-   call wrtout([std_out, ab_out], sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
+   call wrtout(unts, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
    call pot_hdr%free()
@@ -1018,10 +1023,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  sigma%use_ftinterp = .False.
  ABI_MALLOC(sigma%ibz2dvdb, (sigma%nqibz))
  if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, sigma%ibz2dvdb, comm) /= 0) then
-   call wrtout([std_out, ab_out], " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+   call wrtout(unts, " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
    sigma%use_ftinterp = .True.
  else
-   call wrtout([std_out, ab_out], " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
+   call wrtout(unts, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
    sigma%use_ftinterp = .False.
  end if
 
@@ -2228,7 +2233,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
 !arrays
- integer :: intp_kptrlatt(3,3), g0_k(3)
+ integer :: intp_kptrlatt(3,3), g0_k(3), unts(2)
  integer :: qptrlatt(3,3), indkk_k(1,6), my_gmax(3), band_block(2)
  integer :: intp_nshiftk !val_indeces(ebands%nkpt, ebands%nsppol),
  integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
@@ -2246,6 +2251,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call cwtime(cpu, wall, gflops, "start")
+
+ unts = [std_out, ab_out]
 
  ! Copy important dimensions.
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor; mband = dtset%mband
@@ -2311,8 +2318,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  end if
 
  if (my_rank == master) then
-   call gaps%print(unit=std_out)
-   !call gaps%print(unit=ab_out)
+   call gaps%print(unit=std_out) !; call gaps%print(unit=ab_out)
  end if
  !val_indeces = ebands_get_valence_idx(ebands)
 
@@ -2583,7 +2589,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    if (dtset%useria == 567) then
      ! Uncomment this part to use all states to debug.
-     call wrtout([std_out, ab_out], "- Setting bstart to 1 and bstop to nband for debugging purposes")
+     call wrtout(unts, "- Setting bstart to 1 and bstop to nband for debugging purposes")
      new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
      new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
    end if
@@ -2752,7 +2758,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
       new%ncwrite_comm%me = xmpi_comm_rank(new%ncwrite_comm%value)
       new%ncwrite_comm%nproc = xmpi_comm_size(new%ncwrite_comm%value)
       if (my_rank == master) then
-        call wrtout([std_out, ab_out], &
+        call wrtout(unts, &
           sjoin("- Using parallelism over k-points/spins. Cannot write full results to main output", ch10, &
                 "- All procs except master will write to dev_null. Use SIGEPH.nc to analyze results."))
         !write(std_out, *)"ncwrite_comm_me:", new%ncwrite_comm%me, "ncwrite_comm%nproc:", new%ncwrite_comm%nproc
@@ -2866,7 +2872,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    ! In principle only getwfkfine_filepath is used
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
-   call wrtout([std_out, ab_out], " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
+   call wrtout(unts, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
 
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
@@ -2877,7 +2883,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
  else if (any(dtset%bs_interp_kmult /= 0)) then
    ! Read bs_interpmult
-   call wrtout([std_out, ab_out]," EPH interpolation: will use star functions interpolation.", newlines=1)
+   call wrtout(unts, " EPH interpolation: will use star functions interpolation.", newlines=1)
    ! Interpolate band energies with star-functions
    params = 0; params(1) = 1; params(2) = 5
    if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
@@ -3260,19 +3266,22 @@ end subroutine sigmaph_write
 !!  sigmaph_read
 !!
 !! FUNCTION
-!!  Start a sigmaph instance from a netcdf file.
-!!  This routine serves only to read some basic dimensions of sigmaph_t to verify if a restart is possible
+!!  Start an (incomplete) sigmaph instance from a netcdf file.
+!!  This routine serves only to read some basic dimensions and parameters from the SIGEPH.nc file to
+!!
+!!     1. Verify whether a restart in sigmaph is possible when eph_restart == 1
+!!     2. Use these metadata in the RTA module to prepare the calculation of transport properties.
 !!
 !! INPUTS
 !!  path= SIGEPH Filename.
 !!  dtset<dataset_type>=All input variables for this dataset.
-!!  ecut=Cutoff energy for wavefunctions.
-!!  cryst<crystal_t>=Crystalline structure
-!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !!  comm=MPI communicator
+!!  msg=Error message if ierr /= 0
+!!  ierr = Exit status
 !!  [keep_open]=True to keep the Nc file handle open for further reading. Default: False.
 !!  [extrael_fermie]: Return the value of (eph_extrael, eph_fermie) read from file.
+!!  [sigma_ngkpt] =  Value read from the ncfile (used in m_rta)
+!!  [sigma_erange] = Value read from the ncfile (used in m_rta)
 !!
 !! PARENTS
 !!
@@ -3280,7 +3289,8 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, extrael_fermie) result(new)
+type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
+                                      extrael_fermie, sigma_ngkpt, sigma_erange) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -3289,20 +3299,20 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  character(len=500),intent(out) :: msg
  real(dp), optional, intent(out) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
+ integer,optional, intent(out) :: sigma_ngkpt(3)
+ real(dp),optional,intent(out) :: sigma_erange(2)
 
 !Local variables ------------------------------
 !scalars
- integer :: imag_only
+ integer :: imag_only, eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
 #ifdef HAVE_NETCDF
  integer :: ncid !, varid !, ncerr
 #endif
- real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear
- real(dp) :: cpu, wall, gflops
+ real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear, cpu, wall, gflops
  character(len=fnlen) :: path
 !arrays
- integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
- integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3) !, frohl_params(4)
- real(dp) :: sigma_erange(2)
+ integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), my_sigma_ngkpt(3)
+ real(dp) :: my_sigma_erange(2)
 
 ! *************************************************************************
 
@@ -3331,8 +3341,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nctk_get_dim(ncid, "ntemp", new%ntemp))
  NCF_CHECK(nctk_get_dim(ncid, "nqibz", new%nqibz))
  NCF_CHECK(nctk_get_dim(ncid, "nqbz", new%nqbz))
- !NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
- !NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
+ !NCF_CHECK(nctk_get_dim(ncid, "nwr", new%nwr))
+ !NCF_CHECK(nctk_get_dim(ncid, "gfw_nomega", new%gfw_nomega))
 
  ! ======================================================
  ! Read data that does not depend on the (kpt, spin) loop.
@@ -3360,6 +3370,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), new%bstart_ks))
  NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
  new%bstop_ks = new%bstart_ks + new%nbcalc_ks - 1
+
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), new%kcalc))
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), new%kcalc2ibz))
  NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), new%kTmesh))
@@ -3385,11 +3396,12 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  ABI_CHECK(eph_fsmear  == dtset%eph_fsmear, "netcdf eph_fsmear != input file")
  ABI_CHECK(ph_wstep    == dtset%ph_wstep, "netcdf ph_wstep != input file")
  ABI_CHECK(ph_smear    == dtset%ph_smear, "netcdf ph_smear != input file")
+
  if (present(extrael_fermie)) then
    extrael_fermie = [eph_extrael, eph_fermie]
  else
-   ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
-   ABI_CHECK(eph_fermie  == dtset%eph_fermie, "netcdf eph_feremie != input file")
+   ABI_CHECK_DEQ(eph_extrael, dtset%eph_extrael, "netcdf eph_extrael != input file")
+   ABI_CHECK_DEQ(eph_fermie, dtset%eph_fermie, "netcdf eph_feremie != input file")
  end if
 
  NCF_CHECK(nf90_get_var(ncid, vid("eph_task"), eph_task))
@@ -3397,17 +3409,29 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"), ph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"), eph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"), eph_transport))
- ABI_CHECK(symdynmat     == dtset%symdynmat, "netcdf symdynmat != input file")
- ABI_CHECK(ph_intmeth    == dtset%ph_intmeth, "netcdf ph_intmeth != input file")
- ABI_CHECK(eph_intmeth   == dtset%eph_intmeth, "netcdf eph_intmeth != input file")
- ABI_CHECK(eph_transport == dtset%eph_transport, "netcdf eph_transport != input file")
 
+ ABI_CHECK_IEQ(symdynmat, dtset%symdynmat, "netcdf symdynmat != input file")
+ ABI_CHECK_IEQ(ph_intmeth, dtset%ph_intmeth, "netcdf ph_intmeth != input file")
+ ABI_CHECK_IEQ(eph_intmeth, dtset%eph_intmeth, "netcdf eph_intmeth != input file")
+ ABI_CHECK_IEQ(eph_transport, dtset%eph_transport, "netcdf eph_transport != input file")
+
+ !NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
  NCF_CHECK(nf90_get_var(ncid, vid("ddb_ngqpt"), ddb_ngqpt))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_ngqpt"), ph_ngqpt))
- NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
- !NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
- NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
+ NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), my_sigma_ngkpt))
+ if (present(sigma_ngkpt)) then
+   sigma_ngkpt = my_sigma_ngkpt
+ else
+   ABI_CHECK(all(dtset%sigma_ngkpt == my_sigma_ngkpt), "netcdf sigma_ngkpt != input file")
+ end if
+
+ NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), my_sigma_erange))
+ if (present(sigma_erange)) then
+   sigma_erange = my_sigma_erange
+ else
+   ABI_CHECK(all(dtset%sigma_erange == my_sigma_erange), "netcdf sigma_erange != input file")
+ end if
 
  if (present(keep_open)) then
    new%ncid = ncid
@@ -3420,9 +3444,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),"netcdf eph_ngqpt_fine != input file")
  ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt), "netcdf ddb_ngqpt != input file")
  ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt), "netcdf ph_ngqpt != input file")
- ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt), "netcdf sigma_ngkpt != input file")
+
  !ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6), "netcdf frohl_params != input file")
- !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6), "netcdf sigma_erange != input file")
 
  call cwtime_report(" sigmaph_read", cpu, wall, gflops)
 

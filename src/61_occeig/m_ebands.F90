@@ -52,7 +52,7 @@ MODULE m_ebands
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
-                              isdiagmat, interpol3d, interpol3d_indices
+                              isdiagmat, get_diag, interpol3d, interpol3d_indices
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -118,7 +118,8 @@ MODULE m_ebands
 
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
- public :: ebands_write               ! Driver routine to write bands in different (txt) formats.
+ public :: ebands_write               ! Driver routine to write bands in different txt formats.
+ public :: ebands_kmesh2str           ! Return string with info about the k-sampling.
 !!***
 
 !----------------------------------------------------------------------
@@ -5986,6 +5987,45 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  end do
 
 end subroutine klinterp_eval_bsd
+!!***
+
+!!****f* m_ebands/ebands_kmesh2str
+!! NAME
+!! ebands_kmesh2str
+!!
+!! FUNCTION
+!!  Return string with info on the k-point sampling
+!!
+!! SOURCE
+
+character(len=500) function ebands_kmesh2str(self) result(str)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in) :: self
+
+!Local variables-------------------------------
+ integer :: ii
+
+! *********************************************************************
+
+ if (isdiagmat(self%kptrlatt)) then
+   ! Sampling aligned with reciprocal lattice vectors --> use ngkpt
+   str = sjoin(" ngkpt: ", ltoa(get_diag(self%kptrlatt)))
+ else
+   ! write kptrlatt by rows
+   str = sjoin(" kptrlatt_rows: ", ltoa(reshape(transpose(self%kptrlatt), [9])))
+ end if
+
+ ! Write shiftk only if != [0, 0, 0]
+ if (any(self%shiftk /= 0)) then
+   str = sjoin(str, "shiftk:")
+   do ii=1,self%nshiftk
+     str = sjoin(str, ltoa(self%shiftk(:, ii)))
+   end do
+ end if
+
+end function ebands_kmesh2str
 !!***
 
 end module m_ebands

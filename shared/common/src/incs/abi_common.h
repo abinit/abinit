@@ -80,8 +80,11 @@
 /* Stop execution with message `msg` if not expr */
 #define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
 
-/* Stop execution with message `msg` if int1 and int2 are not equal */
+/* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
 #define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+
+/* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
+#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
 /* Stop execution with message `msg` if int1 > int2 */
 #define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))

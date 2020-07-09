@@ -330,9 +330,9 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  type(ddkstore_t) :: ds
  type(sigmaph_t) :: sigmaph
 !arrays
- integer :: kptrlatt(3,3), unts(2)
+ integer :: kptrlatt(3,3), unts(2), sigma_ngkpt(3)
  integer,allocatable :: indkk(:,:)
- real(dp) :: extrael_fermie(2)
+ real(dp) :: extrael_fermie(2), sigma_erange(2)
  real(dp),allocatable :: values_bksd(:,:,:,:), vals_bsd(:,:,:), tmp_array4(:,:,:,:), tmp_array5(:,:,:,:,:)
 
 !************************************************************************
@@ -341,13 +341,14 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  unts = [std_out, ab_out]
-
- sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., extrael_fermie=extrael_fermie)
- ABI_CHECK(ierr == 0, msg)
-
  new%assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
- ! Allocate temperature arrays (same as the ones used in the SIGEPH calculation).
+ ! TODO: Add real test for eph_restart
+ sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., &
+                         extrael_fermie=extrael_fermie, sigma_ngkpt=sigma_ngkpt, sigma_erange=sigma_erange)
+ ABI_CHECK(ierr == 0, msg)
+
+ ! Allocate temperature arrays (same values as the ones used in the SIGEPH calculation).
  new%ntemp = sigmaph%ntemp
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = sigmaph%kTmesh
@@ -390,8 +391,10 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  !      velocity(3, bmin:bmax, nkpt, nsppol)
  !      linewidths(self%ntemp, bmin:bmax, nkpt, nsppol, 2)
  !
+ !if (all(dtset%sigma_ngkpt == 0) .or. all(dtset%sigma_ngkpt == sigma_ngkpt)) then
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with the sigma_ngkpt k-mesh, we need to downsample ebands.
+   !call wrtout(unts, sjoin(" SIGMAPH file used sigma_ngkpt:", ltoa(sigma_ngkpt)))
    call wrtout(unts, sjoin(" Computing integrals with downsampled sigma_ngkpt:", ltoa(dtset%sigma_ngkpt)))
    kptrlatt = 0
    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
@@ -400,8 +403,9 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    new%ebands = sigmaph%get_ebands(cryst, tmp_ebands, [new%bmin, new%bmax], new%linewidths, new%velocity, xmpi_comm_self)
    call ebands_free(tmp_ebands)
  else
+   !call wrtout(unts, sjoin(" Computing integrals with SIGEPH k-mesh:", ebands_kmesh2str(ebands))
    new%ebands = sigmaph%get_ebands(cryst, ebands, [new%bmin, new%bmax], new%linewidths, new%velocity, xmpi_comm_self)
-   kptrlatt = ebands%kptrlatt
+   kptrlatt = new%ebands%kptrlatt
  end if
 
  !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))

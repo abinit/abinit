@@ -692,24 +692,29 @@ The list of $\kk$-points is initialized at the beginning of the calculation and 
 in the netcdf file stores the status of each $\kk$-point (whether it has been computed or not).
 This means that calculations that get killed by the resource manager due to time limit can reuse
 the SIGEPH file to perform an automatic in-place restart.
-Just set [[eph_restart]] to 1 in the input file and rerun the job (there is no harm in setting it 
-from the start).
+Just set [[eph_restart]] to 1 in the input file and rerun the job 
+
+!!! important
+
+    There is no harm in setting [[eph_restart]] to 1 from the begining but keep in mind that
+    the code will overwrite the SIGEPH.nc if the file is completed so we do not recommended 
+    to use this option in MultiDataset mode.
 
 ### Transport calculation from SIGEPH.nc
 
 The routine that computes carrier mobilites is automatically invoked when [[eph_task]] -4 is used
-and a *TRANSPORT.nc* file with the final results is produced.
+and a *RTA.nc* file with the final results is produced.
 There are however cases in which one would like to compute mobilities from an already existing
 SIGEPH.nc file without performing a full self-energy calculation from scratch.
 In this case, one can use [[eph_task]] 7 and specify the name of the SIGEPH.nc file with [[getsigeph_filepath]].
-This advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evaluate the mobility integral.
+The advanced input variable [[transport_ngkpt]] can be use to downsample the $\kk$-mesh used to evaluate the mobility integral.
 
 ### MPI parallelism and memory requirements
 
 There are five different MPI levels that can be used to distribute the workload
 and the most memory-demanding data structures.
 By default, the code tries to reach some compromise between memory requirements and time to solution
-by activating the parallelism over $\qq$-points if no other input is provided from the user.
+by activating the parallelism over $\qq$-points if no other input is provided by the user.
 You can however specify manually the MPI distribution across the five different levels
 by using [[eph_np_pqbks]] (a list of 5 integers).
 The product of these five numbers **must be equal** to the total number of MPI processes.
