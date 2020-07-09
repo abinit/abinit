@@ -353,12 +353,13 @@ contains
         open(file='FUNCTION.dat',unit=50)
         ix=zero
         step=1.d-6
-        do while(ix**2/2<=5)
-          write(50,*) ix**2/2, 0.5*sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))**4*&
-          & exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) - ix)**2/(2*sigma**2))/&
+        do while(ix<=5)
+          write(50,*) ix, 0.5*sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))**4*&
+          & exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) - sqrt(2*ix))**2/(2*sigma**2))/&
           & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
           ix=ix+step
         end do
+        write(0,*) sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)),hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
         close(50)
       else
         xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
