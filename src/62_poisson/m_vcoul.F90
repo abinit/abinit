@@ -671,8 +671,8 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
    ! Beigi"s method: the surface must be along x-y and R must be L_Z/2.
    if (opt_surface==1) then
-     ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)),&
-&     "2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry.")
+     msg="2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry."
+     ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)),trim(msg))
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
