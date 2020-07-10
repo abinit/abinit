@@ -1267,15 +1267,14 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'gw_qlwl','DPR',multivals%gw_nqlwl)
 
- intarr(1,:)=dtsets(:)%gw_icutcoul
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)
-
  intarr(1,:)=dtsets(:)%gw_sctype
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_sctype','INT',0)
 
-
  intarr(1,:)=dtsets(:)%gw_sigxcore
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_sigxcore','INT',0)
+
+ intarr(1,:)=dtsets(:)%gw_icutcoul
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gw_icutcoul','INT',0)
 
  dprarr(1,:)=dtsets(:)%gw_toldfeig
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'gw_toldfeig','ENE',0)
