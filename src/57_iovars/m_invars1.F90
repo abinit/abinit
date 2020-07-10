@@ -2217,16 +2217,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%extrapwf=0
    dtsets(idtset)%exchmix=quarter
 !  F
-   dtsets(idtset)%fermie_nest=zero
-   dtsets(idtset)%fftgw=21
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
    dtsets(idtset)%freqim_alpha=five
-   dtsets(idtset)%freqremin=zero
-   dtsets(idtset)%freqremax=zero
-   dtsets(idtset)%freqspmin=zero
-   dtsets(idtset)%freqspmax=zero
    dtsets(idtset)%friction=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
@@ -2360,7 +2354,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    else
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
-   dtsets(idtset)%nbandkss=0
    dtsets(idtset)%nctime=0
    dtsets(idtset)%ndtset = -1
    dtsets(idtset)%neb_algo=1

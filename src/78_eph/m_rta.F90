@@ -87,9 +87,12 @@ type,public :: rta_t
    ! Same number of energies used in DOS.
 
    integer :: bmin, bmax, bsize
+   ! Only bands betwee bmin and bmax are considered in the integrals.
+   ! as we don't compute linewidths for all states.
+   ! bisze = bmax - bmin + 1
 
    integer :: nrta
-   ! Number of relaxation-time approximations used (1 for SERTA, 2 for MRTA)
+   ! Number of relaxation-time approximations used (1 for SERTA, 2 for SERTA + MRTA)
 
    real(dp) :: eph_extrael
    ! extra electrons per unit cell from sigeph (lifetimes)
@@ -104,10 +107,12 @@ type,public :: rta_t
    ! Fermi level from input file
 
    logical :: assume_gap
+   ! True if we are dealing with a semiconductor.
+   ! This parameter is Initialized from the value of sigma_erange provided by the user.
 
    real(dp),allocatable :: kTmesh(:)
    ! (%ntemp)
-   ! a list of temperatures at which to compute the transport
+   ! a list of k * temperatures at which to compute the transport
 
    real(dp),allocatable :: eph_mu_e(:)
    ! (%ntemp)
@@ -164,7 +169,7 @@ type,public :: rta_t
    real(dp),allocatable :: l1(:,:,:,:,:,:)
    real(dp),allocatable :: l2(:,:,:,:,:,:)
    ! (3, 3, nw, ntemp, nsppol, nrta)
-   ! Onsager coeficients
+   ! Onsager coeficients in Cartesian coordinates
 
    real(dp),allocatable :: sigma(:,:,:,:,:,:)
    real(dp),allocatable :: seebeck(:,:,:,:,:,:)
@@ -172,7 +177,7 @@ type,public :: rta_t
    real(dp),allocatable :: pi(:,:,:,:,:,:)
    real(dp),allocatable :: zte(:,:,:,:,:,:)
    ! (3, 3, nw, ntemp, nsppol, nrta)
-   ! Transport coefficients
+   ! Transport coefficients in Cartesian coordinates
 
    real(dp),allocatable :: mobility(:,:,:,:,:,:,:)
    ! Mobility
@@ -259,7 +264,6 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  call wrtout(unts, sjoin("- Reading carrier lifetimes from:", dtfil%filsigephin), newlines=1, do_flush=.True.)
 
  ! Initialize RTA object
- ! TODO: Should store more metadata: energy window, nkcalc ....
  rta = rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, comm)
 
  ! Compute RTA transport quantities
@@ -338,14 +342,14 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 !************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+ unts = [std_out, ab_out]
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- unts = [std_out, ab_out]
+
  new%assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
- ! TODO: Add real test for eph_restart
  sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., &
-                         extrael_fermie=extrael_fermie, sigma_ngkpt=sigma_ngkpt, sigma_erange=sigma_erange)
+                        extrael_fermie=extrael_fermie, sigma_ngkpt=sigma_ngkpt, sigma_erange=sigma_erange)
  ABI_CHECK(ierr == 0, msg)
 
  ! Allocate temperature arrays (same values as the ones used in the SIGEPH calculation).
@@ -357,7 +361,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  new%nrta = 2; if (sigmaph%mrta == 0) new%nrta = 1
 
  new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
- !new%bmin = 1; new%bmax = ebands%mband  ! This for debugging purposes
+ !new%bmin = 1; new%bmax = ebands%mband  ! This for debugging purposes, results should not change
  new%bsize = new%bmax - new%bmin + 1
 
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
@@ -375,6 +379,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
        new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
        new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
      end do
+     !MSG_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
      MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
    end if
 
@@ -391,7 +396,6 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  !      velocity(3, bmin:bmax, nkpt, nsppol)
  !      linewidths(self%ntemp, bmin:bmax, nkpt, nsppol, 2)
  !
- !if (all(dtset%sigma_ngkpt == 0) .or. all(dtset%sigma_ngkpt == sigma_ngkpt)) then
  if (any(dtset%sigma_ngkpt /= 0)) then
    ! If integrals are computed with the sigma_ngkpt k-mesh, we need to downsample ebands.
    !call wrtout(unts, sjoin(" SIGMAPH file used sigma_ngkpt:", ltoa(sigma_ngkpt)))
@@ -593,6 +597,10 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    call ebands_get_muT_with_fd(ebands, new%ntemp, new%kTmesh, dtset%spinmagntarget, dtset%prtvol, new%transport_mu_e, comm)
  end if
 
+ ! TODO: Implement possible change of sigma_erange, useful for convergence studies
+ !   1) Run sigmaph with relatively large sigma_erange.
+ !   2) Decrease energy window in the trasport part to analyze the behaviour of transport tensors.
+
  ! sigmaph is not needed anymore. Free it.
  sigmaph%ncid = nctk_noid
  call sigmaph%free()
@@ -714,6 +722,7 @@ subroutine rta_compute(self, cryst, dtset, comm)
  end if
 
  ! Compute DOS, vv_dos and vvtau_DOS (v x v tau)
+ !
  !    out_valsdos: (nw, 2, nvals, nsppol) array with DOS for scalar quantities if nvals > 0
  !    out_tensdos: (nw, 2, 3, 3, ntens,  nsppol) array with DOS weighted by tensorial terms if ntens > 0
  !
@@ -1175,9 +1184,6 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
 #ifdef HAVE_NETCDF
  ! Write to netcdf file
- ncerr = nctk_def_dims(ncid, [ &
-    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
- NCF_CHECK(ncerr)
 
  NCF_CHECK(cryst%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(self%ebands, ncid))
@@ -1185,6 +1191,10 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  !nctk_copy from sigeph?
  !    nctkarr_t("eph_ngqpt_fine", "int", "three"), &
+
+ ncerr = nctk_def_dims(ncid, [ &
+    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
+ NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [ &
     nctkarr_t('transport_ngkpt', "int", "three"), &

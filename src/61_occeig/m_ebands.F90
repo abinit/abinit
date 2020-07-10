@@ -518,8 +518,6 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
 
  ierr = maxval(gaps%ierr)
 
- ! TODO
- !gaps = ebands_get_gaps(ebands, gap_err)
  !if (ierr /= 0) then
  !  ! In case of error try to enforce semiconductor occupations before calling ebands_get_gaps
  !  ! This might still fail though...

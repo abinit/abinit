@@ -760,7 +760,7 @@ As a rule of thumb, 2-4 OpenMP threads should be OK provided you link with threa
 Last but not least, do not use datasets: large arrays allocated for $\kk$-points and the size depends on [[ndtset]].
 Never ever use multiple datasets for big EPH calculations. You have been warned!
 
-### How to compute only the $\kk$-points close to the band edges
+### How to compute only the k-points close to the band edges
 
 <!-- part of the discussion can be moved to the eph_intro as SKW will be used also in phgamma -->
 

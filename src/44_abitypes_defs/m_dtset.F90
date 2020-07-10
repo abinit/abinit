@@ -150,7 +150,7 @@ type, public :: dataset_type
  integer :: eph_task = 1
  integer :: exchn2n3d
  integer :: extrapwf
- integer :: fftgw
+ integer :: fftgw = 21
  integer :: fockoptmix
  integer :: frzfermi
  integer :: ga_algor
@@ -299,7 +299,7 @@ type, public :: dataset_type
  integer :: natsph_extra
  integer :: natvshift
  integer :: nbandhf
- integer :: nbandkss
+ integer :: nbandkss = 0
  integer :: nbdblock
  integer :: nbdbuf
  integer :: nberry
@@ -632,13 +632,13 @@ type, public :: dataset_type
  real(dp) :: esmear
  real(dp) :: exchmix
  real(dp) :: fband
- real(dp) :: fermie_nest
+ real(dp) :: fermie_nest = zero
  real(dp) :: focktoldfe
  real(dp) :: freqim_alpha
- real(dp) :: freqremin
- real(dp) :: freqremax
- real(dp) :: freqspmin
- real(dp) :: freqspmax
+ real(dp) :: freqremin = zero
+ real(dp) :: freqremax = zero
+ real(dp) :: freqspmin = zero
+ real(dp) :: freqspmax = zero
  real(dp) :: friction
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
