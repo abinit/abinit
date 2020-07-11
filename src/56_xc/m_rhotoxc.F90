@@ -401,29 +401,30 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  if (with_vxctau) with_vxctau=(size(vxctau)>0)
  if (usekden==1) then
    if (.not.present(taur)) then
-     message='taur argument must be present!'
+     message=' For mGGA functionals, kinetic energy density is needed. Set input variable usekden to 1.' 
+     message=trim(message)//' Also use NC pseudopotentials without non-linear XC core correction.'
      MSG_BUG(message)
    else if (size(taur)/=nfft*nspden) then
-     message='invalid size for taur!'
+     message=' Invalid size for taur!'
      MSG_BUG(message)
    end if
    if (present(xcctau3d)) then
      n3xctau=size(xcctau3d)
      if (n3xctau/=0.and.n3xctau/=nfft) then
-       message='invalid size for xccctau3d!'
+       message=' Invalid size for xccctau3d!'
        MSG_BUG(message)
      end if
    end if
    if (with_vxctau) then
      if (size(vxctau)/=nfft*nspden*4) then
-       message='invalid size for vxctau!'
+       message=' Invalid size for vxctau!'
        MSG_BUG(message)
      end if
    end if
  end if
  if((usekden==1.or.uselaplacian==1).and.nspden==4)then
    !mGGA en NC-magnetism: how do we rotate tau kinetic energy density?
-   message='meta-GGA not comptatible with non-colinear magnetism!'
+   message=' At present, meta-GGA (usekden=1 or uselaplacian=1)  is not comptatible with non-collinear magnetism (nspden=4).'
    MSG_ERROR(message)
  end if
 

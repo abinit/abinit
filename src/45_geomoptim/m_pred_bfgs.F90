@@ -881,7 +881,7 @@ real(dp) :: strten(6)
  vout_prev(:) = vout
  info = lbfgs_execute(vin,etotal,vout)
 
- if (info /= 1) then
+ if (info /= -1) then
    write (ionmov22_errmsg, '(a,i0,3a)') &
     'Lbfgs routine failed. Returned value: ', info,ch10, &
     'Restart your calculation from last step or try a different ionmov'
