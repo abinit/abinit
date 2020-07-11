@@ -1937,7 +1937,7 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
      write(std_out,*)qcart(:,:)
      write(msg,'(7a)')&
 &      '2D geometry, Beigi method. Found q-points with non-zero component along non-periodic (z) direction ',ch10,&
-&      'This is not allowed, see Notes in cutoff_surface.F90. Check your k or q point grid, vectors must be of the form (kx,xy,0). ',ch10,&
+&      'This is not allowed. Check your k or q point grid, vectors must be of the form (kx,ky,0). ',ch10,&
 &      'Possibly shiftk triggers this problem.',ch10,&
 &      'ACTION : Modify the q-point sampling '
      MSG_ERROR(msg)
