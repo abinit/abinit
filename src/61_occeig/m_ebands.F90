@@ -5365,7 +5365,7 @@ end subroutine ebands_prtbltztrp_tau_out
 !!  This routine should be called by a single processor.
 !!
 !! INPUTS
-!!  prtebands=Flag seleecting the output format:
+!!  prtebands=Flag selecting the output format:
 !!    0 --> None
 !!    1 --> xmgrace
 !!    2 --> gnuplot     (not coded yet)

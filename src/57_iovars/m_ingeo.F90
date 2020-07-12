@@ -202,8 +202,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_ALLOCATE(dprarr,(marr))
 
  ! Try from geo_string
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
-             'KEY', key_value=geo_string)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, 'KEY', key_value=geo_string)
 
  if (tread_geo /= 0) then
    ! Set up unit cell from external file.
@@ -841,7 +840,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
          end do
        end if
-
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&

@@ -9,7 +9,7 @@ and how to use the McMillan equation to estimate the superconducting critical te
 the isotropic Eliashberg formalism.
 We start by presenting the equations implemented in the code and their connection with the ABINIT input variables.
 Then we discuss how to run isotropic $T_c$-calculations and how to perform typical convergence studies
-for hexagonal $MgB_2$.
+using hexagonal $MgB_2$ as example
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties in metals.
@@ -182,19 +182,20 @@ to avoid numerical instabilities introduce by band crossings.
 In this tutorial, we prefer to focus on e-ph calculations and the associcated convergence studies.
 For this reason, we rely on **pre-computed DEN.nc, DDB and DFPT POT1.nc files** to bypass the DFPT part.
 The DEN.nc file will be used to perform NSCF computations on arbitrarily dense $\kk$-meshes while the
-POT1.nc files will be merged with the *mrgdv* utility to produce the DVDB database of scattering potentials.
+DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database of scattering potentials.
 
 Note that these files are not shipped with the official ABINIT tarball as they are relatively 
 large in size.
-In order to run the examples of this tutorial, you need to download these files from an external github repository.
+In order to run the examples of this tutorial, you need to download these files 
+from this github repository.
 
-If git is installed on your machine, one can easily fetch the repository with:
+If git is installed on your machine, one can easily fetch the entire repository with:
 
 ```sh
 git clone ...
 ```
 
-Alternatively one can use *wget*:
+Alternatively, use *wget*:
 
 ```sh
 wget 
@@ -398,8 +399,8 @@ The high-symmetry $\qq$-path for the phonon band structure is specified with:
 
 Since Abinit supports multidatases, unlike anaddb, it's easy to define an input file to compute 
 the phonon DOS with multiple $\qq$-meshes.
-This simple test allows us to get an preliminary estimate of the $\qq$-sampling required to convergence the 
-Eliashberg function as $\alpha^2F(\ww)$ is essentially a weighted phonon DOS.
+This simple test allows us to get an initial (very qualitative) estimate of the $\qq$-sampling 
+required to convergence the  Eliashberg function as $\alpha^2F(\ww)$ is essentially a weighted phonon DOS.
 
 The input file xxx, shows how to perform such a test with $\qq$-meshes of increasing density.
 
@@ -420,7 +421,7 @@ Remember to discuss k-mesh and tsmear at the DFPT level.
 
 Now we can finally run our first Eliashberg calculation.
 We start with a relatively simple input that allows us to introduce the most important variables
-and discuss the most important sections of the main output file.
+and the main output files.
 
 To compute $\gamma_{\qq\nu}$ in metals, one has to use [[optdriver]] 7 and [[eph_task]] 1.
 As usual, the location of the DDB, DVDB and WFK files is given by

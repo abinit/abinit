@@ -245,11 +245,11 @@ subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: ierr, my_rank
+ integer :: my_rank
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
- character(len=500) :: msg
+ !character(len=500) :: msg
  character(len=fnlen) :: path
  type(rta_t) :: rta
 !arrays

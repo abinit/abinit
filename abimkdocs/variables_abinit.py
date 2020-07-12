@@ -20857,9 +20857,10 @@ with the NSCF computation of the first order derivative of the KS wavefunctions 
 the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1
-during the GS run and the specification of [[tolwfr]] in the EPH input file.
-The path to the POT file used in the EPH calculation is specified via [[getpot_filepath]].
+during the GS run.
+The path to the external POT file used in the EPH calculation is specified via [[getpot_filepath]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
+The solver stops when the solution is converged within [[tolwfr]].
 
 !!! important
 
@@ -21015,6 +21016,11 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 !!! important
 
     The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the EPH code implements its own MPI-algorithm and this [[eph_np_pqbks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    are **not used** in the EPH subdriver.
 """,
 ),
 

@@ -683,14 +683,13 @@ However, we found that there is very little use to go beyond a mesh three times 
 Using a 72×72×72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
 and a 96×96×96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
 
-
 ### In-place restart
 
 All the results of the calculation are stored in a single SIGEPH.nc file
 for all the $\kk$-points (and spins) considered.
 The list of $\kk$-points is initialized at the beginning of the calculation and an internal table
 in the netcdf file stores the status of each $\kk$-point (whether it has been computed or not).
-This means that calculations that get killed by the resource manager due to time limit can reuse
+This means that calculations that are killed by the resource manager due to time limit can reuse
 the SIGEPH file to perform an automatic in-place restart.
 Just set [[eph_restart]] to 1 in the input file and rerun the job 
 
