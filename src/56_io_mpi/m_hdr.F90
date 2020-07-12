@@ -2741,7 +2741,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%codvsn=list_tmp(1:8)
    do ipsp=2,npsp+1
      list_tmp =list_char(ipsp)
-     hdr%title(ipsp-1) =list_tmp(1:fnlen)
+     hdr%title(ipsp-1) =list_tmp(1:min(fnlen,132))
    end do
    do ipsp=npsp+2,2*npsp+1
      hdr%md5_pseudos(ipsp-npsp-1) = list_char(ipsp)(1:md5_slen)
