@@ -19292,8 +19292,8 @@ Variable(
 [[vcutgeo]] is used in conjunction with [[icutcoul]] to specify the geometry
 used to truncate the Coulomb interaction, as well as the particular approach
 to be used. It has a meaning only for a periodic one-dimensional system, typically
-a nanowire, nanotube or polymer surrounded by vacuum separating the system 
-from images in neighbouring cells 
+a nanowire, nanotube or polymer surrounded by vacuum separating the system
+from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
 typically a slab with vacuum separating it from images in neighbouring cells (([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
@@ -19351,7 +19351,7 @@ vcutgeo -3 -2 0
 **Definition to be added**
 
 Note that not all k-point grids are allowed in these 1D and 2D cases:
-the k point vector component(s) along non-periodic direction(s) must vanish. 
+the k point vector component(s) along non-periodic direction(s) must vanish.
 So, if the 2D Ismail-Beigi technique is used, the z-component of the k points must vanish.
 """,
 ),

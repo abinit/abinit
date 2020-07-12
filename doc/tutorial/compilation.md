@@ -39,7 +39,7 @@ before proceeding with the next steps.
 
 If you are not interested in compiling everything from source, you may want to consider the following alternatives:
 
-* Internal fallbacks
+* Compiling Abinit using the Internal fallbacks
 
 * Compilation with external libraries provided by apt-get (Linux users)
 
