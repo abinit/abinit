@@ -2732,9 +2732,10 @@ subroutine cginv(a,n,comm)
  use_scalapack=.FALSE.
  if (PRESENT(comm)) then
   nprocs = xmpi_comm_size(comm)
-#ifdef HAVE_LINALG_SCALAPACK
-  use_scalapack = (nprocs>1)
-#endif
+  ! TODO
+!#ifdef HAVE_LINALG_SCALAPACK
+!  use_scalapack = (nprocs>1)
+!#endif
  end if
 
  SELECT CASE(use_scalapack)
