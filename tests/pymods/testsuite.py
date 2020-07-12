@@ -1926,7 +1926,7 @@ pp_dirpath $ABI_PSPDIR
             if not os.path.exists(os.path.join(src, "README.md")):
                 self._status = "skipped"
                 msg = self.full_id + ": Skipped:\n\tThis test requires files in the git submodule:\n\t\t%s\n" % src
-                msg += "\tUse `git submodule update --recursive --remote` to fetch the last version from the remote url."
+                msg += "\tUse:\n\t`git submodule init && git submodule update --recursive --remote`\n\t to fetch the last version from the remote url."
                 self.cprint(msg, status2txtcolor[self._status])
                 can_run = False
             else:
@@ -2022,10 +2022,11 @@ pp_dirpath $ABI_PSPDIR
                 # Print message for users running the test suite on their machine
                 # if the test failed and we have exclusion rules on the ABINIT testfarm.
                 if status == "failed" and (self.exclude_hosts or self.exclude_builders):
-                    cprint("\tTest `%s` failed but note that this feature is not portable" % self.full_id, color="yellow")
-                    cprint("\tas this test is partly disabled on the Abinit testfarm.", color="yellow")
-                    if self.exclude_hosts: cprint("\texclude_hosts: %s" % str(self.exclude_hosts), color="yellow")
-                    if self.exclude_builders: cprint("\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
+                    cprint("\tTest `%s` with keywords: `%s` failed." % (self.full_id, str(self.keywords)), color="yellow")
+                    cprint("\tNote however that this feature is not portable", color="yellow")
+                    cprint("\tand this test is partly disabled on the Abinit testfarm.", color="yellow")
+                    if self.exclude_hosts: cprint("\t\texclude_hosts: %s" % str(self.exclude_hosts), color="yellow")
+                    if self.exclude_builders: cprint("\t\texclude_builder: %s" % str(self.exclude_builders), color="yellow")
 
                 if status == "failed" and self.use_git_submodule:
                     cprint("\tTest %s failed. Note, however, that this requires external files in %s" % (
@@ -2037,18 +2038,18 @@ pp_dirpath $ABI_PSPDIR
             if runner.retcode == 124:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "Test has reached timeout and has been killed by SIGTERM"
+                msg = self.full_id + " Test has reached timeout and has been killed by SIGTERM"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "Test has reached timeout and has been killed by SIGKILL"
+                msg = self.full_id + " Test has reached timeout and has been killed by SIGKILL"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
-                msg = (self.full_id + "Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
+                msg = (self.full_id + " Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
                 self.cprint(msg, status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!
