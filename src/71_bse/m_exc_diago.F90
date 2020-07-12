@@ -286,12 +286,13 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  neh1 = Bsp%nreh(1); neh2 = neh1
  if (Hdr_bse%nsppol==2) neh2 = Bsp%nreh(2)
 
+ ! Scalapack is disabled due to portability issues in slk_read
+ ! This part should be rewritten  with hdf5 + mpi-io
+
  use_scalapack = .FALSE.
-#if defined HAVE_LINALG_SCALAPACK
- use_scalapack = (nprocs > 1)
-#endif
- !use_scalapack = .FALSE.
- !use_scalapack = .TRUE.
+!#if defined HAVE_LINALG_SCALAPACK
+! use_scalapack = (nprocs > 1)
+!#endif
  if (use_scalapack .and. nsppol == 2) then
    use_scalapack = .False.
    msg = "Scalapack with nsppol==2 not yet available. Using sequential version"
