@@ -22,6 +22,7 @@ sources = [
  "m_crystal.F90",
  "m_ewald.F90",
  "m_geometry.F90",
+ "m_gtermcutoff.F90",
  "m_spgdata.F90",
  "m_spgbuilder.F90",
  "m_supercell.F90",

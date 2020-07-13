@@ -28,19 +28,14 @@ module m_gtermcutoff
  use defs_basis
  use m_abicore
  use m_errors
- use m_xmpi
+! use m_xmpi
  use m_fstrings,        only : sjoin, itoa
  use m_profiling_abi,   only : abimem_record
- use defs_abitypes,     only : MPI_type
+! use defs_abitypes,     only : MPI_type
  use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
  use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.),quadrature
  use m_paw_numeric,     only : paw_jbessel
-
  use m_geometry,        only : normv, metric
-
- use m_crystal,         only : crystal_t
-! use m_gsphere,         only : gsph_free,gsphere_t, gsph_init, print_gsphere ! print might be deleted after testing
-! use m_bz_mesh,         only : kmesh_t, kmesh_init
 
  implicit none
 
