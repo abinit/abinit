@@ -415,7 +415,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (my_rank == master) then
    if (iblock_dielt_zeff == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
-     call wrtout(ab_out, "Values initialized with zeros")
+     call wrtout(ab_out, " Values initialized with zeros.")
    else
      call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
    end if
@@ -426,7 +426,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (my_rank == master) then
    if (iblock_quadrupoles == 0) then
      call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_filepath))
-     call wrtout(ab_out, "Values initialized with zeros")
+     call wrtout(ab_out, " Values initialized with zeros.")
    else
      call wrtout(ab_out, sjoin("- Found quadrupole tensor in DDB file:", ddb_filepath))
    end if
@@ -453,7 +453,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos%free()
-     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
+     write(msg, "(a, 2f8.5)") "Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
    end do
 

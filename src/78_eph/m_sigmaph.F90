@@ -4623,7 +4623,7 @@ subroutine sigmaph_print(self, dtset, unt)
  ! Write dimensions
  !write(unt,"(a, 2(f5.3, 1x), a)")"Computing self-energy corrections for states inside energy window:", &
  !    self%elow * Ha_eV, self%ehigh * Ha_eV, "[eV]"
- write(unt,"(a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
+ write(unt,"(/,a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
  write(unt,"(a)")sjoin(" From bsum_start:", itoa(self%bsum_start), "to bsum_stop:", itoa(self%bsum_stop))
  if (dtset%eph_stern == 1 .and. .not. self%imag_only) then
    write(unt, "(a)")" Treating high-energy bands with Sternheimer and static self-energy."
@@ -4680,7 +4680,7 @@ subroutine sigmaph_print(self, dtset, unt)
      end do
  end do
 
- write(unt, "(a)")" === MPI parallelism ==="
+ write(unt, "(/,a)")" === MPI parallelism ==="
  write(unt, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", self%my_bsum_start, &
      " up to my_bsum_stop: ", self%my_bsum_stop
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", self%pert_comm%nproc
@@ -4691,7 +4691,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%bsum_comm%nproc
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", self%spin_comm%nproc
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", self%kcalc_comm%nproc
- write(unt, "(2(a,i0))")"P Number of k-point in Sigma_nk treated by this proc: ", self%my_nkcalc, " of ", self%nkcalc
+ write(unt, "(2(a,i0,/))")"P Number of k-point in Sigma_nk treated by this proc: ", self%my_nkcalc, " of ", self%nkcalc
 
 end subroutine sigmaph_print
 !!***

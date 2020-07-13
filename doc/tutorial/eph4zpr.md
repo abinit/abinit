@@ -110,7 +110,7 @@ The potentials are interpolated if [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]]
     are more symmetries that leave the $\kk$-point unchanged within a reciprocal lattice vector.
 
     This symmetrization procedure is activated by default and can be deactivated by setting [[symsigma]]
-    to zero for testing purposes.
+    to 0 for testing purposes.
     Note that when [[symsigma]] is set to 1, the code performs a final average of the QP results
     within each degenerate subspace.
     As a consequence, accidental degeneracies won't be removed when [[symsigma]] = 1.
@@ -166,15 +166,15 @@ with more advanced techniques based on the cumulant expansion [[cite:Nery2018]].
     The EPH code can compute QP corrections only for $\nk$ states that are present in the input WFK file
     (a similar requirement is present in the $GW$ code as well).
     As a consequence, the $\kk$-mesh ([[ngkpt]], [[nshiftk]], [[shiftk]]) should be chosen carefully 
-    especially tf the band edge is not located at an high-symmetry $\kk$-point.
+    especially if the band edge is not located at an high-symmetry $\kk$-point.
 
 There are different approaches one can use to specify the set of $\nk$ states in $\Sigma_{\nk}$.
 Each approach has pros and cons.
 
 The most direct way consists in specifying explicitly the $\kk$-points and the band range 
 using the three variables: [[nkptgw]], [[kptgw]], [[bdgw]]
-To compute the correction for the VBM at $\Gamma$ in a non-magnetic semiconductor
-with 8 electrons per unit cell, one would use:
+To compute the correction for the VBM at $\Gamma$ in silicon 
+(a non-magnetic semiconductor with 8 valence electrons per unit cell), one would use:
 
 ```sh
 nkptgw 1
@@ -184,14 +184,16 @@ bdgw   4 4    # [2, nkptgw] arary giving the initial and the last band index
 ```
 
 as the index of the valence band is given by 8 / 2 = 4.
-When [[symsigma]] is set to 1 (default), the code may decide to enlarge the band range 
-so that all degenerate states for a particular $\kk$-point are included in the calculation.
+When [[symsigma]] is set to 1 (default), the code may decide to enlarge the initial value of [[bdgw]] 
+so that all degenerate states for that particular $\kk$-point are included in the calculation.
 
 Alternatively, one can use [[gw_qprange]] or [[sigma_erange]]
+although *sigma_erange* is usually employs for transport calculations.
 
 ### Spectral function and Eliashberg functions
 
-For the spectral function, we use [[nfreqsp]], [[freqspmax]]
+The computation of the spectral function requires the specified of [[nfreqsp]] and [[freqspmax]].
+The results are stored in the SIGMAPH.nc file for each $\kk$-point and band
 
 <!--
 Further details concerning the implementation are given in Ref.[[cite:Gonze2019]].
@@ -229,7 +231,7 @@ A typical workflow for ZPR and T-dependent calculations requires the following s
 ## Calculation of the ZPR for XXX
 
 In this tutorial, we prefer to focus on the usage of the EPH code hence
-we will be using pre-computed DDB and POT1 files obtained with a xxx $\qq$-mesh to bypass the DFPT computation
+we will be using pre-computed DDB and DFPT POT files obtained with a xxx $\qq$-mesh to bypass the DFPT computation.
 We also provide a DEN.nc file that can be used to start the NSCF calculations required
 to generate the WKF file.
 
@@ -248,7 +250,7 @@ We use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[ir
 
 TODO: Mention ncdump and the input_string
 
-In this particular case the CBM and the VMB ...
+In this particular case the CBM and the VBM ...
 
 TODO: use and explain [[structure]]
 
@@ -256,14 +258,14 @@ TODO: use and explain [[structure]]
 !!! important
 
     Note that the EPH code can compute QP corrections only for $\kk$-points belonging to the $\kk$-mesh
-    associated to WFK file.
+    found in the WFK file.
     In some cases, it is not possible to generate a $\kk$-mesh containing the band edges.
     In this case, you will have to select the closest wavevectors in the grid.
 -->
 
 ## Our first ZPR calculation
 
-For our first ZPR we use a minimalistic input file that allows us to discuss
+For our first ZPR calculation, we use a minimalistic input file that allows us to discuss
 the basic input variables and the organization of the main output file.
 
 Run the code, as usual, using:
@@ -277,9 +279,9 @@ Let's now discuss the meaning of the different variables in more details:
 We use [[optdriver]] 7 and [[eph_task]] 4 to activate the computation of the full self-energy (real + imaginary part).
 The paths to the external files are specified by [[getddb_filepath]], [[getwfk_filepath]], and [[getdvdb_filepath]].
 
-[[ngkpt]] [[nshiftk]] and [[shitfk]]
+[[ngkpt]], [[nshiftk]] and [[shiftk]].
 [[ddb_ngqpt]] is set to XXX as this is the $\qq$-mesh we used in the DFPT part to generate the DDB and DVDB file.
-The integations in $\qq$-space is done with the [[eph_ngqpt_fine]].
+but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh.
 As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate the interpolation of the DFPT potentials
 as discussed in [introduction page for the EPH code](eph_intro).
 
@@ -290,13 +292,16 @@ Run the code with:
 
 Let's have a look at the main output file...
 
+```md
+```
+
 !!! important
 
     To compute the imaginary part of $\Sigma^{\text{e-ph}}$ at the KS, we strongly recommend to use
     [[eph_task]] -4 as this option activates several important optimizations that are not possible
     when the full self-energy is wanted.
     Note, however, that [[eph_task]] -4 is not able to provide the full frequency dependence, only the
-    values at the KS eigenvalue.
+    value of the imaginary part at the KS eigenvalue.
     The computation of spectral functions and Eliashberg functions therefore requires [[eph_task]] +4.
 
 ### Convergence wrt nband
@@ -335,10 +340,19 @@ So XXX bands are needed to convergence the ZPR.
 
 ### How to reduce the number of bands with the Sternheimer method
 
-In this section, we discuss how to take advantange of the Sternheimer equation to accelerate the convergence with [[nband]].
+In this section, we discuss how to take advantage of the Sternheimer equation 
+to accelerate the convergence with [[nband]].
+
+```sh
+eph_stern 1 
+getden_filepath "out_DEN"
+# nline 
+# tolwfr 
+```
+
 To activate the Sternheimer method, set [[eph_stern]] to 1
 and use the [[getpot_filepath]] input variable to specify the external file storing the GS KS potential.
-The Sternheimer equation is solved non-self-consistently using max [[nline]] NSCF iterations.
+The Sternheimer equation is solved non-self-consistently using max [[nline]] NSCF iterations
 and the solver stops when the solution is converged within [[tolwfr]].
 <!--
 Default values are provided for these two variable are provided.
@@ -360,6 +374,15 @@ You might need to adjust the values for more complicated systems.
     As a matter of fact, one uses the Sternheimer method so that we don't need 300 bands to convergence the results.
 
 ### Convergence of the ZPR wrt the q-mesh
+
+```sh
+getwfk_filepath
+
+ndtset 
+eph_ngqpt_fine1
+eph_ngqpt_fine2
+eph_ngqpt_fine3
+```
 
 ### How to compute the spectral function
 
@@ -397,9 +420,8 @@ In other words, the IBZ is not MPI-distributed and this leads to a significant i
 for dense meshes.
 Fortunately, the code is able to MPI-distribute bands hence the memory required for this part will scale as [[nband]] / **np_band**.
 
-
-If you are not using the Sternheimer method, it's important to use enough MPI proceeses for the band level
-in order to decrease the memory requires to allocate the wavefunctions in $\GG$-space as
+If you are not using the Sternheimer method, it's important to use enough MPI processes for the band level
+in order to decrease the memory required to allocate the wavefunctions in $\GG$-space as
 
 To recap:
 
@@ -419,12 +441,12 @@ To recap:
    to speedup the calculation and decrease the memory required by the cache.
 
 4. Finally, use the $\kk$-point parallelism if there are enough CPUs available to boost the calculation.
-   Obviously, this kind of parallelism makes sense if you are computing QP corrections for sevaral $\kk$ points
+   Obviously, this kind of parallelism makes sense if you are computing QP corrections for several $\kk$ points
    and the number of *np_kpt* MPI processes should be adjusted accordingly,
    Keep in mind, however, that each $\kk$-point has a different computational cost so load imbalance is expected.
 
-
-Last but not least, remeber that setting [[boxcutmin]] to a value smaller than 2 will lead to a significant memory reduction.
+Last but not least, remember that setting [[boxcutmin]] to a value smaller than 2 (e.g. 1.1) 
+will lead to a significant memory reduction.
 
 ### Estimating the ZPR with a generalized Fr\"ohlich model
 

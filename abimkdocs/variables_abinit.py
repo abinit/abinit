@@ -20499,7 +20499,7 @@ for increasing number of k points.
 
 When [[optdriver]] = 7, **zcut** defines the small complex shift used to avoid
 divergences in the expression for the Fan-Migdal e-ph self-energy.
-Note that the default value is to large for e-ph calculations, smaller values of the order
+Note that the default value is too large for e-ph calculations, smaller values of the order
 of 0.001 or 0.001 eV should be used (and carefully tested).
 """,
 ),

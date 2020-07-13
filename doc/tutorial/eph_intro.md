@@ -21,19 +21,19 @@ This means that e-ph calculations with advanced features such as PAW, SOC, non-c
 are readily available in the ANADDB version once support in the DFPT part is implemented.
 
 On the other hand, this post-processing approach implies that the number of $\kk/\qq$-points in the e-ph matrix elements
-is **automatically fixed** at the level of the DFPT run.
+is **automatically fixed at the level of the DFPT run**.
 In other words, if you want to compute phonon-limited mobilities with e.g. a 90×90×90 $\kk$- and $\qq$-mesh,
 you need to perform DFPT calculations with the same sampling thus rendering the computation quite heavy.
-In principle, it is possible to use tricks such as a linear interpolation of the matrix elements to densify the sampling
-inside ANADDB, but in order to get a decent interpolation one usually needs initial BZ meshes
+In principle, it is possible to use tricks such as a linear interpolation of the e-ph matrix elements
+to densify the sampling, but in order to get a decent interpolation one usually needs initial BZ meshes
 that are significantly denser than the ones needed to converge the DFPT part alone.
 
-As a matter of fact, electrons, phonons and e-ph properties present **completely different convergence rates**.
+As a matter of fact, electrons, phonons and e-ph properties **present completely different convergence rates**.
 In silicon, for instance, a 9×9×9 mesh both for phonons and electrons is enough to converge
 the electron density and the vibrational spectrum [[cite:Petretto2018]].
-On the contrary, the phonon-limited mobility requires a 45×45×45 $\kk$-grid and a 90×90×90 $\qq$-grid
+On the contrary, the phonon-limited mobility of Si requires a 45×45×45 $\kk$-grid and a 90×90×90 $\qq$-grid
 to reach a 5% relative error [[cite:Brunin2020]].
-Roughly speaking, an explicit computation of phonons with a 90×90×90 $\qq$-mesh in Si
+Roughly speaking, an explicit computation of phonons in Si with a 90×90×90 $\qq$-mesh
 requires around 20000 × 3 × [[natom]] DFPT calculations
 so you can easily get an idea of the cost of a fully ab-initio evaluation of the e-ph matrix elements
 for all these $\qq$-points.
@@ -44,7 +44,8 @@ As a net result, the three problems (electrons, phonons and electron-phonon) are
 **partly decoupled** and can be converged separately.
 Keep in mind, however, that the fact that one can easily densify the $\qq$-sampling in the EPH code does not
 mean one can use under-converged values for the GS/DFPT part.
-Indeed, the quality of the ingredients used for the interpolation depends on the initial $\kk$- and $\qq$-meshes.
+Indeed, the quality of the ingredients used for the interpolation depends on the initial $\kk$- and $\qq$-meshes
+and this is the reason why we said that the three problems are partly decoupled.
 The take-home message is that one should always converge carefully both electronic and vibrational properties
 before moving to EPH computations.
 
@@ -65,14 +66,15 @@ The partial POT files are merged with the **mrgdv** utility to produce a
 single **DVDB file** (Derivatives of V($\rr$) DataBase).
 As usual, the partial DDB files are merged with **mrgddb**.
 
-The EPH driver (blue box) receives as input the total DDB and the DVDB as well as a GS WFK file that is usually
-produced with a different $\kk$-mesh (in some cases, even with a different number of bands).
+The EPH driver (blue box) receives in input the total DDB and the DVDB as well as a GS WFK file that is usually
+produced with a different $\kk$-mesh (in some cases, even with a different number of bands
+when high-energy empty states are needed).
 These ingredients are then used to compute the EPH matrix elements and the associated physical properties.
 <!--
 The $\kk$-mesh in the WFK file must be commensurate with the $\qq$-mesh in the DVDB file
 -->
 
-The EPH calculation is activated by [[optdriver]] = 7 while [[eph_task]] defines the physical properties to be computed.
+The EPH calculation is activated by using [[optdriver]] = 7 while [[eph_task]] defines the physical properties to be computed.
 To read the external files, one specifies the filepath with the three variables:
 [[getwfk_filepath]], [[getddb_filepath]] and [[getdvdb_filepath]].
 
@@ -84,7 +86,7 @@ Finally a specialized routine is invoked depending on the value of [[eph_task]].
 
 The following physical properties can be computed:
 
-* Imaginary part of ph-e self-energy in metals (**eph_task 1**)
+* Imaginary part of ph-e self-energy in metals (**eph_task 1**) that gives access to:
 
     * Phonon linewidths induced by e-ph coupling
     * Eliashberg function
@@ -93,22 +95,22 @@ The following physical properties can be computed:
     * transport properties in metals with the LOVA approximation.
 -->
 
-* Real and imaginary parts of the e-ph self-energy (**eph_task 4**)
+* Real and imaginary parts of the e-ph self-energy (**eph_task 4**) that gives access to:
 
     * Zero-point renormalization of the band gap (ZPR)
     * Correction of the QP energies due to e-ph scattering
     * Spectral function $A(\ww)$ and Eliashberg functions
 
-* Imaginary part of the e-ph self-energy at the KS energy (**eph_task -4**)
+* Imaginary part of the e-ph self-energy at the KS energy (**eph_task -4**) that gives access to:
 
     * e-ph scattering rates
     * Phonon-limited carrier mobility, electrical conductivity and Seebeck coefficient
     * Phonon-limited carrier mean free path and relaxation times
     * All the calculations above can be done as a function of temperature and doping, for nonpolar and polar materials.
 
+<!--
 Other more advanced options are available...
 
-<!--
 Crystalline symmetries are used throughout the code in order to reduce the number
 of $\kk$- and $\qq$-points that must be explicitly treated.
 To achieve good parallel efficiently, the most CPU demanding parts are parallelized with MPI employing
@@ -125,7 +127,7 @@ At the time of writing ( |today| ), the following features are **not yet support
 * Non-collinear magnetism ([[nspinor]] = 2 and [[nspden]] = 4)
 * Non-local part of the pseudopotential applied with [[useylm]] = 1
 
-In this introduction, we mainly focus on the parts common to the different sub-drivers:
+In this introduction, we focus on the parts that are common to the different sub-drivers i.e.:
 
 1. Computation of vibrational properties via Fourier interpolation of the dynamical matrix.
 2. Fourier interpolation of the DFPT potentials.
@@ -177,8 +179,8 @@ ph_ngqpt 40 40 40
 
 The computation of the phonon band structure is activated automatically, provided the input file
 defines the high-symmetry $\qq$-path in terms of [[ph_nqpath]] vertices listed in the [[ph_qpath]] array.
-The [[ph_ndivsm]] variable defines the number of divisions used to sample the smallest segment of the path 
-so that the number of points in each segment respects the proportions.
+The [[ph_ndivsm]] variable defines the number of divisions used to sample the smallest segment of the path
+so that the number of points in each segment is proportional to the length.
 The computation of the phonon band structure can be deactivated by setting [[prtphbands]] = 0.
 The final results are stored in the **PHBST.nc** file (same format at the one produced by ANADDB).
 
@@ -232,7 +234,7 @@ $(\kappa\alpha, \qq)$ perturbation [[cite:Gonze1997]] [[cite:Baroni2001]].
 
 The DVDB file stores $\partial_{\kappa\alpha,\qq} v^\KS(\rr)$
 for all the $\qq$-points in the IBZ and all the irreducible atomic perturbations.
-In a more rigorous way, we should say that the DVDB file stores the local part of the DFPT potential
+More rigorously, we should say that the DVDB file stores the local part of the DFPT potential
 (variation of the Hartree + XC + local part of the pseudo)
 but this is a rather technical point discussed in more detail in [[cite:Brunin2020]] that is not relevant
 for the present discussion so we do not elaborate more on this.
@@ -395,8 +397,8 @@ $\qq$-mesh must be dense enough to capture the full strenght of the coupling.
 A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015]] and [[cite:Sjakste2015]].
 -->
 
-From a more practical point of view, this implies that one should **always monitor** the convergence of the
-physical properties with respect to the initial DFPT $\qq$-mesh.
+From a more practical point of view, this implies that one should **always monitor the convergence of the
+physical properties with respect to the initial DFPT $\qq$-mesh**.
 The LR model implemented in ABINIT facilitates the convergence as the non-analytic behaviour for
 $\qq \rightarrow 0$ is properly described yet the Fourier interpolation can introduce oscillations
 between the *ab-initio* $\qq$-points and these oscillations may affect the quality of the
@@ -404,9 +406,9 @@ physical results [[cite:Brunin2020]].
 
 ## Tricks to accelerate the computation and reduce the memory requirements
 
-Each sub-driver implements tricks to accelerate the calculation and reduce the memory requirements.
+Each sub-driver implements specialized techniques to accelerate the calculation and reduce the memory requirements.
 Here we focus on the techniques that are common to the different EPH sub-drivers.
-Additional tricks specific to [[eph_task]] are discussed in more detail in the associated lesson.
+Additional tricks specific to the particular value of [[eph_task]] are discussed in more detail in the associated lesson.
 
 First of all, note that the memory requirements for the $W_{\kappa\alpha}(\rr,\RR)$ array
 scales as [[nfft]] × product([[ddb_ngqpt]]).
@@ -416,14 +418,19 @@ The MPI parallelism over perturbations (see [[eph_np_pqbks]]) allows one to decr
 
 Also, the total number of $\rr$-points ([[nfft]]) plays an important role both at the level of memory
 as well as the level of the wall-time.
-To optimize this part, one can decrease the value [[boxcutmin]] in the EPH calculation
-to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1.
-You are not obliged to run the GS/DFPT part with the same [[boxcutmin]].
+To optimize this part, one can decrease the value of [[boxcutmin]]
+to a value smaller than 2 e.g. 1.5 or the more aggressive 1.1 during the EPH calculation.
+Note that one is not obliged to run the GS/DFPT part with the same [[boxcutmin]].
+The EPH code will automatically interpolate the DFPT potentials if the FFT mesh defined in input differs
+from the one found in the DVDB file.
+<!--
 An exact representation of densities/potentials in $\GG$-space is obtained with [[boxcutmin]] = 2,
 but we found that using a value of 1.1 does not significantly affect the result
 while allowing one to decrease the cost of the calculation and the memory by a factor ~8.
+-->
 
-A significant fraction of the wall-time in EPH is spent for performing the FFTs required to apply $H^1$.
+A significant fraction of the wall-time in EPH is spent for performing the FFTs required
+to apply the first-order Hamiltonian $H^1$.
 The use of single precision in the FFT routines allows one to decrease the computational cost without losing precision.
 This trick is activated by setting [[mixprec]] = 1 (support for FFTW3 or DFPT-MKL is required to take advantage
 of mixed precision FFTs).
@@ -470,13 +477,13 @@ For instance, the computation of mobilities in semiconductors require the knowle
 is slight above (below) the CMB (VBM), let's say ~0.2 eV.
 In metals, only states close the Fermi level are needed to compute superconducting properties with the standard formalism.
 In other words, several EPH calculations in which delta functions are involved require extremely dense BZ meshes
-to converge but as a matter of fact only a relatively small fraction of the IBZ/BZ compatible with energy and crystalline-momentum
-convervation is nededed.
+to converge but as a matter of fact only a **relatively small fraction of the IBZ/BZ compatible with energy and crystalline-momentum
+convervation is nededed**.
 
 At this point a question naturally arises: can we avoid the NSCF computation of $\kk$-points that
 are supposed to give negligible contribution to the final physical results?
 The answer is yes provided we are able to predict in some easy way and with reasonable accuracy the
-KS eigenvalues $\ee_\nk$ without actually solving the KS equations.
+KS eigenvalues $\ee_\nk$ **without actually solving the KS equations**.
 
 The aproach used in the EPH code is based on the star-function interpolation by Shankland-Koelling-Wood Fourier (SKW)
 with the improvements described in [[cite:Pickett1988]].
@@ -509,6 +516,10 @@ by using a number of star functions equal to the number of *ab initio* $\kk$-poi
 but this usually leads to sharp oscillations between the input eigenvalues.
 To avoid this problem, one uses more star functions than *ab initio* $\kk$-points and constrains the
 fit so that the interpolant function passes through the input energies and a roughness function is minimized [[cite:Pickett1988]].
+<!--
+A similar approach is used in the Bolztrap code to interpolate the electron dispersion, compute group velocities and
+evaluate transport properties withing the constant relaxation time approximation.
+-->
 
 This [[einterp]] variable activates the interpolation of the electronic eigenvalues.
 The user can specify the number of star functions per
@@ -542,7 +553,6 @@ An example can be found in this
 %Therefore it is possible to employ the star-function interpolation by Shankland, Koelling and Wood in the improved version proposed by Pickett to fit the {\it ab initio} results. This interpolation technique, by construction, passes through the initial points and satisfies the basic symmetry property of the band energies.
 %It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings that may cause unphysical oscillations between the {\it ab initio} points.
 -->
-
 Without entering into details (that will be discussed in the other specialized lessons)
 one can use the SKW algorithm to find the relevant $\kk$-points, perform an *ab-initio* NSC run for these wavevectors only
 to produce a WFK file that can be used by the EPH code.
@@ -551,13 +561,13 @@ The entire procedure is performed in an automatic way inside ABINIT but before r
 we strongly recommend to check whether the SKW interpolation gives reasonable results.
 A typical test would be:
 
-1) Compute a WFK file on the IBZ that is reasonably dense (let's call the file **IBZ_WFK**)
+1. Compute a WFK file on the IBZ that is reasonably dense (let's call the file **IBZ_WFK**)
 
-2) Perform a NSCF band structure calculation along a high-symmetry path that covers the most important
+2. Perform a NSCF band structure calculation along a high-symmetry path that covers the most important
    regions of the BZ (e.g. band edges in semiconductors).
    This step produces another WFK file for band structure visualization (let's call it **KPATH_WKF**)
 
-3) Use the *abitk* executable in *src/98_main* to interpolate the KS energies in **IBZ_WFK** and
+3. Use the *abitk* executable in *src/98_main* to interpolate the KS energies in **IBZ_WFK** and
    compare the results with the ab-initio band structure stored in **KPATH_WFK**.
 
 The syntax is:
@@ -567,12 +577,13 @@ abitk skw_compare IBZ_WFK KPATH_WFK [--lpratio 5] [--rcut 0.0] [--rsigma 0]
 ```
 
 where optional arguments are placed between square brackets and the default value is indicated.
-If you prefer, it is possible to replace WFK files with GSR.nc file as only
-KS energies are nededed for the SKW interpolation:
+If you prefer, it is possible to replace WFK files with GSR.nc file as in
 
 ```sh
 abitk skw_compare IBZ_GSR.nc KPATH_GSR.nc
 ```
+
+as only KS energies are nededed for the SKW interpolation:
 
 To compare the bands with AbiPy, use:
 
@@ -587,10 +598,12 @@ If the fit is not good, you may want to try the following:
 3. Play with *rcut* and *rsigma* to damp the oscillations in the interpolant
 
 Note that it is sometimes difficult to get completely rid of spurious oscillations or artifacts in the SKW interpolation
-especially in the presence of degeneracies or band crossing/anti-crossing,
+especially in the presence of **degeneracies or band crossing/anti-crossing**,
 Remember, however, that achieving perfect agreement between the SKW interpolation and the ab-initio results
-is not crucial since the SKW bands are only used to find the relevant $kk$-points and these wavevectors
-will be recomputed afterwards with KS-DFT.
+is not crucial since the SKW bands are only used to find the $\kk$-points that are sufficiently close to the 
+band edges (Fermi level).
+All these wavevectors will be recomputed afterwards with KS-DFT and possible oscillations or artifacts will disappear 
+in the ab-initio results.
 
 In a nutshell, you need to make sure that the SKW bands are **reasonably close** to the ab-initio ones
 especially in the region around the band edge for semiconductors or around the Fermi level for metals.

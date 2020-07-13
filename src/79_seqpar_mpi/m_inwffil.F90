@@ -2703,7 +2703,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: order,ortalgo,seed
  real(dp) :: ai,ar,arg,bi,br,eig_tmp,spinrots,spinrotx,spinroty,spinrotz
  character(len=500) :: message
- integer, parameter :: int64 = selected_int_kind(18)
+ !integer, parameter :: int64 = selected_int_kind(18)
  !arrays
  integer :: atindx(1),identity(3,3),ngfft_now(18),no_shift(3),shiftg(3)
  integer :: symm(3,3),symrel_conv(3,3)
