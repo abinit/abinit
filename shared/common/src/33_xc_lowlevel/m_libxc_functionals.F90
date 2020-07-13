@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/libxc_functionals
 !! NAME
 !!  libxc_functionals
@@ -2157,6 +2156,17 @@ end function xc_char_to_c
 !! Helper function to convert a C string to a Fortran string
 !! Based on a routine by Joseph M. Krahn
 !!
+!! NOTES
+!!   non-ascii chars are replaced by "?" as outputting strings containing non-ascii entries
+!!   can lead to IO error with ifort when running in parallel (don't know why sequential execution is OK, though)
+!!
+!!   forrtl: severe (38): error during write, unit 6, file /proc/3478/fd/1
+!!   Image              PC                Routine            Line        Source
+!!   libifcoremt.so.5   00007FEA9BA95F46  for__io_return        Unknown  Unknown
+!!   libifcoremt.so.5   00007FEA9BB03A99  for_write_seq_fmt     Unknown  Unknown
+!!   libifcoremt.so.5   00007FEA9BB0193A  for_write_seq_fmt     Unknown  Unknown
+!!   abinit             000000000285EB7A  m_io_tools_mp_wri        1218  m_io_tools.F90
+!!
 !! INPUTS
 !!  c_string=C string
 !!
@@ -2183,7 +2193,12 @@ subroutine xc_char_to_f(c_string,f_string)
 
  ii=1
  do while(c_string(ii)/=C_NULL_CHAR.and.ii<=len(f_string))
-   f_string(ii:ii)=c_string(ii) ; ii=ii+1
+   if (iachar(c_string(ii)) <= 127) then
+     f_string(ii:ii)=c_string(ii)
+   else
+     f_string(ii:ii)="?"
+   end if
+   ii=ii+1
  end do
  if (ii<len(f_string)) f_string(ii:)=' '
 end subroutine xc_char_to_f
