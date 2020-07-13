@@ -3113,8 +3113,8 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
  ! Compute the linear mesh so that it encloses all bands.
  eminmax_spin = ebands_get_minmax(ebands, "eig")
- min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
- max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
+ min_ene = minval(eminmax_spin(1, :)); min_ene = min_ene - 0.1_dp * abs(min_ene)
+ max_ene = maxval(eminmax_spin(2, :)); max_ene = max_ene + 0.1_dp * abs(max_ene)
 
  nw = nint((max_ene - min_ene)/edos%step) + 1; edos%nw = nw
 

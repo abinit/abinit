@@ -396,10 +396,10 @@ Possible exceptions are systems with very small effective masses (e.g. GaAs) in 
 a very dense $\kk$-sampling is needed to sample the electron (hole) pocket.
 In this case, using the same sampling for electrons and phonons may be enough to converge.-->
 
-We will use the tetrahedron integration method [[cite:Blochl1994]] to obtain the lifetimes (integration
-over the $\qq$-mesh). 
-This allows to efficiently filter out the $\qq$-points that do not contribute
-to the lifetimes. Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
+We will use the tetrahedron integration method [[cite:Blochl1994]] to obtain the lifetimes 
+(integration over the $\qq$-mesh). 
+This allows to efficiently filter out the $\qq$-points that do not contribute to the lifetimes. 
+Indeed, only a small fraction of the $\qq$-points belonging to the $\qq$-mesh
 ensure energy and momentum conservation for a given $\kk$-point.
 All the other $\qq$-points do not need to be considered and can be filtered out.
 The use of the tetrahedron method is automatically activated when [[eph_task]] is set to -4.
@@ -407,8 +407,8 @@ It is possible to change this behaviour by using [[eph_intmeth]] albeit not reco
 as the calculation will become significantly slower.
 
 The list of temperatures for which the mobility is computed is specified by [[tmesh]].
-The carrier concentration is specified by [[eph_doping]] is |electron_charge| / cm^3 units so negative for electron-doping,
-positive for hole doping.
+The free carrier concentration is specified by [[eph_doping]] in |electron_charge| / cm^3 units 
+so negative values for electron-doping, positive values for hole doping.
 To obtain results that are representative of the intrinsic mobility,
 we suggest to use a very small number, for instance $10^{15}$ to $10^{18}$ electrons per cm$^3$.
 

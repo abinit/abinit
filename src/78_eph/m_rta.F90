@@ -992,7 +992,7 @@ pure subroutine inv33(aa, ait)
        do iw=1,self%nw
          ee = self%edos%mesh(iw)
          if (order > 0) then
-           kernel(iw,:,:,:) = - max_occ * self%vvtau_dos(iw,:,:,itemp,:,irta) * (ee - mu)**order * occ_dfde(ee, kT, mu)
+           kernel(iw,:,:,:) = - max_occ * self%vvtau_dos(iw,:,:,itemp,:,irta) * (ee - mu)** order * occ_dfde(ee, kT, mu)
          else
            kernel(iw,:,:,:) = - max_occ * self%vvtau_dos(iw,:,:,itemp,:,irta) * occ_dfde(ee, kT, mu)
          end if
@@ -1475,6 +1475,113 @@ subroutine rta_free(self)
 
 end subroutine rta_free
 !!***
+
+!----------------------------------------------------------------------
+
+#if 0
+
+!!****f* m_rta/rta_estimate_sigma_erange
+!! NAME
+!! rta_estimate_sigma_erange
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: comm
+ type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(in) :: ebands
+
+!Local variables ------------------------------
+!scalars
+ integer :: ntemp, nsppol, order, spin, iw, imu, irta, nw
+ real(dp) :: mu, ee, kT, max_occ, min_ene, max_ene, estep
+ logical :: assume_gap
+!arrays
+ real(dp),allocatable :: kTmesh(:), eminmax_spin(:,:), ff(:,:), mesh(:)
+!************************************************************************
+
+ ! Compute kTmesh and take the maximum
+ ntemp = nint(dtset%tmesh(3))
+ ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
+ ABI_MALLOC(kTmesh, (ntemp))
+ kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
+ kT = kTmesh(ntemp)
+ ABI_FREE(kTmesh)
+
+ ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
+ !call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
+
+ assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
+
+ nsppol = ebands%nsppol
+ ! Get spin degeneracy
+ max_occ = two / (ebands%nspinor * ebands%nsppol)
+
+ ABI_MALLOC(eminmax_spin, (2, nsppol))
+ eminmax_spin = ebands_get_minmax(ebands, "eig")
+
+ !min_ene = minval(eminmax_spin(1, :)); min_ene = min_ene - 0.1_dp * abs(min_ene)
+ !max_ene = maxval(eminmax_spin(2, :)); max_ene = max_ene + 0.1_dp * abs(max_ene)
+
+ !if (new%assume_gap) then
+ !  ! Information about the gaps
+ !  new%gaps = ebands_get_gaps(ebands, ierr)
+ !  if (ierr /= 0) then
+ !    do spin=1, nsppol
+ !      MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
+ !      new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
+ !      new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
+ !    end do
+ !    !MSG_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+ !    MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
+ !  end if
+
+ !  if (my_rank == master) then
+ !    call new%gaps%print(unit=std_out); call new%gaps%print(unit=ab_out)
+ !  end if
+ !end if
+
+ estep = tol2 * eV_Ha
+ nw = nint((max_ene - min_ene) / estep) + 1
+ ABI_MALLOC(edos%mesh, (nw))
+ mesh = arth(min_ene, estep, nw)
+
+ ! Compute (e - mu)^alpha * (-df/de)
+ ABI_MALLOC(ff, (nw, 0:2))
+
+ do order=0, 2
+   if (order > 0) then
+     !ff(:, order) = -max_occ * (ee - mu) ** order * occ_dfde(ee, kT, mu)
+   else
+     !ff(:, order) = -max_occ * occ_dfde(ee, kT, mu)
+   end if
+
+   ! Spline data
+ end do
+
+ ABI_FREE(ff)
+
+ ! Bisection algorithm
+ do order=0, 2
+ end do
+
+ ! Print results
+ !if (my_rank == master) then
+ !end if
+
+ ABI_FREE(eminmax_spin)
+ ABI_FREE(mesh)
+
+end subroutine rta_estimate_sigma_erange
+!!***
+
+#endif
 
 end module m_rta
 !!***

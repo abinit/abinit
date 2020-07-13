@@ -281,7 +281,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! autoparal section
  ! TODO: This just to activate autoparal in AbiPy. Lot of things should be improved.
- if (dtset%max_ncpus /=0) then
+ if (dtset%max_ncpus /= 0) then
    write(ab_out,'(a)')"--- !Autoparal"
    write(ab_out,"(a)")"# Autoparal section for EPH runs"
    write(ab_out,"(a)")   "info:"
