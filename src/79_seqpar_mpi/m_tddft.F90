@@ -1080,7 +1080,8 @@ contains
 !      &            '   vhartr(1) :,',vhartr(1)
 !      ENDDEBUG
 
-       call hartre(cplex,gsqcut,0,mpi_enreg,nfftdiel,ngfftdiel,rhog,rprimd,vhartr)
+       call hartre(cplex,gsqcut,dtset%icutcoul,0,mpi_enreg,nfftdiel,ngfftdiel,&
+                   &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
 !      DEBUG
 !      write(message,'(a,i3)')'After Hartree, on proc ',me_loc

@@ -1360,7 +1360,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  Compute VH(n^res)(r)
    if (dtset%icoulomb == 0) then
-     call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,nresg,rprimd,vhres)
+     call hartre(1,gsqcut,dtset%icutcoul,izero,mpi_enreg,nfft,ngfft,&
+                 &dtset%nkpt,dtset%rcut,nresg,rprimd,dtset%vcutgeo,vhres)
    else
      comm=mpi_enreg%comm_cell
      nproc=xmpi_comm_size(comm)
@@ -1408,7 +1409,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
    option=2;if (dtset%xclevel==2.and.optxc==0) option=12
 
-   call hartre(1,gsqcut,izero,mpi_enreg,nfft,ngfft,nresg,rprimd,vhres)
+   call hartre(1,gsqcut,dtset%icutcoul,izero,mpi_enreg,nfft,ngfft,&
+               &dtset%nkpt,dtset%rcut,nresg,rprimd,dtset%vcutgeo,vhres)
    call xcdata_init(xcdata,dtset=dtset)
 
 !  To be adjusted for the call to rhotoxc

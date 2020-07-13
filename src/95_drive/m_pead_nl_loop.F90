@@ -444,7 +444,8 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                    end if  ! i2pert <= natom
 
-                   call hartre(cplex,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,rho2g1,rprimd,vhartr1)
+                   call hartre(cplex,gsqcut,3,0,mpi_enreg,nfft,dtset%ngfft,dtset%nkpt,&
+                               &dtset%rcut,rho2g1,rprimd,dtset%vcutgeo,vhartr1)
                    option=1 ; nmxc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
                    call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&
 &                   rho_dum,0,rho_dum,0,nkxc,nmxc,dtset%nspden,n3xccc,option,&

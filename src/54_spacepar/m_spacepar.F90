@@ -317,7 +317,6 @@ end subroutine make_vectornd
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  divgq0= [optional argument] value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
@@ -331,18 +330,18 @@ end subroutine make_vectornd
 !!
 !! SOURCE
 
-subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
+subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
+                 &rcut,rhog,rprimd,vcutgeo,vhartr,&
                  &qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,nfft
- !integer,intent(in),optional ::icutcoul,nkpt
- real(dp),intent(in) :: gsqcut
+ integer,intent(in) :: cplex,icutcoul,izero,nfft,nkpt
+ real(dp),intent(in) :: gsqcut,rcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
+ real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft),vcutgeo(3)
  real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -364,12 +363,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
-
- !BG: Need to be brought back
-! rcut=ten
-! icutcoul=3
-! nkpt=1
-! vcutgeo(:)=zero
 
  ! Keep track of total time spent in hartre
  call timab(10,1,tsec)
@@ -421,8 +414,8 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  end if
 
  !Initialize Gcut-off array from m_gtermcutoff
- ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
- !call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+ !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
@@ -485,7 +478,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
              ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
            end if
 
-           den=piinv/gs
+           den=piinv/gs*gcutoff(ii)
            work1(re,ii)=rhog(re,ii)*den
            work1(im,ii)=rhog(im,ii)*den
          else

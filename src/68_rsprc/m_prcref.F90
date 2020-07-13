@@ -631,7 +631,8 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(vhartr_wk,(nfft))
      option=1
 
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
+     call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
+                 &dtset%nkpt,dtset%rcut,rhog_wk,rprimd,dtset%vcutgeo,vhartr_wk)
 
 !    Prepare the call to rhotoxc
      call xcdata_init(xcdata,dtset=dtset)
@@ -1261,7 +1262,8 @@ end subroutine prcref
    ABI_ALLOCATE(vhartr_wk,(nfft))
    option=1
 
-   call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog_wk,rprimd,vhartr_wk)
+   call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
+               &dtset%nkpt,dtset%rcut,rhog_wk,rprimd,dtset%vcutgeo,vhartr_wk)
 
 !  Prepare the call to rhotoxc
    call xcdata_init(xcdata,dtset=dtset)

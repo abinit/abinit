@@ -537,7 +537,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    if (ipositron/=1) then
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
        if(option/=0 .and. option/=10)then
-         call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
+         call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
+                     &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
        end if
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then
