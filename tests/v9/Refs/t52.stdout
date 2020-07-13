@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 13 Jul 2020.
-- ( at 03h24 )
+- ( at 03h49 )
   
 ->> Enter name of output file: 
 ->> Enter total number of DFPT POT files: 
@@ -31,7 +31,7 @@
 - Merging file [3]: t50o_DS4_POT2
 - Reading header of file [4]: t50o_DS5_POT1
 - Merging file [4]: t50o_DS5_POT1
-Merged successfully 4 files
+ Merged successfully 4 files
 - Analyzing DVDB file: t53o_DS20_DVDB ...
 - dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
