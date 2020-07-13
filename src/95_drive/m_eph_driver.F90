@@ -535,7 +535,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    if (my_rank == master) then
      call dvdb%print()
-     call dvdb%list_perts([-1, -1, -1], unit=ab_out)
+     call dvdb%list_perts([-1, -1, -1])
    end if
  end if
 

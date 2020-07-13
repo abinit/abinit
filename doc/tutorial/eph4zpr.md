@@ -290,9 +290,81 @@ The $\qq$-space integration is done [[eph_intmeth]]
 
 Run the code with:
 
-Let's have a look at the main output file...
+Let's have a look at the main output file.
+First of all, we have a section that summarizes the most important parameters of the calculation
 
 ```md
+ Number of bands in e-ph self-energy sum: 20
+ From bsum_start: 1 to bsum_stop: 20
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Both Real and Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [2, 2, 2]
+ Number of q-points in the IBZ: 3
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ No special treatment of Frohlich divergence in gkq for q --> 0
+ Number of k-points for self-energy corrections: 3
+ List of K-points for self-energy corrections:
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
+   2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+   3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+```
+
+Followed by another section defining how to different dimensions are distributed across the MPI processes:
+
+```
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 20
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 3 of 3
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+ DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
+```
+
+Finally we have the physicals results:
+
+```md
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   1 -19.735  -19.851   -0.116   -0.154   -0.037    0.751   -0.465    0.310    0.000    0.000
+   2  -0.193   -0.094    0.099    0.149   -0.064    0.661   -0.302    0.451   19.542   19.757
+   3  -0.193   -0.094    0.099    0.149   -0.064    0.661   -0.302    0.451    0.000    0.000
+   4  -0.193   -0.094    0.099    0.149   -0.064    0.661   -0.302    0.451    0.000    0.000
+   5   8.342    8.258   -0.085   -0.086   -0.002    0.985   -0.021   -0.065    8.536    8.352
+   6  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523   14.521   14.605
+   7  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523    0.000    0.000
+   8  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523    0.000    0.000
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ QP gap:    8.352 (OTMS:    8.300)
+ QP_gap - KS_gap:   -0.183 (OTMS:   -0.235)
+ 
+============================================================================================
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
 ```
 
 !!! important

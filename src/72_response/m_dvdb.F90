@@ -4880,7 +4880,7 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
    if (iq_file /= -1) then
      ! This q-point is in the DVDB. Test if all the independent perturbations are available.
      if (iq_ibz <= enough)  then
-       call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is present in the DVDB file"))
+       call wrtout(unt, sjoin(" qpoint:", ktoa(qq), "is present in the DVDB file"))
        call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
      end if
      ii = 0; weird_q = 0; miss_q = 0
@@ -4904,19 +4904,19 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
      end do
 
      if (weird_q /= 0) then
-       write(msg,"(a,i0,a)")"DVDB is overcomplete. ",weird_q, " perturbation(s) can be reconstructed by symmetry."
+       write(msg,"(a,i0,a)")" DVDB is overcomplete. ",weird_q, " perturbation(s) can be reconstructed by symmetry."
        call wrtout(unt, msg)
      end if
 
      tot_weird = tot_weird + weird_q
      tot_miss = tot_miss + miss_q
      if (miss_q /=0) then
-       call wrtout(unt, sjoin("WARNING:", itoa(miss_q), "independent perturbation(s) are missing!."))
+       call wrtout(unt, sjoin(" WARNING:", itoa(miss_q), "independent perturbation(s) are missing!."))
      end if
 
    else
      ! This q-point is not present in dvdb. Print the list of independent perturbations.
-     call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is NOT present in the DVDB file"))
+     call wrtout(unt, sjoin(" qpoint:", ktoa(qq), "is NOT present in the DVDB file"))
      call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
      ii = 0
      do ipert=1,db%mpert
@@ -4935,11 +4935,11 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
  end do ! iq_ibz
 
  if (tot_miss /= 0) then
-   call wrtout(unt, sjoin(ch10, "There are ",itoa(tot_miss), "independent perturbations missing!"))
+   call wrtout(unt, sjoin(ch10, " There are ",itoa(tot_miss), "independent perturbations missing!"))
  else
-   call wrtout(unt, "All the independent perturbations are available")
+   call wrtout(unt, " All the independent perturbations are available")
    if (tot_weird /= 0) then
-     call wrtout(unt, "Note however that the DVDB is overcomplete as symmetric perturbations are present.")
+     call wrtout(unt, " Note however that the DVDB is overcomplete as symmetric perturbations are present.")
    end if
  end if
 
