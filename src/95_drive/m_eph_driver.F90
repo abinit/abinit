@@ -152,7 +152,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 !scalars
  integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
- integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift,ierr
+ integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
@@ -528,14 +528,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (.not. dvdb%has_dielt .or. .not. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
      if (dvdb%add_lr /= 0) then
        dvdb%add_lr = 0
-       call wrtout(std_out, &
-         " WARNING: Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
+       MSG_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
 
    if (my_rank == master) then
      call dvdb%print()
-     call dvdb%list_perts([-1, -1, -1])
+     call dvdb%list_perts([-1, -1, -1], npert_miss)
+     ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
    end if
  end if
 
