@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 13 Jul 2020.
-- ( at 02h53 )
+- ( at 03h26 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t85-t86-t87-t88-t89/t89.in
 - output file    -> t89.out
@@ -545,38 +545,6 @@ meta: {optdriver: 7, eph_task: 2, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Computation of electron-phonon coupling matrix elements (GKK files)
@@ -708,38 +676,6 @@ meta: {optdriver: 7, eph_task: -2, }
 -Debye temperature from partial sums:     0.2610650968E+03 (K)
 
 - Writing phonon DOS to netcdf file: t89o_DS4_PHDOS.nc
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Computation of electron-phonon coupling matrix elements GKQ file
@@ -955,10 +891,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          3.4
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          3.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.6  wall=          3.4
++Overall time at end (sec) : cpu=          2.5  wall=          3.7

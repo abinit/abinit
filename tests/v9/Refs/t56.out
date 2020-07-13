@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 13 Jul 2020.
-- ( at 03h04 )
+- ( at 03h25 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
@@ -356,34 +356,6 @@ meta: {optdriver: 7, eph_task: -4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
@@ -642,34 +614,6 @@ meta: {optdriver: 7, eph_task: -4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
@@ -918,34 +862,6 @@ meta: {optdriver: 7, eph_task: -4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 
@@ -1189,34 +1105,6 @@ meta: {optdriver: 7, eph_task: -4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
@@ -1461,34 +1349,6 @@ meta: {optdriver: 7, eph_task: -4, }
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 
@@ -1887,10 +1747,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.0  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          4.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.0  wall=          4.3
++Overall time at end (sec) : cpu=          2.9  wall=          4.2
