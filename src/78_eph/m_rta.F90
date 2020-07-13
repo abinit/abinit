@@ -45,7 +45,7 @@ module m_rta
  use m_io_tools,       only : open_file
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : bisect, simpson_int, safe_div
+ use m_numeric_tools,  only : bisect, simpson_int, safe_div, arth
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
  use m_kpts,           only : listkk, kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_dfde
@@ -1478,7 +1478,7 @@ end subroutine rta_free
 
 !----------------------------------------------------------------------
 
-#if 0
+#if 1
 
 !!****f* m_rta/rta_estimate_sigma_erange
 !! NAME
@@ -1499,16 +1499,21 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
 
 !Local variables ------------------------------
 !scalars
- integer :: ntemp, nsppol, order, spin, iw, imu, irta, nw
- real(dp) :: mu, ee, kT, max_occ, min_ene, max_ene, estep
+ integer :: ntemp, nsppol, order, spin, imu, irta, ie, ne, my_rank, ii, ierr
+ real(dp) :: mu, ee, kT, max_occ, emin, emax, estep, magic_ratio, value_at_edge
  logical :: assume_gap
+ type(gaps_t) :: gaps
 !arrays
- real(dp),allocatable :: kTmesh(:), eminmax_spin(:,:), ff(:,:), mesh(:)
+ real(dp) :: est_sigma_erange(2, 0:2), vb_max(ebands%nsppol), cb_min(ebands%nsppol)
+ real(dp),allocatable :: kTmesh(:), eminmax_spin(:,:), ff(:,:), cb_emesh(:), vb_emesh(:)
+
 !************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); if (my_rank /= 0) return
 
  ! Compute kTmesh and take the maximum
  ntemp = nint(dtset%tmesh(3))
- ABI_CHECK(new%ntemp > 0, "ntemp <= 0")
+ ABI_CHECK(ntemp > 0, "ntemp <= 0")
  ABI_MALLOC(kTmesh, (ntemp))
  kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
  kT = kTmesh(ntemp)
@@ -1526,40 +1531,43 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
  ABI_MALLOC(eminmax_spin, (2, nsppol))
  eminmax_spin = ebands_get_minmax(ebands, "eig")
 
- !min_ene = minval(eminmax_spin(1, :)); min_ene = min_ene - 0.1_dp * abs(min_ene)
- !max_ene = maxval(eminmax_spin(2, :)); max_ene = max_ene + 0.1_dp * abs(max_ene)
+ emin = minval(eminmax_spin(1, :)); emin = emin - 0.1_dp * abs(emin)
+ emax = maxval(eminmax_spin(2, :)); emax = emax + 0.1_dp * abs(emax)
 
- !if (new%assume_gap) then
- !  ! Information about the gaps
- !  new%gaps = ebands_get_gaps(ebands, ierr)
- !  if (ierr /= 0) then
- !    do spin=1, nsppol
- !      MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
- !      new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
- !      new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
- !    end do
- !    !MSG_ERROR("ebands_get_gaps returned non-zero exit status. See above warning messages...")
- !    MSG_WARNING("ebands_get_gaps returned non-zero exit status. See above warning messages...")
- !  end if
+ if (assume_gap) then
+   ! Get information about the gaps
+   gaps = ebands_get_gaps(ebands, ierr)
+   !vb_max(spin) =
+   !cb_min(spin) =
 
- !  if (my_rank == master) then
- !    call new%gaps%print(unit=std_out); call new%gaps%print(unit=ab_out)
- !  end if
- !end if
+   !do spin=1, nsppol
+   !  MSG_WARNING(trim(gaps%errmsg_spin(spin)))
+   !  gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
+   !  gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
+   !end do
 
+   ABI_CHECK(ierr == 0, "ebands_get_gaps returned non-zero exit status. See above warning messages...")
+
+   call gaps%print(unit=std_out); call gaps%print(unit=ab_out)
+ else
+   vb_max = ebands%fermie
+   cb_min = ebands%fermie
+ end if
+
+ ! We build two meshes for Conduction and Valence.
  estep = tol2 * eV_Ha
- nw = nint((max_ene - min_ene) / estep) + 1
- ABI_MALLOC(edos%mesh, (nw))
- mesh = arth(min_ene, estep, nw)
+ ne = nint((emax - emin) / estep) + 1
+ ABI_MALLOC(cb_emesh, (ne))
+ cb_emesh = arth(emin, estep, ne)
 
  ! Compute (e - mu)^alpha * (-df/de)
- ABI_MALLOC(ff, (nw, 0:2))
+ ABI_MALLOC(ff, (ne, 0:2))
 
  do order=0, 2
    if (order > 0) then
-     !ff(:, order) = -max_occ * (ee - mu) ** order * occ_dfde(ee, kT, mu)
+     ff(:, order) = -max_occ * (cb_emesh - mu) ** order * occ_dfde(cb_emesh, kT, mu)
    else
-     !ff(:, order) = -max_occ * occ_dfde(ee, kT, mu)
+     ff(:, order) = -max_occ * occ_dfde(cb_emesh, kT, mu)
    end if
 
    ! Spline data
@@ -1571,12 +1579,36 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
  do order=0, 2
  end do
 
+ !est_sigma_erange(2, 0:2)
+ est_sigma_erange = 0
+ if (assume_gap) then
+   do ii=1,2
+     if (dtset%sigma_erange(ii) > zero) then
+       !value_at_edge =
+       do order=0, 2
+         !do ie=1,ne
+         !  ff(:, order) / value_at_edge < magic_ratio
+         !end do
+       end do
+     end if
+   end do
+ else
+
+ end if
+
  ! Print results
  !if (my_rank == master) then
  !end if
 
  ABI_FREE(eminmax_spin)
- ABI_FREE(mesh)
+ ABI_FREE(cb_emesh)
+
+ call gaps%free()
+
+ ! In [24]: integrand_range / integrand_CBM
+ ! 0.006325409327517321 in Si
+ ! 0.002865971520647022 in GaP
+ ! 0.0014470714061475284 in GaAs
 
 end subroutine rta_estimate_sigma_erange
 !!***
