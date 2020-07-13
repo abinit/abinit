@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h53 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h09 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.in
 - output file    -> teph4mob_7.out
@@ -376,7 +376,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -535,6 +535,7 @@ All the independent perturbations are available
 
  EPH double grid interpolation: will read energies from: teph4mob_4o_DS3_WFK
 
+
  Number of bands in e-ph self-energy sum: 1
  From bsum_start: 5 to bsum_stop: 5
  Symsigma: 1 Timrev: 1
@@ -558,6 +559,7 @@ All the independent perturbations are available
    1     1  [ 4.5833E-01,  4.5833E-01,  0.0000E+00]   5    5
    2     1  [ 5.0000E-01,  4.5833E-01,  0.0000E+00]   5    5
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   5    5
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 5 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -568,6 +570,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 3 of 3
+
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
  Final results in eV.
@@ -773,7 +776,7 @@ meta: {optdriver: 7, eph_task: 7, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
 - Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1205,10 +1208,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         82.5  wall=         83.3
+- Proc.   0 individual time (sec): cpu=         62.6  wall=         63.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         82.5  wall=         83.3
++Overall time at end (sec) : cpu=         62.6  wall=         63.4

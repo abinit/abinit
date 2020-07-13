@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 17 Jun 2020.
-- ( at 13h23 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h03 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t41-t42-t43-t44/t44.in
 - output file    -> t44.out
@@ -392,9 +392,9 @@ meta: {optdriver: 7, eph_task: 4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -464,6 +464,7 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+
  Number of bands in e-ph self-energy sum: 54
  From bsum_start: 1 to bsum_stop: 54
  Symsigma: 0 Timrev: 1
@@ -483,6 +484,7 @@ All the independent perturbations are available
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
@@ -493,6 +495,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -617,9 +620,9 @@ meta: {optdriver: 7, eph_task: 4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -671,6 +674,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+
  Number of bands in e-ph self-energy sum: 54
  From bsum_start: 1 to bsum_stop: 54
  Symsigma: 1 Timrev: 1
@@ -690,6 +694,7 @@ All the independent perturbations are available
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
@@ -700,6 +705,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -823,9 +829,9 @@ meta: {optdriver: 7, eph_task: 5, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -923,9 +929,9 @@ meta: {optdriver: 7, eph_task: 4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -996,6 +1002,7 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+
  Number of bands in e-ph self-energy sum: 54
  From bsum_start: 1 to bsum_stop: 54
  Symsigma: 1 Timrev: 1
@@ -1015,6 +1022,7 @@ All the independent perturbations are available
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
@@ -1025,6 +1033,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1151,9 +1160,9 @@ meta: {optdriver: 7, eph_task: 4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1224,6 +1233,7 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+
  Number of bands in e-ph self-energy sum: 54
  From bsum_start: 1 to bsum_stop: 54
  Symsigma: 1 Timrev: 1
@@ -1244,6 +1254,7 @@ All the independent perturbations are available
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 54
 P Number of CPUs for parallelism over perturbations: 1
@@ -1254,6 +1265,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -1363,9 +1375,9 @@ meta: {optdriver: 7, eph_task: 4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1417,6 +1429,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
  Treating high-energy bands with Sternheimer and static self-energy.
@@ -1439,6 +1452,7 @@ All the independent perturbations are available
  List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 20
 P Number of CPUs for parallelism over perturbations: 1
@@ -1449,6 +1463,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 2 of 2
+
  Reading GS KS potential for Sternheimer from: t41o_DS1_POT
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ================================================================================
@@ -1853,10 +1868,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         32.6  wall=         35.1
+- Proc.   0 individual time (sec): cpu=        150.2  wall=        155.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.6  wall=         35.1
++Overall time at end (sec) : cpu=        150.2  wall=        155.3

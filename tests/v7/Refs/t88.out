@@ -1,5 +1,5 @@
 
-.Version 9.0.2 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 20 Mar 2020.
-- ( at 07h52 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 02h53 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t88.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t85-t86-t87-t88-t89/t88.in
 - output file    -> t88.out
 - root for input  files -> t88i
 - root for output files -> t88o
@@ -352,9 +352,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -476,8 +476,8 @@ qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -601,9 +601,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -828,9 +828,9 @@ meta: {optdriver: 7, eph_task: 5, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -995,9 +995,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1349,9 +1349,9 @@ meta: {optdriver: 7, eph_task: 1, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t88o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1802,10 +1802,10 @@ P           mkmem          29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.3  wall=         13.8
+- Proc.   0 individual time (sec): cpu=         12.0  wall=         14.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.3  wall=         13.8
+.Delivered   7 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.0  wall=         14.0
