@@ -31,6 +31,7 @@ module m_ewald
  use m_splines
  use m_time
 
+ use m_gtermcutoff,    only : termcutoff
  use m_special_funcs,  only : abi_derfc
  use m_symtk,          only : matr3inv
 
@@ -77,27 +78,29 @@ contains
 !!
 !! SOURCE
 
-subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
+subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rmet,rprimd,typat,ucvol,vcutgeo,xred,zion)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,ntypat
- real(dp),intent(in) :: ucvol
+ integer,intent(in) :: icutcoul,natom,nkpt,ntypat
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
  real(dp),intent(out) :: eew
 !arrays
- integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: gmet(3,3),rmet(3,3),xred(3,natom),zion(ntypat)
+ integer,intent(in) :: ngfft(18),typat(natom)
+ real(dp),intent(in) :: gmet(3,3),rmet(3,3),rprimd(3,3),xred(3,natom),vcutgeo(3),zion(ntypat)
  real(dp),intent(out) :: grewtn(3,natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,ib,ig1,ig2,ig3,ir1,ir2,ir3,newg,newr,ng,nr
+ integer  :: ia,ib,ig1,ig2,ig3,ig23,ii,ir1,ir2,ir3,newg,newr,ng,nr
  real(dp) :: arg,c1i,ch,chsq,derfc_arg,direct,drdta1,drdta2,drdta3,eta,fac
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
  real(dp) :: t1,term
  !character(len=500) :: message
+!arrays
+ real(dp),allocatable :: gcutoff(:)
 
 ! *************************************************************************
 
@@ -129,6 +132,10 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  gsum=0._dp
  grewtn(:,:)=0.0_dp
 
+ !Initialize Gcut-off array from m_gtermcutoff
+ !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+
 !Sum over G space, done shell after shell until all
 !contributions are too small.
  ng=0
@@ -145,7 +152,11 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 
    do ig3=-ng,ng
      do ig2=-ng,ng
+     ig23=ng*(ig2+ng + ng*(ig3+ng))
        do ig1=-ng,ng
+       ii = ig1 + ig23
+       write(*,*) 'This is',ii
+       
 
 !        Exclude shells previously summed over
          if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1 ) then
@@ -163,7 +174,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              if (arg <= -minexparg ) then
 !              When any term contributes then include next shell
                newg=1
-               term=exp(-arg)/gsq
+               term=exp(-arg)/gsq*gcutoff(1)
                summr = 0.0_dp
                summi = 0.0_dp
 
@@ -320,6 +331,8 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 
 !Finally assemble Ewald energy, eew
  eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+
+ ABI_DEALLOCATE(gcutoff) 
 
 !DEBUG
 !write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'

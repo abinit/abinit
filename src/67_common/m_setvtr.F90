@@ -294,12 +294,12 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
 !    Periodic system, need to compute energy and forces due to replica and
 !    to correct the shift in potential calculation.
-     call ewald(energies%e_ewald,gmet,grewtn,dtset%natom,ntypat,rmet,dtset%typat,ucvol,xred,psps%ziontypat)
+     call ewald(energies%e_ewald,gmet,grewtn,gsqcut,dtset%icutcoul,dtset%natom,ngfft,dtset%nkpt,ntypat,dtset%rcut,rmet,rprimd,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat)
 !    For a periodic system bearing a finite charge, the monopole correction to the
 !    energy is relevant.
 !    See Leslie and Gillan, JOURNAL OF PHYSICS C-SOLID STATE PHYSICS 18, 973 (1985)
      if(abs(dtset%charge)>tol8) then
-       call ewald(energies%e_monopole,gmet,grewtn_fake,1,1,rmet,(/1/),ucvol,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%charge/))
+       call ewald(energies%e_monopole,gmet,grewtn_fake,gsqcut,dtset%icutcoul,1,ngfft,dtset%nkpt,1,dtset%rcut,rmet,rprimd,(/1/),ucvol,dtset%vcutgeo,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%charge/))
        energies%e_monopole=-energies%e_monopole
      end if
    else if (dtset%icoulomb == 1) then
