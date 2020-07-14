@@ -487,7 +487,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
      if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
      if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
-     call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
+     call wrtout(std_out, sjoin(" ", shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
    end if
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if

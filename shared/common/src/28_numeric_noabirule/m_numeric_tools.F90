@@ -324,7 +324,7 @@ pure function arth_int(start, step, nn)
    end do
 
  case (0)
-   RETURN
+   return
  end select
 
 end function arth_int

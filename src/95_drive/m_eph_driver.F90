@@ -55,7 +55,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
- use m_rta,             only : rta_driver
+ use m_rta,             only : rta_driver, rta_estimate_sigma_erange
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -161,7 +161,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk,use_wfq,use_dvdb
+ logical :: use_wfk, use_wfq, use_dvdb
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
@@ -247,7 +247,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    MSG_COMMENT(msg)
  end if
 
- use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. dtset%eph_task /= 7)
+ use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
 
  if (my_rank == master) then
    if (.not. file_exists(ddb_filepath)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
@@ -616,6 +616,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (7)
    ! Compute phonon-limited RTA from SIGEPH file.
    call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+
+ case (-7)
+   ! Estimate sigma_erange
+   call rta_estimate_sigma_erange(dtset, ebands, comm)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.

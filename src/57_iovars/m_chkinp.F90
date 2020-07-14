@@ -854,7 +854,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
-       14, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, 15, -15, 16], iout)
+       15, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6, 7, -7, 15, -15, 16], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -879,7 +879,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  MSG_ERROR_NOSTOP("eph_task -4 required occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)
      !end if
-     ! TODO: Activate this test
      if (dt%eph_fermie /= zero .and. nint(dt%tmesh(3)) /= 1) then
        MSG_ERROR_NOSTOP("eph_fermie does not support multiple temperatures in tmesh !", ierr)
      end if

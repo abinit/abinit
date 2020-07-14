@@ -57,7 +57,8 @@ module m_rta
  private
 !!****
 
- public :: rta_driver ! Main entry point for transport calculations withing RTA
+ public :: rta_driver                 ! Main entry point for transport calculations withing RTA
+ public :: rta_estimate_sigma_erange
 !!****
 
 !----------------------------------------------------------------------
@@ -1478,8 +1479,6 @@ end subroutine rta_free
 
 !----------------------------------------------------------------------
 
-#if 1
-
 !!****f* m_rta/rta_estimate_sigma_erange
 !! NAME
 !! rta_estimate_sigma_erange
@@ -1499,121 +1498,124 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
 
 !Local variables ------------------------------
 !scalars
- integer :: ntemp, nsppol, order, spin, imu, irta, ie, ne, my_rank, ii, ierr
- real(dp) :: mu, ee, kT, max_occ, emin, emax, estep, magic_ratio, value_at_edge
+ integer :: ntemp, order, spin, imu, irta, ie, ne, my_rank, ii, ierr
+ real(dp) :: mu, ee, kT, max_occ, value_at_edge, vb_max, cb_min, estep, magic_ratio, estart, estop
  logical :: assume_gap
+ character(len=500) :: msg
  type(gaps_t) :: gaps
 !arrays
- real(dp) :: est_sigma_erange(2, 0:2), vb_max(ebands%nsppol), cb_min(ebands%nsppol)
- real(dp),allocatable :: kTmesh(:), eminmax_spin(:,:), ff(:,:), cb_emesh(:), vb_emesh(:)
+ real(dp) :: est_sigma_erange(2, 0:2), mu_vals(1)
+ real(dp),allocatable :: kTmesh(:), ff(:), emesh(:)
 
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); if (my_rank /= 0) return
 
- ! Compute kTmesh and take the maximum
+ ! Compute kTmesh and take the highest T.
  ntemp = nint(dtset%tmesh(3))
  ABI_CHECK(ntemp > 0, "ntemp <= 0")
  ABI_MALLOC(kTmesh, (ntemp))
  kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
  kT = kTmesh(ntemp)
  ABI_FREE(kTmesh)
+ ntemp = 1
 
- ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
- !call ebands_get_muT_with_fd(ebands, new%ntemp, new%ktmesh, dtset%spinmagntarget, dtset%prtvol, new%mu_e, comm)
+ ! Compute the chemical potential with Fermi-Dirac for the highest T.
+ call ebands_get_muT_with_fd(ebands, ntemp, [Kt], dtset%spinmagntarget, dtset%prtvol, mu_vals, xmpi_comm_self)
+ mu = mu_vals(1)
 
+ !write(ab_out, "(a)")" Estimating sigma_erange"
+ !call ebands_print(ebands, unit=ab_out)
+
+ ! It's funny that we need dtset%sigma_erange to estimate sigma_erange!
+ if (all(dtset%sigma_erange == 0)) then
+   msg = "rta_estimate_sigma_erange requires `sigma_erange` to understand if we are dealing with e/h in semiconductor or metal"
+   MSG_ERROR(msg)
+ end if
  assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
- nsppol = ebands%nsppol
  ! Get spin degeneracy
  max_occ = two / (ebands%nspinor * ebands%nsppol)
 
- ABI_MALLOC(eminmax_spin, (2, nsppol))
- eminmax_spin = ebands_get_minmax(ebands, "eig")
-
- emin = minval(eminmax_spin(1, :)); emin = emin - 0.1_dp * abs(emin)
- emax = maxval(eminmax_spin(2, :)); emax = emax + 0.1_dp * abs(emax)
-
  if (assume_gap) then
-   ! Get information about the gaps
+   ! Get gaps. In case of magnetic semiconductor everything is referred to the highest CBM/ smallest VBM.
    gaps = ebands_get_gaps(ebands, ierr)
-   !vb_max(spin) =
-   !cb_min(spin) =
-
-   !do spin=1, nsppol
-   !  MSG_WARNING(trim(gaps%errmsg_spin(spin)))
-   !  gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
-   !  gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
-   !end do
-
-   ABI_CHECK(ierr == 0, "ebands_get_gaps returned non-zero exit status. See above warning messages...")
-
    call gaps%print(unit=std_out); call gaps%print(unit=ab_out)
+   ABI_CHECK(ierr == 0, "ebands_get_gaps returned non-zero exit status. See above warning messages...")
+   vb_max = maxval(gaps%vb_max)
+   cb_min = minval(gaps%cb_min)
+
  else
+   ! metals --> use Fermi level TODO: fermie or mu?
    vb_max = ebands%fermie
    cb_min = ebands%fermie
  end if
 
- ! We build two meshes for Conduction and Valence.
- estep = tol2 * eV_Ha
- ne = nint((emax - emin) / estep) + 1
- ABI_MALLOC(cb_emesh, (ne))
- cb_emesh = arth(emin, estep, ne)
-
- ! Compute (e - mu)^alpha * (-df/de)
- ABI_MALLOC(ff, (ne, 0:2))
-
- do order=0, 2
-   if (order > 0) then
-     ff(:, order) = -max_occ * (cb_emesh - mu) ** order * occ_dfde(cb_emesh, kT, mu)
-   else
-     ff(:, order) = -max_occ * occ_dfde(cb_emesh, kT, mu)
-   end if
-
-   ! Spline data
- end do
-
- ABI_FREE(ff)
-
- ! Bisection algorithm
- do order=0, 2
- end do
-
- !est_sigma_erange(2, 0:2)
  est_sigma_erange = 0
- if (assume_gap) then
-   do ii=1,2
-     if (dtset%sigma_erange(ii) > zero) then
-       !value_at_edge =
-       do order=0, 2
-         !do ie=1,ne
-         !  ff(:, order) / value_at_edge < magic_ratio
-         !end do
-       end do
-     end if
-   end do
- else
-
- end if
-
- ! Print results
- !if (my_rank == master) then
- !end if
-
- ABI_FREE(eminmax_spin)
- ABI_FREE(cb_emesh)
-
- call gaps%free()
 
  ! In [24]: integrand_range / integrand_CBM
  ! 0.006325409327517321 in Si
  ! 0.002865971520647022 in GaP
  ! 0.0014470714061475284 in GaAs
+ magic_ratio = 0.003_dp
+
+ do ii=1,2
+   if (assume_gap .and. dtset%sigma_erange(ii) <= zero) cycle
+
+   if (ii == 1) then
+     ! Valence or metals below ef
+     estart = vb_max
+     estop = vb_max - two * eV_Ha
+   else
+     ! Conduction or metals above ef
+     estart = cb_min
+     estop = estart + two * eV_Ha
+   end if
+
+   ! We build two meshes for Conduction and Valence.
+   estep = tol2 * eV_Ha; if (ii == 1) estep = -estep
+   ne = nint((abs(estop - estart)) / estep) + 1
+   ABI_MALLOC(emesh, (ne))
+   emesh = arth(estart, estep, ne)
+   !pure function linspace(start, stop, nn)
+
+   ! Compute (e - mu)^alpha * (-df/de)
+   ABI_MALLOC(ff, (ne))
+
+   do order=0,2
+     if (order == 0) ff(:) = -max_occ * occ_dfde(emesh, kT, mu)
+     if (order > 0)  ff(:) = -max_occ * (emesh - mu) ** order * occ_dfde(emesh, kT, mu)
+     do ie=2,ne
+       if (ff(ie) / ff(1) < magic_ratio) then
+         est_sigma_erange(ii, order) = abs(emesh(ie) - estart)
+         if (.not. assume_gap) est_sigma_erange(ii, order) = est_sigma_erange(ii, order)
+         exit
+       end if
+     end do
+     ABI_CHECK(ie /= ne + 1, "Cannot find energy such that ratio becomes smaller than!")
+   end do
+
+   ABI_FREE(ff)
+   ABI_FREE(emesh)
+ end do
+
+ ! Print results
+ do order=0,2
+   write(ab_out, "(a,i0,a,2(f8.3,1x),a)")" For order: ", order, ", sigma_erange = ", est_sigma_erange(:, order) * Ha_eV, " eV"
+ end do
+
+ write(ab_out, "(/,a)")" Note that this is a qualitative estimate that depends on several factors:"
+ write(ab_out, "(a)")" T_max, nelect, doping and the input k-mesh."
+ write(ab_out, "(a)")" Systems with small effective masses may require larger energy ranges and better k-sampling"
+ write(ab_out, "(a)") &
+   " It is strongly suggested to increase the window if you are using this value to generate the WFK file with KERANGE"
+ write(ab_out, "(a,/)") &
+   " Also remember that it's possible to decrease sigma_erange at the level or the RTA calculation"
+
+ call gaps%free()
 
 end subroutine rta_estimate_sigma_erange
 !!***
-
-#endif
 
 end module m_rta
 !!***
