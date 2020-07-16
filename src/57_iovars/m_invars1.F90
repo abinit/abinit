@@ -501,7 +501,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  if (tread_pseudos == 1) then
    ! Split pseudos_string using comma and transfer results to pseudos_paths
-   ! Make sure string lenght is large enough and input string is consistent with npsp
+   ! Make sure string length is large enough and input string is consistent with npsp
    ! Lot of checks must be done here!
    !print *, "pseudos_string: ", trim(pseudos_string)
    ABI_ICALLOC(sidx, (npsp + 1))
@@ -516,7 +516,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      end if
    end do
    if (cnt /= npsp) then
-     MSG_ERROR(sjoin("Not enough pseudos in input `pseudos` string, expecting npsp:", itoa(npsp)))
+     write(msg,'(4a)')&
+&      "Not enough pseudopotentials in input `pseudos` string, expecting npsp: ",itoa(npsp),ch10,&
+&      "Perhaps the separator (=a comma) is missing between pseudopotentials in input `pseudos` string."
+     MSG_ERROR(msg)
    end if
 
    do ii=1,npsp
