@@ -857,13 +857,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
 
-         write(msg,'(a,es14.6,10a)')&
-          'The tolerance on symmetries =',tolsym,ch10,&
-          'is bigger than the usual tolerance, i.e. 1.0e-8 .',ch10,&
-          'In order to avoid spurious effect, the atomic coordinates have been',ch10,&
+         write(msg,'(a,es14.6,11a)')&
+          'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+          'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
           'symmetrized before storing them in the dataset internal variable.',ch10,&
           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-          'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.'
+          'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+          'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
          MSG_WARNING(msg)
        end if
 
