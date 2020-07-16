@@ -310,8 +310,9 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    real(dp) :: factor,ix,gamma,sigma,step,xcut
     integer :: ii,ifft,ispden
+    real(dp) :: factor,ix,gamma,zero_gaussian,sigma,step,xcut,x_sigma
+    character(len=500) :: msg
     ! Arrays
     real(dp),dimension(:),allocatable :: valueseel
 
@@ -336,11 +337,12 @@ contains
         ix=dble(this%bcut)
         ii=0
         sigma=this%std_init
+        x_sigma=sqrt(2*sigma)
         do while(ix<=this%gcut)
           ii=ii+1
           valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
-          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+          & hightemp_gaussian_kintegral(x_sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+          & hightemp_gaussian_jintegral(x_sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
           ix=ix+step
         end do
         if (ii>1) then
@@ -350,17 +352,16 @@ contains
 
         ! Change Fermi-Dirac integral lower bound.
         xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
-        open(file='FUNCTION.dat',unit=50)
-        ix=zero
-        step=1.d-6
-        do while(ix<=5)
-          write(50,*) ix, 0.5*sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))**4*&
-          & exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) - sqrt(2*ix))**2/(2*sigma**2))/&
-          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
-          ix=ix+step
-        end do
-        write(0,*) sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)),hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
-        close(50)
+        zero_gaussian=exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))-zero)**2/(2*x_sigma**2))/&
+        & hightemp_gaussian_jintegral(x_sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
+        if(zero_gaussian > tol2) then
+          write(msg,'(5a,f6.4,3a)') &
+          & "WARNING: The planewaves standard deviation is too high.",ch10,&
+          & "The gaussian distribution of planewaves is not null at gamma point.",ch10,&
+          & "(= ",zero_gaussian,") Should be ideally > 1E-2. Action: Increase nband.",ch10,&
+          & "Assume experienced user. Execution will continue."
+          MSG_WARNING(msg)
+        end if
       else
         xcut=hightemp_e_heg(dble(this%bcut),this%ucvol)/tsmear
       end if
@@ -577,7 +578,6 @@ contains
           & istwf_k,mpi_enreg,npw_k,nspinor,&
           & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),&
           & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),0)
-
           this%std_init=this%std_init+wtk*sqrt(tmp_std)/this%nbcut
         end if
       end do

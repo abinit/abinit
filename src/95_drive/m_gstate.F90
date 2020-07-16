@@ -848,8 +848,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if(dtset%use_hightemp>=1) then
    ABI_DATATYPE_ALLOCATE(hightemp,)
    if(dtset%mband<dtset%ht_nbcut) then
-     write(message,'(a,i0,a,i0,a)') "Not enough bands to activate hightemp routines: nband=",dtset%mband,&
-&     " < ht_nbcut=",dtset%ht_nbcut,". Action: Increase nband or decrease ht_nbcut."
+     write(message,'(3a,i0,a,i0,3a)') "Not enough bands to activate hightemp routines.",ch10,&
+     & "nband=",dtset%mband," < ht_nbcut=",dtset%ht_nbcut,".",ch10,&
+     & "Action: Increase nband or decrease ht_nbcut."
      MSG_ERROR(message)
    else
      call hightemp%init(dtset%ht_gcut,dtset%mband,dtset%ht_nbcut,dtset%ht_prt_cg,rprimd,&

@@ -1248,7 +1248,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet Once we have occupation, compute number of free electrons
      if(associated(hightemp)) then
-       hightemp%std_init=dtset%userrb
        call hightemp%compute_nfreeel(energies%e_fermie,dtset%tsmear)
        call hightemp%compute_efreeel(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
@@ -1736,7 +1735,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if(occ(bdtot_index)<min_occ)min_occ=occ(bdtot_index)
          bdtot_index=bdtot_index+1
        end do
-       if(min_occ>0.01_dp)then
+       if(min_occ>0.01_dp .and. .not. associated(hightemp))then
          if(dtset%nsppol==1)then
            write(message, '(a,i0,3a,f7.3,5a)' )&
 &           'For k-point number ',ikpt,',',ch10,&
