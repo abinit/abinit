@@ -352,8 +352,8 @@ contains
 
         ! Change Fermi-Dirac integral lower bound.
         xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
-        zero_gaussian=exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))-zero)**2/(2*x_sigma**2))/&
-        & hightemp_gaussian_jintegral(x_sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
+        zero_gaussian=exp(-(hightemp_e_heg(dble(this%bcut),this%ucvol)-zero)**2/(2*sigma**2))/&
+        & hightemp_gaussian_jintegral(sigma,hightemp_e_heg(dble(this%bcut),this%ucvol))
         if(zero_gaussian > tol2) then
           write(msg,'(5a,f6.4,3a)') &
           & "WARNING: The planewaves standard deviation is too high.",ch10,&
