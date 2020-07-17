@@ -2934,6 +2934,7 @@ subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
    else
      if (ecutmax(3)>zero) dtsets(idtset)%ecut=ecutmax(3)
    end if
+
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
  end do
@@ -2946,14 +2947,14 @@ end subroutine macroin
 !! macroin2
 !!
 !! FUNCTION
-!! Treat "macro" input variables, that can :
+!! Treat "macro" input variables, that can:
 !! - initialize several other input variables for one given dataset
 !! - initialize several other input variables for a set of datasets.
 !! Note that the treatment of these different types of macro input variables is different.
 !! Documentation of such input variables is very important, including the
 !! proper echo, in the output file, of what such input variables have done.
 !!
-!! Important information : all the "macro" input variables should be properly
+!! Important information: all the "macro" input variables should be properly
 !! identifiable to be so, and it is proposed to make them start with the string "macro".
 !!
 !! INPUTS
@@ -2971,7 +2972,7 @@ end subroutine macroin
 !!
 !! SOURCE
 
-subroutine macroin2(dtsets,ndtset_alloc)
+subroutine macroin2(dtsets, ndtset_alloc)
 
 !Arguments ------------------------------------
 !scalars
@@ -2986,7 +2987,7 @@ subroutine macroin2(dtsets,ndtset_alloc)
 !******************************************************************
 
  do idtset=1,ndtset_alloc
-!  Set first PAW+U atom to perform atomic level shift
+   ! Set first PAW+U atom to perform atomic level shift
    if (dtsets(idtset)%typat(1)==0) cycle
    pawujat=dtsets(idtset)%pawujat
    pawujat=pawujat-count(dtsets(idtset)%lpawu( dtsets(idtset)%typat( 1:pawujat ))<0)
@@ -2999,6 +3000,15 @@ subroutine macroin2(dtsets,ndtset_alloc)
        dtsets(idtset)%atvshift(:,2,pawujat)=0_dp
      end if
    end if ! macro_uj
+
+   if (dtsets(idtset)%optdriver == RUNL_EPH) then
+     if (dtsets(idtset)%eph_stern == 1) then
+       ! Default values for the Sternheimer method in the EPH code if not provided.
+       if (dtsets(idtset)%tolwfr == zero) dtsets(idtset)%tolwfr = tol16
+       if (dtsets(idtset)%nline <= 4) dtsets(idtset)%nline = 100
+     end if
+   end if
+
  end do
 
 end subroutine macroin2

@@ -215,6 +215,12 @@ P           mkmem           8
             ngfft          20      20      20
              nkpt           8
            nkptgw           2
+            nline1          4
+            nline2          4
+            nline3          4
+            nline4          4
+            nline5          4
+            nline6        100
              nsym          48
            ntypat           1
               occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
@@ -1227,7 +1233,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
  Treating high-energy bands with Sternheimer and static self-energy.
- Tolwfr:    1.000000E-16, nline: 4
+ Tolwfr:    1.000000E-16, nline: 100
  Symsigma: 1 Timrev: 1
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Tetrahedron method
@@ -1440,6 +1446,12 @@ P           mkmem           8
             ngfft          20      20      20
              nkpt           8
            nkptgw           2
+            nline1          4
+            nline2          4
+            nline3          4
+            nline4          4
+            nline5          4
+            nline6        100
              nsym          48
            ntypat           1
               occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000

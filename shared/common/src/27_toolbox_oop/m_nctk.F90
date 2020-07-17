@@ -2612,7 +2612,7 @@ end subroutine var_from_name
 !! nctk_defwrite_nonana_terms
 !!
 !! FUNCTION
-!!  Write phonon frequencies and displacements for q-->0 in the presence of non-analytical behaviour.
+!!  Write to ncfile the phonon frequencies and displacements for q --> 0 in the presence of non-analytical behaviour.
 !!
 !! INPUTS
 !!  ncid=netcdf file id.

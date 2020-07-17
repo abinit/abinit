@@ -1,0 +1,73 @@
+##############################################
+####                SECTION: basic               
+##############################################
+ nband 20
+ ecut 35.0
+
+ ngkpt 4 4 4
+ nshiftk 1
+ shiftk 0 0 0
+ tolvrs 1e-12
+
+##############################################
+####                 SECTION: eph                
+##############################################
+ optdriver 7
+ eph_task 4
+ ddb_ngqpt 4 4 4
+ tmesh 0 200 1
+
+ #ph_intmeth 2
+ #ph_wstep 0.0001 eV
+ #ph_ngqpt 16 16 16
+ #ph_qshift 0 0 0
+ #ph_nqshift 1
+ #
+ eph_ngqpt_fine 4 4 4
+
+##############################################
+####                SECTION: files               
+##############################################
+ getddb_filepath "teph4zpr_1_DDB"
+ getdvdb_filepath "teph4zpr_2_DVDB"
+ getwfk_filepath "teph4zpr_3o_WFK"
+
+ eph_stern 1
+ getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+
+##############################################
+####                 SECTION: gw                 
+##############################################
+ nkptgw 2
+ kptgw
+    0.0000000000    0.0000000000    0.0000000000
+    0.5000000000    0.5000000000    0.0000000000
+ bdgw
+ 8 9
+ 8 9
+ zcut 0.01 eV
+
+ pp_dirpath = "$ABI_PSPDIR"
+ pseudos = "Mg-sp-gw.psp8, O.psp8"
+
+##############################################
+####                  STRUCTURE                  
+##############################################
+ structure "abivars:MgO_eph_zpr/mgo.abivars"
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  teph4zpr_1.in, teph4zpr_2.in, teph4zpr_3.in, teph4zpr_4.in, teph4zpr_5.in, teph4zpr_6.in, teph4zpr_7.in
+#%% [files]
+#%% use_git_submodule = MgO_eph_zpr
+#%% files_to_test = 
+#%%   teph4zpr_6.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = Convergence of ZPR wrt nband with Sternheimer method
+#%%<END TEST_INFO>

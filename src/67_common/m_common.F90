@@ -1866,10 +1866,10 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
 
  ! Provide defaults for the variables that have not yet been initialized.
  call indefo(dtsets, ndtset_alloc, nprocs)
- call macroin(dtsets, ecut_tmp, lenstr, ndtset_alloc, string)
 
  ! Perform some global initialization, depending on the value of
  ! pseudopotentials, parallelism variables, or macro input variables
+ call macroin(dtsets, ecut_tmp, lenstr, ndtset_alloc, string)
 
  ! If all the pseudopotentials have the same pspxc, override the default value for dtsets 1 to ndtset
  if (minval(abs((pspheads(1:npsp)%pspxc - pspheads(1)%pspxc)))==0) then
