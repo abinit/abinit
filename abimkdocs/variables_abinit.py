@@ -19333,18 +19333,21 @@ Variable(
     requires="[[icutcoul]] in [1,2]",
     added_in_version="before_v9",
     text=r"""
-[[vcutgeo]] is used in conjunction with [[icutcoul]](and [[gw_icutcoul]]) to specify
-the geometry used to truncate the Coulomb interaction, as well as the particular
-approach to be used. It has a meaning only for the cylindrical symmetry
-([[icutcoul]] = 1) or in the case of surfaces ([[icutcoul]] = 2). For each
+[[vcutgeo]] is used in conjunction with [[icutcoul]] to specify the geometry
+used to truncate the Coulomb interaction, as well as the particular approach
+to be used. It has a meaning only for a periodic one-dimensional system, typically
+a nanowire, nanotube or polymer surrounded by vacuum separating the system
+from images in neighbouring cells
+([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
+typically a slab with vacuum separating it from images in neighbouring cells (([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
-Phys. Rev. B 73, 233103 and Phys. Rev. B 73, 205119 for a complete description
+[[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
 of the methods)
 
-In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]], the cutoff region is given by the
+In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
 Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
 thus automatically defined by the unit cell and there is no need to specify
-When [[rcut]].
+the value of [[rcut]].
 
 To define a cylinder along the z-axis use the following lines:
 ```
@@ -19352,14 +19355,14 @@ icutcoul 1
 vcutgeo  0 0 1
 ```
 
-Please note that the method of Ismail-Beigi is implemented only in the case if an
+Please note that the method of Ismail-Beigi is implemented only in the case of an
 orthorhombic Bravais lattice. For hexagonal lattices, one has to use the method
 of Rozzi [[cite:Rozzi2006]]. In this case, the interaction is truncated
-in a finite cylinder. Contrarily to the first approach, here one has to
+in a finite cylinder. Contrarily to the first approach, the user has to
 specify both the radius of the cylinder with [[rcut]] as well as the length of
-the cylinder along the periodic dimension that should always be smaller than
+the cylinder along the periodic dimension, that should always be smaller than
 the extension of the Born von Karman box. The length of the cylinder is given
-in terms of the fraction of the primitive vector along the periodic direction.
+in terms of a multiple of the primitive vector along the periodic direction.
 
 For example, in order to define a finite cylinder along z of radius 2.5 Bohr
 and length 3*R3,
@@ -19369,8 +19372,8 @@ vcutgeo  0 0 -3.0 # note the minus sign
 rcut     2.5
 ```
 
-For surface calculations ([[icutcoul]] = 2), [[vcutgeo]] is used to define the
-two periodic directions defining the surface. Also in this case two different
+For two-dimensional systems ([[icutcoul]] = 2), [[vcutgeo]] is used to define the
+two periodic directions. Also in this case two different
 techniques are available. In the method of Ismail-Beigi, the (positive) non-zero
 components of vcutgeo define the periodic directions of the infinite surface.
 The interaction is truncated within a slab of width L where L is the length of
@@ -19380,14 +19383,20 @@ example:
 icutcoul 2
 vcutgeo  1 1 0
 ```
+At present, the implementation of the Beigi technique for two-dimensional systems is restricted
+to the periodic directions being in the x-y plane.
 
-It is also possible to define a finite
-surface by employing negative values. For example:
+In Rozzi's method, it is also possible to define a finite range
+for the Coulomb interaction in the periodic directions by employing negative values. For example:
 ```
 icutcoul 2
 vcutgeo -3 -2 0
 ```
 **Definition to be added**
+
+Note that not all k-point grids are allowed in these 1D and 2D cases:
+the k point vector component(s) along non-periodic direction(s) must vanish.
+So, if the 2D Ismail-Beigi technique is used, the z-component of the k points must vanish.
 """,
 ),
 
@@ -20534,7 +20543,7 @@ for increasing number of k points.
 
 When [[optdriver]] = 7, **zcut** defines the small complex shift used to avoid
 divergences in the expression for the Fan-Migdal e-ph self-energy.
-Note that the default value is to large for e-ph calculations, smaller values of the order
+Note that the default value is too large for e-ph calculations, smaller values of the order
 of 0.001 or 0.001 eV should be used (and carefully tested).
 """,
 ),
@@ -20640,7 +20649,6 @@ The option is ignored if PAW.
 """,
 ),
 
-#{"abinit_version": "9.0.0"}
 Variable(
     abivarname="sigma_ngkpt",
     varset="gw",
@@ -20653,16 +20661,17 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable allows the user to specify the list of k-points in the self-energy $\Sigma_{n\kk}$
-in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
-on [[nkptgw]], [[kptgw]], [[bdgw]].
+in terms of a homogeneous mesh in the IBZ instead of the traditional approach based on [[nkptgw]], [[kptgw]], [[bdgw]].
 
 The specification in terms of sigma_ngkpt is easier to use in particular when
-the self-energy is needed on a sub-mesh.
-The use of this variables requires a range of bands specified via [[gw_qprange]].
+the self-energy is needed on a sub-mesh used to generate the input WFK file.
+
+The set of bands can be specified either with [[sigma_erange]] or [[gw_qprange]].
+[[sigma_erange]] is the recommended approach when computing transport properties.
 
 !!! important
 
-    sigma_ngkpt and [[nkptgw]] and [[sigma_erange]] are mutually exclusive.
+    sigma_ngkpt and [[nkptgw]] and are mutually exclusive.
 """,
 ),
 
@@ -20901,9 +20910,10 @@ with the NSCF computation of the first order derivative of the KS wavefunctions 
 the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1
-during the GS run and the specification of [[tolwfr]] in the EPH input file.
-The path to the POT file used in the EPH calculation is specified via [[getpot_filepath]].
+during the GS run.
+The path to the external POT file used in the EPH calculation is specified via [[getpot_filepath]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
+The solver stops when the solution is converged within [[tolwfr]].
 
 !!! important
 
@@ -21059,6 +21069,11 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 !!! important
 
     The total number of MPI processes must be equal to the product of the different entries.
+
+    Note also that the EPH code implements its own MPI-algorithm and this [[eph_np_pqbks]] is
+    the **only variable** that should be used to change the default behaviour.
+    Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    are **not used** in the EPH subdriver.
 """,
 ),
 
@@ -21410,14 +21425,39 @@ String defining the list of pseudopotential files when Abinit is executed with t
 
 The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
 
-    pseudos = "al.psp8, as.psp8"
+    pseudos "al.psp8, as.psp8"
 
-The **mandatory** list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
-The directory where all pseudos are located can be specified with [[pp_dirpath]].
+This variable is **mandatory** and the list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
+
+Relative and absolute paths are allowed as in:
+
+    pseudos "../pseudos/al.psp8, ..//pseudos/as.psp8"
+
+
+or
+
+    pseudos "/home/user/pseudos/al.psp8, /home/user/pseudos/as.psp8"
+
+
+If all the pseudos are located in the same directory, it is much easier to use a common prefix with [[pp_dirpath]].
+For instance, the previous example is equivalent to:
+
+    pp_dirpath "/home/user/pseudos"
+    pseudos "al.psp8, as.psp8"
 
 !!! important
 
-    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
+    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported in pseudopotential names.
+    The only exception is the shell variable `$ABI_PSPDIR` that can be used in conjunction with [[pp_dirpath]]
+
+        pp_dirpath = "$ABI_PSPDIR"
+        pseudos "al.psp8, as.psp8"
+
+    Before running the calculation, one should set the value of $ABI_PSPDIR inside the terminal using:
+
+        ```sh
+        export ABI_PSPDIR="/home/user/pseudos"
+        ```
 """
 ),
 

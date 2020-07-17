@@ -157,13 +157,18 @@ program abitk
  !  call get_path_cryst(path, cryst, comm)
  !  call prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
 
+ !case ("to_cif")
+ !  call get_command_argument(2, path)
+ !  call get_path_cryst(path, cryst, comm)
+ !  call prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
+
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)
    call hdr_read_from_fname(hdr, path, fform, comm)
    ABI_CHECK(fform /= 0, "fform == 0")
-   !rdwr = 3; if (prtvol > 0) rdwr = 4
-   rdwr = 4
+   rdwr = 3; if (prtvol > 0) rdwr = 4
+   !rdwr = 4
    call hdr%echo(fform, rdwr, unit=std_out)
 
  case ("ibz")
@@ -189,11 +194,11 @@ program abitk
        write(std_out, "((a, 3(f3.1, 1x)), a)")" [", shiftk(:, ii), "]      ......"
      end if
    end do
-   write(std_out,"(a)")"#  List of kpoints in the IBZ with the corresponding weights:"
-   !write(std_out,"(/,a,i0)")" kptopt ", kptopt
-   write(std_out,"(/,a,i0,/,a)")" nkpt ", nkibz, "kpt"
+   write(std_out,"(/,a)")"# List of kpoints in the IBZ with the corresponding weights:"
+   write(std_out,"(a,i0)")" kptopt ", kptopt
+   write(std_out,"(a,i0,/,a)")" nkpt ", nkibz, " kpt"
    do ii=1,nkibz
-     write(std_out, "(3(es11.4,a),a,es11.4)") kibz(:, ii), " # ", wtk(ii)
+     write(std_out, "(3(es11.4),a,es11.4)") kibz(:, ii), " # wtk ", wtk(ii)
    end do
 
  !case ("testkgrid")
@@ -242,9 +247,11 @@ program abitk
      MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
    end if
 
- !case ("nesting")
+ !case ("ebands_nesting")
    !call get_path_ebands_cryst(path, ebands, cryst, comm)
-   !ierr = ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg)
+   !if (ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg) /= 0) then
+   !  MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
+   !end if
 
  case ("skw_kpath")
    ! Get energies on the IBZ from path file
@@ -277,7 +284,6 @@ program abitk
    !call ebands_free(ebands_kmesh)
 
  case ("skw_compare")
-
    ! Get energies on the IBZ from filepath
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
@@ -359,7 +365,6 @@ program abitk
    !! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
    !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    !ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
-
 
  ! ===========
  ! Unit tests

@@ -56,6 +56,7 @@ module m_sigmaph
  use m_rf2
  use m_dtset
  use m_dtfil
+ use m_clib
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -646,8 +647,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  character(len=500) :: msg
  character(len=fnlen) :: sigeph_filepath
 !arrays
- integer :: g0_k(3),g0_kq(3)
- integer :: work_ngfft(18),gmax(3)
+ integer :: g0_k(3),g0_kq(3), unts(2), work_ngfft(18), gmax(3)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
@@ -688,6 +688,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
+ unts = [std_out, ab_out]
+
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
  nspden = dtset%nspden; nkpt = ebands%nkpt
@@ -721,14 +723,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Get list of QP states that have been computed.
        sigma%qp_done = sigma_restart%qp_done
        restart = 1
-       call wrtout([std_out, ab_out], "- Restarting from previous SIGEPH.nc file")
-       call wrtout([std_out, ab_out], &
-           sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
+       call wrtout(unts, "- Restarting from previous SIGEPH.nc file")
+       call wrtout(unts, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
      else
        restart = 0; sigma%qp_done = 0
-       msg = "Found SIGEPH.nc file with all QP entries already computed. Will overwrite file."
+       msg = sjoin(" Found SIGEPH.nc file with all QP entries already computed.", ch10, &
+                   " Will overwrite:", sigeph_filepath, ch10, &
+                   " Keeping backup copy in:", strcat(sigeph_filepath, ".bkp"))
        call wrtout(ab_out, sjoin("WARNING: ", msg))
        MSG_WARNING(msg)
+       ! keep backup copy
+       ABI_CHECK(clib_rename(sigeph_filepath, strcat(sigeph_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
      end if
    end if
    call sigma_restart%free()
@@ -813,7 +818,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This table is needed when computing the imaginary part:
  ! k+q states outside energy window are not read hence their contribution won't be included.
  ! Error is small provided calculation is close to convergence.
- ! TODO: Store min/max energy difference ...
+ ! To reduce the error one should increase the value of winfact
+ ! TODO: 1) Introduce input variable to define winfact?
+ !       2) Store min/max energy difference
  ABI_MALLOC(ihave_ikibz_spin, (nkpt, nsppol))
  ihave_ikibz_spin = .False.
  do spin=1,sigma%nsppol
@@ -983,7 +990,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (dtset%eph_stern == 1) then
    ! Read GS POT (vtrial) from input POT file
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
-   call wrtout([std_out, ab_out], sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
+   call wrtout(unts, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
    call pot_hdr%free()
@@ -1016,10 +1023,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  sigma%use_ftinterp = .False.
  ABI_MALLOC(sigma%ibz2dvdb, (sigma%nqibz))
  if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, sigma%ibz2dvdb, comm) /= 0) then
-   call wrtout([std_out, ab_out], " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
+   call wrtout(unts, " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
    sigma%use_ftinterp = .True.
  else
-   call wrtout([std_out, ab_out], " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
+   call wrtout(unts, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
    sigma%use_ftinterp = .False.
  end if
 
@@ -2168,6 +2175,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! This to make sure that the parallel output of SIGEPH is completed
  call xmpi_barrier(comm)
+ call cwtime_report(" sigmaph: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 end subroutine sigmaph
 !!***
@@ -2225,7 +2233,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
 !arrays
- integer :: intp_kptrlatt(3,3), g0_k(3)
+ integer :: intp_kptrlatt(3,3), g0_k(3), unts(2)
  integer :: qptrlatt(3,3), indkk_k(1,6), my_gmax(3), band_block(2)
  integer :: intp_nshiftk !val_indeces(ebands%nkpt, ebands%nsppol),
  integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
@@ -2243,6 +2251,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call cwtime(cpu, wall, gflops, "start")
+
+ unts = [std_out, ab_out]
 
  ! Copy important dimensions.
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor; mband = dtset%mband
@@ -2273,12 +2283,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
  qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
-   new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_bz2ibz)
+                             new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_bz2ibz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(temp,(new%nqbz, 6))
  call listkk(dksqmax, cryst%gmet, temp, new%qibz, new%qbz, new%nqibz, new%nqbz, cryst%nsym, &
-      1, cryst%symafm, cryst%symrec, 1, comm, exit_loop=.True., use_symrec=.True.)
+             1, cryst%symafm, cryst%symrec, 1, comm, exit_loop=.True., use_symrec=.True.)
 
  new%ind_bz2ibz(1,:) = temp(:,1)
  new%ind_bz2ibz(2,:) = temp(:,2)
@@ -2308,8 +2318,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  end if
 
  if (my_rank == master) then
-   call gaps%print(unit=std_out)
-   !call gaps%print(unit=ab_out)
+   call gaps%print(unit=std_out) !; call gaps%print(unit=ab_out)
  end if
  !val_indeces = ebands_get_valence_idx(ebands)
 
@@ -2344,6 +2353,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  else
 
    if (any(abs(dtset%sigma_erange) > zero)) then
+     ! Use sigma_erange and (optionally) sigma_ngkpt
      call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks, comm)
 
    else
@@ -2579,7 +2589,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    if (dtset%useria == 567) then
      ! Uncomment this part to use all states to debug.
-     call wrtout([std_out, ab_out], "- Setting bstart to 1 and bstop to nband for debugging purposes")
+     call wrtout(unts, "- Setting bstart to 1 and bstop to nband for debugging purposes")
      new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
      new%my_bsum_start = new%bsum_start; new%my_bsum_stop = new%bsum_stop
    end if
@@ -2748,9 +2758,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
       new%ncwrite_comm%me = xmpi_comm_rank(new%ncwrite_comm%value)
       new%ncwrite_comm%nproc = xmpi_comm_size(new%ncwrite_comm%value)
       if (my_rank == master) then
-        call wrtout([std_out, ab_out], &
+        call wrtout(unts, &
           sjoin("- Using parallelism over k-points/spins. Cannot write full results to main output", ch10, &
-                "- All proc except master will write to dev_null. Use SIGEPH.nc to analyze results"))
+                "- All procs except master will write to dev_null. Use SIGEPH.nc to analyze results."))
         !write(std_out, *)"ncwrite_comm_me:", new%ncwrite_comm%me, "ncwrite_comm%nproc:", new%ncwrite_comm%nproc
       end if
       if (.not. is_open(ab_out)) then
@@ -2852,28 +2862,28 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  !  NB: The routines assume that the k-mesh for electrons and the q-mesh for phonons are the same.
  !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
 
- ! TODO: Should only check the value of getwfkfine_filepath
  new%use_doublegrid = .False.
 
- ! Construct ebands_dense for double grid either from WFK file or via SKW.
- if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
+ ! ================================================================================================
+ ! Here we construct ebands_dense for the double grid either from WFK file or via SKW interpolation
+ ! ================================================================================================
 
+ if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
+   ! In principle only getwfkfine_filepath is used
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
-   if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
-     MSG_ERROR(msg)
-   end if
-   call wrtout([std_out, ab_out], " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
+   ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
+   call wrtout(unts, " EPH double grid interpolation: will read energies from: "//trim(wfk_fname_dense), newlines=1)
 
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    ! TODO add consistency check: number of bands and kpoints (commensurability)
    !if (ebands_dense%is_commensurate(msg) /= 0)
-   ABI_CHECK(ebands_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
+   ABI_CHECK_IEQ(ebands_dense%mband, ebands%mband, "Inconsistent number of bands for the fine and dense grid:")
    new%use_doublegrid = .True.
 
  else if (any(dtset%bs_interp_kmult /= 0)) then
    ! Read bs_interpmult
-   call wrtout([std_out, ab_out]," EPH interpolation: will use star functions interpolation.", newlines=1)
+   call wrtout(unts, " EPH interpolation: will use star functions interpolation.", newlines=1)
    ! Interpolate band energies with star-functions
    params = 0; params(1) = 1; params(2) = 5
    if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
@@ -2915,6 +2925,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  bstart = new%bsum_start
 
  if (new%qint_method > 0) then
+   ! Tetra
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
      new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
@@ -2931,7 +2942,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
        new%ephwg = ephwg_from_ebands(cryst, ifc, ebands, bstart, new%nbsum, comm)
      end if
    end if
+
  else
+   ! Standard quadrature.
    if (new%use_doublegrid) then
      new%eph_doublegrid = eph_double_grid_new(cryst, ebands_dense, ebands%kptrlatt, ebands_dense%kptrlatt)
      new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
@@ -3253,19 +3266,22 @@ end subroutine sigmaph_write
 !!  sigmaph_read
 !!
 !! FUNCTION
-!!  Start a sigmaph instance from a netcdf file.
-!!  This routine serves only to read some basic dimensions of sigmaph_t to verify if a restart is possible
+!!  Start an (incomplete) sigmaph instance from a netcdf file.
+!!  This routine serves only to read some basic dimensions and parameters from the SIGEPH.nc file to
+!!
+!!     1. Verify whether a restart in sigmaph is possible when eph_restart == 1
+!!     2. Use these metadata in the RTA module to prepare the calculation of transport properties.
 !!
 !! INPUTS
 !!  path= SIGEPH Filename.
 !!  dtset<dataset_type>=All input variables for this dataset.
-!!  ecut=Cutoff energy for wavefunctions.
-!!  cryst<crystal_t>=Crystalline structure
-!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !!  comm=MPI communicator
+!!  msg=Error message if ierr /= 0
+!!  ierr = Exit status
 !!  [keep_open]=True to keep the Nc file handle open for further reading. Default: False.
 !!  [extrael_fermie]: Return the value of (eph_extrael, eph_fermie) read from file.
+!!  [sigma_ngkpt] =  Value read from the ncfile (used in m_rta)
+!!  [sigma_erange] = Value read from the ncfile (used in m_rta)
 !!
 !! PARENTS
 !!
@@ -3273,7 +3289,8 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, extrael_fermie) result(new)
+type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
+                                      extrael_fermie, sigma_ngkpt, sigma_erange) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -3282,25 +3299,26 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  character(len=500),intent(out) :: msg
  real(dp), optional, intent(out) :: extrael_fermie(2)
  logical,optional,intent(in) :: keep_open
+ integer,optional, intent(out) :: sigma_ngkpt(3)
+ real(dp),optional,intent(out) :: sigma_erange(2)
 
 !Local variables ------------------------------
 !scalars
- integer :: imag_only
+ integer :: imag_only, eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
 #ifdef HAVE_NETCDF
  integer :: ncid !, varid !, ncerr
 #endif
- real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear
- real(dp) :: cpu, wall, gflops
+ real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, eph_extrael, eph_fsmear, cpu, wall, gflops
  character(len=fnlen) :: path
 !arrays
- integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
- integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3) !, frohl_params(4)
- real(dp) :: sigma_erange(2)
+ integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), my_sigma_ngkpt(3)
+ real(dp) :: my_sigma_erange(2)
 
 ! *************************************************************************
 
  ! Open netcdf file
  msg = "Netcdf not activated at configure time!"
+ ierr = 1
 #ifdef HAVE_NETCDF
  ierr = 0
 
@@ -3323,8 +3341,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nctk_get_dim(ncid, "ntemp", new%ntemp))
  NCF_CHECK(nctk_get_dim(ncid, "nqibz", new%nqibz))
  NCF_CHECK(nctk_get_dim(ncid, "nqbz", new%nqbz))
- !NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
- !NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
+ !NCF_CHECK(nctk_get_dim(ncid, "nwr", new%nwr))
+ !NCF_CHECK(nctk_get_dim(ncid, "gfw_nomega", new%gfw_nomega))
 
  ! ======================================================
  ! Read data that does not depend on the (kpt, spin) loop.
@@ -3352,6 +3370,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), new%bstart_ks))
  NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
  new%bstop_ks = new%bstart_ks + new%nbcalc_ks - 1
+
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), new%kcalc))
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), new%kcalc2ibz))
  NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), new%kTmesh))
@@ -3360,12 +3379,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("eta"), eta))
  new%ieta = j_dpc * eta
 
- ! Try to read the done array used to implement restart capabilities.
+ ! Read the done array used to implement restart capabilities.
  ABI_ICALLOC(new%qp_done, (new%nkcalc, new%nsppol))
- !ncerr = nf90_inq_varid(ncid, "qp_done", varid)
- !if (ncerr == nf90_noerr) then
- !NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
- !end if
  NCF_CHECK(nf90_get_var(ncid, vid("qp_done"), new%qp_done))
 
  ! ============================================================
@@ -3381,11 +3396,12 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  ABI_CHECK(eph_fsmear  == dtset%eph_fsmear, "netcdf eph_fsmear != input file")
  ABI_CHECK(ph_wstep    == dtset%ph_wstep, "netcdf ph_wstep != input file")
  ABI_CHECK(ph_smear    == dtset%ph_smear, "netcdf ph_smear != input file")
+
  if (present(extrael_fermie)) then
    extrael_fermie = [eph_extrael, eph_fermie]
  else
-   ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
-   ABI_CHECK(eph_fermie  == dtset%eph_fermie, "netcdf eph_feremie != input file")
+   ABI_CHECK_DEQ(eph_extrael, dtset%eph_extrael, "netcdf eph_extrael != input file")
+   ABI_CHECK_DEQ(eph_fermie, dtset%eph_fermie, "netcdf eph_feremie != input file")
  end if
 
  NCF_CHECK(nf90_get_var(ncid, vid("eph_task"), eph_task))
@@ -3393,17 +3409,29 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"), ph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"), eph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"), eph_transport))
- ABI_CHECK(symdynmat     == dtset%symdynmat, "netcdf symdynmat != input file")
- ABI_CHECK(ph_intmeth    == dtset%ph_intmeth, "netcdf ph_intmeth != input file")
- ABI_CHECK(eph_intmeth   == dtset%eph_intmeth, "netcdf eph_intmeth != input file")
- ABI_CHECK(eph_transport == dtset%eph_transport, "netcdf eph_transport != input file")
 
+ ABI_CHECK_IEQ(symdynmat, dtset%symdynmat, "netcdf symdynmat != input file")
+ ABI_CHECK_IEQ(ph_intmeth, dtset%ph_intmeth, "netcdf ph_intmeth != input file")
+ ABI_CHECK_IEQ(eph_intmeth, dtset%eph_intmeth, "netcdf eph_intmeth != input file")
+ ABI_CHECK_IEQ(eph_transport, dtset%eph_transport, "netcdf eph_transport != input file")
+
+ !NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
  NCF_CHECK(nf90_get_var(ncid, vid("ddb_ngqpt"), ddb_ngqpt))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_ngqpt"), ph_ngqpt))
- NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
- !NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
- NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
+ NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), my_sigma_ngkpt))
+ if (present(sigma_ngkpt)) then
+   sigma_ngkpt = my_sigma_ngkpt
+ else
+   ABI_CHECK(all(dtset%sigma_ngkpt == my_sigma_ngkpt), "netcdf sigma_ngkpt != input file")
+ end if
+
+ NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), my_sigma_erange))
+ if (present(sigma_erange)) then
+   sigma_erange = my_sigma_erange
+ else
+   ABI_CHECK(all(dtset%sigma_erange == my_sigma_erange), "netcdf sigma_erange != input file")
+ end if
 
  if (present(keep_open)) then
    new%ncid = ncid
@@ -3416,9 +3444,8 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),"netcdf eph_ngqpt_fine != input file")
  ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt), "netcdf ddb_ngqpt != input file")
  ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt), "netcdf ph_ngqpt != input file")
- ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt), "netcdf sigma_ngkpt != input file")
+
  !ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6), "netcdf frohl_params != input file")
- !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6), "netcdf sigma_erange != input file")
 
  call cwtime_report(" sigmaph_read", cpu, wall, gflops)
 
@@ -3440,7 +3467,7 @@ end function sigmaph_read
 !!  sigmaph_get_ebands
 !!
 !! FUNCTION
-!!  Read quantities from the sigmaph to a ebands structure and return mapping
+!!  Read quantities from the sigmaph to an ebands_t structure and return mapping
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
@@ -3452,24 +3479,22 @@ end function sigmaph_read
 !!
 !! SOURCE
 
-type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta, linewidth_mrta, &
-                                           velocity, comm, ierr, indq2ebands) result(new)
+type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidths, velocity, comm, indq2ebands) result(new)
 
 !Arguments -----------------------------------------------
  integer,intent(in) :: comm
  class(sigmaph_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- integer, intent(out) :: ierr
- real(dp), allocatable, intent(out) :: linewidth_serta(:,:,:,:), linewidth_mrta(:,:,:,:), velocity(:,:,:,:)
+ integer,intent(in) :: brange(2)
+ real(dp), allocatable, intent(out) :: linewidths(:,:,:,:,:), velocity(:,:,:,:)
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
-
 
 !Local variables -----------------------------------------
 !scalars
  integer,parameter :: sppoldbl1 = 1
- integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev
- integer :: band_ks, bstart_ks, nbcalc_ks, mband
+ integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev, band_ks, bstart_ks, nbcalc_ks, mband
+ integer :: bmin, bmax
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
@@ -3480,13 +3505,10 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
 ! *************************************************************************
 
- ierr = 0
-
  ! copy useful dimensions
- nsppol = self%nsppol
- nkpt = ebands%nkpt
+ nsppol = self%nsppol; nkpt = ebands%nkpt
 
- ! Map ebands kpoints to sigmaph
+ ! Map input ebands kpoints to kcalc k-points stored in sigmaph file.
  ABI_MALLOC(indkk, (self%nkcalc, 6))
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
@@ -3494,9 +3516,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
              sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
 
  if (dksqmax > tol12) then
-    write(msg, '(3a,es16.6,a)' ) &
-     "Error mapping ebands to sigmaph",ch10,&
-     "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
+    write(msg, '(3a,es16.6)' ) &
+     "Error mapping input ebands%kptns to sigmaph kcalc",ch10,&
+     "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax
     MSG_ERROR(msg)
  end if
 
@@ -3513,17 +3535,16 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
  new = ebands_chop(ebands, 1, mband)
  !mband = ebands%mband
  !call ebands_copy(ebands, new)
+ !bmin = 1; bmax = mband
+ bmin = brange(1); bmax = brange(2)
 
 #ifdef HAVE_NETCDF
  ! Read linewidths from sigmaph file.
  ! Use global array (mband, nkpt, nsppol) but keep in mind that results in SIGPEPH are packed
  ! so that only the relevant k-points are stored on file.
 
- ABI_CALLOC(velocity, (3, mband, nkpt, nsppol))
- ABI_CALLOC(linewidth_serta, (self%ntemp, mband, nkpt, nsppol))
- if (self%mrta > 0) then
-   ABI_CALLOC(linewidth_mrta, (self%ntemp, mband, nkpt, nsppol))
- end if
+ ABI_CALLOC(velocity, (3, bmin:bmax, nkpt, nsppol))
+ ABI_CALLOC(linewidths, (self%ntemp, bmin:bmax, nkpt, nsppol, 2))
 
  do spin=1,nsppol
    do ikcalc=1,self%nkcalc
@@ -3538,13 +3559,13 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
        do itemp=1,self%ntemp
          ! Read SERTA lifetimes
          ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), &
-                 linewidth_serta(itemp, band_ks, ikpt, spin), start=[2, itemp, iband, ikcalc, spin])
+                 linewidths(itemp, band_ks, ikpt, spin, 1), start=[2, itemp, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
 
          ! Read MRTA lifetimes
          if (self%mrta > 0) then
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
-                                linewidth_mrta(itemp, band_ks, ikpt, spin), start=[itemp, iband, ikcalc, spin])
+                                linewidths(itemp, band_ks, ikpt, spin, 2), start=[itemp, iband, ikcalc, spin])
            NCF_CHECK(ncerr)
          end if
        end do
@@ -3561,10 +3582,8 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
 
  ABI_FREE(indkk)
 
- ! This so that output linewidths are always positive independently of the kind of self-energy used
- ! (retarded or advanced)
- linewidth_serta = abs(linewidth_serta)
- if (self%mrta > 0) linewidth_mrta = abs(linewidth_mrta)
+ ! This so that output linewidths are always positive independently of the kind of self-energy used (retarded or advanced)
+ linewidths = abs(linewidths)
 
 end function sigmaph_get_ebands
 !!***
@@ -3592,36 +3611,41 @@ subroutine sigmaph_compare(self, other)
 !Arguments ------------------------------------
  class(sigmaph_t),intent(in) :: self, other
 
-! *************************************************************************
+!Local variables-------------------------------
+ integer :: ierr
 
- ABI_CHECK(self%nkcalc == other%nkcalc, "Difference found in nkcalc.")
- ABI_CHECK(self%max_nbcalc == other%max_nbcalc, "Difference found in max_nbcalc.")
- ABI_CHECK(self%nsppol == other%nsppol, "Difference found in nsppol.")
- ABI_CHECK(self%ntemp == other%ntemp, "Difference found in ntemp.")
- !ABI_CHECK(natom3 == natom3, "")
- ABI_CHECK(self%nqibz == other%nqibz, "Difference found in nqibz.")
- ABI_CHECK(self%nqbz == other%nqbz, "Difference found in nqbz.")
+! *************************************************************************
+ ierr = 0
+
+ ABI_CHECK_NOSTOP(self%nkcalc == other%nkcalc, "Difference found in nkcalc.", ierr)
+ ABI_CHECK_NOSTOP(self%max_nbcalc == other%max_nbcalc, "Difference found in max_nbcalc.", ierr)
+ ABI_CHECK_NOSTOP(self%nsppol == other%nsppol, "Difference found in nsppol.", ierr)
+ ABI_CHECK_NOSTOP(self%ntemp == other%ntemp, "Difference found in ntemp.", ierr)
+ ABI_CHECK_NOSTOP(self%nqibz == other%nqibz, "Difference found in nqibz.", ierr)
+ ABI_CHECK_NOSTOP(self%nqbz == other%nqbz, "Difference found in nqbz.", ierr)
 
  ! ======================================================
  ! Read data that does not depend on the (kpt, spin) loop.
  ! ======================================================
- ABI_CHECK(self%symsigma == other%symsigma, "Different value found for symsigma.")
- ABI_CHECK(self%nbsum == other%nbsum, "Different value found for nbsum.")
- ABI_CHECK(self%bsum_start == other%bsum_start, "Different value found for bsum_start.")
- ABI_CHECK(self%bsum_stop == other%bsum_stop, "Different value found for bsum_stop.")
- ABI_CHECK(self%qint_method == other%qint_method, "Different value found for qint_method.")
- !ABI_CHECK(self%frohl_model == other%frohl_model, "Different value found for frohl_model.")
- ABI_CHECK(self%imag_only .eqv. other%imag_only, "Difference found in imag_only")
- ABI_CHECK(self%wr_step == other%wr_step, "Different value found for wr_step")
- ABI_CHECK(self%ieta == other%ieta, "Different value found for zcut.")
+ ABI_CHECK_NOSTOP(self%symsigma == other%symsigma, "Different value found for symsigma.", ierr)
+ ABI_CHECK_NOSTOP(self%nbsum == other%nbsum, "Different value found for nbsum.", ierr)
+ ABI_CHECK_NOSTOP(self%bsum_start == other%bsum_start, "Different value found for bsum_start.", ierr)
+ ABI_CHECK_NOSTOP(self%bsum_stop == other%bsum_stop, "Different value found for bsum_stop.", ierr)
+ ABI_CHECK_NOSTOP(self%qint_method == other%qint_method, "Different value found for qint_method", ierr)
+ !ABI_CHECK_NOSTOP(self%frohl_model == other%frohl_model, "Different value found for frohl_model.", ierr)
+ ABI_CHECK_NOSTOP(self%imag_only .eqv. other%imag_only, "Difference found in imag_only", ierr)
+ ABI_CHECK_NOSTOP(self%wr_step == other%wr_step, "Different value found for wr_step", ierr)
+ ABI_CHECK_NOSTOP(self%ieta == other%ieta, "Different value found for zcut.", ierr)
 
- ABI_CHECK(all(self%ngqpt == other%ngqpt), "Different value found for ngqpt")
- ABI_CHECK(all(self%bstart_ks == other%bstart_ks), "Different value found for bstart_ks")
- ABI_CHECK(all(self%nbcalc_ks == other%nbcalc_ks), "Different value found for bstop_ks")
- ABI_CHECK(all(self%kcalc == other%kcalc), "Different value found for kcalc")
- ABI_CHECK(all(self%kcalc2ibz == other%kcalc2ibz), "Different value found for kcalc2ibz")
- ABI_CHECK(all(self%kTmesh == other%kTmesh), "Different value found for kTmesh")
- ABI_CHECK(all(self%mu_e == other%mu_e), "Different value found for mu_e")
+ ABI_CHECK_NOSTOP(all(self%ngqpt == other%ngqpt), "Different value found for ngqpt", ierr)
+ ABI_CHECK_NOSTOP(all(self%bstart_ks == other%bstart_ks), "Different value found for bstart_ks", ierr)
+ ABI_CHECK_NOSTOP(all(self%nbcalc_ks == other%nbcalc_ks), "Different value found for bstop_ks", ierr)
+ ABI_CHECK_NOSTOP(all(self%kcalc == other%kcalc), "Different value found for kcalc", ierr)
+ ABI_CHECK_NOSTOP(all(self%kcalc2ibz == other%kcalc2ibz), "Different value found for kcalc2ibz", ierr)
+ ABI_CHECK_NOSTOP(all(self%kTmesh == other%kTmesh), "Different value found for kTmesh", ierr)
+ ABI_CHECK_NOSTOP(all(self%mu_e == other%mu_e), "Different value found for mu_e", ierr)
+
+ ABI_CHECK(ierr == 0, "Fatal error in sigmaph_compare, see previous messages!")
 
 end subroutine sigmaph_compare
 !!***
@@ -3933,6 +3957,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, ebands%kptns, kq_list, ebands%nkpt, self%nqibz_k, cryst%nsym, &
    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
+
  if (dksqmax > tol12) then
    write(msg, '(4a,es16.6,7a)' )&
     "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
@@ -4598,7 +4623,7 @@ subroutine sigmaph_print(self, dtset, unt)
  ! Write dimensions
  !write(unt,"(a, 2(f5.3, 1x), a)")"Computing self-energy corrections for states inside energy window:", &
  !    self%elow * Ha_eV, self%ehigh * Ha_eV, "[eV]"
- write(unt,"(a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
+ write(unt,"(/,a)")sjoin(" Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
  write(unt,"(a)")sjoin(" From bsum_start:", itoa(self%bsum_start), "to bsum_stop:", itoa(self%bsum_stop))
  if (dtset%eph_stern == 1 .and. .not. self%imag_only) then
    write(unt, "(a)")" Treating high-energy bands with Sternheimer and static self-energy."
@@ -4655,7 +4680,7 @@ subroutine sigmaph_print(self, dtset, unt)
      end do
  end do
 
- write(unt, "(a)")" === MPI parallelism ==="
+ write(unt, "(/,a)")" === MPI parallelism ==="
  write(unt, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", self%my_bsum_start, &
      " up to my_bsum_stop: ", self%my_bsum_stop
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", self%pert_comm%nproc
@@ -4666,7 +4691,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", self%bsum_comm%nproc
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", self%spin_comm%nproc
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", self%kcalc_comm%nproc
- write(unt, "(2(a,i0))")"P Number of k-point in Sigma_nk treated by this proc: ", self%my_nkcalc, " of ", self%nkcalc
+ write(unt, "(2(a,i0),/)")"P Number of k-point in Sigma_nk treated by this proc: ", self%my_nkcalc, " of ", self%nkcalc
 
 end subroutine sigmaph_print
 !!***

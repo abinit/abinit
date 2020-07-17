@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h47 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h49 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t54.in
 - output file    -> t54.out
@@ -227,9 +227,9 @@ meta: {optdriver: 7, eph_task: 5, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t54o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t54o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -242,34 +242,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
@@ -343,9 +315,9 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t54o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t54o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -358,54 +330,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 7
  From bsum_start: 1 to bsum_stop: 7
@@ -433,6 +359,7 @@ All the independent perturbations are available
    6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    6
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    6
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 7
 P Number of CPUs for parallelism over perturbations: 1
@@ -443,6 +370,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 8 of 8
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -569,29 +497,27 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:    5.0 [K], mu_e:   17.312
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
- Mesh step:  27.2 (meV) with npts: 2224
- From emin:  -9.7 to emax:  50.8 (eV)
+ Mesh step:  27.2 (meV) with npts: 166
+ From emin:  12.8 to emax:  17.3 (eV)
  Number of k-points in the IBZ: 8
- Fermi level:   1.23189641E+01 (eV)
- Total electron DOS at Fermi level in states/eV:   9.14819245E-03
- Total number of electrons at eF:    8.0
+ edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.90E+17        0.00E+00   3968561107.11            0.00
           300.00        0.90E+17        0.00E+00       105946.96            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.90E+17        0.00E+00   3968561107.11            0.00
           300.00        0.90E+17        0.00E+00       105946.96            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.90E+17        0.00E+00   3968561107.11            0.00
           300.00        0.90E+17        0.00E+00       105946.96            0.00
@@ -599,19 +525,19 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.90E+17        0.00E+00   3908305217.35            0.00
           300.00        0.90E+17        0.00E+00       106478.52            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.90E+17        0.00E+00   3908305217.35            0.00
           300.00        0.90E+17        0.00E+00       106478.52            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.90E+17        0.00E+00   3908305217.35            0.00
           300.00        0.90E+17        0.00E+00       106478.52            0.00
@@ -829,10 +755,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.8  wall=          8.3
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          4.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.8  wall=          8.3
+.Delivered   4 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          4.2

@@ -3241,7 +3241,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
            MSG_COMMENT(msg)
          end if
        else
-         MSG_ERROR(sjoin('k-point', ktoa(Sigp%kptgw(:,ikcalc)), 'not in IBZ'))
+         write(msg,'(3a)')&
+&         ' not in the list of k points treated in the preparatory SCF run.',ch10,' Change kptgw, or shiftk of previous run.'
+         MSG_ERROR(sjoin('k-point', ktoa(Sigp%kptgw(:,ikcalc)),trim(msg)))
        end if
 
      end do
@@ -3262,7 +3264,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ABI_MALLOC(Sigp%kptgw2bz,(Sigp%nkptgw))
  !
  !=== Check if the k-points are in the BZ ===
- !FB TODO Honestly the code is not able to treat k-points, which are not in the IBZ.
+ !FB TODO Honestly the code is not able to treat k-points, which are not in the input list of points in the IBZ.
  !This extension should require to change the code in different places.
  !Therefore, one should by now prevent the user from calculating sigma for a k-point not in the IBZ.
 
@@ -3271,7 +3273,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      !found = has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikcalc2bz,G0)
      Sigp%kptgw2bz(ikcalc) = ikcalc2bz
    else
-     MSG_ERROR(sjoin('k-point:', ktoa(Sigp%kptgw(:,ikcalc)), 'not in the kbz set'))
+     write(msg,'(3a)')&
+&     ' not in the list of k points treated in the preparatory SCF run.',ch10,' Change kptgw, or shiftk of previous run.'
+     MSG_ERROR(sjoin('k-point:', ktoa(Sigp%kptgw(:,ikcalc)),trim(msg)))
    end if
  end do
 

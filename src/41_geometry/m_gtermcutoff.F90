@@ -147,7 +147,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  real(dp)           :: alpha_fac, ap1sqrt, log_alpha
  real(dp)           :: cutoff,rcut_loc,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
- real(dp)           :: gcart_para,gcart_perp,gcart_xy,gcart_z
+ real(dp)           :: gcart_para,gcart_perp,gcart_x,gcart_y,gcart_xy,gcart_z
  real(dp)           :: j0,j1,k0,k1
  real(dp)           :: quad,tmp,ucvol
  real(dp)           :: hcyl,hcyl2
@@ -286,9 +286,15 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        end if
      end do
 
-     if (opt_surface==1) then
+     ! Calculate rcut for each method
+     if(rcut>tol4) then
+       rcut_loc = rcut
+     else
+       rcut_loc = half*SQRT(DOT_PRODUCT(a1,a1))
+     endif
+
+     if (opt_cylinder==1) then
        ABI_CHECK(ALL(pdir == (/0,0,1/)),"Surface must be in the x-y plane")
-       rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
      end if
 
      rcut_= rcut_loc
@@ -300,10 +306,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      ! ===================================================
      ! === Setup for the quadrature of matrix elements ===
      ! ===================================================
-     qopt_    =6         ! Quadrature method, see quadrature routine.
-     ntrial_  =30        ! Max number of attempts.
-     accuracy_=0.001     ! Fractional accuracy required.
+     qopt_    =6        ! Quadrature method, see quadrature routine.
+     ntrial_  =30       ! Max number of attempts.
+     accuracy_=0.001    ! Fractional accuracy required.
      npts_    =10       ! Initial number of point (only for Gauss-Legendre method).
+     hcyl_    =hcyl     ! Lenght of cylinder along z, only if method==2
 
      write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
 &      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
@@ -323,26 +330,28 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
          ii=i1+i23
 
          gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
-         gcartx_=gcart(1) ; gcarty_=gcart(2) ; gcart_para_=ABS(gcart(3))
+         gcart_x=gcart(1) ; gcart_y=gcart(2) ; gcart_z=ABS(gcart(3))
+         gcart_xy = SQRT(gcart_x**2+gcart_y**2) ;
 
-         if (gcart_para_<tol6) then
-           gcart_para_ = tol6
-!           write(std_out,*)"setting qpg_para to=",gcart_para_
+         if (gcart_z>tol4) then
+           ! === Analytic expression ===
+           call CALCK0(gcart_z *rcut_loc,k0,1)
+           call CALJY1(gcart_xy*rcut_loc,j1,0)
+           call CALJY0(gcart_xy*rcut_loc,j0,0)
+           call CALCK1(gcart_z *rcut_loc,k1,1)
+           gcutoff(ii)=one+rcut_loc*gcart_xy*j1*k0-gcart_z*rcut_loc*j0*k1
+         else
+           if (gcart_xy>tol4) then
+             ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
+             call quadrature(F5,zero,rcut_loc,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             if (ierr/=0) then
+               MSG_ERROR("Accuracy not reached")
+             end if
+               gcutoff(ii)= half*pi
+           else
+             gcutoff(ii)= zero 
+          end if
          end if
-
-         tmp=zero
-
-         call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-
-         if (ierr/=0) then
-           MSG_ERROR("Accuracy not reached")
-         end if
-
-         tmp=tmp+quad
-
-!         write(*,*)tmp
-
-         gcutoff(ii)=tmp
 
        end do !i1
       end do !i2
@@ -352,106 +361,71 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      ! === Finite cylinder of length hcyl, from Rozzi et al ===
      ! TODO add check on hcyl value that should be smaller that 1/deltaq
-     if (hcyl<zero) then
-       write(msg,'(a,f8.4)')' Negative value for cylinder length hcyl=',hcyl
+     if (hcyl_<zero) then
+       write(msg,'(a,f8.4)')' Negative value for cylinder length hcyl=',hcyl_
        MSG_BUG(msg)
      end if
       
      npts_=6
      ABI_MALLOC(xx,(npts_))
 
-     if (ABS(hcyl)>tol12) then
-       write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut_loc
-       call wrtout(std_out,msg,'COLL')
-       hcyl_=hcyl
-       hcyl2=hcyl**2
-       rcut2=rcut_loc**2
+     write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut_loc
+     call wrtout(std_out,msg,'COLL')
+     hcyl_=hcyl
+     hcyl2=hcyl**2
+     rcut2=rcut_loc**2
 
-       do i3=1,n3
-        do i2=1,n2
-         i23=n1*(i2-1 + n2*(i3-1))
-         do i1=1,n1
-         ii=i1+i23
+     write(*,*)'This',n1,n2,n3
 
-           gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
-           gcart_para_=ABS(gcart(3)) ; gcart_perp_=SQRT(gcart(1)**2+gcart(2)**2)
+     do i3=1,n3
+      do i2=1,n2
+       i23=n1*(i2-1 + n2*(i3-1))
+       do i1=1,n1
+       ii=i1+i23
 
-           if (gcart_perp_/=zero.and.gcart_para_/=zero) then
-             ! $ 4\pi\int_0^{R_c} d\rho\rho j_o(qpg_perp_.\rho)\int_0^hcyl dz\cos(qpg_para_*z)/sqrt(\rho^2+z^2) $
-             call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-             if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
-             end if
+         gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+         gcart_para_=ABS(gcart(3)) ; gcart_perp_=SQRT(gcart(1)**2+gcart(2)**2)
 
-             gcutoff(ii)=pi*quad
-
-           else if (gcart_perp_==zero.and.gcart_para_/=zero) then
-
-             ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
-             call quadrature(F3,zero,hcyl,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-             if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
-             end if
-
-             c1=one/gcart_para_**2-COS(gcart_para_*hcyl_)/gcart_para_**2-hcyl*SIN(gcart_para_*hcyl_)/gcart_para_
-             c2=SIN(gcart_para_*hcyl_)*SQRT(hcyl2+rcut2)
-             gcutoff(ii)=c1+(c2-quad)/gcart_para_
-
-           else if (gcart_perp_/=zero.and.gcart_para_==zero) then
-             ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
-             call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-             if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
-             end if
-
-             gcutoff(ii)=quad
-
-           else if (gcart_perp_==zero.and.gcart_para_==zero) then
-             ! Use lim q+G --> 0
-              gcutoff(ii)=zero
-
-           else
-             MSG_BUG('You should not be here!')
+         if (gcart_perp_/=zero.and.gcart_para_/=zero) then
+           call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+           if (ierr/=0) then
+             MSG_ERROR("Accuracy not reached")
            end if
 
-         end do !i1
-        end do !i2
-       end do !i3
+           gcutoff(ii)=SQRT(1/quad)
 
-     else
-      ! === Infinite cylinder ===
-      call wrtout(std_out,' cutoff_cylinder: using Rozzi''s method with infinite cylinder ','COLL')
-      do i3=1,n3
-       do i2=1,n2
-        do i1=1,n1
-          icount=ig ; if (icount<my_start.or.icount>my_stop) CYCLE
-          gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
-          gcart_z =ABS(gcart(3)) ; gcart_xy=SQRT(gcart(1)**2+gcart(2)**2)
-          if (gcart_z>tol4) then
-            ! === Analytic expression ===
-            call CALCK0(gcart_z *rcut_,k0,1)
-            call CALJY1(gcart_xy*rcut_,j1,0)
-            call CALJY0(gcart_xy*rcut_,j0,0)
-            call CALCK1(gcart_z *rcut_,k1,1)
-            gcutoff(ii)=one+rcut_loc*gcart_xy*j1*k0-gcart_z*rcut_loc*j0*k1
-          else
-            if (gcart_xy>tol4) then
-              ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
-              call quadrature(F5,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-              if (ierr/=0) then
-                MSG_ERROR("Accuracy not reached")
-              end if
-                gcutoff(ii)=-four_pi*quad
-              else
-                ! === Analytic expression ===
-                gcutoff(ii)=-pi*rcut_loc**2*(two*LOG(rcut_loc)-one)
-            end if
-          end if
-        end do !i1
-       end do !i2
-      end do !i3
+         else if (gcart_perp_==zero.and.gcart_para_/=zero) then
 
-     end if !finite/infinite
+           ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
+           call quadrature(F3,zero,hcyl,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+           if (ierr/=0) then
+             MSG_ERROR("Accuracy not reached")
+           end if
+
+           c1=one/gcart_para_**2-COS(gcart_para_*hcyl_)/gcart_para_**2-hcyl_*SIN(gcart_para_*hcyl_)/gcart_para_
+           c2=SIN(gcart_para_*hcyl_)*SQRT(hcyl2+rcut2)
+           gcutoff(ii)=SQRT(1/(c1+(c2-quad)/gcart_para_))
+
+         else if (gcart_perp_/=zero.and.gcart_para_==zero) then
+           ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
+           call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+           if (ierr/=0) then
+             MSG_ERROR("Accuracy not reached")
+           end if
+
+           gcutoff(ii)=SQRT(1/quad)
+
+         else if (gcart_perp_==zero.and.gcart_para_==zero) then
+           ! Use lim q+G --> 0
+           gcutoff(ii)=zero
+
+         else
+           MSG_BUG('You should not be here!')
+         end if
+
+       end do !i1
+      end do !i2
+     end do !i3
 
      ABI_FREE(xx)
 

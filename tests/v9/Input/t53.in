@@ -58,7 +58,7 @@ znucl 6
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description = 
 #%%   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
 #%%<END TEST_INFO>

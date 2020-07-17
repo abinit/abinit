@@ -23,6 +23,5 @@ teph4mob_1o_DS10_DDB
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description =
-#%%   E-ph for the mobility in semiconductors
+#%% description = Merge DDB files
 #%%<END TEST_INFO>

@@ -118,7 +118,7 @@ module m_wfd
    integer,allocatable :: gbound(:,:)
    ! gbound(2*mgfft+8,2))
    ! The boundary of the basis sphere of G vectors at a given k point.
-   ! for use in improved zero padding of ffts in 3 dimensions.
+   ! for use in improved zero padding of FFTs in 3 dimensions.
 
    !% real(dp) :: kpoint(3)
 

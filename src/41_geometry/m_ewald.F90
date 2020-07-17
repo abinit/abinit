@@ -30,6 +30,7 @@ module m_ewald
  use m_errors
  use m_splines
  use m_time
+ use m_xmpi
 
  use m_gtermcutoff,    only : termcutoff
  use m_special_funcs,  only : abi_derfc
@@ -152,11 +153,7 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 
    do ig3=-ng,ng
      do ig2=-ng,ng
-     ig23=ng*(ig2+ng + ng*(ig3+ng))
        do ig1=-ng,ng
-       ii = ig1 + ig23
-       write(*,*) 'This is',ii
-       
 
 !        Exclude shells previously summed over
          if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1 ) then

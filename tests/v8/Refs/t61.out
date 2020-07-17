@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h33 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h48 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t61-t62-t63-t64-t65/t61.in
 - output file    -> t61.out
@@ -2088,10 +2088,10 @@ P          mk1mem5         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.2  wall=          9.5
+- Proc.   0 individual time (sec): cpu=          8.4  wall=         13.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  35 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.2  wall=          9.5
++Overall time at end (sec) : cpu=          8.4  wall=         13.9
