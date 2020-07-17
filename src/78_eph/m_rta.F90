@@ -1520,12 +1520,11 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
  ABI_FREE(kTmesh)
  ntemp = 1
 
- ! Compute the chemical potential with Fermi-Dirac for the highest T.
+ ! Compute the chemical potential for the highest T with Fermi-Dirac.
  call ebands_get_muT_with_fd(ebands, ntemp, [Kt], dtset%spinmagntarget, dtset%prtvol, mu_vals, xmpi_comm_self)
  mu = mu_vals(1)
 
- !write(ab_out, "(a)")" Estimating sigma_erange"
- !call ebands_print(ebands, unit=ab_out)
+ !call ebands_print(ebands, header="Estimating sigma_erange", unit=ab_out)
 
  ! It's funny that we need dtset%sigma_erange to estimate sigma_erange!
  if (all(dtset%sigma_erange == 0)) then
@@ -1534,11 +1533,11 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
  end if
  assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
- ! Get spin degeneracy
+ ! Spin degeneracy
  max_occ = two / (ebands%nspinor * ebands%nsppol)
 
  if (assume_gap) then
-   ! Get gaps. In case of magnetic semiconductor everything is referred to the highest CBM/ smallest VBM.
+   ! Get gaps. In case of magnetic semiconductor everything is referred to the (highest CBM | smallest VBM).
    gaps = ebands_get_gaps(ebands, ierr)
    call gaps%print(unit=std_out); call gaps%print(unit=ab_out)
    ABI_CHECK(ierr == 0, "ebands_get_gaps returned non-zero exit status. See above warning messages...")
@@ -1573,11 +1572,11 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
    end if
 
    ! We build two meshes for Conduction and Valence.
+   ! For valence, the mesh starts at the VBM and decreases monotonically so tha we can use the same loop over ie.
    estep = tol2 * eV_Ha; if (ii == 1) estep = -estep
    ne = nint((abs(estop - estart)) / estep) + 1
    ABI_MALLOC(emesh, (ne))
    emesh = arth(estart, estep, ne)
-   !pure function linspace(start, stop, nn)
 
    ! Compute (e - mu)^alpha * (-df/de)
    ABI_MALLOC(ff, (ne))
@@ -1592,7 +1591,7 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
          exit
        end if
      end do
-     ABI_CHECK(ie /= ne + 1, "Cannot find energy such that ratio becomes smaller than!")
+     ABI_CHECK(ie /= ne + 1, sjoin("Cannot find energy such that ratio becomes smaller than!", ftoa(magic_ratio)))
    end do
 
    ABI_FREE(ff)

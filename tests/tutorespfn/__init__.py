@@ -14,6 +14,7 @@ subsuites = [
 "eph",
 "eph4mob",
 "eph4isotc",
+"eph4zpr",
 "ffield",
 "lw",
 "nlo",
@@ -52,6 +53,14 @@ inp_files = [
 "teph4mob_7.in",
 #
 "teph4isotc_1.in",
+#
+"teph4zpr_1.in",
+"teph4zpr_2.in",
+"teph4zpr_3.in",
+"teph4zpr_4.in",
+"teph4zpr_5.in",
+"teph4zpr_6.in",
+"teph4zpr_7.in",
 #
 "tffield_1.in",
 "tffield_2.in",

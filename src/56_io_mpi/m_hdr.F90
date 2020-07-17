@@ -2859,7 +2859,7 @@ integer function read_first_record(unit, codvsn8, headform, fform, errmsg) resul
 
  ii = index(codvsn6, ".")
  if (ii == 0 .or. ii == 1) then
-   errmsg = sjoin("Cannot find `major.minor` pattern in codvsn:", codvsn6)
+   errmsg = sjoin("Cannot find major.minor pattern in codvsn:", codvsn6)
    ierr = 1; return
  end if
 
@@ -3996,9 +3996,10 @@ subroutine hdr_check(fform, fform0, hdr, hdr0, mode_paral, restart, restartpaw)
    ! Note, however, that we allow for different FFT meshes and we interpolate the density in the
    ! caller when we are restarting a SCF calculation.
    if (abifile%class == "density" .or. abifile%class == "potential") then
-     write(msg, '(5a)' )&
-       'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
-       'Action: change your fft grid or your restart file.'
+     write(msg, '(10a)' )&
+       'FFT grids must be the same to restart from a ',trim(abifile%class),' file.',ch10,&
+       "ngfft from file: ", trim(ltoa(hdr0%ngfft(1:3))), ", from input: ", trim(ltoa(hdr%ngfft(1:3))), ch10, &
+       'Action: change the FFT grid in the input via ngfft or change the restart file.'
      MSG_ERROR(msg)
    end if
    tng=1

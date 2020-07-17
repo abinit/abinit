@@ -4,10 +4,10 @@ authors: MG
 
 # Zero-point renormalization of the band gap and temperature-dependent band structures
 
-This tutorial explains how to compute the electron self-energy due to phonons, evaluate the zero-point
-renormalization (ZPR) of the band gap, obtain spectral functions and temperature-dependent band structures.
+This tutorial explains how to compute the electron self-energy due to phonons, compute the zero-point
+renormalization (ZPR) of the band gap, temperature-dependent band gaps and spectral functions.
 We start with a very brief overview of the many-body formalism in the context of the electron-phonon (e-ph) interaction,
-then we discuss how to compute the e-ph self-energy and perform typical convergence studies.
+then we discuss how to compute the e-ph self-energy and perform typical convergence studies using MgO as example.
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
@@ -28,18 +28,18 @@ in this tutorial we are mainly interested in $\Sigma^{\text{e-ph}}$ and its temp
 
 In semiconductors and insulators, indeed, most of temperature dependence of the electronic properties
 at low T originates from the e-ph interaction and the thermal expansion of the unit cell.
-Corrections due to $\Sigma^{\text{e-e}}$ are obviously important as KS gaps computed at the LDA/GGA level
-are systematically underestimated with respect to experiments but the temperature dependence of $\Sigma^{\text{e-e}}$
+Corrections due to $\Sigma^{\text{e-e}}$ are obviously important as it is well known that KS gaps computed
+at the LDA/GGA level are systematically underestimated with respect to experiments
+but the temperature dependence of $\Sigma^{\text{e-e}}$
 is rather small as long as the fundamental gap is much larger than $kT$.
 
 In state-of-the-art *ab-initio* methods, the e-ph coupling is described
 within DFT by expanding the KS effective potential in the nuclear displacements,
 and the vibrational properties are obtained with DFPT [[cite:Gonze1997]], [[cite:Baroni2001]].
-The e-ph self-energy consists of two terms: Fan-Migdal (FM) and the Debye-Waller (DW) [[cite:Giustino2017]]
+The e-ph self-energy consists of two terms: the frequency-dependent Fan-Migdal (FM) self-energy
+and the (static and Hermitian) Debye-Waller (DW) part [[cite:Giustino2017]]
 
-$$
-\Sigma^\eph(\ww) = \Sigma^\FM(\ww) + \Sigma^{\DW}.
-$$
+$$ \Sigma^\eph(\ww) = \Sigma^\FM(\ww) + \Sigma^{\DW}. $$
 
 The diagonal matrix elements of the FM self-energy in the KS representation are given by
 
@@ -69,10 +69,10 @@ is a positive real infinitesimal.
 !!! important
 
     From a mathematical point of view, one should take the limit $\eta \rightarrow 0^+$.
-    At the level of the implementation, the infinitesimal $\eta$ is replaced by a (small) 
+    At the level of the implementation, the infinitesimal $\eta$ is replaced by a (small)
     finite value given by the [[zcut]] variable that should be subject to convergence studies.
     More specifically, one should monitor the convergence of the physical properties of interest
-    as a function of [[zcut]] and $\qq$-point sampling similarly to what is done 
+    as a function of [[zcut]] and $\qq$-point sampling similarly to what is done
     in metals for [[tsmear]] and [[ngkpt]].
 
 <!--
@@ -95,7 +95,7 @@ State-of-the-art implementations approximate the DW contribution with
 \end{equation}
 
 where $g_{mn\nu}^{2,\DW}(\kk,\qq)$ is an effective matrix element that, within the **rigid-ion approximation**,
-can be expressed in terms of the $\gkq$ matrix elements using the invariance of the QP energies 
+can be expressed in terms of the $\gkq$ matrix elements using the invariance of the QP energies
 under infinitesimal translation [[cite:Giustino2017]].
 
 At the level of the implementation, the number of bands in the two expressions is defined by [[nband]]
@@ -104,16 +104,17 @@ The potentials are interpolated if [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]]
 
 !!! tips
 
-    The EPH code takes advantage of symmetries to reduce the BZ integration to an appropriate 
-    irreducible wedge, $\text{IBZ}_k$, defined by the little group of the $\kk$-point.
-    Calculations for high-symmetry $\kk$-points such as $\Gamma$ are therefore much faster as there 
-    are more symmetries that leave the $\kk$-point unchanged within a reciprocal lattice vector.
+    The EPH code takes advantage of symmetries to reduce the BZ integration to an appropriate
+    irreducible wedge, $\text{IBZ}_k$, defined by the little group of the $\kk$-point i.e.
+    the set of point group operations of the crystal that leave the $\kk$-point unchanged within a reciprocal lattice vector.
+    Calculations at high-symmetry $\kk$-points such as $\Gamma$ are therefore much faster as there
+    are more symmetries that can be exploited.
 
-    This symmetrization procedure is activated by default and can be deactivated by setting [[symsigma]]
+    This symmetrization procedure is on by default and can be deactivated by setting [[symsigma]]
     to 0 for testing purposes.
     Note that when [[symsigma]] is set to 1, the code performs a final average of the QP results
     within each degenerate subspace.
-    As a consequence, accidental degeneracies won't be removed when [[symsigma]] = 1.
+    As a consequence, accidental degeneracies won't be removed when the sum is performed in the $\text{IBZ}_k$.
 
 <!--
 Both the FM and the DW term converge slowly with respect to the number of empty states and the $\qq$-sampling.
@@ -138,24 +139,19 @@ following two different approaches: **on-the-mass-shell** and **linearized QP eq
 In the on-the-mass-shell approximation, the QP energy is given by the real part
 of the self-energy evaluated at the bare KS eigenvalue:
 
-\begin{equation}
-\ee^\QP_\nk = \ee_\nk + \Re\, \Sigma_\nk^{\text{e-ph}}(\ee_\nk).
-\end{equation}
+$$ \ee^\QP_\nk = \ee_\nk + \Re\, \Sigma_\nk^{\text{e-ph}}(\ee_\nk). $$
 
 This approach is equivalent to standard time-dependent Rayleigh-Schrodinger perturbation theory.
-In the linearized QP equation, on the contrary, the self-energy is Taylor-expanded around 
+In the linearized QP equation, on the contrary, the self-energy is Taylor-expanded around
 the KS eigenvalue and the QP correction is obtained using
 
-\begin{equation}
-  \ee^\QP_\nk = \ee_\nk
-      + Z_\nk\,\Re  \Sigma^\text{e-ph}_\nk(\ee_\nk)
-\end{equation}
+$$ \ee^\QP_\nk = \ee_\nk + Z_\nk\,\Re  \Sigma^\text{e-ph}_\nk(\ee_\nk) $$
 
 with the renormalization factor $Z_\nk$ given by
 
-\begin{equation}
+$$
   Z_\nk= \left(1 - \Re\left[ \frac{\partial\Sigma^\text{e-ph}_{\nk}}{\partial\ee}\right]\Bigg|_{\ee=\ee_\nk} \right)^{-1}.
-\end{equation}
+$$
 
 Both approaches are implemented in ABINIT although it should be noted that, according to recent works,
 the on-the-mass-shell approach provides results that are closer to those obtained
@@ -165,15 +161,15 @@ with more advanced techniques based on the cumulant expansion [[cite:Nery2018]].
 
     The EPH code can compute QP corrections only for $\nk$ states that are present in the input WFK file
     (a similar requirement is present in the $GW$ code as well).
-    As a consequence, the $\kk$-mesh ([[ngkpt]], [[nshiftk]], [[shiftk]]) should be chosen carefully 
+    As a consequence, the $\kk$-mesh ([[ngkpt]], [[nshiftk]], [[shiftk]]) should be chosen carefully
     especially if the band edge is not located at an high-symmetry $\kk$-point.
 
 There are different approaches one can use to specify the set of $\nk$ states in $\Sigma_{\nk}$.
 Each approach has pros and cons.
 
-The most direct way consists in specifying explicitly the $\kk$-points and the band range 
+The most direct way consists in specifying explicitly the $\kk$-points and the band range
 using the three variables: [[nkptgw]], [[kptgw]], [[bdgw]]
-To compute the correction for the VBM at $\Gamma$ in silicon 
+To compute the correction for the VBM at $\Gamma$ in silicon
 (a non-magnetic semiconductor with 8 valence electrons per unit cell), one would use:
 
 ```sh
@@ -184,16 +180,23 @@ bdgw   4 4    # [2, nkptgw] arary giving the initial and the last band index
 ```
 
 as the index of the valence band is given by 8 / 2 = 4.
-When [[symsigma]] is set to 1 (default), the code may decide to enlarge the initial value of [[bdgw]] 
-so that all degenerate states for that particular $\kk$-point are included in the calculation.
+
+!!! important
+
+    When [[symsigma]] is set to 1 (default), the code may decide to enlarge the initial value of [[bdgw]]
+    so that all degenerate states for that particular $\kk$-point are included in the calculation.
 
 Alternatively, one can use [[gw_qprange]] or [[sigma_erange]]
-although *sigma_erange* is usually employs for transport calculations.
+although *sigma_erange* is usually employed for transport calculations.
 
 ### Spectral function and Eliashberg functions
 
+The spectral function is defined by:
+
+! A = -1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] ** 2 + Im Sigma(ww) ** 2])
+
 The computation of the spectral function requires the specified of [[nfreqsp]] and [[freqspmax]].
-The results are stored in the SIGMAPH.nc file for each $\kk$-point and band
+The results are stored in the SIGMAPH.nc file for each $\kk$-point and band.
 
 <!--
 Further details concerning the implementation are given in Ref.[[cite:Gonze2019]].
@@ -217,10 +220,10 @@ A typical workflow for ZPR and T-dependent calculations requires the following s
 
 2. **DFPT calculations** for all the IBZ $\qq$-points corresponding to the *ab-initio* [[ddb_ngqpt]] mesh
    used to perform the Fourier interpolation of the dynamical matrix and of the DFPT potentials.
-   Remember to compute epsinf, BECS and Q*
+   Remember to compute $\epsilon^{\infty}$, $Z^*$ and $Q^*$.
 
 3. **NSCF computation** of a WFK file on a dense $\kk$-mesh containing the wavevectors
-   for which phonon-induced QP corrections are wanted. This part uses the DEN file produced in step #1.
+   for which phonon-induced QP corrections are wanted. This part will use the DEN file produced in step #1.
    Remember to include enough empty states so that it is possible to perform convergence studies wrt [[nband]].
 
 4. **Merge the partial DDB and POT files** with *mrgddb* and *mrgdvdb*, respectively
@@ -228,23 +231,82 @@ A typical workflow for ZPR and T-dependent calculations requires the following s
 5. Use the full DDB file, the DVDB file and the WFK file obtained in step #3 to perform ZPR calculations
    with [[eph_task]] 4.
 
-## Calculation of the ZPR for XXX
+## Preliminary steps
 
 In this tutorial, we prefer to focus on the usage of the EPH code hence
-we will be using pre-computed DDB and DFPT POT files obtained with a xxx $\qq$-mesh to bypass the DFPT computation.
-We also provide a DEN.nc file that can be used to start the NSCF calculations required
+we will be using pre-computed DDB and DFPT POT files to bypass the DFPT computation.
+We also provide a DEN.nc file that can be used to perform the NSCF calculations required
 to generate the WKF file.
+
+If git is installed on your machine, one can easily fetch the entire repository with:
+
+```sh
+git clone ...
+```
+
+Alternatively, use *wget*:
+
+```sh
+wget
+```
+
+or *curl*:
+
+```sh
+curl
+```
+
+or simply copy the tarball by clicking the "download button" in the github interface.
+Note that the directory with the input files must be located in the same working directory as the one in which
+you will be executing the tutorial.
+
+The input file of the GS run is also stored in the DEN.nc file and one can easily access it with the
+*ncdump* utility
+
+!!! info
+
+    To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1419)
+    and norm-conserving pseudopotentials with an energy cutoff [[ecut]] of 60 Ry.
+    All the calculations have been performed with a 40x40x40 [[ngkpt]] Gamma-centered grid for electrons,
+    and the Gaussian smearing [[occopt]] with [[tsmear]].
+    The DFPT computations have been done for a set of XXX irreducible $\qq$-points
+    corresponding to a $\Gamma$-centered 6x6x6 mesh.
+    This is the |AbiPy| script used to automate the GS + DFPT calculation:
+
 
 First of all, let's merge the DDB files using the following input file:
 
-Now we can merge the DFPT potential with the *mrgdv* tool and the following input file:
+{% dialog tests/tutorespfn/Input/teph4zpr_1.in %}
+
+and 
+
+```sh
+mrgdv < teph4zpr_1.in
+```
+
+!!! tip
+
+The number  at the end of the potfile corresponds to the associated perturbation percase = idir + ipert 
+for the given $\qq$-point
+
+Now we can merge the DFPT potential with the *mrgdv* tool 
+
+```sh
+mrgdb <  teph4zpr_2.in
+```
+
+using the following input file:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_2.in %}
 
 For our first NSCF calculation, we use a xxx $\kk$-mesh and XXX bands.
 The number of bands is sufficiently large so that we can perform initial convergence studies.
-We also perform a NSCF calculation on a high-symmetry $\kk$-path to locate the position of the KS band edges
-as these are the states we want to correct.
+We also perform a NSCF calculation on a high-symmetry $\kk$-path to locate
+the position of the KS band edges as these are the states we want to correct.
 
 The input file is ...
+
+{% dialog tests/tutorespfn/Input/teph4zpr_3.in %}
 
 We use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]] variables.
 
@@ -265,14 +327,27 @@ TODO: use and explain [[structure]]
 
 ## Our first ZPR calculation
 
-For our first ZPR calculation, we use a minimalistic input file that allows us to discuss
-the basic input variables and the organization of the main output file.
+For our first ZPR calculation, we use a very minimalistic input file that allows us
+to discuss the basic input variables and the organization of the main output file.
 
 Run the code, as usual, using:
 
 ```sh
 abinit ...
 ```
+
+{% dialog tests/tutorespfn/Input/teph4zpr_4.in %}
+
+!!! tip
+
+    You may want to run the examples in parallel with MPI with e.g.
+
+        mpirun -n 2 abinit ...
+
+    to speed up the calculation.
+    The EPH code will automatically distribute the workload for you using some predefined distribution scheme
+    (not necessarily the most efficient one in terms of time to solution).
+    In the last part of the tutorial, we explain how to specify a particular distribution scheme with [[eph_np_pqbks]].
 
 Let's now discuss the meaning of the different variables in more details:
 
@@ -332,7 +407,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ```
 
-Finally we have the physicals results:
+Finally we have the section with the QP corrections:
 
 ```md
  Notations:
@@ -345,8 +420,8 @@ Finally we have the physicals results:
      OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
      TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
      mu_e: Fermi level for given (T, nelect)
- 
- 
+
+
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.735  -19.851   -0.116   -0.154   -0.037    0.751   -0.465    0.310    0.000    0.000
@@ -357,11 +432,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    6  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523   14.521   14.605
    7  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523    0.000    0.000
    8  22.864   22.863   -0.001   -0.001   -0.028    0.789   -0.524    0.523    0.000    0.000
- 
+
  KS gap:    8.536 (assuming bval:4 ==> bcond:5)
  QP gap:    8.352 (OTMS:    8.300)
  QP_gap - KS_gap:   -0.183 (OTMS:   -0.235)
- 
+
 ============================================================================================
  No more than 1 temperatures are written to the main output file.
  Please use SIGEPH.nc file and AbiPy to analyze the results.
@@ -386,16 +461,11 @@ It's just a matter of adding
 ndtset
 nband:
 nband+
-
-getwk1  0 # Cancel default
-getwfk -1
 ```
 
-Note how we use [[getwfk]] -1 to concatenate the different calculations to speedup a bit the calculation.
-Obviously in a supercomputing center it's more advantageous to split the calculations and run them with independent jobs.
-The price to pay is that we end up with a sequential input file.
-
 An example of input file is given in
+
+{% dialog tests/tutorespfn/Input/teph4zpr_5.in %}
 
 Run the calculation using
 
@@ -412,20 +482,30 @@ So XXX bands are needed to convergence the ZPR.
 
 ### How to reduce the number of bands with the Sternheimer method
 
-In this section, we discuss how to take advantage of the Sternheimer equation 
+In this section, we discuss how to take advantage of the Sternheimer equation
 to accelerate the convergence with [[nband]].
 
-```sh
-eph_stern 1 
-getden_filepath "out_DEN"
-# nline 
-# tolwfr 
-```
-
-To activate the Sternheimer method, set [[eph_stern]] to 1
-and use the [[getpot_filepath]] input variable to specify the external file storing the GS KS potential.
+To activate the Sternheimer method, we need to set [[eph_stern]] to 1
+and use the [[getpot_filepath]] input variable to specify the external file with the GS KS potential
+(this file is produced at the end of the GS calculations provided we set [[prtpot]] to 1 in the input file).
 The Sternheimer equation is solved non-self-consistently using max [[nline]] NSCF iterations
 and the solver stops when the solution is converged within [[tolwfr]].
+
+In brief, we need to add the following section to a standard EPH input for ZPR calculations:
+
+```sh
+eph_stern 1
+getden_filepath "out_DEN"
+# nline
+# tolwfr
+```
+
+An example of input file is provided in:
+
+{% dialog tests/tutorespfn/Input/teph4zpr_6.in %}
+
+Run the calculation, as usual, with:
+
 <!--
 Default values are provided for these two variable are provided.
 You might need to adjust the values for more complicated systems.
@@ -447,16 +527,24 @@ You might need to adjust the values for more complicated systems.
 
 ### Convergence of the ZPR wrt the q-mesh
 
+In the previous sections, we found that XXX bands with the Sternheimer method are enough to converge.
+In this part of the tutorial, we perform a convergence study wrt to the q-sampling
+
 ```sh
 getwfk_filepath
 
-ndtset 
+ndtset
 eph_ngqpt_fine1
 eph_ngqpt_fine2
 eph_ngqpt_fine3
 ```
 
+{% dialog tests/tutorespfn/Input/teph4zpr_7.in %}
+
 ### How to compute the spectral function
+
+The maximum
+[[nfreqsp]] and [[freqspmax]].
 
 ### MPI parallelism and memory requirements
 
@@ -517,7 +605,7 @@ To recap:
    and the number of *np_kpt* MPI processes should be adjusted accordingly,
    Keep in mind, however, that each $\kk$-point has a different computational cost so load imbalance is expected.
 
-Last but not least, remember that setting [[boxcutmin]] to a value smaller than 2 (e.g. 1.1) 
+Last but not least, remember that setting [[boxcutmin]] to a value smaller than 2 (e.g. 1.1)
 will lead to a significant memory reduction.
 
 ### Estimating the ZPR with a generalized Fr\"ohlich model
