@@ -574,7 +574,7 @@ contains
         ! Computing planewaves energy standard deviation over lasts bands.
         if(iband>=nband_k-this%nbcut+1) then
           tmp_std=zero
-          call meanvalue_g(tmp_std,(kinpw(:)-ek_k(iband))**2,0,&
+          call meanvalue_g(tmp_std,(sqrt(2*kinpw(:))-sqrt(2*ek_k(iband)))**2,0,&
           & istwf_k,mpi_enreg,npw_k,nspinor,&
           & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),&
           & cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg),0)
