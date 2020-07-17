@@ -1462,28 +1462,26 @@ subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
 !Local variables ---------------------------------------
 !scalars
  integer :: ier
- real(dp) :: check,sinbeta
+ real(dp) :: check,sinbeta,sinbeta2
  character(len=500) :: msg
 
 ! *********************************************************************
 
  do isn= -1,1,2
    cosbeta=real(isn)*rot(3,3)
-   if(abs(1._dp-cosbeta*cosbeta)<tol10) then
+   sinbeta2=rot(1,3)**2+rot(2,3)**2
+   if(sinbeta2<tol8**2)then
      sinbeta=zero
-   else
-     sinbeta=sqrt(1._dp-cosbeta*cosbeta)
-   end if
-   if (abs(sinbeta).gt.tol10)  then
-     cosalp=isn*rot(3,1)/sinbeta
-     sinalp=isn*rot(3,2)/sinbeta
-     cosgam=-isn*rot(1,3)/sinbeta
-     singam=isn*rot(2,3)/sinbeta
-   else
      cosalp=isn*rot(1,1)/cosbeta
      sinalp=isn*rot(1,2)/cosbeta
      cosgam=one
      singam=zero
+   else
+     sinbeta=sqrt(sinbeta2)
+     cosalp=isn*rot(3,1)/sinbeta
+     sinalp=isn*rot(3,2)/sinbeta
+     cosgam=-isn*rot(1,3)/sinbeta
+     singam=isn*rot(2,3)/sinbeta
    end if
 
 !  Check matrix:

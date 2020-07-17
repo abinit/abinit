@@ -182,7 +182,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
- character(len=500) :: msg
+ character(len=600) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
  type(geo_t) :: geo
@@ -267,7 +267,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Find a tentative Bravais lattice and its point symmetries (might not use them)
  ! Note that the Bravais lattice might not be the correct one yet (because the
- ! actual atomic locations might lower the symattry obtained from the lattice parameters only)
+ ! actual atomic locations might lower the symmetry obtained from the lattice parameters only)
  ABI_ALLOCATE(ptsymrel,(3,3,msym))
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
@@ -927,16 +927,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    iexit=1
 
    call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+
    if(iexit==-1)then
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
      call mkradim(acell,rprim,rprimd)
-     write(msg,'(a,es14.6,10a)')&
-       'The tolerance on symmetries: ',tolsym,ch10,&
-       'is bigger than the usual tolerance, i.e. 1.0e-8 .',ch10,&
-       'In order to avoid spurious effect, the primitive vectors have been',ch10,&
+
+     write(msg,'(a,es14.6,11a)')&
+       'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+       'In order to avoid spurious effects, the primitive vectors have been',ch10,&
        'symmetrized before storing them in the dataset internal variable.',ch10,&
        'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
-       'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.'
+       'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+       'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
+
      MSG_WARNING(msg)
    end if
 
@@ -946,7 +949,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  angdeg(1)=180.0_dp/pi * acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))
  angdeg(2)=180.0_dp/pi * acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))
  angdeg(3)=180.0_dp/pi * acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))
- !write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
+!write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
 
 !--------------------------------------------------------------------------------------
 
