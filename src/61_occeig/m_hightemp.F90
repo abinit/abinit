@@ -311,7 +311,7 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: ii,ifft,ispden
-    real(dp) :: factor,ix,gamma,zero_gaussian,sigma,step,xcut,x_sigma
+    real(dp) :: factor,ix,gamma,zero_gaussian,sigma,step,xcut
     character(len=500) :: msg
     ! Arrays
     real(dp),dimension(:),allocatable :: valueseel
@@ -337,12 +337,11 @@ contains
         ix=dble(this%bcut)
         ii=0
         sigma=this%std_init
-        x_sigma=sqrt(2*sigma)
         do while(ix<=this%gcut)
           ii=ii+1
           valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
-          & hightemp_gaussian_kintegral(x_sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-          & hightemp_gaussian_jintegral(x_sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
           ix=ix+step
         end do
         if (ii>1) then
@@ -352,14 +351,18 @@ contains
 
         ! Change Fermi-Dirac integral lower bound.
         xcut=hightemp_e_heg(ix-step,this%ucvol)/tsmear
-        zero_gaussian=exp(-(hightemp_e_heg(dble(this%bcut),this%ucvol)-zero)**2/(2*sigma**2))/&
-        & hightemp_gaussian_jintegral(sigma,hightemp_e_heg(dble(this%bcut),this%ucvol))
-        if(zero_gaussian > tol2) then
-          write(msg,'(5a,f6.4,3a)') &
-          & "WARNING: The planewaves standard deviation is too high.",ch10,&
+
+        ! Check if 6-sigma uncertainty is respected.
+        zero_gaussian=exp(-(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))**2/(2*sigma**2))/&
+        & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)))
+        if(sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol)) < 3*sigma) then
+          write(msg,'(5a,f6.4,3a,f10.6,a,f10.6,3a)') &
+          & "WARNING: The planewaves module standard deviation is too high.",ch10,&
           & "The gaussian distribution of planewaves is not null at gamma point.",ch10,&
-          & "(= ",zero_gaussian,") Should be ideally > 1E-2. Action: Increase nband.",ch10,&
-          & "Assume experienced user. Execution will continue."
+          & "(= ",zero_gaussian,") Planewaves module meanvalue should be ideally > 3*sigma.",ch10,&
+          & "Mean value = ",sqrt(2*hightemp_e_heg(dble(this%bcut),this%ucvol))," < ",&
+          & 3*sigma," = 3*sigma",ch10,&
+          & "Action: Increase nband. Assuming experienced user. Execution will continue."
           MSG_WARNING(msg)
         end if
       else
@@ -582,6 +585,7 @@ contains
         end if
       end do
     end do
+    write(0,*) this%std_init
   end subroutine compute_pw_avg_std
 
   ! *********************************************************************
