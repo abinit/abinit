@@ -53,7 +53,7 @@ rprim     -0.5  0.5  0.5
            0.5  0.5 -0.5
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Fe.GGA_PBE-JTH.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -69,7 +69,7 @@ rprim     -0.5  0.5  0.5
 #%% description =
 #%%   BCC iron, ferromagnetic, GGA, PAW.
 #%%   Test DFPT phonon q/=0.5 . 
-#%%   Works with pseudo Fe.GGA_PBE-JTH.xml , where usexcnhat=0 . See test v9#42 for the usexcnhat==1 case.
+#%%   Works with pseudo Pseudodojo_paw_pbe_standard/Fe.xml , where usexcnhat=0 . See test v9#42 for the usexcnhat==1 case.
 #%% topics = PAW
 #%%<END TEST_INFO>
 

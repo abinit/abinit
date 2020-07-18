@@ -36,7 +36,7 @@ ngkpt 2 2 2
 chksymbreak 0  # The k point grid is not symmetric, but the calculations being for the ground-state, this is not a problem.
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Ni.GGA_PBE-JTH.xml, O.GGA_PBE-JTH.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/Ni.xml, Pseudodojo_paw_pbe_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

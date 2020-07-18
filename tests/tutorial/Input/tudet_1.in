@@ -58,7 +58,7 @@
      outdata_prefix = "tudet_1.o"
 
      pp_dirpath "$ABI_PSPDIR"
-     pseudos "Fe.GGA_PBE-JTH.xml"
+     pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

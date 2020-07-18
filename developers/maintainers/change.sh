@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!Pseudodojo_PAW_GGA!Pseudodojo_paw_pbe!' $file > tmp.file
+ sed -e 's!O.GGA_PBE-JTH.xml!Pseudodojo_paw_pbe_standard/O.xml!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
