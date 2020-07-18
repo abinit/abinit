@@ -1,7 +1,5 @@
 # Ga75In25N test primitive vector treatment in case of PAW and tolsym loose.
 
-timopt 1 
-
 ecut 5 
 tolvrs 1.0d-12
 tolsym 1.0d-5
