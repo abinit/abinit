@@ -47,7 +47,7 @@ rprim   1.0000000000E+00  4.9609008825E-09 -2.0533856472E-08
 #      0     0        1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_PAW_GGA_standard/Ga.xml, Pseudodojo_PAW_GGA_standard/In.xml, N.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/Ga.xml, Pseudodojo_PAW_GGA_standard/In.xml, N.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

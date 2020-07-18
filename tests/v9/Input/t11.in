@@ -77,7 +77,7 @@
  znucl  31 33
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Pseudodojo_PAW_GGA_standard/Ga.xml, Pseudodojo_PAW_GGA_standard/As.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/Ga.xml, Pseudodojo_PAW_GGA_standard/As.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
