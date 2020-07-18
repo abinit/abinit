@@ -77,7 +77,7 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t40.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -ridiculous;
-#%%   t40o_DOS_AT0001, tolnlines = 40, tolabs = 3.000e+01, tolrel = 9.500e-02, fld_options = -ridiculous
+#%%   t40o_DOS_AT0001, tolnlines = 41, tolabs = 3.000e+01, tolrel = 9.500e-02, fld_options = -ridiculous
 # for the moment do not test PROCAR file - this version depends on the wave function phase with arbitrary sign
 #   PROCAR_0000, tolnlines = 0, tolabs = 1.000e-03, tolrel = 1.000e-03, fld_options = -ridiculous
 #%% [paral_info]
