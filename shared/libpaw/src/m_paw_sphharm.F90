@@ -1649,16 +1649,16 @@ function dbeta(cosbeta,sinbeta,ll,mp,mm)
 !  General case
 
 !!!!! Old coding
-!   cosbetab2=sqrt((1+cosbeta)*0.5_dp)
-!   sinbetab2=sqrt((1-cosbeta)*0.5_dp)
+    cosbetab2=sqrt((1+cosbeta)*0.5_dp)
+    sinbetab2=sqrt((1-cosbeta)*0.5_dp)
 !!!!! End old coding, begin new coding
- if(cosbeta>-tol8)then
-   cosbetab2=sqrt((1+cosbeta)*half)
-   sinbetab2=sinbeta*half/cosbetab2
- else
-   sinbetab2=sqrt((1-cosbeta)*half)
-   cosbetab2=sinbeta*half/sinbetab2
- endif
+! if(cosbeta>-tol8)then
+!   cosbetab2=sqrt((1+cosbeta)*half)
+!   sinbetab2=sinbeta*half/cosbetab2
+! else
+!   sinbetab2=sqrt((1-cosbeta)*half)
+!   cosbetab2=sinbeta*half/sinbetab2
+! endif
 !!!!! End of new coding
 
    ml=max(mp,mm)
