@@ -1014,9 +1014,8 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 
 !Local variables-------------------------------
 !scalars
- logical :: debug
- integer :: isym,search,tmp_nsym,ierr
- logical :: found,my_include_timrev
+ integer :: isym, search, tmp_nsym, ierr
+ logical :: found, my_include_timrev, debug
 !arrays
  integer :: work_symrel(3,3,cryst%nsym)
  integer,allocatable :: symafm(:)

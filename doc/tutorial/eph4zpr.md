@@ -216,7 +216,7 @@ some conduction states while [[sigma_erange]] is usually employed for transport 
 The spectral function is defined by:
 
 $$
-A_\nk(\ww) = -\dfrac{1}{\pi} \dfrac{\Im \Sigma(\ww)} {(\ww - \ee_\nk - \Re \Sigma(\ww)) ^ 2 + \Im \Sigma(\ww) ^ 2}
+A_\nk(\ww) = -\dfrac{1}{\pi} \dfrac{\Im \Sigma_\nk(\ww)} {(\ww - \ee_\nk - \Re \Sigma_\nk(\ww)) ^ 2 + \Im \Sigma_\nk(\ww) ^ 2}
 $$
 
 The computation of the spectral function requires the specification of [[nfreqsp]] and [[freqspmax]].
@@ -244,7 +244,7 @@ A typical workflow for ZPR calculations requires the following steps:
 5. **Start from the full DDB file, the DVDB file and the WFK file** obtained in step #3 to perform ZPR calculations
    with [[eph_task]] 4.
 
-## Preliminary steps
+## Getting started
 
 In this tutorial, we prefer to focus on the usage of the EPH code hence
 we will be using **pre-computed DDB and DFPT POT files** to bypass the DFPT computation.
@@ -318,7 +318,7 @@ and the command
     percase = idir + ipert for the given $\qq$-point
     ```
 
-    Aall DFPT POT files with index <= 3 [[natom]] correspond to atomic pertubations.
+    All DFPT POT files with index <= 3 [[natom]] correspond to atomic pertubations.
 
 
 In the mrgdv output file:

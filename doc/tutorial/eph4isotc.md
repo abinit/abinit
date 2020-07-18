@@ -21,13 +21,22 @@ This lesson should take about 1.5 hour.
 
 ## Formalism and connection with the implementation
 
+Due to the interaction with electrons, phonons acquire a finite lifetime that is given by the imaginary
+part of the phonon-electron self-energy $\Pi$.
+Obviously, there's also another important contribution to the phonon lifetime originating from non-harmonic 
+terms in the expansion of the Born-Oppenheimer energy surface around the equilibrium point.
+In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substancial 
+contribution to the phonon linewidths.
+However, these non-harmonic terms will be ignored in the rest of the tutorial and we will be mainly focusing
+on the computation of the imaginary part of $\Pi$ in the harmonic approximation.
+
 In the so-called double-delta approximation, the phonon linewidth $\gamma_{\qq\nu}$ due 
 to the interaction of the ${\qq\nu}$ phonon with electrons is given by
 
-\begin{equation}
+$$
     \gamma_{\qq\nu} = 2\pi \ww_{\qq\nu} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
     \delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F)
-\end{equation}
+$$
 
 where $\ww_{\qq\nu}$ is the phonon frequency,
 the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the Fermi level
@@ -38,9 +47,9 @@ Converging the double-delta integral therefore requires very dense $\kk$-meshes 
 capture enough states on the FS.
 The convergence rate is indeed much slower that the one required by the electron DOS at $\ee_F$:
 
-\begin{equation}
+$$
     g(\ee_F) = \sum_{n\kk} \delta(\ee_F - \ee_{n\kk})
-\end{equation}
+$$
 
 in which a single Dirac delta is involved.
 
@@ -50,12 +59,15 @@ The integration algorithm is defined by the [[eph_intmeth]] input variable.
 In the case of Gaussian method, one can use a fixed broadening ([[eph_fsmear]] > 0)
 or an adaptive scheme ([[eph_fsmear]] < 0) in which the broadening is automatically computed from 
 the electron group velocity [[cite:Li2015]].
-The tetrahedron method is more accurate and does not require any broadening parameter. 
-Note, however, that in the present implementation the computational cost of the double delta with the tetrahedron method
-quickly increases with the size of the $\kk$-mesh so the adaptive Gaussian scheme represents a valid alternative,
-especially when a dense $\kk$-sampling is used.
 
-The value of the Fermi energy, $\ee_F$, is automatically computed from the KS eigenvalues stored 
+!!! important
+
+    The tetrahedron method is more accurate and does not require any broadening parameter. 
+    Note, however, that in the present implementation the computational cost of the double delta with the tetrahedron method
+    quickly increases with the size of the $\kk$-mesh so the adaptive Gaussian scheme represents a valid alternative,
+    especially when a dense $\kk$-sampling is used.
+
+The value of the Fermi level, $\ee_F$, is automatically computed from the KS eigenvalues stored 
 in the input WFK file according to the two input variables [[occopt]] and [[tsmear]].
 These parameters are usually equal to the ones used for the GS/DFPT calculation.
 However, it is possible to change the value of $\ee_F$ at the EPH level using three (mutually exclusive) input variables:
@@ -83,9 +95,9 @@ In this case, the code employs the Fourier interpolation to obtain the scatterin
 
 Once the phonon linewidths $\gamma_{\qq\nu}$ are known in the IBZ, EPH computes the Eliashberg function defined by:
 
-\begin{equation}
+$$
     \alpha^2F(\ww) = -\dfrac{1}{N_F} \sum_{\qq\nu} \dfrac{\gamma_{\qq\nu}}{\ww_{\qq\nu}} \delta(\ww - \ww_{\qq \nu})
-\end{equation}
+$$
 
 where $N_F$ is the density of states (DOS) per spin at the Fermi level.
 $\alpha^2F(\ww)$ gives the strength by which a phonon of energy $\ww$ scatters electronic
@@ -93,9 +105,9 @@ states on the FS (remember that Abinit uses atomic units hence $\hbar = 1$).
 This quantity is accessible in experiments and experience has shown that
 $\alpha^2F(\ww)$ is qualitatively similar to the phonon DOS $F(\ww)$:
 
-\begin{equation}
+$$
     F(\ww) = \sum_{\qq\nu} \delta(\ww - \ww_{\qq \nu})
-\end{equation}
+$$
 
 This is not surprising as the equation for $\alpha^2F(\ww)$ resembles the one for the phonon DOS $F(\ww)$:
 except for the weighting factor $\frac{\gamma_{\qq\nu}}{\ww_{\qq\nu}}$.
@@ -104,31 +116,31 @@ By default, the code uses the tetrahedron method for the $\qq$-space integration
 
 The total e-ph coupling strength $\lambda$ is defined as the first inverse moment of $\alpha^2F(\ww)$:
 
-\begin{equation}
+$$
     \lambda = \int \dfrac{\alpha^2F(\ww)}{\ww}\dd\ww = \sum_{\qq\nu} \lambda_{\qq\nu}
-\end{equation}
+$$
 
 where we have introduced the mode dependent coupling strength:
 <!-- For spin unpolarized systems: -->
 
-\begin{equation}
+$$
     \lambda_{\qq\nu} = \dfrac{\gamma_{\qq\nu}}{\pi N_F \ww_{\qq\nu}^2}
-\end{equation}
+$$
 
 Finally, the isotropic superconducting temperature $T_c$ can be estimated using the McMillan expression:
 
-\begin{equation}
+$$
     T_c = \dfrac{\ww_{log}}{1.2} \exp \Biggl [
         \dfrac{-1.04 (1 + \lambda)}{\lambda ( 1 - 0.62 \mu^*) - \mu^*}
     \Biggr ]
-\end{equation}
+$$
 
 where $\mu^*$ is a semi-empirical variable that descrives the (screened) e-e interaction while
 $\ww_{\text{log}}$ is the *logarithmic* average of the phonon frequencies given by:
 
-\begin{equation}
+$$
     \ww_{\text{log}} = \exp \Biggl [ \dfrac{2}{\lambda} \int \dfrac{\alpha^2F(\ww)}{\ww}\log(\ww)\dd\ww \Biggr ]
-\end{equation}
+$$
 
 !!! important
 
@@ -177,7 +189,7 @@ Note that we interpolate the matrices in this representation instead of the phon
 to avoid numerical instabilities introduce by band crossings.
 -->
 
-## Preliminary steps
+## Getting started
 
 In this tutorial, we prefer to focus on e-ph calculations and the associcated convergence studies.
 For this reason, we rely on **pre-computed DEN.nc, DDB and DFPT POT1.nc files** to bypass the DFPT part.
@@ -454,6 +466,5 @@ Note, however, that this kind of MPI distribution does not distribute the wavefu
 
 TODO
 As we have seen, Eliashberg calculations require the knowledge of Bloch states 
-inside a relatively small energy window around  $\ee_F$.
-The NSCF computation of the WFK files with dense $\kk$-sampling
-[[sigma_erange]]
+inside a relatively small energy window around $\ee_F$.
+The NSCF computation of the WFK files with dense $\kk$-sampling [[sigma_erange]]
