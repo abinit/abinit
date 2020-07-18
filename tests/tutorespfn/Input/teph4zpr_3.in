@@ -14,7 +14,7 @@
  tolwfr 1e-15
  iscf -2          # NSCF run from DEN.nc
 
- ngfft 30 30 30   # Important
+ ngfft 30 30 30   # # Important: Must use same FFT mesh as the one in DEN.nc
  getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
 ##############################################

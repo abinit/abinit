@@ -210,6 +210,10 @@ program abitk
     call get_path_cryst(path, cryst, comm)
     call cryst%print(unit=std_out, prtvol=prtvol)
 
+ case ("crystal_abivars")
+    call get_path_cryst(path, cryst, comm)
+    call cryst%print_abivars(std_out)
+
  case ("ebands_print", "ebands_xmgrace", "ebands_gnuplot")
    call get_path_ebands(path, ebands, comm)
    if (command == "ebands_print") then

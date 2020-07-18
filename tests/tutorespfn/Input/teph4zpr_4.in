@@ -1,3 +1,4 @@
+# ZPR computation at Gamma for MgO
 
 ##############################################
 ####                SECTION: basic               
@@ -8,38 +9,37 @@
  ngkpt 4 4 4
  nshiftk 1
  shiftk 0 0 0
- tolvrs 1e-12
 
 ##############################################
 ####                 SECTION: eph                
 ##############################################
- optdriver 7
- eph_task 4
+ optdriver 7              # Enter EPH driver
+ eph_task 4               # Compute e-ph self-energy (real + imag)
  ddb_ngqpt 4 4 4
- tmesh 0 200 1
+ eph_ngqpt_fine 4 4 4
+ tmesh 0 200 1            # [start, step, num_T]
 
+# Phonon band structure
  ph_ndivsm 10
  ph_nqpath 12
  ph_qpath
     0.0    0.0    0.0
     0.5    0.0    0.5
-    0.5    0.25    0.75
-    0.375    0.375    0.75
+    0.5    0.25   0.75
+    0.375  0.375  0.75
     0.0    0.0    0.0
     0.5    0.5    0.5
-    0.625    0.25    0.625
-    0.5    0.25    0.75
+    0.625  0.25   0.625
+    0.5    0.25   0.75
     0.5    0.5    0.5
-    0.375    0.375    0.75
-    0.625    0.25    0.625
+    0.375  0.375  0.75
+    0.625  0.25   0.625
     0.5    0.0    0.5
 
+# Phonon DOS
  ph_intmeth 2
  ph_wstep 0.0001 eV
  ph_ngqpt 16 16 16
- ph_qshift 0 0 0
- ph_nqshift 1
- eph_ngqpt_fine 4 4 4
 
 ##############################################
 ####                SECTION: files               
@@ -51,21 +51,16 @@
 ##############################################
 ####                 SECTION: gw                 
 ##############################################
- nkptgw 2
+ nkptgw 1
  kptgw
-    0.0000000000    0.0000000000    0.0000000000
-    0.5000000000    0.5000000000    0.0000000000
+    0.0    0.0    0.0
  bdgw
- 8 9
- 8 9
+    8 9
  zcut 0.01 eV
 
  pp_dirpath = "$ABI_PSPDIR"
  pseudos = "Mg-sp-gw.psp8, O.psp8"
 
-##############################################
-####                  STRUCTURE                  
-##############################################
  structure "abivars:MgO_eph_zpr/mgo.abivars"
 
 #%%<BEGIN TEST_INFO>
@@ -81,5 +76,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = ZPR computation
+#%% description = ZPR computation at Gamma for MgO
 #%%<END TEST_INFO>

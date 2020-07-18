@@ -432,8 +432,8 @@ while allowing one to decrease the cost of the calculation and the memory by a f
 A significant fraction of the wall-time in EPH is spent for performing the FFTs required
 to apply the first-order Hamiltonian $H^1$.
 The use of single precision in the FFT routines allows one to decrease the computational cost without losing precision.
-This trick is activated by setting [[mixprec]] = 1 (support for FFTW3 or DFPT-MKL is required to take advantage
-of mixed precision FFTs).
+This trick is activated by setting [[mixprec]] = 1 (**support for FFTW3 or intel-MKL is required to take advantage
+of mixed precision FFTs**).
 
 !!! important
 
@@ -477,7 +477,7 @@ For instance, the computation of mobilities in semiconductors require the knowle
 is slight above (below) the CMB (VBM), let's say ~0.2 eV.
 In metals, only states close the Fermi level are needed to compute superconducting properties with the standard formalism.
 In other words, several EPH calculations in which delta functions are involved require extremely dense BZ meshes
-to converge but as a matter of fact only a **relatively small fraction of the IBZ/BZ compatible with energy and crystalline-momentum
+to converge but as a matter of fact only a **relatively small fraction of the BZ compatible with energy and crystalline-momentum
 convervation is nededed**.
 
 At this point a question naturally arises: can we avoid the NSCF computation of $\kk$-points that
@@ -554,8 +554,8 @@ An example can be found in this
 %It should be stressed, however, that this Fourier-based method can have problems in the presence of band crossings that may cause unphysical oscillations between the {\it ab initio} points.
 -->
 Without entering into details (that will be discussed in the other specialized lessons)
-one can use the SKW algorithm to find the relevant $\kk$-points, perform an *ab-initio* NSC run for these wavevectors only
-to produce a WFK file that can be used by the EPH code.
+one can use the SKW algorithm to find the relevant $\kk$-points, perform an *ab-initio* NSCF run
+for these wavevectors only in order to produce a WFK file that can be used by the EPH code.
 
 The entire procedure is performed in an automatic way inside ABINIT but before running big EPH calculations,
 we strongly recommend to check whether the SKW interpolation gives reasonable results.
@@ -600,17 +600,16 @@ If the fit is not good, you may want to try the following:
 Note that it is sometimes difficult to get completely rid of spurious oscillations or artifacts in the SKW interpolation
 especially in the presence of **degeneracies or band crossing/anti-crossing**,
 Remember, however, that achieving perfect agreement between the SKW interpolation and the ab-initio results
-is not crucial since the SKW bands are only used to find the $\kk$-points that are sufficiently close to the 
+is not crucial since the SKW bands are only used to find the $\kk$-points that are sufficiently close to the
 band edges (Fermi level).
-All these wavevectors will be recomputed afterwards with KS-DFT and possible oscillations or artifacts will disappear 
+All these wavevectors will be recomputed afterwards with KS-DFT and possible oscillations or artifacts will disappear
 in the ab-initio results.
 
-In a nutshell, you need to make sure that the SKW bands are **reasonably close** to the ab-initio ones
+In a nutshell, you need to **make sure that the SKW bands are reasonably close** to the ab-initio ones
 especially in the region around the band edge for semiconductors or around the Fermi level for metals.
 Small deviations between SKW and ab-initio bands can always be accounted for by increasing the value
-of [[sigma_erange]] used when generaring the KERANGE.nc file.
+of [[sigma_erange]] used for generaring the KERANGE.nc file.
 
 TODO: Recheck the code, perhaps I can use the ab-initio band edge if its greater/smaller than the SKW one.
 The most important thing is that SKW reproduces the position of the band edges as these values are then used
 that the position of the SKW band edge is consistent
-
