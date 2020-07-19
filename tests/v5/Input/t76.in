@@ -56,7 +56,7 @@
  densfor_pred 0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "2he.psphgh"
+ pseudos "PseudosHGH_pwteter/2he.2.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

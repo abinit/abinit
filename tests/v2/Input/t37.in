@@ -149,7 +149,7 @@ kpt
  znucl  12 8
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosHGH_pwteter/12mg.2.hgh, 8o.psphgh"
+ pseudos "PseudosHGH_pwteter/12mg.2.hgh, PseudosHGH_pwteter/8o.6.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
