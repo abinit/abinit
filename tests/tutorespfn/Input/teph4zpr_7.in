@@ -1,47 +1,35 @@
-##############################################
-####                SECTION: basic               
-##############################################
- nband 20
- ecut 35.0
+# Convergence of ZPR wrt q-sampling with Sternheimer method
 
  ndtset 3
 
- ngkpt1 4 4 4
- ngkpt2 8 8 8
- ngkpt3 12 12 12
+ ngkpt1 4 4 4;    eph_ngqpt_fine1 4 4 4;    getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
+ ngkpt2 8 8 8;    eph_ngqpt_fine2 8 8 8;    getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
+ ngkpt3 12 12 12; eph_ngqpt_fine3 12 12 12; getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
+ 
+ getddb_filepath "teph4zpr_1_DDB"
+ ddb_ngqpt 4 4 4
+ getdvdb_filepath "teph4zpr_2_DVDB"
 
- eph_ngqpt_fine1 4 4 4 
- eph_ngqpt_fine2 8 8 8
- eph_ngqpt_fine3 12 12 12
+ eph_stern 1
+ getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+ # nline tolwfr
 
- getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
- getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
- getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
+ nband 20
+ ecut 35.0
 
  nshiftk 1
  shiftk 0 0 0
 
- mixprec 1
- boxcutmin 1.1
+ mixprec 1; boxcutmin 1.1   # Important to speedup the calculation and reduce memory.
 
 ##############################################
 ####                 SECTION: eph                
 ##############################################
  optdriver 7
  eph_task 4
- ddb_ngqpt 4 4 4
  tmesh 0 200 1
 
  prtphdos 0       # Disable computation of PHDOS to save some time
-
-##############################################
-####                SECTION: files               
-##############################################
- getddb_filepath "teph4zpr_1_DDB"
- getdvdb_filepath "teph4zpr_2_DVDB"
-
- eph_stern 1
- getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
 
 ##############################################
 ####                 SECTION: gw                 
@@ -67,7 +55,7 @@
 #%% files_to_test = 
 #%%   teph4zpr_7.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH

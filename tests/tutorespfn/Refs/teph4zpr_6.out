@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 19 Jul 2020.
-- ( at 15h36 )
+- ( at 18h45 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7/teph4zpr_6.in
 - output file    -> teph4zpr_6.out
@@ -437,7 +437,7 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.568
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.569
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.474    4.556    0.082    0.099   -0.002    0.825   -4.196    4.295    0.000    0.000
    7   4.474    4.556    0.082    0.099   -0.002    0.825   -4.196    4.295    0.000    0.000
@@ -645,7 +645,7 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.568
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.569
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.474    4.555    0.080    0.098   -0.002    0.819   -4.198    4.296    0.000    0.000
    7   4.474    4.555    0.080    0.098   -0.002    0.819   -4.198    4.296    0.000    0.000
@@ -853,7 +853,7 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.568
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.569
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.474    4.554    0.080    0.098   -0.002    0.815   -4.200    4.297    0.000    0.000
    7   4.474    4.554    0.080    0.098   -0.002    0.815   -4.200    4.297    0.000    0.000
@@ -1061,7 +1061,7 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.568
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.569
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.474    4.555    0.081    0.100   -0.002    0.812   -4.202    4.301    0.000    0.000
    7   4.474    4.555    0.081    0.100   -0.002    0.812   -4.202    4.301    0.000    0.000
@@ -1276,10 +1276,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         14.5  wall=         14.7
+- Proc.   0 individual time (sec): cpu=         15.8  wall=         16.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.5  wall=         14.7
++Overall time at end (sec) : cpu=         15.8  wall=         16.9

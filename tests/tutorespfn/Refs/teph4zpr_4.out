@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sun 19 Jul 2020.
-- ( at 15h35 )
+- ( at 18h44 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7/teph4zpr_4.in
 - output file    -> teph4zpr_4.out
@@ -362,7 +362,7 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.568
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.569
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    6   4.474    4.547    0.073    0.090   -0.002    0.815   -0.319    0.409    0.000    0.000
    7   4.474    4.547    0.073    0.090   -0.002    0.815   -0.319    0.409    0.000    0.000
@@ -541,10 +541,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          3.0
++Overall time at end (sec) : cpu=          3.1  wall=          3.2

@@ -1,13 +1,9 @@
-# ZPR computation at Gamma for MgO
+# ZPR computation at Gamma for MgO. 
 
-##############################################
-####                SECTION: basic               
-##############################################
  nband 30
  ecut 35.0
 
  ngkpt 4 4 4
- #ngkpt 8 8 8
  nshiftk 1
  shiftk 0 0 0
 
@@ -16,12 +12,26 @@
 ##############################################
  optdriver 7              # Enter EPH driver
  eph_task 4               # Compute e-ph self-energy (real + imag)
- ddb_ngqpt 4 4 4
- #eph_ngqpt_fine 4 4 4
- #eph_ngqpt_fine 8 8 8
- tmesh 0 200 1            # [start, step, num_T]
+ tmesh 0 200 1            # [start, step, num_T] in K
 
-# Phonon band structure
+ ddb_ngqpt 4 4 4          # The code expects to find in the DDB all the q-points of a 4x4x4 q-mesh
+ getddb_filepath "teph4zpr_1_DDB"
+
+ getdvdb_filepath "teph4zpr_2_DVDB"
+ getwfk_filepath "teph4zpr_3o_DS1_WFK"    # 4x4x4 with 70 bands
+
+##############################################
+####                 SECTION: gw                 
+##############################################
+ nkptgw 1
+ kptgw
+    0.0    0.0    0.0
+ bdgw
+    8 9
+ zcut 0.01 eV
+
+# Activate Phonon band structure
+ #ph_prtbands 0
  ph_ndivsm 10
  ph_nqpath 12
  ph_qpath
@@ -39,31 +49,15 @@
     0.5    0.0    0.5
 
 # Phonon DOS
- ph_intmeth 2
- ph_wstep 0.0001 eV
+ #ph_prtdos 0
+ #ph_intmeth 2
+ #ph_wstep 0.0001 eV
  ph_ngqpt 16 16 16
 
-##############################################
-####                SECTION: files               
-##############################################
- getddb_filepath "teph4zpr_1_DDB"
- getdvdb_filepath "teph4zpr_2_DVDB"
- getwfk_filepath "teph4zpr_3o_DS1_WFK"
+ structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
-##############################################
-####                 SECTION: gw                 
-##############################################
- nkptgw 1
- kptgw
-    0.0    0.0    0.0
- bdgw
-    8 9
- zcut 0.01 eV
-
- pp_dirpath = "$ABI_PSPDIR"
- pseudos = "O.psp8, Mg-sp-gw.psp8"
-
- structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "O.psp8, Mg-sp-gw.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -74,9 +68,9 @@
 #%% files_to_test = 
 #%%   teph4zpr_4.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = ZPR computation at Gamma for MgO
+#%% description = ZPR computation at Gamma for MgO. 
 #%%<END TEST_INFO>
