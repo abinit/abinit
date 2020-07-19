@@ -7,6 +7,7 @@
  ecut 35.0
 
  ngkpt 4 4 4
+ #ngkpt 8 8 8
  nshiftk 1
  shiftk 0 0 0
 
@@ -16,7 +17,8 @@
  optdriver 7              # Enter EPH driver
  eph_task 4               # Compute e-ph self-energy (real + imag)
  ddb_ngqpt 4 4 4
- eph_ngqpt_fine 4 4 4
+ #eph_ngqpt_fine 4 4 4
+ #eph_ngqpt_fine 8 8 8
  tmesh 0 200 1            # [start, step, num_T]
 
 # Phonon band structure
@@ -46,7 +48,7 @@
 ##############################################
  getddb_filepath "teph4zpr_1_DDB"
  getdvdb_filepath "teph4zpr_2_DVDB"
- getwfk_filepath "teph4zpr_3o_WFK"
+ getwfk_filepath "teph4zpr_3o_DS1_WFK"
 
 ##############################################
 ####                 SECTION: gw                 
@@ -59,9 +61,9 @@
  zcut 0.01 eV
 
  pp_dirpath = "$ABI_PSPDIR"
- pseudos = "Mg-sp-gw.psp8, O.psp8"
+ pseudos = "O.psp8, Mg-sp-gw.psp8"
 
- structure "abivars:MgO_eph_zpr/mgo.abivars"
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

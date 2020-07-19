@@ -690,7 +690,7 @@ subroutine crystal_print_abivars(cryst, unit)
  if (unit == dev_null) return
 
  ! Write variables using standard Abinit input format.
- write(unit, "(/,/,a)")" # Abinit format"
+ write(unit, "(/,/,a)")" # Abinit variables"
  write(unit, "(a)")" acell 1.0 1.0 1.0"
  write(unit, "(a)")" rprimd"
  do ii=1,3
@@ -706,17 +706,17 @@ subroutine crystal_print_abivars(cryst, unit)
  end do
 
  ! Write variables using the abivars format supported by structure variable.
- write(unit, "(/,/,a)")" # Abivars format (external file with structure variable)"
- write(unit, "(a)")" acell 1.0 1.0 1.0"
- write(unit, "(a)")" rprimd"
- do ii=1,3
-    write(unit, "(1x, 3(f11.7,1x))")cryst%rprimd(:, ii)
- end do
- write(unit, "(a, i0)")" natom ", cryst%natom
- write(unit, "(a)")" xred_symbols"
- do iatom=1,cryst%natom
-   write(unit,"(1x, 3f11.7,2x,a)")cryst%xred(:,iatom), cryst%symbol_type(cryst%typat(iatom))
- end do
+ !write(unit, "(/,/,a)")" # Abivars format (external file with structure variable)"
+ !write(unit, "(a)")" acell 1.0 1.0 1.0"
+ !write(unit, "(a)")" rprimd"
+ !do ii=1,3
+ !   write(unit, "(1x, 3(f11.7,1x))")cryst%rprimd(:, ii)
+ !end do
+ !write(unit, "(a, i0)")" natom ", cryst%natom
+ !write(unit, "(a)")" xred_symbols"
+ !do iatom=1,cryst%natom
+ !  write(unit,"(1x, 3f11.7,2x,a)")cryst%xred(:,iatom), cryst%symbol_type(cryst%typat(iatom))
+ !end do
 
 end subroutine crystal_print_abivars
 !!***

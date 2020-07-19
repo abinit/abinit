@@ -23,19 +23,19 @@ This lesson should take about 1.5 hour.
 
 Due to the interaction with electrons, phonons acquire a finite lifetime that is given by the imaginary
 part of the phonon-electron self-energy $\Pi$.
-Obviously, there's also another important contribution to the phonon lifetime originating from non-harmonic 
+Obviously, there's also another important contribution to the phonon lifetime originating from non-harmonic
 terms in the expansion of the Born-Oppenheimer energy surface around the equilibrium point.
-In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substancial 
+In the many-body language these non-harmonic leads to phonon-phonon scattering that can give a substancial
 contribution to the phonon linewidths.
 However, these non-harmonic terms will be ignored in the rest of the tutorial and we will be mainly focusing
 on the computation of the imaginary part of $\Pi$ in the harmonic approximation.
 
-In the so-called double-delta approximation, the phonon linewidth $\gamma_{\qq\nu}$ due 
+In the so-called double-delta approximation, the phonon linewidth $\gamma_{\qq\nu}$ due
 to the interaction of the ${\qq\nu}$ phonon with electrons is given by
 
-$$
-    \gamma_{\qq\nu} = 2\pi \ww_{\qq\nu} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
-    \delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F)
+$$ 
+\gamma_{\qq\nu} = 2\pi \ww_{\qq\nu} \sum_{mn\kk} |g_{mn\nu}(\kk, \qq)|^2
+\delta(\ee_{\kpq m} -\ee_F) \delta(\ee_{\kk n} -\ee_F)
 $$
 
 where $\ww_{\qq\nu}$ is the phonon frequency,
@@ -43,12 +43,12 @@ the sum over the electron wavevector $\kk$ runs over the full BZ, $\ee_F$ is the
 and $g_{mn\nu}(\kk, \qq)$ are the e-ph matrix elements discussed in the [EPH introduction](eph_intro).
 For a given phonon wavevector $\qq$, the double delta restricts the BZ integration to
 transitions between $\kk$ and $\kq$ electron states on the Fermi surface (FS).
-Converging the double-delta integral therefore requires very dense $\kk$-meshes in order to 
+Converging the double-delta integral therefore requires very dense $\kk$-meshes in order to
 capture enough states on the FS.
 The convergence rate is indeed much slower that the one required by the electron DOS at $\ee_F$:
 
 $$
-    g(\ee_F) = \sum_{n\kk} \delta(\ee_F - \ee_{n\kk})
+g(\ee_F) = \sum_{n\kk} \delta(\ee_F - \ee_{n\kk})
 $$
 
 in which a single Dirac delta is involved.
@@ -57,17 +57,17 @@ At the level of the implementation, the integration of the double delta can be p
 or by replacing the Dirac delta with a Gaussian function of finite width.
 The integration algorithm is defined by the [[eph_intmeth]] input variable.
 In the case of Gaussian method, one can use a fixed broadening ([[eph_fsmear]] > 0)
-or an adaptive scheme ([[eph_fsmear]] < 0) in which the broadening is automatically computed from 
+or an adaptive scheme ([[eph_fsmear]] < 0) in which the broadening is automatically computed from
 the electron group velocity [[cite:Li2015]].
 
 !!! important
 
-    The tetrahedron method is more accurate and does not require any broadening parameter. 
+    The tetrahedron method is more accurate and does not require any broadening parameter.
     Note, however, that in the present implementation the computational cost of the double delta with the tetrahedron method
     quickly increases with the size of the $\kk$-mesh so the adaptive Gaussian scheme represents a valid alternative,
     especially when a dense $\kk$-sampling is used.
 
-The value of the Fermi level, $\ee_F$, is automatically computed from the KS eigenvalues stored 
+The value of the Fermi level, $\ee_F$, is automatically computed from the KS eigenvalues stored
 in the input WFK file according to the two input variables [[occopt]] and [[tsmear]].
 These parameters are usually equal to the ones used for the GS/DFPT calculation.
 However, it is possible to change the value of $\ee_F$ at the EPH level using three (mutually exclusive) input variables:
@@ -85,18 +85,18 @@ the Fermi level that can be specified via [[eph_fsewin]].
     Convergence studies are performed by generating different WFK files on $\kk$-meshes of increasing density.
 -->
 
-The code computes $\gamma_{\qq\nu}$ for each $\qq$-point in the IBZ associated to 
+The code computes $\gamma_{\qq\nu}$ for each $\qq$-point in the IBZ associated to
 a $\qq$-mesh that can be changed by the user.
 By default, the code uses the [[ddb_ngqpt]] $qq$-mesh corresponding to the DDB file (assumed to be equal to the one
-used to generate the DVDB file). 
+used to generate the DVDB file).
 In this case, all the DFPT scattering potentials are available and no interpolation in $qq$-space in required.
-To increase the $qq$-sampling, one simply specifies [[eph_ngqpt_fine]] in the input file while 
+To increase the $qq$-sampling, one simply specifies [[eph_ngqpt_fine]] in the input file while
 In this case, the code employs the Fourier interpolation to obtain the scattering potentials.
 
 Once the phonon linewidths $\gamma_{\qq\nu}$ are known in the IBZ, EPH computes the Eliashberg function defined by:
 
 $$
-    \alpha^2F(\ww) = -\dfrac{1}{N_F} \sum_{\qq\nu} \dfrac{\gamma_{\qq\nu}}{\ww_{\qq\nu}} \delta(\ww - \ww_{\qq \nu})
+\alpha^2F(\ww) = -\dfrac{1}{N_F} \sum_{\qq\nu} \dfrac{\gamma_{\qq\nu}}{\ww_{\qq\nu}} \delta(\ww - \ww_{\qq \nu})
 $$
 
 where $N_F$ is the density of states (DOS) per spin at the Fermi level.
@@ -106,40 +106,38 @@ This quantity is accessible in experiments and experience has shown that
 $\alpha^2F(\ww)$ is qualitatively similar to the phonon DOS $F(\ww)$:
 
 $$
-    F(\ww) = \sum_{\qq\nu} \delta(\ww - \ww_{\qq \nu})
+F(\ww) = \sum_{\qq\nu} \delta(\ww - \ww_{\qq \nu})
 $$
 
 This is not surprising as the equation for $\alpha^2F(\ww)$ resembles the one for the phonon DOS $F(\ww)$:
 except for the weighting factor $\frac{\gamma_{\qq\nu}}{\ww_{\qq\nu}}$.
 The technique used to compute $\alpha^2F(\ww)$ is defined by the two variables [[ph_intmeth]] and [[ph_smear]].
-By default, the code uses the tetrahedron method for the $\qq$-space integration. 
+By default, the code uses the tetrahedron method for the $\qq$-space integration.
 
 The total e-ph coupling strength $\lambda$ is defined as the first inverse moment of $\alpha^2F(\ww)$:
 
 $$
-    \lambda = \int \dfrac{\alpha^2F(\ww)}{\ww}\dd\ww = \sum_{\qq\nu} \lambda_{\qq\nu}
+\lambda = \int \dfrac{\alpha^2F(\ww)}{\ww}\dd\ww = \sum_{\qq\nu} \lambda_{\qq\nu}
 $$
 
 where we have introduced the mode dependent coupling strength:
 <!-- For spin unpolarized systems: -->
 
 $$
-    \lambda_{\qq\nu} = \dfrac{\gamma_{\qq\nu}}{\pi N_F \ww_{\qq\nu}^2}
+\lambda_{\qq\nu} = \dfrac{\gamma_{\qq\nu}}{\pi N_F \ww_{\qq\nu}^2}
 $$
 
 Finally, the isotropic superconducting temperature $T_c$ can be estimated using the McMillan expression:
 
 $$
-    T_c = \dfrac{\ww_{log}}{1.2} \exp \Biggl [
-        \dfrac{-1.04 (1 + \lambda)}{\lambda ( 1 - 0.62 \mu^*) - \mu^*}
-    \Biggr ]
+T_c = \dfrac{\ww_{log}}{1.2} \exp \Biggl [ \dfrac{-1.04 (1 + \lambda)}{\lambda ( 1 - 0.62 \mu^*) - \mu^*} \Biggr ]
 $$
 
 where $\mu^*$ is a semi-empirical variable that descrives the (screened) e-e interaction while
 $\ww_{\text{log}}$ is the *logarithmic* average of the phonon frequencies given by:
 
 $$
-    \ww_{\text{log}} = \exp \Biggl [ \dfrac{2}{\lambda} \int \dfrac{\alpha^2F(\ww)}{\ww}\log(\ww)\dd\ww \Biggr ]
+\ww_{\text{log}} = \exp \Biggl [ \dfrac{2}{\lambda} \int \dfrac{\alpha^2F(\ww)}{\ww}\log(\ww)\dd\ww \Biggr ]
 $$
 
 !!! important
@@ -196,9 +194,9 @@ For this reason, we rely on **pre-computed DEN.nc, DDB and DFPT POT1.nc files** 
 The DEN.nc file will be used to perform NSCF computations on arbitrarily dense $\kk$-meshes while the
 DFPT POT.nc files will be merged with the *mrgdv* utility to produce the DVDB database of scattering potentials.
 
-Note that these files are not shipped with the official ABINIT tarball as they are relatively 
+Note that these files are not shipped with the official ABINIT tarball as they are relatively
 large in size.
-In order to run the examples of this tutorial, you need to download these files 
+In order to run the examples of this tutorial, you need to download these files
 from this github repository.
 
 If git is installed on your machine, one can easily fetch the entire repository with:
@@ -210,7 +208,7 @@ git clone ...
 Alternatively, use *wget*:
 
 ```sh
-wget 
+wget
 ```
 
 or *curl*:
@@ -223,7 +221,7 @@ or simply copy the tarball by clicking the "download button" in the github inter
 Note that the directory with the input files must be located in the same working directory as the one in which
 you will be executing the tutorial.
 
-The input file of the GS run is also stored in the DEN.nc file and one can easily access it with the 
+The input file of the GS run is also stored in the DEN.nc file and one can easily access it with the
 *ncdump* utility
 
 !!! info
@@ -286,9 +284,9 @@ Let's start from the electron DOS...
 Our goal is to perform calculations of $\gamma_{\qq\nu}$ with different $\qq/\kk$-meshes to
 analyse the convergence behaviour of $\lambda$ and $\alpha^2F(\ww)$.
 Remember that in the EPH code the $\qq$-mesh can be changed at will thanks to the Fourier interpolation
-of the dynamical matrix and of the DFPT potentials whereas the $\kk$-mesh must correspond 
+of the dynamical matrix and of the DFPT potentials whereas the $\kk$-mesh must correspond
 to the one used to generate the input WKF file.
-As the $\kk$-mesh must be a multiple of the $\qq$-mesh, we need to generate different WFK files 
+As the $\kk$-mesh must be a multiple of the $\qq$-mesh, we need to generate different WFK files
 in order to perform our convergence studies.
 
 Before running calculations with difference meshes, it is a good idea
@@ -319,7 +317,7 @@ abinit
 ```
 
 All the NSCF calculations will start from the **pre-computed DEN.nc file** via the [[getden_filepath]] input variable.
-Note the usage of the new input variable [[structure]] (added in Abinit v9) to read the crystalline structure from 
+Note the usage of the new input variable [[structure]] (added in Abinit v9) to read the crystalline structure from
 an external file in order to avoid repeating the unit cell in each input file.
 
 ```sh
@@ -383,7 +381,7 @@ eph_task 0
 
 # DDB file
 getddb_filepath "test_submodule/mgb2_121212k_0.01tsmear_DDB"
-ddb_ngqpt 8 8 8 
+ddb_ngqpt 8 8 8
 
 dipdip 0  # No treatment of the dipole-dipole part. OK for metals
 
@@ -397,7 +395,7 @@ ph_qpath
 ph_ndivsm
 ```
 
-[[getddb_filepath]] specifies the path to the external DDB file while [[ddb_ngqpt]] defines the 
+[[getddb_filepath]] specifies the path to the external DDB file while [[ddb_ngqpt]] defines the
 *ab-initio* $\qq$-mesh used to generate the DDB file.
 The phonon DOS will be computed using the (dense) [[ph_ngqpt]] $\qq$-mesh and [[ph_intmeth]].
 The high-symmetry $\qq$-path for the phonon band structure is specified with:
@@ -406,12 +404,12 @@ The high-symmetry $\qq$-path for the phonon band structure is specified with:
 !!! important
 
     [[dipdip]] can be set to zero as we are dealing with a metal and therefore the IFCs are short-ranged.
-    Note that the default value of [[dipdip]] is designed for polar semiconductors so we recommended 
+    Note that the default value of [[dipdip]] is designed for polar semiconductors so we recommended
     to override the default behaviour when performing calculations with [[eph_task]] = 1.
 
-Since Abinit supports multidatases, unlike anaddb, it's easy to define an input file to compute 
+Since Abinit supports multidatases, unlike anaddb, it's easy to define an input file to compute
 the phonon DOS with multiple $\qq$-meshes.
-This simple test allows us to get an initial (very qualitative) estimate of the $\qq$-sampling 
+This simple test allows us to get an initial (very qualitative) estimate of the $\qq$-sampling
 required to convergence the  Eliashberg function as $\alpha^2F(\ww)$ is essentially a weighted phonon DOS.
 
 The input file xxx, shows how to perform such a test with $\qq$-meshes of increasing density.
@@ -451,20 +449,20 @@ Let's now discuss in more detail the output files produced by the code.
 
 ## Notes on the MPI parallelism
 
-The EPH code supports 5 different levels of MPI parallelism and the number of MPI processes for each level 
+The EPH code supports 5 different levels of MPI parallelism and the number of MPI processes for each level
 can be specified via [[eph_np_pqbks]].
 This variable is optional in the sense that whatever number of MPI processes you use, EPH will try to select
 a reasonable distribution of the workload.
-The distribution, however, may not be optimal as EPH tries to minimize memory requirements by focusing on the 
+The distribution, however, may not be optimal as EPH tries to minimize memory requirements by focusing on the
 perturbation/k-point parallelism.
 As usual, MPI algorithms are quite efficent if the distribution of the workload is done at a very high-level.
-In the case of $T_c$ calculations, the outermost loop is over the $\qq$-points in the IBZ hence the highest speedup 
+In the case of $T_c$ calculations, the outermost loop is over the $\qq$-points in the IBZ hence the highest speedup
 is achieved when most of the CPUs are the used for the $\qq$-point parallelism.
 Note, however, that this kind of MPI distribution does not distribute the wavefunctions and the scattering potentials.
 
 ## How to reduce the number of k-points to be computed in the NSCF run
 
 TODO
-As we have seen, Eliashberg calculations require the knowledge of Bloch states 
+As we have seen, Eliashberg calculations require the knowledge of Bloch states
 inside a relatively small energy window around $\ee_F$.
 The NSCF computation of the WFK files with dense $\kk$-sampling [[sigma_erange]]

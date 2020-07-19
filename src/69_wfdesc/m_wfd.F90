@@ -4701,7 +4701,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  if (wfd%prtvol /= 0 .and. wfd%my_rank == 0) call hdr%echo(fform, 4, unit=std_out)
 
  mband_disk = MAXVAL(Hdr%nband)
- ABI_CHECK(Wfd%mband <= mband_disk,"Not enough bands stored on file")
+ ABI_CHECK_ILEQ(Wfd%mband, mband_disk, "Not enough bands stored on WFK file")
 
  ! Each node will read the waves whose status if (WFD_ALLOCATED|WFD_STORED).
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)

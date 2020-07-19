@@ -609,6 +609,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
 
    ! Checks that nothing is left beyond fnlen
    if(ii>fnlen)then
+     !write(std_out, *)"line: `", line(1:fnlen+20), "`"
      do ij=fnlen+1,ii
        if(line(ij:ij)/=' ')then
          write(msg,'(3a,i0,3a,i0,3a)' ) &

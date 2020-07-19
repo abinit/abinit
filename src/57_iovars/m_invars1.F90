@@ -2632,6 +2632,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    dtsets(idtset)%bs_loband=0
 
+   !if (dtsets(idtset)%optdriver == RUNL_EPH) then
+   !  dtsets(idtset)%mixprec = 1
+   !  dtsets(idtset)%boxcutmin = 1.1_dp
+   !end if
+
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.
 ! That might cause unitialized error with valgrind depending on the compiler

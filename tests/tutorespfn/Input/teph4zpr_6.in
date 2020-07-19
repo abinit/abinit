@@ -1,13 +1,19 @@
 ##############################################
 ####                SECTION: basic               
 ##############################################
- nband 20
+ ndtset 4
+ nband: 10
+ nband+ 10
+
  ecut 35.0
 
  ngkpt 4 4 4
+ #ngkpt 8 8 8
  nshiftk 1
  shiftk 0 0 0
- tolvrs 1e-12
+
+ mixprec 1
+ boxcutmin 1.1
 
 ##############################################
 ####                 SECTION: eph                
@@ -16,21 +22,17 @@
  eph_task 4
  ddb_ngqpt 4 4 4
  tmesh 0 200 1
+ #eph_ngqpt_fine 4 4 4
+ #eph_ngqpt_fine 8 8 8
 
- #ph_intmeth 2
- #ph_wstep 0.0001 eV
- #ph_ngqpt 16 16 16
- #ph_qshift 0 0 0
- #ph_nqshift 1
- #
- eph_ngqpt_fine 4 4 4
+ prtphdos 0       # Disable computation of PHDOS to save some time
 
 ##############################################
 ####                SECTION: files               
 ##############################################
  getddb_filepath "teph4zpr_1_DDB"
  getdvdb_filepath "teph4zpr_2_DVDB"
- getwfk_filepath "teph4zpr_3o_WFK"
+ getwfk_filepath "teph4zpr_3o_DS1_WFK"
 
  eph_stern 1
  getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
@@ -46,13 +48,9 @@
  zcut 0.01 eV
 
  pp_dirpath = "$ABI_PSPDIR"
- pseudos = "Mg-sp-gw.psp8, O.psp8"
+ pseudos = "O.psp8, Mg-sp-gw.psp8"
 
-##############################################
-####                  STRUCTURE                  
-##############################################
- structure "abivars:MgO_eph_zpr/mgo.abivars"
-
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -67,5 +65,5 @@
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description = Convergence of ZPR wrt nband with Sternheimer method
+#%% description = Convergence of ZPR wrt nband with the Sternheimer method
 #%%<END TEST_INFO>

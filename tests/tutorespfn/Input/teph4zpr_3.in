@@ -1,12 +1,23 @@
 ##############################################
 ####                SECTION: basic               
 ##############################################
-#
- nband 100
- nbdbuf 10
+
  ecut 35.0
 
- ngkpt 4 4 4
+ nband1  70
+ nbdbuf1 10
+
+ nband  25
+ nbdbuf 5
+
+ ndtset 3
+
+ ngkpt1 4 4 4
+ ngkpt2 8 8 8
+ ngkpt3 12 12 12
+ getwfk2 -1
+ getwfk3 -1
+
  nshiftk 1
  shiftk 0 0 0
 
@@ -14,7 +25,7 @@
  tolwfr 1e-15
  iscf -2          # NSCF run from DEN.nc
 
- ngfft 30 30 30   # # Important: Must use same FFT mesh as the one in DEN.nc
+ ngfft 30 30 30   # Important: Must use same FFT mesh as the one in DEN.nc
  getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
 ##############################################
@@ -37,12 +48,9 @@
  #ndivsm 10
 
  pp_dirpath = "$ABI_PSPDIR"
- pseudos = "Mg-sp-gw.psp8, O.psp8"
+ pseudos = "O.psp8, Mg-sp-gw.psp8"
 
-##############################################
-####                  STRUCTURE                  
-##############################################
- structure "abivars:MgO_eph_zpr/mgo.abivars"
+ structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

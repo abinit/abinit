@@ -1059,7 +1059,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          if (dtset%iomode == IO_MODE_MPI ) accessfil=4
          if (dtset%iomode == IO_MODE_ETSF) accessfil=3
          call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
-&         mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
+           mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
        end if
 
        if (rdwrpaw/=0) then

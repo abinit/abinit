@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 17 Jul 2020.
-- ( at 04h59 )
+.Starting date : Sun 19 Jul 2020.
+- ( at 15h35 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7/teph4zpr_4.in
 - output file    -> teph4zpr_4.out
@@ -51,12 +51,11 @@ _ WF disk file :      4.777 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
-              amu      2.43050000E+01  1.59994000E+01
+              amu      1.59994000E+01  2.43050000E+01
              bdgw           8       9
         ddb_ngqpt        4    4    4
              ecut      3.50000000E+01 Hartree
       eph_intmeth           1
-   eph_ngqpt_fine        4    4    4
          eph_task           4
 -          fftalg         312
            istwfk        2    0    3    0    0    0    7    0
@@ -117,7 +116,7 @@ P           mkmem           8
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             tmesh      0.00000000E+00  2.00000000E+02  1.00000000E+00
-            typat      1  2
+            typat      2  1
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -127,7 +126,7 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
              zcut      3.67493254E-04 Hartree
-            znucl       12.00000    8.00000
+            znucl        8.00000   12.00000
 
 ================================================================================
 
@@ -146,7 +145,7 @@ electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 7, eph_task: 4, }
 ...
 
- mkfilename: getwfk from: teph4zpr_3o_WFK
+ mkfilename: getwfk from: teph4zpr_3o_DS1_WFK
 
  mkfilename: getddb from: teph4zpr_1_DDB
 
@@ -157,7 +156,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: teph4zpr_3o_WFK
+- Reading GS states from WFK file: teph4zpr_3o_DS1_WFK
 - Reading DDB from file: teph4zpr_1_DDB
 - Reading DVDB from file: teph4zpr_2_DVDB
 
@@ -275,31 +274,17 @@ meta: {optdriver: 7, eph_task: 4, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3009014161E-02 (at units)
--                                   =           6.5828 [km/s]
+ Average speed of sound partial sums:     0.3022037113E-02 (at units)
+-                                   =           6.6113 [km/s]
 
- Debye frequency from partial sums:     0.2316660737E-02 (Ha)
--                                 =     0.1524289540E+02 (THz)
--Debye temperature from partial sums:     0.7315427333E+03 (K)
+ Debye frequency from partial sums:     0.2326687197E-02 (Ha)
+-                                 =     0.1530886634E+02 (THz)
+-Debye temperature from partial sums:     0.7347088354E+03 (K)
 
 - Writing phonon DOS to netcdf file: teph4zpr_4o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
-- Mg    ONCVPSP  r_core=  1.16  1.56
-- 12.00000  10.00000    150902                znucl, zion, pspdat
-    8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
-    3.99000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
-     nproj     2     2
-     extension_switch     1
-  pspatm : epsatm=    9.22508734
-         --- l  ekb(1:nproj) -->
-             0    2.568049   -0.805950
-             1   -6.605901   -2.664074
- pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
 - pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
@@ -312,6 +297,20 @@ meta: {optdriver: 7, eph_task: 4, }
              0    5.257212    0.704241
              1   -5.135443   -1.451781
              2   -4.371486
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Mg-sp-gw.psp8
+- Mg    ONCVPSP  r_core=  1.16  1.56
+- 12.00000  10.00000    150902                znucl, zion, pspdat
+    8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    3.99000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+     nproj     2     2
+     extension_switch     1
+  pspatm : epsatm=    9.22508734
+         --- l  ekb(1:nproj) -->
+             0    2.568049   -0.805950
+             1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
    2.46705647E+02                                ecore*ucvol(ha*bohr**3)
@@ -363,16 +362,16 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
      mu_e: Fermi level for given (T, nelect)
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.444
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.568
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   6   4.474    4.562    0.088    0.109   -0.002    0.807   -0.231    0.340    0.000    0.000
-   7   4.474    4.563    0.088    0.109   -0.002    0.807   -0.231    0.340    0.000    0.000
-   8   4.474    4.563    0.088    0.109   -0.002    0.807   -0.231    0.340    0.000    0.000
-   9   8.959    8.879   -0.079   -0.081   -0.000    0.981    0.168   -0.249    4.485    4.317
+   6   4.474    4.547    0.073    0.090   -0.002    0.815   -0.319    0.409    0.000    0.000
+   7   4.474    4.547    0.073    0.090   -0.002    0.815   -0.319    0.409    0.000    0.000
+   8   4.474    4.547    0.073    0.090   -0.002    0.815   -0.319    0.409    0.000    0.000
+   9   8.959    8.873   -0.086   -0.088   -0.000    0.980    0.120   -0.207    4.485    4.326
  
  KS gap:    4.485 (assuming bval:8 ==> bcond:9)
- QP gap:    4.317 (OTMS:    4.294)
- QP_gap - KS_gap:   -0.168 (OTMS:   -0.190)
+ QP gap:    4.326 (OTMS:    4.307)
+ QP_gap - KS_gap:   -0.159 (OTMS:   -0.177)
  
 ============================================================================================
 
@@ -381,12 +380,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.444
   
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
-              amu      2.43050000E+01  1.59994000E+01
+              amu      1.59994000E+01  2.43050000E+01
              bdgw           8       9
         ddb_ngqpt        4    4    4
              ecut      3.50000000E+01 Hartree
       eph_intmeth           1
-   eph_ngqpt_fine        4    4    4
          eph_task           4
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -443,7 +441,7 @@ P           mkmem           8
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
             tmesh      0.00000000E+00  2.00000000E+02  1.00000000E+00
-            typat      1  2
+            typat      2  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1263589907E+00  2.1263589907E+00  2.1263589907E+00
             xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -451,7 +449,7 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
              zcut      3.67493254E-04 Hartree
-            znucl       12.00000    8.00000
+            znucl        8.00000   12.00000
 
 ================================================================================
 
@@ -543,10 +541,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.4
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.4
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.9  wall=          3.0
