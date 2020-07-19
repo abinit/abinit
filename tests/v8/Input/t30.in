@@ -65,16 +65,14 @@ diemac    1.0    diemix 0.5d0
 nstep 10
 
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosHGH_pwteter/3li.1.hgh, HGH/1h.1.hgh"
-## At present, the tolerances are MUCH too large. Should be fixed !!
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "3li.1.hgh, 1h.1.hgh"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t30.out, tolnlines=   0,   tolabs=  0.0e-01,      tolrel= 0.0e-01, fld_options = -easy
-## psp_files = Li.LDA-PW-paw.abinit, H.LDA-PW-paw.abinit
+#%%   t30.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
