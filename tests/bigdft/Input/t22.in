@@ -43,7 +43,7 @@ istwfk 1
  prtwf  0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/1h.1.hgh, HGH/8o.6.hgh"
+ pseudos "PseudosHGH_pwteter/1h.1.hgh, HGH/8o.6.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

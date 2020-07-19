@@ -39,7 +39,7 @@ nkpt 2
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/6c.4.hgh"
+ pseudos "PseudosHGH_pwteter/6c.4.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

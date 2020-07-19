@@ -36,7 +36,7 @@ tolvrs  1.0d-10
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/82pb.4.hgh"
+ pseudos "PseudosHGH_pwteter/82pb.4.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

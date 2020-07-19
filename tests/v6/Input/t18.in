@@ -52,7 +52,7 @@ ecut 15.0          # Maximal kinetic energy cut-off, in Hartree
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/1h.1.hgh, HGH/53i.7.hgh"
+ pseudos "PseudosHGH_pwteter/1h.1.hgh, HGH/53i.7.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
