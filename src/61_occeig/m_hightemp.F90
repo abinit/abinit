@@ -271,16 +271,11 @@ contains
     real(dp),intent(in) :: fermie,tsmear
     class(hightemp_type),intent(inout) :: this
 
-    ! Local variables -------------------------
-    ! Scalars
-    real(dp) :: entropy
-
     ! *********************************************************************
-    entropy=zero
     this%nfreeel=zero
 
     call hightemp_get_nfreeel(this%bcut,this%ebcut,this%e_shiftfactor,&
-    & entropy,fermie,this%gcut,this%nfreeel,tsmear,this%ucvol,this%version)
+    & fermie,this%gcut,this%nfreeel,tsmear,this%ucvol,this%version)
   end subroutine compute_nfreeel
 
   !!****f* ABINIT/m_hightemp/compute_efreeel
@@ -317,7 +312,7 @@ contains
     real(dp),dimension(:),allocatable :: valueseel
 
     ! *********************************************************************
-    step=1e-1
+    step=1e-2
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
     gamma=(fermie-this%e_shiftfactor)/tsmear
     this%e_kin_freeel=zero
@@ -333,20 +328,38 @@ contains
           ix=ix+step
         end do
 
+        ! TEMPORARY
+        ix=dble(this%bcut)
+        sigma=1e-5
+        open(file='Dirac',unit=23)
+        do while(ix<=this%gcut)
+          write(23,'(2ES12.5)') ix, fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
+          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+          ix=ix+step
+        end do
+        close(23)
+
         ABI_ALLOCATE(valueseel,(ii))
         ix=dble(this%bcut)
         ii=0
         sigma=this%std_init
+        open(file='Gauss',unit=23)
         do while(ix<=this%gcut)
           ii=ii+1
           valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
           & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
           & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+          write(23,'(2ES12.5)') ix, fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
+          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
           ix=ix+step
         end do
+        close(23)
         if (ii>1) then
           this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
         end if
+        ! write(0,*) sigma,this%e_shiftfactor,dble(this%bcut),this%gcut,simpson(step,valueseel)
         ABI_DEALLOCATE(valueseel)
 
         ! Change Fermi-Dirac integral lower bound.
@@ -371,6 +384,7 @@ contains
     else if(this%version==2) then
       xcut=(this%ebcut-this%e_shiftfactor)/tsmear
     end if
+    ! write(0,*) this%e_kin_freeel,factor*djp32(xcut,gamma),this%e_kin_freeel+factor*djp32(xcut,gamma)
     this%e_kin_freeel=this%e_kin_freeel+factor*djp32(xcut,gamma)
 
     ! Computation of edc_kin_freeel
@@ -585,7 +599,6 @@ contains
         end if
       end do
     end do
-    write(0,*) this%std_init
   end subroutine compute_pw_avg_std
 
   ! *********************************************************************
@@ -1226,20 +1239,20 @@ contains
   ! CHILDREN
   !
   ! SOURCE
-  subroutine hightemp_get_nfreeel(bcut,ebcut,e_shiftfactor,entropy,fermie,gcut,nelect,tsmear,ucvol,version)
+  subroutine hightemp_get_nfreeel(bcut,ebcut,e_shiftfactor,fermie,gcut,nelect,tsmear,ucvol,version)
 
     ! Arguments -------------------------------
     ! Scalars
     integer :: bcut,version
     real(dp),intent(in) :: ebcut,fermie,gcut,tsmear,e_shiftfactor,ucvol
-    real(dp),intent(inout) :: entropy,nelect
+    real(dp),intent(inout) :: nelect
 
     ! Local variables -------------------------
     ! Scalars
     integer :: ii
     real(dp) :: factor,gamma,ix,step,xcut
     ! Arrays
-    real(dp),dimension(:),allocatable :: valuesnel,valuesent
+    real(dp),dimension(:),allocatable :: valuesnel
 
     ! *********************************************************************
 
@@ -1258,22 +1271,16 @@ contains
         end do
 
         ABI_ALLOCATE(valuesnel,(ii))
-        ABI_ALLOCATE(valuesent,(ii))
         ix=dble(bcut)
         ii=0
         do while(ix<=gcut)
           ii=ii+1
           valuesnel(ii)=2*fermi_dirac(hightemp_e_heg(ix,ucvol)+e_shiftfactor,fermie,tsmear)
-          ! valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
-          ! & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
-          ! & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
           ix=ix+step
         end do
         if (ii>1) then
           nelect=nelect+simpson(step,valuesnel)
-          ! entropy=simpson(step,valuesent)
         end if
-        ABI_DEALLOCATE(valuesent)
         ABI_DEALLOCATE(valuesnel)
 
         ! Change Fermi-Dirac integral lower bound.

@@ -492,7 +492,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !potential and add to nelect bounds.
  if(present(hightemp) .and. associated(hightemp)) then
    call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-&   entropy,fermilo,hightemp%gcut,nelectlo,tsmear,hightemp%ucvol,hightemp%version)
+&   fermilo,hightemp%gcut,nelectlo,tsmear,hightemp%ucvol,hightemp%version)
  end if
 
  fermihi=maxval(eigen(1:nband(1)*nkpt*nsppol))+6.001_dp*tsmear
@@ -507,7 +507,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !potential and add to nelect bounds.
  if(present(hightemp) .and. associated(hightemp)) then
    call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-&   entropy,fermihi,hightemp%gcut,nelecthi,tsmear,hightemp%ucvol,hightemp%version)
+&   fermihi,hightemp%gcut,nelecthi,tsmear,hightemp%ucvol,hightemp%version)
  end if
 
 !Prepare fixed moment calculation
@@ -554,8 +554,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      !potential and add to nelect bounds.
      if(present(hightemp) .and. associated(hightemp)) then
        call hightemp_get_nfreeel(hightemp%bcut,hightemp%ebcut,hightemp%e_shiftfactor,&
-    &   entropy,fermimid,hightemp%gcut,nelectmid,tsmear,hightemp%ucvol,hightemp%version)
-       ! entropy=entropy-entropy_tmp
+    &   fermimid,hightemp%gcut,nelectmid,tsmear,hightemp%ucvol,hightemp%version)
      end if
 
 !    write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
