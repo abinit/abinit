@@ -517,14 +517,15 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: b1,ii,ii1,ii2,ij,iline,ios,iost,ishift,isign
- integer :: lenc,lenstr_inc,mline,nline1,input_unit,shift,sign
+ integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,ishift,isign
+ integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign
  logical :: include_found, ex
 !arrays
  integer :: bs(2)
  character(len=1) :: string1
  character(len=3) :: string3
  character(len=500) :: filnam_inc,msg
+ character(len=fnlen) :: shell_var, shell_value
  character(len=fnlen+20) :: line
  character(len=strlen),pointer :: string_inc
 
@@ -758,41 +759,73 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  close (unit=input_unit)
 
 !DEBUG
-     write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
+!    write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 !ENDDEBUG
 
-     !Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
-     !Actually, at this stage, there is no consecutive blanks left...
-     do
-       b1 = index(string(1:lenstr), '//')
-       if(b1/=0)then
-         !See whether there are preceeding and following '"'
-         do sign=-1,1,2
-           isign=(1+sign)/2  !  0 for minus sign, 1 for plus sign
-           do ii=1,lenstr
-             shift=-ii+isign*(1+2*ii)  !  -ii for minus sign,  1+ii for plus sign
-             if( (isign==0 .and. b1+shift<1) .or. (isign==1 .and. b1+shift>lenstr) )then
-               bs(isign+1)=0 ; exit
-             endif
-             if (string(b1+shift:b1+shift)=='"') then
-               bs(isign+1)=shift ; exit
-             else if (string(b1+shift:b1+shift)/=' ') then
-               bs(isign+1)=0 ; exit
-             endif
-           enddo
-           if(bs(isign+1)==0)exit
-         enddo
-         if(bs(1)==0 .or. bs(2)==0)exit
-         !the two shifts have been found, they give delimiters of the '" // "' chain
-         string(1:lenstr-4)=string(1:b1+bs(1)-1)//string(b1+bs(2)+1:lenstr)
-         lenstr=lenstr+bs(1)-1-bs(2)
-       else
-         exit
-       endif
+!Substitute environment variables, if any
+ b1=0
+ do 
+   b1=b1+1
+   b1 = index(string(b1:lenstr), '$')
+   if(b1==0 .or. b1>=lenstr)exit
+   !Identify delimiter, either a '"', or a "'", or a blank, or a /
+   b2=index(string(b1+1:lenstr),'"')
+   b3=index(string(b1+1:lenstr),"'")
+   if(b3/=0 .and. b3<b2)b2=b3
+   b3=index(string(b1+1:lenstr),' ')
+   if(b3/=0 .and. b3<b2)b2=b3
+   b3=index(string(b1+1:lenstr),'/')
+   if(b3/=0 .and. b3<b2)b2=b3
+   if(b2/=0)then
+     shell_var=string(b1+1:b1+b2-1)
+!DEBUG
+!write(std_out,'(a,a)')' shell_var=',shell_var(:b2-1)
+!ENDDEBUG
+     call get_environment_variable(shell_var(:b2-1),shell_value,status=ierr,length=len_val)
+     if (ierr == -1) MSG_ERROR(sjoin(shell_var(:b2-1), "is present but value of environment variable is too long"))
+     if (ierr == +1) MSG_ERROR(sjoin(shell_var(:b2-1), "environment variable is not defined!"))
+     if (ierr == +2) MSG_ERROR(sjoin(shell_var(:b2-1), "used in input file but processor does not support environment variables"))
+     call wrtout(std_out, sjoin(shell_var(:b2-1), " found in environment, with value ",shell_value(:len_val)))
+     string(1:lenstr-(b2-b1)+len_val)=string(1:b1-1)//shell_value(:len_val)//string(b1+b2:lenstr)
+     lenstr=lenstr-(b2-b1)+len_val
+   endif
+ enddo
+!DEBUG
+!write(std_out,'(a)')string(:lenstr)
+!ENDDEBUG
+
+!Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
+!Actually, at this stage, there is no consecutive blanks left...
+ do
+   b1 = index(string(1:lenstr), '//')
+   if(b1/=0)then
+     !See whether there are preceeding and following '"'
+     do sign=-1,1,2
+       isign=(1+sign)/2  !  0 for minus sign, 1 for plus sign
+       do ii=1,lenstr
+         shift=-ii+isign*(1+2*ii)  !  -ii for minus sign,  1+ii for plus sign
+         if( (isign==0 .and. b1+shift<1) .or. (isign==1 .and. b1+shift>lenstr) )then
+           bs(isign+1)=0 ; exit
+         endif
+         if (string(b1+shift:b1+shift)=='"') then
+           bs(isign+1)=shift ; exit
+         else if (string(b1+shift:b1+shift)/=' ') then
+           bs(isign+1)=0 ; exit
+         endif
+       enddo
+       if(bs(isign+1)==0)exit
      enddo
+     if(bs(1)==0 .or. bs(2)==0)exit
+     !the two shifts have been found, they give delimiters of the '" // "' chain
+     string(1:lenstr-4)=string(1:b1+bs(1)-1)//string(b1+bs(2)+1:lenstr)
+     lenstr=lenstr+bs(1)-1-bs(2)
+   else
+     exit
+   endif
+ enddo
 
 !DEBUG
-     write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
+!write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
 !ENDDEBUG
 
  ! Make sure we don't have unmatched quotation marks
