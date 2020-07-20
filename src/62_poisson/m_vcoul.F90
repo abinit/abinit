@@ -573,7 +573,7 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
          opt_cylinder=2
          !Check to enter the infinite Rozzi treatment
          if(Vcp%vcutgeo(3).le.-tol999) then
-           Vcp%hcyl=-tol12
+           Vcp%hcyl=tol12 
          end if
        end if
      end if
