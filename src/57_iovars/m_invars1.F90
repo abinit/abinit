@@ -2241,7 +2241,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      dtsets(idtset)%gw_qlwl(2,1)=0.00002_dp
      dtsets(idtset)%gw_qlwl(3,1)=0.00003_dp
    end if
-<<<<<<< HEAD
    dtsets(idtset)%gw_frqim_inzgrid=0
    dtsets(idtset)%gw_frqre_inzgrid=0
    dtsets(idtset)%gw_frqre_tangrid=0
@@ -2249,11 +2248,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
    dtsets(idtset)%gw_sigxcore=0
-=======
->>>>>>> remotes/trunk/develop
    dtsets(idtset)%gw_sctype = GWSC_one_shot
    dtsets(idtset)%gw_toldfeig=0.1/Ha_eV
-
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
