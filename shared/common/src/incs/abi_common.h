@@ -92,6 +92,9 @@
 /* Stop execution with message `msg` if int1 < int2 */
 #define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) MSG_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
 
+/* Stop execution with message `msg` if double1 < double2 */
+#define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) MSG_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+
 /* Stop execution with message `msg` if int not in [start, stop] */
 #define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) MSG_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
 

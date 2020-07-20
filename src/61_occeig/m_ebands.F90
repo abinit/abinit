@@ -3088,7 +3088,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
+ integer :: nw,spin,band,ikpt,ief,nproc,my_rank,ierr,cnt,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(htetra_t) :: tetra
@@ -3116,7 +3116,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  min_ene = minval(eminmax_spin(1, :)); min_ene = min_ene - 0.1_dp * abs(min_ene)
  max_ene = maxval(eminmax_spin(2, :)); max_ene = max_ene + 0.1_dp * abs(max_ene)
 
- nw = nint((max_ene - min_ene)/edos%step) + 1; edos%nw = nw
+ nw = nint((max_ene - min_ene) / edos%step) + 1; edos%nw = nw
 
  ABI_MALLOC(edos%mesh, (nw))
  edos%mesh = arth(min_ene, edos%step, nw)
@@ -3144,7 +3144,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
      end do
    end do
    ABI_FREE(wme0)
-   call xmpi_sum(edos%dos, comm, mpierr)
+   call xmpi_sum(edos%dos, comm, ierr)
 
  case (2, -2)
    !call wrtout(std_out, " Computing electron-DOS with tetrahedron method")
@@ -3154,10 +3154,9 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
      ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
-   if (ierr /= 0) MSG_ERROR(msg)
+   ABI_CHECK(ierr == 0, msg)
 
-   ! For each spin and band, interpolate over kpoints,
-   ! calculate integration weights and DOS contribution.
+   ! For each spin and band, interpolate over kpoints, calculate integration weights and DOS contribution.
    ABI_MALLOC(tmp_eigen, (ebands%nkpt))
    ABI_MALLOC(wdt, (nw, 2))
 
@@ -3173,14 +3172,13 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
          call tetra%get_onewk(ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
-         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)*ebands%wtk(ikpt)
-         ! IDOS is computed afterwards with simpson
-         !edos%idos(:,spin) = edos%idos(:,spin) + wdt(:, 2)
+         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1) * ebands%wtk(ikpt)
+         edos%idos(:,spin) = edos%idos(:,spin) + wdt(:, 2) * ebands%wtk(ikpt)
        end do ! ikpt
      end do ! band
    end do ! spin
 
-   call xmpi_sum(edos%dos, comm, mpierr)
+   call xmpi_sum(edos%dos, comm, ierr)
 
    ! Free memory
    ABI_FREE(tmp_eigen)
@@ -3198,15 +3196,17 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  end select
 
  ! Compute total DOS and IDOS
- max_occ = two/(ebands%nspinor*ebands%nsppol)
+ max_occ = two / (ebands%nspinor * ebands%nsppol)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
 
- do spin=1,edos%nsppol
-   call simpson_int(nw,edos%step,edos%dos(:,spin),edos%idos(:,spin))
- end do
+ if (edos%intmeth == 1) then
+   do spin=1,edos%nsppol
+     call simpson_int(nw,edos%step, edos%dos(:,spin), edos%idos(:,spin))
+   end do
+ end if
  edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
- ! Use bisection to find fermi level.
+ ! Use bisection to find the Fermi level at T = 0
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
  ! fullfilled if we use tetra and this is the reason why we have filtered the DOS.
  ief = bisect(edos%idos(:,0), ebands%nelect)
@@ -3226,12 +3226,10 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    edos%gef(spin) = edos%dos(ief,spin)
  end do
 
- if (.False.) then
-   write(std_out,*)"fermie from ebands: ",ebands%fermie
-   write(std_out,*)"fermie from IDOS: ",edos%mesh(ief)
-   write(std_out,*)"gef:from ebands%fermie: " ,edos%dos(bisect(edos%mesh, ebands%fermie), 0)
-   write(std_out,*)"gef:from edos: " ,edos%gef(0)
- end if
+ !write(std_out,*)"fermie from ebands: ",ebands%fermie
+ !write(std_out,*)"fermie from IDOS: ",edos%mesh(ief)
+ !write(std_out,*)"gef:from ebands%fermie: " ,edos%dos(bisect(edos%mesh, ebands%fermie), 0)
+ !write(std_out,*)"gef:from edos: " ,edos%gef(0)
 
 end function ebands_get_edos
 !!***
@@ -3333,14 +3331,15 @@ subroutine edos_write(edos, path)
  else
    write(unt,'(a,es16.8,a)')'# Fermi level: ',edos%mesh(edos%ief)*cfact," [eV]"
    efermi = edos%mesh(edos%ief)
+   !efermi = zero
  end if
 
  ! Write data.
  write(unt,"(a)")"# Energy           DOS_TOT          IDOS_TOT         DOS[spin=UP]     IDOS[spin=UP] ..."
  do iw=1,edos%nw
-   write(unt,'(es17.8)',advance='no')(edos%mesh(iw) - efermi)*cfact
+   write(unt,'(es17.8)',advance='no')(edos%mesh(iw) - efermi) * cfact
    do spin=0,edos%nsppol
-     write(unt,'(2es17.8)',advance='no')edos%dos(iw,spin)/cfact,edos%idos(iw,spin)
+     write(unt,'(2es17.8)',advance='no')max(edos%dos(iw,spin) / cfact, tol30), max(edos%idos(iw,spin), tol30)
    end do
    write(unt,*)
  end do
@@ -4580,8 +4579,9 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
          call tetra%get_onewk(ik_ibz, bcorr, nw, ebands%nkpt, tmp_eigen, emin, emax, max_occ1, weights)
          weights = weights * ebands%wtk(ik_ibz)
 
-         ! Compute DOS
+         ! Compute DOS and IDOS
          edos%dos(:,spin) = edos%dos(:,spin) + weights(:, 1)
+         !edos%idos(:,spin) = edos%idos(:,spin) + weights(:, 2)
 
          ! scalar
 !$OMP PARALLEL DO
@@ -4633,9 +4633,11 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
  max_occ = two / (ebands%nspinor * ebands%nsppol)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
 
+ !if (intmeth == 1) then
  do spin=1,edos%nsppol
    call simpson_int(nw, edos%step, edos%dos(:,spin), edos%idos(:,spin))
  end do
+ !end if
  edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
  ! Use bisection to find the Fermi level.

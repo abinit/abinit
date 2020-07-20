@@ -47,9 +47,11 @@ program abitk
  use m_nctk
 
  use defs_datatypes,   only : ebands_t
- use m_fstrings,       only : sjoin, strcat, basename
+ use m_fstrings,       only : sjoin, strcat, basename, itoa
+ use m_io_tools,       only : open_file
  use m_specialmsg,     only : herald
  use m_symtk,          only : matr3inv
+ use m_numeric_tools,  only : arth
  use m_bz_mesh,        only : kpath_new, kpath_t
  use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
@@ -63,9 +65,9 @@ program abitk
 !scalars
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
- integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth, lenr
- integer :: ndivsm, abimem_level, ierr !, spin
- real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb !, tolsym
+ integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
+ integer :: ndivsm, abimem_level, ierr, ntemp, ios
+ real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb !, tolsym, tsmear
  character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
  type(hdr_type) :: hdr
@@ -77,8 +79,8 @@ program abitk
  type(kpath_t) :: kpath
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3), ngqpt(3)
- real(dp) :: skw_params(4)
- real(dp),allocatable :: bounds(:,:)
+ real(dp) :: skw_params(4), tmesh(3)
+ real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
 !*******************************************************
@@ -89,6 +91,21 @@ program abitk
  ! Initialize MPI
  call xmpi_init()
  comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ if (my_rank == master) then
+#ifdef FC_NAG
+   open(unit=ab_out,file="abitk.out",form='formatted',status='unknown', action="write", recl=ABI_RECL, iomsg=msg, iostat=ios)
+#else
+   open(unit=ab_out,file="abitk.out",form='formatted',status='unknown', action="write", iomsg=msg, iostat=ios)
+#endif
+   ABI_CHECK(ios == 0, msg)
+   rewind (unit=ab_out)
+ else
+   close(std_out)
+   if (open_file(NULL_FILE, msg, unit=std_out, action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+ end if
 
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
@@ -111,11 +128,11 @@ program abitk
    else if (arg == "-h" .or. arg == "--help") then
      ! Document the options.
      write(std_out,"(a)")" --version              Show version number and exit."
-     write(std_out,"(a)")" -h, --help                 Show this help and exit."
-     write(std_out,"(a)")" -v                         Increase verbosity level"
+     write(std_out,"(a)")" -h, --help             Show this help and exit."
+     write(std_out,"(a)")" -v                     Increase verbosity level"
 
      write(std_out,"(2a)")ch10,"=== HEADER ==="
-     write(std_out,"(a)")"hdr FILE                   Print ABINIT header."
+     write(std_out,"(a)")"hdr_print FILE [--prtvol 0]  Print ABINIT header."
 
      write(std_out,"(2a)")ch10,"=== KPOINTS ==="
      write(std_out,"(a)")"ibz FILE --ngkpt 2 2 2 or --kptrlatt [--kptopt 1] [--shiftk 0.5 0.5 0.5] [--chksymbreak 1]"
@@ -128,11 +145,11 @@ program abitk
      write(std_out,"(a)")"ebands_print FILE                    Print info on electron band structure."
      write(std_out,"(a)")"ebands_xmgrace FILE                  Produce XMGRACE file with electron bands."
      write(std_out,"(a)")"ebands_gnuplot FILE                  Produce GNUPLOT file with electron bands."
-     write(std_out,"(a)")"ebands_dos FILE --intmeth, --step, --broad  Compute electron DOS."
+     write(std_out,"(a)")"ebands_edos FILE --intmeth, --step, --broad  Compute electron DOS."
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
-     write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
+     !write(std_out,"(a)")"ebands_mu_t FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
      write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
-     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
+     !write(std_out,"(a)")"ebands_jedos FILE --intmeth, --step, --broad  Compute electron DOS."
      !write(std_out,"(a)")"skw_path FILE                       Interpolate band structure along a k-path."
      write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK        Use e_nk from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
 
@@ -168,7 +185,6 @@ program abitk
    call hdr_read_from_fname(hdr, path, fform, comm)
    ABI_CHECK(fform /= 0, "fform == 0")
    rdwr = 3; if (prtvol > 0) rdwr = 4
-   !rdwr = 4
    call hdr%echo(fform, rdwr, unit=std_out)
 
  case ("ibz")
@@ -227,18 +243,19 @@ program abitk
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    call ebands_print_gaps(ebands, std_out)
 
- case ("ebands_dos", "ebands_jdos")
+ case ("ebands_edos", "ebands_jedos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
-   ABI_CHECK(get_arg("broad", broad, msg, default=0.04 * ev_Ha) == 0, msg)
+   ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
 
-   if (command == "ebands_dos") then
+   if (command == "ebands_edos") then
      edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
+     call edos%print(std_out, header="Electron DOS")
      call edos%write(strcat(basename(path), "_EDOS"))
      call edos%free()
 
-   else if (command == "ebands_jdos") then
+   else if (command == "ebands_jedos") then
      NOT_IMPLEMENTED_ERROR()
      jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
@@ -254,7 +271,7 @@ program abitk
  !case ("ebands_nesting")
    !call get_path_ebands_cryst(path, ebands, cryst, comm)
    !if (ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg) /= 0) then
-   !  MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
+   !  MSG_ERROR("Cannot produce file for nesting factor. Check log file for info.")
    !end if
 
  case ("skw_kpath")
@@ -317,29 +334,39 @@ program abitk
      ch10//" Use `abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot` to compare the bands with AbiPy.", &
      newlines=2)
 
- case ("ebands_extrael")
-
+ case ("ebands_mu_T")
    ! Get energies on the IBZ from filepath
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
-   ABI_CHECK(get_arg("extrael", extrael, msg) == 0, msg)
-   ABI_CHECK(get_arg("occopt", occopt, msg, default=3) == 0, msg)
-   ABI_CHECK(get_arg("tsmear", tsmear, msg, default=tol2) == 0, msg)
+   ABI_CHECK(get_arg("extrael", extrael, msg, default=zero) == 0, msg)
+   if (extrael == zero) then
+     ABI_CHECK(get_arg("doping", doping, msg, default=zero) == 0, msg)
+     ! Units of eph_doping is e_charge / cm^3
+     extrael = - doping * cryst%ucvol * (Bohr_meter * 100) ** 3
+   end if
+
+   !ABI_CHECK(get_arg("occopt", occopt, msg, default=3) == 0, msg)
+   !ABI_CHECK(get_arg("tsmear", tsmear, msg, default=tol2) == 0, msg)
    ABI_CHECK(get_arg("spinmagntarget", spinmagntarget, msg, default=-99.99_dp) == 0, msg)
 
-   !extrael = - dprarr(1) * cryst%ucvol * (Bohr_meter * 100) ** 3
-   !ebands%nelect = ebands%nelect + extrael
-   !call ebands_print_gaps(ebands, std_out, header="KS gaps")
-   !integer,intent(in) :: ntemp
-   !real(dp),intent(in) :: kTmesh(ntemp)
-   !real(dp),intent(out) :: mu_e(ntemp)
-   !call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
+   ebands%nelect = ebands%nelect + extrael
+   call ebands_print_gaps(ebands, std_out, header="KS gaps")
 
-   call ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol)
-   call ebands_set_nelect(ebands, ebands%nelect + extrael, spinmagntarget, msg)
-   write(std_out, "(a)") msg
-   call ebands_update_occ(ebands, spinmagntarget, prtvol=prtvol)
-   call ebands_print(ebands, prtvol=prtvol)
+   ABI_CHECK(get_arg_list("tmesh", tmesh, lenr, msg, default_list=[5._dp, 59._dp, 6._dp] ) == 0, msg)
+   ntemp = nint(tmesh(3))
+   ABI_CHECK_IGEQ(ntemp, 1, "ntemp <= 0")
+   ABI_MALLOC(kTmesh, (ntemp))
+   kTmesh = arth(tmesh(1), tmesh(2), ntemp) * kb_HaK
+   ABI_MALLOC(mu_e, (ntemp))
+
+   call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
+
+   do ii=1,ntemp
+     write(std_out, *)" T (K), mu_e (eV)", kTmesh(ii) / kb_HaK, mu_e(ii) * Ha_eV
+   end do
+
+   ABI_SFREE(kTmesh)
+   ABI_SFREE(mu_e)
 
  ! ====================
  ! Tools for developers

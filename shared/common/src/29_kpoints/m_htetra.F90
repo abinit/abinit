@@ -1287,7 +1287,6 @@ pure subroutine get_onetetra_blochl(eig, energies, nene, bcorr, tweight, dweight
      exit
    end if
 
-   !
    !  if we have a fully degenerate tetrahedron,
    !  1) the tweight is a Heaviside (step) function, which is correct above, but
    !  2) the dweight should contain a Dirac function
