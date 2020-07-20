@@ -131,7 +131,7 @@ znucl 6
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 
-#%%   t44.out, tolnlines = 38, tolabs = 0.05, tolrel = 2.0e-1
+#%%   t44.out, tolnlines = 38, tolabs = 0.06, tolrel = 2.0e-1
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
