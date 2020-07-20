@@ -254,7 +254,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    call importxyz(lenstr,string_raw,string,strlen)
 
    ! Make sure we don't have unmatched quotation marks
-   if (mod(char_count(string, '"'), 2) /= 0) then
+   if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
      MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
    end if
 
@@ -280,7 +280,12 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
+!XG20200720 : Why not saving string ? string_raw is less processed than string ...
  INPUT_STRING = string_raw
+
+!DEBUG
+ write(std_out,'(a)')string(:lenstr)
+!ENDDEBUG
 
 end subroutine parsefile
 !!***
@@ -512,8 +517,11 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit
+ integer :: b1,ii,ii1,ii2,ij,iline,ios,iost,ishift,isign
+ integer :: lenc,lenstr_inc,mline,nline1,input_unit,shift,sign
  logical :: include_found, ex
+!arrays
+ integer :: bs(2)
  character(len=1) :: string1
  character(len=3) :: string3
  character(len=500) :: filnam_inc,msg
@@ -749,8 +757,46 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  nline1=iline-1
  close (unit=input_unit)
 
+!DEBUG
+     write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
+!ENDDEBUG
+
+     !Identify concatenate string '" // "' with an arbitrary number of blanks before and after the //
+     !Actually, at this stage, there is no consecutive blanks left...
+     do
+       b1 = index(string(1:lenstr), '//')
+       if(b1/=0)then
+         !See whether there are preceeding and following '"'
+         do sign=-1,1,2
+           isign=(1+sign)/2  !  0 for minus sign, 1 for plus sign
+           do ii=1,lenstr
+             shift=-ii+isign*(1+2*ii)  !  -ii for minus sign,  1+ii for plus sign
+             if( (isign==0 .and. b1+shift<1) .or. (isign==1 .and. b1+shift>lenstr) )then
+               bs(isign+1)=0 ; exit
+             endif
+             if (string(b1+shift:b1+shift)=='"') then
+               bs(isign+1)=shift ; exit
+             else if (string(b1+shift:b1+shift)/=' ') then
+               bs(isign+1)=0 ; exit
+             endif
+           enddo
+           if(bs(isign+1)==0)exit
+         enddo
+         if(bs(1)==0 .or. bs(2)==0)exit
+         !the two shifts have been found, they give delimiters of the '" // "' chain
+         string(1:lenstr-4)=string(1:b1+bs(1)-1)//string(b1+bs(2)+1:lenstr)
+         lenstr=lenstr+bs(1)-1-bs(2)
+       else
+         exit
+       endif
+     enddo
+
+!DEBUG
+     write(std_out,'(a,a)')' incomprs : 2, string=',string(:lenstr)
+!ENDDEBUG
+
  ! Make sure we don't have unmatched quotation marks
- if (mod(char_count(string, '"'), 2) /= 0) then
+ if (mod(char_count(string(:lenstr), '"'), 2) /= 0) then
    MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
  end if
 
@@ -758,7 +804,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
 
  write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
  call wrtout(std_out,msg)
- !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
+ !write(std_out, "(3a)")"string after instrng:", ch10, string(:lenstr)
 
  DBG_EXIT("COLL")
 
@@ -864,6 +910,7 @@ subroutine incomprs(string,length)
  character(len=1) :: blank=' '
 !scalars
  integer :: bb,f1,ii,jj,kk,l1,lbef,lcut,lold,stringlen
+!arrays
  character(len=500) :: msg
 
 ! *************************************************************************
