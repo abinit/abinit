@@ -33,19 +33,11 @@ module m_occ
 
  use m_time,         only : timab, cwtime, cwtime_report
  use m_fstrings,     only : sjoin, itoa
- use defs_abitypes,  only : MPI_type
- use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
 
  private
 !!***
-
- real(dp),parameter :: huge_tsmearinv = 1e50_dp
- real(dp),parameter :: maxFDarg=500.0_dp
- real(dp),parameter :: maxDFDarg=200.0_dp
- real(dp),parameter :: maxBEarg=600.0_dp
- real(dp),parameter :: maxDBEarg=200.0_dp
 
  public :: getnel        ! Compute total number of electrons from efermi or DOS
  public :: newocc        ! Compute new occupation numbers at each k point,
@@ -55,7 +47,18 @@ module m_occ
  public :: occ_be        ! Bose-Einstein statistics  1 / [(exp((e - mu)/ KT) - 1]
  public :: occ_dbe       ! Derivative of Bose-Einstein statistics  (exp((e - mu)/ KT) / KT[(exp((e - mu)/ KT) - 1]^2
  public :: dos_hdr_write
- public :: pareigocc
+
+
+ integer,parameter :: nptsdiv2_def=6000
+ ! This parameter is used in init_occ_ent and getnel
+ ! nptsdiv2 is the number of integration points, divided by 2.
+
+ real(dp),parameter :: huge_tsmearinv = 1e50_dp
+ real(dp),parameter :: maxFDarg=500.0_dp
+ real(dp),parameter :: maxDFDarg=200.0_dp
+ real(dp),parameter :: maxBEarg=600.0_dp
+ real(dp),parameter :: maxDBEarg=200.0_dp
+
 
 contains
 !!***
@@ -148,10 +151,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 ! real(dp) :: smdFD
 ! smdFD (tt) = 1.0_dp / (exp(-tt/2.0_dp) + exp(tt/2.0_dp))**2
 !scalars
-! TODO: This parameter is defined in init_occ_ent but we cannot call the
-! routine to get this value since the same variable is used to dimension the
-! arrays! This Constants should be stored somewhere in a module.
- integer,parameter :: nptsdiv2_def=6000,  prtdos1=1
+ integer,parameter :: prtdos1=1
  integer :: bantot,iband,iene,ikpt,index,index_start,isppol, nene,nptsdiv2
  real(dp) :: buffer,deltaene,dosdbletot,doshalftot,dostot, wk
  real(dp) :: enemax,enemin,enex,intdostot,limit,tsmearinv
@@ -768,7 +768,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 !scalars
  integer :: algo,ii,jj,nconvd2
  integer :: nmaxFD,nminFD
- integer,parameter :: nptsdiv2_def=6000
  integer,save :: dblsmr,occopt_prev=-9999
  real(dp),save :: convlim,incconv,limit_occ,tphysel_prev=-9999,tsmear_prev=-9999
  real(dp) :: aa,dsqrpi,encorr,factor
@@ -785,8 +784,8 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
 ! *************************************************************************
 
-!Initialize the occupation function and generalized entropy function,
-!at the beginning, or if occopt changed
+ ! Initialize the occupation function and generalized entropy function,
+ ! at the beginning, or if occopt changed
 
  if(option==-1)then
    nptsdiv2 = nptsdiv2_def
@@ -1397,7 +1396,6 @@ elemental real(dp) function occ_fd(ee, kT, mu)
 
  ee_mu = ee - mu
 
- !TODO: Find good tols.
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol6) then
    arg = ee_mu / kT
@@ -1454,7 +1452,6 @@ elemental real(dp) function occ_dfde(ee, kT, mu)
 
  ee_mu = ee - mu
 
- !TODO: Find good tols.
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol6) then
    arg = ee_mu / kT
@@ -1503,7 +1500,6 @@ elemental real(dp) function occ_be(ee, kT, mu)
 
  ee_mu = ee - mu
 
- !TODO: Find good tols.
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol12) then
    arg = ee_mu / kT
@@ -1552,7 +1548,6 @@ elemental real(dp) function occ_dbe(ee, kT, mu)
 
  ee_mu = ee - mu
 
- !TODO: Find good tols.
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol12) then
    arg = ee_mu / kT
@@ -1691,182 +1686,6 @@ subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
  end if
 
 end subroutine dos_hdr_write
-!!***
-
-!!****f* m_occ/pareigocc
-!! NAME
-!! pareigocc
-!!
-!! FUNCTION
-!! This subroutine transmit to all processors, using MPI:
-!!   - the eigenvalues and,
-!!   - if ground-state, the occupation numbers
-!!     (In fact, in the present status of the routine,
-!!     occupation numbers are NOT transmitted)
-!!     transmit_occ = 2 is used in case the occ should be transmitted.
-!!     Yet the code is not already written.
-!!
-!! INPUTS
-!!  formeig=format of eigenvalues (0 for GS, 1 for RF)
-!!  localrdwf=(for parallel case) if 1, the eig and occ initial values
-!!            are local to each machine, if 0, they are on proc me=0.
-!!  mband=maximum number of bands of the output wavefunctions
-!!  mpi_enreg=information about MPI parallelization
-!!  nband(nkpt*nsppol)=desired number of bands at each k point
-!!  nkpt=number of k points
-!!  nsppol=1 for unpolarized, 2 for spin-polarized, output wf file processors,
-!!         Warning : defined only when paralbd=1
-!!  transmit_occ/=2 transmit only eigenvalues, =2 for transmission of occ also
-!!         (yet transmit_occ=2 is not safe or finished at all)
-!!
-!! OUTPUT
-!!  (see side effects)
-!!
-!! SIDE EFFECTS
-!!  eigen(mband*nkpt*nsppol)=eigenvalues (input or init to large number), (Ha)
-!!  occ(mband*nkpt*nsppol)=occupation (input or init to 0.0)  NOT USED NOW
-!!
-!! NOTES
-!! * The case paralbd=1 with formeig=0 is implemented, but not yet used.
-!!
-!! * The transmission of occ is not activated yet !
-!!
-!! * The routine takes the eigenvalues in the eigen array on one of the
-!!   processors that possess the wavefunctions, and transmit it to all procs.
-!!   If localrdwf==0, me=0 has the full array at start,
-!!   If localrdwf==1, the transfer might be more complex.
-!!
-!! * This routine should not be used for RF wavefunctions, since
-!!   it does not treat the eigenvalues as a matrix.
-!!
-!! PARENTS
-!!      newkpt,wfsinp
-!!
-!! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
-!!
-!! SOURCE
-
-subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,occ,transmit_occ)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: formeig,localrdwf,mband,nkpt,nsppol,transmit_occ
- type(MPI_type),intent(in) :: mpi_enreg
-!arrays
- integer,intent(in) :: nband(nkpt*nsppol)
- real(dp),intent(inout) :: eigen(mband*(2*mband)**formeig*nkpt*nsppol)
- real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
-
-!Local variables-------------------------------
-!scalars
- integer :: band_index,iband,ierr,ikpt,isppol,me,nbks,spaceComm
- !character(len=500) :: msg
-!arrays
- real(dp) :: tsec(2)
- real(dp),allocatable :: buffer1(:),buffer2(:)
-
-! *************************************************************************
-
- if(xmpi_paral==1)then
-
-!  Init mpi_comm
-   spaceComm=mpi_enreg%comm_cell
-   if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
-   if(mpi_enreg%paral_hf==1) spaceComm=mpi_enreg%comm_kpt
-!  Init me
-   me=mpi_enreg%me_kpt
-
-   if(localrdwf==0)then
-     call xmpi_bcast(eigen,0,spaceComm,ierr)
-
-   else if(localrdwf==1)then
-
-!    Prepare transmission of eigen (and occ)
-     ABI_MALLOC(buffer1,(2*mband**(formeig+1)*nkpt*nsppol))
-     ABI_MALLOC(buffer2,(2*mband**(formeig+1)*nkpt*nsppol))
-     buffer1(:)=zero
-     buffer2(:)=zero
-
-     band_index=0
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         nbks=nband(ikpt+(isppol-1)*nkpt)
-
-         if(mpi_enreg%paralbd==0)then
-
-           if(formeig==0)then
-             buffer1(2*band_index+1:2*band_index+nbks) = eigen(band_index+1:band_index+nbks)
-             if(transmit_occ==2) then
-               buffer1(2*band_index+nbks+1:2*band_index+2*nbks) = occ(band_index+1:band_index+nbks)
-             end if
-             band_index=band_index+nbks
-           else if(formeig==1)then
-             buffer1(band_index+1:band_index+2*nbks**2) = eigen(band_index+1:band_index+2*nbks**2)
-             band_index=band_index+2*nbks**2
-           end if
-
-         else if(mpi_enreg%paralbd==1)then
-
-!          Skip this k-point if not the proper processor
-           if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nbks,isppol,me)) then
-             if(formeig==0) then
-               band_index=band_index+nbks
-             else
-               band_index=band_index+2*nbks**2
-             end if
-             cycle
-           end if
-!          Loop on bands
-           do iband=1,nbks
-             if(mpi_enreg%proc_distrb(ikpt, iband,isppol) /= me)cycle
-             if(formeig==0)then
-               buffer1(2*band_index+iband)=eigen(band_index+iband)
-!              if(transmit_occ==2) buffer1(2*band_index+iband+nbdks)=occ(band_index+iband)
-             else if (formeig==1)then
-               buffer1(band_index+(iband-1)*2*nbks+1:band_index+(iband-1)*2*nbks+2*nbks) = &
-&               eigen(band_index+(iband-1)*2*nbks+1:band_index+(iband-1)*2*nbks+2*nbks)
-             end if
-           end do
-           if(formeig==0)then
-             band_index=band_index+nbks
-           else
-             band_index=band_index+2*nbks**2
-           end if
-         end if
-
-       end do
-     end do
-
-!    Build sum of everything
-     call timab(48,1,tsec)
-     if(formeig==0)band_index=band_index*2
-     call xmpi_sum(buffer1,buffer2,band_index,spaceComm,ierr)
-     call timab(48,2,tsec)
-
-     band_index=0
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         nbks=nband(ikpt+(isppol-1)*nkpt)
-         if(formeig==0)then
-           eigen(band_index+1:band_index+nbks) = buffer2(2*band_index+1:2*band_index+nbks)
-           if(transmit_occ==2) then
-             occ(band_index+1:band_index+nbks) = buffer2(2*band_index+nbks+1:2*band_index+2*nbks)
-           end if
-           band_index=band_index+nbks
-         else if(formeig==1)then
-           eigen(band_index+1:band_index+2*nbks**2) = buffer1(band_index+1:band_index+2*nbks**2)
-           band_index=band_index+2*nbks**2
-         end if
-       end do
-     end do
-
-     ABI_FREE(buffer1)
-     ABI_FREE(buffer2)
-   end if
- end if
-
-end subroutine pareigocc
 !!***
 
 end module m_occ
