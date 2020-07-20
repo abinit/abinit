@@ -145,8 +145,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/73ta.hgh
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/73ta.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/73ta.5.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/73ta.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ta,  from PRB58, 3641 (1998) paper
 - 73.00000   5.00000    992211                znucl, zion, pspdat
     3    2    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
