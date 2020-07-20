@@ -3179,6 +3179,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    end do ! spin
 
    call xmpi_sum(edos%dos, comm, ierr)
+   call xmpi_sum(edos%idos, comm, ierr)
 
    ! Free memory
    ABI_FREE(tmp_eigen)
@@ -4420,8 +4421,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
  character(len=500) :: msg
  type(htetra_t) :: tetra
 !arrays
- real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp) :: vsum(3), tsum(3,3)
+ real(dp) :: eminmax_spin(2,ebands%nsppol), vsum(3), tsum(3,3)
  real(dp),allocatable :: wme0(:),tmp_eigen(:), weights(:,:)
 
 ! *********************************************************************
@@ -4581,7 +4581,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
          ! Compute DOS and IDOS
          edos%dos(:,spin) = edos%dos(:,spin) + weights(:, 1)
-         !edos%idos(:,spin) = edos%idos(:,spin) + weights(:, 2)
+         edos%idos(:,spin) = edos%idos(:,spin) + weights(:, 2)
 
          ! scalar
 !$OMP PARALLEL DO
@@ -4621,6 +4621,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
    call tetra%free()
 
    call xmpi_sum(edos%dos, comm, ierr)
+   call xmpi_sum(edos%idos, comm, ierr)
    if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
    if (nvecs > 0) call xmpi_sum(out_vecsdos, comm, ierr)
    if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
@@ -4633,11 +4634,11 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
  max_occ = two / (ebands%nspinor * ebands%nsppol)
  edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
 
- !if (intmeth == 1) then
- do spin=1,edos%nsppol
-   call simpson_int(nw, edos%step, edos%dos(:,spin), edos%idos(:,spin))
- end do
- !end if
+ if (intmeth == 1) then
+   do spin=1,edos%nsppol
+     call simpson_int(nw, edos%step, edos%dos(:,spin), edos%idos(:,spin))
+   end do
+ end if
  edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
  ! Use bisection to find the Fermi level.
