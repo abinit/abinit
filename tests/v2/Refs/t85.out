@@ -151,7 +151,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 - pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosHGH_pwteter/73ta.13.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ta,  from PRB58, 3641 (1998) paper
 - 73.00000  13.00000    992211                znucl, zion, pspdat
-    3    2    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
  rloc=   0.5500000
  cc1 =   4.5462360; cc2 =   0.7794220; cc3 =   0.0000000; cc4 =   0.0000000
  rrs =   0.4218530; h11s=   2.7081360; h22s=  -5.7909590; h33s=   0.9476630
