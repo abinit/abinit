@@ -88,7 +88,7 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t42.out,  tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
-#%% psp_files = 01h.pspgth, 8o.pspnc, 14si.pspnc
+#%% psp_files = 01h.pspgth, 8o.pspnc, PseudosTM_pwteter/14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

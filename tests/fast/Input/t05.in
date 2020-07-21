@@ -46,7 +46,7 @@
  znucl 14
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -65,6 +65,6 @@
 #%% keywords = 
 #%% description = 
 #%%   Same as 03 but run with newer Troullier-Martins psp
-#%%   with core density 14si.pspnc.  Start from wf.03 and run irdwfk=1.
+#%%   with core density PseudosTM_pwteter/14si.pspnc.  Start from wf.03 and run irdwfk=1.
 #%%   Also iterated to convergence.
 #%%<END TEST_INFO>

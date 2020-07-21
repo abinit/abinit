@@ -42,7 +42,7 @@ ngkpt 4 4 4
  cineb_start 7
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "1h.pspnc, 1h.pspnc"
+ pseudos "PseudosTM_pwteter/1h.pspnc, 1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

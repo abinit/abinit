@@ -305,7 +305,7 @@ slk_rankpp2 450
 prtvol 4
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspnc"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

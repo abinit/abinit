@@ -58,7 +58,7 @@ charge22  1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "7n.pspnc, 7n.1s.psp_mod, 6c.pspnc, 1h.pspnc"
+ pseudos "7n.pspnc, 7n.1s.psp_mod, 6c.pspnc, PseudosTM_pwteter/1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

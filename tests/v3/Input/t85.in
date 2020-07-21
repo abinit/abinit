@@ -68,7 +68,7 @@ nstep 20               # Maximal number of SCF cycles
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "22ti.pspnc, 28ni.pspnc"
+ pseudos "PseudosTM_pwteter/22ti.pspnc, PseudosTM_pwteter/28ni.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

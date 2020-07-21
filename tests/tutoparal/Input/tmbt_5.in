@@ -76,7 +76,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 14si.pspnc, 8o.pspnc
+#%% psp_files = PseudosTM_pwteter/14si.pspnc, 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 20
 #%% nprocs_to_test = 20

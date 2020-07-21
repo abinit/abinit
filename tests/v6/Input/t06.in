@@ -48,7 +48,7 @@ rfdir 1 1 0  # there is polarisation in the first direction only ;
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "11na.pspnc, 17cl.pspnc"
+ pseudos "PseudosTM_pwteter/11na.pspnc, PseudosTM_pwteter/17cl.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

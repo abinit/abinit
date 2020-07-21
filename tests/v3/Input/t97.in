@@ -30,7 +30,7 @@ toldfe 1.0d-8
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "42mo.pspnc, 14si.pspnc, 8o.pspnc"
+ pseudos "PseudosTM_pwteter/42mo.pspnc, PseudosTM_pwteter/14si.pspnc, 8o.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
