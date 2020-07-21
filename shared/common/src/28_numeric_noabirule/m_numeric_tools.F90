@@ -5227,7 +5227,7 @@ end subroutine interpolate_denpot
 !!
 !! SOURCE
 
-subroutine simpson_int(npts,step,values,int_values)
+subroutine simpson_int(npts, step, values, int_values)
 
 !Arguments ------------------------------------
 !scalars

@@ -1062,6 +1062,8 @@ subroutine rta_compute_mobility(self, cryst, dtset, comm)
  ABI_CALLOC(self%ne, (self%ntemp))
  ABI_CALLOC(self%nh, (self%ntemp))
 
+ !call ebands_get_carriers(self%ebands, self%ntemp, kTmesh, mu_e, self%nh, self%ne)
+
  ! Compute carrier concentration
  do spin=1,nsppol
    do ik_ibz=1,nkpt
@@ -1498,8 +1500,8 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
 
 !Local variables ------------------------------
 !scalars
- integer :: ntemp, order, spin, imu, irta, ie, ne, my_rank, ii, ierr
- real(dp) :: mu, ee, kT, max_occ, value_at_edge, vb_max, cb_min, estep, magic_ratio, estart, estop
+ integer :: ntemp, order, ie, ne, my_rank, ii, ierr
+ real(dp) :: mu, kT, max_occ, vb_max, cb_min, estep, magic_ratio, estart, estop
  logical :: assume_gap
  character(len=500) :: msg
  type(gaps_t) :: gaps
@@ -1528,7 +1530,7 @@ subroutine rta_estimate_sigma_erange(dtset, ebands, comm)
 
  ! It's funny that we need dtset%sigma_erange to estimate sigma_erange!
  if (all(dtset%sigma_erange == 0)) then
-   msg = "rta_estimate_sigma_erange requires `sigma_erange` to understand if we are dealing with e/h in semiconductor or metal"
+   msg = "We need `sigma_erange` to understand if we are dealing with e/h in semiconductors or metals."
    MSG_ERROR(msg)
  end if
  assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)

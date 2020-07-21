@@ -2538,7 +2538,7 @@ subroutine getcgqphase(dtset, timrev, cg,  mcg,  cgq, mcgq, mpi_enreg, nkpt_rbz,
  real(dp), allocatable :: smat_k(:,:,:)
  real(dp), allocatable :: pwnsfac_k(:,:)
  logical, allocatable :: my_kpt(:,:)
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *********************************************************************
 

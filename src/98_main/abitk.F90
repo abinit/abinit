@@ -66,7 +66,7 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
- integer :: ndivsm, abimem_level, ierr, ntemp, ios
+ integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp
  real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb !, tolsym, tsmear
  character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
@@ -82,6 +82,7 @@ program abitk
  real(dp) :: skw_params(4), tmesh(3)
  real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
+ real(dp),allocatable :: nh(:), ne(:)
 
 !*******************************************************
 
@@ -253,13 +254,11 @@ program abitk
      edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
      call edos%print(std_out, header="Electron DOS")
      call edos%write(strcat(basename(path), "_EDOS"))
-     call edos%free()
 
    else if (command == "ebands_jedos") then
      NOT_IMPLEMENTED_ERROR()
      jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
-     call jdos%free()
    end if
 
  case ("ebands_bxsf")
@@ -360,13 +359,39 @@ program abitk
    ABI_MALLOC(mu_e, (ntemp))
 
    call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
+   mu_e = 6.715 * eV_Ha
 
-   do ii=1,ntemp
-     write(std_out, *)" T (K), mu_e (eV)", kTmesh(ii) / kb_HaK, mu_e(ii) * Ha_eV
+   ABI_MALLOC(ne, (ntemp))
+   ABI_MALLOC(nh, (ntemp))
+   call ebands_get_carriers(ebands, ntemp, kTmesh, mu_e, nh, ne)
+
+   !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+   do itemp=1,ntemp
+     write(std_out, "(a, 2f16.2, 2e16.2)")&
+      " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+      nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+      ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3
    end do
 
-   ABI_SFREE(kTmesh)
-   ABI_SFREE(mu_e)
+   ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
+   ABI_CHECK(get_arg("step", step, msg, default=0.001 * eV_Ha) == 0, msg)
+   ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
+   edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
+   call edos%print(std_out, header="Electron DOS")
+   call edos%get_carriers(ntemp, kTmesh, mu_e, nh, ne)
+
+   !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
+   do itemp=1,ntemp
+     write(std_out, "(a, 2f16.2, 2e16.2)")&
+      " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+      nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
+      ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3
+   end do
+
+   ABI_FREE(kTmesh)
+   ABI_FREE(mu_e)
+   ABI_FREE(nh)
+   ABI_FREE(ne)
 
  ! ====================
  ! Tools for developers
@@ -423,6 +448,8 @@ program abitk
  call ebands_free(ebands)
  call ebands_free(ebands_kpath)
  call ebands_free(other_ebands)
+ call edos%free()
+ call jdos%free()
 
  ABI_SFREE(kibz)
  ABI_SFREE(wtk)

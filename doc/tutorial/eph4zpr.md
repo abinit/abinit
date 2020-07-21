@@ -102,7 +102,7 @@ under infinitesimal translation [[cite:Giustino2017]].
 
 At the level of the implementation, the number of bands in the two sums is defined by [[nband]]
 while the $\qq$-mesh is specified by [[eph_ngqpt_fine]] (or [[ddb_ngqpt]] if DFPT potentials should not be interpolated).
-The list of temperatures is defined by the [[tmesh]] input variable in Kelvin.
+The list of temperatures in Kelvin is defined by the [[tmesh]] input variable.
 For the sake of simplicity, the dependence on $T$ will be omitted in the following.
 Keep in mind, however, that all the equations in which $\Sigma$ appears have an additional dependence on
 the physical temperature T.
@@ -116,7 +116,7 @@ the physical temperature T.
     Calculations at high-symmetry $\kk$-points such as $\Gamma$ are therefore much faster as there
     are more symmetries that can be exploited.
 
-    This symmetrization procedure is activated by default and can be disables by setting [[symsigma]]
+    This symmetrization procedure is activated by default and can be disabled by setting [[symsigma]]
     to 0 for testing purposes.
     Note that when [[symsigma]] is set to 1, the code performs a final average of the QP results
     within each degenerate subspace.
@@ -160,7 +160,7 @@ of the self-energy evaluated at the bare KS eigenvalue:
 
 $$ \ee^\QP_\nk = \ee_\nk + \Re\, \Sigma_\nk^{\text{e-ph}}(\ee_\nk). $$
 
-This approach is equivalent to standard time-dependent Rayleigh-Schrodinger perturbation theory.
+This approach is equivalent to a (thermal average of) standard time-dependent Rayleigh-Schrodinger perturbation theory.
 In the linearized QP equation, on the contrary, the self-energy is Taylor-expanded around
 the KS eigenvalue and the QP correction is obtained using
 
@@ -188,17 +188,18 @@ Each approach has pros and cons.
 
 The most direct way consists in specifying explicitly the $\kk$-points and the band range
 using the three variables: [[nkptgw]], [[kptgw]], [[bdgw]]
-To compute the correction for the VBM at $\Gamma$ in silicon
+To compute the correction for the VBM/CBM at $\Gamma$ in silicon
 (a non-magnetic semiconductor with 8 valence electrons per unit cell), one would use:
 
 ```sh
 nkptgw 1
 kptgw  0 0 0  # [3, nkptgw] array
-bdgw   4 4    # [2, nkptgw] arary giving the initial and the last band index
+bdgw   4 5    # [2, nkptgw] arary giving the initial and the last band index
               # for each nkptgw k-point
 ```
 
 as the index of the valence band is given by 8 / 2 = 4.
+Obviously this input file will only provide the ZPR of the optical gap as Si has an indirect bandgap.
 
 !!! important
 
@@ -225,17 +226,19 @@ The results are stored in the SIGMAPH.nc file for each $\nk$ state specified by 
 A typical workflow for ZPR calculations requires the following steps:
 
 1. **GS calculation** to obtain the WFK and the DEN file.
+   The $\kk$-mesh should be dense enough to converge electronic and vibrational properties.
    Remember to set [[prtpot]] to 1 to produce the file with the KS potential required for the Sternheimer method.
 
 2. **DFPT calculations** for all the IBZ $\qq$-points corresponding to the *ab-initio* [[ddb_ngqpt]] mesh
    used to perform the Fourier interpolation of the dynamical matrix and of the DFPT potentials.
    In the simplest case, the DFPT run uses the WFK produced in step #1
-   and the $\qq$-mesh is a submesh of the $\kk$-mesh
+   provided the $\qq$-mesh is a submesh of the GS $\kk$-mesh.
    Remember to compute $\epsilon^{\infty}$, $Z^*$ and $Q^*$.
 
-3. **NSCF computation** of a WFK file on a denser $\kk$-mesh containing the wavevectors
-   for which phonon-induced QP corrections are wanted. This part will use the DEN file produced in step #1.
-   Remember to include enough empty states so that it is possible to perform convergence studies wrt [[nband]].
+3. **NSCF computation** of a WFK file on a much denser $\kk$-mesh containing the wavevectors
+   for which phonon-induced QP corrections are wanted. This job will use the DEN file produced in step #1.
+   Remember to include enough empty states so that it is possible to perform
+   convergence studies wrt [[nband]] afterwards.
 
 4. **Merge the partial DDB and POT files** with *mrgddb* and *mrgdvdb*, respectively
 
@@ -245,8 +248,8 @@ A typical workflow for ZPR calculations requires the following steps:
 ## Getting started
 
 In this tutorial, we prefer to focus on the usage of the EPH code hence
-we will be using **pre-computed DDB and DFPT POT files** to bypass the DFPT computation.
-We also provide a DEN.nc file that can be used to perform the NSCF calculations required
+we will be using **pre-computed DDB and DFPT POT files** to bypass the DFPT part.
+We also provide a **precomputed DEN.nc file** that can be used to perform the NSCF calculations required
 to generate the WKF file and the file with GS KS potential required for the Sternheimer equation.
 
 If git is installed on your machine, one can easily fetch the entire repository with:
@@ -271,9 +274,9 @@ or simply copy the tarball by clicking the "download button" in the github inter
 Note **that the directory with the input files must be located in the same working directory**
 in which you will be executing the tutorial.
 
-The Abipy script used to perform the prelimiary calculations is available here.
+The |AbiPy| script used to perform the prelimiary calculations is available here.
 Note that AbiPy does not supports MultiDatasets so each directory corresponds to a single calculation.
-In particular, all the DFPT task are in 
+In particular, all the DFPT task are in
 
 To produce these files, we used the experimental parameters for hexagonal $MgB_2$ (a = 5.8317 and c/a= 1.1419)
 and norm-conserving pseudopotentials with an energy cutoff [[ecut]] of 60 Ry.
@@ -289,17 +292,17 @@ If what follows, we pretend we know nothing about MgO so that we can explain how
 abitk and netcdf files to inspect the results of the previous calculations.
 and use this piece of info to continue our calculations.
 
-The input file of the GS run is also stored in the DEN.nc file and one can easily access it with the
-*ncdump* utility
+The input file of the GS run is stored in the DEN.nc file (*input_string* nc variable)
+and one can easily access it with the *ncdump* utility
 
     ncdump -v input_string flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
 
     FOOBAR
 
-Let's start by print to terminal the crystalline structure with:
+To print to terminal the crystalline structure, use:
 
 ```md
-$ abitk crystal_print flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
+abitk crystal_print flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
 
  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -322,8 +325,8 @@ $ abitk crystal_print_abivars   flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
 Since we want to compute the renormalization of the band gap due to phonons, it is also useful
 to have a look at the gaps computed from the $\kk$-mesh used to generate the DEN file:
 
-```sh
-$ abitk ebands_gaps flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
+```md
+abitk ebands_gaps flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
 
   >>>> For spin  1
    Minimum direct gap =   4.45 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
@@ -357,11 +360,9 @@ abiopen.py flow_zpr_mgo/w0/t1/outdata/out_GSR.nc -e
 
 If you don't remember the FFT mesh used to generate the DEN file, use
 
-    abitk hdr_print MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
-
-to print the header
-
 ```sh
+abitk hdr_print MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
+
 ===============================================================================
  ECHO of part of the ABINIT file header
 
@@ -385,15 +386,21 @@ to print the header
  The header contain   4 additional records.
 ```
 
+to print the header. Use `--prtvol 1` to output more records.
+
 ### Executing mrgddb
 
-First of all, let's merge the partial DDB files using the following input file:
+First of all, let's merge the partial DDB files with
+
+```sh
+mrgddb < teph4zpr_1.in
+```
+
+and the following input file:
 
 {% dialog tests/tutorespfn/Input/teph4zpr_1.in %}
 
 that lists the **relative paths** of the different partial DDB files and the syntax:
-
-    mrgddb < teph4zpr_1.in
 
 ### Executing mrgdv
 
@@ -419,11 +426,12 @@ and the command
     whereas *ipert* specifies the kind of perturnation ([1, natom] if atomic displacement)
     All DFPT POT files with 1 <= index <= 3 x [[natom]] correspond to atomic pertubations.
 
-In the mrgdv output file:
+In the output file produced by mrgdv 
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_2.stdout %}
 
-we have a section for each $\qq$-point with the list of atomic perturbations merged in the database.
+there is a section for each $\qq$-point with the list of atomic perturbations 
+that have been included in the database.
 
 ```md
  qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -436,14 +444,16 @@ we have a section for each $\qq$-point with the list of atomic perturbations mer
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 ```
 
-"symmetric" means that that particular (idir, ipert) can be reconstructed by symmetry from the "independent" entries.
-At the end of the output file, you should get the following message:
+**symmetric** means that that particular *(idir, ipert)* can be reconstructed by symmetry from the **independent** entries.
+All the independent entries should be present and you should get the following message:
+at the end of the output file, 
 
 ```md
  All the independent perturbations are available
  Done
 ```
-that indicates that our DVDB is complete in the sense that the EPH code will be able
+
+this indicates that our DVDB database is complete in the sense that the EPH code will be able
 to reconstruct by symmetry all the 3 [[natom]] perturbations for each $\qq$-qpoint.
 
 !!! warning
@@ -464,7 +474,7 @@ the position of the KS band edges as these are the states we want to correct.
 We use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]].
 
 Note that in all the input files of the tutorial, we will be using the [[structure]] variable
-to initialize the unit cell from an external input file so that we don't need 
+to initialize the unit cell from an external input file so that we don't need
 to repeat it over and over again.
 
 ```sh
@@ -509,22 +519,22 @@ The input file is ...
  getden_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
 ```
 
-Discuss [[nbdbuf]]
+Note the use of [[nbdbuf]].
 
 !!! important
 
     For mobility calculations, we have seen that it is possible
     to reduce significantly the cost of the WFK computation
-    by restrict the NSCF calculation to the $\kk$-points inside the electron (hole) pockets.
+    by restricting the NSCF calculation to the $\kk$-points inside the electron (hole) pockets.
     Unfortunately, this trick is not possible when computing the full self-energy.
     On the other hand, ZPR calculations can take advange of the Sternheimer method to reduce the number of [[nband]].
 
 ## Our first ZPR calculation
 
 For our first ZPR calculation, we use a very minimalistic input file that allows us
-to discuss the basic input variables and the organization of the main output file.
+to discuss the most important input variables and the info reported in the main output file.
 
-Run the code using:
+First of all, run the code using:
 
 ```sh
 abinit teph4zpr_4.in > teph4zpr_4.log 2> err &
@@ -536,11 +546,11 @@ with the following input file:
 
 !!! tip
 
-    You may want to run the examples in parallel with MPI with e.g.
+    You may want to run the examples in parallel with MPI using e.g.
 
         mpirun -n 2 abinit teph4zpr_4.in > teph4zpr_4.log 2> err &
 
-    to speed up the calculation.
+    to speed up the calculations of the tutorials.
     The EPH code will automatically distribute the workload using a predefined distribution scheme
     (not necessarily the most efficient one in terms of parallel efficiency though).
     In the last part of the tutorial, we explain how to specify a particular
@@ -548,33 +558,32 @@ with the following input file:
 
 Let's now discuss the meaning of the different variables in more details.
 
-We use [[optdriver]] 7 and [[eph_task]] 4 to activate the computation of the full self-energy (real + imaginary part).
-The paths to the external files are specified by [[getddb_filepath]], [[getwfk_filepath]], and [[getdvdb_filepath]].
+We use [[optdriver]] 7 to enter the EPH code while [[eph_task]] 4 activates 
+the computation of the full self-energy (real + imaginary part).
+The paths to the external files (DDB, WFK, DVDB) are specified 
+by the three variables [[getddb_filepath]], [[getwfk_filepath]], and [[getdvdb_filepath]]:
 
-```
+```sh
 getddb_filepath "teph4zpr_1_DDB"
+ddb_ngq pt 4 4 4          # The code expects to find in the DDB
+                          # all the IBZ q-points corresponding to a 4x4x4 q-mesh
+
 getdvdb_filepath "teph4zpr_2_DVDB"
-getwfk_filepath "teph4zpr_3o_WFK"
+getwfk_filepath "teph4zpr_3o_WFK"  # 4x4x4 k-mesh with 70 bands
 ```
 
 The mesh for electrons ([[ngkpt]], [[nshiftk]] and [[shiftk]]) is the one used to generate the input WFK file.
-
 [[ddb_ngqpt]] is set to 4x4x4 as this is the $\qq$-mesh we used in the DFPT part to generate the DDB and DVDB file.
 but the integration in $\qq$-space is performed with the [[eph_ngqpt_fine]] mesh.
 As [[eph_ngqpt_fine]] differs from [[ddb_ngqpt]], the code will automatically activate the interpolation of the DFPT potentials
 as discussed in [introduction page for the EPH code](eph_intro).
-
 The $\qq$-space integration is defined by [[eph_intmeth]] [[zcut]]
 
-Let's now have a look at the main output file.
+We can now have a look at the main output file.
 
 {% dialog tests/tutorespfn/Refs/teph4zpr_4.out %}
 
-```sh
-abiopen.py teph4zpr_4o_PHBST.nc -e
-```
-
-First of all, we have a section that summarizes the most important parameters of the calculation
+First of all, we have a section that summarizes the most important parameters:
 
 ```md
  Number of bands in e-ph self-energy sum: 30
@@ -597,9 +606,11 @@ First of all, we have a section that summarizes the most important parameters of
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 ```
 
-Followed by another section defining how to different dimensions are distributed across the MPI processes:
+Note how [[asr]] and [[chneut]] and [[dipdip]] are automaticall activated
 
-```
+Then we find another section defining how to different dimensions are distributed across the MPI processes:
+
+```md
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 30
 P Number of CPUs for parallelism over perturbations: 1
@@ -614,7 +625,10 @@ P Number of k-point in Sigma_nk treated by this proc: 1 of 1
  Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
 ```
 
-Finally we have the section with the QP corrections:
+In this case we are running in sequential but things will start to change here if you start to
+use more than one core. [[eph_np_pqbks]]
+
+Finally we have the section with the QP results:
 
 ```md
 ================================================================================
@@ -653,17 +667,24 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.568
     The computation of spectral functions and Eliashberg functions therefore requires [[eph_task]] +4.
 
 
-Exercise:
+Since we have computed the phonon band structure with ([[ph_ndivsm]], [[ph_nqpath]], [[ph_qpath]]
+and the phonon DOS with [[ph_ngqpt]]
+
+```sh
+abiopen.py teph4zpr_4o_PHBST.nc -e
+```
+
+### Exercise:
 
  Change the input file to use [[mixprec]] 1 and [[boxcutmin]] 1.1.
  Rerun the calculation and compare with the previous results.
  Do you see significant differences? What about the wall-time?
 
-### Convergence wrt nband
+## Convergence wrt nband
 
 At this point it should be not so difficult to write an input file to perform ZPR
 calculations for different values of [[nband]] for fixed $\qq$-mesh and $\kk$ wavevectors.
-It's just a matter of adding e.g
+It's just a matter of adding:
 
 ```sh
  ndtset 3
@@ -682,15 +703,13 @@ grep something gives
 {% dialog tests/tutorespfn/Refs/teph4zpr_5.out %}
 
 ```sh
-```
-
-```sh
 abicomp.py sigeph teph4zpr_5o_DS*_SIGEPH.nc -e
 ```
 
-The results are quite disappointing in the sense that 
-QP corrections indeed converge slowly 
-So XXX bands are needed to convergence the ZPR.
+The results are quite disappointing in the sense that the QP corrections do not converge at all!
+In part this is due to the coarse nband 300 should be enough if you use a much denser $\kk$-mesh.
+Note however that this typical of many-body approaches based on sum over states in the sense 
+that QP corrections convergence slowly with respect to the number of bands.
 
 !!! important
 
@@ -699,7 +718,7 @@ So XXX bands are needed to convergence the ZPR.
     and can be executed in parallel.
     Note also that restart capabilities (see [[eph_restart]]) won't work in multidataset mode.
 
-### How to reduce the number of bands with the Sternheimer method
+## How to reduce the number of bands with the Sternheimer method
 
 In this section, we discuss how to use the Sternheimer method to accelerate the convergence with [[nband]].
 
@@ -712,11 +731,12 @@ and the solver stops when the first-order wavefunction is converged within [[tol
 Default values for these two variables are provided if they are not specified by the user in the input file.
 The code will abort if the algorithm cannot converge the solution.
 
-In brief, we need to add the following section to out EPH input:
+In brief, we need to add the following section to our initial EPH input:
 
 ```sh
 eph_stern 1
 getpot_filepath "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_POT.nc"
+
 # nline 100 tolwfr 1e-16 # Default values
 ```
 
@@ -732,20 +752,22 @@ Run the calculation, as usual, with:
 
 Let's extract the results:
 
-
 ```
-grep OTMS teph4zpr_6.out 
-
-
-
+grep OTMS teph4zpr_6.out
 ```
 
 ```
 abicomp.py sigeph teph4zpr_6o_DS*_SIGEPH.nc -e
 ```
 
-The convergence now is much better and the ZPR is converged with 1 meV for nband ?? 
+Now the convergence is much better and the ZPR valu is converged with 1 meV for nband ??
 This is the value one should obtain when summing all the bands up to [[mpw]]
+
+Exercise:
+
+    Generate a new WFK with nband ~ mpw and run a ZPR calculation without the Sternheimer method.
+    Compare the sum-over-states results with Sternheimer.
+    Why it is not a good idea to use nband > mpw?
 
 
 !!! important
@@ -762,25 +784,21 @@ This is the value one should obtain when summing all the bands up to [[mpw]]
     **without** the Sternheimer method is much faster than the same computation done with [[eph_stern]] 1.
     As a matter of fact, one uses the Sternheimer method so that we don't need 300 bands to convergence the results.
 
-### Convergence of the ZPR wrt the q-mesh
+## Convergence of the ZPR wrt the q-mesh
 
 In the previous sections, we found that XXX bands with the Sternheimer method are enough to converge.
 In this part of the tutorial, we perform a convergence study wrt to the q-sampling
 
+In the third input *teph4zpr_7.in*, we have computed WFK files on different $\kk-$-meshes 
+and a relatively small number of empty states (XXX).
+We can finally use these extra WFK files to perform ZPR calculations
+
 ```sh
  ndtset 3
 
- ngkpt1 4 4 4
- ngkpt2 8 8 8
- ngkpt3 12 12 12
-
- eph_ngqpt_fine1 4 4 4 
- eph_ngqpt_fine2 8 8 8
- eph_ngqpt_fine3 12 12 12
-
- getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
- getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
- getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
+ ngkpt1 4 4 4;    eph_ngqpt_fine1 4 4 4;    getwfk_filepath1 "teph4zpr_3o_DS1_WFK"
+ ngkpt2 8 8 8;    eph_ngqpt_fine2 8 8 8;    getwfk_filepath2 "teph4zpr_3o_DS2_WFK"
+ ngkpt3 12 12 12; eph_ngqpt_fine3 12 12 12; getwfk_filepath3 "teph4zpr_3o_DS3_WFK"
 ```
 
 {% dialog tests/tutorespfn/Input/teph4zpr_7.in %}
@@ -789,23 +807,26 @@ Run the calculation, as usual, with:
 
     abinit teph4zpr_7.in > teph4zpr_7.log 2> err &
 
+Extracting the ZPR from the output file 
+
 {% dialog tests/tutorespfn/Refs/teph4zpr_7.out %}
 
+as a function of the number of k-points in the IBZ gives:
 
-Extracting the ZPR as a function of the number of k-points in the IBZ gives:
-
-Obviously we are still far from convergence: one should test denser $\kk$-meshes and, last but not least, 
+Obviously we are still far from convergence: one should test denser $\kk$-meshes and, last but not least,
 monitor the behaviour for smaller [[zcut]].
-Unforunately, these additional convergence tests cannot be covered in this tutorial 
-and they are left as excercise.
+Unfortunately, these additional convergence tests cannot be covered in this tutorial
+and they are left as extra excercise.
 
+<!--
 ### How to compute the spectral function
 
-The maximum
-[[nfreqsp]] and [[freqspmax]].
+The maximum [[nfreqsp]] and [[freqspmax]].
+-->
 
 ### MPI parallelism and memory requirements
 
+<!--
 There are five different MPI levels that can be used to distribute the workload
 and the most memory-demanding data structures.
 By default, the code tries to reach some compromise between memory requirements and time to solution
@@ -827,12 +848,13 @@ The MPI parallelism over $\kk$-points and spins is very efficient
 but it requires HDF5 with MPI-IO support and memory does not scale.
 Use these additional levels if memory requirements are under control
 and you want to boost the calculation.
+-->
 
 There's an important difference with respect to [[eph_task]] -4 that is worth discussing in detail.
 When computing the imaginary part at the KS energy for transport properties,
 the EPH code is able to filter both $\kk$- and $\qq$-points so that only the relevant states around the band edge
 are stored in memory.
-Unfortunately, tn the case of full self-energy calculations, this filtering algorithm is not possible and each MPI process needs
+Unfortunately, in the case of full self-energy calculations, this filtering algorithm is not possible and each MPI process needs
 to read and store all the KS wavefunctions in the IBZ so that one can compute e-ph matrix elements connecting $\kk$ to $\kq$.
 In other words, the IBZ is not MPI-distributed and this leads to a significant increase in the memory requirements, especially
 for dense meshes.

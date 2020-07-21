@@ -263,7 +263,7 @@ P           mkmem3         72
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
            tolwfr      1.00000000E-16
-            tmesh      0.00000000E+00  2.00000000E+02  1.00000000E+00
+            tmesh      0.00000000E+00  1.00000000E+02  4.00000000E+00
             typat      2  1
               wtk1       0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
@@ -488,7 +488,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Both Real and Imaginary part of Sigma will be computed.
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
- Number of temperatures: 1 From: 0.000000E+00 to 0.000000E+00 [K]
+ Number of temperatures: 4 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4, 4, 4]
  Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
  Number of q-points in the IBZ: 8
@@ -538,6 +538,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.569
  QP_gap - KS_gap:   -0.164 (OTMS:   -0.184)
  
 ============================================================================================
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -696,7 +699,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Both Real and Imaginary part of Sigma will be computed.
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
- Number of temperatures: 1 From: 0.000000E+00 to 0.000000E+00 [K]
+ Number of temperatures: 4 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4, 4, 4]
  Q-mesh used for self-energy integration [ngqpt]: [8, 8, 8]
  Number of q-points in the IBZ: 29
@@ -746,6 +749,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    5.795
  QP_gap - KS_gap:   -0.205 (OTMS:   -0.266)
  
 ============================================================================================
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -904,7 +910,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Both Real and Imaginary part of Sigma will be computed.
  Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
  Number of frequency in generalized Eliashberg functions: 0
- Number of temperatures: 1 From: 0.000000E+00 to 0.000000E+00 [K]
+ Number of temperatures: 4 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [4, 4, 4]
  Q-mesh used for self-energy integration [ngqpt]: [12, 12, 12]
  Number of q-points in the IBZ: 72
@@ -954,6 +960,9 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    5.795
  QP_gap - KS_gap:   -0.219 (OTMS:   -0.316)
  
 ============================================================================================
+ No more than 1 temperatures are written to the main output file.
+ Please use SIGEPH.nc file and AbiPy to analyze the results.
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1055,7 +1064,7 @@ P           mkmem3         72
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
            tolwfr      1.00000000E-16
-            tmesh      0.00000000E+00  2.00000000E+02  1.00000000E+00
+            tmesh      0.00000000E+00  1.00000000E+02  4.00000000E+00
             typat      2  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1263589907E+00  2.1263589907E+00  2.1263589907E+00

@@ -51,7 +51,7 @@ MODULE m_ebands
  use m_io_tools,       only : file_exists, open_file
  use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
- use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
+ use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson, simpson_int, wrap2_zero_one, &
                               isdiagmat, get_diag, interpol3d, interpol3d_indices
  use m_special_funcs,  only : gaussian
  use m_geometry,       only : normv
@@ -120,6 +120,7 @@ MODULE m_ebands
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
  public :: ebands_write               ! Driver routine to write bands in different txt formats.
  public :: ebands_kmesh2str           ! Return string with info about the k-sampling.
+ public :: ebands_get_carriers        ! Compute carrier concentration from input Fermi level and list of Temperatures.
 !!***
 
 !----------------------------------------------------------------------
@@ -135,13 +136,16 @@ MODULE m_ebands
 
  type,public :: edos_t
 
-   integer :: nsppol
+   integer :: nsppol = -1
     ! Number of spins.
 
-   integer :: nkibz
+   integer :: nspinor =  -1
+    ! Number of spinors
+
+   integer :: nkibz = -1
     ! Number of k-points in the IBZ.
 
-   integer :: nw
+   integer :: nw = -1
    ! Number of points in the frequency mesh.
 
    integer :: ief = 0
@@ -150,13 +154,13 @@ MODULE m_ebands
    ! Note the value of gef stored in edos_t is computed by performing
    ! a linear interpolation between ief and ief + 1
 
-   integer :: intmeth
+   integer :: intmeth = 0
    ! 1 for gaussian, 2 tetra
 
    real(dp) :: broad = zero
    ! Gaussian broadening
 
-   real(dp) :: step
+   real(dp) :: step = -one
    ! Step of the mesh
 
    real(dp),allocatable :: mesh(:)
@@ -187,6 +191,8 @@ MODULE m_ebands
 
    procedure :: ncwrite => edos_ncwrite
    ! Write eDOS to netcdf file.
+
+   procedure :: get_carriers => edos_get_carriers
 
  end type edos_t
 !!***
@@ -3101,7 +3107,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  ierr = 0
 
- edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol
+ edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol; edos%nspinor = ebands%nspinor
  edos%intmeth = intmeth
 
  if (ebands%nkpt == 1) then
@@ -3508,6 +3514,78 @@ subroutine edos_print(edos, unit, header)
  write(unt, "(a)")""
 
 end subroutine edos_print
+!!***
+
+!!****f* m_ebands/edos_get_carriers
+!! NAME
+!! edos_get_carriers
+!!
+!! FUNCTION
+!!  Compute carrier concentration for holes (nh) and electrons (ne) for a given list of `ntemp`
+!!  temperatures `kTmesh` and chemical potentials `mu_e`.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine edos_get_carriers(edos, ntemp, kTmesh, mu_e, nh, ne)
+
+!Arguments ------------------------------------
+ class(edos_t),intent(in) :: edos
+ integer,intent(in) :: ntemp
+!arrays
+ real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
+ real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+
+!Local variables-------------------------------
+ integer :: itemp, iw
+ !real(dp) :: max_occ
+ real(dp),allocatable :: values(:)
+
+! *************************************************************************
+
+ ! Copy important dimensions
+ !max_occ = two / (edos%nspinor * edos%nsppol)
+ ne = zero; nh = zero
+
+ ABI_MALLOC(values, (edos%nw))
+
+ ! TODO: May spline the DOS to improve accuracy of the results.
+ !new_edos = edos%spline()
+
+ do itemp=1,ntemp
+
+   ! For holes
+   do iw=1,edos%nw
+     if (edos%mesh(iw) < mu_e(itemp)) then
+       values(iw) = edos%dos(iw, 0) * (one - occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp)))
+     else
+       values(iw) = zero
+     end if
+   end do
+   nh(itemp) = simpson(edos%step, values)
+
+   ! For electrons
+   do iw=1,edos%nw
+     if (edos%mesh(iw) >= mu_e(itemp)) then
+       values(iw) = edos%dos(iw, 0) * occ_fd(edos%mesh(iw), kTmesh(itemp), mu_e(itemp))
+     else
+       values(iw) = zero
+     end if
+   end do
+   ne(itemp) = simpson(edos%step, values)
+
+ end do
+
+ ABI_FREE(values)
+
+end subroutine edos_get_carriers
 !!***
 
 !----------------------------------------------------------------------
@@ -4430,7 +4508,7 @@ type(edos_t) function ebands_get_edos_matrix_elements(ebands, cryst, bsize, &
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol
+ edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol; edos%nspinor = ebands%nspinor
  edos%intmeth = intmeth
  if (ebands%nkpt == 1) then
    MSG_COMMENT("Cannot use tetrahedra for e-DOS when nkpt == 1. Switching to gaussian method")
@@ -4946,8 +5024,8 @@ subroutine jdos_free(jdos)
 
 ! *********************************************************************
 
- ABI_FREE(jdos%mesh)
- ABI_FREE(jdos%values)
+ ABI_SFREE(jdos%mesh)
+ ABI_SFREE(jdos%values)
 
 end subroutine jdos_free
 !!***
@@ -6027,6 +6105,57 @@ character(len=500) function ebands_kmesh2str(self) result(str)
  end if
 
 end function ebands_kmesh2str
+!!***
+
+!!****f* m_ebands/ebands_get_carriers
+!! NAME
+!! ebands_get_carriers
+!!
+!! FUNCTION
+!!  Compute carrier concentration for holes (nh) and electrons (ne) for a given list of `ntemp`
+!!  temperatures `kTmesh` and chemical potentials `mu_e`.
+!!
+!! SOURCE
+
+subroutine ebands_get_carriers(self, ntemp, kTmesh, mu_e, nh, ne)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in) :: self
+ integer,intent(in) :: ntemp
+!arrays
+ real(dp),intent(in) :: kTmesh(ntemp), mu_e(ntemp)
+ real(dp),intent(out) :: nh(ntemp), ne(ntemp)
+
+!Local variables-------------------------------
+ integer :: spin, ik_ibz, ib, itemp
+ real(dp) :: max_occ, wtk, eig_nk
+
+! *********************************************************************
+
+ ! Copy important dimensions
+ max_occ = two / (self%nspinor * self%nsppol)
+ ne = zero; nh = zero
+
+ do spin=1,self%nsppol
+   do ik_ibz=1,self%nkpt
+     wtk = self%wtk(ik_ibz)
+     do ib=1, self%nband(ik_ibz + (spin-1) * self%nkpt)
+       eig_nk = self%eig(ib, ik_ibz, spin)
+
+       do itemp=1,ntemp
+         if (eig_nk >= mu_e(itemp)) then
+           ne(itemp) = ne(itemp) + wtk * occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp)) * max_occ
+         else
+           nh(itemp) = nh(itemp) + wtk * (one - occ_fd(eig_nk, kTmesh(itemp), mu_e(itemp))) * max_occ
+         end if
+       end do
+
+     end do
+   end do
+ end do
+
+end subroutine ebands_get_carriers
 !!***
 
 end module m_ebands

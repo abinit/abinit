@@ -15,7 +15,7 @@
 ##############################################
  optdriver 7
  eph_task 4
- tmesh 0 200 1
+ tmesh 0 100 4            # [start, step, num_T] in K
 
  getddb_filepath "teph4zpr_1_DDB"
  ddb_ngqpt 4 4 4
