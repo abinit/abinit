@@ -1,7 +1,5 @@
 # Installation notes for ABINIT
 
-THIS FILE SHOULD BE UPDATED FOR V9.
-
 This file provides a description of the operations needed to install the
 ABINIT package, to generate the executable and to make the tests. 
 It provides also the description of simple modifications of the package, for developers.
@@ -25,7 +23,7 @@ Simply contact the ABINIT group <https://forum.abinit.org/>
 For the vast majority of people willing to use ABINIT (Unix/Linux, not developers, but users), 
 here follows a short list of instructions needed to install it:
 
-  0. Prerequisite : Install the mandatory libraries on which ABINIT relies (Linalg, Netcdf, LibXC), and possibly other libraries (MPI, Wannier90, ...), and know where these libraries are located.
+  0. Prerequisite : Install the mandatory libraries on which ABINIT relies (Linalg, Netcdf, LibXC), and other (optional) libraries (MPI, Wannier90, ...), and know where these libraries are located.
   1. Download, gunzip and untar the 
     [latest version of the ABINIT package](https://www.abinit.org/packages) (abinit-x.y.z.tar.gz) 
     from the abinit Web site, then change the current directory to the top of the directory that was created. 
