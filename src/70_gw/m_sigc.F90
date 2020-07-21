@@ -763,12 +763,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! Sum over band
      call timab(445,1,tsec) ! loop
      do ib=1,Sigp%nbnds
-       call timab(436,1,tsec) ! (1)
 
        ! Parallelism over spin
        ! This processor has this k-point but what about spin?
        if (proc_distrb(ib,ik_bz,spin)/=Wfd%my_rank) CYCLE
 
+       call timab(436,1,tsec) ! (1)
        call wfd%get_ur(ib,ik_ibz,spin,ur_ibz)
 
        if (Psps%usepaw==1) then

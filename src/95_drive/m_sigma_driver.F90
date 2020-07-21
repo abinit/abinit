@@ -2487,13 +2487,17 @@ endif
 !       Compute for Sigma_x - Vxc or DELTA Sigma_x - Vxc.(DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
         potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
-        ! MAU
-        write(1000+my_rank,'(a13)') '<ks|Kx_ks|ks>'
+
+        !
+        ! Print diagonal elements? (Debug)
+        !
+        !write(1000+my_rank,'(a13)') '<ks|Kx_ks|ks>'
         !write(1000+my_rank,'(a13)') '<ks|Vh_ks|ks>'
-        do ib1dm=ib1,ib2
-          write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-          !write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
-        enddo
+        !do ib1dm=ib1,ib2
+        !  write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+        !  !write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
+        !enddo
+
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange corrected one for this k-point
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2735,22 +2739,23 @@ endif
        ABI_FREE(keep_ur_dm2)
        ABI_FREE(bdm2_mask)
        ABI_FREE(nband_dm)
-       !
-       ! Print diagonal elements 
-       !
        call xmpi_barrier(Wfd%comm)
-       do ikcalc=1,Sigp%nkptgw                                                 
-         ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
-         ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-         ! MAU
-         write(2000+my_rank,'(a13)') '<ks|Kx_no|ks>'
-         !write(2000+my_rank,'(a13)') '<ks|Vh_no|ks>'
-         do ib1dm=ib1,ib2
-           write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-           !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
-           !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
-         enddo
-       end do
+
+       !
+       ! Print diagonal elements? (debug) 
+       !
+       !do ikcalc=1,Sigp%nkptgw                                                 
+       !  ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
+       !  ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
+       !  write(2000+my_rank,'(a13)') '<ks|Kx_no|ks>'
+       !  write(2000+my_rank,'(a13)') '<ks|Vh_no|ks>'
+       !  do ib1dm=ib1,ib2
+       !    write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
+       !    !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(new_hartr(ib1dm,ikcalc))
+       !    !write(2000+my_rank,'(a2,*(f10.5))') '  ',REAL(GW1RDM_me%vhartree(ib1dm,ib1dm,ikcalc,1))
+       !  enddo
+       !end do
+
        !
        ! Delta eik
        !
