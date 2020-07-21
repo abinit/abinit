@@ -517,7 +517,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,ishift,isign
+ integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
  integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign
  logical :: include_found, ex
 !arrays
