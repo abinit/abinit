@@ -56,7 +56,7 @@
  znucl 14
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspgth"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

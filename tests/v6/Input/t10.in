@@ -24,7 +24,7 @@ nline 8
 xyzfile t10.in.xyz
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspgth, PseudosTM_pwteter/1h.pspnc"
+ pseudos "PseudosGTH_pwteter/14si.pspgth, PseudosTM_pwteter/1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
