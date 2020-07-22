@@ -850,18 +850,22 @@ Use these additional levels if memory requirements are under control
 and you want to boost the calculation.
 -->
 
-There's an important difference with respect to [[eph_task]] -4 that is worth discussing in detail.
+There is an important difference with respect to [[eph_task]] -4 that is worth discussing in detail.
 When computing the imaginary part at the KS energy for transport properties,
-the EPH code is able to filter both $\kk$- and $\qq$-points so that only the relevant states around the band edge
-are stored in memory.
-Unfortunately, in the case of full self-energy calculations, this filtering algorithm is not possible and each MPI process needs
-to read and store all the KS wavefunctions in the IBZ so that one can compute e-ph matrix elements connecting $\kk$ to $\kq$.
-In other words, the IBZ is not MPI-distributed and this leads to a significant increase in the memory requirements, especially
-for dense meshes.
-Fortunately, the code is able to MPI-distribute bands hence the memory required for this part will scale as [[nband]] / **np_band**.
+the EPH code is able to filter both $\kk$- and $\qq$-points so that only the relevant states 
+around the band edge are stored in memory.
+Unfortunately, in the case of full self-energy calculations, this filtering algorithm 
+is not possible and each MPI process needs to read and store all the KS wavefunctions in the IBZ 
+so that one can compute e-ph matrix elements connecting $\kk$ to $\kq$.
+In other words, the wavefunctions in the IBZ are not MPI-distributed and this leads to a significant 
+increase in the memory requirements, especially for dense meshes.
+Fortunately, the code is able to MPI-distribute bands hence the memory required 
+for the orbitals will scale as [[nband]] / **np_band**.
 
+<!--
 If you are not using the Sternheimer method, it's important to use enough MPI processes for the band level
 in order to decrease the memory required to allocate the wavefunctions in $\GG$-space as
+-->
 
 To recap:
 
@@ -885,7 +889,7 @@ To recap:
    and the number of *np_kpt* MPI processes should be adjusted accordingly,
    Keep in mind, however, that each $\kk$-point has a different computational cost so load imbalance is expected.
 
-Last but not least, remember that setting [[boxcutmin]] to a value smaller than 2 (e.g. 1.1)
+Finally, remember that setting [[boxcutmin]] to a value smaller than 2 (e.g. 1.1)
 will lead to a significant memory reduction.
 
 ### Estimating the ZPR with a generalized Fr\"ohlich model

@@ -538,7 +538,6 @@ module m_sigmaph
 
     procedure :: skip_phmode => sigmaph_skip_phmode
       ! Ignore contribution of phonon mode depending on phonon frequency value or mode index.
-      ! TODO: Add similar interface to ignore q < qcut (taking into account umklapp though)
 
  end type sigmaph_t
 !!***
@@ -4253,7 +4252,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
- integer,parameter :: master = 0, max_ntemp = 1
+ integer,parameter :: master = 0, max_ntemp = 50
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band_ks,ik_ibz,ibc,ib_val,ib_cond,jj
  real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond,qpe_oms,qpe_oms_val,qpe_oms_cond
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau
