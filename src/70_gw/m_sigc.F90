@@ -916,7 +916,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                !  end do
                !  sigc_ket(ig+spadc,io)=ctmp
                !end do
-               call xgemv('N',npwc,npwc,cone,ac_integr(:,:,io),npwc,rhotwgp(spadc+1:spadc+npwc),1,czero,sigc_ket(spadc+1:spadc+npwc,io),1)
+               call xgemv('N',npwc,npwc,cone_gw,ac_integr(:,:,io),npwc,rhotwgp(spadc+1:spadc+npwc),1,czero_gw,sigc_ket(spadc+1:spadc+npwc,io),1)
              end do !ispinor
            end do !io
 
