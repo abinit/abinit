@@ -52,7 +52,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "01h.pspgth, PseudosTM_pwteter/8o.pspnc"
+ pseudos "PseudosGTH_pwteter/01h.pspgth, PseudosTM_pwteter/8o.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
