@@ -150,7 +150,7 @@ program abitk
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
      !write(std_out,"(a)")"ebands_mu_t FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
      write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
-     !write(std_out,"(a)")"ebands_jedos FILE --intmeth, --step, --broad  Compute electron DOS."
+     !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
      !write(std_out,"(a)")"skw_path FILE                       Interpolate band structure along a k-path."
      write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK        Use e_nk from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
 
@@ -244,7 +244,7 @@ program abitk
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    call ebands_print_gaps(ebands, std_out)
 
- case ("ebands_edos", "ebands_jedos")
+ case ("ebands_edos", "ebands_jdos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
@@ -255,7 +255,7 @@ program abitk
      call edos%print(std_out, header="Electron DOS")
      call edos%write(strcat(basename(path), "_EDOS"))
 
-   else if (command == "ebands_jedos") then
+   else if (command == "ebands_jdos") then
      NOT_IMPLEMENTED_ERROR()
      jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
@@ -359,7 +359,7 @@ program abitk
    ABI_MALLOC(mu_e, (ntemp))
 
    call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
-   mu_e = 6.715 * eV_Ha
+   !mu_e = 6.715 * eV_Ha
 
    ABI_MALLOC(ne, (ntemp))
    ABI_MALLOC(nh, (ntemp))
@@ -374,7 +374,8 @@ program abitk
    end do
 
    ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
-   ABI_CHECK(get_arg("step", step, msg, default=0.001 * eV_Ha) == 0, msg)
+   ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
+   !ABI_CHECK(get_arg("step", step, msg, default=0.001 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
    edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    call edos%print(std_out, header="Electron DOS")

@@ -2636,6 +2636,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
 
  call ebands_free(tmp_ebands)
  call xmpi_sum(mu_e, comm, ierr)
+
  call cwtime_report(" ebands_get_muT_with_fd", cpu, wall, gflops, end_str=ch10)
 
 end subroutine ebands_get_muT_with_fd
