@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Jul 2020.
-- ( at 03h48 )
+.Starting date : Wed 22 Jul 2020.
+- ( at 02h23 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_1.in
 - output file    -> teph4mob_1.out
@@ -1625,7 +1625,7 @@ tolerances: {tolvrs: 1.00E-08, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
--dfpt_looppert : read the wavefunctions from file: teph4mob_1o_DS2_1WF7
+- dfpt_looppert: read the DDK wavefunctions from file: teph4mob_1o_DS2_1WF7
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -5717,10 +5717,10 @@ P          mk1mem10       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        123.9  wall=        131.9
+- Proc.   0 individual time (sec): cpu=        122.6  wall=        126.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and 215 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        123.9  wall=        131.9
++Overall time at end (sec) : cpu=        122.6  wall=        126.9
