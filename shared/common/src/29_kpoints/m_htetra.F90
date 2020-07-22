@@ -2102,8 +2102,8 @@ end subroutine htetra_blochl_weights
 !!  htetra_blochl_weights_wvals_zinv
 !!
 !! FUNCTION
-!!   The same as htetra_get_onewk_wvals_zinv but looping over tetrahedra
-!!   which is more efficient
+!!  The same as htetra_get_onewk_wvals_zinv but looping over tetrahedra
+!!  which is more efficient
 !!
 !! INPUTS
 !!
@@ -2159,6 +2159,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
 
      ! Loop over frequencies
      do iz=1,nz
+
        ! Get tetrahedron weights
        select case(opt)
        case(1)

@@ -66,7 +66,7 @@ program abitk
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
- integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp
+ integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries
  real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb !, tolsym, tsmear
  character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
@@ -430,12 +430,14 @@ program abitk
  case ("tetra_unit_tests")
    ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
    ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[20, 20, 20]) == 0, msg)
-   call tetra_unittests(ptgroup, ngqpt, comm)
+   ABI_CHECK(get_arg("use-symmetries", use_symmetries, msg, default=1) == 0, msg)
+   call tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
  case ("kptrank_unit_tests")
    ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
    ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[100, 100, 100]) == 0, msg)
-   call kptrank_unittests(ptgroup, ngqpt, comm)
+   ABI_CHECK(get_arg("use-symmetries", use_symmetries, msg, default=1) == 0, msg)
+   call kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
  case default
    MSG_ERROR(sjoin("Unknown command:", command))

@@ -5,9 +5,10 @@ authors: MG
 # Zero-point renormalization of the band gap and temperature-dependent band gaps
 
 This tutorial explains how to obtain the electron self-energy due to phonons, compute the zero-point
-renormalization (ZPR) of the band gap as well as temperature-dependent band gaps and spectral functions.
+renormalization (ZPR) of the band gap as well as temperature-dependent band gaps.
 We start with a very brief overview of the many-body formalism in the context of the electron-phonon (e-ph) interaction,
 then we discuss how to evaluate the e-ph self-energy and perform typical convergence studies using MgO as example.
+Further details concerning the implementation are given in [[cite:Gonze2019]] and [[Romero2020]].
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,
@@ -28,11 +29,11 @@ in this tutorial we are mainly interested in $\Sigma^{\text{e-ph}}$ and its temp
 
 In semiconductors and insulators, indeed, most of temperature dependence of the electronic properties
 at low T originates from the e-ph interaction
-(and the thermal expansion of the unit cell that, however, is not treated in this lesson).
+and the thermal expansion of the unit cell that, however, is not treated in this lesson.
 Corrections due to $\Sigma^{\text{e-e}}$ are obviously important as it is well known that KS gaps computed
 at the LDA/GGA level are systematically underestimated with respect to experiments
 but the temperature dependence of $\Sigma^{\text{e-e}}$
-is rather small as long as $kT$ is much smaller than the fundamental gap.
+is rather small as long as $kT$ is smaller than the fundamental gap (let's say $3 kT < E_{\text{g}}$).
 
 In state-of-the-art *ab-initio* methods, the e-ph coupling is described
 within DFT by expanding the KS effective potential in the nuclear displacements,
@@ -60,10 +61,6 @@ The diagonal matrix elements of the FM self-energy in the KS representation are 
 
 where $f_{m\kk+\qq}(\ef,T)$ and $n_\qnu(T)$ are the Fermi-Dirac and Bose-Einstein occupation functions
 with $T$ the temperature and $\ef$ the Fermi level that in turns depends on T and the number of electron per unit cell.
-<!--
-For the sake of simplicity, the temperature and Fermi level are considered as parameters, and the dependence
-on $T$ and $\ef$ will be omitted in the following.
--->
 The integration is performed over the $\qq$-points in the BZ of volume $\Omega_\BZ$ and $\eta$
 is a positive real infinitesimal.
 
@@ -76,17 +73,6 @@ is a positive real infinitesimal.
     as a function of [[zcut]] and $\qq$-point sampling similarly to what is done
     in metals for [[tsmear]] and [[ngkpt]].
     Note also that [[zcut]] should be of the same order as the phonon frequency so around 0.01, 0.001 eV.
-
-<!--
-First-principles calculations of the EPH self-energy are therefore crucial to understand the temperature-dependence
-of band gaps, including the correction due to zero-point motion, as well as for computing phonon-limited mobilities
-within the Boltzmann transport equation.
-In ABINIT v9, it will be possible to compute the EPH self-energy in the Kohn-Sham representation using the EPH matrix elements.
-The code employs optimized algorithms to compute either the full self-energy
-(needed for QP corrections and spectral functions)
-When computing the full self-energy, it is possible to reduce the number of empty states required for convergence
-by using the first-order wavefunctions obtained by solving the relevant Sternheimer equation.
--->
 
 The **static DW term** involves the second order derivative of the KS potential with respect to the nuclear displacements.
 State-of-the-art implementations approximate the DW contribution with
@@ -134,8 +120,7 @@ This is especially true in polar materials due to the divergence of the polar e-
 in the $\qq \rightarrow 0$ limit [[cite:Vogl1976]].
 -->
 
-<!--
-Further details concerning the implementation are given in Ref.[[cite:Gonze2019]].
+Both the FM and the DW term converge slowly with respect to the number of empty states and the $\qq$-sampling.
 In order to accelerate the convergence with the number of empty states, ABINIT replaces the contributions
 given by the high-energy states above a certain band index $M$ with the solution
 of a non-self-consistent Sternheimer equation in which only the first $M$ states are required.
@@ -144,8 +129,7 @@ in which the phonon frequencies in the denominator of Eq.~(\ref{eq:fan_selfen}) 
 the frequency dependence of $\Sigma$ is approximated with the value computed at $\omega = \enk$.
 This approximation is justified when the bands above $M$ are sufficiently high in energy with respect
 to the $n\kk$ states that must be corrected.
-The code can compute the spectral functions
--->
+The Sternheimer approach requires the specification of [[eph_stern]] and [[getpot_filepath]].
 
 ### Quasi-particle corrections due to e-ph coupling
 
@@ -160,7 +144,8 @@ of the self-energy evaluated at the bare KS eigenvalue:
 
 $$ \ee^\QP_\nk = \ee_\nk + \Re\, \Sigma_\nk^{\text{e-ph}}(\ee_\nk). $$
 
-This approach is equivalent to a (thermal average of) standard time-dependent Rayleigh-Schrodinger perturbation theory.
+This approach is equivalent to a (thermal average of) 
+standard time-dependent Rayleigh-Schrodinger perturbation theory.
 In the linearized QP equation, on the contrary, the self-energy is Taylor-expanded around
 the KS eigenvalue and the QP correction is obtained using
 
@@ -210,6 +195,8 @@ Alternatively, one can use [[gw_qprange]] or [[sigma_erange]]
 Note that [[gw_qprange]] is mainly used to compute all the corrections for the occupied states plus
 some conduction states while [[sigma_erange]] is usually employed for transport calculations with [[eph_task]] = -4.
 
+<!--
+
 ### Spectral function and Eliashberg functions
 
 The spectral function is defined by:
@@ -220,6 +207,7 @@ $$
 
 The computation of the spectral function requires the specification of [[nfreqsp]] and [[freqspmax]].
 The results are stored in the SIGMAPH.nc file for each $\nk$ state specified by the user.
+-->
 
 ## Typical workflow for ZPR
 
@@ -861,11 +849,6 @@ In other words, the wavefunctions in the IBZ are not MPI-distributed and this le
 increase in the memory requirements, especially for dense meshes.
 Fortunately, the code is able to MPI-distribute bands hence the memory required 
 for the orbitals will scale as [[nband]] / **np_band**.
-
-<!--
-If you are not using the Sternheimer method, it's important to use enough MPI processes for the band level
-in order to decrease the memory required to allocate the wavefunctions in $\GG$-space as
--->
 
 To recap:
 

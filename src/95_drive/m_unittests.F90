@@ -131,10 +131,11 @@ end function rprim_from_ptgroup
 !! FUNCTION
 !!  Create a crystal structure from a user defined point group
 !!
-type(crystal_t) function crystal_from_ptgroup(ptgroup) result(crystal)
+type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(crystal)
 
 !Arguments -------------------------------
  character(len=*),intent(in) :: ptgroup
+ integer,intent(in) :: use_symmetries
 
 !Variables -------------------------------
  type(irrep_t),allocatable :: irr(:)
@@ -150,16 +151,21 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup) result(crystal)
 
  rprimd = rprim_from_ptgroup(ptgroup)
 
- call get_point_group(ptgroup,nsym,nclass,symrel,class_ids,class_names,irr)
- ABI_FREE(class_ids)
- ABI_FREE(class_names)
- call irrep_free(irr)
- ABI_FREE(irr)
+ if (use_symmetries == 1) then
+   call get_point_group(ptgroup, nsym, nclass, symrel, class_ids, class_names, irr)
+   ABI_FREE(class_ids)
+   ABI_FREE(class_names)
+   call irrep_free(irr)
+   ABI_FREE(irr)
+ else
+   nsym = 1
+   ABI_MALLOC(symrel, (3, 3, nsym))
+   symrel(:,:,1) = identity_3d
+ end if
 
- ABI_MALLOC(symafm,(nsym))
+ ABI_MALLOC(symafm, (nsym))
  symafm = 1
- ABI_MALLOC(tnons,(3,nsym))
- tnons = 0
+ ABI_CALLOC(tnons, (3, nsym))
 
  amu = 1
  natom = 1
@@ -187,12 +193,12 @@ end function crystal_from_ptgroup
 !! FUNCTION
 !!  Unit tests for the tetrahedron routines
 !!
-subroutine tetra_unittests(ptgroup, ngqpt, comm)
+subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
 !Arguments -------------------------------
 !scalars
  character(len=*),intent(in) :: ptgroup
- integer,intent(in) :: comm
+ integer,intent(in) :: use_symmetries, comm
  integer,intent(in) :: ngqpt(3)
 
 !Local variables -------------------------
@@ -200,7 +206,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  type(crystal_t) :: crystal
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0, master = 0
  real(dp),parameter :: max_occ1 = one
- integer :: nqibz,iqibz,nqbz,ierr,nw, my_rank
+ integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank
  logical :: use_old_tetra
  real(dp) :: cpu, wall, gflops
  real(dp) :: dosdeltae, emin, emax, qnorm, dos_int
@@ -221,38 +227,34 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  my_rank = xmpi_comm_rank(comm)
 
  call wrtout(std_out, sjoin("Tetra DOS unit tests with ptgroup:", ptgroup, ", and ngqpt", ltoa(ngqpt)))
-
  call cwtime(cpu, wall, gflops, "start")
  !
  ! 0. Initialize
  call wrtout(std_out,'0. Initialize')
 
  ! Create fake crystal from ptgroup
- crystal = crystal_from_ptgroup(ptgroup)
+ crystal = crystal_from_ptgroup(ptgroup, use_symmetries)
 
  ! Create a regular grid
  in_qptrlatt = 0
- in_qptrlatt(1,1) = ngqpt(1)
- in_qptrlatt(2,2) = ngqpt(2)
- in_qptrlatt(3,3) = ngqpt(3)
+ in_qptrlatt(1,1) = ngqpt(1); in_qptrlatt(2,2) = ngqpt(2); in_qptrlatt(3,3) = ngqpt(3)
  dos_qshift = zero
 
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft1, dos_qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
- ! Initialize old tetrahedra
  rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
  use_old_tetra = .False.
  if (use_old_tetra) then
+   ! Initialize old tetrahedra
    call init_tetra(bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
    call cwtime_report(" init_tetra_old ", cpu, wall, gflops)
  end if
 
  ! Initialize new tetrahedra
- call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, &
-                  nqibz, ierr, errstr, comm)
+ call htetra_init(htetraq, bz2ibz(1,:), crystal%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
  call htetraq%print(std_out)
  call cwtime_report(" init_htetra", cpu, wall, gflops)
 
@@ -260,19 +262,18 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  call wrtout(std_out, ' 1.Testing parabolic Band')
  ABI_MALLOC(eig, (nqibz))
  ABI_MALLOC(mat, (nqibz))
- do iqibz=1,nqibz
-   qnorm = normv(qibz(:,iqibz), crystal%gmet, 'R')
+ do iq_ibz=1,nqibz
+   qnorm = normv(qibz(:,iq_ibz), crystal%gmet, 'R')
    ! The DOS for this function goes as sqrt(w-0.5)*two_pi
-   eig(iqibz) = qnorm**2 + half
-   mat(iqibz) = abs(one/eig(iqibz))
-   mat(iqibz) = one !abs(one/eig(iqibz))
+   eig(iq_ibz) = qnorm**2 + half
+   mat(iq_ibz) = abs(one / eig(iq_ibz))
+   mat(iq_ibz) = one !abs(one/eig(iq_ibz))
  end do
 
  ! Prepare DOS calculation
- emin = zero
- emax = maxval(eig) + one
+ emin = zero; emax = maxval(eig) + one
  nw = 500
- dosdeltae = (emax-emin) / (nw-1)
+ dosdeltae = (emax - emin) / (nw - 1)
 
  ABI_MALLOC(energies, (nw))
  ABI_MALLOC(dos, (nw))
@@ -283,14 +284,15 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  call cwtime_report(" init", cpu, wall, gflops)
 
  ! Compute DOS using tetrahedron implementation
- ABI_CALLOC(tweight, (nw,nqibz))
- ABI_CALLOC(dweight, (nw,nqibz))
+ ABI_CALLOC(tweight, (nw, nqibz))
+ ABI_CALLOC(dweight, (nw, nqibz))
 
  if (use_old_tetra) then
+   ! Compute tetra weights and DOD/IDOS with old implementation
    call tetra_blochl_weights(tetraq, eig, emin, emax, max_occ1, nw, nqibz, bcorr0, tweight, dweight, comm)
-   do iqibz=1,nqibz
-     dweight(:,iqibz) = dweight(:,iqibz) * mat(iqibz)
-     tweight(:,iqibz) = tweight(:,iqibz) * mat(iqibz)
+   do iq_ibz=1,nqibz
+     dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
+     tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
    end do
    dos(:)  = sum(dweight,2)
    idos(:) = sum(tweight,2)
@@ -303,11 +305,11 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    end if
  end if
 
- ! Compute blochl weights
+ ! Compute tetra weights and DOS/IDOS with new implementation
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, bcorr0, tweight, dweight, comm)
- do iqibz=1,nqibz
-   dweight(:,iqibz) = dweight(:,iqibz) * mat(iqibz)
-   tweight(:,iqibz) = tweight(:,iqibz) * mat(iqibz)
+ do iq_ibz=1,nqibz
+   dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
+   tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
  end do
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
@@ -319,11 +321,11 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    call write_file('parabola_htetra.dat', nw, energies, idos, dos)
  end if
 
- ! Compute blochl weights
+ ! Compute tetra weights with Blochl corrections and DOS/IDOS with new implementation
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, 1, tweight, dweight, comm)
- do iqibz=1,nqibz
-   dweight(:,iqibz) = dweight(:,iqibz) * mat(iqibz)
-   tweight(:,iqibz) = tweight(:,iqibz) * mat(iqibz)
+ do iq_ibz=1,nqibz
+   dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
+   tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
  end do
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
@@ -337,9 +339,9 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
 
  ! Compute weights using LV integration from TDEP
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, 2, tweight, dweight, comm)
- do iqibz=1,nqibz
-   dweight(:,iqibz) = dweight(:,iqibz) * mat(iqibz)
-   tweight(:,iqibz) = tweight(:,iqibz) * mat(iqibz)
+ do iq_ibz=1,nqibz
+   dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
+   tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
  end do
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
@@ -351,12 +353,11 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
    call write_file('parabola_htetra_lv.dat', nw, energies, idos, dos)
  end if
 
- ! Compute DOS using new tetrahedron implementation
+ ! Compute weights using SIMTET routines
  ABI_MALLOC(cenergies, (nw))
  ABI_MALLOC(cweight, (nw, nqibz))
  cenergies = energies
 
- ! Use SIMTET routines
  call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 1, cweight, comm)
  dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
  idos(:) =  sum(real(cweight(:,:)), dim=2)
@@ -381,11 +382,11 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  end if
 
  dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetraq%get_onewk_wvals(iqibz, bcorr0, nw, energies, max_occ1, nqibz, eig, wdt)
-   wdt(:,:) = wdt(:,:)*mat(iqibz)
-   dos(:)  = dos(:)  + wdt(:,1)*wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2)*wtq_ibz(iqibz)
+ do iq_ibz=1,nqibz
+   call htetraq%get_onewk_wvals(iq_ibz, bcorr0, nw, energies, max_occ1, nqibz, eig, wdt)
+   wdt(:,:) = wdt(:,:) * mat(iq_ibz)
+   dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iq_ibz)
+   idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iq_ibz)
  end do
  call ctrap(nw, dos, dosdeltae, dos_int)
 
@@ -396,11 +397,11 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  end if
 
  dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetraq%get_onewk(iqibz, bcorr0, nw, nqibz, eig, emin, emax, max_occ1, wdt)
-   wdt(:,:) = wdt(:,:)*mat(iqibz)
-   dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iqibz)
+ do iq_ibz=1,nqibz
+   call htetraq%get_onewk(iq_ibz, bcorr0, nw, nqibz, eig, emin, emax, max_occ1, wdt)
+   wdt(:,:) = wdt(:,:)*mat(iq_ibz)
+   dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iq_ibz)
+   idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iq_ibz)
  end do
  call ctrap(nw, dos, dosdeltae, dos_int)
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops, end_str=ch10)
@@ -415,15 +416,13 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  call wrtout(std_out, ' 2. Testing Flat Band')
  eig = half
 
- ! Compute DOS using old tetrahedron implementation
  if (use_old_tetra) then
+   ! Compute DOS using old tetrahedron implementation
    call tetra_blochl_weights(tetraq, eig, emin, emax, max_occ1, nw, nqibz, bcorr0, tweight, dweight, comm)
    dos(:)  = sum(dweight, dim=2)
    idos(:) = sum(tweight, dim=2)
    call cwtime_report(" tetra_blochl", cpu, wall, gflops, end_str=ch10)
-   if (my_rank == master) then
-     call write_file('flat_tetra.dat', nw, energies, idos, dos)
-   end if
+   if (my_rank == master) call write_file('flat_tetra.dat', nw, energies, idos, dos)
  end if
 
  ! Compute DOS using new tetrahedron implementation
@@ -431,34 +430,26 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
  call cwtime_report(" htetra_blochl", cpu, wall, gflops, end_str=ch10)
-
- if (my_rank == master) then
-   call write_file('flat_htetra.dat', nw, energies, idos, dos)
- end if
+ if (my_rank == master) call write_file('flat_htetra.dat', nw, energies, idos, dos)
 
  dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetraq%get_onewk_wvals(iqibz, bcorr0, nw, energies, max_occ1, nqibz, eig, wdt)
-   dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iqibz)
+ do iq_ibz=1,nqibz
+   call htetraq%get_onewk_wvals(iq_ibz, bcorr0, nw, energies, max_occ1, nqibz, eig, wdt)
+   dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iq_ibz)
+   idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iq_ibz)
  end do
  call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops, end_str=ch10)
-
- if (my_rank == master) then
-   call write_file('flat_htetra_onewk_wvals.dat', nw, energies, idos, dos)
- end if
+ if (my_rank == master) call write_file('flat_htetra_onewk_wvals.dat', nw, energies, idos, dos)
 
  dos = zero; idos = zero
- do iqibz=1,nqibz
-   call htetraq%get_onewk(iqibz, bcorr0, nw, nqibz, eig, emin, emax, max_occ1, wdt)
-   dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iqibz)
-   idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iqibz)
+ do iq_ibz=1,nqibz
+   call htetraq%get_onewk(iq_ibz, bcorr0, nw, nqibz, eig, emin, emax, max_occ1, wdt)
+   dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iq_ibz)
+   idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iq_ibz)
  end do
  call cwtime_report(" htetra_get_onewk", cpu, wall, gflops, end_str=ch10)
 
- if (my_rank == master) then
-   call write_file('flat_htetra_onewk.dat', nw, energies, idos, dos)
- end if
+ if (my_rank == master) call write_file('flat_htetra_onewk.dat', nw, energies, idos, dos)
 
  ! 3. Compute tetrahedron for simple TB FCC
  !TODO
@@ -496,9 +487,9 @@ subroutine tetra_unittests(ptgroup, ngqpt, comm)
     MSG_ERROR(msg)
   end if
 
-  write(funit, *)"# Energies, IDOS, DOS"
+  write(funit, *)"# Energies, DOS, IDOS"
   do iw=1,nw
-    write(funit,*) energies(iw), idos(iw), dos(iw)
+    write(funit,*) energies(iw), dos(iw), idos(iw)
   end do
   close(funit)
 
@@ -515,12 +506,12 @@ end subroutine tetra_unittests
 !! FUNCTION
 !!  Test the krank routines
 !!
-subroutine kptrank_unittests(ptgroup, ngqpt, comm)
+subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
 !Arguments -------------------------------
 !scalars
  character(len=*),intent(in) :: ptgroup
- integer,intent(in) :: comm
+ integer,intent(in) :: use_symmetries, comm
  integer,intent(in) :: ngqpt(3)
 
 !Local variables -------------------------
@@ -528,10 +519,9 @@ subroutine kptrank_unittests(ptgroup, ngqpt, comm)
  type(crystal_t) :: crystal
  type(krank_t) :: krank
  integer,parameter :: qptopt1=1,nqshft1=1,iout0=0,chksymbreak0=0,sppoldbl1=1
- integer :: nqibz,iqbz,iqibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
+ integer :: nqibz,iqbz,iq_ibz,iqbz_rank,nqbz,nqibz_symkpt,nqibz_symkpt_new
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
- real(dp) :: cpu, gflops, wall
- real(dp) :: dksqmax
+ real(dp) :: cpu, gflops, wall, dksqmax
  real(dp) :: dos_qshift(3,nqshft1)
  character(len=500) :: msg
  integer,allocatable :: bz2ibz(:,:)
@@ -547,7 +537,7 @@ subroutine kptrank_unittests(ptgroup, ngqpt, comm)
  call wrtout(std_out, sjoin("kptrank_unittests with ptgroup:", ptgroup, ", and ngqpt", ltoa(ngqpt)))
 
  ! Create fake crystal from ptgroup
- crystal = crystal_from_ptgroup(ptgroup)
+ crystal = crystal_from_ptgroup(ptgroup, use_symmetries)
 
  ! Create a regular grid
  in_qptrlatt = 0; in_qptrlatt(1,1) = ngqpt(1); in_qptrlatt(2,2) = ngqpt(2); in_qptrlatt(3,3) = ngqpt(3)
@@ -589,8 +579,8 @@ subroutine kptrank_unittests(ptgroup, ngqpt, comm)
  ABI_CHECK(nqibz_symkpt == nqibz_symkpt_new, 'Wrong number of qpoints in the IBZ')
 
  ! check if ibz is the same
- do iqibz=1,nqibz
-   if (ibz2bz(iqibz) == ibz2bz_new(iqibz)) cycle
+ do iq_ibz=1,nqibz
+   if (ibz2bz(iq_ibz) == ibz2bz_new(iq_ibz)) cycle
    MSG_ERROR("The IBZ is different")
  end do
 

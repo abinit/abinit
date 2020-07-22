@@ -4417,7 +4417,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
      if (band_ks == ib_cond) then
        kse_cond = kse; qpe_cond = qpe; qpe_oms_cond = qpe_oms
      end if
-     ! FIXME
+
      if (it <= max_ntemp) then
        if (self%imag_only) then
          invsig2fmts = Time_Sec * 1e+15 / two
@@ -4433,6 +4433,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
            fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
        end if
      end if
+
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
