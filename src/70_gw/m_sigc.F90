@@ -792,11 +792,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            omegame0i_ac  = Sr%omega_i(io)-qp_ene(ib,ik_ibz,spin)
            omegame0i2_ac = omegame0i_ac*omegame0i_ac
            do iiw=1,Er%nomega_i
-             do iggp=0,npwc*npwc-1
-               ig=iggp/npwc+1
-               igp= iggp-(ig-1)*npwc+1 ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
-               ac_integr(ig,igp,io)= ac_integr(ig,igp,io) + ac_epsm1cqwz2(ig,igp,iiw)/(omegame0i2_ac + omegap2(iiw))
-             end do
+             !do iggp=0,npwc*npwc-1
+             !  ig=iggp/npwc+1
+             !  igp= iggp-(ig-1)*npwc+1 ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
+             ac_integr(:,:,io) = ac_integr(:,:,io) + ac_epsm1cqwz2(:,:,iiw)/(omegame0i2_ac + omegap2(iiw))
            end do
            ac_integr(:,:,io)=ac_integr(:,:,io)*omegame0i_ac
          end do
@@ -910,13 +909,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            do io=1,Sr%nomega_i
              do ispinor=1,nspinor
                spadc=(ispinor-1)*npwc
-               do ig=1,npwc
-                 ctmp=czero
-                 do igp=1,npwc
-                   ctmp=ctmp+ac_integr(ig,igp,io)*rhotwgp(igp+spadc)
-                 end do
-                 sigc_ket(ig+spadc,io)=ctmp
-               end do
+               !do ig=1,npwc
+               !  ctmp=czero
+               !  do igp=1,npwc
+               !    ctmp=ctmp+ac_integr(ig,igp,io)*rhotwgp(igp+spadc)
+               !  end do
+               !  sigc_ket(ig+spadc,io)=ctmp
+               !end do
+               call xgemv('N',npwc,npwc,cone,ac_integr(:,:,io),npwc,rhotwgp(spadc+1:spadc+npwc),1,czero,sigc_ket(spadc+1:spadc+npwc,io),1)
              end do !ispinor
            end do !io
 
