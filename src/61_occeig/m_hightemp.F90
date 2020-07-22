@@ -328,38 +328,28 @@ contains
           ix=ix+step
         end do
 
-        ! TEMPORARY
-        ix=dble(this%bcut)
-        sigma=1e-5
-        open(file='Dirac',unit=23)
-        do while(ix<=this%gcut)
-          write(23,'(2ES12.5)') ix, fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
-          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
-          ix=ix+step
-        end do
-        close(23)
-
         ABI_ALLOCATE(valueseel,(ii))
         ix=dble(this%bcut)
         ii=0
         sigma=this%std_init
-        open(file='Gauss',unit=23)
+        open(file='Gauss',unit=23,status='OLD')
+        close(23,status="DELETE")
+        open(file='Gauss',unit=23,status='NEW')
         do while(ix<=this%gcut)
           ii=ii+1
+          sigma=sigma-0.0002*sigma
           valueseel(ii)=fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
           & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
           & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
-          write(23,'(2ES12.5)') ix, fermi_dirac(hightemp_e_heg(ix,this%ucvol)+this%e_shiftfactor,fermie,tsmear)*&
-          & hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
-          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))
+          write(23,*) ix, 0.5*hightemp_gaussian_kintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol)))/&
+          & hightemp_gaussian_jintegral(sigma,sqrt(2*hightemp_e_heg(ix,this%ucvol))),hightemp_e_heg(ix,this%ucvol),sigma
           ix=ix+step
         end do
         close(23)
         if (ii>1) then
           this%e_kin_freeel=this%e_kin_freeel+simpson(step,valueseel)
         end if
-        ! write(0,*) sigma,this%e_shiftfactor,dble(this%bcut),this%gcut,simpson(step,valueseel)
+        write(0,*) sigma,this%e_shiftfactor,dble(this%bcut),this%gcut,simpson(step,valueseel)
         ABI_DEALLOCATE(valueseel)
 
         ! Change Fermi-Dirac integral lower bound.
