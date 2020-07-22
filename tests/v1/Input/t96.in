@@ -125,7 +125,7 @@
  znucl   13.000 8.000
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspgth, 8o.pspnc"
+ pseudos "13al.pspgth, PseudosTM_pwteter/8o.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

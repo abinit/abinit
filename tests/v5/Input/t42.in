@@ -58,7 +58,7 @@ charge22  1
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "7n.pspnc, 7n.1s.psp_mod, 6c.pspnc, PseudosTM_pwteter/1h.pspnc"
+ pseudos "PseudosTM_pwteter/7n.pspnc, 7n.1s.psp_mod, PseudosTM_pwteter/6c.pspnc, PseudosTM_pwteter/1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -74,7 +74,7 @@ charge22  1
 #%% description = 
 #%%   NH3 and NH2-CH3 molecules , supercell geometry
 #%%   Show the computations needed to obtain the differential
-#%%   pseudopotentials 7n.pspnc (just usual atomic configuration)
+#%%   pseudopotentials PseudosTM_pwteter/7n.pspnc (just usual atomic configuration)
 #%%   and 7n.1s_psp.mod (with a hole in state 1s).
 #%%   The differential core-level shift is obtained by comparing
 #%%   difference in the total energies of the NH3 molecule with both pseudopotentials

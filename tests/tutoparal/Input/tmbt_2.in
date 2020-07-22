@@ -61,7 +61,7 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/14si.pspnc, 8o.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc, PseudosTM_pwteter/8o.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

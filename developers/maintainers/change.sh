@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!42mo.pspnc!PseudosTM_pwteter/42mo.pspnc!' $file > tmp.file
+ sed -e 's!9f.pspnc!PseudosTM_pwteter/9f.pspnc!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
