@@ -22,9 +22,12 @@
 - root for input  files -> tucrpa_2_MPI24i
 - root for output files -> tucrpa_2_MPI24o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -767,7 +770,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -787,7 +791,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 - pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -807,7 +812,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 - pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -11672,7 +11678,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -11692,7 +11699,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
 - pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -11712,7 +11720,8 @@ meta: {optdriver: 3, gwcalctyp: 2, }
 
 - pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12682,7 +12691,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12702,7 +12712,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
 - pspini: atom type   2  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12722,7 +12733,8 @@ meta: {optdriver: 4, gwcalctyp: 2, }
 
 - pspini: atom type   3  psp file is /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 - pspatm: opening atomic psp file    /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/cronos2_gnu_7.4_paral/trunk__magcon/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
