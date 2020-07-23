@@ -309,7 +309,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      qopt_    =6        ! Quadrature method, see quadrature routine.
      ntrial_  =30       ! Max number of attempts.
      accuracy_=0.001    ! Fractional accuracy required.
-     npts_    =10       ! Initial number of point (only for Gauss-Legendre method).
+     npts_    =6        ! Initial number of point (only for Gauss-Legendre method).
      hcyl_    =hcyl     ! Lenght of cylinder along z, only if method==2
 
      write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
@@ -328,20 +328,19 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        i23=n1*(i2-1 + n2*(i3-1))
        do i1=1,n1
          ii=i1+i23
-
          gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
          gcart_x=gcart(1) ; gcart_y=gcart(2) ; gcart_z=ABS(gcart(3))
-         gcart_xy = SQRT(gcart_x**2+gcart_y**2) ;
+         gcart_perp_ = SQRT(gcart_x**2+gcart_y**2) ;
 
          if (gcart_z>tol4) then
            ! === Analytic expression ===
            call CALCK0(gcart_z *rcut_loc,k0,1)
-           call CALJY1(gcart_xy*rcut_loc,j1,0)
-           call CALJY0(gcart_xy*rcut_loc,j0,0)
+           call CALJY1(gcart_perp_*rcut_loc,j1,0)
+           call CALJY0(gcart_perp_*rcut_loc,j0,0)
            call CALCK1(gcart_z *rcut_loc,k1,1)
-           gcutoff(ii)=one+rcut_loc*gcart_xy*j1*k0-gcart_z*rcut_loc*j0*k1
+           gcutoff(ii)=one+rcut_loc*gcart_perp_*j1*k0-rcut_loc*gcart_z*j0*k1
          else
-           if (gcart_xy>tol4) then
+           if (gcart_perp_>tol4) then
              ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
              call quadrature(F5,zero,rcut_loc,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
              if (ierr/=0) then
@@ -349,7 +348,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
              end if
                gcutoff(ii)= -quad*gpq(ii)
            else
-               gcutoff(ii)= rcut_loc**2*(two*LOG(rcut_)-one)*gpq(ii)/four
+               gcutoff(ii)= zero !-rcut_loc**2*(two*LOG(rcut_loc)-one)*gpq(ii)/four
           end if
          end if
 
@@ -374,8 +373,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      hcyl_=hcyl
      hcyl2=hcyl**2
      rcut2=rcut_loc**2
-
-     write(*,*)'This',n1,n2,n3
 
      do i3=1,n3
       do i2=1,n2

@@ -126,7 +126,16 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+ if(icutcoul.eq.0) then
+   eta=(four/rcut)
+   write(*,*)'this is icutcuol and eta0D',icutcoul,eta
+ else if((icutcoul.eq.1).or.(icutcoul.eq.2)) then
+   eta=(four_pi/rcut)
+   write(*,*)'this is icutcuol and eta2D',icutcoul,eta
+ else
+   eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
+   write(*,*)'this is icutcul and eta3D',icutcoul,eta
+ end if
 
 !Conduct reciprocal space summations
  fac=pi**2/eta
@@ -150,11 +159,10 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !&       " If you have a metal consider setting dipdip 0.  ng = ", ng
 !      MSG_WARNING(message)
 !   end if
-
+   ii=1
    do ig3=-ng,ng
      do ig2=-ng,ng
        do ig1=-ng,ng
-
 !        Exclude shells previously summed over
          if(abs(ig1)==ng .or. abs(ig2)==ng .or. abs(ig3)==ng .or. ng==1 ) then
 
@@ -171,9 +179,21 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
              if (arg <= -minexparg ) then
 !              When any term contributes then include next shell
                newg=1
-               term=exp(-arg)/gsq*gcutoff(1)
+
+               if((abs(ig1).lt.ngfft(1)).and.&
+                 &(abs(ig2).lt.ngfft(2)).and.&
+                 &(abs(ig3).lt.ngfft(3))) then
+                  ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
+                  ii=abs(ig1)+ig23+1
+                  term=exp(-arg)/gsq*gcutoff(ii)
+               else
+                  term=exp(-arg)/gsq
+	          if(term>1E-15) write(*,*)'this is',ig3,ig2,ig1,term
+               endif
+
                summr = 0.0_dp
                summi = 0.0_dp
+ 
 
 !              XG 20180531  : the two do-loops on ia should be merged, in order to spare
 !              the waste of computing twice the sin and cos.
