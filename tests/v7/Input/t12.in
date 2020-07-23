@@ -48,13 +48,15 @@ kptopt3    3
     xred  0.0  0.0  0.0
   znucl   78
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "78_Pt_r.oncvpsp.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t12.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -medium
-#%% psp_files = 78_Pt_r.oncvpsp.psp8
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

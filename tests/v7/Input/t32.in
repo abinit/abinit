@@ -75,13 +75,15 @@ typat 1 2
 natom 2
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al.GGA-PBE-rpaw-2.00.abinit, As.GGA-PBE-rpaw-2.10.abinit"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%   t32.out, tolnlines = 18, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%% psp_files =  Al.GGA-PBE-rpaw-2.00.abinit, As.GGA-PBE-rpaw-2.10.abinit
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

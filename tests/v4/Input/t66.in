@@ -57,13 +57,15 @@ berryopt3  -2
    typat  1 2
    znucl  13 15
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.psphgh, 15p.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t66.out, tolnlines = 36, tolabs = 5.000e-04, tolrel = 1.001e+00, fld_options = -easy 
-#%% psp_files = 13al.psphgh, 15p.5.hgh
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

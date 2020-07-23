@@ -671,7 +671,8 @@ subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,n
 
    ! Beigi"s method: the surface must be along x-y and R must be L_Z/2.
    if (opt_surface==1) then
-     ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)),"Surface must be in the x-y plane")
+     msg="2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry."
+     ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)), msg)
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
@@ -1934,9 +1935,10 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
    !   the simplified Eq.1 for the Coulomb interaction is used.
    if (ANY(ABS(qcart(3,:))>SMALL)) then
      write(std_out,*)qcart(:,:)
-     write(msg,'(5a)')&
-&      'Found q-points with non-zero component along non-periodic direction ',ch10,&
-&      'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
+     write(msg,'(7a)')&
+&      '2D geometry, Beigi method. Found q-points with non-zero component along non-periodic (z) direction ',ch10,&
+&      'This is not allowed. Check your k or q point grid, vectors must be of the form (kx,ky,0). ',ch10,&
+&      'Possibly shiftk triggers this problem.',ch10,&
 &      'ACTION : Modify the q-point sampling '
      MSG_ERROR(msg)
    end if

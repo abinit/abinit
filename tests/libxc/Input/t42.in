@@ -95,6 +95,9 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # Here, we follow the prescription for bulk silicon.
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -102,7 +105,6 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% files_to_test = 
 #%%   t42.out, tolnlines=10, tolabs=  1.1e-3, tolrel= 5.0e-5, fld_options = -medium;
 #%%   t42o_DS4_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]

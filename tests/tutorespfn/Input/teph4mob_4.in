@@ -1,12 +1,9 @@
 # Crystalline AlAs : computation of the dense WFK
 ndtset   3
 
-#
 # General input data for GS and WFK
-#
 ecut   3
 nband  8
-
 
 # Ground state
 ngkpt1  4 4 4
@@ -32,15 +29,15 @@ ngkpt3 48 48 48
 tolwfr3 1.0d-20
 
 #######################################################################
-#Common input variables
+# Common input variables
 
-#Definition of the unit cell
+# Definition of the unit cell
     acell   3*10.61         # This is equivalent to   10.61 10.61 10.61
     rprim   0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors
             0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1
             0.5  0.5  0.0   # that is, the default.
 
-#Definition of the atom types
+# Definition of the atom types
    ntypat   2         # There are two types of atom
     znucl   13 33     # The keyword "znucl" refers to the atomic number of the
                       # possible type(s) of atom. The pseudopotential(s)
@@ -48,17 +45,17 @@ tolwfr3 1.0d-20
                       # to the type(s) of atom. Here, type 1 is the Aluminum,
                       # type 2 is the Arsenic.
 
-#Definition of the atoms
+# Definition of the atoms
     natom   2         # There are two atoms
     typat   1 2       # The first is of type 1 (Al), the second is of type 2 (As).
      xred   0.0  0.0  0.0
             0.25 0.25 0.25
 
-#Exchange-correlation functional
+# Exchange-correlation functional
 
       ixc   1             # LDA Teter Pade parametrization
 
-#Definition of the SCF procedure
+# Definition of the SCF procedure
     nstep   25         # Maximal number of SCF cycles
    diemac   9.0        # Although this is not mandatory, it is worth to
                        # precondition the SCF cycle. The model dielectric
@@ -67,6 +64,9 @@ tolwfr3 1.0d-20
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, 33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -74,12 +74,10 @@ tolwfr3 1.0d-20
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_4.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
-#%% psp_files =  13al.981214.fhi, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
-#%% description =
-#%%   E-ph for the mobility in semiconductors
+#%% description = Generation of WFK files on dense k-meshes to prepare mobility calculations
 #%%<END TEST_INFO>

@@ -112,6 +112,9 @@ kptopt7   1
  ntypat 2
  znucl 3 9
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "03-Li.psp, 09-F.psp"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -120,7 +123,6 @@ kptopt7   1
 #%% files_to_test = 
 #%%   t57.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 1.1;
 #%%   t57o_DS7_KERANGE, tolnlines = 0, tolabs = 1.1e-6, tolrel = 1.0e-4
-#%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [shell]

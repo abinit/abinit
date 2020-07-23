@@ -70,11 +70,13 @@ prtden 0
 prtwf 0
 prteig 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "08o.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 08o.pspgth
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% nprocs_to_test = 4, 10

@@ -39,13 +39,15 @@ toldfe 1.0d-6     # Will stop when, twice in a row, the difference
                   # differ by less than toldfe (in Hartree)
 prtden 0   prtwf 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "dummy_atom"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t56.out, tolnlines = 0, tolabs = 2.994e-13, tolrel = 1.001e+00
-#%% psp_files = dummy_atom
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

@@ -50,11 +50,13 @@
  znucl 42.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "42mo.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 42mo.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4
 #%% max_nprocs = 4

@@ -64,9 +64,6 @@ module defs_datatypes
 
  type ebands_t
 
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
-! declared in another part of ABINIT, that might need to take into account your modification.
-
   integer :: bantot                ! total number of bands (sum(nband(:))
   integer :: mband                 ! Max number of bands i.e MAXVAL(nband) (to dimension arrays)
   integer :: nkpt                  ! number of k points
@@ -78,6 +75,7 @@ module defs_datatypes
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
   real(dp) :: fermie               ! Fermi energy
   real(dp) :: nelect               ! Number of electrons.
+  !real(dp),protected :: nelect0    ! TODO: should add nelect0 to ebands to keep track of intrinsic
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
 
@@ -104,6 +102,7 @@ module defs_datatypes
   real(dp),allocatable :: linewidth(:,:,:,:)
   ! linewidth(itemp,mband,nkpt,nsppol)
   ! Linewidth of each band
+  ! MG: TODO: This array should be removed (I think Yannick introduced it, see also Ktmesh)
 
   real(dp),allocatable :: kTmesh(:)
   ! kTmesh(ntemp)
@@ -112,6 +111,7 @@ module defs_datatypes
   real(dp),allocatable :: velocity(:,:,:,:)
   ! velocity(3,mband,nkpt,nsppol)
   ! Group velocity of each band
+  ! MG: TODO: This array should be removed (I think HM introduced it)
 
   real(dp),allocatable :: occ(:,:,:)
   ! occ(mband,nkpt,nsppol)

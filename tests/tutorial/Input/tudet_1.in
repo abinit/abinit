@@ -55,9 +55,10 @@
      prtden  1                    # This is the default value    
 
 #PAW atomic data
-     pseudos = "Fe.GGA_PBE-JTH.xml"
-     pp_dirpath = "../../Psps_for_tests"
      outdata_prefix = "tudet_1.o"
+
+     pp_dirpath "$ABI_PSPDIR"
+     pseudos "Fe.GGA_PBE-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -67,7 +68,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   tudet_1.abo, tolnlines=  2, tolabs=  7.000e-09, tolrel=  2.000e-10
-#%% psp_files =  Fe.GGA_PBE-JTH.xml
 #%% output_file = "tudet_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 1

@@ -148,13 +148,15 @@ kpt
  typat  1 2
  znucl  12 8
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "12mg.psphgh, 8o.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t37.out, tolnlines = 2, tolabs = 1.010e-03, tolrel = 4.000e-04, fld_options = -easy
-#%% psp_files = 12mg.psphgh, 8o.psphgh
 #%% [paral_info]
 #%% max_nprocs = 32
 #%% [extra_info]

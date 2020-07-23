@@ -94,33 +94,33 @@ MODULE m_xmpi
 #endif
 
  ! Size in bytes of the entries used in MPI datatypes.
- integer,save, public ABI_PROTECTED:: xmpi_bsize_ch =0
- integer,save, public ABI_PROTECTED:: xmpi_bsize_int=0
- integer,save, public ABI_PROTECTED:: xmpi_bsize_sp =0
- integer,save, public ABI_PROTECTED:: xmpi_bsize_dp =0
- integer,save, public ABI_PROTECTED:: xmpi_bsize_spc=0
- integer,save, public ABI_PROTECTED:: xmpi_bsize_dpc=0
+ integer,save, public ABI_PROTECTED:: xmpi_bsize_ch  = 0
+ integer,save, public ABI_PROTECTED:: xmpi_bsize_int = 0
+ integer,save, public ABI_PROTECTED:: xmpi_bsize_sp  = 0
+ integer,save, public ABI_PROTECTED:: xmpi_bsize_dp  = 0
+ integer,save, public ABI_PROTECTED:: xmpi_bsize_spc = 0
+ integer,save, public ABI_PROTECTED:: xmpi_bsize_dpc = 0
 
  ! kind of the offset used for MPI-IO.
 #ifdef HAVE_MPI_IO
- integer,public,parameter :: xmpi_offset_kind =MPI_OFFSET_KIND
- integer,public,parameter :: xmpi_address_kind=MPI_ADDRESS_KIND
- integer,public,parameter :: xmpi_mpiio=1
+ integer,public,parameter :: xmpi_offset_kind  = MPI_OFFSET_KIND
+ integer,public,parameter :: xmpi_address_kind = MPI_ADDRESS_KIND
+ integer,public,parameter :: xmpi_mpiio = 1
 #else
- integer,public,parameter :: xmpi_offset_kind=i8b
- integer,public,parameter :: xmpi_address_kind=i8b
- integer,public,parameter :: xmpi_mpiio=0
+ integer,public,parameter :: xmpi_offset_kind = i8b
+ integer,public,parameter :: xmpi_address_kind = i8b
+ integer,public,parameter :: xmpi_mpiio = 0
 #endif
 
  ! The byte size and the MPI type of the Fortran record marker.
  ! These quantities are compiler-dependent and are initalized here
  ! for selected compilers or in xmpio_get_info_frm that is called by xmpi_init (only if MPI-IO is on).
 #if defined HAVE_MPI && (defined FC_INTEL || defined FC_GNU || defined FC_IBM)
- integer,save,public ABI_PROTECTED :: xmpio_bsize_frm   =4
- integer,save,public ABI_PROTECTED :: xmpio_mpi_type_frm=MPI_INTEGER4
+ integer,save,public ABI_PROTECTED :: xmpio_bsize_frm   = 4
+ integer,save,public ABI_PROTECTED :: xmpio_mpi_type_frm= MPI_INTEGER4
 #else
- integer,save,public ABI_PROTECTED :: xmpio_bsize_frm   =0
- integer,save,public ABI_PROTECTED :: xmpio_mpi_type_frm=0
+ integer,save,public ABI_PROTECTED :: xmpio_bsize_frm    = 0
+ integer,save,public ABI_PROTECTED :: xmpio_mpi_type_frm = 0
 #endif
 
  integer,save, public ABI_PROTECTED :: xmpio_info = xmpi_info_null
@@ -132,8 +132,8 @@ MODULE m_xmpi
  ! We use a value <= 2  Gb to avoid wraparound errors with standard integers.
 
  ! Options used for the MPI-IO wrappers used in abinit.
- integer,public,parameter :: xmpio_single    =1  ! Individual IO.
- integer,public,parameter :: xmpio_collective=2  ! Collective IO.
+ integer,public,parameter :: xmpio_single     = 1  ! Individual IO.
+ integer,public,parameter :: xmpio_collective = 2  ! Collective IO.
 
  integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
@@ -142,10 +142,10 @@ MODULE m_xmpi
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
  ! To exchange more than 2^32 data we need to create specific user-defined datatypes
  ! For this, we need some parameters:
- integer(KIND=int32),public,parameter :: xmpi_maxint32=HUGE(0_int32)
- integer(KIND=int64),public,parameter :: xmpi_maxint32_64=int(xmpi_maxint32,kind=int64)
+ integer(KIND=int32),public,parameter :: xmpi_maxint32 = huge(0_int32)
+ integer(KIND=int64),public,parameter :: xmpi_maxint32_64 = int(xmpi_maxint32,kind=int64)
  ! Max. integer that can be represented with 32 bits
- integer(KIND=int64),public,save :: xmpi_largetype_size=0
+ integer(KIND=int64),public,save :: xmpi_largetype_size = 0
  ! Number of data to be used in user-defined operations related to user-defined "largetype" type
 !!***
 

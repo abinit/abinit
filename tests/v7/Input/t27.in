@@ -80,18 +80,20 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 ##150 seq psp1=23v.paw psp2=38sr.paw psp3=8o.2.paw opt=-medium DS3AT=Gtau.dat
 ##%%                  t27o_DS2_atom_01_Gtau_01.dat,  tolnlines =0, tolabs =0.0e-00, tolrel = 0.0e-00, fld_options=-medium
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
 #%%                  t27.out,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
-#%% psp_files = 23v.paw, 38sr.paw, 8o.2.paw
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = B. Amadon, J. Bieder 
-#%% keywords = DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = DMFT, CTQMC
 #%% description = Test CT-QMC within DMFT for VSrO3 NSCF over density
 #%% topics = DMFT
 #%%<END TEST_INFO>

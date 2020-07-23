@@ -62,6 +62,9 @@ xred   0.00 0.00 0.00
 ntypat 1
 znucl  13
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Al-psval.psp8"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -69,7 +72,6 @@ znucl  13
 #%% [files]
 #%% files_to_test = 
 #%%   t85.out, tolnlines= 50, tolabs=3.000e-02, tolrel=6.000e-03, fld_options= -easy
-#%% psp_files = Al-psval.psp8
 #%% [shell]
 #%% post_commands =
 #%%  ww_cp t85o_DS1_WFK t88o_DS20_WFK;

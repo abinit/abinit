@@ -60,12 +60,14 @@
  densfor_pred 0
  fftalg 401 # Do not remove this input variable, although it is the default. See KNOWN PROBLEM P802.1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "2he.psphgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% exclude_builders = ubu_intel_17.0_openmpi
 #%% [files]
-#%% psp_files = 2he.psphgh
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4

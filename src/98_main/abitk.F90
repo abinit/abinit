@@ -63,24 +63,22 @@ program abitk
 !scalars
  integer,parameter :: master = 0
  integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
- integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth !ierr,
- integer :: ndivsm, abimem_level, ierr, spin
- real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb
- character(len=500) :: command, arg, msg
+ integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, occopt, intmeth, lenr
+ integer :: ndivsm, abimem_level, ierr !, spin
+ real(dp) :: spinmagntarget, tsmear, extrael, step, broad, abimem_limit_mb !, tolsym
+ character(len=500) :: command, arg, msg, ptgroup
  character(len=fnlen) :: path, other_path !, prefix
  type(hdr_type) :: hdr
  type(ebands_t) :: ebands, ebands_kpath, other_ebands
  type(edos_t) :: edos
+ type(jdos_t) :: jdos
  type(crystal_t) :: cryst, other_cryst
  type(geo_t) :: geo
  type(kpath_t) :: kpath
- type(gaps_t) :: gaps
 !arrays
- integer :: kptrlatt(3,3), new_kptrlatt(3,3)
- !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
+ integer :: kptrlatt(3,3), new_kptrlatt(3,3), ngqpt(3)
  real(dp) :: skw_params(4)
  real(dp),allocatable :: bounds(:,:)
- !real(dp) :: klatt(3,3), rlatt(3,3)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
 
 !*******************************************************
@@ -133,10 +131,10 @@ program abitk
      write(std_out,"(a)")"ebands_dos FILE --intmeth, --step, --broad  Compute electron DOS."
      write(std_out,"(a)")"ebands_bxsf FILE                     Produce BXSF file for Xcrysden."
      write(std_out,"(a)")"ebands_extrael FILE --occopt --tsmear --extrael  Change number of electron, compute new Fermi level."
-     !write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
+     write(std_out,"(a)")"ebands_gaps FILE                     Print info on gaps"
      !write(std_out,"(a)")"ebands_jdos FILE --intmeth, --step, --broad  Compute electron DOS."
-     !write(std_out,"(a)")"skw_path FILE                     Produce BXSF file for Xcrysden."
-     !write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK       Use eigens from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
+     !write(std_out,"(a)")"skw_path FILE                       Interpolate band structure along a k-path."
+     write(std_out,"(a)")"skw_compare IBZ_WFK KPATH_WFK        Use e_nk from IBZ_WFK to interpolate on the k-path in KPATH_WFK."
 
      write(std_out,"(2a)")ch10,"=== DEVELOPERS ==="
      write(std_out,"(a)")"tetra_unit_tests                      Run unit tests for tetrahedron routines."
@@ -159,16 +157,18 @@ program abitk
  !  call get_path_cryst(path, cryst, comm)
  !  call prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
 
- !case ("wfk_downsample")
- ! e.g. go from a 8x8x8 WFK to a 4x4x4
+ !case ("to_cif")
+ !  call get_command_argument(2, path)
+ !  call get_path_cryst(path, cryst, comm)
+ !  call prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
 
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)
    call hdr_read_from_fname(hdr, path, fform, comm)
    ABI_CHECK(fform /= 0, "fform == 0")
-   !rdwr = 3; if (prtvol > 0) rdwr = 4
-   rdwr = 4
+   rdwr = 3; if (prtvol > 0) rdwr = 4
+   !rdwr = 4
    call hdr%echo(fform, rdwr, unit=std_out)
 
  case ("ibz")
@@ -194,10 +194,11 @@ program abitk
        write(std_out, "((a, 3(f3.1, 1x)), a)")" [", shiftk(:, ii), "]      ......"
      end if
    end do
-   write(std_out,"(a)")"#  List of kpoints in the IBZ with the corresponding weights:"
-   write(std_out,"(/,a,i0,/,a)")" nkpt ", nkibz, "kpt"
+   write(std_out,"(/,a)")"# List of kpoints in the IBZ with the corresponding weights:"
+   write(std_out,"(a,i0)")" kptopt ", kptopt
+   write(std_out,"(a,i0,/,a)")" nkpt ", nkibz, " kpt"
    do ii=1,nkibz
-     write(std_out, "(3(es11.4,a),a,es11.4)") kibz(:, ii), " # ", wtk(ii)
+     write(std_out, "(3(es11.4),a,es11.4)") kibz(:, ii), " # wtk ", wtk(ii)
    end do
 
  !case ("testkgrid")
@@ -220,19 +221,11 @@ program abitk
 
  case ("ebands_gaps")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   ierr = get_gaps(ebands, gaps)
-   if (ierr /= 0) then
-     do spin=1, ebands%nsppol
-       MSG_WARNING(trim(gaps%errmsg_spin(spin)))
-     end do
-     MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
-   end if
-   call gaps%print(unit=std_out)
-   call gaps%free()
+   call ebands_print_gaps(ebands, std_out)
 
  case ("ebands_dos", "ebands_jdos")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   ABI_CHECK(get_arg("intmeth", intmeth, msg, default=1) == 0, msg)
+   ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.04 * ev_Ha) == 0, msg)
 
@@ -243,23 +236,25 @@ program abitk
 
    else if (command == "ebands_jdos") then
      NOT_IMPLEMENTED_ERROR()
-     !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+     jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
-     !call jdos%free()
+     call jdos%free()
    end if
 
  case ("ebands_bxsf")
    call get_path_ebands_cryst(path, ebands, cryst, comm)
    if (ebands_write_bxsf(ebands, cryst, strcat(basename(path), "_BXSF")) /= 0)  then
-     MSG_ERROR("Cannot produce file for Fermi surface, check log file for more info")
+     MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
    end if
 
- !case ("nesting")
+ !case ("ebands_nesting")
    !call get_path_ebands_cryst(path, ebands, cryst, comm)
-   !ierr = ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg)
+   !if (ebands_write_nesting(ebands, cryst, filepath, prtnest, tsmear, fermie_nest, qpath_vertices, errmsg) /= 0) then
+   !  MSG_ERROR("Cannot produce file for Fermi surface in BXSF format. Check log file for info.")
+   !end if
 
  case ("skw_kpath")
-   ! Get energies on the IBZ from path
+   ! Get energies on the IBZ from path file
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
    ! Generate k-path
@@ -292,7 +287,7 @@ program abitk
    ! Get energies on the IBZ from filepath
    call get_path_ebands_cryst(path, ebands, cryst, comm)
 
-   ! Get ab-initio energies for the second file (assume it's a path!)
+   ! Get ab-initio energies for the second file (assume k-path!)
    call get_path_ebands_cryst(other_path, other_ebands, other_cryst, comm, argpos=3)
 
    ! Interpolate band energies on the path with star-functions
@@ -300,6 +295,10 @@ program abitk
 
    call parse_skw_params(skw_params)
    ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, skw_params, [1, ebands%mband], comm)
+
+   ! Compare gaps
+   call ebands_print_gaps(other_ebands, std_out, header="Ab-initio gaps")
+   call ebands_print_gaps(ebands_kpath, std_out, header="SKW interpolated gaps")
 
    !ABI_CHECK(get_arg("prtebands", prtebands, msg, default=2) == 0, msg)
    !call ebands_write(ebands_kpath, prtebands, path)
@@ -315,11 +314,22 @@ program abitk
      newlines=2)
 
  case ("ebands_extrael")
-   call get_path_ebands(path, ebands, comm)
+
+   ! Get energies on the IBZ from filepath
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+
+   ABI_CHECK(get_arg("extrael", extrael, msg) == 0, msg)
    ABI_CHECK(get_arg("occopt", occopt, msg, default=3) == 0, msg)
    ABI_CHECK(get_arg("tsmear", tsmear, msg, default=tol2) == 0, msg)
-   ABI_CHECK(get_arg("extrael", extrael, msg) == 0, msg)
    ABI_CHECK(get_arg("spinmagntarget", spinmagntarget, msg, default=-99.99_dp) == 0, msg)
+
+   !extrael = - dprarr(1) * cryst%ucvol * (Bohr_meter * 100) ** 3
+   !ebands%nelect = ebands%nelect + extrael
+   !call ebands_print_gaps(ebands, std_out, header="KS gaps")
+   !integer,intent(in) :: ntemp
+   !real(dp),intent(in) :: kTmesh(ntemp)
+   !real(dp),intent(out) :: mu_e(ntemp)
+   !call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
 
    call ebands_set_scheme(ebands, occopt, tsmear, spinmagntarget, prtvol)
    call ebands_set_nelect(ebands, ebands%nelect + extrael, spinmagntarget, msg)
@@ -330,10 +340,10 @@ program abitk
  ! ====================
  ! Tools for developers
  ! ====================
- !case ("f2nc")
+ !case ("denpot_f2nc")
  !   call get_command_argument(2, path)
  !   call get_command_argument(3, other_path)
- !   call f2nc(path, other_path)
+ !   call denpot_f2nc(path, other_path)
 
    ! Get important dimensions from the first header and rewind the file.
    !call hdr_fort_read(new%hdr_ref, unt, fform)
@@ -356,16 +366,19 @@ program abitk
    !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    !ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
 
-
  ! ===========
  ! Unit tests
  ! ===========
 
  case ("tetra_unit_tests")
-   call tetra_unittests(comm)
+   ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
+   ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[20, 20, 20]) == 0, msg)
+   call tetra_unittests(ptgroup, ngqpt, comm)
 
  case ("kptrank_unit_tests")
-   call kptrank_unittests(comm)
+   ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
+   ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[100, 100, 100]) == 0, msg)
+   call kptrank_unittests(ptgroup, ngqpt, comm)
 
  case default
    MSG_ERROR(sjoin("Unknown command:", command))
@@ -515,7 +528,6 @@ subroutine parse_skw_params(params)
 
 !*******************************************************
 
- !params = zero; params(1) = 1; params(2) = 5
  ABI_CHECK(get_arg("lpratio", lpratio, msg, default=5) == 0, msg)
  ABI_CHECK(get_arg("rcut", rcut, msg, default=zero) == 0, msg)
  ABI_CHECK(get_arg("rsigma", rsigma, msg, default=zero) == 0, msg)

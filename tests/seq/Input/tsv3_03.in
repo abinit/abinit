@@ -151,12 +151,14 @@ ndtset 8
    istwfk8 16*1          ! Insist on full storage mode
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "31ga.hgh, 33as.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = tsv3_03.out, tolnlines=0, tolabs=0.0, tolrel=0.0, fld_options=-medium
-#%% psp_files= 31ga.hgh, 33as.hgh 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

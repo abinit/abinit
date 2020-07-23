@@ -118,7 +118,7 @@ module m_wfd
    integer,allocatable :: gbound(:,:)
    ! gbound(2*mgfft+8,2))
    ! The boundary of the basis sphere of G vectors at a given k point.
-   ! for use in improved zero padding of ffts in 3 dimensions.
+   ! for use in improved zero padding of FFTs in 3 dimensions.
 
    !% real(dp) :: kpoint(3)
 
@@ -4659,7 +4659,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: formeig0=0, optkg1=1, method = 2
- integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode,ii
+ integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode,ii, enough
  integer :: comm,master,my_rank,spin,ik_ibz,fform,ierr ! ,igp
  integer :: mcg,nband_wfd,nband_disk,band,mband_disk,bcount,istwfk_disk
  integer :: spinor,cg_spad,gw_spad,icg,igw,cg_bpad,ib, ik, is
@@ -4707,7 +4707,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
  ABI_MALLOC(my_readmask,(mband_disk, Wfd%nkibz, Wfd%nsppol))
  my_readmask=.FALSE.
- all_countks = 0
+ all_countks = 0; enough = 0
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
@@ -4715,7 +4715,10 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
          my_readmask(band,ik_ibz,spin) = .TRUE.
          all_countks(ik_ibz, spin) = 1
          if (wfd%ihave_ug(band, ik_ibz, spin, how="Stored")) then
-           MSG_WARNING("Wavefunction is already stored!")
+           enough = enough + 1
+           if (enough < 30) then
+             MSG_WARNING("Wavefunction is already stored!")
+           end if
          end if
        end if
      end do

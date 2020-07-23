@@ -305,7 +305,6 @@ CONTAINS  !===========================================================
 
 pure function arth_int(start, step, nn)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -347,7 +346,6 @@ end function arth_int
 
 pure function arth_rdp(start, step, nn)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -359,16 +357,14 @@ pure function arth_rdp(start, step, nn)
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  arth_rdp(1)=start
-  do ii=2,nn
-   arth_rdp(ii)=arth_rdp(ii-1)+step
-  end do
+   arth_rdp(1)=start
+   do ii=2,nn
+    arth_rdp(ii)=arth_rdp(ii-1)+step
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function arth_rdp
@@ -388,31 +384,28 @@ end function arth_rdp
 !!
 !! SOURCE
 
-pure function linspace(start,stop,nn)
-
+pure function linspace(start, stop, nn)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
- real(dp),intent(in) :: start,stop
- real(dp) :: length
+ real(dp),intent(in) :: start, stop
  real(dp) :: linspace(nn)
 
 !Local variables-------------------------------
+ real(dp) :: length
  integer :: ii
 ! *********************************************************************
 
  select case (nn)
-
  case (1:)
-  length = stop-start
-  do ii=1,nn
-   linspace(ii)=start+length*(ii-1)/(nn-1)
-  end do
+   length = stop-start
+   do ii=1,nn
+     linspace(ii)=start+length*(ii-1)/(nn-1)
+   end do
 
  case (0)
-  RETURN
-
+   return
  end select
 
 end function linspace
@@ -441,7 +434,6 @@ end function linspace
 
 
 pure function geop(start,factor,nn) result(res)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -478,7 +470,6 @@ end function geop
 
 subroutine reverse_int(arr)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(inout) :: arr(:)
@@ -514,7 +505,6 @@ end subroutine reverse_int
 !! SOURCE
 
 subroutine reverse_rdp(arr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -556,7 +546,6 @@ end subroutine reverse_rdp
 
 pure subroutine unit_matrix_int(matrix)
 
-
 !Arguments ------------------------------------
  integer,intent(inout) :: matrix(:,:)
 
@@ -593,7 +582,6 @@ end subroutine unit_matrix_int
 !! SOURCE
 
 pure subroutine unit_matrix_rdp(matrix)
-
 
 !Arguments ------------------------------------
  real(dp),intent(inout) :: matrix(:,:)
@@ -632,7 +620,6 @@ end subroutine unit_matrix_rdp
 
 pure subroutine unit_matrix_cdp(matrix)
 
-
 !Arguments ------------------------------------
  complex(dpc),intent(inout) :: matrix(:,:)
 
@@ -668,7 +655,6 @@ end subroutine unit_matrix_cdp
 !! SOURCE
 
 pure function get_trace_int(matrix) result(trace)
-
 
 !Arguments ------------------------------------
  integer :: trace
@@ -706,7 +692,6 @@ end function get_trace_int
 
 pure function get_trace_rdp(matrix) result(trace)
 
-
 !Arguments ------------------------------------
  real(dp) :: trace
  real(dp),intent(in) :: matrix(:,:)
@@ -740,7 +725,6 @@ end function get_trace_rdp
 !! SOURCE
 
 pure function get_trace_cdp(matrix) result(trace)
-
 
 !Arguments ------------------------------------
  complex(dpc) :: trace
@@ -776,7 +760,6 @@ end function get_trace_cdp
 
 function get_diag_int(mat) result(diag)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mat(:,:)
@@ -786,11 +769,10 @@ function get_diag_int(mat) result(diag)
  integer :: ii
 ! *************************************************************************
 
- ii=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ ii = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  do ii=1,SIZE(mat,1)
-  diag(ii)=mat(ii,ii)
+   diag(ii)=mat(ii,ii)
  end do
 
 end function get_diag_int
@@ -812,8 +794,8 @@ end function get_diag_int
 !!  diag(:)=the diagonal
 !!
 !! SOURCE
-function get_diag_rdp(mat) result(diag)
 
+function get_diag_rdp(mat) result(diag)
 
 !Arguments ------------------------------------
 !scalars
@@ -824,11 +806,10 @@ function get_diag_rdp(mat) result(diag)
  integer :: ii
 ! *************************************************************************
 
- ii=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ ABI_CHECK(SIZE(mat,1) == SIZE(mat,2), 'Matrix not square')
 
  do ii=1,SIZE(mat,1)
-  diag(ii)=mat(ii,ii)
+   diag(ii) = mat(ii,ii)
  end do
 
 end function get_diag_rdp
@@ -859,11 +840,10 @@ function get_diag_cdp(cmat) result(cdiag)
  integer :: ii
 ! *************************************************************************
 
- ii=assert_eq(SIZE(cmat,1),SIZE(cmat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ ABI_CHECK(SIZE(cmat,1) == SIZE(cmat,2), 'Matrix not square')
 
  do ii=1,SIZE(cmat,1)
-  cdiag(ii)=cmat(ii,ii)
+   cdiag(ii)=cmat(ii,ii)
  end do
 
 end function get_diag_cdp
@@ -916,7 +896,6 @@ end function isdiagmat_int
 
 pure logical function isdiagmat_rdp(mat, atol) result(ans)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: mat(:,:)
@@ -958,7 +937,6 @@ end function isdiagmat_rdp
 
 pure function l2int_1D(larr) result(int_arr)
 
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: larr(:)
@@ -991,7 +969,6 @@ end function l2int_1D
 
 pure function l2int_2D(larr) result(int_arr)
 
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: larr(:,:)
@@ -1023,7 +1000,6 @@ end function l2int_2D
 !! SOURCE
 
 pure function l2int_3D(larr) result(int_arr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1060,7 +1036,6 @@ end function l2int_3D
 
 pure function rdp2cdp_1D(rr) result(cc)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:)
@@ -1088,7 +1063,6 @@ end function rdp2cdp_1D
 !! SOURCE
 
 pure function rdp2cdp_2D(rr) result(cc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1118,7 +1092,6 @@ end function rdp2cdp_2D
 
 pure function rdp2cdp_3D(rr) result(cc)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:)
@@ -1146,7 +1119,6 @@ end function rdp2cdp_3D
 !! SOURCE
 
 pure function rdp2cdp_4D(rr) result(cc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1176,7 +1148,6 @@ end function rdp2cdp_4D
 
 pure function rdp2cdp_5D(rr) result(cc)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rr(:,:,:,:,:,:)
@@ -1204,7 +1175,6 @@ end function rdp2cdp_5D
 !! SOURCE
 
 pure function rdp2cdp_6D(rr) result(cc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1237,7 +1207,6 @@ end function rdp2cdp_6D
 
 pure function cdp2rdp_1D(cc) result(rr)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: cc(:)
@@ -1267,7 +1236,6 @@ end function cdp2rdp_1D
 
 pure function cdp2rdp_2D(cc) result(rr)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: cc(:,:)
@@ -1295,7 +1263,6 @@ end function cdp2rdp_2D
 !! SOURCE
 
 pure function cdp2rdp_3D(cc) result(rr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1326,7 +1293,6 @@ end function cdp2rdp_3D
 
 pure function cdp2rdp_4D(cc) result(rr)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: cc(:,:,:,:)
@@ -1354,7 +1320,6 @@ end function cdp2rdp_4D
 !! SOURCE
 
 pure function cdp2rdp_5D(cc) result(rr)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1386,7 +1351,6 @@ end function cdp2rdp_5D
 
 elemental function iseven(nn)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -1414,7 +1378,6 @@ end function iseven
 !! SOURCE
 
 pure function is_integer_0d(rr,tol) result(ans)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1445,7 +1408,6 @@ end function is_integer_0d
 !! SOURCE
 
 pure function is_integer_1d(rr,tol) result(ans)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1484,7 +1446,6 @@ end function is_integer_1d
 
 function is_zero_rdp_0d(rr,tol) result(ans)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: tol
@@ -1514,7 +1475,6 @@ end function is_zero_rdp_0d
 
 function is_zero_rdp_1d(rr,tol) result(ans)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: tol
@@ -1541,7 +1501,6 @@ end function is_zero_rdp_1d
 
 pure logical function inrange_int(xval, win)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: xval,win(2)
@@ -1565,7 +1524,6 @@ end function inrange_int
 
 pure logical function inrange_dp(xval, win)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: xval, win(2)
@@ -1588,7 +1546,6 @@ end function inrange_dp
 !! SOURCE
 
 pure function bisect_rdp(AA,xx) result(loc)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1645,7 +1602,6 @@ end function bisect_rdp
 !! SOURCE
 pure function bisect_int(AA,xx) result(loc)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: AA(:)
@@ -1696,7 +1652,6 @@ end function bisect_int
 
 pure function imax_loc_int(iarr,mask)
 
-
 !Arguments ------------------------------------
 !scalars
  integer :: imax_loc_int
@@ -1733,7 +1688,6 @@ end function imax_loc_int
 !! SOURCE
 pure function imax_loc_rdp(arr,mask)
 
-
 !Arguments ------------------------------------
 !scalars
  integer :: imax_loc_rdp
@@ -1767,7 +1721,6 @@ end function imax_loc_rdp
 !! SOURCE
 
 pure function imin_loc_int(arr,mask)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1805,7 +1758,6 @@ end function imin_loc_int
 !! SOURCE
 
 pure function imin_loc_rdp(arr,mask)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1850,7 +1802,6 @@ end function imin_loc_rdp
 !! SOURCE
 
 integer pure function lfind(mask, back)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1917,7 +1868,6 @@ end function lfind
 !! SOURCE
 
 subroutine list2blocks(list,nblocks,blocks)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1990,7 +1940,6 @@ end subroutine list2blocks
 !! SOURCE
 
 subroutine mask2blocks(mask,nblocks,blocks)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2075,7 +2024,6 @@ end subroutine mask2blocks
 !! SOURCE
 
 function linfit_rdp(nn,xx,yy,aa,bb) result(res)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2183,7 +2131,6 @@ end function linfit_spc
 
 function linfit_dpc(nn,xx,zz,aa,bb) result(res)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -2246,7 +2193,6 @@ end function linfit_dpc
 
 subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfuncs
@@ -2277,12 +2223,9 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  real(dp),allocatable :: work(:),Vt(:,:),U(:,:),S(:)
 ! *************************************************************************
 
- npts=assert_eq(SIZE(xx),SIZE(yy),SIZE(sigma),'Wrong size in xx,yy,sigma',&
-& __FILE__,__LINE__)
- call assert((npts>=nfuncs),'No. of functions must greater than no. of points',&
-& __FILE__,__LINE__)
- ii=assert_eq(nfuncs,SIZE(cov,1),SIZE(cov,2),SIZE(var),'Wrong size in covariance',&
-& __FILE__,__LINE__)
+ npts = assert_eq(SIZE(xx),SIZE(yy),SIZE(sigma),'Wrong size in xx,yy,sigma', __FILE__, __LINE__)
+ call assert((npts>=nfuncs),'No. of functions must greater than no. of points', __FILE__, __LINE__)
+ ii = assert_eq(nfuncs,SIZE(cov,1),SIZE(cov,2),SIZE(var),'Wrong size in covariance', __FILE__, __LINE__)
 
  !
  ! === Calculate design matrix and b vector ===
@@ -2365,7 +2308,6 @@ end subroutine llsfit_svd
 
 subroutine polyn_interp(xa,ya,x,y,dy)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: xa(:),ya(:)
@@ -2378,8 +2320,7 @@ subroutine polyn_interp(xa,ya,x,y,dy)
  real(dp),dimension(SIZE(xa)) :: c,d,den,ho
 ! *************************************************************************
 
- n=assert_eq(SIZE(xa),SIZE(ya),'Different size in xa and ya',&
-& __FILE__,__LINE__)
+ n = assert_eq(SIZE(xa),SIZE(ya),'Different size in xa and ya',__FILE__,__LINE__)
 
  ! === Initialize the tables of c and d ===
  c(:)=ya(:) ; d(:)=ya(:) ; ho(:)=xa(:)-x
@@ -2445,7 +2386,6 @@ end subroutine polyn_interp
 !! SOURCE
 
 recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2551,7 +2491,6 @@ end subroutine trapezoidal_
 
  recursive subroutine midpoint_(func,nn,xmin,xmax,quad)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn
@@ -2650,7 +2589,6 @@ end subroutine midpoint_
 !! SOURCE
 
 recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,npts)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2860,7 +2798,6 @@ end subroutine quadrature
 
 subroutine ctrap(imax,ff,hh,ans)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: imax
@@ -3017,7 +2954,6 @@ end subroutine ctrap
 !! SOURCE
 
 subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3179,7 +3115,6 @@ end subroutine cspint
 
 subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -3257,7 +3192,6 @@ end subroutine coeffs_gausslegint
 
 function simpson_cplx(npts,step,ff)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npts
@@ -3328,7 +3262,6 @@ end function simpson_cplx
 
 subroutine hermitianize_spc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3342,8 +3275,7 @@ subroutine hermitianize_spc(mat,uplo)
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
 
@@ -3418,7 +3350,6 @@ end subroutine hermitianize_spc
 
 subroutine hermitianize_dpc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3432,8 +3363,7 @@ subroutine hermitianize_dpc(mat,uplo)
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
 
@@ -3503,7 +3433,6 @@ end subroutine hermitianize_dpc
 
 pure subroutine mkherm(array,ndim)
 
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ndim
@@ -3565,7 +3494,6 @@ end subroutine mkherm
 !! SOURCE
 
 subroutine hermit(chmin,chmout,ierr,ndim)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3675,7 +3603,6 @@ end subroutine hermit
 
 subroutine symmetrize_spc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3689,8 +3616,7 @@ subroutine symmetrize_spc(mat,uplo)
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
 
@@ -3756,7 +3682,6 @@ end subroutine symmetrize_spc
 
 subroutine symmetrize_dpc(mat,uplo)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3770,11 +3695,9 @@ subroutine symmetrize_dpc(mat,uplo)
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
 
- nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
-& __FILE__,__LINE__)
+ nn = assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',__FILE__,__LINE__)
 
  select case (uplo(1:1))
-
  case ("A","a") ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
@@ -3885,7 +3808,6 @@ end subroutine pack_matrix
 
 subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,max_r
@@ -3946,7 +3868,6 @@ end subroutine print_arr1d_spc
 
 subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,max_r
@@ -4006,7 +3927,6 @@ end subroutine print_arr1d_dpc
 !! SOURCE
 
 subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4073,7 +3993,6 @@ end subroutine print_arr2d_spc
 
 subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,max_r,max_c
@@ -4132,7 +4051,6 @@ end subroutine print_arr2d_dpc
 
 function pade(n,z,f,zz)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -4179,7 +4097,6 @@ end function pade
 !! SOURCE
 
 function dpade(n,z,f,zz)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4245,7 +4162,6 @@ end function dpade
 
 subroutine calculate_pade_a(a,n,z,f)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -4290,7 +4206,6 @@ end subroutine calculate_pade_a
 
 function newrap_step(z,f,df)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc),intent(in) :: z,f,df
@@ -4320,7 +4235,6 @@ end function newrap_step
 !!
 pure function cross_product_int(vec1,vec2) result(res)
 
-
 !Arguments ------------------------------------
  integer,intent(in) :: vec1(3),vec2(3)
  integer :: res(3)
@@ -4343,7 +4257,6 @@ end function cross_product_int
 !!  Return the cross product of two vectors with real double precision components.
 !!
 pure function cross_product_rdp(vec1,vec2) result(res)
-
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: vec1(3),vec2(3)
@@ -4368,7 +4281,6 @@ end function cross_product_rdp
 !!
 
 pure function l2norm_rdp(vec) result(res)
-
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: vec(:)
@@ -4415,7 +4327,6 @@ end function l2norm_rdp
 !! SOURCE
 
 subroutine remove_copies(n_in,set_in,n_out,is_equal)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4502,7 +4413,6 @@ end subroutine remove_copies
 
 integer function denominator(dd,ierr,tolerance)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ierr
@@ -4549,7 +4459,6 @@ end function denominator
 !! SOURCE
 
 integer function mincm(ii,jj)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4609,7 +4518,6 @@ end function mincm
 !! SOURCE
 
 subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -4720,7 +4628,6 @@ end subroutine continued_fract
 
 subroutine cmplx_sphcart(carr, from, units)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: from
@@ -4807,7 +4714,6 @@ end subroutine cmplx_sphcart
 
 subroutine pfactorize(nn,nfactors,pfactors,powers)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn,nfactors
@@ -4866,7 +4772,6 @@ end subroutine pfactorize
 !! SOURCE
 
 function isordered_rdp(nn,arr,direction,tol) result(isord)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -5009,8 +4914,7 @@ end function stats_eval
 !!
 !! SOURCE
 
-elemental subroutine wrap2_zero_one(num,red,shift)
-
+elemental subroutine wrap2_zero_one(num, red, shift)
 
 !Arguments ------------------------------------
 !scalars
@@ -5060,7 +4964,6 @@ end subroutine wrap2_zero_one
 
 elemental subroutine wrap2_pmhalf(num,red,shift)
 
-
 !Arguments -------------------------------
 !scalars
  real(dp),intent(in) :: num
@@ -5108,12 +5011,11 @@ end subroutine wrap2_pmhalf
 !!
 !! SOURCE
 
-pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
-
+pure function interpol3d(r, nr1, nr2, nr3, grid) result(res)
 
 !Arguments-------------------------------------------------------------
 !scalars
- integer,intent(in) :: nr1,nr2,nr3
+ integer,intent(in) :: nr1, nr2, nr3
  real(dp) :: res
 !arrays
  real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)
@@ -5134,14 +5036,14 @@ pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
 
 !calculation of the density value
  res=zero
- res=res + grid(ir1,ir2,ir3)*(one-x1)*(one-x2)*(one-x3)
- res=res + grid(pr1,ir2,ir3)*x1*(one-x2)*(one-x3)
- res=res + grid(ir1,pr2,ir3)*(one-x1)*x2*(one-x3)
- res=res + grid(ir1,ir2,pr3)*(one-x1)*(one-x2)*x3
- res=res + grid(pr1,pr2,ir3)*x1*x2*(one-x3)
- res=res + grid(ir1,pr2,pr3)*(one-x1)*x2*x3
- res=res + grid(pr1,ir2,pr3)*x1*(one-x2)*x3
- res=res + grid(pr1,pr2,pr3)*x1*x2*x3
+ res=res + grid(ir1, ir2, ir3) * (one-x1)*(one-x2)*(one-x3)
+ res=res + grid(pr1, ir2, ir3) * x1*(one-x2)*(one-x3)
+ res=res + grid(ir1, pr2, ir3) * (one-x1)*x2*(one-x3)
+ res=res + grid(ir1, ir2, pr3) * (one-x1)*(one-x2)*x3
+ res=res + grid(pr1, pr2, ir3) * x1*x2*(one-x3)
+ res=res + grid(ir1, pr2, pr3) * (one-x1)*x2*x3
+ res=res + grid(pr1, ir2, pr3) * x1*(one-x2)*x3
+ res=res + grid(pr1, pr2, pr3) * x1*x2*x3
 
 end function interpol3d
 !!***
@@ -5174,7 +5076,6 @@ end function interpol3d
 !! SOURCE
 
 pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
-
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5247,7 +5148,6 @@ end subroutine interpol3d_indices
 !! SOURCE
 
 subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_rhor)
-
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5329,7 +5229,6 @@ end subroutine interpolate_denpot
 
 subroutine simpson_int(npts,step,values,int_values)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npts
@@ -5400,7 +5299,6 @@ end subroutine simpson_int
 
 function simpson(step, values) result(res)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: step
@@ -5443,7 +5341,6 @@ end function simpson
 !! SOURCE
 
 pure subroutine rhophi(cx,phi,rho)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -5582,7 +5479,6 @@ end function vdiff_eval
 !! SOURCE
 
 subroutine vdiff_print(vd, unit)
-
 
 !Arguments ------------------------------------
 !scalars

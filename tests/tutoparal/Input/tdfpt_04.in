@@ -61,12 +61,14 @@ qpt 0.0 0.25  0.0
 
 timopt -2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "56ba.psp_mod, 22ti.psp_mod, 8o.psp_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = tdfpt_03.in, tdfpt_04.in
 #%% [files]
-#%% psp_files= 56ba.psp_mod, 22ti.psp_mod, 8o.psp_mod
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24

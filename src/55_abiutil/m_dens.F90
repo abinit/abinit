@@ -1481,6 +1481,8 @@ end subroutine mag_penalty_e
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol, optional argument
 !!  gr_intgden(3,nspden,natom)=grad wrt atomic positions, of integrated density (magnetization...) for each atom in a sphere. Should be Optional arg
 !!  rhomag(2,nspden)=integrated complex density (magnetization...) over full u.c. vol, optional argument
+!!    in collinear case component 1 is total density and 2 is _magnetization_ up-down
+!!    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  intgden(nspden, natom)=integrated density (magnetization...) for each atom in a sphere of radius ratsph. Optional arg
 !!    Note that when intgden is present, the definition of the spherical integration function changes, as it is smoothed.
 !!  intgf2(natom,natom)=overlaps of the spherical integration functions for each atom in a sphere of radius ratsph. Optional arg
@@ -2095,10 +2097,22 @@ end subroutine prtdenmagsph
 !! radsmear
 !!
 !! FUNCTION
+!! As a function of the argument xarg (a positive number), return a function fsm that is zero
+!! beyond some cut-off value xcut, one for xarg smaller than xcut-xsmear,
+!! and interpolates smoothly between one and zero in the region from xcut-xsmear to xcut.
+!! Also returns the derivative of this function, called dfsm.
+!! The function fsm is twice differentiable at xcut (the first derivative is continuous, not the second),
+!! and three times differentiable at xcut-xsmear (the second derivative is continuous, not the third).
+!! 
 !!
 !! INPUTS
+!! xarg=argument of the function (should be positive)
+!! xcut=largest value for which the function is non-zero
+!! xsmear=defined the smearing region, between xcut-xsmear and xcut
 !!
 !! OUTPUT
+!! fsm=value of the function
+!! dfsm=derivative of the function with respect to xarg (zero, except in the smearing region).
 !!
 !! PARENTS
 !!
@@ -2106,28 +2120,28 @@ end subroutine prtdenmagsph
 !!
 !! SOURCE
 
-subroutine radsmear(dfsm,fsm,r2,r2sph,rsm2)
+subroutine radsmear(dfsm,fsm,xarg,xcut,xsmear)
 
 !Arguments ------------------------------------
 !scalars
  real(dp), intent(out) :: dfsm,fsm
- real(dp), intent(in) :: r2, r2sph, rsm2
+ real(dp), intent(in) :: xarg, xcut, xsmear
 
 !Local variables ------------------------------
 !scalars
- real(dp) :: rsm2inv,xx
+ real(dp) :: xsmearinv,xx
 
 !******************************************************************
 
  fsm = zero
  dfsm=zero
- if (r2 < r2sph - rsm2 - tol12) then
+ if (xarg < xcut - xsmear - tol12) then
    fsm = one
- else if (r2 < r2sph - tol12) then
-   rsm2inv=one/rsm2
-   xx = (r2sph - r2) * rsm2inv
+ else if (xarg < xcut - tol12) then
+   xsmearinv=one/xsmear
+   xx = (xcut - xarg) * xsmearinv
    fsm = xx**2*(3+xx*(1+xx*(-6+3*xx)))
-   dfsm = -(xx*(6+xx*(3+xx*(-24+15*xx))))*rsm2inv
+   dfsm = -(xx*(6+xx*(3+xx*(-24+15*xx))))*xsmearinv
  end if
 
 end subroutine radsmear

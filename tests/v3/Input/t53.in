@@ -48,13 +48,15 @@
  wtk  1
  znucl  8.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "8o.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t53.out, tolnlines = 2, tolabs = 2.0e-10, tolrel = 2.0e-9
-#%% psp_files = 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

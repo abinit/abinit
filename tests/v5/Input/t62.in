@@ -54,13 +54,15 @@
  #mkmem4    0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "1h.pspnc, 4be.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t62.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -easy
-#%% psp_files = 1h.pspnc, 4be.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

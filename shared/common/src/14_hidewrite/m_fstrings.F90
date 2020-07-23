@@ -1368,9 +1368,9 @@ pure function ltoa_int(list) result(str)
      write(temp, "(i0,a)")list(ii),", "
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)//" "
+     base = len_trim(str) + 2
    else
      return
    end if
@@ -1427,9 +1427,9 @@ pure function ltoa_dp(list, fmt) result(str)
      write(temp, fa) list(ii),","
    end if
 
-   if (base + len_trim(temp) - 1 <= MAX_SLEN) then
-     str(base:) = trim(temp)
-     base = len_trim(str) + 1
+   if (base + len_trim(temp) <= MAX_SLEN) then
+     str(base:) = trim(temp)// " "
+     base = len_trim(str) + 2
    else
      return
    end if

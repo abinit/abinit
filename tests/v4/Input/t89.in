@@ -66,13 +66,15 @@ xred   0.0  0.0  0.00     # This keyword indicate that the location of the atoms
 ecut 3       # Maximal kinetic energy cut-off, in Hartree
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "79au.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t89.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 79au.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

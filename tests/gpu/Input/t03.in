@@ -105,13 +105,15 @@ dmatpawu2
 # === Other options
 prtden 0  prteig 0  prtwf 0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "28ni.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t03.out, tolnlines = 64, tolabs = 7.0e-4, tolrel = 8.5e-2
-#%% psp_files = 28ni.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
