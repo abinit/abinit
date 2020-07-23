@@ -2259,8 +2259,8 @@ subroutine ebands_update_occ(ebands, spinmagntarget, stmbias, prtvol)
 
 ! *************************************************************************
 
- my_prtvol=0; if (PRESENT(prtvol )) my_prtvol=prtvol
- stmbias_local=zero; if (PRESENT(stmbias)) stmbias_local=stmbias
+ my_prtvol = 0; if (PRESENT(prtvol )) my_prtvol = prtvol
+ stmbias_local = zero; if (PRESENT(stmbias)) stmbias_local = stmbias
 
  if (ebands_has_metal_scheme(ebands)) then
    ! Compute new occupation numbers if metallic occupation.

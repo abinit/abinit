@@ -364,6 +364,7 @@ program abitk
    !mu_e = 6.715 * eV_Ha
 
    call gaps%print(unit=std_out, header="KS gaps", kTmesh=kTmesh, mu_e=mu_e)
+   !stop
 
    ABI_MALLOC(ne, (ntemp))
    ABI_MALLOC(nh, (ntemp))

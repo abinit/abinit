@@ -461,9 +461,9 @@ the position of the KS band edges as these are the states we want to correct.
 
 We use [[getden_filepath]] to read the DEN.nc file instead of [[getden]] or [[irdden]].
 
-Note that in all the input files of the tutorial, we will be using the [[structure]] variable
-to initialize the unit cell from an external input file so that we don't need
-to repeat it over and over again.
+Note that in all the input files of the tutorial, we will be using the new [[structure]] 
+variable (added in v9) to initialize the unit cell from an external input file so that 
+we don't need to repeat this part over and over again in the input file.
 
 ```sh
  structure = "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
@@ -838,7 +838,7 @@ Use these additional levels if memory requirements are under control
 and you want to boost the calculation.
 -->
 
-There is an important difference with respect to [[eph_task]] -4 that is worth discussing in detail.
+There is an important difference with respect to [[eph_task]] -4 that is worth discussing in more detail.
 When computing the imaginary part at the KS energy for transport properties,
 the EPH code is able to filter both $\kk$- and $\qq$-points so that only the relevant states 
 around the band edge are stored in memory.

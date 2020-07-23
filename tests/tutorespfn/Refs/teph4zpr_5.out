@@ -372,6 +372,24 @@ meta: {optdriver: 7, eph_task: 4, }
 --------------------------------------------------------------------------------
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     4.485 (eV)
+   VBM:     4.474 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.959 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         4.485 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     7.569     3.095     1.390
+ 100.0     0.000     7.505     3.030     1.454
+ 200.0     0.001     7.440     2.966     1.519
+ 300.0     0.001     7.375     2.901     1.583
+
+
+
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
  Symsigma: 1 Timrev: 1
@@ -619,6 +637,24 @@ meta: {optdriver: 7, eph_task: 4, }
 --------------------------------------------------------------------------------
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     4.485 (eV)
+   VBM:     4.474 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.959 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         4.485 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     7.569     3.095     1.390
+ 100.0     0.000     7.505     3.030     1.454
+ 200.0     0.001     7.440     2.966     1.519
+ 300.0     0.001     7.375     2.901     1.583
+
+
+
  Number of bands in e-ph self-energy sum: 40
  From bsum_start: 1 to bsum_stop: 40
  Symsigma: 1 Timrev: 1
@@ -864,6 +900,24 @@ meta: {optdriver: 7, eph_task: 4, }
 
 - Writing phonon DOS to netcdf file: teph4zpr_5o_DS3_PHDOS.nc
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     4.485 (eV)
+   VBM:     4.474 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.959 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         4.485 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     7.569     3.095     1.390
+ 100.0     0.000     7.505     3.030     1.454
+ 200.0     0.001     7.440     2.966     1.519
+ 300.0     0.001     7.375     2.901     1.583
+
 
 
  Number of bands in e-ph self-energy sum: 60
