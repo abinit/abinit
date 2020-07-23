@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 22 Jul 2020.
-- ( at 02h24 )
+.Starting date : Thu 23 Jul 2020.
+- ( at 15h25 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t53.in
 - output file    -> t53.out
@@ -245,6 +245,22 @@ meta: {optdriver: 7, eph_task: -4, }
 
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    15.265     2.465     2.053
+ 300.0     0.001    15.169     2.369     2.148
+
 
 
  Number of bands in e-ph self-energy sum: 8
@@ -593,6 +609,22 @@ meta: {optdriver: 7, eph_task: -4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    15.265     2.465     2.053
+ 300.0     0.001    15.169     2.369     2.148
+
 
 
  Number of bands in e-ph self-energy sum: 8
@@ -1085,10 +1117,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.5  wall=          3.3
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.5  wall=          3.3
++Overall time at end (sec) : cpu=          2.5  wall=          3.9

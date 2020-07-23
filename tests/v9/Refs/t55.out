@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 22 Jul 2020.
-- ( at 02h24 )
+.Starting date : Thu 23 Jul 2020.
+- ( at 15h26 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t55.in
 - output file    -> t55.out
@@ -315,6 +315,22 @@ meta: {optdriver: 7, eph_task: -4, }
 --------------------------------------------------------------------------------
 
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    16.984     4.184     0.333
+ 300.0     0.001    16.728     3.928     0.589
+
 
 
  Number of bands in e-ph self-energy sum: 8
@@ -683,6 +699,22 @@ meta: {optdriver: 7, eph_task: -4, }
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    16.984     4.184     0.333
+ 300.0     0.001    16.728     3.928     0.589
+
+
+
  Number of bands in e-ph self-energy sum: 7
  From bsum_start: 1 to bsum_stop: 7
  Symsigma: 1 Timrev: 1
@@ -1048,6 +1080,22 @@ meta: {optdriver: 7, eph_task: -4, }
  EPH interpolation: will use star functions interpolation.
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    16.266     3.465     1.052
+ 300.0     0.001    16.010     3.210     1.308
+
+
+
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -1410,6 +1458,22 @@ meta: {optdriver: 7, eph_task: -4, }
 --------------------------------------------------------------------------------
 
  EPH interpolation: will use star functions interpolation.
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000    16.266     3.465     1.052
+ 300.0     0.001    16.010     3.210     1.308
+
 
 
  Number of bands in e-ph self-energy sum: 7
@@ -1935,10 +1999,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.9  wall=          6.9
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          7.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.9  wall=          6.9
++Overall time at end (sec) : cpu=          6.0  wall=          7.0

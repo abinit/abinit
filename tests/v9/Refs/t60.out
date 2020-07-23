@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 22 Jul 2020.
-- ( at 02h27 )
+.Starting date : Thu 23 Jul 2020.
+- ( at 15h28 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
@@ -525,6 +525,22 @@ meta: {optdriver: 7, eph_task: 4, }
 --------------------------------------------------------------------------------
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.001     3.173     3.366     5.170
+
+
+
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
  Symsigma: 1 Timrev: 1
@@ -855,6 +871,22 @@ meta: {optdriver: 7, eph_task: 4, }
 --------------------------------------------------------------------------------
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.001     3.173     3.366     5.170
+
+
+
  Number of bands in e-ph self-energy sum: 3
  From bsum_start: 2 to bsum_stop: 4
  Symsigma: 1 Timrev: 1
@@ -1088,6 +1120,22 @@ meta: {optdriver: 7, eph_task: -4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.001     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 9
@@ -1475,6 +1523,22 @@ meta: {optdriver: 7, eph_task: -4, }
 --------------------------------------------------------------------------------
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.001     3.173     3.366     5.170
+
+
+
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
  Symsigma: 1 Timrev: 1
@@ -1709,6 +1773,22 @@ meta: {optdriver: 7, eph_task: -4, }
 --------------------------------------------------------------------------------
 
 
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.001     3.173     3.366     5.170
+
+
+
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
  Symsigma: 1 Timrev: 1
@@ -1941,6 +2021,22 @@ meta: {optdriver: 7, eph_task: 4, }
 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   0.0     0.000     3.561     3.754     4.782
+ 300.0     0.001     3.173     3.366     5.170
+
 
 
  Number of bands in e-ph self-energy sum: 3
@@ -2587,10 +2683,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.7  wall=         20.8
+- Proc.   0 individual time (sec): cpu=         18.7  wall=         21.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.7  wall=         20.8
++Overall time at end (sec) : cpu=         18.7  wall=         21.3

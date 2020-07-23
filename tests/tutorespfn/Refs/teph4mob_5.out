@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 22 Jul 2020.
-- ( at 02h27 )
+.Starting date : Thu 23 Jul 2020.
+- ( at 15h28 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_5.in
 - output file    -> teph4mob_5.out
@@ -459,6 +459,26 @@ meta: {optdriver: 7, eph_task: -4, }
 
    2.28550852E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.523     1.166     0.003
+  64.0     0.000     3.492     1.136     0.033
+ 123.0     0.000     3.461     1.104     0.065
+ 182.0     0.001     3.428     1.072     0.097
+ 241.0     0.001     3.393     1.036     0.133
+ 300.0     0.001     3.355     0.998     0.171
+
 
 
  Number of bands in e-ph self-energy sum: 1
@@ -921,10 +941,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.2  wall=         18.6
+- Proc.   0 individual time (sec): cpu=         18.2  wall=         18.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.2  wall=         18.6
++Overall time at end (sec) : cpu=         18.2  wall=         18.9

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 22 Jul 2020.
-- ( at 02h29 )
+.Starting date : Thu 23 Jul 2020.
+- ( at 15h30 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.in
 - output file    -> teph4mob_7.out
@@ -487,6 +487,26 @@ meta: {optdriver: 7, eph_task: -4, }
 --------------------------------------------------------------------------------
 
  EPH double grid interpolation: will read energies from: teph4mob_4o_DS3_WFK
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.169 (eV)
+   VBM:     2.356 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     3.525 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.355 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+   5.0     0.000     3.524     1.167     0.002
+  64.0     0.000     3.503     1.146     0.023
+ 123.0     0.000     3.474     1.117     0.052
+ 182.0     0.001     3.439     1.083     0.086
+ 241.0     0.001     3.401     1.044     0.125
+ 300.0     0.001     3.360     1.004     0.165
+
 
 
  Number of bands in e-ph self-energy sum: 1
@@ -1214,10 +1234,10 @@ P           mkmem         413
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         62.5  wall=         63.4
+- Proc.   0 individual time (sec): cpu=         62.4  wall=         63.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         62.5  wall=         63.4
++Overall time at end (sec) : cpu=         62.4  wall=         63.2
