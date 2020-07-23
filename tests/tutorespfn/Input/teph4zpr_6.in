@@ -31,7 +31,7 @@
  prtphdos 0       # Disable computation of PHDOS to save some time
 
 ##############################################
-####                 SECTION: gw                 
+####                 SECTION: Sigma_nk                 
 ##############################################
  nkptgw 1
  kptgw

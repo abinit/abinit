@@ -73,6 +73,7 @@ program abitk
  type(hdr_type) :: hdr
  type(ebands_t) :: ebands, ebands_kpath, other_ebands
  type(edos_t) :: edos
+ type(gaps_t) :: gaps
  type(jdos_t) :: jdos
  type(crystal_t) :: cryst, other_cryst
  type(geo_t) :: geo
@@ -342,6 +343,7 @@ program abitk
      ABI_CHECK(get_arg("doping", doping, msg, default=zero) == 0, msg)
      ! Units of eph_doping is e_charge / cm^3
      extrael = - doping * cryst%ucvol * (Bohr_meter * 100) ** 3
+     write(std_out, *)"Adding doping", doping
    end if
 
    !ABI_CHECK(get_arg("occopt", occopt, msg, default=3) == 0, msg)
@@ -349,17 +351,19 @@ program abitk
    ABI_CHECK(get_arg("spinmagntarget", spinmagntarget, msg, default=-99.99_dp) == 0, msg)
 
    ebands%nelect = ebands%nelect + extrael
-   call ebands_print_gaps(ebands, std_out, header="KS gaps")
+   gaps = ebands_get_gaps(ebands, ierr)
 
    ABI_CHECK(get_arg_list("tmesh", tmesh, lenr, msg, default_list=[5._dp, 59._dp, 6._dp] ) == 0, msg)
    ntemp = nint(tmesh(3))
    ABI_CHECK_IGEQ(ntemp, 1, "ntemp <= 0")
    ABI_MALLOC(kTmesh, (ntemp))
    kTmesh = arth(tmesh(1), tmesh(2), ntemp) * kb_HaK
-   ABI_MALLOC(mu_e, (ntemp))
 
+   ABI_MALLOC(mu_e, (ntemp))
    call ebands_get_muT_with_fd(ebands, ntemp, kTmesh, spinmagntarget, prtvol, mu_e, comm)
    !mu_e = 6.715 * eV_Ha
+
+   call gaps%print(unit=std_out, header="KS gaps", kTmesh=kTmesh, mu_e=mu_e)
 
    ABI_MALLOC(ne, (ntemp))
    ABI_MALLOC(nh, (ntemp))
@@ -375,7 +379,6 @@ program abitk
 
    ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
-   !ABI_CHECK(get_arg("step", step, msg, default=0.001 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
    edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    call edos%print(std_out, header="Electron DOS")
@@ -393,6 +396,8 @@ program abitk
    ABI_FREE(mu_e)
    ABI_FREE(nh)
    ABI_FREE(ne)
+
+ !case ("ebands_dope")
 
  ! ====================
  ! Tools for developers
@@ -453,6 +458,7 @@ program abitk
  call ebands_free(other_ebands)
  call edos%free()
  call jdos%free()
+ call gaps%free()
 
  ABI_SFREE(kibz)
  ABI_SFREE(wtk)

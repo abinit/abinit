@@ -337,6 +337,7 @@ end subroutine herald
 !!   "INIT" to change the rank of the master node that prints the message if "COLL" is used.
 !!  [do_flush]=True to flush the unit. Defaults to .False.
 !!  [newlines]: Number of new lines added after message. Default 0
+!!  [pre_newlines]: Number of new lines added vefore message. Default 0
 !!
 !! OUTPUT
 !!  (only writing)
@@ -348,18 +349,18 @@ end subroutine herald
 !!
 !! SOURCE
 
-subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
+subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines, pre_newlines)
 
 !Arguments ------------------------------------
  integer,intent(in) :: unit
  character(len=*),intent(in) :: msg
  character(len=*),optional,intent(in) :: mode_paral
  logical,optional,intent(in) :: do_flush
- integer,optional,intent(in) :: newlines
+ integer,optional,intent(in) :: newlines, pre_newlines
 
 !Local variables-------------------------------
  integer,save :: master=0
- integer :: comm, me, nproc, my_newlines, ii
+ integer :: comm, me, nproc, my_newlines, ii,  my_pre_newlines
  logical :: my_flush
  character(len=len(msg)+50) :: string
  character(len=500) :: my_mode_paral
@@ -373,6 +374,7 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
  my_mode_paral = "COLL"; if (present(mode_paral)) my_mode_paral = mode_paral
  my_flush = .false.; if (present(do_flush)) my_flush = do_flush
  my_newlines = 0; if (present(newlines)) my_newlines = newlines
+ my_pre_newlines = 0; if (present(pre_newlines)) my_pre_newlines = pre_newlines
 
  ! Communicator is xmpi_world by default, except for the parallelization over images
  if (abinit_comm_output /= -1) then
@@ -386,20 +388,22 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines)
 
  if (my_mode_paral == 'COLL' .or. nproc == 1) then
    if (me == master) then
+     if (my_pre_newlines /= 0) then
+       do ii=1,my_pre_newlines; write(unit, "(a)")""; end do
+     end if
      call wrtout_myproc(unit, msg, do_flush=my_flush)
      if (my_newlines /= 0) then
-       do ii=1,my_newlines
-         write(unit, "(a)")""
-       end do
+       do ii=1,my_newlines; write(unit, "(a)")""; end do
      end if
    end if
 
  else if (my_mode_paral == 'PERS') then
+   if (my_pre_newlines /= 0) then
+     do ii=1,my_pre_newlines; write(unit, "(a)")""; end do
+   end if
    call write_lines(unit,msg)
    if (my_newlines /= 0) then
-     do ii=1,my_newlines
-       write(unit, "(a)")""
-     end do
+     do ii=1,my_newlines; write(unit, "(a)")""; end do
    end if
    ! Flush unit
    if (my_flush) call flush_unit(unit)
@@ -435,6 +439,7 @@ end subroutine wrtout_unit
 !!   "INIT" to change the rank of the master node that prints the message if "COLL" is used.
 !!  [do_flush]=True to flush the unit. Defaults to .False.
 !!  [newlines]: Number of new lines added after message. Default 0
+!!  [pre_newlines]: Number of new lines added vefore message. Default 0
 !!
 !! OUTPUT
 !!  (only writing)
@@ -445,18 +450,18 @@ end subroutine wrtout_unit
 !!
 !! SOURCE
 
-subroutine wrtout_units(units, msg, mode_paral, do_flush, newlines)
+subroutine wrtout_units(units, msg, mode_paral, do_flush, newlines, pre_newlines)
 
 !Arguments ------------------------------------
  integer,intent(in) :: units(:)
  character(len=*),intent(in) :: msg
  character(len=*),optional,intent(in) :: mode_paral
  logical,optional,intent(in) :: do_flush
- integer,optional,intent(in) :: newlines
+ integer,optional,intent(in) :: newlines, pre_newlines
 
 !Local variables-------------------------------
 !scalars
- integer :: ii, cnt, my_newlines
+ integer :: ii, cnt, my_newlines, my_pre_newlines
  logical :: my_flush
  character(len=500) :: my_mode_paral
 !arrays
@@ -467,6 +472,7 @@ subroutine wrtout_units(units, msg, mode_paral, do_flush, newlines)
  my_mode_paral = "COLL"; if (present(mode_paral)) my_mode_paral = mode_paral
  my_flush = .false.; if (present(do_flush)) my_flush = do_flush
  my_newlines = 0; if (present(newlines)) my_newlines = newlines
+ my_pre_newlines = 0; if (present(pre_newlines)) my_pre_newlines = pre_newlines
 
  ! Remove duplicated units (if any)
  my_units(1) = units(1); cnt = 1
@@ -477,7 +483,8 @@ subroutine wrtout_units(units, msg, mode_paral, do_flush, newlines)
  end do
 
  do ii=1,cnt
-   call wrtout_unit(my_units(ii), msg, mode_paral=my_mode_paral, do_flush=my_flush, newlines=my_newlines)
+   call wrtout_unit(my_units(ii), msg, mode_paral=my_mode_paral, &
+                    do_flush=my_flush, newlines=my_newlines, pre_newlines=my_pre_newlines)
  end do
 
 end subroutine wrtout_units

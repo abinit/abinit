@@ -481,13 +481,11 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:  300.0 [K], mu_e:   15.169
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -837,13 +835,11 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:  300.0 [K], mu_e:   15.169
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 

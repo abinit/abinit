@@ -2232,7 +2232,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 !arrays
  integer :: intp_kptrlatt(3,3), g0_k(3), unts(2)
  integer :: qptrlatt(3,3), indkk_k(1,6), my_gmax(3), band_block(2)
- integer :: intp_nshiftk !val_indeces(ebands%nkpt, ebands%nsppol),
+ integer :: intp_nshiftk
  integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
 #ifdef HAVE_MPI
@@ -2314,11 +2314,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    call ebands_free(tmp_ebands)
  end if
 
- if (my_rank == master) then
-   call gaps%print(unit=std_out) !; call gaps%print(unit=ab_out)
- end if
- !val_indeces = ebands_get_valence_idx(ebands)
-
  ! Frequency mesh for sigma(w) and spectral function.
  ! TODO: Use GW variables but change default
  !dtset%freqspmin
@@ -2378,8 +2373,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
     end if
 
  end if ! nkptgw /= 0
-
- call gaps%free()
 
  ! The k-point and the symmetries relating the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
@@ -2969,6 +2962,13 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  endif
 
  call ebands_free(ebands_dense)
+
+ if (my_rank == master) then
+   msg = "Gaps, band edges and relative position wrt Fermi level"
+   call gaps%print(unit=std_out, kTmesh=new%ktmesh, mu_e=new%mu_e, header=msg)
+   call gaps%print(unit=ab_out, kTmesh=new%ktmesh, mu_e=new%mu_e, header=msg)
+ end if
+ call gaps%free()
 
  ! Prepare computation of Frohlich self-energy
  ! TODO: Reintegrate at least frohl_model 1 for the full self-energy

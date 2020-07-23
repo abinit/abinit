@@ -856,7 +856,7 @@ To recap:
    Ideally, *np_band* should divide [[nband]] to distribute the work equally.
    Note that the band parallelism is beneficial also when the Sternheimer method is used
    as the Sternheimer solver will operate on MPI-distributed bands.
-   Perhaps the parallel efficiency won't be perfect but memory for the wavefunctions will continue to scale.
+   Perhaps the parallel efficiency won't be perfect but the memory for the wavefunctions will continue to scale.
 
 2. Once the memory for the wavefunctions reaches a reasonable amount, activate the parallelism
    over perturbations in order to decrease the memory for $W(\rr, \RR, \text{3 natom})$.

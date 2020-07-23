@@ -1230,13 +1230,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1561,13 +1559,11 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
@@ -1797,13 +1793,11 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   8.54 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   8.54 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Valence Max:     -0.19 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:   8.34 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 

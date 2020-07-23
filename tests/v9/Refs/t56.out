@@ -582,13 +582,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.169
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -962,13 +960,11 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   15.642
 
 
 
-  >>>> For spin  1
-   Minimum direct gap =   5.63 (eV), located at k-point     : [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Fundamental gap    =   4.52 (eV), Top of valence bands at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-                                     Bottom of conduction at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-   Valence Max:     12.80 (eV) at: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   Conduction min:  17.32 (eV) at: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
-
+ Indirect band gap semiconductor
+ Fundamental gap:     4.517 (eV)
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1346,7 +1342,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.527
 
  Detected metallic system for spin channel: 1
  Cannot detect gap for spin: 1
-   Fermi level: 17.48 (eV) with nelect:  8.20
+   Fermi level:   17.476 (eV) with nelect:    8.200
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1729,7 +1725,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   18.022
 
  Detected metallic system for spin channel: 1
  Cannot detect gap for spin: 1
-   Fermi level: 17.48 (eV) with nelect:  8.20
+   Fermi level:   17.476 (eV) with nelect:    8.200
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1967,7 +1963,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:   17.500
 
  Detected metallic system for spin channel: 1
  Cannot detect gap for spin: 1
-   Fermi level: 17.50 (eV) with nelect:  8.21
+   Fermi level:   17.500 (eV) with nelect:    8.208
 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
