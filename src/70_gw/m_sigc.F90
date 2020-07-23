@@ -792,9 +792,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            omegame0i_ac  = Sr%omega_i(io)-qp_ene(ib,ik_ibz,spin)
            omegame0i2_ac = omegame0i_ac*omegame0i_ac
            do iiw=1,Er%nomega_i
-             !do iggp=0,npwc*npwc-1
-             !  ig=iggp/npwc+1
-             !  igp= iggp-(ig-1)*npwc+1 ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
+             ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
              ac_integr(:,:,io) = ac_integr(:,:,io) + ac_epsm1cqwz2(:,:,iiw)/(omegame0i2_ac + omegap2(iiw))
            end do
            ac_integr(:,:,io)=ac_integr(:,:,io)*omegame0i_ac
