@@ -456,11 +456,6 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
          ii1=2
          work1(re,1+i23)=zero
          work1(im,1+i23)=zero
-         ! If the value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq is given, use it
-!         if (PRESENT(divgq0)) then
-!           work1(re,1+i23)=rhog(re,1+i23)*divgq0*piinv
-!           work1(im,1+i23)=rhog(im,1+i23)*divgq0*piinv
-!         end if
        end if
 
        ! Final inner loop on the first dimension (note the lower limit)

@@ -126,22 +126,17 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- if(icutcoul.eq.0) then
-   eta=(four/rcut)
-   write(*,*)'this is icutcuol and eta0D',icutcoul,eta
- else if((icutcoul.eq.1).or.(icutcoul.eq.2)) then
-   eta=(four_pi/rcut)
-   write(*,*)'this is icutcuol and eta2D',icutcoul,eta
+ if(icutcoul.ne.3) then
+   eta=sqrt(eight/rcut)
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
-   write(*,*)'this is icutcul and eta3D',icutcoul,eta
  end if
 
 !Conduct reciprocal space summations
  fac=pi**2/eta
  gsum=0._dp
  grewtn(:,:)=0.0_dp
-
+ 
  !Initialize Gcut-off array from m_gtermcutoff
  !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
@@ -187,8 +182,7 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
                   ii=abs(ig1)+ig23+1
                   term=exp(-arg)/gsq*gcutoff(ii)
                else
-                  term=exp(-arg)/gsq
-	          if(term>1E-15) write(*,*)'this is',ig3,ig2,ig1,term
+                  term=zero
                endif
 
                summr = 0.0_dp
@@ -344,16 +338,16 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  end do ! End loop on nr (new shells). Note that there is an exit within the loop
 !
  sumr=0.5_dp*sumr
- fac=pi*ch**2/(2.0_dp*eta*ucvol)
-
+ fac=pi*ch**2.0_dp/(2.0_dp*eta*ucvol)
+ 
 !Finally assemble Ewald energy, eew
  eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
 
  ABI_DEALLOCATE(gcutoff) 
 
 !DEBUG
-!write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
-!write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
+write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
+write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
 !ENDDEBUG
 
 !Length scale grads handled with stress tensor, ewald2
