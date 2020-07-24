@@ -41,8 +41,8 @@ ngkpt 4 4 4
  neb_spring 2*0.1
  cineb_start 7
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/1h.pspnc, 1h.pspnc"
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "1h.pspnc, 1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

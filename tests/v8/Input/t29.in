@@ -37,8 +37,8 @@
  nstep  35
  ecut 5
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/1h.pspnc, 1h.pspnc"
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "1h.pspnc, 1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
