@@ -602,12 +602,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   if (dtset%eph_task == -4) call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+   ! Compute transport properties only if sigma_erange has been used
+   if (dtset%eph_task == -4 .and. any(abs(dtset%sigma_erange) > zero)) then
+     call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+   end if
 
  case (5, -5)
    ! Interpolate the phonon potential.
-   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
-                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
+   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model

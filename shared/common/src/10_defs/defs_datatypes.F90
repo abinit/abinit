@@ -75,9 +75,11 @@ module defs_datatypes
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
   real(dp) :: fermie               ! Fermi energy
   real(dp) :: nelect               ! Number of electrons.
-  !real(dp),protected :: nelect0    ! TODO: should add nelect0 to ebands to keep track of intrinsic
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
+
+  !real(dp) :: spinmagntarget
+  ! TODO This should be set via dtset%spinmagntarget to simplify the API.
 
   integer,allocatable :: istwfk(:)
   ! istwfk(nkpt)
@@ -133,6 +135,17 @@ module defs_datatypes
 
   real(dp) :: charge
   ! nelect = zion - charge
+  ! Extra charge added to the unit cell when performing GS calculations
+  ! To treat a system missing one electron per unit cell, charge is set to +1.
+  ! When reading the band structure from an external file,
+  ! charge is mainly used as metadata describing the GS calculation that procuded the ebands_t object.
+  ! To simulate doping in a post-processing tool, use ebands_set_extrael that defines the value of %extra_el.
+  ! and changes %nelect, accordingly.
+
+  real(dp) :: extrael = zero
+  ! Extra number of electrons.
+  ! This variable is mainly used to simulate doping in the rigid band approximation.
+  ! Set by ebands_set_extrael method.
 
   integer :: kptrlatt_orig(3,3), kptrlatt(3,3)
   ! Original value of kptrlatt and value after the call to inkpts

@@ -347,6 +347,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ !ABI_CHECK(any(abs(dtset%sigma_erange) > zero), "rta_driver requires the specification of sigma_erange")
  new%assume_gap = (.not. all(dtset%sigma_erange < zero) .or. dtset%gw_qprange /= 0)
 
  sigmaph = sigmaph_read(dtfil%filsigephin, dtset, xmpi_comm_self, msg, ierr, keep_open=.true., &
@@ -358,7 +359,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = sigmaph%kTmesh
 
- ! How many RTA approximations have we computed in sigmaph? (SERTA, MRTA)
+ ! How many RTA approximations have we computed in sigmaph? (SERTA, MRTA ...?)
  new%nrta = 2; if (sigmaph%mrta == 0) new%nrta = 1
 
  new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
@@ -372,7 +373,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  new%eminmax_spin = ebands_get_minmax(ebands, "eig")
 
  if (new%assume_gap) then
-   ! Information about the gaps
+   ! Get gaps
    new%gaps = ebands_get_gaps(ebands, ierr)
    if (ierr /= 0) then
      do spin=1, nsppol

@@ -96,7 +96,8 @@ MODULE m_ebands
  public :: ebands_update_occ       ! Update the occupation numbers.
  public :: ebands_set_scheme       ! Set the occupation scheme.
  public :: ebands_set_fermie       ! Change the fermi level (assume metallic scheme).
- public :: ebands_set_nelect       ! Change the number of electrons (assume metallic scheme).
+ public :: ebands_set_extrael      ! Add extrael to initial number of electrons to simulate e/h doping.
+                                   ! (assume metallic scheme).
  public :: ebands_get_muT_with_fd  ! Change the number of electrons (assume metallic scheme).
  public :: ebands_calc_nelect      ! Compute nelect from Fermi level and Temperature.
  public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
@@ -119,7 +120,6 @@ MODULE m_ebands
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
  public :: ebands_write               ! Driver routine to write bands in different txt formats.
- public :: ebands_kmesh2str           ! Return string with info about the k-sampling.
  public :: ebands_get_carriers        ! Compute carrier concentration from input Fermi level and list of Temperatures.
 !!***
 
@@ -421,11 +421,10 @@ end subroutine ebands_print_gaps
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
-!!  [kmask]=Logical mask used to exclude k-points.
 !!
 !! OUTPUT
 !!  ierr=Return code (!=0 signals failure)
-!!  gaps<gaps_t>=object with info on the gaps (calleris responsible for freeing the object).
+!!  gaps<gaps_t>=object with info on the gaps (caller is responsible for freeing the object).
 !!
 !! PARENTS
 !!
@@ -433,26 +432,92 @@ end subroutine ebands_print_gaps
 !!
 !! SOURCE
 
-type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
+type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),target,intent(in)  :: ebands
  integer,intent(out) :: ierr
-!arrays
- logical,optional,intent(in) :: kmask(ebands%nkpt)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: occopt3 = 3, prtvol0 = 0
+ real(dp),parameter :: spinmagntarget_ = -99.99_dp, stmbias0 = zero
+ real(dp) :: tsmear
+ type(ebands_t)  :: tmp_ebands
+ character(len=500) :: msg
+
+! *********************************************************************
+
+ gaps = get_gaps_(ebands, ierr)
+
+ if (ierr /= 0) then
+   ! get_gaps_ will fail if we have a real metal/semimetal
+   ! but it's also possible to have a false negative if the input ebands represents a:
+   !
+   !  1) highly degenerate doped semiconductor with the Fermi level in the bands.
+   !  2) Small gap semiconductor at relatively high T.
+   !
+   ! Here I try to compute the gaps of an instrinc semiconductor at low T with Fermi-Dirac.
+   ! This might still fail though and the caller should handle that.
+   call gaps%free()
+   call ebands_copy(ebands, tmp_ebands)
+   tsmear = 0.01_dp * eV_Ha
+   call ebands_set_scheme(tmp_ebands, occopt3, tsmear, spinmagntarget_, prtvol0, update_occ=.False.)
+   ! Remove extrael to go back to intrinsic system
+   if (ebands%extrael /= zero) tmp_ebands%nelect = ebands%nelect - ebands%extrael
+   !if (ebands%charge /= zero) tmp_ebands%nelect = ebands%nelect + ebands%charge
+   call ebands_update_occ(tmp_ebands, spinmagntarget_, stmbias0)
+
+   ! Try to compute gaps the again with new Fermi level at FD T = tsmear computed from update_occ.
+   ! Return ierr
+   gaps = get_gaps_(tmp_ebands, ierr)
+   call ebands_free(tmp_ebands)
+   !if (ierr /= 0) ierr = -abs(ierr)
+ end if
+
+end function ebands_get_gaps
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/get_gaps_
+!! NAME
+!! get_gaps_
+!!
+!! FUNCTION
+!!  Private function that teturns a gaps_t object with info on the fundamental and direct gap.
+!!
+!! INPUTS
+!!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
+!!
+!! OUTPUT
+!!  ierr=Return code (!=0 signals failure)
+!!  gaps<gaps_t>=object with info on the gaps (caller is responsible for freeing the object).
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),target,intent(in)  :: ebands
+ integer,intent(out) :: ierr
 
 !Local variables-------------------------------
 !scalars
  integer :: ikibz,nband_k,spin,nsppol,ikopt,ivk,ick,ivb,icb
  real(dp),parameter :: tol_fermi = tol6
- real(dp) :: fun_gap,opt_gap
+ real(dp) :: fun_gap, opt_gap
  logical :: ismetal
  !type(ebands_t)  :: tmp_ebands
 !arrays
  integer :: val_idx(ebands%nkpt, ebands%nsppol)
  real(dp) :: top_valence(ebands%nkpt), bot_conduct(ebands%nkpt)
- logical :: my_kmask(ebands%nkpt)
 
 ! *********************************************************************
 
@@ -476,9 +541,8 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
  gaps%errmsg_spin(:) = ""
  gaps%fermie = ebands%fermie
 
- my_kmask=.TRUE.; if (PRESENT(kmask)) my_kmask=kmask
-
  ! Compute "valence index" using efermi
+ !if (ebands%extrael == zero)
  val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi=tol_fermi)
 
  spin_loop: &
@@ -496,7 +560,6 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
    icb = ivb + 1
 
    do ikibz=1,ebands%nkpt
-     if (.not. my_kmask(ikibz)) cycle
      nband_k = ebands%nband(ikibz + (spin-1)*ebands%nkpt)
      top_valence(ikibz) = ebands%eig(ivb, ikibz, spin)
      if (icb > nband_k) then
@@ -508,12 +571,12 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
    end do
 
    ! Minimum of the direct Gaps
-   ikopt = imin_loc(bot_conduct - top_valence, MASK=my_kmask)
+   ikopt = imin_loc(bot_conduct - top_valence)
    opt_gap = bot_conduct(ikopt) - top_valence(ikopt)
 
    ! Fundamental Gap
-   ick = imin_loc(bot_conduct, MASK=my_kmask)
-   ivk = imax_loc(top_valence, MASK=my_kmask)
+   ick = imin_loc(bot_conduct)
+   ivk = imax_loc(top_valence)
 
    gaps%vb_max(spin) = ebands%eig(ivb, ivk, spin)
    gaps%cb_min(spin) = ebands%eig(icb, ick, spin)
@@ -525,17 +588,16 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr, kmask) result(gaps)
  ierr = maxval(gaps%ierr)
 
  !if (ierr /= 0) then
- !  ! In case of error try to enforce semiconductor occupations before calling ebands_get_gaps
- !  ! This might still fail though...
- !  call gaps%free()
- !  call ebands_copy(ebands, tmp_ebands)
- !  call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
- !  call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect-dtset%eph_extrael, dtset%spinmagntarget, msg)
- !  gaps = ebands_get_gaps(tmp_ebands, ierr)
- !  call ebands_free(tmp_ebands)
+ !  ! Set vbm and cbm to fermie if metal.
+ !  do spin=1,nsppol
+ !    if (gaps%ierr(spin) /= 0) then
+ !      gaps%vb_max(spin) = ebands%fermie
+ !      gaps%cb_min(spin) = ebands%fermie
+ !    end if
+ !  end do
  !end if
 
-end function ebands_get_gaps
+end function get_gaps_
 !!***
 
 !----------------------------------------------------------------------
@@ -1038,6 +1100,7 @@ subroutine ebands_copy(ibands, obands)
  obands%nshiftk     = ibands%nshiftk
 
  obands%charge  = ibands%charge
+ obands%extrael = ibands%extrael
  obands%entropy = ibands%entropy
  obands%fermie  = ibands%fermie
  obands%nelect  = ibands%nelect
@@ -1108,7 +1171,6 @@ end subroutine ebands_move_alloc
 !!  [unit]=Unit number (std_out if None)
 !!  [header]=title for info
 !!  [prtvol]=Verbosity level (0 if None)
-!!  [mode_paral]=Either 'COLL' or 'PERS' ('COLL' if None).
 !!
 !! OUTPUT
 !!  Only writing
@@ -1120,28 +1182,25 @@ end subroutine ebands_move_alloc
 !!
 !! SOURCE
 
-subroutine ebands_print(ebands, header, unit, prtvol, mode_paral)
+subroutine ebands_print(ebands, header, unit, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol,unit
  character(len=*),optional,intent(in) :: header
- character(len=4),optional,intent(in) :: mode_paral
  class(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
  integer :: spin, ikpt, unt, my_prtvol, ii
- character(len=4) :: my_mode
  character(len=500) :: msg
 ! *************************************************************************
 
- unt   =std_out; if (PRESENT(unit      )) unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
- my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+ unt = std_out; if (present(unit)) unt =unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  msg=' ==== Info on the ebands_t ==== '
- if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
- call wrtout(unt, msg, my_mode)
+ if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(unt, msg)
 
  write(msg,'(6(a,i0,a))')&
    '  Number of spinorial components ...... ',ebands%nspinor,ch10,&
@@ -1150,41 +1209,43 @@ subroutine ebands_print(ebands, header, unit, prtvol, mode_paral)
    '  kptopt .............................. ',ebands%kptopt,ch10,&
    '  Maximum number of bands ............. ',ebands%mband,ch10,&
    '  Occupation option ................... ',ebands%occopt,ch10
- call wrtout(unt, msg, my_mode)
+ call wrtout(unt, msg)
 
- !EBANDS_NEW
- !write(msg,"(a)")&
- !  " kptrlatt ..............................",ltoa(ebands%kptrlatt)
+ write(msg,"(2a)")" kptrlatt .............. ",trim(ltoa(reshape(ebands%kptrlatt, [9])))
+ call wrtout(unt, msg)
+ write(msg,"(2a)")" shiftk ................ ",trim(ltoa(reshape(ebands%shiftk, [3 * ebands%nshiftk])))
+ call wrtout(unt, msg)
 
- write(msg,'(2(a,f14.2,a),4(a,f14.6,a))')&
+ write(msg,'(3(a,f14.2,a),4(a,f14.6,a))')&
    '  Number of valence electrons ......... ',ebands%nelect,ch10,&
-   '  Extra charge ........................ ',ebands%charge,ch10,&
+   '  Extra charge (from GS run)........... ',ebands%charge,ch10,&
+   '  Extra electrons (after GS run)....... ',ebands%extrael,ch10,&
    '  Fermi level  ........................ ',ebands%fermie,ch10,&
    '  Entropy ............................. ',ebands%entropy,ch10,&
    '  Tsmear value ........................ ',ebands%tsmear,ch10,&
    '  Tphysel value ....................... ',ebands%tphysel,ch10
- call wrtout(unt, msg, my_mode)
+ call wrtout(unt, msg)
 
  if (my_prtvol > 10) then
    if (ebands%nsppol == 1)then
-     call wrtout(unt, sjoin(' New occ. numbers for occopt= ', itoa(ebands%occopt),' , spin-unpolarized case.'), my_mode)
+     call wrtout(unt, sjoin(' New occ. numbers for occopt= ', itoa(ebands%occopt),' , spin-unpolarized case.'))
    end if
 
    do spin=1,ebands%nsppol
      if (ebands%nsppol==2) then
        write(msg,'(a,i9,a,i0)')' New occ. numbers for occopt= ',ebands%occopt,', spin ',spin
-       call wrtout(unt, msg, my_mode)
+       call wrtout(unt, msg)
      end if
 
      do ikpt=1,ebands%nkpt
        write(msg,'(2a,i4,3a,f6.3,2a)')ch10,&
          ' k-point number ',ikpt,') ',trim(ktoa(ebands%kptns(:,ikpt))),'; weight: ',ebands%wtk(ikpt), ch10, &
          " eig (Ha), eig (eV), occ, doccde"
-       call wrtout(unt, msg, my_mode)
+       call wrtout(unt, msg)
        do ii=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          write(msg,'(4(f7.3,1x))')ebands%eig(ii,ikpt,spin), ebands%eig(ii,ikpt,spin) * Ha_eV, &
              ebands%occ(ii,ikpt,spin), ebands%doccde(ii,ikpt,spin)
-         call wrtout(unt, msg, my_mode)
+         call wrtout(unt, msg)
        end do
      end do !ikpt
 
@@ -1523,7 +1584,7 @@ pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
 
 ! *************************************************************************
 
- tol_=tol6; if (present(tol_fermi)) tol_ = tol_fermi
+ tol_ = tol6; if (present(tol_fermi)) tol_ = tol_fermi
 
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
@@ -1531,7 +1592,7 @@ pure function ebands_get_valence_idx(ebands, tol_fermi) result(val_idx)
      idx = 0
      do band=1,nband_k
        if (ebands%eig(band,ikpt,spin) > ebands%fermie + abs(tol_)) then
-         idx=band; exit
+         idx = band; exit
        end if
      end do
      val_idx(ikpt,spin) = idx - 1
@@ -1748,11 +1809,11 @@ subroutine ebands_apply_scissors(ebands, scissor_energy)
      ival = val_idx(ikpt,spin)
 
      if (nband_k >= ival+1) then
-       ebands%eig(ival+1:,ikpt,spin) = ebands%eig(ival+1:,ikpt,spin)+scissor_energy
+       ebands%eig(ival+1:,ikpt,spin) = ebands%eig(ival+1:,ikpt,spin) + scissor_energy
      else
        write(msg,'(2a,4(a,i0))')&
         'Not enough bands to apply the scissor operator. ',ch10,&
-        'spin= ',spin,' ikpt= ',ikpt,' nband_k= ',nband_k,' but valence index= ',ival
+        'spin: ',spin,' ikpt: ',ikpt,' nband_k: ',nband_k,' but valence index: ',ival
        MSG_COMMENT(msg)
      end if
 
@@ -2394,7 +2455,7 @@ end subroutine ebands_update_occ
 !! spinmagntarget=if differ from -99.99d0, fix the spin polarization (in Bohr magneton)
 !! prtvol=Verbosity level (0 for lowest level)
 !! [update_occ]=False to avoid recomputing occupation factors (mainly used when a call to set_scheme is followed
-!!  by another call to set_nelect (update_occ is expensive for large k-meshes). Default: True.
+!!  by another call to set_extrael (update_occ is expensive for large k-meshes). Default: True.
 !!
 !! PARENTS
 !!      eph,m_sigmaph
@@ -2525,18 +2586,19 @@ end subroutine ebands_set_fermie
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebands_set_nelect
+!!****f* m_ebands/ebands_set_extrael
 !! NAME
-!! ebands_set_nelect
+!! ebands_set_extrael
 !!
 !! FUNCTION
-!! Set the new number of electrons, recompute Fermi level from eigenenergies
+!! Add extrael to ebands%nelect. Set value of ebands%extrael
+!! Recompute Fermi level from eigenenergies
 !! and new occupation numbers according to the smearing scheme defined by occopt
 !! (and smearing width tsmear or tphysel) as well as
 !! entropy and derivative of occupancies wrt the energy for each band and k point.
 !!
 !! INPUTS
-!!  nelect=New number of electrons
+!!  extrael=Number of electrons be added in units. Negative to add holes
 !!  spinmagntarget=if differ from -99.99d0, fix the spin polarization (in Bohr magneton)
 !!  [prtvol]=Verbosity level
 !!
@@ -2553,30 +2615,32 @@ end subroutine ebands_set_fermie
 !!
 !! SOURCE
 
-subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
+subroutine ebands_set_extrael(ebands, extrael, spinmagntarget, msg, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(inout) :: ebands
  integer,optional,intent(in) :: prtvol
- real(dp),intent(in) :: nelect, spinmagntarget
+ real(dp),intent(in) :: extrael, spinmagntarget
  character(len=*),intent(out) :: msg
 
 !Local variables-------------------------------
 !scalars
  integer :: my_prtvol
- real(dp) :: prev_fermie,prev_nelect
+ real(dp) :: prev_fermie, prev_nelect
 
 ! *************************************************************************
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  if (.not. ebands_has_metal_scheme(ebands)) then
-   MSG_ERROR("set_nelect assumes a metallic occupation scheme. Use ebands_set_scheme!")
+   MSG_ERROR("set_extrael assumes a metallic occupation scheme. Use ebands_set_scheme!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
- ebands%nelect = nelect
+ ! Here we set the value of extrael
+ ebands%extrael = extrael
+ ebands%nelect = ebands%nelect + extrael
  call ebands_update_occ(ebands, spinmagntarget, prtvol=my_prtvol)
 
  write(msg,"(2(a,es16.6),a,2(a,es16.6))")&
@@ -2584,7 +2648,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
    " New fermi level: ",ebands%fermie,", with nelect: ",ebands%nelect
  call wrtout(std_out, msg)
 
-end subroutine ebands_set_nelect
+end subroutine ebands_set_extrael
 !!***
 
 !----------------------------------------------------------------------
@@ -2642,7 +2706,7 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
    mu_e(it) = tmp_ebands%fermie
    !
    ! Check that the total number of electrons is correct
-   ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
+   ! This is to trigger problems as the routines that calculate the occupations in ebands_set_extrael
    ! are different from the occ_fd that will be used in the rest of the code.
    nelect = ebands_calc_nelect(tmp_ebands, kTmesh(it), mu_e(it))
 
@@ -2650,10 +2714,11 @@ subroutine ebands_get_muT_with_fd(self, ntemp, kTmesh, spinmagntarget, prtvol, m
      ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
      ! for finite doping its hard to find nelect that exactly matches self%nelect.
      ! in this case we print a warning
-     write(msg,'(3(a,f10.6))') &
-       'Calculated number of electrons nelect: ',nelect, &
-       ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for kT = ',kTmesh(it)
-     if (kTmesh(it) == 0) then
+     write(msg,'(2(a,f10.6,a), f10.6)') &
+       'Calculated number of electrons nelect  : ',nelect, ch10, &
+       ' does not correspond with ebands%nelect: ',tmp_ebands%nelect,' for kT: ', kTmesh(it)
+
+     if (kTmesh(it) == zero) then
        MSG_WARNING(msg)
      else
        MSG_ERROR(msg)
@@ -2729,7 +2794,6 @@ end function ebands_calc_nelect
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
 !!  [header]=Optional title.
-!!  [kmask]=Logical mask used to exclude k-points.
 !!  [unit]=Optional unit for output (std_out if not specified)
 !!  [mode_paral]=Either "COLL" or "PERS", former is default.
 !!
@@ -2751,7 +2815,7 @@ end function ebands_calc_nelect
 !!
 !! SOURCE
 
-subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
+subroutine ebands_report_gap(ebands, header, unit, mode_paral, gaps)
 
 !Arguments ------------------------------------
 !scalars
@@ -2761,7 +2825,6 @@ subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
  class(ebands_t),intent(in)  :: ebands
 !arrays
  real(dp),optional,intent(out) :: gaps(3,ebands%nsppol)
- logical,optional,intent(in) ::  kmask(ebands%nkpt)
 
 !Local variables-------------------------------
 !scalars
@@ -2774,7 +2837,6 @@ subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
  real(dp) :: top_valence(ebands%nkpt),bot_conduct(ebands%nkpt)
- logical :: my_kmask(ebands%nkpt)
 
 ! *********************************************************************
 
@@ -2782,12 +2844,11 @@ subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
 
  unt =std_out; if (PRESENT(unit      )) unt =unit
  my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
- my_kmask=.TRUE.; if (PRESENT(kmask     )) my_kmask=kmask
 
  if (PRESENT(gaps)) gaps=zero
 
  val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi)
- first=0
+ first = 0
 
  ! Initialize the return status for the gaps
  if (PRESENT(gaps)) gaps(1:3,1:nsppol)=zero
@@ -2812,7 +2873,6 @@ subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
    icb=ivb+1
 
    do ikibz=1,ebands%nkpt
-     if (.not.my_kmask(ikibz)) CYCLE
      nband_k = ebands%nband(ikibz+(spin-1)*ebands%nkpt)
      top_valence(ikibz) = ebands%eig(ivb,ikibz,spin)
      if (icb>nband_k) then
@@ -2822,12 +2882,12 @@ subroutine ebands_report_gap(ebands, header, kmask, unit, mode_paral, gaps)
    end do
 
    ! Get minimum of the direct Gap
-   ikopt= imin_loc(bot_conduct-top_valence,MASK=my_kmask)
+   ikopt= imin_loc(bot_conduct-top_valence)
    opt_gap=bot_conduct(ikopt)-top_valence(ikopt)
 
    ! Get fundamental Gap
-   ick = imin_loc(bot_conduct,MASK=my_kmask)
-   ivk = imax_loc(top_valence,MASK=my_kmask)
+   ick = imin_loc(bot_conduct)
+   ivk = imax_loc(top_valence)
    fun_gap = ebands%eig(icb,ick,spin)-ebands%eig(ivb,ivk,spin)
 
    write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)')&
@@ -2979,7 +3039,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  ! ===========================================================
  ! Define variables.
  NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "occopt", "kptopt"], defmode=.True.))
- NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "tphysel", "charge", "nelect"]))
+ NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "tphysel", "charge", "nelect", "extrael"]))
 
  ncerr = nctk_def_arrays(ncid, nctkarr_t('istwfk', "i", 'number_of_kpoints'))
  NCF_CHECK(ncerr)
@@ -3005,6 +3065,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("istwfk"), ebands%istwfk))
  NCF_CHECK(nf90_put_var(ncid, vid("kptopt"), ebands%kptopt))
  NCF_CHECK(nf90_put_var(ncid, vid("charge"), ebands%charge))
+ NCF_CHECK(nf90_put_var(ncid, vid("extrael"), ebands%extrael))
  NCF_CHECK(nf90_put_var(ncid, vid("nelect"), ebands%nelect))
  NCF_CHECK(nf90_put_var(ncid, vid('kptrlatt_orig'), ebands%kptrlatt_orig))
  NCF_CHECK(nf90_put_var(ncid, vid('shiftk_orig'), ebands%shiftk_orig))
@@ -4395,7 +4456,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  ! Needed by AbiPy to understand that we have a k-path instead of a mesh.
  new_kptopt = -kpath%nbounds
 
- call ebands_init(new_bantot, new,e bands%nelect, new_doccde, new_eig, new_istwfk, kpath%points, &
+ call ebands_init(new_bantot, new, ebands%nelect, new_doccde, new_eig, new_istwfk, kpath%points, &
    new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear, &
    ebands%occopt, new_occ, new_wtk,&
    ebands%charge, new_kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
@@ -6095,45 +6156,6 @@ subroutine klinterp_eval_bsd(self, kpt, vals_bsd)
  end do
 
 end subroutine klinterp_eval_bsd
-!!***
-
-!!****f* m_ebands/ebands_kmesh2str
-!! NAME
-!! ebands_kmesh2str
-!!
-!! FUNCTION
-!!  Return string with info on the k-point sampling
-!!
-!! SOURCE
-
-character(len=500) function ebands_kmesh2str(self) result(str)
-
-!Arguments ------------------------------------
-!scalars
- class(ebands_t),intent(in) :: self
-
-!Local variables-------------------------------
- integer :: ii
-
-! *********************************************************************
-
- if (isdiagmat(self%kptrlatt)) then
-   ! Sampling aligned with reciprocal lattice vectors --> use ngkpt
-   str = sjoin(" ngkpt: ", ltoa(get_diag(self%kptrlatt)))
- else
-   ! write kptrlatt by rows
-   str = sjoin(" kptrlatt_rows: ", ltoa(reshape(transpose(self%kptrlatt), [9])))
- end if
-
- ! Write shiftk only if != [0, 0, 0]
- if (any(self%shiftk /= 0)) then
-   str = sjoin(str, "shiftk:")
-   do ii=1,self%nshiftk
-     str = sjoin(str, ltoa(self%shiftk(:, ii)))
-   end do
- end if
-
-end function ebands_kmesh2str
 !!***
 
 !!****f* m_ebands/ebands_get_carriers
