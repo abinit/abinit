@@ -234,6 +234,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  real(dp),allocatable :: omegame0i(:), w_maxval(:)
  complex(gwpc) :: sigcohme(Sigp%nsig_ab)
+ complex(gwpc) :: mat_tmp(Er%nomega_i,Sr%nomega_i)
  complex(gwpc),allocatable :: vc_sqrt_qbz(:),rhotwg(:),rhotwgp(:)
  complex(gwpc),allocatable :: botsq_conjg_transp(:,:),ac_epsm1cqwz2(:,:,:)
  complex(gwpc),allocatable :: epsm1_qbz(:,:,:),epsm1_trcc_qbz(:,:,:), epsm1_tmp(:,:)
@@ -791,13 +792,22 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          do io=1,Sr%nomega_i
            omegame0i_ac  = Sr%omega_i(io)-qp_ene(ib,ik_ibz,spin)
            omegame0i2_ac = omegame0i_ac*omegame0i_ac
-           do iiw=1,Er%nomega_i
-             ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
-             ac_integr(:,:,io) = ac_integr(:,:,io) + ac_epsm1cqwz2(:,:,iiw)/(omegame0i2_ac + omegap2(iiw))
-           end do
-           ac_integr(:,:,io)=ac_integr(:,:,io)*omegame0i_ac
+           mat_tmp(:,io) = -piinv * omegame0i_ac / (omegame0i2_ac + omegap2(:))
          end do
-         ac_integr(:,:,:)=-ac_integr(:,:,:)*piinv
+         ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
+#ifdef HAVE_GW_DPC
+           call ZGEMM('N','N',npwc*npwc,Sr%nomega_i,Er%nomega_i,cone_gw,ac_epsm1cqwz2,npwc*npwc,mat_tmp,Er%nomega_i,czero_gw,ac_integr,npwc*npwc)
+#else
+           call CGEMM('N','N',npwc*npwc,Sr%nomega_i,Er%nomega_i,cone_gw,ac_epsm1cqwz2,npwc*npwc,mat_tmp,Er%nomega_i,czero_gw,ac_integr,npwc*npwc)
+#endif           
+! MRM old version of the code
+!           do iiw=1,Er%nomega_i
+!             ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
+!             ac_integr(:,:,io) = ac_integr(:,:,io) + ac_epsm1cqwz2(:,:,iiw)/(omegame0i2_ac + omegap2(iiw))
+!           end do
+!           ac_integr(:,:,io)=ac_integr(:,:,io)*omegame0i_ac
+!         end do
+!         ac_integr(:,:,:)=-ac_integr(:,:,:)*piinv
        end if
 
        call timab(436,2,tsec) ! (1)
