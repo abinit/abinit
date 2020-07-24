@@ -950,9 +950,9 @@ meta: {optdriver: 7, eph_task: -4, }
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
  Fundamental gap:     4.517 (eV)
-   VBM:    12.800 (eV) at k: [ 7.5174-316,  7.7153-316,  0.0000E+00]
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
- Direct gap:         5.626 (eV) at k: [ 7.5174-316,  7.7153-316,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Position of CBM/VBM with respect to the Fermi level:
  Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
@@ -1240,9 +1240,9 @@ meta: {optdriver: 7, eph_task: -4, }
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
  Fundamental gap:     4.517 (eV)
-   VBM:    12.800 (eV) at k: [ 7.7178-316,  7.7585-316,  0.0000E+00]
+   VBM:    12.800 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:    17.318 (eV) at k: [ 2.5000E-01,  2.5000E-01,  0.0000E+00]
- Direct gap:         5.626 (eV) at k: [ 7.7178-316,  7.7585-316,  0.0000E+00]
+ Direct gap:         5.626 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Position of CBM/VBM with respect to the Fermi level:
  Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)

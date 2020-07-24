@@ -259,10 +259,6 @@ MODULE m_ebands
 !! FUNCTION
 !! Structure with information on the fundamental and direct gaps returned by ebands_report_gap.
 !!
-!! TODO
-!! Remove gaps_t, move info about CBM, VBM and Fermi energy (i.e. Fermi level for T --> 0) inside
-!! ebands_t and make sure that all the setter methods of ebands_t support the new protocol.
-!!
 !! SOURCE
 
  type,public :: gaps_t
@@ -296,8 +292,13 @@ MODULE m_ebands
      ! valence band max and conduction band min for each spin in Ha.
      ! Only for Semiconductors, set to (+, -) huge(one) for metals.
 
-   real(dp),pointer :: kpoints(:,:) => null()
-     ! Reference to the k-points of the band structure used to compute the gaps.
+   real(dp),allocatable :: optical_kpoints(:,:)
+     ! (3, nsppol)
+     ! kpoint of optical gap for each spin
+
+   real(dp),allocatable :: fund_kpoints(:,:, :)
+     ! (3, 2, nsppol)
+     ! kpoint of the fundamental gap for (val, cond) and each spin
 
    character(len=500),allocatable :: errmsg_spin(:)
      ! errmsg_spin(nsppol)
@@ -485,7 +486,7 @@ end function ebands_get_gaps
 !! get_gaps_
 !!
 !! FUNCTION
-!!  Private function that teturns a gaps_t object with info on the fundamental and direct gap.
+!!  Private function that returns a gaps_t object with info on the fundamental and direct gap.
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Info on the band structure, the smearing technique and the physical temperature used.
@@ -531,7 +532,11 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
  ABI_MALLOC(gaps%vb_max, (nsppol))
  ABI_MALLOC(gaps%cb_min, (nsppol))
  ABI_MALLOC(gaps%errmsg_spin, (nsppol))
- gaps%kpoints => ebands%kptns
+
+ ABI_MALLOC(gaps%fund_kpoints, (3, 2, nsppol))
+ ABI_MALLOC(gaps%optical_kpoints, (3, nsppol))
+ gaps%fund_kpoints = huge(one)
+ gaps%optical_kpoints = huge(one)
 
  gaps%fo_kpos = 0
  gaps%ierr = 0
@@ -541,7 +546,6 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
  gaps%fermie = ebands%fermie
 
  ! Compute "valence index" using efermi
- !if (ebands%extrael == zero)
  val_idx(:,:) = ebands_get_valence_idx(ebands, tol_fermi=tol_fermi)
 
  spin_loop: &
@@ -582,19 +586,23 @@ type(gaps_t) function get_gaps_(ebands, ierr) result(gaps)
    fun_gap = ebands%eig(icb, ick, spin) - ebands%eig(ivb, ivk, spin)
    gaps%fo_values(:, spin) = [fun_gap, opt_gap]
    gaps%fo_kpos(:, spin) = [ivk, ick, ikopt]
+
+   gaps%optical_kpoints(:, spin) = ebands%kptns(:, ikopt)
+   gaps%fund_kpoints(:, 1, spin) = ebands%kptns(:, ivk)
+   gaps%fund_kpoints(:, 2, spin) = ebands%kptns(:, ick)
  end do spin_loop
 
  ierr = maxval(gaps%ierr)
 
- !if (ierr /= 0) then
- !  ! Set vbm and cbm to fermie if metal.
- !  do spin=1,nsppol
- !    if (gaps%ierr(spin) /= 0) then
- !      gaps%vb_max(spin) = ebands%fermie
- !      gaps%cb_min(spin) = ebands%fermie
- !    end if
- !  end do
- !end if
+ if (ierr /= 0) then
+   ! Set VBM and CBM to fermie if metal.
+   do spin=1,nsppol
+     if (gaps%ierr(spin) /= 0) then
+       gaps%vb_max(spin) = ebands%fermie
+       gaps%cb_min(spin) = ebands%fermie
+     end if
+   end do
+ end if
 
 end function get_gaps_
 !!***
@@ -630,12 +638,11 @@ subroutine gaps_free(gaps)
  ABI_SFREE(gaps%fo_values)
  ABI_SFREE(gaps%vb_max)
  ABI_SFREE(gaps%cb_min)
+ ABI_SFREE(gaps%optical_kpoints)
+ ABI_SFREE(gaps%fund_kpoints)
 
 !chars
  ABI_SFREE(gaps%errmsg_spin)
-
-! nullify pointers
- nullify(gaps%kpoints)
 
 end subroutine gaps_free
 !!***
@@ -723,11 +730,11 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    if (ivk /= ick) call wrtout(unt, " Indirect band gap semiconductor")
    write(msg, "(a,f9.3,a )")" Fundamental gap: ", fun_gap * Ha_eV, " (eV)"
    call wrtout(unt, msg)
-   write(msg, "(a,f9.3,2a)")"   VBM: ", gaps%vb_max(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%kpoints(:, ivk)))
+   write(msg, "(a,f9.3,2a)")"   VBM: ", gaps%vb_max(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%fund_kpoints(:,1,spin)))
    call wrtout(unt, msg)
-   write(msg, "(a,f9.3,2a)")"   CBM: ", gaps%cb_min(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%kpoints(:, ick)))
+   write(msg, "(a,f9.3,2a)")"   CBM: ", gaps%cb_min(spin) * Ha_eV, " (eV) at k: ", trim(ktoa(gaps%fund_kpoints(:,2,spin)))
    call wrtout(unt, msg)
-   write(msg, "(a,f9.3,2a)")" Direct gap:     ", opt_gap * Ha_eV," (eV) at k: ", trim(ktoa(gaps%kpoints(:,ikopt)))
+   write(msg, "(a,f9.3,2a)")" Direct gap:     ", opt_gap * Ha_eV," (eV) at k: ", trim(ktoa(gaps%optical_kpoints(:,spin)))
    call wrtout(unt, msg)
 
    if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
