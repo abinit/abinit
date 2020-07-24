@@ -61,7 +61,7 @@ accuracy7 6
   pawecutdg 15
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Al.GGA_PBE-JTH-paw.xml"
+ pseudos "Al.GGA_PBE-Atompaw3.1-paw.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

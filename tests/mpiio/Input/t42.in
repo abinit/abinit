@@ -61,7 +61,7 @@
  fftalg 401 # Do not remove this input variable, although it is the default. See KNOWN PROBLEM P802.1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "2he.psphgh"
+ pseudos "PseudosHGH_pwteter/2he.2.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -117,10 +117,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
- integer :: treads, use_gpu_cuda, ierr
+ integer :: treads, use_gpu_cuda
  real(dp) :: cpus
  character(len=500) :: msg
- character(len=fnlen) :: pp_dirpath, shell_var
+ character(len=fnlen) :: pp_dirpath
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
@@ -481,14 +481,15 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  pp_dirpath = ""
  call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'pp_dirpath', tread, 'KEY', key_value=pp_dirpath)
  if (tread == 1) then
-   if (pp_dirpath(1:1) == "$") then
-     shell_var = pp_dirpath(2:)
-     call get_environment_variable(shell_var, pp_dirpath, status=ierr)
-     if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
-     if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
-     if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
-     call wrtout(std_out, sjoin(" ", shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
-   end if
+!! XG2020_07_20 Now, the replacement of environment variables is done at the level of the parser
+!  if (pp_dirpath(1:1) == "$") then
+!    shell_var = pp_dirpath(2:)
+!    call get_environment_variable(shell_var, pp_dirpath, status=ierr)
+!    if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
+!    if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
+!    if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
+!    call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
+!  end if
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if
 

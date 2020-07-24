@@ -43,8 +43,8 @@
  prtden 0
  prtwf  0
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "31ga.hgh, HGH/5b.3.hgh, 1h.psphgh"
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "31ga.3.hgh, 5b.3.hgh, 1h.1.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

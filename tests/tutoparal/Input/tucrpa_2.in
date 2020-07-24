@@ -134,7 +134,7 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
  gwpara4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "V.LDA_PW-JTH.xml, Sr.LDA_PW-JTH.xml, O.LDA_PW-JTH.xml"
+ pseudos "Pseudodojo_paw_pw_standard/V.xml, Pseudodojo_paw_pw_standard/Sr.xml, Pseudodojo_paw_pw_standard/O.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

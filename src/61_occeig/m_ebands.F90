@@ -445,7 +445,7 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
  real(dp),parameter :: spinmagntarget_ = -99.99_dp, stmbias0 = zero
  real(dp) :: tsmear
  type(ebands_t)  :: tmp_ebands
- character(len=500) :: msg
+ !character(len=500) :: msg
 
 ! *********************************************************************
 
@@ -473,7 +473,6 @@ type(gaps_t) function ebands_get_gaps(ebands, ierr) result(gaps)
    ! Return ierr
    gaps = get_gaps_(tmp_ebands, ierr)
    call ebands_free(tmp_ebands)
-   !if (ierr /= 0) ierr = -abs(ierr)
  end if
 
 end function ebands_get_gaps

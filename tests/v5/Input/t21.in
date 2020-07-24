@@ -106,7 +106,7 @@ typat 1 1 2 2 3 3
    diemac   6.0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "9f.pspnc, 17cl.pspnc, 82pb.4.hgh"
+ pseudos "9f.pspnc, 17cl.pspnc, PseudosHGH_pwteter/82pb.4.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -198,8 +198,9 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    else if (usexml==1 .and. test_paw==0) then
 #if defined HAVE_LIBPSML
-     write(msg,'(2a)')  &
-       '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
+     write(msg,'(4a)')  &
+       '- inpspheads : Reading pseudopotential header in XML form from ',ch10,&
+&      '-   ',trim(filnam(ipsp))
      call wrtout([std_out, ab_out], msg)
 
      ! could pass pspheads(ipsp) directly and fill all of it in psxml2ab
@@ -219,9 +220,10 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
    else if(usexml==1.and.test_paw==1)then
 
-     write(msg,'(a,a)')  &
-       '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
-     call wrtout([std_out, ab_out],  msg)
+     write(msg,'(4a)')  &
+       '- inpspheads : Reading pseudopotential header in XML form from ',ch10,&
+&      '-   ',trim(filnam(ipsp))
+     call wrtout([std_out, ab_out], msg)
 
      call pawpsxml2ab(filnam(ipsp),ecut_tmp(:,:,ipsp), pspheads(ipsp),1)
      pspcod=17; pspheads(ipsp)%pspcod=pspcod

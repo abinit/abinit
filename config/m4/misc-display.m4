@@ -71,6 +71,8 @@ Core build parameters
   * GPU    enabled   : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
 
   * LibXML2 enabled  : ${abi_libxml2_enable}
+  * LibPSML enabled  : ${sd_libpsml_enable}
+  * XMLF90  enabled  : ${sd_xmlf90_enable}
   * HDF5 enabled     : ${sd_hdf5_enable} (MPI support: ${sd_hdf5_mpi_ok})
   * NetCDF enabled   : ${sd_netcdf_enable} (MPI support: ${sd_netcdf_mpi_ok})
   * NetCDF-F enabled : ${sd_netcdf_fortran_enable} (MPI support: ${sd_netcdf_fortran_mpi_ok})

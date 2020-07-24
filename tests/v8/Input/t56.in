@@ -70,7 +70,7 @@ diemac 6
 ecut 30               # Underconverged ecut. 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Ca.psp8, O.psp8"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8, O.psp8"
 nstep 100
 #%%<BEGIN TEST_INFO>
 #%% [setup]
