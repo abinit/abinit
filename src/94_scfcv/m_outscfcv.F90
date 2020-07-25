@@ -381,10 +381,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  !write(std_out,*)"results_gs%fermie in outscfcv",results_gs%fermie
  !write(std_out,*)"hdr%efermi in outscfcv",hdr%fermie
 
- if (me == master) then !.and. dtset%occopt == 1) then
-   call ebands_print_gaps(ebands, std_out, "KS gaps estimated from k-sampling")
-   !call ebands_print_gaps(ebands, ab_out, "KS Gaps")
- end if
+ !if (me == master) then !.and. dtset%occopt == 1) then
+ !  call ebands_print_gaps(ebands, std_out, "KS gaps estimated from k-sampling")
+ !  !call ebands_print_gaps(ebands, ab_out, "KS Gaps")
+ !end if
 
  ! YAML output
  if (me == master) then

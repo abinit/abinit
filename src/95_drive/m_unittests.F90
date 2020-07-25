@@ -57,7 +57,7 @@ contains
 !!  rprim_from_ptgroup
 !!
 !! FUNCTION
-!!  Get an rprim compatible with the point group
+!!  Generate rprim compatible with the point group
 !!  This is only for testing porposes
 !!
 function rprim_from_ptgroup(ptgroup) result(rprim)
@@ -272,7 +272,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  emin = zero; emax = maxval(eig) + one
  nw = 500
  dosdeltae = (emax - emin) / (nw - 1)
- broad = tol1 * eV_Ha
+ broad = tol2 * eV_Ha
 
  if (my_rank == master) then
    write(std_out, *)" min, Max band energy: ", minval(eig), maxval(eig)
@@ -310,7 +310,6 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
      call write_file('parabola_tetra.dat', nw, energies, dos, idos)
    end if
  end if
-
 
  dos = zero; cauchy_ppart = zero
  do iq_ibz=1,nqibz
