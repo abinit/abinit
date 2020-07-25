@@ -106,21 +106,21 @@ module defs_datatypes
   ! Linewidth of each band
   ! MG: TODO: This array should be removed (I think Yannick introduced it, see also Ktmesh)
 
-  real(dp),allocatable :: kTmesh(:)
+  !real(dp),allocatable :: kTmesh(:)
   ! kTmesh(ntemp)
   ! List of temperatures (KT units).
 
-  real(dp),allocatable :: velocity(:,:,:,:)
+  !real(dp),allocatable :: velocity(:,:,:,:)
   ! velocity(3,mband,nkpt,nsppol)
   ! Group velocity of each band
   ! MG: TODO: This array should be removed (I think HM introduced it)
 
   real(dp),allocatable :: occ(:,:,:)
-  ! occ(mband,nkpt,nsppol)
+  ! occ(mband, nkpt, nsppol)
   ! occupation of each band.
 
   real(dp),allocatable :: doccde(:,:,:)
-  ! doccde(mband,nkpt,nsppol)
+  ! doccde(mband, nkpt, nsppol)
   ! derivative of the occupation of each band wrt energy (needed for RF).
 
   real(dp),allocatable :: wtk(:)
@@ -151,11 +151,11 @@ module defs_datatypes
   ! Original value of kptrlatt and value after the call to inkpts
 
   real(dp),allocatable :: shiftk_orig(:,:)
-  ! shiftk_orig(3,nshiftk_orig)
+  ! shiftk_orig(3, nshiftk_orig)
   ! original shifts given in input (changed in inkpts).
 
   real(dp),allocatable :: shiftk(:,:)
-  ! shiftk(3,nshiftk)
+  ! shiftk(3, nshiftk)
 
  end type ebands_t
 !!***

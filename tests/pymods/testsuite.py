@@ -1927,7 +1927,7 @@ pp_dirpath $ABI_PSPDIR
                 self._status = "skipped"
                 msg = self.full_id + ": Skipped:\n\tThis test requires files in the git submodule:\n\t\t%s\n" % src
                 msg += "\tbut cannot find README.md file in dir\n"
-                msg += "\tUse:\n\t`git submodule init && git submodule update --recursive --remote`\n\t to fetch the last version from the remote url."
+                msg += "\tUse:\n\t\t`git submodule init && git submodule update --recursive --remote`\n\tto fetch the last version from the remote url."
                 self.cprint(msg, status2txtcolor[self._status])
                 can_run = False
             else:

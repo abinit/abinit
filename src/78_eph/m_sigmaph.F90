@@ -4743,10 +4743,11 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
  kk = sigma%kcalc(:, ikcalc)
  ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
- nbcalc_ks = sigma%nbcalc_ks(ikcalc,spin)
- bstart_ks = sigma%bstart_ks(ikcalc,spin)
+ nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
+ bstart_ks = sigma%bstart_ks(ikcalc, spin)
  bsum_start = sigma%bsum_start; bsum_stop = sigma%bsum_stop
  natom3 = 3 * cryst%natom
  ndiv = 1; if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
@@ -4754,16 +4755,16 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
  ABI_CHECK(sigma%symsigma == 1, "symsigma 0 with tetra not implemented")
 
  if (sigma%imag_only) then
-   ! Weights for Im (tethraedron, eta --> 0)
+   ! Weights for Im (tetrahedron, eta --> 0)
    ABI_REMALLOC(sigma%deltaw_pm, (2, nbcalc_ks, sigma%my_npert, bsum_start:bsum_stop, sigma%my_nqibz_k, ndiv))
    sigma%deltaw_pm = zero
 
    ! Temporary weights (on the fine IBZ_k mesh if double grid is used)
    ABI_MALLOC(tmp_deltaw_pm, (1, sigma%ephwg%nq_k, 2))
 
-   ! loop over bands to sum
+   ! Loop over bands to sum
    do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
-     ! loop over my phonon modes
+     ! Loop over my phonon modes
      do imyp=1,sigma%my_npert
        nu = sigma%my_pinfo(3, imyp)
 
@@ -4815,9 +4816,9 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
  else
    ! Both real and imag part --> compute \int 1/z with tetrahedron.
-   ! Note that we still need a finite i.eta in the expression (hopefully smaller than default value).
-   ! Besides we have to take into account the case in which the spectral function in wanted.
-   ! Derivative wrt omega is still computed with finite i.eta.
+   ! Note that we still need a finite i.eta in the expression (hopefully smaller than the default value).
+   ! Besides we have to take into account the case in which the spectral function is wanted.
+   ! Derivative wrt omega is still computed with finite i.eta, though.
    ABI_CHECK(.not. sigma%use_doublegrid, "double grid for Re-Im not implemented")
 
    ! TODO: This part should be tested.
@@ -4829,8 +4830,10 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    ! Initialize z-points for Sigma_{nk} for different n bands.
    zvals(1, :) = sigma%e0vals + sigma%ieta
    if (sigma%nwr > 0) zvals(2:sigma%nwr+1, :) = sigma%wrmesh_b(:, 1:nbcalc_ks) + sigma%ieta
+
    ! Loop over my bands in self-energy sum.
    ! TODO: Really slow if nz >> 1, reduce the number of ibsum_kq bands for which tetra must be used.
+   ! or use spline with non-linear mesh
    do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
      ! Loop over my phonon modes
      do imyp=1,sigma%my_npert

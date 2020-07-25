@@ -802,9 +802,6 @@ end subroutine gaps_print
 !! OUTPUT
 !! ebands<ebands_t>=the ebands_t datatype
 !!
-!! SIDE EFFECTS
-!!  %entropy and %fermie initialized to zero.
-!!
 !! PARENTS
 !!      dfpt_looppert,eig2tot,gstate,m_ebands,mlwfovlp_qp,optic,outscfcv
 !!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
@@ -839,36 +836,36 @@ subroutine ebands_init(bantot, ebands, nelect, doccde, eig, istwfk, kptns, &
  ! are passed to routines (mband,nkpt,nsppol). It might happen that bantot<mband*nktp*nsppol
  ! this should not lead to problems since arrays are passed by reference
  ! anyway the treatment of these arrays have to be rationalized
- ebands%bantot =bantot
- ebands%mband  =MAXVAL(nband(1:nkpt*nsppol))
- ebands%nkpt   =nkpt
- ebands%nspinor=nspinor
- ebands%nsppol =nsppol
- ebands%occopt =occopt
+ ebands%bantot = bantot
+ ebands%mband  = MAXVAL(nband(1:nkpt*nsppol))
+ ebands%nkpt   = nkpt
+ ebands%nspinor= nspinor
+ ebands%nsppol = nsppol
+ ebands%occopt = occopt
 
- ebands%entropy=zero  ! Initialize results
- ebands%fermie =zero  ! Initialize results
- ebands%nelect =nelect
- ebands%tphysel=tphysel
- ebands%tsmear =tsmear
+ ebands%entropy= zero
+ ebands%fermie = zero
+ ebands%nelect = nelect
+ ebands%tphysel= tphysel
+ ebands%tsmear = tsmear
 
  ! Allocate the components
- ABI_MALLOC(ebands%nband,(nkpt*nsppol))
- ABI_MALLOC(ebands%istwfk,(nkpt))
- ABI_MALLOC(ebands%npwarr,(nkpt))
- ABI_MALLOC(ebands%kptns,(3,nkpt))
+ ABI_MALLOC(ebands%nband, (nkpt*nsppol))
+ ABI_MALLOC(ebands%istwfk, (nkpt))
+ ABI_MALLOC(ebands%npwarr, (nkpt))
+ ABI_MALLOC(ebands%kptns, (3, nkpt))
 
  ! Copy the arrays
- ebands%nband(1:nkpt*nsppol)=nband(1:nkpt*nsppol)
- ebands%istwfk(1:nkpt)      =istwfk(1:nkpt)
- ebands%npwarr(1:nkpt)      =npwarr(1:nkpt)
- ebands%kptns(1:3,1:nkpt)   =kptns(1:3,1:nkpt)
+ ebands%nband(1:nkpt*nsppol) = nband(1:nkpt*nsppol)
+ ebands%istwfk(1:nkpt)       = istwfk(1:nkpt)
+ ebands%npwarr(1:nkpt)       = npwarr(1:nkpt)
+ ebands%kptns(1:3,1:nkpt)    = kptns(1:3,1:nkpt)
 
  ! In ebands, energies and occupations are stored in a matrix (mband,nkpt,nsppol).
  ! put_eneocc_vect is used to reshape the values stored in vectorial form.
- ABI_MALLOC(ebands%eig   ,(ebands%mband,nkpt,nsppol))
- ABI_MALLOC(ebands%occ   ,(ebands%mband,nkpt,nsppol))
- ABI_MALLOC(ebands%doccde,(ebands%mband,nkpt,nsppol))
+ ABI_MALLOC(ebands%eig   , (ebands%mband, nkpt, nsppol))
+ ABI_MALLOC(ebands%occ   , (ebands%mband, nkpt, nsppol))
+ ABI_MALLOC(ebands%doccde, (ebands%mband, nkpt, nsppol))
 
  call put_eneocc_vect(ebands,'eig',   eig   )
  call put_eneocc_vect(ebands,'occ',   occ   )
@@ -1007,6 +1004,8 @@ type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
+ !new%extrael = dtset%eph_extrael
+
  ABI_FREE(ugly_doccde)
  ABI_FREE(ugly_ene)
  ABI_FREE(ugly_occ)
@@ -1054,8 +1053,8 @@ subroutine ebands_free(ebands)
  ABI_SFREE(ebands%occ)
  ABI_SFREE(ebands%doccde)
  ABI_SFREE(ebands%wtk)
- ABI_SFREE(ebands%velocity)
- ABI_SFREE(ebands%kTmesh)
+ !ABI_SFREE(ebands%velocity)
+ !ABI_SFREE(ebands%kTmesh)
  ABI_SFREE(ebands%shiftk_orig)
  ABI_SFREE(ebands%shiftk)
 
@@ -3303,7 +3302,7 @@ type(edos_t) function ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
 
  if (edos%intmeth == 1) then
    do spin=1,edos%nsppol
-     call simpson_int(nw,edos%step, edos%dos(:,spin), edos%idos(:,spin))
+     call simpson_int(nw, edos%step, edos%dos(:,spin), edos%idos(:,spin))
    end do
  end if
  edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
@@ -4189,9 +4188,9 @@ subroutine ebands_sort(self)
      ! Shuffle other arrays depending on nband_k
      self%occ(1:nband_k, ik_ibz, spin) = self%occ(iperm_k(1:nband_k), ik_ibz, spin)
      self%doccde(1:nband_k, ik_ibz, spin) = self%doccde(iperm_k(1:nband_k), ik_ibz, spin)
-     if (allocated(self%velocity)) then
-       self%velocity(:, 1:nband_k, ik_ibz, spin) = self%velocity(:, iperm_k(1:nband_k), ik_ibz, spin)
-     end if
+     !if (allocated(self%velocity)) then
+     !  self%velocity(:, 1:nband_k, ik_ibz, spin) = self%velocity(:, iperm_k(1:nband_k), ik_ibz, spin)
+     !end if
    end do
  end do
 
@@ -4317,9 +4316,9 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  if (itype == 1 .or. itype == 2) then
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, my_bblock, comm)
-   if (itype == 2) then
-     ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
-   end if
+   !if (itype == 2) then
+   !  ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
+   !end if
  else
    MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end if
@@ -4335,8 +4334,8 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
        select case (itype)
        case (1)
          call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
-       case (2)
-         call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin), new%velocity(:,ib,ik_ibz,spin))
+       !case (2)
+       !  call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin), new%velocity(:,ib,ik_ibz,spin))
        case default
          MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
        end select
@@ -4344,7 +4343,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    end do
  end do
  call xmpi_sum(new%eig, comm, ierr)
- if (itype == 2) call xmpi_sum(new%velocity, comm, ierr)
+ !if (itype == 2) call xmpi_sum(new%velocity, comm, ierr)
 
  ! Sort eigvalues_k in ascending order to be compatible with other ebands routines.
  call ebands_sort(new)

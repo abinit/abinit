@@ -8,7 +8,7 @@ This tutorial explains how to obtain the electron self-energy due to phonons, co
 renormalization (ZPR) of the band gap as well as temperature-dependent band gaps.
 We start with a very brief overview of the many-body formalism in the context of the electron-phonon (e-ph) interaction,
 then we discuss how to evaluate the e-ph self-energy and perform typical convergence studies using MgO as example.
-Further details concerning the implementation are given in [[cite:Gonze2019]] and [[Romero2020]].
+Further details concerning the implementation are given in [[cite:Gonze2019]] and [[cite:Romero2020]].
 
 It is assumed the user has already completed the two tutorials [RF1](rf1) and [RF2](rf2),
 and that he/she is familiar with the calculation of ground state and response properties,

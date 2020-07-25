@@ -1825,12 +1825,12 @@ subroutine htetra_get_delta_mask(tetra, eig_ibz, wvals, nw, nkpt, kmask, comm)
    if (mod(ihash,nprocs) /= my_rank) cycle
 
    ! For each tetrahedron
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
      do isummit=1,4
-       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit, itetra)
        eig(isummit) = eig_ibz(ind_ibz(isummit))
      end do
 
@@ -1838,8 +1838,8 @@ subroutine htetra_get_delta_mask(tetra, eig_ibz, wvals, nw, nkpt, kmask, comm)
      emin = minval(eig)
      emax = maxval(eig)
 
-     ! Check if any value in wvals is betwen emin and emax
-     contrib = 0; if (any(emin<wvals.and.wvals<emax)) contrib = 1
+     ! Check if any value in wvals is between emin and emax
+     contrib = 0; if (any(emin < wvals .and. wvals < emax)) contrib = 1
 
      ! Compute the union
      do isummit=1,4
@@ -1942,8 +1942,8 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
      multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
      do isummit=1,4
        ik_ibz = ind_ibz(isummit)
-       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:)*multiplicity*max_occ
-       tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:)*multiplicity*max_occ
+       dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:) * multiplicity * max_occ
+       tweight(:,ik_ibz) = tweight(:,ik_ibz) + tweight_tmp(isummit,:) * multiplicity * max_occ
      end do
    end do ! itetra
  end do
@@ -1952,12 +1952,12 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
  select case(tetra%opt)
  case(1)
    do ik_ibz=1,tetra%nkibz
-     dweight(:,ik_ibz) = dweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
-     tweight(:,ik_ibz) = tweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%tetra_total(ik_ibz)/tetra%nkbz
+     dweight(:,ik_ibz) = dweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
+     tweight(:,ik_ibz) = tweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%tetra_total(ik_ibz) / tetra%nkbz
    end do
  case(2)
-   dweight = dweight*tetra%vv/4.0_dp
-   tweight = tweight*tetra%vv/4.0_dp
+   dweight = dweight*tetra%vv / 4.0_dp
+   tweight = tweight*tetra%vv / 4.0_dp
  end select
 
  call xmpi_sum(dweight, comm, ierr)
@@ -1994,9 +1994,7 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
  integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
- real(dp) :: eig(4)
- real(dp) :: wvals(nw)
- real(dp) :: dweight_tmp(4,nw),tweight_tmp(4,nw)
+ real(dp) :: eig(4), wvals(nw), dweight_tmp(4,nw),tweight_tmp(4,nw)
 
 ! *********************************************************************
 
@@ -2072,17 +2070,16 @@ end subroutine htetra_wvals_weights_delta
 !!
 !! SOURCE
 
-subroutine htetra_blochl_weights(tetra,eig_ibz,enemin,enemax,max_occ,nw,nkpt,&
-  bcorr,tweight,dweight,comm)
+subroutine htetra_blochl_weights(tetra, eig_ibz, enemin, enemax, max_occ, nw, nkpt, bcorr, tweight, dweight, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nw,nkpt,bcorr,comm
  class(htetra_t), intent(in) :: tetra
- real(dp) ,intent(in) :: enemax,enemin,max_occ
+ integer,intent(in) :: nw,nkpt, bcorr, comm
+ real(dp) ,intent(in) :: enemax, enemin, max_occ
 !arrays
  real(dp) ,intent(in) :: eig_ibz(nkpt)
- real(dp) ,intent(out) :: dweight(nw,nkpt),tweight(nw,nkpt)
+ real(dp) ,intent(out) :: dweight(nw,nkpt), tweight(nw,nkpt)
 
 !Local variables-------------------------------
  real(dp) :: wvals(nw)
@@ -2115,21 +2112,21 @@ end subroutine htetra_blochl_weights
 !!
 !! SOURCE
 
-subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cweight,comm)
+subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, opt, cweight, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nz,nkpt,opt,comm
+ integer,intent(in) :: nz, nkpt, opt, comm
  class(htetra_t), intent(in) :: tetra
  real(dp) ,intent(in) :: max_occ
 !arrays
  real(dp) ,intent(in) :: eig_ibz(nkpt)
  complex(dp),intent(in)  :: zvals(nz)
- complex(dp),intent(out) :: cweight(nz,nkpt)
+ complex(dp),intent(out) :: cweight(nz, nkpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,iz,multiplicity,nprocs,my_rank,ierr
+ integer :: ik_ibz, iz, multiplicity, nprocs, my_rank, ierr
  integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
@@ -2142,7 +2139,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
-   if (mod(ihash,nprocs) /= my_rank) cycle
+   if (mod(ihash, nprocs) /= my_rank) cycle
 
    ! For each tetrahedron that belongs to this k-point
    tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
@@ -2155,7 +2152,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
      end do
 
      ! Get multiplicity
-     multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
+     multiplicity = tetra%unique_tetra(ihash)%indexes(0, itetra)
 
      ! Loop over frequencies
      do iz=1,nz
@@ -2172,7 +2169,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
        ! Accumulate contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
-         cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit)*multiplicity*max_occ
+         cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit) * multiplicity * max_occ
        end do
      end do ! iz
    end do ! itetra
@@ -2182,7 +2179,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
  select case(tetra%opt)
  case(1)
    do ik_ibz=1,tetra%nkibz
-     cweight(:,ik_ibz) = cweight(:,ik_ibz)*tetra%ibz_multiplicity(ik_ibz)/tetra%nkbz/tetra%tetra_total(ik_ibz)
+     cweight(:,ik_ibz) = cweight(:,ik_ibz) * tetra%ibz_multiplicity(ik_ibz) / tetra%nkbz / tetra%tetra_total(ik_ibz)
    end do
  case(2)
    cweight = cweight*tetra%vv
@@ -2192,7 +2189,6 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
 
 end subroutine htetra_weights_wvals_zinv
 !!***
-
 
 !----------------------------------------------------------------------
 

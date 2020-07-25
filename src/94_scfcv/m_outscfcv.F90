@@ -328,40 +328,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    MSG_ERROR(msg)
  end if
 
-!Initialize two objects to facilitate the propagation of info.
-!These objects should used more frequently, actually they should
-!become basic objects used in abinit.
-
-!Crystalline structure.
- remove_inv=.false.
- if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
-
- timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
- call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
-   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
-   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
-   dtset%symrel,dtset%tnons,dtset%symafm)
-
-!Electron band energies.
- bantot= dtset%mband*dtset%nkpt*dtset%nsppol
- ABI_MALLOC(doccde,(bantot))
- doccde=zero
-
- call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
-   hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-   hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
-
- ABI_FREE(doccde)
-
- ebands%fermie  = results_gs%energies%e_fermie
- e_fermie = results_gs%energies%e_fermie
- ebands%entropy = results_gs%energies%entropy
- !write(std_out,*)"ebands%efermi in outscfcv",ebands%fermie
- !write(std_out,*)"results_gs%energies%e_fermie in outscfcv",e_fermie
- !write(std_out,*)"results_gs%fermie in outscfcv",results_gs%fermie
- !write(std_out,*)"hdr%efermi in outscfcv",hdr%fermie
-
  ! Parameters for MPI-FFT
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); nfft_tot = product(ngfft(1:3))
  comm_fft = mpi_enreg%comm_fft
@@ -382,6 +348,44 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    my_atmtab_allocated = .true.
  end if
 
+ ! Initialize two objects to facilitate the propagation of info.
+ ! These objects should used more frequently, actually they should
+ ! become basic objects used in abinit.
+
+ ! Crystalline structure.
+ remove_inv=.false.
+ if (dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
+
+ timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
+ call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
+   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
+   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+   dtset%symrel,dtset%tnons,dtset%symafm)
+
+ ! Electron band energies.
+ bantot= dtset%mband*dtset%nkpt*dtset%nsppol
+ ABI_CALLOC(doccde, (bantot))
+
+ call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+   hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+   hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+
+ ABI_FREE(doccde)
+
+ ebands%fermie  = results_gs%energies%e_fermie
+ e_fermie = results_gs%energies%e_fermie
+ ebands%entropy = results_gs%energies%entropy
+ !write(std_out,*)"ebands%efermi in outscfcv",ebands%fermie
+ !write(std_out,*)"results_gs%energies%e_fermie in outscfcv",e_fermie
+ !write(std_out,*)"results_gs%fermie in outscfcv",results_gs%fermie
+ !write(std_out,*)"hdr%efermi in outscfcv",hdr%fermie
+
+ if (me == master) then !.and. dtset%occopt == 1) then
+   call ebands_print_gaps(ebands, std_out, "KS gaps estimated from k-sampling")
+   !call ebands_print_gaps(ebands, ab_out, "KS Gaps")
+ end if
+
  ! YAML output
  if (me == master) then
    call results_gs%yaml_write(ab_out, crystal, dtset%nstep > 0, info="Summary of ground state results")
@@ -389,6 +393,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !wannier interface
  call timab(951,1,tsec)
+
  if (dtset%prtwant==2) then
 
    call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&

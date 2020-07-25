@@ -900,12 +900,12 @@ end subroutine hdr_malloc
 !! ebands <type(ebands_t)>=band structure information including Brillouin zone description
 !! codvsn=code version
 !! dtset <type(dataset_type)>=all input variables for this dataset
-!! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
-!! comm_atom=--optional-- MPI communicator over atoms
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !! pertcase=index of the perturbation, or 0 if GS calculation
 !! psps <type(pseudopotential_type)>=all the information about psps
-!! my_atomtab(:)=Index of the atoms (in global numbering ) treated by current proc (Optional)
+!! [my_atomtab(:)]=Index of the atoms (in global numbering ) treated by current proc.
+!! [mpi_atmtab(:)]= indexes of the atoms treated by current proc
+!! [comm_atom]= MPI communicator over atoms
 !!
 !! OUTPUT
 !! hdr <type(hdr_type)>=the header, initialized, and for most part of
@@ -919,8 +919,8 @@ end subroutine hdr_malloc
 !!
 !! SOURCE
 
-subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
-                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+subroutine hdr_init(ebands, codvsn, dtset, hdr, pawtab, pertcase, psps,wvl, &
+                    mpi_atmtab, comm_atom) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
