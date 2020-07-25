@@ -54,8 +54,7 @@ ecut   50           # This cut-off is too low for real calculations
                     
                     
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosGTH_pwteter/01h.pspgth"
+ pseudos "../../Psps_for_tests/PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
