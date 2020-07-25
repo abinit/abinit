@@ -47,8 +47,8 @@
  xred 3*0.00d0
  znucl  70.0
 
-
- pseudos "../../Psps_for_tests/PseudosTM_pwteter/70yb.pspnc"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/70yb.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

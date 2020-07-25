@@ -46,7 +46,8 @@
 # Output density to an ETSF file
 iomode  3
 
- pseudos "../../Psps_for_tests/20ca.paw"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "20ca.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

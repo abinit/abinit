@@ -30,8 +30,8 @@ nspden  2
 spinat  1.0 0.0 0.0
 
 
-
- pseudos "../../Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/83bi.5.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -44,8 +44,8 @@
  znucl  1.0
 
 
-# pp_dirpath "$ABI_PSPDIR"
- pseudos "../../Psps_for_tests/PseudosGTH_pwteter/01h.pspgth"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

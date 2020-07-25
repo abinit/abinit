@@ -37,7 +37,7 @@ istwfk 8*1
  znucl  31 33
 
 
- pp_dirpath "../../Psps_for_tests/PseudosTM_pwteter"
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
  pseudos "31ga.pspnc, 33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
