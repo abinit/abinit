@@ -1319,7 +1319,7 @@ end subroutine get_onetetra_blochl
 pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
     ! dispersion values at the corners of the tetrahedron
     real(dp), intent(in) :: eig(4)
-    ! energy to evaulate the weights at
+    ! energy to evaluate the weights at
     complex(dp), intent(in) :: z
     ! complex weights
     complex(dp), intent(out) :: cw(4)
@@ -1719,6 +1719,8 @@ end subroutine htetra_get_onewk
 !!  weights(nw,2) = integration weights for
 !!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
 !!    for a given (band, k-point, spin).
+!!  [erange(2)]: if present, weights are computed with a standard quadrature method if
+!!   real(z) is outside of this interval and with tetra if inside.
 !!
 !! PARENTS
 !!
@@ -1726,7 +1728,7 @@ end subroutine htetra_get_onewk
 !!
 !! SOURCE
 
-subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz, eig_ibz, opt, cweights)
+subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz, eig_ibz, opt, cweights, erange)
 
 !Arguments ------------------------------------
 !scalars
@@ -1735,6 +1737,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  class(htetra_t), intent(inout) :: tetra
 !arrays
  complex(dp),intent(in) :: zvals(nz)
+ real(dp),optional,intent(in) :: erange(2)
  real(dp),intent(in) :: eig_ibz(nkibz)
  complex(dp),intent(out) :: cweights(nz)
 
@@ -1744,7 +1747,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  real(dp) :: tweight
 !arrays
  integer  :: ind_ibz(4),tetra_mibz(0:4)
- real(dp) :: eig(4)
+ real(dp) :: eig(4), my_erange(2)
  complex(dp) :: verm(4), cw(4), verli(4)
 ! *********************************************************************
 
@@ -1756,13 +1759,15 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
    MSG_ERROR(sjoin("Invalid opt:", itoa(opt)))
  end if
 
+ my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange
+
  ! For each tetrahedron that belongs to this k-point
  tetra_count = tetra%tetra_count(ik_ibz)
  tetra_total = tetra%tetra_total(ik_ibz)
  do itetra=1,tetra_count
 
-   call htetra_get_ibz(tetra,ik_ibz,itetra,tetra_mibz)
-   tweight = one*tetra_mibz(0)/tetra_total
+   call htetra_get_ibz(tetra, ik_ibz, itetra, tetra_mibz)
+   tweight = one * tetra_mibz(0) / tetra_total
    do isummit=1,4
      ! Get mapping of each summit to eig_ibz
      ind_ibz(isummit) = tetra_mibz(isummit)
@@ -1771,17 +1776,22 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
 
    ! Loop over frequencies
    do iz=1,nz
-     select case(opt)
-     case(1)
-       verm = zvals(iz) - eig
-       call SIM0TWOI(cw, VERLI, VERM)
-     case(2)
-       call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
-     end select
+
+     !if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
+       select case(opt)
+       case(1)
+         verm = zvals(iz) - eig
+         call SIM0TWOI(cw, VERLI, VERM)
+       case(2)
+         call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
+       end select
+     !else
+     !  cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
+     !end if
 
      do isummit=1,4
        if (ind_ibz(isummit) /= ik_ibz) cycle
-       cweights(iz) = cweights(iz) + cw(isummit) *tweight*max_occ
+       cweights(iz) = cweights(iz) + cw(isummit) * tweight * max_occ
        ! HM: This exit is important, avoids summing the same contribution more than once
        exit
      end do
@@ -2103,6 +2113,8 @@ end subroutine htetra_blochl_weights
 !!  which is more efficient
 !!
 !! INPUTS
+!!  [erange(2)]: if present, weights are computed with a standard quadrature method if
+!!   real(z) is outside of this interval and with tetra if inside.
 !!
 !! OUTPUT
 !!
@@ -2112,7 +2124,7 @@ end subroutine htetra_blochl_weights
 !!
 !! SOURCE
 
-subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, opt, cweight, comm)
+subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, opt, cweight, comm, erange)
 
 !Arguments ------------------------------------
 !scalars
@@ -2120,7 +2132,8 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, o
  class(htetra_t), intent(in) :: tetra
  real(dp) ,intent(in) :: max_occ
 !arrays
- real(dp) ,intent(in) :: eig_ibz(nkpt)
+ real(dp),intent(in) :: eig_ibz(nkpt)
+ real(dp),optional,intent(in) :: erange(2)
  complex(dp),intent(in)  :: zvals(nz)
  complex(dp),intent(out) :: cweight(nz, nkpt)
 
@@ -2130,12 +2143,14 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, o
  integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
- real(dp) :: eig(4)
+ real(dp) :: eig(4), my_erange(2)
  complex(dp) :: cw(4), verli(4), verm(4)
 ! *********************************************************************
 
  cweight = zero
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
@@ -2158,18 +2173,22 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, o
      do iz=1,nz
 
        ! Get tetrahedron weights
-       select case(opt)
-       case(1)
-         verm = zvals(iz) - eig
-         call SIM0TWOI(cw, VERLI, VERM)
-       case(2)
-         call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
-       end select
+       !if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
+         select case(opt)
+         case(1)
+           verm = zvals(iz) - eig
+           call SIM0TWOI(cw, VERLI, VERM)
+         case(2)
+           call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
+         end select
+       !else
+       !  cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
+       !end if
 
        ! Accumulate contributions
        do isummit=1,4
          ik_ibz = ind_ibz(isummit)
-         cweight(iz,ik_ibz) = cweight(iz,ik_ibz) + cw(isummit) * multiplicity * max_occ
+         cweight(iz, ik_ibz) = cweight(iz, ik_ibz) + cw(isummit) * multiplicity * max_occ
        end do
      end do ! iz
    end do ! itetra

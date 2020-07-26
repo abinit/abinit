@@ -103,11 +103,8 @@ type, public :: ephwg_t
   ! Number of points in IBZ(k) i.e. the irreducible wedge
   ! defined by the operations of the little group of k.
 
-  ! Integer controling whether to compute and store the electron-phonon matrix elements
-  ! computed from generalized Frohlich model
-  ! C. Verdi and F. Giustino, Phys. Rev. Lett. 115, 176401 (2015).
-  ! 1,2: Unused (for compatibility with sigma_t)
-  ! 3: Compute Frohlich electron-phonon matrix elements in the IBZ for later integration
+  !real(dp) :: max_phfrq
+  ! Max Phonon frequency, computed from phfrq_ibz
 
   integer, allocatable :: kq2ibz(:)
   ! kq2ibz(nq_k)
@@ -253,7 +250,7 @@ type(ephwg_t) function ephwg_new( &
 
  ! Get full BZ (new%nbz, new%bz) and new kptrlatt for tetra.
  call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, out_nkibz, out_kibz, out_wtk, new%nbz, new%bz, &
-   new_kptrlatt=out_kptrlatt)
+                             new_kptrlatt=out_kptrlatt)
  call cwtime_report(" ephwg_new: kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  rlatt = out_kptrlatt; call matr3inv(rlatt, new%klatt)
@@ -277,7 +274,11 @@ type(ephwg_t) function ephwg_new( &
    new%phfrq_ibz(ik, :) = phfrq
  end do
 
+ ! Collect results on each rank
  call xmpi_sum(new%phfrq_ibz, comm, ierr)
+
+ !new%max_phfrq = maxval(phfrq_ibz)
+
  call cwtime_report(" ephwg_new: ifc_fourq", cpu, wall, gflops)
 
 end function ephwg_new
@@ -891,12 +892,12 @@ end subroutine ephwg_get_deltas_qibzk
 !! Compute weights for a given (kpoint, qpoint, spin) for all phonon modes.
 !!
 !! INPUTS
-!! qpt(3)
-!! iband_sum=band index in self-energy sum. (global index i.e. unshifted)
-!! spin=Spin index
-!! nu=Phonon branch.
+!! nz: Number of frequencies
 !! nbcalc=Number of bands in self-energy matrix elements.
 !! zvals
+!! iband_sum = band index in self-energy sum. (global index i.e. unshifted)
+!! spin=Spin index
+!! nu=Phonon branch index
 !! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
@@ -927,8 +928,8 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
- integer :: iq_ibz,ikpq_ibz,ib,ii,iq,nprocs, my_rank, ierr
+ integer,parameter :: master = 0
+ integer :: iq_ibz, ikpq_ibz, ib, ii, iq, nprocs, my_rank, ierr
  real(dp),parameter :: max_occ1 = one
  logical :: use_bzsum_
 !arrays
@@ -953,40 +954,40 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 
  cweights = zero
  ABI_MALLOC(cweights_tmp, (nz, self%nq_k))
+
  do ib=1,nbcalc
    do ii=1,2
-     call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:,ib), &
-                                          max_occ1, self%nq_k, opt, cweights_tmp, comm)
+     call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:, ib), max_occ1, self%nq_k, opt, cweights_tmp, comm)
      do iq=1,self%nq_k
-       cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
+       cweights(:, ii, ib, iq) = cweights_tmp(:, iq)
      end do
    end do
  end do
+
+ ! As this part is quite demanding, especially when nz is large, use input z-mesh
+ ! when we are inside the window in which the denominator can blow up (+- some tolerance)
+ ! Outside the window, downsample the mesh use to compute the weights and spline the results.
+#if 0
+  e_min = minval(self%eigkbs_ibz(:, ib, spin) - self%max_phfrq
+  e_max = maxval(self%eigkbs_ibz(:, ib, spin) + self%max_phfrq
+  iz_min = 0, iz_max = 0
+  do iz=1, nz
+    if (real(zvals(iz, ib)) > e_min .and. iz_min /= 0) then
+      iz_min = iz
+    end if
+    if (real(zvals(iz, ib)) > e_max .and. iz_min /= 0 .and. iz_max /= 0) then
+      iz_max = iz; exit
+    end if
+  end do
+#endif
+
  ABI_FREE(cweights_tmp)
 
  ! Rescale weights so that the caller can sum over the full BZ.
  !if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
 
- call xmpi_sum(cweights, comm, ierr)
-
- ! Compare results with naive one-point integration.
- !if (.False. .and. my_rank == master) then
- !  volconst_mult = one
- !  volconst_mult = self%lgk%weights(iqlk)
- !  do ib=1,nbcalc
- !    !do nu=1,self%natom3
- !      write(std_out,*)"# naive vs tetra integration for band, nu", ib - 1 + self%bstart, nu
- !      do iz=1,nz
- !        write(std_out,"(5es16.8)") &
- !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 1)) * volconst_mult, cweights(iz, 1, ib, nu)
- !        write(std_out,"(5es16.8)") &
- !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 2)) * volconst_mult, cweights(iz, 2, ib, nu)
- !      end do
- !    !end do
- !  end do
- !end if
-
  ABI_FREE(pme_k)
+ call xmpi_sum(cweights, comm, ierr)
 
 end subroutine ephwg_get_zinv_weights
 !!***

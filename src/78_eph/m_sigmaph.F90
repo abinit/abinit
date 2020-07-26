@@ -2314,7 +2314,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    call ebands_free(tmp_ebands)
  end if
 
- ! Frequency mesh for sigma(w) and spectral function.
+ ! Frequency mesh for sigma(w) and spectral functions.
  ! TODO: Use GW variables but change default
  !dtset%freqspmin
  new%nwr = dtset%nfreqsp; new%wr_step = zero
@@ -4825,9 +4825,9 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    nz = 1; if (sigma%nwr > 0) nz = 1 + sigma%nwr
    ABI_REMALLOC(sigma%cweights, (nz,2,nbcalc_ks,sigma%my_npert,sigma%my_bsum_start:sigma%my_bsum_stop,sigma%my_nqibz_k,ndiv))
    ABI_MALLOC(tmp_cweights, (nz, 2, nbcalc_ks, sigma%nqibz_k))
-   ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
    ! Initialize z-points for Sigma_{nk} for different n bands.
+   ABI_MALLOC(zvals, (nz, nbcalc_ks))
    zvals(1, :) = sigma%e0vals + sigma%ieta
    if (sigma%nwr > 0) zvals(2:sigma%nwr+1, :) = sigma%wrmesh_b(:, 1:nbcalc_ks) + sigma%ieta
 
@@ -4840,10 +4840,11 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
        nu = sigma%my_pinfo(3, imyp)
 
        ! cweights(nz, 2, nbsigma, self%nq_k)
-       call sigma%ephwg%get_zinv_weights(nz, nbcalc_ks, zvals, ibsum_kq, spin, nu, sigma%zinv_opt, &
-                                         tmp_cweights, xmpi_comm_self) !  use_bzsum=sigma%symsigma == 0)
+       call sigma%ephwg%get_zinv_weights(nz, nbcalc_ks, zvals, ibsum_kq, spin, nu, sigma%zinv_opt, tmp_cweights, &
+                                         xmpi_comm_self) !  use_bzsum=sigma%symsigma == 0)
+                                         !sigma%qpt_comm%value)
 
-       ! For all the q-points that I am going to calculate
+       ! Extract weights for all the q-points that I am going to calculate.
        do imyq=1,sigma%my_nqibz_k
          iq_ibz = sigma%myq2ibz_k(imyq)
          weight = sigma%ephwg%lgk%weights(iq_ibz)
@@ -4851,8 +4852,10 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
        end do
      end do
    end do
+
    ABI_FREE(zvals)
    ABI_FREE(tmp_cweights)
+
  end if
 
  call cwtime_report(" get_all_qweights with tetrahedron", cpu, wall, gflops)

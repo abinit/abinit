@@ -150,6 +150,7 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
  character(len=5),allocatable :: class_names(:)
  integer,allocatable :: symrel(:,:,:),symafm(:),class_ids(:,:)
 
+ ! Get some lattice from ptgroup
  rprimd = rprim_from_ptgroup(ptgroup)
 
  if (use_symmetries == 1) then
@@ -159,6 +160,7 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
    call irrep_free(irr)
    ABI_FREE(irr)
  else
+   ! Only identity operator.
    nsym = 1
    ABI_MALLOC(symrel, (3, 3, nsym))
    symrel(:,:,1) = identity_3d
@@ -168,16 +170,13 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
  symafm = 1
  ABI_CALLOC(tnons, (3, nsym))
 
- amu = 1
- natom = 1
- ntypat = 1
- typat = 1
- znucl=1
- zion=1
- xred(:,1) = [0,0,0]
- call crystal_init(amu,crystal,space_group0,natom,npsp1,ntypat,nsym,rprimd,typat,xred,&
-                   zion,znucl,timrev1,use_antiferro_true,remove_inv_false,"test",&
-                   symrel=symrel,symafm=symafm,tnons=tnons)
+ amu = one; natom = 1; ntypat = 1; typat = 1; znucl = one; zion = one
+ xred(:, 1) = zero
+
+ call crystal_init(amu, crystal, space_group0, natom, npsp1, ntypat, nsym, rprimd, typat, xred, &
+                   zion, znucl, timrev1, use_antiferro_true, remove_inv_false, "test", &
+                   symrel=symrel, symafm=symafm, tnons=tnons)
+
  ABI_FREE(symrel)
  ABI_FREE(tnons)
  ABI_FREE(symafm)
@@ -204,10 +203,10 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0, master = 0
+ integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0, bcorr1 = 1, master = 0
  integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank
  real(dp),parameter :: max_occ1 = one
- real(dp) :: cpu, wall, gflops, dosdeltae, emin, emax, qnorm, dos_int, broad
+ real(dp) :: cpu, wall, gflops, dosdeltae, emin, emax, qnorm, dos_int, broad, min_eig, max_eig
  character(len=80) :: errstr
  logical,parameter :: use_old_tetra = .False.
  type(crystal_t) :: crystal
@@ -229,7 +228,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  call cwtime(cpu, wall, gflops, "start")
  !
  ! 0. Initialize
- call wrtout(std_out, '0. Initialize')
+ call wrtout(std_out, ' 0. Initialize')
 
  ! Create fake crystal from ptgroup
  crystal = crystal_from_ptgroup(ptgroup, use_symmetries)
@@ -261,11 +260,12 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ABI_MALLOC(eig, (nqibz))
  ABI_MALLOC(mat, (nqibz))
  do iq_ibz=1,nqibz
-   qnorm = normv(qibz(:,iq_ibz), crystal%gmet, 'R')
+   qnorm = normv(qibz(:, iq_ibz), crystal%gmet, 'R')
    ! The DOS for this function goes as sqrt(w - 0.5) * two_pi
-   eig(iq_ibz) = qnorm**2 + half
-   mat(iq_ibz) = abs(one / eig(iq_ibz))
-   mat(iq_ibz) = one !abs(one/eig(iq_ibz))
+   eig(iq_ibz) = qnorm ** 2 + half
+   !eig(iq_ibz) = cos(qnorm)
+   !mat(iq_ibz) = abs(one / eig(iq_ibz))
+   mat(iq_ibz) = one
  end do
 
  ! Prepare DOS calculation
@@ -274,8 +274,9 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  dosdeltae = (emax - emin) / (nw - 1)
  broad = tol2 * eV_Ha
 
+ min_eig = minval(eig); max_eig = maxval(eig)
  if (my_rank == master) then
-   write(std_out, *)" min, Max band energy: ", minval(eig), maxval(eig)
+   write(std_out, *)" min, Max band energy: ", min_eig, max_eig
    write(std_out, *)" energy mesh, Max: ", emin, emax, nw
    write(std_out, *)" Broad: ", broad
  end if
@@ -345,7 +346,7 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  end if
 
  ! Compute tetra weights with Blochl corrections and DOS/IDOS with new implementation by Henrique
- call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, 1, tweight, dweight, comm)
+ call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, bcorr1, tweight, dweight, comm)
  do iq_ibz=1,nqibz
    dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
    tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
@@ -376,10 +377,25 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
    call write_file('parabola_htetra_lv.dat', nw, energies, dos, idos)
  end if
 
- ! Compute weights using SIMTET routines (slow but accurate)
  ABI_MALLOC(cenergies, (nw))
  ABI_MALLOC(cweight, (nw, nqibz))
  cenergies = energies ! + j_dpc * broad
+
+ ! Compute weights using SIMTET routines and erange
+ call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 1, cweight, comm, &
+                                 erange=[min_eig * (one - tol2), max_eig * (one + tol2)])
+
+ dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
+ call simpson_int(nw, dosdeltae, dos, idos)
+ cauchy_ppart =  sum(real(cweight(:,:)), dim=2)
+ call ctrap(nw, dos, dosdeltae, dos_int)
+ call cwtime_report(" htetra_weights_wvals_zinv_simtet_erange   ", cpu, wall, gflops)
+
+ ! Compute weights using SIMTET routines (slow but accurate)
+ if (my_rank == master) then
+   write(std_out,*) "dos_int, idos", dos_int, idos(nw)
+   call write_file('parabola_zinv_simtet_erange.dat', nw, energies, dos, idos, cauchy_ppart=cauchy_ppart)
+ end if
 
  call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 1, cweight, comm)
 
