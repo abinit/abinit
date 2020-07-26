@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Test-Suite],[9.1.5],
+AC_INIT([ABINIT-Test-Suite],[9.1.6],
   [https://bugs.launchpad.net/abinit/],[abinit-test])
 AC_REVISION([Autotools support for the ABINIT Test Suite])
 AC_CONFIG_AUX_DIR([config/gnu])
