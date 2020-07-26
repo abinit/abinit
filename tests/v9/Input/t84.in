@@ -16,7 +16,8 @@ latt_taut = 80
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_hosts = nag@alps
+#%% exclude_hosts = nag@abiref
+#%% exclude_builders = .*_nag_7.0_.*
 #%% system_xml = t83.nc
 #%% exec_args = --F03
 #%% [files]
@@ -29,7 +30,7 @@ latt_taut = 80
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read netcdf and run lattice dynamics using Berendsen NVT (dynamics=103)
-#%%   Disabled on nag@alps because integer overflow (-C=intovf option of NAG compiler)
+#%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
 #%%<END TEST_INFO>
