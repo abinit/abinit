@@ -146,7 +146,7 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 #%% max_nprocs = 24
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
-#%% files_to_test = tucrpa_2_MPI24.out, tolnlines = 4, tolabs = 5.000e-01, tolrel = 1.100e-02
+#%% files_to_test = tucrpa_2_MPI24.out, tolnlines = 6, tolabs = 5.000e-01, tolrel = 1.100e-02
 #%% [extra_info]
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon
