@@ -127,7 +127,7 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
  if(icutcoul.ne.3) then
-   eta=sqrt(eight/rcut)
+   eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3))))
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
