@@ -39,7 +39,7 @@
 #%% [shell]
 #%% pre_commands = w_touch abinit.exit
 #%% [files]
-#%% psp_files = 14si.pspnc 
+#%% psp_files = PseudosTM_pwteter/14si.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

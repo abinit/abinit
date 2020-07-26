@@ -47,7 +47,7 @@ w90prtunk2 1   #Prints UNK files (for plotting the Wannier functions)
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

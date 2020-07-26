@@ -48,8 +48,8 @@ diemac    1.0    diemix 0.5d0
 nstep 10
 
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/3li.1.hgh, HGH/1h.1.hgh"
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "3li.1.hgh, 1h.1.hgh"
 ## At present, the tolerances are MUCH too large. Should be fixed !!
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -61,7 +61,6 @@ nstep 10
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. Gonze 
-#%% keywords = PAW
 #%% description = 
 #%%    LiH molecule
 #%%    test the use of spatial chemical potential. The molecule starts aligned along the x direction,

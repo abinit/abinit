@@ -75,7 +75,7 @@
           Angstrom
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "7n.pspnc"
+ pseudos "PseudosTM_pwteter/7n.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

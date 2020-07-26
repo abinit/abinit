@@ -68,7 +68,7 @@ prtwf 0      # Don't output the wave-functions
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "22ti.12.khgh, HGH/11na.1.hgh"
+ pseudos "22ti.12.khgh, PseudosHGH_pwteter/11na.1.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -324,13 +324,13 @@ extra_javascript:
     - extra_javascript/jquery.dialogextend.min.js
     - extra_javascript/abidocs.js
 
-copyright: Copyright &copy; 2019-2020 The Abinit Group
+copyright: Copyright &copy; 2020-2021 The Abinit Group
 
 # Google Analytics
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.1.5  
+    version: 9.1.6
     previous_published_versions: [] #8.2.0
     social:
         - type: github-alt

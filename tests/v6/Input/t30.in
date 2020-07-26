@@ -53,8 +53,8 @@
  typat  1 1 2 2 2 3 3 3 3 3 3 3 3
  znucl  3.0 5.0 1.0
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/3li.1.hgh, HGH/5b.3.hgh, HGH/1h.1.hgh"
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "3li.1.hgh, 5b.3.hgh, 1h.1.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
