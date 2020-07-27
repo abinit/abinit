@@ -489,7 +489,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(440)='calc_sigc_me(wfd_barrier        '
  names(441)='calc_sigc_me(xmpi_sum)          '
  names(442)='calc_sigc_me(final ops)         '
- names(443)='calc_sigc_me(ac_lowrank)        '
 
  names(445)='calc_sigc_me(loop)              '
 
