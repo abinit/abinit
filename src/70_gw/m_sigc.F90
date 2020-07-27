@@ -10,6 +10,7 @@
 !! CHILDREN
 !!
 !! SOURCE
+#define FBFB
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -32,7 +33,7 @@ module m_sigc
 
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
- use m_hide_blas,     only : xdotc, xgemv, xgemm
+ use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
@@ -54,6 +55,7 @@ module m_sigc
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_sym,       only : paw_symcprj
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
+ use m_hide_lapack,   only : xheev
 
  implicit none
 
@@ -253,6 +255,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
+#ifdef FBFB
+ integer :: neig(Er%nomega_i)
+ real(dp) :: epsm1_ev(Sigp%npwc)
+ complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
+ complex(gwpc),allocatable :: rhotw_epsm1_rhotw(:,:,:)
+#endif
+ !FBFB
+ complex(gwpc) :: mat_tmp(Er%nomega_i,Sr%nomega_i)
 
 !************************************************************************
 
@@ -294,6 +304,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 &  ' Calculating <nk|Sigma_c(omega)|nk> at k = ',kgw(:),ch10,&
 &  ' bands n = from ',ib1,' to ',ib2,ch10
  call wrtout(std_out,msg,'COLL')
+#ifdef FBFB
+ write(*,*) 'FBFB is defined'
+ open(unit=1000)
+ read(1000,*) neig(1)
+ close(1000)
+ write(*,*) 'neig=',neig(1)
+#endif
 
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
  w_maxval = zero
@@ -451,6 +468,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(rhotwg, (npwc*nspinor))
  ABI_MALLOC(rhotwgp, (npwc*nspinor))
  ABI_MALLOC(vc_sqrt_qbz, (npwc))
+#ifdef FBFB
+ ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
+#endif
 
  if (Er%mqmem==0) then ! Use out-of-core solution for epsilon.
    MSG_COMMENT('Reading q-slices from file. Slower but less memory.')
@@ -729,10 +749,26 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Prepare the first term: \Sum w_i 1/z_i^2 f(1/z_i-1)..
          ! The first frequencies are always real, skip them.
          ! Memory is not optimized.
+
+         !FBFB
+#ifdef FBFB
+         do iiw=1,Er%nomega_i
+           z2=gl_knots(iiw)*gl_knots(iiw)
+           ac_epsm1cqwz2(:,:,iiw)= gl_wts(iiw)*epsm1_qbz(:,:,Er%nomega_r+iiw)/z2
+           call xheev('V','L',npwc,ac_epsm1cqwz2(:,:,iiw),epsm1_ev)
+           neig(iiw) = neig(1)
+           do ig=1,neig(iiw)
+             ac_epsm1cqwz2(:,ig,iiw) = ac_epsm1cqwz2(:,ig,iiw) * SQRT( -epsm1_ev(ig) )
+           enddo
+           !write(500+iiw,'(a,1x,i5,1x,i5)') '#',npwc,COUNT(ABS(epsm1_ev(:))<1.0e-3)
+           !write(500+iiw,'(1x,es16.6)') epsm1_ev(:)
+         enddo
+#else
          do iiw=1,Er%nomega_i
            z2=gl_knots(iiw)*gl_knots(iiw)
            ac_epsm1cqwz2(:,:,iiw)= gl_wts(iiw)*epsm1_qbz(:,:,Er%nomega_r+iiw)/z2
          end do
+#endif
        end if
 
        if (mod10==SIG_QPGW_CD) then
@@ -776,6 +812,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          end if
        end if
 
+         !FBFB
+#ifndef FBFB
        if (mod10==SIG_GW_AC) then
          ! Calculate integral over omegap with Gauss-Legendre quadrature.
          ! * -1/pi \int domegap epsm1c*(omega-e0i) / ( (omega-e0i)^2 + omegap^2)
@@ -784,17 +822,25 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          do io=1,Sr%nomega_i
            omegame0i_ac  = Sr%omega_i(io)-qp_ene(ib,ik_ibz,spin)
            omegame0i2_ac = omegame0i_ac*omegame0i_ac
-           do iiw=1,Er%nomega_i
-             do iggp=0,npwc*npwc-1
-               ig=iggp/npwc+1
-               igp= iggp-(ig-1)*npwc+1 ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
-               ac_integr(ig,igp,io)= ac_integr(ig,igp,io) + ac_epsm1cqwz2(ig,igp,iiw)/(omegame0i2_ac + omegap2(iiw))
-             end do
-           end do
-           ac_integr(:,:,io)=ac_integr(:,:,io)*omegame0i_ac
+           mat_tmp(:,io) = -piinv * omegame0i_ac / (omegame0i2_ac + omegap2(:))
          end do
-         ac_integr(:,:,:)=-ac_integr(:,:,:)*piinv
+         ! \int domegap epsm1c/((omega-e0i)^2 + omegap^2)
+#ifdef HAVE_GW_DPC
+           call ZGEMM('N','N',npwc*npwc,Sr%nomega_i,Er%nomega_i,cone_gw,ac_epsm1cqwz2,npwc*npwc,mat_tmp,Er%nomega_i,czero_gw,ac_integr,npwc*npwc)
+#else
+           call CGEMM('N','N',npwc*npwc,Sr%nomega_i,Er%nomega_i,cone_gw,ac_epsm1cqwz2,npwc*npwc,mat_tmp,Er%nomega_i,czero_gw,ac_integr,npwc*npwc)
+#endif 
+!         do io=1,Sr%nomega_i
+!           omegame0i_ac  = Sr%omega_i(io)-qp_ene(ib,ik_ibz,spin)
+!           omegame0i2_ac = omegame0i_ac*omegame0i_ac
+!           do iiw=1,Er%nomega_i
+!             ac_integr(:,:,io)= ac_integr(:,:,io) + ac_epsm1cqwz2(:,:,iiw)/(omegame0i2_ac + omegap2(iiw))
+!           end do
+!           ac_integr(:,:,io)=ac_integr(:,:,io)*omegame0i_ac
+!         end do
+!         ac_integr(:,:,:)=-ac_integr(:,:,:)*piinv
        end if
+#endif
 
        call timab(436,2,tsec) ! (1)
        call timab(437,1,tsec) ! rho_tw_g
@@ -868,6 +914,20 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
        call timab(437,2,tsec) ! rho_tw_g
 
+#ifdef FBFB
+       call timab(443,1,tsec) ! ac_lowrank
+      !FBFB
+      do iiw=1,Er%nomega_i
+        ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
+        ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
+        call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
+&                 rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
+        call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
+        ABI_FREE(epsm1_sqrt_rhotw)
+      enddo
+       call timab(443,2,tsec) ! ac_lowrank
+#endif
+
        do kb=ib1,ib2
          call timab(438,1,tsec) ! (2)
 
@@ -900,18 +960,21 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          CASE (SIG_GW_AC)
            ! GW with Analytic continuation.
            ! Evaluate \sum_Gp integr_GGp(omegasi) rhotw_Gp TODO this part can be optimized
+#ifndef FBFB          
            do io=1,Sr%nomega_i
              do ispinor=1,nspinor
                spadc=(ispinor-1)*npwc
-               do ig=1,npwc
-                 ctmp=czero
-                 do igp=1,npwc
-                   ctmp=ctmp+ac_integr(ig,igp,io)*rhotwgp(igp+spadc)
-                 end do
-                 sigc_ket(ig+spadc,io)=ctmp
-               end do
+               !do ig=1,npwc
+               !  ctmp=czero
+               !  do igp=1,npwc
+               !    ctmp=ctmp+ac_integr(ig,igp,io)*rhotwgp(igp+spadc)
+               !  end do
+               !  sigc_ket(ig+spadc,io)=ctmp
+               !end do
+               call xgemv('N',npwc,npwc,cone_gw,ac_integr(:,:,io),npwc,rhotwgp(spadc+1:spadc+npwc),1,czero_gw,sigc_ket(spadc+1:spadc+npwc,io),1)
              end do !ispinor
            end do !io
+#endif
 
          CASE (SIG_GW_CD)
            ! GW with contour deformation.
@@ -1039,12 +1102,31 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
            ! Calculate <\phi_j|\Sigma_c|\phi_k>
            ! Different freqs according to method (AC or Perturbative), see nomega_sigc.
+#ifdef FBFB
+          ! FBFB
+          if (mod10==SIG_GW_AC) then
+            sigctmp(:,:) = czero_gw
+            do iab=1,Sigp%nsig_ab
+              do io=1,nomega_sigc
+                omegame0i_ac  = Sr%omega_i(io)-qp_ene(ib,ik_ibz,spin)
+                omegame0i2_ac = omegame0i_ac*omegame0i_ac
+                do iiw=1,Er%nomega_i
+                  sigctmp(io,iab) = sigctmp(io,iab) + piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac &
+&                                                     /(omegame0i2_ac + omegap2(iiw))
+                enddo
+              enddo
+            enddo
+          else
+#endif
            do iab=1,Sigp%nsig_ab
              spadc1 = spinor_padc(1, iab); spadc2 = spinor_padc(2, iab)
              do io=1,nomega_sigc
                sigctmp(io,iab) = XDOTC(npwc,rhotwg(spadc1+1:),1,sigc_ket(spadc2+1:,io),1)
              end do
            end do
+#ifdef FBFB
+           endif
+#endif
 
            if (Sigp%gwcomp==1) then
              ! Evaluate Extrapolar term TODO this does not work with spinor
