@@ -1,4 +1,4 @@
-# Crystalline AlAs : computation of the intrinsic mobility
+# Crystalline AlAs: computation of the intrinsic mobility
 
 ndtset 6
 
@@ -74,7 +74,7 @@ nband 8
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi, 33as.pspnc"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -87,7 +87,7 @@ nband 8
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description =
 #%%   E-ph for the mobility in semiconductors
 #%%<END TEST_INFO>

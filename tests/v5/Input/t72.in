@@ -82,7 +82,7 @@ xred
     0.00000000000    0.00000000000    0.00000000000 # Au
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "79au.pspnc"
+ pseudos "PseudosTM_pwteter/79au.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

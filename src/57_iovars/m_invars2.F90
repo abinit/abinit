@@ -1437,7 +1437,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%ph_nqshift=intarr(1)
 
  if (dtset%ph_nqshift > 0) then
-   ! Read ph_qshift for phonons default is [0,0,0]
+   ! Read ph_qshift for phonons, default is [0,0,0]
    ABI_CALLOC(dtset%ph_qshift, (3, dtset%ph_nqshift))
    if (tread == 1) then
      ABI_CHECK(3 * dtset%ph_nqshift <= marr, "3 * dtset%ph_nqshift > marr!")

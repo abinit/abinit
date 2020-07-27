@@ -47,7 +47,7 @@ tolwfr 1.e-8
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "26fe.pspnc, 6c.pspnc, 8o.pspnc"
+ pseudos "PseudosTM_pwteter/26fe.pspnc, PseudosTM_pwteter/6c.pspnc, PseudosTM_pwteter/8o.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

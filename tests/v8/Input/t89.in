@@ -162,7 +162,7 @@ optdriver7    5 # for nonlinear calculation
    d3e_pert3_dir7   1 1 1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Al.LDA_PW-JTH.xml, As.LDA_PW-JTH_sp.xml"
+ pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

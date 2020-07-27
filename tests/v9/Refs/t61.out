@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h51 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h52 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.in
 - output file    -> t61.out
@@ -504,7 +504,7 @@ meta: {optdriver: 7, eph_task: 5, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t61o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -517,34 +517,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Interpolation of the electron-phonon coupling potential
@@ -628,7 +600,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t61o_DS20_DDB
-Values initialized with zeros
+ Values initialized with zeros.
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -641,54 +613,8 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 1.2500E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
- More than 20 q-points with prtvol == 0. Only important messages will be printed...
-qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=independent, found=Yes
-    5)  idir= 2, ipert=   2, type=independent, found=Yes
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-All the independent perturbations are available
 --------------------------------------------------------------------------------
+
 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
@@ -715,6 +641,7 @@ All the independent perturbations are available
    4     1  [ 1.2500E-01,  1.2500E-01,  0.0000E+00]   3    4
    5     1  [-2.5000E-01,  1.2500E-01,  0.0000E+00]   4    4
    6     1  [-1.2500E-01,  1.2500E-01,  0.0000E+00]   4    4
+
  === MPI parallelism ===
 P Allocating and summing bands from my_bsum_start: 2 up to my_bsum_stop: 5
 P Number of CPUs for parallelism over perturbations: 1
@@ -725,6 +652,7 @@ P Number of CPUs for parallelism over bands: 1
 P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
 P Number of k-point in Sigma_nk treated by this proc: 6 of 6
+
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
 ================================================================================
  Final results in eV.
@@ -801,19 +729,19 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
 
  Transport (RTA) calculation results:
 
-Cartesian component of SERTA mobility tensor: xx
+ Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: yy
+ Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
 
 
-Cartesian component of SERTA mobility tensor: zz
+ Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
@@ -821,19 +749,19 @@ Cartesian component of SERTA mobility tensor: zz
 
 
 
-Cartesian component of MRTA mobility tensor: xx
+ Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: yy
+ Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
 
 
-Cartesian component of MRTA mobility tensor: zz
+ Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
@@ -1051,10 +979,10 @@ P           mkmem3         29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         30.1  wall=         30.8
+- Proc.   0 individual time (sec): cpu=         30.2  wall=         31.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         30.1  wall=         30.8
++Overall time at end (sec) : cpu=         30.2  wall=         31.0

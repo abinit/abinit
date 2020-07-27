@@ -133,7 +133,7 @@
               6.6697112171E-01  6.6697112171E-01  6.6697112171E-01
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "79au.pspnc"
+ pseudos "PseudosTM_pwteter/79au.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

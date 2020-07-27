@@ -55,7 +55,6 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
- use m_special_funcs,   only : levi_civita_3
  use m_rta,             only : rta_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -72,6 +71,7 @@ module m_eph_driver
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
  use m_pspini,          only : pspini
+ use m_ephtk,           only : ephtk_update_ebands
 
  implicit none
 
@@ -152,7 +152,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 !scalars
  integer,parameter :: master = 0, natifc0 = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
- integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift,ierr
+ integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
@@ -227,14 +227,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  wfk0_path = dtfil%fnamewffk
  wfq_path = dtfil%fnamewffq
  ddb_filepath = dtfil%filddbsin
+
  ! Use the ddb file as prefix if getdvdb or irddvb are not given in the input.
  dvdb_filepath = dtfil%fildvdbin
  if (dvdb_filepath == ABI_NOFILE) then
-   dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
+   dvdb_filepath = dtfil%filddbsin; ii = len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
- use_wfk = all(dtset%eph_task /= [5, -5, 6, +15, -15, -16, 16])
+
+ use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
- ! If eph_task is needed and ird/get variables are not provided we assume WFQ == WFK
+
+ ! If eph_task is needed and ird/get variables are not provided, assume WFQ == WFK
  if (any(dtset%eph_task == [2, -2, 3]) .and. .not. use_wfq) then
    wfq_path = wfk0_path
    use_wfq = .True.
@@ -243,6 +246,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        "Will read WFQ wavefunctions from WFK file:", trim(wfk0_path)
    MSG_COMMENT(msg)
  end if
+
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. dtset%eph_task /= 7)
 
  if (my_rank == master) then
@@ -277,7 +281,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! autoparal section
  ! TODO: This just to activate autoparal in AbiPy. Lot of things should be improved.
- if (dtset%max_ncpus /=0) then
+ if (dtset%max_ncpus /= 0) then
    write(ab_out,'(a)')"--- !Autoparal"
    write(ab_out,"(a)")"# Autoparal section for EPH runs"
    write(ab_out,"(a)")   "info:"
@@ -329,88 +333,22 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
    ABI_FREE(gs_eigen)
+
+   ! Here we change the GS bands (Fermi level, scissors operator ...)
+   ! All the modifications to ebands should be done here.
+   call ephtk_update_ebands(dtset, ebands, "Ground state energies")
  end if
 
- ! Read WFQ and construct ebands on the shifted grid.
  if (use_wfq) then
+   ! Read WFQ and construct ebands on the shifted grid.
    call wfk_read_eigenvalues(wfq_path, gs_eigen, wfq_hdr, comm)
-   ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against file.
+   ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against dtset.
    !call wfq_hdr%vs_dtset(dtset)
    ebands_kq = ebands_from_hdr(wfq_hdr, maxval(wfq_hdr%nband), gs_eigen)
    call wfq_hdr%free()
    ABI_FREE(gs_eigen)
+   call ephtk_update_ebands(dtset, ebands_kq, "Ground state energies (K+Q)")
  end if
-
- ! Here we change the GS bands (Fermi level, scissors operator ...)
- ! All the modifications to ebands should be done here.
- ! FIXME: This part should be rationalized!
- if (use_wfk) then
-
-   if (dtset%occopt /= ebands%occopt .or. abs(dtset%tsmear - ebands%tsmear) > tol12) then
-     write(msg,"(2a,2(a,i0,a,f14.6,a))")&
-     " Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.",ch10,&
-     "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
-     "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
-     call wrtout([std_out, ab_out], msg)
-     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-
-     if (abs(dtset%mbpt_sciss) > tol6) then
-       ! Apply the scissor operator
-       call wrtout([std_out, ab_out], &
-         sjoin(" Applying scissors operator to the conduction states with value: ", &
-         ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-       call ebands_apply_scissors(ebands, dtset%mbpt_sciss)
-     end if
-
-     if (use_wfq) then
-       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-
-       if (abs(dtset%mbpt_sciss) > tol6) then
-         ! Apply the scissor operator
-         call wrtout([std_out, ab_out], &
-           sjoin(" Applying scissors operator to the k+q conduction with value:", &
-           ftoa(dtset%mbpt_sciss * Ha_eV, fmt="(f6.2)"), " (eV)"))
-         call ebands_apply_scissors(ebands_kq, dtset%mbpt_sciss)
-       end if
-     end if
-   end if
-
-   ! Default value of eph_fermie is zero hence no tolerance is used!
-   if (dtset%eph_fermie /= zero) then
-     ABI_CHECK(dtset%eph_extrael == zero, "eph_fermie and eph_extrael are mutually exclusive")
-     call wrtout([std_out, ab_out], &
-        sjoin(" Fermi level set by the user at:", ftoa(dtset%eph_fermie * Ha_eV, fmt="(f6.2)"), " (eV)"))
-     call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
-     call wrtout([std_out, ab_out], msg)
-     if (use_wfq) then
-       call ebands_set_fermie(ebands_kq, dtset%eph_fermie, msg)
-       call wrtout(ab_out, msg)
-     end if
-
-   else if (abs(dtset%eph_extrael) > zero) then
-     call wrtout([std_out, ab_out], &
-                 sjoin(" Adding eph_extrael:", ftoa(dtset%eph_extrael), "to input nelect:", ftoa(ebands%nelect)))
-     call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-     call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
-     call wrtout([std_out, ab_out], msg)
-     if (use_wfq) then
-       call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-       call ebands_set_nelect(ebands_kq, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
-       call wrtout(ab_out, msg)
-     end if
-   end if
-
-   ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
-   ! since occ are set to zero, and fermie is taken from the previous density.
-   if (dtset%kptopt > 0) then
-     call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
-     call ebands_print(ebands, header="Ground state energies", prtvol=dtset%prtvol)
-     if (use_wfq) then
-       call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
-       call ebands_print(ebands_kq, header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
-     end if
-   end if
- end if ! use_wfk
 
  call cwtime_report(" eph%init", cpu, wall, gflops)
 
@@ -477,7 +415,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (my_rank == master) then
    if (iblock_dielt_zeff == 0) then
      call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
-     call wrtout(ab_out, "Values initialized with zeros")
+     call wrtout(ab_out, " Values initialized with zeros.")
    else
      call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
    end if
@@ -488,7 +426,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (my_rank == master) then
    if (iblock_quadrupoles == 0) then
      call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_filepath))
-     call wrtout(ab_out, "Values initialized with zeros")
+     call wrtout(ab_out, " Values initialized with zeros.")
    else
      call wrtout(ab_out, sjoin("- Found quadrupole tensor in DDB file:", ddb_filepath))
    end if
@@ -515,7 +453,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos%free()
-     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
+     write(msg, "(a, 2f8.5)") "Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
    end do
 
@@ -575,8 +513,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb%qdamp = dtset%dvdb_qdamp
 
    ! Set quadrupoles
-   dvdb%qstar = qdrp_cart
-   if (iblock_quadrupoles /= 0) dvdb%has_quadrupoles = .True.
+   dvdb%qstar = qdrp_cart; if (iblock_quadrupoles /= 0) dvdb%has_quadrupoles = .True.
 
    ! Set dielectric tensor, BECS and associated flags.
    ! This flag activates automatically the treatment of the long-range term in the Fourier interpolation
@@ -591,20 +528,19 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (.not. dvdb%has_dielt .or. .not. (dvdb%has_zeff .or. dvdb%has_quadrupoles)) then
      if (dvdb%add_lr /= 0) then
        dvdb%add_lr = 0
-       call wrtout(std_out, &
-         " WARNING: Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
+       MSG_WARNING("Setting dvdb_add_lr to 0. Long-range term won't be substracted in Fourier interpolation.")
      end if
    end if
 
    if (my_rank == master) then
      call dvdb%print()
-     call dvdb%list_perts([-1, -1, -1], unit=ab_out)
+     call dvdb%list_perts([-1, -1, -1], npert_miss)
+     ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
    end if
  end if
 
- ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
-    gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
+                  gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
  call print_ngfft(ngfftc, header='Coarse FFT mesh used for the wavefunctions')
  call print_ngfft(ngfftf, header='Dense FFT mesh used for densities and potentials')
@@ -649,37 +585,37 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (2, -2)
    ! Compute e-ph matrix elements.
    call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (3)
    ! Compute phonon self-energy.
    call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (4, -4)
    ! Compute electron self-energy (phonon contribution)
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
-     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+                pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   if (dtset%eph_task == -4) call rta_driver(dtfil, dtset, ebands, cryst, comm)
+   if (dtset%eph_task == -4) call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (5, -5)
    ! Interpolate the phonon potential.
    call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
-     ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
+                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
    call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (7)
-   ! Compute phonon-limited rta from SIGEPH file.
-   call rta_driver(dtfil, dtset, ebands, cryst, comm)
+   ! Compute phonon-limited RTA from SIGEPH file.
+   call rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
@@ -719,10 +655,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call ddb%free()
  call ifc%free()
  call wfk0_hdr%free()
- if (use_wfk) call ebands_free(ebands)
- if (use_wfq) call ebands_free(ebands_kq)
+ call ebands_free(ebands)
+ call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
+
  if (allocated(efmasdeg)) call efmasdeg_free_array(efmasdeg)
  if (allocated(efmasval)) call efmasval_free_array(efmasval)
  ABI_SFREE(kpt_efmas)

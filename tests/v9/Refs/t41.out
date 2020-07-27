@@ -22,7 +22,7 @@
 - root for input  files -> t41i
 - root for output files -> t41o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
 
  DATASET    1 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -454,9 +454,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.15090
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze-9.0/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574

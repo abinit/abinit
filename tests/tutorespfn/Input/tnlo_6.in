@@ -90,7 +90,7 @@ xcart3?   -0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
 nbdbuf 0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspnc, 33as.pspnc"
+ pseudos "PseudosTM_pwteter/13al.pspnc, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

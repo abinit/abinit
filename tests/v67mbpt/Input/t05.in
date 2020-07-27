@@ -77,7 +77,7 @@ ecut 8.0          # Maximal kinetic energy cut-off, in Hartree
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "6c.pspnc"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

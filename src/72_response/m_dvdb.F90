@@ -4794,7 +4794,7 @@ end function my_hdr_skip
 !!  [unit]=Unit number for output. Default `std_out`.
 !!
 !! OUTPUT
-!!  Only writing.
+!!  npert_miss = Number of missing perturbations.
 !!
 !! PARENTS
 !!      eph,m_dvdb,mrgdv
@@ -4803,17 +4803,18 @@ end function my_hdr_skip
 !!
 !! SOURCE
 
-subroutine dvdb_list_perts(db, ngqpt, unit)
+subroutine dvdb_list_perts(db, ngqpt, npert_miss, unit)
 
 !Arguments ------------------------------------
  class(dvdb_t),target,intent(in) :: db
+ integer,intent(out) :: npert_miss
  integer,optional,intent(in) :: unit
 !arrays
  integer,intent(in) :: ngqpt(3)
 
 !Local variables-------------------------------
 !scalars
- integer :: tot_miss,tot_weird,miss_q,idir,ipert,iv1,psy,weird_q,enough
+ integer :: npert_redund,miss_q,idir,ipert,iv1,psy,weird_q,enough
  integer :: iq_ibz,nqibz,iq_file,qptopt,nshiftq,ii,timerev_q,unt,nqbz
  character(len=500) :: msg,ptype,found
  type(crystal_t),pointer :: cryst
@@ -4856,10 +4857,11 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 
  ! Loop over the q-points in the IBZ and test whether the q-point is present
  ! and if all the independent perturbations are available.
- !   `tot_miss` is the number of irreducible perturbations not found in the DVDB (critical)
- !   `tot_weird` is the number of redundant perturbations found in the DVDB (not critical)
+ !   `npert_miss` is the number of irreducible perturbations not found in the DVDB (critical)
+ !   `npert_redund` is the number of redundant perturbations found in the DVDB (not critical)
+ !
  enough = 5; if (db%prtvol > 0) enough = nqibz + 1
- tot_miss = 0; tot_weird = 0
+ npert_miss = 0; npert_redund = 0
  do iq_ibz=1,nqibz
    if (iq_ibz == enough)  then
      call wrtout(unt,' More than 20 q-points with prtvol == 0. Only important messages will be printed...')
@@ -4880,7 +4882,7 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
    if (iq_file /= -1) then
      ! This q-point is in the DVDB. Test if all the independent perturbations are available.
      if (iq_ibz <= enough)  then
-       call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is present in the DVDB file"))
+       call wrtout(unt, sjoin(" qpoint:", ktoa(qq), "is present in the DVDB file"))
        call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
      end if
      ii = 0; weird_q = 0; miss_q = 0
@@ -4904,19 +4906,19 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
      end do
 
      if (weird_q /= 0) then
-       write(msg,"(a,i0,a)")"DVDB is overcomplete. ",weird_q, " perturbation(s) can be reconstructed by symmetry."
+       write(msg,"(a,i0,a)")" DVDB is overcomplete. ",weird_q, " perturbation(s) can be reconstructed by symmetry."
        call wrtout(unt, msg)
      end if
 
-     tot_weird = tot_weird + weird_q
-     tot_miss = tot_miss + miss_q
+     npert_redund = npert_redund + weird_q
+     npert_miss = npert_miss + miss_q
      if (miss_q /=0) then
-       call wrtout(unt, sjoin("WARNING:", itoa(miss_q), "independent perturbation(s) are missing!."))
+       call wrtout(unt, sjoin(" WARNING:", itoa(miss_q), "independent perturbation(s) are missing!."))
      end if
 
    else
      ! This q-point is not present in dvdb. Print the list of independent perturbations.
-     call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is NOT present in the DVDB file"))
+     call wrtout(unt, sjoin(" qpoint:", ktoa(qq), "is NOT present in the DVDB file"))
      call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
      ii = 0
      do ipert=1,db%mpert
@@ -4925,7 +4927,7 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
            ii=ii+1
            write(msg,'(i5,a,i2,a,i4,a)')ii,')  idir=',idir,', ipert=',ipert,", type=independent, found=No"
            call wrtout(unt, msg)
-           tot_miss = tot_miss + 1
+           npert_miss = npert_miss + 1
          end if
        end do
      end do
@@ -4934,12 +4936,12 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
    if (iq_ibz <= enough) call wrtout(unt," ")
  end do ! iq_ibz
 
- if (tot_miss /= 0) then
-   call wrtout(unt, sjoin(ch10, "There are ",itoa(tot_miss), "independent perturbations missing!"))
+ if (npert_miss /= 0) then
+   call wrtout(unt, sjoin(ch10, " There are ",itoa(npert_miss), "independent perturbations missing!"))
  else
-   call wrtout(unt, "All the independent perturbations are available")
-   if (tot_weird /= 0) then
-     call wrtout(unt, "Note however that the DVDB is overcomplete as symmetric perturbations are present.")
+   call wrtout(unt, " All the independent perturbations are available")
+   if (npert_redund /= 0) then
+     call wrtout(unt, " Note however that the DVDB is overcomplete as symmetric perturbations are present.")
    end if
  end if
 
@@ -4991,7 +4993,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
  !integer :: fform_pot=102
  integer :: fform_pot=111
  integer :: ii,jj,fform,ount,cplex,nfft,ifft,ispden,nperts
- integer :: n1,n2,n3,v1_varid,ierr
+ integer :: n1,n2,n3,v1_varid,ierr, npert_miss
  logical :: qeq0
  character(len=500) :: msg
  type(hdr_type),pointer :: hdr1
@@ -5122,12 +5124,12 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
  end do
  ABI_FREE(hdr1_list)
 
- write(std_out,"(a,i0,a)")"Merged successfully ", nfiles, " files"
+ write(std_out,"(a,i0,a)")" Merged successfully ", nfiles, " files"
 
  ! List available perturbations.
  dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
  call dvdb%print()
- call dvdb%list_perts([-1, -1, -1])
+ call dvdb%list_perts([-1, -1, -1], npert_miss)
  call dvdb%free()
 
  return
@@ -5297,7 +5299,7 @@ subroutine dvdb_test_v1rsym(db_path, symv1scf, comm)
  db%debug = .True.
  db%symv1 = symv1scf
  call db%print()
- !call db%list_perts([-1,-1,-1])
+ !call db%list_perts([-1,-1,-1], npert_miss)
 
  call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
  nfft = product(ngfft(1:3))
@@ -5417,9 +5419,9 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master = 0
  integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank, ncid
- integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3,cnt
+ integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3,cnt, npert_miss
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
@@ -5441,7 +5443,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  dvdb%debug = .false.
  dvdb%symv1 = symv1scf
  call dvdb%print()
- call dvdb%list_perts([-1,-1,-1])
+ call dvdb%list_perts([-1,-1,-1], npert_miss)
 
  call ngfft_seq(ngfft, dvdb%ngfft3_v1(:,1))
  nfft = product(ngfft(1:3))

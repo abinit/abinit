@@ -142,7 +142,7 @@ znucl 22
 #fermie_nest 0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "22ti.pspnc"
+ pseudos "PseudosTM_pwteter/22ti.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

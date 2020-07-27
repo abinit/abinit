@@ -66,7 +66,7 @@ iomode 3  # ETSF IO access
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "06c.pspgth, 08o.pspgth"
+ pseudos "PseudosGTH_pwteter/06c.pspgth, PseudosGTH_pwteter/08o.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

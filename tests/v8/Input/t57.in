@@ -125,7 +125,7 @@ diemac 6
 nstep 100
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "Ca.psp8, O.psp8"
+ pseudos "Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8, O.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

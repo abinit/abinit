@@ -54,7 +54,7 @@ toldfe 1.0d-4       # Tolerance on difference of energy
 iomode  3
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "08o.pspgth, 01h.pspgth"
+ pseudos "PseudosGTH_pwteter/08o.pspgth, PseudosGTH_pwteter/01h.pspgth"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

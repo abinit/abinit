@@ -54,8 +54,8 @@
  ngkpt 2 2 2
 
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "HGH/32ge.4.hgh, HGH/52te.6.hgh"
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "32ge.4.hgh, 52te.6.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

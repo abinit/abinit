@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 26 Jun 2020.
-- ( at 11h50 )
+.Starting date : Mon 13 Jul 2020.
+- ( at 03h51 )
   
 ->> Enter name of output file: 
 ->> Enter total number of DFPT POT files: 
@@ -43,7 +43,7 @@
 - Merging file [7]: t57o_DS6_POT1
 - Reading header of file [8]: t57o_DS6_POT4
 - Merging file [8]: t57o_DS6_POT4
-Merged successfully 8 files
+ Merged successfully 8 files
 - Analyzing DVDB file: t59o_DVDB ...
 - dvdb_new completed. cpu:  0.00 [s] , wall:  0.00 [s] <<< TIME
  ==== Info on the dvdb% object ====
@@ -64,7 +64,7 @@ Merged successfully 8 files
  Have electric field: no
  Treatment of long-range part in V1scf (add_lr): 1
  Damping factor for Gaussian filter (qdamp):   0.1
-qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
@@ -73,7 +73,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
@@ -82,7 +82,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
@@ -91,5 +91,5 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
-All the independent perturbations are available
+ All the independent perturbations are available
  Done

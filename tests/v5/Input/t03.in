@@ -40,7 +40,7 @@ vel
  -4.5e-5  2.5e-5 -1.5e-5
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.pspnc"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
