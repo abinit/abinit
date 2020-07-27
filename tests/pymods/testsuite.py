@@ -1800,12 +1800,16 @@ pp_dirpath $ABI_PSPDIR
             compilers.append(compiler)
             slaves.append(host)
 
-        # Find the slave and compare the name of the compiler.
+        # Find the slave
+        # Use short hostname i.e. the toke before '.' so alps.pcml.ucl.ac.be becomes alps
         try:
-            idx = slaves.index(self.build_env.hostname)
+            #idx = slaves.index(self.build_env.hostname)
+            short_hostname = self.build_env.hostname.split('.', 1)[0]
+            idx = slaves.index(short_hostname)
         except ValueError:
             return False
 
+        # Compare the name of the compiler.
         return compilers[idx] == self.build_env.fortran_compiler.name
 
     def skip_buildbot_builder(self):
