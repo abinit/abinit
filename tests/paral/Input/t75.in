@@ -134,7 +134,7 @@ nstep   50
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "11na.pspnc"
+ pseudos "PseudosTM_pwteter/11na.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

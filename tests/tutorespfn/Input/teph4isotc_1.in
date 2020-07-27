@@ -39,7 +39,7 @@ nband   8
 structure "abivars:test_submodule/mgb2.ucell"
 
 pp_dirpath "$ABI_PSPDIR"
-pseudos "12mg.pspnc, 05b.soft_tm"
+pseudos "PseudosTM_pwteter/12mg.pspnc, 05b.soft_tm"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

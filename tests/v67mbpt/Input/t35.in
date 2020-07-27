@@ -64,7 +64,7 @@ bs_interp_method  1 # Rohlfing & Louie technique
 bs_interp_rl_nb   1 # First-neighbour
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

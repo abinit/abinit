@@ -71,7 +71,7 @@
  wtk  1
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "1h.pspnc"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -85,6 +85,6 @@
 #%% keywords = NC
 #%% authors = Unknown
 #%% description = 
-#%%   Test multi-dataset mode. H2 molecule in a box (psp 1h.pspnc). acell constant, small (7 5 5).
+#%%   Test multi-dataset mode. H2 molecule in a box (psp PseudosTM_pwteter/1h.pspnc). acell constant, small (7 5 5).
 #%%   10 different values of ecut (convergence study). Use getxred=-1.
 #%%<END TEST_INFO>

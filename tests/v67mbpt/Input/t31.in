@@ -105,7 +105,7 @@ nshiftk5           1
 shiftk5            0.22 0.24 0.26
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

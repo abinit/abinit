@@ -112,7 +112,7 @@
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi, 33as.pspnc"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

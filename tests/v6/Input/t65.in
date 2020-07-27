@@ -97,7 +97,7 @@ optdriver?5    5
 nbdbuf 0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "11na.pspnc, 17cl.pspnc"
+ pseudos "PseudosTM_pwteter/11na.pspnc, PseudosTM_pwteter/17cl.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
