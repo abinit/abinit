@@ -117,7 +117,6 @@ CONTAINS  !===========================================================
 
 function normv_rdp_vector(xv,met,space) result(res)
 
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: res
@@ -159,8 +158,7 @@ end function normv_rdp_vector
 !!
 !! SOURCE
 
-function normv_int_vector(xv,met,space) result(res)
-
+function normv_int_vector(xv, met, space) result(res)
 
 !Arguments ------------------------------------
 !scalars
@@ -206,7 +204,6 @@ end function normv_int_vector
 
 function normv_int_vector_array(xv,met,space) result(res)
 
-
 !Arguments ------------------------------------
 !scalars
  character(len=1),intent(in) :: space
@@ -220,7 +217,7 @@ function normv_int_vector_array(xv,met,space) result(res)
 ! *************************************************************************
 
  res(:) = ( xv(1,:)*met(1,1)*xv(1,:) + xv(2,:)*met(2,2)*xv(2,:) + xv(3,:)*met(3,3)*xv(3,:)  &
-&     +two*(xv(1,:)*met(1,2)*xv(2,:) + xv(1,:)*met(1,3)*xv(3,:) + xv(2,:)*met(2,3)*xv(3,:)) )
+      +two*(xv(1,:)*met(1,2)*xv(2,:) + xv(1,:)*met(1,3)*xv(3,:) + xv(2,:)*met(2,3)*xv(3,:)) )
 
  select case (space)
  case ('r','R')
@@ -252,7 +249,6 @@ end function normv_int_vector_array
 !! SOURCE
 
 function normv_rdp_vector_array(xv,met,space) result(res)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -307,7 +303,6 @@ end function normv_rdp_vector_array
 !! SOURCE
 
 function vdotw_rr_vector(xv,xw,met,space) result(res)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -365,7 +360,6 @@ end function vdotw_rr_vector
 
 function vdotw_rc_vector(xv,xw,met,space) result(res)
 
-
 !Arguments ------------------------------------
 !scalars
  complex(dpc) :: res
@@ -420,7 +414,6 @@ end function vdotw_rc_vector
 
 subroutine acrossb(a,b,c)
 
-
 !Arguments ---------------------------------------------
 !arrays
  real(dp),intent(in) :: a(3),b(3)
@@ -459,10 +452,9 @@ end subroutine acrossb
 
 subroutine wedge_basis(gprimd,rprimd,wedge,normalize)
 
-
-  !Arguments ---------------------------------------------
-  ! scalars
-  logical,optional,intent(in) :: normalize
+ !Arguments ---------------------------------------------
+ ! scalars
+ logical,optional,intent(in) :: normalize
 !arrays
  real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
  real(dp),intent(out) :: wedge(3,3,3)
@@ -527,14 +519,13 @@ end subroutine wedge_basis
 
 subroutine wedge_product(produv,u,v,wedgebasis)
 
-
 !Arguments ---------------------------------------------
 !arrays
  real(dp),intent(in) :: u(3),v(3),wedgebasis(3,3,3)
  real(dp),intent(out) :: produv(3)
 
- ! local
- !scalars
+! local
+!scalars
  integer :: igprimd, ii, irprimd
 
 ! *********************************************************************
@@ -602,7 +593,6 @@ end subroutine wedge_product
 !! SOURCE
 
 subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvol)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -748,7 +738,6 @@ end subroutine wigner_seitz
 
 subroutine phdispl_cart2red(natom,gprimd,displ_cart,displ_red)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -832,8 +821,7 @@ end subroutine phdispl_cart2red
 !!
 !! SOURCE
 
-subroutine getspinrot(rprimd,spinrot,symrel_conv)
-
+subroutine getspinrot(rprimd, spinrot, symrel_conv)
 
 !Arguments ------------------------------------
 !arrays
@@ -1067,7 +1055,6 @@ end function spinrot_cmat
 
 subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: inversion_flag
@@ -1169,7 +1156,6 @@ end subroutine rotmat
 !! SOURCE
 
 subroutine fixsym(iatfix,indsym,natom,nsym)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1391,7 +1377,6 @@ end subroutine metric
 
 subroutine mkradim(acell,rprim,rprimd)
 
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(out) :: acell(3),rprim(3,3)
@@ -1434,7 +1419,6 @@ end subroutine mkradim
 !! SOURCE
 
 subroutine chkrprimd(acell,rprim,rprimd,iout)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1522,7 +1506,6 @@ end subroutine chkrprimd
 !! SOURCE
 
 subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1758,7 +1741,6 @@ end subroutine xcart2xred
 
 subroutine xred2xcart(natom,rprimd,xcart,xred)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -1811,7 +1793,6 @@ end subroutine xred2xcart
 !! SOURCE
 
 subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -1883,7 +1864,6 @@ end subroutine fred2fcart
 
 subroutine fcart2fred(fcart,fred,rprimd,natom)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -1953,7 +1933,6 @@ end subroutine fcart2fred
 !! SOURCE
 
 subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,xred,znucl)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2293,7 +2272,6 @@ end subroutine bonds_lgth_angles
 
 subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat,xred,znucl,acell)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,npsp,ntypat,random_atpos
@@ -2512,7 +2490,6 @@ end subroutine randomcellpos
 
 subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)              :: natom
@@ -2652,7 +2629,6 @@ end subroutine shellstruct
 
 subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in)              :: natom,option
@@ -2784,7 +2760,6 @@ end subroutine ioniondist
 
 function dist2(v1,v2,rprimd,option)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: option
@@ -2902,7 +2877,6 @@ end function dist2
 !! SOURCE
 
 subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -3181,7 +3155,6 @@ end subroutine strainsym
 
 subroutine stresssym(gprimd,nsym,stress,sym)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -3297,7 +3270,6 @@ end subroutine stresssym
 
 subroutine strconv(frac,gprimd,cart)
 
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: frac(6),gprimd(3,3)
@@ -3403,7 +3375,6 @@ end subroutine strconv
 subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 &    rfmeth,symafm,symaf1,symq,symrec,symrel,symrl1,syuse,tnons,tnons1, &
 &    unit) ! Optional
-
 
 !Arguments -------------------------------
 !scalars
@@ -3585,7 +3556,6 @@ end subroutine littlegroup_pert
 !! SOURCE
 
 subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq,symrec,symrel)
-
 
 !Arguments -------------------------------
 !scalars

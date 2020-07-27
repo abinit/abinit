@@ -1316,7 +1316,8 @@ end subroutine get_onetetra_blochl
 !!
 !! SOURCE
 
-pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
+!pure
+subroutine get_ontetra_lambinvigneron(eig,z,cw)
     ! dispersion values at the corners of the tetrahedron
     real(dp), intent(in) :: eig(4)
     ! energy to evaluate the weights at
@@ -1364,30 +1365,35 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
     ! Now get the actual weights
     ! e1=e2=e3=e4
     if ( E12+E23+E34 .lt. tol14 ) then
+        !print *, "e1=e2=e3=e4"
         cw(1)=0.25_dp/EZ1
         cw(2)=0.25_dp/EZ2
         cw(3)=0.25_dp/EZ3
         cw(4)=0.25_dp/EZ4
-    !    e2=e3=e4
+    !    e2=e3=e4  ! diff wrt simteta
     elseif ( E23+E34 .lt. tol14 ) then
+        !print *, "e2=e3=e4"
         cw(1)=-a - (3*a**2*EZ2)*half + 3*a**3*EZ1*EZ2 + 3*a**4*EZ1**2*EZ2*Log(EZ2/EZ1)
         cw(2)=-a - (3*a**2*EZ2)*half + 3*a**3*EZ1*EZ2 + 3*a**4*EZ1**2*EZ2*Log(EZ2/EZ1)
         cw(3)=-a - (3*a**2*EZ2)*half + 3*a**3*EZ1*EZ2 + 3*a**4*EZ1**2*EZ2*Log(EZ2/EZ1)
         cw(4)=-a*third + (a**2*EZ1)*half - a**3*EZ1**2 + a**4*EZ1**3*Log(EZ2/EZ1)
     ! e1=e2=e3
     elseif ( E12+E23 .lt. tol14 ) then
+        !print *, "e1=e2=e3" ! diff wrt simteta
         cw(1)=f*third - (EZ4*f**2)*half + EZ4**2*f**3 + EZ4**3*f**4*Log(EZ4/EZ3)
         cw(2)=f*third - (EZ4*f**2)*half + EZ4**2*f**3 + EZ4**3*f**4*Log(EZ4/EZ3)
         cw(3)=f*third - (EZ4*f**2)*half + EZ4**2*f**3 + EZ4**3*f**4*Log(EZ4/EZ3)
         cw(4)=-f + (3*EZ3*f**2)*half - 3*EZ3*EZ4*f**3 + 3*EZ3*EZ4**2*f**4*Log(EZ3/EZ4)
     ! e1=e2 e3=e4
     elseif ( E12+E34 .lt. tol14 ) then
+        !print *, "e1=e2 e3=e4"    ! Buggy?
         cw(1)=-d - (3*d**2*EZ2)*half + 3*d**3*EZ2*EZ3 + 3*d**4*EZ2*EZ3**2*Log(EZ2/EZ3)
         cw(2)=-d - (3*d**2*EZ2)*half + 3*d**3*EZ2*EZ3 + 3*d**4*EZ2*EZ3**2*Log(EZ2/EZ3)
         cw(3)=d - (3*d**2*EZ3)*half - 3*d**3*EZ2*EZ3 + 3*d**4*EZ2**2*EZ3*Log(EZ3/EZ2)
         cw(4)=d - (3*d**2*EZ3)*half - 3*d**3*EZ2*EZ3 + 3*d**4*EZ2**2*EZ3*Log(EZ3/EZ2)
     !       e3=e4
     elseif ( E34 .lt. tol14 ) then
+        !print *, "e3=e4"
         cw(1)=-(a*b**2*EZ1**2*(-1 + (a*EZ2 + 2*b*EZ3)*Log(EZ1))) + a**2*d**2*EZ2**3*Log(EZ2) - &
                 b**2*d*EZ3**2*(1 + (2*b*EZ1 + d*EZ2)*Log(EZ3))
         cw(2)=a**2*b**2*EZ1**3*Log(EZ1) - a*d**2*EZ2**2*(1 + (a*EZ1 - 2*d*EZ3)*Log(EZ2)) - &
@@ -1398,6 +1404,7 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
              (b**2*EZ1**2 + b*d*EZ1*EZ2 + d**2*EZ2**2)*Log(EZ3))
     !    e2=e3
     elseif ( E23 .lt. tol14 ) then
+        !print *, "e2=e3"
         cw(1)=-(a**2*c*EZ1**2*(-1 + (2*a*EZ2 + c*EZ4)*Log(EZ1))) + &
                 a**2*e*EZ2**2*(1 + (2*a*EZ1 - e*EZ4)*Log(EZ2)) + c**2*e**2*EZ4**3*Log(EZ4)
         cw(2)=a**3*c*EZ1**3*Log(EZ1) - &
@@ -1408,6 +1415,7 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
               a*e**2*EZ2**2*(1 + (a*EZ1 - 2*e*EZ4)*Log(EZ2)) - c*e**2*EZ4**2*(1 + (c*EZ1 + 2*e*EZ2)*Log(EZ4))
     ! e1=e2
     elseif ( E12 .lt. tol14 ) then
+        !print *, "e1=e2"
         cw(1)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - &
               b**3*EZ3**3*f*Log(EZ3) + c**3*EZ4**3*f*Log(EZ4)
         cw(2)=b*c*EZ1*(half - b*EZ3 - c*EZ4 + (b**2*EZ3**2 + b*c*EZ3*EZ4 + c**2*EZ4**2)*Log(EZ1)) - &
@@ -1418,6 +1426,7 @@ pure subroutine get_ontetra_lambinvigneron(eig,z,cw)
                 b**2*EZ3**3*f**2*Log(EZ3) - c**2*EZ4**2*f*(1 + (2*c*EZ1 + EZ3*f)*Log(EZ4))
     ! e1<e2<e3<e4
     else
+        !print *, "e1<e2<e3<e4"
         cw(1)=a**2*d*e*EZ2**3*Log(EZ2/EZ1) - b**2*d*EZ3**3*f*Log(EZ3/EZ1) + c*(a*b*EZ1**2 + c*e*EZ4**3*f*Log(EZ4/EZ1))
         cw(2)=a**2*b*c*EZ1**3*Log(EZ1/EZ2) - b*d**2*EZ3**3*f*Log(EZ3/EZ2) + e*(-(a*d*EZ2**2) + c*e*EZ4**3*f*Log(EZ4/EZ2))
         cw(3)=a*b**2*c*EZ1**3*Log(EZ1/EZ3) - a*d**2*e*EZ2**3*Log(EZ2/EZ3) + f*(b*d*EZ3**2 + c*e*EZ4**3*f*Log(EZ4/EZ3))
@@ -1777,7 +1786,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
    ! Loop over frequencies
    do iz=1,nz
 
-     !if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
+     if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
        select case(opt)
        case(1)
          verm = zvals(iz) - eig
@@ -1785,9 +1794,9 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
        case(2)
          call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
        end select
-     !else
-     !  cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
-     !end if
+     else
+       cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
+     end if
 
      do isummit=1,4
        if (ind_ibz(isummit) /= ik_ibz) cycle
@@ -2144,7 +2153,7 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, o
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eig(4), my_erange(2)
- complex(dp) :: cw(4), verli(4), verm(4)
+ complex(dp) :: cw(4), verli(4), verm(4) !, cw_lw(4)
 ! *********************************************************************
 
  cweight = zero
@@ -2173,17 +2182,24 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, o
      do iz=1,nz
 
        ! Get tetrahedron weights
-       !if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
-         select case(opt)
-         case(1)
-           verm = zvals(iz) - eig
-           call SIM0TWOI(cw, VERLI, VERM)
-         case(2)
-           call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
-         end select
-       !else
-       !  cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
-       !end if
+       if (real(zvals(iz)) >= my_erange(1) .and. real(zvals(iz)) <= my_erange(2)) then
+        select case(opt)
+        case(1)
+          verm = zvals(iz) - eig
+          call SIM0TWOI(cw, VERLI, VERM)
+          !call get_ontetra_lambinvigneron(eig, zvals(iz), cw_lw)
+          !if (any(abs(real(cw_lw(:)) / (two * real(cw(:)))) > 1.1)) then
+          !  do ierr=1,4
+          !    !write(std_out, *) "simte vs lw:", cw(ierr), cw_lw(ierr)
+          !    write(std_out, *) "cw_lw / (2 simtet:)", cw_lw(ierr) / (two * cw(ierr))
+          !  end do
+          !end if
+        case(2)
+          call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
+        end select
+       else
+         cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
+       end if
 
        ! Accumulate contributions
        do isummit=1,4

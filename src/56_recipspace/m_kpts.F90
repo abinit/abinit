@@ -139,7 +139,7 @@ end function kpts_timrev_from_kptopt
 !! SOURCE
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
+                                  new_kptrlatt, new_shiftk, bz2ibz)  ! Optional
 
 !Arguments ------------------------------------
 !scalars

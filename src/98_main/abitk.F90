@@ -53,7 +53,7 @@ program abitk
  use m_symtk,          only : matr3inv
  use m_numeric_tools,  only : arth
  use m_bz_mesh,        only : kpath_new, kpath_t
- use m_unittests,      only : tetra_unittests, kptrank_unittests
+ use m_unittests,      only : tetra_unittests, kptrank_unittests, tetra_zinv_convergence
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
@@ -438,6 +438,12 @@ program abitk
    ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[20, 20, 20]) == 0, msg)
    ABI_CHECK(get_arg("use-symmetries", use_symmetries, msg, default=1) == 0, msg)
    call tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
+
+ case ("tetra_zinv_convergence")
+   ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
+   !ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[20, 20, 20]) == 0, msg)
+   ABI_CHECK(get_arg("use-symmetries", use_symmetries, msg, default=1) == 0, msg)
+   call tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 
  case ("kptrank_unit_tests")
    ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
