@@ -151,7 +151,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  real(dp)           :: j0,j1,k0,k1
  real(dp)           :: quad,tmp,ucvol
  real(dp)           :: hcyl,hcyl2
- real(dp),parameter :: tolfix=1.0000001_dp
+ real(dp),parameter :: tolfix=1.0000001_dp,tol999=999.0
  character(len=50)  :: mode
  character(len=500) :: msg
 ! type(gcut_t)       :: gcut  !
@@ -282,6 +282,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
          if (check<zero) then  ! use Rozzi's method.
            hcyl=ABS(check)*SQRT(SUM(rprimd(:,ii)**2))
            opt_cylinder=2
+           !Check to enter the infinite Rozzi treatment
+           if(vcutgeo(3).le.-tol999) then
+             hcyl=tol12 
+           end if
          end if
        end if
      end do
@@ -294,7 +298,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      endif
 
      if (opt_cylinder==1) then
-       ABI_CHECK(ALL(pdir == (/0,0,1/)),"Surface must be in the x-y plane")
+       ABI_CHECK(ALL(pdir == (/0,0,1/)),"The cylinder must be along the z-axis")
      end if
 
      rcut_= rcut_loc
@@ -322,39 +326,51 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      SELECT CASE (opt_cylinder)
      
      CASE(1)
-   
-     do i3=1,n3
-      do i2=1,n2
-       i23=n1*(i2-1 + n2*(i3-1))
-       do i1=1,n1
-         ii=i1+i23
-         gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
-         gcart_x=gcart(1) ; gcart_y=gcart(2) ; gcart_z=ABS(gcart(3))
-         gcart_perp_ = SQRT(gcart_x**2+gcart_y**2) ;
 
-         if (gcart_z>tol4) then
-           ! === Analytic expression ===
-           call CALCK0(gcart_z *rcut_loc,k0,1)
-           call CALJY1(gcart_perp_*rcut_loc,j1,0)
-           call CALJY0(gcart_perp_*rcut_loc,j0,0)
-           call CALCK1(gcart_z *rcut_loc,k1,1)
-           gcutoff(ii)=one+rcut_loc*gcart_perp_*j1*k0-rcut_loc*gcart_z*j0*k1
-         else
-           if (gcart_perp_>tol4) then
-             ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
-             call quadrature(F5,zero,rcut_loc,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-             if (ierr/=0) then
-               MSG_ERROR("Accuracy not reached")
-             end if
-               gcutoff(ii)= -quad*gpq(ii)
-           else
-               gcutoff(ii)= zero !-rcut_loc**2*(two*LOG(rcut_loc)-one)*gpq(ii)/four
-          end if
-         end if
+     ! === Infinite cylinder, interaction is zeroed outside the Wigner-Seitz cell ===
+     ! * Beigi"s expression holds only if the BZ is sampled only along z.
+     write(msg,'(2(a,f8.4))')' cutoff_cylinder: Using Beigi''s Infinite cylinder '
+     call wrtout(std_out,msg,'COLL')
+     ! * Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
+     !   In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
+     if ( (ANY(ABS(rprimd(2:3,  1))>tol6)).or.&
+&         (ANY(ABS(rprimd(1:3:2,2))>tol6)).or.&
+&         (ANY(ABS(rprimd(1:2,  3))>tol6))    &
+&       ) then
+       msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
+       MSG_ERROR(msg)
+     end if
 
-       end do !i1
-      end do !i2
-     end do !i3
+     ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
+     hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
+     r0_=MIN(ha_,hb_)/N0
+
+     do ig=1,nfft
+  
+       gcart(:)=b1(:)*gvec(1,ig)+b2(:)*gvec(2,ig)+b3(:)*gvec(3,ig)
+       gcartx_=gcart(1) ; gcarty_=gcart(2) ; gcart_para_=ABS(gcart(3))
+
+       ! Avoid singularity in K_0{gcart_para_\rho) by using a small g along the periodic dimension.
+       if (gcart_para_<tol6) then
+         gcart_para_ = tol6
+         write(std_out,*)"setting gcart_para to=",gcart_para_
+       end if
+       !
+       ! * Calculate $ 2\int_{WS} dxdy K_0{gcart_para_\rho) cos(x.gcartx + y.gcarty) $
+       !   where WS is the Wigner-Seitz cell.
+       tmp=zero
+       ! === More stable method: midpoint integration with Romberg extrapolation ===
+       call quadrature(K0cos_dy,zero,ha_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+       !write(std_out,'(i8,a,es14.6)')ig,' 3 ',quad
+       if (ierr/=0) then
+         MSG_ERROR("Accuracy not reached")
+       end if
+       ! === Store final result ===
+       ! * Factor two comes from the replacement WS -> (1,4) quadrant thanks to symmetries of the integrad.
+       tmp=tmp+quad
+       gcutoff(ig)=gpq(ig)**2.0_dp*tmp/pi
+      
+     end do !nfft
 
      CASE(2)
 
@@ -364,64 +380,106 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        write(msg,'(a,f8.4)')' Negative value for cylinder length hcyl=',hcyl_
        MSG_BUG(msg)
      end if
-      
-     npts_=6
-     ABI_MALLOC(xx,(npts_))
 
-     write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut_loc
-     call wrtout(std_out,msg,'COLL')
-     hcyl_=hcyl
-     hcyl2=hcyl**2
-     rcut2=rcut_loc**2
+     if (ABS(hcyl_)>tol12) then
+       write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl_,' rcut= ',rcut_
+       call wrtout(std_out,msg,'COLL')
+       
+       npts_=6
+       ABI_MALLOC(xx,(npts_))
 
-     do i3=1,n3
-      do i2=1,n2
-       i23=n1*(i2-1 + n2*(i3-1))
-       do i1=1,n1
-       ii=i1+i23
+       write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut_loc
+       call wrtout(std_out,msg,'COLL')
+       hcyl_=hcyl
+       hcyl2=hcyl**2.0_dp
+       rcut2=rcut_loc**2.0_dp
 
-         gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
-         gcart_para_=ABS(gcart(3)) ; gcart_perp_=SQRT(gcart(1)**2+gcart(2)**2)
+       do i3=1,n3
+        do i2=1,n2
+         i23=n1*(i2-1 + n2*(i3-1))
+         do i1=1,n1
+         ii=i1+i23
 
-         if (gcart_perp_/=zero.and.gcart_para_/=zero) then
-           call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-           if (ierr/=0) then
-             MSG_ERROR("Accuracy not reached")
+           gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+           gcart_para_=ABS(gcart(3)) ; gcart_perp_=SQRT(gcart(1)**2+gcart(2)**2)
+
+           if (gcart_perp_/=zero.and.gcart_para_/=zero) then
+             call quadrature(F2,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             if (ierr/=0) then
+               MSG_ERROR("Accuracy not reached")
+             end if
+
+             gcutoff(ii)=quad*gpq(ii)**2.0_dp
+
+           else if (gcart_perp_==zero.and.gcart_para_/=zero) then
+
+             ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
+             call quadrature(F3,zero,hcyl,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             if (ierr/=0) then
+               MSG_ERROR("Accuracy not reached")
+             end if
+
+             c1=one/gcart_para_**2.0_dp-COS(gcart_para_*hcyl_)/gcart_para_**2.0_dp-hcyl_*SIN(gcart_para_*hcyl_)/gcart_para_
+             c2=SIN(gcart_para_*hcyl_)*SQRT(hcyl2+rcut2)
+             gcutoff(ii)=(c1+(c2-quad)/gcart_para_)*gpq(ii)**2.0_dp
+
+           else if (gcart_perp_/=zero.and.gcart_para_==zero) then
+             ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
+             call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+             if (ierr/=0) then
+               MSG_ERROR("Accuracy not reached")
+             end if
+
+             gcutoff(ii)=quad*gpq(ii)**2.0_dp
+ 
+           else if (gcart_perp_==zero.and.gcart_para_==zero) then
+             ! Use lim q+G --> 0
+             gcutoff(ii)=zero
+           else
+             MSG_BUG('You should not be here!')
            end if
 
-           gcutoff(ii)=SQRT(1/quad)
+         end do !i1
+        end do !i2
+       end do !i3
 
-         else if (gcart_perp_==zero.and.gcart_para_/=zero) then
+     else
 
-           ! $ \int_0^h sin(qpg_para_.z)/\sqrt(rcut^2+z^2)dz $
-           call quadrature(F3,zero,hcyl,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-           if (ierr/=0) then
-             MSG_ERROR("Accuracy not reached")
+       call wrtout(std_out,'Using Rozzi infinite cut-off cylinder method.')
+
+       do i3=1,n3
+        do i2=1,n2
+         i23=n1*(i2-1 + n2*(i3-1))
+         do i1=1,n1
+           ii=i1+i23
+           gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
+           gcart_x=gcart(1) ; gcart_y=gcart(2) ; gcart_z=ABS(gcart(3))
+           gcart_perp_ = SQRT(gcart_x**2.0_dp+gcart_y**2.0_dp) ;
+
+           if (gcart_z>tol4) then
+             ! === Analytic expression ===
+             call CALCK0(gcart_z *rcut_loc,k0,1)
+             call CALJY1(gcart_perp_*rcut_loc,j1,0)
+             call CALJY0(gcart_perp_*rcut_loc,j0,0)
+             call CALCK1(gcart_z *rcut_loc,k1,1)
+             gcutoff(ii)=one+rcut_loc*gcart_perp_*j1*k0-rcut_loc*gcart_z*j0*k1
+           else
+             if (gcart_perp_>tol4) then
+               ! === Integrate r*Jo(G_xy r)log(r) from 0 up to rcut_  ===
+               call quadrature(F5,zero,rcut_loc,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
+               if (ierr/=0) then
+                 MSG_ERROR("Accuracy not reached")
+               end if
+                 gcutoff(ii)= -quad*gpq(ii)**2.0_dp
+             else
+                 gcutoff(ii)= zero !-rcut_loc**2*(two*LOG(rcut_loc)-one)*gpq(ii)/four
+            end if
            end if
 
-           c1=one/gcart_para_**2-COS(gcart_para_*hcyl_)/gcart_para_**2-hcyl_*SIN(gcart_para_*hcyl_)/gcart_para_
-           c2=SIN(gcart_para_*hcyl_)*SQRT(hcyl2+rcut2)
-           gcutoff(ii)=SQRT(1/(c1+(c2-quad)/gcart_para_))
-
-         else if (gcart_perp_/=zero.and.gcart_para_==zero) then
-           ! $ 4pi\int_0^rcut d\rho \rho J_o(qpg_perp_.\rho) ln((h+\sqrt(h^2+\rho^2))/\rho) $
-           call quadrature(F4,zero,rcut_,qopt_,quad,ierr,ntrial_,accuracy_,npts_)
-           if (ierr/=0) then
-             MSG_ERROR("Accuracy not reached")
-           end if
-
-           gcutoff(ii)=SQRT(1/quad)
-
-         else if (gcart_perp_==zero.and.gcart_para_==zero) then
-           ! Use lim q+G --> 0
-           gcutoff(ii)=zero
-         else
-           MSG_BUG('You should not be here!')
-         end if
-
-       end do !i1
-      end do !i2
-     end do !i3
+         end do !i1
+        end do !i2
+       end do !i3
+     end if ! case 2 - selecting Rozzi 
 
      ABI_FREE(xx)
 
