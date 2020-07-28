@@ -335,8 +335,8 @@ Examples:
 | `[[test:libxc_41]]` | [[test:libxc_41]]
 | `[[tests/tutorial/Refs/tbase1_1.out]]` |  [[tests/tutorial/Refs/tbase1_1.out]]
 | `[[~abinit/tests/tutorial/Refs/tbase1_1.out]]` |  [[~abinit/tests/tutorial/Refs/tbase1_1.out]]
-| `[[~abinit/tests/Psps_for_tests/6c.lda.atompaw]]` | [[~abinit/tests/Psps_for_tests/6c.lda.atompaw]]
-| `[[tests/Psps_for_tests/6c.lda.atompaw]]` | [[tests/Psps_for_tests/6c.lda.atompaw]]
+| `[[~abinit/tests/Psps_for_tests/6c_lda.paw]]` | [[~abinit/tests/Psps_for_tests/6c_lda.paw]]
+| `[[tests/Psps_for_tests/6c_lda.paw]]` | [[tests/Psps_for_tests/6c_lda.paw]]
 
 The input variables for anaddb, optic and aim will be recognized if they are used with
 the namespaces `anaddb`, `optic` and `aim`.

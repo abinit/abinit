@@ -55,13 +55,15 @@ nsym 0
  enunit 2
  istwfk *1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   tdepes_2.out,  tolnlines= 20, tolabs=  5.000e-05, tolrel=  5.000e-04, fld_options=-medium
-#%% psp_files =  6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

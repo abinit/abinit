@@ -565,8 +565,8 @@ P           mkmem           1
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.07240
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/bzr/804/gmatteo-private/tests/Psps_for_tests/79au.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/bzr/804/gmatteo-private/tests/Psps_for_tests/79au.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/bzr/804/gmatteo-private/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/bzr/804/gmatteo-private/tests/Psps_for_tests/PseudosTM_pwteter/79au.pspnc
 -  Troullier-Martins psp for element  Au        Thu Oct 27 17:58:22 EDT 1994
 - 79.00000  11.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

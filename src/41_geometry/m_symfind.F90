@@ -620,7 +620,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
  integer,intent(in) :: chkprim,msym,nsym
  integer,intent(out) :: ptgroupma,spgroup
  real(dp),intent(in) :: tolsym
- logical,optional :: verbose
+ logical,optional,intent(in) :: verbose
 !arrays
  integer,intent(out) :: bravais(11)
  integer,intent(in) :: symafm(msym),symrel(3,3,msym)
@@ -630,7 +630,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
 !Local variables-------------------------------
 !scalars
- integer, parameter :: maxsym=192 
+ integer, parameter :: maxsym=192
 ! In this routine, maxsym is used either to determine the ptsymrel from the rprimd (routine symlatt),
 ! so, it might be up to 192 = 4*48 for FCC, and also to define the maximum number of symmetry operation labels,
 ! but only in case the cell is primitive, which gives the same upper bound. Thus in this routine, msym might
@@ -1108,7 +1108,7 @@ end subroutine symbrav
 !! Find the type of each symmetry operation (calling symcharac):
 !!   proper symmetries 1,2,2_1,3,3_1,3_2,4,4_1,4_2,4_3,6,6_1,...6_5
 !!   improper symmetries -1,m,a,b,c,d,n,g,-3,-4,-6 ,
-!! Then, build an array with the number of such operations. 
+!! Then, build an array with the number of such operations.
 !! Then, call symlist to identify the space group.
 !!
 !! INPUTS
@@ -1277,7 +1277,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 
 !  Note : nsymconv might be bigger than 192, but only for non-primitive cells, in which case labels will not be echoed anywhere.
 !  192 is the fixed dimension of labels, so this avoids possible memory problems.
-   call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym-1,192)+1), &   
+   call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym-1,192)+1), &
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
      write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&

@@ -93,6 +93,9 @@
  istwfk     2*1
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc, PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -100,7 +103,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t31.out, tolnlines = 6, tolabs = 1.100e-03, tolrel = 5.400e-04
-#%% psp_files = 6c.pspnc, 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

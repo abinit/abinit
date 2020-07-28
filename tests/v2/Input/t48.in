@@ -42,13 +42,15 @@
  wtk  1
  znucl  1.0
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  t48.out, tolnlines = 0, tolabs = 5.303e-10, tolrel = 8.000e-03, fld_options = -easy
-#%% psp_files = 1h.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

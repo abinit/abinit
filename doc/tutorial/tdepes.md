@@ -136,7 +136,7 @@ copy/modify the relevant files. Explicitly:
     cp ../tdepes*in ../tdepes*files .
 
 Then, edit the [[tests/tutorespfn/Input/tdepes_1.files]] to modify location of the pseudopotential file
-(from the Work subdirectory, the location is ../../../Psps_for_tests/6c.pspnc, although you might as well copy the
+(from the Work subdirectory, the location is ../../../Psps_for_tests/PseudosTM_pwteter/6c.pspnc, although you might as well copy the
 file 6c.pspnc in the Work directory, in which case the location is simply 6c.pspnc).
 Finally, issue
 

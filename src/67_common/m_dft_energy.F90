@@ -94,6 +94,7 @@ contains
 !! energies%e_eigenvalues, ek and enl from arbitrary (orthonormal) provided wf,
 !! ehart, enxc, and eei from provided density and potential,
 !! energies%e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
+!! energies%e_zeeman=Zeeman spin energy from applied magnetic field -m.B
 !! ek=kinetic energy, ehart=Hartree electron-electron energy,
 !! enxc,enxcdc=exchange-correlation energies, eei=local pseudopotential energy,
 !! enl=nonlocal pseudopotential energy
@@ -293,6 +294,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
  real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
+ real(dp) :: magvec(dtset%nspden)
  real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
@@ -421,7 +423,11 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if (any(abs(dtset%zeemanfield(:))>tol8)) then
    vzeeman(:) = zero
    if(dtset%nspden==2)then
-     vzeeman(2) = -half*dtset%zeemanfield(3) ! For collinear ispden=2 is rho_up only
+!TODO: check this against rhotov and setvtr, where the potential is -1/2 and +1/2 for the 2 spin components.
+! see comment by SPr in rhotov
+! TODO: check this 1/2 factor is for the electron spin magnetic moment.
+     vzeeman(1) = -half*dtset%zeemanfield(3) ! For collinear ispden=1 potential is v_upup
+     vzeeman(2) = +half*dtset%zeemanfield(3) ! For collinear ispden=2 potential is v_dndn
    end if
    if(dtset%nspden==4)then
      vzeeman(1)=-half*dtset%zeemanfield(3)
@@ -429,11 +435,22 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      vzeeman(3)=-half*dtset%zeemanfield(1)
      vzeeman(4)= half*dtset%zeemanfield(2)
    end if
+   magvec = zero
    do ispden=1,dtset%nspden
      do ifft=1,nfftf
+!TODO: the full cell magnetization will need extra PAW terms, and is certainly calculated elsewhere.
+!The calculation of the zeeman energy can be moved there
+       magvec(ispden) = magvec(ispden) + rhor(ifft,ispden)
        vtrial(ifft,ispden)=vtrial(ifft,ispden)+vzeeman(ispden)
      end do
    end do
+   if(dtset%nspden==2)then
+     energies%e_zeeman = -half*dtset%zeemanfield(3)*(two*magvec(2)-magvec(1)) !  diff rho = rhoup-rhodown = 2 rhoup - rho
+   else if(dtset%nspden==4)then
+     energies%e_zeeman = -half * (dtset%zeemanfield(1)*magvec(2)& ! x
+&                                +dtset%zeemanfield(2)*magvec(3)& ! y
+&                                +dtset%zeemanfield(3)*magvec(4)) ! z
+   end if
  end if
 
 !Compute the constrained potential for the magnetic moments

@@ -51,13 +51,15 @@
    typat  1 2
    znucl  13 15
 
+ pp_dirpath "$ABI_PSPDIR"//"/PseudosHGH_pwteter"  ! Test this syntax
+ pseudos "13al.3.hgh, 15p.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t65.out, tolnlines = 2, tolabs = 1.010e-06, tolrel = 2.000e-04, fld_options =  -medium
-#%% psp_files = 13al.psphgh, 15p.5.hgh
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]

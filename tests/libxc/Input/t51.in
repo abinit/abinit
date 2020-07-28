@@ -55,12 +55,14 @@ getwfk -1        # Start from previous wavefunctions to ease convergence
 nkpthf  27          # number of k-point in the full-BZ 
 nbandhf  4         # number of occupied states
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t51.out, tolnlines=4, tolabs=1.000e-08, tolrel=5.000e-04
-#%% psp_files= 14si.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

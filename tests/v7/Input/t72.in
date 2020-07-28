@@ -73,12 +73,14 @@ nband 4  # number of occupied states
 
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/14si.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t72.out, tolnlines=0, tolabs=0.0, tolrel=0.0
-#%% psp_files= 14si.pspgth
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

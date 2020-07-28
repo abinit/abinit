@@ -32,6 +32,9 @@ occopt 7
 tsmear 0.1 eV
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -42,7 +45,6 @@ tsmear 0.1 eV
 #%%   t11o_DS2_BLZTRP.struct, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t11o_DS2_ns_BLZTRP.def, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   t11o_DS2_ns_BLZTRP.intrans, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
-#%% psp_files = 13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

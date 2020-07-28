@@ -42,13 +42,15 @@ prtvxc     0
 prt1dm     0
 ixc -101130
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13_Al_atom.psml"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%  t11.out, tolnlines = 1, tolabs = 1.1e-06, tolrel = 2.00e-04
-#%% psp_files = 13_Al_atom.psml
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

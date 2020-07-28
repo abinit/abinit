@@ -25,11 +25,13 @@
  znucl  1.0 4.0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosGTH_pwteter/01h.pspgth, PseudosGTH_pwteter/04be.pspgth"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files= 01h.pspgth, 04be.pspgth
 #%% files_to_test = 
 #%%   t00.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]

@@ -63,6 +63,9 @@ bs_interp_method  0
 bs_interp_mode    2
 bs_interp_kmult   2 2 2
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -73,7 +76,6 @@ bs_interp_kmult   2 2 2
 #%%  t33o_DS1_EXC_MDF    ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t33o_DS1_GW_NLF_MDF ,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%%  t33o_DS1_RPA_NLF_MDF,  tolnlines = 800, tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
-#%% psp_files = 14si.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

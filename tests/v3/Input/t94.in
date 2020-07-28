@@ -47,13 +47,15 @@
   tolwfr   1.e-22
      wtk   4*0.25
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "14si.Hamann_mod, 14si.Hamann_mod"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t94.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 14si.Hamann_mod, 14si.Hamann_mod
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

@@ -1,7 +1,0 @@
-Hartwigsen-Goedecker-Hutter psp for Magnesium,  from PRB58, 3641 (1998) paper
-12   2   980509                     zatom,zion,pspdat
-3   1   1    0    2001    0        pspcod,pspxc,lmax,lloc,mmax,r2well
-0.651812 -2.864297 0.0   0.0  0.0  rloc, c1, c2, c3, c4
-0.556478  2.970957 1.329941  0.0   rs, h11s, h22s, h33s
-0.677569  1.049881 0.0       0.0   rp, h11p, h22p, h33p
-          0.005152 0.0       0.0       k11p, k22p, k33p

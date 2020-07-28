@@ -817,9 +817,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(2,:)=dtsets(:)%eph_phrange(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_phrange','INT',0)
 
- intarr(1,:)=dtsets(:)%eph_mrta
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_mrta','INT',0)
-
  intarr(1,:)=dtsets(:)%eph_restart
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_restart','INT',0)
 
@@ -1182,6 +1179,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
      nimagem(0)=tmpimg0
    end if
  endif
+
+ intarr(1,:)=dtsets(:)%gwaclowrank
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwaclowrank','INT',0)
 
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)

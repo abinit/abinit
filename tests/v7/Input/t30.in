@@ -78,6 +78,9 @@ upawu2  3.1333333333333333  0.0  0.0  eV
 f4of2_sla3  0.0  0.0  0.0 
 jpawu2  0.7583333333333333  0.0  0.0  eV
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "23v.paw, 38sr.paw, 8o.2.paw"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -85,15 +88,14 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% [files]
 #%% files_to_test =
 #%%                  t30.out,  tolnlines =120, tolabs =0.005, tolrel = 3.5e-01, fld_options=-medium ;
-#%% psp_files =  23v.paw, 38sr.paw, 8o.2.paw
 #%% [shell] 
 #%% post_commands = 
 #%%    ww_cp t30o_DS2_WFK t31o_DS1_WFK;
 #%%    ww_cp t30o_DS2_data4EntropyDMFT t31o_DS2_data4EntropyDMFT;
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = B. Amadon, J. Bieder 
-#%% keywords = PAW, DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = PAW, DMFT, CTQMC
 #%% description = Test entropy calculation for SrVO3 within DMFT
 #%%<END TEST_INFO>

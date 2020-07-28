@@ -66,11 +66,13 @@ toldff  2.0d-6
 paral_kgb 0
 autoparal 1
 
+ pp_dirpath "$ABI_PSPDIR/PseudosTM_pwteter"
+ pseudos "1h.pspnc, 1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 1h.pspnc, 1h.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10

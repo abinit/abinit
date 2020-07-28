@@ -451,7 +451,7 @@ real(dp) :: deltav1v2
 real(dp) :: ha2ev
 real(dp) :: tmpabs
 real(dp) :: renorm_factor,emin,emax
-real(dp) :: ene
+real(dp) :: ene,abs_eps,re_eps
 complex(dpc) :: b11,b12
 complex(dpc) :: ieta,w
 character(len=fnlen) :: fnam1
@@ -459,6 +459,7 @@ character(len=500) :: msg
 ! local allocatable arrays
 real(dp) :: s(3,3),sym(3,3)
 complex(dpc), allocatable :: chi(:,:)
+ real(dp), allocatable :: im_refract(:),re_refract(:)
 complex(dpc), allocatable :: eps(:)
 
 ! *********************************************************************
@@ -538,6 +539,8 @@ complex(dpc), allocatable :: eps(:)
 !allocate local arrays
  ABI_ALLOCATE(chi,(nmesh,nspin))
  ABI_ALLOCATE(eps,(nmesh))
+ ABI_ALLOCATE(im_refract,(nmesh))
+ ABI_ALLOCATE(re_refract,(nmesh))
  ieta=(0._dp,1._dp)*brod
  renorm_factor=1._dp/(omega*dble(nsymcrys))
  ha2ev=13.60569172*2._dp
@@ -673,7 +676,11 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,abs(eps(iw))
+     abs_eps=abs(eps(iw))
+     re_eps=dble(eps(iw))
+     write(fout1, '(2es16.6)' ) ene,abs_eps
+     re_refract(iw)=sqrt(half*(abs_eps+re_eps))
+     im_refract(iw)=sqrt(half*(abs_eps-re_eps))
    end do
    write(fout1,*)
    write(fout1,*)
@@ -681,7 +688,7 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) - dble(eps(iw)) ))
+     write(fout1, '(2es16.6)' ) ene,im_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
@@ -689,7 +696,7 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene,sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+     write(fout1, '(2es16.6)' ) ene,re_refract(iw)
    end do
    write(fout1,*)
    write(fout1,*)
@@ -697,7 +704,7 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      ene=ene*ha2ev
-     write(fout1, '(2es16.6)' ) ene, sqrt(half*(abs(eps(iw)) + dble(eps(iw)) ))
+     write(fout1, '(2es16.6)' ) ene, ((re_refract(iw)-one)**2+im_refract(iw)**2)/((re_refract(iw)+one)**2+im_refract(iw)**2)
    end do
    write(fout1,*)
    write(fout1,*)
@@ -705,8 +712,8 @@ complex(dpc), allocatable :: eps(:)
    do iw=2,nmesh
      ene=(iw-1)*de
      tmpabs=zero
-     if (abs(eps(iw)) + dble(eps(iw)) > zero) then
-       tmpabs = aimag(eps(iw))*ene / sqrt(half*( abs(eps(iw)) + dble(eps(iw)) )) / Sp_Lt / Bohr_meter * 1.0d-6
+     if ( re_refract(iw) > tol10 ) then
+       tmpabs = aimag(eps(iw))*ene / re_refract(iw) / Sp_Lt / Bohr_meter * 1.0d-6
      end if
      write(fout1, '(2es16.6)' ) ha2ev*ene, tmpabs
    end do
@@ -722,8 +729,10 @@ complex(dpc), allocatable :: eps(:)
 #endif
  end if
 
- ABI_DEALLOCATE(chi)
+ ABI_FREE(chi)
  ABI_FREE(eps)
+ ABI_FREE(im_refract)
+ ABI_FREE(re_refract)
 
 end subroutine linopt
 !!***

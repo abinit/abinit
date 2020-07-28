@@ -76,13 +76,15 @@
   icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t85.out, tolnlines = 10, tolabs = 1.100e-03, tolrel = 2.000e-03
-#%% psp_files = 13al.pspnc
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

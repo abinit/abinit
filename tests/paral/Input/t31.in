@@ -304,11 +304,13 @@ slk_rankpp1 900
 slk_rankpp2 450
 prtvol 4
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/13al.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 13al.pspnc
 #%% [NCPU_10]
 #%% files_to_test = 
 #%%   t31_MPI10.out, tolnlines = 1038, tolabs = 1.100e-06, tolrel = 0.22

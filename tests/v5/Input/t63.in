@@ -122,13 +122,15 @@ xred    0.0  0.0  0.0
         1/2  1/2  1/2
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t63.out, tolnlines = 15, tolabs = 1.001e-03, tolrel = 2.0e-03, fld_options = -medium
-#%% psp_files = 1h.pspnc 
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

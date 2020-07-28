@@ -67,6 +67,9 @@ toldfe 1.0d-8
 prtvol     5
 enunit     1
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -74,7 +77,6 @@ enunit     1
 #%% [files]
 #%% files_to_test = 
 #%%   tgw2_3.out, tolnlines=  5, tolabs=0.002, tolrel=  3.000e-02 
-#%% psp_files = 13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

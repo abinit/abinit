@@ -16,9 +16,10 @@ eph_task1 -4
 eph_task2  7  
 getsigeph_filepath2 "teph4mob_7o_DS1_SIGEPH.nc"
 transport_ngkpt2 12 12 12 
+#sigma_ngkpt2 12 12 12 
 
 #########################
-# Commen to all datasets
+# Common to all datasets
 #########################
 
 # General input for e-ph computations
@@ -43,14 +44,16 @@ getwfkfine_filepath "teph4mob_4o_DS3_WFK" # Path to the dense 48x48x48 WFK
 
 # Definition of the variables related to transport properties
 tmesh 5.0 59.0 6        # Temperature array at which the mobility will be computed
-eph_extrael 1e-6        # Change this depending on the concentration you want
+# Change this depending on the concentration you want
+eph_doping  -2.26e+16    # this corresponds to eph_extrael 1e-6  
+
 sigma_erange  0 0.15 eV # We compute the lifetimes of electrons only,
                         # in an energy window of 0.15 eV from the CBM
 
 # Input variables related to the e-ph run
 mixprec 1     # We use single precision in some parts.
-              # It does not affect the precision of the result
-              # but helps decreasing the memory requirements.
+              # It does not affect the precision of the result but accelerates the calculation
+              #
 boxcutmin 1.1 # Use boxcutmin 1.1 to decrease the memory
               # requirements. Check that it does not affect
               # your results by increasing this (up to 2 max).
@@ -62,13 +65,13 @@ boxcutmin 1.1 # Use boxcutmin 1.1 to decrease the memory
 ecut 3
 nband 8
 
-#Definition of the unit cell
+# Definition of the unit cell
     acell   3*10.61         # This is equivalent to   10.61 10.61 10.61
     rprim   0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors
             0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1
             0.5  0.5  0.0   # that is, the default.
 
-#Definition of the atom types
+# Definition of the atom types
    ntypat   2         # There are two types of atom
     znucl   13 33     # The keyword "znucl" refers to the atomic number of the
                       # possible type(s) of atom. The pseudopotential(s)
@@ -84,6 +87,9 @@ nband 8
             0.25 0.25 0.25
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "13al.981214.fhi, PseudosTM_pwteter/33as.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -91,16 +97,19 @@ nband 8
 #%% [files]
 #%% files_to_test =
 #%%   teph4mob_7.out, tolnlines= 57, tolabs=  30, tolrel= 0.03;
-#%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 20.0, tolrel= 1.2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_KAPPA, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_KAPPA, tolnlines= 50, tolabs= 1.2e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_PI, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%%   teph4mob_7o_DS1_SERTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
-#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
-#%% psp_files =  13al.981214.fhi, 33as.pspnc
+#%%   teph4mob_7o_DS1_MRTA_SBK, tolnlines= 50, tolabs= 1.1e-2, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_SERTA_SIGMA, tolnlines= 50, tolabs= 4e+3, tolrel= 5.0e-2, fld_options = -ridiculous;
+#%%   teph4mob_7o_DS1_MRTA_SIGMA, tolnlines= 50, tolabs= 100, tolrel= 5.0e-2, fld_options = -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = G. Brunin, M. Giantomassi
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH, RTA
 #%% description =
 #%%   E-ph for the mobility in semiconductors
 #%%<END TEST_INFO>

@@ -39,13 +39,15 @@ tolwfr2    1.0d-9
  znucl  7
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosHGH_pwteter/7n.5.hgh"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
 #%%   t61.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-#%% psp_files = 7n.psphgh
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

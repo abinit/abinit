@@ -117,10 +117,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
- integer :: treads, use_gpu_cuda, ierr
+ integer :: treads, use_gpu_cuda
  real(dp) :: cpus
  character(len=500) :: msg
- character(len=fnlen) :: pp_dirpath, shell_var
+ character(len=fnlen) :: pp_dirpath
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
@@ -481,14 +481,15 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  pp_dirpath = ""
  call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'pp_dirpath', tread, 'KEY', key_value=pp_dirpath)
  if (tread == 1) then
-   if (pp_dirpath(1:1) == "$") then
-     shell_var = pp_dirpath(2:)
-     call get_environment_variable(shell_var, pp_dirpath, status=ierr)
-     if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
-     if (ierr == +1) MSG_ERROR(sjoin(shell_var, "does not exist"))
-     if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
-     call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
-   end if
+!! XG2020_07_20 Now, the replacement of environment variables is done at the level of the parser
+!  if (pp_dirpath(1:1) == "$") then
+!    shell_var = pp_dirpath(2:)
+!    call get_environment_variable(shell_var, pp_dirpath, status=ierr)
+!    if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
+!    if (ierr == +1) MSG_ERROR(sjoin(shell_var, "variable is not defined!"))
+!    if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
+!    call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
+!  end if
    if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
  end if
 
@@ -501,7 +502,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  if (tread_pseudos == 1) then
    ! Split pseudos_string using comma and transfer results to pseudos_paths
-   ! Make sure string lenght is large enough and input string is consistent with npsp
+   ! Make sure string length is large enough and input string is consistent with npsp
    ! Lot of checks must be done here!
    !print *, "pseudos_string: ", trim(pseudos_string)
    ABI_ICALLOC(sidx, (npsp + 1))
@@ -516,7 +517,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      end if
    end do
    if (cnt /= npsp) then
-     MSG_ERROR(sjoin("Not enough pseudos in input `pseudos` string, expecting npsp:", itoa(npsp)))
+     write(msg,'(4a)')&
+&      "Not enough pseudopotentials in input `pseudos` string, expecting npsp: ",itoa(npsp),ch10,&
+&      "Perhaps the separator (=a comma) is missing between pseudopotentials in input `pseudos` string."
+     MSG_ERROR(msg)
    end if
 
    do ii=1,npsp
@@ -1014,7 +1018,6 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
- dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0
  dtset%typat(:)=0  ! This init is important because dimension of typat is mx%natom (and not natom).
@@ -2000,8 +2003,8 @@ end subroutine invars1
 !! The outputs of this routine are the defaults values of input
 !! variables, stored at the index 0 of the last dimension of their multi-dataset representation.
 !!
-!!  Scalars and static arrays can be initialized directly at the level of the datatype declaration
-!!  provided the value does not depend on runtime conditions.
+!! NOTE that Scalars and static arrays can be initialized directly at the level of the datatype declaration
+!! provided the value does not depend on runtime conditions.
 !!
 !! PARENTS
 !!      m_ab7_invars_f90
@@ -2010,7 +2013,7 @@ end subroutine invars1
 !!
 !! SOURCE
 
-subroutine indefo(dtsets,ndtset_alloc,nprocs)
+subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
  use m_gwdefs
 #if defined DEV_YP_VDWXC
@@ -2097,7 +2100,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%atvshift(:,:,:)=zero
    dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
-   dtsets(idtset)%awtr=1
 !  B
    dtsets(idtset)%bdberry(1:4)=0
    dtsets(idtset)%bdeigrf=-1
@@ -2108,7 +2110,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%boxcutmin=two
    dtsets(idtset)%brvltt=0
    dtsets(idtset)%bs_nstates=0
-!  dtsets(idtset)%bs_hayd_term=0
    dtsets(idtset)%bs_hayd_term=1
    dtsets(idtset)%builtintest=0
    dtsets(idtset)%bxctmindg=two
@@ -2131,10 +2132,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%delayperm=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
-!XG170502 : This section is completely useless, as ionmov is NOT know at present !
-!#ifdef HAVE_LOTF
-!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
-!#endif
    dtsets(idtset)%dfpt_sciss=zero
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
@@ -2224,16 +2221,10 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%extrapwf=0
    dtsets(idtset)%exchmix=quarter
 !  F
-   dtsets(idtset)%fermie_nest=zero
-   dtsets(idtset)%fftgw=21
    dtsets(idtset)%focktoldfe=zero
    dtsets(idtset)%fockoptmix=0
    dtsets(idtset)%fockdownsampling(:)=1
    dtsets(idtset)%freqim_alpha=five
-   dtsets(idtset)%freqremin=zero
-   dtsets(idtset)%freqremax=zero
-   dtsets(idtset)%freqspmin=zero
-   dtsets(idtset)%freqspmax=zero
    dtsets(idtset)%friction=0.001_dp
    dtsets(idtset)%frzfermi=0
    dtsets(idtset)%fxcartfactor=one ! Should be adjusted to the H2 conversion factor
@@ -2247,54 +2238,15 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1/)
    dtsets(idtset)%gpu_linalg_limit=2000000
    if (dtsets(idtset)%gw_customnfreqsp/=0) dtsets(idtset)%gw_freqsp(:) = zero
-   dtsets(idtset)%gw_nstep =30
-   dtsets(idtset)%gwgamma =0
    if ( dtsets(idtset)%gw_nqlwl > 0 ) then
      dtsets(idtset)%gw_qlwl(:,:)=zero
      dtsets(idtset)%gw_qlwl(1,1)=0.00001_dp
      dtsets(idtset)%gw_qlwl(2,1)=0.00002_dp
      dtsets(idtset)%gw_qlwl(3,1)=0.00003_dp
    end if
-   dtsets(idtset)%gw_frqim_inzgrid=0
-   dtsets(idtset)%gw_frqre_inzgrid=0
-   dtsets(idtset)%gw_frqre_tangrid=0
-   dtsets(idtset)%gw_invalid_freq=0
-   dtsets(idtset)%gw_qprange=0
-   dtsets(idtset)%gw_sigxcore=0
    dtsets(idtset)%gw_sctype = GWSC_one_shot
    dtsets(idtset)%gw_toldfeig=0.1/Ha_eV
-   dtsets(idtset)%getbseig=0
-   dtsets(idtset)%getbsreso=0
-   dtsets(idtset)%getbscoup=0
-   dtsets(idtset)%getcell =0
-   dtsets(idtset)%getddb  =0
-   dtsets(idtset)%getddk  =0
-   dtsets(idtset)%getdelfd=0
-   dtsets(idtset)%getdkdk =0
-   dtsets(idtset)%getdkde =0
-   dtsets(idtset)%getden  =0
-   dtsets(idtset)%getefmas=0
-   dtsets(idtset)%getgam_eig2nkq  =0
-   dtsets(idtset)%gethaydock=0
-   dtsets(idtset)%getocc  =0
-   dtsets(idtset)%getpawden=0
-   dtsets(idtset)%getqps  =0
-   dtsets(idtset)%getscr  =0
-   dtsets(idtset)%getsuscep=0
-   dtsets(idtset)%getvel  =0
-   dtsets(idtset)%getwfk  =0
-   dtsets(idtset)%getwfkfine = 0
-   dtsets(idtset)%getwfq  =0
-   dtsets(idtset)%getxcart=0
-   dtsets(idtset)%getxred =0
-   dtsets(idtset)%get1den =0
-   dtsets(idtset)%get1wf  =0
-   dtsets(idtset)%gwcalctyp=0
-   dtsets(idtset)%gwcomp=0
-   dtsets(idtset)%gwencomp=2.0_dp
-   dtsets(idtset)%gwmem=11
-   dtsets(idtset)%gwpara=2
-   dtsets(idtset)%gwrpacorr=0
+
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
@@ -2331,37 +2283,14 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%icutcoul=6
    dtsets(idtset)%ieig2rf=0
    dtsets(idtset)%imgwfstor=0
-   dtsets(idtset)%inclvkb=2
    dtsets(idtset)%intxc=0
-!  if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
+   ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
-!This section is completely useless, as ionmov is NOT know at present !
-!#ifdef HAVE_LOTF
-!   if (dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2 ! Recommended for LOTF
-!#endif
    dtsets(idtset)%iprcel=0
    dtsets(idtset)%iprcfc=0
    dtsets(idtset)%irandom=3
-   dtsets(idtset)%irdbseig=0
-   dtsets(idtset)%irdbsreso=0
-   dtsets(idtset)%irdbscoup=0
-   dtsets(idtset)%irdddb=0
-   dtsets(idtset)%irdddk=0
-   dtsets(idtset)%irdden=0
-   dtsets(idtset)%irdefmas=0
-   dtsets(idtset)%irdhaydock=0
-   dtsets(idtset)%irdpawden=0
-   dtsets(idtset)%irdqps=0
-   dtsets(idtset)%irdscr=0
-   dtsets(idtset)%irdsuscep=0
-   dtsets(idtset)%irdvdw=0
-   dtsets(idtset)%irdwfk=0
-   dtsets(idtset)%irdwfkfine=0
-   dtsets(idtset)%irdwfq=0
-   dtsets(idtset)%ird1den=0
-   dtsets(idtset)%ird1wf=0
 !iscf
    if(wvl_bigdft) then
      dtsets(idtset)%iscf=0
@@ -2392,9 +2321,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kptopt=1
    if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
    dtsets(idtset)%kptrlen=30.0_dp
-   dtsets(idtset)%kssform=1
 !  L
-   dtsets(idtset)%localrdwf=1
 
 #if defined HAVE_LOTF
    dtsets(idtset)%lotf_classic=5
@@ -2407,10 +2334,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
-   dtsets(idtset)%max_ncpus = 0
-   dtsets(idtset)%mbpt_sciss=zero
    dtsets(idtset)%mband = -1
-   dtsets(idtset)%mdf_epsinf = zero
    dtsets(idtset)%mdtemp(:)=300.0_dp
    dtsets(idtset)%mdwall=10000_dp
    dtsets(idtset)%mep_mxstep=100._dp
@@ -2429,23 +2353,17 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nbdblock=1
    dtsets(idtset)%nbdbuf=0
    dtsets(idtset)%nberry=1
-   if (dtsets(idtset)%usepaw==0) then
-     dtsets(idtset)%nc_xccc_gspace=0
+   if (dtsets(idtset)%usepaw == 0) then
+     dtsets(idtset)%nc_xccc_gspace = 0
    else
-     dtsets(idtset)%nc_xccc_gspace=1
+     dtsets(idtset)%nc_xccc_gspace = 1
    end if
-   dtsets(idtset)%nbandkss=0
    dtsets(idtset)%nctime=0
    dtsets(idtset)%ndtset = -1
    dtsets(idtset)%neb_algo=1
    dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
-   dtsets(idtset)%npwkss=0
    dtsets(idtset)%nfft = -1
    dtsets(idtset)%nfftdg = -1
-
-   dtsets(idtset)%nfreqim=-1
-   dtsets(idtset)%nfreqre=-1
-   dtsets(idtset)%nfreqsp=0
 
    dtsets(idtset)%npulayit=7
 
@@ -2475,15 +2393,9 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ngkpt=0
    dtsets(idtset)%nnsclo=0
    dtsets(idtset)%nnsclohf=0
-   dtsets(idtset)%nomegasf=100
-   dtsets(idtset)%nomegasrd=9
-   dtsets(idtset)%nomegasi=12
    dtsets(idtset)%nonlinear_info=0
    dtsets(idtset)%noseinert=1.0d5
    dtsets(idtset)%npvel=0
-   dtsets(idtset)%npweps=0
-   dtsets(idtset)%npwsigx=0
-   dtsets(idtset)%npwwfn=0
    dtsets(idtset)%nqpt=0
    dtsets(idtset)%nscforder=16
    dtsets(idtset)%nshiftk=1
@@ -2501,8 +2413,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 !  O
    dtsets(idtset)%occopt=1
    dtsets(idtset)%occ_orig(:,:)=zero
-   dtsets(idtset)%omegasrdmax=1.0_dp/Ha_eV  ! = 1eV
-   dtsets(idtset)%omegasimax=50/Ha_eV
    dtsets(idtset)%optcell=0
    dtsets(idtset)%optforces=2
    if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
@@ -2544,10 +2454,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pawujv=0.1_dp/Ha_eV
    dtsets(idtset)%pawusecp=1
    dtsets(idtset)%pawxcdev=1
-   dtsets(idtset)%ph_nqshift = 0
-   if(dtsets(idtset)%ph_nqshift > 0)then
-     dtsets(idtset)%ph_qshift = zero
-   end if
    dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
@@ -2572,61 +2478,17 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%posocc=one
    dtsets(idtset)%postoldfe=0.000001_dp
    dtsets(idtset)%postoldff=zero
-   dtsets(idtset)%ppmodel=1
-   dtsets(idtset)%ppmfrq=zero
    dtsets(idtset)%prepalw=0
    dtsets(idtset)%prepanl=0
-   dtsets(idtset)%prepgkk=0
-   dtsets(idtset)%prtbbb=0
-   dtsets(idtset)%prtbltztrp=0
-   dtsets(idtset)%prtcif=0
    dtsets(idtset)%prtden=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtden=0
-   dtsets(idtset)%prtdensph=1
-   dtsets(idtset)%prtdipole=0
-   dtsets(idtset)%prtdos=0
-   dtsets(idtset)%prtdosm=0
    dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
-   dtsets(idtset)%prtefg=0
-   dtsets(idtset)%prtefmas=1
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
-   dtsets(idtset)%prtelf=0
-   dtsets(idtset)%prtfc=0
-   dtsets(idtset)%prtfull1wf=0
-   dtsets(idtset)%prtfsurf=0
-   dtsets(idtset)%prtgden=0
-   dtsets(idtset)%prtgeo=0
-   dtsets(idtset)%prtgkk=0
-   dtsets(idtset)%prtkden=0
    dtsets(idtset)%prtkpt = -1
-   dtsets(idtset)%prtlden=0
-   dtsets(idtset)%prtnabla=0
-   dtsets(idtset)%prtnest=0
-   dtsets(idtset)%prtphdos=1
-   dtsets(idtset)%prtphsurf=0
-   dtsets(idtset)%prtposcar=0
-   dtsets(idtset)%prtprocar=0
-   dtsets(idtset)%prtpot=0
-   dtsets(idtset)%prtpsps=0
-   dtsets(idtset)%prtspcur=0
-   dtsets(idtset)%prtsuscep=0
-   dtsets(idtset)%prtstm=0
-   dtsets(idtset)%prtvclmb=0
-   dtsets(idtset)%prtvdw=0
-   dtsets(idtset)%prtvha=0
-   dtsets(idtset)%prtvhxc=0
-   dtsets(idtset)%prtvxc=0
-   dtsets(idtset)%prtvol=0
-   dtsets(idtset)%prtvolimg=0
-   dtsets(idtset)%prtvpsp=0
-   dtsets(idtset)%prtwant=0
    dtsets(idtset)%prtwf=1; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtset%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
-   dtsets(idtset)%prtwf_full=0
-   dtsets(idtset)%prtxml = 0
    do ii=1,dtsets(idtset)%natom,1
      dtsets(idtset)%prtatlist(ii)=ii
    end do
-   dtsets(idtset)%prt1dm=0
    dtsets(idtset)%pvelmax(:)=one
    dtsets(idtset)%pw_unbal_thresh=40._dp
 !  Q
@@ -2674,15 +2536,12 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%spgaxor = -1
    dtsets(idtset)%spgorig = -1
    dtsets(idtset)%spinmagntarget=-99.99_dp
-   dtsets(idtset)%spmeth=0
    dtsets(idtset)%spnorbscl=one
    dtsets(idtset)%stmbias=zero
    dtsets(idtset)%strfact=100.0_dp
    dtsets(idtset)%string_algo=1
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
-   dtsets(idtset)%symchi=1
-   dtsets(idtset)%symsigma=1
 !  T
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
@@ -2700,7 +2559,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
-   dtsets(idtset)%tmesh=[5._dp, 59._dp, 6._dp]
    dtsets(idtset)%tsmear=0.01_dp
 !  U
    dtsets(idtset)%ucrpa_bands(:)=-1
@@ -2774,62 +2632,11 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    !if(dtsets(idtset)%optdriver == RUNL_EPH) dtsets(idtset)%zcut = 0.01 * eV_Ha
    dtsets(idtset)%ziontypat(:)=zero
 
-!  BEGIN VARIABLES FOR @Bethe-Salpeter
-   dtsets(idtset)%bs_algorithm    =2
-   dtsets(idtset)%bs_haydock_niter=100
-   dtsets(idtset)%bs_exchange_term=1
-   dtsets(idtset)%bs_coulomb_term=11
-   dtsets(idtset)%bs_calctype=1
-   dtsets(idtset)%bs_coupling=0
-
-   dtsets(idtset)%bs_haydock_tol=(/0.02_dp,zero/)
-
    dtsets(idtset)%bs_loband=0
-!  Take big absolute value numbers, but the the biggest ones, otherwise overflow can happen
-   dtsets(idtset)%bs_eh_cutoff = [smallest_real*tol6,greatest_real*tol6]
-   dtsets(idtset)%bs_freq_mesh = [zero,zero,0.01_dp/Ha_eV]
-
-!  Interpolation
-   dtsets(idtset)%bs_interp_method = 1 ! YG interpolation
-   dtsets(idtset)%bs_interp_mode = 0 ! No interpolation
-   dtsets(idtset)%bs_interp_prep = 0 ! Do not prepare interp
-   dtsets(idtset)%bs_interp_kmult = 0
-   dtsets(idtset)%bs_interp_m3_width = one
-   dtsets(idtset)%bs_interp_rl_nb = 1
-
-!  END VARIABLES FOR @Bethe-Salpeter.
-
-! EPH variables
-   dtsets(idtset)%asr = 1
-   dtsets(idtset)%dipdip = 1
-   dtsets(idtset)%chneut = 1
-   dtsets(idtset)%symdynmat = 1
-
-   dtsets(idtset)%ph_ndivsm = 20
-   dtsets(idtset)%ph_nqpath = 0
-   dtsets(idtset)%ph_ngqpt = [20, 20, 20]
-
-   dtsets(idtset)%eph_mustar = 0.1_dp
-   dtsets(idtset)%eph_intmeth = 2
-   dtsets(idtset)%eph_extrael = zero
-   dtsets(idtset)%eph_fermie = zero
-   dtsets(idtset)%eph_frohlichm = 0
-   dtsets(idtset)%eph_fsmear = 0.01
-   dtsets(idtset)%eph_fsewin = 0.04
-   dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]
-   dtsets(idtset)%eph_task = 1
-   dtsets(idtset)%eph_transport  = 0
-
-   dtsets(idtset)%ph_wstep = 0.1/Ha_meV
-   dtsets(idtset)%ph_intmeth = 2
-   dtsets(idtset)%ph_nqshift = 1
-   dtsets(idtset)%ph_smear = 0.00002_dp
-   dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
-   dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.
-! That might cause unitialized error with valgrind depending on the compilo
+! That might cause unitialized error with valgrind depending on the compiler
 ! chkprim
 ! maxnsym
 ! nsym

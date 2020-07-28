@@ -99,11 +99,13 @@ nsym 0
 paral_kgb 0
 
 
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
