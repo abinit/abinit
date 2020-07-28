@@ -256,7 +256,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: ilwrk
  integer :: neig(Er%nomega_i)
- real(dp) :: epsm1_ev(Sigp%npwc)
+ real(gwp) :: epsm1_ev(Sigp%npwc)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
  complex(gwpc),allocatable :: rhotw_epsm1_rhotw(:,:,:)
 
@@ -472,7 +472,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(rhotwg, (npwc*nspinor))
  ABI_MALLOC(rhotwgp, (npwc*nspinor))
  ABI_MALLOC(vc_sqrt_qbz, (npwc))
- ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
 
  if (Er%mqmem==0) then ! Use out-of-core solution for epsilon.
    MSG_COMMENT('Reading q-slices from file. Slower but less memory.')
@@ -495,6 +494,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end if ! usepaw==1
 
  if (mod10==SIG_GW_AC) then ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
+
+   ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
+
    call coeffs_gausslegint(zero,one,gl_knots,gl_wts,Er%nomega_i)
 
    do io=1,Er%nomega_i ! First frequencies are always real
