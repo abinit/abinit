@@ -305,12 +305,16 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 &  ' bands n = from ',ib1,' to ',ib2,ch10
  call wrtout(std_out,msg,'COLL')
 #ifdef FBFB
- write(*,*) 'FBFB is defined'
- open(unit=1000)
- read(1000,*) neig(1)
- close(1000)
- neig(1) = MIN(neig(1),sigp%npwc)
- write(*,*) 'neig=',neig(1)
+ if ( Dtset%gwaclowrank > 0 ) then
+   ! Today we use the same number of eigenvectors irrespective to iw'
+   ! Tomorrow we might optimize this further
+   neig(:) = MIN(Dtset%gwaclowrank,Sigp%npwc)
+ else
+   neig(:) = Sigp%npwc
+ endif
+ write(msg,'(3a,i6,a,i6)') ' Using a low-rank formula for AC',&
+&         ch10,' Number of epsm1 eigenvectors retained: ',neig(1),' over ',Sigp%npwc
+ call wrtout(std_out,msg,'COLL')
 #endif
 
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
@@ -433,7 +437,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 &    ' with extrapolar energy: ',en_high*Ha_eV,' [eV]'
    call wrtout(std_out,msg,'COLL')
    ABI_MALLOC(wf1swf2_g,(gwc_nfftot*nspinor))
- endif
+ end if
 
  if (Sigp%gwcomp == 1) then
    ! Setup of MPI table for extrapolar contributions.
@@ -762,10 +766,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            neig(iiw) = neig(1)
            do ig=1,neig(iiw)
              ac_epsm1cqwz2(:,ig,iiw) = ac_epsm1cqwz2(:,ig,iiw) * SQRT( -epsm1_ev(ig) )
-           enddo
+           end do
            !write(500+iiw,'(a,1x,i5,1x,i5)') '#',npwc,COUNT(ABS(epsm1_ev(:))<1.0e-3)
            !write(500+iiw,'(1x,es16.6)') epsm1_ev(:)
-         enddo
+         end do
          call timab(444,2,tsec) ! ac_lrk_diag
 #else
          do iiw=1,Er%nomega_i
@@ -934,10 +938,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          do jb=minbnd,maxbnd
            do kb=jb+1,maxbnd
              rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG( rhotw_epsm1_rhotw(kb,jb,iiw) )
-           enddo
-         enddo
+           end do
+         end do
          ABI_FREE(epsm1_sqrt_rhotw)
-       enddo
+       end do
        call timab(443,2,tsec) ! ac_lrk_appl
 #endif
 
@@ -1126,9 +1130,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                 do iiw=1,Er%nomega_i
                   sigctmp(io,iab) = sigctmp(io,iab) + piinv * rhotw_epsm1_rhotw(jb,kb,iiw) * omegame0i_ac &
 &                                                     /(omegame0i2_ac + omegap2(iiw))
-                enddo
-              enddo
-            enddo
+                end do
+              end do
+            end do
           else
 #endif
            do iab=1,Sigp%nsig_ab
@@ -1138,7 +1142,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              end do
            end do
 #ifdef FBFB
-           endif
+           end if
 #endif
 
            if (Sigp%gwcomp==1) then
@@ -1406,7 +1410,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 #ifdef FBFB
  if (allocated(rhotw_epsm1_rhotw)) then
    ABI_FREE(rhotw_epsm1_rhotw)
- endif
+ end if
 #endif
 
  if (allocated(aherm_sigc_ket)) then
@@ -1417,7 +1421,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  end if
  if (Sigp%gwcomp==1) then
    ABI_FREE(wf1swf2_g)
- endif
+ end if
  if (Sigp%gwcomp==1) then
    ABI_FREE(extrapolar_distrb)
  end if
