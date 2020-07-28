@@ -40,7 +40,7 @@ module m_unittests
 #endif
 
  use m_time,            only : cwtime, cwtime_report
- use m_fstrings,        only : ltoa, itoa, sjoin
+ use m_fstrings,        only : ltoa, itoa, sjoin, strcat
  use m_numeric_tools,   only : linspace, ctrap, simpson_int
  use m_special_funcs,   only : gaussian
  use m_symtk,           only : matr3inv
@@ -195,18 +195,18 @@ end function crystal_from_ptgroup
 !! FUNCTION
 !!  Unit tests for the tetrahedron routines
 !!
-subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
+subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
 
 !Arguments -------------------------------
 !scalars
  character(len=*),intent(in) :: ptgroup
- integer,intent(in) :: use_symmetries, comm
+ integer,intent(in) :: use_symmetries, prtvol, comm
  integer,intent(in) :: ngqpt(3)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, bcorr0 = 0, bcorr1 = 1, master = 0
- integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank
+ integer :: nqibz,iq_ibz,nqbz,ierr,nw, my_rank, return_code
  real(dp),parameter :: max_occ1 = one
  real(dp) :: cpu, wall, gflops, dosdeltae, emin, emax, qnorm, int_dos, broad, min_eig, max_eig
  character(len=80) :: errstr
@@ -214,23 +214,28 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  type(crystal_t) :: cryst
  type(t_tetrahedron) :: tetraq
  type(htetra_t) :: htetraq
+#ifdef HAVE_NETCDF
+ integer :: ncid, ncerr
+#endif
+!arrays
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
  real(dp) :: qshift(3,nqshft1), rlatt(3,3), qlatt(3,3)
  real(dp),allocatable :: tweight(:,:), dweight(:,:)
  real(dp),allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:), wdt(:,:)
- real(dp),allocatable :: energies(:), eig(:),mat(:), dos(:), idos(:), cauchy_ppart(:)
- complex(dp),allocatable :: cenergies(:), cweight(:,:)
+ real(dp),allocatable :: wmesh(:), eig(:),mat(:), dos(:), idos(:), cauchy_ppart(:)
+ complex(dp),allocatable :: zmesh(:), cweight(:,:)
 
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
+ return_code = 0
 
  call wrtout(std_out, sjoin(" Tetrahedron unit tests with ptgroup:", ptgroup, ", ngqpt", ltoa(ngqpt)))
  call cwtime(cpu, wall, gflops, "start")
- !
+
  ! 0. Initialize
- call wrtout(std_out, ' 0. Initialize')
+ call wrtout(std_out, ' [0] Initializing tetrahedron object...')
 
  ! Create fake crystal from ptgroup
  cryst = crystal_from_ptgroup(ptgroup, use_symmetries)
@@ -241,23 +246,23 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
  call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt1, nqshft1, qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
- call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
+ if (prtvol > 0) call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
 
  if (use_old_tetra) then
    ! Initialize old tetrahedra
    call init_tetra(bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, tetraq, ierr, errstr, comm)
-   call cwtime_report(" init_tetra_old ", cpu, wall, gflops)
+   if (prtvol > 0) call cwtime_report(" init_tetra_old ", cpu, wall, gflops)
  end if
 
  ! Initialize new tetrahedra
  call htetra_init(htetraq, bz2ibz(1,:), cryst%gprimd, qlatt, qbz, nqbz, qibz, nqibz, ierr, errstr, comm)
  call htetraq%print(std_out)
- call cwtime_report(" init_htetra", cpu, wall, gflops)
+ if (prtvol > 0) call cwtime_report(" init_htetra", cpu, wall, gflops)
 
  ! 1. Compute parabolic band
- call wrtout(std_out, ' 1. Begin testing parabolic band dispersion ... ', newlines=1)
+ call wrtout(std_out, ' [1] Testing tetrahedra with parabolic band dispersion ... ', newlines=1)
  ABI_MALLOC(eig, (nqibz))
  ABI_MALLOC(mat, (nqibz))
  do iq_ibz=1,nqibz
@@ -275,23 +280,42 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  dosdeltae = (emax - emin) / (nw - 1)
  broad = tol2 * eV_Ha
  broad = tol1 * eV_Ha
-
  min_eig = minval(eig); max_eig = maxval(eig)
+
+ ABI_MALLOC(wmesh, (nw))
+ wmesh = linspace(emin, emax, nw)
+
  if (my_rank == master) then
    write(std_out, *)" min, Max band energy: ", min_eig, max_eig
    write(std_out, *)" energy mesh, Max: ", emin, emax, nw
    write(std_out, *)" Broad: ", broad
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nctk_open_create(ncid, "foo_TETRATEST.nc", xmpi_comm_self))
+   NCF_CHECK(cryst%ncwrite(ncid))
+   ! Add dimensions.
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("nw", nw), nctkdim_t("nqibz", nqibz) &
+     ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ! Define arrays with results.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("eig", "dp", "nqibz"), &
+     nctkarr_t("wmesh", "dp", "nw") &
+   ])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig"), eig))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wmesh"), wmesh))
+#endif
  end if
 
- ABI_MALLOC(energies, (nw))
  ABI_MALLOC(dos, (nw))
  ABI_MALLOC(idos, (nw))
  ABI_MALLOC(cauchy_ppart, (nw))
  ABI_MALLOC(wdt, (nw, 2))
 
- energies = linspace(emin, emax, nw)
-
- call cwtime_report(" init", cpu, wall, gflops)
+ if (prtvol > 0) call cwtime_report(" init", cpu, wall, gflops)
 
  ABI_CALLOC(tweight, (nw, nqibz))
  ABI_CALLOC(dweight, (nw, nqibz))
@@ -305,31 +329,21 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
    end do
    dos(:)  = sum(dweight, dim=2)
    idos(:) = sum(tweight, dim=2)
-   call ctrap(nw, dos, dosdeltae, int_dos)
-   call cwtime_report(" tetra_blochl   ", cpu, wall, gflops)
-
-   if (my_rank == master) then
-     write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-     call write_file('parabola_tetra.dat', nw, energies, dos, idos)
-   end if
+   if (my_rank == master) call write_file("parabola", "old_tetra", nw, wmesh, dos, idos=idos)
  end if
 
+ ! Compute DOS/IDOS with finite broadening
  dos = zero; cauchy_ppart = zero
  do iq_ibz=1,nqibz
-   dos = dos - wtq_ibz(iq_ibz) * aimag(one / (energies - eig(iq_ibz) + j_dpc * broad)) / pi
-   cauchy_ppart = cauchy_ppart + wtq_ibz(iq_ibz) * real(one / (energies - eig(iq_ibz) + j_dpc * broad))
+   dos = dos - wtq_ibz(iq_ibz) * aimag(one / (wmesh - eig(iq_ibz) + j_dpc * broad)) / pi
+   cauchy_ppart = cauchy_ppart + wtq_ibz(iq_ibz) * real(one / (wmesh - eig(iq_ibz) + j_dpc * broad))
  end do
- call simpson_int(nw, dosdeltae, dos, idos)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" finite broadening   ", cpu, wall, gflops)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_gauss.dat', nw, energies, dos, idos, cauchy_ppart=cauchy_ppart)
- end if
+ if (my_rank == master) call write_file("parabola", "broad", nw, wmesh, dos, cauchy_ppart=cauchy_ppart)
 
  ! Compute tetra weights and DOS/IDOS with new implementation by Henrique
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, bcorr0, tweight, dweight, comm)
+
  do iq_ibz=1,nqibz
    dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
    tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
@@ -337,106 +351,71 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_blochl   ", cpu, wall, gflops)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_htetra.dat', nw, energies, dos, idos)
- end if
+ if (my_rank == master) call write_file("parabola", "htetra_blochl", nw, wmesh, dos, idos=idos)
 
  ! Compute tetra weights with Blochl corrections and DOS/IDOS with new implementation by Henrique
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, bcorr1, tweight, dweight, comm)
+
  do iq_ibz=1,nqibz
    dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
    tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
  end do
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_blochl_corr   ", cpu, wall, gflops)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_htetra_corr.dat', nw, energies, dos, idos)
- end if
+ if (my_rank == master) call write_file("parabola", "htetra_blochl_corr", nw, wmesh, dos, idos=idos)
 
  ! Compute weights using LV integration from TDEP
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, 2, tweight, dweight, comm)
+
  do iq_ibz=1,nqibz
    dweight(:,iq_ibz) = dweight(:,iq_ibz) * mat(iq_ibz)
    tweight(:,iq_ibz) = tweight(:,iq_ibz) * mat(iq_ibz)
  end do
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_blochl_lv   ", cpu, wall, gflops)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_htetra_lv.dat', nw, energies, dos, idos)
- end if
+ if (my_rank == master) call write_file("parabola", "htetra_lv", nw, wmesh, dos, idos=idos)
 
- ABI_MALLOC(cenergies, (nw))
+ ABI_MALLOC(zmesh, (nw))
  ABI_MALLOC(cweight, (nw, nqibz))
- cenergies = energies + j_dpc * broad
+ zmesh = wmesh + j_dpc * broad
 
  ! Compute weights using SIMTET routines and erange
- call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 1, cweight, comm, &
+ call htetraq%weights_wvals_zinv(eig, nw, zmesh, max_occ1, nqibz, 1, cweight, comm, &
                                  erange=[min_eig * (one - tol2), max_eig * (one + tol2)])
 
  dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
- call simpson_int(nw, dosdeltae, dos, idos)
  cauchy_ppart =  sum(real(cweight(:,:)), dim=2)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_weights_wvals_zinv_simtet_erange   ", cpu, wall, gflops)
+
+ if (my_rank == master) call write_file("parabola", "simtet_erange", nw, wmesh, dos, cauchy_ppart=cauchy_ppart)
 
  ! Compute weights using SIMTET routines (slow but accurate)
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_zinv_simtet_erange.dat', nw, energies, dos, idos, cauchy_ppart=cauchy_ppart)
- end if
-
- call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 1, cweight, comm)
+ call htetraq%weights_wvals_zinv(eig, nw, zmesh, max_occ1, nqibz, 1, cweight, comm)
 
  dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
- call simpson_int(nw, dosdeltae, dos, idos)
  cauchy_ppart =  sum(real(cweight(:,:)), dim=2)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_weights_wvals_zinv_simtet   ", cpu, wall, gflops)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_zinv_simtet.dat', nw, energies, dos, idos, cauchy_ppart=cauchy_ppart)
- end if
+ if (my_rank == master) call write_file("parabola", "simtet", nw, wmesh, dos, cauchy_ppart=cauchy_ppart)
 
  ! Use LV integration from TDEP
- call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 2, cweight, comm)
- dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
- call simpson_int(nw, dosdeltae, dos, idos)
- cauchy_ppart =  sum(real(cweight(:,:)), dim=2)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_weights_wvals_zinv_lv   ", cpu, wall, gflops)
+ call htetraq%weights_wvals_zinv(eig, nw, zmesh, max_occ1, nqibz, 2, cweight, comm)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_zinv_lv.dat', nw, energies, dos, idos, cauchy_ppart)
- end if
+ dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
+ cauchy_ppart =  sum(real(cweight(:,:)), dim=2)
+
+ if (my_rank == master) call write_file("parabola", "zinv_lv", nw, wmesh, dos, cauchy_ppart=cauchy_ppart)
 
  dos = zero; idos = zero
  do iq_ibz=1,nqibz
-   call htetraq%get_onewk_wvals(iq_ibz, bcorr0, nw, energies, max_occ1, nqibz, eig, wdt)
+   call htetraq%get_onewk_wvals(iq_ibz, bcorr0, nw, wmesh, max_occ1, nqibz, eig, wdt)
    wdt(:,:) = wdt(:,:) * mat(iq_ibz)
    dos(:)  = dos(:)  + wdt(:,1) * wtq_ibz(iq_ibz)
    idos(:) = idos(:) + wdt(:,2) * wtq_ibz(iq_ibz)
  end do
- call ctrap(nw, dos, dosdeltae, int_dos)
 
- call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops)
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_htetra_onewk_wvals.dat', nw, energies, dos, idos)
- end if
+ if (my_rank == master) call write_file("parabola", "htetra_onewk_wvals", nw, wmesh, dos, idos=idos)
 
  dos = zero; idos = zero
  do iq_ibz=1,nqibz
@@ -445,51 +424,36 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
    dos(:)  = dos(:)  + wdt(:, 1) * wtq_ibz(iq_ibz)
    idos(:) = idos(:) + wdt(:, 2) * wtq_ibz(iq_ibz)
  end do
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('parabola_htetra_onewk.dat', nw, energies, dos, idos)
-   call htetraq%print(std_out)
- end if
+ if (my_rank == master) call write_file("parabola", "htetra_onewk", nw, wmesh, dos, idos=idos)
 
  ! 2. Compute energies for a flat band
- call wrtout(std_out, " 2. Begin testing flat band dispersion ...", pre_newlines=1)
- eig = half
+ call wrtout(std_out, " [2] Testing tetrahedra with flat band at zero ...", pre_newlines=1)
+ eig = zero
 
  if (use_old_tetra) then
    ! Compute DOS using old tetrahedron implementation
    call tetra_blochl_weights(tetraq, eig, emin, emax, max_occ1, nw, nqibz, bcorr0, tweight, dweight, comm)
    dos(:)  = sum(dweight, dim=2)
    idos(:) = sum(tweight, dim=2)
-   call cwtime_report(" tetra_blochl", cpu, wall, gflops)
-   if (my_rank == master) call write_file('flat_tetra.dat', nw, energies, dos, idos)
+   if (my_rank == master) call write_file("flat", "tetra_old", nw, wmesh, dos, idos=idos)
  end if
 
  ! Compute DOS using new tetrahedron implementation from Henrique
  call htetraq%blochl_weights(eig, emin, emax, max_occ1, nw, nqibz, bcorr0, tweight, dweight, comm)
+
  dos(:)  = sum(dweight, dim=2)
  idos(:) = sum(tweight, dim=2)
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_blochl", cpu, wall, gflops)
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('flat_htetra.dat', nw, energies, dos, idos)
- end if
+ if (my_rank == master) call write_file("flat", "htetra", nw, wmesh, dos, idos=idos)
 
  dos = zero; idos = zero
  do iq_ibz=1,nqibz
-   call htetraq%get_onewk_wvals(iq_ibz, bcorr0, nw, energies, max_occ1, nqibz, eig, wdt)
+   call htetraq%get_onewk_wvals(iq_ibz, bcorr0, nw, wmesh, max_occ1, nqibz, eig, wdt)
    dos(:)  = dos(:)  + wdt(:, 1) * wtq_ibz(iq_ibz)
    idos(:) = idos(:) + wdt(:, 2) * wtq_ibz(iq_ibz)
  end do
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_get_onewk_wvals", cpu, wall, gflops)
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('flat_htetra_onewk_wvals.dat', nw, energies, dos, idos)
- end if
+
+ if (my_rank == master) call write_file("flat", "htetra_onewk_wvals", nw, wmesh, dos, idos=idos)
 
  dos = zero; idos = zero
  do iq_ibz=1,nqibz
@@ -497,19 +461,14 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
    dos(:)  = dos(:)  + wdt(:, 1) * wtq_ibz(iq_ibz)
    idos(:) = idos(:) + wdt(:, 2) * wtq_ibz(iq_ibz)
  end do
- call ctrap(nw, dos, dosdeltae, int_dos)
- call cwtime_report(" htetra_get_onewk", cpu, wall, gflops)
 
- if (my_rank == master) then
-   write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-   call write_file('flat_htetra_onewk.dat', nw, energies, dos, idos)
- end if
+ if (my_rank == master) call write_file("flat", "htetra_onewk", nw, wmesh, dos, idos=idos)
 
  ! 3. Compute tetrahedron for simple TB FCC
  !TODO
 
  ! Free memory
- ABI_SFREE(energies)
+ ABI_SFREE(wmesh)
  ABI_SFREE(eig)
  ABI_SFREE(mat)
  ABI_SFREE(wdt)
@@ -522,23 +481,83 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ABI_SFREE(qbz)
  ABI_SFREE(qibz)
  ABI_SFREE(bz2ibz)
- ABI_SFREE(cenergies)
+ ABI_SFREE(zmesh)
  ABI_SFREE(cweight)
 
  call cryst%free()
  call htetraq%free()
  call destroy_tetra(tetraq)
 
+ if (my_rank == master) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ end if
+
+ if (return_code /= 0) then
+   MSG_ERROR("Some of the tetrahedron unit tests failed. See above results")
+ end if
+
  contains
 
- subroutine write_file(fname, nw, energies, dos, idos, cauchy_ppart)
-  integer,intent(in) :: nw
-  character(len=*), intent(in) :: fname
-  real(dp),intent(in) :: energies(nw), dos(nw), idos(nw)
-  real(dp),optional,intent(in) :: cauchy_ppart(nw)
-  character(len=500) :: msg
-  integer :: iw,funit
+ subroutine write_file(ekind, algo, nw, wmesh, dos, idos, cauchy_ppart)
 
+  integer,intent(in) :: nw
+  character(len=*), intent(in) :: ekind, algo
+  real(dp),intent(in) :: wmesh(nw), dos(nw)
+  real(dp),optional, intent(in) :: idos(nw)
+  real(dp),optional,intent(in) :: cauchy_ppart(nw)
+
+  character(len=500) :: msg
+  character(len=fnlen) :: fname
+  character(len=nctk_slen) :: dos_vname, idos_vname, ppart_vname, key
+  integer :: iw,funit
+  real(dp) :: my_idos(nw), rerr
+
+  key = strcat(ekind, "_", algo)
+  if (prtvol > 0) call cwtime_report("- "//trim(key), cpu, wall, gflops)
+
+  if (.not. present(idos)) then
+    call simpson_int(nw, dosdeltae, dos, my_idos)
+  else
+    my_idos = idos
+  end if
+
+  call ctrap(nw, dos, dosdeltae, int_dos)
+
+  rerr = 100 * (int_dos - my_idos(nw)) / my_idos(nw)
+  msg = "[OK]:";
+  if (abs(rerr) > half .or. abs(my_idos(nw) - one) > two * tol2) then
+    msg = "[FAILED]:"
+    return_code = return_code + 1
+  end if
+  write(std_out, "(1x,2(a,1x),/,4x,a,3(f10.5,1x))") &
+    trim(key), trim(msg), " integral_dos, idos(nw), relative_err: ", int_dos, my_idos(nw), rerr
+
+#ifdef HAVE_NETCDF
+  dos_vname = strcat("dos_", key)
+  idos_vname = strcat("idos_", key)
+  ppart_vname = strcat("cauchy_ppart_", key)
+
+  ! Define arrays with results.
+  ncerr = nctk_def_arrays(ncid, [ &
+    nctkarr_t(dos_vname, "dp", "nw"), &
+    nctkarr_t(idos_vname, "dp", "nw") &
+  ])
+  NCF_CHECK(ncerr)
+  if (present(cauchy_ppart)) then
+    NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t(ppart_vname, "dp", "nw")]))
+  end if
+  NCF_CHECK(nctk_set_datamode(ncid))
+  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, dos_vname), dos))
+  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, idos_vname), my_idos))
+  if (present(cauchy_ppart)) then
+    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, ppart_vname), cauchy_ppart))
+  end if
+#endif
+
+  ! Write results to txt file.
+  fname = trim(key)//".dat"
   if (open_file(fname, msg, newunit=funit, action="write") /= 0) then
     MSG_ERROR(msg)
   end if
@@ -546,12 +565,12 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
   if (.not. present(cauchy_ppart)) then
     write(funit, *)"# Energies, DOS, IDOS"
     do iw=1,nw
-      write(funit,*) energies(iw), dos(iw), idos(iw)
+      write(funit,*) wmesh(iw), dos(iw), my_idos(iw)
     end do
   else
-    write(funit, *)"# Energiesm DOS, IDOS, Cauchy_PPART "
+    write(funit, *)"# Energies DOS, IDOS, Cauchy_PrincipalPart"
     do iw=1,nw
-      write(funit,*) energies(iw), dos(iw), idos(iw), cauchy_ppart(iw)
+      write(funit,*) wmesh(iw), dos(iw), my_idos(iw), cauchy_ppart(iw)
     end do
   end if
 
@@ -590,12 +609,13 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
  character(len=80) :: errstr
  type(crystal_t) :: cryst
  type(htetra_t) :: htetraq
+!arrays
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3), ngqpt(3)
  integer,allocatable :: bz2ibz(:,:), ngqpt_list(:,:)
  real(dp) :: qshift(3,nqshft1), rlatt(3,3), qlatt(3,3)
  real(dp),allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:), broad_list(:)
- real(dp),allocatable :: energies(:), eig(:), mat(:), dos(:), idos(:), cauchy_ppart(:)
- complex(dp),allocatable :: cenergies(:), cweight(:,:)
+ real(dp),allocatable :: wmesh(:), eig(:), mat(:), dos(:), idos(:), cauchy_ppart(:)
+ complex(dp),allocatable :: zmesh(:), cweight(:,:)
 
 ! *********************************************************************
 
@@ -662,9 +682,9 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
      ABI_MALLOC(dos, (nw))
      ABI_MALLOC(idos, (nw))
      ABI_MALLOC(cauchy_ppart, (nw))
-     ABI_MALLOC(energies, (nw))
-     energies = linspace(emin, emax, nw)
-     ABI_MALLOC(cenergies, (nw))
+     ABI_MALLOC(wmesh, (nw))
+     wmesh = linspace(emin, emax, nw)
+     ABI_MALLOC(zmesh, (nw))
 
      if (my_rank == master) then
        write(std_out, *)" min, Max band energy: ", min_eig, max_eig
@@ -694,7 +714,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
        ])
        NCF_CHECK(ncerr)
        NCF_CHECK(nctk_set_datamode(ncid))
-       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wmesh"), energies))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wmesh"), wmesh))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt_list"), ngqpt_list))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "broad_list"), broad_list))
 #endif
@@ -710,8 +730,8 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 
      dos = zero; cauchy_ppart = zero
      do iq_ibz=1,nqibz
-       dos = dos - wtq_ibz(iq_ibz) * aimag(one / (energies - eig(iq_ibz) + j_dpc * broad)) / pi
-       cauchy_ppart = cauchy_ppart + wtq_ibz(iq_ibz) * real(one / (energies - eig(iq_ibz) + j_dpc * broad))
+       dos = dos - wtq_ibz(iq_ibz) * aimag(one / (wmesh - eig(iq_ibz) + j_dpc * broad)) / pi
+       cauchy_ppart = cauchy_ppart + wtq_ibz(iq_ibz) * real(one / (wmesh - eig(iq_ibz) + j_dpc * broad))
      end do
      call simpson_int(nw, dosdeltae, dos, idos)
      call ctrap(nw, dos, dosdeltae, int_dos)
@@ -719,7 +739,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 
      if (my_rank == master) then
        write(std_out, "(a, 3(f10.5,1x))") " int_dos, idos, rerr: ", int_dos, idos(nw), 100 * (int_dos - idos(nw)) / idos(nw)
-       !call write_file('parabola_gauss.dat', nw, energies, dos, idos, cauchy_ppart=cauchy_ppart)
+       !call write_file('parabola_gauss.dat', nw, wmesh, dos, idos, cauchy_ppart=cauchy_ppart)
 #ifdef HAVE_NETCDF
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "dos_simple"), dos, start=[1, ibroad, iq_mesh])
        NCF_CHECK(ncerr)
@@ -728,10 +748,10 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 #endif
      end if
 
-     cenergies = energies + j_dpc * broad
+     zmesh = wmesh + j_dpc * broad
 
      ! Compute weights using SIMTET routines and erange
-     call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 1, cweight, comm, &
+     call htetraq%weights_wvals_zinv(eig, nw, zmesh, max_occ1, nqibz, 1, cweight, comm, &
                                      erange=[min_eig * (one - tol2), max_eig * (one + tol2)])
 
      dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
@@ -749,7 +769,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
        NCF_CHECK(ncerr)
      end if
 
-     call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 1, cweight, comm)
+     call htetraq%weights_wvals_zinv(eig, nw, zmesh, max_occ1, nqibz, 1, cweight, comm)
 
      dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
      call simpson_int(nw, dosdeltae, dos, idos)
@@ -768,7 +788,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
      end if
 
      ! Use LV integration from TDEP
-     call htetraq%weights_wvals_zinv(eig, nw, cenergies, max_occ1, nqibz, 2, cweight, comm)
+     call htetraq%weights_wvals_zinv(eig, nw, zmesh, max_occ1, nqibz, 2, cweight, comm)
      dos(:)  = -sum(aimag(cweight(:,:)), dim=2) / pi
      call simpson_int(nw, dosdeltae, dos, idos)
      cauchy_ppart =  sum(real(cweight(:,:)), dim=2)
@@ -792,8 +812,8 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
    call htetraq%free()
  end do ! iq_mesh
 
- ABI_SFREE(energies)
- ABI_SFREE(cenergies)
+ ABI_SFREE(wmesh)
+ ABI_SFREE(zmesh)
  ABI_SFREE(dos)
  ABI_SFREE(idos)
  ABI_SFREE(cauchy_ppart)
@@ -804,7 +824,7 @@ subroutine tetra_zinv_convergence(ptgroup, use_symmetries, comm)
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF
- NCF_CHECK(nf90_close(ncid))
+   NCF_CHECK(nf90_close(ncid))
 #endif
  end if
 

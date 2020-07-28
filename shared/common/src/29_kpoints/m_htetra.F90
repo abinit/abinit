@@ -1296,9 +1296,9 @@ pure subroutine get_onetetra_blochl(eig, energies, nene, bcorr, tweight, dweight
 end subroutine get_onetetra_blochl
 !!***
 
-!!****f* m_htetra/get_ontetra_lambinvigneron
+!!****f* m_htetra/get_onetetra_lambinvigneron
 !! NAME
-!! get_ontetra_lambinvigneron
+!! get_onetetra_lambinvigneron
 !!
 !! FUNCTION
 !!  Compute the complex weights according to:
@@ -1317,7 +1317,7 @@ end subroutine get_onetetra_blochl
 !! SOURCE
 
 !pure
-subroutine get_ontetra_lambinvigneron(eig,z,cw)
+subroutine get_onetetra_lambinvigneron(eig,z,cw)
     ! dispersion values at the corners of the tetrahedron
     real(dp), intent(in) :: eig(4)
     ! energy to evaluate the weights at
@@ -1436,7 +1436,7 @@ subroutine get_ontetra_lambinvigneron(eig,z,cw)
     ! HM:check this
     cw = cw * two
 
-end subroutine get_ontetra_lambinvigneron
+end subroutine get_onetetra_lambinvigneron
 !!***
 
 !!****f* m_htetra/get_ontetratra_lambinvigneron_imag
@@ -1792,7 +1792,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
          verm = zvals(iz) - eig
          call SIM0TWOI(cw, VERLI, VERM)
        case(2)
-         call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
+         call get_onetetra_lambinvigneron(eig, zvals(iz), cw)
        end select
      else
        cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
@@ -1933,15 +1933,15 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
 
  ! For each bucket of tetrahedra
  do ihash=1,tetra%nbuckets
-   if (mod(ihash,nprocs) /= my_rank) cycle
+   if (mod(ihash, nprocs) /= my_rank) cycle
 
    ! For each tetrahedron
-   tetra_count = size(tetra%unique_tetra(ihash)%indexes,2)
+   tetra_count = size(tetra%unique_tetra(ihash)%indexes, dim=2)
    do itetra=1,tetra_count
 
      ! Get mapping of each summit to eig_ibz
      do isummit=1,4
-       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit,itetra)
+       ind_ibz(isummit) = tetra%unique_tetra(ihash)%indexes(isummit, itetra)
        eig(isummit) = eig_ibz(ind_ibz(isummit))
      end do
 
@@ -1958,7 +1958,7 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
      end select
 
      ! Acumulate the contributions
-     multiplicity = tetra%unique_tetra(ihash)%indexes(0,itetra)
+     multiplicity = tetra%unique_tetra(ihash)%indexes(0, itetra)
      do isummit=1,4
        ik_ibz = ind_ibz(isummit)
        dweight(:,ik_ibz) = dweight(:,ik_ibz) + dweight_tmp(isummit,:) * multiplicity * max_occ
@@ -2187,7 +2187,7 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, o
         case(1)
           verm = zvals(iz) - eig
           call SIM0TWOI(cw, VERLI, VERM)
-          !call get_ontetra_lambinvigneron(eig, zvals(iz), cw_lw)
+          !call get_onetetra_lambinvigneron(eig, zvals(iz), cw_lw)
           !if (any(abs(real(cw_lw(:)) / (two * real(cw(:)))) > 1.1)) then
           !  do ierr=1,4
           !    !write(std_out, *) "simte vs lw:", cw(ierr), cw_lw(ierr)
@@ -2195,7 +2195,7 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, o
           !  end do
           !end if
         case(2)
-          call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
+          call get_onetetra_lambinvigneron(eig, zvals(iz), cw)
         end select
        else
          cw = (one / (zvals(iz) - eig)) / four !* tetra%vv
@@ -2260,14 +2260,10 @@ pure subroutine sort_4tetra(list, perm)
  real(dp), intent(inout) :: list(4)
 
 !Local variables-------------------------------
- integer :: ia,ib,ic,id
- integer :: ilow1,ilow2,ihigh1,ihigh2
- integer :: ilowest,ihighest
- integer :: imiddle1,imiddle2
- real(dp) :: va,vb,vc,vd
- real(dp) :: vlow1,vlow2,vhigh1,vhigh2
- real(dp) :: vlowest,vhighest
- real(dp) :: vmiddle1,vmiddle2
+ integer :: ia,ib,ic,id,ilow1,ilow2,ihigh1,ihigh2
+ integer :: ilowest,ihighest,imiddle1,imiddle2
+ real(dp) :: va,vb,vc,vd,vlow1,vlow2,vhigh1,vhigh2
+ real(dp) :: vlowest,vhighest,vmiddle1,vmiddle2
 
  va = list(1); ia = perm(1)
  vb = list(2); ib = perm(2)
@@ -2307,11 +2303,11 @@ pure subroutine sort_4tetra(list, perm)
  endif
 
  if (vmiddle1 < vmiddle2) then
-     list = [vlowest,vmiddle1,vmiddle2,vhighest]
-     perm = [ilowest,imiddle1,imiddle2,ihighest]
+     list = [vlowest, vmiddle1, vmiddle2, vhighest]
+     perm = [ilowest, imiddle1, imiddle2, ihighest]
  else
-     list = [vlowest,vmiddle2,vmiddle1,vhighest]
-     perm = [ilowest,imiddle2,imiddle1,ihighest]
+     list = [vlowest, vmiddle2, vmiddle1, vhighest]
+     perm = [ilowest, imiddle2, imiddle1, ihighest]
  endif
 
 end subroutine sort_4tetra
@@ -2336,10 +2332,8 @@ pure subroutine sort_4tetra_int(list)
  integer, intent(inout) :: list(4)
 
 !Local variables-------------------------------
- integer :: va,vb,vc,vd
- integer :: vlow1,vlow2,vhigh1,vhigh2
- integer :: vlowest,vhighest
- integer :: vmiddle1,vmiddle2
+ integer :: va,vb,vc,vd, vlow1,vlow2,vhigh1,vhigh2
+ integer :: vlowest,vhighest, vmiddle1,vmiddle2
 
  va = list(1)
  vb = list(2)
@@ -2371,9 +2365,9 @@ pure subroutine sort_4tetra_int(list)
  endif
 
  if (vmiddle1 < vmiddle2) then
-     list = [vlowest,vmiddle1,vmiddle2,vhighest]
+     list = [vlowest, vmiddle1, vmiddle2, vhighest]
  else
-     list = [vlowest,vmiddle2,vmiddle1,vhighest]
+     list = [vlowest, vmiddle2, vmiddle1, vhighest]
  endif
 
 end subroutine sort_4tetra_int

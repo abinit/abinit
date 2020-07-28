@@ -324,7 +324,7 @@ logical function is_open_unit(unit)
  integer,intent(in) :: unit
 ! *********************************************************************
 
- inquire(unit=unit,opened=is_open_unit)
+ inquire(unit=unit, opened=is_open_unit)
 
 end function is_open_unit
 !!***

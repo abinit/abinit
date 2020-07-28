@@ -437,7 +437,7 @@ program abitk
    ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)
    ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default_list=[20, 20, 20]) == 0, msg)
    ABI_CHECK(get_arg("use-symmetries", use_symmetries, msg, default=1) == 0, msg)
-   call tetra_unittests(ptgroup, ngqpt, use_symmetries, comm)
+   call tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
 
  case ("tetra_zinv_convergence")
    ABI_CHECK(get_arg("ptgroup", ptgroup, msg, default="m-3m") == 0, msg)

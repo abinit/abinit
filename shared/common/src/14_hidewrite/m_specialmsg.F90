@@ -531,7 +531,7 @@ subroutine wrtout_myproc(unit, msg, do_flush) ! optional argument
 !******************************************************************
 
  print_std_err = (unit == std_out .and. std_out /= std_err .and. &
-   (index(trim(msg),'BUG')/=0.or.index(trim(msg),'ERROR')/=0))
+   (index(trim(msg), 'BUG') /= 0 .or. index(trim(msg), 'ERROR') /= 0))
 
  ! Print message
  call write_lines(unit, msg)
