@@ -165,7 +165,7 @@ nband8   8
 bs_freq_mesh8      0 10.0 0.1 eV
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

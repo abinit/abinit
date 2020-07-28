@@ -39,7 +39,7 @@
 ### FIXME
 #%% no_check = yes
 #%% [files]
-#%% psp_files = 14si.pspnc
+#%% psp_files = PseudosTM_pwteter/14si.pspnc
 ###%% files_to_test = t99.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 4

@@ -77,7 +77,7 @@
  znucl 14 12
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "14si.pspnc, 12mg.pspnc"
+ pseudos "PseudosTM_pwteter/14si.pspnc, PseudosTM_pwteter/12mg.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

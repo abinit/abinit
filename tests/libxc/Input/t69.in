@@ -46,7 +46,7 @@
 
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "C.xml, H4.GGA_X_PBE+GGA_C_PBE-paw.xml"
+ pseudos "Pseudodojo_paw_pbe_standard/C.xml, H4.GGA_X_PBE+GGA_C_PBE-paw.xml"
  
 #%%<BEGIN TEST_INFO>
 #%% [setup]

@@ -151,8 +151,8 @@ P           mkmem         1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/8o.pspnc
-- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/8o.pspnc
+- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
    8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -868,8 +868,8 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/8o.pspnc
-- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/8o.pspnc
+- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
    8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1534,8 +1534,8 @@ P newkpt: treating      7 bands with npw=     258 for ikpt=   1 by node    0
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.06487
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/8o.pspnc
-- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/8o.pspnc
+- pspini: atom type   1  psp file is /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/franco/ABINIT-OLDCODE/6.1.2-private/tmp_gcc44/../tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
    8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

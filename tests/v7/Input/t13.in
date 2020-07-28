@@ -55,7 +55,7 @@ tolwfr 1.e-8
 #shiftk 3*0.0
 
  pp_dirpath "$ABI_PSPDIR"
- pseudos "6c.pspnc"
+ pseudos "PseudosTM_pwteter/6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

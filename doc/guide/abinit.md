@@ -120,7 +120,8 @@ value is provided by giving the name of the input variable and then placing
 the numerical value(s) beside the name, separated by one or more spaces, or
 even an equal sign (equal signs are replaced by blanks by the parser).
 Depending on the input variable, the numerical value may be an integer or a
-real number (internal representation as double precision number), and may
+real number (internal representation as double precision number), or 
+a character string (delimited with double quotes) and may
 actually represent an array of values. If it represents an array, the next set
 of numbers separated by spaces are taken as the values for the array.
 
@@ -185,6 +186,15 @@ ABINIT has also some (very limited) interpretor capabilities:
     At most, a sqrt identifier can contain an expression that uses a fraction (e.g. sqrt(3/4) is OK), 
     but two fractions (or two sqrt) cannot be used in one expression, and a sqrt cannot be present 
     in the numerator or denominator of a fraction. 
+
+  * A string might be formed by concatenating two strings with the // operator (even blanks before or after // are accepted)
+
+  * Environment variables are accepted, in the form $VAR where VAR is the name of the environment variable.
+    The end of the name of the environment variable, VAR, is determined by finding the closest separator 
+    among a blank, a slash, or a double quote. 
+    The parser will automatically substitute the value of the environment variable to the $VAR string.
+    As an example, "$PSPDIR/PseudosHGH_pwteter" with PSPDIR being Psps_for_tests will give
+    "Psps_for_tests/PseudosHGH_pwteter".
 
 Comments should be placed to the right of the comment characters # or !;
 anything to the right of a "#" or a "!" on any line is simply ignored by the
