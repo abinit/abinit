@@ -257,7 +257,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(esymm_t),pointer :: QP_sym(:)
  integer :: ilwrk
  integer :: neig(Er%nomega_i)
- real(dp) :: epsm1_ev(Sigp%npwc)
+ real(gwp) :: epsm1_ev(Sigp%npwc)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
  complex(gwpc),allocatable :: rhotw_epsm1_rhotw(:,:,:)
 
