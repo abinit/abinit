@@ -256,6 +256,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
 #ifdef FBFB
+ integer :: ilwrk
  integer :: neig(Er%nomega_i)
  real(dp) :: epsm1_ev(Sigp%npwc)
  complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
@@ -759,17 +760,24 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          !FBFB
 #ifdef FBFB
          call timab(444,1,tsec) ! ac_lrk_diag
+         ac_epsm1cqwz2(:,:,:) = czero_gw
          do iiw=1,Er%nomega_i
+           ! Use the available MPI tasks to parallelize over iw'
+           if ( Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
            z2=gl_knots(iiw)*gl_knots(iiw)
            ac_epsm1cqwz2(:,:,iiw)= gl_wts(iiw)*epsm1_qbz(:,:,Er%nomega_r+iiw)/z2
+
+           ! (epsm1-1) has negative eigenvalues
+           ! after the diago, they will be sorted starting from the most negative
            call xheev('V','L',npwc,ac_epsm1cqwz2(:,:,iiw),epsm1_ev)
            neig(iiw) = neig(1)
-           do ig=1,neig(iiw)
-             ac_epsm1cqwz2(:,ig,iiw) = ac_epsm1cqwz2(:,ig,iiw) * SQRT( -epsm1_ev(ig) )
+           do ilwrk=1,neig(iiw)
+             ac_epsm1cqwz2(:,ilwrk,iiw) = ac_epsm1cqwz2(:,ilwrk,iiw) * SQRT( -epsm1_ev(ilwrk) )
            end do
-           !write(500+iiw,'(a,1x,i5,1x,i5)') '#',npwc,COUNT(ABS(epsm1_ev(:))<1.0e-3)
-           !write(500+iiw,'(1x,es16.6)') epsm1_ev(:)
          end do
+         if ( Dtset%gwpara == 2 ) then
+           call xmpi_sum(ac_epsm1cqwz2, Wfd%comm, ierr)
+         endif
          call timab(444,2,tsec) ! ac_lrk_diag
 #else
          do iiw=1,Er%nomega_i
