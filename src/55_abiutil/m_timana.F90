@@ -489,7 +489,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(440)='calc_sigc_me(wfd_barrier        '
  names(441)='calc_sigc_me(xmpi_sum)          '
  names(442)='calc_sigc_me(final ops)         '
- names(443)='calc_sigc_me(ac_lowrank)        '
+ names(443)='calc_sigc_me(ac_lrk_appl)       '
+ names(444)='calc_sigc_me(ac_lrk_diag)       '
 
  names(445)='calc_sigc_me(loop)              '
 
@@ -1750,8 +1751,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if !ncount
      end if !xmpi_paral
 
-     nlist=23
-     list(:23)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,804,805,331,332,333/)
+     nlist=25
+     list(:25)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)

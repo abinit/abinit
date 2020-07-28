@@ -309,6 +309,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  open(unit=1000)
  read(1000,*) neig(1)
  close(1000)
+ neig(1) = MIN(neig(1),sigp%npwc)
  write(*,*) 'neig=',neig(1)
 #endif
 
@@ -510,7 +511,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    omegap(:)=one/gl_knots(:)-one
    omegap2(:)=omegap(:)*omegap(:)
    ABI_MALLOC(ac_epsm1cqwz2, (npwc, npwc, Er%nomega_i))
+#ifndef FBFB
    ABI_MALLOC(ac_integr, (npwc, npwc, Sr%nomega_i))
+#endif
  end if
 
  ! Calculate total number of frequencies and allocate related arrays.
@@ -748,10 +751,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        if (mod10==SIG_GW_AC) then
          ! Prepare the first term: \Sum w_i 1/z_i^2 f(1/z_i-1)..
          ! The first frequencies are always real, skip them.
-         ! Memory is not optimized.
 
          !FBFB
 #ifdef FBFB
+         call timab(444,1,tsec) ! ac_lrk_diag
          do iiw=1,Er%nomega_i
            z2=gl_knots(iiw)*gl_knots(iiw)
            ac_epsm1cqwz2(:,:,iiw)= gl_wts(iiw)*epsm1_qbz(:,:,Er%nomega_r+iiw)/z2
@@ -763,6 +766,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            !write(500+iiw,'(a,1x,i5,1x,i5)') '#',npwc,COUNT(ABS(epsm1_ev(:))<1.0e-3)
            !write(500+iiw,'(1x,es16.6)') epsm1_ev(:)
          enddo
+         call timab(444,2,tsec) ! ac_lrk_diag
 #else
          do iiw=1,Er%nomega_i
            z2=gl_knots(iiw)*gl_knots(iiw)
@@ -915,17 +919,26 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(437,2,tsec) ! rho_tw_g
 
 #ifdef FBFB
-       call timab(443,1,tsec) ! ac_lowrank
-      !FBFB
-      do iiw=1,Er%nomega_i
-        ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
-        ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
-        call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
-&                 rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
-        call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
-        ABI_FREE(epsm1_sqrt_rhotw)
-      enddo
-       call timab(443,2,tsec) ! ac_lowrank
+       call timab(443,1,tsec) ! ac_lrk_appl
+      
+       rhotw_epsm1_rhotw(:,:,:) = czero_gw
+       do iiw=1,Er%nomega_i
+         ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
+         ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
+         call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
+&                  rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
+         call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
+
+         ! Get the upper part of rhotw_epsm1_rhotw
+         ! that is hermitian by construction
+         do jb=minbnd,maxbnd
+           do kb=jb+1,maxbnd
+             rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG( rhotw_epsm1_rhotw(kb,jb,iiw) )
+           enddo
+         enddo
+         ABI_FREE(epsm1_sqrt_rhotw)
+       enddo
+       call timab(443,2,tsec) ! ac_lrk_appl
 #endif
 
        do kb=ib1,ib2
@@ -1390,6 +1403,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  if (allocated(ac_integr)) then
    ABI_FREE(ac_integr)
  end if
+#ifdef FBFB
+ if (allocated(rhotw_epsm1_rhotw)) then
+   ABI_FREE(rhotw_epsm1_rhotw)
+ endif
+#endif
+
  if (allocated(aherm_sigc_ket)) then
    ABI_FREE(aherm_sigc_ket)
  end if
