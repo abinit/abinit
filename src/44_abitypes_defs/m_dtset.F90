@@ -189,14 +189,14 @@ type, public :: dataset_type
  integer :: gwcomp
  integer :: gwgamma
  integer :: gwrpacorr
- integer :: gw1rdm  ! MRM
+ integer :: gw1rdm = 0  ! MRM
  integer :: gw_customnfreqsp
  integer :: gw_invalid_freq
  integer :: gw_qprange
  integer :: gw_nqlwl
  integer :: gw_nstep
  integer :: gw_sigxcore
- integer :: x1rdm  ! MRM
+ integer :: x1rdm  = 0 ! MRM
 
  ! GWLS
  integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine

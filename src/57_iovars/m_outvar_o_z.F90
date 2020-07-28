@@ -1452,6 +1452,9 @@ contains
  dprarr(1,:)=dtsets(:)%xc_tb09_c
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_tb09_c','DPR',0)
 
+ intarr(1,:)=dtsets(:)%x1rdm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'x1rdm','INT',0)
+
 !xred
  prtimg(:,:)=1
  do idtset=0,ndtset_alloc
