@@ -893,25 +893,26 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
        call timab(443,1,tsec) ! ac_lrk_appl
       
-       rhotw_epsm1_rhotw(:,:,:) = czero_gw
-       do iiw=1,Er%nomega_i
-         ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
-         ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
-         call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
-&                  rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
-         call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
+       if (mod10==SIG_GW_AC) then
+         rhotw_epsm1_rhotw(:,:,:) = czero_gw
+         do iiw=1,Er%nomega_i
+           ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
+           ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
+           call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
+&                    rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
+           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
 
-         ! Get the upper part of rhotw_epsm1_rhotw
-         ! that is hermitian by construction
-         do jb=minbnd,maxbnd
-           do kb=jb+1,maxbnd
-             rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG( rhotw_epsm1_rhotw(kb,jb,iiw) )
+           ! Get the upper part of rhotw_epsm1_rhotw
+           ! that is hermitian by construction
+           do jb=minbnd,maxbnd
+             do kb=jb+1,maxbnd
+               rhotw_epsm1_rhotw(jb,kb,iiw) = CONJG( rhotw_epsm1_rhotw(kb,jb,iiw) )
+             end do
            end do
+           ABI_FREE(epsm1_sqrt_rhotw)
          end do
-         ABI_FREE(epsm1_sqrt_rhotw)
-       end do
-       call timab(443,2,tsec) ! ac_lrk_appl
-
+         call timab(443,2,tsec) ! ac_lrk_appl
+       endif
 
        do kb=ib1,ib2
          call timab(438,1,tsec) ! (2)
