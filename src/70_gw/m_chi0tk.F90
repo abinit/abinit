@@ -34,9 +34,9 @@ MODULE m_chi0tk
  use m_wfd
 
  use defs_datatypes, only : ebands_t
- use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, em1params_t, j_gw
+ use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, one_gw, em1params_t, j_gw
  use m_fstrings, only : sjoin, itoa
- use m_hide_blas,     only : xgerc, xgemm
+ use m_hide_blas,only : xgerc, xgemm, xherk, xher
  use m_crystal,  only : crystal_t
  use m_gsphere,  only : gsphere_t, gsph_gmg_idx, gsph_gmg_fftidx
  use m_bz_mesh,  only : littlegroup_t, kmesh_t, has_BZ_item
@@ -132,12 +132,13 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 !Local variables-------------------------------
 !scalars
  integer :: itim,io,isym,ig1,ig2,nthreads
+ integer :: isymop,nsymop
+ real(gwp) :: dr
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
  integer :: Sm1_gmG0(Ep%npwe)
- complex(gwpc) :: rhotwg_sym(Ep%npwe)
- !complex(gwpc),allocatable :: rhotwg_I(:),rhotwg_J(:)
+ complex(gwpc),allocatable :: rhotwg_sym(:,:)
 
 ! *************************************************************************
 
@@ -148,27 +149,21 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
  SELECT CASE (Ep%symchi)
  CASE (0)
    ! Do not use symmetries
-   if (nthreads==1 .or. Ep%nomega>=nthreads) then
-     ! MKL_10.3 xgerc is not threaded. BTW: single precision is faster (sometimes factor ~2).
-!$omp parallel do private(dd)
-     do io=1,Ep%nomega
-       dd = green_w(io)
-       call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
-     end do
-   else
-!$omp parallel private(dd)
-     do io=1,Ep%nomega
-       dd = green_w(io)
-!$omp do
-       do ig2=1,Ep%npwe
-         do ig1=1,Ep%npwe
-           chi0(ig1,ig2,io) = chi0(ig1,ig2,io) + dd * rhotwg(ig1) * GWPC_CONJG(rhotwg(ig2))
-         end do
-       end do
-!$omp end do NOWAIT
-     end do
-!$omp end parallel
-   end if
+
+   ! note that single precision is faster (sometimes factor ~2).
+   ! Rely on MKL threads for OPENMP parallelization
+
+   do io=1,Ep%nomega
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! if yes, the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp ) then
+       dr=green_w(io)
+       call xher('U',Ep%npwe,dr,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgerc(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     endif
+   end do
 
  CASE (1)
    ! Use symmetries to reconstruct the integrand in the BZ.
@@ -189,6 +184,11 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
    ! these arrays, usually, do not conform to rho_twg_sym(npw) !
    !
    ! Loop over symmetries of the space group and time-reversal.
+   nsymop = count(Ltg_q%wtksym(:,:,ik_bz)==1)
+   ABI_MALLOC(rhotwg_sym,(Ep%npwe,nsymop))
+   isymop = 0
+
+   ! Prepare all the rhotwg at once to use BLAS level 3 routines
    do isym=1,Ltg_q%nsym_sg
      do itim=1,Ltg_q%timrev
        if (Ltg_q%wtksym(itim,isym,ik_bz)==1) then
@@ -199,43 +199,35 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
          !gmG0 => Ltg_q%igmG0(1:Ep%npwe,itim,isym)
          Sm1_gmG0(1:Ep%npwe) = Gsph_epsG0%rottbm1( Ltg_q%igmG0(1:Ep%npwe,itim,isym), itim,isym)
 
+         isymop = isymop + 1
          SELECT CASE (itim)
          CASE (1)
-           rhotwg_sym(1:Ep%npwe) = rhotwg(Sm1_gmG0) * Gsph_epsG0%phmGt(1:Ep%npwe,isym)
+           rhotwg_sym(1:Ep%npwe,isymop) = rhotwg(Sm1_gmG0) * Gsph_epsG0%phmGt(1:Ep%npwe,isym)
          CASE (2)
-           rhotwg_sym(1:Ep%npwe) = GWPC_CONJG(rhotwg(Sm1_gmG0))*Gsph_epsG0%phmGt(1:Ep%npwe,isym)
+           rhotwg_sym(1:Ep%npwe,isymop) = GWPC_CONJG(rhotwg(Sm1_gmG0))*Gsph_epsG0%phmGt(1:Ep%npwe,isym)
          CASE DEFAULT
            MSG_BUG(sjoin('Wrong itim:', itoa(itim)))
          END SELECT
-
-         ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
-         if (nthreads==1 .or. Ep%nomega>=nthreads) then
-           ! MKL_10.3 xgerc is not threaded. BTW: single precision is faster (sometimes factor ~2).
-!$omp parallel do private(dd)
-           do io=1,Ep%nomega
-             dd=green_w(io)
-             call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_sym,1,rhotwg_sym,1,chi0(:,:,io),Ep%npwe)
-           end do
-
-         else
-           !write(std_out,*)"in new with nthreads = ",nthreads
-!$omp parallel private(dd)
-           do io=1,Ep%nomega
-             dd=green_w(io)
-!$omp do
-             do ig2=1,Ep%npwe
-               do ig1=1,Ep%npwe
-                 chi0(ig1,ig2,io) = chi0(ig1,ig2,io) + dd * rhotwg_sym(ig1) * GWPC_CONJG(rhotwg_sym(ig2))
-               end do
-             end do
-!$omp end do NOWAIT
-           end do
-!$omp end parallel
-         end if
        end if
-
      end do
    end do
+
+   ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
+   ! note that single precision is faster (sometimes factor ~2).
+   ! Rely on MKL threads for OPENMP parallelization
+   do io=1,Ep%nomega
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! if yes, the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp ) then
+       dr=green_w(io)
+       call xherk('U','N',Ep%npwe,nsymop,dr,rhotwg_sym,Ep%npwe,one_gw,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgemm('N','C',Ep%npwe,Ep%npwe,nsymop,dd,rhotwg_sym,Ep%npwe,rhotwg_sym,Ep%npwe,cone_gw,chi0(:,:,io),Ep%npwe)
+     endif
+   end do
+
+   ABI_FREE(rhotwg_sym)
 
  CASE DEFAULT
    MSG_BUG(sjoin('Wrong symchi:', itoa(Ep%symchi)))
