@@ -270,6 +270,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_CHECK(Sigp%npwc==Gsph_c%ng,"")
  ABI_CHECK(Sigp%npwvec==Gsph_Max%ng,"")
 
+ mod10=MOD(Sigp%gwcalctyp,10)
+
  call timab(424,1,tsec) ! calc_sigc_me
  call timab(431,1,tsec) ! calc_sigc_me
  call timab(432,1,tsec) ! Init
@@ -312,7 +314,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(w_maxval,(minbnd:maxbnd))
  w_maxval = zero
 
- if ( ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
+ if ( ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call Wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
  gwc_mgfft   = MAXVAL(gwc_ngfft(1:3))
  gwc_fftalga = gwc_ngfft(7)/100 !; gwc_fftalgc=MOD(gwc_ngfft(7),10)
 
@@ -332,17 +334,21 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
       end if
     end do
    end if
-   if (wfd%nspinor == 2) MSG_WARNING("Symmetrization with nspinor=2 not implemented")
+   if (Wfd%nspinor == 2) MSG_WARNING("Symmetrization with nspinor=2 not implemented")
  end if
 
  ABI_UNUSED(Pawang%l_max)
 
  ! Print type of calculation.
- mod10=MOD(Sigp%gwcalctyp,10); sigma_type = sigma_type_from_key(mod10)
+ sigma_type = sigma_type_from_key(mod10)
  call wrtout(std_out,sigma_type,'COLL')
 
  ! Set up logical flags for Sigma calculation
  if (mod10==SIG_GW_AC.and.Sigp%gwcalctyp/=1) then
+   MSG_ERROR("not implemented")
+ end if
+
+ if (mod10==SIG_GW_AC.and.Sigp%gwcomp==1) then
    MSG_ERROR("not implemented")
  end if
 
@@ -355,7 +361,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Initialize some values
  nspinor = Wfd%nspinor
- npwc = sigp%npwc
+ npwc = Sigp%npwc
  spinor_padc(:,:)=RESHAPE([0, 0, npwc, npwc, 0, npwc, npwc, 0], [2, 4])
  ABI_MALLOC(npoles_missing,(minbnd:maxbnd))
  npoles_missing=0
@@ -526,20 +532,26 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ABI_MALLOC(sigctmp,(nomega_sigc,Sigp%nsig_ab))
  sigctmp=czero_gw
- ABI_MALLOC(sigc_ket, (npwc*nspinor, nomega_sigc))
+ if (mod10/=SIG_GW_AC) then
+   ABI_MALLOC(sigc_ket, (npwc*nspinor, nomega_sigc))
+ endif
 
+#if 0
+ !TODO gmatteo: these arrays are never used in practice. Should we remove them?
  ! Arrays storing the contribution given by the Hermitian/anti-Hermitian part of \Sigma_c
  ABI_MALLOC(aherm_sigc_ket, (npwc*nspinor, nomega_sigc))
  ABI_MALLOC( herm_sigc_ket, (npwc*nspinor, nomega_sigc))
+#endif
 
  sigcme_tmp=czero
 
  ABI_MALLOC(sigc,(2,nomega_sigc,ib1:ib2,ib1:ib2,Wfd%nsppol*Sigp%nsig_ab))
  sigc=czero
 
- !FIXME This quantities are only used for model GW if I am not wrong
- ABI_MALLOC(ket1, (npwc*nspinor, nomega_tot))
- ABI_MALLOC(ket2, (npwc*nspinor, nomega_tot))
+ if( mod10==SIG_QPGW_PPM .or. mod10==SIG_QPGW_CD ) then
+   ABI_MALLOC(ket1, (npwc*nspinor, nomega_tot))
+   ABI_MALLOC(ket2, (npwc*nspinor, nomega_tot))
+ endif
  ABI_MALLOC(omegame0i,(nomega_tot))
 
  ! Here we divide the states where the QP energies are required into complexes. Note however that this approach is not
@@ -606,7 +618,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    ! Load wavefunctions for GW corrections
    ! TODO: Rotate the functions here instead of calling rho_tw_g
    ABI_MALLOC(wfr_bdgw,(gwc_nfftot*nspinor,ib1:ib2))
-   call wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
+   call Wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
 
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
@@ -615,7 +627,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
-       call wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+       call Wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
        call paw_symcprj(jk_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        call pawcprj_copy(Cprj_ksum,Cprj_kgw(:,ibsp:ibsp+(nspinor-1)))
        ibsp=ibsp+nspinor
@@ -625,7 +637,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_MALLOC(ur_ae_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        ABI_MALLOC(ur_ps_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        do jb=ib1,ib2
-         call wfdf%paw_get_aeur(jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+         call Wfdf%paw_get_aeur(jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &          ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          ur_ae_bdgw(:,jb)=ur_ae_sum
          ur_ae_onsite_bdgw(:,jb)=ur_ae_onsite_sum
@@ -751,12 +763,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        if (mod10==SIG_GW_AC) then
 
          call timab(444,1,tsec) ! ac_lrk_diag
-         ! Important to set to zero here for all procs since we're going to use a dirty reduction later
+         ! Important to set to zero here for all procs since we're going to use a dirty reduction later 
+         ! The reduction 'xmpi_sum' does not induce a significant performance loss in the tested systems
          ac_epsm1cqwz2(:,:,:) = czero_gw
          do iiw=1,Er%nomega_i
            ! Use the available MPI tasks to parallelize over iw'
            if ( Dtset%gwpara == 2 .and. MODULO(iiw-1,Wfd%nproc) /= Wfd%my_rank ) CYCLE
-
          
            ! Prepare the integration weights w_i 1/z_i^2 f(1/z_i-1)..
            ! The first frequencies are always real, skip them.
@@ -805,16 +817,16 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ! This processor has this k-point but what about spin?
        if (proc_distrb(ib,ik_bz,spin)/=Wfd%my_rank) CYCLE
 
-       call wfd%get_ur(ib,ik_ibz,spin,ur_ibz)
+       call Wfd%get_ur(ib,ik_ibz,spin,ur_ibz)
 
        if (Psps%usepaw==1) then
          ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call wfd%get_cprj(ib,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+         call Wfd%get_cprj(ib,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
          if (Dtset%pawcross==1) then
-           call wfdf%paw_get_aeur(ib,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+           call Wfdf%paw_get_aeur(ib,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &              ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if
@@ -866,9 +878,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              npw_k = Wfd%npwarr(ik_ibz)
              rhotwg_ki(1, jb) = zero; rhotwg_ki(npwc+1, jb) = zero
              if (ib==jb) then
-               ABI_CHECK(wfd%get_wave_ptr(ib, ik_ibz, spin, wave_sum, msg) == 0, msg)
+               ABI_CHECK(Wfd%get_wave_ptr(ib, ik_ibz, spin, wave_sum, msg) == 0, msg)
                cg_sum => wave_sum%ug
-               ABI_CHECK(wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
+               ABI_CHECK(Wfd%get_wave_ptr(jb, jk_ibz, spin, wave_jb, msg) == 0, msg)
                cg_jb  => wave_jb%ug
                ctmp = xdotc(npw_k, cg_sum(1:), 1, cg_jb(1:), 1)
                rhotwg_ki(1,jb)=CMPLX(SQRT(Vcp%i_sz),0.0_gwp) * real(ctmp)
@@ -925,17 +937,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
          ! Get the ket \Sigma|\phi_{k,kb}> according to the method.
          rhotwgp(:)=rhotwg_ki(:,kb)
-         sigc_ket  = czero_gw
-         ket1      = czero_gw
-         ket2      = czero_gw
-         !aherm_sigc_ket = czero_gw
-         ! herm_sigc_ket = czero_gw
 
          SELECT CASE (mod10)
          CASE (SIG_GW_PPM)
            ! GW WITH Plasmon-Pole Model.
            ! Note that ppmodel 3 or 4 work only in case of standard perturbative approach!
            ! Moreover, for ppmodel 3 and 4, spinorial case is not allowed
+           sigc_ket  = czero_gw
            call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
 &           omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,sigc_ket,sigcme_3)
 
@@ -953,6 +961,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Check if pole contributions need to be summed
            ! (this avoids unnecessary splint calls and saves time)
            !me_calc_poles = .TRUE.
+           sigc_ket  = czero_gw
            do io=1,nomega_tot
              if (omegame0i(io)>=zero.AND.(ABS(one-theta_mu_minus_e0i)>zero)) then
                !me_calc_poles(io) = .TRUE.
@@ -980,7 +989,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 &              Er%omega,epsm1_trcc_qbz,omegame0i,theta_mu_minus_e0i,aherm_sigc_ket,Dtset%ppmfrq,npoles_missing(kb),&
 &               method=Dtset%cd_frqim_method)
 
-              herm_sigc_ket = half*(sigc_ket + aherm_sigc_ket)
+             herm_sigc_ket  = half*(sigc_ket + aherm_sigc_ket)
              aherm_sigc_ket = half*(sigc_ket - aherm_sigc_ket)
            else
              herm_sigc_ket  = sigc_ket
@@ -992,6 +1001,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! MODEL GW calculation WITH PPm  TODO Spinor not tested.
            ! Calculate \Sigma(E_k) |k> to obtain <j|\Sigma(E_k)|k>
            ABI_MALLOC(sigcme_new,(nomega_tot))
+           sigc_ket  = czero_gw
+           ket1      = czero_gw
+           ket2      = czero_gw
 
            call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
 &            omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket1,sigcme_new)
@@ -1027,6 +1039,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Check if pole contributions need to be summed
            ! (this avoids unnecessary splint calls and saves time)
            !me_calc_poles = .TRUE.
+           sigc_ket  = czero_gw
+           ket1      = czero_gw
+           ket2      = czero_gw
+
            do io=1,nomega_tot
              if (omegame0i(io)>=zero.AND.(ABS(one-theta_mu_minus_e0i)>zero)) then
                !me_calc_poles(io) = .TRUE.
@@ -1204,8 +1220,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  call timab(440,2,tsec) ! wfd_barrier
  call timab(441,1,tsec) ! xmpi_sum
 
- call xmpi_sum(sigcme_tmp, wfd%comm, ierr)
- call xmpi_sum(sigc, wfd%comm, ierr)
+ call xmpi_sum(sigcme_tmp, Wfd%comm, ierr)
+ call xmpi_sum(sigc, Wfd%comm, ierr)
  call timab(441,2,tsec) ! xmpi_sum
 
  ! Multiply by constants. In 3D systems sqrt(4pi) is included in vc_sqrt_qbz ===
@@ -1221,9 +1237,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  do spin=1,Wfd%nsppol
    if (can_symmetrize(spin)) then
      if (mod10==SIG_GW_AC) then ! FIXME here there is a problem in case of AC with symmetries
-       ABI_MALLOC(sym_cme, (Sr%nomega_i, ib1:ib2, ib1:ib2, sigp%nsig_ab))
+       ABI_MALLOC(sym_cme, (Sr%nomega_i, ib1:ib2, ib1:ib2, Sigp%nsig_ab))
      else
-       ABI_MALLOC(sym_cme, (nomega_tot, ib1:ib2, ib1:ib2, sigp%nsig_ab))
+       ABI_MALLOC(sym_cme, (nomega_tot, ib1:ib2, ib1:ib2, Sigp%nsig_ab))
      end if
      sym_cme=czero
 
@@ -1237,7 +1253,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            if (nspinor == 1) then
              sym_cme(:, ib, ib, 1) = sym_cme(:, ib, ib, 1) + SUM(sigc(:,:,jb,jb,spin), DIM=1)
            else
-             do ii=1,sigp%nsig_ab
+             do ii=1,Sigp%nsig_ab
                sym_cme(:, ib, ib, ii) = sym_cme(:, ib, ib, ii) + SUM(sigc(:,:,jb,jb,ii), dim=1)
              end do
            end if
@@ -1260,7 +1276,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          if (nspinor == 1) then
            sigcme_tmp(:,ib,jb,spin) = sym_cme(:,ib,jb,1)
          else
-           do ii=1,sigp%nsig_ab
+           do ii=1,Sigp%nsig_ab
              sigcme_tmp(:,ib,jb,ii) = sym_cme(:,ib,jb,ii)
            end do
          end if
@@ -1282,7 +1298,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! GW with contour deformation: check on the number of poles not included.
  if (ANY(mod10 == [SIG_GW_CD,SIG_QPGW_CD])) then
-   call xmpi_sum(npoles_missing, wfd%comm, ierr)
+   call xmpi_sum(npoles_missing, Wfd%comm, ierr)
    npls = SUM(npoles_missing)
    if (npls>0) then
      MSG_WARNING(sjoin("Total number of missing poles for contour deformation method:", itoa(npls)))
@@ -1296,7 +1312,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end if
    ! Print data on the maximum value needed for the screening along the real axis
    w_localmax = MAXVAL(w_maxval)
-   call xmpi_max(w_localmax,w_max, wfd%comm, ierr)
+   call xmpi_max(w_localmax,w_max, Wfd%comm, ierr)
    write(msg,'(a,f12.5,a)') ' Max omega value used in W(omega): ',w_max*Ha_eV,' [eV]'
    call wrtout(std_out,msg,"COLL")
  end if
@@ -1328,8 +1344,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(usr_bz)
  ABI_FREE(ktabr)
  ABI_FREE(sigc_ket)
- ABI_FREE(ket1)
- ABI_FREE(ket2)
  ABI_FREE(rhotwg_ki)
  ABI_FREE(rhotwg)
  ABI_FREE(rhotwgp)
@@ -1339,6 +1353,12 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(sigc)
  ABI_FREE(w_maxval)
 
+ if (allocated(ket1)) then
+   ABI_FREE(ket1)
+ endif
+ if (allocated(ket2)) then
+   ABI_FREE(ket2)
+ endif
  if (allocated(epsm1_qbz)) then
    ABI_FREE(epsm1_qbz)
  end if
