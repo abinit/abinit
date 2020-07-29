@@ -1334,7 +1334,6 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
    nctkarr_t('hhartree', "dp",'cplex, nbgw, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigmee', "dp", 'cplex, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigcmee0', "dp",'cplex, nbgw, number_of_kpoints, ndim_sig'),&
-   nctkarr_t('sigcmesi', "dp",'cplex, nbgw, number_of_kpoints, ndim_sig'),&
    nctkarr_t('sigcme4sd', "dp",'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('sigxcme4sd', "dp", 'cplex, nbgw, number_of_kpoints, nomega4sd, ndim_sig'),&
    nctkarr_t('ze0',"dp", 'cplex, nbgw, number_of_kpoints, number_of_spins'),&
@@ -1357,6 +1356,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  if (Sr%nomega_i>0) then
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t('sigxcmesi', "dp", 'cplex, nbgw, number_of_kpoints, nomega_i, ndim_sig'),&
+     nctkarr_t('sigcmesi', "dp",'cplex, nbgw, number_of_kpoints, nomega_i, ndim_sig'),&
      nctkarr_t('omega_i', "dp", 'cplex, nomega_i')])
    NCF_CHECK(ncerr)
  end if
