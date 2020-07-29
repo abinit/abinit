@@ -114,12 +114,13 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 
-subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_epsG0,chi0)
+subroutine assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_epsG0,chi0)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in) :: is_metallic
  integer,intent(in) :: ik_bz,npwepG0,nspinor
  type(gsphere_t),intent(in) :: Gsph_epsG0
  type(littlegroup_t),intent(in) :: Ltg_q
@@ -155,8 +156,9 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
 
    do io=1,Ep%nomega
      ! Check if green_w(io) is real (=> pure imaginary omega)
-     ! if yes, the corresponding chi0(io) is hermitian
-     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp ) then
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
        dr=green_w(io)
        call xher('U',Ep%npwe,dr,rhotwg,1,chi0(:,:,io),Ep%npwe)
      else
@@ -217,8 +219,9 @@ subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_e
    ! Rely on MKL threads for OPENMP parallelization
    do io=1,Ep%nomega
      ! Check if green_w(io) is real (=> pure imaginary omega)
-     ! if yes, the corresponding chi0(io) is hermitian
-     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp ) then
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
        dr=green_w(io)
        call xherk('U','N',Ep%npwe,nsymop,dr,rhotwg_sym,Ep%npwe,one_gw,chi0(:,:,io),Ep%npwe)
      else

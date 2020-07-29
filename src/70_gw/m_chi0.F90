@@ -41,7 +41,7 @@ module m_chi0
  use m_crystal,         only : crystal_t
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt
  use m_occ,             only : getnel
- use m_ebands,          only : pack_eneocc, unpack_eneocc
+ use m_ebands,          only : pack_eneocc, unpack_eneocc, ebands_has_metal_scheme
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_BZ_item, get_BZ_diff, &
 &                              littlegroup_t, littlegroup_print, littlegroup_free, littlegroup_init
  use m_gsphere,         only : gsphere_t, gsph_fft_tabs, gsph_in_fftbox, gsph_free, print_gsphere
@@ -220,9 +220,9 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 !scalars
  integer,parameter :: tim_fourdp=1,enough=10,two_poles=2,one_pole=1,ndat1=1
  integer :: bandinf,bandsup,lcor,nspinor,npw_k,istwf_k,mband,nfft,band1c,band2c
- integer :: band1,band2,iat1,iat2,iat,ig,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
+ integer :: band1,band2,iat1,iat2,iat,ig,ig1,ig2,itim_k,ik_bz,ik_ibz,io,iqlwl,ispinor1,ispinor2,isym_k,il1,il2
  integer :: itypatcor,m1,m2,nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,use_padfftf,mgfftf
- integer :: my_nbbp,my_nbbpks,spin,nsppol !ig1,ig2,
+ integer :: my_nbbp,my_nbbpks,spin,nsppol
  integer :: comm,ierr,my_wl,my_wr,iomegal,iomegar,gw_mgfft,dummy
  real(dp) :: cpu_time,wall_time,gflops
  real(dp) :: fac,fac1,fac2,fac3,fac4,spin_fact,deltaf_b1b2,weight,factor
@@ -231,7 +231,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  real(dp) :: wl,wr,numerator,deltaeGW_b1b2
  real(dp) :: gw_gsq,memreq
  complex(dpc) :: deltaeKS_b1b2
- logical :: qzero,luwindow
+ logical :: qzero,luwindow,is_metallic
  character(len=500) :: msg_tmp,msg,allup
  type(gsphere_t) :: Gsph_FFT
  type(wave_t),pointer :: wave1, wave2
@@ -286,6 +286,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  ABI_CHECK(Wfd%nfftot==nfftot_gw,"Wrong nfftot_gw")
  dim_rtwg=1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
 
+ is_metallic = ebands_has_metal_scheme(QP_BSt)
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
@@ -980,15 +981,18 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG what about metals, where we have poles around zero?
- !  do io=1,Ep%nomega
- !    if (ABS(REAL(Ep%omega(io)))<0.00001) then
- !      do ig2=1,Ep%npwe
- !        do ig1=1,ig2-1
- !         chi0(ig2,ig1,io)=GWPC_CONJG(chi0(ig1,ig2,io))
- !        end do
- !      end do
- !    end if
- !  end do
+ ! FB because of the intraband term, chi0 is never hermitian in case of metals
+ if (.not. is_metallic) then
+   do io=1,Ep%nomega
+     if (ABS(REAL(Ep%omega(io)))<0.00001) then
+       do ig2=1,Ep%npwe
+         do ig1=1,ig2-1
+          chi0(ig2,ig1,io)=GWPC_CONJG(chi0(ig1,ig2,io))
+         end do
+       end do
+     end if
+   end do
+ end if
  !
  ! =====================
  ! ==== Free memory ====
@@ -1214,7 +1218,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  real(dp) :: gw_gsq,memreq
  complex(dpc) :: ph_mkmqt,ph_mkt
  complex(gwpc) :: local_czero_gw
- logical :: qzero,isirred_k,isirred_kmq,luwindow
+ logical :: qzero,isirred_k,isirred_kmq,luwindow,is_metallic
  character(len=500) :: msg,allup
  type(gsphere_t) :: Gsph_FFT
 !arrays
@@ -1246,6 +1250,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  nsppol = Wfd%nsppol; nspinor = Wfd%nspinor
+ is_metallic = ebands_has_metal_scheme(QP_BSt)
  ucrpa_bands(1)=dtset%ucrpa_bands(1)
  ucrpa_bands(2)=dtset%ucrpa_bands(2)
  luwindow=.false.
@@ -1791,7 +1796,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
              green_w=green_w*fac
            endif
 
-           call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
+           call assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
 
          CASE (1, 2)
            ! Spectral method (not yet adapted for nspinor=2)
@@ -1911,6 +1916,9 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG what about metals, where we have poles around zero?
+ ! FB because of the intraband term, chi0 is never hermitian in case of metals
+ ! FIXME: as of today, hermitianity is also enforced for metallic systems
+ !if (.not. is_metallic) then
  do io=1,Ep%nomega
    if (ABS(REAL(Ep%omega(io))) <0.00001) then
      do ig2=1,Ep%npwe
@@ -1920,6 +1928,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      end do
    end if
  end do
+ !endif
 
  ! === Symmetrize chi0 in case of AFM system ===
  ! Reconstruct $chi0{\down,\down}$ from $chi0{\up,\up}$.
@@ -2066,7 +2075,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  integer,parameter :: tim_fourdp1=1,two_poles=2,one_pole=1,ndat1=1
  integer,parameter :: unitdos0=0,option1=1,NOMEGA_PRINTED=15
  integer :: nqlwl,nband_k,iomega,istwf_k,npw_k,my_nband,lbidx
- integer :: band,itim_k,ik_bz,ik_ibz,io,isym_k,spin,iqlwl!,gw_eet !ig,ig1,ig2,my_nbbp,my_nbbpks
+ integer :: band,itim_k,ik_bz,ik_ibz,io,isym_k,spin,iqlwl !ig,ig1,ig2,my_nbbp,my_nbbpks
  integer :: nkpt_summed,dim_rtwg,use_padfft,gw_fftalga,ifft
  integer :: kptopt,isym,nsppol,nspinor
  integer :: comm,ierr,gw_mgfft,use_umklp,inclvkb
@@ -2075,7 +2084,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  real(dp),parameter :: dummy_dosdeltae=HUGE(zero)
  real(dp) :: o_entropy,o_nelect,maxocc
  complex(dpc) :: ph_mkt
- logical :: iscompatibleFFT !,ltest
+ logical :: iscompatibleFFT,is_metallic !,ltest
  character(len=500) :: msg,msg_tmp !,allup
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q
@@ -2116,6 +2125,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  nsppol  = Wfd%nsppol
  nspinor = Wfd%nspinor
+ is_metallic = ebands_has_metal_scheme(BSt)
 
  gw_mgfft = MAXVAL(ngfft_gw(1:3))
  gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
@@ -2413,7 +2423,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
        end if
 
        ! ==== Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?) ====
-       call assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
+       call assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,Ep%npwepG0,rhotwg,Gsph_epsG0,chi0)
      end do !band
    end do !ik_bz
  end do !spin
@@ -2462,17 +2472,15 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
  ! Impose Hermiticity (valid only for zero or purely imaginary frequencies)
  ! MG what about metals, where we have poles around zero?
- !if (dtset%gw_eet/=-1) then
- !  do io=1,Ep%nomega
- !    if (ABS(REAL(Ep%omega(io)))<0.00001) then
- !      do ig2=1,Ep%npwe
- !        do ig1=1,ig2-1
- !         chi0(ig2,ig1,io)=CONJG(chi0(ig1,ig2,io))
- !        end do
+ !do io=1,Ep%nomega
+ !  if (ABS(REAL(Ep%omega(io)))<0.00001) then
+ !    do ig2=1,Ep%npwe
+ !      do ig1=1,ig2-1
+ !       chi0(ig2,ig1,io)=CONJG(chi0(ig1,ig2,io))
  !      end do
- !    end if
- !  end do
- !end if
+ !    end do
+ !  end if
+ !end do
 
  do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
    write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0_intra(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
