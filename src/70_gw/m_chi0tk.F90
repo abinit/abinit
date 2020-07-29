@@ -644,11 +644,12 @@ end subroutine symmetrize_afm_chi0
 !!
 !! SOURCE
 
-subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,Cryst,Ltg_q,Gsph_epsG0,&
+subroutine accumulate_chi0_q0(is_metallic,ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,Cryst,Ltg_q,Gsph_epsG0,&
 & chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
 
 !Arguments ------------------------------------
 !scalars
+ logical,intent(in) :: is_metallic
  integer,intent(in) :: ik_bz,isym_kbz,itim_kbz,npwepG0,nspinor,gwcomp
  real(dp),intent(in) :: deltaf_b1b2
  type(littlegroup_t),intent(in) :: Ltg_q
@@ -667,12 +668,14 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
 !Local variables-------------------------------
 !scalars
  integer :: itim,io,isym,idir,jdir
+ integer :: isymop,nsymop
+ real(gwp) :: dr
  complex(gwpc) :: dd
  !character(len=500) :: msg
 !arrays
  integer,ABI_CONTIGUOUS pointer :: Sm1G(:)
  complex(dpc) :: mir_kbz(3)
- complex(gwpc),allocatable :: rhotwg_sym(:)
+ complex(gwpc),allocatable :: rhotwg_sym(:,:)
  complex(gwpc), ABI_CONTIGUOUS pointer :: phmGt(:)
 
 !************************************************************************
@@ -689,11 +692,20 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
    !    rhotwg(1)= S^-1q * rhotwx_ibz
    !    rhotwg(1)=-S^-1q * CONJG(rhotwx_ibz) if time-reversal is used.
 
-   ! Multiply elements G1,G2 of rhotwg_sym by green_w(io) and accumulate in chi0(G1,G2,io)
-!$omp parallel do private(dd)
+   ! Multiply elements G1,G2 of rhotwg by green_w(io) and accumulate in chi0(G1,G2,io)
+
+   ! Rely on MKL threads for OPENMP parallelization
    do io=1,Ep%nomega
-     dd=green_w(io)
-     call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
+       dr=green_w(io)
+       call xher('U',Ep%npwe,dr,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgerc(Ep%npwe,Ep%npwe,dd,rhotwg,1,rhotwg,1,chi0(:,:,io),Ep%npwe)
+     endif
    end do
 
    ! === Accumulate heads and wings for each small q ===
@@ -736,7 +748,10 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
 
  CASE (1)
    ! Use symmetries to reconstruct the integrand.
-   ABI_MALLOC(rhotwg_sym, (Ep%npwe))
+
+   nsymop = count(Ltg_q%wtksym(:,:,ik_bz)==1)
+   ABI_MALLOC(rhotwg_sym,(Ep%npwe,nsymop))
+   isymop = 0
 
    ! Loop over symmetries of the space group and time-reversal.
    do isym=1,Ltg_q%nsym_sg
@@ -747,21 +762,16 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
          phmGt => Gsph_epsG0%phmGt  (1:Ep%npwe,isym) ! In the 2 lines below note the slicing (1:npwe)
          Sm1G  => Gsph_epsG0%rottbm1(1:Ep%npwe,itim,isym)
 
+         isymop = isymop + 1
          SELECT CASE (itim)
          CASE (1)
-           rhotwg_sym(1:Ep%npwe)=rhotwg(Sm1G(1:Ep%npwe))*phmGt(1:Ep%npwe)
+           rhotwg_sym(1:Ep%npwe,isymop)=rhotwg(Sm1G(1:Ep%npwe))*phmGt(1:Ep%npwe)
          CASE (2)
-           rhotwg_sym(1:Ep%npwe)=CONJG(rhotwg(Sm1G(1:Ep%npwe)))*phmGt(1:Ep%npwe)
+           rhotwg_sym(1:Ep%npwe,isymop)=CONJG(rhotwg(Sm1G(1:Ep%npwe)))*phmGt(1:Ep%npwe)
          CASE DEFAULT
            MSG_BUG(sjoin('Wrong value of itim:', itoa(itim)))
          END SELECT
 
-         ! Multiply elements G1,G2 of rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
-!$omp parallel do private(dd)
-         do io=1,Ep%nomega
-           dd=green_w(io)
-           call XGERC(Ep%npwe,Ep%npwe,dd,rhotwg_sym,1,rhotwg_sym,1,chi0(:,:,io),Ep%npwe)
-         end do
 
          ! === Accumulate heads and wings for each small q ===
          ! FIXME extrapolar method should be checked!!
@@ -778,13 +788,13 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
          ! here we might take advantage of Hermiticity along Im axis in RPA (see mkG0w)
          do idir=1,3
            do io=1,Ep%nomega
-             chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym)
-             chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym*CONJG(mir_kbz(idir))
+             chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
+             chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
              ! Add contribution due to extrapolar technique.
              !if (gwcomp==1.and.ABS(deltaf_b1b2)>=GW_TOL_DOCC) then
              if (gwcomp==1) then
-               chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym)
-               chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_sym*CONJG(mir_kbz(idir))
+               chi0_uwing(:,io,idir) = chi0_uwing(:,io,idir) + green_enhigh_w(io) * mir_kbz(idir)*CONJG(rhotwg_sym(:,isymop))
+               chi0_lwing(:,io,idir) = chi0_lwing(:,io,idir) + green_enhigh_w(io) * rhotwg_sym(:,isymop)*CONJG(mir_kbz(idir))
              end if
            end do
          end do
@@ -806,6 +816,22 @@ subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,
        end if !wtksym
      end do !itim
    end do !isym
+
+   ! Multiply rhotwg_sym by green_w(io) and accumulate in chi0(G,Gp,io)
+   ! note that single precision is faster (sometimes factor ~2).
+   ! Rely on MKL threads for OPENMP parallelization
+   do io=1,Ep%nomega
+     ! Check if green_w(io) is real (=> pure imaginary omega)
+     ! and that it is not a metal
+     ! then the corresponding chi0(io) is hermitian
+     if( ABS(AIMAG(green_w(io))) < 1.0e-6_dp .and. .not. is_metallic ) then
+       dr=green_w(io)
+       call xherk('U','N',Ep%npwe,nsymop,dr,rhotwg_sym,Ep%npwe,one_gw,chi0(:,:,io),Ep%npwe)
+     else
+       dd=green_w(io)
+       call xgemm('N','C',Ep%npwe,Ep%npwe,nsymop,dd,rhotwg_sym,Ep%npwe,rhotwg_sym,Ep%npwe,cone_gw,chi0(:,:,io),Ep%npwe)
+     endif
+   end do
 
    ABI_FREE(rhotwg_sym)
 
