@@ -30,6 +30,7 @@ inp_files = [
 "t15.in", # check slight misalignment of rprim, with large tolsym
 # GW/BSE
 "t21.in", # HF exchange checking q->0 terms
+"t22.in", # AC GW
 # DFPT
 "t41.in",
 "t42.in",
