@@ -208,7 +208,8 @@ module m_sigmaph
 
   integer :: zinv_opt = 1
    ! Defines the algorithm used to compute the tetrahedron weights for 1/z if re-im computation
-   ! 1 for S. Kaprzyk routines, 2 for Lambin.
+   ! 1 for S. Kaprzyk routines,
+   ! 2 for Lambin-Vigneron.
 
   integer :: ntheta, nphi
    ! Number of division for spherical integration of Frohlich term.
@@ -1447,7 +1448,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              else if (out_resid < zero) then
                MSG_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
              else if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
-               write(std_out, "(2(a,es13.5),a,i0,2a)") &
+               write(std_out, "(2(a,es13.5),/, a,i0,2a)") &
                  " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
                  " after ", nlines_done, " iterations. wall-time: ", trim(sec2str(wall_stern))
                !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
@@ -2217,7 +2218,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, occopt3 = 3, qptopt1 = 1, sppoldbl1 = 1, istwfk1 = 1
+ integer,parameter :: master = 0, qptopt1 = 1, sppoldbl1 = 1, istwfk1 = 1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
  integer :: onpw, ii, ipw, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
  integer :: jj, bstart, natom, natom3 !, ip, iatom, idir, pertcase,
@@ -2267,6 +2268,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ! Decide default behaviour for Re-Im/Im
  new%qint_method = dtset%eph_intmeth - 1
 
+ ! Define option for integration of 1/z with tetrahedron method.
+ new%zinv_opt = 1; if (dtset%userie /= 0) new%zinv_opt = dtset%userie
+
  ! Broadening parameter from zcut
  new%ieta = + j_dpc * dtset%zcut
 
@@ -2303,16 +2307,6 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
  gaps = ebands_get_gaps(ebands, gap_err)
- if (gap_err /= 0) then
-   ! In case of error try to enforce semiconductor occupations before calling ebands_get_gaps
-   ! This might still fail though...
-   call gaps%free()
-   call ebands_copy(ebands, tmp_ebands)
-   call ebands_set_scheme(tmp_ebands, occopt3, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol, update_occ=.False.)
-   call ebands_set_extrael(tmp_ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
-   gaps = ebands_get_gaps(tmp_ebands, gap_err)
-   call ebands_free(tmp_ebands)
- end if
 
  ! Frequency mesh for sigma(w) and spectral functions.
  ! TODO: Use GW variables but change default
@@ -4832,8 +4826,10 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    if (sigma%nwr > 0) zvals(2:sigma%nwr+1, :) = sigma%wrmesh_b(:, 1:nbcalc_ks) + sigma%ieta
 
    ! Loop over my bands in self-energy sum.
-   ! TODO: Really slow if nz >> 1, reduce the number of ibsum_kq bands for which tetra must be used.
-   ! or use spline with non-linear mesh
+   ! TODO: Really slow if nz >> 1. Possible solutions:
+   ! 1) reduce the number of ibsum_kq bands for which tetra must be used.
+   ! 2) use spline with non-linear mesh
+   ! 3) use asyntotic expansion at "large" z
    do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
      ! Loop over my phonon modes
      do imyp=1,sigma%my_npert
@@ -4841,8 +4837,10 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
        ! cweights(nz, 2, nbsigma, self%nq_k)
        call sigma%ephwg%get_zinv_weights(nz, nbcalc_ks, zvals, ibsum_kq, spin, nu, sigma%zinv_opt, tmp_cweights, &
-                                         xmpi_comm_self) !  use_bzsum=sigma%symsigma == 0)
+                                         xmpi_comm_self)
                                          !sigma%qpt_comm%value)
+                                         !erange=
+                                         !use_bzsum=sigma%symsigma == 0)
 
        ! Extract weights for all the q-points that I am going to calculate.
        do imyq=1,sigma%my_nqibz_k
@@ -4855,7 +4853,6 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
    ABI_FREE(zvals)
    ABI_FREE(tmp_cweights)
-
  end if
 
  call cwtime_report(" get_all_qweights with tetrahedron", cpu, wall, gflops)

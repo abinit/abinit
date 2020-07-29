@@ -894,17 +894,21 @@ end subroutine ephwg_get_deltas_qibzk
 !! INPUTS
 !! nz: Number of frequencies
 !! nbcalc=Number of bands in self-energy matrix elements.
-!! zvals
+!! zvals(nw): z-values
 !! iband_sum = band index in self-energy sum. (global index i.e. unshifted)
 !! spin=Spin index
 !! nu=Phonon branch index
-!! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
+!! zinv_opt:
+!!   1 for S. Kaprzyk routines,
+!!   2 for Lambin-Vigneron.
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
 !!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
 !!   If use_bzsum is set to True, the Nstar(q) coefficient is removed so that the caller can
 !!   integrate over the BZ without using symmetries.
-!!
+!!  [erange(2)]: if present, weights are computed with an approximated asyntotic expression if
+!!   real(z) is outside of this interval and with tetra if inside.
+
 !! OUTPUT
 !!  cweights(nz, 2, nbcalc, %nq_k)  (plus, minus)
 !!  include weights for BZ integration.
@@ -915,24 +919,27 @@ end subroutine ephwg_get_deltas_qibzk
 !!
 !! SOURCE
 
-subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, opt, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, zinv_opt, cweights, comm, use_bzsum, erange)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, opt, comm
+ integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, zinv_opt, comm
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
-!arraye
+!arrays
  complex(dpc),intent(in) :: zvals(nz, nbcalc)
  complex(dpc),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
+ real(dp),optional,intent(in) :: erange(2)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
  integer :: iq_ibz, ikpq_ibz, ib, ii, iq, nprocs, my_rank, ierr
  real(dp),parameter :: max_occ1 = one
+ real(dp) :: emin, emax
  logical :: use_bzsum_
 !arrays
+ real(dp) :: my_erange(2)
  real(dp),allocatable :: pme_k(:,:)
  complex(dp),allocatable :: cweights_tmp(:,:)
 !----------------------------------------------------------------------
@@ -940,6 +947,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
+ my_erange = [-huge(one), huge(one)]; if (present(erange)) my_erange = erange
 
  ! Allocate array for e_{k+q, b} +- w_{q,nu)
  ABI_MALLOC(pme_k, (self%nq_k, 2))
@@ -952,34 +960,28 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
    pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
+ ! As this part is quite demanding, especially when nz is large, use input z-mesh
+ ! when we are inside the window in which the denominator can blow up (+- some tolerance)
+ ! Outside the window, downsample the mesh use to compute the weights and spline the results.
+ if (zinv_opt == 2) then
+   emin = minval(self%eigkbs_ibz(:, ib, spin))
+   emax = maxval(self%eigkbs_ibz(:, ib, spin))
+   !my_erange = [emin - half * abs(emin), emax + half * abs(emax)]
+   my_erange = [emin - tol2 * abs(emin), emax + tol2 * abs(emax)]
+ end if
+
  cweights = zero
  ABI_MALLOC(cweights_tmp, (nz, self%nq_k))
 
  do ib=1,nbcalc
    do ii=1,2
-     call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:, ib), max_occ1, self%nq_k, opt, cweights_tmp, comm)
+     call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:, ib), max_occ1, self%nq_k, zinv_opt, &
+                                          cweights_tmp, comm, erange=my_erange)
      do iq=1,self%nq_k
        cweights(:, ii, ib, iq) = cweights_tmp(:, iq)
      end do
    end do
  end do
-
- ! As this part is quite demanding, especially when nz is large, use input z-mesh
- ! when we are inside the window in which the denominator can blow up (+- some tolerance)
- ! Outside the window, downsample the mesh use to compute the weights and spline the results.
-#if 0
-  e_min = minval(self%eigkbs_ibz(:, ib, spin) - self%max_phfrq
-  e_max = maxval(self%eigkbs_ibz(:, ib, spin) + self%max_phfrq
-  iz_min = 0, iz_max = 0
-  do iz=1, nz
-    if (real(zvals(iz, ib)) > e_min .and. iz_min /= 0) then
-      iz_min = iz
-    end if
-    if (real(zvals(iz, ib)) > e_max .and. iz_min /= 0 .and. iz_max /= 0) then
-      iz_max = iz; exit
-    end if
-  end do
-#endif
 
  ABI_FREE(cweights_tmp)
 
@@ -987,7 +989,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  !if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
 
  ABI_FREE(pme_k)
- call xmpi_sum(cweights, comm, ierr)
+ !call xmpi_sum(cweights, comm, ierr)
 
 end subroutine ephwg_get_zinv_weights
 !!***
