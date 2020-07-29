@@ -1343,7 +1343,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(ur_ibz)
  ABI_FREE(usr_bz)
  ABI_FREE(ktabr)
- ABI_FREE(sigc_ket)
  ABI_FREE(rhotwg_ki)
  ABI_FREE(rhotwg)
  ABI_FREE(rhotwgp)
@@ -1353,6 +1352,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(sigc)
  ABI_FREE(w_maxval)
 
+ if (allocated(sigc_ket)) then
+   ABI_FREE(sigc_ket)
+ endif
  if (allocated(ket1)) then
    ABI_FREE(ket1)
  endif
