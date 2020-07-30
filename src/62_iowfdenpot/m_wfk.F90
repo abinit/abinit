@@ -5175,11 +5175,10 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, comm)
  call owfk%close()
 
  ! Rename files, keep backup copy of input WFK file.
- ABI_CHECK(clib_rename(my_inpath, strcat(my_inpath, ".bkp")) == 0, "Failed to rename input WFK file.")
+ call delete_file(my_inpath, ierr)
+ ABI_CHECK(ierr == 0, sjoin("Cannot remove OLD file:", my_inpath))
+ !ABI_CHECK(clib_rename(my_inpath, strcat(my_inpath, ".bkp")) == 0, "Failed to rename input WFK file.")
  ABI_CHECK(clib_rename(out_wfkpath, my_inpath) == 0, "Failed to rename output WFK file.")
-
- !open(unit=1234, iostat=stat, file=file, status='old')
- !if (stat == 0) close(1234, status='delete')
 
  call cwtime_report(" WFK with fine k-mesh written to file.", cpu, wall, gflops)
 

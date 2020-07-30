@@ -902,6 +902,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
 
  call xmpi_sum(sigma%vcar_calc, comm, ierr)
+
+ if (sigma%mrta > 0) then
+   !ABI_ICALLOC(vcar_calc_ibz_computed, (nkpt, nsppol))
+   !ABI_CALLOC(vcar_calc_ibz, (3, sigma%max_nbcalc, nkpt, nsppol))
+   !do spin=1,nsppol
+   !  do ikcalc=1,sigma%nkcalc
+   !   ik_ibz = sigma%kcalc2ibz(ikcalc)
+   !   vcar_calc_ibz(:,:, ik_ibz, spin) = sigma%vcar_calc_ibz(:, :, ikcalc, spin)
+   !   vcar_calc_ibz_computed(ik_ibz, spin)) = 1
+   !end do
+   !end do
+   !ABI_SFREE(vcar_calc_ibz)
+ end if
+
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
  ! Write results to disk.
@@ -1325,6 +1339,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
        !end if
 
+       ! Prepare DDK operator only if (k+q) is not alreay computed via nkcalc
+       ! that is if the k+q is slightly outside the sigma_erange window.
+       !if (sigma%mrta > 0 .and. vcar_calc_ibz_computed(ikq_ibz, spin)) == 0) then
        if (sigma%mrta > 0) then
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
        end if
@@ -1636,8 +1653,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          weight_q = sigma%wtq_k(iq_ibz)
 
          if (sigma%mrta > 0) then
-           ! Precompute alpha coefficients.
+
+           !if (vcar_calc_ibz_computed(ikq_ibz, spin)) == 1) then
+           !   vkq = vcar_calc_ibz(:, ibsum_kq, ikq_ibz, spin)
+           !   if (.not. isirr_kq) then
+           !     vkq = matmul(cryst%symrel_cart(:,:,isym_kq), vkq)
+           !     if (trev_kq =/ 0) vkq = -vkq
+           !   end if
+           !else
+
+           ! Need to crecompute alpha coefficients here if kq is slightly outside the Sigma_erange window.
            vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
+           !end if
+
            do ib_k=1,nbcalc_ks
              vk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm = sqrt(dot_product(vk, vk))

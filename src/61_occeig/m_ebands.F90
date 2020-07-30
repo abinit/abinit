@@ -746,7 +746,7 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
        csi_c =  gaps%cb_min(spin) - mu_e(itemp)
        csi_v = -gaps%vb_max(spin) + mu_e(itemp)
        write(msg, "(f6.1, 1x, 4(f9.3, 1x))") &
-         kTmesh(itemp) / kb_HaK, kTmesh(itemp), mu_e(itemp) * Ha_eV, csi_v * Ha_eV,  csi_c * Ha_eV
+         kTmesh(itemp) / kb_HaK, kTmesh(itemp) * Ha_eV, mu_e(itemp) * Ha_eV, csi_v * Ha_eV,  csi_c * Ha_eV
        call wrtout(unt, msg)
      end do
      call wrtout(unt, "")
