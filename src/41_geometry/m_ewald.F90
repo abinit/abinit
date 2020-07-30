@@ -126,8 +126,10 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- if(icutcoul.ne.3) then
+ if(icutcoul.eq.2) then
    eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3))))
+ else if (icutcoul.eq.1) then
+   eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
