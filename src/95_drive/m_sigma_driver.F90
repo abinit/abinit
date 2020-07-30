@@ -239,22 +239,23 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose ! MRM new gw1rdm and verbose
+ integer :: ib1dm,ib2dm,order_int,ifreqs,gaussian_kind,gw1rdm,x1rdm,verbose,icutcoul_eff,usefock_ixc,nqlwl,xclevel_ixc ! MRM new gw1rdm and verbose
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
- real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy ! MRM 
+ real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi,eh_energy,coef_hyb ! MRM 
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
- real(dp):: gwalpha,gwbeta,wmin,wmax,coef_hyb_tmp,eik_new  ! MRM
+ real(dp):: gwalpha,gwbeta,wmin,wmax,eik_new,rcut  ! MRM
  complex(dpc) :: max_degw,cdummy,delta_band_ibik   ! MRM
- logical :: hyb_tmp,wfknocheck                     ! MRM
+ logical :: wfknocheck                             ! MRM
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname ! MRM
  type(kmesh_t) :: Kmesh,Qmesh
  type(ebands_t) :: KS_BSt,QP_BSt
  type(vcoul_t) :: Vcp
+ type(vcoul_t) :: Vcp_ks,Vcp_full  ! MRM
  type(crystal_t) :: Cryst
  type(Energies_type) :: KS_energies,QP_energies
  type(Epsilonm1_results) :: Er
@@ -279,7 +280,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:) ! MRM
+ real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:),gw_rhog(:,:),gw_vhartr(:),qlwl(:,:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -426,24 +427,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! ===============================================
  ! * Sigp is completetly initialized here.
  ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in mkdump_Er
- call timab(403,1,tsec) ! ,hyb_tmpsetup_sigma
+ call timab(403,1,tsec) ! setup_sigma
 
- ! MRM only used for Hybrids (not local hybrids)
- if(gwcalctyp==21 .and. gw1rdm>3) then
-   hyb_tmp=.TRUE.
-   coef_hyb_tmp=0.0_dp
-   if(abs(Dtset%hyb_mixing+999.000)<tol8) then
-     coef_hyb_tmp=0.0_dp
-   else
-     coef_hyb_tmp=abs(Dtset%hyb_mixing)
-   endif
-   call setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
-   & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm,hyb_tmp)
- else
-   coef_hyb_tmp=0.0_dp
-   call setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
-   & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
- endif
+ call setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
+ & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_sigma,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
  call timab(403,2,tsec) ! setup_sigma
  call timab(402,1,tsec) ! Init1
@@ -2478,26 +2465,14 @@ endif
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
      ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
      ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
       ! MRM compute 1-RDM correction?
       if(gwcalctyp==21 .and. gw1rdm>0) then 
 !       Compute for Sigma_x - Vxc or DELTA Sigma_x - Vxc.(DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals)
-        potk(ib1:ib2,ib1:ib2)=((1.0d0-coef_hyb_tmp)*Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1))-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
+        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=czero
-
-        !
-        ! Print diagonal elements? (Debug)
-        !
-        !write(1000+my_rank,'(a13)') '<ks|Kx_ks|ks>'
-        !write(1000+my_rank,'(a13)') '<ks|Vh_ks|ks>'
-        !do ib1dm=ib1,ib2
-        !  write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(Sr%x_mat(ib1dm,ib1dm,ikcalc,1))
-        !  !write(1000+my_rank,'(a2,*(f10.5))') '  ',REAL(KS_me%vhartree(ib1dm,ib1dm,ikcalc,1))
-        !enddo
-
         call calc_rdmx(ib1,ib2,ikcalc,0,verbose,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange corrected one for this k-point
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
@@ -2513,35 +2488,6 @@ endif
    call xmpi_barrier(Wfd%comm)
    call timab(421,2,tsec) ! calc_sigx_me
 
-   ! Print initial Vee = J + K  components 
-   if(gw1rdm>3 .and. gwcalctyp==21) then
-     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a46)')' Vee[HF-like] energy obtained using KS 1-RDM:'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     eh_energy=me_get_haene(Sr,KS_me,Kmesh,QP_BSt)
-     write(msg,'(a,2(es16.6,a))')' Eh[KS]     = : ',eh_energy,' Ha ,',eh_energy*Ha_eV,' eV'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)
-     write(msg,'(a,2(es16.6,a))')' Ex[KS]     = : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a,2(es16.6,a))')' Vee[KS]    = : ',(ex_energy+eh_energy),' Ha ,',(ex_energy+eh_energy)*Ha_eV,' eV'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     write(msg,'(a98)')'-------------------------------------------------------------------------------------------------'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-   end if
-
-   if(gwcalctyp==21) then
-     write(msg,'(a1)')' '
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-   endif
    ! ==========================================================
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
@@ -2671,19 +2617,80 @@ endif
        !
        ! Exchange <NO_i|K[NO]|NO_j> and save old K and new J matrices
        !
+       rcut=Dtset%rcut
+       icutcoul_eff=Dtset%icutcoul
+       if (Dtset%gw_nqlwl==0) then
+         nqlwl=1
+         ABI_MALLOC(qlwl,(3,nqlwl))
+         qlwl(:,1)= GW_Q0_DEFAULT
+       else
+         nqlwl=Dtset%gw_nqlwl
+         ABI_MALLOC(qlwl,(3,nqlwl))
+         qlwl(:,:)=Dtset%gw_qlwl(:,1:nqlwl)
+       end if
+        ! Use a Vcp_full to compute the full Coulomb interaction for NOs
+       if (Gsph_x%ng > Gsph_c%ng) then
+         call vcoul_init(Vcp_full,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+          Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+       else
+         call vcoul_init(Vcp_full,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+          Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+       end if
+        ! Use a Vcp_ks to compute the Coulomb interaction already present in the Fock part of the Kohn-Sham Hamiltonian
+       coef_hyb=zero
+       call get_xclevel(Dtset%ixc,xclevel_ixc,usefock_ixc) ! usefock is 0 for 0.0 Fock contrib in KS-GS calc
+       if(usefock_ixc==1)then
+         if(abs(Dtset%hyb_mixing)>tol8) then
+           coef_hyb=abs(Dtset%hyb_mixing)
+           if(abs(coef_hyb-999.0d0)>tol8) then ! HF
+             coef_hyb=1.0d0
+           endif
+         else if(abs(Dtset%hyb_mixing_sr)>tol8)then
+           coef_hyb=abs(Dtset%hyb_mixing_sr)
+           icutcoul_eff=5
+         endif
+         if(abs(rcut)<tol6 .and. abs(Dtset%hyb_range_fock)>tol8) then
+           rcut=one/Dtset%hyb_range_fock
+         endif
+       endif
+       if (Gsph_x%ng > Gsph_c%ng) then
+         call vcoul_init(Vcp_ks,Gsph_x,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+          Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+       else
+         call vcoul_init(Vcp_ks,Gsph_c,Cryst,Qmesh,Kmesh,rcut,icutcoul_eff,Dtset%vcutgeo,&
+          Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+       end if
+       ABI_FREE(qlwl)
+        ! Now compute the "residual" Coulomb interactions. 
+       Vcp_full%vc_sqrt_resid=Vcp_full%vc_sqrt
+       Vcp_full%i_sz_resid=Vcp_full%i_sz
+       Vcp_ks%vc_sqrt_resid=sqrt(coef_hyb*Vcp_ks%vc_sqrt**2)
+       Vcp_ks%i_sz_resid=coef_hyb*Vcp_ks%i_sz
+        ! Now compute the matrix elements and save them on Sr%x_mat 
        do ikcalc=1,Sigp%nkptgw                                                 
          ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irreducible k-point for GW
          ib1=MINVAL(Sigp%minbnd(ikcalc,:))       ! min and max band indices for GW corrections (for this k-point)
          ib2=MAXVAL(Sigp%maxbnd(ikcalc,:))
-         do ib=b1gw,b2gw
-           old_purex(ib,ikcalc)=coef_hyb_tmp*Sr%x_mat(ib,ib,ikcalc,1) ! Save old <i|K[KS]|i> from the GS calc. for Delta eik
-           new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)    ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
-         enddo
-         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),& 
+         if(coef_hyb>tol8) then
+           call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,KS_BSt,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),& ! Notice we need KS occs and band energy diffs       
+           & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&     ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
+           & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+           do ib=b1gw,b2gw
+             old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)            ! Save old <i|K[KS]|i> from the GS calc. for Delta eik
+             new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
+           enddo
+         else
+           do ib=b1gw,b2gw
+             new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
+           enddo
+         endif
+         call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp_full,Kmesh,Qmesh,Ltg_k(ikcalc),& 
          & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd_nato_all,Wfdf,QP_sym,&     ! Build <NO_i|Sigma_x[NO]|NO_j> matrix
          & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
        end do
        call xmpi_barrier(Wfd%comm)
+       call vcoul_free(Vcp_ks)
+       call vcoul_free(Vcp_full)
        ex_energy=sigma_get_exene(Sr,Kmesh,QP_BSt)                            ! Save the new total exchange energy 
        !
        ! Transform      <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>
@@ -3145,14 +3152,13 @@ end subroutine sigma
 !! SOURCE
 
 subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawtab,&
-& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm,hyb_tmp)
+& gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
  !use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- logical,intent(in),optional :: hyb_tmp
  character(len=8),intent(in) :: codvsn
  character(len=*),intent(in) :: wfk_fname
  type(Datafiles_type),intent(in) :: Dtfil
@@ -3954,14 +3960,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
         Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
      end if
 
-!    Now compute the residual Coulomb interaction. MRM added hyb_tmp
-     if(present(hyb_tmp)) then
-       Vcp%vc_sqrt_resid=Vcp%vc_sqrt
-       Vcp%i_sz_resid=Vcp%i_sz
-     else
-       Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
-       Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
-     endif
+!    Now compute the residual Coulomb interaction. 
+     Vcp%vc_sqrt_resid=sqrt(Vcp%vc_sqrt**2-Sigp%sigma_mixing*Vcp_ks%vc_sqrt**2)
+     Vcp%i_sz_resid=Vcp%i_sz-Sigp%sigma_mixing*Vcp_ks%i_sz
 !    The mixing factor has already been accounted for, so set it back to one
      Sigp%sigma_mixing=one
      call vcoul_free(Vcp_ks)
