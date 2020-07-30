@@ -963,12 +963,12 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  ! As this part is quite demanding, especially when nz is large, use input z-mesh
  ! when we are inside the window in which the denominator can blow up (+- some tolerance)
  ! Outside the window, downsample the mesh use to compute the weights and spline the results.
- if (zinv_opt == 2) then
-   emin = minval(self%eigkbs_ibz(:, ib, spin))
-   emax = maxval(self%eigkbs_ibz(:, ib, spin))
-   !my_erange = [emin - half * abs(emin), emax + half * abs(emax)]
-   my_erange = [emin - tol2 * abs(emin), emax + tol2 * abs(emax)]
- end if
+ !if (zinv_opt == 2) then
+ !  emin = minval(self%eigkbs_ibz(:, ib, spin))
+ !  emax = maxval(self%eigkbs_ibz(:, ib, spin))
+ !  !my_erange = [emin - half * abs(emin), emax + half * abs(emax)]
+ !  my_erange = [emin - tol2 * abs(emin), emax + tol2 * abs(emax)]
+ !end if
 
  cweights = zero
  ABI_MALLOC(cweights_tmp, (nz, self%nq_k))

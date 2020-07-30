@@ -1301,8 +1301,7 @@ end subroutine get_onetetra_blochl
 !! get_onetetra_lambinvigneron
 !!
 !! FUNCTION
-!!  Compute the complex weights according to:
-!!  P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984)
+!!  Compute the complex weights according to: P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984)
 !!  This routine is adapted from tdep where it was implemented
 !!  by Olle Hellman, all credits go to him
 !!
@@ -1526,7 +1525,7 @@ end subroutine get_onetetra_lambinvigneron
 !!
 !! SOURCE
 
-pure subroutine get_ontetetra_lambinvigneron_imag(eig, energies, nene, wt)
+pure subroutine get_onetetetra_lambinvigneron_imag(eig, energies, nene, wt)
 
  ! dispersion values at the corners of the tetrahedron
  real(dp), intent(in), dimension(4) :: eig
@@ -1624,7 +1623,7 @@ pure subroutine get_ontetetra_lambinvigneron_imag(eig, energies, nene, wt)
  end do
  wt = wt*4.0_dp
 
-end subroutine get_ontetetra_lambinvigneron_imag
+end subroutine get_onetetetra_lambinvigneron_imag
 !!***
 
 !----------------------------------------------------------------------
@@ -1704,7 +1703,7 @@ subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz,
    case(0:1)
      call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
    case(2)
-     call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
+     call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
      tweight_tmp = zero
    end select
 
@@ -2019,7 +2018,7 @@ subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, t
      case(0:1)
        call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
      case(2)
-       call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
+       call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
        tweight_tmp = zero
      end select
 
@@ -2108,7 +2107,7 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
      case(0:1)
        call get_onetetra_blochl(eig, wvals, nw, opt, tweight_tmp, dweight_tmp)
      case(2)
-       call get_ontetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
+       call get_onetetetra_lambinvigneron_imag(eig, wvals, nw, dweight_tmp)
      end select
 
      ! Acumulate the contributions
@@ -2228,6 +2227,7 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, z
  integer :: ind_ibz(4)
  real(dp) :: eig(4), my_erange(2)
  complex(dp) :: cw(4), verli(4), verm(4), aw(4), bw(4), cw_lw(4)
+ real(dp) :: rwg(nz, 4)
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -2257,6 +2257,7 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, z
      ! to fix get_onetetra_lambinvigneron we need to sort here.
      call sort_4tetra(eig, ind_ibz)
 
+if (zinv_opt == 1) then
      ! Loop over frequencies
      do iz=1,nz
 
@@ -2306,7 +2307,21 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, z
          ik_ibz = ind_ibz(isummit)
          cweight(iz, ik_ibz) = cweight(iz, ik_ibz) + cw(isummit) * multiplicity * max_occ
        end do
+
      end do ! iz
+
+else
+       call get_onetetra_ppart_lv(nz, real(zvals), eig, rwg)
+
+       do iz=1,nz
+         ! Accumulate contributions
+         do isummit=1,4
+           ik_ibz = ind_ibz(isummit)
+           cweight(iz, ik_ibz) = cweight(iz, ik_ibz) + rwg(iz, isummit) * multiplicity * max_occ
+         end do
+       end do
+endif
+
    end do ! itetra
  end do
 
@@ -2469,6 +2484,319 @@ pure subroutine sort_4tetra_int(list)
  endif
 
 end subroutine sort_4tetra_int
+!!***
+
+!!****f* m_htetra/get_onetetra_ppart_lv
+!! NAME
+!! get_onetetra_ppart_lv
+!!
+!! FUNCTION
+!!  Compute the complex weights according to: P. Lambin and J.P. Vigneron, Phys. Rev. B 29, 3430 (1984)
+!!
+!! INPUTS
+!!  nw
+!!  wvals: energy to evaluate the weights at
+!!  eig: eigenvalues at the corners of the tetrahedron
+!!
+!! OUTPUT
+!!  rwg(nw, 4)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine get_onetetra_ppart_lv(nw, wvals, eig, rwg)
+
+ integer,intent(in) :: nw
+ real(dp), intent(in) :: wvals(nw), eig(4)
+ real(dp), intent(out) :: rwg(nw, 4)
+
+!Local variables-------------------------------
+ integer :: ii, jj, iw
+ real(dp),parameter :: tol = tol14
+ !real(dp),parameter :: tol = tol20
+ !real(dp),parameter :: tol = tol30
+ real(dp) :: D12,D13,D14,D23,D24,D34
+ real(dp) :: e10, e20, e30, e31, e32, e21
+ real(dp) :: inv_e10, inv_e21, inv_e20, inv_e30, inv_e31, inv_e32
+ real(dp) :: E0(nw), E1(nw), E2(nw), E3(nw)
+
+! *********************************************************************
+
+ ! Then the energy differences, for the coefficients. Must always be positive, I hope.
+ D12 = eig(2) - eig(1)
+ D13 = eig(3) - eig(1)
+ D14 = eig(4) - eig(1)
+ D23 = eig(3) - eig(2)
+ D24 = eig(4) - eig(2)
+ D34 = eig(4) - eig(3)
+
+ ! Now get the actual weights
+ ! Notations
+ !  eij = e_i - e_j
+ !  Ej = E - e_j
+
+ e10 = huge(one);  e20 = huge(one);  e30 = huge(one);
+ e31 = huge(one);  e32 = huge(one);  e21 = huge(one)
+ inv_e10 = huge(one);  inv_e21 = huge(one);  inv_e20 = huge(one)
+ inv_e30 = huge(one);  inv_e31 = huge(one);  inv_e32 = huge(one)
+
+ E0 = wvals(:) - eig(1)
+ E1 = wvals(:) - eig(2)
+ E2 = wvals(:) - eig(3)
+ E3 = wvals(:) - eig(4)
+
+#if 0
+ where (abs(E0) < tol1)
+   E0 = tol1
+ end where
+ where (abs(E1) < tol1)
+   E1 = tol1
+ end where
+ where (abs(E2) < tol1)
+   E2 = tol1
+ end where
+ where (abs(E3) < tol1)
+   E3 = tol1
+ end where
+#endif
+
+ ! e1=e2=e3=e4
+ if (D12 + D23 + D34 < tol) then
+   do ii=1,4
+     !rwg(:, ii) = 0.25_dp / (wvals - eig(ii))
+     rwg(:, ii) = 0.25_dp / E0
+   end do
+
+ ! e2=e3=e4
+ else if (D23 + D34 < tol) then
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       three * E0(iw)**2 * E1(iw) * inv_e10**4 * log(abs(E1(iw) / E0(iw))) &
+       + 1.5_dp * E1(iw) * (two * E0(iw) + e10) * inv_e10**3 + inv_e10
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+       E0(iw) ** 3 * inv_e10**4 * log(abs(E0(iw) / E1(iw))) &
+       - (six * E0(iw)**2 + three * E0(iw) * e10 + two * e10**2) * inv_e10**3 / six
+   end do
+   rwg(:,3) = rwg(:,2)
+   rwg(:,4) = rwg(:,2)
+
+   !rwg = zero
+
+ ! e1=e2=e3
+ else if (D12 + D23 < tol) then
+
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E3(iw)**3 * inv_e30**4 * log(abs(E3(iw) / E0(iw))) &
+       + (six * E3(iw)**2 - three * E3(iw) * e30 + two * e30**2) * inv_e30**3 / six
+   end do
+   rwg(:,2) = rwg(:,1)
+   rwg(:,3) = rwg(:,1)
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       three * E0(iw) * E3(iw)**2 * inv_e30**4 * log(abs(E0(iw) / E3(iw))) &
+       - 1.5_dp * E0(iw) * (two * E3(iw) - e30) * inv_e30**3 - inv_e30
+   end do
+
+   !rwg = zero
+
+ ! e1=e2 < e3=e4
+ else if (D12 + D34 < tol) then
+
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       three * E0(iw) * E2(iw)**2 * inv_e20**4 * log(abs(E0(iw) / E2(iw))) &
+       - 1.5_dp * E0(iw) * (two * E2(iw) - e20) * inv_e20**3 - inv_e20
+   end do
+   rwg(:,2) = rwg(:,1)
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+       three * E0(iw)** 2 * E2(iw) * inv_e20**4 * log(abs(E2(iw) / E0(iw))) &
+       + 1.5_dp * E2(iw) * (two * E0(iw) + e20) * inv_e20**3 + inv_e20
+   end do
+   rwg(:,4) = rwg(:,3)
+
+   !rwg = zero
+
+ ! e3=e4
+ else if (D34 < tol) then
+
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+   e21 = eig(3) - eig(2); inv_e21 = one / e21
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E0(iw)**2 * inv_e20**2 * inv_e10  &
+       * (one + (-two * E2(iw) * inv_e20 - E1(iw) * inv_e10) * log(abs(E0(iw)))) &
+       - E2(iw)**2 * inv_e20**2 * inv_e21 &
+       * (one + (two * E0(iw) * inv_e20 + E1(iw) * inv_e21) * log(abs(E2(iw)))) &
+       + E1(iw)**3 * inv_e10**2 * inv_e21**2 * log(abs(E1(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+       -E1(iw)**2 * inv_e21**2 * inv_e10  &
+       * (one + (-two * E2(iw) * inv_e21 + E0(iw) * inv_e10) * log(abs(E1(iw)))) &
+       - E2(iw)**2 * inv_e21**2 * inv_e20 &
+       * (one + (two * E1(iw) * inv_e21 + E0(iw) * inv_e20) * log(abs(E2(iw)))) &
+       + E0(iw)**3 * inv_e10**2 * inv_e20**2 * log(abs(E0(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+       +E0(iw)**3 * inv_e10 * inv_e20**3 * log(abs(E0(iw))) &
+       -E1(iw)**3 * inv_e10 * inv_e21**3 * log(abs(E1(iw))) &
+       +E2(iw) * inv_e20 * inv_e21 &
+       * (half + E0(iw) * inv_e20 + E1(iw) * inv_e21  &
+         +(E0(iw)**2 * inv_e20**2 + E1(iw)**2 * inv_e21**2 + &
+           E0(iw) * E1(iw) * inv_e20 * inv_e21) * log(abs(E2(iw))))
+   end do
+
+   rwg(:,4) = rwg(:,3)
+
+   !rwg = zero
+
+ ! e2=e3
+ else if (D23 < tol) then
+
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+   e31 = eig(4) - eig(2); inv_e31 = one / e31
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E0(iw)**2 * inv_e10**2 * inv_e30 &
+       * (one - (two * E1(iw) * inv_e10 + E3(iw) * inv_e30) * log(abs(E0(iw)))) &
+       + E1(iw)**2 * inv_e10**2 * inv_e31 &
+       * (one + (+two * E0(iw) * inv_e10 - E3(iw) * inv_e31) * log(abs(E1(iw)))) &
+       + E3(iw)**3 * inv_e30**2 * inv_e31**2 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+        E0(iw)**3 * inv_e30 * inv_e10**3 * log(abs(E0(iw))) &
+       + E3(iw)**3 * inv_e30 * inv_e31**3 * log(abs(E3(iw))) &
+       - E1(iw) * inv_e10 * inv_e31  &
+       * (half + E0(iw) * inv_e10 - E3(iw) * inv_e31 + &
+         (E0(iw)**2 * inv_e10**2 + E3(iw)**2 * inv_e31**2 - E0(iw) * E3(iw) * inv_e10 * inv_e31) * log(abs(E1(iw))))
+   end do
+   rwg(:,3) = rwg(:,2)
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       -E3(iw)**2 * inv_e31**2 * inv_e30 &
+       * (one + (two * E1(iw) * inv_e31 + E0(iw) * inv_e30) * log(abs(E3(iw)))) &
+       - E1(iw)**2 * inv_e31**2 * inv_e10 &
+       * (one + (-two * E3(iw) * inv_e31 + E0(iw) * inv_e10) * log(abs(E1(iw)))) &
+       + E0(iw)**3 * inv_e30**2 * inv_e10**2 * log(abs(E0(iw)))
+   end do
+
+   !rwg = zero
+
+ ! e1=e2
+ else if (D12 < tol) then
+
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+   e32 = eig(4) - eig(3); inv_e32 = one / e32
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+        -E2(iw)**3 * inv_e32 * inv_e20**3 * log(abs(E2(iw))) &
+       + E3(iw)**3 * inv_e32 * inv_e30**3 * log(abs(E3(iw))) &
+       + E0(iw) * inv_e20 * inv_e30  &
+       * (half - E2(iw) * inv_e20 - E3(iw) * inv_e30 + &
+         (E2(iw)**2 * inv_e20**2 + E3(iw)**2 * inv_e30**2 + E2(iw) * E3(iw) * inv_e20 * inv_e30) * log(abs(E0(iw))))
+   end do
+   rwg(:,2) = rwg(:,1)
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+        E2(iw)**2 * inv_e20**2 * inv_e32 &
+        * (one + (two * E0(iw) * inv_e20 - E3(iw) * inv_e32) * log(abs(E2(iw)))) &
+        + E0(iw)**2 * inv_e20**2 * inv_e30 &
+        * (one - (two * E2(iw) * inv_e20 + E3(iw) * inv_e30) * log(abs(E0(iw))))  &
+        + (E3(iw)**3 * inv_e32**2 * inv_e30**2 * log(abs(E3(iw))))
+   end do
+   ! This was wrong due to a misplaced parantes
+   !rwg(:,3) = zero
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       -E3(iw)**2 * inv_e30**2 * inv_e32 &
+       * (one + (two * E0(iw) * inv_e30 + E2(iw) * inv_e32) * log(abs(E3(iw)))) &
+       + E0(iw)**2 * inv_e30**2 * inv_e20 &
+       * (one - (two * E3(iw) * inv_e30 + E2(iw) * inv_e20) * log(abs(E0(iw)))) &
+       + (E2(iw)**3 * inv_e32**2 * inv_e20**2 * log(abs(E2(iw))))
+   end do
+
+   !rwg = zero
+
+ ! e1<e2<e3<e4
+ else
+
+   e10 = eig(2) - eig(1); inv_e10 = one / e10
+   e20 = eig(3) - eig(1); inv_e20 = one / e20
+   e21 = eig(3) - eig(2); inv_e21 = one / e21
+   e30 = eig(4) - eig(1); inv_e30 = one / e30
+   e31 = eig(4) - eig(2); inv_e31 = one / e31
+   e32 = eig(4) - eig(3); inv_e32 = one / e32
+
+   do iw=1,nw
+     rwg(iw, 1) = &
+       E0(iw)**2 * inv_e10 * inv_e20 * inv_e30 &
+       * (one - (E1(iw) * inv_e10 + E2(iw) * inv_e20 + E3(iw) * inv_e30) * log(abs(E0(iw)))) &
+       + E1(iw)**3 * inv_e10**2 * inv_e21 * inv_e31 * log(abs(E1(iw))) &
+       - E2(iw)**3 * inv_e20**2 * inv_e21 * inv_e32 * log(abs(E2(iw))) &
+       + E3(iw)**3 * inv_e30**2 * inv_e31 * inv_e32 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 2) = &
+       -E1(iw)**2 * inv_e10 * inv_e21 * inv_e31 &
+       * (one + (E0(iw) * inv_e10 - E2(iw) * inv_e21 - E3(iw) * inv_e31) * log(abs(E1(iw)))) &
+       + E0(iw)**3 * inv_e10**2 * inv_e20 * inv_e30 * log(abs(E0(iw))) &
+       - E2(iw)**3 * inv_e20 * inv_e21**2 * inv_e32 * log(abs(E2(iw))) &
+       + E3(iw)**3 * inv_e30 * inv_e31**2 * inv_e32 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 3) = &
+       E2(iw)**2 * inv_e20 * inv_e21 * inv_e32 &
+       * (one + (E0(iw) * inv_e20 + E1(iw) * inv_e21 - E3(iw) * inv_e32) * log(abs(E2(iw)))) &
+       + E0(iw)**3 * inv_e10 * inv_e20**2 * inv_e30 * log(abs(E0(iw))) &
+       - E1(iw)**3 * inv_e10 * inv_e21**2 * inv_e31 * log(abs(E1(iw))) &
+       + E3(iw)**3 * inv_e30 * inv_e31 * inv_e32**2 * log(abs(E3(iw)))
+   end do
+
+   do iw=1,nw
+     rwg(iw, 4) = &
+       -E3(iw)**2 * inv_e30 * inv_e31 * inv_e32 &
+       * (one + (E0(iw) * inv_e30 + E1(iw) * inv_e31 + E2(iw) * inv_e32) * log(abs(E3(iw)))) &
+       + E0(iw)**3 * inv_e10 * inv_e20 * inv_e30**2 * log(abs(E0(iw))) &
+       - E1(iw)**3 * inv_e10 * inv_e21 * inv_e31**2 * log(abs(E1(iw))) &
+       + E2(iw)**3 * inv_e20 * inv_e21 * inv_e32**2 * log(abs(E2(iw)))
+   end do
+   !rwg = zero
+
+ end if
+
+end subroutine get_onetetra_ppart_lv
 !!***
 
 end module m_htetra

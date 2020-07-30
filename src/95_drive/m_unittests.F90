@@ -268,8 +268,9 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  ABI_MALLOC(eig, (nqibz))
  ABI_MALLOC(mat, (nqibz))
  mstar = one
- mstar = 0.05_dp
- mstar = 0.5_dp
+ mstar = ten
+ !mstar = 0.05_dp
+ !mstar = 0.5_dp
 
  do iq_ibz=1,nqibz
    qnorm = normv(qibz(:, iq_ibz), cryst%gmet, 'G')
@@ -281,7 +282,8 @@ subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
  end do
 
  ! Prepare DOS calculation
- emin = minval(eig) - one; emax = maxval(eig) + one
+ !emin = minval(eig) - one; emax = maxval(eig) + one
+ emin = minval(eig); emax = maxval(eig)
  nw = 300
  dosdeltae = (emax - emin) / (nw - 1)
  !broad = tol2 * eV_Ha

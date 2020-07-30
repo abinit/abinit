@@ -1814,8 +1814,11 @@ subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
  !write(msg,'(a,f8.1,a)')' Memory allocated for Kdata = ',kdata_bsize * b2Mb,' [Mb] <<< MEM'
 
  write(msg,'(a,f8.1,a)')' Memory needed for wfd%s datastructure: ',ABI_MEM_MB(wfd%s),' [Mb] <<< MEM'
+ call wrtout(std_out, msg)
  write(msg,'(a,f8.1,a)')' Memory needed for wfd%s(0)%k datastructure: ',ABI_MEM_MB(wfd%s(1)%k),' [Mb] <<< MEM'
- write(msg,'(a,f8.1,a)')' Memory allocated for Kdata = ',ABI_MEM_MB(wfd%kdata),' [Mb] <<< MEM'
+ call wrtout(std_out, msg)
+ write(msg,'(a,f8.1,a)')' Memory allocated for Kdata array = ',ABI_MEM_MB(wfd%kdata),' [Mb] <<< MEM'
+ call wrtout(std_out, msg)
 
 end subroutine wfd_print
 !!***

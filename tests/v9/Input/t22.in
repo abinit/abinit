@@ -1,8 +1,9 @@
 # Crystalline silicon calculation of the GW corrections.
 # Using analytic continuation for Sigma
-# Dataset 1:  ground state calculation and of the kss file for 16 k-points in IBZ
+# Dataset 1:  ground state calculation and of the WFK file for 16 k-points in IBZ
 # Dataset 2:  calculation of the screening with spectral method (15 real frequencies, 5 purely imaginary)
-# Dataset 3:  calculation of the Self-Energy matrix elements with contour deformation.
+# Dataset 3:  calculation of the Self-Energy matrix elements with convolution on the imaginary axis
+#             followed by analytic continuation.
 #
 
 ndtset      3
