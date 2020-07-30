@@ -132,7 +132,7 @@ subroutine assemblychi0_sym(is_metallic,ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,r
 
 !Local variables-------------------------------
 !scalars
- integer :: itim,io,isym,ig1,ig2,nthreads
+ integer :: itim,io,isym,nthreads
  integer :: isymop,nsymop
  real(gwp) :: dr
  complex(gwpc) :: dd
