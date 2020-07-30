@@ -912,7 +912,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
            call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
 &                    rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
-           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
+           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),&
+&                    zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
 
            ! Get the upper part of rhotw_epsm1_rhotw
            ! that is hermitian by construction
