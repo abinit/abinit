@@ -618,7 +618,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: ngvecs = 1
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
+ integer :: ibsum_kq, ib_k, ib_kq, band_ks, ibsum, ii, jj, iw
  integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
@@ -630,7 +630,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
- integer :: comm_rpt, osc_npw
+ integer :: comm_rpt, osc_npw, vkq_ikcalc !, vkq_ibz
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
@@ -651,8 +651,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
+ integer,allocatable :: ibzspin_2ikcalc(:,:), have_vcar_ibz(:,:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
- real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
+ real(dp) :: vk(3), vkq(3), vkq_symm(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: gdw2, gdw2_stern, rtmp
@@ -666,7 +667,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:)
+ real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:)
  logical,allocatable :: osc_mask(:)
@@ -778,6 +779,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
 
+ ! Mapping Sigma_{k,s} states to IBZ. 0 if not computed
+ ABI_ICALLOC(ibzspin_2ikcalc, (nkpt, nsppol))
+
  ! Each node needs the wavefunctions for Sigma_{nk}
  do spin=1,sigma%nsppol
    do ikcalc=1,sigma%nkcalc
@@ -785,9 +789,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      bstart = sigma%bstart_ks(ikcalc,spin)
      bstop = bstart + sigma%nbcalc_ks(ikcalc,spin) - 1
      bks_mask(bstart:bstop, ik_ibz, spin) = .True.
+     ibzspin_2ikcalc(ik_ibz, spin) = ikcalc
    end do
  end do
 
+ ! For the imaginay part, add bands outside the energy window to account for ph absorption/emission
  if (sigma%imag_only .and. sigma%qint_method == 1) then
    call wrtout(std_out, " Including restricted set of states within energy window around relevant states.")
    do spin=1,sigma%nsppol
@@ -876,6 +882,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      msg=" Computing diagonal elements of velocity operator for all states in Sigma_nk...")
  ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
  ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+ sigma%vcar_calc = -10
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  !if (my_rank == master) call ddkop%print(std_out)
@@ -886,7 +893,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    do ikcalc=1,sigma%nkcalc
      kk = sigma%kcalc(:, ikcalc)
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
-     ik_ibz = sigma%kcalc2ibz(ikcalc,1)
+     ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
      npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
      call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
 
@@ -904,16 +911,25 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call xmpi_sum(sigma%vcar_calc, comm, ierr)
 
  if (sigma%mrta > 0) then
-   !ABI_ICALLOC(vcar_calc_ibz_computed, (nkpt, nsppol))
-   !ABI_CALLOC(vcar_calc_ibz, (3, sigma%max_nbcalc, nkpt, nsppol))
-   !do spin=1,nsppol
-   !  do ikcalc=1,sigma%nkcalc
-   !   ik_ibz = sigma%kcalc2ibz(ikcalc)
-   !   vcar_calc_ibz(:,:, ik_ibz, spin) = sigma%vcar_calc_ibz(:, :, ikcalc, spin)
-   !   vcar_calc_ibz_computed(ik_ibz, spin)) = 1
-   !end do
-   !end do
-   !ABI_SFREE(vcar_calc_ibz)
+   ! Allocate arrays in the IBZ to store vk so that we avoid recomputing vkq as everything can be
+   ! reconstructed by symmetry. Note that %vcar_calc may not be enough if there's a m-nband outside
+   ! the energy window. This is the reason why use these additional datastructures to push new data at runtime.
+   ABI_ICALLOC(have_vcar_ibz, (sigma%bsum_start:sigma%bsum_stop, nkpt, nsppol))
+   ABI_CALLOC(vcar_ibz, (3, sigma%bsum_start:sigma%bsum_stop, nkpt, nsppol))
+   ! Fill vcar_ibz from sigma%vcar_calc
+   vcar_ibz = huge(one)
+   do spin=1,nsppol
+     do ikcalc=1,sigma%nkcalc
+        bstart_ks = sigma%bstart_ks(ikcalc, spin)
+        ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
+         do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
+           band_ks = ib_k + bstart_ks - 1
+           vcar_ibz(:, band_ks, ik_ibz, spin) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+           have_vcar_ibz(band_ks, ik_ibz, spin) = 1
+        end do
+     end do
+   end do
+
  end if
 
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
@@ -1339,13 +1355,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
        !end if
 
-       ! Prepare DDK operator only if (k+q) is not alreay computed via nkcalc
-       ! that is if the k+q is slightly outside the sigma_erange window.
-       !if (sigma%mrta > 0 .and. vcar_calc_ibz_computed(ikq_ibz, spin)) == 0) then
-       if (sigma%mrta > 0) then
-         call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
-       end if
-
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
        end if
@@ -1569,6 +1578,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(stern_ppb)
        end if ! eph_stern == 1
 
+       ! Prepare DDK operator only if (k+q) is not alreay computed via nkcalc
+       ! that is if the k+q is slightly outside the sigma_erange window.
+       !if (sigma%mrta > 0) then
+       if (sigma%mrta > 0) then
+         if (any(have_vcar_ibz(sigma%my_bsum_start:sigma%my_bsum_stop, ikq_ibz, spin) == 0)) then
+           call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+         end if
+       end if
+
        ! ==============
        ! Sum over bands
        ! ==============
@@ -1653,17 +1671,40 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          weight_q = sigma%wtq_k(iq_ibz)
 
          if (sigma%mrta > 0) then
+           vkq_ikcalc = 0
+           if (have_vcar_ibz(ibsum_kq, ikq_ibz, spin) == 1) then
+             vkq_ikcalc = ibzspin_2ikcalc(ikq_ibz, spin)
+             vkq = vcar_ibz(:, ibsum_kq, ikq_ibz, spin)
+             if (.not. isirr_kq) then
+               ! If k+q is not in the IBZ, we need to recostruct the value by symmetry using v(Sq) = S v(q).
+               ! Use transpose(R) because we are using the tables for the wavefunctions
+               ! In this case listkk has been called with symrec and use_symrec=False
+               ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
+               vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
+               !vkq = matmul(cryst%symrel_cart(:,:,isym_kq), vkq)
+               if (trev_kq /= 0) vkq = -vkq
+             end if
+             vkq_symm = vkq
 
-           !if (vcar_calc_ibz_computed(ikq_ibz, spin)) == 1) then
-           !   vkq = vcar_calc_ibz(:, ibsum_kq, ikq_ibz, spin)
-           !   if (.not. isirr_kq) then
-           !     vkq = matmul(cryst%symrel_cart(:,:,isym_kq), vkq)
-           !     if (trev_kq =/ 0) vkq = -vkq
-           !   end if
-           !else
+           else
 
-           ! Need to crecompute alpha coefficients here if kq is slightly outside the Sigma_erange window.
-           vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
+             ! Need to compute alpha coefficients here if kq is slightly outside the Sigma_erange window.
+             ! Save it in vcar_ibz so that we don't need to recompute it at the next interation.
+             vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
+             have_vcar_ibz(ibsum_kq, ikq_ibz, spin) = 1
+             vcar_ibz(:, ibsum_kq, ikq_ibz, spin) = vkq
+           end if
+
+           !if (vkq_ikcalc /= 0) then
+           !  if (sqrt(dot_product(vkq - vkq_symm, vkq - vkq_symm)) > tol10) then
+           !    write(std_out, *)"ib_kq:", ib_kq
+           !    write(std_out, *) "kk", kk, ch10, "kq", kq
+           !    write(std_out, *)" vkq", vkq
+           !    write(std_out, *)" vkq_symm", vkq_symm
+           !    write(std_out, *)"isym_kq, trev_kq", isym_kq, trev_kq
+           !    write(std_out, *)"|v|", sqrt(dot_product(vkq - vkq_symm, vkq - vkq_symm))
+           !    MSG_ERROR("Wrong vq_symm")
+           !  end if
            !end if
 
            do ib_k=1,nbcalc_ks
@@ -2191,6 +2232,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_SFREE(delta_e_minus_emkq)
  ABI_FREE(gbound_kq)
  ABI_FREE(osc_gbound_q)
+
+ ABI_FREE(ibzspin_2ikcalc)
+ ABI_SFREE(vcar_ibz)
+ ABI_SFREE(have_vcar_ibz)
 
  call gs_hamkq%free()
  call wfd%free()

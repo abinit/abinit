@@ -32,7 +32,7 @@ module m_getgh1c
 
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
- use m_time,        only : timab
+ use m_time,        only : timab, cwtime, cwtime_report
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby
  use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
  use m_mkffnl,      only : mkffnl
@@ -151,7 +151,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
  integer :: tim_fourwf,tim_nonlop,usecprj
  logical :: compute_conjugate,has_kin,usevnl2
- real(dp) :: weight
+ real(dp) :: weight !, cpu, wall, gflops
  !character(len=500) :: msg
 !arrays
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
@@ -167,8 +167,11 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
  DBG_ENTER("COLL")
 
-!Keep track of total time spent in getgh1c
+ ! Keep track of total time spent in getgh1c
  call timab(196+tim_getgh1c,1,tsec)
+
+ !call cwtime(cpu, wall, gflops, "start")
+ !call cwtime_report(" getgh1c", cpu, wall, gflops)
 
 !======================================================================
 !== Initialisations and compatibility tests
@@ -178,7 +181,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  npw1 =gs_hamkq%npw_kp
  natom=gs_hamkq%natom
 
-!Compatibility tests
+ ! Compatibility tests
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))) .or. &
        (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc)))) then
@@ -201,7 +204,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    MSG_BUG('Not compatible with parallelization over spinorial components !')
  end if
 
-!Check sizes
+ ! Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
    MSG_BUG('wrong size for cwave!')
@@ -225,8 +228,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    end if
  end if
 
-!PAW: specific treatment for usecprj input arg
-!     force it to zero if cwaveprj is not allocated
+ ! PAW: specific treatment for usecprj input arg
+ !      force it to zero if cwaveprj is not allocated
  usecprj=gs_hamkq%usecprj ; ncpgr=0
  if(gs_hamkq%usepaw==1) then
    if (size(cwaveprj)==0) usecprj=0
@@ -932,11 +935,11 @@ end subroutine rf_transgrid_and_pack
 !!
 !! SOURCE
 
-subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&           ! In
-&                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,&                          ! In
-&                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                           ! In
-&                dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&         ! Out
-&                ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                               ! Optional
+subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&          ! In
+                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,&                          ! In
+                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                           ! In
+                dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&         ! Out
+                ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                               ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -961,6 +964,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 !scalars
  integer :: dimffnl1,dimffnlk,ider,idir0,idir1,idir2,istr,ntypat,print_info
  logical :: qne0
+ real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: ylmgr_dum(1,1,1), tsec(2)
 
@@ -968,6 +972,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
  ! Keep track of total time spent in getgh1c_setup (use 195 slot)
  call timab(195, 1, tsec)
+ call cwtime(cpu, wall, gflops, "start")
 
  if(.not.present(ddkinpw) .and. ipert==natom+10) then
    MSG_BUG("ddkinpw is not optional for ipert=natom+10.")
@@ -982,33 +987,29 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  ntypat = psps%ntypat
  qne0=((kpq(1)-kpoint(1))**2+(kpq(2)-kpoint(2))**2+(kpq(3)-kpoint(3))**2>=tol14)
 
-!Compute (k+G) vectors
+ ! Compute k+G vectors
  nkpg=0;if(ipert>=1.and.ipert<=natom) nkpg=3*dtset%nloalg(3)
  ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
- if (nkpg>0) then
-   call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
- end if
+ if (nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
 
-!Compute (k+q+G) vectors
+ ! Compute k+q+G vectors
  nkpg1=0;if(ipert>=1.and.ipert<=natom) nkpg1=3*dtset%nloalg(3)
  ABI_ALLOCATE(kpg1_k,(npw1_k,nkpg1))
- if (nkpg1>0) then
-   call mkkpg(kg1_k,kpg1_k,kpq(:),nkpg1,npw1_k)
- end if
+ if (nkpg1>0) call mkkpg(kg1_k,kpg1_k,kpq(:),nkpg1,npw1_k)
 
-!===== Preparation of the non-local contributions
+ ! ===== Preparation of the non-local contributions
 
  dimffnlk=0;if (ipert<=natom) dimffnlk=1
  ABI_ALLOCATE(ffnlk,(npw_k,dimffnlk,psps%lmnmax,ntypat))
 
-!Compute nonlocal form factors ffnlk at (k+G)
-!(only for atomic displacement perturbation)
+ ! Compute nonlocal form factors ffnlk at (k+G)
+ ! (only for atomic displacement perturbation)
  if (ipert<=natom) then
    ider=0;idir0=0
    call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
-&   gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-&   psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
-&   psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
+     gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+     psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
+     psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
  end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G)
@@ -1038,16 +1039,16 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    ider=0;idir0=0
  end if
 
-!Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
+ ! Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
  dimffnl1=1+ider
  if (ider==1.and.idir0==0) dimffnl1=2+2*psps%useylm
  if (ider==2.and.idir0==4) dimffnl1=3+7*psps%useylm
  ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
  call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
-& psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
-& npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+   psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+   npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
 
-!Compute ffnl for nonlop with signs = 1
+ ! Compute ffnl for nonlop with signs = 1
  print_info = 0
  if (dtset%prtvol==-19.or.dtset%prtvol==-20.or.dtset%prtvol==-21.or.dtset%nonlinear_info>=3) then
    print_info = 1
@@ -1056,15 +1057,17 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    ABI_ALLOCATE(ffnl1_test,(npw1_k,dimffnl1,psps%lmnmax,psps%ntypat))
    idir0 = 0 ! for nonlop with signs = 1
    call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1_test,psps%ffspl,gs_hamkq%gmet,gs_hamkq%gprimd,ider,idir0,&
-&   psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
-&   npw1_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+     psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+     npw1_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
  end if
 
-!===== Preparation of the kinetic contributions
+ call cwtime_report(" getgh1c_setup_mkffnl", cpu, wall, gflops)
 
-!Note that not all these arrays should be allocated in the general case when wtk_k vanishes
+ !===== Preparation of the kinetic contributions
 
-!Compute (1/2) (2 Pi)**2 (k+q+G)**2:
+ ! Note that not all these arrays should be allocated in the general case when wtk_k vanishes
+
+ ! Compute (1/2) (2 Pi)**2 (k+q+G)**2:
  ABI_ALLOCATE(kinpw1,(npw1_k))
  kinpw1(:)=zero
  call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
@@ -1080,21 +1083,21 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    ddkinpw(:)=zero
  end if
 
-!-- k-point perturbation (1st-derivative)
+ ! -- k-point perturbation (1st-derivative)
  if (ipert==natom+1) then
-!  Compute the derivative of the kinetic operator vs k
+   ! Compute the derivative of the kinetic operator vs k
    call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
  end if
 
-!-- k-point perturbation (2nd-derivative)
+ !-- k-point perturbation (2nd-derivative)
  if (ipert==natom+10.or.ipert==natom+11) then
-!  Compute the derivative of the kinetic operator vs k in kinpw, second and first orders
+   ! Compute the derivative of the kinetic operator vs k in kinpw, second and first orders
    if(ipert==natom+10 .and. idir<=3) then
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,dkinpw,kpoint,npw_k,idir,0) ! 1st derivative
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,ddkinpw,kpoint,npw_k,idir,idir) ! 2nd derivative
    else
      select case(idir)
-!      Diagonal terms :
+     ! Diagonal terms:
      case(1)
        idir1 = 1
        idir2 = 1
@@ -1104,7 +1107,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
      case(3)
        idir1 = 3
        idir2 = 3
-!      Upper triangular terms :
+     ! Upper triangular terms:
      case(4)
        idir1 = 2
        idir2 = 3
@@ -1114,7 +1117,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
      case(6)
        idir1 = 1
        idir2 = 2
-!      Lower triangular terms :
+     ! Lower triangular terms:
      case(7)
        idir1 = 3
        idir2 = 2
@@ -1137,13 +1140,14 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  if (ipert==natom+3.or.ipert==natom+4) then
    if (ipert==natom+3) istr=idir
    if (ipert==natom+4) istr=idir+3
-!  Compute the derivative of the kinetic operator vs strain
+   ! Compute the derivative of the kinetic operator vs strain
    call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr,kg_k,kpoint,npw_k)
  end if
 
-!===== Load the k/k+q dependent parts of the Hamiltonian
+ call cwtime_report(" getgh1c_setup_mkkin", cpu, wall, gflops)
 
-!Load k-dependent part in the Hamiltonian datastructure
+ !===== Load the k/k+q dependent parts of the Hamiltonian
+ ! Load k-dependent part in the Hamiltonian datastructure
  ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
  call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
                       ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
@@ -1153,25 +1157,24 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    call gs_hamkq%load_k(ffnl_k=ffnl1)
  end if
 
-!Load k+q-dependent part in the Hamiltonian datastructure
-!    Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
+  ! Load k+q-dependent part in the Hamiltonian datastructure
+  ! Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
  call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
-& kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,compute_gbound=.true.)
+   kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,compute_gbound=.true.)
  if (qne0) then
    ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
    call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
  end if
 
-!Load k-dependent part in the 1st-order Hamiltonian datastructure
+ !Load k-dependent part in the 1st-order Hamiltonian datastructure
  call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
  if (ipert==natom+10) then
    call rf_hamkq%load_k(ddkinpw_k=ddkinpw)
-   if (idir>3) then
-     call rf_hamk_dir2%load_k(dkinpw_k=dkinpw2,ddkinpw_k=ddkinpw)
-   end if
+   if (idir>3) call rf_hamk_dir2%load_k(dkinpw_k=dkinpw2,ddkinpw_k=ddkinpw)
  end if
 
  call timab(195, 2, tsec)
+ call cwtime_report(" getgh1c_setup_hams", cpu, wall, gflops)
 
 end subroutine getgh1c_setup
 !!***

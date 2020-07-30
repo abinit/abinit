@@ -995,7 +995,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1748)='ifc_fourq'; basic(1748) = 1
  names(1749)='ewald9'; basic(1749) = 1
 
- names(1780)='ctk_rotate'; basic(1780) = 1
+ names(1780)='cgtk_rotate'; basic(1780) = 1
 
  ! DVDB object
  names(1800)='dvdb_new'; basic(1800) = 1
