@@ -5124,8 +5124,8 @@ end subroutine nanal9
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
-  dipquad,quadquad)
+                  nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,qdrp_cart,ewald_option,comm,&
+                  dipquad,quadquad)  ! optional
 
 !Arguments -------------------------------
 !scalars
@@ -5181,7 +5181,8 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
    ABI_ALLOCATE(dyew,(2,3,natom,3,natom))
 
    call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
-      qdrp_cart,ewald_option,dipquad=dipquad_,quadquad=quadquad_)
+      qdrp_cart,option=ewald_option,dipquad=dipquad_,quadquad=quadquad_)
+
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
 

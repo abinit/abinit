@@ -148,7 +148,8 @@ module m_dvdb
     ! Store all the 3*natom perturbations associated to `stored_iqibz_cplex`
     ! Used to reduce the number of MPI communications required to collect all the potentials
     ! on the MPI rank before computing V(Sq) from V(q).
-    ! I assume client code is looping over stars/shells. cplex value is stored in `stored_iqibz_cplex`.
+    ! IMPORTANT: This cache is beneficial provided client code loops over q-points grouped in stars/shells.
+    ! cplex value is stored in `stored_iqibz_cplex`.
 
    integer :: stored_iqibz_cplex(2) = huge(1)
     ! The index of the qpoint in the IBZ/DVDB file associated to v1scf_3natom_qibz.
@@ -1982,7 +1983,7 @@ subroutine qcache_report_stats(qcache)
      " Cache hit in MPI-distributed cache: ", qcache%stats(3), "(", (100.0_dp * qcache%stats(3)) / qcache%stats(1), "%)"
    write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
      " Cache miss: ", qcache%stats(4), "(", (100.0_dp * qcache%stats(4)) / qcache%stats(1), "%)"
-   write(std_out, "(a)")sjoin("     Memory allocated for cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
+   write(std_out, "(a)")sjoin("     Memory allocated for MPI cache: ", ftoa(qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM")
    write(std_out, "(a)")sjoin(" max_mbsize:", ftoa(qcache%max_mbsize, fmt="f8.1"), &
                               "(Decrease this value if calculation goes out of memory)")
  end if
@@ -3400,12 +3401,13 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr, my_add_lr
  real(dp) :: wr, qmod !wi,
- !complex(dpc) :: beta
+ complex(sp) :: cbeta_sp
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
  real(dp) :: qcart(3)
- real(dp),allocatable :: eiqr(:,:), weiqr(:,:), v1r_lr(:,:,:)
+ real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
+ real(dp),allocatable :: weiqr(:,:)
 
 ! *************************************************************************
 
@@ -3455,6 +3457,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
    do ispden=1,db%nspden
 
+#if 1
      ! Slow FT.
      do ifft=1,nfft
        do ir=1,db%my_nrpt
@@ -3469,14 +3472,16 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
          ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + v1r_lr(2, ifft, imyp)
        end if
      end do ! ifft
-
-     !beta = czero
-     !if (my_add_lr > 0) then
-     !  beta = cone
-     !  ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
-     !end if
-     !call ZGEMV("T", db%my_nrpt, nfft, cone, db%wsr(1,1,1,ispden,imyp), db%mynrpt, weiqr, 1, &
-     !           beta, ov1r(1,1,ispden,imyp), 1)
+#else
+     cbeta_sp = czero_sp
+     if (my_add_lr > 0) then
+       cbeta_sp = cone_sp
+       ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
+     end if
+     !sum_R W(R, r) e^{iq.R} with W real matrix
+     call CGEMV("T", db%my_nrpt, nfft, cone_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr, 1, &
+                cbeta_sp, ov1r(1,1,ispden,imyp), 1)
+#endif
 
      ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
@@ -3804,7 +3809,6 @@ if (db%ft_qcache%maxnq /= 0) then
  end do
 
  ABI_FREE(v1scf)
-
 end if
 
  ! Compute final cache size.

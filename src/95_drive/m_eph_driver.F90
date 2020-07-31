@@ -434,7 +434,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! TODO: Add support for dipquad and quadquad in abinit
  call ifc_init(ifc, cryst, ddb, &
-   dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+   dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
+   dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
    qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
 
  ABI_FREE(ddb_qshifts)

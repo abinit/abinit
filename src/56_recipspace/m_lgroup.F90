@@ -261,11 +261,12 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
  ! In principle, the best approach would be to pack in stars using crystal%symrec.
  ! For the time being we pack in shells (much easier). Use wtk_folded as workspace to store the norm.
- ksign = 0
- !ksign = 1
+ !ksign = 0
+ ksign = +1
  if (present(sord)) then
    if (sord == "<") ksign = -1
    if (sord == ">") ksign = +1
+   !if (sord == "r") ksign = 0
  end if
 
  if (ksign /= 0) then

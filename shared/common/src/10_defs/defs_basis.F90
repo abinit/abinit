@@ -253,9 +253,13 @@ module defs_basis
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
 
 !Complex constants
- complex(dpc), parameter :: czero=(0._dp,0._dp)
- complex(dpc), parameter :: cone =(1._dp,0._dp)
- complex(dpc), parameter :: j_dpc=(0._dp,1.0_dp)
+ complex(dpc), parameter :: czero = (0._dp,0._dp)
+ complex(dpc), parameter :: cone  = (1._dp,0._dp)
+ complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
+
+ complex(spc), parameter :: czero_sp = (0._sp,0._sp)
+ complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
  complex(dpc), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
