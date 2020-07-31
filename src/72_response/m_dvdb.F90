@@ -1962,7 +1962,12 @@ subroutine qcache_report_stats(qcache)
 ! *************************************************************************
 
  if (qcache%maxnq == 0) then
-   write(std_out, "(a)")" qcache deactivated with maxnq == 0"
+   write(std_out, "(a)")" MPI-distributed q-cache deactivated since maxnq == 0"
+   if (qcache%use_3natom_cache) then
+     write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
+       " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), "(", (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%)"
+   end if
+
  else if (qcache%maxnq > 0 .and. qcache%stats(1) /= 0) then
    write(std_out, "(2a)")ch10, " Qcache stats:"
    write(std_out, "(4x,a,i0)")" Total number of calls: ", qcache%stats(1)
@@ -1976,6 +1981,7 @@ subroutine qcache_report_stats(qcache)
    write(std_out, "(a)")sjoin(" max_mbsize:", ftoa(qcache%max_mbsize, fmt="f8.1"), &
                               "(Decrease this value if calculation goes out of memory)")
  end if
+
  write(std_out, "(a)")
  qcache%stats = 0
 
@@ -3762,6 +3768,9 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
 
+ ! All procs skip this part is qcache is not used.
+!if (db%ft_qcache%maxnq /= 0) then
+
  ! Note that cplex is always set to 2 here
  cplex = 2
  ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
@@ -3790,6 +3799,8 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  end do
 
  ABI_FREE(v1scf)
+
+!end if
 
  ! Compute final cache size.
  my_mbsize = db%ft_qcache%get_mbsize()

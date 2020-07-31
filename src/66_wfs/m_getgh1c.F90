@@ -972,7 +972,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
  ! Keep track of total time spent in getgh1c_setup (use 195 slot)
  call timab(195, 1, tsec)
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
 
  if(.not.present(ddkinpw) .and. ipert==natom+10) then
    MSG_BUG("ddkinpw is not optional for ipert=natom+10.")
@@ -1061,7 +1061,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
      npw1_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
  end if
 
- call cwtime_report(" getgh1c_setup_mkffnl", cpu, wall, gflops)
+ !call cwtime_report(" getgh1c_setup_mkffnl", cpu, wall, gflops)
 
  !===== Preparation of the kinetic contributions
 
@@ -1144,7 +1144,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr,kg_k,kpoint,npw_k)
  end if
 
- call cwtime_report(" getgh1c_setup_mkkin", cpu, wall, gflops)
+ !call cwtime_report(" getgh1c_setup_mkkin", cpu, wall, gflops)
 
  !===== Load the k/k+q dependent parts of the Hamiltonian
  ! Load k-dependent part in the Hamiltonian datastructure
@@ -1174,7 +1174,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  end if
 
  call timab(195, 2, tsec)
- call cwtime_report(" getgh1c_setup_hams", cpu, wall, gflops)
+ !call cwtime_report(" getgh1c_setup_hams", cpu, wall, gflops)
 
 end subroutine getgh1c_setup
 !!***
@@ -1349,8 +1349,6 @@ end subroutine getdc1
 subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 &          idir,ipert,mpi_enreg,optlocal,optnl,qdir1,rf_hamkq,&
 &          qdir2)                                                        !optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1585,8 +1583,6 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                            ! In
 &                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&       ! Out
 &                qdir2)                                                                  ! Optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

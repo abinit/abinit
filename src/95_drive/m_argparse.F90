@@ -38,7 +38,7 @@ module m_argparse
  use m_nctk
 
  use m_build_info,      only : dump_config, abinit_version
- use m_io_tools,        only : open_file, file_exists
+ use m_io_tools,        only : open_file, file_exists, enforce_fortran_io
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
  use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, sjoin
@@ -231,6 +231,9 @@ type(args_t) function args_parser() result(args)
       !  Use netcdf classic mode for new files when only sequential-IO needs to be performed
       call nctk_use_classic_for_seq()
 
+    else if (arg == "--enforce-fortran-io") then
+      call enforce_fortran_io(.True.)
+
     else if (arg == "--F03") then
        ! For multibinit only
        args%multibinit_F03_mode = 1
@@ -252,6 +255,9 @@ type(args_t) function args_parser() result(args)
         write(std_out,*)"--log                      Enable log files and status files in parallel execution."
         write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
         write(std_out,*)"                           Default is netcdf4/hdf5"
+        write(std_out,*)"--enforce-fortran-io       Force Fortran IO instead of MPI-IO when operating on Fortran files"
+        write(std_out,*)"                           Useful to read files is the MPI-IO library is not efficient."
+        write(std_out,*)"                           DON'T USE this option when the code needs to write large files e.g. WFK"
         write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm notation:"
         write(std_out,*)"                               days-hours"
         write(std_out,*)"                               days-hours:minutes"

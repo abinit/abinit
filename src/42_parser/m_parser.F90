@@ -250,6 +250,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
    ! Might import data from xyz file(s) into string
    ! Need string_raw to deal properly with xyz filenames
+   ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
    lenstr_noxyz = lenstr
    call importxyz(lenstr,string_raw,string,strlen)
 
@@ -280,12 +281,12 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  end if
 
  ! Save input string in global variable so that we can access it in ntck_open_create
-!XG20200720 : Why not saving string ? string_raw is less processed than string ...
+ ! XG20200720 : Why not saving string ? string_raw is less processed than string ...
+ ! MG: Because the string will be use by python or users to recreate an input file.
+ ! and input file in lower-case is nicer
  INPUT_STRING = string_raw
 
-!DEBUG
- write(std_out,'(a)')string(:lenstr)
-!ENDDEBUG
+ !write(std_out,'(a)')string(:lenstr)
 
 end subroutine parsefile
 !!***
@@ -765,7 +766,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string)
 
 !Substitute environment variables, if any
  b1=0
- do 
+ do
    b1=b1+1
    b1 = index(string(b1:lenstr), '$')
    if(b1==0 .or. b1>=lenstr)exit
