@@ -32,7 +32,7 @@ module m_sigc
 
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
- use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
+ use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
@@ -54,7 +54,6 @@ module m_sigc
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_sym,       only : paw_symcprj
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
- use m_hide_lapack,   only : xheev
 
  implicit none
 
