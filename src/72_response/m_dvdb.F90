@@ -16,6 +16,10 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
+!! TODO
+!!  Do we still need to support the case in which the potentials are read from file
+!!  without interpolation? We know that IO is gonna be terrible.
+!!
 !! PARENTS
 !!
 !! SOURCE
@@ -1797,7 +1801,8 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, mbsize, qselect_dvdb, itreatq, comm
    ABI_FREE(v1scf)
  end do
 
- call wrtout(std_out, sjoin(" Memory allocated for cache:", ftoa(db%qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM"))
+ call wrtout(std_out, sjoin(" Memory allocated for cache:", ftoa(db%qcache%get_mbsize(), fmt="f8.1"), " [Mb] <<< MEM"), &
+             pre_newlines=2)
  call cwtime_report(" DVDB qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
@@ -1962,9 +1967,9 @@ subroutine qcache_report_stats(qcache)
 ! *************************************************************************
 
  if (qcache%maxnq == 0) then
-   write(std_out, "(a)")" MPI-distributed q-cache deactivated since maxnq == 0"
+   write(std_out, "(/,a)")" MPI-distributed q-cache deactivated as maxnq == 0"
    if (qcache%use_3natom_cache) then
-     write(std_out, "(4x,a,i0,2x,a,f5.1,a)") &
+     write(std_out, "(a,i0,2x,a,f5.1,a)") &
        " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), "(", (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%)"
    end if
 
@@ -3769,7 +3774,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  db%ft_qcache%itreatq(:) = itreatq
 
  ! All procs skip this part is qcache is not used.
-!if (db%ft_qcache%maxnq /= 0) then
+if (db%ft_qcache%maxnq /= 0) then
 
  ! Note that cplex is always set to 2 here
  cplex = 2
@@ -3800,7 +3805,7 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
 
  ABI_FREE(v1scf)
 
-!end if
+end if
 
  ! Compute final cache size.
  my_mbsize = db%ft_qcache%get_mbsize()
