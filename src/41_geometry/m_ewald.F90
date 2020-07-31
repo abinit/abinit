@@ -126,10 +126,10 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !A bias is introduced, because G-space summation scales
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
- if(icutcoul.eq.2) then
+if(icutcoul.eq.1) then
+   eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))   
+ else if (icutcoul.eq.2) then
    eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3))))
- else if (icutcoul.eq.1) then
-   eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
@@ -183,8 +183,10 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
                   ig23=ngfft(1)*(abs(ig2)+ngfft(2)*(abs(ig3)))
                   ii=abs(ig1)+ig23+1
                   term=exp(-arg)/gsq*gcutoff(ii)
+               else if (icutcoul.ne.3) then
+                  term=zero !exp(-arg)/gsq
                else
-                  term=zero
+                  term=exp(-arg)/gsq
                endif
 
                summr = 0.0_dp
@@ -343,13 +345,17 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  fac=pi*ch**2.0_dp/(2.0_dp*eta*ucvol)
  
 !Finally assemble Ewald energy, eew
- eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+ if(icutcoul.eq.2) then
+   eew=sumg-chsq*reta/sqrt(pi)!-fac-2*sumr
+ else
+   eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
+ end if
 
  ABI_DEALLOCATE(gcutoff) 
 
 !DEBUG
-write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
-write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
+!write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
+!write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac,eta
 !ENDDEBUG
 
 !Length scale grads handled with stress tensor, ewald2

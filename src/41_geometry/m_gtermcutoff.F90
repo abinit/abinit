@@ -139,18 +139,17 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 !Local variables-------------------------------
 !scalars
  integer,parameter  :: N0=1000
- integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing,icount
+ integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing
  integer            :: c1,c2,opt_cylinder
- integer            :: my_start,my_stop
  integer            :: n1,n2,n3,nfft
  integer            :: test,opt_surface !opt_cylinder
  real(dp)           :: alpha_fac, ap1sqrt, log_alpha
  real(dp)           :: cutoff,rcut_loc,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
- real(dp)           :: gcart_para,gcart_perp,gcart_x,gcart_y,gcart_xy,gcart_z
+ real(dp)           :: gcart_para,gcart_perp,gcart_x,gcart_y,gcart_z
  real(dp)           :: j0,j1,k0,k1
  real(dp)           :: quad,tmp,ucvol
- real(dp)           :: ha,hcyl,hcyl2
+ real(dp)           :: hcyl,hcyl2
  real(dp),parameter :: tolfix=1.0000001_dp,tol999=999.0
  character(len=50)  :: mode
  character(len=500) :: msg
@@ -160,7 +159,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
  real(dp)             :: pdir(3),alpha(3)
- real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:),xx(:)
+ real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
  real(dp),allocatable :: gcutoff(:)
 
 ! === Save dimension and other useful quantities in vcut% ===
@@ -347,7 +346,6 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      ha_=half*SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1)))
      hb_=half*SQRT(DOT_PRODUCT(rprimd(:,2),rprimd(:,2)))
      r0_=MIN(ha_,hb_)/N0
-     write(*,*)'this is',ha_,hb_,r0_
 
      do i3=1,n3
       do i2=1,n2
@@ -466,8 +464,8 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
            if (gcart_z>tol4) then
              ! === Analytic expression ===
-             call CALCK0(gcart_z*rcut_loc,k0,1)
              call CALJY1(gcart_perp_*rcut_loc,j1,0)
+             call CALCK0(gcart_z*rcut_loc,k0,1)
              call CALJY0(gcart_perp_*rcut_loc,j0,0)
              call CALCK1(gcart_z*rcut_loc,k1,1)
              gcutoff(ii)=one+rcut_loc*gcart_perp_*j1*k0-rcut_loc*gcart_z*j0*k1
@@ -478,9 +476,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
                if (ierr/=0) then
                  MSG_ERROR("Accuracy not reached")
                end if
-                 gcutoff(ii)= quad*gpq(ii)
+                 gcutoff(ii)= -quad*gpq(ii)
              else
-                 gcutoff(ii)= zero !-rcut_loc**2*(two*LOG(rcut_loc)-one)*gpq(ii)/four
+                 gcutoff(ii)= zero
             end if
            end if
 
