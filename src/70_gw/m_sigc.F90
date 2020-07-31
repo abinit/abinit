@@ -209,11 +209,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp2=2,ndat1=1
- integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,iggp,igp,ii,iik,itim_q,i1,i2,npls
+ integer :: npw_k,iab,ib,ib1,ib2,ierr,ig,ii,iik,itim_q,i1,i2,npls
  integer :: ik_bz,ik_ibz,io,iiw,isym_q,iq_bz,iq_ibz,spin,isym,jb,is_idx
  integer :: band,band1,band2,idle,rank,jik,jk_bz,jk_ibz,kb,nspinor
- integer :: nomega_tot,nq_summed,ispinor,ibsp,dimcprj_gw,npwc
- integer :: spad,spadc,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10
+ integer :: nomega_tot,nq_summed,ibsp,dimcprj_gw,npwc
+ integer :: spad,spadc1,spadc2,irow,my_nbks,ndegs,wtqm,wtqp,mod10
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: iwc,ifft
  real(dp) :: cpu_time,wall_time,gflops
@@ -911,7 +911,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! epsm1_sqrt_rhotw = SQRT(epsm1) * rho_tw
            call xgemm('C','N',neig(iiw),maxbnd-minbnd+1,npwc,cone_gw,ac_epsm1cqwz2(:,:,iiw),npwc,&
 &                    rhotwg_ki,npwc,czero_gw,epsm1_sqrt_rhotw,neig(iiw))
-           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
+           call xherk('L','C',maxbnd-minbnd+1,neig(iiw),one_gw,epsm1_sqrt_rhotw,neig(iiw),&
+&                    zero_gw,rhotw_epsm1_rhotw(:,:,iiw),maxbnd-minbnd+1)
 
            ! Get the upper part of rhotw_epsm1_rhotw
            ! that is hermitian by construction
@@ -1342,7 +1343,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(ur_ibz)
  ABI_FREE(usr_bz)
  ABI_FREE(ktabr)
- ABI_FREE(sigc_ket)
  ABI_FREE(rhotwg_ki)
  ABI_FREE(rhotwg)
  ABI_FREE(rhotwgp)
@@ -1352,6 +1352,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_FREE(sigc)
  ABI_FREE(w_maxval)
 
+ if (allocated(sigc_ket)) then
+   ABI_FREE(sigc_ket)
+ endif
  if (allocated(ket1)) then
    ABI_FREE(ket1)
  endif
