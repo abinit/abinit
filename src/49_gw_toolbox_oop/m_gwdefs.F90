@@ -729,7 +729,7 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 !************************************************************************
 
  if (delta_ene**2>tol14) then
-   sgn=delta_ene/ABS(delta_ene)
+   sgn=SIGN(1.0_dp,delta_ene)
    !
    if (opt_poles == 2) then ! Resonant and anti-resonant contributions.
      if (DABS(REAL(omega))>TOL_W0) then
