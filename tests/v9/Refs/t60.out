@@ -208,6 +208,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
+    eph_phwinfact1     4.00000000E+00
+    eph_phwinfact2     4.00000000E+00
+    eph_phwinfact3     4.00000000E+00
+    eph_phwinfact4     4.00000000E+00
+    eph_phwinfact5     4.00000000E+00
+    eph_phwinfact6     3.90000000E+00
+    eph_phwinfact7     4.00000000E+00
+    eph_phwinfact8     4.00000000E+00
+    eph_phwinfact9     4.00000000E+00
+    eph_phwinfact10    4.00000000E+00
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -2318,6 +2328,16 @@ meta: {optdriver: 7, eph_task: -15, }
         boxcutmin      1.10000000E+00
         ddb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
+    eph_phwinfact1     4.00000000E+00
+    eph_phwinfact2     4.00000000E+00
+    eph_phwinfact3     4.00000000E+00
+    eph_phwinfact4     4.00000000E+00
+    eph_phwinfact5     4.00000000E+00
+    eph_phwinfact6     3.90000000E+00
+    eph_phwinfact7     4.00000000E+00
+    eph_phwinfact8     4.00000000E+00
+    eph_phwinfact9     4.00000000E+00
+    eph_phwinfact10    4.00000000E+00
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1

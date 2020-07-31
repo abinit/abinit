@@ -934,9 +934,9 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: iq_ibz, ikpq_ibz, ib, ii, iq, nprocs, my_rank, ierr
+ integer :: iq_ibz, ikpq_ibz, ib, ii, iq, nprocs, my_rank !, ierr
  real(dp),parameter :: max_occ1 = one
- real(dp) :: emin, emax
+ !real(dp) :: emin, emax
  logical :: use_bzsum_
 !arrays
  real(dp) :: my_erange(2)

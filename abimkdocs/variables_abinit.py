@@ -19320,7 +19320,7 @@ the cylinder along the periodic dimension, that should always be smaller than
 the extension of the Born von Karman box. The length of the cylinder is given
 in terms of a multiple of the primitive vector along the periodic direction.
 Another option provided by Rozzi [[cite:Rozzi2006]] is the infinite length cylinder.
-In order to activate it in ABINIT, 
+In order to activate it in ABINIT,
 one needs to use a very large negative [[vcutgeo]] value on the third direction
 (i.e. vcutgeo(3) <= -999).
 
@@ -21677,6 +21677,33 @@ Variable(
 Gives the doping charge in units of |e_charge| / cm^3.
 Negative for n-doping, positive for p-doping.
 Aternative to [[eph_extrael]] for simulating doping within the rigid band approximation.
+""",
+),
+
+Variable(
+    abivarname="eph_phwinfact",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=4.0,
+    mnemonics="EPH PHonon FACTor for energy WINdow",
+    added_in_version="9.2.0",
+    text=r"""
+This variable is used to define the effective energy window for the $\kq$ KS states
+in the computation of electron lifetimes ([[eph_task]] -4) and predict
+the list of $\qq$-points in the BZ that will be needeed during the calculation.
+
+The code uses e.g. the input [[sigma_erange]] to select the $\nk$ states in $\tau_\nk}$ but then this
+initial energy window must be increased a bit to accomodate for phonon absorption/emission (from $\kk$ to $\kq$).
+This is importat for $\nk$ states that are close to edge of the initial energy window as this states may be needed
+for the linear interpolation used in tetrahedron method.
+
+In a nuthshell, the code increases the initial window using the max phonon frequency multiplied by [[eph_phwinfact]].
+The default value is a compromise between numerical stability and efficiency.
+Reducing [[eph_phwinfact]] to a value closer to one (still > 1) can lead to a substancial decrease in the number of
+$\kq$ KS states that must be read from file with a subsequent decrease in the memory requirements for the wavefunctions.
+We recommended to perform initial tests to decide whether a value smaller than four can be used.
 """,
 ),
 

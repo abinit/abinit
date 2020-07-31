@@ -2226,7 +2226,7 @@ subroutine htetra_weights_wvals_zinv(tetra, eig_ibz, nz, zvals, max_occ, nkpt, z
 !arrays
  integer :: ind_ibz(4)
  real(dp) :: eig(4), my_erange(2)
- complex(dp) :: cw(4), verli(4), verm(4), aw(4), bw(4), cw_lw(4)
+ complex(dp) :: cw(4), verli(4), verm(4), aw(4), bw(4) !, cw_lw(4)
  real(dp) :: rwg(nz, 4)
 ! *********************************************************************
 

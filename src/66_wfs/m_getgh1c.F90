@@ -964,7 +964,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 !scalars
  integer :: dimffnl1,dimffnlk,ider,idir0,idir1,idir2,istr,ntypat,print_info
  logical :: qne0
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
 !arrays
  real(dp) :: ylmgr_dum(1,1,1), tsec(2)
 

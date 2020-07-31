@@ -102,6 +102,7 @@ eph_intmeth6 2
 sigma_ngkpt6 2 2 2
 sigma_erange6  0.5 0.5 eV
 eph_tols_idelta6 1e-6 1e-6
+eph_phwinfact6 3.9
 getdvdb6  2
 eph_ngqpt_fine6 4 4 4
 

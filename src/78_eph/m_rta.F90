@@ -1389,7 +1389,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
 
  ! write header
  write(ount, "(2a)")"# ", trim(header)
- write(ount, "(a)")"# ", trim(rta_type)
+ write(ount, "(2a)")"# ", trim(rta_type)
  ! TODO: Units ?
  write(ount, "(a, 3(i0, 1x))")"#", dtset%transport_ngkpt
  write(ount, "(a)")"#"
@@ -1406,7 +1406,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
  if (self%nsppol == 1) then
    do itemp=1, self%ntemp
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
-     write(ount, "(a)")"# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
+     write(ount, "(a)")"# Energy [Ha], (xx, yx, zx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor."
      do iw=1,self%nw
        write(ount, "(10(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, itemp, 1)
      end do
@@ -1416,7 +1416,7 @@ subroutine rta_write_tensor(self, dtset, irta, header, values, path)
    do itemp=1, self%ntemp
      write(ount, "(/, a, 1x, f16.2)")"# T = ", self%kTmesh(itemp) / kb_HaK
      write(ount, "(a)") &
-       "# Energy [Ha], (xx, yx, yx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
+       "# Energy [Ha], (xx, yx, zx, xy, yy, zy, xz, yz, zz) Cartesian components of tensor for spin up followed by spin down."
      do iw=1,self%nw
        write(ount, "(19(es16.6))")self%edos%mesh(iw), tmp_values(:, :, iw, itemp, 1), tmp_values(:, :, iw, itemp, 2)
      end do

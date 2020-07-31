@@ -861,7 +861,7 @@ type, public :: dataset_type
  real(dp) :: eph_fsmear = 0.01_dp
  real(dp) :: eph_fsewin = 0.04_dp
  real(dp) :: eph_ecutosc = zero
- !real(dp) :: eph_alpha_gmin = zero !sqrt(5)
+ real(dp) :: eph_phwinfact = four
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
  integer :: eph_phrange(2) = 0
 
@@ -1385,7 +1385,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ecutosc        = dtin%eph_ecutosc
- !dtout%eph_alpha_gmin     = dtin%eph_alpha_gmin
+ dtout%eph_phwinfact      = dtin%eph_phwinfact
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_np_pqbks       = dtin%eph_np_pqbks
  dtout%eph_restart        = dtin%eph_restart
@@ -3100,11 +3100,11 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_np_pqbks'
-  ! XG20200321, please provide testing for eph_np_pqbks
-  ! Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
-  ! and all the tests in the paral and mpiio directory are done with a single input file
-  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
+ ! XG20200321, please provide testing for eph_np_pqbks
+ ! MG: Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
+ ! and all the tests in the paral and mpiio directory are done with a single input file
+ ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
+ list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'

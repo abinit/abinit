@@ -230,8 +230,8 @@ module m_sigmaph
    ! min and Max KS energy treated in self-energy +- max phonon energy
    ! Used to select bands in self-energy sum if imag only and select q-points in qpoints_oracle
 
-  real(dp) :: winfact = four
-   ! winfact * wmax is used to define the energy window for filtering electronic states
+  real(dp) :: phwinfact = four
+   ! phwinfact * wmax is used to define the energy window for filtering electronic states
    ! in the computation of electron lifetimes.
 
   real(dp) :: wr_step
@@ -618,7 +618,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: ngvecs = 1
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq, ib_k, ib_kq, band_ks, ibsum, ii, jj, iw
+ integer :: ibsum_kq, ib_k, band_ks, ibsum, ii, jj, iw !ib_kq,
  integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
@@ -630,7 +630,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
- integer :: comm_rpt, osc_npw, vkq_ikcalc !, vkq_ibz
+ integer :: comm_rpt, osc_npw !, vkq_ikcalc !, vkq_ibz
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
@@ -800,8 +800,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      do ik_ibz=1,ebands%nkpt
        do band=sigma%my_bsum_start, sigma%my_bsum_stop
          eig0mk = ebands%eig(band, ik_ibz, spin)
-         if (eig0mk >= sigma%elow  - sigma%winfact * sigma%wmax .and. &
-             eig0mk <= sigma%ehigh + sigma%winfact * sigma%wmax) then
+         if (eig0mk >= sigma%elow  - sigma%phwinfact * sigma%wmax .and. &
+             eig0mk <= sigma%ehigh + sigma%phwinfact * sigma%wmax) then
             bks_mask(band, ik_ibz ,spin) = .True.
          end if
        end do
@@ -824,9 +824,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This table is needed when computing the imaginary part:
  ! k+q states outside energy window are not read hence their contribution won't be included.
  ! Error is small provided calculation is close to convergence.
- ! To reduce the error one should increase the value of winfact
- ! TODO: 1) Introduce input variable to define winfact?
- !       2) Store min/max energy difference
+ ! To reduce the error one should increase the value of phwinfact
+ ! TODO: 2) Store min/max energy difference
  ABI_MALLOC(ihave_ikibz_spin, (nkpt, nsppol))
  ihave_ikibz_spin = .False.
  do spin=1,sigma%nsppol
@@ -1671,9 +1670,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          weight_q = sigma%wtq_k(iq_ibz)
 
          if (sigma%mrta > 0) then
-           vkq_ikcalc = 0
+
+           ! Compute vkq
+           !vkq_ikcalc = 0
            if (have_vcar_ibz(ibsum_kq, ikq_ibz, spin) == 1) then
-             vkq_ikcalc = ibzspin_2ikcalc(ikq_ibz, spin)
+             !vkq_ikcalc = ibzspin_2ikcalc(ikq_ibz, spin)
              vkq = vcar_ibz(:, ibsum_kq, ikq_ibz, spin)
              if (.not. isirr_kq) then
                ! If k+q is not in the IBZ, we need to recostruct the value by symmetry using v(Sq) = S v(q).
@@ -1681,18 +1682,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                ! In this case listkk has been called with symrec and use_symrec=False
                ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
                vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
-               !vkq = matmul(cryst%symrel_cart(:,:,isym_kq), vkq)
                if (trev_kq /= 0) vkq = -vkq
              end if
              vkq_symm = vkq
 
            else
 
-             ! Need to compute alpha coefficients here if kq is slightly outside the Sigma_erange window.
+             ! Need to compute vkq here if kq is slightly outside the Sigma_erange window.
              ! Save it in vcar_ibz so that we don't need to recompute it at the next interation.
              vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
-             have_vcar_ibz(ibsum_kq, ikq_ibz, spin) = 1
              vcar_ibz(:, ibsum_kq, ikq_ibz, spin) = vkq
+             have_vcar_ibz(ibsum_kq, ikq_ibz, spin) = 1
            end if
 
            !if (vkq_ikcalc /= 0) then
@@ -1707,6 +1707,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !  end if
            !end if
 
+           ! Not precompute alpha MRTA coefficients for all nk states.
            do ib_k=1,nbcalc_ks
              vk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm = sqrt(dot_product(vk, vk))
@@ -2340,6 +2341,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)
  ! Decide default behaviour for Re-Im/Im
  new%qint_method = dtset%eph_intmeth - 1
+ new%phwinfact = dtset%eph_phwinfact
 
  ! Define option for integration of 1/z with tetrahedron method.
  new%zinv_opt = 1; if (dtset%userie /= 0) new%zinv_opt = dtset%userie
@@ -2692,14 +2694,27 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    !end if
 
    ! Handle parallelism over perturbations first.
-   ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements for DFPT potentials.
+   ! Use MPI communicator to distribute the 3 * natom perturbations to reduce memory requirements for DFPT potentials.
    ! Ideally, perturbations are equally distributed --> total number of CPUs should be divisible by 3 * natom.
    ! or at least, divisible by one integer i for i in [2, 3 * natom - 1].
-   do cnt=natom3,2,-1
-     if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-       new%pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
-     end if
-   end do
+
+   ! Try to have 3 perts per proc first because the q-point parallelism is more efficient
+   ! The memory for W(R,r,ipert) will increase though.
+   !do cnt=natom,2,-1
+   !  if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+   !    new%pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
+   !  end if
+   !end do
+
+   if (new%pert_comm%nproc == 1) then
+     ! Try again with more procs.
+     do cnt=natom3,2,-1
+       if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+         new%pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
+       end if
+     end do
+   end if
+
    if (new%my_npert == natom3 .and. nprocs > 1) then
      MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
    end if
@@ -3189,7 +3204,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      "imag_only", "symv1scf", "dvdb_add_lr", "mrta"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"])
+     "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"])
    NCF_CHECK(ncerr)
 
    ! Define arrays with results.
@@ -3279,9 +3294,9 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
      dtset%eph_transport, ii, dtset%symv1scf, dtset%dvdb_add_lr, self%mrta])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
+     "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"], &
      [aimag(self%ieta), self%wr_step, dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, &
-     dtset%ph_wstep, dtset%ph_smear])
+     dtset%ph_wstep, dtset%ph_smear, dtset%eph_phwinfact])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), self%ngqpt))
@@ -4701,6 +4716,7 @@ subroutine sigmaph_print(self, dtset, unt)
  if (self%qint_method == 1) then
    ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
    write(unt, "(a, 2(es16.6,1x))")" Tolerance for integration weights < ", dtset%eph_tols_idelta(:) / ndiv
+   !write(unt, "(a, (f5.2,1x))")" eph_phwinfact: ", self%phwinfact
  end if
  if (self%use_doublegrid) write(unt, "(a, i0)")" Using double grid technique with ndiv: ", self%eph_doublegrid%ndiv
  if (self%imag_only) write(unt, "(a)")" Only the Imaginary part of Sigma will be computed."
@@ -5074,9 +5090,9 @@ end subroutine eval_sigfrohl_deltas
 !!  qpoints_oracle
 !!
 !! FUNCTION
-!!  This function tries to predict the **full** list of q-points needed to compute the lifetimes
-!!  once we know sigma%nkcalc. It uses an energy window computed from the max phonon frequency
-!!  multiplied by sigma%winfact.
+!!  This function tries to predict the **full** list of q-points in the BZ needed to compute the lifetimes
+!!  once we know sigma%nkcalc.
+!!  It uses an energy window computed from the max phonon frequency multiplied by sigma%phwinfact.
 !!
 !! INPUT
 !! cryst=Crystalline structure
@@ -5127,7 +5143,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  call cwtime(cpu, wall, gflops, "start")
- call wrtout(std_out, sjoin(" qpoints_oracle: predicting number q-points for tau with winfact:", ftoa(sigma%winfact)))
+ call wrtout(std_out, &
+             sjoin(" qpoints_oracle: predicting number q-points for tau with eph_phwinfact:", ftoa(sigma%phwinfact)))
 
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
@@ -5179,7 +5196,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
            eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
            ediff = eig0nk - eig0mkq
            ! Perform check on the energy difference to exclude this q-point.
-           if (abs(ediff) <= sigma%winfact * sigma%wmax) qbz_count(iq_bz) = qbz_count(iq_bz) + 1
+           if (abs(ediff) <= sigma%phwinfact * sigma%wmax) qbz_count(iq_bz) = qbz_count(iq_bz) + 1
          end do
        end do
      end do
