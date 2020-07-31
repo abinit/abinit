@@ -4692,7 +4692,8 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  comm = Wfd%comm; my_rank = Wfd%my_rank; master = Wfd%master
 
  tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
- call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, "with iomode:", iomode2str(iomode)), do_flush=.True.)
+ call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, "with iomode:", iomode2str(iomode)), &
+             do_flush=.True., pre_newlines=2)
 
  wfk_unt = get_unit()
  call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,wfk_unt,Wfd%comm,Hdr_out=Hdr)
@@ -4929,7 +4930,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_SFREE(work)
       ABI_SFREE(out_cg)
 
-      if (ik_ibz <= 10 .or. mod(ik_ibz, 50) == 0) then
+      if (ik_ibz <= 10 .or. mod(ik_ibz, 200) == 0) then
         write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
