@@ -2642,7 +2642,7 @@ endif
        if(usefock_ixc==1)then
          if(abs(Dtset%hyb_mixing)>tol8) then
            coef_hyb=abs(Dtset%hyb_mixing)
-           if(abs(coef_hyb-999.0d0)>tol8) then ! HF
+           if(abs(coef_hyb+999.0d0)<tol8) then ! HF
              coef_hyb=1.0d0
            endif
          else if(abs(Dtset%hyb_mixing_sr)>tol8)then
@@ -2675,6 +2675,7 @@ endif
            call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,KS_BSt,Sigp,Sr,Gsph_x,Vcp_ks,Kmesh,Qmesh,Ltg_k(ikcalc),& ! Notice we need KS occs and band energy diffs       
            & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&     ! Build <KS_i|RS?_Hyb?_Sigma_x[KS]|KS_j> matrix (Use Wfd)
            & gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+           call xmpi_barrier(Wfd%comm)
            do ib=b1gw,b2gw
              old_purex(ib,ikcalc)=Sr%x_mat(ib,ib,ikcalc,1)            ! Save old <i|K[KS]|i> from the GS calc. for Delta eik
              new_hartr(ib,ikcalc)=GW1RDM_me%vhartree(ib,ib,ikcalc,1)  ! Save new <i|Hartree[NO]|i> in KS basis for Delta eik
