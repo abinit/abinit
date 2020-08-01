@@ -33,6 +33,7 @@ module m_mkffnl
 
  use m_time,     only : timab
  use m_kg,       only : mkkin
+ use m_sort,     only : sort_dp
 
  implicit none
 
@@ -208,10 +209,11 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+ integer,allocatable :: iperm(:)
  real(dp) :: rprimd(3,3),tsec(2)
  real(dp),allocatable :: dffnl_cart(:,:),dffnl_red(:,:),dffnl_tmp(:)
  real(dp),allocatable :: d2ffnl_cart(:,:),d2ffnl_red(:,:),d2ffnl_tmp(:)
- real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:),wk_ffnl1(:)
+ real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:),wk_ffnl1(:), kpgnorm_sort(:)
  real(dp),allocatable :: wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
 
 ! *************************************************************************
@@ -262,6 +264,14 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  ! Get (k+G) and |k+G|
  ABI_MALLOC(kpgnorm,(npw))
  ABI_MALLOC(kpgnorm_inv,(npw))
+
+#define MG_MKFFNL
+
+#ifdef MG_MKFFNL
+ ABI_MALLOC(kpgnorm_sort,(npw))
+ ABI_MALLOC(iperm,(npw))
+#endif
+
  ig0=-1 ! index of |k+g|=0 vector
 
  if (useylm==1) then
@@ -331,6 +341,12 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end if
  end if
 
+#ifdef MG_MKFFNL
+ kpgnorm_sort = kpgnorm
+ iperm = [(ig, ig=1, npw)]
+ call sort_dp(npw, kpgnorm_sort, iperm, tol16)
+#endif
+
  ! Need rprimd in some cases
  if (ider>=1.and.useylm==1.and.ig0>0) then
    do mu=1,3
@@ -388,11 +404,21 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
          ! -------------------------------
          if (iln>iln0) then
            wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
-           ider_tmp=min(ider,1)
+           ider_tmp = min(ider, 1)
+#ifndef MG_MKFFNL
            call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm,wk_ffnl1,mqgrid,npw)
-           if(ider==2) then
+           if (ider == 2) then
              call splfit(qgrid,wk_ffnl3,wk_ffspl,ider,kpgnorm,wk_ffnl1,mqgrid,npw)
            end if
+#else
+           call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm_sort,wk_ffnl1,mqgrid,npw)
+           call reorder(npw, wk_ffnl1)
+           call reorder(npw, wk_ffnl2)
+           if (ider == 2) then
+             call splfit(qgrid,wk_ffnl3,wk_ffspl,ider,kpgnorm_sort,wk_ffnl1,mqgrid,npw)
+             call reorder(npw, wk_ffnl3)
+           end if
+#endif
          end if
 
          ! Store FFNL and FFNL derivatives
@@ -644,12 +670,41 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
  ABI_FREE(kpgnorm_inv)
  ABI_FREE(kpgnorm)
+#ifdef MG_MKFFNL
+ ABI_FREE(kpgnorm_sort)
+ ABI_FREE(iperm)
+#endif
  ABI_FREE(wk_ffnl1)
  ABI_FREE(wk_ffnl2)
  ABI_FREE(wk_ffnl3)
  ABI_FREE(wk_ffspl)
 
  call timab(16,2,tsec)
+
+contains
+pure subroutine reorder(npw, vals)
+ integer,intent(in) :: npw
+ real(dp),intent(inout) :: vals(npw)
+ !integer :: ii, ig
+ !real(dp) :: r1, r2
+ !real(dp) :: new_vals(npw)
+
+ !do ig=1,npw
+ !  ii = iperm(ig)
+ !  new_vals(ii) = vals(ig)
+ !  !r1 = vals(ii)
+ !  !r2 = vals(ig)
+ !  !vals(ig) = r1
+ !  !vals(ii) = r2
+ !  !vals(ii) = r1
+ !  !vals(ig) = r2
+ !end do
+ !vals = new_vals
+ !vals = vals(iperm)
+
+ vals(iperm) = vals(:)
+
+end subroutine reorder
 
 end subroutine mkffnl
 !!***

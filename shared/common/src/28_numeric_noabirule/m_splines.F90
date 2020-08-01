@@ -30,7 +30,8 @@ module m_splines
  use m_abicore
  use m_errors
 
- use m_time,   only : timab
+ use m_fstrings, only : sjoin, itoa, ftoa
+ !use m_time,   only : timab
 
  implicit none
 
@@ -92,116 +93,116 @@ contains
 !!
 !! SOURCE
 
-subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
+subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
 
- integer, intent(in) :: ider,numarg,numnew
- real(dp), intent(in) :: arg(numarg),fun(numarg,2),newarg(numnew)
+ integer, intent(in) :: ider, numarg, numnew
+ real(dp), intent(in) :: arg(numarg), fun(numarg,2), newarg(numnew)
  real(dp), intent(out) :: derfun(numnew)
  real(dp), intent(inout) :: newfun(numnew)
 
  integer :: i,jspl
  real(dp) :: argmin,delarg,d,aa,bb,cc,dd
- character(len=500) :: msg
- real(dp) :: tsec(2)
+ !real(dp) :: tsec(2)
 
 ! *************************************************************************
 
  ! Keep track of time spent in mkffnl
- call timab(1905, 1, tsec)
+ !call timab(1905, 1, tsec)
 
  ! argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
- argmin=arg(1)
- delarg=(arg(numarg)-argmin)/dble(numarg-1)
+ argmin = arg(1)
+ delarg = (arg(numarg)-argmin) / dble(numarg-1)
 
- if(delarg<tol12)then
-   write(msg,'(a,es16.8)') ' delarg should be strictly positive, while delarg= ',delarg
-   MSG_ERROR(msg)
+ if (delarg < tol12) then
+   MSG_ERROR(sjoin('delarg should be strictly positive, while it is: ', ftoa(delarg)))
  endif
 
- jspl=-1
+ jspl = -1
 
  ! Do one loop for no grads, other for grads
- if (ider==0) then
+ select case (ider)
+ case (0)
 
   ! Spline index loop for no grads:
   do i=1,numnew
-    if (newarg(i).ge.arg(numarg)) then
+    if (newarg(i) >= arg(numarg)) then
       ! function values are being requested outside
       ! range of data.',a1,' Function and slope will be set to
       ! values at upper end of data.
 
       newfun(i)=fun(numarg,1)
 
-    else if (newarg(i).le.arg(1)) then
+    else if (newarg(i) <= arg(1)) then
       newfun(i)=fun(1,1)
 
     else
-      jspl=1+int((newarg(i)-argmin)/delarg)
-      d=newarg(i)-arg(jspl)
-      bb = d/delarg
-      aa = 1.0d0-bb
-      cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-      dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-      newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
+      jspl = 1+int((newarg(i)-argmin)/delarg)
+      d = newarg(i) - arg(jspl)
+      bb = d / delarg
+      aa = one - bb
+      cc = aa*(aa**2 -one) * (delarg**2 / six)
+      dd = bb*(bb**2 -one) * (delarg**2 / six)
+      newfun(i)=aa * fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
     end if
   enddo
 
- else if(ider==1)then
+ case (1)
 
    ! Spline index loop includes grads:
    do i=1,numnew
 
-     if (newarg(i).ge.arg(numarg)) then
-       newfun(i)=fun(numarg,1)
-       derfun(i)=0.0d0
+     if (newarg(i) >= arg(numarg)) then
+       newfun(i) = fun(numarg,1)
+       derfun(i) = zero
 
-     else if (newarg(i).le.arg(1)) then
-       newfun(i)=fun(1,1)
-       derfun(i)=0.0d0
+     else if (newarg(i) <= arg(1)) then
+       newfun(i) = fun(1,1)
+       derfun(i) = zero
 
      else
        ! cubic spline interpolation:
-       jspl=1+int((newarg(i)-arg(1))/delarg)
-       d=newarg(i)-arg(jspl)
-       bb = d/delarg
-       aa = 1.0d0-bb
-       cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-       dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-       newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
+       jspl = 1 + int((newarg(i) - arg(1)) / delarg)
+       d = newarg(i) - arg(jspl)
+       bb = d / delarg
+       aa = one - bb
+       cc = aa*(aa**2 - one) * (delarg**2 / six)
+       dd = bb*(bb**2 - one) * (delarg**2 / six)
+       newfun(i) = aa*fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
        ! spline fit to first derivative:
        ! note correction of Numerical Recipes sign error
        derfun(i) = (fun(jspl+1,1)-fun(jspl,1))/delarg +    &
-          (-(3.d0*aa**2-1.d0)*fun(jspl,2)+                 &
-           (3.d0*bb**2-1.d0)*fun(jspl+1,2)) * delarg/6.0d0
+          (-(3.d0*aa**2 -one) * fun(jspl,2) + (3.d0*bb**2 -one) * fun(jspl+1,2)) * delarg/six
 
      end if
    enddo
 
- else if (ider==2) then
+ case (2)
 
    do i=1,numnew
 
-     if (newarg(i).ge.arg(numarg)) then
-      derfun(i)=0.0d0
+     if (newarg(i) >= arg(numarg)) then
+       derfun(i) = zero
 
-     else if (newarg(i).le.arg(1)) then
-      derfun(i)=0.0d0
+     else if (newarg(i) <= arg(1)) then
+       derfun(i) = zero
 
      else
-      ! cubic spline interpolation:
-      jspl=1+int((newarg(i)-argmin)/delarg)
-      d=newarg(i)-arg(jspl)
-      bb = d/delarg
-      aa = 1.0d0-bb
-      ! second derivative of spline (piecewise linear function)
-      derfun(i) = aa*fun(jspl,2)+bb*fun(jspl+1,2)
+       ! cubic spline interpolation:
+       jspl = 1 + int((newarg(i) - argmin) / delarg)
+       d = newarg(i) - arg(jspl)
+       bb = d / delarg
+       aa = one - bb
+       ! second derivative of spline (piecewise linear function)
+       derfun(i) = aa*fun(jspl,2) + bb*fun(jspl+1,2)
 
      end if
    enddo
 
- end if
+ case default
+   MSG_ERROR(sjoin("Invalid ider:", itoa(ider)))
+ end select
 
- call timab(1905, 2, tsec)
+ !call timab(1905, 2, tsec)
 
 end subroutine splfit
 !!***

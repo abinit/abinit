@@ -365,12 +365,12 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx
  real(dp) :: d1kpg2,d2kpg2,ddfsm, dfsm
 !arrays
- real(dp) :: gmet_break(3,3), tsec(2)
+ real(dp) :: gmet_break(3,3) !, tsec(2)
 
 ! *************************************************************************
 
  ! Keep track of time spent in mkffnl
- call timab(1906, 1, tsec)
+ !call timab(1906, 1, tsec)
 
  ! htpisq is (1/2) (2 Pi) **2:
  htpisq=0.5_dp*(two_pi)**2
@@ -459,7 +459,7 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  end do
 !$OMP END PARALLEL DO
 
- call timab(1906, 2, tsec)
+ !call timab(1906, 2, tsec)
 
 end subroutine mkkin
 !!***
