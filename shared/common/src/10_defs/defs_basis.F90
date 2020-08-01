@@ -137,8 +137,8 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
- !real(dp), parameter :: zero_sp=0._sp
- !real(dp), parameter :: one_sp=1._sp
+ real(sp), parameter :: zero_sp=0._sp
+ real(sp), parameter :: one_sp=1._sp
 
 !Fractionary real constants
  real(dp), parameter :: half=0.50_dp
@@ -253,19 +253,21 @@ module defs_basis
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
 
 !Complex constants
+ !double precision
  complex(dpc), parameter :: czero = (0._dp,0._dp)
  complex(dpc), parameter :: cone  = (1._dp,0._dp)
  complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
 
+ ! single-precision
  complex(spc), parameter :: czero_sp = (0._sp,0._sp)
  complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
  complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
  complex(dpc), parameter :: pauli_mat(2,2,0:3) = reshape([cone,czero,czero,cone, &
-&                                                         czero,cone,cone,czero,&
-&                                                         czero,j_dpc,-j_dpc,czero,&
-&                                                         cone,czero,czero,-cone], [2,2,4])
+                                                          czero,cone,cone,czero,&
+                                                          czero,j_dpc,-j_dpc,czero,&
+                                                          cone,czero,czero,-cone], [2,2,4])
 
 !Character constants
  character(len=1), parameter :: ch10 = char(10)

@@ -1579,7 +1579,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Prepare DDK operator only if (k+q) is not alreay computed via nkcalc
        ! that is if the k+q is slightly outside the sigma_erange window.
-       !if (sigma%mrta > 0) then
        if (sigma%mrta > 0) then
          if (any(have_vcar_ibz(sigma%my_bsum_start:sigma%my_bsum_stop, ikq_ibz, spin) == 0)) then
            call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
@@ -2336,6 +2335,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  if (dtset%eph_task == -4) then
    new%imag_only = .True.
    new%mrta = 1 ! Compute lifetimes in the MRTA approximation? Default is yes
+   if (dtset%userie == 1) new%mrta = 0
  end if
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method

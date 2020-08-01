@@ -3400,15 +3400,15 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !scalars
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr, my_add_lr
- real(dp) :: wr, qmod !wi,
- !complex(sp) :: cbeta_sp
+ real(dp) :: qmod
+ real(sp) :: beta_sp, wr !wi,
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
  real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
- real(dp),allocatable :: weiqr(:,:)
- !real(sp),allocatable :: weiqr(:,:)
+ !real(dp),allocatable :: weiqr(:,:)
+ real(sp),allocatable :: weiqr(:,:), ov1r_sp(:, :)
 
 ! *************************************************************************
 
@@ -3451,14 +3451,15 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
  ! Interpolate potentials (results in ov1r)
  ov1r = zero
+ ABI_MALLOC(ov1r_sp, (2, nfft))
+
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
    weiqr(1,:) = db%my_wratm(:, ipert) * eiqr(1,:)
    weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
 
    do ispden=1,db%nspden
-
-#if 1
+#if 0
      ! Slow FT.
      do ifft=1,nfft
        do ir=1,db%my_nrpt
@@ -3474,14 +3475,21 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
        end if
      end do ! ifft
 #else
-     cbeta_sp = czero_sp
+     ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
+     ! Use BLAS2 to compute ov1r = W (x + iy) + beta * v1r_lr but need to handle kind conversion in input/output.
+     beta_sp = zero_sp
      if (my_add_lr > 0) then
-       cbeta_sp = cone_sp
-       ov1r(:, :, ispden, imyp) = v1r_lr(:, :, imyp)
+       ! Add the long-range part of the potential
+       beta_sp = one_sp
+       ov1r_sp(:, :) = v1r_lr(:, :, imyp)
      end if
-     !sum_R W(R, r) e^{iq.R} with W real matrix
-     call CGEMV("T", db%my_nrpt, nfft, cone_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr, 1, &
-                cbeta_sp, ov1r(1,1,ispden,imyp), 1)
+
+     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr(1,1), 2, &
+                beta_sp, ov1r_sp(1,1), 2)
+     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr(2,1), 2, &
+                beta_sp, ov1r_sp(2,1), 2)
+
+     ov1r(:, :) = oov1r_sp(:, :)
 #endif
 
      ! Remove the phase to get the lattice-periodic part.
@@ -3498,7 +3506,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    end if
  end do ! imyp
 
+ ABI_FREE(ov1r_sp)
+
  if (db%symv1 == 2) then
+   ! Symmetrize potentials
    ! Initialize the list of perturbations rfpert and rdfir
    ! WARNING: Only phonon perturbations are considered for the time being.
    ABI_MALLOC(rfpert, (db%mpert))
@@ -3588,6 +3599,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
+
  ABI_UNUSED(comm)
 
  ! Keep track of total time spent.
