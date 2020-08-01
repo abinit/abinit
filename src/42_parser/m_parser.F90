@@ -284,7 +284,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  INPUT_STRING = string_raw
 
 !DEBUG
- write(std_out,'(a)')string(:lenstr)
+!write(std_out,'(a)')string(:lenstr)
 !ENDDEBUG
 
 end subroutine parsefile

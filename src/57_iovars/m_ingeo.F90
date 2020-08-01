@@ -846,6 +846,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          chrgat=chrgat,nucdipmom=nucdipmom)
 
        ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the atomic positions
+       ! and recompute the symmetry operations (tnons might not be accurate enough)
        if(tolsym>1.00001e-8)then
          ABI_ALLOCATE(indsym,(4,natom,nsym))
          ABI_ALLOCATE(symrec,(3,3,nsym))
@@ -865,8 +866,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
           'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
           'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
          MSG_WARNING(msg)
-       end if
 
+         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
+           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+           chrgat=chrgat,nucdipmom=nucdipmom)
+
+       end if
      end if
    end if
 

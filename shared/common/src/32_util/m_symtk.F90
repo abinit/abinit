@@ -1622,6 +1622,11 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
 
 ! *************************************************************************
 
+!DEBUG
+! write(std_out,'(a,a,i4,3f18.12)') ch10,&
+!& ' symchk : enter, trtypat,tratom=',trtypat,tratom
+!ENDDEBUG
+
 !Start testmn out at large value
  testmn=1000000.d0
 
@@ -1643,7 +1648,6 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
    test1=test1-dble(trans1)
    test2=test2-dble(trans2)
    test3=test3-dble(trans3)
-
    test=abs(test1)+abs(test2)+abs(test3)
    if (test<tol10) then
 !    Note that abs() is not taken here
@@ -1780,6 +1784,18 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,'(a,es12.4)')' symatm : enter, tolsym=',tolsym
+!write(std_out,'(a,es12.4)')' symatm : xred='
+!do ii=1,natom
+!  write(std_out,'(i4,3es18.10)')ii,xred(1:3,ii)
+!enddo
+!write(std_out,'(a,es12.4)')' symatm : isym,symrec,tnons='
+!do isym=1,nsym
+!  write(std_out,'(i6,9i4,3es18.10)')isym,symrec(:,:,isym),tnons(1:3,isym)
+!enddo
+!ENDDEBUG
+
  err=zero
  errout=0
 
@@ -1806,12 +1822,19 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
      difmax=max(abs(difmin(1)),abs(difmin(2)),abs(difmin(3)))
      err=max(err,difmax)
 
-     if (difmax>tolsym) then ! Print warnings if differences exceed tolerance
-       write(msg, '(3a,i3,a,i6,a,i3,a,a,3es12.4,3a)' )&
-       'Trouble finding symmetrically equivalent atoms',ch10,&
-       'Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
-       'gives tratom=',tratom(1:3),'.',ch10,&
-       'This is further away from every atom in crystal than the allowed tolerance.'
+     if(errout==3)then
+       write(msg, '(a)' )&
+       ' Suppress warning about finding symmetrically equivalent atoms, as mentioned already three times.'
+       MSG_WARNING(msg)
+       errout=errout+1
+     endif
+
+     if (difmax>tolsym .and. errout<3) then ! Print warnings if differences exceed tolerance
+       write(msg, '(3a,i3,a,i6,a,i3,a,a,3f18.12,3a,es12.4)' )&
+       ' Trouble finding symmetrically equivalent atoms',ch10,&
+       ' Applying inv of symm number',isym,' to atom number',iatom,'  of typat',typat(iatom),ch10,&
+       ' gives tratom=',tratom(1:3),'.',ch10,&
+       ' This is further away from every atom in crystal than the allowed tolerance, tolsym=',tolsym
        MSG_WARNING(msg)
 
        write(msg, '(a,3i3,a,a,3i3,a,a,3i3)' ) &
@@ -1819,10 +1842,10 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
        '                                ',symrec(2,1:3,isym),ch10,&
        '                                ',symrec(3,1:3,isym)
        call wrtout(std_out,msg)
-       write(msg, '(a,3f13.7)' )'  and the nonsymmorphic transl. tnons =',(tnons(mu,isym),mu=1,3)
+       write(msg, '(a,3f18.12)' )'  and the nonsymmorphic transl. tnons =',(tnons(mu,isym),mu=1,3)
 
        call wrtout(std_out,msg)
-       write(msg, '(a,1p,3e11.3,a,a,i5)' ) &
+       write(msg, '(a,1p,3es12.4,a,a,i5)' ) &
         '  The nearest coordinate differs by',difmin(1:3),ch10,&
         '  for indsym(nearest atom)=',indsym(4,isym,iatom)
        call wrtout(std_out,msg)
@@ -1830,12 +1853,12 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 !      Use errout to reduce volume of error diagnostic output
        if (errout==0) then
          write(msg,'(6a)') ch10,&
-          '  This indicates that when symatm attempts to find atoms  symmetrically',ch10, &
+          '  This indicates that when symatm attempts to find atoms symmetrically',ch10, &
           '  related to a given atom, the nearest candidate is further away than some',ch10,&
           '  tolerance.  Should check atomic coordinates and symmetry group input data.'
          call wrtout(std_out,msg)
-         errout=1
        end if
+       errout=errout+1
 
      end if !difmax>tol
    end do !iatom
@@ -1863,7 +1886,7 @@ subroutine symatm(indsym, natom, nsym, symrec, tnons, tolsym, typat, xred, print
 
  if (err>tolsym) then
    write(msg, '(1x,a,1p,e14.5,a,e12.4)' )'symatm: maximum (delta t)=',err,' is larger than tol=',tolsym
-   call wrtout(std_out,msg)
+   MSG_WARNING(msg)
  end if
 
 !Stop execution if error is really big
