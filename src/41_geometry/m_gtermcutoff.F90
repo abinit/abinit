@@ -148,7 +148,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
  real(dp)           :: gcart_para,gcart_perp,gcart_x,gcart_y,gcart_z
  real(dp)           :: j0,j1,k0,k1
- real(dp)           :: quad,tmp,ucvol
+ real(dp)           :: quad,ucvol
  real(dp)           :: hcyl,hcyl2
  real(dp),parameter :: tolfix=1.0000001_dp,tol999=999.0
  character(len=50)  :: mode
