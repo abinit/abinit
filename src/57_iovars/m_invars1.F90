@@ -2052,7 +2052,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
  dtsets(0)%ptgroupma=0
  dtsets(0)%spgroup=0
  dtsets(0)%shiftk(:,:)=half
- dtsets(0)%tolsym=tol8
+!XG20200801 Changed the default value
+!dtsets(0)%tolsym=tol8
+ dtsets(0)%tolsym=tol5
  dtsets(0)%znucl(:)=zero
  dtsets(0)%ucrpa=0
  dtsets(0)%usedmft=0
