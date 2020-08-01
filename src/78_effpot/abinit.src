@@ -12,9 +12,9 @@
 #
 
 # Source file attributes
-ABI_SRC_NIL = 0     # No attribute
-ABI_SRC_BLT = 1     # The file is built by a script
-ABI_SRC_DEP = 2     # The file depends on other files
+ABI_SRC_NIL = 0  # No attribute
+ABI_SRC_BLT = 1  # The file is built by a script
+ABI_SRC_DEP = 2  # The file depends on other files
 
 # Source files
 sources = [
@@ -43,18 +43,25 @@ sources = [
     "m_lattice_mover.F90",
     "m_lattice_verlet_mover.F90",
     "m_linked_list.F90",
+    "m_lwf_hist.F90",
+    "m_lwf_mc_mover.F90",
     "m_lwf_mover.F90",
+    "m_lwf_ncfile.F90",
+    "m_lwf_observables.F90",
+    "m_lwf_primitive.F90",
+    "m_lwf_potential.F90",
     "m_mathfuncs.F90",
     "m_mergesort.F90",
     "m_mpi_scheduler.F90",
     "m_multibinit_cell.F90",
     "m_multibinit_dataset.F90",
     "m_multibinit_io_xml.F90",
-    "m_opt_effpot.F90",
     "m_multibinit_main.F90",
     "m_multibinit_manager.F90",
     # "m_multibinit_supercell.F90",
     "m_multibinit_unittest.F90",
+    "m_observables.F90",
+    "m_opt_effpot.F90",
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
     "m_polynomial_potential.F90",
@@ -85,7 +92,8 @@ sources = [
     "m_spmat_NDCOO.F90",
     "m_supercell_maker.F90",
     "m_tightbinding.F90",
+    "m_twobody_interaction.F90"
     #"m_unitcell.F90"
- ]
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

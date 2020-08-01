@@ -132,6 +132,13 @@ module m_multibinit_dataset
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
 
+  ! parameters for lwf
+  integer :: lwf_dynamics
+  integer :: lwf_init_state
+  integer :: lwf_ntime
+  integer :: lwf_nctime
+  integer :: lwf_self_bound_order
+
   ! parameters for spin
   integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
@@ -184,6 +191,12 @@ module m_multibinit_dataset
   real(dp) :: latt_taup     ! 
   real(dp) :: latt_compressibility
   integer :: latt_mask(3)
+
+  ! lwf related
+  real(dp) :: lwf_dt
+  real(dp) :: lwf_mc_avg_amp
+  real(dp) :: lwf_temperature
+  real(dp) :: lwf_self_bound_coeff
 
   !  parameters for spin
   real(dp) :: spin_dt
@@ -394,7 +407,19 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%test_effpot=0 
  multibinit_dtset%test_prt_ph=0 
  multibinit_dtset%tolmxf=2.0d-5
+
+ multibinit_dtset%lwf_dynamics = 0
+ multibinit_dtset%lwf_nctime = 0
+ multibinit_dtset%lwf_ntime = 0
+ multibinit_dtset%lwf_init_state = 0
+ multibinit_dtset%lwf_dt=0
+ multibinit_dtset%lwf_self_bound_order=0
+ multibinit_dtset%lwf_temperature=0.0_dp
+ multibinit_dtset%lwf_mc_avg_amp=0.0_dp
+ multibinit_dtset%lwf_self_bound_coeff=0.0_dp
  
+
+
  multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
  multibinit_dtset%spin_calc_correlation_obs=0
@@ -1011,6 +1036,96 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%latt_taup=1000
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_taup',tread,'DPR')
  if(tread==1) multibinit_dtset%latt_taup=dprarr(1)
+
+ multibinit_dtset%lwf_dt= 1d-16
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_dt',tread,'TIM')
+ if(tread==1) multibinit_dtset%lwf_dt=dprarr(1)
+ if(multibinit_dtset%lwf_dt<0)then
+    write(message, '(a,es10.2,a,a,a,a,a)' )&
+         &   'lwf_dt is',multibinit_dtset%lwf_dt,', but the only allowed values',ch10,&
+         &   'are superior to 0  .',ch10,&
+         &   'Action: correct lwf_dt in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%lwf_init_state=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_init_state',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_init_state=intarr(1)
+ if( .not. (multibinit_dtset%lwf_init_state <= 1) ) then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'lwf_init_state is ',multibinit_dtset%lwf_init_state,', but the only allowed values',ch10,&
+         &   'are 0, 1 and negative values.',ch10,&
+         &   'Action: correct lwf_init_state in your input file.'
+    MSG_ERROR(message)
+ end if
+
+
+ multibinit_dtset%lwf_dynamics=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_dynamics',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_dynamics=intarr(1)
+ if( .not. (multibinit_dtset%lwf_dynamics <= 1) ) then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'lwf_dynamics is ',multibinit_dtset%lwf_dynamics,', but the only allowed values',ch10,&
+         &   'are 0, 1 and negative values.',ch10,&
+         &   'Action: correct lwf_dynamics in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%lwf_mc_avg_amp=0.05
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_mc_avg_amp',tread,'DPR')
+ if(tread==1) multibinit_dtset%lwf_mc_avg_amp=dprarr(1)
+ if(multibinit_dtset%lwf_mc_avg_amp<0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'lwf_mc_avg_amp is ',multibinit_dtset%lwf_mc_avg_amp,'. The only allowed values',ch10,&
+         &   'are non-negative values.',ch10,&
+         &   'Action: correct lwf_mc_avg_amp in your input file.'
+    MSG_ERROR(message)
+ end if
+
+
+
+
+ multibinit_dtset%lwf_nctime=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_nctime',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_nctime=intarr(1)
+ if( .not. (multibinit_dtset%lwf_nctime >= 0) ) then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'lwf_nctime is ',multibinit_dtset%lwf_nctime,', but the only non-negative values allowed.'
+    MSG_ERROR(message)
+ end if
+
+
+ multibinit_dtset%lwf_ntime=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_ntime',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_ntime=intarr(1)
+ if( .not. (multibinit_dtset%lwf_ntime >= 0) ) then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'lwf_ntime is ',multibinit_dtset%lwf_ntime,', but the only non-negative values allowed.'
+    MSG_ERROR(message)
+ end if
+
+
+ multibinit_dtset%lwf_self_bound_order=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_self_bound_order',tread,'INT')
+ if(tread==1) multibinit_dtset%lwf_self_bound_order=intarr(1)
+
+
+ multibinit_dtset%lwf_self_bound_coeff=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_self_bound_coeff',tread,'DPR')
+ if(tread==1) multibinit_dtset%lwf_self_bound_coeff=dprarr(1)
+
+
+ multibinit_dtset%lwf_temperature=325
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lwf_temperature',tread,'DPR')
+ if(tread==1) multibinit_dtset%lwf_temperature=dprarr(1)
+ if(multibinit_dtset%lwf_temperature<0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'lwf_temperature is ',multibinit_dtset%lwf_temperature,'. The only allowed values',ch10,&
+         &   'are non-negative values.',ch10,&
+         &   'Action: correct lwf_temperature in your input file.'
+    MSG_ERROR(message)
+ end if
+
 
 
 !N
@@ -2696,6 +2811,19 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
       write(nunit,'(a15,ES15.5)')'     latt_mask',(multibinit_dtset%latt_mask(ii), ii=1, 3)
    end if
 
+ end if
+
+ if(multibinit_dtset%lwf_dynamics/=0) then
+    write(nunit,'(a)')' LWF Dynamics :'
+    write(nunit,'(12x,a16,I12.1)')'lwf_dynamics',multibinit_dtset%lwf_dynamics
+    write(nunit, '(13x, a15, I12.1)') 'lwf_init_state', multibinit_dtset%lwf_init_state
+    write(nunit,'(10x, a18, 5x, F10.5)')'lwf_temperature',multibinit_dtset%lwf_temperature
+    write(nunit,'(10x, a18, 5x, F10.5)')'lwf_mc_avg_amp',multibinit_dtset%lwf_mc_avg_amp
+    write(nunit,'(13x,a15,ES15.5, a8)')  'lwf_dt',multibinit_dtset%lwf_dt*Time_Sec , ' second' !TODO: use a.u.
+    write(nunit,'(13x,a15,I10.1)')'lwf_ntime',multibinit_dtset%lwf_ntime
+    write(nunit,'(13x,a15,I10.1)')'lwf_nctime',multibinit_dtset%lwf_nctime
+    write(nunit,'(8x,a20,I10.1)')'lwf_self_bound_order',multibinit_dtset%lwf_self_bound_order
+    write(nunit,'(8x,a20,F10.5)')'lwf_self_bound_coeff',multibinit_dtset%lwf_self_bound_coeff
  end if
 
  if(multibinit_dtset%spin_dynamics/=0) then

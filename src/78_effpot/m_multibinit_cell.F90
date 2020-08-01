@@ -109,6 +109,7 @@ module m_multibinit_cell
      procedure :: finalize
      procedure :: set_lattice   ! intialize the lattice
      procedure :: set_spin      ! initilzie the spin
+     procedure :: set_lwf
      procedure :: fill_supercell  ! fill supercell.
      !procedure :: from_unitcell
   end type mbcell_t
@@ -185,10 +186,11 @@ contains
   !----------------------------------------------------------------------
   !> @brief initialize LWF sub type
   !----------------------------------------------------------------------
-  subroutine set_lwf(self)
+  subroutine set_lwf(self, nlwf)
     class(mbcell_t) , intent(inout):: self
+    integer, intent(in) :: nlwf
     self%has_lwf=.True.
-    call self%lwf%initialize()
+    call self%lwf%initialize(nlwf)
   end subroutine set_lwf
 
   !----------------------------------------------------------------------
@@ -538,14 +540,15 @@ contains
 
 
   !========================= LWF =================================
-  Subroutine lwf_initialize(self)
+  Subroutine lwf_initialize(self, nlwf)
     class(mbcell_lwf_t), intent(inout) :: self
-    ABI_UNUSED_A(self)
+    integer, intent(in) :: nlwf
+    self%nlwf=nlwf
   end subroutine lwf_initialize
 
   subroutine lwf_finalize(self)
     class(mbcell_lwf_t), intent(inout) :: self
-    ABI_UNUSED_A(self)
+    self%nlwf=0
   end subroutine lwf_finalize
 
   subroutine lwf_fill_supercell(self, sc_maker,supercell)
@@ -559,9 +562,9 @@ contains
     class(mbcell_lwf_t) :: self
     type(supercell_maker_t):: sc_maker
     type(mbcell_lwf_t) :: unitcell
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(sc_maker)
-    ABI_UNUSED_A(unitcell)
+    print *, "unitcell nlwf", unitcell%nlwf
+    self%nlwf=sc_maker%ncells*unitcell%nlwf
+    print *, "supercell nlwf", self%nlwf
   end subroutine lwf_from_unitcell
 
 end module m_multibinit_cell

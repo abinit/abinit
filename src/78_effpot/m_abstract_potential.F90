@@ -70,6 +70,7 @@ module m_abstract_potential
      procedure :: set_params      ! parameters from input file
      procedure :: calculate       ! get energy and 1st derivative from input state
      procedure :: get_delta_E     ! calculate energy diffence if one component is changed for Monte carlo algorithm
+     procedure :: get_delta_E_lwf     ! calculate energy diffence if one component is changed for Monte carlo algorithm
   end type abstract_potential_t
 
 contains
@@ -189,8 +190,8 @@ contains
     ! for spin monte carlo
     ! calculate energy difference if one spin is moved.
     class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
-    real(dp), intent(inout) :: S(:,:),  Snew(:)
-    integer, intent(in) :: ispin
+    real(dp),  intent(inout) :: S(:,:),  Snew(:)
+    integer,  intent(in) :: ispin
     real(dp), intent(inout) :: deltaE
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(S)
@@ -199,6 +200,33 @@ contains
     ABI_UNUSED_A(deltaE)
     MSG_ERROR("get_delta_E not implemented for this effpot.")
   end subroutine get_delta_E
+
+  !----------------------------------------------------------------------
+  !> @brief get_delta_E_lwf: calculate the energy difference when a given lwf
+  !> is changed. This is to be used for spin Monte Carlo. Currently the
+  !> only supported is the spin model. 
+  !>
+  !> @param[in]  lwf: lwf of full structure. array of (nlwf)
+  !> @param[in]  ilwf: the index of spin changed. integer
+  !> @param[in]  lwf_new: the new value of the changed spin. 
+  !> @param[out] deltaE: the energy difference
+  !----------------------------------------------------------------------
+  subroutine get_delta_E_lwf(self, lwf, ilwf, lwf_new, deltaE)
+    ! for spin monte carlo
+    ! calculate energy difference if one spin is moved.
+    class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
+    real(dp),  intent(inout) :: lwf(:),  lwf_new
+    integer,  intent(in) :: ilwf
+    real(dp), intent(inout) :: deltaE
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(ilwf)
+    ABI_UNUSED_A(lwf_new)
+    ABI_UNUSED_A(deltaE)
+    MSG_ERROR("get_delta_E_lwf not implemented for this effpot."//self%label)
+  end subroutine get_delta_E_lwf
+
+
 
 !   subroutine get_energy(self, energy)
 !     class(abstract_potential_t), intent(inout) :: self

@@ -84,6 +84,8 @@ module m_potential_list
      procedure :: calculate ! each potential in list do calculate and then sum.
      procedure :: get_delta_E ! currently only used in spin potential, 
                               ! to calculate energy difference when one spin changes.
+
+     procedure :: get_delta_E_lwf ! currently only used in lwf potential, 
   end type potential_list_t
   !!***
 
@@ -234,5 +236,30 @@ contains
        call self%list(i)%ptr%get_delta_E(S=S, ispin=ispin, Snew=Snew, deltaE=deltaE)
     end do
     end subroutine get_delta_E
+
+    !----------------------------------------------------------------------
+    !> @brief get_delta_E_lwf: calculate the energy difference when a given lwf
+    !> is changed. This is to be used for spin Monte Carlo. Currently the
+    !> only supported is the spin model. 
+    !>
+    !> @param[in]  lwf: lwf of full structure. array of (nlwf)
+    !> @param[in]  ilwf: the index of spin changed. integer
+    !> @param[in]  lwf_new: the new value of the changed spin. 
+    !> @param[out] deltaE: the energy difference
+    !----------------------------------------------------------------------
+    subroutine get_delta_E_lwf(self, lwf, ilwf, lwf_new, deltaE)
+      ! for spin monte carlo
+      ! calculate energy difference if one spin is moved.
+      class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
+      real(dp),  intent(inout) :: lwf(:),  lwf_new
+      integer,  intent(in) :: ilwf
+      real(dp), intent(inout) :: deltaE
+      integer :: i
+      do i=1, self%size
+         call self%list(i)%ptr%get_delta_E_lwf(lwf=lwf, ilwf=ilwf, lwf_new=lwf_new, deltaE=deltaE)
+      end do
+    end subroutine get_delta_E_lwf
+
+
 
 end module m_potential_list
