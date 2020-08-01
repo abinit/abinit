@@ -209,12 +209,11 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
- integer,allocatable :: iperm(:)
  real(dp) :: rprimd(3,3),tsec(2)
  real(dp),allocatable :: dffnl_cart(:,:),dffnl_red(:,:),dffnl_tmp(:)
  real(dp),allocatable :: d2ffnl_cart(:,:),d2ffnl_red(:,:),d2ffnl_tmp(:)
- real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:),wk_ffnl1(:), kpgnorm_sort(:)
- real(dp),allocatable :: wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
+ real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:),wk_ffnl1(:)
+ real(dp),allocatable :: wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:), mg_wk_ffspl(:,:)
 
 ! *************************************************************************
 
@@ -266,11 +265,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  ABI_MALLOC(kpgnorm_inv,(npw))
 
 #define MG_MKFFNL
-
-#ifdef MG_MKFFNL
- ABI_MALLOC(kpgnorm_sort,(npw))
- ABI_MALLOC(iperm,(npw))
-#endif
 
  ig0=-1 ! index of |k+g|=0 vector
 
@@ -341,12 +335,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end if
  end if
 
-#ifdef MG_MKFFNL
- kpgnorm_sort = kpgnorm
- iperm = [(ig, ig=1, npw)]
- call sort_dp(npw, kpgnorm_sort, iperm, tol16)
-#endif
-
  ! Need rprimd in some cases
  if (ider>=1.and.useylm==1.and.ig0>0) then
    do mu=1,3
@@ -361,6 +349,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  ABI_MALLOC(wk_ffnl2,(npw))
  ABI_MALLOC(wk_ffnl3,(npw))
  ABI_MALLOC(wk_ffspl,(mqgrid,2))
+ ABI_MALLOC(mg_wk_ffspl,(2,mqgrid))
 
  if (ider>=1.and.useylm==1) then
    ABI_MALLOC(dffnl_red,(npw,3))
@@ -411,12 +400,10 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
              call splfit(qgrid,wk_ffnl3,wk_ffspl,ider,kpgnorm,wk_ffnl1,mqgrid,npw)
            end if
 #else
-           call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm_sort,wk_ffnl1,mqgrid,npw)
-           call reorder(npw, wk_ffnl1)
-           call reorder(npw, wk_ffnl2)
+           mg_wk_ffspl(:,:)=transpose(ffspl(:,:,iln,itypat))
+           call mg_splfit(qgrid,wk_ffnl2,mg_wk_ffspl,ider_tmp,kpgnorm,wk_ffnl1,mqgrid,npw)
            if (ider == 2) then
-             call splfit(qgrid,wk_ffnl3,wk_ffspl,ider,kpgnorm_sort,wk_ffnl1,mqgrid,npw)
-             call reorder(npw, wk_ffnl3)
+             call mg_splfit(qgrid,wk_ffnl3,mg_wk_ffspl,ider,kpgnorm,wk_ffnl1,mqgrid,npw)
            end if
 #endif
          end if
@@ -670,43 +657,173 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
  ABI_FREE(kpgnorm_inv)
  ABI_FREE(kpgnorm)
-#ifdef MG_MKFFNL
- ABI_FREE(kpgnorm_sort)
- ABI_FREE(iperm)
-#endif
  ABI_FREE(wk_ffnl1)
  ABI_FREE(wk_ffnl2)
  ABI_FREE(wk_ffnl3)
  ABI_FREE(wk_ffspl)
+ ABI_FREE(mg_wk_ffspl)
 
  call timab(16,2,tsec)
 
-contains
-pure subroutine reorder(npw, vals)
- integer,intent(in) :: npw
- real(dp),intent(inout) :: vals(npw)
- !integer :: ii, ig
- !real(dp) :: r1, r2
- !real(dp) :: new_vals(npw)
-
- !do ig=1,npw
- !  ii = iperm(ig)
- !  new_vals(ii) = vals(ig)
- !  !r1 = vals(ii)
- !  !r2 = vals(ig)
- !  !vals(ig) = r1
- !  !vals(ii) = r2
- !  !vals(ii) = r1
- !  !vals(ig) = r2
- !end do
- !vals = new_vals
- !vals = vals(iperm)
-
- vals(iperm) = vals(:)
-
-end subroutine reorder
-
 end subroutine mkffnl
+!!***
+
+
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_splines/mg_splfit
+!! NAME
+!!  mg_splfit
+!!
+!! FUNCTION
+!!  Evaluate cubic spline fit to get function values on input set
+!!  of ORDERED, UNFORMLY SPACED points.
+!!  Optionally gives derivatives (first and second) at those points too.
+!!  If point lies outside the range of arg, assign the extremal
+!!  point values to these points, and zero derivative.
+!!
+!! INPUTS
+!!  arg(numarg)=equally spaced arguments (spacing delarg) for data
+!!   to which spline was fit.
+!!  fun(numarg,2)=function values to which spline was fit and spline
+!!   fit to second derivatives (from Numerical Recipes spline).
+!!  ider=  see above
+!!  newarg(numnew)=new values of arguments at which function is desired.
+!!  numarg=number of arguments at which spline was fit.
+!!  numnew=number of arguments at which function values are desired.
+!!
+!! OUTPUT
+!!  derfun(numnew)=(optional) values of first or second derivative of function.
+!!   This is only computed for ider=1 or 2; otherwise derfun not used.
+!!  newfun(numnew)=values of function at newarg(numnew).
+!!   This is only computed for ider=0 or 1.
+!!
+!! NOTES
+!!        if ider=0, compute only the function (contained in fun)
+!!        if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
+!!        if ider=2, compute only the second derivative of the function (in derfun)
+!!
+!! PARENTS
+!!      getnel,m_pawpwij,mkffnl,pawgylmg,psp8lo
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mg_splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
+
+ integer, intent(in) :: ider, numarg, numnew
+ real(dp), intent(in) :: arg(numarg), fun(2,numarg), newarg(numnew)
+ real(dp), intent(out) :: derfun(numnew)
+ real(dp), intent(inout) :: newfun(numnew)
+
+ integer :: i,jspl
+ real(dp) :: argmin,delarg,d,aa,bb,cc,dd
+ !real(dp) :: tsec(2)
+
+! *************************************************************************
+
+ ! Keep track of time spent in mkffnl
+ !call timab(1905, 1, tsec)
+
+ ! argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
+ argmin = arg(1)
+ delarg = (arg(numarg)-argmin) / dble(numarg-1)
+
+ if (delarg < tol12) then
+   MSG_ERROR(sjoin('delarg should be strictly positive, while it is: ', ftoa(delarg)))
+ endif
+
+ jspl = -1
+
+ ! Do one loop for no grads, other for grads
+ select case (ider)
+ case (0)
+
+  ! Spline index loop for no grads:
+  do i=1,numnew
+    if (newarg(i) >= arg(numarg)) then
+      ! function values are being requested outside
+      ! range of data.',a1,' Function and slope will be set to
+      ! values at upper end of data.
+
+      newfun(i)=fun(1,numarg)
+
+    else if (newarg(i) <= arg(1)) then
+      newfun(i)=fun(1,1)
+
+    else
+      jspl = 1+int((newarg(i)-argmin)/delarg)
+      d = newarg(i) - arg(jspl)
+      bb = d / delarg
+      aa = one - bb
+      cc = aa*(aa**2 -one) * (delarg**2 / six)
+      dd = bb*(bb**2 -one) * (delarg**2 / six)
+      newfun(i)=aa * fun(1,jspl) + bb*fun(1,jspl+1) + cc*fun(2,jspl) + dd*fun(2,jspl+1)
+    end if
+  enddo
+
+ case (1)
+
+   ! Spline index loop includes grads:
+   do i=1,numnew
+
+     if (newarg(i) >= arg(numarg)) then
+       newfun(i) = fun(1,numarg)
+       derfun(i) = zero
+
+     else if (newarg(i) <= arg(1)) then
+       newfun(i) = fun(1,1)
+       derfun(i) = zero
+
+     else
+       ! cubic spline interpolation:
+       jspl = 1 + int((newarg(i) - arg(1)) / delarg)
+       d = newarg(i) - arg(jspl)
+       bb = d / delarg
+       aa = one - bb
+       cc = aa*(aa**2 - one) * (delarg**2 / six)
+       dd = bb*(bb**2 - one) * (delarg**2 / six)
+       newfun(i) = aa*fun(1,jspl) + bb*fun(1,jspl+1) + cc*fun(2,jspl) + dd*fun(2,jspl+1)
+       ! spline fit to first derivative:
+       ! note correction of Numerical Recipes sign error
+       derfun(i) = (fun(1,jspl+1)-fun(1,jspl))/delarg +    &
+          (-(3.d0*aa**2 -one) * fun(2,jspl) + (3.d0*bb**2 -one) * fun(2,jspl+1)) * delarg/six
+
+     end if
+   enddo
+
+ case (2)
+
+   do i=1,numnew
+
+     if (newarg(i) >= arg(numarg)) then
+       derfun(i) = zero
+
+     else if (newarg(i) <= arg(1)) then
+       derfun(i) = zero
+
+     else
+       ! cubic spline interpolation:
+       jspl = 1 + int((newarg(i) - argmin) / delarg)
+       d = newarg(i) - arg(jspl)
+       bb = d / delarg
+       aa = one - bb
+       ! second derivative of spline (piecewise linear function)
+       derfun(i) = aa*fun(2,jspl) + bb*fun(2,jspl+1)
+
+     end if
+   enddo
+
+ case default
+   MSG_ERROR(sjoin("Invalid ider:", itoa(ider)))
+ end select
+
+ !call timab(1905, 2, tsec)
+
+end subroutine mg_splfit
 !!***
 
 end module m_mkffnl
