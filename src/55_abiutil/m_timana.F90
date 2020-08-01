@@ -221,7 +221,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(13)='mkresi                          '
  names(14)='rwwf                            '; basic(13)=1
  names(15)='pspini                          '; basic(15)=1
- names(16)='mkffnl                          '
+ names(16)='mkffnl                          '; basic(16)=1
  names(17)='symrhg(no FFT)                  '; basic(17)=1
  names(19)='inwffil                         '
 
@@ -1010,10 +1010,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1809)='dvdb_get_ftqbz'; basic(1809) = 1
 
  ! SIGEPH
- names(1900)='sigph_pre_qloop'; basic(1900) = 1
- names(1901)='sigph_qloop_preamble'; basic(1901) = 1
- names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
+ !names(1900)='sigph_pre_qloop'; basic(1900) = 1
+ !names(1901)='sigph_qloop_preamble'; basic(1901) = 1
+ !names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
  names(1903)='sigph_bsum'; basic(1903) = 1
+
  names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
 
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement

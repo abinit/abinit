@@ -1791,8 +1791,8 @@ subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
  end do
 
  ! Info on memory needed for u(g), u(r) and PAW cprj
- write(msg, '(/,a,i0)')' Number of Bloch states treated by this rank: ', ug_cnt
- call wrtout(std_out, msg)
+ write(msg, '(a,i0)')' Number of Bloch states treated by this rank: ', ug_cnt
+ call wrtout(std_out, msg, pre_newlines=1)
 
  ug_size = one * Wfd%nspinor * mpw * ug_cnt
  write(msg,'(a,f8.1,a)')' Memory allocated for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
@@ -1817,8 +1817,8 @@ subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
  call wrtout(std_out, msg)
  write(msg,'(a,f8.1,a)')' Memory needed for wfd%s(0)%k datastructure: ',ABI_MEM_MB(wfd%s(1)%k),' [Mb] <<< MEM'
  call wrtout(std_out, msg)
- write(msg,'(a,f8.1,a,/)')' Memory allocated for Kdata array = ',ABI_MEM_MB(wfd%kdata),' [Mb] <<< MEM'
- call wrtout(std_out, msg)
+ write(msg,'(a,f8.1,a)')' Memory allocated for Kdata array: ',ABI_MEM_MB(wfd%kdata),' [Mb] <<< MEM'
+ call wrtout(std_out, msg, newlines=1)
 
 end subroutine wfd_print
 !!***

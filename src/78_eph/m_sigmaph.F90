@@ -728,12 +728,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call wrtout(unts, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
      else
        restart = 0; sigma%qp_done = 0
-       msg = sjoin(" Found SIGEPH.nc file with all QP entries already computed.", ch10, &
-                   " Will overwrite:", sigeph_filepath, ch10, &
-                   " Keeping backup copy in:", strcat(sigeph_filepath, ".bkp"))
+       msg = sjoin("Found SIGEPH.nc file with all QP entries already computed.", ch10, &
+                   "Will overwrite:", sigeph_filepath, ch10, &
+                   "Keeping backup copy in:", strcat(sigeph_filepath, ".bkp"))
        call wrtout(ab_out, sjoin("WARNING: ", msg))
        MSG_WARNING(msg)
-       ! keep backup copy
+       ! Keep backup copy
        ABI_CHECK(clib_rename(sigeph_filepath, strcat(sigeph_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
      end if
    end if
@@ -1149,7 +1149,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Check if this kpoint and spin was already calculated
      if (sigma%qp_done(ikcalc, spin) == 1) cycle
 
-     call timab(1900, 1, tsec)
+     !call timab(1900, 1, tsec)
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
@@ -1222,7 +1222,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Distribute q-points, compute tetra weigths.
      call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, dvdb, spin, ikcalc, nfftf, ngfftf, sigma%pqb_comm%value)
-     call timab(1900, 2, tsec)
+     !call timab(1900, 2, tsec)
 
      ! ==========================================
      ! Integration over my q-points in the IBZ(k)
@@ -1270,7 +1270,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-       call timab(1901, 1, tsec)
+       !call timab(1901, 1, tsec)
        call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%pert_comm%value)
 
        ! Double grid stuff
@@ -1308,8 +1308,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
          ABI_FREE(gtmp)
        end if
-       call timab(1901, 2, tsec)
-       call timab(1902, 1, tsec)
+       !call timab(1901, 2, tsec)
+       !call timab(1902, 1, tsec)
 
        istwf_kqirr = wfd%istwfk(ikq_ibz); npw_kqirr = wfd%npwarr(ikq_ibz)
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
@@ -1503,7 +1503,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
        end do ! imyp
-       call timab(1902, 2, tsec)
+       !call timab(1902, 2, tsec)
 
        ABI_FREE(gs1c)
        ABI_FREE(gvnlx1)
@@ -1666,6 +1666,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Accumulate contribution to self-energy
          eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
+
          ! q-weight for naive integration
          weight_q = sigma%wtq_k(iq_ibz)
 
@@ -2698,13 +2699,13 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    ! Ideally, perturbations are equally distributed --> total number of CPUs should be divisible by 3 * natom.
    ! or at least, divisible by one integer i for i in [2, 3 * natom - 1].
 
-   ! Try to have 3 perts per proc first because the q-point parallelism is more efficient
+   ! Try to have 3 perts per proc first because the q-point parallelism is more efficient.
    ! The memory for W(R,r,ipert) will increase though.
-   !do cnt=natom,2,-1
-   !  if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-   !    new%pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
-   !  end if
-   !end do
+   do cnt=natom,2,-1
+     if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+       new%pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
+     end if
+   end do
 
    if (new%pert_comm%nproc == 1) then
      ! Try again with more procs.
@@ -2870,10 +2871,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ! Distribute DFPT potentials (IBZ q-points) inside qpt_comm.
  ! Note that we distribute IBZ instead of the full BZ or the IBZ_k inside the loop over ikcalc.
  ! This means that the load won't be equally distributed but memory will scale with qpt_comm%nproc.
- ! To reduce load imbalance, we sort qibz points by norm and use cyclic distribution.
+ ! To reduce load imbalance, we sort the qibz points by norm and use cyclic distribution inside qpt_comm
  ABI_ICALLOC(new%itreat_qibz, (new%nqibz))
  call sort_rpts(new%nqibz, new%qibz, cryst%gmet, iperm)
- !call sort_weights(new%nqibz, new%wtq, iperm)
  do ii=1,new%nqibz
    iq_ibz = iperm(ii)
    if (mod(ii, new%qpt_comm%nproc) == new%qpt_comm%me) new%itreat_qibz(iq_ibz) = 1
@@ -2913,8 +2913,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    estep = dtset%dosdeltae; if (estep <= zero) estep = 0.05 * eV_Ha
    new%a2f_ne = nint((maxval(ebands%eig) - minval(ebands%eig)) / estep) + 1
    if (my_rank == master) then
-     write(std_out, *)"Computing a2f with ", new%a2f_ne, " points for electrons and ", new%gfw_nomega, " points for phonons."
-     write(std_out, *)"doseltae:", estep, ", tsmear:", dtset%tsmear
+     write(std_out, *)" Computing a2f with ", new%a2f_ne, " points for electrons and ", new%gfw_nomega, " points for phonons."
+     write(std_out, *)" doseltae:", estep, ", tsmear:", dtset%tsmear
    end if
    ABI_MALLOC(new%a2f_emesh, (new%a2f_ne))
    new%a2f_emesh = arth(minval(ebands%eig), estep, new%a2f_ne)
@@ -2941,6 +2941,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  ! ================================================================================================
 
  if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
+
    ! In principle only getwfkfine_filepath is used
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    ABI_CHECK(nctk_try_fort_or_ncfile(wfk_fname_dense, msg) == 0, msg)
@@ -2954,12 +2955,13 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    new%use_doublegrid = .True.
 
  else if (any(dtset%bs_interp_kmult /= 0)) then
+
    ! Read bs_interpmult
    call wrtout(unts, " EPH interpolation: will use star functions interpolation.", newlines=1)
    ! Interpolate band energies with star-functions
    params = 0; params(1) = 1; params(2) = 5
    if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
-   write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters for double-grid:", params
+   !write(std_out, "(a, 4(f5.2, 2x))")" SKW parameters for double-grid:", params
 
    !TODO: mband should be min of nband
    band_block = [1, ebands%mband]
@@ -3471,10 +3473,10 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
  NCF_CHECK(nf90_get_var(ncid, vid("eph_fermie"), eph_fermie))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_wstep"), ph_wstep))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"), ph_smear))
- ABI_CHECK(eph_fsewin  == dtset%eph_fsewin, "netcdf eph_fsewin != input file")
- ABI_CHECK(eph_fsmear  == dtset%eph_fsmear, "netcdf eph_fsmear != input file")
- ABI_CHECK(ph_wstep    == dtset%ph_wstep, "netcdf ph_wstep != input file")
- ABI_CHECK(ph_smear    == dtset%ph_smear, "netcdf ph_smear != input file")
+ ABI_CHECK(eph_fsewin == dtset%eph_fsewin, "netcdf eph_fsewin != input file")
+ ABI_CHECK(eph_fsmear == dtset%eph_fsmear, "netcdf eph_fsmear != input file")
+ ABI_CHECK(ph_wstep   == dtset%ph_wstep, "netcdf ph_wstep != input file")
+ ABI_CHECK(ph_smear   == dtset%ph_smear, "netcdf ph_smear != input file")
 
  if (present(extrael_fermie)) then
    extrael_fermie = [eph_extrael, eph_fermie]

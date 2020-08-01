@@ -3139,7 +3139,7 @@ subroutine dvdb_get_maxw(db, ngqpt, all_rpt, all_rmod, maxw)
      phre = zero
      do ispden=1,db%nspden
        do ifft=1,nfft
-         phre = max(phre, db%wsr(1,irpt,ifft,ispden,imyp) ** 2) ! + db%wsr(2,irpt,ifft,ispden,imyp) ** 2)
+         phre = max(phre, real(db%wsr(1,irpt,ifft,ispden,imyp), kind=dp) ** 2) ! + db%wsr(2,irpt,ifft,ispden,imyp) ** 2)
        end do
      end do
      maxw(irpt_tot, ipc) = sqrt(phre)
@@ -3401,13 +3401,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  integer,parameter :: cplex2 = 2
  integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr, my_add_lr
  real(dp) :: wr, qmod !wi,
- complex(sp) :: cbeta_sp
+ !complex(sp) :: cbeta_sp
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
  real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
  real(dp),allocatable :: weiqr(:,:)
+ !real(sp),allocatable :: weiqr(:,:)
 
 ! *************************************************************************
 
