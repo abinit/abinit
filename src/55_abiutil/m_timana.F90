@@ -1016,6 +1016,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1903)='sigph_bsum'; basic(1903) = 1
 
  names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
+ names(1905)='splfit'; basic(1905) = 1
+ names(1906)='mkkin'; basic(1906) = 1
 
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 

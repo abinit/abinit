@@ -183,8 +183,8 @@ contains
 !! SOURCE
 
 subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
-&                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
-&                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
+                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
+                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
 
 !Arguments ------------------------------------
 !scalars
@@ -258,7 +258,8 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
      ABI_CHECK(size(ylm_gr,3)==mpsang**2,'BUG: wrong ylm_gr size (3)')
    end if
  end if
-!Get (k+G) and |k+G|:
+
+ ! Get (k+G) and |k+G|
  ABI_MALLOC(kpgnorm,(npw))
  ABI_MALLOC(kpgnorm_inv,(npw))
  ig0=-1 ! index of |k+g|=0 vector
@@ -309,7 +310,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  else
    if (nkpg<3) then
      ecut=huge(0.0d0)*0.1d0;ecutsm=zero;effmass_free=one
-!    Note that with ecutsm=0, the right kinetic energy is computed
+     ! Note that with ecutsm=0, the right kinetic energy is computed
      call mkkin(ecut,ecutsm,effmass_free,gmet,kg,kpgnorm,kpt,npw,0,0)
 !$OMP PARALLEL DO
      do ig=1,npw
@@ -330,7 +331,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end if
  end if
 
-!Need rprimd in some cases
+ ! Need rprimd in some cases
  if (ider>=1.and.useylm==1.and.ig0>0) then
    do mu=1,3
      do nu=1,3
@@ -339,23 +340,24 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end do
  end if
 
-!Allocate several temporary arrays
+ ! Allocate several temporary arrays
  ABI_MALLOC(wk_ffnl1,(npw))
  ABI_MALLOC(wk_ffnl2,(npw))
  ABI_MALLOC(wk_ffnl3,(npw))
  ABI_MALLOC(wk_ffspl,(mqgrid,2))
+
  if (ider>=1.and.useylm==1) then
    ABI_MALLOC(dffnl_red,(npw,3))
-   if (idir/=0)  then
+   if (idir/=0) then
      ABI_MALLOC(dffnl_cart,(npw,3))
    end if
-   if (idir>0)   then
+   if (idir>0) then
      ABI_MALLOC(dffnl_tmp,(npw))
    end if
  end if
- if (ider>=2.and.useylm==1) then
+ if (ider>=2 .and. useylm==1) then
    ABI_MALLOC(d2ffnl_red,(npw,6))
-   if (idir==4)  then
+   if (idir==4) then
      ABI_MALLOC(d2ffnl_cart,(npw,6))
      ABI_MALLOC(d2ffnl_tmp,(npw))
    end if
@@ -380,15 +382,12 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
        ! Compute FFNL only if ekb>0 or paw
        if (usepaw==1) testnl=.true.
        if (usepaw==0) testnl=(abs(ekb(iln,itypat))>tol_norm)
-       if (testnl) then
 
+       if (testnl) then
          ! Store form factors (from ffspl)
          ! -------------------------------
          if (iln>iln0) then
-           do ig=1,mqgrid
-             wk_ffspl(ig,1)=ffspl(ig,1,iln,itypat)
-             wk_ffspl(ig,2)=ffspl(ig,2,iln,itypat)
-           end do
+           wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
            ider_tmp=min(ider,1)
            call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm,wk_ffnl1,mqgrid,npw)
            if(ider==2) then
@@ -426,7 +425,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                  dffnl_red(ig,mu)=ylm(ig,ilm)*wk_ffnl2(ig)*kpgn(ig,mu)+ylm_gr(ig,mu,ilm)*wk_ffnl1(ig)
                end do
              end do
-             !Special cases |k+g|=0
+             ! Special cases |k+g|=0
              if (ig0>0) then
                do mu=1,3
                  dffnl_red(ig0,mu)=zero
@@ -493,18 +492,14 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                  mu=abs(idir);mua=alpha(mu);mub=beta(mu)
 !$OMP PARALLEL DO
                  do ig=1,npw
-                   ffnl(ig,2,iffnl,itypat)=0.5d0* &
-&                   (dffnl_cart(ig,mua)*kpgc(ig,mub) &
-&                   +dffnl_cart(ig,mub)*kpgc(ig,mua))
+                   ffnl(ig,2,iffnl,itypat)=0.5d0* (dffnl_cart(ig,mua)*kpgc(ig,mub) + dffnl_cart(ig,mub)*kpgc(ig,mua))
                  end do
                else if (idir==-7) then
 !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(mua, mub)
                  do mu=1,6
                    do ig=1,npw
                      mua=alpha(mu);mub=beta(mu)
-                     ffnl(ig,1+mu,iffnl,itypat)=0.5d0* &
-&                     (dffnl_cart(ig,mua)*kpgc(ig,mub) &
-&                     +dffnl_cart(ig,mub)*kpgc(ig,mua))
+                     ffnl(ig,1+mu,iffnl,itypat)=0.5d0 * (dffnl_cart(ig,mua)*kpgc(ig,mub) + dffnl_cart(ig,mub)*kpgc(ig,mua))
                    end do
                  end do
                end if
@@ -518,12 +513,12 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !$OMP PARALLEL DO
                do ig=1,npw
                  d2ffnl_red(ig,mu)= &
-&                 ylm_gr(ig,3+mu,ilm)*wk_ffnl1(ig) &
-&                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,ilm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
-&                 + ylm(ig,ilm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
-&                 + (ylm_gr(ig,mua,ilm)*kpgn(ig,mub)+ylm_gr(ig,mub,ilm)*kpgn(ig,mua))*wk_ffnl2(ig)
+                 ylm_gr(ig,3+mu,ilm)*wk_ffnl1(ig) &
+                 + (rmetab-kpgn(ig,mua)*kpgn(ig,mub))*ylm(ig,ilm)*wk_ffnl2(ig)*kpgnorm_inv(ig) &
+                 + ylm(ig,ilm)*kpgn(ig,mua)*kpgn(ig,mub)*wk_ffnl3(ig) &
+                 + (ylm_gr(ig,mua,ilm)*kpgn(ig,mub)+ylm_gr(ig,mub,ilm)*kpgn(ig,mua))*wk_ffnl2(ig)
                end do
-               !Special cases |k+g|=0
+               ! Special cases |k+g|=0
                if (ig0>0) then
                  d2ffnl_red(ig0,mu)=zero
                  if (il==0) then
@@ -536,7 +531,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
                    if (im==+1) d2ffnl_red(ig0,mu)=fact*(rprimd(1,mua)*rprimd(3,mub)+rprimd(3,mua)*rprimd(1,mub))
                    if (im==+2) d2ffnl_red(ig0,mu)=fact*(rprimd(1,mua)*rprimd(1,mub)-rprimd(2,mua)*rprimd(2,mub))
                    if (im== 0) d2ffnl_red(ig0,mu)=(fact/sqrt3)*(two*rprimd(3,mua)*rprimd(3,mub) &
-&                   -rprimd(1,mua)*rprimd(1,mub)-rprimd(2,mua)*rprimd(2,mub))
+                                                  -rprimd(1,mua)*rprimd(1,mub)-rprimd(2,mua)*rprimd(2,mub))
                  end if
                end if
              end do
@@ -613,13 +608,13 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 !$OMP PARALLEL DO
                do ig=1,npw
                  ffnl(ig,3,iffnl,itypat)= (wk_ffnl3(ig)-       &
-&                 dble(2*il+1)*wk_ffnl2(ig)*kpgnorm_inv(ig)+   &
-&                 dble(il*(il+2))*wk_ffnl1(ig)*kpgnorm_inv(ig)**2)*kpgnorm_inv(ig)**(il+2)
+                   dble(2*il+1)*wk_ffnl2(ig)*kpgnorm_inv(ig)+   &
+                   dble(il*(il+2))*wk_ffnl1(ig)*kpgnorm_inv(ig)**2)*kpgnorm_inv(ig)**(il+2)
                end do
              end if
            end if
 
-         end if  ! End if - Use of Ylm or not
+         end if  ! Use of Ylm or not
 
        else ! No NL part
 !$OMP PARALLEL DO COLLAPSE(2)

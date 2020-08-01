@@ -4716,7 +4716,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
    do ik_ibz=1,Wfd%nkibz
      do band=1,Wfd%nband(ik_ibz,spin)
        if (wfd%ihave_ug(band, ik_ibz, spin)) then
-         my_readmask(band,ik_ibz,spin) = .TRUE.
+         my_readmask(band, ik_ibz, spin) = .TRUE.
          all_countks(ik_ibz, spin) = 1
          if (wfd%ihave_ug(band, ik_ibz, spin, how="Stored")) then
            enough = enough + 1
@@ -4729,11 +4729,14 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
    end do
  end do
 
- ! All procs must agree when skipping (k, s)
+ ! All procs must agree when skipping (k, s) states
  call xmpi_sum(all_countks, wfd%comm, ierr)
 
- write(msg,'(a,i0,a)')" Reading ",COUNT(my_readmask)," (b,k,s) states ..."
- call wrtout(std_out, msg)
+ call wrtout(std_out, sjoin(" About to read: ",itoa(count(my_readmask)), " (b, k, s) states in total."))
+ do spin=1,Wfd%nsppol
+   call wrtout(std_out, sjoin("For spin:", itoa(spin), " will read:", itoa(count(all_countks(:, spin) == 1))," k-points."))
+ end do
+
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
  call cwtime(cpu, wall, gflops, "start")
 

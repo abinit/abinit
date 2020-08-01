@@ -30,6 +30,8 @@ module m_splines
  use m_abicore
  use m_errors
 
+ use m_time,   only : timab
+
  implicit none
 
  public :: splfit
@@ -100,8 +102,14 @@ subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
  integer :: i,jspl
  real(dp) :: argmin,delarg,d,aa,bb,cc,dd
  character(len=500) :: msg
+ real(dp) :: tsec(2)
 
-!argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
+! *************************************************************************
+
+ ! Keep track of time spent in mkffnl
+ call timab(1905, 1, tsec)
+
+ ! argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
  argmin=arg(1)
  delarg=(arg(numarg)-argmin)/dble(numarg-1)
 
@@ -112,93 +120,88 @@ subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
 
  jspl=-1
 
-!Do one loop for no grads, other for grads:
+ ! Do one loop for no grads, other for grads
  if (ider==0) then
-! Spline index loop for no grads:
+
+  ! Spline index loop for no grads:
   do i=1,numnew
-   if (newarg(i).ge.arg(numarg)) then
+    if (newarg(i).ge.arg(numarg)) then
+      ! function values are being requested outside
+      ! range of data.',a1,' Function and slope will be set to
+      ! values at upper end of data.
 
-    ! MJV 6/4/2009 FIXME this message is never used
-!    write(msg,1000)char(10),i,newarg(i), jspl,char(10),numarg,arg(numarg),char(10),char(10),char(10)
-!1000 format(a1,' splfit: for arg number',i8,2x,'of value', &
-!    1p,e12.4,1x,'jspl=',i8,a1,' is >= numarg=',i8,  &
-!    '  (max arg(numarg)=',e12.4,')',a1,             &
-!    ' Means function values are being requested outside',       &
-!    ' range of data.',a1,' Function and slope will be set to',  &
-!    ' values at upper end of data.',a1)
+      newfun(i)=fun(numarg,1)
 
-    newfun(i)=fun(numarg,1)
+    else if (newarg(i).le.arg(1)) then
+      newfun(i)=fun(1,1)
 
-   else if (newarg(i).le.arg(1)) then
-    newfun(i)=fun(1,1)
-
-   else
-    jspl=1+int((newarg(i)-argmin)/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
-   end if
+    else
+      jspl=1+int((newarg(i)-argmin)/delarg)
+      d=newarg(i)-arg(jspl)
+      bb = d/delarg
+      aa = 1.0d0-bb
+      cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
+      dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
+      newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
+    end if
   enddo
 
  else if(ider==1)then
 
-! Spline index loop includes grads:
-  do i=1,numnew
+   ! Spline index loop includes grads:
+   do i=1,numnew
 
-   if (newarg(i).ge.arg(numarg)) then
-    newfun(i)=fun(numarg,1)
-    derfun(i)=0.0d0
+     if (newarg(i).ge.arg(numarg)) then
+       newfun(i)=fun(numarg,1)
+       derfun(i)=0.0d0
 
-   else if (newarg(i).le.arg(1)) then
-    newfun(i)=fun(1,1)
-    derfun(i)=0.0d0
+     else if (newarg(i).le.arg(1)) then
+       newfun(i)=fun(1,1)
+       derfun(i)=0.0d0
 
-   else
+     else
+       ! cubic spline interpolation:
+       jspl=1+int((newarg(i)-arg(1))/delarg)
+       d=newarg(i)-arg(jspl)
+       bb = d/delarg
+       aa = 1.0d0-bb
+       cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
+       dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
+       newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
+       ! spline fit to first derivative:
+       ! note correction of Numerical Recipes sign error
+       derfun(i) = (fun(jspl+1,1)-fun(jspl,1))/delarg +    &
+          (-(3.d0*aa**2-1.d0)*fun(jspl,2)+                 &
+           (3.d0*bb**2-1.d0)*fun(jspl+1,2)) * delarg/6.0d0
 
-!   cubic spline interpolation:
-    jspl=1+int((newarg(i)-arg(1))/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-    cc = aa*(aa**2-1.0d0)*(delarg**2/6.0d0)
-    dd = bb*(bb**2-1.0d0)*(delarg**2/6.0d0)
-    newfun(i)=aa*fun(jspl,1)+bb*fun(jspl+1,1)+cc*fun(jspl,2)+dd*fun(jspl+1,2)
-!   spline fit to first derivative:
-!   note correction of Numerical Recipes sign error
-    derfun(i) = (fun(jspl+1,1)-fun(jspl,1))/delarg +    &
-&      (-(3.d0*aa**2-1.d0)*fun(jspl,2)+                 &
-&        (3.d0*bb**2-1.d0)*fun(jspl+1,2)) * delarg/6.0d0
-
-          end if
-  enddo
+     end if
+   enddo
 
  else if (ider==2) then
 
-  do i=1,numnew
+   do i=1,numnew
 
-   if (newarg(i).ge.arg(numarg)) then
-    derfun(i)=0.0d0
+     if (newarg(i).ge.arg(numarg)) then
+      derfun(i)=0.0d0
 
-   else if (newarg(i).le.arg(1)) then
-    derfun(i)=0.0d0
+     else if (newarg(i).le.arg(1)) then
+      derfun(i)=0.0d0
 
-   else
+     else
+      ! cubic spline interpolation:
+      jspl=1+int((newarg(i)-argmin)/delarg)
+      d=newarg(i)-arg(jspl)
+      bb = d/delarg
+      aa = 1.0d0-bb
+      ! second derivative of spline (piecewise linear function)
+      derfun(i) = aa*fun(jspl,2)+bb*fun(jspl+1,2)
 
-!   cubic spline interpolation:
-    jspl=1+int((newarg(i)-argmin)/delarg)
-    d=newarg(i)-arg(jspl)
-    bb = d/delarg
-    aa = 1.0d0-bb
-!   second derivative of spline (piecewise linear function)
-    derfun(i) = aa*fun(jspl,2)+bb*fun(jspl+1,2)
-
-   end if
-  enddo
+     end if
+   enddo
 
  end if
+
+ call timab(1905, 2, tsec)
 
 end subroutine splfit
 !!***
@@ -437,8 +440,6 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
   enddo
 
   ABI_DEALLOCATE(tmp)
-
-  return
 end subroutine spline
 !!***
 

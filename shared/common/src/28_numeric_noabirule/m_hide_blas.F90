@@ -691,7 +691,7 @@ subroutine sqmat_itranspose_sp(n,mat,alpha)
 
 ! *************************************************************************
 
-#if defined HAVE_LINALG_MKL_IMATCOPY
+#ifdef HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_simatcopy("Column", "Trans", n, n, alpha, mat, n, n)
   else
@@ -700,13 +700,9 @@ subroutine sqmat_itranspose_sp(n,mat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -747,7 +743,7 @@ subroutine sqmat_itranspose_dp(n,mat,alpha)
 
 ! *************************************************************************
 
-#if defined HAVE_LINALG_MKL_IMATCOPY
+#ifdef HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_dimatcopy("Column", "Trans", n, n, alpha, mat, n, n)
   else
@@ -756,13 +752,9 @@ subroutine sqmat_itranspose_dp(n,mat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -803,7 +795,7 @@ subroutine sqmat_itranspose_spc(n,mat,alpha)
 
 ! *************************************************************************
 
-#if defined HAVE_LINALG_MKL_IMATCOPY
+#ifdef HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_cimatcopy("Column", "Trans", n, n, alpha, mat, n, n)
   else
@@ -812,13 +804,9 @@ subroutine sqmat_itranspose_spc(n,mat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -859,7 +847,7 @@ subroutine sqmat_itranspose_dpc(n,mat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_IMATCOPY
+#ifdef HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zimatcopy("Column", "Trans", n, n, alpha, mat, n, n)
   else
@@ -868,13 +856,9 @@ subroutine sqmat_itranspose_dpc(n,mat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -917,7 +901,7 @@ subroutine sqmat_otranspose_sp(n,imat,omat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_OMATCOPY
+#ifdef HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_somatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
   else
@@ -926,13 +910,9 @@ subroutine sqmat_otranspose_sp(n,imat,omat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -975,7 +955,7 @@ subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_OMATCOPY
+#ifdef HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_domatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
   else
@@ -984,13 +964,9 @@ subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -1033,7 +1009,7 @@ subroutine sqmat_otranspose_spc(n,imat,omat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_OMATCOPY
+#ifdef HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_comatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
   else
@@ -1042,13 +1018,9 @@ subroutine sqmat_otranspose_spc(n,imat,omat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -1091,7 +1063,7 @@ subroutine sqmat_otranspose_dpc(n,imat,omat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_OMATCOPY
+#ifdef HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zomatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
   else
@@ -1100,13 +1072,9 @@ subroutine sqmat_otranspose_dpc(n,imat,omat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -1147,7 +1115,7 @@ subroutine sqmat_iconjgtrans_spc(n,mat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_IMATCOPY
+#ifdef HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_cimatcopy("Column", "C", n, n, alpha, mat, n, n)
   else
@@ -1156,13 +1124,9 @@ subroutine sqmat_iconjgtrans_spc(n,mat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(CONJG(mat))
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(CONJG(mat))
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -1192,7 +1156,7 @@ end subroutine sqmat_iconjgtrans_spc
 !!
 !! SOURCE
 
-subroutine sqmat_iconjgtrans_dpc(n,mat,alpha)
+subroutine sqmat_iconjgtrans_dpc(n, mat, alpha)
 
 !Arguments ------------------------------------
 !scalars
@@ -1203,7 +1167,7 @@ subroutine sqmat_iconjgtrans_dpc(n,mat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_IMATCOPY
+#ifdef HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zimatcopy("Column", "C", n, n, alpha, mat, n, n)
   else
@@ -1212,13 +1176,9 @@ subroutine sqmat_iconjgtrans_dpc(n,mat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(CONJG(mat))
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(CONJG(mat))
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -1249,7 +1209,7 @@ end subroutine sqmat_iconjgtrans_dpc
 !!
 !! SOURCE
 
-subroutine sqmat_oconjgtrans_spc(n,imat,omat,alpha)
+subroutine sqmat_oconjgtrans_spc(n, imat, omat, alpha)
 
 !Arguments ------------------------------------
 !scalars
@@ -1261,7 +1221,7 @@ subroutine sqmat_oconjgtrans_spc(n,imat,omat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_OMATCOPY
+#ifdef HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_comatcopy("Column", "C", n, n, alpha, imat, n, omat, n)
   else
@@ -1270,13 +1230,9 @@ subroutine sqmat_oconjgtrans_spc(n,imat,omat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(CONJG(imat))
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(CONJG(imat))
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 
@@ -1319,7 +1275,7 @@ subroutine sqmat_oconjgtrans_dpc(n,imat,omat,alpha)
 
 ! *************************************************************************
 
-#if defined  HAVE_LINALG_MKL_OMATCOPY
+#ifdef HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zomatcopy("Column", "C", n, n, alpha, imat, n, omat, n)
   else
@@ -1328,13 +1284,9 @@ subroutine sqmat_oconjgtrans_dpc(n,imat,omat,alpha)
 #else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
-!$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(CONJG(imat))
-!$OMP END PARALLEL WORKSHARE
   else
-!$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(CONJG(imat))
-!$OMP END PARALLEL WORKSHARE
   end if
 #endif
 

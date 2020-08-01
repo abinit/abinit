@@ -316,7 +316,7 @@ subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
  if (asr==0) return
  !call wrtout(std_out,' asria_corr: imposition of the ASR for the interatomic forces.')
 
-! Remove d2asr
+ ! Remove d2asr
  do ipert2=1,natom
    do idir2=1,3
      do ipert1=1,natom
@@ -5313,7 +5313,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
- !In the case the non-analyticity is required:
+ ! In the case the non-analyticity is required:
  ! the tensor is in cartesian coordinates and this means that qphon must be in given in Cartesian coordinates.
  if(analyt==0)then
 
@@ -5364,12 +5364,12 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  ! Multiply IFC(q) by masses
  call massmult_and_breaksym(natom, ntypat, typat, amu, displ)
 
-!***********************************************************************
-!Diagonalize the dynamical matrix
+ ! ***********************************************************************
+ ! Diagonalize the dynamical matrix
 
-!Symmetrize the dynamical matrix
-!FIXME: swap the next 2 lines and update test files to include symmetrization for Gamma point too (except in non-analytic case)
-!if (symdynmat==1 .and. analyt > 0) then
+ !Symmetrize the dynamical matrix
+ !FIXME: swap the next 2 lines and update test files to include symmetrization for Gamma point too (except in non-analytic case)
+ !if (symdynmat==1 .and. analyt > 0) then
  if (symdynmat==1 .and. analyt == 1) then
    qptn(:)=qphon(:)
    if (analyt==1) qptn(:)=qphon(:)/qphnrm
@@ -5408,9 +5408,9 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
-!***********************************************************************
+ !***********************************************************************
 
-!Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
+ ! Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
  do imode=1,3*natom
    if(eigval(imode)>=1.0d-16)then
      phfrq(imode)=sqrt(eigval(imode))

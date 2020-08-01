@@ -35,6 +35,7 @@ MODULE m_kg
  use defs_abitypes, only : MPI_type
  use m_fftcore,     only : kpgsph, bound
  use m_mpinfo,      only : proc_distrb_cycle
+ use m_time,        only : timab
 
  implicit none
 
@@ -364,11 +365,14 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx
  real(dp) :: d1kpg2,d2kpg2,ddfsm, dfsm
 !arrays
- real(dp) :: gmet_break(3,3)
+ real(dp) :: gmet_break(3,3), tsec(2)
 
 ! *************************************************************************
-!
-!htpisq is (1/2) (2 Pi) **2:
+
+ ! Keep track of time spent in mkffnl
+ call timab(1906, 1, tsec)
+
+ ! htpisq is (1/2) (2 Pi) **2:
  htpisq=0.5_dp*(two_pi)**2
 
  ecutsm_inv=0.0_dp
@@ -454,6 +458,8 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
    kinpw(ig)=kinetic/effmass_free
  end do
 !$OMP END PARALLEL DO
+
+ call timab(1906, 2, tsec)
 
 end subroutine mkkin
 !!***
@@ -1196,7 +1202,7 @@ end subroutine mkpwind_k
 !!  kpg(npw,3)= (k+G) components
 !!
 !! PARENTS
-!!  nonlop_ylm  
+!!  nonlop_ylm
 !!
 !! CHILDREN
 !!
@@ -1310,8 +1316,6 @@ end subroutine mkkpgcart
 !! SOURCE
 
 subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

@@ -970,6 +970,9 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
 ! *************************************************************************
 
+ ! MG: This routine is called many times in the EPH code for phonon and DDK perturbations
+ ! Please, be extremely careful when adding extra stuff that may affect performance.
+
  ! Keep track of total time spent in getgh1c_setup (use 195 slot)
  call timab(195, 1, tsec)
  !call cwtime(cpu, wall, gflops, "start")
