@@ -3794,37 +3794,37 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  db%ft_qcache%itreatq(:) = itreatq
 
  ! All procs skip this part is qcache is not used.
-if (db%ft_qcache%maxnq /= 0) then
+ if (db%ft_qcache%maxnq /= 0) then
 
- ! Note that cplex is always set to 2 here
- cplex = 2
- ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+   ! Note that cplex is always set to 2 here
+   cplex = 2
+   ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
 
- do iq_ibz=1,nqibz
-   ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
-   if (qselect_ibz(iq_ibz) == 0) cycle
-   if (itreatq(iq_ibz) == 0) cycle
+   do iq_ibz=1,nqibz
+     ! Ignore points reported by the oracle. We can still recompute them on the fly if needed.
+     if (qselect_ibz(iq_ibz) == 0) cycle
+     if (itreatq(iq_ibz) == 0) cycle
 
-   call cwtime(cpu, wall, gflops, "start")
+     call cwtime(cpu, wall, gflops, "start")
 
-   ! Interpolate my_npert potentials inside comm_rpt
-   call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
+     ! Interpolate my_npert potentials inside comm_rpt
+     call db%ftinterp_qpt(qibz(:, iq_ibz), nfft, ngfft, v1scf, db%comm_rpt)
 
-   ! Points in the IBZ may be distributed to reduce memory.
-   if (db%ft_qcache%itreatq(iq_ibz) /= 0) then
-     ABI_MALLOC_OR_DIE(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
-     db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
-   end if
+     ! Points in the IBZ may be distributed to reduce memory.
+     if (db%ft_qcache%itreatq(iq_ibz) /= 0) then
+       ABI_MALLOC_OR_DIE(db%ft_qcache%key(iq_ibz)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
+       db%ft_qcache%key(iq_ibz)%v1scf = real(v1scf, kind=QCACHE_KIND)
+     end if
 
-   ! Print progress.
-   if (iq_ibz <= 50 .or. mod(iq_ibz, 100) == 0) then
-     write(msg,'(2(a,i0),a)') " Interpolating q-point [", iq_ibz, "/", nqibz, "]"
-     call cwtime_report(msg, cpu, wall, gflops)
-   end if
- end do
+     ! Print progress.
+     if (iq_ibz <= 50 .or. mod(iq_ibz, 100) == 0) then
+       write(msg,'(2(a,i0),a)') " Interpolating q-point [", iq_ibz, "/", nqibz, "]"
+       call cwtime_report(msg, cpu, wall, gflops)
+     end if
+   end do
 
- ABI_FREE(v1scf)
-end if
+   ABI_FREE(v1scf)
+ end if
 
  ! Compute final cache size.
  my_mbsize = db%ft_qcache%get_mbsize()

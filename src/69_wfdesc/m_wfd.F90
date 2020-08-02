@@ -1791,20 +1791,20 @@ subroutine wfd_print(Wfd, header, unit, prtvol, mode_paral)
  end do
 
  ! Info on memory needed for u(g), u(r) and PAW cprj
- write(msg, '(a,i0)')' Number of Bloch states treated by this rank: ', ug_cnt
+ write(msg, '(a,i0)')' Total number of (b,k,s) states stored by this rank: ', ug_cnt
  call wrtout(std_out, msg, pre_newlines=1)
 
  ug_size = one * Wfd%nspinor * mpw * ug_cnt
- write(msg,'(a,f8.1,a)')' Memory allocated for Fourier components u(G) = ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
+ write(msg,'(a,f8.1,a)')' Memory allocated for Fourier components u(G): ',two*gwpc*ug_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  ur_size = one * Wfd%nspinor * Wfd%nfft * ur_cnt
- write(msg,'(a,f8.1,a)')' Memory allocated for real-space u(r) = ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
+ write(msg,'(a,f8.1,a)')' Memory allocated for real-space u(r): ',two*gwpc*ur_size*b2Mb,' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 
  if (wfd%usepaw==1) then
    cprj_size = one * Wfd%nspinor * sum(Wfd%nlmn_atm) * cprj_cnt
-   write(msg,'(a,f8.1,a)')' Memory allocated for PAW projections Cprj = ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
+   write(msg,'(a,f8.1,a)')' Memory allocated for PAW projections cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
@@ -4661,7 +4661,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: formeig0=0, optkg1=1, method = 2
+ integer,parameter :: formeig0 = 0, optkg1 = 1, method = 2
  integer :: wfk_unt,npw_disk,nmiss,ig,sc_mode,ii, enough
  integer :: comm,master,my_rank,spin,ik_ibz,fform,ierr ! ,igp
  integer :: mcg,nband_wfd,nband_disk,band,mband_disk,bcount,istwfk_disk
@@ -4673,10 +4673,9 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  type(Hdr_type) :: Hdr
  type(wave_t),pointer :: wave
 !arrays
- integer,allocatable :: gf2wfd(:),kg_k(:,:)
- integer :: work_ngfft(18),gmax_wfd(3),gmax_disk(3),gmax(3), all_countks(wfd%nkibz, wfd%nsppol)
- real(dp),allocatable :: eig_k(:),cg_k(:,:) !occ_k(:),
- real(dp),allocatable :: out_cg(:,:), work(:,:,:,:)
+ integer,allocatable :: gf2wfd(:), kg_k(:,:), all_countks(:,:)
+ integer :: work_ngfft(18),gmax_wfd(3),gmax_disk(3),gmax(3)
+ real(dp),allocatable :: eig_k(:), cg_k(:,:), out_cg(:,:), work(:,:,:,:)
  logical,allocatable :: my_readmask(:,:,:)
  character(len=6) :: tag_spin(2)
 
@@ -4711,6 +4710,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  ! all_countks is a global array used to skip (ik_ibz, spin) if all MPI procs do not need bands for this (k, s)
  ABI_MALLOC(my_readmask,(mband_disk, Wfd%nkibz, Wfd%nsppol))
  my_readmask=.FALSE.
+ ABI_MALLOC(all_countks, (wfd%nkibz, wfd%nsppol))
  all_countks = 0; enough = 0
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
@@ -4733,15 +4733,15 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  call xmpi_sum(all_countks, wfd%comm, ierr)
 
  call wrtout(std_out, sjoin(" About to read: ",itoa(count(my_readmask)), " (b, k, s) states in total."))
- do spin=1,Wfd%nsppol
-   call wrtout(std_out, sjoin("For spin:", itoa(spin), " will read:", itoa(count(all_countks(:, spin) == 1))," k-points."))
+ do spin=1,wfd%nsppol
+   call wrtout(std_out, sjoin(" For spin:", itoa(spin), ", will read:", itoa(count(all_countks(:, spin) /= 0)), " k-points."))
  end do
 
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
  call cwtime(cpu, wall, gflops, "start")
 
  if (method == 1) then
-  do spin=1,Wfd%nsppol
+  do spin=1,wfd%nsppol
     do ik_ibz=1,Wfd%nkibz
       if (all_countks(ik_ibz, spin) == 0) cycle
       npw_disk   = Hdr%npwarr(ik_ibz)
@@ -4948,6 +4948,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
  call Hdr%free()
 
  ABI_FREE(my_readmask)
+ ABI_FREE(all_countks)
 
  ! Update the kbs table storing the distribution of the ug and set the MPI communicators.
  call wfd%set_mpicomm()
