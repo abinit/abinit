@@ -2930,7 +2930,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  write(std_out, "(a, i0)")" Number of R-points treated by this MPI rank: ", db%my_nrpt
  write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
- ! Allocate potential in the supercell. Memory is distributed over my_nrpt and my_npert
+ ! Allocate potential in the supercell. Memory is MPI-distributed over my_nrpt and my_npert
  call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
     ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * sp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
@@ -3015,13 +3015,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
          call v1phq_rotate(db%cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
        end if
-
-       !call littlegroup_q(db%cryst%nsym, qpt_bz, symq, db%cryst%symrec, db%cryst%symafm, timerev_q, prtvol=db%prtvol)
-       !do ipc=1,db%natom3
-       !  idir = mod(ipc - 1, 3) + 1; ipert = (ipc - idir) / 3 + 1
-       !  call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, &
-       !                        db%mpi_enreg, v1r_qbz(:,:,:,ipc))
-       !end do
 
        ! Multiply by e^{iqpt_bz.r}
        call times_eikr(qpt_bz, ngfft, nfft, db%nspden * db%natom3, v1r_qbz)
@@ -3459,7 +3452,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
 
    do ispden=1,db%nspden
-#if 0
+#if 1
      ! Slow FT.
      do ifft=1,nfft
        do ir=1,db%my_nrpt

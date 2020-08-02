@@ -1332,7 +1332,7 @@ subroutine get_onetetra_lambinvigneron(eig, z, cw)
     real(dp) :: E12,E13,E14,E23,E24,E34
     real(dp) :: a,b,c,d,e,f
     complex(dp) zmE(4), verli(4) !, verm(4)
-    integer :: ii, jj
+    !integer :: ii, jj
 
     cw = zero
 

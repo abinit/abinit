@@ -28,7 +28,8 @@ mixprec 1
 
 # Test qcache
 dvdb_qcache_mb1 -1.0
-dvdb_qcache_mb2 0.0
+#dvdb_qcache_mb2 0.0
+dvdb_qcache_mb2 1024
 
 # Test computation of Sigma_nk(w)
 prtvol 1
