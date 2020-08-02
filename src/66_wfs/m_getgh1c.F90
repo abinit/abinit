@@ -856,7 +856,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 
 ! *************************************************************************
 
- call timab(1904, 1, tsec)
+ !call timab(1904, 1, tsec)
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
@@ -909,7 +909,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    ABI_FREE(vlocal1_tmp)
  end if !nspden
 
- call timab(1904, 2, tsec)
+ !call timab(1904, 2, tsec)
 
 end subroutine rf_transgrid_and_pack
 !!***

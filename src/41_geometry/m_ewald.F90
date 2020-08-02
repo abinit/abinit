@@ -693,7 +693,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  do_quadrupole = any(qdrp_cart /= zero)
 
  ! Keep track of total time spent.
- call timab(1749, 1, tsec)
+ !call timab(1749, 1, tsec)
 
  ! Initialize dipquad and quadquad options
  dipquad_=0; if(present(dipquad)) dipquad_=dipquad
@@ -1192,7 +1192,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ABI_DEALLOCATE(dydqt)
  ABI_DEALLOCATE(dyqqt)
 
- call timab(1749, 2, tsec)
+ !call timab(1749, 2, tsec)
 
 end subroutine ewald9
 !!***

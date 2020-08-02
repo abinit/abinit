@@ -3452,7 +3452,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
 
    do ispden=1,db%nspden
-#if 1
+#if 0
      ! Slow FT.
      do ifft=1,nfft
        do ir=1,db%my_nrpt

@@ -993,7 +993,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  ! IFC object
  names(1748)='ifc_fourq'; basic(1748) = 1
- names(1749)='ewald9'; basic(1749) = 1
+ !names(1749)='ewald9'; basic(1749) = 1
 
  names(1780)='cgtk_rotate'; basic(1780) = 1
 
@@ -1015,7 +1015,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
  names(1903)='sigph_bsum'; basic(1903) = 1
 
- names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
+ !names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
  !names(1905)='splfit'; basic(1905) = 1
  !names(1906)='mkkin'; basic(1906) = 1
 
