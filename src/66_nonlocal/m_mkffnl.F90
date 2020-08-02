@@ -624,7 +624,8 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 
          end if  ! Use of Ylm or not
 
-       else ! No NL part
+       else
+         ! No NL part
 !$OMP PARALLEL DO COLLAPSE(2)
          do mu=1,dimffnl
            do ig=1,npw
@@ -632,12 +633,12 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
            end do
          end do
 
-       end if ! a nonlocal part exists
+       end if ! testnl (a nonlocal part exists)
      end if ! special case: spin orbit calc. & no spin-orbit psp
 
-     if (iln>iln0) iln0=iln
-   end do ! loop over (l,m,n) values
+     if (iln > iln0) iln0 = iln
 
+   end do ! loop over (l,m,n) values
  end do ! loop over atom types
 
  ! Optional deallocations.

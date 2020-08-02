@@ -59,15 +59,13 @@ contains
 !!  splfit
 !!
 !! FUNCTION
-!!  Evaluate cubic spline fit to get function values on input set
-!!  of ORDERED, UNFORMLY SPACED points.
+!!  Evaluate cubic spline fit to get function values on input set of ORDERED, UNFORMLY SPACED points.
 !!  Optionally gives derivatives (first and second) at those points too.
 !!  If point lies outside the range of arg, assign the extremal
 !!  point values to these points, and zero derivative.
 !!
 !! INPUTS
-!!  arg(numarg)=equally spaced arguments (spacing delarg) for data
-!!   to which spline was fit.
+!!  arg(numarg)=equally spaced arguments (spacing de) for data to which spline was fit.
 !!  fun(numarg,2)=function values to which spline was fit and spline
 !!   fit to second derivatives (from Numerical Recipes spline).
 !!  ider=  see above
@@ -100,8 +98,9 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
  real(dp), intent(out) :: derfun(numnew)
  real(dp), intent(inout) :: newfun(numnew)
 
+!Local variables---------------------------------------
  integer :: i,jspl
- real(dp) :: argmin,delarg,d,aa,bb,cc,dd
+ real(dp) :: argmin,de,d,aa,bb,cc,dd,de2_dby_six,de_dby_six
  !real(dp) :: tsec(2)
 
 ! *************************************************************************
@@ -109,12 +108,14 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
  ! Keep track of time spent in mkffnl
  !call timab(1905, 1, tsec)
 
- ! argmin is smallest x value in spline fit; delarg is uniform spacing of spline argument
+ ! argmin is smallest x value in spline fit; de is uniform spacing of spline argument
  argmin = arg(1)
- delarg = (arg(numarg)-argmin) / dble(numarg-1)
+ de = (arg(numarg) - argmin) / dble(numarg-1)
+ de2_dby_six = de**2 / six
+ de_dby_six = de / six
 
- if (delarg < tol12) then
-   MSG_ERROR(sjoin('delarg should be strictly positive, while it is: ', ftoa(delarg)))
+ if (de < tol12) then
+   MSG_ERROR(sjoin('spacing should be strictly positive, while de is: ', ftoa(de)))
  endif
 
  jspl = -1
@@ -126,23 +127,22 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
   ! Spline index loop for no grads:
   do i=1,numnew
     if (newarg(i) >= arg(numarg)) then
-      ! function values are being requested outside
-      ! range of data.',a1,' Function and slope will be set to
-      ! values at upper end of data.
+      ! function values are being requested outside range of data.',a1,'
+      ! Function and slope will be set to values at upper end of data.
 
-      newfun(i)=fun(numarg,1)
+      newfun(i) = fun(numarg,1)
 
     else if (newarg(i) <= arg(1)) then
-      newfun(i)=fun(1,1)
+      newfun(i) = fun(1,1)
 
     else
-      jspl = 1+int((newarg(i)-argmin)/delarg)
+      jspl = 1 + int((newarg(i) - argmin)/de)
       d = newarg(i) - arg(jspl)
-      bb = d / delarg
+      bb = d / de
       aa = one - bb
-      cc = aa*(aa**2 -one) * (delarg**2 / six)
-      dd = bb*(bb**2 -one) * (delarg**2 / six)
-      newfun(i)=aa * fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
+      cc = aa*(aa**2 -one) * de2_dby_six
+      dd = bb*(bb**2 -one) * de2_dby_six
+      newfun(i)= aa * fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
     end if
   enddo
 
@@ -161,17 +161,17 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
 
      else
        ! cubic spline interpolation:
-       jspl = 1 + int((newarg(i) - arg(1)) / delarg)
+       jspl = 1 + int((newarg(i) - arg(1)) / de)
        d = newarg(i) - arg(jspl)
-       bb = d / delarg
+       bb = d / de
        aa = one - bb
-       cc = aa*(aa**2 - one) * (delarg**2 / six)
-       dd = bb*(bb**2 - one) * (delarg**2 / six)
+       cc = aa*(aa**2 - one) * de2_dby_six
+       dd = bb*(bb**2 - one) * de2_dby_six
        newfun(i) = aa*fun(jspl,1) + bb*fun(jspl+1,1) + cc*fun(jspl,2) + dd*fun(jspl+1,2)
        ! spline fit to first derivative:
        ! note correction of Numerical Recipes sign error
-       derfun(i) = (fun(jspl+1,1)-fun(jspl,1))/delarg +    &
-          (-(3.d0*aa**2 -one) * fun(jspl,2) + (3.d0*bb**2 -one) * fun(jspl+1,2)) * delarg/six
+       derfun(i) = (fun(jspl+1,1)-fun(jspl,1)) / de +    &
+          (-(3.d0*aa**2 -one) * fun(jspl,2) + (3.d0*bb**2 -one) * fun(jspl+1,2)) * de_dby_six
 
      end if
    enddo
@@ -188,9 +188,9 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
 
      else
        ! cubic spline interpolation:
-       jspl = 1 + int((newarg(i) - argmin) / delarg)
+       jspl = 1 + int((newarg(i) - argmin) / de)
        d = newarg(i) - arg(jspl)
-       bb = d / delarg
+       bb = d / de
        aa = one - bb
        ! second derivative of spline (piecewise linear function)
        derfun(i) = aa*fun(jspl,2) + bb*fun(jspl+1,2)
