@@ -3408,7 +3408,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
  !real(dp),allocatable :: weiqr(:,:)
- real(sp),allocatable :: weiqr(:,:) !, ov1r_sp(:, :)
+ real(sp),allocatable :: weiqr(:,:), ov1r_sp(:, :)
 
 ! *************************************************************************
 
@@ -3451,7 +3451,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
  ! Interpolate potentials (results in ov1r)
  ov1r = zero
- !ABI_MALLOC(ov1r_sp, (2, nfft))
+ ABI_MALLOC(ov1r_sp, (2, nfft))
 
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3459,7 +3459,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
 
    do ispden=1,db%nspden
-#if 1
+#if 0
      ! Slow FT.
      do ifft=1,nfft
        do ir=1,db%my_nrpt
@@ -3480,11 +3480,11 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      ! Believe it or not, it seems the above version is faster, perhaps due to the conversion sp <--> dp
      ! needed to call BLAS.
      beta_sp = zero_sp
-     if (my_add_lr > 0) then
-       ! Add the long-range part of the potential
-       beta_sp = one_sp
-       ov1r_sp(:, :) = v1r_lr(:, :, imyp)
-     end if
+     !if (my_add_lr > 0) then
+     !  ! Add the long-range part of the potential
+     !  beta_sp = one_sp
+     !  ov1r_sp(:, :) = v1r_lr(:, :, imyp)
+     !end if
 
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr(1,1), 2, &
                 beta_sp, ov1r_sp(1,1), 2)
@@ -3492,6 +3492,8 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
                 beta_sp, ov1r_sp(2,1), 2)
 
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
+     ! Add the long-range part of the potential
+     if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
 #endif
 
      ! Remove the phase to get the lattice-periodic part.
@@ -3508,7 +3510,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    end if
  end do ! imyp
 
- !ABI_FREE(ov1r_sp)
+ ABI_FREE(ov1r_sp)
 
  if (db%symv1 == 2) then
    ! Symmetrize potentials (seldom used)

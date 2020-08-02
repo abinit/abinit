@@ -408,8 +408,8 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
    call wrtout(std_out,msg)
  end if
 
- write(msg,'(a,i0)')' asrflag is', asrflag
- call wrtout([std_out, ab_out],msg)
+ write(msg,'(a,i0)')' asrflag is ', asrflag
+ call wrtout([std_out, ab_out], msg)
 
 !variables for the dimensions of the matrices
 
