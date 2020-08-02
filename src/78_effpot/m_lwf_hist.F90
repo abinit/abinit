@@ -72,7 +72,10 @@ contains
   subroutine finalize(self)
     class(lwf_hist_t), intent(inout) :: self
     self%mxhist=0
+    self%nlwf=0
     self%ihist=0
+    nullify(self%current_lwf)
+    nullify(self%current_energy)
     ABI_SFREE(self%hist)
     ABI_SFREE(self%energy)
   end subroutine finalize
@@ -80,7 +83,7 @@ contains
   subroutine set_hist(self, lwf, energy)
     class(lwf_hist_t), target, intent(inout) :: self
     real(dp), intent(in) :: lwf(:), energy
-    self%ihist=mod(self%ihist+1, self%mxhist)+1
+    self%ihist=modulo(self%ihist+1, self%mxhist)+1
     self%hist(:,self%ihist)=lwf(:)
     self%energy(self%ihist)=energy
     self%current_lwf => self%hist(:,self%ihist)
@@ -97,7 +100,7 @@ contains
        if (rel_ihist>0 .or. abs(rel_ihist)>self%mxhist) then
           MSG_BUG("Asking for lwf hist which is beyond mxhist.")
        end if
-       i=mod(self%ihist+rel_ihist, self%mxhist)
+       i=modulo(self%ihist+rel_ihist, self%mxhist)+1
     else
        i=self%ihist
     end if

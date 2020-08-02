@@ -137,7 +137,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_params(self, params)
     class(slc_potential_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
+    type(multibinit_dtset_type), intent(inout) :: params
 
     integer :: master, my_rank, comm, nproc, ierr, coupling
     logical :: iam_master

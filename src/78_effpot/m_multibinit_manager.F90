@@ -89,6 +89,7 @@ module m_multibinit_manager
   use m_lwf_potential, only: lwf_potential_t
   use m_lwf_mover, only: lwf_mover_t
   use m_lwf_mc_mover, only: lwf_mc_t
+  use m_lwf_ncfile, only: lwf_ncfile_t
 
   implicit none
   private
@@ -117,7 +118,6 @@ module m_multibinit_manager
      class(lwf_mover_t), pointer :: lwf_mover => null()
 
      ! spin netcdf hist file
-     type(spin_ncfile_t) :: spin_ncfile
      type(rng_t) :: rng
      type(hash_table_t) :: energy_table
      ! DOC: The energy table contains
@@ -384,7 +384,6 @@ contains
           call lat_ham_pot%load_from_files(self%params, self%filenames)
           call self%prim_pots%append(lat_ham_pot)
        end select
-       print *, "latt_harmonic potential added"
     end if
 
     ! spin
@@ -404,12 +403,10 @@ contains
           call self%prim_pots%append(spin_pot)
        end select
 
-       print *, "spin potential added"
     end if
 
     !LWF 
     if(self%params%lwf_dynamics>0) then
-       write(std_out, *)"LWF_dynamics"
        ABI_DATATYPE_ALLOCATE_SCALAR(lwf_primitive_potential_t, lwf_pot)
        select type(lwf_pot)
        type is (lwf_primitive_potential_t)
@@ -417,7 +414,6 @@ contains
           call lwf_pot%load_from_files(self%params, self%filenames)
           call self%prim_pots%append(lwf_pot)
        end select
-       print *, "lwf potential added"
     end if
 
     ! spin-lattice coupling
@@ -429,8 +425,9 @@ contains
           call slc_pot%load_from_files(self%params, self%filenames)
           call self%prim_pots%append(slc_pot)
        end select 
-       print *, "slc_couping potential added"
     endif
+
+
   end subroutine read_potentials
 
   !-------------------------------------------------------------------!
@@ -443,15 +440,16 @@ contains
     ! build supercell structure
     !call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
     call self%supercell%from_unitcell(self%sc_maker, self%unitcell)
-    print *,"After filling supercell, nlwf:", self%supercell%lwf%nlwf
 
     ! supercell potential
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
-
     ! why do this twice.
     call self%pots%set_supercell(self%supercell)
+    print *, "SET params"
+    call self%pots%set_params(self%params)
+    print *, "SET params finished"
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
@@ -644,18 +642,14 @@ contains
   !-------------------------------------------------------------------!
   subroutine run_lwf_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
-    print *, "Init prim pot"
     call self%prim_pots%initialize()
-    print *, "Reading prim pot"
     call self%read_potentials()
-    print *, "Init sc_maker"
     call self%sc_maker%initialize(diag(self%params%ncell))
-    print *, "Fill supercell"
     call self%fill_supercell()
-    print *, "Set mover"
     call self%set_movers()
-    print *, "Run mover"
+    call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%lwf_mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lwf_mover%ncfile%finalize()
   end subroutine run_lwf_dynamics
 
 

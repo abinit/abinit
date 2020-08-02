@@ -106,10 +106,10 @@ contains
   !----------------------------------------------------------------------
   subroutine set_params(self, params)
     class(abstract_potential_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
+    type(multibinit_dtset_type), intent(inout) :: params
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(params)
-    MSG_ERROR("Every potential should override this method set_params to avoid mistakes")
+    ! The default behavior is do nothing
   end subroutine set_params
 
   ! hexu comment : which one is better, more general variables,

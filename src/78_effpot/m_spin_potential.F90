@@ -169,7 +169,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_params(self, params)
     class(spin_potential_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params
+    type(multibinit_dtset_type), intent(inout) :: params
     real(dp) :: tmp(3, self%nspin)
     integer :: i
     integer :: master, my_rank, comm, nproc

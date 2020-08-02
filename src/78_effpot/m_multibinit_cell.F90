@@ -85,8 +85,10 @@ module m_multibinit_cell
   !----------------------------------------------------------------------
   type, public :: mbcell_lwf_t
      integer :: nlwf =0 ! number of lattice wannier functions
+     integer, allocatable ::  ilwf_prim(:) ! index of primitive cell
+     integer, allocatable ::  rvec(:,:) ! R cell vectors for each spin (for supercell)
    contains
-     procedure :: initialize => lwf_initialize
+     Procedure :: initialize => lwf_initialize
      procedure :: finalize => lwf_finalize
      procedure :: fill_supercell => lwf_fill_supercell
      procedure :: from_unitcell => lwf_from_unitcell
@@ -549,6 +551,8 @@ contains
   subroutine lwf_finalize(self)
     class(mbcell_lwf_t), intent(inout) :: self
     self%nlwf=0
+    ABI_SFREE(self%ilwf_prim)
+    ABI_SFREE(self%rvec)
   end subroutine lwf_finalize
 
   subroutine lwf_fill_supercell(self, sc_maker,supercell)
@@ -562,9 +566,10 @@ contains
     class(mbcell_lwf_t) :: self
     type(supercell_maker_t):: sc_maker
     type(mbcell_lwf_t) :: unitcell
-    print *, "unitcell nlwf", unitcell%nlwf
+    integer :: i
     self%nlwf=sc_maker%ncells*unitcell%nlwf
-    print *, "supercell nlwf", self%nlwf
+    call sc_maker%repeat([(i ,i=1, unitcell%nlwf)], self%ilwf_prim)
+    call sc_maker%rvec_for_each(unitcell%nlwf, self%rvec)
   end subroutine lwf_from_unitcell
 
 end module m_multibinit_cell

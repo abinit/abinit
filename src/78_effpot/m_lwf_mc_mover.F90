@@ -89,10 +89,11 @@
     !----------------------------------------------------------------------
     subroutine finalize(self)
       class(lwf_mc_t), intent(inout) :: self
-      ABI_SFREE(self%lwf)
-      ABI_SFREE(self%lwf_force)
-      self%nlwf=0
+      call self%lwf_mover_t%finalize()
       self%nstep=0
+      self%avg_amp=0.0
+      self%temperature=0.0
+      self%beta=0.0
     end subroutine finalize
 
 
@@ -131,7 +132,7 @@
   !    The other variables are only required if there is coupling with
   !    the mover variable.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf,  energy_table)
     ! run one step. (For MC also?)
     class(lwf_mc_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)

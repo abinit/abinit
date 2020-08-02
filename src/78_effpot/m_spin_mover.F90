@@ -34,6 +34,8 @@
 
 #include "abi_common.h"
 
+#define HAVE_NETCDF 1
+
 module m_spin_mover
 
   use defs_basis
@@ -222,7 +224,7 @@ contains
     else
       call self%set_initial_state(mode=params%spin_init_state)
     endif
-      
+
     ! observable
     if(iam_master) then
        call self%spin_ob%initialize(self%supercell, params)

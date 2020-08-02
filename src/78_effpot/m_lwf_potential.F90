@@ -40,6 +40,7 @@ module m_lwf_potential
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_hashtable_strval, only: hash_table_t
   use m_twobody_interaction, only: get_twobody_dEdx, get_twobody_delta_E
+  use m_multibinit_dataset, only: multibinit_dtset_type
   implicit none
 !!***
 
@@ -56,11 +57,13 @@ module m_lwf_potential
      logical :: has_self_bound_term = .False.
      integer :: self_bound_order=0
      real(dp) :: self_bound_coeff=0.0_dp
+     real(dp) :: beta
    contains
      procedure :: initialize
      procedure :: finalize
      procedure :: set_supercell
      procedure :: set_ref_energy
+     procedure :: set_params
      procedure :: calculate
      procedure :: add_term
      procedure :: convert_coeff_to_csr
@@ -207,11 +210,14 @@ contains
     endif
 
     !energy =energy + 0.5_dp * sum(f*displacement)
-    etmp=0.5_dp * sum(f*lwf) 
+    etmp=0.5_dp * sum(f*lwf)
     if (self%has_self_bound_term) then
        etmp = etmp + &
             & self%self_bound_coeff*sum(lwf**(self%self_bound_order))
     end if
+
+    !TODO: remove. For testing only
+    etmp = etmp+ self%beta*sum(lwf(::2)**2 * lwf(1::2)**2)
 
     if (present(energy)) then
        energy=energy+etmp
@@ -252,6 +258,12 @@ contains
             & - lold**(self%self_bound_order))
     end if
 
+    if(modulo(ilwf, 2)==0) then
+       deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf-1)**2)
+    else
+       deltaE=deltaE+ self%beta*((lwf_new**2- lold**2)*lwf(ilwf+1)**2)
+    endif
+
     lwf(ilwf)=lwf(ilwf)-dlwf
   end subroutine get_delta_E_lwf
 
@@ -265,5 +277,17 @@ contains
        self%self_bound_coeff=coeff
     end if
   end subroutine add_self_bound_term
+
+  !----------------------------------------------------------------------
+  !> @brief set_params: set the parameters from input file parameters
+  !>
+  !> @param[in]  params: multibinit_dtset_type: from input file
+  !----------------------------------------------------------------------
+  subroutine set_params(self, params)
+    class(lwf_potential_t), intent(inout) :: self
+    type(multibinit_dtset_type), intent(inout) :: params
+    self%beta=params%spin_damping
+  end subroutine set_params
+
 
 end module m_lwf_potential

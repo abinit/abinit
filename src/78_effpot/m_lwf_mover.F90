@@ -37,7 +37,7 @@ module m_lwf_mover
   use m_errors
   use m_abicore
   use m_xmpi
-  use m_mpi_scheduler, only: mpi_scheduler_t
+  use m_mpi_scheduler, only: mpi_scheduler_t, init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_abstract_potential, only: abstract_potential_t
@@ -46,6 +46,7 @@ module m_lwf_mover
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_lwf_hist, only: lwf_hist_t
   use m_lwf_observables, only: lwf_observables_t
+  use m_lwf_ncfile, only: lwf_ncfile_t
 
 
   implicit none
@@ -57,7 +58,8 @@ module m_lwf_mover
      real(dp) :: lwf_temperature, energy
      integer :: nlwf
      real(dp), allocatable :: lwf(:), lwf_force(:)
-
+     type(lwf_ncfile_t) :: ncfile
+     type(lwf_hist_t) :: hist
    contains
      procedure :: initialize
      procedure :: finalize
@@ -65,6 +67,8 @@ module m_lwf_mover
      procedure :: set_initial_state
      procedure :: run_one_step
      procedure :: run_time
+     procedure :: prepare_ncfile
+     procedure :: set_ncfile_name
   end type lwf_mover_t
 
 contains
@@ -80,14 +84,12 @@ contains
     call self%set_params(params)
     call self%set_rng(rng)
     self%nlwf=self%supercell%lwf%nlwf
-    !print *, "LWF:----------------", self%nlwf
     ABI_ALLOCATE(self%lwf, (self%nlwf))
     self%lwf(:) = 0.0_dp
-    !print *, "LWF:----------------", self%lwf
     ABI_ALLOCATE(self%lwf_force, (self%nlwf))
     self%lwf_force(:) = 0.0_dp
-    !print *, "LWF_FORCE:----------------", self%lwf_force
     self%energy=0.0_dp
+    call self%hist%initialize(nlwf=self%nlwf, mxhist=1)
   end subroutine initialize
 
 
@@ -97,6 +99,8 @@ contains
     nullify(self%params)
     ABI_SFREE(self%lwf)
     ABI_SFREE(self%lwf_force)
+    call self%hist%finalize()
+    !call self%ncfile%finalize()
   end subroutine finalize
 
   subroutine set_params(self, params)
@@ -107,7 +111,7 @@ contains
     self%lwf_temperature=params%lwf_temperature
   end subroutine set_params
 
-  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf,  energy_table)
     ! run one step. (For MC also?)
     class(lwf_mover_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
@@ -169,6 +173,11 @@ contains
     do i =1, nstep
        !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=self%lwf, energy_table=energy_table)
+
+       call self%hist%set_hist(lwf=self%lwf, energy=self%energy )
+       if(modulo(i, self%params%lwf_nctime)==0) then
+          call self%ncfile%write_one_step(self%hist)
+       end if
        !print *, "Step: ", i,   "Ev", self%energy, "Etot"
 
 !       write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
@@ -180,8 +189,7 @@ contains
        !            & (self%Ek+self%energy)/self%supercell%ncell
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
-       
-       
+
        !TODO: output, observables
     end do
 
@@ -208,10 +216,42 @@ contains
          self%lwf(:)=0.0
       end select
 
+      call self%hist%set_hist(lwf=self%lwf, energy=0.0_dp)
+
       ABI_UNUSED(mode)
       ABI_UNUSED(restart_hist_fname)
     end subroutine set_initial_state
 
+    subroutine prepare_ncfile(self, params, fname)
+      class(lwf_mover_t), intent(inout) :: self
+      type(multibinit_dtset_type) :: params
+      character(len=*), intent(in) :: fname
+      integer :: master, my_rank, comm, nproc
+      logical :: iam_master
+      ABI_UNUSED_A(params)
+      call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+      if(iam_master) then
+         call self%ncfile%initialize( trim(fname), 1)
+         call self%ncfile%write_cell(self%supercell)
+         call self%ncfile%def_lwf_var(self%hist)
+      end if
+    end subroutine prepare_ncfile
+
+    !-------------------------------------------------------------------!
+    !set_ncfile_name :
+    !-------------------------------------------------------------------!
+    subroutine set_ncfile_name(self, params, fname)
+      class(lwf_mover_t), intent(inout) :: self
+      type(multibinit_dtset_type) :: params
+      character(len=fnlen), intent(in) :: fname
+      integer :: master, my_rank, comm, nproc
+      logical :: iam_master
+      call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+      if (iam_master) then
+         call self%prepare_ncfile(params, trim(fname)//'_lwfhist.nc')
+         call self%ncfile%write_one_step(self%hist)
+      endif
+    end subroutine set_ncfile_name
 
 
 
