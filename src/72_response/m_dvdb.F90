@@ -3489,7 +3489,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr(2,1), 2, &
                 beta_sp, ov1r_sp(2,1), 2)
 
-     ov1r(:, :) = oov1r_sp(:, :)
+     ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
 #endif
 
      ! Remove the phase to get the lattice-periodic part.
@@ -3500,7 +3500,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    end do ! ispden
 
    ! Be careful with gamma and cplex!
-   if (db%symv1==1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
+   if (db%symv1 == 1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
      call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, &
          db%mpi_enreg, ov1r(:,:,:,imyp))
    end if

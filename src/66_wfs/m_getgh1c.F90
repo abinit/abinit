@@ -970,7 +970,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
 ! *************************************************************************
 
- ! MG: This routine is called many times in the EPH code for phonon and DDK perturbations
+ ! MG: This routine is called **many times** in the EPH code for phonon and DDK perturbations
  ! Please, be extremely careful when adding extra stuff that may affect performance.
 
  ! Keep track of total time spent in getgh1c_setup (use 195 slot)
@@ -1047,6 +1047,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  if (ider==1.and.idir0==0) dimffnl1=2+2*psps%useylm
  if (ider==2.and.idir0==4) dimffnl1=3+7*psps%useylm
  ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
+
  call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
    psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
    npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
