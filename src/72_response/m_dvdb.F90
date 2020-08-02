@@ -3408,7 +3408,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
  !real(dp),allocatable :: weiqr(:,:)
- real(sp),allocatable :: weiqr(:,:), ov1r_sp(:, :)
+ real(sp),allocatable :: weiqr(:,:) !, ov1r_sp(:, :)
 
 ! *************************************************************************
 
@@ -3451,7 +3451,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
  ! Interpolate potentials (results in ov1r)
  ov1r = zero
- ABI_MALLOC(ov1r_sp, (2, nfft))
+ !ABI_MALLOC(ov1r_sp, (2, nfft))
 
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3459,24 +3459,26 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
 
    do ispden=1,db%nspden
-#if 0
+#if 1
      ! Slow FT.
      do ifft=1,nfft
        do ir=1,db%my_nrpt
          wr = db%wsr(1, ir, ifft, ispden, imyp)
+         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + wr * weiqr(:, ir)
          !wi = db%wsr(2, ir, ifft, ispden, imyp)
-         ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr(1, ir) ! - wi * weiqr(2, ir)
-         ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) ! + wi * weiqr(1, ir)
+         !ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr(1, ir) ! - wi * weiqr(2, ir)
+         !ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) ! + wi * weiqr(1, ir)
        end do
        ! Add the long-range part of the potential
        if (my_add_lr > 0) then
-         ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + v1r_lr(1, ifft, imyp)
-         ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + v1r_lr(2, ifft, imyp)
+         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + v1r_lr(:, ifft, imyp)
        end if
      end do ! ifft
 #else
      ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
      ! Use BLAS2 to compute ov1r = W (x + iy) + beta * v1r_lr but need to handle kind conversion in input/output.
+     ! Believe it or not, it seems the above version is faster, perhaps due to the conversion sp <--> dp
+     ! needed to call BLAS.
      beta_sp = zero_sp
      if (my_add_lr > 0) then
        ! Add the long-range part of the potential
@@ -3506,10 +3508,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    end if
  end do ! imyp
 
- ABI_FREE(ov1r_sp)
+ !ABI_FREE(ov1r_sp)
 
  if (db%symv1 == 2) then
-   ! Symmetrize potentials
+   ! Symmetrize potentials (seldom used)
    ! Initialize the list of perturbations rfpert and rdfir
    ! WARNING: Only phonon perturbations are considered for the time being.
    ABI_MALLOC(rfpert, (db%mpert))
