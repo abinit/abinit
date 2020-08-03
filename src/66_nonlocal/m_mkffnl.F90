@@ -213,7 +213,7 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  real(dp),allocatable :: dffnl_cart(:,:),dffnl_red(:,:),dffnl_tmp(:)
  real(dp),allocatable :: d2ffnl_cart(:,:),d2ffnl_red(:,:),d2ffnl_tmp(:)
  real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:),wk_ffnl1(:)
- real(dp),allocatable :: wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:) !, mg_wk_ffspl(:,:)
+ real(dp),allocatable :: wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
 
 ! *************************************************************************
 
@@ -347,7 +347,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  ABI_MALLOC(wk_ffnl2,(npw))
  ABI_MALLOC(wk_ffnl3,(npw))
  ABI_MALLOC(wk_ffspl,(mqgrid,2))
- !ABI_MALLOC(mg_wk_ffspl,(2,mqgrid))
 
  if (ider>=1.and.useylm==1) then
    ABI_MALLOC(dffnl_red,(npw,3))
@@ -657,7 +656,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
  ABI_FREE(wk_ffnl2)
  ABI_FREE(wk_ffnl3)
  ABI_FREE(wk_ffspl)
- !ABI_FREE(mg_wk_ffspl)
 
  call timab(16,2,tsec)
 

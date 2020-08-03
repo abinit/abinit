@@ -39,6 +39,7 @@ module m_dynmat
  use m_symtk,           only : mati3inv, matr3inv, littlegroup_q
  use m_cgtools,         only : fxphas_seq
  use m_ewald,           only : ewald9
+ use m_time,            only : timab
 
  implicit none
 
@@ -2112,7 +2113,7 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
 
 ! *********************************************************************
 
-!0) initializations
+ ! 0) initializations
  call matr3inv(rprimd,gprimd)
  do isym=1,nsym
    call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
@@ -2156,40 +2157,41 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
    end do
  end do
 
-
-!Get the symq of the CURRENT Q POINT
-!mjv: set prtvol=0 for production runs.
+ ! Get the symq of the CURRENT Q POINT
+ ! mjv: set prtvol=0 for production runs.
  call littlegroup_q(nsym,qptn,symq,symrec,symafm,timrev,prtvol=0)
 
  indij(:,:)=0
  dynmatint=zero
 
- do isym=1,nsym                                 ! loop over all the symmetries
-!  write(std_out,*) 'current symmetry',isym
-   do itirev=1,2                                 ! loop over the time-reversal symmetry
-     isgn=3-2*itirev                             ! to take into accont the time-reversal
-!    write(std_out,*) 'timereversal',isgn
-     if (symq(4,itirev,isym)==1) then             ! isym belongs to the wave vector point group
-!      write(std_out,*) 'isym belongs to the wave vector point group'
-       do iat=1,natom                              ! loop over the atoms
-         do jat=1,natom                            ! loop over the atoms
-           niat=indsym(4,isym,iat)                   ! niat={R|t}iat
-           njat=indsym(4,isym,jat)                   ! njat={R|t}jat
+ do isym=1,nsym  ! loop over all the symmetries
+   ! write(std_out,*) 'current symmetry',isym
+   do itirev=1,2  ! loop over the time-reversal symmetry
+     isgn=3-2*itirev
+     ! write(std_out,*) 'timereversal',isgn
+
+     if (symq(4,itirev,isym)==1) then ! isym belongs to the wave vector point group
+       ! write(std_out,*) 'isym belongs to the wave vector point group'
+       do iat=1,natom
+         do jat=1,natom
+           niat=indsym(4,isym,iat)  ! niat={R|t}iat
+           njat=indsym(4,isym,jat)  ! njat={R|t}jat
            indij(niat,njat)=indij(niat,njat)+1
-!          write(std_out,'(a,5i5)') 'current status:',iat,jat,niat,njat,indij(niat,njat)
-!          phase calculation, arg1 and arg2 because of two-atom derivative
+           ! write(std_out,'(a,5i5)') 'current status:',iat,jat,niat,njat,indij(niat,njat)
+           ! phase calculation, arg1 and arg2 because of two-atom derivative
            arg1=two_pi*( qptn(1)*indsym(1,isym,iat)+&
-&           qptn(2)*indsym(2,isym,iat)+&
-&           qptn(3)*indsym(3,isym,iat) )
+             qptn(2)*indsym(2,isym,iat)+&
+             qptn(3)*indsym(3,isym,iat) )
            arg2=two_pi*( qptn(1)*indsym(1,isym,jat)+&
-&           qptn(2)*indsym(2,isym,jat)+&
-&           qptn(3)*indsym(3,isym,jat) )
+             qptn(2)*indsym(2,isym,jat)+&
+             qptn(3)*indsym(3,isym,jat) )
+
            re=cos(arg1)*cos(arg2)+sin(arg1)*sin(arg2)
            im=isgn*(cos(arg2)*sin(arg1)-cos(arg1)*sin(arg2))
 
-           do idir=1,3                               ! loop over displacements
-             do jdir=1,3                              ! loop over displacements
-!              we pick the (iat,jat) (3x3) block of the dyn.mat.
+           do idir=1,3     ! loop over displacements
+             do jdir=1,3   ! loop over displacements
+               ! we pick the (iat,jat) (3x3) block of the dyn.mat.
                sumr=zero
                sumi=zero
                do ii=1,3
@@ -2202,7 +2204,6 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
 
                dynmatint(nsym*(itirev-1)+isym,1,idir,iat,jdir,jat)=re*sumr-im*sumi
                dynmatint(nsym*(itirev-1)+isym,2,idir,iat,jdir,jat)=re*sumi+im*sumr
-
              end do
            end do
          end do
@@ -2211,8 +2212,7 @@ subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
    end do ! time-reversal
  end do ! symmetries
 
-
-!4) make the average, get the final symmetric dynamical matrix
+ !4) make the average, get the final symmetric dynamical matrix
  do iat=1,natom
    do jat=1,natom
      do idir=1,3
@@ -3646,7 +3646,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
-!Interatomic Forces from Dynamical Matrices
+ ! Interatomic Forces from Dynamical Matrices
  atmfrc = zero
  do irpt=1,nrpt
    if (mod(irpt, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -3749,18 +3749,20 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
- dynmat = zero
- cnt = 0
+ dynmat = zero; cnt = 0
+
+ ! TODO Use BLAS
  do iqpt=1,nqpt
+
+   ! Calculation of the k coordinates in Normalized Reciprocal coordinates
+   kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
+   kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
+   kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
+
    do irpt=1,nrpt
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
-     ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-     kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
-     kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
-     kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
-
-     ! Product of k and r
+     ! k. R
      kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
 
      ! Get phase factor
@@ -3777,13 +3779,13 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
              do mu=1,3
                !  Real and imaginary part of the dynamical matrices
                dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-&               +factr*atmfrc(mu,ia,nu,ib,irpt)
-!              Atmfrc should be real
-!              &       -im*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
+                 +factr*atmfrc(mu,ia,nu,ib,irpt)
+               !              Atmfrc should be real
+               ! -im*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
                dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-&               +facti*atmfrc(mu,ia,nu,ib,irpt)
-!              Atmfrc should be real
-!              &        +re*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
+                 +facti*atmfrc(mu,ia,nu,ib,irpt)
+               ! Atmfrc should be real
+               ! +re*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
              end do
            end do
          end if
@@ -5126,10 +5128,13 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  integer :: i1,i2,ib,nsize
  integer :: dipquad_, quadquad_
 !arrays
- real(dp) :: qphon(3)
+ real(dp) :: qphon(3), tsec(2)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
 
 ! *********************************************************************
+
+ ! Keep track of time spent in gtdyn9
+ call timab(1750, 1, tsec)
 
  ABI_MALLOC(dq,(2,3,natom,3,natom))
 
@@ -5145,7 +5150,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  end if
 
  ! Generate the analytical part from the interatomic forces
- call ftifc_r2q(atmfrc, dq, gprim, natom, nqpt1, nrpt, rpt, qphon,wghatm, comm)
+ call ftifc_r2q(atmfrc, dq, gprim, natom, nqpt1, nrpt, rpt, qphon, wghatm, comm)
 
  ! The analytical dynamical matrix dq has been generated
  ! in the normalized canonical coordinate system.
@@ -5190,6 +5195,8 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  end if
 
  ABI_FREE(dq)
+
+ call timab(1750, 2, tsec)
 
 end subroutine gtdyn9
 !!***
@@ -5276,10 +5283,13 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  logical,parameter :: debug = .False.
  real(dp) :: sc_prod
 !arrays
- real(dp) :: qptn(3),dum(2,0)
+ real(dp) :: qptn(3),dum(2,0), tsec(2)
  real(dp),allocatable :: matrx(:,:),zeff(:,:),zhpev1(:,:),zhpev2(:)
 
 ! *********************************************************************
+
+ ! Keep track of time spent in dfpt_phfrq
+ call timab(1751, 1, tsec)
 
  ! Prepare the diagonalisation: analytical part.
  ! Note: displ is used as work space here
@@ -5376,7 +5386,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    call symdyma(displ,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
  end if
 
- ier=0; ii=1
+ ii=1
  ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
  do i2=1,3*natom
    do i1=1,i2
@@ -5475,6 +5485,8 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
      end do
    end do
  end if
+
+ call timab(1751, 2, tsec)
 
 end subroutine dfpt_phfrq
 !!***

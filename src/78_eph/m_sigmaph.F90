@@ -2701,11 +2701,11 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
    ! Try to have 3 perts per proc first because the q-point parallelism is more efficient.
    ! The memory for W(R,r,ipert) will increase though.
-   do cnt=natom,2,-1
-     if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-       new%pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
-     end if
-   end do
+   !do cnt=natom,2,-1
+   !  if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+   !    new%pert_comm%nproc = cnt; new%my_npert = natom3 / cnt; exit
+   !  end if
+   !end do
 
    if (new%pert_comm%nproc == 1) then
      ! Try again with more procs.
