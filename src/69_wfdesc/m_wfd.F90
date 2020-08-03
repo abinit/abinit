@@ -4956,6 +4956,8 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
  call cwtime_report(" WFK IO", cpu, wall, gflops, end_str=ch10)
 
+ !call wfd%test_ortho(cryst, pawtab)
+
  DBG_EXIT("COLL")
 
 end subroutine wfd_read_wfk

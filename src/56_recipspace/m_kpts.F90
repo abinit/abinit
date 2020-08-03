@@ -520,7 +520,7 @@ end function symkchk
 !!
 !! SOURCE
 
-subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
+subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppoldbl, symafm, symmat, timrev, comm, &
                   exit_loop, use_symrec) ! optional
 
 !Arguments ------------------------------------
@@ -700,7 +700,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
-           !do itimrev=0,timrev_used
 
              ! Select magnetic characteristic of symmetries
              if (isppol == 1 .and. symafm(isym) == -1) cycle

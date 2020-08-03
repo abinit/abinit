@@ -876,8 +876,8 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 !scalars
  type(crystal_t) :: cryst
  type(krank_t) :: krank
- integer,parameter :: qptopt1 = 1, nqshft1 = 1, iout0 = 0,chksymbreak0 = 0, sppoldbl1 = 1
- integer :: nqibz, iqbz, iq_ibz, iqbz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new
+ integer,parameter :: qptopt1 = 1, nqshft1 = 1, iout0 = 0,chksymbreak0 = 0, sppoldbl1 = 1, master = 0
+ integer :: nqibz, iqbz, iq_ibz, iqbz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new, my_rank, ierr
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3)
  real(dp) :: cpu, gflops, wall, dksqmax
  real(dp) :: qshift(3, nqshft1)
@@ -888,7 +888,9 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
 ! *********************************************************************
 
- call wrtout(std_out, sjoin(" kptrank_unittests with ptgroup:", ptgroup, ", and ngqpt", ltoa(ngqpt)))
+ call wrtout(std_out, sjoin(" kptrank_unittests with ptgroup:", ptgroup, ", and ngqpt:", ltoa(ngqpt)))
+
+ my_rank = xmpi_comm_rank(comm)
 
  ! Create fake crystal from ptgroup
  cryst = crystal_from_ptgroup(ptgroup, use_symmetries)
@@ -909,7 +911,6 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
    ABI_CHECK(iqbz == iqbz_rank, 'wrong q-point')
  end do
  call cwtime_report(" krank", cpu, wall, gflops)
- call krank%free()
 
  ABI_MALLOC(wtq_fullbz, (nqbz))
  ABI_MALLOC(wtq_folded, (nqbz))
@@ -935,37 +936,43 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ! check if ibz is the same
  do iq_ibz=1,nqibz
    if (ibz2bz(iq_ibz) == ibz2bz_new(iq_ibz)) cycle
-   MSG_ERROR("The IBZ is different")
+   MSG_ERROR("The IBZ is different.")
  end do
 
  ! check if mapping is the same
  do iqbz=1,nqbz
    if (bz2ibz_symkpt(1, iqbz) == bz2ibz_symkpt_new(1, iqbz)) cycle
-   write(msg,*) "Inconsistent mapping", iqbz, bz2ibz_symkpt(1,iqbz), bz2ibz_symkpt_new(1,iqbz)
+   write(msg,*) "Inconsistent mapping:", iqbz, bz2ibz_symkpt(1,iqbz), bz2ibz_symkpt_new(1,iqbz)
    MSG_ERROR(msg)
  end do
 
  ! call listkk
  ABI_MALLOC(bz2ibz_listkk,(nqbz, 6))
- call listkk(dksqmax, cryst%gmet, bz2ibz_listkk, qibz,qbz, nqibz, nqbz, cryst%nsym,&
+ call listkk(dksqmax, cryst%gmet, bz2ibz_listkk, qibz, qbz, nqibz, nqbz, cryst%nsym,&
              sppoldbl1, cryst%symafm, cryst%symrec, cryst%timrev, comm, exit_loop=.True., use_symrec=.True.)
  call cwtime_report(" listkk", cpu, wall, gflops)
 
  ! check if indkk is the same
  do iqbz=1,nqbz
    if (bz2ibz_listkk(iqbz, 1) /= bz2ibz_symkpt_new(1, iqbz)) then
-     write(std_out,*) "Inconsistent ikpt", iqbz, bz2ibz_listkk(iqbz,1), bz2ibz_symkpt_new(1,iqbz)
+     ierr = ierr + 1
+     if (my_rank == master) write(std_out,*) "Inconsistent ikpt", iqbz, bz2ibz_listkk(iqbz,1), bz2ibz_symkpt_new(1,iqbz)
    end if
    if (bz2ibz_listkk(iqbz, 2) /= bz2ibz_symkpt_new(2, iqbz)) then
-     write(std_out,*) "Inconsistent isym", iqbz, bz2ibz_listkk(iqbz,2), bz2ibz_symkpt_new(2,iqbz)
+     ierr = ierr + 1
+     if (my_rank == master) write(std_out,*) "Inconsistent isym", iqbz, bz2ibz_listkk(iqbz,2), bz2ibz_symkpt_new(2,iqbz)
    end if
    if (bz2ibz_listkk(iqbz, 6) /= bz2ibz_symkpt_new(3, iqbz)) then
-     write(std_out,*) "Inconsistent itim", iqbz, bz2ibz_listkk(iqbz,6), bz2ibz_symkpt_new(3,iqbz)
+     ierr = ierr + 1
+     if (my_rank == master ) write(std_out,*) "Inconsistent itim", iqbz, bz2ibz_listkk(iqbz,6), bz2ibz_symkpt_new(3,iqbz)
    end if
    if (.not.all(bz2ibz_listkk(iqbz, 3:5) == bz2ibz_symkpt_new(4:, iqbz))) then
-     write(std_out,*) "Inconsistent shift", iqbz
-     write(std_out,*) bz2ibz_listkk(iqbz, 3:5)
-     write(std_out,*) bz2ibz_symkpt_new(4:, iqbz)
+     ierr = ierr + 1
+     if (my_rank == master) then
+       write(std_out,*) "Inconsistent shift:", iqbz
+       write(std_out,*) bz2ibz_listkk(iqbz, 3:5)
+       write(std_out,*) bz2ibz_symkpt_new(4:, iqbz)
+     end if
    end if
  end do
 
@@ -980,7 +987,9 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ABI_SFREE(qibz)
  ABI_SFREE(bz2ibz)
  ABI_SFREE(wtq_ibz)
+
  call cryst%free()
+ call krank%free()
 
 end subroutine kptrank_unittests
 !!***

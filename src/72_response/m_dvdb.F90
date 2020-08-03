@@ -3392,9 +3392,9 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex2 = 2
- integer :: ir, ispden, ifft, imyp, idir, ipert, timerev_q, ierr, my_add_lr
+ integer :: ispden, imyp, idir, ipert, timerev_q, ierr, my_add_lr !ifft, ir,
  real(dp) :: qmod
- real(sp) :: beta_sp, wr !wi,
+ real(sp) :: beta_sp !, wr !wi,
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)

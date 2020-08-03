@@ -33,7 +33,9 @@ module m_krank
 
  private
 
- double precision :: zero = 0.0d0, half = 0.5d0, one = 1.0d0, tol8 = 1.d-8,  tol10 = 1.d-10, tol12 = 1.d-12
+ integer, parameter :: dp=kind(1.0d0)
+
+ real(dp) :: zero = 0.0d0, half = 0.5d0, one = 1.0d0, tol8 = 1.d-8,  tol10 = 1.d-10, tol12 = 1.d-12
 !!***
 
 !!****t* m_krank/krank_t
@@ -53,6 +55,7 @@ module m_krank
    integer :: npoints
    logical :: time_reversal
    integer,allocatable :: invrank(:)
+   !real(dp),pointer kpoints(:,:)
 
  contains
 
@@ -112,18 +115,20 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
  integer,intent(in), optional :: nsym
  logical,intent(in), optional :: time_reversal
 !arrays
- double precision,intent(in) :: kpt(3,nkpt)
+ real(dp),intent(in) :: kpt(3,nkpt)
  integer,intent(in), optional :: symrec(3,3, *)
 
 !Local variables -------------------------
 !scalars
  integer :: ikpt, isym, symkptrank, irank, timrev, itim
- double precision :: smallestlen
+ real(dp) :: smallestlen
  character(len=500) :: msg
 !arrays
- double precision :: symkpt(3)
+ real(dp) :: symkpt(3)
 
 ! *********************************************************************
+
+ !krank%kpts => kpt
 
  ! find smallest linear length
  smallestlen = one
@@ -219,13 +224,13 @@ integer function get_rank(krank, kpt) result(rank)
 !scalars
  class(krank_t), intent(in) :: krank
 !arrays
- double precision,intent(in) :: kpt(3)
+ real(dp),intent(in) :: kpt(3)
 
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
 !arrays
- double precision :: redkpt(3)
+ real(dp) :: redkpt(3)
 
 ! *************************************************************************
 
@@ -294,7 +299,7 @@ integer function krank_get_index(krank, kpt) result(ikpt)
 !scalars
  class(krank_t), intent(in) :: krank
 !arrays
- double precision,intent(in) :: kpt(3)
+ real(dp),intent(in) :: kpt(3)
 
 !Local variables-------------------------------
 !scalars
@@ -346,6 +351,7 @@ type(krank_t) function krank_copy(krank_in) result(krank_out)
 
  TETRA_ALLOCATE(krank_out%invrank, (krank_out%min_rank:krank_out%max_rank))
  krank_out%invrank = krank_in%invrank
+ !krank_out%kpts => krank_in
 
 end function krank_copy
 !!***
@@ -430,6 +436,80 @@ end subroutine krank_dump
 !!***
 
 !----------------------------------------------------------------------
+
+subroutine krank_map(self, nkpt1, kptns1, dksqmax, gmet, indkk, nsym, symafm, symmat, timrev, comm, &
+                     use_symrec) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ class(krank_t),intent(in) :: self
+ integer,intent(in) :: nkpt1, nsym, timrev, comm !nkpt2,
+ real(dp),intent(out) :: dksqmax
+ logical,optional,intent(in) :: use_symrec
+!arrays
+ integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
+ integer,intent(out) :: indkk(6, self%npoints)
+ real(dp),intent(in) :: gmet(3,3),kptns1(3,nkpt1) !,kptns2(3,nkpt2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt1, itimrev, isym, ik2_rank, isk, ierr, my_rank, nprocs
+ real(dp) :: kpt1a(3)
+
+! *************************************************************************
+
+ !my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ indkk = 0
+
+ do ikpt1=1,nkpt1
+   !if (mod(ikpt1, nprocs) /= my_rank) cycle ! MPI parallelism.
+
+   itimrev_loop: &
+   do itimrev=0,timrev
+     do isym=1,nsym
+       ! Select magnetic characteristic of symmetries
+       if (symafm(isym) == -1) cycle
+       !if (isppol == 1 .and. symafm(isym) == -1) cycle
+       !if (isppol == 2 .and. symafm(isym) == 1) cycle
+
+       ! original code only used transpose(symrel)
+       if (present(use_symrec)) then
+         if (use_symrec) then
+           kpt1a(:) = MATMUL(symmat(:,:,isym), kptns1(:,ikpt1))
+         else
+           kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)), kptns1(:,ikpt1))
+         end if
+       else
+         kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)), kptns1(:,ikpt1))
+       end if
+       kpt1a(:) = (1-2*itimrev)*kpt1a(:)
+
+       !ik2_rank = self%get_rank(kpt1a)
+       !if ik2_rank
+       isk = self%get_index(kpt1a)
+       if (isk /= -1) then
+         !indkk(1, isk) = ikpt1
+         !indkk(2, isk) = isym
+         !indkk(3:5, isk) = jdkint(:)
+         !indkk(6, isk) = itimrev
+
+         ! Compute norm of the difference vector, and update kpt1 if better.
+         !dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+ &
+         !     gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+ &
+         !     gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
+
+         !dksqmax = max(dksqmax, dksqmn)
+         exit itimrev_loop
+       end if
+
+     end do
+   end do itimrev_loop
+ end do
+
+ !if (nprocs > 1) call xmpi_sum(indkk, comm, ierr)
+
+end subroutine krank_map
+!!***
 
 end module m_krank
 !!***

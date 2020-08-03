@@ -961,7 +961,7 @@ end subroutine kpgstr
 !! SOURCE
 
 
-subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
+subroutine mkkpg(kg, kpg, kpt, nkpg, npw)
 
 !Arguments ------------------------------------
 !scalars
@@ -980,17 +980,15 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
  if (nkpg==0) return
 
-!-- Test nkpg --
+ !-- Test nkpg --
  if (nkpg/=3.and.nkpg/=9) then
    write(message, '(a,i0)' )' Bad value for nkpg !',nkpg
    MSG_BUG(message)
  end if
 
-!-- Compute (k+G) --
+ !-- Compute (k+G) --
 !$OMP PARALLEL DO COLLAPSE(2) &
 !$OMP PRIVATE(mu,ipw)
  do ipw=1,npw
@@ -1000,7 +998,7 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
  end do
 !$OMP END PARALLEL DO
 
-!-- Compute [(k+G)_a].[(k+G)_b] --
+ !-- Compute [(k+G)_a].[(k+G)_b] --
  if (nkpg==9) then
 !$OMP PARALLEL DO COLLAPSE(2) &
 !$OMP PRIVATE(ipw,mu,mua,mub)
@@ -1013,8 +1011,6 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 !$OMP END PARALLEL DO
  end if
 
- DBG_EXIT("COLL")
-
 end subroutine mkkpg
 !!***
 
@@ -1026,13 +1022,6 @@ end subroutine mkkpg
 !! Make plane wave index at k point for basis at second k point,
 !! needed to compute overlaps $\langle u_{k,n}|u_{k+b,n}\rangle$
 !! as appear in Berry phase derived quantities
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2020 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
 !! dk(3)=real vector difference of ket kpt - bra kpt

@@ -21,6 +21,8 @@
 
 #include "abi_common.h"
 
+#define NEW
+
 module m_sigmaph
 
  use defs_basis
@@ -57,6 +59,7 @@ module m_sigmaph
  use m_dtset
  use m_dtfil
  use m_clib
+ use m_mkffnl
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -71,7 +74,7 @@ module m_sigmaph
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_be !occ_dfde,
- use m_kg,             only : getph
+ use m_kg,             only : getph, mkkpg
  use m_bz_mesh,        only : isamek
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
@@ -612,7 +615,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, istw1 = 1
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer,parameter :: ngvecs = 1
@@ -670,6 +673,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:)
+ real(dp) :: ylmgr_dum(1,1,1)
  logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
  complex(dpc) :: cp3(3)
@@ -852,8 +856,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
- !call wfd%read_wfk(wfk0_path, IO_MODE_FORTRAN)
- !call wfd%test_ortho(cryst, pawtab)
 
  ! if PAW, one has to solve a generalized eigenproblem
  ! BE careful here because I will need sij_opt == -1
@@ -877,8 +879,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout(std_out, sjoin("Including G vectors inside a sphere with ecut.", ftoa(osc_ecut)))
  end if
 
- call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
-     msg=" Computing diagonal elements of velocity operator for all states in Sigma_nk...")
+ call cwtime(cpu_ks, wall_ks, gflops_ks, "start", msg=" Computing v_nk matrix elements for all states in Sigma_nk...")
  ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
  ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
  !sigma%vcar_calc = -10
@@ -1139,6 +1140,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
 
+   ! Compute k+G vectors
+#ifdef NEW
+   nkpg = 3*dtset%nloalg(3)
+   ABI_MALLOC(kpg_k, (npw_k, nkpg))
+   if (nkpg > 0) call mkkpg(kg_k, kpg_k, kk, nkpg, npw_k)
+
+   ! Compute nonlocal form factors ffnlk at (k+G)
+   ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
+   call mkffnl(psps%dimekb, 1, psps%ekb, ffnlk, psps%ffspl,&
+     cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax,&
+     psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat,&
+     psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
+#endif
+
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
    ! TODO: Spin should be treated in a more flexible and scalable way --> kcalc and bdgw should depend on spin.
@@ -1346,13 +1361,26 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(gvnlx1, (2, npw_kq*nspinor))
 
        ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
-       !if (psps%useylm==1) then
+       !if (psps%useylm == 1) then
        !   optder = 0; if (useylmgr == 1) optder = 1
        !   call initylmg(cryst%gprimd, kg_k, kk, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
        !     [npw_k], dtset%nsppol, optder, cryst%rprimd, ylm_k, ylmgr)
        !   call initylmg(cryst%gprimd, kg_kq, kq, mkmem1, mpi_enreg, psps%mpsang, mpw, nband, mkmem1, &
        !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
        !end if
+
+#ifdef NEW
+       ! Compute k+q+G vectors
+       nkpg1 = 3*dtset%nloalg(3)
+       ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
+       if (nkpg1 > 0) call mkkpg(kg_kq, kpg1_k, kq, nkpg1, npw_kq)
+
+       ! Compute nonlocal form factors ffnl1 at (k+q+G)
+       ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
+       call mkffnl(psps%dimekb, 1, psps%ekb, ffnl1, psps%ffspl, cryst%gmet, cryst%gprimd, ider0, idir0, &
+         psps%indlmn, kg_kq, kpg1_k, kq, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg1, &
+         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq)
+#endif
 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
@@ -1379,7 +1407,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-           dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1)    ! Out
+           dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1, &  ! Out
+#ifdef NEW
+           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)
+#else
+          )
+#endif
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
@@ -1495,11 +1528,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call rf_hamkq%free()
 
          ABI_FREE(kinpw1)
+
+         ABI_FREE(dkinpw)
+#ifndef NEW
          ABI_FREE(kpg1_k)
          ABI_FREE(kpg_k)
-         ABI_FREE(dkinpw)
          ABI_FREE(ffnlk)
          ABI_FREE(ffnl1)
+#endif
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
        end do ! imyp
@@ -1957,6 +1993,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(bra_kq)
        ABI_FREE(cgwork)
        ABI_FREE(h1kets_kq)
+#ifdef NEW
+       ABI_FREE(kpg1_k)
+       ABI_FREE(ffnl1)
+#endif
 
        if (osc_ecut /= zero) then
          ABI_FREE(osc_gvecq)
@@ -2210,6 +2250,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
+#ifdef NEW
+   ABI_FREE(kpg_k)
+   ABI_FREE(ffnlk)
+#endif
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
@@ -4056,6 +4100,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  ABI_FREE(iqk2dvdb)
 
  ! FIXME: This is a hotspot
+ ! k+q --> ebands completed. cpu: 07:07 [minutes] , wall: 07:06 [minutes] <<< TIME
  call cwtime_report(" k+q --> ebands", cpu, wall, gflops)
 
  if (self%qint_method > 0 .and. .not. self%use_doublegrid) then
