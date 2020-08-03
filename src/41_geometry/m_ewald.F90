@@ -98,7 +98,7 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term
+ real(dp) :: t1,term,zcut
  !character(len=500) :: message
 !arrays
  real(dp),allocatable :: gcutoff(:)
@@ -127,9 +127,10 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
 !better than r space summation ! Note : debugging is the most
 !easier at fixed eta.
 if(icutcoul.eq.1) then
-   eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))   
+   eta=SQRT(16.0_dp/SQRT(DOT_PRODUCT(rprimd(:,1),rprimd(:,1))))
  else if (icutcoul.eq.2) then
-   eta=sqrt(16/SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3))))
+   zcut=SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))/2.0_dp
+   eta=SQRT(8.0_dp/zcut)
  else
    eta=pi*200.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  end if
@@ -138,9 +139,9 @@ if(icutcoul.eq.1) then
  fac=pi**2/eta
  gsum=0._dp
  grewtn(:,:)=0.0_dp
- 
+
  !Initialize Gcut-off array from m_gtermcutoff
- !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
+ !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
 !Sum over G space, done shell after shell until all
@@ -346,7 +347,7 @@ if(icutcoul.eq.1) then
  
 !Finally assemble Ewald energy, eew
  if(icutcoul.eq.2) then
-   eew=sumg-chsq*reta/sqrt(pi)!-fac-2*sumr
+   eew=sumg+sumr-chsq*reta/sqrt(pi)
  else
    eew=sumg+sumr-chsq*reta/sqrt(pi)-fac
  end if
@@ -355,7 +356,7 @@ if(icutcoul.eq.1) then
 
 !DEBUG
 !write(std_out,*)'eew=sumg+sumr-chsq*reta/sqrt(pi)-fac'
-!write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac,eta
+!write(std_out,*)eew,sumg,sumr,chsq*reta/sqrt(pi),fac
 !ENDDEBUG
 
 !Length scale grads handled with stress tensor, ewald2
