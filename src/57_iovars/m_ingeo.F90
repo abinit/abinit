@@ -257,8 +257,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
 !tolsym = tol8
-!XG20200801 New default value for tolsym. This default value is also defined in m_ingeo.F90
- tolsym = tol4
+!XG20200801 New default value for tolsym. This default value is also defined in m_invars1.F90
+ tolsym = tol5
  !if (tread_geo /= 0 .and. geo%filetype == "poscar") then
  !  tolsym = tol4
  !  MSG_COMMENT("Reading structure from POSCAR --> default value of tolsym is set to 1e-4")

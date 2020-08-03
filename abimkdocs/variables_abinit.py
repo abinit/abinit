@@ -16778,7 +16778,7 @@ translations.
 Alternatively to [[rprim]], directions of dimensionless primitive vectors can
 be specified by using the input variable [[angdeg]]. This is especially useful
 for hexagonal lattices (with 120 or 60 degrees angles). Indeed, in order for
-symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (1.0e-4 by default), 
+symmetries to be recognized, rprim must be symmetric up to [[tolsym]] (1.0e-5 by default), 
 inducing a specification such as
 
       rprim  0.86602  0.5  0.0
@@ -18242,7 +18242,7 @@ Variable(
     vartype="real",
     topics=['crystal_useful'],
     dimensions="scalar",
-    defaultval=1e-04,
+    defaultval=1e-05,
     mnemonics="TOLERANCE for SYMmetries",
     added_in_version="before_v9",
     text=r"""
