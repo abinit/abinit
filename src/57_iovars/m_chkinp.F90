@@ -3172,7 +3172,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  (lengths and absolute values of scalar products should be preserved)
    iexit=0
 
-   call chkorthsy(gprimd,iexit,dt%nsym,rmet,rprimd,dt%symrel)
+   call chkorthsy(gprimd,iexit,dt%nsym,rmet,rprimd,dt%symrel,tol8)
 
 !  symchi
    if (all(dt%symchi /= [0, 1])) then

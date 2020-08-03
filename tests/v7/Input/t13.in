@@ -1,9 +1,14 @@
 #Test the capability to correct inaccurate rprim or angdeg values
 
- ndtset 14
- udtset 7 2
+ ndtset 28
+ udtset 7 4
 
-tolsym?2   2.0d-4     # With this value of tolsym, an higher symmetry Bravais lattice is recognized, and then rprim is corrected
+tolsym?1   1.0d-8     # With this stringent value of tolsym, a lower symmetry Bravais lattice is recognized, rprim is not corrected
+tolsym?2   2.0d-5     # With this tolsym, the higher symmetry Bravais lattice is never recognized,
+                      # still more symmetries are recognized than with tol8, and  rprim is corrected accordinagly
+tolsym?3   5.0d-5     # With this tolsym, the higher symmetry Bravais lattice is not always recognized, 
+                      # still more symmetries are recognized than with tol8, and  rprim is corrected accordingly
+tolsym?4   1.0d-4     # With this default value of tolsym, an higher symmetry Bravais lattice is recognized, and then rprim is corrected
 
 # Fix a simple cubic lattice
 acell1?   5.0001 5.0000 4.9999

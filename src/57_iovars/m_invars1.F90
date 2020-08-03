@@ -2052,9 +2052,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
  dtsets(0)%ptgroupma=0
  dtsets(0)%spgroup=0
  dtsets(0)%shiftk(:,:)=half
-!XG20200801 Changed the default value
+!XG20200801 Changed the default value. This default value is also defined in m_ingeo.F90 . Must be coherent !
 !dtsets(0)%tolsym=tol8
- dtsets(0)%tolsym=tol5
+ dtsets(0)%tolsym=tol4
  dtsets(0)%znucl(:)=zero
  dtsets(0)%ucrpa=0
  dtsets(0)%usedmft=0

@@ -1399,7 +1399,8 @@ subroutine mkradim(acell,rprim,rprimd)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii
+ integer :: ii,jj
+ real(dp) :: rprim_maxabs
 
 ! *************************************************************************
 
@@ -1408,6 +1409,14 @@ subroutine mkradim(acell,rprim,rprimd)
    acell(ii)=sqrt(rprimd(1,ii)**2+rprimd(2,ii)**2+rprimd(3,ii)**2)
    rprim(:,ii)=rprimd(:,ii)/acell(ii)
  end do
+
+!Suppress meaningless values
+ rprim_maxabs=maxval(abs(rprim))
+ do ii=1,3
+   do jj=1,3
+     if(abs(rprim(ii,jj))<tol12*rprim_maxabs)rprim(ii,jj)=zero
+   enddo
+ enddo
 
 end subroutine mkradim
 !!***
