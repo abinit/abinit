@@ -31,6 +31,8 @@
 
 #include "abi_common.h"
 
+#define NEW
+
 module m_phgamma
 
  use defs_basis
@@ -61,6 +63,7 @@ module m_phgamma
  use m_dtfil
  use m_wfd
  use m_ephtk
+ use m_mkffnl
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report
@@ -72,7 +75,7 @@ module m_phgamma
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, get_kg
  use m_cgtools,        only : cg_zdotc
- use m_kg,             only : getph
+ use m_kg,             only : getph, mkkpg
  use m_dynmat,         only : symdyma, ftgam_init, ftgam, asrif9
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_bz_mesh,        only : kpath_t, kpath_new
@@ -3503,7 +3506,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, timrev1 = 1
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, timrev1 = 1, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, eph_scalprod0 = 0
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
@@ -3521,8 +3524,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: ncerr
 #endif
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
- real(dp) :: edos_step, edos_broad, sigma
- real(dp) :: ecut,eshift,eig0nk,dksqmax
+ real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk, dksqmax
  logical :: gen_eigenpb, need_velocities
  type(wfd_t) :: wfd
  type(fstab_t),pointer :: fs
@@ -3545,18 +3547,18 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
  real(dp) :: wminmax(2), n0(ebands%nsppol)
  real(dp) :: resvv_in(2,9), resvv_out(2,9), phfrq(3*cryst%natom)
- real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
- real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
- real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:),gkk_atm(:,:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
- real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
+ real(dp) :: ylmgr_dum(1,1,1)
+ real(dp),allocatable :: displ_cart(:,:,:,:), displ_red(:,:,:,:)
+ real(dp),allocatable :: grad_berry(:,:), kinpw1(:), kpg1_k(:,:), kpg_k(:,:), dkinpw(:)
+ real(dp),allocatable :: ffnlk(:,:,:,:), ffnl1(:,:,:,:), ph3d(:,:,:), ph3d1(:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), tgam(:,:,:), gkk_atm(:,:,:,:)
+ real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:)
+ real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
+ real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:), gvnlx1(:,:), work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:), v1_work(:,:,:,:)
- real(dp),allocatable :: wt_ek(:,:),wt_ekq(:,:), dbldelta_wts(:,:)
- real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:)
- real(dp), allocatable :: tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
+ real(dp),allocatable :: wt_ek(:,:), wt_ekq(:,:), dbldelta_wts(:,:)
+ real(dp), allocatable :: tgamvv_in(:,:,:,:),  vv_kk(:,:,:), tgamvv_out(:,:,:,:), vv_kkq(:,:,:)
  real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:), emesh(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
@@ -3777,7 +3779,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), gams%qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wtq'), gams%wtq))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz'), qibz_done))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'qibz_done'), qibz_done))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), gamma_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
@@ -4149,6 +4151,31 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
        !end if
 
+#ifdef NEW
+       ! Compute k+G vectors
+       nkpg = 3*dtset%nloalg(3)
+       ABI_MALLOC(kpg_k, (npw_k, nkpg))
+       if (nkpg > 0) call mkkpg(kg_k, kpg_k, kk, nkpg, npw_k)
+
+       ! Compute nonlocal form factors ffnlk at (k+G)
+       ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
+       call mkffnl(psps%dimekb, 1, psps%ekb, ffnlk, psps%ffspl,&
+         cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax,&
+         psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat,&
+         psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
+
+       ! Compute k+q+G vectors
+       nkpg1 = 3*dtset%nloalg(3)
+       ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
+       if (nkpg1 > 0) call mkkpg(kg_kq, kpg1_k, kq, nkpg1, npw_kq)
+
+       ! Compute nonlocal form factors ffnl1 at (k+q+G)
+       ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
+       call mkffnl(psps%dimekb, 1, psps%ekb, ffnl1, psps%ffspl, cryst%gmet, cryst%gprimd, ider0, idir0, &
+         psps%indlmn, kg_kq, kpg1_k, kq, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg1, &
+         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq)
+#endif
+
        ! Loop over all my perturbations.
        gkk_atm = zero
        do imyp=1,my_npert
@@ -4163,7 +4190,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          call getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kk, kq, idir, ipert, &  ! In
            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
-           dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1)    ! Out
+           dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1,&   ! Out
+#ifdef NEW
+           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)
+#else
+          )
+#endif
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -4181,11 +4213,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
          call rf_hamkq%free()
 
          ABI_FREE(kinpw1)
-         ABI_FREE(kpg1_k)
-         ABI_FREE(kpg_k)
          ABI_FREE(dkinpw)
+#ifndef NEW
          ABI_FREE(ffnlk)
          ABI_FREE(ffnl1)
+         ABI_FREE(kpg1_k)
+         ABI_FREE(kpg_k)
+#endif
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
 
@@ -4204,7 +4238,12 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end do ! imyp (loop over my_npert atomic perturbations)
 
        ABI_FREE(gs1c)
-
+#ifdef NEW
+       ABI_FREE(ffnlk)
+       ABI_FREE(ffnl1)
+       ABI_FREE(kpg1_k)
+       ABI_FREE(kpg_k)
+#endif
        ! Collect gkk_atm inside pert_comm so that all procs can operate on data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
 

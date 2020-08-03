@@ -2924,7 +2924,6 @@ end subroutine fourwf
 
 subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
