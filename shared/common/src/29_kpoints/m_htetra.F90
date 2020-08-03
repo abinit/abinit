@@ -2514,7 +2514,7 @@ pure subroutine get_onetetra_ppart_lv(nw, wvals, eig, rwg)
  real(dp), intent(out) :: rwg(nw, 4)
 
 !Local variables-------------------------------
- integer :: ii, jj, iw
+ integer :: ii, iw !jj,
  real(dp),parameter :: tol = tol14
  !real(dp),parameter :: tol = tol20
  !real(dp),parameter :: tol = tol30

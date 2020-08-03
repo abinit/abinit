@@ -82,7 +82,7 @@ nband 8
 #%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
 #%% [files]
 #%% files_to_test =
-#%%   teph4mob_6.out, tolnlines= 350, tolabs=  140, tolrel=  1.500e-02
+#%%   teph4mob_6.out, tolnlines= 350, tolabs=  180, tolrel=  1.500e-02
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

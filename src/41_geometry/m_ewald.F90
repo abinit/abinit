@@ -677,7 +677,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: c3r(2*mr+1),cosqxred(natom),wdielt(3,3),eig_dielt(3),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
- real(dp) :: gprimbyacell(3,3),tsec(2)
+ real(dp) :: gprimbyacell(3,3) !,tsec(2)
  real(dp),allocatable :: dyddt(:,:,:,:,:), dydqt(:,:,:,:,:,:), dyqqt(:,:,:,:,:,:,:)
  real(dp),allocatable :: work(:)
  complex(dpc) :: exp2piqx(natom)

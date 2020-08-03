@@ -850,7 +850,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !scalars
  integer :: n1,n2,n3,n4,n5,n6,paral_kgb,ispden
 !arrays
- real(dp) :: rhodum(1), tsec(2)
+ real(dp) :: rhodum(1) !, tsec(2)
  real(dp), ABI_CONTIGUOUS pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
  real(dp),allocatable :: cgrvtrial(:,:),cgrvtrial1(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
 
