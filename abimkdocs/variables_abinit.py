@@ -21544,6 +21544,15 @@ These are the **ONLY QUANTITIES** that are initialized from the external POSCAR 
 your POSCAR resembles the example given above and do not expect ABINIT to understand other entries
 such as `Selective dynamics` or velocities.
 
+!!! important
+
+    Several POSCAR files available on the internet give atomic positions and lattice vectors with ~6 digits.
+    The ABINIT routines use tighter tolerances to detect the space group thus it may happen that ABINIT does not
+    detect all the symmetry operations with a consequent **INCREASE** of the number of k-points in the IBZ
+    and the associated computational cost. This is especially true for hexagonal or rhombohedral lattices.
+    A possible solution is to increase the value of [[tolsym]] in the input file to e.g. 1e-4
+    so that ABINIT will automatically refine the atomic positions.
+
 Note the following important remarks:
 
 - The structure is initialized by the parser at the very beginning of the calculation
