@@ -5128,13 +5128,13 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  integer :: i1,i2,ib,nsize
  integer :: dipquad_, quadquad_
 !arrays
- real(dp) :: qphon(3), tsec(2)
+ real(dp) :: qphon(3) !, tsec(2)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
 
 ! *********************************************************************
 
  ! Keep track of time spent in gtdyn9
- call timab(1750, 1, tsec)
+ !call timab(1750, 1, tsec)
 
  ABI_MALLOC(dq,(2,3,natom,3,natom))
 
@@ -5196,7 +5196,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 
  ABI_FREE(dq)
 
- call timab(1750, 2, tsec)
+ !call timab(1750, 2, tsec)
 
 end subroutine gtdyn9
 !!***
@@ -5283,13 +5283,13 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  logical,parameter :: debug = .False.
  real(dp) :: sc_prod
 !arrays
- real(dp) :: qptn(3),dum(2,0), tsec(2)
+ real(dp) :: qptn(3),dum(2,0) !, tsec(2)
  real(dp),allocatable :: matrx(:,:),zeff(:,:),zhpev1(:,:),zhpev2(:)
 
 ! *********************************************************************
 
  ! Keep track of time spent in dfpt_phfrq
- call timab(1751, 1, tsec)
+ !call timab(1751, 1, tsec)
 
  ! Prepare the diagonalisation: analytical part.
  ! Note: displ is used as work space here
@@ -5486,7 +5486,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
- call timab(1751, 2, tsec)
+ !call timab(1751, 2, tsec)
 
 end subroutine dfpt_phfrq
 !!***

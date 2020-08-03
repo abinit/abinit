@@ -994,8 +994,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  ! IFC object
  names(1748)='ifc_fourq'; basic(1748) = 1
  !names(1749)='ewald9'; basic(1749) = 1
- names(1750)='gtdyn9'; basic(1750) = 1
- names(1751)='dfpt_phfrq'; basic(1751) = 1
+ !names(1750)='gtdyn9'; basic(1750) = 1
+ !names(1751)='dfpt_phfrq'; basic(1751) = 1
 
  names(1780)='cgtk_rotate'; basic(1780) = 1
 
