@@ -1221,9 +1221,9 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
 !Local variables ------------------------------
 !scalars
- integer :: allequal,ii,jj,orth
- real(dp):: aa,reldiff,scprod1
- character(len=500) :: msg
+ integer :: allequal,ii,orth
+ real(dp):: aa,scprod1
+!character(len=500) :: msg
 !arrays
  integer :: ang90(3),equal(3)
  real(dp) :: length(3),metric(3,3),norm(3),rbasis(3,3),rconv(3,3),rconv_new(3,3)
@@ -1430,8 +1430,8 @@ subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 !Local variables-------------------------------
 !scalars
  integer :: foundc,iexit,ii,jj
- real(dp):: reldiff,rprimd_maxabs
- character(len=500) :: msg
+ real(dp):: rprimd_maxabs
+!character(len=500) :: msg
 !arrays
  real(dp):: aa(3,3),ait(3,3),cell_base(3,3),gprimd(3,3),rmet(3,3),rprimd_new(3,3)
 
