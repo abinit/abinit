@@ -78,7 +78,7 @@ module m_dynmat
                                 ! inputs) are consistent with the rprim used in the routine generating  the Big Box
  public :: dist9                ! Compute the distance between atoms in the big box
  public :: ftifc_q2r            ! Fourier transform of the dynamical matrices to obtain interatomic forces (real space).
- public :: ftifc_r2q            ! Fourier transform of the interatomic forces to obtain dynamical matrices (reciprocal space).
+ private :: ftifc_r2q            ! Fourier transform of the interatomic forces to obtain dynamical matrices (reciprocal space).
  public :: dynmat_dq            ! Compute the derivative D(q)/dq via Fourier transform of the interatomic forces
  public :: ifclo9               ! Convert from cartesian coordinates to local coordinates
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
@@ -3600,8 +3600,8 @@ end subroutine dist9
 !! ftifc_q2r
 !!
 !! FUNCTION
-!!   Generates the Fourier transform of the dynamical matrices
-!!   to obtain interatomic forces (real space).
+!!  Generates the Fourier transform of the dynamical matrices
+!!  to obtain interatomic forces (real space).
 !!
 !! INPUTS
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
@@ -3747,10 +3747,11 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
-
  dynmat = zero; cnt = 0
 
- ! TODO Use BLAS
+ ! MG: This is an hotspot. I don'tknow whether one should rewrite with BLAS1 dot or not.
+ ! Note, however, that simply removing the check on the weights inside the loop over atoms.
+ ! leads to a non-negligible speedup with intel (~30% if dipdip -1 is used)
  do iqpt=1,nqpt
 
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
@@ -3769,7 +3770,7 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
      ! Inner loop on atoms and directions
      do ib=1,natom
        do ia=1,natom
-         if (abs(wghatm(ia,ib,irpt)) > tol10) then
+         !if (abs(wghatm(ia,ib,irpt)) > tol10) then  ! Commented by MG
            factr = re * wghatm(ia,ib,irpt)
            facti = im * wghatm(ia,ib,irpt)
            do nu=1,3
@@ -3780,7 +3781,7 @@ subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghat
                dynmat(2,mu,ia,nu,ib,iqpt) = dynmat(2,mu,ia,nu,ib,iqpt) + facti * atmfrc(mu,ia,nu,ib,irpt)
              end do
            end do
-         end if
+         !end if
        end do
      end do
    end do
@@ -5116,9 +5117,8 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: nqpt1=1,option2=2,sumg0=0,plus1=1,iqpt1=1
- integer :: i1,i2,ib,nsize
- integer :: dipquad_, quadquad_
+ integer,parameter :: nqpt1 = 1, option2 = 2, sumg0 = 0, plus1 = 1, iqpt1 = 1
+ integer :: i1, i2, ib, nsize, dipquad_, quadquad_
 !arrays
  real(dp) :: qphon(3) !, tsec(2)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)

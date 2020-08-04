@@ -628,7 +628,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! In the case of effective potential, we need to keep all the points
  Ifc%nrpt = 0
  do irpt=1,ifc_tmp%nrpt
-   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt+1
+   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt + 1
  end do
 
  ABI_CALLOC(Ifc%atmfrc,(3,natom,3,natom,Ifc%nrpt))

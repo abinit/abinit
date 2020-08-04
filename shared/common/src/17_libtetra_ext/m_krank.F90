@@ -234,7 +234,7 @@ integer function get_rank(krank, kpt) result(rank)
 
 ! *************************************************************************
 
-! wrap to [0, 1[ -> replaced call to wrap2_zeroone inline, to encapsulate this module
+ ! wrap to [0, 1[ -> replaced call to wrap2_zeroone inline, to encapsulate this module
  if (kpt(1)>zero) then
    redkpt(1)=mod((kpt(1)+tol12),one)-tol12
  else

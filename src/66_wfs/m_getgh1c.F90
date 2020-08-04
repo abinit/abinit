@@ -931,12 +931,12 @@ end subroutine rf_transgrid_and_pack
 !!
 !! SOURCE
 
-subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipert,&     ! In
-                natom, rmet, gprimd, gmet, istwf_k, npw_k, npw1_k, &                     ! In
-                useylmgr1, kg_k, ylm_k, kg1_k, ylm1_k, ylmgr1_k, &                       ! In
-                dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1,&  ! Out
-                ddkinpw, dkinpw2, rf_hamk_dir2, ffnl1_test, &                            ! Optional
-                reuse_kpg_k, reuse_kpg1_k, reuse_ffnlk, reuse_ffnl1)                     ! Optional
+subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipert,&              ! In
+                         natom, rmet, gprimd, gmet, istwf_k, npw_k, npw1_k, &                     ! In
+                         useylmgr1, kg_k, ylm_k, kg1_k, ylm1_k, ylmgr1_k, &                       ! In
+                         dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1,&  ! Out
+                         ddkinpw, dkinpw2, rf_hamk_dir2, ffnl1_test, &                            ! Optional
+                         reuse_kpg_k, reuse_kpg1_k, reuse_ffnlk, reuse_ffnl1)                     ! Optional
 
 !Arguments ------------------------------------
 !scalars

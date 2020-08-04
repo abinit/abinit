@@ -857,7 +857,6 @@ end subroutine tetra_zinv_convergence
 !!***
 
 !!****f* m_unittests/kptrank_unittests
-!!
 !! NAME
 !!  kptrank_unittests
 !!
@@ -874,14 +873,15 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
 !Local variables -------------------------
 !scalars
- type(crystal_t) :: cryst
- type(krank_t) :: krank
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, iout0 = 0,chksymbreak0 = 0, sppoldbl1 = 1, master = 0
  integer :: nqibz, iqbz, iq_ibz, iqbz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new, my_rank, ierr
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3)
  real(dp) :: cpu, gflops, wall, dksqmax
  real(dp) :: qshift(3, nqshft1)
  character(len=500) :: msg
+ type(crystal_t) :: cryst
+ type(krank_t) :: krank
+!arrays
  integer,allocatable :: bz2ibz(:,:), bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:)
  integer,allocatable :: bz2ibz_listkk(:,:), ibz2bz(:), ibz2bz_new(:)
  real(dp),allocatable :: wtq_fullbz(:), wtq_folded(:), wtq_ibz(:), qbz(:,:),qibz(:,:)
@@ -904,13 +904,13 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
- ! Test krank
+ ! Test krank object.
  krank = krank_new(nqbz, qbz)
  do iqbz=1,nqbz
    iqbz_rank = krank%get_index(qbz(:,iqbz))
    ABI_CHECK(iqbz == iqbz_rank, 'wrong q-point')
  end do
- call cwtime_report(" krank", cpu, wall, gflops)
+ call cwtime_report(" krank basic check", cpu, wall, gflops)
 
  ABI_MALLOC(wtq_fullbz, (nqbz))
  ABI_MALLOC(wtq_folded, (nqbz))
@@ -933,26 +933,26 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  call cwtime_report(" symkpt_new", cpu, wall, gflops)
  ABI_CHECK(nqibz_symkpt == nqibz_symkpt_new, 'Wrong number of qpoints in the IBZ')
 
- ! check if ibz is the same
+ ! Check if ibz is the same
  do iq_ibz=1,nqibz
    if (ibz2bz(iq_ibz) == ibz2bz_new(iq_ibz)) cycle
    MSG_ERROR("The IBZ is different.")
  end do
 
- ! check if mapping is the same
+ ! Check if mapping is the same
  do iqbz=1,nqbz
    if (bz2ibz_symkpt(1, iqbz) == bz2ibz_symkpt_new(1, iqbz)) cycle
    write(msg,*) "Inconsistent mapping:", iqbz, bz2ibz_symkpt(1,iqbz), bz2ibz_symkpt_new(1,iqbz)
    MSG_ERROR(msg)
  end do
 
- ! call listkk
+ ! Call listkk
  ABI_MALLOC(bz2ibz_listkk,(nqbz, 6))
  call listkk(dksqmax, cryst%gmet, bz2ibz_listkk, qibz, qbz, nqibz, nqbz, cryst%nsym,&
              sppoldbl1, cryst%symafm, cryst%symrec, cryst%timrev, comm, exit_loop=.True., use_symrec=.True.)
  call cwtime_report(" listkk", cpu, wall, gflops)
 
- ! check if indkk is the same
+ ! Check if indkk is the same
  do iqbz=1,nqbz
    if (bz2ibz_listkk(iqbz, 1) /= bz2ibz_symkpt_new(1, iqbz)) then
      ierr = ierr + 1
