@@ -15,7 +15,6 @@ osc_ecut = 10,
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = fftprof
-#%% exclude_hosts=ibm@ibm8
 #%% [files]
 #%% files_to_test = tfftgw_01.stdout, tolnlines=2, tolabs=5.0e-8, tolrel=1.1
 #%% [paral_info]
