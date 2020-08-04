@@ -516,20 +516,21 @@ contains
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: blocksize,iband,iblock,iblocksize,ierr,ipw,nblockbd
+    integer :: blocksize,iband,iblock,iblocksize,ierr,ipw,nblockbd,unit
     real(dp) :: kpg1,kpg2,kpg3,tmp_std
     character(len=50) :: filenameoutpw
     ! Arrays
     real(dp) :: cgnk(2,npw_k*nspinor),cgnk2(npw_k*nspinor)
 
     ! *********************************************************************
+    unit=mpi_enreg%me
 
     ! Debug : Priting Eigenvalues, Kinetic and PW grid if requested
     if(this%prt_cg.and.(mpi_enreg%me==mpi_enreg%me_kpt)) then
 
       ! Not sure of this debug block if istwf_k>1
       write(filenameoutpw,'(A,I5.5)') '_PW_MESH_k',ikpt
-      open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
       do ipw=1,npw_k
         kpg1=kpt(1,ikpt)+dble(kg_k(1,ipw))
         kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
@@ -545,12 +546,12 @@ contains
       close(23)
 
       write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ikpt
-      open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
       write(23,'(ES12.5)') eig_k
       close(23)
 
       write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ikpt
-      open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+      open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
       write(23,'(ES12.5)') ek_k
       close(23)
     end if
@@ -570,12 +571,12 @@ contains
           cgnk(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
           cgnk2(:)=(cgnk(1,:)*cgnk(1,:)+cgnk(2,:)*cgnk(2,:))
           write(filenameoutpw, '(A,I5.5,A,I5.5)') '_PW_k',ikpt,'_b',iband
-          open(file=trim(fnameabo)//trim(filenameoutpw),unit=23)
+          open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
           do ipw=1,npw_k
-            write(23,'(i14,ES14.6,ES14.6,i14)') ipw,&
+            write(unit,'(i14,ES14.6,ES14.6,i14)') ipw,&
             & kinpw(ipw),sqrt(cgnk2(ipw))
           end do
-          close(23)
+          close(unit)
         end if
 
         ! Computing planewaves energy standard deviation over lasts bands.
