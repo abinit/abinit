@@ -30,6 +30,7 @@ module m_mkffnl
  use m_abicore
  use m_errors
  use m_splines
+ use m_xmpi
 
  use m_time,     only : timab
  use m_kg,       only : mkkin
@@ -93,6 +94,7 @@ contains
 !!         1=using Ylm, 0=using Legendre polynomials
 !!  ylm   (npw,mpsang*mpsang*useylm)=real spherical harmonics for each G and k point
 !!  ylm_gr(npw,3,mpsang*mpsang*useylm)=gradients of real spherical harmonics wrt (k+G)
+!! [comm]=MPI communicator. Default: xmpi_comm_self.
 !!
 !! OUTPUT
 !!  ffnl(npw,dimffnl,lmnmax,ntypat)=described below
@@ -176,7 +178,7 @@ contains
 !! PARENTS
 !!      ctocprj,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi
 !!      dfptnl_resp,energy,fock2ACE,forstrnps,getgh1c,ks_ddiago,m_io_kss
-!!      m_shirley,m_vkbr,m_wfd,nonlop_test,vtorho
+!!      m_vkbr,m_wfd,nonlop_test,vtorho
 !!
 !! CHILDREN
 !!      mkkin,splfit,timab
@@ -185,12 +187,14 @@ contains
 
 subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, indlmn, &
                    kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
-                   qgrid, rmet, usepaw, useylm, ylm, ylm_gr)
+                   qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
+                   comm) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dimekb,dimffnl,ider,idir,lmnmax,lnmax,mpsang,mqgrid,nkpg
  integer,intent(in) :: npw,ntypat,usepaw,useylm
+ integer,optional,intent(in) :: comm
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg(3,npw),pspso(ntypat)
  real(dp),intent(in) :: ekb(dimekb,ntypat*(1-usepaw))
@@ -202,6 +206,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 !Local variables-------------------------------
 !scalars
  integer :: ider_tmp,iffnl,ig,ig0,il,ilm,ilmn,iln,iln0,im,itypat,mu,mua,mub,nlmn,nu,nua,nub
+ integer :: nprocs, my_rank, cnt, ierr
  real(dp),parameter :: renorm_factor=0.5d0/pi**2,tol_norm=tol10
  real(dp) :: ecut,ecutsm,effmass_free,fact,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3,rmetab,yp1
  logical :: testnl=.false.
@@ -219,6 +224,11 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
 
  ! Keep track of time spent in mkffnl
  call timab(16,1,tsec)
+
+ nprocs = 1; my_rank = 0
+ if (present(comm)) then
+   nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ end if
 
  ! Compatibility tests
  if (mpsang>4) then
@@ -366,34 +376,40 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  end if
 
  ! Loop over types of atoms
+ ffnl = zero; cnt = 0
  do itypat=1,ntypat
 
    ! Loop over (l,m,n) values
-   iln0=0;nlmn=count(indlmn(3,:,itypat)>0)
-   ffnl(:,:,:,itypat)=zero
+   iln0=0; nlmn=count(indlmn(3,:,itypat)>0)
+
    do ilmn=1,nlmn
      il=indlmn(1,ilmn,itypat)
      im=indlmn(2,ilmn,itypat)
      ilm =indlmn(4,ilmn,itypat)
      iln =indlmn(5,ilmn,itypat)
      iffnl=ilmn;if (useylm==0) iffnl=iln
+
      ! Special case: we enter the loop in case of spin-orbit calculation
      ! even if the psp has no spin-orbit component.
-     if ((indlmn(6,ilmn,itypat)==1).or.(pspso(itypat)/=0)) then
+     if (indlmn(6,ilmn,itypat) ==1 .or. pspso(itypat) /=0) then
 
        ! Compute FFNL only if ekb>0 or paw
        if (usepaw==1) testnl=.true.
        if (usepaw==0) testnl=(abs(ekb(iln,itypat))>tol_norm)
 
        if (testnl) then
+         cnt = cnt + 1
+         if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+         !
          ! Store form factors (from ffspl)
          ! -------------------------------
-         ! MG: This part is an hotspot of getgh1c_setup
+         ! MG: This part is an hotspot of in the EPH code due to the large number of k-points used
          ! To improve memory locality, I tried to:
-         !  1) call a new version of splfit that operates on wk_ffspl with shape: (2,mqgrid)
-         !  2) pass a sorted kpgnorm array and then rearrange the output spline
-         ! but I didn't manage to make it significantly faster
-         if (iln>iln0) then
+         !      1) call a new version of splfit that operates on wk_ffspl with shape: (2,mqgrid)
+         !      2) pass a sorted kpgnorm array and then rearrange the output spline
+         ! but I didn't manage to make it significantly faster.
+         ! For the time being, we rely on MPI-parallelsism via the optional MPI communicator.
+         if (iln > iln0) then
            wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
            ider_tmp = min(ider, 1)
            call splfit(qgrid,wk_ffnl2,wk_ffspl,ider_tmp,kpgnorm,wk_ffnl1,mqgrid,npw)
@@ -640,6 +656,13 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    end do ! loop over (l,m,n) values
  end do ! loop over atom types
 
+ ABI_FREE(kpgnorm_inv)
+ ABI_FREE(kpgnorm)
+ ABI_FREE(wk_ffnl1)
+ ABI_FREE(wk_ffnl2)
+ ABI_FREE(wk_ffnl3)
+ ABI_FREE(wk_ffspl)
+
  ! Optional deallocations.
  ABI_SFREE(kpgc)
  ABI_SFREE(kpgn)
@@ -650,12 +673,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  ABI_SFREE(dffnl_tmp)
  ABI_SFREE(d2ffnl_tmp)
 
- ABI_FREE(kpgnorm_inv)
- ABI_FREE(kpgnorm)
- ABI_FREE(wk_ffnl1)
- ABI_FREE(wk_ffnl2)
- ABI_FREE(wk_ffnl3)
- ABI_FREE(wk_ffspl)
+ if (nprocs > 1) call xmpi_sum(ffnl, comm, ierr)
 
  call timab(16,2,tsec)
 

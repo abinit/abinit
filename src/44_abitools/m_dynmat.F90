@@ -3701,9 +3701,8 @@ end subroutine ftifc_q2r
 !! ftifc_r2q
 !!
 !! FUNCTION
-!! (r->q):
-!!   Generates the Fourier transform of the interatomic forces
-!!   to obtain dynamical matrices (reciprocal space).
+!! Generates the Fourier transform of the interatomic forces
+!! to obtain dynamical matrices in reciprocal space: R --> q.
 !!
 !! INPUTS
 !! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space
@@ -3727,7 +3726,7 @@ end subroutine ftifc_q2r
 !!
 !! SOURCE
 
-subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
+subroutine ftifc_r2q(atmfrc, dynmat, gprim, natom, nqpt, nrpt, rpt, spqpt, wghatm, comm)
 
 !Arguments -------------------------------
 !scalars
@@ -3762,30 +3761,23 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
    do irpt=1,nrpt
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
-     ! k. R
-     kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
-
+     ! k.R
+     kr = kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
      ! Get phase factor
-     re=cos(two_pi*kr)
-     im=sin(two_pi*kr)
+     re = cos(two_pi*kr); im = sin(two_pi*kr)
 
      ! Inner loop on atoms and directions
      do ib=1,natom
        do ia=1,natom
-         if(abs(wghatm(ia,ib,irpt))>1.0d-10)then
-           factr=re*wghatm(ia,ib,irpt)
-           facti=im*wghatm(ia,ib,irpt)
+         if (abs(wghatm(ia,ib,irpt)) > tol10) then
+           factr = re * wghatm(ia,ib,irpt)
+           facti = im * wghatm(ia,ib,irpt)
            do nu=1,3
              do mu=1,3
-               !  Real and imaginary part of the dynamical matrices
-               dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-                 +factr*atmfrc(mu,ia,nu,ib,irpt)
-               !              Atmfrc should be real
-               ! -im*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
-               dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-                 +facti*atmfrc(mu,ia,nu,ib,irpt)
+               ! Real and imaginary part of the dynamical matrices
                ! Atmfrc should be real
-               ! +re*wghatm(ia,ib,irpt)*atmfrc(2,mu,ia,nu,ib,irpt)
+               dynmat(1,mu,ia,nu,ib,iqpt) = dynmat(1,mu,ia,nu,ib,iqpt) + factr * atmfrc(mu,ia,nu,ib,irpt)
+               dynmat(2,mu,ia,nu,ib,iqpt) = dynmat(2,mu,ia,nu,ib,iqpt) + facti * atmfrc(mu,ia,nu,ib,irpt)
              end do
            end do
          end if

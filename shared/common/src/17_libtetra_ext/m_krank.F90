@@ -484,14 +484,12 @@ subroutine krank_map(self, nkpt1, kptns1, dksqmax, gmet, indkk, nsym, symafm, sy
        end if
        kpt1a(:) = (1-2*itimrev)*kpt1a(:)
 
-       !ik2_rank = self%get_rank(kpt1a)
-       !if ik2_rank
        isk = self%get_index(kpt1a)
        if (isk /= -1) then
-         !indkk(1, isk) = ikpt1
-         !indkk(2, isk) = isym
+         indkk(1, isk) = ikpt1
+         indkk(2, isk) = isym
          !indkk(3:5, isk) = jdkint(:)
-         !indkk(6, isk) = itimrev
+         indkk(6, isk) = itimrev
 
          ! Compute norm of the difference vector, and update kpt1 if better.
          !dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+ &

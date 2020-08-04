@@ -31,7 +31,6 @@
 
 #include "abi_common.h"
 
-#define NEW
 
 module m_phgamma
 
@@ -4151,7 +4150,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
        !end if
 
-#ifdef NEW
        ! Compute k+G vectors
        nkpg = 3*dtset%nloalg(3)
        ABI_MALLOC(kpg_k, (npw_k, nkpg))
@@ -4160,9 +4158,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Compute nonlocal form factors ffnlk at (k+G)
        ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
        call mkffnl(psps%dimekb, 1, psps%ekb, ffnlk, psps%ffspl,&
-         cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax,&
+         cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax, &
          psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat,&
-         psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
+         psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum, &
+         comm=pert_comm%value)
 
        ! Compute k+q+G vectors
        nkpg1 = 3*dtset%nloalg(3)
@@ -4173,8 +4172,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
        call mkffnl(psps%dimekb, 1, psps%ekb, ffnl1, psps%ffspl, cryst%gmet, cryst%gprimd, ider0, idir0, &
          psps%indlmn, kg_kq, kpg1_k, kq, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg1, &
-         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq)
-#endif
+         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq, &
+         comm=pert_comm%value)
 
        ! Loop over all my perturbations.
        gkk_atm = zero
@@ -4191,11 +4190,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
            dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1,&   ! Out
-#ifdef NEW
-           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)
-#else
-          )
-#endif
+           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -4214,12 +4209,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
          ABI_FREE(kinpw1)
          ABI_FREE(dkinpw)
-#ifndef NEW
-         ABI_FREE(ffnlk)
-         ABI_FREE(ffnl1)
-         ABI_FREE(kpg1_k)
-         ABI_FREE(kpg_k)
-#endif
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
 
@@ -4238,12 +4227,11 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        end do ! imyp (loop over my_npert atomic perturbations)
 
        ABI_FREE(gs1c)
-#ifdef NEW
        ABI_FREE(ffnlk)
        ABI_FREE(ffnl1)
        ABI_FREE(kpg1_k)
        ABI_FREE(kpg_k)
-#endif
+
        ! Collect gkk_atm inside pert_comm so that all procs can operate on data.
        if (pert_comm%nproc > 1) call xmpi_sum(gkk_atm, pert_comm%value, ierr)
 

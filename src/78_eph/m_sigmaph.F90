@@ -21,8 +21,6 @@
 
 #include "abi_common.h"
 
-#define NEW
-
 module m_sigmaph
 
  use defs_basis
@@ -1141,7 +1139,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
 
    ! Compute k+G vectors
-#ifdef NEW
    nkpg = 3*dtset%nloalg(3)
    ABI_MALLOC(kpg_k, (npw_k, nkpg))
    if (nkpg > 0) call mkkpg(kg_k, kpg_k, kk, nkpg, npw_k)
@@ -1151,8 +1148,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call mkffnl(psps%dimekb, 1, psps%ekb, ffnlk, psps%ffspl,&
      cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax,&
      psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat,&
-     psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
-#endif
+     psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum, &
+     comm=sigma%pert_comm%value)
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
@@ -1369,7 +1366,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !     [npw_kq], dtset%nsppol, optder, cryst%rprimd, ylm_kq, ylmgr_kq)
        !end if
 
-#ifdef NEW
        ! Compute k+q+G vectors
        nkpg1 = 3*dtset%nloalg(3)
        ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
@@ -1379,8 +1375,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
        call mkffnl(psps%dimekb, 1, psps%ekb, ffnl1, psps%ffspl, cryst%gmet, cryst%gprimd, ider0, idir0, &
          psps%indlmn, kg_kq, kpg1_k, kq, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg1, &
-         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq)
-#endif
+         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq, &
+         comm=sigma%pert_comm%value)
 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
@@ -1408,11 +1404,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &             ! In
            npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &         ! In
            dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnlk, ffnl1, ph3d, ph3d1, &  ! Out
-#ifdef NEW
-           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)
-#else
-          )
-#endif
+           reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)              ! Reuse some arrays
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
@@ -1528,14 +1520,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call rf_hamkq%free()
 
          ABI_FREE(kinpw1)
-
          ABI_FREE(dkinpw)
-#ifndef NEW
-         ABI_FREE(kpg1_k)
-         ABI_FREE(kpg_k)
-         ABI_FREE(ffnlk)
-         ABI_FREE(ffnl1)
-#endif
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
        end do ! imyp
@@ -1731,6 +1716,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              have_vcar_ibz(ibsum_kq, ikq_ibz, spin) = 1
            end if
 
+           ! Debugging section
            !if (vkq_ikcalc /= 0) then
            !  if (sqrt(dot_product(vkq - vkq_symm, vkq - vkq_symm)) > tol10) then
            !    write(std_out, *)"ib_kq:", ib_kq
@@ -1993,10 +1979,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(bra_kq)
        ABI_FREE(cgwork)
        ABI_FREE(h1kets_kq)
-#ifdef NEW
        ABI_FREE(kpg1_k)
        ABI_FREE(ffnl1)
-#endif
 
        if (osc_ecut /= zero) then
          ABI_FREE(osc_gvecq)
@@ -2250,10 +2234,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
-#ifdef NEW
    ABI_FREE(kpg_k)
    ABI_FREE(ffnlk)
-#endif
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
