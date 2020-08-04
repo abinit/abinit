@@ -33,6 +33,7 @@ module m_sigc
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
+ use m_hide_lapack,   only : xheev
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
