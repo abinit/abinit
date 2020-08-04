@@ -654,7 +654,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
  integer,allocatable :: ibzspin_2ikcalc(:,:), have_vcar_ibz(:,:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
- real(dp) :: vk(3), vkq(3), vkq_symm(3), tsec(2), eminmax(2)
+ real(dp) :: vk(3), vkq(3), vkq_ibz(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: gdw2, gdw2_stern, rtmp
@@ -1705,26 +1705,30 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
                if (trev_kq /= 0) vkq = -vkq
              end if
-             vkq_symm = vkq
+             !vkq_ibz = vkq
 
            else
 
              ! Need to compute vkq here if kq is slightly outside the Sigma_erange window.
-             ! Save it in vcar_ibz so that we don't need to recompute it at the next interation.
              vkq = ddkop%get_vdiag(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, bra_kq, cwaveprj0)
-             vcar_ibz(:, ibsum_kq, ikq_ibz, spin) = vkq
+
+             ! Get the velocity in the IBZ and save it vcar_ibz so that we don't need
+             ! to recompute it in the next interations.
+             vkq_ibz = matmul(cryst%symrel_cart(:,:,isym_kq), vkq)
+             if (trev_kq /= 0) vkq_ibz = -vkq_ibz
+             vcar_ibz(:, ibsum_kq, ikq_ibz, spin) = vkq_ibz
              have_vcar_ibz(ibsum_kq, ikq_ibz, spin) = 1
            end if
 
            ! Debugging section
            !if (vkq_ikcalc /= 0) then
-           !  if (sqrt(dot_product(vkq - vkq_symm, vkq - vkq_symm)) > tol10) then
+           !  if (sqrt(dot_product(vkq - vkq_ibz, vkq - vkq_ibz)) > tol10) then
            !    write(std_out, *)"ib_kq:", ib_kq
            !    write(std_out, *) "kk", kk, ch10, "kq", kq
            !    write(std_out, *)" vkq", vkq
-           !    write(std_out, *)" vkq_symm", vkq_symm
+           !    write(std_out, *)" vkq_ibz", vkq_ibz
            !    write(std_out, *)"isym_kq, trev_kq", isym_kq, trev_kq
-           !    write(std_out, *)"|v|", sqrt(dot_product(vkq - vkq_symm, vkq - vkq_symm))
+           !    write(std_out, *)"|v|", sqrt(dot_product(vkq - vkq_ibz, vkq - vkq_ibz))
            !    MSG_ERROR("Wrong vq_symm")
            !  end if
            !end if

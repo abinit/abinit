@@ -453,7 +453,7 @@ subroutine krank_map(self, nkpt1, kptns1, dksqmax, gmet, indkk, nsym, symafm, sy
 
 !Local variables-------------------------------
 !scalars
- integer :: ikpt1, itimrev, isym, ik2_rank, isk, ierr, my_rank, nprocs
+ integer :: ikpt1, itimrev, isym, isk !, ierr, my_rank, nprocs
  real(dp) :: kpt1a(3)
 
 ! *************************************************************************
