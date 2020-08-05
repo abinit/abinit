@@ -37,7 +37,7 @@ module m_kpts
  use m_time,           only : cwtime, cwtime_report
  use m_copy,           only : alloc_copy
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
- use m_fstrings,       only : sjoin, itoa, ltoa
+ use m_fstrings,       only : sjoin, itoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_symkpt,         only : symkpt, symkpt_new
@@ -749,6 +749,11 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
                if (present(exit_loop)) then
                  if (exit_loop) then
                    if (dksq < tol12) ikpt2_done = 1
+                   !if (ikpt2_done == 1) then
+                   !  write(std_out, "(5a, es18.6)") "ikpt2_done with k2: ", trim(ktoa(kptns2(:,ikpt2))), &
+                   !                         " --> k1:", trim(ktoa(kptns1(:,ikpt1))), " dksq", dksq
+                   !  write(std_out,*)"dk:", dk, "dkint:", dkint
+                   !end if
                  end if
                end if
 

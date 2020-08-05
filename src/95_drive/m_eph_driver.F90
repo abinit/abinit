@@ -69,7 +69,7 @@ module m_eph_driver
  use m_efmas,           only : efmasdeg_free_array, efmasval_free_array, efmas_ncread
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph
+ use m_sigmaph,         only : sigmaph, test_phrotation
  use m_pspini,          only : pspini
  use m_ephtk,           only : ephtk_update_ebands
 
@@ -641,6 +641,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (nprocs > 1) then
      MSG_WARNING("eph_task in [16, -16] does not support nprocs > 1. Running in sequential...")
    end if
+
+   call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
 
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then

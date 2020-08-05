@@ -840,7 +840,7 @@ end subroutine cg_zaxpby
 !!
 !! SOURCE
 
-subroutine cg_zgemv(trans,nrows,ncols,cgmat,vec,matvec,alpha,beta)
+subroutine cg_zgemv(trans, nrows, ncols, cgmat, vec, matvec, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars

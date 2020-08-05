@@ -195,6 +195,7 @@ end function crystal_from_ptgroup
 !! FUNCTION
 !!  Unit tests for the tetrahedron routines
 !!
+
 subroutine tetra_unittests(ptgroup, ngqpt, use_symmetries, prtvol, comm)
 
 !Arguments -------------------------------

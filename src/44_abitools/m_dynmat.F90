@@ -94,6 +94,8 @@ module m_dynmat
                                 ! long-range electrostatic interactions.
  public :: dfpt_phfrq           ! Diagonalize IFC(q), return phonon frequencies and eigenvectors.
                                 ! If q is Gamma, the non-analytical behaviour can be included.
+ public :: pheigvec_normalize   ! Normalize input eigenvectors in cartesian coordinates.
+ public :: phdispl_from_eigvec  ! Phonon displacements from eigenvectors
  public :: dfpt_prtph           ! Print phonon frequencies
  public :: massmult_and_breaksym  ! Multiply IFC(q) by atomic masses.
 
@@ -5271,7 +5273,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 !scalars
  integer :: analyt,i1,i2,idir1,idir2,ier,ii,imode,ipert1,ipert2
  integer :: jmode,indexi,indexj,index
- real(dp) :: epsq,norm,qphon2
+ real(dp) :: epsq,qphon2
  logical,parameter :: debug = .False.
  real(dp) :: sc_prod
 !arrays
@@ -5370,7 +5372,8 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  ! Diagonalize the dynamical matrix
 
  !Symmetrize the dynamical matrix
- !FIXME: swap the next 2 lines and update test files to include symmetrization for Gamma point too (except in non-analytic case)
+ !FIXME: swap the next 2 lines and update test files to include symmetrization
+ !       for Gamma point too (except in non-analytic case)
  !if (symdynmat==1 .and. analyt > 0) then
  if (symdynmat==1 .and. analyt == 1) then
    qptn(:)=qphon(:)
@@ -5424,40 +5427,13 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  end do
 
  ! Fix the phase of the eigenvectors
- call fxphas_seq(eigvec,dum,0,0,1,3*natom*3*natom,0,3*natom,3*natom,0)
+ call fxphas_seq(eigvec,dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
 
  ! Normalise the eigenvectors
- do imode=1,3*natom
-   norm=zero
-   do idir1=1,3
-     do ipert1=1,natom
-       i1=idir1+(ipert1-1)*3
-       index=i1+3*natom*(imode-1)
-       norm=norm+eigvec(2*index-1)**2+eigvec(2*index)**2
-     end do
-   end do
-   norm=sqrt(norm)
-   do idir1=1,3
-     do ipert1=1,natom
-       i1=idir1+(ipert1-1)*3
-       index=i1+3*natom*(imode-1)
-       eigvec(2*index-1)=eigvec(2*index-1)/norm
-       eigvec(2*index)=eigvec(2*index)/norm
-     end do
-   end do
- end do
+ call pheigvec_normalize(natom, eigvec)
 
  ! Get the phonon displacements
- do imode=1,3*natom
-   do idir1=1,3
-     do ipert1=1,natom
-       i1=idir1+(ipert1-1)*3
-       index=i1+3*natom*(imode-1)
-       displ(2*index-1)=eigvec(2*index-1) / sqrt(amu(typat(ipert1))*amu_emass)
-       displ(2*index  )=eigvec(2*index  ) / sqrt(amu(typat(ipert1))*amu_emass)
-     end do
-   end do
- end do
+ call phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
 
  if (debug) then
    write(std_out,'(a)')' Phonon eigenvectors and displacements '
@@ -5482,6 +5458,128 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
 end subroutine dfpt_phfrq
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/pheigvec_normalize
+!!
+!! NAME
+!! pheigvec_normalize
+!!
+!! FUNCTION
+!!  Normalize input eigenvectors in cartesian coordinates
+!!
+!! INPUTS
+!!  natom: number of atoms in unit cell
+!!
+!! SIDE EFFECTS
+!!  eigvec(2*3*natom*3*natom)=in output the normalized eigenvectors in cartesian coordinates.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine pheigvec_normalize(natom, eigvec)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom
+!arrays
+ real(dp),intent(inout) :: eigvec(2*3*natom*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1,idir1,imode,ipert1,index
+ real(dp) :: norm
+
+! *********************************************************************
+
+ do imode=1,3*natom
+
+   norm=zero
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       norm=norm+eigvec(2*index-1)**2+eigvec(2*index)**2
+     end do
+   end do
+   norm=sqrt(norm)
+
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       eigvec(2*index-1)=eigvec(2*index-1)/norm
+       eigvec(2*index)=eigvec(2*index)/norm
+     end do
+   end do
+
+ end do
+
+end subroutine pheigvec_normalize
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/phdispl_from_eigvec
+!!
+!! NAME
+!! phdispl_from_eigvec
+!!
+!! FUNCTION
+!!  Phonon displacements from eigenvectors
+!!
+!! INPUTS
+!!  natom: number of atoms in unit cell
+!!  ntypat=number of atom types
+!!  typat(natom)=integer label of each type of atom (1,2,...)
+!!  amu(ntypat)=mass of the atoms (atomic mass unit) matrix (diagonal in the atoms)
+!!  eigvec(2*3*natom*3*natom)= eigenvectors of the dynamical matrix in cartesian coordinates.
+!!
+!! OUTPUT
+!!  displ(2*3*natom*3*natom)=displacements of atoms in cartesian coordinates.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom, ntypat
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: amu(ntypat)
+ real(dp),intent(in) :: eigvec(2*3*natom*3*natom)
+ real(dp),intent(out) :: displ(2*3*natom*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1,idir1,imode,ipert1, index
+
+! *********************************************************************
+
+ do imode=1,3*natom
+
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       displ(2*index-1)=eigvec(2*index-1) / sqrt(amu(typat(ipert1))*amu_emass)
+       displ(2*index  )=eigvec(2*index  ) / sqrt(amu(typat(ipert1))*amu_emass)
+     end do
+   end do
+
+ end do
+
+end subroutine phdispl_from_eigvec
+!!!***
 
 !!****f* m_dynmat/dfpt_prtph
 !! NAME

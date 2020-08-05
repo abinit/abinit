@@ -1729,12 +1729,12 @@ end if
  end if
 
 !===== Preparation of the kinetic contributions
-!Compute (1/2) (2 Pi)**2 (k+q+G)**2:
+! Compute (1/2) (2 Pi)**2 (k+q+G)**2:
  ABI_MALLOC(kinpw1,(npw1_k))
  kinpw1(:)=zero
  call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
-ABI_MALLOC(dqdqkinpw,(npw_k))
+ ABI_MALLOC(dqdqkinpw,(npw_k))
  !-- Metric (strain) perturbation
  if (ipert==natom+3.or.ipert==natom+4) then
    call mkkin_metdqdq(dqdqkinpw,dtset%effmass_free,gprimd,idir,kg_k,kpoint,npw_k,qdir1)
@@ -1748,6 +1748,7 @@ ABI_MALLOC(dqdqkinpw,(npw_k))
  ABI_MALLOC(ph3d,(2,npw_k,gs_hamkq%matblk))
  call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 & ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
+
  if (size(ffnlk)>0) then
    call gs_hamkq%load_k(ffnl_k=ffnlk)
  else
@@ -1759,6 +1760,7 @@ ABI_MALLOC(dqdqkinpw,(npw_k))
  call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
 & kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
 & compute_gbound=.true.)
+
  if (qne0) then
    ABI_MALLOC(ph3d1,(2,npw1_k,gs_hamkq%matblk))
    call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
