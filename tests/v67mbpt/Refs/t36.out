@@ -300,7 +300,7 @@ _ WF disk file :      0.487 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
           gwgamma12        -6
           gwgamma21        -8
           gwgamma22        -8
-         icutcoul           7
+        gw_icutcoul           7
              iscf1          7
              iscf2         -2
              iscf4          7
@@ -3983,7 +3983,7 @@ data: !SigmaeeData |
           gwgamma12        -6
           gwgamma21        -8
           gwgamma22        -8
-         icutcoul           7
+        gw_icutcoul           7
              iscf1          7
              iscf2         -2
              iscf4          7

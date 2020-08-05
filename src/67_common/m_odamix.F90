@@ -353,7 +353,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !------Compute Hartree and xc potentials----------------------------------
  nfftot=PRODUCT(ngfft(1:3))
 
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
+             &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
  call xcdata_init(xcdata,dtset=dtset)
 
@@ -595,7 +596,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !------Compute Hartree and xc potentials----------------------------------
 
- call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
+ call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
+             &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2

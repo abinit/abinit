@@ -55,7 +55,7 @@
                 0.50   0.50   0.00
       bdgw3     4      5
                 4      5
-  icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul3     3   # old deprecated value of icutcoul, only used for legacy
 
 
 # Calculation of the GW corrections without PPM
@@ -70,7 +70,7 @@
                 0.50   0.50   0.00
       bdgw4     4      5
                 4      5
-  icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
+ gw_icutcoul4     3   # old deprecated value of icutcoul, only used for legacy
 
 #    nfreqsp4  200
 #  freqspmax4    1.

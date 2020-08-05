@@ -90,7 +90,7 @@ subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
  end do
 
  if (ALL(ABS(q(:,iq))<tol3)) then !FIXED<--FIXME avoid this, everything should be under the control of the programmer.
-   ! * Treat q as it were zero except when G=0
+   ! * Treat q as if it were zero except when G=0
    qplusg(1)=two_pi*SQRT(DOT_PRODUCT(q(:,iq),MATMUL(gmet,q(:,iq))))
    do ig=2,npwvec
      gpq(:)=gvec(:,ig)

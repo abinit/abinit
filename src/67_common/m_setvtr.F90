@@ -222,7 +222,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(in) :: nhat(nfft,dtset%nspden*psps%usepaw)
  real(dp),intent(in) :: nhatgr(:,:,:) !(nfft,dtset%nspden,3*nhatgrdim)
  real(dp),intent(in) :: rhog(2,nfft)
- real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
+ real(dp),intent(inout) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(inout) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft),vpsp(nfft)
  real(dp),intent(inout),optional :: taur(nfft,dtset%nspden*dtset%usekden)
@@ -294,12 +294,14 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
 !    Periodic system, need to compute energy and forces due to replica and
 !    to correct the shift in potential calculation.
-     call ewald(energies%e_ewald,gmet,grewtn,dtset%natom,ntypat,rmet,dtset%typat,ucvol,xred,psps%ziontypat)
+     call ewald(energies%e_ewald,gmet,grewtn,gsqcut,dtset%icutcoul,dtset%natom,ngfft,dtset%nkpt,ntypat,&
+                &dtset%rcut,rmet,rprimd,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat)
 !    For a periodic system bearing a finite charge, the monopole correction to the
 !    energy is relevant.
 !    See Leslie and Gillan, JOURNAL OF PHYSICS C-SOLID STATE PHYSICS 18, 973 (1985)
      if(abs(dtset%charge)>tol8) then
-       call ewald(energies%e_monopole,gmet,grewtn_fake,1,1,rmet,(/1/),ucvol,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%charge/))
+       call ewald(energies%e_monopole,gmet,grewtn_fake,gsqcut,dtset%icutcoul,1,ngfft,dtset%nkpt,1,&
+            &dtset%rcut,rmet,rprimd,(/1/),ucvol,dtset%vcutgeo,(/0.0_dp,0.0_dp,0.0_dp/),(/dtset%charge/))
        energies%e_monopole=-energies%e_monopole
      end if
    else if (dtset%icoulomb == 1) then
@@ -376,7 +378,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call atm2fft(atindx1,xccc3d,vpsp,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
 &   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&   dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&   dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    call timab(552,2,tsec)
@@ -388,7 +390,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    call atm2fft(atindx1,xcctau3d,dummy_out6,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
 &   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&   dummy_in,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&   dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
    call timab(552,2,tsec)
@@ -486,7 +488,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
      call atm2fft(atindx1,dummy_out1,vpsp,dummy_out2,dummy_out3,dummy_out4,dummy_in,&
 &     gmet,gprimd,dummy_out5,grtn,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
 &     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
-&     rhojellg,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&     dtset%rcut,rhojellg,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
 
@@ -537,7 +539,8 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    if (ipositron/=1) then
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
        if(option/=0 .and. option/=10)then
-         call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
+         call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
+                     &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
        end if
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then

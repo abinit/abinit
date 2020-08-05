@@ -363,7 +363,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 
    if (dtset%icoulomb == 0) then
 !    Use the periodic solver to compute Hxc.
-     call hartre(1,gsqcut,psps%usepaw,mpi_enreg,nfftf,ngfftf,rhog,rprimd,vhartr)
+     call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfftf,ngfftf,&
+                 &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
      call xcdata_init(xcdata,dtset=dtset)
      ABI_ALLOCATE(kxc,(1,nkxc))
 !    to be adjusted for the call to rhotoxc

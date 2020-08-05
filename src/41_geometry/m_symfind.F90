@@ -779,6 +779,10 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
  end if
 
+!DEBUG
+!write(std_out,'(a)') ' symanal : exit '
+!ENDDEBUG
+
 end subroutine symanal
 !!***
 
@@ -1096,6 +1100,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      end if
    end if
  end if
+
+!DEBUG
+!write(std_out,'(a)')' symbrav : exit '
+!ENDDEBUG
 
 end subroutine symbrav
 !!***
@@ -1616,6 +1624,10 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  real(dp) :: minim(3,3),scprods(3,3),vecta(3),vectb(3),vectc(3),vin1(3),vin2(3),vext(3)
 
 !**************************************************************************
+
+!DEBUG
+!write(std_out,'(a)') ' symlatt : enter '
+!ENDDEBUG
 
  identity(:,:)=0 ; identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
  nvecta(1)=2 ; nvectb(1)=3
@@ -2467,10 +2479,10 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  do ii=1,3
    do jj=1,3
      val=coord(ii,jj)*fact
-     if(abs(val-nint(val))>fact*tolsym)then
+     if(abs(val-nint(val))>fact*two*tolsym)then
        write(message,'(4a,a,3es18.10,a,a,3es18.10,a,a,3es18.10,a,a,i4)')&
 &       'One of the coordinates of rprimd in axes is non-integer,',ch10,&
-&       'or non-half-integer (if centering).',ch10,&
+&       'or non-half-integer (if centering), within 2*tolsym.',ch10,&
 &       'coord=',coord(:,1),ch10,&
 &       '      ',coord(:,2),ch10,&
 &       '      ',coord(:,3),ch10,&
@@ -2554,6 +2566,10 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !Transform symmetry matrices in the system defined by rprimd
  call symrelrot(nptsym,axes,rprimd,ptsymrel,tolsym)
+
+!DEBUG
+!write(std_out,'(a)') ' symlatt : exit '
+!ENDDEBUG
 
 end subroutine symlatt
 !!***

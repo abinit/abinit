@@ -256,7 +256,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call mkrdim(acell, rprim, rprimd)
  call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
- tolsym = tol8
+!tolsym = tol8
+!XG20200801 New default value for tolsym. This default value is also defined in m_invars1.F90
+ tolsym = tol5
  !if (tread_geo /= 0 .and. geo%filetype == "poscar") then
  !  tolsym = tol4
  !  MSG_COMMENT("Reading structure from POSCAR --> default value of tolsym is set to 1e-4")
@@ -783,7 +785,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      ! Check whether the symmetry operations are consistent with the lattice vectors
      iexit=0
 
-     call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+     call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 
    else
      ! spgroup==0 and nsym==0
@@ -931,12 +933,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    ! Check whether the symmetry operations are consistent with the lattice vectors
    iexit=1
 
-   call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
+   call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tol8)
 
    if(iexit==-1)then
-     call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
-     call mkradim(acell,rprim,rprimd)
-
      write(msg,'(a,es14.6,11a)')&
        'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
        'In order to avoid spurious effects, the primitive vectors have been',ch10,&
@@ -944,8 +943,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
        'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
        'In order to avoid this symmetrization (e.g. for specific debugging/development), decrease tolsym to 1.0e-8 or lower.'
-
      MSG_WARNING(msg)
+     call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tol8)
+     call mkradim(acell,rprim,rprimd)
    end if
 
  end if

@@ -27,8 +27,6 @@
 
 module m_fock
 
- use m_vcoul 
-
  use defs_basis
  use m_abicore
  use m_errors
@@ -43,7 +41,7 @@ module m_fock
  use m_cgtools
  use m_dtset
 
- use defs_abitypes, only : MPI_type
+ use defs_abitypes,     only : MPI_type
  use m_time,            only : timab
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_symtk,           only : mati3inv, matr3inv
@@ -51,6 +49,8 @@ module m_fock
  use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
+
+ use m_barevcoul,       only : barevcoul
 
  implicit none
 
@@ -2056,7 +2056,7 @@ end subroutine fock_print
 !!  icutcoul=Option for the Coulomb potential cutoff technique
 !!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
-!!  izero=if 1, unbalanced components of V(q,g) are set to zero
+!!  izero=if 1, unbalanced components of V(q,g) are set to zero # Used by the PAW library
 !!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
 !!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
@@ -2079,15 +2079,16 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nfft,nkpt_bz,icutcoul
+ integer,intent(in) :: izero,nfft,nkpt_bz
  real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gmet(3,3),qphon(3)
+ real(dp),intent(in) :: qphon(3)
+ real(dp),intent(inout) :: gmet(3,3)
  real(dp),intent(out) ::  vqg(nfft)
 
 !Local variables-------------------------------
@@ -2097,8 +2098,9 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
- character(len=100) :: msg,method
+ real(dp) :: cutoff,gs,rcut,divgq0,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
+ character(len=100) :: msg
+ logical  :: shortrange
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
@@ -2110,15 +2112,11 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
    MSG_BUG(msg)
  end if
 
-! Re-use variable defined initially in m_vcoul
-if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
-if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
-
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  divgq0= two_pi*rcut**two
-!divgq0=zero
+
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  cutoff=gsqcut*tolfix
@@ -2146,6 +2144,26 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
  ig1min=n1;ig2min=n2;ig3min=n3
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ if (abs(hyb_mixing)>tol8) then
+    shortrange=.false.
+    rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
+    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
+    vqg=vqg*hyb_mixing
+    if (hyb_range_fock>tol8)then
+       vqg(1)=hyb_mixing*divgq0+hyb_mixing*(pi/hyb_range_fock**2)
+    endif
+ end if
+ 
+ if (abs(hyb_mixing_sr)>tol8) then
+    shortrange=.true.
+    rcut=hyb_range_fock
+    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
+    vqg=vqg*hyb_mixing_sr
+!    if (hyb_range_fock>tol8)then
+!       vqg(1)=hyb_mixing*divgq0+hyb_mixing_sr*pi/hyb_range_fock**2
+!    endif
+ end if
 
  ! Triple loop on each dimension
  do i3=1,n3
@@ -2182,6 +2200,7 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
      ! Final inner loop on the first dimension (note the lower limit)
      do i1=ii1,n1
        gs=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+
        ii=i1+i23
 
        if(gs<=cutoff)then
@@ -2194,33 +2213,11 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
            ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
          end if
 
-         den=piinv/gs
-
-         ! Treat the Coulomb potential cut-off by selected method
-         if (abs(hyb_mixing)>tol8)then
-!           SELECT CASE ( trim(method) )
-!           CASE ('SPHERE')
-             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-             !& vqg(ii)=vqg(ii)+hyb_mixing*den
-!           CASE DEFAULT
-!             msg = sjoin('Cut-off method: ',method)
-!             MSG_ERROR(msg)
-!           END SELECT  
-         endif
-!        Erfc screening
-         if (abs(hyb_mixing_sr)>tol8) then
-           vqg(ii)=vqg(ii)+hyb_mixing_sr*den*(one-exp(-pi/(den*hyb_range_fock**2)))
-!          This other possibility combines Erfc and Spencer-Alavi screening in case rcut is too small or hyb_range_fock too large
-!          if(divgq0<pi/(hyb_range_fock**2))then
-!            vqg(ii)=vqg(ii)+hyb_mixing_sr*den*&
-!&             (one-exp(-pi/(den*hyb_range_fock**2)))*(one-cos(rcut*sqrt(four_pi/den)))
-!          endif
-         endif
-
        end if ! Cut-off
      end do ! End loop on i1
    end do ! End loop on i2
  end do ! End loop on i3
+
 
  if (izero==1) then
    ! Set contribution of unbalanced components to zero

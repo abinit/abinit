@@ -388,15 +388,15 @@ program mrgscr
            qlwl(:,:)=Er%Hscr%qlwl(:,1:nqlwl)
          end if
 
-         Dtset%icutcoul=3; Dtset%rcut=zero
+         Dtset%gw_icutcoul=3; Dtset%rcut=zero
          Dtset%vcutgeo=(/zero,zero,zero/);
          Dtset%boxcenter=(/zero,zero,zero/)
 
          write(std_out,'(2a)',advance='no') ch10,' Was a Coulomb cutoff technique used [Y/N] ? '
          read(std_in,*)ans
          if (ans=='Y'.or.ans=='y') then
-           write(std_out,'(2a)',advance='no') ' Enter icutcoul: '
-           read(std_in,*)Dtset%icutcoul
+           write(std_out,'(2a)',advance='no') ' Enter gw_icutcoul: '
+           read(std_in,*)Dtset%gw_icutcoul
            write(std_out,'(2a)',advance='no') ' Enter vcutgeo: '
            read(std_in,*)Dtset%vcutgeo
            write(std_out,'(2a)',advance='no') ' Enter boxcenter: '
@@ -404,7 +404,7 @@ program mrgscr
          end if
          dtset%ecutsigx = -one
 
-         call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,&
+         call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
            Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,ngfft,comm)
          ABI_FREE(qlwl)
 
@@ -620,7 +620,7 @@ program mrgscr
      ngfft(8)=get_cache_kb()
      nfft = PRODUCT(ngfft(1:3))
 
-     Dtset%icutcoul=3; Dtset%rcut=zero
+     Dtset%gw_icutcoul=3; Dtset%rcut=zero
      Dtset%vcutgeo=(/zero,zero,zero/); Dtset%boxcenter=(/zero,zero,zero/)
      Dtset%ecutsigx = -1
 
@@ -634,7 +634,7 @@ program mrgscr
        qlwl(:,:)=Er%Hscr%qlwl(:,1:nqlwl)
      end if
 
-     call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,&
+     call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,&
        qlwl,ngfft,comm)
      ABI_FREE(qlwl)
 

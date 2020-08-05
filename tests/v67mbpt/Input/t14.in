@@ -35,7 +35,7 @@ pawecutdg 30.0
 nstep 50                   # Maximum number of SCF cycles
 
 
-icutcoul 3      # For legacy reasons
+gw_icutcoul 3      # For legacy reasons
 
 # Step 1: determine the ground state
 nband1  10                    # Number of bands
