@@ -274,15 +274,15 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
            getwfk31         0
            getwfk32        -1
            getwfk33        -2
-         icutcoul11         6
-         icutcoul12         6
-         icutcoul13         3
-         icutcoul21         6
-         icutcoul22         6
-         icutcoul23         3
-         icutcoul31         6
-         icutcoul32         6
-         icutcoul33         3
+        gw_icutcoul11         6
+        gw_icutcoul12         6
+        gw_icutcoul13         3
+        gw_icutcoul21         6
+        gw_icutcoul22         6
+        gw_icutcoul23         3
+        gw_icutcoul31         6
+        gw_icutcoul32         6
+        gw_icutcoul33         3
           inclvkb11         2
           inclvkb12         0
           inclvkb13         2
@@ -3666,15 +3666,15 @@ data: !SigmaeeData |
            getwfk31         0
            getwfk32        -1
            getwfk33        -2
-         icutcoul11         6
-         icutcoul12         6
-         icutcoul13         3
-         icutcoul21         6
-         icutcoul22         6
-         icutcoul23         3
-         icutcoul31         6
-         icutcoul32         6
-         icutcoul33         3
+        gw_icutcoul11         6
+        gw_icutcoul12         6
+        gw_icutcoul13         3
+        gw_icutcoul21         6
+        gw_icutcoul22         6
+        gw_icutcoul23         3
+        gw_icutcoul31         6
+        gw_icutcoul32         6
+        gw_icutcoul33         3
           inclvkb11         2
           inclvkb12         0
           inclvkb13         2

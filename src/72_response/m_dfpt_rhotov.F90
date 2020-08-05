@@ -154,6 +154,7 @@ contains
 !arrays
  integer,intent(in)   :: ngfft(18)
  real(dp)             :: tsec(20)
+ real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
 
@@ -201,7 +202,7 @@ contains
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
 
- call hartre(cplex,gsqcut,0,mpi_enreg,nfft,ngfft,rhog1,rprimd,vhartr1_,qpt=qphon)
+ call hartre(cplex,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog1,rprimd,dummyvgeo,vhartr1_,qpt=qphon)
 
  if (optene>0) then
    call dotprod_vn(cplex,rhor1,ehart1,doti,nfft,nfftot,1,1,vhartr1_,ucvol)

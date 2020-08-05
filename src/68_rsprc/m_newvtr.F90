@@ -239,7 +239,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  integer,intent(in) :: ngfft(18),ngfftmix(18)
  real(dp),intent(in) :: dielar(7)
  real(dp),intent(in) :: fcart(3,dtset%natom),grhf(3,dtset%natom)
- real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: susmat(2,npwdiel,dtset%nspden,npwdiel,dtset%nspden)
  real(dp),intent(in) :: vhartr(nfft),vnew_mean(dtset%nspden),vres_mean(dtset%nspden)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden)

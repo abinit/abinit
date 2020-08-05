@@ -30,10 +30,12 @@ module m_atm2fft
  use m_errors
  use m_xmpi
  use m_distribfft
+ use m_dtset
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use defs_datatypes,only : pseudopotential_type
+ use m_gtermcutoff, only : termcutoff
  use m_pawtab,      only : pawtab_type
  use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
@@ -191,7 +193,7 @@ contains
 subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &                  grn,grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
 &                  optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
+&                  psps,pawtab,ph1d,qgrid,qprtrb,rcut,rhog,rprimd,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
 &                  is2_in,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
 
 !Arguments ------------------------------------
@@ -199,7 +201,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  integer,intent(in) :: mgfft,mqgrid,natom,nfft,ntypat,optatm,optdyfr,opteltfr
  integer,intent(in) :: optgr,optn,optn2,optstr,optv,usepaw
  integer,optional,intent(in) :: is2_in,me_g0,comm_fft,paral_kgb
- real(dp),intent(in) :: gsqcut,ucvol
+ real(dp),intent(in) :: rcut,gsqcut,ucvol
  type(pseudopotential_type),target,intent(in) :: psps
  type(distribfft_type),optional,intent(in),target :: distribfft
 !arrays
@@ -207,6 +209,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp),intent(in) :: gauss(2,ntypat*(optn2/3)),gmet(3,3),gprimd(3,3)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: rhog(2,nfft*optv*max(optgr,optstr,optdyfr,opteltfr))
+ real(dp),intent(inout) :: rprimd(3,3)
  real(dp),intent(in) :: vg(2,nfft*optn*max(optgr,optstr,optdyfr,opteltfr))
  real(dp),intent(in) :: vg1(2,nfft*optn*opteltfr),vg1_core(2,nfft*optn*opteltfr)
  real(dp),intent(in) :: vprtrb(2),vspl(mqgrid,2,ntypat*optv)
@@ -221,12 +224,12 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: im=2,re=1
+ integer,parameter :: im=2,re=1,icutcoul=3
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig1_,ig2,ig2_,ig3,ig3_,ii,is1,is2
  integer :: itypat,jj,js,ka,kb,kd,kg,me_fft,my_comm_fft,ndir,n1,n2,n3,nproc_fft,paral_kgb_fft
  integer :: shift1,shift2,shift3
  logical :: have_g0
- real(dp),parameter :: tolfix=1.0000001_dp
+ real(dp),parameter :: tolfix=1.0000001_dp, vcutgeo(3)=zero
  real(dp) :: aa,alf2pi2,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,dg1,dg2,d2g,diff
  real(dp) :: dn_at,d2n_at,d2n_at2,dq,dq2div6,dqdiv6,dqm1,dv_at,ee,ff,gauss1,gauss2,gg,gmag,gsquar,n_at
  real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r,ph3i,ph3r,sfi,sfr,term,term1,term2,tmpni,tmpnr
@@ -242,6 +245,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
  real(dp),allocatable :: dyfrn_indx(:,:,:),dyfrv_indx(:,:,:),grn_indx(:,:)
  real(dp),allocatable :: grv_indx(:,:),phim_igia(:),phre_igia(:),workn(:,:)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: workv(:,:)
 
 ! *************************************************************************
@@ -356,6 +360,10 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  ABI_ALLOCATE(phre_igia,(natom))
  ABI_ALLOCATE(phim_igia,(natom))
 
+ !Initialize Gcut-off array from m_termcutoff
+ !ABI_ALLOCATE(gcutoff,(nfft))
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,1,rcut,rprimd,vcutgeo)
+
  ia1=1
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -439,7 +447,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                else
                  v_at=(aa*vspl(jj,1,itypat)+bb*vspl(jj+1,1,itypat)+&
 &                 cc*vspl(jj,2,itypat)+dd*vspl(jj+1,2,itypat)) &
-&                 /gsquar
+&                 /gsquar * gcutoff(ii)
                end if
              end if
              if (optn==1) then
@@ -721,6 +729,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  ABI_DEALLOCATE(phre_igia)
  ABI_DEALLOCATE(phim_igia)
+ ABI_DEALLOCATE(gcutoff)
 
 !Get local potential or density back to real space
  if(optatm==1)then

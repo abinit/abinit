@@ -36,6 +36,7 @@ module m_spacepar
  use defs_abitypes,     only : MPI_type
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
+ use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -316,7 +317,6 @@ end subroutine make_vectornd
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  divgq0= [optional argument] value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
@@ -330,21 +330,18 @@ end subroutine make_vectornd
 !!
 !! SOURCE
 
-subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
-&  divgq0,qpt) ! Optional argument
+subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
+                 &rcut,rhog,rprimd,vcutgeo,vhartr,&
+                 &qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,nfft
- real(dp),intent(in) :: gsqcut
-! REMEMBER to define the V_Coulomb type first before you uncomment this
-! For the moment we will leave optional the choice of cut-off technique 
-! type(vcoul_type), intent(in), optional :: icutcoul 
+ integer,intent(in) :: cplex,icutcoul,izero,nfft,nkpt
+ real(dp),intent(in) :: gsqcut,rcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(inout),optional :: divgq0
+ real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft),vcutgeo(3)
  real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -355,13 +352,14 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol,rcut
+ real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
  character(len=500) :: message
 !arrays
  integer :: id(3)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),qpt_(3),rmet(3,3),tsec(2)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: gq(:,:),work1(:,:)
 
 ! *************************************************************************
@@ -415,6 +413,10 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
    MSG_ERROR(message)
  end if
 
+ !Initialize Gcut-off array from m_gtermcutoff
+ !ABI_ALLOCATE(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3))) 
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...
  ABI_ALLOCATE(gq,(3,max(n1,n2,n3)))
@@ -430,37 +432,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 
  ABI_ALLOCATE(work1,(2,nfft))
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
-
- ! If there is a special treatment for the Coulomb singularity: 
- ! Calculate it here only once before entering the loop over the grid points
-  if (PRESENT(divgq0)) then
-   rcut = (three*nfft*ucvol/four_pi)**(one/three)
-
-! SELECT CASE (singularity_mode)
-
-!   CASE('SPHERE') ! 0D 
-   ! Treatment of the divergence at the Gamma point
-   ! Spencer-Alavi scheme !!! ATT: Other methods will be gradually included
-   ! I am not completely convinced that this should be purely attributed to Spencer-Alavi  2008
-   ! since in Rozzi et al. 2006 they propose the same treatment for 0D case
-   divgq0 = two_pi*rcut**two
-
-!   CASE('CYLINDER') ! According to Rozzi et al 2006
-!     divgq0 = -pi*rcut**two*(2*log(rcut)-1)
-
-!   CASE('SURFACE') ! According to Rozzi et al 2006
-!     divgq0 = -two_pi*rcut**two
-
-!   CASE DEFAULT
-!     
-!     DEBUG
-!       call wrtout(std_out,"!!!No divergence treatment chosen!!!")
-!     ENDDEBUG
-
-! END SELECT
- 
- end if 
-
 
  ! Triple loop on each dimension
  do i3=1,n3
@@ -485,11 +456,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
          ii1=2
          work1(re,1+i23)=zero
          work1(im,1+i23)=zero
-         ! If the value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq is given, use it
-         if (PRESENT(divgq0)) then
-           work1(re,1+i23)=rhog(re,1+i23)*divgq0*piinv
-           work1(im,1+i23)=rhog(im,1+i23)*divgq0*piinv
-         end if
        end if
 
        ! Final inner loop on the first dimension (note the lower limit)
@@ -507,7 +473,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
              ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
            end if
 
-           den=piinv/gs
+           den=piinv/gs*gcutoff(ii)
            work1(re,ii)=rhog(re,ii)*den
            work1(im,ii)=rhog(im,ii)*den
          else
@@ -554,6 +520,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  ! Fourier Transform Vhartree. Vh in reciprocal space was stored in work1
  call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,1,ngfft,0)
 
+ ABI_DEALLOCATE(gcutoff) 
  ABI_DEALLOCATE(work1)
 
  call timab(10,2,tsec)

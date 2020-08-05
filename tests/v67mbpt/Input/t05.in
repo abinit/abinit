@@ -25,7 +25,7 @@ ecuteps    4.0
 ecutsigx   4.0    # Dimension of the G sum in Sigma_x
                   # (the dimension in Sigma_c is controlled by ecuteps)
 
- icutcoul   3  # old deprecated value of icutcoul, only used for legacy
+gw_icutcoul   3  # old deprecated value of icutcoul, only used for legacy
 # Dataset1: Calculation of the Self-Energy matrix elements (GW corrections)
 irdscr1        1       # Read input SCR file.
 

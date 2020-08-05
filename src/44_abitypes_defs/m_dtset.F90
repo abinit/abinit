@@ -152,6 +152,7 @@ type, public :: dataset_type
  integer :: extrapwf
  integer :: fftgw = 21
  integer :: fockoptmix
+ integer :: fock_icutcoul
  integer :: frzfermi
  integer :: ga_algor
  integer :: ga_fitness
@@ -189,8 +190,9 @@ type, public :: dataset_type
  integer :: gwgamma = 0
  integer :: gwrpacorr = 0
  integer :: gw_customnfreqsp
- integer :: gw_invalid_freq = 0
- integer :: gw_qprange = 0
+ integer :: gw_icutcoul
+ integer :: gw_invalid_freq
+ integer :: gw_qprange
  integer :: gw_nqlwl
  ! TODO: REMOVE?
  integer :: gw_nstep = 30
@@ -226,7 +228,6 @@ type, public :: dataset_type
  integer :: hmctt
  integer :: iboxcut
  integer :: icoulomb
- integer :: icsing
  integer :: icutcoul
  integer :: ieig2rf
  integer :: imgmov
@@ -1429,6 +1430,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%fftgw              = dtin%fftgw
  dtout%fockdownsampling   = dtin%fockdownsampling
  dtout%fockoptmix         = dtin%fockoptmix
+ dtout%fock_icutcoul      = dtin%fock_icutcoul
  dtout%freqim_alpha       = dtin%freqim_alpha
  dtout%freqremin          = dtin%freqremin
  dtout%freqremax          = dtin%freqremax
@@ -1484,6 +1486,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
+ dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
  dtout%gw_frqim_inzgrid   = dtin%gw_frqim_inzgrid
@@ -1517,7 +1520,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%hmctt              = dtin%hmctt
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
- dtout%icsing             = dtin%icsing
  dtout%icutcoul           = dtin%icutcoul
  dtout%ieig2rf            = dtin%ieig2rf
  dtout%imgmov             = dtin%imgmov
@@ -3106,7 +3108,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_EFS'
  list_vars=trim(list_vars)//' fit_generateCoeff fit_iatom fit_initializeData fit_nbancoeff fit_ncoeff fit_nfixcoeff'
  list_vars=trim(list_vars)//' fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
- list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
+ list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
@@ -3124,7 +3126,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
- list_vars=trim(list_vars)//' gw_invalid_freq '
+ list_vars=trim(list_vars)//' gw_invalid_freq'
+ list_vars=trim(list_vars)//' gw_icutcoul'
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
@@ -3136,7 +3139,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
- list_vars=trim(list_vars)//' iboxcut icoulomb icsing icutcoul ieig2rf'
+ list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'
