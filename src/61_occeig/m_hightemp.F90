@@ -523,8 +523,8 @@ contains
     real(dp) :: cgnk(2,npw_k*nspinor),cgnk2(npw_k*nspinor)
 
     ! *********************************************************************
-    unit=mpi_enreg%me
-
+    unit=96+mpi_enreg%me
+    
     ! Debug : Priting Eigenvalues, Kinetic and PW grid if requested
     if(this%prt_cg.and.(mpi_enreg%me==mpi_enreg%me_kpt)) then
 
@@ -536,7 +536,7 @@ contains
         kpg2=kpt(2,ikpt)+dble(kg_k(2,ipw))
         kpg3=kpt(3,ikpt)+dble(kg_k(3,ipw))
 
-        write(23,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
+        write(unit,'(i14,ES13.5,ES13.5,ES13.5,ES13.5)')&
         & ipw,&
         & gprimd(1,1)*kpg1+gprimd(1,2)*kpg2+gprimd(1,3)*kpg3,&
         & gprimd(2,1)*kpg1+gprimd(2,2)*kpg2+gprimd(2,3)*kpg3,&
@@ -547,12 +547,12 @@ contains
 
       write(filenameoutpw,'(A,I5.5)') '_PW_EIG_k',ikpt
       open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-      write(23,'(ES12.5)') eig_k
+      write(unit,'(ES12.5)') eig_k
       close(23)
 
       write(filenameoutpw,'(A,I5.5)') '_PW_KIN_k',ikpt
       open(file=trim(fnameabo)//trim(filenameoutpw),unit=unit)
-      write(23,'(ES12.5)') ek_k
+      write(unit,'(ES12.5)') ek_k
       close(23)
     end if
 
