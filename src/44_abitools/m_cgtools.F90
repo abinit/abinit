@@ -950,7 +950,7 @@ subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha,
  my_alpha = cg_cone;  if (PRESENT(alpha)) my_alpha = alpha
  my_beta  = cg_czero; if (PRESENT(beta))  my_beta  = beta
 
- call ZGEMM(transa,transb,mm,nn,kk,my_alpha,cg_a,lda,cg_b,ldb,my_beta,cg_c,ldc)
+ call ZGEMM(transa, transb, mm, nn, kk, my_alpha, cg_a, lda, cg_b, ldb, my_beta, cg_c, ldc)
 
 end subroutine cg_zgemm
 !!***

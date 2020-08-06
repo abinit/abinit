@@ -746,16 +746,18 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
                if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
 
                ! This line leads to a significant speedup for dense meshes but ~30 tests fail after this change.
-               if (present(exit_loop)) then
-                 if (exit_loop) then
-                   if (dksq < tol12) ikpt2_done = 1
-                   !if (ikpt2_done == 1) then
-                   !  write(std_out, "(5a, es18.6)") "ikpt2_done with k2: ", trim(ktoa(kptns2(:,ikpt2))), &
-                   !                         " --> k1:", trim(ktoa(kptns1(:,ikpt1))), " dksq", dksq
-                   !  write(std_out,*)"dk:", dk, "dkint:", dkint
-                   !end if
-                 end if
-               end if
+               ! MG: This trick is not safe as the routine may return the wrong index.
+               ! FIXME: Should replaced listkk by new approach based on krank object.
+               !if (present(exit_loop)) then
+               !  if (exit_loop) then
+               !    if (dksq < tol12) ikpt2_done = 1
+               !    !if (ikpt2_done == 1) then
+               !    !  write(std_out, "(5a, es18.6)") "ikpt2_done with k2: ", trim(ktoa(kptns2(:,ikpt2))), &
+               !    !                         " --> k1:", trim(ktoa(kptns1(:,ikpt1))), " dksq", dksq
+               !    !  write(std_out,*)"dk:", dk, "dkint:", dkint
+               !    !end if
+               !  end if
+               !end if
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,

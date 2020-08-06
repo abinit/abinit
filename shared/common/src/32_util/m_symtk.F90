@@ -657,7 +657,7 @@ subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel,tolsym)
 
    if(sqrt(residual) > two*tolsym*sqrt(rmet2))then
      if(iexit==0)then
-       write(std_out, '(a)') ' Matrix rprimd :' 
+       write(std_out, '(a)') ' Matrix rprimd :'
        do ii=1,3
          write(std_out, '(3es16.8)')rprimd(:,ii)
        enddo
@@ -1715,8 +1715,7 @@ subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
 ! *************************************************************************
 
 !DEBUG
-! write(std_out,'(a,a,i4,3f18.12)') ch10,&
-!& ' symchk : enter, trtypat,tratom=',trtypat,tratom
+! write(std_out,'(a,a,i4,3f18.12)') ch10,' symchk : enter, trtypat,tratom=',trtypat,tratom
 !ENDDEBUG
 
 !Start testmn out at large value
@@ -1790,8 +1789,7 @@ end subroutine symchk
 !! space primitive translations equals the transpose of the same symmetry
 !! operation expressed in the basis of reciprocal space primitive transl:
 !!
-!!      $xred(nu,indsym(4,isym,ia))=symrec(mu,nu,isym)*(xred(mu,ia)-tnons(mu,isym))
-!!          - transl(mu)$
+!!      $ xred(nu,indsym(4,isym,ia)) = symrec(mu,nu,isym)*(xred(mu,ia)-tnons(mu,isym)) - transl(mu)$
 !!
 !! where $transl$ is also a set of integers and
 !! where translation transl places coordinates within unit cell (note sign).

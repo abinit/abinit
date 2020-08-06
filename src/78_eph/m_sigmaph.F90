@@ -63,12 +63,12 @@ module m_sigmaph
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
+ use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson, print_arr
  use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file
  use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
  use m_cgtk,           only : cgtk_rotate
- use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
+ use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_seq
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_be !occ_dfde,
@@ -5365,18 +5365,22 @@ function get_frohlich(cryst, ifc, qpt, nu, phfrq, displ_cart, ngvecs, gvecs) res
 end function get_frohlich
 !!***
 
-subroutine rotate_pheigvev(cryst, isym, itimrev, eigvec_in, eigvec_out)
+subroutine rotate_pheigvev(cryst, sq, isym, itimrev, eigvec_in, eigvec_out)
+
+ use m_dynmat, only : pheigvec_normalize
 
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: isym, itimrev
- real(dp),intent(in) :: eigvec_in(2,3,cryst%natom,3*cryst%natom)
+ real(dp),intent(in) :: sq(3), eigvec_in(2,3,cryst%natom,3*cryst%natom)
  real(dp),intent(out) :: eigvec_out(2,3,cryst%natom,3*cryst%natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: natom, natom3, idir, iat, jdir, jat
+ integer :: natom, natom3, idir, iat, jdir, iat_sym
  real(dp) :: arg
 !arrays
+ integer :: r0(3)
+ real(dp) :: dum(0,0)
  real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom), symat(3,3), phase(2)
 
 !************************************************************************
@@ -5388,32 +5392,39 @@ subroutine rotate_pheigvev(cryst, isym, itimrev, eigvec_in, eigvec_out)
 
  ! Build Gamma matrix
  gamma_matrix = zero
- do jat=1,natom
-   do iat=1,natom
-     ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
-     ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
-     ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
-     !cryst%indsym(4, cryst%nsym, natom))
-     !if (iat not connected to jat by S) cycle
-     !arg = two_pi * dot_product()
-     arg = zero
-     phase(:) = [cos(arg), sin(arg)]
-     do jdir=1,3
-       do idir=1,3
-         gamma_matrix(:, idir, iat, jdir, jat) = symat(idir, jdir) * phase(:)
-       end do
+ do iat=1,natom
+   !do iat_sym=1,natom
+   ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
+   ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
+   ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
+   iat_sym = cryst%indsym(4, isym, iat)
+   r0 = -cryst%indsym(1:3, isym, iat)
+   !r0 = matmul(cryst%symrec(:,:, isym), r0)
+   !r0 = matmul(transpose(cryst%symrec(:,:, isym)), r0)
+   !r0 =  matmul(cryst%symrel(:,:, isym), r0)
+   !r0 = matmul(transpose(cryst%symrel(:,:, isym)), r0)
+   arg = two_pi * dot_product(sq, r0)
+   phase(:) = [cos(arg), sin(arg)]
+   !if (itimrev == 1) phase(2) = -phase(2)
+   do jdir=1,3
+     do idir=1,3
+       gamma_matrix(:, idir, iat, jdir, iat_sym) = symat(idir, jdir) * phase(:)
+       !gamma_matrix(:, idir, iat_sym, jdir, iat) = symat(idir, jdir) * phase(:)
      end do
    end do
  end do
 
- !eigvec_out
- call cg_zgemm("N", "N", natom3, natom3, natom, gamma_matrix, eigvec_in, eigvec_out)
+ !write(std_out, "(2a)")" gamma_matrix for sq:", trim(ktoa(sq))
+ !call print_arr(reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
+
+ call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_in, eigvec_out)
+ if (itimrev == 1) eigvec_out(2,:,:,:) = -eigvec_out(2,:,:,:)
 
  ! Fix the phase of the eigenvectors
- !call fxphas_seq(eigvec_out, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
+ call fxphas_seq(eigvec_out, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
 
  ! Normalise the eigenvectors
- !call pheigvec_normalize(natom, eigvec_out)
+ call pheigvec_normalize(natom, eigvec_out)
 
  ! Get the phonon displacements
  !call phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec_out, displ)
@@ -5433,16 +5444,14 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: natom, natom3 !iq_bz !, idir, iat, jdir, jat
-!arrays
-
+ integer :: natom, natom3
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, sppoldbl1 = 1, master = 0
- integer :: nqibz, iq_bz, iq_ibz, iqbz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new, my_rank
- integer :: isym, itimrev, ierr_freq, ierr_eigvec
- real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, err_eigvec, maxerr_eigvec
+ integer :: nqibz, iq_bz, iq_ibz, iqbz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new, my_rank, ii
+ integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
+ real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, err_eigvec, maxerr_eigvec, tol
  logical :: isirr_q
  character(len=500) :: msg, fmt_freqs, fmt_eigvec
 ! type(krank_t) :: krank
@@ -5459,10 +5468,13 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
 !************************************************************************
 
+ if (xmpi_comm_rank(comm) /= 0) return
+
+ prtvol = 1
  natom = cryst%natom
  natom3 = cryst%natom * 3
 
- call wrtout(std_out, sjoin(" Testing symmetrization of phonon frequencies and eigens with ngqpt:", ltoa(ngqpt)))
+ call wrtout(std_out, sjoin(" Testing symmetrization of phonon frequencies and eigenvectors with ngqpt:", ltoa(ngqpt)), ch10)
 
  ! Create a regular grid
  in_qptrlatt = 0; in_qptrlatt(1,1) = ngqpt(1); in_qptrlatt(2,2) = ngqpt(2); in_qptrlatt(3,3) = ngqpt(3)
@@ -5478,6 +5490,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  !end do
 
  call cryst%print(unit=std_out)
+ write(std_out, *)""
 
  ! Call listkk
  ABI_MALLOC(bz2ibz_listkk, (nqbz, 6))
@@ -5496,7 +5509,6 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_CALLOC(displ_cart_ibz, (2, natom3, natom3, nqibz))
  ABI_CALLOC(eigvec_ibz, (2, natom3, natom3, nqibz))
  do iq_ibz=1,nqibz
-   !if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
    call ifc%fourq(cryst, qibz(:,iq_ibz), &
                   phfreqs_ibz(:,iq_ibz), displ_cart_ibz(:,:,:,iq_ibz), out_eigvec=eigvec_ibz(:,:,:,iq_ibz))
  end do
@@ -5508,50 +5520,70 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ! Precompute ph freqs in the BZ and compare with BZ
  ierr_freq = 0; ierr_eigvec = 0
  fmt_freqs = sjoin("(a, ", itoa(natom3), "(f7.3, 1x))")
- !fmt_eigvec = sjoin("(a, ", itoa(natom3), "(f7.3, 1x))")
+ fmt_eigvec = sjoin("(a, i0, 1x, a, ", itoa(natom3), "(f12.9, 1x))")
  maxerr_phfreq = zero; maxerr_eigvec = zero
 
  do iq_bz=1,nqbz
-   !if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
-
    call ifc%fourq(cryst, qbz(:, iq_bz), phfrq, displ_cart, out_eigvec=eigvec_bz) !, out_displ_red=displ_red)
    iq_ibz = bz2ibz_listkk(iq_bz, 1); isym = bz2ibz_listkk(iq_bz, 2)
    itimrev = bz2ibz_listkk(iq_bz, 6); g0 = bz2ibz_listkk(iq_bz, 3:5)
    isirr_q = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0))
 
+   ! Compare phfreqs within tol in meV.
    err_phfreq = maxval(abs(phfrq - phfreqs_ibz(:, iq_ibz))) * Ha_meV
-
-   ! Check phfreqs
-   if (err_phfreq > tol3) then
+   tol = tol3
+   if (err_phfreq > tol) then
      maxerr_phfreq = max(maxerr_phfreq, err_phfreq)
-     write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> ", trim(ktoa(qibz(:, iq_ibz)))
+     write(std_out,*)" " // repeat("=", 92)
+     write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> qibz:", trim(ktoa(qibz(:, iq_ibz)))
      write(std_out, fmt_freqs)" w_bz :", phfrq * Ha_meV
      write(std_out, fmt_freqs)" w_ibz:", phfreqs_ibz(:, iq_ibz) * Ha_meV
-     write(std_out,*)" err_phfreq (meV):", err_phfreq
+     write(std_out,*)" err_phfreq (meV):", err_phfreq, " > tol: ", tol
+     write(std_out,*)" " // repeat("=", 92)
      ierr_freq = ierr_freq + 1
    end if
 
-   ! Rotate and check eigenvectors
-   call rotate_pheigvev(cryst, isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), eigvec_out)
+   ! Rotate and compare eigenvectors
+   call rotate_pheigvev(cryst, qbz(:, iq_bz), isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), eigvec_out)
 
    err_eigvec = maxval(abs(eigvec_out - eigvec_bz))
 
-   if (err_eigvec > tol16) then
+   tol = tol6
+   if (err_eigvec > tol) then
      maxerr_eigvec = max(maxerr_eigvec, err_eigvec)
-     !write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> ", trim(ktoa(qibz(:, iq_ibz)))
-     write(std_out,*)" err_eigvec:", err_eigvec
+     write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> qibz: ", trim(ktoa(qibz(:, iq_ibz)))
+     write(std_out, "(a,2(i0,1x),a)")" qbz image through isym, itimrev: ", isym, itimrev, trim(ltoa(cryst%tnons(:, isym)))
+     write(std_out, "(a,l)")" has_r0: ", any(cryst%indsym(:, isym, :) /= 0)
+     write(std_out, *) "err_eigvec ", err_eigvec, " > tol:", tol
+     do ii=1,natom3
+       if (all(abs(eigvec_out(:,:,ii) - eigvec_bz(:,:,ii)) < tol)) cycle
+       if (prtvol > 0) then
+         write(std_out, "(a, 2(f12.9,1x))") " diff (re/im): ", &
+           maxval(abs(eigvec_out(1,:,ii) - eigvec_bz(1,:,ii))), maxval(abs(eigvec_out(2,:,ii) - eigvec_bz(2,:,ii)))
+         write(std_out, fmt_eigvec) " mode: ", ii, "re_sym: ", eigvec_out(1,:,ii)
+         write(std_out, fmt_eigvec) " mode: ", ii, "re_bz : ", eigvec_bz(1,:,ii)
+         write(std_out, fmt_eigvec) " mode: ", ii, "im_sym: ", eigvec_out(2,:,ii)
+         write(std_out, fmt_eigvec) " mode: ", ii, "im_bz : ", eigvec_bz(2,:,ii)
+       end if
+     end do
+     write(std_out,*)" " // repeat("=", 92)
      ierr_eigvec = ierr_eigvec + 1
    end if
+
  end do
 
  write(std_out,*)" maxerr_phfreq (meV)", maxerr_phfreq
- write(std_out,*) "relative percentage of q-points:", ierr_freq / (one * nqbz) * 100, "%"
+ write(std_out,*) "percentage of q-points for phfreq:", ierr_freq / (one * nqbz) * 100, "%"
+
+ write(std_out,*)" maxerr_eigvec", maxerr_eigvec
+ write(std_out,*)" percentage of q-points for eigvec:", ierr_eigvec / (one * nqbz) * 100, "%"
+
  if (ierr_freq /= 0) then
    MSG_ERROR("Wrong symmetrization in eigenvalues")
  end if
- !if (ierr_eigvec /= 0) then
- !  MSG_ERROR("Wrong symmetrization in eigenvectors")
- !end if
+ if (ierr_eigvec /= 0) then
+   MSG_ERROR("Wrong symmetrization in eigenvectors")
+ end if
 
  write(std_out, *)"No errot detected!"
  stop

@@ -324,7 +324,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  integer :: symrec(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  integer,pointer :: symrel_noI(:,:,:)
- integer,allocatable :: indsym(:,:,:)
  real(dp),pointer :: tnons_noI(:,:)
 ! *************************************************************************
 
@@ -445,18 +444,14 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
  !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym = 0
+ ABI_MALLOC(cryst%indsym,(4, Cryst%nsym, natom))
  tolsym8=tol8
- call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
-
- ABI_MALLOC(Cryst%indsym,(4,Cryst%nsym,natom))
- Cryst%indsym=indsym
- ABI_FREE(indsym)
+ call symatm(cryst%indsym, natom, Cryst%nsym, Cryst%symrec, Cryst%tnons, tolsym8, Cryst%typat, Cryst%xred)
 
  ! Rotations in spinor space
- ABI_MALLOC(Cryst%spinrot,(4,Cryst%nsym))
+ ABI_MALLOC(Cryst%spinrot, (4, Cryst%nsym))
  do isym=1,Cryst%nsym
-   call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
+   call getspinrot(Cryst%rprimd, Cryst%spinrot(:,isym), Cryst%symrel(:,:,isym))
  end do
 
 end subroutine crystal_init
