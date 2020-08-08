@@ -622,7 +622,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  if (my_prtvol == -1) return
 
  if (my_prtvol > 0) then
-   call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
+   call print_symmetries(Cryst%nsym, Cryst%symrel, Cryst%tnons, Cryst%symafm, unit=my_unt, mode_paral=my_mode)
    if (Cryst%use_antiferro) call wrtout(my_unt,' System has magnetic symmetries ',my_mode)
 
    ! Print indsym using the same format as in symatm

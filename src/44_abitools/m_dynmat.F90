@@ -3618,7 +3618,6 @@ end subroutine dist9
 !!
 !! OUTPUT
 !! atmfrc(3,natom,3,natom,nrpt)= Interatomic Forces in real space.
-!!  We used the imaginary part just for debugging!
 !!
 !! PARENTS
 !!      m_ifc
@@ -5063,7 +5062,6 @@ end subroutine nanal9
 !! INPUTS
 !! acell(3)=length scales by which rprim is to be multiplied
 !! atmfrc(3,natom,3,natom,nrpt) = Interatomic Forces in real space
-!!  (imaginary part only for debugging)
 !! dielt(3,3) = dielectric tensor
 !! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
 !!  if 1, atmfrc has been build without dipole-dipole part

@@ -21,6 +21,8 @@
 
 #include "abi_common.h"
 
+#define USE_KRANK
+
 module m_sigmaph
 
  use defs_basis
@@ -1750,7 +1752,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !  end if
            !end if
 
-           ! Not precompute alpha MRTA coefficients for all nk states.
+           ! Precompute alpha MRTA coefficients for all nk states.
            do ib_k=1,nbcalc_ks
              vk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm = sqrt(dot_product(vk, vk))
@@ -2351,12 +2353,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  logical :: changed, isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
+ type(krank_t) :: krank, qrank
 !arrays
- integer :: intp_kptrlatt(3,3), g0_k(3), unts(2)
- integer :: qptrlatt(3,3), indkk_k(1,6), my_gmax(3), band_block(2)
  integer :: intp_nshiftk
+ integer :: intp_kptrlatt(3,3), g0_k(3), unts(2), indkk_k(1,6), my_gmax(3), band_block(2), qptrlatt(3,3)
  integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
- real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
+ real(dp):: params(4), my_shiftq(3,1), kk(3), kq(3), intp_shiftk(3)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
@@ -2410,9 +2412,21 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
                              new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_bz2ibz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
- ABI_MALLOC(temp,(new%nqbz, 6))
+ ABI_MALLOC(temp, (new%nqbz, 6))
+
+#ifdef USE_KRANK
+  qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+  call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
+                         cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
+  call qrank%free()
+#else
  call listkk(dksqmax, cryst%gmet, temp, new%qibz, new%qbz, new%nqibz, new%nqbz, cryst%nsym, &
              1, cryst%symafm, cryst%symrec, 1, comm, exit_loop=.True., use_symrec=.True.)
+#endif
+
+ if (dksqmax > tol12) then
+    MSG_ERROR("Cannot map BZ to IBZ!")
+ end if
 
  new%ind_bz2ibz(1,:) = temp(:,1)
  new%ind_bz2ibz(2,:) = temp(:,2)
@@ -2453,9 +2467,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
  call cwtime_report(" sigmaph_new: k-points", cpu, wall, gflops)
 
- ! TODO: Rename variable
- ! Reorder k-points by lengths to improve cache locality?
  if (dtset%nkptgw /= 0) then
+
    ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
    call sigtk_kcalc_from_nkptgw(dtset, mband, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
 
@@ -2491,7 +2504,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
 
  end if ! nkptgw /= 0
 
- ! The k-point and the symmetries relating the BZ k-point to the IBZ.
+ ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
  if (abs(new%symsigma) == 1) then
    ABI_MALLOC(new%degtab, (new%nkcalc, new%nsppol))
@@ -2511,16 +2524,26 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    end if
 
    ! Note symrel and use_symrel.
+   ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    kk = new%kcalc(:, ikcalc)
+
+#ifdef USE_KRANK
+   krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(1, kk, dksqmax, cryst%gmet, indkk_k, cryst%nsym, cryst%symafm, cryst%symrel, new%timrev, &
+                          use_symrec=.False.)
+   call krank%free()
+
+#else
    call listkk(dksqmax, cryst%gmet, indkk_k, ebands%kptns, kk, ebands%nkpt, 1, cryst%nsym,&
       sppoldbl1, cryst%symafm, cryst%symrel, new%timrev, xmpi_comm_self, exit_loop=.True., use_symrec=.False.)
+#endif
 
    if (dksqmax > tol12) then
       write(msg, '(4a,es16.6,7a)' )&
        "The WFK file cannot be used to compute self-energy corrections at kpoint: ",ktoa(kk),ch10,&
-       "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
-       "Q-mesh: ",trim(ltoa(new%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-       'Action: check your WFK file and (k, q) point input variables'
+       "The k-point cannot be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+       "Q-mesh: ",trim(ltoa(new%ngqpt)),", K-mesh (from kptrlatt): ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
+       'Action: check your WFK file and the (k, q) point input variables'
       MSG_ERROR(msg)
    end if
 
@@ -2619,7 +2642,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
        do i1=-1,1
          cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
          kq = kk + half * [i1, i2, i3]
-         ! TODO: g0 umklapp here can enter into play gmax could not be large enough!
+         ! TODO: g0 umklapp here can enter into play gmax may not be large enough!
          call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
          new%mpw = max(new%mpw, onpw)
          do ipw=1,onpw
@@ -3626,6 +3649,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
+ type(krank_t) :: krank
  character(len=500) :: msg
 !arrays
  integer,allocatable :: indkk(:,:)
@@ -3640,8 +3664,16 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  ABI_MALLOC(indkk, (self%nkcalc, 6))
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
+#ifdef USE_KRANK
+ krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call krank%get_mapping(self%nkcalc, self%kcalc, dksqmax, cryst%gmet, indkk, &
+                        cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
+ call krank%free()
+
+#else
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, self%nkcalc, cryst%nsym, &
              sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+#endif
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6)' ) &
@@ -3930,7 +3962,9 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  logical :: compute_lgk
  type(lgroup_t),target :: lgk
  type(lgroup_t),pointer :: lgk_ptr
+ type(krank_t) :: krank, qrank
 !arrays
+ integer :: qptrlatt(3,3)
  integer,allocatable :: iqk2dvdb(:,:)
  real(dp) :: kk(3)
  real(dp),allocatable :: kq_list(:,:)
@@ -4007,8 +4041,17 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  if (self%symsigma == 0) then
    ! Find correspondence IBZ_k --> IBZ
    ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
+
+#ifdef USE_KRANK
+   qptrlatt = 0; qptrlatt(1,1) = self%ngqpt(1); qptrlatt(2,2) = self%ngqpt(2); qptrlatt(3,3) = self%ngqpt(3)
+   qrank = krank_from_kptrlatt(self%nqibz, self%qibz, qptrlatt, compute_invrank=.False.)
+   call qrank%get_mapping(self%nqibz_k, self%qibz_k, dksqmax, cryst%gmet, iqk2dvdb, &
+                          cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+   call qrank%free()
+#else
    call listkk(dksqmax, cryst%gmet, iqk2dvdb, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym, &
         1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+#endif
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6,2a)' )&
@@ -4076,15 +4119,23 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
  !
  ABI_MALLOC(kq_list, (3, self%nqibz_k))
-!!!!$OMP PARALLEL DO
  do iq_ibz=1,self%nqibz_k
    kq_list(:, iq_ibz) = kk + self%qibz_k(:,iq_ibz)
  end do
 
  ! Use iqk2dvdb as workspace array.
  ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
- call listkk(dksqmax, cryst%gmet, iqk2dvdb, ebands%kptns, kq_list, ebands%nkpt, self%nqibz_k, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
+
+#ifdef USE_KRANK
+   krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(self%nqibz_k, kq_list, dksqmax, cryst%gmet, iqk2dvdb, &
+                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+   call krank%free()
+#else
+
+   call listkk(dksqmax, cryst%gmet, iqk2dvdb, ebands%kptns, kq_list, ebands%nkpt, self%nqibz_k, cryst%nsym, &
+     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
+#endif
 
  if (dksqmax > tol12) then
    write(msg, '(4a,es16.6,7a)' )&
@@ -5186,9 +5237,9 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
  real(dp) :: eig0nk, eig0mkq, dksqmax, ediff, cpu, wall, gflops
  character(len=500) :: msg
- type(krank_t) :: krank
+ type(krank_t) :: krank, qrank
 !arrays
- integer :: g0(3)
+ integer :: g0(3), qptrlatt(3,3)
  integer,allocatable :: qbz_count(:), qbz2qpt(:,:), bz2ibz(:,:)
  real(dp) :: kq(3), kk(3)
  real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
@@ -5266,10 +5317,20 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  call xmpi_sum(qbz_count, comm, ierr)
  call cwtime_report(" qbz_count", cpu, wall, gflops)
 
- ! Get mapping QBZ --> QPTS q-points. Time-reversal is always used for phonons.
+ ! Get mapping QBZ --> List of q-points involved in e-ph scattering for e/h in pockets.
+ ! Note that time-reversal is always used for phonons.
  ABI_MALLOC(qbz2qpt, (nqbz, 6))
+
+#ifdef USE_KRANK
+ qptrlatt = 0; qptrlatt(1,1) = sigma%ngqpt(1); qptrlatt(2,2) = sigma%ngqpt(2); qptrlatt(3,3) = sigma%ngqpt(3)
+ qrank = krank_from_kptrlatt(nqpt, qpts, qptrlatt, compute_invrank=.False.)
+ call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, qbz2qpt, &
+                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ call qrank%free()
+#else
  call listkk(dksqmax, cryst%gmet, qbz2qpt, qpts, qbz, nqpt, nqbz, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+#endif
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,2a)' )&
@@ -5454,7 +5515,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, err_eigvec, maxerr_eigvec, tol
  logical :: isirr_q
  character(len=500) :: msg, fmt_freqs, fmt_eigvec
-! type(krank_t) :: krank
+ type(krank_t) :: qrank
 !arrays
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3), g0(3)
  integer,allocatable :: bz2ibz(:,:), bz2ibz_listkk(:,:) !, ibz2bz(:)
@@ -5477,7 +5538,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  call wrtout(std_out, sjoin(" Testing symmetrization of phonon frequencies and eigenvectors with ngqpt:", ltoa(ngqpt)), ch10)
 
  ! Create a regular grid
- in_qptrlatt = 0; in_qptrlatt(1,1) = ngqpt(1); in_qptrlatt(2,2) = ngqpt(2); in_qptrlatt(3,3) = ngqpt(3)
+ in_qptrlatt = 0; in_qptrlatt(1, 1) = ngqpt(1); in_qptrlatt(2, 2) = ngqpt(2); in_qptrlatt(3, 3) = ngqpt(3)
  qshift = zero
 
  call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt1, nqshft1, qshift, &
@@ -5494,8 +5555,16 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
  ! Call listkk
  ABI_MALLOC(bz2ibz_listkk, (nqbz, 6))
+
+#ifdef USE_KRANK
+ qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
+ call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, bz2ibz_listkk, &
+                        cryst%nsym, cryst%symafm, cryst%symrec, cryst%timrev - 1, use_symrec=.True.)
+ call qrank%free()
+#else
  call listkk(dksqmax, cryst%gmet, bz2ibz_listkk, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-             sppoldbl1, cryst%symafm, cryst%symrec, cryst%timrev, comm, exit_loop=.False., use_symrec=.True.)
+             sppoldbl1, cryst%symafm, cryst%symrec, cryst%timrev - 1, comm, exit_loop=.False., use_symrec=.True.)
+#endif
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6)' ) &
@@ -5512,7 +5581,6 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
    call ifc%fourq(cryst, qibz(:,iq_ibz), &
                   phfreqs_ibz(:,iq_ibz), displ_cart_ibz(:,:,:,iq_ibz), out_eigvec=eigvec_ibz(:,:,:,iq_ibz))
  end do
-
 
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
@@ -5574,7 +5642,6 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
  write(std_out,*)" maxerr_phfreq (meV)", maxerr_phfreq
  write(std_out,*) "percentage of q-points for phfreq:", ierr_freq / (one * nqbz) * 100, "%"
-
  write(std_out,*)" maxerr_eigvec", maxerr_eigvec
  write(std_out,*)" percentage of q-points for eigvec:", ierr_eigvec / (one * nqbz) * 100, "%"
 

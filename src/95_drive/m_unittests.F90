@@ -65,11 +65,16 @@ contains
 !!  Generate rprimd compatible with the point group
 !!  This is only for testing porposes
 !!
+
 function rprimd_from_ptgroup(ptgroup) result(rprim)
 
  character(len=*),intent(in) :: ptgroup
+
+!Local variables -------------------------
  real(dp) :: a,b,c, tmp1, tmp2, alpha,beta, gamma, tx,ty,tz
  real(dp) :: rprim(3,3)
+
+! *********************************************************************
 
  a = one * 5
  b = two * 5
@@ -134,16 +139,17 @@ end function rprimd_from_ptgroup
 !! FUNCTION
 !!  Create a crystal structure from a user defined point group
 !!
+
 type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cryst)
 
 !Arguments -------------------------------
  character(len=*),intent(in) :: ptgroup
  integer,intent(in) :: use_symmetries
 
-!Variables -------------------------------
+!Local variables -------------------------
  type(irrep_t),allocatable :: irr(:)
  logical,parameter :: use_antiferro_true=.true.,remove_inv_false=.false.
- integer,parameter :: npsp1=1,space_group0=0,timrev1=1
+ integer,parameter :: npsp1 = 1, space_group0 = 0, timrev2 = 2
  integer :: natom,nclass,ntypat,nsym
  integer :: typat(1)
  real(dp) :: rprimd(3,3)
@@ -176,7 +182,7 @@ type(crystal_t) function crystal_from_ptgroup(ptgroup, use_symmetries) result(cr
  xred(:, 1) = zero
 
  call crystal_init(amu, cryst, space_group0, natom, npsp1, ntypat, nsym, rprimd, typat, xred, &
-                   zion, znucl, timrev1, use_antiferro_true, remove_inv_false, "test", &
+                   zion, znucl, timrev2, use_antiferro_true, remove_inv_false, "test", &
                    symrel=symrel, symafm=symafm, tnons=tnons)
 
  ABI_FREE(symrel)
@@ -875,7 +881,7 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, iout0 = 0,chksymbreak0 = 0, sppoldbl1 = 1, master = 0
- integer :: nqibz, iqbz, iq_ibz, iqbz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new, my_rank, ierr
+ integer :: nqibz, iq_bz, iq_ibz, iqibz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new, my_rank, ierr, timrev, prtvol
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3)
  real(dp) :: cpu, gflops, wall, dksqmax
  real(dp) :: qshift(3, nqshft1)
@@ -883,7 +889,7 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  type(crystal_t) :: cryst
  type(krank_t) :: krank
 !arrays
- integer,allocatable :: bz2ibz(:,:), bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:)
+ integer,allocatable :: bz2ibz(:,:), bz2ibz_symkpt(:,:), bz2ibz_symkpt_new(:,:), kmap(:,:)
  integer,allocatable :: bz2ibz_listkk(:,:), ibz2bz(:), ibz2bz_new(:)
  real(dp),allocatable :: wtq_fullbz(:), wtq_folded(:), wtq_ibz(:), qbz(:,:),qibz(:,:)
 
@@ -892,24 +898,31 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  call wrtout(std_out, sjoin(" kptrank_unittests with ptgroup:", ptgroup, ", and ngqpt:", ltoa(ngqpt)))
 
  my_rank = xmpi_comm_rank(comm)
+ if (my_rank /= 0) return
 
  ! Create fake crystal from ptgroup
  cryst = crystal_from_ptgroup(ptgroup, use_symmetries)
+ timrev = cryst%timrev - 1
+ prtvol = 1
+ call cryst%print(unit=std_out, prtvol=prtvol)
 
  ! Create a regular grid
  in_qptrlatt = 0; in_qptrlatt(1,1) = ngqpt(1); in_qptrlatt(2,2) = ngqpt(2); in_qptrlatt(3,3) = ngqpt(3)
  qshift(:,1) = 0
 
  call cwtime(cpu, wall, gflops, "start")
+
  call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt1, nqshft1, qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  call cwtime_report(" kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
  ! Test krank object.
- krank = krank_new(nqbz, qbz)
- do iqbz=1,nqbz
-   iqbz_rank = krank%get_index(qbz(:,iqbz))
-   ABI_CHECK(iqbz == iqbz_rank, 'wrong q-point')
+ !krank = krank_new(nqibz, qibz)
+ krank = krank_from_kptrlatt(nqibz, qibz, new_qptrlatt)
+
+ do iq_ibz=1,nqibz
+   iqibz_rank = krank%get_index(qibz(:, iq_ibz))
+   ABI_CHECK(iq_ibz == iqibz_rank, 'Wrong q-point')
  end do
  call cwtime_report(" krank basic check", cpu, wall, gflops)
 
@@ -923,59 +936,76 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
 
  ! Test symkpt (note that the above call to kpts_ibz_from_kptrlatt already involves calling this routine)
  call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, qbz, nqbz, &
-             nqibz_symkpt, cryst%nsym, cryst%symrec, cryst%timrev, &
+             nqibz_symkpt, cryst%nsym, cryst%symrec, timrev, &
              wtq_fullbz, wtq_folded, bz2ibz_symkpt, comm)
  call cwtime_report(" symkpt", cpu, wall, gflops)
 
  wtq_fullbz = one / nqbz
  call symkpt_new(chksymbreak0, cryst%gmet, ibz2bz_new, iout0, qbz, nqbz, &
-                 nqibz_symkpt_new, cryst%nsym, cryst%symrec, cryst%timrev, &
+                 nqibz_symkpt_new, cryst%nsym, cryst%symrec, timrev, &
                  bz2ibz_symkpt_new, comm)
  call cwtime_report(" symkpt_new", cpu, wall, gflops)
  ABI_CHECK(nqibz_symkpt == nqibz_symkpt_new, 'Wrong number of qpoints in the IBZ')
 
- ! Check if ibz is the same
+ ! Check if the IBZ is the same
  do iq_ibz=1,nqibz
    if (ibz2bz(iq_ibz) == ibz2bz_new(iq_ibz)) cycle
    MSG_ERROR("The IBZ is different.")
  end do
 
- ! Check if mapping is the same
- do iqbz=1,nqbz
-   if (bz2ibz_symkpt(1, iqbz) == bz2ibz_symkpt_new(1, iqbz)) cycle
-   write(msg,*) "Inconsistent mapping:", iqbz, bz2ibz_symkpt(1,iqbz), bz2ibz_symkpt_new(1,iqbz)
+ ! Check if the mapping is the same
+ do iq_bz=1,nqbz
+   if (bz2ibz_symkpt(1, iq_bz) == bz2ibz_symkpt_new(1, iq_bz)) cycle
+   write(msg,*) "Inconsistent mapping:", iq_bz, bz2ibz_symkpt(1,iq_bz), bz2ibz_symkpt_new(1,iq_bz)
    MSG_ERROR(msg)
  end do
 
- ! Call listkk
- ABI_MALLOC(bz2ibz_listkk,(nqbz, 6))
- call listkk(dksqmax, cryst%gmet, bz2ibz_listkk, qibz, qbz, nqibz, nqbz, cryst%nsym,&
-             sppoldbl1, cryst%symafm, cryst%symrec, cryst%timrev, comm, exit_loop=.True., use_symrec=.True.)
- call cwtime_report(" listkk", cpu, wall, gflops)
+ ABI_MALLOC(kmap, (nqbz, 6))
+ call krank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, kmap, cryst%nsym, cryst%symafm, cryst%symrec, timrev, &
+                        use_symrec=.True.)
+ write(std_out,*)"dksqmax: ", dksqmax
 
  ! Check if indkk is the same
- do iqbz=1,nqbz
-   if (bz2ibz_listkk(iqbz, 1) /= bz2ibz_symkpt_new(1, iqbz)) then
+ ierr = 0
+ do iq_bz=1,nqbz
+   if (kmap(iq_bz, 1) /= bz2ibz_symkpt_new(1, iq_bz) .or. &
+       kmap(iq_bz, 2) /= bz2ibz_symkpt_new(2, iq_bz) .or. &
+       kmap(iq_bz, 6) /= bz2ibz_symkpt_new(3, iq_bz) .or. &
+       any(kmap(iq_bz, 3:5) /= bz2ibz_symkpt_new(4:, iq_bz))) then
+       ierr = ierr + 1
+       write(std_out,"(a,i0)") " Inconsistent (ikpt, isym, itime, shift) for iq_bz:", iq_bz
+       write(std_out,*) "kmap:       ", &
+         kmap(iq_bz, 1), kmap(iq_bz, 2), kmap(iq_bz, 6), kmap(iq_ibz, 3:5)
+       write(std_out,*) "symkpt_new: ", &
+         bz2ibz_symkpt_new(1,iq_bz), bz2ibz_symkpt_new(2,iq_bz), bz2ibz_symkpt_new(3,iq_bz), bz2ibz_symkpt_new(4:, iq_bz)
+    end if
+ end do
+ ABI_FREE(kmap)
+ call cwtime_report(" get_mapping", cpu, wall, gflops)
+
+ ! Call listkk
+ ABI_MALLOC(bz2ibz_listkk, (nqbz, 6))
+ call listkk(dksqmax, cryst%gmet, bz2ibz_listkk, qibz, qbz, nqibz, nqbz, cryst%nsym, &
+             sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+
+ ! Check if indkk is the same
+ do iq_bz=1,nqbz
+   if (bz2ibz_listkk(iq_bz, 1) /= bz2ibz_symkpt_new(1, iq_bz) .or. &
+       bz2ibz_listkk(iq_bz, 2) /= bz2ibz_symkpt_new(2, iq_bz) .or. &
+       bz2ibz_listkk(iq_bz, 6) /= bz2ibz_symkpt_new(3, iq_bz) .or. &
+      any(bz2ibz_listkk(iq_bz, 3:5) /= bz2ibz_symkpt_new(4:, iq_bz))) then
      ierr = ierr + 1
-     if (my_rank == master) write(std_out,*) "Inconsistent ikpt", iqbz, bz2ibz_listkk(iqbz,1), bz2ibz_symkpt_new(1,iqbz)
-   end if
-   if (bz2ibz_listkk(iqbz, 2) /= bz2ibz_symkpt_new(2, iqbz)) then
-     ierr = ierr + 1
-     if (my_rank == master) write(std_out,*) "Inconsistent isym", iqbz, bz2ibz_listkk(iqbz,2), bz2ibz_symkpt_new(2,iqbz)
-   end if
-   if (bz2ibz_listkk(iqbz, 6) /= bz2ibz_symkpt_new(3, iqbz)) then
-     ierr = ierr + 1
-     if (my_rank == master ) write(std_out,*) "Inconsistent itim", iqbz, bz2ibz_listkk(iqbz,6), bz2ibz_symkpt_new(3,iqbz)
-   end if
-   if (.not.all(bz2ibz_listkk(iqbz, 3:5) == bz2ibz_symkpt_new(4:, iqbz))) then
-     ierr = ierr + 1
-     if (my_rank == master) then
-       write(std_out,*) "Inconsistent shift:", iqbz
-       write(std_out,*) bz2ibz_listkk(iqbz, 3:5)
-       write(std_out,*) bz2ibz_symkpt_new(4:, iqbz)
-     end if
+     write(std_out,*) "Inconsistent ikpt", iq_bz, bz2ibz_listkk(iq_bz,1), bz2ibz_symkpt_new(1,iq_bz)
+     write(std_out,*) "Inconsistent isym", iq_bz, bz2ibz_listkk(iq_bz,2), bz2ibz_symkpt_new(2,iq_bz)
+     write(std_out,*) "Inconsistent itim", iq_bz, bz2ibz_listkk(iq_bz,6), bz2ibz_symkpt_new(3,iq_bz)
+     write(std_out,*) "Inconsistent shift:", iq_bz
+     !write(std_out,*) bz2ibz_listkk(iq_bz, 3:5)
+     !write(std_out,*) bz2ibz_symkpt_new(4:, iq_bz)
    end if
  end do
+ call cwtime_report(" listkk", cpu, wall, gflops)
+
+ ABI_CHECK(ierr == 0, "Something wrong in k-mapping routines")
 
  ABI_SFREE(bz2ibz_symkpt)
  ABI_SFREE(bz2ibz_symkpt_new)

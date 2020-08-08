@@ -184,7 +184,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0,debug=0
+ integer,parameter :: iout0=0, my_timrev0 = 0, chksymbreak0 = 0, debug = 0
  integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign,isym_lgk
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)

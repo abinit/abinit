@@ -22,20 +22,20 @@
 #include "config.h"
 #endif
 
-#include "libtetra.h"
+#include "abi_common.h"
+
+! TODO: Remove file
+!#include "libtetra.h"
 
 module m_krank
 
- USE_MEMORY_PROFILING
- USE_MSG_HANDLING
+ use defs_basis
+ use m_abicore
+ use m_errors
 
  implicit none
 
  private
-
- integer, parameter :: dp=kind(1.0d0)
-
- real(dp) :: zero = 0.0d0, half = 0.5d0, one = 1.0d0, tol8 = 1.d-8,  tol10 = 1.d-10, tol12 = 1.d-12
 !!***
 
 !!****t* m_krank/krank_t
@@ -50,12 +50,21 @@ module m_krank
  type,public :: krank_t
 
    integer :: max_linear_density
+
    integer :: min_rank
+
    integer :: max_rank
+
    integer :: npoints
+
    logical :: time_reversal
+
+   logical :: kpts_owns_memory = .False.
+
    integer,allocatable :: invrank(:)
-   !real(dp),pointer kpoints(:,:)
+
+   real(dp),ABI_CONTIGUOUS pointer :: kpts(:,:)
+    ! Reference to input k-points or copy of the array depending on kpts_owns_memory
 
  contains
 
@@ -66,24 +75,82 @@ module m_krank
     ! Return the index of the k-point `kpt` in the initial set. -1 if not found.
 
    procedure :: copy => krank_copy
-    ! Copy the object
+    ! Deep copy of the object
 
    procedure :: free => krank_free
     ! Free memory
 
-   procedure :: dump => krank_dump
+   procedure :: print => krank_print
     ! Prints the arrays and dimensions of a krank_t structure
+
+   procedure :: get_mapping => krank_get_mapping
 
  end type krank_t
 
- public :: krank_new       ! Sets up the kpt ranks for comparing kpts
+ public :: krank_from_kptrlatt  ! Initialize object from kptrlatt
+ public :: krank_new            ! Sets up the kpt ranks for comparing kpts
 !!***
 
 contains
+
+
+!!****f* m_krank/krank_from_kptrlatt
+!! NAME
+!! krank_from_kptrlatt
+!!
+!! FUNCTION
+!! This routine sets up the kpt ranks for comparing kpts
+!!
+!! INPUTS
+!!  npt = number of kpoints (eventually irreducible)
+!!  kpt = coordinates of kpoints
+!!
+!! OUTPUT
+!!  krank = object containing ranking and inverse ranking
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(krank_t) function krank_from_kptrlatt(nkpt, kpts, kptrlatt, compute_invrank) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt
+ logical,optional,intent(in) :: compute_invrank
+!arrays
+ integer,intent(in) :: kptrlatt(3,3)
+ real(dp),intent(in) :: kpts(3,nkpt)
+
+!Local variables -------------------------
+!scalars
+ integer :: ii, jj, max_linear_density
+ logical :: compute_invrank_
+
+! *********************************************************************
+
+ do jj=1,3
+   do ii=1,3
+     if (ii == jj .and. kptrlatt(ii, ii) == 0) then
+       MSG_ERROR("kptrlatt with zero matrix element on the diagonal!")
+     end if
+     if (ii /= jj .and. kptrlatt(ii, jj) /= 0) then
+       MSG_ERROR("kptrlatt with non-zero off-diagonal matrix elements is not supported")
+     end if
+   end do
+ end do
+
+ compute_invrank_ = .True.; if (present(compute_invrank)) compute_invrank_ = compute_invrank
+
+ max_linear_density = maxval([kptrlatt(1,1), kptrlatt(2,2), kptrlatt(3,3)])
+ new = krank_new(nkpt, kpts, max_linear_density=max_linear_density, compute_invrank=compute_invrank_)
+
+end function krank_from_kptrlatt
 !!***
 
 !!****f* m_krank/krank_new
-!!
 !! NAME
 !! krank_new
 !!
@@ -96,9 +163,6 @@ contains
 !!  time_reversal = true or false to use time reversal symmetry.
 !!     Default is true, but only important if nsym and symrec are present
 !!
-!! OUTPUT
-!!  krank = object containing ranking and inverse ranking
-!!
 !! PARENTS
 !!      get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma,m_pptools
 !!      m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph,read_el_veloc
@@ -107,20 +171,23 @@ contains
 !!
 !! SOURCE
 
-type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(krank)
+type(krank_t) function krank_new(nkpt, kpts, nsym, symrec, time_reversal, max_linear_density, compute_invrank) result(new)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt
  integer,intent(in), optional :: nsym
  logical,intent(in), optional :: time_reversal
+ integer,optional,intent(in) :: max_linear_density
+ logical,optional,intent(in) :: compute_invrank
 !arrays
- real(dp),intent(in) :: kpt(3,nkpt)
+ real(dp),target,intent(in) :: kpts(3,nkpt)
  integer,intent(in), optional :: symrec(3,3, *)
 
 !Local variables -------------------------
 !scalars
  integer :: ikpt, isym, symkptrank, irank, timrev, itim
+ logical :: compute_invrank_
  real(dp) :: smallestlen
  character(len=500) :: msg
 !arrays
@@ -128,63 +195,72 @@ type(krank_t) function krank_new(nkpt, kpt, nsym, symrec, time_reversal) result(
 
 ! *********************************************************************
 
- !krank%kpts => kpt
+ compute_invrank_ = .True.; if (present(compute_invrank)) compute_invrank_ = compute_invrank
 
- ! find smallest linear length
- smallestlen = one
- do ikpt=1, nkpt
-   if (abs(kpt(1,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(1,ikpt)))
-   if (abs(kpt(2,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(2,ikpt)))
-   if (abs(kpt(3,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(3,ikpt)))
- end do
+ new%kpts => kpts
+ new%kpts_owns_memory = .False.
 
- krank%max_linear_density = nint(one/smallestlen)
- krank%npoints = nkpt
- krank%min_rank = nint(real(krank%max_linear_density)*(half+tol8 +&
-                       real(krank%max_linear_density)*(half+tol8 +&
-                       real(krank%max_linear_density)*(half+tol8))))
+ if (.not. present(max_linear_density)) then
+   ! Find smallest linear length from input kpts
+   smallestlen = one
+   do ikpt=1, nkpt
+     if (abs(kpts(1,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpts(1,ikpt)))
+     if (abs(kpts(2,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpts(2,ikpt)))
+     if (abs(kpts(3,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpts(3,ikpt)))
+   end do
+   new%max_linear_density = nint(one/smallestlen)
+ else
+   new%max_linear_density = max_linear_density
+ end if
 
- krank%max_rank = nint(real(krank%max_linear_density)*(1+half+tol8 +&
-                       real(krank%max_linear_density)*(1+half+tol8 +&
-                       real(krank%max_linear_density)*(1+half+tol8))))
+ new%npoints = nkpt
+ new%min_rank = nint(real(new%max_linear_density)*(half+tol8 +&
+                     real(new%max_linear_density)*(half+tol8 +&
+                     real(new%max_linear_density)*(half+tol8))))
 
- TETRA_ALLOCATE(krank%invrank, (krank%min_rank:krank%max_rank))
- krank%invrank(:) = -1
+ new%max_rank = nint(real(new%max_linear_density)*(1+half+tol8 +&
+                     real(new%max_linear_density)*(1+half+tol8 +&
+                     real(new%max_linear_density)*(1+half+tol8))))
 
  timrev = 2
- krank%time_reversal = .true.
+ new%time_reversal = .true.
  if (present(time_reversal)) then
    if (.not. time_reversal) timrev = 1
-   krank%time_reversal = .false.
+   new%time_reversal = .false.
  end if
 
  ! Ensure kpt(i)+one is positive, and the smallest difference between kpts should be larger than 1/100 ie ngkpt < 100.
  ! the following fills invrank for the k-points in the list provided (may be only the irred kpts)
- do ikpt=1,nkpt
-   irank = krank%get_rank(kpt(:,ikpt))
+ if (compute_invrank_) then
+   ABI_MALLOC(new%invrank, (new%min_rank:new%max_rank))
+   new%invrank(:) = -1
 
-   if (irank > krank%max_rank .or. irank < krank%min_rank) then
-     write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
-     TETRA_ERROR(msg)
-   end if
-   krank%invrank(irank) = ikpt
- end do
+   do ikpt=1,nkpt
+     irank = new%get_rank(kpts(:,ikpt))
+
+     if (irank > new%max_rank .or. irank < new%min_rank) then
+       write(msg,'(a,2i0)')" rank above max_rank or bellow min_rank, ikpt, rank ", ikpt, irank
+       MSG_ERROR(msg)
+     end if
+     new%invrank(irank) = ikpt
+   end do
+ end if
 
  ! if symrec is provided, fill invrank with appropriate irred kpt indices
  ! for symmetry completion: kptrank_t%invrank points to the irred k-point
  ! equivalent to the k-point whose rank is provided
  if (present(symrec)) then
    if(.not. present(nsym)) then
-     TETRA_ERROR("need both symrec and nsym arguments together")
+     MSG_ERROR("need both symrec and nsym arguments together")
    end if
    do ikpt=1,nkpt
      ! itim == 1 for positive, and itim==2 gives Kramers opposite of k-point
      ! favor the former by looping it last
      do itim = timrev, 1, -1
        do isym = 1, nsym
-         symkpt = (-1)**(itim+1) * matmul(symrec(:,:,isym), kpt(:, ikpt))
-         symkptrank = krank%get_rank(symkpt(:))
-         krank%invrank(symkptrank) = ikpt
+         symkpt = (-1)**(itim+1) * matmul(symrec(:,:,isym), kpts(:, ikpt))
+         symkptrank = new%get_rank(symkpt(:))
+         new%invrank(symkptrank) = ikpt
        end do
      end do
    end do
@@ -234,7 +310,7 @@ integer function get_rank(krank, kpt) result(rank)
 
 ! *************************************************************************
 
- ! wrap to [0, 1[ -> replaced call to wrap2_zeroone inline, to encapsulate this module
+ ! wrap to [0, 1[ -> replaced call to wrap2_zero2one inline, to encapsulate this module
  if (kpt(1)>zero) then
    redkpt(1)=mod((kpt(1)+tol12),one)-tol12
  else
@@ -264,8 +340,8 @@ integer function get_rank(krank, kpt) result(rank)
              real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
 
  if (rank > krank%max_rank) then
-   write(msg,'(a,i0,a,i0)') ' rank should be inferior to ', krank%max_rank, ' got ', rank
-   TETRA_ERROR(msg)
+   write(msg,'(a,i0,a,i0)') ' Rank should be inferior to: ', krank%max_rank, ' but got: ', rank
+   MSG_ERROR(msg)
  end if
 
 end function get_rank
@@ -322,7 +398,7 @@ end function krank_get_index
 !! krank_copy
 !!
 !! FUNCTION
-!! Copy the object
+!! Deep copy of the object
 !!
 !! INPUTS
 !!
@@ -349,9 +425,13 @@ type(krank_t) function krank_copy(krank_in) result(krank_out)
  krank_out%max_rank = krank_in%max_rank
  krank_out%npoints = krank_in%npoints
 
- TETRA_ALLOCATE(krank_out%invrank, (krank_out%min_rank:krank_out%max_rank))
+ ABI_MALLOC(krank_out%invrank, (krank_out%min_rank:krank_out%max_rank))
  krank_out%invrank = krank_in%invrank
- !krank_out%kpts => krank_in
+
+ ! This is why I call it deep copy!
+ ABI_MALLOC(krank_out%kpts, (3, size(krank_in%kpts, dim=2)))
+ krank_out%kpts = krank_in%kpts
+ krank_out%kpts_owns_memory = .True.
 
 end function krank_copy
 !!***
@@ -359,7 +439,6 @@ end function krank_copy
 !----------------------------------------------------------------------
 
 !!****f* m_krank/krank_free
-!!
 !! NAME
 !! krank_free
 !!
@@ -385,8 +464,13 @@ subroutine krank_free(krank)
 
 ! *********************************************************************
 
- if (allocated(krank%invrank))  then
-   TETRA_DEALLOCATE(krank%invrank)
+ ABI_SFREE(krank%invrank)
+ if (krank%kpts_owns_memory) then
+   if (associated(krank%kpts)) then
+     ABI_FREE(krank%kpts)
+   end if
+ else
+   krank%kpts => null()
  end if
 
 end subroutine krank_free
@@ -394,10 +478,10 @@ end subroutine krank_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_krank/krank_dump
+!!****f* m_krank/krank_print
 !!
 !! NAME
-!! krank_dump
+!! krank_print
 !!
 !! FUNCTION
 !! This routine prints the arrays and dimensions of a krank_t structure
@@ -412,7 +496,7 @@ end subroutine krank_free
 !!
 !! SOURCE
 
-subroutine krank_dump (krank, unout)
+subroutine krank_print(krank, unout)
 
 !Arguments ------------------------------------
 !scalars
@@ -432,81 +516,145 @@ subroutine krank_dump (krank, unout)
   write(unout, '(i0)') krank%invrank(:)
   write(unout, *)
 
-end subroutine krank_dump
+end subroutine krank_print
 !!***
 
 !----------------------------------------------------------------------
 
-subroutine krank_map(self, nkpt1, kptns1, dksqmax, gmet, indkk, nsym, symafm, symmat, timrev, comm, &
-                     use_symrec) ! optional
+!!****f* m_krank/krank_get_mapping
+!! NAME
+!! krank_get_mapping
+!!
+!! FUNCTION
+!! Given a list of nkpt1 initial k points kptns1 and a list of nkpt2
+!! final k points kptns2, associates each final kpt with a "closest"
+!! initial k point (or symmetric thereof, also taking possible umklapp)
+!! as determined by a metric gmet, that commutes with the symmetry operations.
+!! The algorithm does not scale as nkpt1 times nkpt2, thanks
+!! to the ordering of the kptns1 and kptns2 vectors according to their
+!! lengths, and comparison first between vectors of similar lengths.
+!! Returns indirect indexing list indkk.
+!!
+!! INPUTS
+!!  gmet(3,3)=reciprocal space metric (bohr^-2)
+!!  kptns1(3,nkpt1)=list of initial k points (reduced coordinates)
+!!  kptns2(3,nkpt2)=list of final k points
+!!  nkpt1=number of initial k points
+!!  nkpt2=number of final k points
+!!  nsym=number of symmetry elements in space group
+!!  sppoldbl=if 1, no spin-polarisation doubling
+!!           if 2, spin-polarisation doubling using symafm
+!!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
+!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
+!!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
+!!  comm=MPI communicator.
+!!  [exit_loop]: if present and True, exit the loop over k-points in the sphere as soon as the lenght**2 of the
+!!    difference vector is smaller than tol12. Default: False
+!!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
+!!
+!! OUTPUT
+!!  dksqmax=maximal value of the norm**2 of the difference between
+!!    a kpt2 vector and the closest k-point found from the kptns1 set, using symmetries.
+!!  indkk(nkpt2*sppoldbl,6)=describe k point number of kpt1 that allows to
+!!    generate wavefunctions closest to given kpt2
+!!    if sppoldbl=2, use symafm to generate spin down wfs from spin up wfs
+!!
+!!    indkk(:,1)=k point number of kptns1
+!!    indkk(:,2)=symmetry operation to be applied to kpt1, to give kpt1a
+!!      (if 0, means no symmetry operation, equivalent to identity )
+!!    indkk(:,3:5)=shift in reciprocal space to be given to kpt1a,
+!!      to give kpt1b, that is the closest to kpt2.
+!!    indkk(:,6)=1 if time-reversal was used to generate kpt1a from kpt1, 0 otherwise
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, symafm, symmat, timrev, &
+                             use_symrec) ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(krank_t),intent(in) :: self
- integer,intent(in) :: nkpt1, nsym, timrev, comm !nkpt2,
+ integer,intent(in) :: nkpt2, nsym, timrev
  real(dp),intent(out) :: dksqmax
  logical,optional,intent(in) :: use_symrec
 !arrays
- integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
- integer,intent(out) :: indkk(6, self%npoints)
- real(dp),intent(in) :: gmet(3,3),kptns1(3,nkpt1) !,kptns2(3,nkpt2)
+ integer,intent(in) :: symafm(nsym), symmat(3,3,nsym)
+ integer,intent(out) :: indkk(nkpt2, 6)
+ real(dp),intent(in) :: gmet(3,3), kptns2(3,nkpt2)
 
 !Local variables-------------------------------
 !scalars
- integer :: ikpt1, itimrev, isym, isk !, ierr, my_rank, nprocs
- real(dp) :: kpt1a(3)
+ integer :: irank, ikpt1, ikpt2, itimrev, isym, isk, ierr, irank2, ii
+ logical :: my_use_symrec
+!arrays
+ integer :: dkint(3), my_symmat(3, 3, nsym)
+ integer,allocatable :: rank2info(:,:)
+ real(dp) :: kpt1a(3), dk(3)
 
 ! *************************************************************************
 
- !my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- indkk = 0
+ my_use_symrec = .False.; if (present(use_symrec)) my_use_symrec = use_symrec
 
- do ikpt1=1,nkpt1
-   !if (mod(ikpt1, nprocs) /= my_rank) cycle ! MPI parallelism.
+ if (my_use_symrec) then
+   ! Symrec k
+   my_symmat = symmat
+ else
+   ! Symrel^T k
+   do isym=1,nsym
+     my_symmat(:,:,isym) = transpose(symmat(:,:,isym))
+   end do
+ end if
 
-   itimrev_loop: &
+ ABI_MALLOC(rank2info, (2, self%min_rank:self%max_rank))
+ rank2info = -1
+
+ do ikpt1=1,self%npoints
+
    do itimrev=0,timrev
      do isym=1,nsym
        ! Select magnetic characteristic of symmetries
        if (symafm(isym) == -1) cycle
-       !if (isppol == 1 .and. symafm(isym) == -1) cycle
-       !if (isppol == 2 .and. symafm(isym) == 1) cycle
 
-       ! original code only used transpose(symrel)
-       if (present(use_symrec)) then
-         if (use_symrec) then
-           kpt1a(:) = MATMUL(symmat(:,:,isym), kptns1(:,ikpt1))
-         else
-           kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)), kptns1(:,ikpt1))
-         end if
-       else
-         kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)), kptns1(:,ikpt1))
+       kpt1a = (1 - 2*itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
+       irank = self%get_rank(kpt1a)
+       if (rank2info(1, irank) == -1) then
+         rank2info(1, irank) = ikpt1
+         rank2info(2, irank) = isym + itimrev * nsym
        end if
-       kpt1a(:) = (1-2*itimrev)*kpt1a(:)
-
-       isk = self%get_index(kpt1a)
-       if (isk /= -1) then
-         indkk(1, isk) = ikpt1
-         indkk(2, isk) = isym
-         !indkk(3:5, isk) = jdkint(:)
-         indkk(6, isk) = itimrev
-
-         ! Compute norm of the difference vector, and update kpt1 if better.
-         !dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+ &
-         !     gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+ &
-         !     gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
-
-         !dksqmax = max(dksqmax, dksqmn)
-         exit itimrev_loop
-       end if
-
      end do
-   end do itimrev_loop
+   end do
+
  end do
 
- !if (nprocs > 1) call xmpi_sum(indkk, comm, ierr)
+ dksqmax = zero
+ do ikpt2=1,nkpt2
+   irank = self%get_rank(kptns2(:, ikpt2))
+   ikpt1 = rank2info(1, irank)
+   ii = rank2info(2, irank)
+   isym = 1 + mod(ii - 1, nsym)
+   itimrev = (ii - 1) / nsym
+   indkk(ikpt2, 1) = ikpt1
+   indkk(ikpt2, 2) = isym
+   kpt1a = (1 - 2 * itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
+   dk(:) = kptns2(:,ikpt2) - kpt1a(:)
+   dkint(:) = nint(dk(:) + tol12)
+   indkk(ikpt2, 3:5) = dkint(:)
+   indkk(ikpt2, 6) = itimrev
 
-end subroutine krank_map
+   ! Compute norm of the difference vector.
+   dk(:) = dk(:) - dkint(:)
+   dksqmax = max(dksqmax, &
+                 gmet(1,1)*dk(1)**2 + gmet(2,2)*dk(2)**2 + gmet(3,3)*dk(3)**2 + &
+                 two * (gmet(2,1)*dk(2)*dk(1) + gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1)))
+ end do
+
+ ABI_FREE(rank2info)
+
+end subroutine krank_get_mapping
 !!***
 
 end module m_krank

@@ -106,6 +106,8 @@ type, public :: ephwg_t
   !real(dp) :: max_phfrq
   ! Max Phonon frequency, computed from phfrq_ibz
 
+  !integer :: kptrlatt(3,3)
+
   integer, allocatable :: kq2ibz(:)
   ! kq2ibz(nq_k)
   ! Mapping (k + q) --> initial IBZ array
@@ -210,7 +212,7 @@ contains
 !! SOURCE
 
 type(ephwg_t) function ephwg_new( &
-&  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
+   cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -356,7 +358,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1
+ integer,parameter :: sppoldbl1 = 1
  integer :: ierr,ii
  logical :: do_mapping
  real(dp) :: dksqmax, cpu, wall, gflops
@@ -375,6 +377,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
  self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz, comm)
+
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
@@ -386,8 +389,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
    ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
 
    !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
    !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
@@ -409,7 +413,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
 
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.true., use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
