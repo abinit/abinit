@@ -46,6 +46,7 @@ module m_dvdb
  use m_ddb
  use m_ddb_hdr
  use m_dtset
+ use m_krank
 
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
@@ -2932,7 +2933,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
  ! Allocate potential in the supercell. Memory is MPI-distributed over my_nrpt and my_npert
  call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
-    ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * sp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
+            ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * sp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
  ABI_SFREE(all_cell)
  ABI_SFREE(all_wghatm)
@@ -3192,6 +3193,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  logical :: found
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
+ type(krank_t) :: qrank
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz_sort(:),all_cell(:,:)
@@ -3259,7 +3261,8 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    call mkradim(acell, rprim, cryst%rprimd)
    call canat9(db%brav, cryst%natom, rcan, rprim, trans, cryst%xred)
    call matr3inv(rprim, gprim)
-   ! TODO: In principle one may have N_R that depends on iatom to minimize memory.
+
+   ! In principle one may have N_R that depends on iatom to minimize memory.
    call get_bigbox_and_weights(db%brav, cryst%natom, nqbz, ngqpt, nqshift, qshift, rprim, cryst%rprimd, gprim, rcan, &
                                cutmode2, nrtot, all_rcart, all_cell, all_wghatm, r_inscribed_sphere, comm)
    ABI_FREE(all_cell)
@@ -3278,8 +3281,14 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ! q --> -q symmetry is always used for phonons.
  ! we use symrec instead of symrel
  ABI_MALLOC(indqq, (nqbz*sppoldbl1, 6))
+
  call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
    sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+
+ !qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ !call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -3338,6 +3347,11 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ! Redo the mapping with the new IBZ
  call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
    sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
+
+ !qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ !call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -4048,6 +4062,11 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
    sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,exit_loop=.True., use_symrec=.True.)
 
+ !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
+ !call qrank%free()
+
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
  end if
@@ -4104,6 +4123,11 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  ! Redo the mapping with the new IBZ
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
    sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,exit_loop=.True., use_symrec=.True.)
+
+ !qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
+ !call qrank%get_mapping(new%nqbz, new%qbz, dksqmax, cryst%gmet, temp, &
+ !                       cryst%nsym, cryst%symafm, cryst%symrec, 1, use_symrec=.True.)
+ !call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")

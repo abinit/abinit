@@ -583,7 +583,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  logical,optional,intent(in) :: use_symrec
 !arrays
  integer,intent(in) :: symafm(nsym), symmat(3,3,nsym)
- integer,intent(out) :: indkk(nkpt2, 6)
+ integer,intent(out) :: indkk(6, nkpt2)
  real(dp),intent(in) :: gmet(3,3), kptns2(3,nkpt2)
 
 !Local variables-------------------------------
@@ -637,13 +637,13 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
    ii = rank2info(2, irank)
    isym = 1 + mod(ii - 1, nsym)
    itimrev = (ii - 1) / nsym
-   indkk(ikpt2, 1) = ikpt1
-   indkk(ikpt2, 2) = isym
+   indkk(1, ikpt2) = ikpt1
+   indkk(2, ikpt2) = isym
    kpt1a = (1 - 2 * itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
    dk(:) = kptns2(:,ikpt2) - kpt1a(:)
    dkint(:) = nint(dk(:) + tol12)
-   indkk(ikpt2, 3:5) = dkint(:)
-   indkk(ikpt2, 6) = itimrev
+   indkk(3:5, ikpt2) = dkint(:)
+   indkk(6, ikpt2) = itimrev
 
    ! Compute norm of the difference vector.
    dk(:) = dk(:) - dkint(:)

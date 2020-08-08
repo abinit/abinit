@@ -28,8 +28,6 @@
 
 #include "abi_common.h"
 
-#define USE_KRANK
-
 module m_ephwg
 
  use defs_basis
@@ -363,7 +361,6 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1 = 1
  integer :: ierr,ii
  logical :: do_mapping
  real(dp) :: dksqmax, cpu, wall, gflops
@@ -394,21 +391,12 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ! to symmetrize wavefunctions and potentials that require S-1 i.e. the symrel convention.
 
    ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+   ABI_MALLOC(indkk, (6, self%nq_k))
 
-#ifdef USE_KRANK
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
    call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
                           cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
    call krank%free()
-
-#else
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
-
-   !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
-   !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
-#endif
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -416,7 +404,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
      MSG_ERROR(msg)
    end if
    ABI_SFREE(self%lgk2ibz)
-   call alloc_copy(indkk(:, 1), self%lgk2ibz)
+   call alloc_copy(indkk(1, :), self%lgk2ibz)
    ABI_FREE(indkk)
    call cwtime_report(" listkk1", cpu, wall, gflops)
 
@@ -424,18 +412,12 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    do ii=1,self%nq_k
      self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
    end do
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+   ABI_MALLOC(indkk, (6, self%nq_k))
 
-#ifdef USE_KRANK
    krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
    call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
                           cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
    call krank%free()
-#else
-
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
-#endif
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -445,7 +427,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    call cwtime_report(" listkk2", cpu, wall, gflops)
 
    ABI_SFREE(self%kq2ibz)
-   call alloc_copy(indkk(:, 1), self%kq2ibz)
+   call alloc_copy(indkk(1, :), self%kq2ibz)
    ABI_FREE(indkk)
 
    ! Revert changes
@@ -455,7 +437,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  end if
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
- ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
+ ABI_MALLOC(indkk, (self%nbz, 1))
  indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
@@ -508,7 +490,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1,timrev0=0
+ integer,parameter :: timrev0 = 0
  integer :: ierr,ii,ik_idx
  !real(dp) :: dksqmax
  character(len=80) :: errorstring

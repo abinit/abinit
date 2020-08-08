@@ -229,7 +229,6 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  ! Find the irreducible zone with the little group operations.
  ! Do not use time-reversal since it has been manually introduced previously
  ABI_MALLOC(ibz2bz, (nkbz))
-
  ABI_MALLOC(new%bz2ibz_smap, (6, nkbz))
  ! IBZ2BZ ?
 

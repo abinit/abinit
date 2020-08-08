@@ -576,7 +576,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
          !  MSG_ERROR('Wrong k-point mapping found by krank')
          !end if
          if (ikpt_found >= ikpt) cycle
-         bz2ibz_smap(:3, ikpt)  = [ikpt_found,isym,itim]
+         bz2ibz_smap(:3, ikpt)  = [ikpt_found, isym, itim]
          bz2ibz_smap(4,ikpt) = bz2ibz_smap(4,ikpt) + bz2ibz_smap(4,ikpt_found)
          bz2ibz_smap(4,ikpt_found) = 0
        end do ! itim
@@ -620,7 +620,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
        ikpt_found = krank%get_index(ksym)
        if (ikpt_found < 0) cycle
        if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
-       bz2ibz_smap(:3, ikpt_found) = [ikpt,isym,itim]
+       bz2ibz_smap(:3, ikpt_found) = [ikpt, isym, itim]
        bz2ibz_smap(4:, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
      end do
    end do

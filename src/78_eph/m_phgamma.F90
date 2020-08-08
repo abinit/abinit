@@ -31,8 +31,6 @@
 
 #include "abi_common.h"
 
-#define USE_KRANK
-
 module m_phgamma
 
  use defs_basis
@@ -3542,7 +3540,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 !arrays
  integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym)
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
- integer :: indkk_kq(1,6)
+ integer :: indkk_kq(6,1)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),wfd_istwfk(:)
  integer,allocatable :: my_pinfo(:,:), pert_table(:,:) !, qibz_done(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), lf(2),rg(2),res(2)
@@ -4111,16 +4109,10 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Skip this point if kq does not belong to the FS window.
        if (ikq_bz == -1) cycle
 
-#ifdef USE_KRANK
        krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
        call krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, timrev, &
                               use_symrec=.False.)
        call krank%free()
-#else
-
-       call listkk(dksqmax, cryst%gmet, indkk_kq, ebands%kptns, kq, ebands%nkpt, 1, cryst%nsym,&
-          1, cryst%symafm, cryst%symrel, timrev, xmpi_comm_self, use_symrec=.False.)
-#endif
 
        if (dksqmax > tol12) then
          write(msg, '(3a,es16.6,7a)' ) &
@@ -4131,8 +4123,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
           MSG_ERROR(msg)
        end if
 
-       ikq_ibz = indkk_kq(1, 1); isym_kq = indkk_kq(1, 2)
-       trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
+       ikq_ibz = indkk_kq(1, 1); isym_kq = indkk_kq(2, 1)
+       trev_kq = indkk_kq(6, 1); g0_kq = indkk_kq(3:5, 1)
        kq_ibz = ebands%kptns(:, ikq_ibz)
 
        ! Number of bands crossing the Fermi level at k+q
@@ -4144,7 +4136,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
                           work_ngfft, work, istwf_k, npw_k, kg_k, kets_k)
 
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
-       call wfd%sym_ug_kg(ecut, kq, kq_ibz, bstart_kq, nband_kq, spin, mpw, indkk_kq(1,:), cryst, &
+       call wfd%sym_ug_kg(ecut, kq, kq_ibz, bstart_kq, nband_kq, spin, mpw, indkk_kq(:,1), cryst, &
                           work_ngfft, work, istwf_kq, npw_kq, kg_kq, bras_kq)
 
        ! if PAW, one has to solve a generalized eigenproblem
