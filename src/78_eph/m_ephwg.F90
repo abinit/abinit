@@ -28,6 +28,8 @@
 
 #include "abi_common.h"
 
+#define USE_KRANK
+
 module m_ephwg
 
  use defs_basis
@@ -46,6 +48,7 @@ module m_ephwg
  use m_lgroup
  use m_ebands
  use m_eph_double_grid
+ use m_krank
 
  use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime, cwtime_report
@@ -106,7 +109,8 @@ type, public :: ephwg_t
   !real(dp) :: max_phfrq
   ! Max Phonon frequency, computed from phfrq_ibz
 
-  !integer :: kptrlatt(3,3)
+  integer :: kptrlatt(3,3)
+   ! Value of kptrlatt after inkpts. So one shift
 
   integer, allocatable :: kq2ibz(:)
   ! kq2ibz(nq_k)
@@ -255,6 +259,7 @@ type(ephwg_t) function ephwg_new( &
                              new_kptrlatt=out_kptrlatt)
  call cwtime_report(" ephwg_new: kpts_ibz_from_kptrlatt", cpu, wall, gflops)
 
+ new%kptrlatt = out_kptrlatt
  rlatt = out_kptrlatt; call matr3inv(rlatt, new%klatt)
 
  ABI_CHECK(size(out_kibz, dim=2) == new%nibz, "mismatch in nkibz!")
@@ -365,6 +370,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
  character(len=80) :: errorstring
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
+ type(krank_t) :: krank
 !arrays
  integer,allocatable :: indkk(:,:)
 
@@ -390,11 +396,19 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
 
+#ifdef USE_KRANK
+   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
+                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+   call krank%free()
+
+#else
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
       sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
 
    !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
    !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+#endif
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -412,8 +426,16 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    end do
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
 
+#ifdef USE_KRANK
+   krank = krank_from_kptrlatt(self%nibz, self%ibz, self%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(self%nq_k, self%lgk%ibz, dksqmax, cryst%gmet, indkk, &
+                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+   call krank%free()
+#else
+
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
       sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
+#endif
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -425,6 +447,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm, skip_mapping)
    ABI_SFREE(self%kq2ibz)
    call alloc_copy(indkk(:, 1), self%kq2ibz)
    ABI_FREE(indkk)
+
+   ! Revert changes
    do ii=1,self%nq_k
      self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
    end do

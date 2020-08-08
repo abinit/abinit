@@ -4127,14 +4127,14 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
 
 #ifdef USE_KRANK
-   krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
-   call krank%get_mapping(self%nqibz_k, kq_list, dksqmax, cryst%gmet, iqk2dvdb, &
-                          cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
-   call krank%free()
+ krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+ call krank%get_mapping(self%nqibz_k, kq_list, dksqmax, cryst%gmet, iqk2dvdb, &
+                        cryst%nsym, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+ call krank%free()
 #else
 
-   call listkk(dksqmax, cryst%gmet, iqk2dvdb, ebands%kptns, kq_list, ebands%nkpt, self%nqibz_k, cryst%nsym, &
-     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
+ call listkk(dksqmax, cryst%gmet, iqk2dvdb, ebands%kptns, kq_list, ebands%nkpt, self%nqibz_k, cryst%nsym, &
+   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, exit_loop=.True., use_symrec=.False.)
 #endif
 
  if (dksqmax > tol12) then
@@ -4145,6 +4145,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
     "Action: check your WFK file and (k, q) point input variables."
    MSG_ERROR(msg)
  end if
+
  ABI_FREE(kq_list)
 
  ABI_REMALLOC(self%indkk_kq, (6, self%nqibz_k))

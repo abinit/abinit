@@ -557,10 +557,10 @@ subroutine nctk_test_mpiio()
 
    if (ncerr == nf90_noerr) then
      nctk_has_mpiio = .True.
-     call wrtout(std_out,"Netcdf library supports MPI-IO", "COLL")
+     call wrtout(std_out," Netcdf library supports MPI-IO", "COLL")
    else if (ncerr == nf90_enopar) then
      ! This is the value returned by the C function ifndef USE_PARALLEL
-     MSG_WARNING(sjoin("netcdf lib does not support MPI-IO and: ", nf90_strerror(ncerr)))
+     MSG_WARNING(sjoin("Netcdf lib does not support MPI-IO and: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
    else
      ! Maybe something wrong in the low-level layer!
