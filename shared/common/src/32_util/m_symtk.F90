@@ -956,8 +956,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
  integer,intent(in),optional :: prtvol,use_sym
  integer,intent(out) :: timrev
 !arrays
- integer,intent(in) :: symrec(3,3,nsym)
- integer,intent(in) :: symafm(nsym)
+ integer,intent(in) :: symrec(3,3,nsym), symafm(nsym)
  integer,intent(out) :: symq(4,2,nsym)
  real(dp),intent(in) :: qpt(3)
 
@@ -980,34 +979,32 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
  isym = symafm(1) ! just to fool abirules and use symafm for the moment
 
  do isym=1,nsym
-!   if (symafm(isym) /= 1) cycle ! skip afm symops
-! TODO: check how much of the afm syms are coded in the rf part of the code. cf
-! test v3 / 12
+   !   if (symafm(isym) /= 1) cycle ! skip afm symops
+   ! TODO: check how much of the afm syms are coded in the rf part of the code. cf
+   ! test v3 / 12
    do itirev=1,2
      isign=3-2*itirev  ! isign is 1 without time-reversal, -1 with time-reversal
 
-!    Get the symmetric of the vector
+     ! Get the symmetric of the vector
      do ii=1,3
        qsym(ii)=qpt(1)*isign*symrec(ii,1,isym)&
-&       +qpt(2)*isign*symrec(ii,2,isym)&
-&       +qpt(3)*isign*symrec(ii,3,isym)
+         +qpt(2)*isign*symrec(ii,2,isym)&
+         +qpt(3)*isign*symrec(ii,3,isym)
      end do
 
-!    Get the difference between the symmetric and the original vector
-
+     ! Get the difference between the symmetric and the original vector
      symq(4,itirev,isym)=1
      do ii=1,3
        difq(ii)=qsym(ii)-qpt(ii)
-!      Project modulo 1 in the interval ]-1/2,1/2] such that difq = reduce + shift
+       ! Project modulo 1 in the interval ]-1/2,1/2] such that difq = reduce + shift
        call wrap2_pmhalf(difq(ii),reduce,shift(ii))
        if(abs(reduce)>tol)symq(4,itirev,isym)=0
      end do
 
-!    SP: When prtgkk is asked (GKK matrix element will be output), one has to
-!    disable symmetries. There is otherwise a jauge problem with the unperturbed
-!    and the perturbed wavefunctions. This leads to a +- 5% increase in computational
-!    cost but provide the correct GKKs (i.e. the same as without the use of
-!    symmerties.)
+     ! SP: When prtgkk is asked (GKK matrix element will be output), one has to
+     ! disable symmetries. There is otherwise a jauge problem with the unperturbed
+     ! and the perturbed wavefunctions. This leads to a +- 5% increase in computational
+     ! cost but provide the correct GKKs (i.e. the same as without the use of symmetries.)
 
      if (PRESENT(use_sym)) then
        if (use_sym == 0) then
@@ -1016,14 +1013,14 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
        end if
      end if
 
-!    If the operation succeded, change shift from real(dp) to integer, then exit loop
+     ! If the operation succeded, change shift from real(dp) to integer, then exit loop
      if(symq(4,itirev,isym)/=0)then
        if (my_prtvol>0) then
          if(itirev==1)write(msg,'(a,i4,a)')' littlegroup_q : found symmetry',isym,' preserves q '
          if(itirev==2)write(msg,'(a,i4,a)')' littlegroup_q : found symmetry ',isym,' + TimeReversal preserves q '
          call wrtout(std_out,msg)
        end if
-!      Uses the mathematical function NINT = nearest integer
+       ! Uses the mathematical function NINT = nearest integer
        do ii=1,3
          symq(ii,itirev,isym)=nint(shift(ii))
        end do
@@ -1032,18 +1029,18 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
    end do !itirev
  end do !isym
 
-!Test time-reversal symmetry
+ ! Test time-reversal symmetry
  timrev=1
  do ii=1,3
-!  Unfortunately, this version does not work yet ...
-!  call wrap2_pmhalf(2*qpt(ii),reduce,shift(ii))
-!  if(abs(reduce)>tol)timrev=0
-!  So, this is left ...
+   ! Unfortunately, this version does not work yet ...
+   ! call wrap2_pmhalf(2*qpt(ii),reduce,shift(ii))
+   ! if(abs(reduce)>tol)timrev=0
+   ! So, this is left ...
    if(abs(qpt(ii))>tol)timrev=0
  end do
 
  if(timrev==1.and.my_prtvol>0)then
-   write(msg, '(a,a,a)' )&
+   write(msg, '(3a)' )&
    ' littlegroup_q : able to use time-reversal symmetry. ',ch10,&
    '  (except for gamma, not yet able to use time-reversal symmetry)'
    call wrtout(std_out,msg)

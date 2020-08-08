@@ -673,7 +673,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:)
- !real(dp),allocatable :: phfreqs_ibz(:,:), displ_cart_ibz(:,:,:,:,:)
+ !real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_ibz(:,:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
  logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
@@ -947,13 +947,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (sigma%mrta == 0) call ddkop%free()
 
  ! Precompute ph frequencies in the IBZ. Will be used to symmetrize quantities for q in IBZ(k)
- !ABI_CALLOC(phfreqs_ibz, (natom3, nkpt))
- !ABI_CALLOC(displ_cart_ibz, (2, 3, cryst%natom, natom3, nkpt))
- !do iq_ibz=1,eband%nkpt
- !   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
- !  call ifc%fourq(cryst, ebands%kptns(:,iq_ibz), &
- !                 phfreqs_ibz(:,iq_ibz), displ_cart_ibz(:,:,:,:,iq_ibz)) !, out_displ_red=displ_red)
+ !ABI_CALLOC(phfreqs_ibz, (natom3, sigma%nqibz))
+ !ABI_CALLOC(pheigvec_ibz, (2, natom3, natom3, sigma%nqibz))
+ !do iq_ibz=1,sigma%nqibz
+ !  if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+ !  call ifc%fourq(cryst, sigma%qibz(:,iq_ibz), phfreqs_ibz(:, iq_ibz), displ_cart, out_eigvec=pheigvec_ibz(:,:,:,iq_ibz))
  !end do
+ !call xmpi_sum(phfreqs_ibz, comm, ierr)
+ !call xmpi_sum(pheigvec_ibz, comm, ierr)
  !ABI_FREE(phfreqs_ibz)
  !ABI_FREE(displ_cart_ibz)
 

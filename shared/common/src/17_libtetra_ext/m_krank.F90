@@ -332,15 +332,15 @@ integer function get_rank(krank, kpt) result(rank)
  end if
  if(abs(redkpt(3))<tol12)redkpt(3)=zero
 
-! rank = int(real(krank%max_linear_density)*(redkpt(3)+half+tol8 +&
-!            real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
+! rank = int(real(krank%max_linear_density)*(redkpt(3)+half+tol8 + &
+!            real(krank%max_linear_density)*(redkpt(2)+half+tol8 + &
 !            real(krank%max_linear_density)*(redkpt(1)+half+tol8))))
- rank = nint(real(krank%max_linear_density)*(redkpt(1)+half+tol8 +&
-             real(krank%max_linear_density)*(redkpt(2)+half+tol8 +&
+ rank = nint(real(krank%max_linear_density)*(redkpt(1)+half+tol8 + &
+             real(krank%max_linear_density)*(redkpt(2)+half+tol8 + &
              real(krank%max_linear_density)*(redkpt(3)+half+tol8))))
 
  if (rank > krank%max_rank) then
-   write(msg,'(a,i0,a,i0)') ' Rank should be inferior to: ', krank%max_rank, ' but got: ', rank
+   write(msg,'(2(a,i0))') ' Rank should be inferior to: ', krank%max_rank, ' but got: ', rank
    MSG_ERROR(msg)
  end if
 
@@ -350,7 +350,6 @@ end function get_rank
 !----------------------------------------------------------------------
 
 !!****f* m_krank/krank_get_index
-!!
 !! NAME
 !! krank_get_index
 !!
@@ -526,42 +525,29 @@ end subroutine krank_print
 !! krank_get_mapping
 !!
 !! FUNCTION
-!! Given a list of nkpt1 initial k points kptns1 and a list of nkpt2
-!! final k points kptns2, associates each final kpt with a "closest"
-!! initial k point (or symmetric thereof, also taking possible umklapp)
-!! as determined by a metric gmet, that commutes with the symmetry operations.
-!! The algorithm does not scale as nkpt1 times nkpt2, thanks
-!! to the ordering of the kptns1 and kptns2 vectors according to their
-!! lengths, and comparison first between vectors of similar lengths.
+!! Use symmetries to map input kptn2 to the list of k-points used to generate krank_t.
+!! Similar to listkk but, unlike listkk, this algo does not try to minimize the distance
+!! Mainly used tp map two set of k-points associated to the same grid (e.g. BZ --> IBZ, IBZ(q) --> IBZ ect.
+!! Must faster than listkk for dense meshes
+!! although this routine requires the allocation of temporary array of shape (2, self%min_rank:self%max_rank)
 !! Returns indirect indexing list indkk.
 !!
 !! INPUTS
-!!  gmet(3,3)=reciprocal space metric (bohr^-2)
-!!  kptns1(3,nkpt1)=list of initial k points (reduced coordinates)
 !!  kptns2(3,nkpt2)=list of final k points
-!!  nkpt1=number of initial k points
 !!  nkpt2=number of final k points
-!!  nsym=number of symmetry elements in space group
-!!  sppoldbl=if 1, no spin-polarisation doubling
-!!           if 2, spin-polarisation doubling using symafm
+!!  gmet(3,3)=reciprocal space metric (bohr^-2)
+!!  nsym=number of symmetry elements
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
-!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
+!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec)
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
-!!  comm=MPI communicator.
-!!  [exit_loop]: if present and True, exit the loop over k-points in the sphere as soon as the lenght**2 of the
-!!    difference vector is smaller than tol12. Default: False
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
 !!  dksqmax=maximal value of the norm**2 of the difference between
 !!    a kpt2 vector and the closest k-point found from the kptns1 set, using symmetries.
-!!  indkk(nkpt2*sppoldbl,6)=describe k point number of kpt1 that allows to
-!!    generate wavefunctions closest to given kpt2
-!!    if sppoldbl=2, use symafm to generate spin down wfs from spin up wfs
-!!
-!!    indkk(:,1)=k point number of kptns1
+!!  indkk(6, nkpt2)=
+!!    indkk(:,1)=k point index of kptns1
 !!    indkk(:,2)=symmetry operation to be applied to kpt1, to give kpt1a
-!!      (if 0, means no symmetry operation, equivalent to identity )
 !!    indkk(:,3:5)=shift in reciprocal space to be given to kpt1a,
 !!      to give kpt1b, that is the closest to kpt2.
 !!    indkk(:,6)=1 if time-reversal was used to generate kpt1a from kpt1, 0 otherwise
@@ -616,7 +602,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
    do itimrev=0,timrev
      do isym=1,nsym
-       ! Select magnetic characteristic of symmetries
+       ! Do not use magnetic symmetries.
        if (symafm(isym) == -1) cycle
 
        kpt1a = (1 - 2*itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))

@@ -523,7 +523,6 @@ subroutine fstab_init(fstab, ebands, cryst, dtset, comm)
  ABI_FREE(kbz)
  ABI_FREE(full2ebands)
 
-
  call cwtime_report(" fstab_init%fs_weights:", cpu, wall, gflops)
 
 end subroutine fstab_init

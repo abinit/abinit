@@ -1695,6 +1695,8 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
  ! Disable it if no parallelism over perturbations.
  qcache%use_3natom_cache = .True.
  if (my_npert == natom3) qcache%use_3natom_cache = .False.
+ ! Disabled as slow FT R --> q seems to be faster.
+ qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
    ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
@@ -3403,14 +3405,13 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  integer,parameter :: cplex2 = 2
  integer :: ispden, imyp, idir, ipert, timerev_q, ierr, my_add_lr !, ifft, ir
  real(dp) :: qmod
- real(sp) :: beta_sp !, wr !,wi
+ !real(sp) :: beta_sp !, wr !,wi
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
  real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
- !real(dp),allocatable :: weiqr(:,:)
- real(sp),allocatable :: weiqr(:,:), ov1r_sp(:, :)
+ real(sp),allocatable :: weiqr_sp(:,:), ov1r_sp(:, :), eiqr_sp(:,:)
 
 ! *************************************************************************
 
@@ -3437,12 +3438,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  ! Examine the symmetries of the q-wavevector
  call littlegroup_q(db%cryst%nsym, qpt, symq, db%cryst%symrec, db%cryst%symafm, timerev_q, prtvol=db%prtvol)
 
- ! Compute e^{iqR} FT phases for this q-point.
- ABI_MALLOC(weiqr, (2, db%my_nrpt))
- ABI_MALLOC(eiqr, (2, db%my_nrpt))
- call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
-
- ! Compute long-range part of the coupling potential
+ ! Compute long-range part of the coupling potential.
  if (my_add_lr > 0) then
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
@@ -3451,51 +3447,65 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    end do
  end if
 
+ ! Compute e^{iq.R} FT phases for this q-point.
+ ABI_MALLOC(eiqr, (2, db%my_nrpt))
+ call calc_eiqr(qpt, db%my_nrpt, db%my_rpt, eiqr)
+
  ! Interpolate potentials (results in ov1r)
- ov1r = zero
+ if (db%nprocs_rpt > 1) ov1r = zero
  ABI_MALLOC(ov1r_sp, (2, nfft))
+
+#define DEV_USE_SGEMV
+
+#ifdef DEV_USE_SGEMV
+ ABI_MALLOC(weiqr_sp, (db%my_nrpt, 2))
+ ABI_MALLOC(eiqr_sp, (db%my_nrpt, 2))
+ eiqr_sp = transpose(eiqr)
+#else
+ ABI_MALLOC(weiqr_sp, (2, db%my_nrpt))
+#endif
 
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
-   weiqr(1,:) = db%my_wratm(:, ipert) * eiqr(1,:)
-   weiqr(2,:) = db%my_wratm(:, ipert) * eiqr(2,:)
+
+#ifdef DEV_USE_SGEMV
+   weiqr_sp(:, 1) = db%my_wratm(:, ipert) * eiqr_sp(:, 1)
+   weiqr_sp(:, 2) = db%my_wratm(:, ipert) * eiqr_sp(:, 2)
+#else
+   weiqr_sp(1, :) = db%my_wratm(:, ipert) * eiqr(1, :)
+   weiqr_sp(2, :) = db%my_wratm(:, ipert) * eiqr(2, :)
+#endif
 
    do ispden=1,db%nspden
-#if 0
-     ! Slow FT.
+
+#ifdef DEV_USE_SGEMV
+     ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
+     ! Use BLAS2 to compute ov1r = W (x + iy) but need to handle kind conversion as ov1r is double-precision
+
+     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
+                zero_sp, ov1r_sp(1,1), 2)
+     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,2), 1, &
+                zero_sp, ov1r_sp(2,1), 2)
+
+     ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
+     ! Add the long-range part of the potential
+     if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
+
+#else
+     ! Slow FT with do loops
      do ifft=1,nfft
        do ir=1,db%my_nrpt
          wr = db%wsr(1, ir, ifft, ispden, imyp)
-         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + wr * weiqr(:, ir)
+         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + wr * weiqr_sp(:, ir)
          !wi = db%wsr(2, ir, ifft, ispden, imyp)
-         !ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr(1, ir) ! - wi * weiqr(2, ir)
-         !ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr(2, ir) ! + wi * weiqr(1, ir)
+         !ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr_sp(1, ir) ! - wi * weiqr_sp(2, ir)
+         !ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr_sp(2, ir) ! + wi * weiqr_sp(1, ir)
        end do
        ! Add the long-range part of the potential
        if (my_add_lr > 0) then
          ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + v1r_lr(:, ifft, imyp)
        end if
      end do ! ifft
-#else
-     ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
-     ! Use BLAS2 to compute ov1r = W (x + iy) + beta * v1r_lr but need to handle kind conversion in input/output.
-     ! Believe it or not, it seems the above version is faster, perhaps due to the conversion sp <--> dp
-     ! needed to call BLAS.
-     beta_sp = zero_sp
-     !if (my_add_lr > 0) then
-     !  ! Add the long-range part of the potential
-     !  beta_sp = one_sp
-     !  ov1r_sp(:, :) = v1r_lr(:, :, imyp)
-     !end if
-
-     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr(1,1), 2, &
-                beta_sp, ov1r_sp(1,1), 2)
-     call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr(2,1), 2, &
-                beta_sp, ov1r_sp(2,1), 2)
-
-     ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
-     ! Add the long-range part of the potential
-     if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
 #endif
 
      ! Remove the phase to get the lattice-periodic part.
@@ -3505,7 +3515,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      if (db%nprocs_rpt > 1) call xmpi_sum(ov1r(:,:,ispden,imyp), comm_rpt, ierr)
    end do ! ispden
 
-   ! Be careful with gamma and cplex!
+   ! Be careful with Gamma-point and cplex!
    if (db%symv1 == 1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
      call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, &
          db%mpi_enreg, ov1r(:,:,:,imyp))
@@ -3520,7 +3530,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    ! WARNING: Only phonon perturbations are considered for the time being.
    ABI_MALLOC(rfpert, (db%mpert))
    rfpert = 0; rfpert(1:db%cryst%natom) = 1; rfdir = 1
-   ABI_MALLOC(pertsy, (3,db%mpert))
+   ABI_MALLOC(pertsy, (3, db%mpert))
    ABI_MALLOC(pflag, (3, db%natom))
 
    ! Determine the symmetrical perturbations. Meaning of pertsy:
@@ -3548,8 +3558,9 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  if (sum(qpt**2) < tol14) ov1r(2, :, :, :) = zero
 
  ABI_FREE(eiqr)
- ABI_FREE(weiqr)
+ ABI_FREE(weiqr_sp)
  ABI_SFREE(v1r_lr)
+ ABI_SFREE(eiqr_sp)
 
 end subroutine dvdb_ftinterp_qpt
 !!***
@@ -5195,6 +5206,7 @@ end subroutine dvdb_merge_files
 !!  calc_eiqr
 !!
 !! FUNCTION
+!!   Compute e^{iq.r} for nrpt R-points.
 !!
 !! INPUTS
 !!
@@ -5213,8 +5225,8 @@ pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 !scalars
  integer,intent(in) :: nrpt
 !arrays
- real(dp),intent(in) :: qpt(3),rpt(3,nrpt)
- real(dp),intent(out) :: eiqr(2,nrpt)
+ real(dp),intent(in) :: qpt(3), rpt(3, nrpt)
+ real(dp),intent(out) :: eiqr(2, nrpt)
 
 !Local variables -------------------------
 !scalars
@@ -5225,7 +5237,7 @@ pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
  do ir=1,nrpt
    qr = two_pi * dot_product(qpt, rpt(:,ir))
-   eiqr(1,ir) = cos(qr); eiqr(2,ir) = sin(qr)
+   eiqr(1, ir) = cos(qr); eiqr(2, ir) = sin(qr)
  end do
 
 end subroutine calc_eiqr
