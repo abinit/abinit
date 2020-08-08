@@ -1329,8 +1329,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    end if
  end do
 
- percent_limit=0.5_dp; if (timopt<0) percent_limit=0.0001_dp
- !percent_limit=tol12
+ percent_limit=0.5_dp
+ !if (timopt<0) percent_limit=0.0001_dp
+ if (timopt<0) percent_limit=tol12
 
 !In case there is parallelism, report times for node 0
 !if (me==0 .and. nproc>1) then
@@ -1376,7 +1377,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      isort = list(ilist)
 
      if ( (times(1,isort)*cpunm  > percent_limit .and. &
-           times(2,isort)*wallnm > percent_limit) .and. ncount(isort)/=0 ) then ! Timing analysis
+           times(2,isort)*wallnm > percent_limit) .and. ncount(isort) /= 0) then ! Timing analysis
 
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
@@ -1683,7 +1684,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 #endif
            end if
            if(ncount(isort)/=0)then
-             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then   ! Does not write a slot if the wall time ratio is below a threshold
+             ! Do not write a slot if the wall time ratio is below a threshold
+             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then
                if ( times(2,isort) < 0.0001 ) times(2,isort) = -1.d0
                write(ount,format01040)names(isort),&
                  times(1,isort),times(1,isort)*cpunm,&

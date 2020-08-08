@@ -32,7 +32,7 @@ module m_eph_double_grid
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_symtk,          only : mati3inv
  use m_crystal,        only : crystal_t
- use m_kpts,           only : listkk
+ use m_kpts,           only : kpts_timrev_from_kptopt !, listkk
  use m_fstrings,       only : itoa, sjoin
 
  implicit none
@@ -180,7 +180,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrlatt_coarse, kptrlatt_dense) result(eph_dg)
+type(eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrlatt_coarse, kptrlatt_dense) result(eph_dg)
 
 !Arguments-------------------------------
  type(crystal_t), intent(in) :: cryst
@@ -188,10 +188,14 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  integer, intent(in) :: kptrlatt_coarse(3,3), kptrlatt_dense(3,3)
 
 !Local variables ------------------------
- integer,parameter :: sppoldbl1=1,timrev1=1
- integer :: i_dense,i_coarse,this_dense,i_subdense,i1,i2,i3,ii,jj,kk
+ !integer,parameter :: sppoldbl1 = 1
+ integer :: i_dense,i_coarse,this_dense,i_subdense,i1,i2,i3,ii,jj,kk,timrev
  integer :: nkpt_coarse(3), nkpt_dense(3), interp_kmult(3), interp_side(3)
  !integer,allocatable :: indkk(:,:)
+
+! *************************************************************************
+
+ timrev = kpts_timrev_from_kptopt(ebands_dense%kptopt)
 
  nkpt_coarse(1) = kptrlatt_coarse(1,1)
  nkpt_coarse(2) = kptrlatt_coarse(2,2)
@@ -221,24 +225,24 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
                (2*interp_side(2)+1)*&
                (2*interp_side(3)+1)
 
-
  write(std_out,*) 'coarse:      ', nkpt_coarse
  write(std_out,*) 'fine:        ', nkpt_dense
  write(std_out,*) 'interp_kmult:', interp_kmult
  write(std_out,*) 'ndiv:        ', eph_dg%ndiv
+
  ABI_CHECK(all(nkpt_dense(:) >= nkpt_coarse(:)), 'fine mesh is smaller than coarse mesh.')
 
- ABI_MALLOC(eph_dg%coarse_to_dense,(eph_dg%coarse_nbz,eph_dg%ndiv))
+ ABI_MALLOC(eph_dg%coarse_to_dense, (eph_dg%coarse_nbz, eph_dg%ndiv))
 
- ABI_MALLOC(eph_dg%dense_to_indexes,(3,eph_dg%dense_nbz))
- ABI_MALLOC(eph_dg%indexes_to_dense,(nkpt_dense(1),nkpt_dense(2),nkpt_dense(3)))
+ ABI_MALLOC(eph_dg%dense_to_indexes, (3, eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%indexes_to_dense, (nkpt_dense(1), nkpt_dense(2), nkpt_dense(3)))
 
- ABI_MALLOC(eph_dg%coarse_to_indexes,(3,eph_dg%dense_nbz))
- ABI_MALLOC(eph_dg%indexes_to_coarse,(nkpt_coarse(1),nkpt_coarse(2),nkpt_coarse(3)))
+ ABI_MALLOC(eph_dg%coarse_to_indexes, (3, eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%indexes_to_coarse, (nkpt_coarse(1), nkpt_coarse(2), nkpt_coarse(3)))
 
- ABI_MALLOC(eph_dg%bz2lgkibz,(eph_dg%dense_nbz))
- ABI_MALLOC(eph_dg%mapping,(6,eph_dg%ndiv))
- ABI_MALLOC(eph_dg%weights_dense,(eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%bz2lgkibz, (eph_dg%dense_nbz))
+ ABI_MALLOC(eph_dg%mapping, (6, eph_dg%ndiv))
+ ABI_MALLOC(eph_dg%weights_dense, (eph_dg%dense_nbz))
 
  write(std_out,*) 'create fine to coarse mapping'
  ! generate mapping of points in dense bz to the dense bz
@@ -285,7 +289,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
          enddo
        enddo
        eph_dg%indexes_to_coarse(ii,jj,kk) = i_coarse
-       eph_dg%coarse_to_indexes(:,i_coarse) = [ii,jj,kk]
+       eph_dg%coarse_to_indexes(:,i_coarse) = [ii, jj, kk]
      enddo
    enddo
  enddo
@@ -342,19 +346,17 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  write(std_out,*) 'map bz -> ibz'
  ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
  call eph_double_grid_bz2ibz(eph_dg, ebands_dense%kptns, eph_dg%dense_nibz,&
-                             cryst%symrel, cryst%nsym, eph_dg%bz2ibz_dense, timrev1)
+                             cryst%symrel, cryst%nsym, eph_dg%bz2ibz_dense, timrev)
 
-#if 0
- ABI_MALLOC(indkk,(eph_dg%dense_nbz,6))
- call listkk(dksqmax, cryst%gmet, indkk, ebands_dense%kptns, eph_dg%kpts_dense,&
-             eph_dg%dense_nibz, eph_dg%dense_nbz, cryst%nsym,&
-             sppoldbl1, cryst%symafm, cryst%symrel, timrev1, use_symrec=.False.)
+ !ABI_MALLOC(indkk,(eph_dg%dense_nbz,6))
+ !call listkk(dksqmax, cryst%gmet, indkk, ebands_dense%kptns, eph_dg%kpts_dense,&
+ !            eph_dg%dense_nibz, eph_dg%dense_nbz, cryst%nsym,&
+ !            sppoldbl1, cryst%symafm, cryst%symrel, timrev, use_symrec=.False.)
 
- do ii=1,eph_dg%dense_nbz
-   ABI_CHECK((indkk(ii,1)==eph_dg%bz2ibz_dense(ii)),'Unmatching indexes')
- end do
- ABI_FREE(indkk)
-#endif
+ !do ii=1,eph_dg%dense_nbz
+ !  ABI_CHECK((indkk(ii,1)==eph_dg%bz2ibz_dense(ii)),'Unmatching indexes')
+ !end do
+ !ABI_FREE(indkk)
 
 end function eph_double_grid_new
 !!***

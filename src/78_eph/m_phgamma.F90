@@ -31,6 +31,7 @@
 
 #include "abi_common.h"
 
+#define USE_KRANK
 
 module m_phgamma
 
@@ -3505,9 +3506,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, timrev1 = 1, ider0 = 0, idir0 = 0
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, eph_scalprod0 = 0
- integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz
+ integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,iq_ibz, timrev
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2, band_k, band_kq
  integer :: ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
@@ -3535,6 +3536,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  type(a2fw_tr_t) :: a2fw_tr
  type(ddkop_t) :: ddkop
  type(xcomm_t) :: pert_comm, qs_comm, qpt_comm, bsum_comm, kpt_comm, spin_comm, pkb_comm !, ncwrite_comm
+ type(krank_t) :: krank
  character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
@@ -3587,6 +3589,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  nkibz = ebands%nkpt; mband = ebands%mband
+ timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  ! FFT meshes
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -4108,8 +4111,16 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
        ! Skip this point if kq does not belong to the FS window.
        if (ikq_bz == -1) cycle
 
+#ifdef USE_KRANK
+       krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
+       call krank%get_mapping(1, kq, dksqmax, cryst%gmet, indkk_kq, cryst%nsym, cryst%symafm, cryst%symrel, timrev, &
+                              use_symrec=.False.)
+       call krank%free()
+#else
+
        call listkk(dksqmax, cryst%gmet, indkk_kq, ebands%kptns, kq, ebands%nkpt, 1, cryst%nsym,&
-          1, cryst%symafm, cryst%symrel, timrev1, xmpi_comm_self, use_symrec=.False.)
+          1, cryst%symafm, cryst%symrel, timrev, xmpi_comm_self, use_symrec=.False.)
+#endif
 
        if (dksqmax > tol12) then
          write(msg, '(3a,es16.6,7a)' ) &

@@ -5577,7 +5577,7 @@ pure subroutine phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
  end do
 
 end subroutine phdispl_from_eigvec
-!!!***
+!!***
 
 !!****f* m_dynmat/dfpt_prtph
 !! NAME

@@ -588,7 +588,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
 
 !Local variables-------------------------------
 !scalars
- integer :: irank, ikpt1, ikpt2, itimrev, isym, isk, ierr, irank2, ii
+ integer :: irank, ikpt1, ikpt2, itimrev, isym, ii
  logical :: my_use_symrec
 !arrays
  integer :: dkint(3), my_symmat(3, 3, nsym)

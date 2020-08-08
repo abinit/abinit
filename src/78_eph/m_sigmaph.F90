@@ -1161,11 +1161,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    ! Compute nonlocal form factors ffnlk at (k+G)
    ABI_MALLOC(ffnlk, (npw_k, 1, psps%lmnmax, psps%ntypat))
-   call mkffnl(psps%dimekb, 1, psps%ekb, ffnlk, psps%ffspl,&
-     cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax,&
-     psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat,&
-     psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum, &
-     comm=sigma%pert_comm%value)
+   call mkffnl(psps%dimekb, 1, psps%ekb, ffnlk, psps%ffspl, &
+     cryst%gmet, cryst%gprimd, ider0, idir0, psps%indlmn, kg_k, kpg_k, kk, psps%lmnmax, &
+     psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, psps%ntypat, &
+     psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum) !, &
+     !comm=sigma%pert_comm%value)
 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
@@ -1394,8 +1394,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
        call mkffnl(psps%dimekb, 1, psps%ekb, ffnl1, psps%ffspl, cryst%gmet, cryst%gprimd, ider0, idir0, &
          psps%indlmn, kg_kq, kpg1_k, kq, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg1, &
-         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq, &
-         comm=sigma%pert_comm%value)
+         npw_kq, psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_kq, ylmgr_kq) !, &
+         !comm=sigma%pert_comm%value)
 
        if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
@@ -3643,9 +3643,9 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
 
 !Local variables -----------------------------------------
 !scalars
- integer,parameter :: sppoldbl1 = 1
+ integer,parameter :: sppoldbl1 = 1, master = 0
  integer :: spin, ikpt, ikcalc, iband, itemp, nsppol, nkpt, timrev, band_ks, bstart_ks, nbcalc_ks, mband
- integer :: bmin, bmax
+ integer :: bmin, bmax, my_rank, ierr
 #ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
@@ -3656,6 +3656,8 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  real(dp) :: dksqmax
 
 ! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
 
  ! copy useful dimensions
  nsppol = self%nsppol; nkpt = ebands%nkpt
@@ -3706,44 +3708,50 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  ABI_CALLOC(velocity, (3, bmin:bmax, nkpt, nsppol))
  ABI_CALLOC(linewidths, (self%ntemp, bmin:bmax, nkpt, nsppol, 2))
 
- do spin=1,nsppol
-   do ikcalc=1,self%nkcalc
-     bstart_ks = self%bstart_ks(ikcalc, spin)
-     nbcalc_ks = self%nbcalc_ks(ikcalc, spin)
-     do iband=1,nbcalc_ks
-       ! band index in global array.
-       band_ks = iband + bstart_ks - 1
-       ! kcalc --> ibz index
-       ikpt = indkk(ikcalc, 1)
+ if (my_rank == master) then
+   do spin=1,nsppol
+     do ikcalc=1,self%nkcalc
+       bstart_ks = self%bstart_ks(ikcalc, spin)
+       nbcalc_ks = self%nbcalc_ks(ikcalc, spin)
+       do iband=1,nbcalc_ks
+         ! band index in global array.
+         band_ks = iband + bstart_ks - 1
+         ! kcalc --> ibz index
+         ikpt = indkk(ikcalc, 1)
 
-       do itemp=1,self%ntemp
-         ! Read SERTA lifetimes
-         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), &
-                 linewidths(itemp, band_ks, ikpt, spin, 1), start=[2, itemp, iband, ikcalc, spin])
+         do itemp=1,self%ntemp
+           ! Read SERTA lifetimes
+           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), &
+                   linewidths(itemp, band_ks, ikpt, spin, 1), start=[2, itemp, iband, ikcalc, spin])
+           NCF_CHECK(ncerr)
+
+           ! Read MRTA lifetimes
+           if (self%mrta > 0) then
+             ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
+                                  linewidths(itemp, band_ks, ikpt, spin, 2), start=[itemp, iband, ikcalc, spin])
+             NCF_CHECK(ncerr)
+           end if
+         end do
+
+         ! Read band velocities
+         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), &
+                              velocity(:, band_ks, ikpt, spin), start=[1, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
 
-         ! Read MRTA lifetimes
-         if (self%mrta > 0) then
-           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), &
-                                linewidths(itemp, band_ks, ikpt, spin, 2), start=[itemp, iband, ikcalc, spin])
-           NCF_CHECK(ncerr)
-         end if
        end do
-
-       ! Read band velocities
-       ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), &
-                            velocity(:, band_ks, ikpt, spin), start=[1, iband, ikcalc, spin])
-       NCF_CHECK(ncerr)
-
      end do
    end do
- end do
+ end if
 #endif
 
  ABI_FREE(indkk)
 
- ! This so that output linewidths are always positive independently of the kind of self-energy used (retarded or advanced)
+ ! This so that output linewidths are always positive independently
+ ! of the kind of self-energy used (retarded or advanced)
  linewidths = abs(linewidths)
+
+ call xmpi_bcast(linewidths, master, comm, ierr)
+ call xmpi_bcast(velocity, master, comm, ierr)
 
 end function sigmaph_get_ebands
 !!***
@@ -5511,7 +5519,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, sppoldbl1 = 1, master = 0
- integer :: nqibz, iq_bz, iq_ibz, iqbz_rank, nqbz, nqibz_symkpt, nqibz_symkpt_new, my_rank, ii
+ integer :: nqibz, iq_bz, iq_ibz, nqbz, ii
  integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
  real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, err_eigvec, maxerr_eigvec, tol
  logical :: isirr_q
@@ -5524,7 +5532,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp) :: phfrq(3*cryst%natom)
- real(dp) :: eigvec_in(2,3*cryst%natom,3*cryst%natom), eigvec_out(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_in(2,3*cryst%natom,3*cryst%natom),
  real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: phfreqs_ibz(:,:), displ_cart_ibz(:,:,:,:),eigvec_ibz(:,:,:,:)
 
@@ -5622,7 +5630,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
      maxerr_eigvec = max(maxerr_eigvec, err_eigvec)
      write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> qibz: ", trim(ktoa(qibz(:, iq_ibz)))
      write(std_out, "(a,2(i0,1x),a)")" qbz image through isym, itimrev: ", isym, itimrev, trim(ltoa(cryst%tnons(:, isym)))
-     write(std_out, "(a,l)")" has_r0: ", any(cryst%indsym(:, isym, :) /= 0)
+     write(std_out, "(a,l1)")" has_r0: ", any(cryst%indsym(:, isym, :) /= 0)
      write(std_out, *) "err_eigvec ", err_eigvec, " > tol:", tol
      do ii=1,natom3
        if (all(abs(eigvec_out(:,:,ii) - eigvec_bz(:,:,ii)) < tol)) cycle
