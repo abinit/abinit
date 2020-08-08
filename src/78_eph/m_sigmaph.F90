@@ -340,18 +340,18 @@ module m_sigmaph
    ! (natom3)
    ! A mask to skip accumulating the contribution of certain phonon modes
 
-  integer,allocatable:: ind_bz2ibz(:,:)
+  integer,allocatable:: ind_qbz2ibz(:,:)
    ! (6, %nqibz)
-   ! Mapping q IBZ to BZ
+   ! Mapping qBZ to IBZ
 
   integer,allocatable:: indkk_kq(:, :)
    ! (6, %nqibz_k))
    ! Mapping k+q --> initial IBZ. Depends on ikcalc.
 
-  integer,allocatable :: indq2dvdb_k(:,:)
+  integer,allocatable :: ind_q2dvdb_k(:,:)
    ! (6, %nqibz_k))
-   ! Mapping qibz_k --> IBZ found in DVDB file. Used when DFPT potentials are read from DVDB file
-   ! so that we know how to access/symmetrize v1scf
+   ! Mapping qibz_k --> IBZ found in DVDB file.
+   ! Used when DFPT potentials are read from DVDB file so that we know how to access/symmetrize v1scf
    ! Depends on ikcalc.
 
   integer,allocatable :: ind_ibzk2ibz(:,:)
@@ -359,8 +359,8 @@ module m_sigmaph
    ! Mapping qibz_k --> IBZ defined by eph_ngqpt_fine.
    ! Depends on ikcalc.
 
-  integer,allocatable :: ibz2dvdb(:)
-   ! (6, %nqpts))
+  integer,allocatable :: qibz2dvdb(:)
+   ! (%nqibz))
    ! Mapping dvdb%ibz --> %ibz
 
   real(dp),allocatable :: kcalc(:,:)
@@ -1063,8 +1063,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ! Activate FT interpolation automatically if required q-points in the IBZ are not found in the DVDB.
  sigma%use_ftinterp = .False.
- ABI_MALLOC(sigma%ibz2dvdb, (sigma%nqibz))
- if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, sigma%ibz2dvdb, comm) /= 0) then
+ ABI_MALLOC(sigma%qibz2dvdb, (sigma%nqibz))
+ if (dvdb%find_qpts(sigma%nqibz, sigma%qibz, sigma%qibz2dvdb, comm) /= 0) then
    call wrtout(unts, " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
    sigma%use_ftinterp = .True.
  else
@@ -1109,7 +1109,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
    do iq_ibz=1,sigma%nqibz
      if (sigma%itreat_qibz(iq_ibz) == 0) cycle
-     db_iqpt = sigma%ibz2dvdb(iq_ibz)
+     db_iqpt = sigma%qibz2dvdb(iq_ibz)
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(sigma%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
@@ -1290,9 +1290,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        else
          ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
          ! This call allocates v1scf(cplex, nfftf, nspden, my_npert))
-         db_iqpt = sigma%indq2dvdb_k(1, iq_ibz)
+         db_iqpt = sigma%ind_q2dvdb_k(1, iq_ibz)
          ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file."))
-         call dvdb%readsym_qbz(cryst, qpt, sigma%indq2dvdb_k(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%pert_comm%value)
+         call dvdb%readsym_qbz(cryst, qpt, sigma%ind_q2dvdb_k(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%pert_comm%value)
        end if
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
@@ -2403,9 +2403,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
  end if
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
- qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
+ qptrlatt = 0; qptrlatt(1, 1) = new%ngqpt(1); qptrlatt(2, 2) = new%ngqpt(2); qptrlatt(3, 3) = new%ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
-                             new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_bz2ibz)
+                             new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_qbz2ibz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(temp, (6, new%nqbz))
@@ -2419,12 +2419,12 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
     MSG_ERROR("Cannot map BZ to IBZ!")
  end if
 
- new%ind_bz2ibz(1,:) = temp(1,:)
- new%ind_bz2ibz(2,:) = temp(2,:)
- new%ind_bz2ibz(3,:) = temp(6,:)
- new%ind_bz2ibz(4,:) = temp(3,:)
- new%ind_bz2ibz(5,:) = temp(4,:)
- new%ind_bz2ibz(6,:) = temp(5,:)
+ new%ind_qbz2ibz(1,:) = temp(1,:)
+ new%ind_qbz2ibz(2,:) = temp(2,:)
+ new%ind_qbz2ibz(3,:) = temp(6,:)
+ new%ind_qbz2ibz(4,:) = temp(3,:)
+ new%ind_qbz2ibz(5,:) = temp(4,:)
+ new%ind_qbz2ibz(6,:) = temp(5,:)
  ABI_FREE(temp)
 !END DEBUG
 
@@ -3668,7 +3668,7 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, brange, linewidt
  ! store mapping to return
  if (present(indq2ebands)) then
    ABI_MALLOC(indq2ebands, (self%nkcalc))
-   indq2ebands(:) = indkk(1,:)
+   indq2ebands(:) = indkk(1, :)
  end if
 
  ! Allocate using only the relevant bands for transport
@@ -3837,11 +3837,11 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%my_pinfo)
  ABI_SFREE(self%pert_table)
  ABI_SFREE(self%phmodes_skip)
- ABI_SFREE(self%ind_bz2ibz)
+ ABI_SFREE(self%ind_qbz2ibz)
  ABI_SFREE(self%indkk_kq)
- ABI_SFREE(self%indq2dvdb_k)
+ ABI_SFREE(self%ind_q2dvdb_k)
  ABI_SFREE(self%ind_ibzk2ibz)
- ABI_SFREE(self%ibz2dvdb)
+ ABI_SFREE(self%qibz2dvdb)
 
  ! real
  ABI_SFREE(self%kcalc)
@@ -4052,6 +4052,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
    ABI_FREE(iqk2dvdb)
 
  else if (abs(self%symsigma) == 1) then
+
    ! IBZ_k --> BZ --> IBZ
    ABI_REMALLOC(self%ind_ibzk2ibz, (6, self%nqibz_k))
    self%ind_ibzk2ibz = 0
@@ -4067,14 +4068,14 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
      ! check IBZ_k --> BZ
      ABI_CHECK(sum(abs(self%qbz(:,ikpt) - self%qibz_k(:,ibz_k))) < tol8, 'Wrong mapping')
      ! IBZ_k --> IBZ
-     !self%ind_ibzk2ibz(:, ibz_k) = self%ind_bz2ibz(:,ikpt)
-     self%ind_ibzk2ibz(1, ibz_k) = self%ind_bz2ibz(1, ikpt)
-     self%ind_ibzk2ibz(2, ibz_k) = self%ind_bz2ibz(2, ikpt)
-     self%ind_ibzk2ibz(6, ibz_k) = self%ind_bz2ibz(3, ikpt)
-     self%ind_ibzk2ibz(3:5, ibz_k) = self%ind_bz2ibz(4:6, ikpt)
+     !self%ind_ibzk2ibz(:, ibz_k) = self%ind_qbz2ibz(:,ikpt)
+     self%ind_ibzk2ibz(1, ibz_k) = self%ind_qbz2ibz(1, ikpt)
+     self%ind_ibzk2ibz(2, ibz_k) = self%ind_qbz2ibz(2, ikpt)
+     self%ind_ibzk2ibz(6, ibz_k) = self%ind_qbz2ibz(3, ikpt)
+     self%ind_ibzk2ibz(3:5, ibz_k) = self%ind_qbz2ibz(4:6, ikpt)
    end do
    do ikpt=1,self%nqibz_k
-     ABI_CHECK(self%ind_ibzk2ibz(1,ikpt) /= 0, 'Did not find mapping')
+     ABI_CHECK(self%ind_ibzk2ibz(1, ikpt) /= 0, 'Did not find mapping')
    end do
    if (compute_lgk) call lgk%free()
  else
@@ -4091,10 +4092,10 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
    !   q --> -q symmetry is always used for phonons.
    !   we use symrec instead of symrel (see also m_dvdb)
    ! IBZ_K -> BZ -> IBZ -> DVDB
-   ABI_REMALLOC(self%indq2dvdb_k, (6, self%nqibz_k))
-   self%indq2dvdb_k = self%ind_ibzk2ibz
+   ABI_REMALLOC(self%ind_q2dvdb_k, (6, self%nqibz_k))
+   self%ind_q2dvdb_k = self%ind_ibzk2ibz
    do ikpt=1,self%nqibz_k
-     self%indq2dvdb_k(1,ikpt) = self%ibz2dvdb(self%ind_ibzk2ibz(1,ikpt))
+     self%ind_q2dvdb_k(1, ikpt) = self%qibz2dvdb(self%ind_ibzk2ibz(1, ikpt))
    end do
    call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
  end if
@@ -4303,7 +4304,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
            iq_ibz_k = qtab(iq)
            iq_ibz = self%ind_ibzk2ibz(1, iq_ibz_k)
            itreat = int(self%itreat_qibz(iq_ibz), kind=i4b)
-           if (.not. self%use_ftinterp) iq_dvdb = self%indq2dvdb_k(1, iq_ibz_k)
+           if (.not. self%use_ftinterp) iq_dvdb = self%ind_q2dvdb_k(1, iq_ibz_k)
            if (itreat /= 0) then
              if (ii == 1) self%my_nqibz_k = self%my_nqibz_k + 1
              if (ii == 2) then
@@ -5239,17 +5240,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  ABI_FREE(wtk)
  ABI_FREE(kibz)
  ABI_CHECK(nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
-
- ! Build BZ --> IBZ mapping using symrec.
- !ABI_MALLOC(bz2ibz, (nkbz, 6))
- !call listkk(dksqmax, cryst%gmet, bz2ibz, ebands%kptns, kbz, ebands%nkpt, nkbz, cryst%nsym, &
- !     1, cryst%symafm, cryst%symrec, sigma%timrev, comm, exit_loop=.True., use_symrec=.True.)
- !if (dksqmax > tol12) then
- !  write(msg, '(a, es16.6)' ) &
- !   "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ", dksqmax
- !  MSG_ERROR(msg)
- !end if
- !call cwtime_report(" qpoints_oracle_listkk1", cpu, wall, gflops)
 
  ! Make full k-point rank arrays
  krank = krank_new(nkbz, kbz)

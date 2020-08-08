@@ -3,7 +3,7 @@
 !! m_lgroup
 !!
 !! FUNCTION
-!! The little group of a q-point is defined as the subset of the space group that preserves q,
+!! The little group of a q-point is defined as the subgroup of rotations that preserves q,
 !! modulo a G0 vector (also called umklapp vector). Namely:
 !!
 !!    Sq = q + G0
@@ -84,10 +84,10 @@ module m_lgroup
    ! One should pay attention when calling other routines in which timrev is required
    ! Because from Sq = q does not necessarily follow that -Sq = q if q is not on zone-border.
    ! The operations in G-space stored here already include time-reversal if input_timrev == 1
-   ! so one should call k-point routines with timrev = 0.
+   ! so one should call k-point routines with timrev = 0 when using the operations of the little group.
 
    real(dp) :: point(3)
-   ! The external q-point.
+   ! The external q-point in reduced coordinates.
 
    integer,allocatable :: symtab(:,:,:)
    ! symtab(4, 2, cryst%nsym)
@@ -102,16 +102,16 @@ module m_lgroup
 
    integer, allocatable :: symafm_lg(:)
    ! symafm_lg(nsym_lg)
-   ! Anti-ferromagnetic character
+   ! Anti-ferromagnetic character associated to symrec_lg
 
    integer,allocatable :: bz2ibz_smap(:,:)
-   ! bz2ibz_smap(nbz, 6) Mapping BZ --> IBZ.
+   ! bz2ibz_smap(6, nbz) Mapping BZ --> IBZ(q)
    ! Note that here we used the symmetries of the little group.
 
    integer, allocatable :: lgsym2glob(:, :)
    ! lgsym2glob(2, nsym_lg)
    ! Mapping isym_lg --> [isym, itime]
-   ! where isym is the index of the operaion in crystal%symrec
+   ! where isym is the index of the operaion in the global array crystal%symrec
    ! and itim is 2 if time-reversal T must be included else 1.
 
   real(dp) :: gmet(3,3)
@@ -188,13 +188,13 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
  integer :: otimrev_k,ierr,itim,isym,ik_ibz,ik_bz,ksign,isym_lgk
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
- real(dp) :: kred(3),shift(3)
  integer,allocatable :: ibz2bz(:), iperm(:), inv_iperm(:)
+ real(dp) :: kred(3), shift(3)
  real(dp),allocatable :: wtk_folded(:), kord(:,:)
 
 ! *************************************************************************
 
- ! TODO: Option to exclude umklapp/time-reversal symmetry and kptopt
+ ! TODO: Add option to exclude umklapp/time-reversal symmetry and kptopt
  new%point = kpoint
  new%input_timrev = timrev
  new%gmet = cryst%gmet
@@ -234,16 +234,16 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
  ! TODO: In principle here we would like to have a set that contains the initial IBZ.
  call symkpt_new(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
-   new%nsym_lg, new%symrec_lg, my_timrev0, new%bz2ibz_smap, comm)
+                 new%nsym_lg, new%symrec_lg, my_timrev0, new%bz2ibz_smap, comm)
 
  ABI_MALLOC(new%ibz, (3, new%nibz))
  ABI_CALLOC(new%weights, (new%nibz))
 
  do ik_bz=1,nkbz
-   ik_ibz   = new%bz2ibz_smap(1,ik_bz)
-   isym_lgk = new%bz2ibz_smap(2,ik_bz)
-   new%bz2ibz_smap(2,ik_bz) = lgsym2glob(1,isym_lgk)
-   new%bz2ibz_smap(3,ik_bz) = lgsym2glob(2,isym_lgk)
+   ik_ibz   = new%bz2ibz_smap(1, ik_bz)
+   isym_lgk = new%bz2ibz_smap(2, ik_bz)
+   new%bz2ibz_smap(2, ik_bz) = lgsym2glob(1, isym_lgk)
+   new%bz2ibz_smap(3, ik_bz) = lgsym2glob(2, isym_lgk)
    new%weights(ik_ibz) = new%weights(ik_ibz) + 1
  end do
  new%weights(:) = new%weights(:) / nkbz
@@ -408,7 +408,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 
  ! Note use_symrec and timrev0
  call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
-    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, exit_loop=.True., use_symrec=.True.)
+    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
 
  iq_ibz = indkk(1)
  if (dksqmax > tol12) iq_ibz = -1

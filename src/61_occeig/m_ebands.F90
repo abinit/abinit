@@ -6033,7 +6033,7 @@ type(klinterp_t) function klinterp_new(cryst, kptrlatt, nshiftk, shiftk, kptopt,
  ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1, 6))
 
  call listkk(dksqmax, cryst%gmet, bz2ibz, kibz, kfull, nkibz, nkfull, cryst%nsym,&
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+   sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, use_symrec=.True.)
 
  ABI_FREE(kfull)
 

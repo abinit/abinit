@@ -986,7 +986,7 @@ subroutine kptrank_unittests(ptgroup, ngqpt, use_symmetries, comm)
  ! Call listkk
  ABI_MALLOC(bz2ibz_listkk, (nqbz, 6))
  call listkk(dksqmax, cryst%gmet, bz2ibz_listkk, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-             sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+             sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, use_symrec=.True.)
 
  ! Check if indkk is the same
  do iq_bz=1,nqbz

@@ -623,6 +623,7 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
        bz2ibz_smap(:3, ikpt_found) = [ikpt, isym, itim]
        bz2ibz_smap(4:, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
 
+       ! TODO: Use same conventions as in listkk but must propagate the changes!
        !bz2ibz_smap(1:2, ikpt_found) = [ikpt, isym]
        !bz2ibz_smap(3:5, ikpt_found) = nint(-ksym + kbz(:,ikpt_found)  + tol12)
        !bz2ibz_smap(6, ikpt_found) = itim
