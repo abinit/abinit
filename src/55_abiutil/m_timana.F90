@@ -1330,8 +1330,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end do
 
  percent_limit=0.5_dp
- !if (timopt<0) percent_limit=0.0001_dp
- if (timopt<0) percent_limit=tol12
+ if (timopt<0) percent_limit=0.0001_dp
+ !if (timopt<0) percent_limit=tol12
 
 !In case there is parallelism, report times for node 0
 !if (me==0 .and. nproc>1) then

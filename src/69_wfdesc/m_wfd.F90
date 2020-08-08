@@ -545,12 +545,11 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: ider0=0,idir0=0
- integer :: mpw_,npw_k,dimffnl,useylmgr,nkpg,iatom, mkmem_,nkpt_,optder,mgfft
- integer :: iatm,matblk
+ integer,parameter :: ider0 = 0, idir0 = 0
+ integer :: mpw_, npw_k, dimffnl, useylmgr, nkpg, iatom, mkmem_, nkpt_, optder, mgfft, iatm, matblk
  real(dp) :: arg
 !arrays
- integer :: nband_(1),npwarr_(1)
+ integer :: nband_(1), npwarr_(1)
  real(dp),allocatable :: ylmgr_k(:,:,:),kpg_k(:,:),ph1d(:,:)
 
 !************************************************************************
@@ -623,13 +622,13 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 
  ! Compute (k+G) vectors.
  nkpg = 0
- ABI_MALLOC(kpg_k,(npw_k,nkpg))
- if (nkpg>0) call mkkpg(Kdata%kg_k,kpg_k,kpoint,nkpg,npw_k)
+ ABI_MALLOC(kpg_k,(npw_k, nkpg))
+ if (nkpg>0) call mkkpg(Kdata%kg_k, kpg_k, kpoint, nkpg, npw_k)
 
  ! Compute nonlocal form factors fnl_dir0der0 for all (k+G).
  dimffnl = 0
  if (psps%usepaw == 1) dimffnl = 1+3*ider0
- ABI_MALLOC(Kdata%fnl_dir0der0,(npw_k,dimffnl,Psps%lmnmax,Cryst%ntypat))
+ ABI_MALLOC(Kdata%fnl_dir0der0,(npw_k, dimffnl, Psps%lmnmax, Cryst%ntypat))
 
  if (dimffnl /= 0) then
    call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,Kdata%fnl_dir0der0,Psps%ffspl,&
@@ -914,14 +913,14 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  Wfd%ecutsm  = ecutsm
  Wfd%dilatmx = dilatmx
 
- ABI_MALLOC(Wfd%indlmn,(6,Wfd%lmnmax,Wfd%ntypat))
+ ABI_MALLOC(Wfd%indlmn,(6, Wfd%lmnmax, Wfd%ntypat))
  Wfd%indlmn = Psps%indlmn
 
  if (Wfd%usepaw==1) then
-   ABI_MALLOC(Wfd%nlmn_atm,(Cryst%natom))
-   ABI_MALLOC(Wfd%nlmn_type,(Cryst%ntypat))
+   ABI_MALLOC(Wfd%nlmn_atm, (Cryst%natom))
+   ABI_MALLOC(Wfd%nlmn_type, (Cryst%ntypat))
    do iatom=1,Cryst%natom
-     Wfd%nlmn_atm(iatom)=Pawtab(Cryst%typat(iatom))%lmn_size
+     Wfd%nlmn_atm(iatom) = Pawtab(Cryst%typat(iatom))%lmn_size
    end do
 
    do itypat=1,Cryst%ntypat
@@ -936,8 +935,8 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
    end do
  end if
 
- ABI_MALLOC(Wfd%keep_ur,(mband,nkibz,nsppol))
- Wfd%keep_ur=keep_ur
+ ABI_MALLOC(Wfd%keep_ur, (mband, nkibz, nsppol))
+ Wfd%keep_ur = keep_ur
 
  ! Setup of the FFT mesh
  Wfd%ngfft  = ngfft
@@ -948,10 +947,10 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  Wfd%ecut = ecut
 
  ! Precalculate the FFT index of $ R^{-1} (r-\tau) $ used to symmetrize u_Rk.
- ABI_MALLOC(Wfd%irottb,(Wfd%nfftot,Cryst%nsym))
+ ABI_MALLOC(Wfd%irottb,(Wfd%nfftot, Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
- if (.not.iscompatibleFFT) then
+ if (.not. iscompatibleFFT) then
    msg = "FFT mesh is not compatible with symmetries. Wavefunction symmetrization might be affected by large errors!"
    MSG_WARNING(msg)
  end if
@@ -1043,7 +1042,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
        if (bks_mask(band, ik_ibz, spin)) then
          cnt_b = cnt_b + 1
          call wave_init(wfd%s(cnt_s)%k(cnt_k)%b(cnt_b), &
-                        Wfd%usepaw,npw_k,nfft0,Wfd%nspinor,Wfd%natom,Wfd%nlmn_atm,CPR_RANDOM)
+                        Wfd%usepaw, npw_k, nfft0, Wfd%nspinor, Wfd%natom, Wfd%nlmn_atm, CPR_RANDOM)
          wfd%bks2wfd(:, band, ik_ibz, spin) = [cnt_b, cnt_k, cnt_s]
        end if
      end do
@@ -1072,8 +1071,8 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  ! ===================================================
  !
  ! Calculate 1-dim structure factor phase information.
- ABI_MALLOC(Wfd%ph1d, (2,3*(2*Wfd%mgfft+1)*Wfd%natom))
- call getph(Cryst%atindx,Wfd%natom,Wfd%ngfft(1),Wfd%ngfft(2),Wfd%ngfft(3),Wfd%ph1d,Cryst%xred)
+ ABI_MALLOC(Wfd%ph1d, (2, 3*(2*Wfd%mgfft+1)*Wfd%natom))
+ call getph(Cryst%atindx, Wfd%natom, Wfd%ngfft(1), Wfd%ngfft(2), Wfd%ngfft(3), Wfd%ph1d, Cryst%xred)
 
  ! TODO: This one will require some memory if nkibz is large.
  ABI_MALLOC(Wfd%Kdata, (Wfd%nkibz))

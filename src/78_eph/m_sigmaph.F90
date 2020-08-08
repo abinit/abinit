@@ -1346,8 +1346,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
-       ! Finds the boundary of the basis sphere of G vectors (for this kq point)
-       ! for use in improved zero padding of ffts in 3 dimensions.
        if (osc_ecut /= zero) then
          ! Finds the boundary of the basis sphere of G vectors (for this kq point)
          ! for use in improved zero padding of ffts in 3 dimensions.
@@ -1625,9 +1623,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end if
        end if
 
-       ! ==============
-       ! Sum over bands
-       ! ==============
+       ! ================
+       ! Sum over m bands
+       ! ================
        call timab(1903, 1, tsec)
        do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
 
@@ -2564,8 +2562,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
    if (abs(new%symsigma) == 1) then
      cnt = 0
      do spin=1,new%nsppol
-       bstop = new%bstart_ks(ikcalc,spin) + new%nbcalc_ks(ikcalc,spin) - 1
-       call ebands_enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc,spin), bstop, changed, TOL_EDIFF, &
+       bstop = new%bstart_ks(ikcalc, spin) + new%nbcalc_ks(ikcalc, spin) - 1
+       call ebands_enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
                                     degblock=degblock)
        if (changed) then
          new%nbcalc_ks(ikcalc,spin) = bstop - new%bstart_ks(ikcalc,spin) + 1
@@ -2573,7 +2571,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dvdb, dtfi
          if (cnt < 5) then
            write(msg,'(2(a,i0),2a,2(1x,i0))') &
              "Not all the degenerate states for ikcalc: ",ikcalc,", spin: ",spin,ch10, &
-             "were included in the bdgw set. bdgw has been automatically changed to: ",new%bstart_ks(ikcalc,spin),bstop
+             "were included in the bdgw set. bdgw has been automatically changed to: ",new%bstart_ks(ikcalc, spin), bstop
            MSG_COMMENT(msg)
          end if
          write(msg,'(2(a,i0),2a)') &
