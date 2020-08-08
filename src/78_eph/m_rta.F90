@@ -37,6 +37,7 @@ module m_rta
  use m_sigmaph
  use m_dtset
  use m_dtfil
+ use m_krank
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -47,7 +48,7 @@ module m_rta
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div, arth
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
- use m_kpts,           only : listkk, kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
  use m_ddk,            only : ddkstore_t
@@ -334,6 +335,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  type(klinterp_t) :: klinterp
  type(ddkstore_t) :: ds
  type(sigmaph_t) :: sigmaph
+ type(krank_t) :: krank
 !arrays
  integer :: kptrlatt(3,3), unts(2), sigma_ngkpt(3)
  integer,allocatable :: indkk(:,:)
@@ -537,11 +539,12 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
    ! Map the points of the downsampled bands to dense ebands
    timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-   ABI_MALLOC(indkk, (tmp_ebands%nkpt, 6))
+   ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
-   call listkk(dksqmax, cryst%gmet, indkk, new%ebands%kptns, tmp_ebands%kptns, &
-               new%ebands%nkpt, tmp_ebands%nkpt, cryst%nsym, &
-               sppoldbl1, cryst%symafm, cryst%symrec, timrev, comm, exit_loop=.True., use_symrec=.True.)
+   krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
+   call krank%get_mapping(tmp_ebands%nkpt, tmp_ebands%kptns, dksqmax, cryst%gmet, indkk, &
+                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
+   call krank%free()
 
    if (dksqmax > tol12) then
       write(msg, '(3a,es16.6,a)' ) &
@@ -554,14 +557,14 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ABI_MOVE_ALLOC(new%linewidths, tmp_array5)
    ABI_REMALLOC(new%linewidths, (new%ntemp, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol, new%nrta))
    do ikpt=1,tmp_ebands%nkpt
-     new%linewidths(:,:,ikpt,:,:) = tmp_array5(:,:,indkk(ikpt, 1),:,:)
+     new%linewidths(:,:,ikpt,:,:) = tmp_array5(:,:,indkk(1, ikpt),:,:)
    end do
    ABI_FREE(tmp_array5)
 
    ABI_MOVE_ALLOC(new%velocity, tmp_array4)
    ABI_REMALLOC(new%velocity, (3, new%bmin:new%bmax, tmp_ebands%nkpt, nsppol))
    do ikpt=1,tmp_ebands%nkpt
-     new%velocity(:,:,ikpt,:) = tmp_array4(:,:,indkk(ikpt, 1),:)
+     new%velocity(:,:,ikpt,:) = tmp_array4(:,:,indkk(1, ikpt),:)
    end do
    ABI_FREE(tmp_array4)
 

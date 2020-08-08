@@ -616,12 +616,16 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
                                kpt1(3)*symrec(ii,3,isym) )
        end do
 
-       !find this point
+       ! Find this point
        ikpt_found = krank%get_index(ksym)
        if (ikpt_found < 0) cycle
        if (bz2ibz_smap(1, ikpt_found) /= 0) cycle
        bz2ibz_smap(:3, ikpt_found) = [ikpt, isym, itim]
        bz2ibz_smap(4:, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
+
+       !bz2ibz_smap(1:2, ikpt_found) = [ikpt, isym]
+       !bz2ibz_smap(3:5, ikpt_found) = nint(-ksym + kbz(:,ikpt_found)  + tol12)
+       !bz2ibz_smap(6, ikpt_found) = itim
      end do
    end do
  end do

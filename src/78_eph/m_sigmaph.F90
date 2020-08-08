@@ -70,7 +70,7 @@ module m_sigmaph
  use m_cgtk,           only : cgtk_rotate
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm, fxphas_seq
  use m_crystal,        only : crystal_t
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
  use m_occ,            only : occ_fd, occ_be !occ_dfde,
  use m_kg,             only : getph, mkkpg
  use m_bz_mesh,        only : isamek

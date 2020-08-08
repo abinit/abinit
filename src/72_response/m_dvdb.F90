@@ -2909,6 +2909,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ! Use REMALLOC so that we can call this routine multiple times i.e. for chaning add_lr
  db%my_nrpt = my_rstop - my_rstart + 1
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
+
  ABI_REMALLOC(db%my_rpt, (3, db%my_nrpt))
  db%my_rpt = all_rpt(:, my_rstart:my_rstop)
  ABI_REMALLOC(db%my_irpt2tot, (db%my_nrpt))
@@ -2963,11 +2964,11 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
      iqst = iqst + 1
      !if (mod(ii, nproc) /= my_rank) cycle ! MPI parallelism.
      iq_bz = iperm(iqst)
-     ABI_CHECK(iq_ibz == indqq(iq_bz,1), "iq_ibz !/ indqq(1)")
+     ABI_CHECK(iq_ibz == indqq(1, iq_bz), "iq_ibz !/ indqq(1)")
      qpt_bz = qbz(:, iq_bz)
      !if (all(abs(qpt_bz) < tol12)) cycle
      ! IS(q_ibz) + g0q = q_bz
-     isym = indqq(iq_bz, 2); itimrev = indqq(iq_bz, 6) + 1; g0q = indqq(iq_bz, 3:5)
+     isym = indqq(2, iq_bz); itimrev = indqq(6, iq_bz) + 1; g0q = indqq(3:5, iq_bz)
      isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
      !write(std_out, *)"qbz", trim(ktoa(qpt_bz)), " --> qibz ", trim(ktoa(qibz(:,iq_ibz)))
      !write(std_out, *)"via isym, itimrev, g0q:", isym, itimrev, g0q
@@ -3167,7 +3168,7 @@ end subroutine dvdb_get_maxw
 !!  prepare_ftinterp
 !!
 !! FUNCTION
-!!
+!!  Internal helper function used to prepare the Fourier interpolation of the DFPT potentials.
 
 subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
                             qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, comm)
@@ -3185,7 +3186,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1, timrev1=1, cutmode2=2
+ integer,parameter :: timrev1=1, cutmode2=2
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
@@ -3280,15 +3281,12 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ! Find correspondence BZ --> IBZ. Note:
  ! q --> -q symmetry is always used for phonons.
  ! we use symrec instead of symrel
- ABI_MALLOC(indqq, (nqbz*sppoldbl1, 6))
 
- call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
-
- !qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
- !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- !call qrank%free()
+ ABI_MALLOC(indqq, (6, nqbz))
+ qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -3298,7 +3296,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_MALLOC(iperm, (nqbz))
  ABI_MALLOC(bz2ibz_sort, (nqbz))
  iperm = [(ii, ii=1,nqbz)]
- bz2ibz_sort = indqq(:,1)
+ bz2ibz_sort = indqq(1, :)
  call sort_int(nqbz, bz2ibz_sort, iperm)
 
  ! Reconstruct the IBZ according to what is present in the DVDB.
@@ -3345,13 +3343,10 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_FREE(bz2ibz_sort)
 
  ! Redo the mapping with the new IBZ
- call listkk(dksqmax, cryst%gmet, indqq, qibz, qbz, nqibz, nqbz, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, exit_loop=.True., use_symrec=.True.)
-
- !qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- !call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
- !                       cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- !call qrank%free()
+ qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
+ call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
+                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ call qrank%free()
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")

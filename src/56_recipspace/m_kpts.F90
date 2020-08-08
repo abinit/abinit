@@ -1409,7 +1409,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 #endif
 
  else if(kptopt==3)then
-   ABI_CALLOC(bz2ibz_smap, (6, nkpt_fullbz))
+   ABI_ICALLOC(bz2ibz_smap, (6, nkpt_fullbz))
    bz2ibz_smap(1,:) = [(ii,ii=1,nkpt_fullbz)]
    bz2ibz_smap(2,:) = 1 !isym
    nkpt_computed=nkpt_fullbz
