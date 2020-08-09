@@ -5523,7 +5523,6 @@ end subroutine pheigvec_normalize
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/phdispl_from_eigvec
-!!
 !! NAME
 !! phdispl_from_eigvec
 !!

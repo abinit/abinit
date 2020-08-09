@@ -3404,12 +3404,12 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !scalars
  integer,parameter :: cplex2 = 2
  integer :: ispden, imyp, idir, ipert, timerev_q, ierr, my_add_lr !, ifft, ir
- real(dp) :: qmod
+ !real(dp) :: qmod
  !real(sp) :: beta_sp !, wr !,wi
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
- real(dp) :: qcart(3)
+ !real(dp) :: qcart(3)
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:,:)
  real(sp),allocatable :: weiqr_sp(:,:), ov1r_sp(:, :), eiqr_sp(:,:)
 
@@ -3417,8 +3417,8 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
  my_add_lr = db%add_lr; if (present(add_lr)) my_add_lr = add_lr
 
- qcart = two_pi * matmul(db%cryst%gprimd, qpt)
- qmod = sqrt(dot_product(qcart, qcart))
+ !qcart = two_pi * matmul(db%cryst%gprimd, qpt)
+ !qmod = sqrt(dot_product(qcart, qcart))
 
  if (my_add_lr == 4) then
    ! Use LR part only and return immediately.
@@ -3518,14 +3518,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
    ! Be careful with Gamma-point and cplex!
    if (db%symv1 == 1) then !(.and. reveiver == -1 .or. receiver == db%comm_rpt%my_rank)
      call v1phq_symmetrize(db%cryst, idir, ipert, symq, ngfft, cplex2, nfft, db%nspden, db%nsppol, &
-         db%mpi_enreg, ov1r(:,:,:,imyp))
+                           db%mpi_enreg, ov1r(:,:,:,imyp))
    end if
  end do ! imyp
 
  ABI_FREE(ov1r_sp)
 
  if (db%symv1 == 2) then
-   ! Symmetrize potentials (seldom used)
+   ! Symmetrize potentials (this part is seldom executed)
    ! Initialize the list of perturbations rfpert and rdfir
    ! WARNING: Only phonon perturbations are considered for the time being.
    ABI_MALLOC(rfpert, (db%mpert))
