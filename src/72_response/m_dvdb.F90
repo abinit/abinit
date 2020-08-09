@@ -6401,6 +6401,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  tau_red = db%cryst%xred(:,iatom)
 
  ! Get the set of G vectors
+ ! TODO: May use zero-padded FFT with small G-sphere
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
  !if (db%has_zeff .or. db%has_quadrupoles) then

@@ -324,7 +324,7 @@ end subroutine symdet
 !!
 !! SOURCE
 
-subroutine chkgrp(nsym,symafm,symrel,ierr)
+subroutine chkgrp(nsym, symafm, symrel, ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -358,54 +358,55 @@ subroutine chkgrp(nsym,symafm,symrel,ierr)
    MSG_WARNING("First operation must be the identity operator")
    ierr = ierr+1
  end if
-!
-!2) The inverse of each element must belong to the group.
+ !
+ ! 2) The inverse of each element must belong to the group.
  do isym=1,nsym
-   call mati3inv(symrel(:,:,isym),chk)
+   call mati3inv(symrel(:,:,isym), chk)
    chk = TRANSPOSE(chk)
    found_inv = .FALSE.
    do jsym=1,nsym
-     if ( ALL(symrel(:,:,jsym) == chk) .and. (symafm(jsym)*symafm(isym) == 1 )) then
+     if ( ALL(symrel(:,:,jsym) == chk) .and. (symafm(jsym) * symafm(isym) == 1 )) then
        found_inv = .TRUE.; EXIT
      end if
    end do
 
    if (.not.found_inv) then
      write(msg,'(a,i0,2a)')&
-&     "Cannot find the inverse of symmetry operation ",isym,ch10,&
-&     "Input symmetries do not form a group "
+      "Cannot find the inverse of symmetry operation ",isym,ch10,&
+      "Input symmetries do not form a group "
      MSG_WARNING(msg)
      ierr = ierr+1
    end if
 
  end do
-!
-!Closure relation under composition.
+ !
+ ! Closure relation under composition.
  do isym=1,nsym
    do jsym=1,nsym
-!
-!    Compute the product of the two symmetries
+     !
+     ! Compute the product of the two symmetries
      chk = MATMUL(symrel(:,:,jsym), symrel(:,:,isym))
      symafmchk=symafm(jsym)*symafm(isym)
-!
-!    Check that product array is one of the original symmetries.
+     !
+     ! Check that product array is one of the original symmetries.
      do ksym=1,nsym
        testeq=1
        if ( ANY(chk/=symrel(:,:,ksym) )) testeq=0
 #if 0
 !      FIXME this check make v4/t26 and v4/t27 fails.
 !      The rotational part is in the group but with different magnetic part!
-       if (symafmchk/=symafm(ksym))testeq=0
+       if (symafmchk /= symafm(ksym)) testeq=0
 #endif
        if (testeq==1) exit ! The test is positive
      end do
 !
-     if(testeq==0) then ! The test is negative
+     if(testeq==0) then
+       ! The test is negative
        write(msg, '(a,2i3,a,7a)' )&
-&       'product of symmetries',isym,jsym,' is not in group.',ch10,&
-&       'This indicates that the input symmetry elements',ch10,&
-&       'do not possess closure under group composition.',ch10,&
-&       'Action: check symrel, symafm and fix them.'
+        'product of symmetries',isym,jsym,' is not in group.',ch10,&
+        'This indicates that the input symmetry elements',ch10,&
+        'do not possess closure under group composition.',ch10,&
+        'Action: check symrel, symafm and fix them.'
        MSG_WARNING(msg)
        ierr = ierr+1
      end if
@@ -437,7 +438,7 @@ end subroutine chkgrp
 !!      of the operation of index multable(1,sym1,sym2) to obtain the fractional traslation of the product S1 * S2.
 !!  [toinv(4,nsym)]= Optional output.
 !!    toinv(1,sym1)=Gives the index of the inverse of the symmetry operation.
-!!     S1 * S1^{-1} = {E, L} with E identity and L a lattice vector
+!!     S1 * S1^{-1} = {E, L} with E the identity and L a real-space lattice vector.
 !!    toinv(2:4,sym1)=The lattice vector L
 !!      Note that toinv can be easily obtained from multable but sometimes we do not need the full table.
 !!
@@ -445,13 +446,13 @@ end subroutine chkgrp
 !!  This improved version should replace chkgrp.
 !!
 !! PARENTS
-!!      m_crystal,m_shirley
+!!      m_crystal
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
+subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, toinv)
 
 !Arguments ------------------------------------
 !scalars
@@ -460,8 +461,7 @@ subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
  real(dp),intent(in) :: tnons_tol
 !arrays
  integer,intent(in) :: symafm(nsym),symrel(3,3,nsym)
- integer,optional,intent(out) :: multable(4,nsym,nsym)
- integer,optional,intent(out) :: toinv(4,nsym)
+ integer,optional,intent(out) :: multable(4,nsym,nsym), toinv(4,nsym)
  real(dp),intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
@@ -477,74 +477,77 @@ subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
 
  ierr = 0
 
-!1) Identity must be the first symmetry. Do not check tnons, cell might not be primitive.
- if (ANY(symrel(:,:,1) /= identity_3d .or. symafm(1)/=1 )) then
+ ! 1) Identity must be the first symmetry. Do not check if tnon == 0 as cell might not be primitive.
+ if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
    MSG_WARNING("First operation must be the identity operator")
-   ierr = ierr+1
+   ierr = ierr + 1
  end if
-!
-!2) The inverse of each element must belong to the group.
+
+ ! 2) The inverse of each element must belong to the group.
  do sym1=1,nsym
    found_inv = .FALSE.
    do sym2=1,nsym
-     prd_symrel = MATMUL(symrel(:,:,sym1), symrel(:,:,sym2))
-     prd_tnons = tnons(:,sym1) + MATMUL(symrel(:,:,sym1),tnons(:,sym2))
+     prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
+     prd_tnons = tnons(:,sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
      prd_symafm = symafm(sym1)*symafm(sym2)
-     if ( ALL(prd_symrel == identity_3d) .and. isinteger(prd_tnons,tnons_tol) .and. prd_symafm == 1 ) then
+     if ( all(prd_symrel == identity_3d) .and. isinteger(prd_tnons, tnons_tol) .and. prd_symafm == 1 ) then
        found_inv = .TRUE.
-       if (PRESENT(toinv)) then
-         toinv(1,sym1) = sym2
-         toinv(2:4,sym1) = NINT(prd_tnons)
+       if (present(toinv)) then
+         toinv(1, sym1) = sym2
+         toinv(2:4, sym1) = nint(prd_tnons)
        end if
-       EXIT
+       exit
      end if
    end do
 
-   if (.not.found_inv) then
+   if (.not. found_inv) then
      write(msg,'(a,i0,2a)')&
-&     "Cannot find the inverse of symmetry operation ",sym1,ch10,&
-&     "Input symmetries do not form a group "
+      "Cannot find the inverse of symmetry operation ",sym1,ch10,&
+      "Input symmetries do not form a group "
      MSG_WARNING(msg)
-     ierr = ierr+1
+     ierr = ierr + 1
    end if
  end do
-!
-!Check closure relation under composition and construct multiplication table.
+
+ ! Check closure relation under composition and construct multiplication table.
  do sym1=1,nsym
    do sym2=1,nsym
-!
-!    Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a+Ab}
-     prd_symrel = MATMUL(symrel(:,:,sym1), symrel(:,:,sym2))
-     prd_symafm = symafm(sym1)*symafm(sym2)
-     prd_tnons = tnons(:,sym1) + MATMUL(symrel(:,:,sym1),tnons(:,sym2))
-!
-     iseq=.FALSE.
-     do sym3=1,nsym ! Check that product array is one of the original symmetries.
-       iseq = ( ALL(prd_symrel==symrel(:,:,sym3) )           .and. &
-&       isinteger(prd_tnons-tnons(:,sym3),tnons_tol) .and. &
-&       prd_symafm==symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail.
-!      The rotational part is in the group but with different magnetic part!
 
-       if (iseq) then ! The test is positive
-         if (PRESENT(multable)) then
+     ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a+Ab}
+     prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
+     prd_symafm = symafm(sym1) * symafm(sym2)
+     prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
+
+     ! Check that product array is one of the original symmetries.
+     iseq = .False.
+     do sym3=1,nsym
+       iseq = (all(prd_symrel == symrel(:,:,sym3) ) .and. &
+               isinteger(prd_tnons - tnons(:,sym3), tnons_tol) .and. &
+               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail.
+
+       ! The rotational part is in the group but with different magnetic part!
+       if (iseq) then
+         ! The test is positive
+         if (present(multable)) then
            multable(1,sym1,sym2) = sym3
-           multable(2:4,sym1,sym2) = NINT(prd_tnons-tnons(:,sym3))
+           multable(2:4,sym1,sym2) = nint(prd_tnons - tnons(:,sym3))
          end if
-         EXIT
+         exit
        end if
      end do
-!
-     if (.not.iseq) then ! The test is negative
+
+     if (.not. iseq) then
+       ! The test is negative
        write(msg, '(a,2(i0,1x),a,7a)' )&
-&       'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
-&       'This indicates that the input symmetry elements',ch10,&
-&       'do not possess closure under group composition.',ch10,&
-&       'Action: check symrel, symafm and fix them.'
+         'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
+         'This indicates that the input symmetry elements',ch10,&
+         'do not possess closure under group composition.',ch10,&
+         'Action: check symrel, symafm and fix them.'
        MSG_WARNING(msg)
-       ierr = ierr+1
-       if (PRESENT(multable)) then
-         multable(1,sym1,sym2) = 0
-         multable(2:4,sym1,sym2) = HUGE(0)
+       ierr = ierr + 1
+       if (present(multable)) then
+         multable(1, sym1, sym2) = 0
+         multable(2:4, sym1, sym2) = huge(0)
        end if
      end if
 
