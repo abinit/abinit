@@ -79,7 +79,6 @@ diemac 12.0       # Although this is not mandatory, it is worth to
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_hosts = nag@abiref
 #%% [files]
 #%% files_to_test = 
 #%%   t34.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options =  
