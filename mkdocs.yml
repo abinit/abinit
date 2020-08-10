@@ -37,7 +37,6 @@ pages:
         - MacOSX: README_MacOSX.md
         - Ubuntu: README_Ubuntu.md
         - GPUs: README_gpu.md
-        - Xlf: README_xlf.md
 
 - Topics:
     - Features: topics/features.md
