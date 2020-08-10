@@ -378,7 +378,7 @@
 #enable_cclock="yes"
 
 # Wrap Fortran compiler calls (default is auto-detected)
-# Combine this option with enable_debug="yes" to keep preprocessed source
+# Combine this option with with_debug_flavor="basic" (or some other debug flavor) to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
 #enable_fc_wrapper="yes"
@@ -644,6 +644,10 @@
 # Linear algebra support                                                     #
 # -------------------------------------------------------------------------- #
 
+# A large set of linear algebra libraries are available on the Web.
+# See e.g. https://hpc.llnl.gov/manuals/mathematical-software/math-libraries-and-interactive-tools
+# Among all those, many are supported by ABINIT.
+
 # WARNING: when setting the value of the linear algebra flavor to "custom",
 #          the associated CPP options may be defined in an impredictable
 #          manner by the build system. In such a case, checking which
@@ -653,11 +657,8 @@
 
 # Supported libraries:
 #
-#   * acml      : AMD Core Math Libraries
-#                 http://developer.amd.com/libraries/acml/pages/default.aspx
-#
-#   * asl       : NEC Advanced Scientific Library
-#                 http://www.nec.co.jp/solution/hpc/library/asl_e/index.html
+#   * AOCL      : AMD Optimizing CPU Libraries
+#                 https://developer.amd.com/amd-aocl/
 #
 #   * atlas     : Automatically Tuned Linear Algebra Software
 #                 http://math-atlas.sourceforge.net/
@@ -670,9 +671,6 @@
 #
 #   * elpa      : Eigen soLvers for Petaflops Applications
 #                 http://elpa.rzg.mpg.de
-#
-#   * essl      : IBM Engineering and Scientific Subroutine Library
-#                 http://www-03.ibm.com/systems/software/essl/
 #
 #   * magma     : Matrix Algebra on GPU and Multicore Architectures
 #                 (MAGMA minimal version>=1.1.0, requires Cuda)
@@ -697,7 +695,7 @@
 #
 # Notes:
 #
-#   * you may combine "magma" and/or "plasma" and/or "scalapack" with
+#   * you may combine "magma" and/or "plasma" with
 #     any other flavor, using '+' as a separator
 #
 #   * "custom" also works when the Fortran compiler provides a full
@@ -717,6 +715,13 @@
 #   * with_linalg_incs and with_linalg_libs systematically override the
 #     contents of with_linalg
 #
+#   * in order to enable SCALAPACK, you might have to specify -lscalapack 
+#     or use another appropriate syntax for your system.
+#
+#  Additional information might be obtained from
+#  https://wiki.abinit.org/doku.php?id=build:linear_algebra
+#  and
+#  https://wiki.abinit.org/doku.php?id=developers:buildsys:internals
 
 # Install prefix for linear algebra
 #
@@ -724,7 +729,7 @@
 
 # Flavor of linear algebra libraries to use (default is netlib)
 #
-#with_linalg_flavor="goto+scalapack"
+#with_linalg_flavor="openblas"
 
 # C preprocessing flags for linear algebra (default is unset)
 #
@@ -748,7 +753,7 @@
 
 # Library flags for linear algebra (default is unset)
 #
-#LINALG_LIBS="-L/usr/local/lib -llapack -lblas"
+#LINALG_LIBS="-L/usr/local/lib -llapack -lblas -lscalapack"
 
 # -------------------------------------------------------------------------- #
 # Optimized FFT support                                                      #
