@@ -82,6 +82,8 @@ module m_sigmaph
  use m_pawrhoij,       only : pawrhoij_type
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : dfpt_cgwf
+ use m_dynmat,         only : pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec
+ use m_geometry,       only : phdispl_cart2red
 
  implicit none
 
@@ -623,7 +625,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: ibsum_kq, ib_k, band_ks, ibsum, ii, jj, iw !ib_kq,
  integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
- integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !, isym_q, trev_q
+ integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine
  integer :: my_spin, spin, istwf_k, istwf_kq, istwf_kqirr, npw_k, npw_kq, npw_kqirr
  integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
@@ -638,7 +640,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
  real(dp) :: vkk_norm, osc_ecut
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
- logical :: isirr_k, isirr_kq, gen_eigenpb, is_qzero !, isirr_q
+ logical :: isirr_k, isirr_kq, gen_eigenpb, is_qzero, isirr_q
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -672,7 +674,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
  real(dp),allocatable :: delta_e_minus_emkq(:)
- !real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_ibz(:,:,:,:)
+ real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
  logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
@@ -932,8 +934,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  end if
 
- call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
-
  ! Write results to disk.
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
@@ -942,21 +942,25 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 #endif
 
  ABI_FREE(cgwork)
-
  if (sigma%mrta == 0) call ddkop%free()
+ call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
- ! Precompute ph frequencies and eigenvectors in the IBZ.
- ! These terms are be used to symmetrize quantities for q in IBZ(k) to reduce the number of calls to ifc%fourq
- !ABI_CALLOC(phfreqs_ibz, (natom3, sigma%nqibz))
- !ABI_CALLOC(pheigvec_ibz, (2, natom3, natom3, sigma%nqibz))
- !do iq_ibz=1,sigma%nqibz
- !  if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
- !  call ifc%fourq(cryst, sigma%qibz(:,iq_ibz), phfreqs_ibz(:, iq_ibz), displ_cart, out_eigvec=pheigvec_ibz(:,:,:,iq_ibz))
- !end do
- !call xmpi_sum(phfreqs_ibz, comm, ierr)
- !call xmpi_sum(pheigvec_ibz, comm, ierr)
- !ABI_FREE(phfreqs_ibz)
- !ABI_FREE(pheigvec_ibz)
+ ! Precompute phonon frequencies and eigenvectors in the IBZ.
+ ! These terms are used to symmetrize quantities for q in the IBZ(k) in order
+ ! to reduce the number of calls to ifc%fourq
+ call wrtout(std_out, " Computing phonon frequencies and eigenvectors in the IBZ.")
+ write(msg, "(a,f8.1,a)")" Memory required by pheigvec_qibz: ", 2 * natom3**2 * sigma%nqibz * dp * b2Mb, " [Mb] <<< MEM"
+ call wrtout(std_out, msg)
+ ABI_MALLOC(eigvec_qpt, (2, natom3, natom3))
+ ABI_CALLOC(phfreqs_qibz, (natom3, sigma%nqibz))
+ ABI_CALLOC(pheigvec_qibz, (2, natom3, natom3, sigma%nqibz))
+ do iq_ibz=1,sigma%nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+   call ifc%fourq(cryst, sigma%qibz(:,iq_ibz), phfreqs_qibz(:, iq_ibz), displ_cart, out_eigvec=pheigvec_qibz(:,:,:,iq_ibz))
+ end do
+ call xmpi_sum(phfreqs_qibz, comm, ierr)
+ call xmpi_sum(pheigvec_qibz, comm, ierr)
+ call cwtime_report(" phonons in the q-IBZ", cpu_ks, wall_ks, gflops_ks)
 
  ! Radius of sphere with volume equivalent to the micro zone.
  q0rad = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
@@ -1258,17 +1262,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ignore_kq = 0; ignore_ibsum_kq = 0
 
      do imyq=1,sigma%my_nqibz_k
+       call cwtime(cpu, wall, gflops, "start")
        iq_ibz_k = sigma%myq2ibz_k(imyq)
        qpt = sigma%qibz_k(:, iq_ibz_k)
-       !iq_ibz = sigma%ind_ibzk2ibz(1, iq_ibz_k))
-       !isym_q = sigma%ind_ibzk2ibz(2, iq_ibz_k))
-       !trev_q = sigma%ind_ibzk2ibz(6, iq_ibz_k))
-       ! Don't test if umklapp == 0 because we use the gauge phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
-       !isirr_q = (isym_q == 1 .and. trev_q == 0)
-       !qibz = sigma%qibz(:, iq_ibz)
        is_qzero = sum(qpt**2) < tol14
 
-       call cwtime(cpu, wall, gflops, "start")
+       iq_ibz = sigma%ind_ibzk2ibz(1, iq_ibz_k)
+       isym_q = sigma%ind_ibzk2ibz(2, iq_ibz_k)
+       trev_q = sigma%ind_ibzk2ibz(6, iq_ibz_k)
+       ! Don't test if umklapp == 0 because we use the gauge phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
+       isirr_q = (isym_q == 1 .and. trev_q == 0)
+       !qq_ibz = sigma%qibz(:, iq_ibz)
 
        ! Find k + q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered as:
@@ -1304,17 +1308,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
        !call timab(1901, 1, tsec)
-       call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%pert_comm%value)
+       !call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%pert_comm%value)
 
-       !phfrq = phfreqs_ibz(:, iq_ibz)
-       !if (isirr_q) then
-       !  call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, pheigvec_ibz(:,:,:,iq_ibz), displ_cart)
-       !  call phdispl_cart2red(natom, crystal%gprimd, displ_cart, displ_red)
-       !else
-       !  call pheigvec_rotate(cryst, qpt, isym_q, trev_q, pheigvec_ibz(:,:,:,iq_ibz), eigvec_out)
-       !  call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_out, displ_cart)
-       !  call phdispl_cart2red(natom, crystal%gprimd, displ_cart, displ_red)
-       !end if
+       phfrq = phfreqs_qibz(:, iq_ibz)
+       if (isirr_q) then
+         call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, pheigvec_qibz(:,:,:,iq_ibz), displ_cart)
+         call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
+       else
+         call pheigvec_rotate(cryst, sigma%qibz(:, iq_ibz), qpt, isym_q, trev_q, pheigvec_qibz(:,:,:,iq_ibz), eigvec_qpt)
+         call phdispl_from_eigvec(natom, cryst%ntypat, cryst%typat, cryst%amu, eigvec_qpt, displ_cart)
+         call phdispl_cart2red(natom, cryst%gprimd, displ_cart, displ_red)
+       end if
 
        ! Double grid stuff
        if (sigma%use_doublegrid) then
@@ -2067,12 +2071,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        do iq_ibz_k=q_start,q_stop
          call cwtime(cpu, wall, gflops, "start")
+
          if (abs(sigma%symsigma) == 1) then
+           ! Sum over IBZ_k
            qpt = sigma%qibz_k(:, iq_ibz_k); weight_q = sigma%wtq_k(iq_ibz_k)
+           ! Sum over IBZ
            ! TODO: This should be much faster but it should be tested.
            !qpt = sigma%qibz(:,iq_ibz_k); weight_q = sigma%wtq(iq_ibz_k)
          else
-           ! Use full BZ for q-integration.
+           ! Sum over full BZ
            qpt = sigma%qbz(:, iq_ibz_k); weight_q = one / sigma%nqbz
          end if
 
@@ -2292,10 +2299,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_SFREE(delta_e_minus_emkq)
  ABI_FREE(gbound_kq)
  ABI_FREE(osc_gbound_q)
-
  ABI_FREE(ibzspin_2ikcalc)
  ABI_SFREE(vcar_ibz)
  ABI_SFREE(have_vcar_ibz)
+
+ ABI_SFREE(phfreqs_qibz)
+ ABI_SFREE(pheigvec_qibz)
+ ABI_SFREE(eigvec_qpt)
 
  call gs_hamkq%free()
  call wfd%free()
@@ -5404,29 +5414,32 @@ function get_frohlich(cryst, ifc, qpt, nu, phfrq, displ_cart, ngvecs, gvecs) res
 end function get_frohlich
 !!***
 
-subroutine pheigvec_rotate(cryst, sq, isym, itimrev, eigvec_in, eigvec_out)
-
- use m_dynmat, only : pheigvec_normalize
+subroutine pheigvec_rotate(cryst, q, sq, isym, itimrev, eigvec_in, eigvec_out)
 
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: isym, itimrev
- real(dp),intent(in) :: sq(3), eigvec_in(2,3,cryst%natom,3*cryst%natom)
- real(dp),intent(out) :: eigvec_out(2,3,cryst%natom,3*cryst%natom)
+ !integer,intent(in) :: toinv(4, cryst%nsym)
+ real(dp),intent(in) :: q(3), sq(3), eigvec_in(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(out) :: eigvec_out(2,3*cryst%natom,3*cryst%natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: natom, natom3, idir, iat, jdir, iat_sym
+ integer :: natom, natom3, idir, iat, jdir, iat_sym, isym_inv
  real(dp) :: arg
 !arrays
  integer :: r0(3)
- real(dp) :: dum(0,0)
- real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom), symat(3,3), phase(2)
+ real(dp) :: gamma_matrix(2,3,cryst%natom,3,cryst%natom), gamma2(2,3,cryst%natom,3,cryst%natom)
+ real(dp) :: symat(3,3), phase(2), dum(0, 0)
 
 !************************************************************************
 
  natom = cryst%natom
  natom3 = cryst%natom * 3
+
+ !isym_inv = toinv(1, isym)
  symat = cryst%symrel_cart(:,:,isym)
+ !symat = transpose(cryst%symrel_cart(:,:,isym))
+ !symat = cryst%symrel_cart(:,:,isym_inv)
 
  ! Build Gamma matrix in Cartesian coordinates.
  ! e(Sq) = Gamma({S, v}) e(q)
@@ -5437,33 +5450,46 @@ subroutine pheigvec_rotate(cryst, sq, isym, itimrev, eigvec_in, eigvec_out)
    ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
    ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
    iat_sym = cryst%indsym(4, isym, iat)
-   r0 = -cryst%indsym(1:3, isym, iat)
+   r0 = cryst%indsym(1:3, isym, iat)
+   !r0 = cryst%indsym(1:3, isym_inv, iat)
+   !iat_sym = cryst%indsym(4, isym_inv, iat)
+   !r0 = -cryst%indsym(1:3, isym_inv, iat)
    !r0 = matmul(cryst%symrec(:,:, isym), r0)
    !r0 = matmul(transpose(cryst%symrec(:,:, isym)), r0)
    !r0 = matmul(cryst%symrel(:,:, isym), r0)
    !r0 = matmul(transpose(cryst%symrel(:,:, isym)), r0)
-   arg = two_pi * dot_product(sq, r0)
+   !arg = two_pi * dot_product(sq, r0)
+   arg = two_pi * dot_product(q, real(r0))
    phase(:) = [cos(arg), sin(arg)]
-   !if (itimrev == 1) phase(2) = -phase(2)
+   !if (any(r0 /= 0)) phase = zero
+   !phase = one
+   !write(std_out, *)" ro: ", r0, "phase: " ,phase, "qibz: ", q
    do jdir=1,3
      do idir=1,3
        gamma_matrix(:, idir, iat, jdir, iat_sym) = symat(idir, jdir) * phase(:)
        !gamma_matrix(:, idir, iat_sym, jdir, iat) = symat(idir, jdir) * phase(:)
+       !gamma_matrix(:, jdir, iat_sym, idir, iat) = symat(idir, jdir) * phase(:)
      end do
    end do
  end do
 
- !write(std_out, "(2a)")" gamma_matrix for sq:", trim(ktoa(sq))
+ !write(std_out, "(2a)")" Gamma_matrix for sq:", trim(ktoa(sq))
  !call print_arr(reshape(cmplx(gamma_matrix(1,:,:,:,:), gamma_matrix(2,:,:,:,:)), [natom3, natom3]))
 
+ !gamma2 = gamma_matrix
+ !call cg_zgemm("C", "N", natom3, natom3, natom3, gamma_matrix, gamma2, eigvec_out)
+ !write(std_out, "(a)")" gamma^H gamma:"
+ !call print_arr(reshape(cmplx(eigvec_out(1,:,:), eigvec_out(2,:,:)), [natom3, natom3]))
+ !call cg_check_unitary(natom3, gamm_matrix)
+
  call cg_zgemm("N", "N", natom3, natom3, natom3, gamma_matrix, eigvec_in, eigvec_out)
- if (itimrev == 1) eigvec_out(2,:,:,:) = -eigvec_out(2,:,:,:)
+ if (itimrev == 1) eigvec_out(2,:,:) = -eigvec_out(2,:,:)
 
  ! Fix the phase of the eigenvectors
- call fxphas_seq(eigvec_out, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
+ !call fxphas_seq(eigvec_out, dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
 
  ! Normalise the eigenvectors
- call pheigvec_normalize(natom, eigvec_out)
+ !call pheigvec_normalize(natom, eigvec_out)
 
  ! Get the phonon displacements
  !call phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec_out, displ)
@@ -5476,6 +5502,9 @@ end subroutine pheigvec_rotate
 
 subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
+ use m_symtk, only : sg_multable
+
+
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: comm
@@ -5484,7 +5513,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0
- integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3
+ integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3, ierr
  integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
  real(dp), parameter ::  tol_phfreq_meV = tol3, tol_eigvec = tol6
  real(dp) :: dksqmax, maxerr_phfreq, err_phfreq, err_eigvec, maxerr_eigvec
@@ -5493,14 +5522,14 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  type(krank_t) :: qrank
 !arrays
  integer :: in_qptrlatt(3,3), new_qptrlatt(3,3), g0(3)
- integer,allocatable :: bz2ibz(:,:), bz2ibz_listkk(:,:)
- real(dp) :: qshift(3, nqshft1)
- real(dp) :: phfrq(3*cryst%natom)
+ integer,allocatable :: bz2ibz(:,:), bz2ibz_listkk(:,:), toinv(:,:)
+ real(dp) :: qshift(3, nqshft1), phfrq(3*cryst%natom), work(3*cryst%natom)
  real(dp) :: eigvec_out(2,3*cryst%natom,3*cryst%natom) !eigvec_in(2,3*cryst%natom,3*cryst%natom),
  real(dp) :: eigvec_bz(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: d2cart(2,3*cryst%natom,3*cryst%natom), d2tmp(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: wtq_ibz(:), qbz(:,:), qibz(:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
- real(dp),allocatable :: phfreqs_ibz(:,:), displ_cart_ibz(:,:,:,:),eigvec_ibz(:,:,:,:)
+ real(dp),allocatable :: phfreqs_qibz(:,:), displ_cart_ibz(:,:,:,:),eigvec_ibz(:,:,:,:)
 
 !************************************************************************
 
@@ -5519,16 +5548,16 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt1, nqshft1, qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
 
- write(std_out, "(2(a, i0))")" nqibz: ", nqibz, ", nqbz:", nqbz
+ !write(std_out, "(2(a, i0))")" nqibz: ", nqibz, ", nqbz:", nqbz
  !write(std_out, "(a)") " qibz_list:"
  !do iq_ibz=1,nqibz
  !  write(std_out, "(a)")trim(ltoa(qibz(:,iq_ibz)))
  !end do
 
- call cryst%print(unit=std_out)
- write(std_out, *)""
+ !call cryst%print(unit=std_out)
+ !write(std_out, *)""
 
- ! Call listkk
+ ! Compute BZ --> IBZ mapping.
  ABI_MALLOC(bz2ibz_listkk, (6, nqbz))
 
  qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
@@ -5539,21 +5568,26 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6)' ) &
      "Error mapping BZ to IBZ",ch10,&
-     "the q-point could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     "The q-point could not be generated from a symmetrical one. dksqmax: ",dksqmax
     MSG_ERROR(msg)
  end if
 
  ! Compute ph freqs in the IBZ.
- ABI_CALLOC(phfreqs_ibz, (natom3, nqibz))
+ ABI_CALLOC(phfreqs_qibz, (natom3, nqibz))
  ABI_CALLOC(displ_cart_ibz, (2, natom3, natom3, nqibz))
  ABI_CALLOC(eigvec_ibz, (2, natom3, natom3, nqibz))
+
  do iq_ibz=1,nqibz
    call ifc%fourq(cryst, qibz(:,iq_ibz), &
-                  phfreqs_ibz(:,iq_ibz), displ_cart_ibz(:,:,:,iq_ibz), out_eigvec=eigvec_ibz(:,:,:,iq_ibz))
+                  phfreqs_qibz(:,iq_ibz), displ_cart_ibz(:,:,:,iq_ibz), out_eigvec=eigvec_ibz(:,:,:,iq_ibz))
  end do
 
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
+
+ ABI_MALLOC(toinv, (4, cryst%nsym))
+ call sg_multable(cryst%nsym, cryst%symafm, cryst%symrel, cryst%tnons, tol6, ierr, toinv=toinv)
+ ABI_CHECK(ierr == 0, "sg_multable returned ierr != 0")
 
  ! Precompute ph freqs in the BZ and compare with BZ
  ierr_freq = 0; ierr_eigvec = 0
@@ -5562,48 +5596,64 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  maxerr_phfreq = zero; maxerr_eigvec = zero
 
  do iq_bz=1,nqbz
-   call ifc%fourq(cryst, qbz(:, iq_bz), phfrq, displ_cart, out_eigvec=eigvec_bz) !, out_displ_red=displ_red)
+
+   call ifc%fourq(cryst, qbz(:, iq_bz), phfrq, displ_cart, out_eigvec=eigvec_bz, out_d2cart=d2cart)
+
    iq_ibz = bz2ibz_listkk(1, iq_bz); isym = bz2ibz_listkk(2, iq_bz)
    itimrev = bz2ibz_listkk(6, iq_bz); g0 = bz2ibz_listkk(3:5, iq_bz)
    isirr_q = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0))
 
    ! Compare phfreqs within tol in meV.
-   err_phfreq = maxval(abs(phfrq - phfreqs_ibz(:, iq_ibz))) * Ha_meV
+   err_phfreq = maxval(abs(phfrq - phfreqs_qibz(:, iq_ibz))) * Ha_meV
    if (err_phfreq > tol_phfreq_meV) then
      maxerr_phfreq = max(maxerr_phfreq, err_phfreq)
      write(std_out,*)" " // repeat("=", 92)
      write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> qibz:", trim(ktoa(qibz(:, iq_ibz)))
      write(std_out, fmt_freqs)" w_bz :", phfrq * Ha_meV
-     write(std_out, fmt_freqs)" w_ibz:", phfreqs_ibz(:, iq_ibz) * Ha_meV
+     write(std_out, fmt_freqs)" w_ibz:", phfreqs_qibz(:, iq_ibz) * Ha_meV
      write(std_out,*)" err_phfreq (meV):", err_phfreq, " > tol: ", tol_phfreq_meV
      write(std_out,*)" " // repeat("=", 92)
      ierr_freq = ierr_freq + 1
    end if
 
    ! Rotate and compare eigenvectors
-   call pheigvec_rotate(cryst, qbz(:, iq_bz), isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), eigvec_out)
+   call pheigvec_rotate(cryst, qibz(:, iq_ibz), qbz(:, iq_bz), isym, itimrev, eigvec_ibz(:,:,:,iq_ibz), eigvec_out)
 
-   err_eigvec = maxval(abs(eigvec_out - eigvec_bz))
-   if (err_eigvec > tol_eigvec) then
-     maxerr_eigvec = max(maxerr_eigvec, err_eigvec)
-     write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> qibz: ", trim(ktoa(qibz(:, iq_ibz)))
-     write(std_out, "(a,2(i0,1x),a)")" qbz image through isym, itimrev: ", isym, itimrev, trim(ltoa(cryst%tnons(:, isym)))
-     write(std_out, "(a,l1)")" has_r0: ", any(cryst%indsym(:, isym, :) /= 0)
-     write(std_out, *) "err_eigvec ", err_eigvec, " > tol:", tol_eigvec
-     do ii=1,natom3
-       if (all(abs(eigvec_out(:,:,ii) - eigvec_bz(:,:,ii)) < tol_eigvec)) cycle
-       if (prtvol > 0) then
-         write(std_out, "(a, 2(f12.9,1x))") " diff (re/im): ", &
-           maxval(abs(eigvec_out(1,:,ii) - eigvec_bz(1,:,ii))), maxval(abs(eigvec_out(2,:,ii) - eigvec_bz(2,:,ii)))
-         write(std_out, fmt_eigvec) " mode: ", ii, "re_sym: ", eigvec_out(1,:,ii)
-         write(std_out, fmt_eigvec) " mode: ", ii, "re_bz : ", eigvec_bz(1,:,ii)
-         write(std_out, fmt_eigvec) " mode: ", ii, "im_sym: ", eigvec_out(2,:,ii)
-         write(std_out, fmt_eigvec) " mode: ", ii, "im_bz : ", eigvec_bz(2,:,ii)
-       end if
-     end do
-     write(std_out,*)" " // repeat("=", 92)
-     ierr_eigvec = ierr_eigvec + 1
-   end if
+   ! e^H D e = w**2 I
+   call massmult_and_breaksym(natom, cryst%ntypat, cryst%typat, cryst%amu, d2cart)
+   call cg_zgemm("N", "N", natom3, natom3, natom3, d2cart, eigvec_out, d2tmp)
+   call cg_zgemm("C", "N", natom3, natom3, natom3, eigvec_out, d2tmp, d2cart)
+   do ii=1,natom3
+     work(ii) = d2cart(1, ii, ii)
+   end do
+   work = sqrt(abs(phfrq ** 2 - work)) * Ha_meV
+   if (maxval(work) > tol_phfreq_meV) ierr_eigvec = ierr_eigvec + 1
+   write(std_out, *) "max eig_diff [meV]: ", maxval(work)
+   write(std_out, "(a)")" e^H D e (meV**2)"
+   d2cart = d2cart * Ha_meV ** 2
+   call print_arr(reshape(cmplx(d2cart(1,:,:), d2cart(2,:,:)), [natom3, natom3]))
+
+   !err_eigvec = maxval(abs(eigvec_out - eigvec_bz))
+   !if (err_eigvec > tol_eigvec) then
+   !  maxerr_eigvec = max(maxerr_eigvec, err_eigvec)
+   !  write(std_out, "(4a)")" qbz:", trim(ktoa(qbz(:, iq_bz))), " --> qibz: ", trim(ktoa(qibz(:, iq_ibz)))
+   !  write(std_out, "(a,2(i0,1x),a)")" qbz image through isym, itimrev: ", isym, itimrev, trim(ltoa(cryst%tnons(:, isym)))
+   !  write(std_out, "(a,l1)")" has_r0: ", any(cryst%indsym(1:3, isym, :) /= 0)
+   !  write(std_out, *) "err_eigvec ", err_eigvec, " > tol:", tol_eigvec
+   !  do ii=1,natom3
+   !    if (all(abs(eigvec_out(:,:,ii) - eigvec_bz(:,:,ii)) < tol_eigvec)) cycle
+   !    if (prtvol > 0) then
+   !      write(std_out, "(a, 2(f12.9,1x))") " diff (re/im): ", &
+   !        maxval(abs(eigvec_out(1,:,ii) - eigvec_bz(1,:,ii))), maxval(abs(eigvec_out(2,:,ii) - eigvec_bz(2,:,ii)))
+   !      write(std_out, fmt_eigvec) " mode: ", ii, "re_sym: ", eigvec_out(1,:,ii)
+   !      write(std_out, fmt_eigvec) " mode: ", ii, "re_bz : ", eigvec_bz(1,:,ii)
+   !      write(std_out, fmt_eigvec) " mode: ", ii, "im_sym: ", eigvec_out(2,:,ii)
+   !      write(std_out, fmt_eigvec) " mode: ", ii, "im_bz : ", eigvec_bz(2,:,ii)
+   !    end if
+   !  end do
+   !  write(std_out,*)" " // repeat("=", 92)
+   !  ierr_eigvec = ierr_eigvec + 1
+   !end if
 
  end do
 
@@ -5611,19 +5661,17 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  write(std_out,*)" maxerr_phfreq (meV): ", maxerr_phfreq
  write(std_out,*)" percentage of erroneous q-points for phfreq: ", ierr_freq / (one * nqbz) * 100, "%"
  write(std_out,*)""
- write(std_out,*)" maxerr_eigvec: ", maxerr_eigvec
+ !write(std_out,*)" maxerr_eigvec: ", maxerr_eigvec
  write(std_out,*)" percentage of q-points for eigvec: ", ierr_eigvec / (one * nqbz) * 100, "%"
  write(std_out,*)""
 
  if (ierr_freq /= 0) then
    MSG_ERROR("Wrong symmetrization in phonon eigenvalues.")
- end if
- if (ierr_eigvec /= 0) then
+ else if (ierr_eigvec /= 0) then
    MSG_ERROR("Wrong symmetrization in phonon eigenvectors.")
+ else
+   write(std_out, *)" ALL OK: No error detected!"
  end if
-
- write(std_out, *)" ALL OK: No error detected!"
- stop
 
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
@@ -5632,9 +5680,11 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_SFREE(qibz)
  ABI_SFREE(bz2ibz)
  ABI_SFREE(wtq_ibz)
- ABI_FREE(phfreqs_ibz)
+ ABI_FREE(phfreqs_qibz)
  ABI_FREE(displ_cart_ibz)
  ABI_FREE(eigvec_ibz)
+ ABI_FREE(toinv)
+ !stop
 
 end subroutine test_phrotation
 !!***

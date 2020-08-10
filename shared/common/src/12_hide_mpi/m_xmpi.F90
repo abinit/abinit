@@ -867,7 +867,7 @@ subroutine xmpi_abort(comm,mpierr,msg,exit_status)
  !  write(std_out,'(2a)')" MPI_ERROR_STRING: ",TRIM(mpi_msg_error)
  !end if
 
- call MPI_ABORT(my_comm,my_errorcode,ierr)
+ call MPI_ABORT(my_comm, my_errorcode, ierr)
 #endif
 
  if (present(exit_status)) then

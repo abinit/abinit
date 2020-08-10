@@ -723,7 +723,7 @@ end subroutine wigner_seitz
 !!
 !! INPUTS
 !!  natom=Number of atoms.
-!!  gprimd(3,3)Dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
+!!  gprimd(3,3)=Dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  displ_cart(2,3*natom,3*natom)=Phonon displacement in Cartesian coordinates.
 !!
 !! OUTPUT
@@ -736,7 +736,7 @@ end subroutine wigner_seitz
 !!
 !! SOURCE
 
-subroutine phdispl_cart2red(natom,gprimd,displ_cart,displ_red)
+subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
 
 !Arguments ------------------------------------
 !scalars
