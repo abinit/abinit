@@ -456,14 +456,14 @@ Change the input yaml files or the python code
         #with self.new_mdfile(dirname, "index.md") as mdf:
         #    mdf.write("\n".join(index_md))
 
-    def copy_readme_files(self):
+    def copy_install_files(self):
         """
-        Copy README_*.md files from ~abint to ~abinit/doc and *git ignore* them.
+        Copy INSTALL_*.md files from ~abinit to ~abinit/doc and *git ignore* them.
         Files must be included in mkdocs.yml in the `Installation` section.
         """
         top = os.path.abspath(os.path.join(self.root, ".."))
         for f in os.listdir(top):
-            if f.startswith("README_") and f.endswith(".md"):
+            if f.startswith("INSTALL_") and f.endswith(".md"):
                 src = os.path.join(top, f)
                 dest = os.path.join(self.root, f)
                 shutil.copy(src, dest)
@@ -512,7 +512,7 @@ This page gathers the autoconf files used by the buildbot testfarm
         """Generate markdown files using the data stored in the bibtex file, the abivars file ..."""
         start = time.time()
 
-        self.copy_readme_files()
+        self.copy_install_files()
         self.generate_page_with_ac_examples()
 
         # Write index.md with the description of the input variables.
